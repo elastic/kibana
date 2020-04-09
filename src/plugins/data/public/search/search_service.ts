@@ -139,14 +139,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs: {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
-          return new AggConfigs(
-            indexPattern,
-            configStates,
-            {
-              typesRegistry: aggTypesStart,
-            },
-            { fieldFormats }
-          );
+          return new AggConfigs(indexPattern, configStates, {
+            typesRegistry: aggTypesStart,
+            fieldFormats,
+          });
         },
         types: aggTypesStart,
       },

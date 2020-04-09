@@ -19,7 +19,7 @@
 
 import { tabifyGetColumns } from './get_columns';
 import { TabbedAggColumn } from './types';
-import { AggConfigs, AggConfigsDependencies } from '../aggs';
+import { AggConfigs } from '../aggs';
 import { mockAggTypesRegistry, mockDataServices } from '../aggs/test_helpers';
 import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
@@ -29,9 +29,7 @@ describe('get columns', () => {
   });
 
   const typesRegistry = mockAggTypesRegistry();
-  const aggConfigsDependencies: AggConfigsDependencies = {
-    fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  };
+  const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
   const createAggConfigs = (aggs: any[] = []) => {
     const field = {
@@ -47,14 +45,10 @@ describe('get columns', () => {
       },
     } as any;
 
-    return new AggConfigs(
-      indexPattern,
-      aggs,
-      {
-        typesRegistry,
-      },
-      aggConfigsDependencies
-    );
+    return new AggConfigs(indexPattern, aggs, {
+      typesRegistry,
+      fieldFormats,
+    });
   };
 
   test('should inject the metric after each bucket if the vis is hierarchical', () => {

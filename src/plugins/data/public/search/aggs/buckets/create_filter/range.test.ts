@@ -71,8 +71,10 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry: mockAggTypesRegistry([getRangeBucketAgg(aggTypesDependencies)]) },
-        { fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
+        {
+          typesRegistry: mockAggTypesRegistry([getRangeBucketAgg(aggTypesDependencies)]),
+          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+        }
       );
     };
 

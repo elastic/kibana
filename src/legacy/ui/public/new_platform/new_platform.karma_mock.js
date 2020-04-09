@@ -445,16 +445,10 @@ export const npStart = {
         aggs: {
           calculateAutoTimeExpression: sinon.fake(),
           createAggConfigs: (indexPattern, configStates = []) => {
-            return new AggConfigs(
-              indexPattern,
-              configStates,
-              {
-                typesRegistry: aggTypesRegistry.start(),
-              },
-              {
-                fieldFormats: getFieldFormatsRegistry(mockCoreStart),
-              }
-            );
+            return new AggConfigs(indexPattern, configStates, {
+              typesRegistry: aggTypesRegistry.start(),
+              fieldFormats: getFieldFormatsRegistry(mockCoreStart),
+            });
           },
           types: aggTypesRegistry.start(),
         },

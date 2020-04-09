@@ -18,7 +18,7 @@
  */
 
 import { createFilterHistogram } from './histogram';
-import { AggConfigs, AggConfigsDependencies } from '../../agg_configs';
+import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
@@ -28,9 +28,7 @@ import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 describe('AggConfig Filters', () => {
   describe('histogram', () => {
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
-    const aggConfigsDependencies: AggConfigsDependencies = {
-      fieldFormats: fieldFormatsServiceMock.createStartContract(),
-    };
+    const fieldFormats = fieldFormatsServiceMock.createStartContract();
     const getAggConfigs = () => {
       const field = {
         name: 'bytes',
@@ -59,8 +57,7 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() },
-        aggConfigsDependencies
+        { typesRegistry: mockAggTypesRegistry(), fieldFormats }
       );
     };
 

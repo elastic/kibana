@@ -95,8 +95,10 @@ describe('Range Agg', () => {
           },
         },
       ],
-      { typesRegistry: mockAggTypesRegistry([getRangeBucketAgg(aggTypesDependencies)]) },
-      { fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
+      {
+        typesRegistry: mockAggTypesRegistry([getRangeBucketAgg(aggTypesDependencies)]),
+        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+      }
     );
   };
 

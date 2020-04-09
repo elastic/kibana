@@ -71,16 +71,10 @@ export const searchAggsSetupMock = (): SearchAggsSetup => ({
 export const searchAggsStartMock = (): SearchAggsStart => ({
   calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createStart().uiSettings),
   createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
-    return new AggConfigs(
-      indexPattern,
-      configStates,
-      {
-        typesRegistry: mockAggTypesRegistry(),
-      },
-      {
-        fieldFormats: fieldFormatsServiceMock.createStartContract(),
-      }
-    );
+    return new AggConfigs(indexPattern, configStates, {
+      typesRegistry: mockAggTypesRegistry(),
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    });
   }),
   types: mockAggTypesRegistry(),
 });

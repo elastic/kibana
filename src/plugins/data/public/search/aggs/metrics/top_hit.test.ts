@@ -89,8 +89,7 @@ describe('Top hit metric', () => {
           params,
         },
       ],
-      { typesRegistry },
-      { fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
+      { typesRegistry, fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
     );
 
     // Grab the aggConfig off the vis (we don't actually use the vis for anything else)

@@ -48,9 +48,6 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
 
 export interface AggConfigsOptions {
   typesRegistry: AggTypesRegistryStart;
-}
-
-export interface AggConfigsDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
@@ -81,8 +78,7 @@ export class AggConfigs {
   constructor(
     indexPattern: IndexPattern,
     configStates: CreateAggConfigParams[] = [],
-    opts: AggConfigsOptions,
-    { fieldFormats }: AggConfigsDependencies
+    opts: AggConfigsOptions
   ) {
     this.typesRegistry = opts.typesRegistry;
 
@@ -90,7 +86,7 @@ export class AggConfigs {
 
     this.aggs = [];
     this.indexPattern = indexPattern;
-    this.fieldFormats = fieldFormats;
+    this.fieldFormats = opts.fieldFormats;
 
     configStates.forEach((params: any) => this.createAggConfig(params));
   }
@@ -119,16 +115,10 @@ export class AggConfigs {
       return agg.enabled;
     };
 
-    const aggConfigs = new AggConfigs(
-      this.indexPattern,
-      this.aggs.filter(filterAggs),
-      {
-        typesRegistry: this.typesRegistry,
-      },
-      {
-        fieldFormats: this.fieldFormats,
-      }
-    );
+    const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), {
+      typesRegistry: this.typesRegistry,
+      fieldFormats: this.fieldFormats,
+    });
 
     return aggConfigs;
   }

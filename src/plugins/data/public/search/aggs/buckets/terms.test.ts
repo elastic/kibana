@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import { AggConfigs, AggConfigsDependencies } from '../agg_configs';
+import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 
 describe('Terms Agg', () => {
   describe('order agg editor UI', () => {
-    const aggConfigsDependencies: AggConfigsDependencies = {
-      fieldFormats: fieldFormatsServiceMock.createStartContract(),
-    };
+    const fieldFormats = fieldFormatsServiceMock.createStartContract();
     const getAggConfigs = (params: Record<string, any> = {}) => {
       const indexPattern = {
         id: '1234',
@@ -51,8 +49,7 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() },
-        aggConfigsDependencies
+        { typesRegistry: mockAggTypesRegistry(), fieldFormats }
       );
     };
 

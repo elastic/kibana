@@ -64,8 +64,7 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
           },
         },
       ],
-      { typesRegistry },
-      { fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
+      { typesRegistry, fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
     );
   };
 
