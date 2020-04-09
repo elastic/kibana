@@ -15,7 +15,7 @@ describe('cluster', () => {
 
       it('returns correct Cluster instance', () => {
         const cluster = Cluster.fromUpstreamJSON(upstreamJSON);
-        expect(cluster.downstreamJSON).toEqual({ uuid: upstreamJSON.cluster_uuid });
+        expect(cluster.uuid).toEqual(upstreamJSON.cluster_uuid);
       });
     });
   });

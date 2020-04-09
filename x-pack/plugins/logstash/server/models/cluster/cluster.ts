@@ -10,7 +10,7 @@ import { get } from 'lodash';
  * This model deals with a cluster object from ES and converts it to Kibana downstream
  */
 export class Cluster {
-  private readonly uuid: string;
+  public readonly uuid: string;
   constructor({ uuid }: { uuid: string }) {
     this.uuid = uuid;
   }
