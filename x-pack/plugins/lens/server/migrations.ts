@@ -5,65 +5,33 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { SavedObjectUnsanitizedDoc } from 'src/core/server';
+import { SavedObjectMigrationFn } from 'src/core/server';
 
-export interface RawLensSavedXYObject770 {
-  type: 'lens';
-  attributes: Record<string, unknown> & {
-    visualizationType: string;
-    state: Record<string, unknown> & {
-      datasourceStates?: Record<string, unknown> & {
-        indexpattern?: Record<string, unknown> & {
-          layers: Record<string, Record<string, unknown> & { columns: Record<string, unknown> }>;
-        };
-      };
-      visualization: Record<string, unknown> & {
-        layers: Array<
-          Record<string, unknown> & {
-            layerId: string;
-            accessors: string[];
-            xAccessor: string;
-            splitAccessor: string;
-          }
-        >;
-      };
-    };
-  };
+interface XYLayerPre77 {
+  layerId: string;
+  xAccessor: string;
+  splitAccessor: string;
+  accessors: string[];
 }
 
-type LensSavedXYObjectPost770 = RawLensSavedXYObject770;
-
-function isLensSavedXY770(
-  doc: SavedObjectUnsanitizedDoc | RawLensSavedXYObject770
-): doc is RawLensSavedXYObject770 {
-  return (
-    doc.type === 'lens' &&
-    doc.attributes &&
-    (doc.attributes as Record<string, string>).visualizationType === 'lnsXY'
-  );
-}
-
-export const migrations = {
-  '7.7.0': (
-    doc: SavedObjectUnsanitizedDoc | RawLensSavedXYObject770
-  ): SavedObjectUnsanitizedDoc | LensSavedXYObjectPost770 => {
+export const migrations: Record<string, SavedObjectMigrationFn> = {
+  '7.7.0': doc => {
     const newDoc = cloneDeep(doc);
-    if (!isLensSavedXY770(newDoc)) {
-      return newDoc;
+    if (newDoc.attributes?.visualizationType === 'lnsXY') {
+      const datasourceState = newDoc.attributes.state?.datasourceStates?.indexpattern;
+      const datasourceLayers = datasourceState?.layers ?? {};
+      const xyState = newDoc.attributes.state?.visualization;
+      newDoc.attributes.state.visualization.layers = xyState.layers.map((layer: XYLayerPre77) => {
+        const layerId = layer.layerId;
+        const datasource = datasourceLayers[layerId];
+        return {
+          ...layer,
+          xAccessor: datasource?.columns[layer.xAccessor] ? layer.xAccessor : undefined,
+          splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
+          accessors: layer.accessors.filter(accessor => !!datasource?.columns[accessor]),
+        };
+      }) as typeof xyState.layers;
     }
-    const datasourceState = newDoc.attributes.state?.datasourceStates?.indexpattern;
-    const datasourceLayers = datasourceState?.layers ?? {};
-    const xyState = newDoc.attributes.state?.visualization;
-    newDoc.attributes.state.visualization.layers = xyState.layers.map(layer => {
-      const layerId = layer.layerId;
-      const datasource = datasourceLayers[layerId];
-      return {
-        ...layer,
-        xAccessor: datasource?.columns[layer.xAccessor] ? layer.xAccessor : undefined,
-        splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
-        accessors: layer.accessors.filter(accessor => !!datasource?.columns[accessor]),
-      };
-    }) as typeof xyState.layers;
     return newDoc;
   },
 };

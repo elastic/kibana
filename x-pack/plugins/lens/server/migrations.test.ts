@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { migrations, RawLensSavedXYObject770 } from './migrations';
-import { SavedObjectUnsanitizedDoc } from 'src/core/server';
+import { migrations } from './migrations';
+import { SavedObjectMigrationContext } from 'src/core/server';
 
 describe('Lens migrations', () => {
   describe('7.7.0 missing dimensions in XY', () => {
-    const migrate = (doc: SavedObjectUnsanitizedDoc | RawLensSavedXYObject770) =>
-      migrations['7.7.0'](doc);
+    const context = {} as SavedObjectMigrationContext;
 
-    const example: RawLensSavedXYObject770 = {
+    const example = {
       type: 'lens',
       attributes: {
         expression:
@@ -107,25 +106,28 @@ describe('Lens migrations', () => {
           visualizationType: 'lnsMetric',
         },
       };
-      const result = migrate(target as SavedObjectUnsanitizedDoc);
+      const result = migrations['7.7.0'](target, context);
       expect(result).toEqual(target);
     });
 
     it('should handle missing layers', () => {
-      const result = migrate({
-        ...example,
-        attributes: {
-          ...example.attributes,
-          state: {
-            ...example.attributes.state,
-            datasourceStates: {
-              indexpattern: {
-                layers: [],
+      const result = migrations['7.7.0'](
+        {
+          ...example,
+          attributes: {
+            ...example.attributes,
+            state: {
+              ...example.attributes.state,
+              datasourceStates: {
+                indexpattern: {
+                  layers: [],
+                },
               },
             },
           },
         },
-      } as SavedObjectUnsanitizedDoc) as RawLensSavedXYObject770;
+        context
+      );
 
       expect(result.attributes.state.visualization.layers).toEqual([
         {
@@ -141,7 +143,7 @@ describe('Lens migrations', () => {
     });
 
     it('should remove only missing accessors', () => {
-      const result = migrate(example) as RawLensSavedXYObject770;
+      const result = migrations['7.7.0'](example, context);
 
       expect(result.attributes.state.visualization.layers).toEqual([
         {
