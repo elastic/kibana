@@ -17,17 +17,18 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { OrderedChart } from './point_series';
 
-export function makeFakeXAspect() {
-  return {
-    accessor: -1,
-    title: i18n.translate('common.ui.aggResponse.allDocsTitle', {
-      defaultMessage: 'All docs',
-    }),
-    params: {
-      defaultValue: '_all',
-    },
-    format: {},
-  };
+export function orderedDateAxis(chart: OrderedChart) {
+  const x = chart.aspects.x[0];
+  const bounds = 'bounds' in x.params ? x.params.bounds : undefined;
+
+  chart.ordered.date = true;
+
+  if (bounds) {
+    chart.ordered.min = typeof bounds.min === 'string' ? Date.parse(bounds.min) : bounds.min;
+    chart.ordered.max = typeof bounds.max === 'string' ? Date.parse(bounds.max) : bounds.max;
+  } else {
+    chart.ordered.endzones = false;
+  }
 }

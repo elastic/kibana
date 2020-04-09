@@ -17,18 +17,26 @@
  * under the License.
  */
 
-// import moment from 'moment';
+export interface Column {
+  // -1 value can be in a fake X aspect
+  id: string | -1;
+  name: string;
+}
 
-export function orderedDateAxis(chart) {
-  const x = chart.aspects.x[0];
-  const { bounds } = x.params;
+export interface Row {
+  [key: string]: number | string | object;
+}
 
-  chart.ordered.date = true;
-
-  if (bounds) {
-    chart.ordered.min = isNaN(bounds.min) ? Date.parse(bounds.min) : bounds.min;
-    chart.ordered.max = isNaN(bounds.max) ? Date.parse(bounds.max) : bounds.max;
-  } else {
-    chart.ordered.endzones = false;
-  }
+export interface TableParent {
+  table: Table;
+  tables?: Table[];
+  column: number;
+  row: number;
+  key: number;
+  name: string;
+}
+export interface Table {
+  columns: Column[];
+  rows: Row[];
+  $parent?: TableParent;
 }

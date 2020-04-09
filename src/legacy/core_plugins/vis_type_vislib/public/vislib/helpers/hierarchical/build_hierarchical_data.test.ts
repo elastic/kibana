@@ -17,24 +17,26 @@
  * under the License.
  */
 
-import { buildHierarchicalData } from './build_hierarchical_data';
+import { buildHierarchicalData, Dimensions, Dimension } from './build_hierarchical_data';
+import { Table, TableParent } from '../../types';
 
-function tableVisResponseHandler(table, dimensions) {
-  const converted = {
+function tableVisResponseHandler(table: Table, dimensions: Dimensions) {
+  const converted: {
+    tables: Array<TableParent | Table>;
+  } = {
     tables: [],
   };
 
   const split = dimensions.splitColumn || dimensions.splitRow;
 
   if (split) {
-    converted.direction = dimensions.splitRow ? 'row' : 'column';
     const splitColumnIndex = split[0].accessor;
     const splitColumn = table.columns[splitColumnIndex];
-    const splitMap = {};
+    const splitMap: { [key: string]: number } = {};
     let splitIndex = 0;
 
     table.rows.forEach((row, rowIndex) => {
-      const splitValue = row[splitColumn.id];
+      const splitValue = row[splitColumn.id] as string;
 
       if (!splitMap.hasOwnProperty(splitValue)) {
         splitMap[splitValue] = splitIndex++;
@@ -46,8 +48,8 @@ function tableVisResponseHandler(table, dimensions) {
           column: splitColumnIndex,
           row: rowIndex,
           table,
-          tables: [],
-        };
+          tables: [] as Table[],
+        } as any;
 
         tableGroup.tables.push({
           $parent: tableGroup,
@@ -59,34 +61,30 @@ function tableVisResponseHandler(table, dimensions) {
       }
 
       const tableIndex = splitMap[splitValue];
-      converted.tables[tableIndex].tables[0].rows.push(row);
+      (converted.tables[tableIndex] as TableParent).tables![0].rows.push(row);
     });
   } else {
     converted.tables.push({
       columns: table.columns,
       rows: table.rows,
-    });
+    } as Table);
   }
 
   return converted;
 }
 
-jest.mock('ui/new_platform');
-jest.mock('ui/chrome', () => ({
-  getUiSettingsClient: jest.fn().mockReturnValue({
-    get: jest.fn().mockReturnValue('KQL'),
-  }),
-}));
-jest.mock('ui/visualize/loader/pipeline_helpers/utilities', () => ({
-  getFormat: jest.fn(() => ({
-    convert: jest.fn(v => v),
+jest.mock('../../../services', () => ({
+  getFormatService: jest.fn(() => ({
+    deserialize: () => ({
+      convert: jest.fn(v => JSON.stringify(v)),
+    }),
   })),
 }));
 
 describe('buildHierarchicalData convertTable', () => {
   describe('metric only', () => {
-    let dimensions;
-    let table;
+    let dimensions: Dimensions;
+    let table: Table;
 
     beforeEach(() => {
       const tabifyResponse = {
@@ -94,11 +92,11 @@ describe('buildHierarchicalData convertTable', () => {
         rows: [{ 'col-0-agg_1': 412032 }],
       };
       dimensions = {
-        metric: { accessor: 0 },
+        metric: { accessor: 0 } as Dimension,
       };
 
       const tableGroup = tableVisResponseHandler(tabifyResponse, dimensions);
-      table = tableGroup.tables[0];
+      table = tableGroup.tables[0] as Table;
     });
 
     it('should set the slices with one child to a consistent label', () => {
@@ -118,8 +116,8 @@ describe('buildHierarchicalData convertTable', () => {
   });
 
   describe('threeTermBuckets', () => {
-    let dimensions;
-    let tables;
+    let dimensions: Dimensions;
+    let tables: TableParent[];
 
     beforeEach(async () => {
       const tabifyResponse = {
@@ -231,60 +229,60 @@ describe('buildHierarchicalData convertTable', () => {
         ],
       };
       dimensions = {
-        splitRow: [{ accessor: 0 }],
-        metric: { accessor: 5 },
-        buckets: [{ accessor: 2 }, { accessor: 4 }],
+        splitRow: [{ accessor: 0 } as Dimension],
+        metric: { accessor: 5 } as Dimension,
+        buckets: [{ accessor: 2 }, { accessor: 4 }] as Dimension[],
       };
       const tableGroup = await tableVisResponseHandler(tabifyResponse, dimensions);
-      tables = tableGroup.tables;
+      tables = tableGroup.tables as TableParent[];
     });
 
     it('should set the correct hits attribute for each of the results', () => {
       tables.forEach(t => {
-        const results = buildHierarchicalData(t.tables[0], dimensions);
+        const results = buildHierarchicalData(t.tables![0], dimensions);
         expect(results).toHaveProperty('hits');
         expect(results.hits).toBe(4);
       });
     });
 
     it('should set the correct names for each of the results', () => {
-      const results0 = buildHierarchicalData(tables[0].tables[0], dimensions);
+      const results0 = buildHierarchicalData(tables[0].tables![0], dimensions);
       expect(results0).toHaveProperty('names');
       expect(results0.names).toHaveLength(5);
 
-      const results1 = buildHierarchicalData(tables[1].tables[0], dimensions);
+      const results1 = buildHierarchicalData(tables[1].tables![0], dimensions);
       expect(results1).toHaveProperty('names');
       expect(results1.names).toHaveLength(5);
 
-      const results2 = buildHierarchicalData(tables[2].tables[0], dimensions);
+      const results2 = buildHierarchicalData(tables[2].tables![0], dimensions);
       expect(results2).toHaveProperty('names');
       expect(results2.names).toHaveLength(4);
     });
 
     it('should set the parent of the first item in the split', () => {
-      const results0 = buildHierarchicalData(tables[0].tables[0], dimensions);
+      const results0 = buildHierarchicalData(tables[0].tables![0], dimensions);
       expect(results0).toHaveProperty('slices');
       expect(results0.slices).toHaveProperty('children');
       expect(results0.slices.children).toHaveLength(2);
-      expect(results0.slices.children[0].rawData.table.$parent).toHaveProperty('key', 'png');
+      expect(results0.slices.children[0].rawData!.table.$parent).toHaveProperty('key', 'png');
 
-      const results1 = buildHierarchicalData(tables[1].tables[0], dimensions);
+      const results1 = buildHierarchicalData(tables[1].tables![0], dimensions);
       expect(results1).toHaveProperty('slices');
       expect(results1.slices).toHaveProperty('children');
       expect(results1.slices.children).toHaveLength(2);
-      expect(results1.slices.children[0].rawData.table.$parent).toHaveProperty('key', 'css');
+      expect(results1.slices.children[0].rawData!.table.$parent).toHaveProperty('key', 'css');
 
-      const results2 = buildHierarchicalData(tables[2].tables[0], dimensions);
+      const results2 = buildHierarchicalData(tables[2].tables![0], dimensions);
       expect(results2).toHaveProperty('slices');
       expect(results2.slices).toHaveProperty('children');
       expect(results2.slices.children).toHaveLength(2);
-      expect(results2.slices.children[0].rawData.table.$parent).toHaveProperty('key', 'html');
+      expect(results2.slices.children[0].rawData!.table.$parent).toHaveProperty('key', 'html');
     });
   });
 
   describe('oneHistogramBucket', () => {
-    let dimensions;
-    let table;
+    let dimensions: Dimensions;
+    let table: Table;
 
     beforeEach(async () => {
       const tabifyResponse = {
@@ -302,11 +300,11 @@ describe('buildHierarchicalData convertTable', () => {
         ],
       };
       dimensions = {
-        metric: { accessor: 1 },
-        buckets: [{ accessor: 0, params: { field: 'bytes', interval: 8192 } }],
+        metric: { accessor: 1 } as Dimension,
+        buckets: [{ accessor: 0 } as Dimension],
       };
       const tableGroup = await tableVisResponseHandler(tabifyResponse, dimensions);
-      table = tableGroup.tables[0];
+      table = tableGroup.tables[0] as Table;
     });
 
     it('should set the hits attribute for the results', () => {
@@ -320,8 +318,8 @@ describe('buildHierarchicalData convertTable', () => {
   });
 
   describe('oneRangeBucket', () => {
-    let dimensions;
-    let table;
+    let dimensions: Dimensions;
+    let table: Table;
 
     beforeEach(async () => {
       const tabifyResponse = {
@@ -335,11 +333,11 @@ describe('buildHierarchicalData convertTable', () => {
         ],
       };
       dimensions = {
-        metric: { accessor: 1 },
-        buckets: [{ accessor: 0, format: { id: 'range', params: { id: 'agg_2' } } }],
+        metric: { accessor: 1 } as Dimension,
+        buckets: [{ accessor: 0, format: { id: 'range', params: { id: 'agg_2' } } } as Dimension],
       };
       const tableGroup = await tableVisResponseHandler(tabifyResponse, dimensions);
-      table = tableGroup.tables[0];
+      table = tableGroup.tables[0] as Table;
     });
 
     it('should set the hits attribute for the results', () => {
@@ -348,13 +346,13 @@ describe('buildHierarchicalData convertTable', () => {
       expect(results).toHaveProperty('slices');
       expect(results.slices).toHaveProperty('children');
       expect(results).toHaveProperty('names');
-      // expect(results.names).toHaveLength(2);
+      expect(results.names).toHaveLength(2);
     });
   });
 
   describe('oneFilterBucket', () => {
-    let dimensions;
-    let table;
+    let dimensions: Dimensions;
+    let table: Table;
 
     beforeEach(async () => {
       const tabifyResponse = {
@@ -368,15 +366,15 @@ describe('buildHierarchicalData convertTable', () => {
         ],
       };
       dimensions = {
-        metric: { accessor: 1 },
+        metric: { accessor: 1 } as Dimension,
         buckets: [
           {
             accessor: 0,
           },
-        ],
+        ] as Dimension[],
       };
       const tableGroup = await tableVisResponseHandler(tabifyResponse, dimensions);
-      table = tableGroup.tables[0];
+      table = tableGroup.tables[0] as Table;
     });
 
     it('should set the hits attribute for the results', () => {

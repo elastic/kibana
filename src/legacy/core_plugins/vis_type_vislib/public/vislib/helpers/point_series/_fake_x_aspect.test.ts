@@ -16,20 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import expect from '@kbn/expect';
-import { makeFakeXAspect } from '../_fake_x_aspect';
+import { makeFakeXAspect } from './_fake_x_aspect';
 
 describe('makeFakeXAspect', function() {
   it('creates an object that looks like an aspect', function() {
     const aspect = makeFakeXAspect();
 
-    expect(aspect)
-      .to.have.property('accessor', -1)
-      .and.have.property('title', 'All docs')
-      .and.have.property('format')
-      .and.have.property('params');
+    expect(aspect).toHaveProperty('accessor', -1);
+    expect(aspect).toHaveProperty('title', 'All docs');
+    expect(aspect).toHaveProperty('format');
+    expect(aspect).toHaveProperty('params');
 
-    expect(aspect.params).to.have.property('defaultValue', '_all');
+    expect(aspect.params).toHaveProperty('defaultValue', '_all');
   });
 });

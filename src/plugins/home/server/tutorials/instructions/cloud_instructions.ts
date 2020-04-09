@@ -16,15 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 
-describe('Point Series Agg Response', function() {
-  require('./_main');
-  require('./_add_to_siri');
-  require('./_fake_x_aspect');
-  require('./_get_aspects');
-  require('./_get_point');
-  require('./_get_series');
-  require('./_init_x_axis');
-  require('./_init_y_axis');
-  require('./_ordered_date_axis');
-});
+export const cloudPasswordAndResetLink = i18n.translate(
+  'home.tutorials.common.cloudInstructions.passwordAndResetLink',
+  {
+    defaultMessage:
+      'Where {passwordTemplate} is the password of the `elastic` user.' +
+      `\\{#config.cloud.resetPasswordUrl\\}
+      Forgot the password? [Reset in Elastic Cloud](\\{config.cloud.resetPasswordUrl\\}).
+      \\{/config.cloud.resetPasswordUrl\\}`,
+    values: { passwordTemplate: '`<password>`' },
+  }
+);

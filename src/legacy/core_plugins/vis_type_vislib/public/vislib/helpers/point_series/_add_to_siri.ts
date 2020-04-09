@@ -17,16 +17,38 @@
  * under the License.
  */
 
-export function addToSiri(series, point, id, yLabel, yFormat, zFormat, zLabel) {
+import { Point } from './_get_point';
+import { Dimension } from './point_series';
+
+export interface Serie {
+  id: string;
+  rawId: string;
+  label: string;
+  count: number;
+  values: Point[];
+  format: Dimension['format'];
+  zLabel?: string;
+  zFormat?: Dimension['format'];
+}
+
+export function addToSiri(
+  series: Map<string, Serie>,
+  point: Point,
+  id: string,
+  yLabel: string | undefined | null,
+  yFormat: Dimension['format'],
+  zFormat?: Dimension['format'],
+  zLabel?: string
+) {
   id = id == null ? '' : id + '';
 
   if (series.has(id)) {
-    series.get(id).values.push(point);
+    (series.get(id) as Serie).values.push(point);
     return;
   }
 
   series.set(id, {
-    id: id.split('-').pop(),
+    id: id.split('-').pop() as string,
     rawId: id,
     label: yLabel == null ? id : yLabel,
     count: 0,
