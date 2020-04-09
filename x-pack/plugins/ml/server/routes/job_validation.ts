@@ -48,6 +48,8 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
    * @api {post} /api/ml/validate/estimate_bucket_span Estimate bucket span
    * @apiName EstimateBucketSpan
    * @apiDescription  Estimates minimum viable bucket span based on the characteristics of a pre-viewed subset of the data
+   *
+   * @apiSchema (body) estimateBucketSpanSchema
    */
   router.post(
     {
@@ -93,6 +95,8 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
    * @api {post} /api/ml/validate/calculate_model_memory_limit Calculates model memory limit
    * @apiName CalculateModelMemoryLimit
    * @apiDescription Calls _estimate_model_memory endpoint to retrieve model memory estimation.
+   *
+   * @apiSchema (body) modelMemoryLimitSchema
    *
    * @apiSuccess {String} modelMemoryLimit
    */

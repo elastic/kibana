@@ -295,6 +295,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/update_groups Update job groups
    * @apiName UpdateGroups
    * @apiDescription Updates 'groups' property of an anomaly detection job
+   *
+   * @apiSchema (body) updateGroupsSchema
    */
   router.post(
     {
@@ -413,6 +415,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/new_job_line_chart Get job line chart data
    * @apiName NewJobLineChart
    * @apiDescription Returns line chart data for anomaly detection job
+   *
+   * @apiSchema (body) chartSchema
    */
   router.post(
     {
@@ -463,6 +467,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/new_job_population_chart Get population job chart data
    * @apiName NewJobPopulationChart
    * @apiDescription Returns population job chart data
+   *
+   * @apiSchema (body) chartSchema
    */
   router.post(
     {
@@ -539,6 +545,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/look_back_progress Get lookback progress
    * @apiName GetLookBackProgress
    * @apiDescription Returns current progress of anomaly detection job
+   *
+   * @apiSchema (body) lookBackProgressSchema
    */
   router.post(
     {
@@ -568,6 +576,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/categorization_field_examples Get categorization field examples
    * @apiName ValidateCategoryExamples
    * @apiDescription Validates category examples
+   *
+   * @apiSchema (body) categorizationFieldExamplesSchema
    */
   router.post(
     {
@@ -627,6 +637,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/top_categories Get top categories
    * @apiName TopCategories
    * @apiDescription Returns list of top categories
+   *
+   * @apiSchema (body) topCategoriesSchema
    */
   router.post(
     {
