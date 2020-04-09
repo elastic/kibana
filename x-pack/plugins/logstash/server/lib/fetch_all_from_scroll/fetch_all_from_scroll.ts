@@ -4,29 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { APICaller } from 'src/core/server';
-import { get } from 'lodash';
-import { ES_SCROLL_SETTINGS } from '../../../common/constants';
+import { SearchResponse } from 'elasticsearch';
 
-export function fetchAllFromScroll(
-  response: Record<string, any>,
+import { ES_SCROLL_SETTINGS } from '../../../common/constants';
+type Hits = SearchResponse<any>['hits']['hits'];
+
+export async function fetchAllFromScroll(
+  response: SearchResponse<any>,
   callWithRequest: APICaller,
-  hits = []
-): Record<string, any> {
-  const newHits = get(response, 'hits.hits', []);
-  const scrollId = get(response, '_scroll_id');
+  hits: Hits = []
+): Promise<Hits> {
+  const newHits = response.hits.hits;
+  const scrollId = response._scroll_id;
 
   if (newHits.length > 0) {
     hits.push(...newHits);
 
-    return callWithRequest('scroll', {
+    const innerResponse = await callWithRequest('scroll', {
       body: {
         scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
         scroll_id: scrollId,
       },
-    }).then(innerResponse => {
-      return fetchAllFromScroll(innerResponse, callWithRequest, hits);
     });
+
+    return await fetchAllFromScroll(innerResponse, callWithRequest, hits);
   }
 
-  return Promise.resolve(hits);
+  return hits;
 }

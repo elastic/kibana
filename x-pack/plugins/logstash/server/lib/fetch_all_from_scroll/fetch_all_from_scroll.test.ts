@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { fetchAllFromScroll } from './fetch_all_from_scroll';
 
 describe('fetch_all_from_scroll', () => {
@@ -34,12 +33,12 @@ describe('fetch_all_from_scroll', () => {
       };
 
       it('should return an empty array of hits', async () => {
-        const hits = await fetchAllFromScroll(mockResponse, stubCallWithRequest);
+        const hits = await fetchAllFromScroll(mockResponse as any, stubCallWithRequest);
         expect(hits).toEqual([]);
       });
 
       it('should not call callWithRequest', async () => {
-        await fetchAllFromScroll(mockResponse, stubCallWithRequest);
+        await fetchAllFromScroll(mockResponse as any, stubCallWithRequest);
         expect(stubCallWithRequest).toHaveBeenCalledTimes(0);
       });
     });
@@ -53,12 +52,12 @@ describe('fetch_all_from_scroll', () => {
       };
 
       it('should return the hits from the response', async () => {
-        const hits = await fetchAllFromScroll(mockResponse, stubCallWithRequest);
+        const hits = await fetchAllFromScroll(mockResponse as any, stubCallWithRequest);
         expect(hits).toEqual(['foo', 'bar', 'newhit']);
       });
 
       it('should call callWithRequest', async () => {
-        await fetchAllFromScroll(mockResponse, stubCallWithRequest);
+        await fetchAllFromScroll(mockResponse as any, stubCallWithRequest);
         expect(stubCallWithRequest).toHaveBeenCalledTimes(2);
 
         const firstCallWithRequestCallArgs = stubCallWithRequest.mock.calls[0];
