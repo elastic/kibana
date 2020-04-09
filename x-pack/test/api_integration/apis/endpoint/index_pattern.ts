@@ -11,26 +11,17 @@ export default function({ getService }: FtrProviderContext) {
 
   describe('Endpoint index pattern API', () => {
     it('should retrieve the index pattern for events', async () => {
-      const { body } = await supertest
-        .get('/api/endpoint/index_pattern/events')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      const { body } = await supertest.get('/api/endpoint/index_pattern/events').expect(200);
       expect(body.indexPattern).to.eql('events-endpoint-*');
     });
 
     it('should retrieve the index pattern for metadata', async () => {
-      const { body } = await supertest
-        .get('/api/endpoint/index_pattern/metadata')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      const { body } = await supertest.get('/api/endpoint/index_pattern/metadata').expect(200);
       expect(body.indexPattern).to.eql('metrics-endpoint-*');
     });
 
     it('should not retrieve the index pattern for an invalid key', async () => {
-      await supertest
-        .get('/api/endpoint/index_pattern/blah')
-        .set('kbn-xsrf', 'xxx')
-        .expect(404);
+      await supertest.get('/api/endpoint/index_pattern/blah').expect(404);
     });
   });
 }

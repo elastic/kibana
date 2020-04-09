@@ -6,25 +6,21 @@
 
 import { IRouter, Logger, RequestHandler } from 'kibana/server';
 import { EndpointAppContext } from '../types';
-import { IndexPatternGetParamsResult, IndexPatternGetQueryParamsResult } from '../../common/types';
-import {
-  indexPatternGetParamsSchema,
-  indexPatternGetQueryParamsSchema,
-} from '../../common/schema/index_pattern';
+import { IndexPatternGetParamsResult } from '../../common/types';
+import { indexPatternGetParamsSchema } from '../../common/schema/index_pattern';
 import { IndexPatternRetriever } from '../index_pattern';
 
 function handleIndexPattern(
   log: Logger,
   indexRetriever: IndexPatternRetriever
-): RequestHandler<IndexPatternGetParamsResult, IndexPatternGetQueryParamsResult> {
+): RequestHandler<IndexPatternGetParamsResult> {
   return async (context, req, res) => {
     try {
       return res.ok({
         body: {
           indexPattern: await indexRetriever.get(
             context.core.savedObjects.client,
-            req.params.datasetPath,
-            req.query.version
+            req.params.datasetPath
           ),
         },
       });
@@ -41,7 +37,7 @@ export function registerIndexPatternRoute(router: IRouter, endpointAppContext: E
   router.get(
     {
       path: '/api/endpoint/index_pattern/{datasetPath}',
-      validate: { params: indexPatternGetParamsSchema, query: indexPatternGetQueryParamsSchema },
+      validate: { params: indexPatternGetParamsSchema },
       options: { authRequired: true },
     },
     handleIndexPattern(log, endpointAppContext.indexPatternRetriever)

@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'kibana/server';
-import * as Registry from './epm/registry';
-import { getInstallationObject, findInstalledPackageByName } from './epm/packages/get';
-import { Installation } from '../types';
+import { getInstallation } from './epm/packages/get';
 
 export interface IndexPatternService {
   get(
     savedObjectsClient: SavedObjectsClientContract,
     pkgName: string,
-    datasetPath: string,
-    version?: string
+    datasetPath: string
   ): Promise<string | undefined>;
 }
 
@@ -21,19 +18,9 @@ export class IndexPatternSavedObjectService implements IndexPatternService {
   public async get(
     savedObjectsClient: SavedObjectsClientContract,
     pkgName: string,
-    datasetPath: string,
-    version?: string
+    datasetPath: string
   ): Promise<string | undefined> {
-    let installation: Installation | undefined;
-    if (version) {
-      const pkgkey = Registry.pkgToPkgKey({
-        name: pkgName,
-        version,
-      });
-      installation = (await getInstallationObject({ savedObjectsClient, pkgkey }))?.attributes;
-    } else {
-      installation = await findInstalledPackageByName({ savedObjectsClient, pkgName });
-    }
+    const installation = await getInstallation({ savedObjectsClient, pkgName });
     return installation?.installed.patterns[datasetPath];
   }
 }

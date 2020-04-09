@@ -9,7 +9,7 @@ import { IndexPatternService } from '../../ingest_manager/server';
 const endpointPackageName = 'endpoint';
 
 export interface IndexPatternRetriever {
-  get(client: SavedObjectsClientContract, datasetPath: string, version?: string): Promise<string>;
+  get(client: SavedObjectsClientContract, datasetPath: string): Promise<string>;
 }
 
 export class IngestIndexPatternRetriever implements IndexPatternRetriever {
@@ -19,16 +19,11 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
   }
 
   async get(client: SavedObjectsClientContract, datasetPath: string, version?: string) {
-    const pattern = await this.service.get(client, endpointPackageName, datasetPath, version);
+    const pattern = await this.service.get(client, endpointPackageName, datasetPath);
 
     if (!pattern) {
-      const versionStr = version || 'none';
-      this.log.warn(
-        `Failed to retrieve index pattern from ingest manager dataset: ${datasetPath} version: ${versionStr}`
-      );
-      throw new Error(
-        `Unable to retrieve the index pattern for dataset: ${datasetPath} version: ${version}`
-      );
+      this.log.warn(`Failed to retrieve index pattern from ingest manager dataset: ${datasetPath}`);
+      throw new Error(`Unable to retrieve the index pattern for dataset: ${datasetPath}`);
     }
 
     return pattern;

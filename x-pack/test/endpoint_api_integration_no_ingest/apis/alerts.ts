@@ -20,11 +20,8 @@ export default function({ getService }: FtrProviderContext) {
       await esArchiver.unload('endpoint/alerts/host_api_feature');
     });
 
-    it('should return zero results', async () => {
-      await supertest
-        .get('/api/endpoint/alerts')
-        .set('kbn-xsrf', 'xxx')
-        .expect(500);
+    it('should return a 500', async () => {
+      await supertest.get('/api/endpoint/alerts').expect(500);
     });
   });
 }

@@ -10,12 +10,9 @@ import { EndpointPlugin, EndpointPluginSetupDependencies } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
 import { PluginSetupContract } from '../../features/server';
 import { IndexPatternService } from '../../ingest_manager/server';
+import { IndexPatternRetriever } from './index_pattern';
 
 export const MetadataIndexPattern = 'metadata-endpoint-*';
-
-export interface IndexPatternRetriever {
-  get(client: SavedObjectsClientContract, datasetPath: string, version?: string): Promise<string>;
-}
 
 export class FakeIndexPatternRetriever implements IndexPatternRetriever {
   constructor(private readonly indexPattern: string) {}
@@ -24,7 +21,7 @@ export class FakeIndexPatternRetriever implements IndexPatternRetriever {
     return new FakeIndexPatternRetriever(MetadataIndexPattern);
   }
 
-  async get(client: SavedObjectsClientContract, datasetPath: string, version?: string) {
+  async get(client: SavedObjectsClientContract, datasetPath: string) {
     return this.indexPattern;
   }
 }
@@ -35,8 +32,7 @@ export class FakeIndexPatternService implements IndexPatternService {
   async get(
     savedObjectsClient: SavedObjectsClientContract,
     pkgName: string,
-    datasetPath: string,
-    version?: string
+    datasetPath: string
   ): Promise<string | undefined> {
     return this.indexPattern;
   }

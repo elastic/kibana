@@ -9,11 +9,8 @@ export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Endpoint index pattern API without ingest manager initialized', () => {
-    it('should retrieve the index pattern for events', async () => {
-      await supertest
-        .get('/api/endpoint/index_pattern/events')
-        .set('kbn-xsrf', 'xxx')
-        .expect(404);
+    it('should not retrieve the index pattern for events', async () => {
+      await supertest.get('/api/endpoint/index_pattern/events').expect(404);
     });
   });
 }
