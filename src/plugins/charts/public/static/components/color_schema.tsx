@@ -67,7 +67,7 @@ function ColorSchemaOptions({
         }}
       >
         <FormattedMessage
-          id="visTypeVislib.controls.colorSchema.resetColorsButtonLabel"
+          id="charts.controls.colorSchema.resetColorsButtonLabel"
           defaultMessage="Reset colors"
         />
       </EuiLink>
@@ -80,11 +80,11 @@ function ColorSchemaOptions({
         disabled={disabled}
         helpText={
           showHelpText &&
-          i18n.translate('visTypeVislib.controls.colorSchema.howToChangeColorsDescription', {
+          i18n.translate('charts.controls.colorSchema.howToChangeColorsDescription', {
             defaultMessage: 'Individual colors can be changed in the legend.',
           })
         }
-        label={i18n.translate('visTypeVislib.controls.colorSchema.colorSchemaLabel', {
+        label={i18n.translate('charts.controls.colorSchema.colorSchemaLabel', {
           defaultMessage: 'Color schema',
         })}
         labelAppend={isCustomColors && resetColorsButton}
@@ -96,7 +96,7 @@ function ColorSchemaOptions({
 
       <SwitchOption
         disabled={disabled}
-        label={i18n.translate('visTypeVislib.controls.colorSchema.reverseColorSchemaLabel', {
+        label={i18n.translate('charts.controls.colorSchema.reverseColorSchemaLabel', {
           defaultMessage: 'Reverse schema',
         })}
         paramName="invertColors"
