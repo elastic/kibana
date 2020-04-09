@@ -17,7 +17,6 @@ import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
-  LayerDescriptor,
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
