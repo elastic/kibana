@@ -59,7 +59,7 @@
         }
       },
       "transient": {
-        "__scope_link": ".persistent"
+        "__scope_link": "cluster\\.put_settings.persistent"
       }
     }
   }

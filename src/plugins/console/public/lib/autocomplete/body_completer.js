@@ -79,7 +79,18 @@ class ScopeResolver extends SharedComponent {
       throw new Error('unsupported link format', this.link);
     }
 
-    let path = this.link.replace(/\./g, '{').split(/(\{)/);
+    let path = this.link
+      .replace(/[\\]?\./g, match => {
+        // An escaped '.' is collapsed to '.';
+        if (match.startsWith('\\')) {
+          return '.';
+        }
+        // If there is no leading '\' then replace the '.' with the noop '{' char
+        // for us to split this path on.
+        return '{';
+      })
+      .split(/(\{)/);
+
     const endpoint = path[0];
     let components;
     try {
