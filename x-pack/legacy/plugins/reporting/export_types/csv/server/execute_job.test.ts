@@ -15,6 +15,7 @@ import { LevelLogger } from '../../../server/lib/level_logger';
 import { setFieldFormats } from '../../../server/services';
 import { executeJobFactory } from './execute_job';
 import { JobDocPayloadDiscoverCsv } from '../types';
+import { CSV_BOM_CHARS } from '../../../common/constants';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(() => resolve(), ms));
 
@@ -398,6 +399,50 @@ describe('CSV Execute Job', function() {
       );
 
       expect(csvContainsFormulas).toEqual(false);
+    });
+  });
+
+  describe('Byte order mark encoding', () => {
+    it('encodes CSVs with BOM', async () => {
+      configGetStub.withArgs('csv', 'useByteOrderMarkEncoding').returns(true);
+      callAsCurrentUserStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { one: 'one', two: 'bar' } }],
+        },
+        _scroll_id: 'scrollId',
+      });
+
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
+      const jobParams = getJobDocPayload({
+        headers: encryptedHeaders,
+        fields: ['one', 'two'],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      });
+      const { content } = await executeJob('job123', jobParams, cancellationToken);
+
+      expect(content).toEqual(`${CSV_BOM_CHARS}one,two\none,bar\n`);
+    });
+
+    it('encodes CSVs without BOM', async () => {
+      configGetStub.withArgs('csv', 'useByteOrderMarkEncoding').returns(false);
+      callAsCurrentUserStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { one: 'one', two: 'bar' } }],
+        },
+        _scroll_id: 'scrollId',
+      });
+
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
+      const jobParams = getJobDocPayload({
+        headers: encryptedHeaders,
+        fields: ['one', 'two'],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      });
+      const { content } = await executeJob('job123', jobParams, cancellationToken);
+
+      expect(content).toEqual('one,two\none,bar\n');
     });
   });
 
