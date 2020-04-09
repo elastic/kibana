@@ -14,7 +14,7 @@ import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../ty
 import { SymbolIds, NamedColors, PaintServerIds } from './defs';
 import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
-// import * as eventModel from '../../../../common/models/event';
+import * as eventModel from '../../../../common/models/event';
 import * as processModel from '../models/process_event';
 import * as selectors from '../store/selectors';
 
@@ -275,6 +275,17 @@ export const ProcessEventDot = styled(
                 </text>
               </g>
             </svg>
+            <div style={{
+              left: '25%',
+              top: '39%',
+              position: 'absolute',
+              width: '46%',
+              color: 'white',
+              fontSize: `${magFactorX > 1 ? 25.75+(12.5*(magFactorX - 1)) : 25.75}px`,
+              lineHeight: '140%',
+              textAlign: 'center',
+              backgroundColor: NamedColors.resolverBackground,
+            }}>{eventModel.eventName(event)}</div>
           </div>
         </EuiKeyboardAccessible>
       );
