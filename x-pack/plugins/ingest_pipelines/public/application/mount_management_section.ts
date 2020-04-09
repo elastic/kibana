@@ -5,9 +5,8 @@
  */
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { i18n } from '@kbn/i18n';
 
-import { documentationService, uiMetricService, apiService } from './services';
+import { documentationService, uiMetricService, apiService, breadcrumbService } from './services';
 import { renderApp } from '.';
 
 export async function mountManagementSection(
@@ -22,17 +21,10 @@ export async function mountManagementSection(
   } = coreStart;
 
   documentationService.setup(docLinks);
-
-  setBreadcrumbs([
-    {
-      text: i18n.translate('xpack.ingestPipelines.breadcrumbsTitle', {
-        defaultMessage: 'Ingest Pipelines',
-      }),
-    },
-  ]);
+  breadcrumbService.setup(setBreadcrumbs);
 
   const services = {
-    setBreadcrumbs,
+    breadcrumbs: breadcrumbService,
     metric: uiMetricService,
     documentation: documentationService,
     api: apiService,

@@ -6,14 +6,13 @@
 
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { ChromeBreadcrumb } from 'src/core/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 import { App } from './app';
-import { DocumentationService, UiMetricService, ApiService } from './services';
+import { DocumentationService, UiMetricService, ApiService, BreadcrumbService } from './services';
 
 export interface AppServices {
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  breadcrumbs: BreadcrumbService;
   metric: UiMetricService;
   documentation: DocumentationService;
   api: ApiService;

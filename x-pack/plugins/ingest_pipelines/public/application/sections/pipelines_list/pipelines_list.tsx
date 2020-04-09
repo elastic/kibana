@@ -27,7 +27,8 @@ export const PipelinesList: React.FunctionComponent = () => {
   // Track component loaded
   useEffect(() => {
     services.metric.trackUiMetric(UIM_PIPELINES_LIST_LOAD);
-  }, [services.metric]);
+    services.breadcrumbs.setBreadcrumbs('home');
+  }, [services]);
 
   return (
     <EuiPageBody>

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -32,19 +32,11 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
     }
 
     // TODO navigate back to list page with flyout open
-    // history.push();
   };
 
-  // TODO set breadcrumbs
-  // useEffect(() => {
-  //   services.setBreadcrumbs([
-  //     {
-  //       text: i18n.translate('xpack.ingestPipelines.breadcrumbsTitle', {
-  //         defaultMessage: 'Ingest Pipelines',
-  //       }),
-  //     },
-  //   ]);
-  // }, [services]);
+  useEffect(() => {
+    services.breadcrumbs.setBreadcrumbs('create');
+  }, [services]);
 
   return (
     <EuiPageBody>
