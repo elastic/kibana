@@ -39,6 +39,17 @@ have multiple environments for development and production.
 Import and export also work well when you have a large number
 of objects to update and want to batch the process.
 
+[float]
+==== Compatibility across versions and downgrades
+
+We do not guarantee compatibility of a Saved Object exported from newer Kibana version and imported to older Kibana version:
+
+* New functionalities (e.g. a new Visualization type or new options in existing visualizations) cannot be reproduced in previous versions
+* The exported format of Saved Objects can change without notice and it is guaranteed to work only when reimported on the same (or more recent) Kibana version
+
+Kibana automatically performs a Saved Object migration at every upgrade (even minor versions) due to format changes, new features or fixes.
+
+The official process to perform a Kibana downgrade is to restore a snapshot of the Kibana indices taken before the upgrade. Please **always** snapshot all the Kibana indices prior upgrading.
 
 [float]
 ==== Import
