@@ -105,7 +105,7 @@ function extractDocEntries(docEntries: DocEntry[], block: Block, paramsGroup = '
 
     collection.push({
       group,
-      type: field.type,
+      type: escapeSpecial(field.type),
       size: undefined,
       allowedValues: undefined,
       optional: !!field.optional,
@@ -118,4 +118,11 @@ function extractDocEntries(docEntries: DocEntry[], block: Block, paramsGroup = '
       extractDocEntries(field.nested, block, field.name);
     }
   }
+}
+
+/**
+ * Escape special character to make sure the markdown table isn't broken
+ */
+function escapeSpecial(str: string): string {
+  return str.replace(/\|/g, '\\|');
 }

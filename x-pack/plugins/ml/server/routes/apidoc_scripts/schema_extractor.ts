@@ -113,7 +113,7 @@ export function extractDocumentation(
 
     return {
       name: symbol.getName(),
-      documentation: ts.displayPartsToString(symbol.getDocumentationComment(checker)),
+      documentation: getCommentString(symbol),
       type,
       ...(nestedEntries ? { nested: nestedEntries } : {}),
     };
@@ -140,7 +140,7 @@ export function extractDocumentation(
       members.forEach(member => {
         collection.push({
           name: member.escapedName,
-          documentation: ts.displayPartsToString(member.getDocumentationComment(checker)),
+          documentation: getCommentString(member),
           // @ts-ignore
           type: checker.typeToString(member.type),
         });
@@ -148,6 +148,10 @@ export function extractDocumentation(
     }
 
     return collection;
+  }
+
+  function getCommentString(symbol: ts.Symbol): string {
+    return ts.displayPartsToString(symbol.getDocumentationComment(checker)).replace(/\n/g, ' ');
   }
 
   /**
