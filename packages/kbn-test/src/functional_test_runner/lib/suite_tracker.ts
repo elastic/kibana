@@ -23,14 +23,14 @@ import { REPO_ROOT } from '@kbn/dev-utils';
 
 import { Lifecycle } from './lifecycle';
 
-export interface TrackedSuiteMetadata {
+export interface SuiteInProgress {
   startTime?: Date;
   endTime?: Date;
   duration?: number;
   success?: boolean;
 }
 
-export interface TrackedSuite {
+export interface SuiteWithMetadata {
   config: string;
   file: string;
   tag: string;
@@ -46,16 +46,16 @@ const getTestMetadataPath = () => {
   return process.env.TEST_METADATA_PATH || resolve(REPO_ROOT, 'target', 'test_metadata.json');
 };
 
-export class TestTracker {
+export class SuiteTracker {
   lifecycle: Lifecycle;
-  finishedSuitesByConfig: Record<string, Record<string, TrackedSuite>> = {};
-  inProgressSuites: Map<object, TrackedSuiteMetadata> = new Map<object, TrackedSuiteMetadata>();
+  finishedSuitesByConfig: Record<string, Record<string, SuiteWithMetadata>> = {};
+  inProgressSuites: Map<object, SuiteInProgress> = new Map<object, SuiteInProgress>();
 
-  getTracked(suite: object): TrackedSuiteMetadata {
+  getTracked(suite: object): SuiteInProgress {
     if (!this.inProgressSuites.has(suite)) {
-      this.inProgressSuites.set(suite, { success: true } as TrackedSuiteMetadata);
+      this.inProgressSuites.set(suite, { success: true } as SuiteInProgress);
     }
-    return this.inProgressSuites.get(suite) || ({} as TrackedSuiteMetadata);
+    return this.inProgressSuites.get(suite) || ({} as SuiteInProgress);
   }
 
   constructor(lifecycle: Lifecycle) {
@@ -114,7 +114,7 @@ export class TestTracker {
           (this.finishedSuitesByConfig[config][file] &&
             this.finishedSuitesByConfig[config][file].leafSuite)
         ),
-      } as TrackedSuite;
+      } as SuiteWithMetadata;
     });
 
     lifecycle.cleanup.add(() => {
@@ -125,10 +125,12 @@ export class TestTracker {
   }
 
   getAllFinishedSuites() {
-    const flattened: TrackedSuite[] = [];
-    Object.values(this.finishedSuitesByConfig).forEach((byFile: Record<string, TrackedSuite>) =>
-      Object.values(byFile).forEach((suite: TrackedSuite) => flattened.push(suite))
-    );
+    const flattened: SuiteWithMetadata[] = [];
+    for (const byFile of Object.values(this.finishedSuitesByConfig)) {
+      for (const suite of Object.values(byFile)) {
+        flattened.push(suite);
+      }
+    }
 
     flattened.sort((a, b) => b.duration - a.duration);
     return flattened;

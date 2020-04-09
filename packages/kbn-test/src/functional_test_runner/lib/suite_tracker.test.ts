@@ -27,14 +27,14 @@ jest.mock('@kbn/dev-utils', () => {
 
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { Lifecycle } from './lifecycle';
-import { TestTracker } from './test_tracker';
+import { SuiteTracker } from './suite_tracker';
 
 const DEFAULT_TEST_METADATA_PATH = join(REPO_ROOT, 'target', 'test_metadata.json');
 const MOCK_CONFIG_PATH = join('test', 'config.js');
 const MOCK_TEST_PATH = join('test', 'apps', 'test.js');
 const ENVS_TO_RESET = ['TEST_METADATA_PATH'];
 
-describe('TestTracker', () => {
+describe('SuiteTracker', () => {
   const originalEnvs: Record<string, string> = {};
 
   beforeEach(() => {
@@ -74,9 +74,9 @@ describe('TestTracker', () => {
 
   const runLifecycleWithMocks = async (mocks: object[], fn: (objs: any) => any = () => {}) => {
     const lifecycle = new Lifecycle();
-    const testTracker = new TestTracker(lifecycle);
+    const suiteTracker = new SuiteTracker(lifecycle);
 
-    const ret = { lifecycle, testTracker };
+    const ret = { lifecycle, suiteTracker };
 
     for (const mock of mocks) {
       await lifecycle.beforeTestSuite.trigger(mock);
@@ -101,9 +101,9 @@ describe('TestTracker', () => {
   });
 
   it('collects metadata for a single suite with multiple describe()s', async () => {
-    const { testTracker } = await runLifecycleWithMocks([MOCKS.WITHOUT_TESTS, MOCKS.WITH_TESTS]);
+    const { suiteTracker } = await runLifecycleWithMocks([MOCKS.WITHOUT_TESTS, MOCKS.WITH_TESTS]);
 
-    const suites = testTracker.getAllFinishedSuites();
+    const suites = suiteTracker.getAllFinishedSuites();
     expect(suites.length).toBe(1);
     const suite = suites[0];
 
@@ -117,10 +117,10 @@ describe('TestTracker', () => {
   });
 
   it('writes metadata to a file when cleanup is triggered', async () => {
-    const { lifecycle, testTracker } = await runLifecycleWithMocks([MOCKS.WITH_TESTS]);
+    const { lifecycle, suiteTracker } = await runLifecycleWithMocks([MOCKS.WITH_TESTS]);
     await lifecycle.cleanup.trigger();
 
-    const suites = testTracker.getAllFinishedSuites();
+    const suites = suiteTracker.getAllFinishedSuites();
 
     const call = (fs.writeFileSync as jest.Mock).mock.calls[0];
     expect(call[0]).toEqual(DEFAULT_TEST_METADATA_PATH);
@@ -142,8 +142,8 @@ describe('TestTracker', () => {
     const parent = createMock({ parent: root });
     const withTests = createMock({ parent, tests: [{}] });
 
-    const { testTracker } = await runLifecycleWithMocks([root, parent, withTests]);
-    const suites = testTracker.getAllFinishedSuites();
+    const { suiteTracker } = await runLifecycleWithMocks([root, parent, withTests]);
+    const suites = suiteTracker.getAllFinishedSuites();
 
     const finishedRoot = suites.find(s => s.title === 'root');
     const finishedWithTests = suites.find(s => s.title !== 'root');
@@ -165,14 +165,14 @@ describe('TestTracker', () => {
     });
 
     it('marks parent suites as not successful when a test fails', async () => {
-      const { testTracker } = await runLifecycleWithMocks(
+      const { suiteTracker } = await runLifecycleWithMocks(
         [root, parent, failed],
         async ({ lifecycle }) => {
           await lifecycle.testFailure.trigger(Error('test'), { parent: failed });
         }
       );
 
-      const suites = testTracker.getAllFinishedSuites();
+      const suites = suiteTracker.getAllFinishedSuites();
       expect(suites.length).toBe(2);
       for (const suite of suites) {
         expect(suite.success).toBeFalsy();
@@ -180,14 +180,14 @@ describe('TestTracker', () => {
     });
 
     it('marks parent suites as not successful when a test hook fails', async () => {
-      const { testTracker } = await runLifecycleWithMocks(
+      const { suiteTracker } = await runLifecycleWithMocks(
         [root, parent, failed],
         async ({ lifecycle }) => {
           await lifecycle.testHookFailure.trigger(Error('test'), { parent: failed });
         }
       );
 
-      const suites = testTracker.getAllFinishedSuites();
+      const suites = suiteTracker.getAllFinishedSuites();
       expect(suites.length).toBe(2);
       for (const suite of suites) {
         expect(suite.success).toBeFalsy();

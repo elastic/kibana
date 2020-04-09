@@ -23,4 +23,4 @@ export { readConfigFile, Config } from './config';
 export { readProviderSpec, ProviderCollection, Provider } from './providers';
 export { runTests, setupMocha } from './mocha';
 export { FailureMetadata } from './failure_metadata';
-export { TestTracker } from './test_tracker';
+export { SuiteTracker } from './suite_tracker';
