@@ -83,7 +83,7 @@ describe('export timelines', () => {
   });
 
   describe('request validation', () => {
-    test('return validation error for query param', async () => {
+    test('return validation error for request body', async () => {
       const request = requestMock.create({
         method: 'get',
         path: TIMELINE_EXPORT_URL,
@@ -96,7 +96,7 @@ describe('export timelines', () => {
       );
     });
 
-    test('return validation error for query body', async () => {
+    test('return validation error for request params', async () => {
       const request = requestMock.create({
         method: 'get',
         path: TIMELINE_EXPORT_URL,
