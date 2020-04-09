@@ -48,7 +48,7 @@ interface StepIndexPatternProps {
   esService: DataPublicPluginStart['search']['__LEGACY']['esClient'];
   savedObjectsClient: SavedObjectsClient;
   indexPatternCreationType: IndexPatternCreationConfig;
-  goToNextStep: () => void;
+  goToNextStep: (query: string) => void;
   initialQuery?: string;
   uiSettings: IUiSettingsClient;
 }

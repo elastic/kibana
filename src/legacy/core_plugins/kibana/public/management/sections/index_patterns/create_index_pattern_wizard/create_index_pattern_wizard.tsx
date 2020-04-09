@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { ReactElement, Component } from 'react';
 
-import { EuiGlobalToastList } from '@elastic/eui';
+import { EuiGlobalToastList, EuiGlobalToastListToast } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
@@ -31,41 +31,68 @@ import { EmptyState } from './components/empty_state';
 
 import { MAX_SEARCH_SIZE } from './constants';
 import { ensureMinimumTime, getIndices } from './lib';
-import { i18n } from '@kbn/i18n';
+import {
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+  OverlayStart,
+} from '../../../../../../../../core/public';
+import { DataPublicPluginStart } from '../../../../../../../../plugins/data/public';
+import { IndexPatternCreationConfig } from '../../../../../../management/public';
+import { MatchedIndex } from './types';
 
-export class CreateIndexPatternWizard extends Component {
-  static propTypes = {
-    initialQuery: PropTypes.string,
-    services: PropTypes.shape({
-      es: PropTypes.object.isRequired,
-      indexPatterns: PropTypes.object.isRequired,
-      savedObjectsClient: PropTypes.object.isRequired,
-      indexPatternCreationType: PropTypes.object.isRequired,
-      config: PropTypes.object.isRequired,
-      changeUrl: PropTypes.func.isRequired,
-      openConfirm: PropTypes.func.isRequired,
-    }).isRequired,
+interface CreateIndexPatternWizardProps {
+  initialQuery: string;
+  services: {
+    indexPatternCreationType: IndexPatternCreationConfig;
+    es: DataPublicPluginStart['search']['__LEGACY']['esClient'];
+    indexPatterns: DataPublicPluginStart['indexPatterns'];
+    savedObjectsClient: SavedObjectsClientContract;
+    config: IUiSettingsClient;
+    changeUrl: (url: string) => void;
+    openConfirm: OverlayStart['openConfirm'];
+  };
+}
+
+interface CreateIndexPatternWizardState {
+  step: number;
+  indexPattern: string;
+  allIndices: MatchedIndex[];
+  remoteClustersExist: boolean;
+  isInitiallyLoadingIndices: boolean;
+  isIncludingSystemIndices: boolean;
+  toasts: EuiGlobalToastListToast[];
+  indexPatternCreationType: IndexPatternCreationConfig;
+}
+
+export class CreateIndexPatternWizard extends Component<
+  CreateIndexPatternWizardProps,
+  CreateIndexPatternWizardState
+> {
+  state = {
+    step: 1,
+    indexPattern: '',
+    allIndices: [],
+    remoteClustersExist: false,
+    isInitiallyLoadingIndices: true,
+    isIncludingSystemIndices: false,
+    toasts: [],
+    indexPatternCreationType: {} as IndexPatternCreationConfig,
   };
 
-  constructor(props) {
+  constructor(props: CreateIndexPatternWizardProps) {
     super(props);
-    this.indexPatternCreationType = this.props.services.indexPatternCreationType;
-    this.state = {
-      step: 1,
-      indexPattern: '',
-      allIndices: [],
-      remoteClustersExist: false,
-      isInitiallyLoadingIndices: true,
-      isIncludingSystemIndices: false,
-      toasts: [],
-    };
+    this.state.indexPatternCreationType = this.props.services.indexPatternCreationType;
   }
 
   async UNSAFE_componentWillMount() {
     this.fetchData();
   }
 
-  catchAndWarn = async (asyncFn, errorValue, errorMsg) => {
+  catchAndWarn = async (
+    asyncFn: Promise<MatchedIndex[]>,
+    errorValue: [] | string[],
+    errorMsg: ReactElement
+  ) => {
     try {
       return await asyncFn;
     } catch (errors) {
@@ -109,24 +136,28 @@ export class CreateIndexPatternWizard extends Component {
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE),
+        getIndices(services.es, this.state.indexPatternCreationType, `*`, MAX_SEARCH_SIZE),
         [],
         indicesFailMsg
       )
-    ).then(allIndices => this.setState({ allIndices, isInitiallyLoadingIndices: false }));
+    ).then((allIndices: MatchedIndex[]) =>
+      this.setState({ allIndices, isInitiallyLoadingIndices: false })
+    );
 
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(services.es, this.indexPatternCreationType, `*:*`, 1),
+      getIndices(services.es, this.state.indexPatternCreationType, `*:*`, 1),
       ['a'],
       clustersFailMsg
-    ).then(remoteIndices => this.setState({ remoteClustersExist: !!remoteIndices.length }));
+    ).then((remoteIndices: string[] | MatchedIndex[]) =>
+      this.setState({ remoteClustersExist: !!remoteIndices.length })
+    );
   };
 
-  createIndexPattern = async (timeFieldName, indexPatternId) => {
+  createIndexPattern = async (timeFieldName: string | undefined, indexPatternId: string) => {
     const { services } = this.props;
-    const { indexPattern } = this.state;
+    const { indexPattern, indexPatternCreationType } = this.state;
 
     const emptyPattern = await services.indexPatterns.make();
 
@@ -134,13 +165,13 @@ export class CreateIndexPatternWizard extends Component {
       id: indexPatternId,
       title: indexPattern,
       timeFieldName,
-      ...this.indexPatternCreationType.getIndexPatternMappings(),
+      ...indexPatternCreationType.getIndexPatternMappings(),
     });
 
     const createdId = await emptyPattern.create();
     if (!createdId) {
       const confirmMessage = i18n.translate('kbn.management.indexPattern.titleExistsLabel', {
-        values: { title: this.title },
+        values: { title: emptyPattern.title },
         defaultMessage: "An index pattern with the title '{title}' already exists.",
       });
 
@@ -165,7 +196,7 @@ export class CreateIndexPatternWizard extends Component {
     services.changeUrl(`/management/kibana/index_patterns/${createdId}`);
   };
 
-  goToTimeFieldStep = indexPattern => {
+  goToTimeFieldStep = (indexPattern: string) => {
     this.setState({ step: 2, indexPattern });
   };
 
@@ -174,22 +205,22 @@ export class CreateIndexPatternWizard extends Component {
   };
 
   onChangeIncludingSystemIndices = () => {
-    this.setState(state => ({
-      isIncludingSystemIndices: !state.isIncludingSystemIndices,
+    this.setState(prevState => ({
+      isIncludingSystemIndices: !prevState.isIncludingSystemIndices,
     }));
   };
 
   renderHeader() {
-    const { isIncludingSystemIndices } = this.state;
+    const { isIncludingSystemIndices, indexPatternCreationType } = this.state;
 
     return (
       <Header
-        prompt={this.indexPatternCreationType.renderPrompt()}
-        showSystemIndices={this.indexPatternCreationType.getShowSystemIndices()}
+        prompt={indexPatternCreationType.renderPrompt()}
+        showSystemIndices={indexPatternCreationType.getShowSystemIndices()}
         isIncludingSystemIndices={isIncludingSystemIndices}
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
-        indexPatternName={this.indexPatternCreationType.getIndexPatternName()}
-        isBeta={this.indexPatternCreationType.getIsBeta()}
+        indexPatternName={indexPatternCreationType.getIndexPatternName()}
+        isBeta={indexPatternCreationType.getIsBeta()}
       />
     );
   }
@@ -202,13 +233,14 @@ export class CreateIndexPatternWizard extends Component {
       step,
       indexPattern,
       remoteClustersExist,
+      indexPatternCreationType,
     } = this.state;
 
     if (isInitiallyLoadingIndices) {
       return <LoadingState />;
     }
 
-    const hasDataIndices = allIndices.some(({ name }) => !name.startsWith('.'));
+    const hasDataIndices = allIndices.some(({ name }: MatchedIndex) => !name.startsWith('.'));
     if (!hasDataIndices && !isIncludingSystemIndices && !remoteClustersExist) {
       return <EmptyState onRefresh={this.fetchData} />;
     }
@@ -222,9 +254,9 @@ export class CreateIndexPatternWizard extends Component {
           isIncludingSystemIndices={isIncludingSystemIndices}
           esService={services.es}
           savedObjectsClient={services.savedObjectsClient}
-          indexPatternCreationType={this.indexPatternCreationType}
+          indexPatternCreationType={indexPatternCreationType}
           goToNextStep={this.goToTimeFieldStep}
-          uiSettings={services.uiSettings}
+          uiSettings={services.config}
         />
       );
     }
@@ -237,7 +269,7 @@ export class CreateIndexPatternWizard extends Component {
           indexPatternsService={services.indexPatterns}
           goToPreviousStep={this.goToIndexPatternStep}
           createIndexPattern={this.createIndexPattern}
-          indexPatternCreationType={this.indexPatternCreationType}
+          indexPatternCreationType={indexPatternCreationType}
         />
       );
     }
@@ -245,9 +277,9 @@ export class CreateIndexPatternWizard extends Component {
     return null;
   }
 
-  removeToast = removedToast => {
+  removeToast = (id: string) => {
     this.setState(prevState => ({
-      toasts: prevState.toasts.filter(toast => toast.id !== removedToast.id),
+      toasts: prevState.toasts.filter(toast => toast.id !== id),
     }));
   };
 
@@ -263,7 +295,9 @@ export class CreateIndexPatternWizard extends Component {
         </div>
         <EuiGlobalToastList
           toasts={this.state.toasts}
-          dismissToast={this.removeToast}
+          dismissToast={({ id }) => {
+            this.removeToast(id);
+          }}
           toastLifeTimeMs={6000}
         />
       </React.Fragment>
