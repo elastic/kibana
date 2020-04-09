@@ -90,7 +90,7 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
 
   if (action.type === 'userChangedPolicyConfig') {
     const newState = { ...state, policyItem: { ...(state.policyItem as PolicyData) } };
-    const newPolicy = (newState.policyItem.inputs[0].config.policy.value = {
+    const newPolicy: any = (newState.policyItem.inputs[0].config.policy.value = {
       ...fullPolicy(state),
     });
 

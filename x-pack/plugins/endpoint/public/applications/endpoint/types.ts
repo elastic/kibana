@@ -97,7 +97,7 @@ export interface PolicyListState {
 /**
  * Policy details store state
  */
-export interface PolicyDetailsState {
+export type PolicyDetailsState = Immutable<{
   /** A single policy item  */
   policyItem?: PolicyData;
   /** API error if loading data failed */
@@ -112,7 +112,7 @@ export interface PolicyDetailsState {
     success: boolean;
     error?: ServerApiError;
   };
-}
+}>;
 
 /**
  * Endpoint Policy configuration
