@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiComponent } from 'src/plugins/kibana_utils/common';
+import { UiComponent } from 'src/plugins/kibana_utils/public';
 import { ActionType, ActionContextMapping } from '../types';
 import { Presentable } from '../util/presentable';
 
