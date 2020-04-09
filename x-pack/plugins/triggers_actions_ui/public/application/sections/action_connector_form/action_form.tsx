@@ -85,6 +85,7 @@ export const ActionForm = ({
   );
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
+  const [isLoadingConnectors, setIsLoadingConnectors] = useState<boolean>(false);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
 
@@ -128,6 +129,7 @@ export const ActionForm = ({
 
   async function loadConnectors() {
     try {
+      setIsLoadingConnectors(true);
       const actionsResponse = await loadAllActions({ http });
       setConnectors(actionsResponse);
     } catch (e) {
@@ -139,6 +141,8 @@ export const ActionForm = ({
           }
         ),
       });
+    } finally {
+      setIsLoadingConnectors(false);
     }
   }
   const getSelectedOptions = (actionItemId: string) => {
@@ -485,19 +489,28 @@ export const ActionForm = ({
 
   return (
     <Fragment>
-      {actions.map((actionItem: AlertAction, index: number) => {
-        const actionConnector = connectors.find(field => field.id === actionItem.id);
-        // connectors doesn't exists
-        if (!actionConnector) {
-          return getAddConnectorsForm(actionItem, index);
-        }
+      {isLoadingConnectors ? (
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertForm.loadingConnectorsDescription"
+            defaultMessage="Loading connectors…"
+          />
+        </SectionLoading>
+      ) : (
+        actions.map((actionItem: AlertAction, index: number) => {
+          const actionConnector = connectors.find(field => field.id === actionItem.id);
+          // connectors doesn't exists
+          if (!actionConnector) {
+            return getAddConnectorsForm(actionItem, index);
+          }
 
-        const actionErrors: { errors: IErrorObject } = actionTypeRegistry
-          .get(actionItem.actionTypeId)
-          ?.validateParams(actionItem.params);
+          const actionErrors: { errors: IErrorObject } = actionTypeRegistry
+            .get(actionItem.actionTypeId)
+            ?.validateParams(actionItem.params);
 
-        return getActionTypeForm(actionItem, actionConnector, actionErrors, index);
-      })}
+          return getActionTypeForm(actionItem, actionConnector, actionErrors, index);
+        })
+      )}
       <EuiSpacer size="m" />
       {isAddActionPanelOpen === false ? (
         <EuiButton
