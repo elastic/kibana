@@ -17,7 +17,7 @@ import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
-  Promise<JobDocPayloadDiscoverCsv>
+  JobDocPayloadDiscoverCsv
 >> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
