@@ -5,7 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
+import { AbstractSourceDescriptor, LayerDescriptor } from '../../../common/descriptor_types';
 import { ILayer } from '../layer';
 
 export type ImmutableSourceProperty = {
@@ -29,7 +29,7 @@ export interface ISource {
   isQueryAware(): boolean;
   isRefreshTimerAware(): Promise<boolean>;
   isTimeAware(): Promise<boolean>;
-  getImmutableProperties(): ImmutableSourceProperty[];
+  getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributions(): Promise<Attribution[]>;
 }
 
@@ -38,7 +38,7 @@ export class AbstractSource implements ISource {
   constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters?: object);
 
   destroy(): void;
-  createDefaultLayer(): ILayer;
+  createDefaultLayer(layerDescriptor?: LayerDescriptor): ILayer;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): object;
   isFieldAware(): boolean;
@@ -47,6 +47,6 @@ export class AbstractSource implements ISource {
   isQueryAware(): boolean;
   isRefreshTimerAware(): Promise<boolean>;
   isTimeAware(): Promise<boolean>;
-  getImmutableProperties(): ImmutableSourceProperty[];
+  getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributions(): Promise<Attribution[]>;
 }

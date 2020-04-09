@@ -17,7 +17,7 @@ const descriptor: XYZTMSSourceDescriptor = {
 };
 describe('xyz Tilemap Source', () => {
   it('should create a tile-layer', () => {
-    const source = new XYZTMSSource(descriptor, null);
+    const source = new XYZTMSSource(descriptor);
     const layer: ILayer = source.createDefaultLayer();
     expect(layer instanceof TileLayer).toEqual(true);
   });

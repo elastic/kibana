@@ -34,7 +34,7 @@ export class XYZTMSEditor extends Component<Props, State> {
     attributionUrl: '',
   };
 
-  _sourceConfigChange = _.debounce(updatedSourceConfig => {
+  _sourceConfigChange = _.debounce((updatedSourceConfig: SourceConfig) => {
     if (this.state.tmsCanPreview) {
       this.props.onSourceConfigChange(updatedSourceConfig);
     }
