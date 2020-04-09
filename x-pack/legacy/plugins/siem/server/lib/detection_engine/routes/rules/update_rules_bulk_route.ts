@@ -122,6 +122,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               note,
               version,
               lists,
+              actions,
             });
             if (rule != null) {
               const ruleActions = await updateRulesNotifications({
