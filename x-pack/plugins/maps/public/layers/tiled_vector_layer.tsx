@@ -14,16 +14,16 @@ import { canSkipSourceUpdate } from './util/can_skip_fetch';
 import { ITiledSingleLayerVectorSource, IVectorSource } from './sources/vector_source';
 import { SyncContext } from '../actions/map_actions';
 import { ISource } from './sources/source';
-import { DataMeta, MapFilters, VectorLayerDescriptor } from '../../common/descriptor_types';
+import { DataMeta, MapFilters, VectorSourceRequestMeta } from '../../common/descriptor_types';
 
 export class SingleTiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
-  static createDescriptor(options: VectorLayerDescriptor, mapColors: string[]) {
+  static createDescriptor(options: VectorLayerArguments, mapColors: string[]) {
     const layerDescriptor = super.createDescriptor(options, mapColors);
     layerDescriptor.type = SingleTiledVectorLayer.type;
 
-    if (!options.style) {
+    if (!layerDescriptor.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors);
       layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
     }
@@ -31,7 +31,7 @@ export class SingleTiledVectorLayer extends VectorLayer {
     return layerDescriptor;
   }
 
-  private readonly _source: ITiledSingleLayerVectorSource; // downcast to the more specific type
+  readonly _source: ITiledSingleLayerVectorSource; // downcast to the more specific type
 
   constructor({ layerDescriptor, source }: VectorLayerArguments) {
     super({ layerDescriptor, source });
@@ -47,7 +47,11 @@ export class SingleTiledVectorLayer extends VectorLayer {
     };
   }
 
-  _getSearchFilters(dataFilters: MapFilters, source: IVectorSource, style: IVectorStyle): DataMeta {
+  _getSearchFilters(
+    dataFilters: MapFilters,
+    source: IVectorSource,
+    style: IVectorStyle
+  ): VectorSourceRequestMeta {
     const fieldNames = [...source.getFieldNames(), ...style.getSourceFieldNames()];
 
     return {

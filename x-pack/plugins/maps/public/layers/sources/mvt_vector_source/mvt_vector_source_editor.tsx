@@ -58,8 +58,8 @@ export class MVTVectorSourceEditor extends React.Component {
   };
 
   _handleZoomRangeChange = (e: Value) => {
-    const minZoom = parseInt(e[0], 10);
-    const maxZoom = parseInt(e[1], 10);
+    const minZoom = parseInt(e[0] as string, 10);
+    const maxZoom = parseInt(e[1] as string, 10);
 
     if (this.state.minZoom !== minZoom || this.state.maxZoom !== maxZoom) {
       this.setState({ minZoom, maxZoom }, () => this._sourceConfigChange());

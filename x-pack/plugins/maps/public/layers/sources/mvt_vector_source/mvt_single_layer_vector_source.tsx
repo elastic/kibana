@@ -56,11 +56,11 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     };
   }
 
-  private readonly _descriptor: TiledSingleLayerVectorSourceDescriptor;
+  readonly _descriptor: TiledSingleLayerVectorSourceDescriptor;
 
-  constructor(descriptor: TiledSingleLayerVectorSourceDescriptor, adapters: object) {
-    super(descriptor, adapters);
-    this._descriptor = descriptor; // re-assignment is required due to TS-JS transpilation, not the type-system
+  constructor(sourceDescriptor: TiledSingleLayerVectorSourceDescriptor, inspectorAdapters: object) {
+    super(sourceDescriptor, inspectorAdapters);
+    this._descriptor = sourceDescriptor; // re-assignment is required due to TS-JS transpilation, not the type-system
   }
 
   renderSourceSettingsEditor() {
@@ -186,6 +186,7 @@ export const mvtVectorSourceWizardConfig = {
         layerName,
         minZoom,
         maxZoom,
+        type: MVTSingleLayerVectorSource.type,
       });
       const source = new MVTSingleLayerVectorSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);

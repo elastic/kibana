@@ -5,11 +5,13 @@
  */
 
 import { AbstractSource, ISource } from './source';
+import { XYZTMSSourceDescriptor } from '../../../common/descriptor_types';
 
 export interface ITMSSource extends ISource {
   getUrlTemplate(): Promise<string>;
 }
 
 export class AbstractTMSSource extends AbstractSource implements ITMSSource {
+  readonly _descriptor: XYZTMSSourceDescriptor;
   getUrlTemplate(): Promise<string>;
 }

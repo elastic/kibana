@@ -21,11 +21,11 @@ export interface ISource {
 }
 
 export class AbstractSource implements ISource {
-  private readonly _descriptor: AbstractSourceDescriptor;
+  readonly _descriptor: AbstractSourceDescriptor;
   constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters: object);
 
   destroy(): void;
-  createDefaultLayer(options: LayerDescriptor): ILayer;
+  createDefaultLayer(options: LayerDescriptor | undefined): ILayer;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): object;
   isFieldAware(): boolean;

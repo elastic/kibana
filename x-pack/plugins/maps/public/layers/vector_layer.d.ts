@@ -28,6 +28,7 @@ export interface IVectorLayer extends ILayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];
+  getSource(): IVectorSource;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -64,4 +65,5 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   ownsMbLayerId(sourceId: string): boolean;
   _setMbPointsProperties(mbMap: unknown, options: unknown): void;
   _setMbLinePolygonProperties(mbMap: unknown, options: unknown): void;
+  getSource(): IVectorSource;
 }
