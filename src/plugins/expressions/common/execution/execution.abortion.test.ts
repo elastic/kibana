@@ -77,4 +77,20 @@ describe('Execution abortion tests', () => {
       },
     });
   });
+
+  test('cancelling execution after it completed has no effect', async () => {
+    jest.useRealTimers();
+
+    const execution = createExecution('sleep 1');
+
+    execution.start();
+
+    const result = await execution.result;
+
+    execution.cancel();
+
+    expect(result).toBe(null);
+
+    jest.useFakeTimers();
+  });
 });
