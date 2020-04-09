@@ -56,9 +56,8 @@ Select **Save**. The alert has been created and is now active!
 
 This guide creates an alert for the `opbeans-python` service based on the following criteria:
 
-* Transaction type: `transaction.type:celery`
 * Error rate is above 25 for the last minute
-* Check every 1 minutes, and repeat the alert every 10 minutes
+* Check every 1 minute, and repeat the alert every 10 minutes
 * Send the alert via email to the `opbeans-python` team
 
 From the APM app, navigate to the `opbeans-python` service and select
@@ -72,7 +71,6 @@ Based on the alert criteria, define the following alert details:
 
 * **Check every** - `1 minute`
 * **Notify every** - `10 minutes`
-* **TYPE** - `celery`
 * **IS ABOVE** - `25 errors`
 * **FOR THE LAST** - `1 minute`
 
