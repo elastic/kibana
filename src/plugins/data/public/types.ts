@@ -30,6 +30,7 @@ import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
 import { IndexPatternsContract } from './index_patterns';
 import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
+import { EnsureDefaultIndexPattern } from './ui/ensure_default_index_pattern';
 
 export interface DataSetupDependencies {
   expressions: ExpressionsSetup;
@@ -59,6 +60,7 @@ export interface DataPublicPluginStart {
   ui: {
     IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
     SearchBar: React.ComponentType<StatefulSearchBarProps>;
+    ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
   };
 }
 

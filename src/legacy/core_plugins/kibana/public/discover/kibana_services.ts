@@ -53,11 +53,7 @@ export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
 }>('urlTracker');
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
-export {
-  unhashUrl,
-  redirectWhenMissing,
-  ensureDefaultIndexPattern,
-} from '../../../../../plugins/kibana_utils/public';
+export { unhashUrl, redirectWhenMissing } from '../../../../../plugins/kibana_utils/public';
 export {
   formatMsg,
   formatStack,

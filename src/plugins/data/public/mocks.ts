@@ -54,6 +54,7 @@ const createStartContract = (): Start => {
     ui: {
       IndexPatternSelect: jest.fn(),
       SearchBar: jest.fn(),
+      ensureDefaultIndexPattern: jest.fn(),
     },
     indexPatterns: ({
       make: () => ({
