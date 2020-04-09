@@ -11,7 +11,7 @@ import { htmlIdGenerator, EuiKeyboardAccessible } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
-import { SymbolIds, NamedColors, PaintServerIds } from './defs';
+import { SymbolIds, NamedColors } from './defs';
 import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../../common/models/event';
@@ -21,7 +21,7 @@ import * as selectors from '../store/selectors';
 const nodeAssets = {
   runningProcessCube: {
     cubeSymbol: `#${SymbolIds.runningProcessCube}`,
-    labelFill: `url(#${PaintServerIds.runningProcess})`,
+    labelBackground: NamedColors.fullLabelBackground,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningProcess', {
       defaultMessage: 'Running Process',
@@ -29,7 +29,7 @@ const nodeAssets = {
   },
   runningTriggerCube: {
     cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
-    labelFill: `url(#${PaintServerIds.runningTrigger})`,
+    labelBackground: NamedColors.fullLabelBackground,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningTrigger', {
       defaultMessage: 'Running Trigger',
@@ -37,7 +37,7 @@ const nodeAssets = {
   },
   terminatedProcessCube: {
     cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
-    labelFill: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.fullLabelBackground,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedProcess', {
       defaultMessage: 'Terminated Process',
@@ -45,7 +45,7 @@ const nodeAssets = {
   },
   terminatedTriggerCube: {
     cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
-    labelFill: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.fullLabelBackground,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedTrigger', {
       defaultMessage: 'Terminated Trigger',
@@ -114,11 +114,19 @@ export const ProcessEventDot = styled(
         [left, magFactorX, top]
       );
 
+      /**
+       * Type in non-SVG components scales as follows:
+       *  (These values were adjusted to match the proportions in the comps provided by UX/Design)
+       *  18.75 : The smallest readable font size at which labels/descriptions can be read. Font size will not scale below this.
+       *  12.5 : A 'slope' at which the font size will scale w.r.t. to zoom level otherwise
+       */
+      const scaledTypeSize = useMemo(()=>{
+        return magFactorX > 1 ? 18.75 + 12.5 * (magFactorX - 1) : 18.75
+      },[magFactorX])
+
       const markerBaseSize = 15;
       const markerSize = markerBaseSize;
       const markerPositionOffset = -markerBaseSize / 2;
-
-      const labelYOffset = markerPositionOffset + 0.25 * markerSize - 0.5;
 
       /**
        * An element that should be animated when the node is clicked.
@@ -134,9 +142,7 @@ export const ProcessEventDot = styled(
             })
           | null;
       } = React.createRef();
-      const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[
-        nodeType(event)
-      ];
+      const { cubeSymbol, labelBackground, descriptionText } = nodeAssets[nodeType(event)];
       const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
       const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
@@ -178,6 +184,9 @@ export const ProcessEventDot = styled(
         [animationTarget, dispatch, nodeId]
       );
       /* eslint-disable jsx-a11y/click-events-have-key-events */
+      /**
+       * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
+       */
       return (
         <EuiKeyboardAccessible>
           <div
@@ -220,13 +229,6 @@ export const ProcessEventDot = styled(
                   height={markerSize * 1.5}
                   className="backing"
                 />
-                <rect
-                  x="7"
-                  y="-12.75"
-                  width="15"
-                  height="10"
-                  fill={NamedColors.resolverBackground}
-                />
                 <use
                   role="presentation"
                   xlinkHref={cubeSymbol}
@@ -249,43 +251,53 @@ export const ProcessEventDot = styled(
                     ref={animationTarget}
                   />
                 </use>
-                <use
-                  role="presentation"
-                  xlinkHref={`#${SymbolIds.processNodeLabel}`}
-                  x={markerPositionOffset + markerSize - 0.5}
-                  y={labelYOffset}
-                  width={(markerSize / 1.7647) * 5}
-                  height={markerSize / 1.7647}
-                  opacity="1"
-                  fill={labelFill}
-                />
-                <text
-                  x={markerPositionOffset + markerSize}
-                  y={labelYOffset - 1}
-                  textAnchor="start"
-                  dominantBaseline="middle"
-                  fontSize="2.67"
-                  fill={descriptionFill}
-                  id={descriptionId}
-                  paintOrder="stroke"
-                  fontWeight="bold"
-                  style={{ textTransform: 'uppercase', letterSpacing: '-0.01px' }}
-                >
-                  {descriptionText}
-                </text>
               </g>
             </svg>
-            <div style={{
-              left: '25%',
-              top: '39%',
-              position: 'absolute',
-              width: '46%',
-              color: 'white',
-              fontSize: `${magFactorX > 1 ? 25.75+(12.5*(magFactorX - 1)) : 25.75}px`,
-              lineHeight: '140%',
-              textAlign: 'center',
-              backgroundColor: NamedColors.resolverBackground,
-            }}>{eventModel.eventName(event)}</div>
+            <div
+              style={{
+                left: '25%',
+                top: '30%',
+                position: 'absolute',
+                width: '50%',
+                color: 'white',
+                fontSize: `${scaledTypeSize}px`,
+                lineHeight: '140%',
+              }}
+            >
+              <div
+                id={descriptionId}
+                style={{
+                  textTransform: 'uppercase',
+                  letterSpacing: '-0.01px',
+                  backgroundColor: NamedColors.resolverBackground,
+                  lineHeight: '1.2',
+                  fontWeight: 'bold',
+                  fontSize: '.5em',
+                  width: '100%',
+                  margin: '0 0 .05em 0',
+                  textAlign: 'left',
+                  padding: '0',
+                }}
+              >
+                {descriptionText}
+              </div>
+              <div
+                data-test-subject="nodeLabel"
+                id={labelId}
+                style={{
+                  backgroundColor: labelBackground,
+                  padding: '.15em 0',
+                  textAlign: 'center',
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  contain: 'content',
+                }}
+              >
+                {eventModel.eventName(event)}
+              </div>
+            </div>
           </div>
         </EuiKeyboardAccessible>
       );
