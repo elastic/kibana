@@ -6,6 +6,7 @@
 import { HttpSetup } from 'src/core/public';
 
 import { API_BASE_PATH } from '../../../common/constants';
+import { Pipeline } from '../../../common/types';
 import {
   UseRequestConfig,
   sendRequest as _sendRequest,
@@ -15,11 +16,11 @@ import {
 export class ApiService {
   private client: HttpSetup | undefined;
 
-  private useRequest(config: UseRequestConfig) {
+  private useRequest<R = any, E = Error>(config: UseRequestConfig) {
     if (!this.client) {
       throw new Error('Api service has not be initialized.');
     }
-    return _useRequest(this.client, config);
+    return _useRequest<R, E>(this.client, config);
   }
 
   public setup(httpClient: HttpSetup): void {
@@ -27,7 +28,7 @@ export class ApiService {
   }
 
   public useLoadPipelines() {
-    return this.useRequest({
+    return this.useRequest<Pipeline[]>({
       path: API_BASE_PATH,
       method: 'get',
     });
