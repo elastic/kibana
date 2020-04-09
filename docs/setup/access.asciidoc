@@ -3,7 +3,7 @@
 
 If you are running our hosted {ess} on Elastic Cloud, you can easily access {kib} with a single click.
 
-. Log in to the link:https://cloud.elastic.co/[{ess} Console].
+. Log in to link:https://cloud.elastic.co/[{ess}].
 +
 If you need an account, register for a link:https://www.elastic.co/cloud/elasticsearch-service/signup[free 14-day trial].
 
@@ -15,7 +15,7 @@ If you need an account, register for a link:https://www.elastic.co/cloud/elastic
 
 .. Click *Create deployment*.
 
-.. Copy down the password for the `elastic` user and Cloud ID information.
+.. Save the password for the `elastic` user and the Cloud ID information.
 
 . Under *Applications*, click *Launch* for {kib}.
 
