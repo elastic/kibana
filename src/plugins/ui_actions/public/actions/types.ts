@@ -22,3 +22,9 @@ export interface SerializedAction<Config> {
   readonly name: string;
   readonly config: Config;
 }
+
+export interface SerializedEvent {
+  eventId: string;
+  triggers: string[];
+  action: SerializedAction<unknown>;
+}

@@ -6,10 +6,8 @@
 
 import { CoreSetup } from 'src/core/public';
 import { SetupDependencies, StartDependencies } from '../../plugin';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableContext,
-} from '../../../../../../src/plugins/embeddable/public';
+import { CONTEXT_MENU_TRIGGER } from '../../../../../../src/plugins/embeddable/public';
+import { EnhancedEmbeddableContext } from '../../../../embeddable_enhanced/public';
 import {
   FlyoutCreateDrilldownAction,
   FlyoutEditDrilldownAction,
@@ -21,8 +19,8 @@ import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldow
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
-    [OPEN_FLYOUT_ADD_DRILLDOWN]: EmbeddableContext;
-    [OPEN_FLYOUT_EDIT_DRILLDOWN]: EmbeddableContext;
+    [OPEN_FLYOUT_ADD_DRILLDOWN]: EnhancedEmbeddableContext;
+    [OPEN_FLYOUT_EDIT_DRILLDOWN]: EnhancedEmbeddableContext;
   }
 }
 

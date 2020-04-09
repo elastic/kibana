@@ -203,13 +203,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       this.props.embeddable.render(this.embeddableRoot.current);
     }
 
-    const dynamicActions = this.props.embeddable.dynamicActions;
+    const dynamicActions = (this.props.embeddable.enhancements as any)?.dynamicActions;
     if (dynamicActions) {
       this.setState({ eventCount: dynamicActions.state.get().events.length });
-      this.eventCountSubscription = dynamicActions.state.state$.subscribe(({ events }) => {
-        if (!this.mounted) return;
-        this.setState({ eventCount: events.length });
-      });
+      this.eventCountSubscription = dynamicActions.state.state$.subscribe(
+        ({ events }: { events: unknown[] }) => {
+          if (!this.mounted) return;
+          this.setState({ eventCount: events.length });
+        }
+      );
     }
   }
 

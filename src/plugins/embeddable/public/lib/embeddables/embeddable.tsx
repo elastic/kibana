@@ -22,12 +22,7 @@ import { Adapters, ViewMode } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { TriggerContextMapping } from '../ui_actions';
-import { EmbeddableActionStorage } from './embeddable_action_storage';
-import {
-  UiActionsDynamicActionManager,
-  UiActionsStart,
-} from '../../../../../plugins/ui_actions/public';
-import { EmbeddableContext } from '../triggers';
+import { UiActionsStart } from '../../../../../plugins/ui_actions/public';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
@@ -60,27 +55,8 @@ export abstract class Embeddable<
   // to update input when the parent changes.
   private parentSubscription?: Rx.Subscription;
 
-  private storageSubscription?: Rx.Subscription;
-
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
-
-  private storage = new EmbeddableActionStorage((this as unknown) as Embeddable);
-
-  private cachedDynamicActions?: UiActionsDynamicActionManager;
-  public get dynamicActions(): UiActionsDynamicActionManager | undefined {
-    if (!this.params.uiActions) return undefined;
-    if (!this.cachedDynamicActions) {
-      this.cachedDynamicActions = new UiActionsDynamicActionManager({
-        isCompatible: async (context: unknown) =>
-          (context as EmbeddableContext).embeddable.runtimeId === this.runtimeId,
-        storage: this.storage,
-        uiActions: this.params.uiActions,
-      });
-    }
-
-    return this.cachedDynamicActions;
-  }
 
   constructor(
     input: TEmbeddableInput,
@@ -109,18 +85,6 @@ export abstract class Embeddable<
 
         const newInput = parent.getInputForChild<TEmbeddableInput>(this.id);
         this.onResetInput(newInput);
-      });
-    }
-
-    if (this.dynamicActions) {
-      this.dynamicActions.start().catch(error => {
-        /* eslint-disable */
-        console.log('Failed to start embeddable dynamic actions', this);
-        console.error(error);
-        /* eslint-enable */
-      });
-      this.storageSubscription = this.input$.subscribe(() => {
-        this.storage.reload$.next();
       });
     }
   }
@@ -201,19 +165,6 @@ export abstract class Embeddable<
    */
   public destroy(): void {
     this.destoyed = true;
-
-    if (this.dynamicActions) {
-      this.dynamicActions.stop().catch(error => {
-        /* eslint-disable */
-        console.log('Failed to stop embeddable dynamic actions', this);
-        console.error(error);
-        /* eslint-enable */
-      });
-    }
-
-    if (this.storageSubscription) {
-      this.storageSubscription.unsubscribe();
-    }
 
     this.input$.complete();
     this.output$.complete();
