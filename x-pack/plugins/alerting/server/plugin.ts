@@ -190,7 +190,7 @@ export class AlertingPlugin {
     unmuteAllAlertRoute(router, this.licenseState);
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
-    healthRoute(router, this.licenseState);
+    healthRoute(router, this.licenseState, plugins.encryptedSavedObjects);
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
@@ -218,6 +218,7 @@ export class AlertingPlugin {
       getSpaceId(request: KibanaRequest) {
         return spaces?.getSpaceId(request);
       },
+      preconfiguredActions: plugins.actions.preconfiguredActions,
     });
 
     taskRunnerFactory.initialize({
