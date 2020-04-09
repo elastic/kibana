@@ -34,6 +34,7 @@ describe('createRules', () => {
       interval: '',
       name: '',
       tags: [],
+      actions: [],
     });
 
     expect(alertsClient.create).toHaveBeenCalledWith(
