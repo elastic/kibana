@@ -147,38 +147,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     /**
-     * Navigates browser using the pathname from the appConfig and subUrl as the extended path.
-     * This was added to be able to test an application that uses browser history over hash history.
-     * @param appName As defined in the apps config, e.g. 'home'
-     * @param subUrl The route after the appUrl, e.g. 'tutorial_directory/sampleData'
-     * @param args additional arguments
-     */
-    public async navigateToUrlWithBrowserHistory(
-      appName: string,
-      subUrl?: string,
-      search?: string,
-      {
-        basePath = '',
-        ensureCurrentUrl = true,
-        shouldLoginIfPrompted = true,
-        useActualUrl = true,
-      } = {}
-    ) {
-      const appConfig = {
-        // subUrl following the basePath, assumes no hashes.  Ex: 'app/endpoint/management'
-        pathname: `${basePath}${config.get(['apps', appName]).pathname}${subUrl}`,
-        search,
-      };
-
-      await this.navigate({
-        appConfig,
-        ensureCurrentUrl,
-        shouldLoginIfPrompted,
-        useActualUrl,
-      });
-    }
-
-    /**
      * Navigates browser using only the pathname from the appConfig
      * @param appName As defined in the apps config, e.g. 'kibana'
      * @param hash The route after the hash (#), e.g. 'management/kibana/settings'
