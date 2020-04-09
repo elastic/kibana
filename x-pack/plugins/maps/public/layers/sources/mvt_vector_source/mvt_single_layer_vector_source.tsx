@@ -23,6 +23,7 @@ import {
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
+import { VectorLayerArguments } from '../../vector_layer';
 
 const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
   defaultMessage: 'Vector Tile Layer',
@@ -58,9 +59,12 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   readonly _descriptor: TiledSingleLayerVectorSourceDescriptor;
 
-  constructor(sourceDescriptor: TiledSingleLayerVectorSourceDescriptor, inspectorAdapters: object) {
+  constructor(
+    sourceDescriptor: TiledSingleLayerVectorSourceDescriptor,
+    inspectorAdapters?: object
+  ) {
     super(sourceDescriptor, inspectorAdapters);
-    this._descriptor = sourceDescriptor; // re-assignment is required due to TS-JS transpilation, not the type-system
+    this._descriptor = sourceDescriptor;
   }
 
   renderSourceSettingsEditor() {
@@ -68,16 +72,20 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   createDefaultLayer(options: LayerDescriptor): SingleTiledVectorLayer {
-    return new SingleTiledVectorLayer({
-      layerDescriptor: SingleTiledVectorLayer.createDescriptor(
-        {
-          sourceDescriptor: this._descriptor,
-          ...options,
-        },
-        []
-      ),
+    const layerDescriptor = {
+      sourceDescriptor: this._descriptor,
+      ...options,
+    };
+    const normalizedLayerDescriptor: LayerDescriptor = SingleTiledVectorLayer.createDescriptor(
+      { layerDescriptor, source: this },
+      []
+    );
+    const vectorLayerArguments: VectorLayerArguments = {
+      layerDescriptor: normalizedLayerDescriptor,
       source: this,
-    });
+      ...options,
+    };
+    return new SingleTiledVectorLayer(vectorLayerArguments);
   }
 
   getGeoJsonWithMeta(

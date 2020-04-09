@@ -23,7 +23,7 @@ describe('xyz Tilemap Source', () => {
   });
 
   it('should echo url template for url template', async () => {
-    const source = new XYZTMSSource(descriptor, null);
+    const source = new XYZTMSSource(descriptor);
     const template = await source.getUrlTemplate();
     expect(template).toEqual(descriptor.urlTemplate);
   });

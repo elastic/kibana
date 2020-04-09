@@ -36,7 +36,7 @@ export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncM
 export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
   fieldNames: string[];
-  geogridPrecision: number;
+  geogridPrecision?: number;
   sourceQuery: MapQuery;
   sourceMeta: VectorSourceSyncMeta;
 };

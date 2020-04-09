@@ -15,7 +15,6 @@ import { ITiledSingleLayerVectorSource, IVectorSource } from './sources/vector_s
 import { SyncContext } from '../actions/map_actions';
 import { ISource } from './sources/source';
 import {
-  DataMeta,
   MapFilters,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
@@ -25,10 +24,10 @@ export class SingleTiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
   static createDescriptor(
-    options: VectorLayerArguments,
+    vectorLayerArguments: VectorLayerArguments,
     mapColors: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = super.createDescriptor(options, mapColors);
+    const layerDescriptor = super.createDescriptor(vectorLayerArguments, mapColors);
     layerDescriptor.type = SingleTiledVectorLayer.type;
 
     if (!layerDescriptor.style) {
@@ -53,29 +52,25 @@ export class SingleTiledVectorLayer extends VectorLayer {
   }
 
   _getSearchFilters(
-    dataFilters: MapFilters,
+    mapFilters: MapFilters,
     source: IVectorSource,
     style: IVectorStyle
   ): VectorSourceRequestMeta {
     const fieldNames = [...source.getFieldNames(), ...style.getSourceFieldNames()];
 
-    return {
-      ...dataFilters,
-      fieldNames: _.uniq(fieldNames).sort(),
-      sourceQuery: this.getQuery(),
+    const requestMeta: VectorSourceRequestMeta = {
+      ...mapFilters,
       applyGlobalQuery: this._source.getApplyGlobalQuery(),
+      fieldNames,
+      sourceQuery: this.getQuery(),
     };
+
+    return requestMeta;
   }
 
-  async _syncMVTUrlTemplate({
-    startLoading,
-    stopLoading,
-    onLoadError,
-    registerCancelCallback,
-    dataFilters,
-  }: SyncContext) {
+  async _syncMVTUrlTemplate({ startLoading, stopLoading, onLoadError, dataFilters }: SyncContext) {
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
-    const searchFilters: DataMeta = this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
       dataFilters,
       this.getSource(),
       this._style
