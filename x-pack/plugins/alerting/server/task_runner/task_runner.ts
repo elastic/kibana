@@ -5,6 +5,7 @@
  */
 
 import { pick, mapValues, omit, without } from 'lodash';
+import Boom from 'boom';
 import { Logger, SavedObject } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
@@ -31,7 +32,7 @@ const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
 
 interface AlertTaskRunResult {
   state: AlertTaskState;
-  runAt: Date;
+  runAt: Date | undefined;
 }
 
 interface AlertTaskInstance extends ConcreteTaskInstance {
@@ -335,15 +336,17 @@ export class TaskRunner {
           };
         }
       ),
-      runAt: resolveErr<Date, Error>(runAt, () =>
-        getNextRunAt(
-          new Date(),
-          // if we fail at this point we wish to recover but don't have access to the Alert's
-          // attributes, so we'll use a default interval to prevent the underlying task from
-          // falling into a failed state
-          FALLBACK_RETRY_INTERVAL
-        )
-      ),
+      runAt: resolveErr<Date | undefined, Error>(runAt, err => {
+        return isAlertSavedObjectNotFoundError(err, alertId)
+          ? undefined
+          : getNextRunAt(
+              new Date(),
+              // if we fail at this point we wish to recover but don't have access to the Alert's
+              // attributes, so we'll use a default interval to prevent the underlying task from
+              // falling into a failed state
+              FALLBACK_RETRY_INTERVAL
+            );
+      }),
     };
   }
 }
@@ -405,4 +408,12 @@ async function errorAsAlertTaskRunResult(
       runAt: asErr(e),
     };
   }
+}
+
+function isAlertSavedObjectNotFoundError(err: Error | Boom, alertId: string) {
+  return (
+    Boom.isBoom(err) &&
+    err?.output?.statusCode === 404 &&
+    err?.output?.payload?.message?.includes(alertId)
+  );
 }
