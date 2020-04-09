@@ -12,7 +12,7 @@ import * as i18n from './translations';
 import { ClosureType } from './types';
 import { CurrentConfiguration } from '../../../pages/case/components/configure_cases/reducer';
 
-interface PersistCaseConfigure {
+export interface PersistCaseConfigure {
   connectorId: string;
   connectorName: string;
   closureType: ClosureType;

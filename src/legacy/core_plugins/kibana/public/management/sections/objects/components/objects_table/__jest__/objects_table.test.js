@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { mockManagementPlugin } from '../../../../../../../../management/public/np_ready/mocks';
+import { mockManagementPlugin } from '../../../../../../../../../../plugins/index_pattern_management/public/mocks';
 import { Query } from '@elastic/eui';
 
 import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
@@ -30,7 +30,7 @@ import { extractExportDetails } from '../../../lib/extract_export_details';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
-jest.mock('../../../../../../../../management/public/legacy', () => ({
+jest.mock('../../../../../../../../../../plugins/index_pattern_management/public', () => ({
   setup: mockManagementPlugin.createSetupContract(),
   start: mockManagementPlugin.createStartContract(),
 }));
