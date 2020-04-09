@@ -1,11 +1,11 @@
+import ora = require('ora');
 import isEmpty from 'lodash.isempty';
 import { BackportOptions } from '../options/options';
-import { promptForCommits } from '../services/prompts';
-import ora = require('ora');
-import { fetchCommitBySha } from '../services/github/fetchCommitBySha';
-import { fetchCommitsByAuthor } from '../services/github/fetchCommitsByAuthor';
 import { getShortSha } from '../services/github/commitFormatters';
-import { fetchCommitByPullNumber } from '../services/github/fetchCommitByPullNumber';
+import { fetchCommitBySha } from '../services/github/v3/fetchCommitBySha';
+import { fetchCommitByPullNumber } from '../services/github/v4/fetchCommitByPullNumber';
+import { fetchCommitsByAuthor } from '../services/github/v4/fetchCommitsByAuthor';
+import { promptForCommits } from '../services/prompts';
 
 export async function getCommits(options: BackportOptions) {
   if (options.sha) {

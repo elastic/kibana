@@ -1,5 +1,6 @@
-import { last } from 'lodash';
+/* eslint-disable @typescript-eslint/no-empty-function */
 import os from 'os';
+import { last } from 'lodash';
 
 jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
 

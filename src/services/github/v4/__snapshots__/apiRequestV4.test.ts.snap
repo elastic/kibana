@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`apiRequestV4 when request fails without error messages should return parsed github error 1`] = `
+"Unexpected response from Github API (v4):
+{
+  \\"foo\\": \\"bar\\"
+}"
+`;

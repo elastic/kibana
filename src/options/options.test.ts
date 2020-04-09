@@ -1,52 +1,76 @@
-import { OptionsFromCliArgs } from './cliArgs';
-import {
-  validateRequiredOptions,
-  getOptions,
-  BackportOptions,
-} from './options';
 import axios from 'axios';
+import { OptionsFromCliArgs } from './cliArgs';
+import { validateRequiredOptions, getOptions } from './options';
 
 describe('getOptions', () => {
-  let axiosHeadSpy: jest.SpyInstance;
-  let axiosPostSpy: jest.SpyInstance;
-  let options: BackportOptions;
-
-  beforeEach(async () => {
-    jest.clearAllMocks();
-    axiosHeadSpy = jest.spyOn(axios, 'head').mockReturnValueOnce(true as any);
-    axiosPostSpy = jest.spyOn(axios, 'post').mockReturnValueOnce({
+  function getPerformStartChecksSpy({
+    defaultBranch,
+    refName,
+  }: {
+    defaultBranch: string;
+    refName?: 'backport';
+  }) {
+    // startup check request
+    return jest.spyOn(axios, 'post').mockResolvedValueOnce({
       data: {
-        data: { repository: { defaultBranchRef: { name: 'myDefaultBranch' } } },
+        data: {
+          repository: {
+            ref: {
+              name: refName,
+            },
+            defaultBranchRef: { name: defaultBranch },
+          },
+        },
       },
-    } as any);
+    });
+  }
 
-    const argv = [
-      '--branch',
-      '6.0',
-      '--branch',
-      '6.1',
-      '--upstream',
-      'elastic/kibana',
-    ];
+  const argv = [
+    '--branch',
+    '6.0',
+    '--branch',
+    '6.1',
+    '--upstream',
+    'elastic/kibana',
+  ] as const;
 
-    options = await getOptions(argv);
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should check whether access token is valid', () => {
-    expect(axiosHeadSpy).toHaveBeenCalledTimes(1);
-    expect(axiosHeadSpy).toHaveBeenCalledWith(
-      'https://api.github.com/repos/elastic/kibana',
-      {
-        auth: { password: 'myAccessToken', username: 'sqren' },
-      }
+  it('should check whether the acccess token is valid', async () => {
+    jest.spyOn(axios, 'post').mockRejectedValueOnce({
+      response: { status: 401, data: { errors: [] } },
+    });
+    await expect(getOptions(argv)).rejects.toThrowError(
+      'Please check your access token and make sure it is valid.\nConfig: /myHomeDir/.backport/config.json'
     );
   });
 
-  it('should get default repositry branch', () => {
-    expect(axiosPostSpy).toHaveBeenCalledTimes(1);
+  it('should get default repository branch', async () => {
+    const spy = getPerformStartChecksSpy({
+      defaultBranch: 'my-default-branch',
+    });
+    const options = await getOptions(argv);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(options.sourceBranch).toBe('my-default-branch');
+  });
+
+  it('should ensure that "backport" branch does not exist', async () => {
+    getPerformStartChecksSpy({
+      defaultBranch: 'my-default-branch',
+      refName: 'backport',
+    });
+
+    await expect(getOptions(argv)).rejects.toThrowError(
+      'You must delete the branch "backport" to continue. See https://github.com/sqren/backport/issues/155 for details'
+    );
   });
 
   it('should return options', async () => {
+    getPerformStartChecksSpy({ defaultBranch: 'some-branch-name' });
+    const options = await getOptions(argv);
+
     expect(options).toEqual({
       accessToken: 'myAccessToken',
       all: false,
@@ -69,7 +93,7 @@ describe('getOptions', () => {
       repoName: 'kibana',
       repoOwner: 'elastic',
       resetAuthor: false,
-      sourceBranch: 'myDefaultBranch',
+      sourceBranch: 'some-branch-name',
       username: 'sqren',
       verbose: false,
     });

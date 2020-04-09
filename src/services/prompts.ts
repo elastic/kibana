@@ -5,8 +5,8 @@ import inquirer, {
   ConfirmQuestion,
 } from 'inquirer';
 import isEmpty from 'lodash.isempty';
+import { CommitChoice } from '../types/Commit';
 import { BranchChoice } from '../types/Config';
-import { CommitChoice } from './github/Commit';
 
 type Question = CheckboxQuestion | ListQuestion | ConfirmQuestion;
 

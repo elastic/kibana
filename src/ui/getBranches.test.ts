@@ -2,19 +2,21 @@ import * as prompts from '../services/prompts';
 import { getBranches } from './getBranches';
 
 describe('getBranches', () => {
-  let promptSpy: ReturnType<typeof spyOn>;
+  let promptSpy: ReturnType<typeof jest.spyOn>;
 
   beforeEach(() => {
-    promptSpy = spyOn(prompts, 'promptForBranches').and.returnValue([
-      'branchA',
-    ]);
+    jest.clearAllMocks();
+
+    promptSpy = jest
+      .spyOn(prompts, 'promptForBranches')
+      .mockResolvedValueOnce(['branchA']);
   });
 
   describe('when `options.branches` is empty', () => {
     let branches: ReturnType<typeof getBranches>;
 
-    beforeEach(() => {
-      branches = getBranches({
+    beforeEach(async () => {
+      branches = await getBranches({
         branches: [],
         branchChoices: ['branchA', 'branchB'],
         multipleBranches: false,

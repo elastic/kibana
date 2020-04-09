@@ -1,6 +1,6 @@
 import axios from 'axios';
+import { BackportOptions } from '../../../options/options';
 import { fetchCommitBySha } from './fetchCommitBySha';
-import { BackportOptions } from '../../options/options';
 
 describe('fetchCommitBySha', () => {
   it('should return single commit with pull request', async () => {
@@ -15,7 +15,7 @@ describe('fetchCommitBySha', () => {
     } as BackportOptions;
 
     const axiosSpy = jest
-      .spyOn(axios, 'get')
+      .spyOn(axios, 'request')
 
       // mock commits
       .mockResolvedValueOnce({

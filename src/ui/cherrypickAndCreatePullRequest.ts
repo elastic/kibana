@@ -1,8 +1,9 @@
 import chalk from 'chalk';
 import ora = require('ora');
 import { BackportOptions } from '../options/options';
-import { CommitSelected } from '../services/github/Commit';
-import { addLabelsToPullRequest } from '../services/github/addLabelsToPullRequest';
+import { HandledError } from '../services/HandledError';
+import { exec } from '../services/child-process-promisified';
+import { getRepoPath } from '../services/env';
 import {
   cherrypick,
   createFeatureBranch,
@@ -15,15 +16,14 @@ import {
   cherrypickContinue,
   getFilesWithConflicts,
 } from '../services/git';
-import { createPullRequest } from '../services/github/createPullRequest';
-import { getRepoPath } from '../services/env';
 import { getShortSha } from '../services/github/commitFormatters';
+import { addLabelsToPullRequest } from '../services/github/v3/addLabelsToPullRequest';
+import { createPullRequest } from '../services/github/v3/createPullRequest';
 import { consoleLog } from '../services/logger';
-import { exec } from '../services/child-process-promisified';
-import { sequentially } from '../services/sequentially';
-import { withSpinner } from './withSpinner';
 import { confirmPrompt } from '../services/prompts';
-import { HandledError } from '../services/HandledError';
+import { sequentially } from '../services/sequentially';
+import { CommitSelected } from '../types/Commit';
+import { withSpinner } from './withSpinner';
 import dedent = require('dedent');
 import isEmpty = require('lodash.isempty');
 

@@ -1,6 +1,6 @@
 import makeDir from 'make-dir';
-import { chmod, writeFile } from '../../services/fs-promisified';
 import { getGlobalConfigPath, getReposPath } from '../../services/env';
+import { chmod, writeFile } from '../../services/fs-promisified';
 import { readConfigFile } from './readConfigFile';
 
 export async function getGlobalConfig() {

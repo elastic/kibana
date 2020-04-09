@@ -1,14 +1,14 @@
 import axios from 'axios';
-import httpAdapter from 'axios/lib/adapters/http';
-import { getCommitBySha } from './getCommits';
 import { BackportOptions } from '../options/options';
-import { commitByShaMock } from '../services/github/mocks/commitByShaMock';
-
-axios.defaults.adapter = httpAdapter;
+import { commitByShaMock } from '../services/github/v3/mocks/commitByShaMock';
+import { getCommitBySha } from './getCommits';
 
 describe('getCommitBySha', () => {
   it('should return a single commit without PR', async () => {
-    const axiosSpy = mockCommitItems([commitByShaMock]);
+    const axiosSpy = jest
+      .spyOn(axios, 'request')
+      .mockResolvedValueOnce({ data: { items: [commitByShaMock] } });
+
     const commit = await getCommitBySha({
       username: 'sqren',
       accessToken: 'myAccessToken',
@@ -26,17 +26,17 @@ describe('getCommitBySha', () => {
       pullNumber: undefined,
     });
 
-    expect(axiosSpy).toHaveBeenCalledWith(
-      'https://api.github.com/search/commits?q=hash:myCommitSha%20repo:elastic/kibana&per_page=1',
-      {
-        headers: { Accept: 'application/vnd.github.cloak-preview' },
-        auth: { password: 'myAccessToken', username: 'sqren' },
-      }
-    );
+    expect(axiosSpy).toHaveBeenCalledWith({
+      method: 'get',
+      url:
+        'https://api.github.com/search/commits?q=hash:myCommitSha%20repo:elastic/kibana&per_page=1',
+      headers: { Accept: 'application/vnd.github.cloak-preview' },
+      auth: { password: 'myAccessToken', username: 'sqren' },
+    });
   });
 
   it('should throw error if sha does not exist', async () => {
-    mockCommitItems([]);
+    jest.spyOn(axios, 'request').mockResolvedValueOnce({ data: { items: [] } });
 
     await expect(
       getCommitBySha({
@@ -48,7 +48,3 @@ describe('getCommitBySha', () => {
     ).rejects.toThrowError('No commit found on master with sha "myCommitSha"');
   });
 });
-
-function mockCommitItems(items: any) {
-  return jest.spyOn(axios, 'get').mockResolvedValue({ data: { items } });
-}

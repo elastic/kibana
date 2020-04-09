@@ -1,23 +1,21 @@
 import axios from 'axios';
-import { BackportOptions } from '../options/options';
-import * as prompts from '../services/prompts';
-import { cherrypickAndCreatePullRequest } from './cherrypickAndCreatePullRequest';
-import * as childProcess from '../services/child-process-promisified';
-import * as logger from '../services/logger';
 import dedent from 'dedent';
 import ora from 'ora';
-import { PromiseReturnType } from '../types/PromiseReturnType';
-import { CommitSelected } from '../services/github/Commit';
+import { BackportOptions } from '../options/options';
+import * as childProcess from '../services/child-process-promisified';
+import * as logger from '../services/logger';
+import * as prompts from '../services/prompts';
 import { ExecError } from '../test/ExecError';
-
-type ExecReturnType = PromiseReturnType<typeof childProcess.exec>;
+import { CommitSelected } from '../types/Commit';
+import { SpyHelper } from '../types/SpyHelper';
+import { cherrypickAndCreatePullRequest } from './cherrypickAndCreatePullRequest';
 
 describe('cherrypickAndCreatePullRequest', () => {
-  let axiosPostMock: jest.SpyInstance;
+  let axiosRequestSpy: SpyHelper<typeof axios.request>;
 
   beforeEach(() => {
-    axiosPostMock = jest
-      .spyOn(axios, 'post')
+    axiosRequestSpy = jest
+      .spyOn(axios, 'request')
 
       // mock: createPullRequest
       .mockResolvedValueOnce({
@@ -28,7 +26,7 @@ describe('cherrypickAndCreatePullRequest', () => {
       })
 
       // mock: addLabelsToPullRequest
-      .mockResolvedValueOnce(null);
+      .mockResolvedValueOnce({});
   });
 
   afterEach(() => {
@@ -36,11 +34,13 @@ describe('cherrypickAndCreatePullRequest', () => {
   });
 
   describe('when commit has a pull request reference', () => {
-    let execSpy: jest.SpyInstance;
+    let execSpy: SpyHelper<typeof childProcess.exec>;
     beforeEach(async () => {
       execSpy = jest
         .spyOn(childProcess, 'exec')
-        .mockResolvedValue({ stdout: '' } as ExecReturnType);
+
+        // mock all exec commands to respond without errors
+        .mockResolvedValue({ stdout: '', stderr: '' });
 
       const options = {
         githubApiBaseUrlV3: 'https://api.github.com',
@@ -103,32 +103,32 @@ describe('cherrypickAndCreatePullRequest', () => {
     });
 
     it('should create pull request', () => {
-      expect(axiosPostMock).toHaveBeenCalledTimes(2);
-      const [apiEndpoint, payload] = axiosPostMock.mock.calls[0];
-      expect(apiEndpoint).toBe(
+      expect(axiosRequestSpy).toHaveBeenCalledTimes(2);
+      const config = axiosRequestSpy.mock.calls[0][0];
+      expect(config.url).toBe(
         'https://api.github.com/repos/elastic/kibana/pulls'
       );
-      expect(payload.title).toBe(
+      expect(config.data.title).toBe(
         '[6.x] myCommitMessage (#1000) | myOtherCommitMessage (#2000)'
       );
-      expect(payload.body).toBe(
+      expect(config.data.body).toBe(
         dedent(`Backports the following commits to 6.x:
    - myCommitMessage (#1000)
    - myOtherCommitMessage (#2000)
 
   myPrSuffix`)
       );
-      expect(payload.head).toBe('sqren:backport/6.x/pr-1000_pr-2000');
-      expect(payload.base).toBe('6.x');
+      expect(config.data.head).toBe('sqren:backport/6.x/pr-1000_pr-2000');
+      expect(config.data.base).toBe('6.x');
     });
 
     it('it should add labels', () => {
-      const [apiEndpoint, labels] = axiosPostMock.mock.calls[1];
+      const config = axiosRequestSpy.mock.calls[1][0];
 
-      expect(apiEndpoint).toBe(
+      expect(config.url).toBe(
         'https://api.github.com/repos/elastic/kibana/issues/1337/labels'
       );
-      expect(labels).toEqual(['backport']);
+      expect(config.data).toEqual(['backport']);
     });
   });
 
@@ -158,27 +158,28 @@ describe('cherrypickAndCreatePullRequest', () => {
     });
 
     it('should create pull request', () => {
-      expect(axiosPostMock).toHaveBeenCalledTimes(2);
-      const [apiEndpoint, payload] = axiosPostMock.mock.calls[0];
-      expect(apiEndpoint).toBe(
+      expect(axiosRequestSpy).toHaveBeenCalledTimes(2);
+      const config = axiosRequestSpy.mock.calls[0][0];
+
+      expect(config.url).toBe(
         'https://api.github.com/repos/elastic/kibana/pulls'
       );
-      expect(payload.title).toBe('[6.x] myCommitMessage (mySha)');
-      expect(payload.body).toBe(
+      expect(config.data.title).toBe('[6.x] myCommitMessage (mySha)');
+      expect(config.data.body).toBe(
         `Backports the following commits to 6.x:
  - myCommitMessage (mySha)`
       );
-      expect(payload.head).toBe('sqren:backport/6.x/commit-mySha');
-      expect(payload.base).toBe('6.x');
+      expect(config.data.head).toBe('sqren:backport/6.x/commit-mySha');
+      expect(config.data.base).toBe('6.x');
     });
 
     it('it should add labels', () => {
-      const [apiEndpoint, labels] = axiosPostMock.mock.calls[1];
+      const config = axiosRequestSpy.mock.calls[1][0];
 
-      expect(apiEndpoint).toBe(
+      expect(config.url).toBe(
         'https://api.github.com/repos/elastic/kibana/issues/1337/labels'
       );
-      expect(labels).toEqual(['backport']);
+      expect(config.data).toEqual(['backport']);
     });
   });
 
@@ -300,7 +301,7 @@ describe('cherrypickAndCreatePullRequest', () => {
         ]
       `);
       expect(execSpy.mock.calls).toMatchSnapshot();
-      expect(axiosPostMock).toHaveBeenCalledTimes(2);
+      expect(axiosRequestSpy).toHaveBeenCalledTimes(2);
     });
   });
 });

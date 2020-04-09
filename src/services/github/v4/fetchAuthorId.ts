@@ -1,5 +1,5 @@
-import { BackportOptions } from '../../options/options';
-import { gqlRequest } from './gqlRequest';
+import { BackportOptions } from '../../../options/options';
+import { apiRequestV4 } from './apiRequestV4';
 
 interface DataResponse {
   user: { id: string };
@@ -19,7 +19,7 @@ export async function fetchAuthorId(options: BackportOptions) {
     }
   `;
 
-  const res = await gqlRequest<DataResponse>({
+  const res = await apiRequestV4<DataResponse>({
     githubApiBaseUrlV4,
     accessToken,
     query,

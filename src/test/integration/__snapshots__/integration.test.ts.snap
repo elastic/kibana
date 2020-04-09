@@ -117,8 +117,17 @@ Object {
 exports[`when a single commit is backported should make correct API requests 1`] = `
 Object {
   "query": "
-    query getDefaultBranch($repoOwner: String!, $repoName: String!) {
+    query getDefaultRepoBranchAndPerformStartupChecks(
+      $repoOwner: String!
+      $repoName: String!
+    ) {
       repository(owner: $repoOwner, name: $repoName) {
+        # check whether \\"backport\\" branch exists
+        ref(qualifiedName: \\"refs/heads/backport\\") {
+          name
+        }
+
+        # get default branch
         defaultBranchRef {
           name
         }

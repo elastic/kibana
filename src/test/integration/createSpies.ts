@@ -1,7 +1,7 @@
+import os from 'os';
 import axios from 'axios';
 import inquirer from 'inquirer';
-import { commitsWithPullRequestsMock } from '../../services/github/mocks/commitsByAuthorMock';
-import os from 'os';
+import { commitsWithPullRequestsMock } from '../../services/github/v4/mocks/commitsByAuthorMock';
 import childProcess = require('child_process');
 import {
   HOMEDIR_PATH,
@@ -30,22 +30,19 @@ export function createSpies({ commitCount }: { commitCount: number }) {
     return unmockedExec(nextCmd, options, cb);
   });
 
-  // mock verifyAccessToken
-  jest.spyOn(axios, 'head').mockReturnValueOnce(true as any);
-
-  // mock axios post request (graphql)
+  // mock github API v4
   const axiosPostSpy = jest
     .spyOn(axios, 'post')
 
-    // mock getDefaultRepoBranch
-    .mockReturnValueOnce({
+    // mock `getDefaultRepoBranchAndPerformStartupChecks`
+    .mockResolvedValueOnce({
       data: {
         data: { repository: { defaultBranchRef: { name: 'master' } } },
       },
-    } as any)
+    })
 
-    // mock author id
-    .mockReturnValueOnce({
+    // mock `getIdByLogin`
+    .mockResolvedValueOnce({
       data: {
         data: {
           user: {
@@ -53,17 +50,21 @@ export function createSpies({ commitCount }: { commitCount: number }) {
           },
         },
       },
-    } as any)
+    })
 
-    // mock list of commits
-    .mockReturnValueOnce({
+    // mock `fetchCommitsByAuthor`
+    .mockResolvedValueOnce({
       data: {
         data: commitsWithPullRequestsMock,
       },
-    } as any)
+    });
+
+  // mock githb API v3
+  const axiosRequestSpy = jest
+    .spyOn(axios, 'request')
 
     // mock create pull request
-    .mockReturnValueOnce({ data: {} } as any);
+    .mockResolvedValueOnce({ data: {} });
 
   // mock prompt
   jest
@@ -84,16 +85,19 @@ export function createSpies({ commitCount }: { commitCount: number }) {
   return {
     getAxiosCalls: () => {
       const [
-        getDefaultRepoBranch,
-        getAuthorPayload,
-        getCommitsPayload,
-        createPullRequestPayload,
+        getDefaultRepoBranchAndPerformStartupChecks,
+        getAuthorRequestConfig,
+        getCommitsRequestConfig,
       ] = axiosPostSpy.mock.calls.map((call) => call[1]);
 
+      const [createPullRequestPayload] = axiosRequestSpy.mock.calls.map(
+        (call) => call[0].data
+      );
+
       return {
-        getDefaultRepoBranch,
-        getAuthorPayload,
-        getCommitsPayload,
+        getDefaultRepoBranchAndPerformStartupChecks,
+        getAuthorRequestConfig,
+        getCommitsRequestConfig,
         createPullRequestPayload,
       };
     },

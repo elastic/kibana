@@ -1,25 +1,30 @@
-import { CommitSelected } from './Commit';
+import axios from 'axios';
+import { getDefaultOptions } from '../../../test/getDefaultOptions';
+import { CommitSelected } from '../../../types/Commit';
+import { SpyHelper } from '../../../types/SpyHelper';
 import {
   fetchCommitsByAuthor,
   getExistingBackportPRs,
 } from './fetchCommitsByAuthor';
 import { commitsWithPullRequestsMock } from './mocks/commitsByAuthorMock';
 import { getCommitsByAuthorMock } from './mocks/getCommitsByAuthorMock';
-import { getDefaultOptions } from '../../test/getDefaultOptions';
-import axios from 'axios';
 import { getPullRequestEdgeMock } from './mocks/getPullRequestEdgeMock';
 
 const currentUserMock = { user: { id: 'myUserId' } } as const;
 
 describe('fetchCommitsByAuthor', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('when commit has an associated pull request', () => {
-    let requestSpy: jasmine.Spy;
+    let axiosPostSpy: SpyHelper<typeof axios.post>;
     let res: CommitSelected[];
     beforeEach(async () => {
-      requestSpy = spyOn(axios, 'post').and.returnValues(
-        { data: { data: currentUserMock } },
-        { data: { data: commitsWithPullRequestsMock } }
-      );
+      axiosPostSpy = jest
+        .spyOn(axios, 'post')
+        .mockResolvedValueOnce({ data: { data: currentUserMock } })
+        .mockResolvedValueOnce({ data: { data: commitsWithPullRequestsMock } });
 
       const options = getDefaultOptions();
       res = await fetchCommitsByAuthor(options);
@@ -58,11 +63,11 @@ describe('fetchCommitsByAuthor', () => {
     });
 
     it('should call with correct args to fetch author id', () => {
-      expect(requestSpy.calls.argsFor(0)).toMatchSnapshot();
+      expect(axiosPostSpy.mock.calls[0]).toMatchSnapshot();
     });
 
     it('should call with correct args to fetch commits', () => {
-      expect(requestSpy.calls.argsFor(1)).toMatchSnapshot();
+      expect(axiosPostSpy.mock.calls[1]).toMatchSnapshot();
     });
   });
 
@@ -94,22 +99,21 @@ describe('fetchCommitsByAuthor', () => {
 
   describe('when a custom github api hostname is supplied', () => {
     it('should be used in gql requests', async () => {
-      const requestSpy = spyOn(axios, 'post').and.returnValues(
-        { data: { data: currentUserMock } },
-        { data: { data: commitsWithPullRequestsMock } }
-      );
+      const axiosPostSpy = jest
+        .spyOn(axios, 'post')
+        .mockResolvedValueOnce({ data: { data: currentUserMock } })
+        .mockResolvedValueOnce({ data: { data: commitsWithPullRequestsMock } });
 
       const options = getDefaultOptions({
         githubApiBaseUrlV4: 'https://api.github.my-company.com',
       });
       await fetchCommitsByAuthor(options);
 
-      expect(requestSpy.calls.argsFor(0)[0]).toBe(
-        'https://api.github.my-company.com'
-      );
-      expect(requestSpy.calls.argsFor(1)[0]).toBe(
-        'https://api.github.my-company.com'
-      );
+      const baseUrls = axiosPostSpy.mock.calls.map((args) => args[0]);
+      expect(baseUrls).toEqual([
+        'https://api.github.my-company.com',
+        'https://api.github.my-company.com',
+      ]);
     });
   });
 });
@@ -187,10 +191,10 @@ async function getExistingBackportsByRepoName(
 ) {
   const commitsMock = getCommitsByAuthorMock(repoName1);
 
-  spyOn(axios, 'post').and.returnValues(
-    { data: { data: currentUserMock } },
-    { data: { data: commitsMock } }
-  );
+  jest
+    .spyOn(axios, 'post')
+    .mockResolvedValueOnce({ data: { data: currentUserMock } })
+    .mockResolvedValueOnce({ data: { data: commitsMock } });
 
   const options = getDefaultOptions({
     repoName: repoName2,

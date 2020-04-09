@@ -4,7 +4,7 @@ import { OptionsFromConfigFiles } from './config/config';
 export type OptionsFromCliArgs = ReturnType<typeof getOptionsFromCliArgs>;
 export function getOptionsFromCliArgs(
   configOptions: OptionsFromConfigFiles,
-  argv: string[]
+  argv: readonly string[]
 ) {
   const cliArgs = yargs(argv)
     .parserConfiguration({
@@ -144,7 +144,8 @@ export function getOptionsFromCliArgs(
     .alias('version', 'V')
     .help().argv;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // omitting $0 and _
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
   const { $0, _, ...rest } = cliArgs;
 
   return {

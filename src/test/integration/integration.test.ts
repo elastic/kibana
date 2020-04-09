@@ -1,8 +1,8 @@
 import { once } from 'lodash';
 import { getOptions } from '../../options/options';
 import { runWithOptions } from '../../runWithOptions';
-import { REMOTE_ORIGIN_REPO_PATH, REMOTE_FORK_REPO_PATH } from './envConstants';
 import { createSpies } from './createSpies';
+import { REMOTE_ORIGIN_REPO_PATH, REMOTE_FORK_REPO_PATH } from './envConstants';
 import {
   getBranches,
   getLatestCommit,
@@ -35,15 +35,15 @@ describe('when a single commit is backported', () => {
 
   it('should make correct API requests', () => {
     const {
-      getDefaultRepoBranch,
-      getAuthorPayload,
-      getCommitsPayload,
+      getDefaultRepoBranchAndPerformStartupChecks,
+      getAuthorRequestConfig,
+      getCommitsRequestConfig,
       createPullRequestPayload,
     } = spies.getAxiosCalls();
 
-    expect(getDefaultRepoBranch).toMatchSnapshot();
-    expect(getAuthorPayload).toMatchSnapshot();
-    expect(getCommitsPayload).toMatchSnapshot();
+    expect(getDefaultRepoBranchAndPerformStartupChecks).toMatchSnapshot();
+    expect(getAuthorRequestConfig).toMatchSnapshot();
+    expect(getCommitsRequestConfig).toMatchSnapshot();
     expect(createPullRequestPayload).toMatchSnapshot();
   });
 
@@ -96,13 +96,13 @@ describe('when a multiple commits are backported', () => {
 
   it('should make correct API requests', () => {
     const {
-      getAuthorPayload,
-      getCommitsPayload,
+      getAuthorRequestConfig,
+      getCommitsRequestConfig,
       createPullRequestPayload,
     } = spies.getAxiosCalls();
 
-    expect(getAuthorPayload).toMatchSnapshot();
-    expect(getCommitsPayload).toMatchSnapshot();
+    expect(getAuthorRequestConfig).toMatchSnapshot();
+    expect(getCommitsRequestConfig).toMatchSnapshot();
     expect(createPullRequestPayload).toMatchSnapshot();
   });
 

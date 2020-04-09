@@ -1,7 +1,7 @@
 import stripJsonComments from 'strip-json-comments';
-import { Config } from '../../types/Config';
 import { HandledError } from '../../services/HandledError';
 import { readFile } from '../../services/fs-promisified';
+import { Config } from '../../types/Config';
 
 export async function readConfigFile(filepath: string) {
   const fileContents = await readFile(filepath, 'utf8');

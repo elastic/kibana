@@ -10,19 +10,18 @@ describe('maybeSetupRepo', () => {
       throw new Error('makeDir failed');
     });
 
-    try {
-      await maybeSetupRepo({
+    await expect(
+      maybeSetupRepo({
         repoOwner: 'elastic',
         repoName: 'kibana',
         username: 'sqren',
         accessToken: 'myAccessToken',
         gitHostname: 'github.com',
-      } as BackportOptions);
-    } catch (e) {
-      expect(e.message).toBe('makeDir failed');
-      expect(del).toHaveBeenCalledWith(
-        '/myHomeDir/.backport/repositories/elastic/kibana'
-      );
-    }
+      } as BackportOptions)
+    ).rejects.toThrowError('makeDir failed');
+
+    expect(del).toHaveBeenCalledWith(
+      '/myHomeDir/.backport/repositories/elastic/kibana'
+    );
   });
 });

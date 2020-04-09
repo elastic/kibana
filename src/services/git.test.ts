@@ -1,4 +1,5 @@
 import { BackportOptions } from '../options/options';
+import * as childProcess from '../services/child-process-promisified';
 import {
   addRemote,
   getUnmergedFiles,
@@ -8,11 +9,10 @@ import {
   cherrypick,
   getFilesWithConflicts,
 } from '../services/git';
-import * as childProcess from '../services/child-process-promisified';
 
 describe('getUnmergedFiles', () => {
   it('should split lines and remove empty', async () => {
-    jest.spyOn(childProcess, 'exec').mockResolvedValue({
+    jest.spyOn(childProcess, 'exec').mockResolvedValueOnce({
       stdout: 'conflicting-file.txt\nconflicting-file2.txt\n',
       stderr: '',
     });
@@ -29,7 +29,7 @@ describe('getUnmergedFiles', () => {
   });
 
   it('should not error on empty', async () => {
-    jest.spyOn(childProcess, 'exec').mockResolvedValue({
+    jest.spyOn(childProcess, 'exec').mockResolvedValueOnce({
       stdout: '',
       stderr: '',
     });
@@ -225,7 +225,7 @@ describe('addRemote', () => {
   it('add correct origin remote', async () => {
     const spy = jest
       .spyOn(childProcess, 'exec')
-      .mockResolvedValue({ stderr: '', stdout: '' });
+      .mockResolvedValueOnce({ stderr: '', stdout: '' });
     await addRemote(options, 'elastic');
 
     return expect(
@@ -239,7 +239,7 @@ describe('addRemote', () => {
   it('add correct user remote', async () => {
     const spy = jest
       .spyOn(childProcess, 'exec')
-      .mockResolvedValue({ stderr: '', stdout: '' });
+      .mockResolvedValueOnce({ stderr: '', stdout: '' });
     await addRemote(options, 'sqren');
 
     return expect(
@@ -253,7 +253,7 @@ describe('addRemote', () => {
   it('allows custom github url', async () => {
     const spy = jest
       .spyOn(childProcess, 'exec')
-      .mockResolvedValue({ stderr: '', stdout: '' });
+      .mockResolvedValueOnce({ stderr: '', stdout: '' });
     await addRemote(
       { ...options, gitHostname: 'github.my-company.com' },
       'sqren'

@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`throwOnInvalidAccessToken when status code is should handle SSO error 1`] = `
+"Please follow the link to authorize your personal access token with SSO:
+
+https://ssourl.com"
+`;
+
+exports[`throwOnInvalidAccessToken when status code is should handle insufficient permissions (oauth scopes) 1`] = `
+"You do not have access to the repository \\"elastic/kibana\\". Please make sure your access token has the required scopes.
+
+Required scopes: a,b,c
+Access token scopes: a,b"
+`;

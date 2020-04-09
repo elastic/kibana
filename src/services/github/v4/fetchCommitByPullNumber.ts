@@ -1,8 +1,8 @@
-import { BackportOptions } from '../../options/options';
-import { CommitSelected } from './Commit';
-import { getFormattedCommitMessage } from './commitFormatters';
-import { gqlRequest } from './gqlRequest';
-import { HandledError } from '../HandledError';
+import { BackportOptions } from '../../../options/options';
+import { CommitSelected } from '../../../types/Commit';
+import { HandledError } from '../../HandledError';
+import { getFormattedCommitMessage } from '../commitFormatters';
+import { apiRequestV4 } from './apiRequestV4';
 
 export async function fetchCommitByPullNumber(
   options: BackportOptions & { pullNumber: number }
@@ -34,7 +34,7 @@ export async function fetchCommitByPullNumber(
     }
   `;
 
-  const res = await gqlRequest<DataResponse>({
+  const res = await apiRequestV4<DataResponse>({
     githubApiBaseUrlV4,
     accessToken,
     query,

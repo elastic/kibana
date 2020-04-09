@@ -1,8 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`gqlRequest when request fails without error messages should return parsed github error 1`] = `
-"Unexpected response from Github:
-{
-  \\"foo\\": \\"bar\\"
-}"
-`;

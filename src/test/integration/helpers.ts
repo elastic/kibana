@@ -6,9 +6,8 @@ import {
   INTEGRATION_TEST_DIR_PATH,
 } from './envConstants';
 
-type Exec = typeof childProcess.exec;
 const unmockedExec = childProcess.exec;
-const execPromisified = promisify(unmockedExec as Exec);
+const execPromisified = promisify(unmockedExec);
 
 export async function getBranches(cwd: string) {
   const { stdout } = await execPromisified('git --no-pager branch', { cwd });

@@ -1,10 +1,10 @@
 {
-  "editor.formatOnSave": true,
   "eslint.validate": ["javascript", "typescript"],
   "files.exclude": {
     "yarn.lock": true,
     "coverage": true
   },
+  "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   }

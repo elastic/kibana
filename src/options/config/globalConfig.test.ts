@@ -1,17 +1,17 @@
+import makeDir from 'make-dir';
 import * as fs from '../../services/fs-promisified';
 import { PromiseReturnType } from '../../types/PromiseReturnType';
 import { getGlobalConfig, maybeCreateGlobalConfig } from './globalConfig';
-import makeDir from 'make-dir';
 
 describe('config', () => {
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => jest.clearAllMocks());
 
   describe('getGlobalConfig', () => {
     let res: PromiseReturnType<typeof getGlobalConfig>;
     beforeEach(async () => {
-      jest.spyOn(fs, 'chmod').mockResolvedValue();
-      jest.spyOn(fs, 'writeFile').mockResolvedValue();
-      jest.spyOn(fs, 'readFile').mockResolvedValue(
+      jest.spyOn(fs, 'chmod').mockResolvedValueOnce();
+      jest.spyOn(fs, 'writeFile').mockResolvedValueOnce();
+      jest.spyOn(fs, 'readFile').mockResolvedValueOnce(
         JSON.stringify({
           accessToken: 'myAccessToken',
           username: 'sqren',
@@ -51,7 +51,7 @@ describe('config', () => {
 
   describe('maybeCreateGlobalConfig', () => {
     it('should create config and succeed', async () => {
-      jest.spyOn(fs, 'writeFile').mockResolvedValue(undefined);
+      jest.spyOn(fs, 'writeFile').mockResolvedValueOnce(undefined);
       const didCreate = await maybeCreateGlobalConfig(
         '/path/to/globalConfig',
         'myConfigTemplate'
