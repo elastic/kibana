@@ -152,15 +152,6 @@ export const transformAlertToRule = (
   });
 };
 
-export const transformDataToNdjson = (data: unknown[]): string => {
-  if (data.length !== 0) {
-    const dataString = data.map(rule => JSON.stringify(rule)).join('\n');
-    return `${dataString}\n`;
-  } else {
-    return '';
-  }
-};
-
 export const transformAlertsToRules = (
   alerts: RuleAlertType[]
 ): Array<Partial<OutputRuleAlertRest>> => {

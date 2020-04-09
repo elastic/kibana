@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import * as rt from 'io-ts';
 import { Transform } from 'stream';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -18,7 +18,7 @@ import {
   parseNdjsonStrings,
   filterExportedCounts,
   createLimitStream,
-} from '../detection_engine/rules/create_rules_stream_from_ndjson';
+} from '../../utils/read_stream/create_rules_stream_from_ndjson';
 
 import { ImportTimelineResponse } from './routes/utils/import_timelines';
 import { ImportTimelinesSchemaRt } from './routes/schemas/import_timelines_schema';
