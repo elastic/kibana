@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { Cluster } from '../cluster';
+import { Cluster } from './cluster';
 
 describe('cluster', () => {
   describe('Cluster', () => {
@@ -16,7 +15,7 @@ describe('cluster', () => {
 
       it('returns correct Cluster instance', () => {
         const cluster = Cluster.fromUpstreamJSON(upstreamJSON);
-        expect(cluster.uuid).to.be(upstreamJSON.cluster_uuid);
+        expect(cluster.downstreamJSON).toEqual({ uuid: upstreamJSON.cluster_uuid });
       });
     });
   });

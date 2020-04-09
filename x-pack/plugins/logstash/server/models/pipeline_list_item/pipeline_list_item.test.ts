@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { PipelineListItem } from '../pipeline_list_item';
+import { PipelineListItem } from './pipeline_list_item';
 
 describe('pipeline_list_item', () => {
   describe('PipelineListItem', () => {
@@ -26,10 +25,10 @@ describe('pipeline_list_item', () => {
     describe('fromUpstreamJSON factory method', () => {
       it('returns correct PipelineListItem instance', () => {
         const pipelineListItem = PipelineListItem.fromUpstreamJSON(upstreamJSON);
-        expect(pipelineListItem.id).to.be(upstreamJSON._id);
-        expect(pipelineListItem.description).to.be(upstreamJSON._source.description);
-        expect(pipelineListItem.username).to.be(upstreamJSON._source.username);
-        expect(pipelineListItem.last_modified).to.be(upstreamJSON._source.last_modified);
+        expect(pipelineListItem.id).toBe(upstreamJSON._id);
+        expect(pipelineListItem.description).toBe(upstreamJSON._source.description);
+        expect(pipelineListItem.username).toBe(upstreamJSON._source.username);
+        expect(pipelineListItem.last_modified).toBe(upstreamJSON._source.last_modified);
       });
     });
 
@@ -42,7 +41,7 @@ describe('pipeline_list_item', () => {
           username: 'elastic',
           last_modified: '2017-05-14T02:50:51.250Z',
         };
-        expect(pipelineListItem.downstreamJSON).to.eql(expectedDownstreamJSON);
+        expect(pipelineListItem.downstreamJSON).toEqual(expectedDownstreamJSON);
       });
     });
   });

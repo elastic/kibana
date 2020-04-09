@@ -9,19 +9,37 @@ import { badRequest } from 'boom';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
+interface PipelineOptions {
+  id: string;
+  description: string;
+  username: string;
+  pipeline: string;
+  settings?: Record<string, any>;
+}
+
+interface DownstreamPipeline {
+  description: string;
+  pipeline: string;
+  settings: Record<string, any>;
+}
 /**
  * This model deals with a pipeline object from ES and converts it to Kibana downstream
  */
 export class Pipeline {
-  constructor(props) {
-    this.id = props.id;
-    this.description = props.description;
-    this.username = props.username;
-    this.pipeline = props.pipeline;
-    this.settings = props.settings || {};
+  public readonly id: string;
+  public readonly description: string;
+  public readonly username: string;
+  public readonly pipeline: string;
+  private readonly settings: Record<string, any>;
+  constructor(options: PipelineOptions) {
+    this.id = options.id;
+    this.description = options.description;
+    this.username = options.username;
+    this.pipeline = options.pipeline;
+    this.settings = options.settings || {};
   }
 
-  get downstreamJSON() {
+  public get downstreamJSON() {
     const json = {
       id: this.id,
       description: this.description,
@@ -41,7 +59,7 @@ export class Pipeline {
    * pipeline_metadata.type is the Logstash config type (future: LIR, json, etc)
    * @return {[JSON]} [Elasticsearch JSON]
    */
-  get upstreamJSON() {
+  public get upstreamJSON() {
     return {
       description: this.description,
       last_modified: moment().toISOString(),
@@ -56,7 +74,11 @@ export class Pipeline {
   }
 
   // generate Pipeline object from kibana response
-  static fromDownstreamJSON(downstreamPipeline, pipelineId, username) {
+  static fromDownstreamJSON(
+    downstreamPipeline: DownstreamPipeline,
+    pipelineId: string,
+    username: string
+  ) {
     const opts = {
       id: pipelineId,
       description: downstreamPipeline.description,
@@ -69,7 +91,7 @@ export class Pipeline {
   }
 
   // generate Pipeline object from elasticsearch response
-  static fromUpstreamJSON(upstreamPipeline) {
+  static fromUpstreamJSON(upstreamPipeline: Record<string, any>) {
     if (!upstreamPipeline._id) {
       throw badRequest(
         i18n.translate(
@@ -80,13 +102,13 @@ export class Pipeline {
         )
       );
     }
-    const id = get(upstreamPipeline, '_id');
-    const description = get(upstreamPipeline, '_source.description');
-    const username = get(upstreamPipeline, '_source.username');
-    const pipeline = get(upstreamPipeline, '_source.pipeline');
-    const settings = get(upstreamPipeline, '_source.pipeline_settings');
+    const id = get<string>(upstreamPipeline, '_id');
+    const description = get<string>(upstreamPipeline, '_source.description');
+    const username = get<string>(upstreamPipeline, '_source.username');
+    const pipeline = get<string>(upstreamPipeline, '_source.pipeline');
+    const settings = get<Record<string, any>>(upstreamPipeline, '_source.pipeline_settings');
 
-    const opts = { id, description, username, pipeline, settings };
+    const opts: PipelineOptions = { id, description, username, pipeline, settings };
 
     return new Pipeline(opts);
   }

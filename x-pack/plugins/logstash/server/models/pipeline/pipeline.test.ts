@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { Pipeline } from '../pipeline';
+import { Pipeline } from './pipeline';
 
 describe('pipeline', () => {
   describe('Pipeline', () => {
@@ -25,10 +24,10 @@ describe('pipeline', () => {
 
       it('returns correct Pipeline instance', () => {
         const pipeline = Pipeline.fromUpstreamJSON(upstreamJSON);
-        expect(pipeline.id).to.be(upstreamJSON._id);
-        expect(pipeline.description).to.be(upstreamJSON._source.description);
-        expect(pipeline.username).to.be(upstreamJSON._source.username);
-        expect(pipeline.pipeline).to.be(upstreamJSON._source.pipeline);
+        expect(pipeline.id).toBe(upstreamJSON._id);
+        expect(pipeline.description).toBe(upstreamJSON._source.description);
+        expect(pipeline.username).toBe(upstreamJSON._source.username);
+        expect(pipeline.pipeline).toBe(upstreamJSON._source.pipeline);
       });
 
       it('throws if pipeline argument does not contain an id property', () => {
@@ -39,7 +38,7 @@ describe('pipeline', () => {
         const testFromUpstreamJsonError = () => {
           return Pipeline.fromUpstreamJSON(badJSON);
         };
-        expect(testFromUpstreamJsonError).to.throwError(
+        expect(testFromUpstreamJsonError).toThrowError(
           /upstreamPipeline argument must contain an id property/i
         );
       });
@@ -64,12 +63,12 @@ describe('pipeline', () => {
           pipeline: 'input {} filter { grok {} }\n output {}',
         };
         // can't do an object level comparison because modified field is always `now`
-        expect(pipeline.upstreamJSON.last_modified).to.be.a('string');
-        expect(pipeline.upstreamJSON.description).to.be(expectedUpstreamJSON.description);
-        expect(pipeline.upstreamJSON.pipeline_metadata).to.eql(
+        expect(pipeline.upstreamJSON.last_modified).toStrictEqual(expect.any(String));
+        expect(pipeline.upstreamJSON.description).toBe(expectedUpstreamJSON.description);
+        expect(pipeline.upstreamJSON.pipeline_metadata).toEqual(
           expectedUpstreamJSON.pipeline_metadata
         );
-        expect(pipeline.upstreamJSON.pipeline).to.be(expectedUpstreamJSON.pipeline);
+        expect(pipeline.upstreamJSON.pipeline).toBe(expectedUpstreamJSON.pipeline);
       });
     });
   });

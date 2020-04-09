@@ -10,11 +10,12 @@ import { get } from 'lodash';
  * This model deals with a cluster object from ES and converts it to Kibana downstream
  */
 export class Cluster {
-  constructor(props) {
-    this.uuid = props.uuid;
+  private readonly uuid: string;
+  constructor({ uuid }: { uuid: string }) {
+    this.uuid = uuid;
   }
 
-  get downstreamJSON() {
+  public get downstreamJSON() {
     const json = {
       uuid: this.uuid,
     };
@@ -23,8 +24,8 @@ export class Cluster {
   }
 
   // generate Pipeline object from elasticsearch response
-  static fromUpstreamJSON(upstreamCluster) {
-    const uuid = get(upstreamCluster, 'cluster_uuid');
+  static fromUpstreamJSON(upstreamCluster: Record<string, string>) {
+    const uuid = get<string>(upstreamCluster, 'cluster_uuid');
     return new Cluster({ uuid });
   }
 }
