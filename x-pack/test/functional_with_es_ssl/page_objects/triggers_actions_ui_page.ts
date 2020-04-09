@@ -9,11 +9,10 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';
 
-export function TriggersActionsPageProvider({ getPageObjects, getService }: FtrProviderContext) {
+export function TriggersActionsPageProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common']);
 
   return {
     async getSectionHeadingText() {
@@ -142,13 +141,6 @@ export function TriggersActionsPageProvider({ getPageObjects, getService }: FtrP
         '[data-test-subj="createAlertButton"],[data-test-subj="createFirstAlertButton"]'
       );
       await createBtn.click();
-    },
-    async waitForEditAlertFlyout({ name }: { name: string }) {
-      await retry.try(async () => {
-        const inputValue = await testSubjects.getAttribute('alertNameInput', 'value');
-        expect(inputValue).to.eql(name);
-      });
-      await pageObjects.common.sleep(500);
     },
   };
 }
