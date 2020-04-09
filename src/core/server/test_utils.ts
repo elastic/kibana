@@ -18,3 +18,4 @@
  */
 
 export { createHttpServer } from './http/test_utils';
+export { ServiceStatusLevelSnapshotSerializer } from './status/test_utils';
