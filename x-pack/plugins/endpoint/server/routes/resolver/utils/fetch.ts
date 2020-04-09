@@ -61,7 +61,7 @@ export class Fetcher {
 
     const next = parentEntityId(results[0]);
     if (next !== undefined) {
-      await this.doAncestors(tree, next, id, levels - 1);
+      await this.doAncestors(tree, next, next, levels - 1);
     }
   }
 

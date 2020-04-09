@@ -111,14 +111,13 @@ export class Tree {
 
   public addAncestor(id: string, ...events: ResolverEvent[]): void {
     events.forEach(event => {
-      const ancestorID = parentEntityId(event);
-      if (ancestorID) {
-        if (!this.cache[ancestorID]) {
-          this.cache[ancestorID] = createNode(ancestorID);
-          this.cache[id].parent = this.cache[ancestorID];
-        }
-        this.cache[ancestorID].lifecycle.push(event);
+      const ancestorID = entityId(event);
+      console.log(ancestorID, 'ancestor');
+      if (!this.cache[ancestorID]) {
+        this.cache[ancestorID] = createNode(ancestorID);
+        this.cache[id].parent = this.cache[ancestorID];
       }
+      this.cache[ancestorID].lifecycle.push(event);
     });
   }
 

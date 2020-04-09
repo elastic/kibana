@@ -42,6 +42,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
         try {
           let lifecycle: ResolverEvent[];
           let children: Node[];
+          let ancestor: any;
           if (event.isLegacyEvent(action.payload.selectedEvent)) {
             const entityId = action.payload.selectedEvent?.endgame?.unique_pid;
             const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
@@ -52,10 +53,12 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
             ]);
           } else {
             const entityId = action.payload.selectedEvent.process.entity_id;
-            [{ lifecycle, children }] = await Promise.all([
+            [{ lifecycle, children }, ancestor] = await Promise.all([
               context.services.http.get(`/api/endpoint/resolver/${entityId}`),
+              context.services.http.get(`/api/endpoint/resolver/${entityId}/ancestry`),
             ]);
           }
+          console.log(ancestor);
           const response: ResolverEvent[] = [...lifecycle, ...descendants(children)];
           api.dispatch({
             type: 'serverReturnedResolverData',
