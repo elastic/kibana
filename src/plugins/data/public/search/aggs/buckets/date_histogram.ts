@@ -44,19 +44,14 @@ const updateTimeBuckets = (
   timefilter: TimefilterContract,
   customBuckets?: IBucketDateHistogramAggConfig['buckets']
 ) => {
-  const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
+  const bounds =
+    agg.params.timeRange && agg.fieldIsTimeField()
+      ? timefilter.calculateBounds(agg.params.timeRange)
+      : undefined;
   const buckets = customBuckets || agg.buckets;
-  buckets.setBounds(agg.fieldIsTimeField() && bounds);
+  buckets.setBounds(bounds);
   buckets.setInterval(agg.params.interval);
 };
-
-// TODO: Need to incorporate these properly into TimeBuckets
-interface ITimeBuckets {
-  setBounds: Function;
-  getScaledDateFormat: TimeBuckets['getScaledDateFormat'];
-  setInterval: Function;
-  getInterval: Function;
-}
 
 export interface DateHistogramBucketAggDependencies {
   uiSettings: IUiSettingsClient;
@@ -65,7 +60,7 @@ export interface DateHistogramBucketAggDependencies {
 }
 
 export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
-  buckets: ITimeBuckets;
+  buckets: TimeBuckets;
 }
 
 export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHistogramAggConfig {
@@ -113,7 +108,12 @@ export const getDateHistogramBucketAgg = ({
               if (buckets) return buckets;
 
               const { timefilter } = query.timefilter;
-              buckets = new TimeBuckets({ uiSettings });
+              buckets = new TimeBuckets({
+                'histogram:maxBars': uiSettings.get('histogram:maxBars'),
+                'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+                dateFormat: uiSettings.get('dateFormat'),
+                'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+              });
               updateTimeBuckets(this, timefilter, buckets);
 
               return buckets;
@@ -206,7 +206,8 @@ export const getDateHistogramBucketAgg = ({
               ...dateHistogramInterval(interval.expression),
             };
 
-            const scaleMetrics = scaleMetricValues && interval.scaled && interval.scale < 1;
+            const scaleMetrics =
+              scaleMetricValues && interval.scaled && interval.scale && interval.scale < 1;
             if (scaleMetrics && aggs) {
               const metrics = aggs.aggs.filter(a => isMetricAggType(a.type));
               const all = every(metrics, (a: IBucketAggConfig) => {
@@ -218,7 +219,7 @@ export const getDateHistogramBucketAgg = ({
               });
               if (all) {
                 output.metricScale = interval.scale;
-                output.metricScaleText = interval.preScaled.description;
+                output.metricScaleText = interval.preScaled?.description || '';
               }
             }
           },
