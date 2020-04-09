@@ -940,7 +940,7 @@ Everyone loves snappy applications with responsive UI and hates spinners. Users 
 There are 2 main aspects of the perceived speed of an application: loading time and responsiveness to user actions.
 New platform loads and bootstraps **all** the plugins whenever a user lands on any page. It means that adding every new application affects overall **loading performance** in the new platform, as plugin code is loaded **eagerly** to initialize the plugin and provide plugin API to dependent plugins.
 However, it's usually not necessary that the whole plugin code should be loaded and initialized at once. The plugin could keep on loading code covering API functionality on Kibana bootstrap but load UI related code lazily on-demand, when an application page or management section is mounted.
-For this purpose, Kibana provides dedicated integration points: async `mount` functions. Use them to keep the initially loaded bundle as slim as possible without any loss in the functionality.
+Always prefer to require UI root components lazily when possible (such as in mount handlers). Even if their size may seem negligible, they are likely using some heavy-weight libraries that will also be removed from the initial plugin bundle, therefore, reducing its size by a significant amount.
 
 ```typescript
 import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
