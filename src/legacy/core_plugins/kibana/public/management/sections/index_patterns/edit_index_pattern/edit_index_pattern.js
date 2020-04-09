@@ -140,8 +140,11 @@ function updateIndexedFieldsTable($scope) {
           fieldWildcardMatcher={$scope.fieldWildcardMatcher}
           indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
           helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.changeToRoute(obj, route);
+            redirectToRoute: field => {
+              $scope.kbnUrl.changePath(
+                '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
+                field
+              );
               $scope.$apply();
             },
             getFieldInfo: $scope.getFieldInfo,
