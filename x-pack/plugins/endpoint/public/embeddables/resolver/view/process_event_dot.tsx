@@ -120,9 +120,9 @@ export const ProcessEventDot = styled(
        *  18.75 : The smallest readable font size at which labels/descriptions can be read. Font size will not scale below this.
        *  12.5 : A 'slope' at which the font size will scale w.r.t. to zoom level otherwise
        */
-      const scaledTypeSize = useMemo(()=>{
-        return magFactorX > 1 ? 18.75 + 12.5 * (magFactorX - 1) : 18.75
-      },[magFactorX])
+      const scaledTypeSize = useMemo(() => {
+        return magFactorX > 1 ? 18.75 + 12.5 * (magFactorX - 1) : 18.75;
+      }, [magFactorX]);
 
       const markerBaseSize = 15;
       const markerSize = markerBaseSize;
