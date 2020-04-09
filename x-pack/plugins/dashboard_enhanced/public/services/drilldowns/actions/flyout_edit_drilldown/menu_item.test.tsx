@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, cleanup, act } from '@testing-library/react/pure';
 import { MenuItem } from './menu_item';
-import { createStateContainer } from '../../../../../../../../src/plugins/kibana_utils/common';
+import { createStateContainer } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { DynamicActionManager } from '../../../../../../../../src/plugins/ui_actions/public';
 import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public/lib/embeddables';
 import '@testing-library/jest-dom';
