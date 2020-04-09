@@ -8,6 +8,6 @@ import * as legacyElasticsearch from 'elasticsearch';
 
 const esErrorsParent = legacyElasticsearch.errors._Abstract;
 
-export function isEsError(err: Error) {
+export function isEsError(err: Error): boolean {
   return err instanceof esErrorsParent;
 }
