@@ -7,6 +7,7 @@ import { HttpSetup } from 'src/core/public';
 
 import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
+import { Pipeline } from '../../../common/types';
 import {
   UseRequestConfig,
   SendRequestConfig,
@@ -21,11 +22,11 @@ export class ApiService {
   private client: HttpSetup | undefined;
   private uiMetricService: UiMetricService | undefined;
 
-  private useRequest(config: UseRequestConfig) {
+  private useRequest<R = any, E = Error>(config: UseRequestConfig) {
     if (!this.client) {
       throw new Error('Api service has not be initialized.');
     }
-    return _useRequest(this.client, config);
+    return _useRequest<R, E>(this.client, config);
   }
 
   private sendRequest(config: SendRequestConfig): Promise<SendRequestResponse> {
@@ -48,7 +49,7 @@ export class ApiService {
   }
 
   public useLoadPipelines() {
-    return this.useRequest({
+    return this.useRequest<Pipeline[]>({
       path: API_BASE_PATH,
       method: 'get',
     });
