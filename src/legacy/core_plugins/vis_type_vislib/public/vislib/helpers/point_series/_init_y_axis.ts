@@ -17,30 +17,20 @@
  * under the License.
  */
 
-import { uniq } from 'lodash';
-import moment from 'moment';
+import { Chart } from './point_series';
 
-export function initXAxis(chart, table) {
-  const { format, title, params, accessor } = chart.aspects.x[0];
+export function initYAxis(chart: Chart) {
+  const y = chart.aspects.y;
 
-  chart.xAxisOrderedValues =
-    accessor === -1 ? [params.defaultValue] : uniq(table.rows.map(r => r[accessor]));
-  chart.xAxisFormat = format;
-  chart.xAxisLabel = title;
+  if (Array.isArray(y)) {
+    // TODO: vis option should allow choosing this format
+    chart.yAxisFormat = y[0].format;
+    chart.yAxisLabel = y.length > 1 ? '' : y[0].title;
+  }
 
-  const { interval, date } = params;
-  if (interval) {
-    if (date) {
-      const { intervalESUnit, intervalESValue } = params;
-      chart.ordered = {
-        interval: moment.duration(interval),
-        intervalESUnit: intervalESUnit,
-        intervalESValue: intervalESValue,
-      };
-    } else {
-      chart.ordered = {
-        interval,
-      };
-    }
+  const z = chart.aspects.series;
+  if (z) {
+    chart.zAxisFormat = z[0].format;
+    chart.zAxisLabel = '';
   }
 }
