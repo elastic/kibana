@@ -15,6 +15,8 @@ export enum Comparator {
   NOT_EQ = 'does not equal',
   MATCH = 'matches',
   NOT_MATCH = 'does not match',
+  MATCH_PHRASE = 'matches phrase',
+  NOT_MATCH_PHRASE = 'does not match phrase',
 }
 
 export enum AlertStates {

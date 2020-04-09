@@ -17,6 +17,7 @@ import {
 import { IFieldType } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { uniq } from 'lodash';
 import { euiStyled } from '../../../../../../observability/public';
 import {
   ForLastExpression,
@@ -63,19 +64,29 @@ export const ExpressionEditor: React.FC<Props> = props => {
     createDerivedIndexPattern,
   ]);
 
+  const supportedFields = useMemo(() => {
+    if (derivedIndexPattern?.fields) {
+      return derivedIndexPattern.fields.filter(field => {
+        return (field.type === 'string' || field.type === 'number') && field.searchable;
+      });
+    } else {
+      return [];
+    }
+  }, [derivedIndexPattern]);
+
   const defaultExpression = useMemo(() => {
     return {
       count: {
         value: 75,
         comparator: Comparator.GT,
       },
-      criteria: [{ field: undefined, comparator: Comparator.EQ, value: undefined }],
+      criteria: [{ field: 'log.level', comparator: Comparator.EQ, value: 'error' }],
       timeSize: 5,
       timeUnit: 'm',
     };
   }, []);
 
-  // Set the default expression (disables exhaustive-deps due to only wanting to run this once on mount)
+  // Set the default expression (disables exhaustive-deps as we only want to run this once on mount)
   useEffect(() => {
     for (const [key, value] of Object.entries(defaultExpression)) {
       setAlertParams(key, value);
@@ -90,9 +101,18 @@ export const ExpressionEditor: React.FC<Props> = props => {
     [alertParams.count, setAlertParams]
   );
 
-  const updateCriteria = useCallback(() => {
-    // Update things here
-  }, []);
+  const updateCriteria = useCallback(
+    (idx, criterionParams) => {
+      const nextCriteria = alertParams.criteria?.map((criterion, index) => {
+        return idx === index ? { ...criterion, ...criterionParams } : criterion;
+      });
+      setAlertParams('criteria', nextCriteria ? nextCriteria : []);
+    },
+    [alertParams, setAlertParams]
+  );
+
+  // Wait until field info has loaded
+  if (supportedFields.length === 0) return null;
 
   return (
     <>
@@ -102,7 +122,11 @@ export const ExpressionEditor: React.FC<Props> = props => {
         updateCount={updateCount}
       />
 
-      <Criteria criteria={alertParams.criteria} updateCriteria={updateCriteria} />
+      <Criteria
+        fields={supportedFields}
+        criteria={alertParams.criteria}
+        updateCriteria={updateCriteria}
+      />
     </>
   );
 };
