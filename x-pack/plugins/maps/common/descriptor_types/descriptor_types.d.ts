@@ -91,8 +91,6 @@ export type WMSSourceDescriptor = {
 
 export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
   AttributionDescriptor & {
-    id: string;
-    type: string;
     urlTemplate: string;
   };
 

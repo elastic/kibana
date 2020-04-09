@@ -9,14 +9,14 @@ import _ from 'lodash';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export interface SourceConfig {
+export interface XYZTMSSourceConfig {
   urlTemplate: string;
   attributionText?: string;
   attributionUrl?: string;
 }
 
 export interface Props {
-  onSourceConfigChange: (sourceConfig: SourceConfig) => {};
+  onSourceConfigChange: (sourceConfig: XYZTMSSourceConfig) => {};
 }
 
 interface State {
@@ -34,7 +34,7 @@ export class XYZTMSEditor extends Component<Props, State> {
     attributionUrl: '',
   };
 
-  _sourceConfigChange = _.debounce((updatedSourceConfig: SourceConfig) => {
+  _sourceConfigChange = _.debounce((updatedSourceConfig: XYZTMSSourceConfig) => {
     if (this.state.tmsCanPreview) {
       this.props.onSourceConfigChange(updatedSourceConfig);
     }

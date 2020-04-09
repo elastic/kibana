@@ -12,7 +12,7 @@ import { registerSource } from '../source_registry';
 import { AbstractTMSSource } from '../tms_source';
 import { LayerDescriptor, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty } from '../source';
-import { SourceConfig } from './xyz_tms_editor';
+import { XYZTMSSourceConfig } from './xyz_tms_editor';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
   defaultMessage: 'Tile Map Service',
@@ -27,7 +27,7 @@ export class XYZTMSSource extends AbstractTMSSource {
     urlTemplate,
     attributionText,
     attributionUrl,
-  }: SourceConfig): XYZTMSSourceDescriptor {
+  }: XYZTMSSourceConfig): XYZTMSSourceDescriptor {
     return {
       type: XYZTMSSource.type,
       urlTemplate,
