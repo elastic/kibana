@@ -21,7 +21,7 @@ do {
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X PATCH ${KIBANA_URL}${SPACE_URL}/api/detection_engine/lists \
+  -X PATCH ${KIBANA_URL}${SPACE_URL}/api/lists \
   -d @${LIST} \
   | jq .;
 } &

@@ -17,6 +17,6 @@ FILE=${2:-./lists/files/ips.txt}
 curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X POST "${KIBANA_URL}${SPACE_URL}/api/detection_engine/lists/items/_import?list_id=${LIST_ID}" \
+  -X POST "${KIBANA_URL}${SPACE_URL}/api/lists/items/_import?list_id=${LIST_ID}" \
   --form file=@${FILE} \
   | jq .;

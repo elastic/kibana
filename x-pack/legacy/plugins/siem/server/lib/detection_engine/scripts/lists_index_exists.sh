@@ -13,4 +13,4 @@ set -e
 curl -s -k -f \
  -H 'Content-Type: application/json' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- ${KIBANA_URL}${SPACE_URL}/api/detection_engine/lists/index | jq .
+ ${KIBANA_URL}${SPACE_URL}/api/lists/index | jq .

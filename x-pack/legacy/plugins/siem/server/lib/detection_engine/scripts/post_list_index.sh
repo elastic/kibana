@@ -14,4 +14,4 @@ curl -s -k \
  -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/lists/index | jq .
+ -X POST ${KIBANA_URL}${SPACE_URL}/api/lists/index | jq .

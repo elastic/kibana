@@ -96,8 +96,9 @@ export const initRoutes = (
   readPrivilegesRoute(router, security, usingEphemeralEncryptionKey);
 
   if (hasListsFeature()) {
-    // Detection Engine list routes that have the REST endpoints of /api/detection_engine/lists
-    // All REST index creation, policy management of lists
+    // List routes that have the REST endpoints of /api/lists
+
+    // index creation, policy management of lists
     createListsIndexRoute(router);
     readListsIndexRoute(router);
     deleteListsIndexRoute(router);
@@ -111,6 +112,7 @@ export const initRoutes = (
     // list items routes
     createListsItemsRoute(router);
     readListsItemsRoute(router);
+
     // TODO: Add a updateListsItemsRoute
     deleteListsItemsRoute(router);
     patchListsItemsRoute(router);
