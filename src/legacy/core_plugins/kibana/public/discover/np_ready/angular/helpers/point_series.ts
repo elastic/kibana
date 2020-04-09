@@ -107,9 +107,5 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
       y: row[yAccessor] as number,
     }));
 
-  if (!chart.values.length) {
-    chart.values.push({} as any);
-  }
-
   return chart;
 };
