@@ -8,6 +8,7 @@ import sinon from 'sinon';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { mockLogger, resolvable, sleep } from './test_utils';
 import { asOk } from './lib/result_type';
+import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 
 describe('TaskPool', () => {
   test('occupiedWorkers are a sum of running tasks', async () => {
@@ -97,6 +98,25 @@ describe('TaskPool', () => {
         "Task TaskType \\"shooooo\\" failed in attempt to run: Run Task has failed miserably",
       ]
     `);
+
+    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+  });
+
+  test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
+    const logger = mockLogger();
+    const pool = new TaskPool({
+      maxWorkers: 3,
+      logger,
+    });
+
+    const taskFailedToRun = mockTask();
+    taskFailedToRun.run.mockImplementation(async () => {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError('task', taskFailedToRun.id);
+    });
+
+    const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
+
+    expect(logger.warn).not.toHaveBeenCalled();
 
     expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
   });
