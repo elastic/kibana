@@ -219,14 +219,15 @@ export function XYChart({
     ? parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds()
     : undefined;
 
-  const xDomain =
-    data.dateRange && layers.every(l => l.xScaleType === 'time')
-      ? {
-          min: data.dateRange.fromDate.getTime(),
-          max: data.dateRange.toDate.getTime(),
-          minInterval,
-        }
-      : undefined;
+  const isTimeViz = data.dateRange && layers.every(l => l.xScaleType === 'time');
+
+  const xDomain = isTimeViz
+    ? {
+        min: data.dateRange?.fromDate.getTime(),
+        max: data.dateRange?.toDate.getTime(),
+        minInterval,
+      }
+    : undefined;
 
   return (
     <Chart>
@@ -239,7 +240,7 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={(min: number, max: number) => {
           // in the future we want to make it also for histogram
-          if (!xAxisColumn || xAxisColumn.meta?.type !== 'date_histogram') {
+          if (!xAxisColumn || !isTimeViz) {
             return;
           }
 
@@ -253,14 +254,14 @@ export function XYChart({
               range: [moment(min).toISOString(), moment(max).toISOString()],
               data: {
                 ordered: {
-                  date: xAxisColumn.formatHint?.id === 'date',
+                  date: isTimeViz,
                 },
                 series: [
                   {
                     values: table.rows.map((row, rowIndex) => ({
                       xRaw: {
                         table,
-                        column: table.columns.findIndex(el => el.id === xAxisColumn?.id), // index of X accessor in the table:
+                        column: table.columns.findIndex(el => el.id === layers[0].xAccessor), // index of X accessor in the table:
                         row: rowIndex,
                       },
                     })),

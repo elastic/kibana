@@ -602,7 +602,30 @@ describe('xy_expression', () => {
         .first()
         .prop('onBrushEnd')!(1585757732783, 1585758880838);
 
-      expect(executeTriggerActions.mock.calls[0]).toMatchSnapshot();
+      expect(executeTriggerActions).toHaveBeenCalledWith('SELECT_RANGE_TRIGGER', {
+        data: {
+          data: {
+            ordered: {
+              date: true,
+            },
+            series: [
+              {
+                values: expect.arrayContaining([
+                  {
+                    xRaw: {
+                      column: 0,
+                      row: 2,
+                      table: dateHistogramData.tables.timeLayer,
+                    },
+                  },
+                ]),
+              },
+            ],
+          },
+          range: ['2020-04-01T16:15:32.783Z', '2020-04-01T16:34:40.838Z'],
+        },
+        timeFieldName: 'order_date',
+      });
     });
 
     test('onElementClick returns correct context data', () => {
