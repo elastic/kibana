@@ -17,17 +17,22 @@
  * under the License.
  */
 
+import { IFieldFormatsRegistry } from '../../../../../../../plugins/data/common';
 import { getPoint } from './_get_point';
 import { setFormatService } from '../../../services';
 import { Aspect } from './point_series';
 import { Table, Row, Column } from '../../types';
 
 describe('getPoint', function() {
+  let deserialize: IFieldFormatsRegistry['deserialize'];
+
   beforeAll(() => {
+    deserialize = jest.fn(() => ({
+      convert: jest.fn(v => v),
+    })) as any;
+
     setFormatService({
-      deserialize: () => ({
-        convert: jest.fn(v => v),
-      }),
+      deserialize,
     } as any);
   });
 
@@ -87,15 +92,13 @@ describe('getPoint', function() {
       expect(point).toHaveProperty('y', 3);
     });
 
-    it('properly formats series values', function() {
+    it('should call deserialize', function() {
       const seriesAspect = [
         { accessor: '1', format: { id: 'number', params: { pattern: '$' } } } as Aspect,
       ];
-      const point = getPoint(table, xAspect, seriesAspect, row, 0, yAspect);
+      getPoint(table, xAspect, seriesAspect, row, 0, yAspect);
 
-      expect(point).toHaveProperty('x', 1);
-      expect(point).toHaveProperty('series', '2');
-      expect(point).toHaveProperty('y', 3);
+      expect(deserialize).toHaveBeenCalledWith(seriesAspect[0].format);
     });
   });
 });
