@@ -39,6 +39,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       createdActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdActionId,
+        isPreconfigured: false,
         name: 'An email action',
         actionTypeId: '.email',
         config: {
@@ -58,6 +59,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'An email action',
         actionTypeId: '.email',
         config: {

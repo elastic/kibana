@@ -29,6 +29,7 @@ import {
 import { useLinks as useEPMLinks } from '../../epm/hooks';
 import { CreateDatasourcePageLayout, ConfirmCreateDatasourceModal } from './components';
 import { CreateDatasourceFrom, CreateDatasourceStep } from './types';
+import { DatasourceValidationResults, validateDatasource, validationHasErrors } from './services';
 import { StepSelectPackage } from './step_select_package';
 import { StepSelectConfig } from './step_select_config';
 import { StepConfigureDatasource } from './step_configure_datasource';
@@ -80,6 +81,9 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     inputs: [],
   });
 
+  // Datasource validation state
+  const [validationResults, setValidationResults] = useState<DatasourceValidationResults>();
+
   // Update package info method
   const updatePackageInfo = (updatedPackageInfo: PackageInfo | undefined) => {
     if (updatedPackageInfo) {
@@ -106,6 +110,8 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     console.debug('Agent config updated', updatedAgentConfig);
   };
 
+  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
+
   // Update datasource method
   const updateDatasource = (updatedFields: Partial<NewDatasource>) => {
     const newDatasource = {
@@ -114,11 +120,28 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     };
     setDatasource(newDatasource);
 
-    if (newDatasource.package && newDatasource.config_id && newDatasource.config_id !== '') {
-      setFormState('VALID');
-    }
     // eslint-disable-next-line no-console
     console.debug('Datasource updated', newDatasource);
+    const newValidationResults = updateDatasourceValidation(newDatasource);
+    const hasPackage = newDatasource.package;
+    const hasValidationErrors = newValidationResults
+      ? validationHasErrors(newValidationResults)
+      : false;
+    const hasAgentConfig = newDatasource.config_id && newDatasource.config_id !== '';
+    if (hasPackage && hasAgentConfig && !hasValidationErrors) {
+      setFormState('VALID');
+    }
+  };
+
+  const updateDatasourceValidation = (newDatasource?: NewDatasource) => {
+    if (packageInfo) {
+      const newValidationResult = validateDatasource(newDatasource || datasource, packageInfo);
+      setValidationResults(newValidationResult);
+      // eslint-disable-next-line no-console
+      console.debug('Datasource validation results', newValidationResult);
+
+      return newValidationResult;
+    }
   };
 
   // Cancel url
@@ -143,6 +166,10 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   };
 
   const onSubmit = async () => {
+    if (formState === 'VALID' && hasErrors) {
+      setFormState('INVALID');
+      return;
+    }
     if (agentCount !== 0 && formState !== 'CONFIRM') {
       setFormState('CONFIRM');
       return;
@@ -222,6 +249,8 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
             packageInfo={packageInfo}
             datasource={datasource}
             updateDatasource={updateDatasource}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
           />
         ) : null,
     },
@@ -238,7 +267,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       )}
       <EuiSteps steps={steps} />
       <EuiSpacer size="l" />
-      <EuiBottomBar className="ingestManager__bottomBar" paddingSize="m">
+      <EuiBottomBar className="ingestManager__bottomBar" paddingSize="s">
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty color="ghost" href={cancelUrl}>
