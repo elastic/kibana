@@ -17,17 +17,30 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { Table, SourseFiltersTableProps, SourseFiltersTableState } from './table';
-import { keyCodes } from '@elastic/eui';
+import { Table, TableProps, TableState } from './table';
+import { EuiTableFieldDataColumnType, keyCodes } from '@elastic/eui';
 import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
+import { SourceFiltersTableFilter } from '../../types';
 
 const indexPattern = {} as IIndexPattern;
 const items = [{ value: 'tim*' }];
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
+
+const getTableColumnRender = (
+  component: ShallowWrapper<TableProps, TableState, Table>,
+  index: number = 0
+) => {
+  const columns = component.prop<Array<EuiTableFieldDataColumnType<SourceFiltersTableFilter>>>(
+    'columns'
+  );
+  return {
+    render: columns[index].render as (...args: any) => ReactElement,
+  };
+};
 
 describe('Table', () => {
   it('should render normally', async () => {
@@ -37,7 +50,7 @@ describe('Table', () => {
         items={items}
         deleteFilter={() => {}}
         fieldWildcardMatcher={() => {}}
-        saveFilter={() => {}}
+        saveFilter={() => undefined}
         isSaving={true}
       />
     );
@@ -46,7 +59,7 @@ describe('Table', () => {
   });
 
   it('should render filter matches', async () => {
-    const component = shallow(
+    const component = shallow<Table>(
       <Table
         indexPattern={getIndexPatternMock({
           getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
@@ -54,22 +67,24 @@ describe('Table', () => {
         items={items}
         deleteFilter={() => {}}
         fieldWildcardMatcher={(filter: string) => (field: string) => field.includes(filter[0])}
-        saveFilter={() => {}}
+        saveFilter={() => undefined}
         isSaving={false}
       />
     );
 
-    const matchesTableCell = shallow(component.prop('columns')[1].render('tim', { clientId: 1 }));
+    const matchesTableCell = shallow(
+      getTableColumnRender(component, 1).render('tim', { clientId: 1 })
+    );
     expect(matchesTableCell).toMatchSnapshot();
   });
 
   describe('editing', () => {
     const saveFilter = jest.fn();
     const clientId = '1';
-    let component: ShallowWrapper<SourseFiltersTableProps, SourseFiltersTableState, Table>;
+    let component: ShallowWrapper<TableProps, TableState, Table>;
 
     beforeEach(() => {
-      component = shallow(
+      component = shallow<Table>(
         <Table
           indexPattern={indexPattern}
           items={items}
@@ -86,7 +101,7 @@ describe('Table', () => {
 
       const editingComponent = shallow(
         // Wrap in a div because: https://github.com/airbnb/enzyme/issues/1213
-        <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
+        <div>{getTableColumnRender(component, 2).render({ clientId, value: 'tim*' })}</div>
       );
       editingComponent
         .find('EuiButtonIcon')
@@ -95,9 +110,9 @@ describe('Table', () => {
       // Ensure the state change propagates
       component.update();
 
-      // Ensure the table cell switches to an input
-      const colum = component.prop<>('columns')[0];
-      const filterNameTableCell = shallow(colum.render('tim*', { clientId }));
+      const cell = getTableColumnRender(component).render('tim*', { clientId });
+
+      const filterNameTableCell = shallow(cell);
 
       expect(filterNameTableCell).toMatchSnapshot();
     });
@@ -106,8 +121,9 @@ describe('Table', () => {
       // Start the editing process
       const editingComponent = shallow(
         // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-        <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
+        <div>{getTableColumnRender(component, 2).render({ clientId, value: 'tim*' })}</div>
       );
+
       editingComponent
         .find('EuiButtonIcon')
         .at(1)
@@ -119,7 +135,7 @@ describe('Table', () => {
       // Verify save button
       const saveTableCell = shallow(
         // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-        <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
+        <div>{getTableColumnRender(component, 2).render({ clientId, value: 'tim*' })}</div>
       );
       expect(saveTableCell).toMatchSnapshot();
     });
@@ -174,8 +190,9 @@ describe('Table', () => {
       // Click the save button
       const editingComponent = shallow(
         // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-        <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
+        <div>{getTableColumnRender(component, 2).render({ clientId, value: 'tim*' })}</div>
       );
+
       editingComponent
         .find('EuiButtonIcon')
         .at(0)
@@ -185,12 +202,12 @@ describe('Table', () => {
 
       // Ensure we call saveFilter properly
       expect(saveFilter).toBeCalledWith({
-        filterId: clientId,
-        newFilterValue: 'ti*',
+        clientId,
+        value: 'ti*',
       });
 
       // Ensure the state is properly reset
-      expect(component.state('editingFilterId')).toBe(null);
+      expect(component.state('editingFilterId')).toBe('');
     });
   });
 
@@ -203,7 +220,7 @@ describe('Table', () => {
         items={items}
         deleteFilter={deleteFilter}
         fieldWildcardMatcher={() => {}}
-        saveFilter={() => {}}
+        saveFilter={() => undefined}
         isSaving={false}
       />
     );
@@ -258,7 +275,7 @@ describe('Table', () => {
     expect(saveFilter).toBeCalled();
 
     // It should reset
-    expect(component.state('editingFilterId')).toBe(null);
+    expect(component.state('editingFilterId')).toBe('');
   });
 
   test('should cancel when in edit mode and the esc key is pressed', () => {
@@ -301,6 +318,6 @@ describe('Table', () => {
     expect(saveFilter).not.toBeCalled();
 
     // It should reset
-    expect(component.state('editingFilterId')).toBe(null);
+    expect(component.state('editingFilterId')).toBe('');
   });
 });

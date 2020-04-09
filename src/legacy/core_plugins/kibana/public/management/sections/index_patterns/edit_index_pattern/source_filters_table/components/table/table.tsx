@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 
 import {
   keyCodes,
+  EuiBasicTableColumn,
   EuiInMemoryTable,
   EuiFieldText,
   EuiButtonIcon,
@@ -30,6 +31,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SourceFiltersTableFilter } from '../../types';
 
 import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
 
@@ -67,21 +69,21 @@ const cancelAria = i18n.translate('kbn.management.editIndexPattern.source.table.
   defaultMessage: 'Cancel',
 });
 
-export interface SourseFiltersTableProps {
+export interface TableProps {
   indexPattern: IIndexPattern;
   items: any[];
   deleteFilter: Function;
   fieldWildcardMatcher: Function;
-  saveFilter: Function;
+  saveFilter: (filter: SourceFiltersTableFilter) => any;
   isSaving: boolean;
 }
 
-export interface SourseFiltersTableState {
-  editingFilterId: string | null;
-  editingFilterValue: string | null;
+export interface TableState {
+  editingFilterId: string | number;
+  editingFilterValue: string;
 }
 
-export class Table extends Component<SourseFiltersTableProps, SourseFiltersTableState> {
+export class Table extends Component<TableProps, TableState> {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     items: PropTypes.array.isRequired,
@@ -91,28 +93,28 @@ export class Table extends Component<SourseFiltersTableProps, SourseFiltersTable
     isSaving: PropTypes.bool.isRequired,
   };
 
-  constructor(props: SourseFiltersTableProps) {
+  constructor(props: TableProps) {
     super(props);
     this.state = {
-      editingFilterId: null,
-      editingFilterValue: null,
+      editingFilterId: '',
+      editingFilterValue: '',
     };
   }
 
   startEditingFilter = (
-    editingFilterId: SourseFiltersTableState['editingFilterId'],
-    editingFilterValue: SourseFiltersTableState['editingFilterValue']
+    editingFilterId: TableState['editingFilterId'],
+    editingFilterValue: TableState['editingFilterValue']
   ) => this.setState({ editingFilterId, editingFilterValue });
 
-  stopEditingFilter = () => this.setState({ editingFilterId: null });
+  stopEditingFilter = () => this.setState({ editingFilterId: '' });
   onEditingFilterChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     this.setState({ editingFilterValue: e.target.value });
 
   onEditFieldKeyDown = ({ keyCode }: React.KeyboardEvent<HTMLInputElement>) => {
-    if (keyCodes.ENTER === keyCode) {
+    if (keyCodes.ENTER === keyCode && this.state.editingFilterId && this.state.editingFilterValue) {
       this.props.saveFilter({
-        filterId: this.state.editingFilterId,
-        newFilterValue: this.state.editingFilterValue,
+        clientId: this.state.editingFilterId,
+        value: this.state.editingFilterValue,
       });
       this.stopEditingFilter();
     }
@@ -121,7 +123,7 @@ export class Table extends Component<SourseFiltersTableProps, SourseFiltersTable
     }
   };
 
-  getColumns() {
+  getColumns(): Array<EuiBasicTableColumn<SourceFiltersTableFilter>> {
     const { deleteFilter, fieldWildcardMatcher, indexPattern, saveFilter } = this.props;
 
     return [
@@ -132,7 +134,7 @@ export class Table extends Component<SourseFiltersTableProps, SourseFiltersTable
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
-          if (this.state.editingFilterId === filter.clientId) {
+          if (this.state.editingFilterId && this.state.editingFilterId === filter.clientId) {
             return (
               <EuiFieldText
                 autoFocus
@@ -153,14 +155,18 @@ export class Table extends Component<SourseFiltersTableProps, SourseFiltersTable
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
-          const realtimeValue =
-            this.state.editingFilterId === filter.clientId ? this.state.editingFilterValue : value;
-          const matcher = fieldWildcardMatcher([realtimeValue]);
           const matches = indexPattern
             .getNonScriptedFields()
-            .map(f => f.name)
-            .filter(matcher)
+            .map((currentFilter: SourceFiltersTableFilter) => currentFilter.name)
+            .filter(
+              fieldWildcardMatcher([
+                this.state.editingFilterId === filter.clientId
+                  ? this.state.editingFilterValue
+                  : value,
+              ])
+            )
             .sort();
+
           if (matches.length) {
             return <span>{matches.join(', ')}</span>;
           }
@@ -179,7 +185,7 @@ export class Table extends Component<SourseFiltersTableProps, SourseFiltersTable
         name: '',
         align: RIGHT_ALIGNMENT,
         width: '100',
-        render: filter => {
+        render: (filter: SourceFiltersTableFilter) => {
           if (this.state.editingFilterId === filter.clientId) {
             return (
               <>
@@ -187,8 +193,8 @@ export class Table extends Component<SourseFiltersTableProps, SourseFiltersTable
                   size="s"
                   onClick={() => {
                     saveFilter({
-                      filterId: this.state.editingFilterId,
-                      newFilterValue: this.state.editingFilterValue,
+                      clientId: this.state.editingFilterId,
+                      value: this.state.editingFilterValue,
                     });
                     this.stopEditingFilter();
                   }}

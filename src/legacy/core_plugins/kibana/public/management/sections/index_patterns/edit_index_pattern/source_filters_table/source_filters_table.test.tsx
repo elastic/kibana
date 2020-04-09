@@ -39,6 +39,7 @@ jest.mock('@elastic/eui', () => ({
     default: () => {},
   },
 }));
+
 jest.mock('./components/header', () => ({ Header: 'header' }));
 jest.mock('./components/table', () => ({
   // Note: this seems to fix React complaining about non lowercase attributes
@@ -54,7 +55,7 @@ const getIndexPatternMock = (mockedFields: any = {}) =>
   } as IIndexPattern);
 
 describe('SourceFiltersTable', () => {
-  it('should render normally', async () => {
+  test('should render normally', () => {
     const component = shallow(
       <SourceFiltersTable
         indexPattern={getIndexPatternMock()}
@@ -66,7 +67,7 @@ describe('SourceFiltersTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should filter based on the query bar', async () => {
+  test('should filter based on the query bar', () => {
     const component = shallow(
       <SourceFiltersTable
         indexPattern={getIndexPatternMock()}
@@ -79,7 +80,7 @@ describe('SourceFiltersTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should should a loading indicator when saving', async () => {
+  test('should should a loading indicator when saving', () => {
     const component = shallow(
       <SourceFiltersTable
         indexPattern={getIndexPatternMock({
@@ -94,8 +95,8 @@ describe('SourceFiltersTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should show a delete modal', async () => {
-    const component = shallow(
+  test('should show a delete modal', () => {
+    const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
         indexPattern={getIndexPatternMock({
           sourceFilters: [{ value: 'tim*' }],
@@ -105,25 +106,25 @@ describe('SourceFiltersTable', () => {
       />
     );
 
-    component.instance().startDeleteFilter({ value: 'tim*' });
+    component.instance().startDeleteFilter({ value: 'tim*', clientId: 1 });
     component.update(); // We are not calling `.setState` directly so we need to re-render
     expect(component).toMatchSnapshot();
   });
 
-  it('should remove a filter', async () => {
+  test('should remove a filter', async () => {
     const save = jest.fn();
-    const component = shallow(
+    const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
-        indexPattern={{
+        indexPattern={getIndexPatternMock({
           save,
           sourceFilters: [{ value: 'tim*' }, { value: 'na*' }],
-        }}
+        })}
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
       />
     );
 
-    component.instance().startDeleteFilter({ value: 'tim*' });
+    component.instance().startDeleteFilter({ value: 'tim*', clientId: 1 });
     component.update(); // We are not calling `.setState` directly so we need to re-render
     await component.instance().deleteFilter();
     component.update(); // We are not calling `.setState` directly so we need to re-render
@@ -132,9 +133,9 @@ describe('SourceFiltersTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should add a filter', async () => {
+  test('should add a filter', async () => {
     const save = jest.fn();
-    const component = shallow(
+    const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
         indexPattern={getIndexPatternMock({
           save,
@@ -152,9 +153,9 @@ describe('SourceFiltersTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should update a filter', async () => {
+  test('should update a filter', async () => {
     const save = jest.fn();
-    const component = shallow(
+    const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
         indexPattern={getIndexPatternMock({
           save,
@@ -165,7 +166,7 @@ describe('SourceFiltersTable', () => {
       />
     );
 
-    await component.instance().saveFilter({ oldFilterValue: 'tim*', newFilterValue: 'ti*' });
+    await component.instance().saveFilter({ clientId: 'tim*', value: 'ti*' });
     component.update(); // We are not calling `.setState` directly so we need to re-render
 
     expect(save).toBeCalled();
