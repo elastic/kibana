@@ -4,7 +4,7 @@
   "false_positives": [
     "DNS domains that use large numbers of child domains, such as software or content distribution networks, can trigger this signal and such parent domains can be excluded."
   ],
-  "from": "now-16m",
+  "from": "now-45m",
   "interval": "15m",
   "machine_learning_job_id": "packetbeat_dns_tunneling",
   "name": "DNS Tunneling",

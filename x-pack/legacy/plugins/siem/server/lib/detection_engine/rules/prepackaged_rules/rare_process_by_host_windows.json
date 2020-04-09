@@ -4,7 +4,7 @@
   "false_positives": [
     "A newly installed program or one that runs rarely as part of a monthly or quarterly workflow could trigger this signal."
   ],
-  "from": "now-16m",
+  "from": "now-45m",
   "interval": "15m",
   "machine_learning_job_id": "rare_process_by_host_windows_ecs",
   "name": "Unusual Process For a Windows Host",

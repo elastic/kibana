@@ -4,7 +4,7 @@
   "false_positives": [
     "A newly installed program or one that rarely uses the network could trigger this signal."
   ],
-  "from": "now-16m",
+  "from": "now-45m",
   "interval": "15m",
   "machine_learning_job_id": "linux_anomalous_network_port_activity_ecs",
   "name": "Unusual Linux Network Port Activity",
