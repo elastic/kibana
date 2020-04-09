@@ -22,7 +22,7 @@ import { HttpStart } from 'src/core/public';
 export async function getSavedObjectCounts(
   http: HttpStart,
   typesToInclude: string[],
-  searchString: string
+  searchString?: string
 ): Promise<Record<string, number>> {
   return await http.post<Record<string, number>>(
     `/api/kibana/management/saved_objects/scroll/counts`,

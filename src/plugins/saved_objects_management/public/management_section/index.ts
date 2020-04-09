@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { registerManagementSection } from './register_section';
+export { mountManagementSection } from './mount_section';

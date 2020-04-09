@@ -32,7 +32,6 @@ import {
   SavedObjectsManagementServiceRegistry,
   ISavedObjectsManagementServiceRegistry,
 } from './services';
-import { registerManagementSection } from './management_section';
 import { registerServices } from './register_services';
 
 export interface SavedObjectsManagementPluginSetup {
@@ -71,6 +70,8 @@ export class SavedObjectsManagementPlugin
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
     { home, management }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
+    const actionSetup = this.actionService.setup();
+
     home.featureCatalogue.register({
       id: 'saved_objects',
       title: i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
@@ -86,12 +87,24 @@ export class SavedObjectsManagementPlugin
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    const actionSetup = this.actionService.setup();
-
-    registerManagementSection({
-      core,
-      serviceRegistry: this.serviceRegistry,
-      sections: management.sections,
+    const kibanaSection = management.sections.getSection('kibana');
+    if (!kibanaSection) {
+      throw new Error('`kibana` management section not found.');
+    }
+    kibanaSection.registerApp({
+      id: 'objects',
+      title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
+        defaultMessage: 'Saved Objects',
+      }),
+      order: 10,
+      mount: async mountParams => {
+        const { mountManagementSection } = await import('./management_section');
+        return mountManagementSection({
+          core,
+          serviceRegistry: this.serviceRegistry,
+          mountParams,
+        });
+      },
     });
 
     // depends on `getStartServices`, should not be awaited

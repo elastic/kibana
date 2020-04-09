@@ -17,9 +17,16 @@
  * under the License.
  */
 
-export function parseQuery(query: any) {
-  let queryText;
-  let visibleTypes;
+import { Query } from '@elastic/eui';
+
+interface ParsedQuery {
+  queryText?: string;
+  visibleTypes?: string[];
+}
+
+export function parseQuery(query: Query): ParsedQuery {
+  let queryText: string | undefined;
+  let visibleTypes: string[] | undefined;
 
   if (query) {
     if (query.ast.getTermClauses().length) {
@@ -29,7 +36,7 @@ export function parseQuery(query: any) {
         .join(' ');
     }
     if (query.ast.getFieldClauses('type')) {
-      visibleTypes = query.ast.getFieldClauses('type')[0].value;
+      visibleTypes = query.ast.getFieldClauses('type')[0].value as string[];
     }
   }
 

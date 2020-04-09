@@ -21,8 +21,7 @@ import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-ignore
-import { keyCodes } from '@elastic/eui/lib/services';
+import { keyCodes } from '@elastic/eui';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
 import { Table, TableProps } from './table';

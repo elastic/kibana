@@ -25,6 +25,6 @@ describe('getQueryText', () => {
       getTermClauses: () => [{ value: 'foo' }, { value: 'bar' }],
       getFieldClauses: () => [{ value: 'lala' }, { value: 'lolo' }],
     };
-    expect(parseQuery({ ast })).toEqual({ queryText: 'foo bar', visibleTypes: 'lala' });
+    expect(parseQuery({ ast } as any)).toEqual({ queryText: 'foo bar', visibleTypes: 'lala' });
   });
 });

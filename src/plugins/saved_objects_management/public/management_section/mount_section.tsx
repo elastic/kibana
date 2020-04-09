@@ -42,6 +42,8 @@ interface MountParams {
   mountParams: ManagementAppMountParams;
 }
 
+let allowedObjectTypes: string[] | undefined;
+
 export const mountManagementSection = async ({
   core,
   mountParams,
@@ -49,7 +51,10 @@ export const mountManagementSection = async ({
 }: MountParams) => {
   const [coreStart, { data }, pluginStart] = await core.getStartServices();
   const { element, basePath, setBreadcrumbs } = mountParams;
-  const allowedTypes = await getAllowedTypes(coreStart.http);
+  if (allowedObjectTypes === undefined) {
+    allowedObjectTypes = await getAllowedTypes(coreStart.http);
+  }
+
   const capabilities = coreStart.application.capabilities;
 
   ReactDOM.render(
@@ -72,7 +77,7 @@ export const mountManagementSection = async ({
                 dataStart={data}
                 serviceRegistry={serviceRegistry}
                 actionRegistry={pluginStart.actions}
-                allowedTypes={allowedTypes}
+                allowedTypes={allowedObjectTypes}
                 setBreadcrumbs={setBreadcrumbs}
               />
             </RedirectToHomeIfUnauthorized>
