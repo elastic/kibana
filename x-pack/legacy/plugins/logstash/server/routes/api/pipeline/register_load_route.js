@@ -5,9 +5,10 @@
  */
 
 import Boom from 'boom';
-import { INDEX_NAMES } from '../../../../common/constants';
+import { INDEX_NAMES } from '../../../../../../../plugins/logstash/common/constants';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { Pipeline } from '../../../models/pipeline';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Pipeline } from '../../../../../../../plugins/logstash/server/models/pipeline';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchPipeline(callWithRequest, pipelineId) {

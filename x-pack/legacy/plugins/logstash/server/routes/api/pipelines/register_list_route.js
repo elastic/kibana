@@ -6,9 +6,14 @@
 
 import { wrapEsError } from '../../../lib/error_wrappers';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
-import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
-import { PipelineListItem } from '../../../models/pipeline_list_item';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fetchAllFromScroll } from '../../../../../../../plugins/logstash/server/lib/fetch_all_from_scroll';
+import {
+  INDEX_NAMES,
+  ES_SCROLL_SETTINGS,
+} from '../../../../../../../plugins/logstash/common/constants';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { PipelineListItem } from '../../../../../../../plugins/logstash/server/models/pipeline_list_item';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchPipelines(callWithRequest) {

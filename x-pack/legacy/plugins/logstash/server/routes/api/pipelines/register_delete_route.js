@@ -6,7 +6,7 @@
 
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { wrapUnknownError } from '../../../lib/error_wrappers';
-import { INDEX_NAMES } from '../../../../common/constants';
+import { INDEX_NAMES } from '../../../../../../../plugins/logstash/common/constants';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function deletePipelines(callWithRequest, pipelineIds) {

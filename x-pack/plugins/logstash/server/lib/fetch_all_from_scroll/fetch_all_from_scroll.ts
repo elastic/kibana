@@ -3,11 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { APICaller } from 'src/core/server';
 import { get } from 'lodash';
 import { ES_SCROLL_SETTINGS } from '../../../common/constants';
 
-export function fetchAllFromScroll(response, callWithRequest, hits = []) {
+export function fetchAllFromScroll(
+  response: Record<string, any>,
+  callWithRequest: APICaller,
+  hits = []
+): Record<string, any> {
   const newHits = get(response, 'hits.hits', []);
   const scrollId = get(response, '_scroll_id');
 

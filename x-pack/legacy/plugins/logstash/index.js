@@ -10,7 +10,7 @@ import { registerLogstashPipelineRoutes } from './server/routes/api/pipeline';
 import { registerLogstashUpgradeRoutes } from './server/routes/api/upgrade';
 import { registerLogstashClusterRoutes } from './server/routes/api/cluster';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
-import { PLUGIN } from './common/constants';
+import { PLUGIN } from '../../../plugins/logstash/common/constants';
 
 export const logstash = kibana =>
   new kibana.Plugin({
