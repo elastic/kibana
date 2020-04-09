@@ -246,8 +246,15 @@ export const getDefaultFieldsFromJobCaps = (
   fields: Field[],
   jobConfig: DataFrameAnalyticsConfig,
   needsDestIndexFields: boolean
-): { selectedFields: Field[]; docFields: Field[]; depVarType?: ES_FIELD_TYPES } => {
-  const fieldsObj = { selectedFields: [], docFields: [] };
+): {
+  selectedFields: Field[];
+  docFields: Field[];
+  depVarType?: ES_FIELD_TYPES;
+} => {
+  const fieldsObj = {
+    selectedFields: [],
+    docFields: [],
+  };
   if (fields.length === 0) {
     return fieldsObj;
   }

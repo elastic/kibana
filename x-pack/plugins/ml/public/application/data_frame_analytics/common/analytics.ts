@@ -54,8 +54,6 @@ export interface ClassificationAnalysis {
 }
 
 export interface LoadExploreDataArg {
-  field: string;
-  direction: SortDirection;
   searchQuery: SavedSearchQuery;
   requiresKeyword?: boolean;
   pageIndex?: number;

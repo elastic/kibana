@@ -4,27 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, Dispatch, SetStateAction } from 'react';
+import { EuiDataGridPaginationProps, EuiDataGridSorting } from '@elastic/eui';
 
 import { SearchResponse } from 'elasticsearch';
 import { cloneDeep } from 'lodash';
 
-import { SortDirection, SORT_DIRECTION } from '../../../../../components/ml_in_memory_table';
-
 import { ml } from '../../../../../services/ml_api_service';
 import { getNestedProperty } from '../../../../../util/object_utils';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { SORT_DIRECTION } from '../../../../../components/ml_in_memory_table';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import {
   getDefaultFieldsFromJobCaps,
+  getDependentVar,
   getFlattenedFields,
+  getPredictedFieldName,
   DataFrameAnalyticsConfig,
   EsFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
-  SearchQuery,
+  // SearchQuery,
 } from '../../../../common';
-import { Field } from '../../../../../../../common/types/fields';
+import { Dictionary } from '../../../../../../../common/types/common';
+import { isKeywordAndTextType } from '../../../../common/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
   LoadExploreDataArg,
@@ -34,50 +38,89 @@ import {
 } from '../../../../common/analytics';
 
 export type TableItem = Record<string, any>;
+type Pagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 
 export interface UseExploreDataReturnType {
   errorMessage: string;
-  loadExploreData: (arg: LoadExploreDataArg) => void;
-  sortField: EsFieldName;
-  sortDirection: SortDirection;
+  fieldTypes: { [key: string]: ES_FIELD_TYPES };
+  pagination: Pagination;
+  rowCount: number;
+  searchQuery: SavedSearchQuery;
+  selectedFields: EsFieldName[];
+  setPagination: Dispatch<SetStateAction<Pagination>>;
+  setSearchQuery: Dispatch<SetStateAction<SavedSearchQuery>>;
+  setSelectedFields: Dispatch<SetStateAction<EsFieldName[]>>;
+  setSortingColumns: Dispatch<SetStateAction<EuiDataGridSorting['columns']>>;
+  sortingColumns: EuiDataGridSorting['columns'];
   status: INDEX_STATUS;
+  tableFields: string[];
   tableItems: TableItem[];
 }
 
+type EsSorting = Dictionary<{
+  order: 'asc' | 'desc';
+}>;
+
+// The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
+interface SearchResponse7 extends SearchResponse<any> {
+  hits: SearchResponse<any>['hits'] & {
+    total: {
+      value: number;
+      relation: string;
+    };
+  };
+}
+
 export const useExploreData = (
-  jobConfig: DataFrameAnalyticsConfig | undefined,
-  needsDestIndexFields: boolean,
-  selectedFields: Field[],
-  setSelectedFields: React.Dispatch<React.SetStateAction<Field[]>>,
-  setDocFields: React.Dispatch<React.SetStateAction<Field[]>>,
-  setDepVarType: React.Dispatch<React.SetStateAction<ES_FIELD_TYPES | undefined>>
+  jobConfig: DataFrameAnalyticsConfig,
+  needsDestIndexFields: boolean
 ): UseExploreDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
+
+  const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
+  const [tableFields, setTableFields] = useState<string[]>([]);
   const [tableItems, setTableItems] = useState<TableItem[]>([]);
-  const [sortField, setSortField] = useState<string>('');
-  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
+  const [fieldTypes, setFieldTypes] = useState<any>({}); // TODO: update type
+  const [rowCount, setRowCount] = useState(0);
+  const [depVarType, setDepVarType] = useState<string | undefined>(undefined);
+
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
+  const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
+
+  const predictedFieldName = getPredictedFieldName(
+    jobConfig.dest.results_field,
+    jobConfig.analysis
+  );
+  const dependentVariable = getDependentVar(jobConfig.analysis);
 
   const getDefaultSelectedFields = () => {
     const { fields } = newJobCapsService;
-
     if (selectedFields.length === 0 && jobConfig !== undefined) {
       const {
         selectedFields: defaultSelected,
         docFields,
-        depVarType,
+        depVarType: dvType,
       } = getDefaultFieldsFromJobCaps(fields, jobConfig, needsDestIndexFields);
 
-      setDepVarType(depVarType);
-      setSelectedFields(defaultSelected);
-      setDocFields(docFields);
+      const types: { [key: string]: ES_FIELD_TYPES } = {};
+      const allFields: string[] = [];
+
+      docFields.forEach(field => {
+        types[field.id] = field.type;
+        allFields.push(field.id);
+      });
+
+      setDepVarType(dvType);
+      setFieldTypes(types);
+      setSelectedFields(defaultSelected.map(field => field.id));
+      setTableFields(allFields);
     }
   };
 
   const loadExploreData = async ({
-    field,
-    direction,
-    searchQuery,
+    searchQuery: incomingQuery,
     requiresKeyword,
   }: LoadExploreDataArg) => {
     if (jobConfig !== undefined) {
@@ -86,10 +129,11 @@ export const useExploreData = (
 
       try {
         const resultsField = jobConfig.dest.results_field;
-        const searchQueryClone: ResultsSearchQuery = cloneDeep(searchQuery);
+        const searchQueryClone: ResultsSearchQuery = cloneDeep(incomingQuery);
         let query: ResultsSearchQuery;
+        const { pageIndex, pageSize } = pagination;
 
-        if (JSON.stringify(searchQuery) === JSON.stringify(defaultSearchQuery)) {
+        if (JSON.stringify(incomingQuery) === JSON.stringify(defaultSearchQuery)) {
           query = {
             exists: {
               field: resultsField,
@@ -110,28 +154,30 @@ export const useExploreData = (
         } else {
           query = searchQueryClone;
         }
-        const body: SearchQuery = {
-          query,
-        };
 
-        if (field !== undefined) {
-          body.sort = [
-            {
-              [`${field}${requiresKeyword ? '.keyword' : ''}`]: {
-                order: direction,
-              },
-            },
-          ];
-        }
+        const sort: EsSorting = sortingColumns
+          .map(column => {
+            const { id } = column;
+            column.id = requiresKeyword ? `${id}.keyword` : id;
+            return column;
+          })
+          .reduce((s, column) => {
+            s[column.id] = { order: column.direction };
+            return s;
+          }, {} as EsSorting);
 
-        const resp: SearchResponse<any> = await ml.esSearch({
+        const resp: SearchResponse7 = await ml.esSearch({
           index: jobConfig.dest.index,
           size: SEARCH_SIZE,
-          body,
+          body: {
+            query,
+            from: pageIndex * pageSize,
+            size: pageSize,
+            ...(Object.keys(sort).length > 0 ? { sort } : {}),
+          },
         });
 
-        setSortField(field);
-        setSortDirection(direction);
+        setRowCount(resp.hits.total.value);
 
         const docs = resp.hits.hits;
 
@@ -183,10 +229,48 @@ export const useExploreData = (
   };
 
   useEffect(() => {
-    if (jobConfig !== undefined) {
-      getDefaultSelectedFields();
+    getDefaultSelectedFields();
+  }, [jobConfig && jobConfig.id]);
+
+  // By default set sorting to descending on the prediction field (`<dependent_varible or prediction_field_name>_prediction`).
+  // if that's not available sort ascending on the first column. Check if the current sorting field is still available.
+  useEffect(() => {
+    if (selectedFields.length > 0) {
+      const predictedFieldSelected = selectedFields.some(field => field === predictedFieldName);
+      // CHECK IF keyword suffix is needed (if predicted field is selected we have to check the dependent variable type)
+      let sortByField = predictedFieldSelected ? dependentVariable : selectedFields[0];
+      sortByField = predictedFieldSelected ? predictedFieldName : sortByField;
+      const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
+
+      setSortingColumns([{ id: sortByField, direction }]);
     }
   }, [jobConfig && jobConfig.id]);
 
-  return { errorMessage, loadExploreData, sortField, sortDirection, status, tableItems };
+  useEffect(() => {
+    if (selectedFields.length > 0) {
+      const predictedFieldSelected = selectedFields.some(field => field === predictedFieldName);
+      // CHECK IF keyword suffix is needed (if predicted field is selected we have to check the dependent variable type)
+      const sortByField = predictedFieldSelected ? dependentVariable : selectedFields[0];
+      const requiresKeyword = isKeywordAndTextType(sortByField);
+
+      loadExploreData({ searchQuery, requiresKeyword });
+    }
+  }, [jobConfig && jobConfig.id, pagination, searchQuery, selectedFields, sortingColumns.length]);
+
+  return {
+    errorMessage,
+    fieldTypes,
+    pagination,
+    searchQuery,
+    selectedFields,
+    rowCount,
+    setPagination,
+    setSelectedFields,
+    setSortingColumns,
+    setSearchQuery,
+    sortingColumns,
+    status,
+    tableItems,
+    tableFields,
+  };
 };
