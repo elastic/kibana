@@ -17,4 +17,18 @@
  * under the License.
  */
 
-export * from './index_pattern_management';
+export default async function({ readConfigFile }) {
+  const defaultConfig = await readConfigFile(require.resolve('./config'));
+
+  return {
+    ...defaultConfig.getAll(),
+
+    browser: {
+      type: 'msedge',
+    },
+
+    junit: {
+      reportName: 'MS Chromium Edge UI Functional Tests',
+    },
+  };
+}

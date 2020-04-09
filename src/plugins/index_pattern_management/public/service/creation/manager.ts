@@ -17,23 +17,25 @@
  * under the License.
  */
 
-import { HttpSetup } from '../../../../../../../../core/public';
+import { HttpSetup } from '../../../../../core/public';
 import { IndexPatternCreationConfig, UrlHandler, IndexPatternCreationOption } from './config';
 
 export class IndexPatternCreationManager {
   private configs: IndexPatternCreationConfig[];
 
-  constructor(private readonly httpClient: HttpSetup) {
+  constructor() {
     this.configs = [];
   }
 
-  public add(Config: typeof IndexPatternCreationConfig) {
-    const config = new Config({ httpClient: this.httpClient });
+  public addCreationConfig = (httpClient: HttpSetup) => (
+    Config: typeof IndexPatternCreationConfig
+  ) => {
+    const config = new Config({ httpClient });
     if (this.configs.findIndex(c => c.key === config.key) !== -1) {
       throw new Error(`${config.key} exists in IndexPatternCreationManager.`);
     }
     this.configs.push(config);
-  }
+  };
 
   public getType(key: string | undefined): IndexPatternCreationConfig | null {
     if (key) {
@@ -58,4 +60,13 @@ export class IndexPatternCreationManager {
     );
     return options;
   }
+
+  setup = (httpClient: HttpSetup) => ({
+    addCreationConfig: this.addCreationConfig(httpClient).bind(this),
+  });
+
+  start = () => ({
+    getType: this.getType.bind(this),
+    getIndexPatternCreationOptions: this.getIndexPatternCreationOptions.bind(this),
+  });
 }
