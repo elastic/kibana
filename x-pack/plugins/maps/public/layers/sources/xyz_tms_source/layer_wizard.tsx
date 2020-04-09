@@ -8,14 +8,14 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { XYZTMSEditor, SourceConfig } from './xyz_tms_editor';
 import { XYZTMSSource, sourceTitle } from './xyz_tms_source';
-import { LayerWizard } from '../../layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 
 export const tmsLayerWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.ems_xyzDescription', {
     defaultMessage: 'Tile map service configured in interface',
   }),
   icon: 'grid',
-  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
+  renderWizard: ({ onPreviewSource, inspectorAdapters }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: SourceConfig) => {
       const sourceDescriptor = XYZTMSSource.createDescriptor(sourceConfig);
       const source = new XYZTMSSource(sourceDescriptor, inspectorAdapters);

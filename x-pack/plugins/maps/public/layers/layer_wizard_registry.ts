@@ -5,17 +5,20 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { ISource } from './sources/source';
+
+export type PreviewSourceHandler = (source: ISource) => void;
+
+export type RenderWizardArguments = {
+  onPreviewSource: PreviewSourceHandler;
+  inspectorAdapters: object;
+};
+
 export type LayerWizard = {
   description: string;
   icon: string;
   isIndexingSource?: boolean;
-  renderWizard({
-    onPreviewSource,
-    inspectorAdapters,
-  }: {
-    onPreviewSource: () => void;
-    inspectorAdapters: unknown;
-  }): unknown;
+  renderWizard(renderWizardArguments: RenderWizardArguments): unknown;
   title: string;
 };
 

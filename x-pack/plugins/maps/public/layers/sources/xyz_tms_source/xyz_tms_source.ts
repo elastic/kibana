@@ -48,7 +48,7 @@ export class XYZTMSSource extends AbstractTMSSource {
     ];
   }
 
-  createDefaultLayer(options: LayerDescriptor): TileLayer {
+  createDefaultLayer(options?: LayerDescriptor): TileLayer {
     const layerDescriptor: LayerDescriptor = TileLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options,
