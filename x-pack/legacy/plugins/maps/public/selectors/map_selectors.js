@@ -32,7 +32,6 @@ import { InnerJoin } from '../../../../../plugins/maps/public/layers/joins/inner
 import { getSourceByType } from '../../../../../plugins/maps/public/layers/sources/source_registry';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
-  console.log('lauyer inst', layerDescriptor);
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
   switch (layerDescriptor.type) {
