@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const fn = require(`src/plugins/vis_type_timelion`);
+const fn = require(`src/plugins/vis_type_timelion/server/series_functions/fit`);
 import moment from 'moment';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';

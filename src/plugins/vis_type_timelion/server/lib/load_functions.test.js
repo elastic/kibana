@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const fn = require(`src/plugins/vis_type_timelion`);
+const fn = require(`src/plugins/vis_type_timelion/server/lib/load_functions`);
 
 const expect = require('chai').expect;
 
