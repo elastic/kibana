@@ -55,6 +55,18 @@ interface Props {
   setAlertProperty(key: string, value: any): void;
 }
 
+const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
+
+const DEFAULT_EXPRESSION = {
+  count: {
+    value: 75,
+    comparator: Comparator.GT,
+  },
+  criteria: [DEFAULT_CRITERIA],
+  timeSize: 5,
+  timeUnit: 'm',
+};
+
 export const ExpressionEditor: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors } = props;
   const { source, createDerivedIndexPattern } = useSource({ sourceId: 'default' });
@@ -74,21 +86,9 @@ export const ExpressionEditor: React.FC<Props> = props => {
     }
   }, [derivedIndexPattern]);
 
-  const defaultExpression = useMemo(() => {
-    return {
-      count: {
-        value: 75,
-        comparator: Comparator.GT,
-      },
-      criteria: [{ field: 'log.level', comparator: Comparator.EQ, value: 'error' }],
-      timeSize: 5,
-      timeUnit: 'm',
-    };
-  }, []);
-
   // Set the default expression (disables exhaustive-deps as we only want to run this once on mount)
   useEffect(() => {
-    for (const [key, value] of Object.entries(defaultExpression)) {
+    for (const [key, value] of Object.entries(DEFAULT_EXPRESSION)) {
       setAlertParams(key, value);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -127,6 +127,13 @@ export const ExpressionEditor: React.FC<Props> = props => {
     [setAlertParams]
   );
 
+  const addCriteria = useCallback(() => {
+    const nextCriteria = alertParams?.criteria
+      ? [...alertParams.criteria, DEFAULT_CRITERIA]
+      : [DEFAULT_CRITERIA];
+    setAlertParams('criteria', nextCriteria);
+  }, [alertParams, setAlertParams]);
+
   const emptyError = useMemo(() => {
     return {
       timeSizeUnit: [],
@@ -158,6 +165,21 @@ export const ExpressionEditor: React.FC<Props> = props => {
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
       />
+
+      <div>
+        <EuiButtonEmpty
+          color={'primary'}
+          iconSide={'left'}
+          flush={'left'}
+          iconType={'plusInCircleFilled'}
+          onClick={addCriteria}
+        >
+          <FormattedMessage
+            id="xpack.infra.metrics.alertFlyout.addCondition"
+            defaultMessage="Add condition"
+          />
+        </EuiButtonEmpty>
+      </div>
     </>
   );
 };
