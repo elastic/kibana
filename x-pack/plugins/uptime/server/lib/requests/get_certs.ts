@@ -36,18 +36,25 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
                 field: 'tls',
               },
             },
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-1d',
+                },
+              },
+            },
           ],
         },
       },
       _source: [
         'tls.common_name',
-        'tls.sh256',
+        'tls.sha256',
         'tls.issued_by',
         'tls.certificate_not_valid_before',
         'tls.certificate_not_valid_after',
       ],
       collapse: {
-        field: 'tls.common_name',
+        field: 'tls.sha256',
         inner_hits: {
           _source: {
             includes: ['monitor.id', 'monitor.name'],
