@@ -126,10 +126,16 @@ export class TaskPool {
     taskRunner
       .run()
       .catch(err => {
-        if (!isTaskSavedObjectNotFoundError(err, taskRunner.id)) {
-          this.logger.warn(
-            `Task ${taskRunner.toString()} failed in attempt to run: ${err.message}`
-          );
+        // If a task Saved Object can't be found by an in flight task runner
+        // we asssume the underlying task has been deleted while it was running
+        // so we will log this as a debug, rather than a warn
+        const errorLogLine = `Task ${taskRunner.toString()} failed in attempt to run: ${
+          err.message
+        }`;
+        if (isTaskSavedObjectNotFoundError(err, taskRunner.id)) {
+          this.logger.debug(errorLogLine);
+        } else {
+          this.logger.warn(errorLogLine);
         }
       })
       .then(() => this.running.delete(taskRunner));
