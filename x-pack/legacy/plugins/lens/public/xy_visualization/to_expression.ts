@@ -19,7 +19,7 @@ function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
     yTitle: 'y',
   };
 
-  if (!layer || !layer.accessors.length) {
+  if (!layer || !layer.accessors?.length) {
     return defaults;
   }
   const datasource = frame.datasourceLayers[layer.layerId];

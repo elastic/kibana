@@ -47,7 +47,7 @@ function getDescription(state?: State) {
 
   return {
     icon:
-      seriesTypes.length === 1
+      visualizationType && seriesTypes.length === 1
         ? visualizationType.largeIcon || visualizationType.icon
         : chartMixedSVG,
     label:

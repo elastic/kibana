@@ -26,6 +26,7 @@ import { SavedObjectIndexStore } from './persistence';
 import { XyVisualization } from './xy_visualization';
 import { MetricVisualization } from './metric_visualization';
 import { DatatableVisualization } from './datatable_visualization';
+import { PieVisualization } from './pie_visualization';
 import { App } from './app_plugin';
 import {
   LensReportManager,
@@ -65,6 +66,7 @@ export class LensPlugin {
   private indexpatternDatasource: IndexPatternDatasource;
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
+  private pieVisualization: PieVisualization;
 
   constructor() {
     this.datatableVisualization = new DatatableVisualization();
@@ -72,6 +74,7 @@ export class LensPlugin {
     this.indexpatternDatasource = new IndexPatternDatasource();
     this.xyVisualization = new XyVisualization();
     this.metricVisualization = new MetricVisualization();
+    this.pieVisualization = new PieVisualization();
   }
 
   setup(
@@ -95,6 +98,7 @@ export class LensPlugin {
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
+    this.pieVisualization.setup(core, dependencies);
 
     visualizations.registerAlias(getLensAliasConfig());
 
@@ -195,6 +199,7 @@ export class LensPlugin {
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
     this.xyVisualization.start(core, startDependencies);
+    this.pieVisualization.start(core, startDependencies);
   }
 
   stop() {

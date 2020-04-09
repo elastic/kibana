@@ -373,7 +373,9 @@ function buildSuggestion({
 
   return {
     title,
-    score: getScore(yValues, splitBy, changeType),
+    score: currentState
+      ? getScore(yValues, splitBy, changeType)
+      : getScore(yValues, splitBy, changeType) / 2, // Lower score for non-XY charts
     // don't advertise chart of same type but with less data
     hide: currentState && changeType === 'reduced',
     state,
