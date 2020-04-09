@@ -72,12 +72,7 @@ describe('alerts_list component empty', () => {
       },
     ]);
     loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
-    loadAllActions.mockResolvedValue({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValue([]);
 
     const mockes = coreMock.createSetup();
     const [
@@ -196,12 +191,7 @@ describe('alerts_list component with items', () => {
       },
     ]);
     loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
-    loadAllActions.mockResolvedValue({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValue([]);
     const mockes = coreMock.createSetup();
     const [
       {
@@ -286,12 +276,7 @@ describe('alerts_list component empty with show only capability', () => {
       },
     ]);
     loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
-    loadAllActions.mockResolvedValue({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValue([]);
     const mockes = coreMock.createSetup();
     const [
       {
@@ -405,12 +390,7 @@ describe('alerts_list with show only capability', () => {
       },
     ]);
     loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
-    loadAllActions.mockResolvedValue({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValue([]);
     const mockes = coreMock.createSetup();
     const [
       {
