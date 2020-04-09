@@ -37,7 +37,7 @@ export const PipelinesList: React.FunctionComponent = () => {
   useEffect(() => {
     services.metric.trackUiMetric(UIM_PIPELINES_LIST_LOAD);
     services.breadcrumbs.setBreadcrumbs('home');
-  }, [services.metric, services.breadcrumb, services.breadcrumbs]);
+  }, [services.metric, services.breadcrumbs]);
 
   const { data, isLoading, error, sendRequest } = services.api.useLoadPipelines();
 
