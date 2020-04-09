@@ -14,4 +14,6 @@ export {
   useRequest,
 } from '../../../../src/plugins/es_ui_shared/public/request/np_ready_request';
 
+export { SectionLoading } from '../../../../src/plugins/es_ui_shared/public';
+
 export const useKibana = () => _useKibana<AppServices>();

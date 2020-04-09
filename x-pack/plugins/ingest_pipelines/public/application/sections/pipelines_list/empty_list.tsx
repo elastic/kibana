@@ -14,13 +14,12 @@ interface Props {
 export const EmptyList: FunctionComponent<Props> = ({ onClick }) => (
   <EuiEmptyPrompt
     iconType="managementApp"
-    titleSize="xs"
     title={
-      <h1>
+      <h2>
         {i18n.translate('xpack.ingestPipelines.list.table.emptyPromptTitle', {
           defaultMessage: 'Create your first pipeline',
         })}
-      </h1>
+      </h2>
     }
     actions={
       <EuiButton onClick={onClick}>

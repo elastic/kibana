@@ -63,7 +63,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
               }),
               description: i18n.translate(
                 'xpack.ingestPipelines.list.table.editActionDescription',
-                { defaultMessage: 'Edit a pipeline' }
+                { defaultMessage: 'Edit this pipeline' }
               ),
               type: 'icon',
               icon: 'pencil',
@@ -75,7 +75,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
               }),
               description: i18n.translate(
                 'xpack.ingestPipelines.list.table.deleteActionDescription',
-                { defaultMessage: 'Delete a pipeline' }
+                { defaultMessage: 'Delete this pipeline' }
               ),
               type: 'icon',
               icon: 'trash',

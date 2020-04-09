@@ -12,6 +12,8 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   EuiDescriptionList,
+  EuiText,
+  EuiSpacer,
   EuiCodeBlock,
   EuiFlyoutFooter,
   EuiFlexGroup,
@@ -51,14 +53,6 @@ export const PipelineDetails: FunctionComponent<Props> = ({
     });
   }
 
-  descriptionListItems.push({
-    title: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
-      defaultMessage: 'Processors JSON',
-    }),
-    // We use this title from the description list and display the processors in a code block underneath
-    description: '',
-  });
-
   return (
     <EuiFlyout
       onClose={onClose}
@@ -74,7 +68,24 @@ export const PipelineDetails: FunctionComponent<Props> = ({
 
       <EuiFlyoutBody>
         <EuiDescriptionList listItems={descriptionListItems} />
-        <EuiCodeBlock overflowHeight={500} isCopyable language="json">
+
+        <EuiSpacer size="m" />
+
+        <EuiText size="s">
+          <label htmlFor="piplineDetailsProcessorsJson">
+            <b>
+              {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
+                defaultMessage: 'Processors JSON',
+              })}
+            </b>
+          </label>
+        </EuiText>
+        <EuiCodeBlock
+          id="piplineDetailsProcessorsJson"
+          language="json"
+          overflowHeight={500}
+          isCopyable
+        >
           {JSON.stringify(pipeline.processors, null, 2)}
         </EuiCodeBlock>
       </EuiFlyoutBody>

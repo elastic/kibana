@@ -22,7 +22,7 @@ import {
 import { EuiSpacer, EuiText } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
-import { useKibana } from '../../../shared_imports';
+import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
 
 import { EmptyList } from './empty_list';
@@ -45,11 +45,12 @@ export const PipelinesList: React.FunctionComponent = () => {
 
   if (isLoading) {
     content = (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.ingestPipelines.list.loadingMessage"
+          defaultMessage="Loading pipelines..."
+        />
+      </SectionLoading>
     );
   } else if (data?.length) {
     content = (
