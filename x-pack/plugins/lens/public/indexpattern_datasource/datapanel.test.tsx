@@ -6,6 +6,7 @@
 
 import React, { ChangeEvent } from 'react';
 import { createMockedDragDropContext } from './mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
 import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
@@ -216,6 +217,7 @@ describe('IndexPattern Data Panel', () => {
     defaultProps = {
       indexPatternRefs: [],
       existingFields: {},
+      data: dataPluginMock.createStartContract(),
       dragDropContext: createMockedDragDropContext(),
       currentIndexPatternId: '1',
       indexPatterns: initialState.indexPatterns,
