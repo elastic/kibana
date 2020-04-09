@@ -248,11 +248,12 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                 }
               >
                 <EuiButtonIcon
+                  isDisabled={!canDelete}
+                  data-test-subj="deleteConnector"
                   aria-label={i18n.translate(
                     'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
                     { defaultMessage: 'Delete' }
                   )}
-                  data-test-subj="collapseBtn"
                   onClick={() => setConnectorsToDelete([item.id])}
                   iconType={'trash'}
                 />
