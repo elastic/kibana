@@ -29,12 +29,7 @@ describe('actions_connectors_list component empty', () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValueOnce([]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -111,27 +106,22 @@ describe('actions_connectors_list component with items', () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 2,
-      data: [
-        {
-          id: '1',
-          actionTypeId: 'test',
-          description: 'My test',
-          referencedByCount: 1,
-          config: {},
-        },
-        {
-          id: '2',
-          actionTypeId: 'test2',
-          description: 'My test 2',
-          referencedByCount: 1,
-          config: {},
-        },
-      ],
-    });
+    loadAllActions.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        description: 'My test',
+        referencedByCount: 1,
+        config: {},
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        description: 'My test 2',
+        referencedByCount: 1,
+        config: {},
+      },
+    ]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -214,12 +204,7 @@ describe('actions_connectors_list component empty with show only capability', ()
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValueOnce([]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -289,27 +274,22 @@ describe('actions_connectors_list with show only capability', () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 2,
-      data: [
-        {
-          id: '1',
-          actionTypeId: 'test',
-          description: 'My test',
-          referencedByCount: 1,
-          config: {},
-        },
-        {
-          id: '2',
-          actionTypeId: 'test2',
-          description: 'My test 2',
-          referencedByCount: 1,
-          config: {},
-        },
-      ],
-    });
+    loadAllActions.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        description: 'My test',
+        referencedByCount: 1,
+        config: {},
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        description: 'My test 2',
+        referencedByCount: 1,
+        config: {},
+      },
+    ]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -384,27 +364,22 @@ describe('actions_connectors_list component with disabled items', () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 2,
-      data: [
-        {
-          id: '1',
-          actionTypeId: 'test',
-          description: 'My test',
-          referencedByCount: 1,
-          config: {},
-        },
-        {
-          id: '2',
-          actionTypeId: 'test2',
-          description: 'My test 2',
-          referencedByCount: 1,
-          config: {},
-        },
-      ],
-    });
+    loadAllActions.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        description: 'My test',
+        referencedByCount: 1,
+        config: {},
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        description: 'My test 2',
+        referencedByCount: 1,
+        config: {},
+      },
+    ]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',

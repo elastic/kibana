@@ -45,7 +45,9 @@ export const rulesNotificationAlertType = ({
     const ruleParams = { ...ruleAlertParams, name: ruleName, id: ruleAlertSavedObject.id };
 
     const fromInMs = parseScheduleDates(
-      previousStartedAt ? previousStartedAt.toISOString() : `now-${ruleParams.interval}`
+      previousStartedAt
+        ? previousStartedAt.toISOString()
+        : `now-${ruleAlertSavedObject.attributes.schedule.interval}`
     )?.format('x');
     const toInMs = parseScheduleDates(startedAt.toISOString())?.format('x');
 
@@ -53,7 +55,7 @@ export const rulesNotificationAlertType = ({
       from: fromInMs,
       to: toInMs,
       index: ruleParams.outputIndex,
-      ruleId: ruleParams.ruleId!,
+      ruleId: ruleParams.ruleId,
       callCluster: services.callCluster,
     });
 
@@ -61,14 +63,14 @@ export const rulesNotificationAlertType = ({
       from: fromInMs,
       to: toInMs,
       id: ruleAlertSavedObject.id,
-      kibanaSiemAppUrl: ruleAlertParams.meta?.kibanaSiemAppUrl as string,
+      kibanaSiemAppUrl: ruleAlertParams.meta?.kibana_siem_app_url,
     });
 
     logger.info(
       `Found ${signalsCount} signals using signal rule name: "${ruleParams.name}", id: "${params.ruleAlertId}", rule_id: "${ruleParams.ruleId}" in "${ruleParams.outputIndex}" index`
     );
 
-    if (signalsCount) {
+    if (signalsCount !== 0) {
       const alertInstance = services.alertInstanceFactory(alertId);
       scheduleNotificationActions({ alertInstance, signalsCount, resultsLink, ruleParams });
     }
