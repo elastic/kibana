@@ -36,8 +36,8 @@ export class XYZTMSSource extends AbstractTMSSource {
     };
   }
 
-  constructor(sourceDescriptor: XYZTMSSourceDescriptor, inspectorAdapters) {
-    super(sourceDescriptor, inspectorAdapters);
+  constructor(sourceDescriptor: XYZTMSSourceDescriptor) {
+    super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
   }
 
@@ -66,12 +66,11 @@ export class XYZTMSSource extends AbstractTMSSource {
   async getAttributions(): Promise<Attribution[]> {
     const { attributionText, attributionUrl } = this._descriptor;
     const attributionComplete = !!attributionText && !!attributionUrl;
-
     return attributionComplete
       ? [
           {
-            url: attributionUrl,
-            label: attributionText,
+            url: attributionUrl as string,
+            label: attributionText as string,
           },
         ]
       : [];

@@ -9,10 +9,12 @@ import _ from 'lodash';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export interface XYZTMSSourceConfig {
-  urlTemplate: string;
+interface AttributionUpdate {
   attributionText?: string;
   attributionUrl?: string;
+}
+export interface XYZTMSSourceConfig extends AttributionUpdate {
+  urlTemplate: string;
 }
 
 export interface Props {
@@ -54,7 +56,7 @@ export class XYZTMSEditor extends Component<Props, State> {
     );
   }
 
-  _handleTMSAttributionChange(attributionUpdate: string) {
+  _handleTMSAttributionChange(attributionUpdate: AttributionUpdate) {
     this.setState(attributionUpdate, () => {
       const { attributionText, attributionUrl, tmsInput } = this.state;
 
