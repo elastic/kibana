@@ -59,11 +59,11 @@ export class XYZTMSSource extends AbstractTMSSource {
     });
   }
 
-  async getDisplayName(): string {
+  async getDisplayName(): Promise<string> {
     return this._descriptor.urlTemplate;
   }
 
-  async getAttributions(): Attribution[] {
+  async getAttributions(): Promise<Attribution[]> {
     const { attributionText, attributionUrl } = this._descriptor;
     const attributionComplete = !!attributionText && !!attributionUrl;
 
@@ -77,7 +77,7 @@ export class XYZTMSSource extends AbstractTMSSource {
       : [];
   }
 
-  async getUrlTemplate(): string {
+  async getUrlTemplate(): Promise<string> {
     return this._descriptor.urlTemplate;
   }
 }

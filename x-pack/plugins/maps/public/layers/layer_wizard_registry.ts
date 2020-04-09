@@ -5,7 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-type LayerWizard = {
+export type LayerWizard = {
   description: string;
   icon: string;
   isIndexingSource?: boolean;
