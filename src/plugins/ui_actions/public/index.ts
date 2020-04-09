@@ -31,11 +31,7 @@ export {
   ActionDefinition as UiActionsActionDefinition,
   ActionFactoryDefinition as UiActionsActionFactoryDefinition,
   ActionInternal as UiActionsActionInternal,
-  ActionStorage as UiActionsActionStorage,
-  AbstractActionStorage as UiActionsAbstractActionStorage,
   createAction,
-  DynamicActionManager,
-  DynamicActionManagerState,
   IncompatibleActionError,
   SerializedAction as UiActionsSerializedAction,
   SerializedEvent as UiActionsSerializedEvent,
@@ -57,4 +53,4 @@ export {
   applyFilterTrigger,
 } from './triggers';
 export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
-export { ActionByType, DynamicActionManager as UiActionsDynamicActionManager } from './actions';
+export { ActionByType } from './actions';

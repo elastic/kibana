@@ -1,36 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  UiActionsAbstractActionStorage,
-  UiActionsSerializedEvent,
-} from '../../../../ui_actions/public';
-import { Embeddable } from '..';
+import { UiActionsSerializedEvent as SerializedEvent } from '../../../../../src/plugins/ui_actions/public';
+import { UiActionsEnhancedAbstractActionStorage as AbstractActionStorage } from '../../../advanced_ui_actions/public';
+import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 
-export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
-  constructor(private readonly embbeddable: Embeddable) {
+export class EmbeddableActionStorage extends AbstractActionStorage {
+  constructor(private readonly embbeddable: IEmbeddable) {
     super();
   }
 
-  async create(event: UiActionsSerializedEvent) {
+  async create(event: SerializedEvent) {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as UiActionsSerializedEvent[];
+    const events = (input.events || []) as SerializedEvent[];
     const exists = !!events.find(({ eventId }) => eventId === event.eventId);
 
     if (exists) {
@@ -45,9 +30,9 @@ export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
     });
   }
 
-  async update(event: UiActionsSerializedEvent) {
+  async update(event: SerializedEvent) {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as UiActionsSerializedEvent[];
+    const events = (input.events || []) as SerializedEvent[];
     const index = events.findIndex(({ eventId }) => eventId === event.eventId);
 
     if (index === -1) {
@@ -65,7 +50,7 @@ export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
 
   async remove(eventId: string) {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as UiActionsSerializedEvent[];
+    const events = (input.events || []) as SerializedEvent[];
     const index = events.findIndex(event => eventId === event.eventId);
 
     if (index === -1) {
@@ -81,9 +66,9 @@ export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
     });
   }
 
-  async read(eventId: string): Promise<UiActionsSerializedEvent> {
+  async read(eventId: string): Promise<SerializedEvent> {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as UiActionsSerializedEvent[];
+    const events = (input.events || []) as SerializedEvent[];
     const event = events.find(ev => eventId === ev.eventId);
 
     if (!event) {
@@ -98,10 +83,10 @@ export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
 
   private __list() {
     const input = this.embbeddable.getInput();
-    return (input.events || []) as UiActionsSerializedEvent[];
+    return (input.events || []) as SerializedEvent[];
   }
 
-  async list(): Promise<UiActionsSerializedEvent[]> {
+  async list(): Promise<SerializedEvent[]> {
     return this.__list();
   }
 }
