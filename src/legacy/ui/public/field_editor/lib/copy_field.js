@@ -18,6 +18,7 @@
  */
 
 import { has } from 'lodash';
+import { Field } from '../../../../../plugins/data/public';
 
 /**
  * Fully clones a Field object, so that modifications can be performed on
@@ -32,7 +33,7 @@ import { has } from 'lodash';
  * @param {object} Field - Field object type
  * @return {object} the cloned object
  */
-export const copyField = (field, indexPattern, Field) => {
+export const copyField = (field, indexPattern) => {
   const changes = {};
   const newFieldProps = {
     // When we are ready to save the copied field back into the index pattern,

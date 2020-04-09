@@ -111,11 +111,9 @@ export class FieldEditor extends PureComponent {
   constructor(props) {
     super(props);
 
-    const {
-      field,
-      indexPattern,
-      helpers: { Field },
-    } = props;
+    const { field, indexPattern } = props;
+
+    // console.log('field_editors', Field);
 
     this.state = {
       isReady: false,
@@ -125,7 +123,8 @@ export class FieldEditor extends PureComponent {
       fieldTypes: [],
       fieldTypeFormats: [],
       existingFieldNames: indexPattern.fields.map(f => f.name),
-      field: copyField(field, indexPattern, Field),
+      field: copyField(field, indexPattern),
+      // field: new Field(indexPattern, field), // what about short dots?
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -730,7 +729,7 @@ export class FieldEditor extends PureComponent {
   };
 
   saveField = async () => {
-    const field = this.state.field.toActualField();
+    const field = this.state.field;
     const { indexPattern } = this.props;
     const { fieldFormatId } = this.state;
 
