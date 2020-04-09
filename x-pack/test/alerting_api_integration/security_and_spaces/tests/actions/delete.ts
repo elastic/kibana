@@ -137,6 +137,36 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it(`shouldn't delete action from preconfigured list`, async () => {
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(space.id)}/api/action/my-slack1`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo');
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'Preconfigured action my-slack1 is not allowed to delete.',
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
   });

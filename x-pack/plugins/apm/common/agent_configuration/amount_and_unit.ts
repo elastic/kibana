@@ -10,7 +10,8 @@ interface AmountAndUnit {
 }
 
 export function amountAndUnitToObject(value: string): AmountAndUnit {
-  const [, amount = '', unit = ''] = value.match(/(\d+)?(\w+)?/) || [];
+  // matches any postive and negative number and its unit.
+  const [, amount = '', unit = ''] = value.match(/(^-?\d+)?(\w+)?/) || [];
   return { amount, unit };
 }
 
