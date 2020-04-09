@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { htmlIdGenerator } from '@elastic/eui';
 import { setIn } from '../../../../models/policy_details_config';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../../store/policy_details/selectors';
@@ -14,17 +15,15 @@ import { PolicyDetailsAction } from '../../../../store/policy_details';
 import { UIPolicyConfig } from '../../../../types';
 
 export const EventingCheckbox = React.memo(function<
-  T extends keyof UIPolicyConfig,
-  TT extends keyof UIPolicyConfig[T],
-  TTT extends keyof UIPolicyConfig[T][TT]
+  T extends keyof UIPolicyConfig & string,
+  TT extends keyof UIPolicyConfig[T] & string,
+  TTT extends keyof UIPolicyConfig[T][TT] & string
 >({
-  id,
   name,
   os,
   protectionEvent,
   protectionField,
 }: {
-  id: string;
   name: string;
   os: T;
   protectionEvent: TT;
@@ -52,5 +51,12 @@ export const EventingCheckbox = React.memo(function<
     [dispatch, os, policyDetailsConfig, protectionEvent, protectionField]
   );
 
-  return <EuiCheckbox id={id} label={name} checked={selected} onChange={handleCheckboxChange} />;
+  return (
+    <EuiCheckbox
+      id={useMemo(() => htmlIdGenerator()(), [])}
+      label={name}
+      checked={selected}
+      onChange={handleCheckboxChange}
+    />
+  );
 });
