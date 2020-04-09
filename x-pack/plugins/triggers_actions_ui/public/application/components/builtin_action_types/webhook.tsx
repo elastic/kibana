@@ -22,9 +22,6 @@ import {
   EuiCodeEditor,
   EuiSwitch,
   EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiPopover,
-  EuiContextMenuPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -34,6 +31,7 @@ import {
   ActionParamsProps,
 } from '../../../types';
 import { WebhookActionParams, WebhookActionConnector } from './types';
+import { AddMessageVariables } from '../add_message_variables';
 
 const HTTP_VERBS = ['post', 'put'];
 
@@ -467,20 +465,9 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
   errors,
 }) => {
   const { body } = actionParams;
-  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
-  const messageVariablesItems = messageVariables?.map((variable: string, i: number) => (
-    <EuiContextMenuItem
-      key={variable}
-      data-test-subj={`variableMenuButton-${i}`}
-      icon="empty"
-      onClick={() => {
-        editAction('body', (body ?? '').concat(` {{${variable}}}`), index);
-        setIsVariablesPopoverOpen(false);
-      }}
-    >
-      {`{{${variable}}}`}
-    </EuiContextMenuItem>
-  ));
+  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
+    editAction(paramsProperty, (body ?? '').concat(` {{${variable}}}`), index);
+  };
   return (
     <Fragment>
       <EuiFormRow
@@ -495,34 +482,11 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
         fullWidth
         error={errors.body}
         labelAppend={
-          // TODO: replace this button with a proper Eui component, when it will be ready
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                data-test-subj="webhookAddVariableButton"
-                onClick={() => setIsVariablesPopoverOpen(true)}
-                iconType="indexOpen"
-                title={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addVariableTitle',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addVariablePopoverButton',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-              />
-            }
-            isOpen={isVariablesPopoverOpen}
-            closePopover={() => setIsVariablesPopoverOpen(false)}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={messageVariablesItems} />
-          </EuiPopover>
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable('body', variable)}
+            paramsProperty="body"
+          />
         }
       >
         <EuiCodeEditor
