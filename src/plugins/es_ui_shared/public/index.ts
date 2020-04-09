@@ -19,6 +19,10 @@
 
 export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
 
+export { SectionLoading } from './components/section_loading';
+
+export { CronEditor, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from './components/cron_editor';
+
 export {
   SendRequestConfig,
   SendRequestResponse,
@@ -31,3 +35,11 @@ export {
 export { indices } from './indices';
 
 export { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
+
+/** dummy plugin, we just want esUiShared to have its own bundle */
+export function plugin() {
+  return new (class EsUiSharedPlugin {
+    setup() {}
+    start() {}
+  })();
+}

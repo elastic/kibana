@@ -6,17 +6,20 @@
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardDrilldownsService } from './services';
 import { DrilldownsSetup, DrilldownsStart } from '../../drilldowns/public';
 
 export interface SetupDependencies {
-  uiActions: UiActionsSetup;
   drilldowns: DrilldownsSetup;
+  embeddable: EmbeddableSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface StartDependencies {
-  uiActions: UiActionsStart;
   drilldowns: DrilldownsStart;
+  embeddable: EmbeddableStart;
+  uiActions: UiActionsStart;
 }
 
 // eslint-disable-next-line

@@ -9,13 +9,13 @@ import useMountedState from 'react-use/lib/useMountedState';
 import {
   AdvancedUiActionsActionFactory as ActionFactory,
   AdvancedUiActionsStart,
+  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
 } from '../../../../advanced_ui_actions/public';
 import { NotificationsStart } from '../../../../../../src/core/public';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
 import {
-  DynamicActionManager,
   UiActionsSerializedEvent,
   UiActionsSerializedAction,
   VALUE_CLICK_TRIGGER,
