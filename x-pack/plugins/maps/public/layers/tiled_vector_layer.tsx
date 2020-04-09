@@ -24,10 +24,10 @@ export class SingleTiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
   static createDescriptor(
-    vectorLayerArguments: VectorLayerArguments,
+    descriptor: VectorLayerDescriptor,
     mapColors: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = super.createDescriptor(vectorLayerArguments, mapColors);
+    const layerDescriptor = super.createDescriptor(descriptor, mapColors);
     layerDescriptor.type = SingleTiledVectorLayer.type;
 
     if (!layerDescriptor.style) {

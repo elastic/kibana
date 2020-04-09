@@ -20,6 +20,7 @@ import {
   LayerDescriptor,
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
+  VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
@@ -71,19 +72,18 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return null;
   }
 
-  createDefaultLayer(options: LayerDescriptor): SingleTiledVectorLayer {
+  createDefaultLayer(options: VectorLayerDescriptor): SingleTiledVectorLayer {
     const layerDescriptor = {
       sourceDescriptor: this._descriptor,
       ...options,
     };
-    const normalizedLayerDescriptor: LayerDescriptor = SingleTiledVectorLayer.createDescriptor(
-      { layerDescriptor, source: this },
+    const normalizedLayerDescriptor: VectorLayerDescriptor = SingleTiledVectorLayer.createDescriptor(
+      layerDescriptor,
       []
     );
     const vectorLayerArguments: VectorLayerArguments = {
       layerDescriptor: normalizedLayerDescriptor,
       source: this,
-      ...options,
     };
     return new SingleTiledVectorLayer(vectorLayerArguments);
   }
