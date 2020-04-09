@@ -10,7 +10,7 @@ type ViewportConfig = CaptureConfig['viewport'];
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 
 interface LaunchArgs {
-  userDataDir: string;
+  userDataDir: BrowserConfig['userDataDir'];
   viewport: ViewportConfig;
   disableSandbox: BrowserConfig['disableSandbox'];
   proxy: BrowserConfig['proxy'];
