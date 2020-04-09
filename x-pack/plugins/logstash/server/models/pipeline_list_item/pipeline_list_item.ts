@@ -5,18 +5,13 @@
  */
 
 import { get } from 'lodash';
+import { Hit, PipelineListItemOptions } from '../../types';
 
-interface PipelineListItemOptions {
-  id: string;
-  description: string;
-  last_modified: string;
-  username: string;
-}
 export class PipelineListItem {
-  private readonly id: string;
-  private readonly description: string;
-  private readonly last_modified: string;
-  private readonly username: string;
+  public readonly id: string;
+  public readonly description: string;
+  public readonly last_modified: string;
+  public readonly username: string;
   constructor(options: PipelineListItemOptions) {
     this.id = options.id;
     this.description = options.description;
@@ -39,7 +34,7 @@ export class PipelineListItem {
    * Takes the json GET response from ES and constructs a pipeline model to be used
    * in Kibana downstream
    */
-  static fromUpstreamJSON(pipeline: Record<string, any>) {
+  static fromUpstreamJSON(pipeline: Hit) {
     const opts = {
       id: pipeline._id,
       description: get<string>(pipeline, '_source.description'),

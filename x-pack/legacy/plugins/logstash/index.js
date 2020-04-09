@@ -5,10 +5,6 @@
  */
 
 import { resolve } from 'path';
-import { registerLogstashPipelinesRoutes } from './server/routes/api/pipelines';
-import { registerLogstashPipelineRoutes } from './server/routes/api/pipeline';
-import { registerLogstashUpgradeRoutes } from './server/routes/api/upgrade';
-import { registerLogstashClusterRoutes } from './server/routes/api/cluster';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { PLUGIN } from '../../../plugins/logstash/common/constants';
 
@@ -32,9 +28,5 @@ export const logstash = kibana =>
     },
     init: server => {
       registerLicenseChecker(server);
-      registerLogstashPipelinesRoutes(server);
-      registerLogstashPipelineRoutes(server);
-      registerLogstashUpgradeRoutes(server);
-      registerLogstashClusterRoutes(server);
     },
   });

@@ -12,15 +12,15 @@ import { i18n } from '@kbn/i18n';
 interface PipelineOptions {
   id: string;
   description: string;
-  username: string;
   pipeline: string;
+  username?: string;
   settings?: Record<string, any>;
 }
 
 interface DownstreamPipeline {
   description: string;
   pipeline: string;
-  settings: Record<string, any>;
+  settings?: Record<string, any>;
 }
 /**
  * This model deals with a pipeline object from ES and converts it to Kibana downstream
@@ -28,9 +28,10 @@ interface DownstreamPipeline {
 export class Pipeline {
   public readonly id: string;
   public readonly description: string;
-  public readonly username: string;
+  public readonly username?: string;
   public readonly pipeline: string;
   private readonly settings: Record<string, any>;
+
   constructor(options: PipelineOptions) {
     this.id = options.id;
     this.description = options.description;
@@ -77,7 +78,7 @@ export class Pipeline {
   static fromDownstreamJSON(
     downstreamPipeline: DownstreamPipeline,
     pipelineId: string,
-    username: string
+    username?: string
   ) {
     const opts = {
       id: pipelineId,

@@ -20,6 +20,9 @@ describe('pipeline_list_item', () => {
         username: 'elastic',
         pipeline: 'input {} filter { grok {} }\n output {}',
       },
+      _index: 'index',
+      _type: 'type',
+      _score: 100,
     };
 
     describe('fromUpstreamJSON factory method', () => {

@@ -7,14 +7,14 @@ import { APICaller } from 'src/core/server';
 import { SearchResponse } from 'elasticsearch';
 
 import { ES_SCROLL_SETTINGS } from '../../../common/constants';
-type Hits = SearchResponse<any>['hits']['hits'];
+import { Hits } from '../../types';
 
 export async function fetchAllFromScroll(
   response: SearchResponse<any>,
   callWithRequest: APICaller,
   hits: Hits = []
 ): Promise<Hits> {
-  const newHits = response.hits.hits;
+  const newHits = response.hits?.hits || [];
   const scrollId = response._scroll_id;
 
   if (newHits.length > 0) {
