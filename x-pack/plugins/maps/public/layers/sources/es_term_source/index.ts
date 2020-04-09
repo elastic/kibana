@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from '../es_term_source';
+export * from './es_term_source';
