@@ -40,6 +40,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await el.getVisibleText();
     }
 
+    public async findFieldByName(name: string) {
+      const fieldSearch = await testSubjects.find('fieldFilterSearchInput');
+      await fieldSearch.type(name);
+    }
+
     public async saveSearch(searchName: string) {
       log.debug('saveSearch');
       await this.clickSaveSearchButton();
@@ -132,7 +137,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
       await browser
         .getActions()
-        .move({ x: 200, y: 20, origin: el._webElement })
+        .move({ x: 0, y: 20, origin: el._webElement })
         .click()
         .perform();
     }
@@ -141,8 +146,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const el = await elasticChart.getCanvas();
 
       await browser.dragAndDrop(
-        { location: el, offset: { x: 200, y: 20 } },
-        { location: el, offset: { x: 400, y: 30 } }
+        { location: el, offset: { x: -300, y: 20 } },
+        { location: el, offset: { x: -100, y: 30 } }
       );
     }
 
@@ -238,10 +243,16 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.click(`fieldToggle-${field}`);
     }
 
-    public async clickFieldListItemVisualize(field: string) {
-      return await retry.try(async () => {
-        await testSubjects.click(`fieldVisualize-${field}`);
-      });
+    public async clickFieldListItemVisualize(fieldName: string) {
+      const field = await testSubjects.find(`field-${fieldName}`);
+      const isActive = await field.elementHasClass('dscSidebarItem--active');
+
+      if (!isActive) {
+        // expand the field to show the "Visualize" button
+        await field.click();
+      }
+
+      await testSubjects.click(`fieldVisualize-${fieldName}`);
     }
 
     public async expectFieldListItemVisualize(field: string) {
