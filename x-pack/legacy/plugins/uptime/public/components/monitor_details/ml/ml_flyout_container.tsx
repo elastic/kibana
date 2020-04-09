@@ -23,7 +23,7 @@ import {
 import { MLFlyoutView } from './ml_flyout';
 import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
-import { useUrlParams } from '../../../hooks';
+import { useGetUrlParams, useUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 import { useMonitorId } from '../../../hooks/use_monitor';
 
@@ -92,8 +92,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
 
   const [isCreatingJob, setIsCreatingJob] = useState(false);
 
-  const [getUrlParams] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd } = getUrlParams();
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   useEffect(() => {
     if (isCreatingJob && !isMLJobCreating) {

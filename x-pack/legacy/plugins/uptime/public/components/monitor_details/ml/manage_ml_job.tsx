@@ -12,7 +12,7 @@ import { canDeleteMLJobSelector } from '../../../state/selectors';
 import { UptimeSettingsContext } from '../../../contexts';
 import * as labels from './translations';
 import { getMLJobLinkHref } from './ml_job_link';
-import { useUrlParams } from '../../../hooks';
+import { useGetUrlParams } from '../../../hooks';
 import { useMonitorId } from '../../../hooks/use_monitor';
 
 interface Props {
@@ -28,8 +28,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
 
   const canDeleteMLJob = useSelector(canDeleteMLJobSelector);
 
-  const [getUrlParams] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd } = getUrlParams();
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const monitorId = useMonitorId();
 
