@@ -3,9 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { ILayer } from '../layer';
+
+export type ImmutableSourceProperty = {
+  label: string;
+  value: string;
+};
 
 export interface ISource {
   createDefaultLayer(): ILayer;
@@ -18,6 +24,7 @@ export interface ISource {
   isQueryAware(): boolean;
   isRefreshTimerAware(): Promise<boolean>;
   isTimeAware(): Promise<boolean>;
+  getImmutableProperties(): ImmutableSourceProperty[];
 }
 
 export class AbstractSource implements ISource {
@@ -34,4 +41,5 @@ export class AbstractSource implements ISource {
   isQueryAware(): boolean;
   isRefreshTimerAware(): Promise<boolean>;
   isTimeAware(): Promise<boolean>;
+  getImmutableProperties(): ImmutableSourceProperty[];
 }
