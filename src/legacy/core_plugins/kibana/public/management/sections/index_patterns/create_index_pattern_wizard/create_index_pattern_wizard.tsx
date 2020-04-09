@@ -32,12 +32,12 @@ import { EmptyState } from './components/empty_state';
 import { MAX_SEARCH_SIZE } from './constants';
 import { ensureMinimumTime, getIndices } from './lib';
 import {
-  SavedObjectsClientContract,
+  SavedObjectsClient,
   IUiSettingsClient,
   OverlayStart,
 } from '../../../../../../../../core/public';
 import { DataPublicPluginStart } from '../../../../../../../../plugins/data/public';
-import { IndexPatternCreationConfig } from '../../../../../../management/public';
+import { IndexPatternCreationConfig } from '../../../../../../../../plugins/index_pattern_management/public';
 import { MatchedIndex } from './types';
 
 interface CreateIndexPatternWizardProps {
@@ -46,7 +46,7 @@ interface CreateIndexPatternWizardProps {
     indexPatternCreationType: IndexPatternCreationConfig;
     es: DataPublicPluginStart['search']['__LEGACY']['esClient'];
     indexPatterns: DataPublicPluginStart['indexPatterns'];
-    savedObjectsClient: SavedObjectsClientContract;
+    savedObjectsClient: SavedObjectsClient;
     config: IUiSettingsClient;
     changeUrl: (url: string) => void;
     openConfirm: OverlayStart['openConfirm'];

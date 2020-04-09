@@ -23,8 +23,9 @@ import { shallow } from 'enzyme';
 import { CreateIndexPatternWizard } from './create_index_pattern_wizard';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../../../../plugins/data/public/mocks';
-import { IndexPatternCreationConfig } from '../../../../../../management/public';
+import { IndexPatternCreationConfig } from '../../../../../../../../plugins/index_pattern_management/public';
 import { IndexPattern } from '../../../../../../../../plugins/data/public';
+import { SavedObjectsClient } from '../../../../../../../../core/public';
 
 jest.mock('./components/step_index_pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
 jest.mock('./components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));
@@ -51,7 +52,7 @@ const initialQuery = '';
 const services = {
   es: search.__LEGACY.esClient,
   indexPatterns,
-  savedObjectsClient: savedObjects.client,
+  savedObjectsClient: savedObjects.client as SavedObjectsClient,
   config: uiSettings,
   changeUrl: jest.fn(),
   openConfirm: overlays.openConfirm,
