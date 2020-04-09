@@ -5,11 +5,17 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useCaseConfigure, ReturnUseCaseConfigure } from './use_configure';
+import { useCaseConfigure, ReturnUseCaseConfigure, PersistCaseConfigure } from './use_configure';
 import { caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
+
+const configuration: PersistCaseConfigure = {
+  connectorId: '456',
+  connectorName: 'My Connector 2',
+  closureType: 'close-by-pushing',
+};
 
 describe('useConfigure', () => {
   beforeEach(() => {
@@ -61,7 +67,6 @@ describe('useConfigure', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(args.setConnector).toHaveBeenCalled();
       expect(args.setConnector).toHaveBeenCalledWith('123', 'My Connector');
     });
   });
@@ -73,7 +78,6 @@ describe('useConfigure', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(args.setClosureType).toHaveBeenCalled();
       expect(args.setClosureType).toHaveBeenCalledWith('close-by-user');
     });
   });
@@ -85,7 +89,6 @@ describe('useConfigure', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(args.setCurrentConfiguration).toHaveBeenCalled();
       expect(args.setCurrentConfiguration).toHaveBeenCalledWith({
         connectorId: '123',
         closureType: 'close-by-user',
@@ -144,11 +147,7 @@ describe('useConfigure', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      result.current.persistCaseConfigure({
-        connectorId: '456',
-        connectorName: 'My Connector 2',
-        closureType: 'close-by-pushing',
-      });
+      result.current.persistCaseConfigure(configuration);
 
       expect(result.current).toEqual({
         loading: false,
@@ -173,9 +172,7 @@ describe('useConfigure', () => {
     spyOnPostCaseConfigure.mockImplementation(() =>
       Promise.resolve({
         ...caseConfigurationCamelCaseResponseMock,
-        connectorId: '456',
-        closureType: 'close-by-pushing',
-        connectorName: 'My Connector 2',
+        ...configuration,
       })
     );
 
@@ -186,19 +183,12 @@ describe('useConfigure', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      result.current.persistCaseConfigure({
-        connectorId: '456',
-        connectorName: 'My Connector 2',
-        closureType: 'close-by-pushing',
-      });
+      result.current.persistCaseConfigure(configuration);
 
       await waitForNextUpdate();
 
-      expect(args.setConnector).toHaveBeenCalled();
       expect(args.setConnector).toHaveBeenNthCalledWith(2, '456');
-      expect(args.setClosureType).toHaveBeenCalled();
       expect(args.setClosureType).toHaveBeenNthCalledWith(2, 'close-by-pushing');
-      expect(args.setCurrentConfiguration).toHaveBeenCalled();
       expect(args.setCurrentConfiguration).toHaveBeenNthCalledWith(2, {
         connectorId: '456',
         closureType: 'close-by-pushing',
@@ -211,9 +201,7 @@ describe('useConfigure', () => {
     spyOnPatchCaseConfigure.mockImplementation(() =>
       Promise.resolve({
         ...caseConfigurationCamelCaseResponseMock,
-        connectorId: '456',
-        closureType: 'close-by-pushing',
-        connectorName: 'My Connector 2',
+        ...configuration,
       })
     );
 
@@ -224,19 +212,12 @@ describe('useConfigure', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      result.current.persistCaseConfigure({
-        connectorId: '456',
-        connectorName: 'My Connector 2',
-        closureType: 'close-by-pushing',
-      });
+      result.current.persistCaseConfigure(configuration);
 
       await waitForNextUpdate();
 
-      expect(args.setConnector).toHaveBeenCalled();
       expect(args.setConnector).toHaveBeenNthCalledWith(2, '456');
-      expect(args.setClosureType).toHaveBeenCalled();
       expect(args.setClosureType).toHaveBeenNthCalledWith(2, 'close-by-pushing');
-      expect(args.setCurrentConfiguration).toHaveBeenCalled();
       expect(args.setCurrentConfiguration).toHaveBeenNthCalledWith(2, {
         connectorId: '456',
         closureType: 'close-by-pushing',
@@ -253,11 +234,7 @@ describe('useConfigure', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      result.current.persistCaseConfigure({
-        connectorId: '456',
-        connectorName: 'My Connector 2',
-        closureType: 'close-by-pushing',
-      });
+      result.current.persistCaseConfigure(configuration);
 
       await waitForNextUpdate();
 
@@ -307,11 +284,7 @@ describe('useConfigure', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      result.current.persistCaseConfigure({
-        connectorId: '456',
-        connectorName: 'My Connector 2',
-        closureType: 'close-by-pushing',
-      });
+      result.current.persistCaseConfigure(configuration);
 
       await waitForNextUpdate();
 
