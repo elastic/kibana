@@ -7,13 +7,17 @@
 import { i18n } from '@kbn/i18n/';
 import { TypeOf } from '@kbn/config-schema';
 import crypto from 'crypto';
-import { map } from 'rxjs/operators';
 import { PluginConfigDescriptor } from 'kibana/server';
+import { map, mergeMap } from 'rxjs/operators';
 import { CoreSetup, Logger, PluginInitializerContext } from 'src/core/server';
+import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
 import { ConfigSchema, ConfigType } from './schema';
 
 /*
  * Set up dynamic config defaults
+ * - xpack.reporting.encryptionKey
+ * - xpack.kibanaServer
+ * - xpack.capture.browser.chromium.disableSandbox
  */
 export function createConfig$(core: CoreSetup, context: PluginInitializerContext, logger: Logger) {
   return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -70,6 +74,20 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
           protocol: kibanaServerProtocol,
         },
       };
+    }),
+    mergeMap(async config => {
+      // if the disableSandbox is unset / undefined, give it a default depending on the OS
+      if (config.capture.browser.chromium.disableSandbox != null) {
+        // disableSandbox was set
+        return config;
+      }
+
+      // disableSandbox was not set: apply default for OS
+      return Object.assign(config, {
+        capture: {
+          browser: { chromium: { disableSandbox: await getDefaultChromiumSandboxDisabled() } },
+        },
+      });
     })
   );
 }

@@ -85,7 +85,7 @@ const CaptureSchema = schema.object({
         schema.boolean({ defaultValue: false }),
         schema.maybe(schema.never())
       ),
-      disableSandbox: schema.boolean({ defaultValue: false }),
+      disableSandbox: schema.maybe(schema.boolean()), // leave this unset and determine the default at runtime
       proxy: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
         server: schema.conditional(
