@@ -15,7 +15,7 @@ import {
   transformComments,
   flattenCommentSavedObject,
 } from './utils';
-import { newCase } from './mock';
+import { newCase } from './__mocks__/request_responses';
 import { isBoom, boomify } from 'boom';
 import { mockCases, mockCaseComments } from './__fixtures__/mock_saved_objects';
 
