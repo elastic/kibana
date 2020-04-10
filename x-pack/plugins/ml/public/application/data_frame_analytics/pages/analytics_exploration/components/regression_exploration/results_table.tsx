@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { Fragment, FC, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -38,6 +38,7 @@ import { IndexPattern } from '../../../../../../../../../../src/plugins/data/pub
 import { useExploreData } from './use_explore_data';
 import { ExplorationTitle } from './regression_exploration';
 import { RegressionExplorationDataGrid } from './regression_exploration_data_grid';
+import { ExplorationQueryBar } from '../exploration_query_bar';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
@@ -81,6 +82,10 @@ export const ResultsTable: FC<Props> = React.memo(
       tableFields,
       tableItems,
     } = useExploreData(jobConfig, needsDestIndexFields);
+
+    useEffect(() => {
+      setEvaluateSearchQuery(searchQuery);
+    }, [JSON.stringify(searchQuery)]);
 
     const columns = tableFields
       .sort((a: any, b: any) => sortRegressionResultsFields(a, b, jobConfig))
@@ -210,28 +215,32 @@ export const ResultsTable: FC<Props> = React.memo(
           <EuiProgress size="xs" color="accent" max={1} value={0} />
         )}
         {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
-          <Fragment>
-            <EuiFormRow
-              helpText={tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
-            >
-              <Fragment />
-            </EuiFormRow>
-
-            <EuiSpacer />
-            <RegressionExplorationDataGrid
-              columns={columns}
-              indexPattern={indexPattern}
-              pagination={pagination}
-              resultsField={jobConfig.dest.results_field}
-              rowCount={rowCount}
-              selectedFields={selectedFields}
-              setPagination={setPagination}
-              setSelectedFields={setSelectedFields}
-              setSortingColumns={setSortingColumns}
-              sortingColumns={sortingColumns}
-              tableItems={tableItems}
-            />
-          </Fragment>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="s" />
+              <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
+              <EuiFormRow
+                helpText={tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
+              >
+                <Fragment />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RegressionExplorationDataGrid
+                columns={columns}
+                indexPattern={indexPattern}
+                pagination={pagination}
+                resultsField={jobConfig.dest.results_field}
+                rowCount={rowCount}
+                selectedFields={selectedFields}
+                setPagination={setPagination}
+                setSelectedFields={setSelectedFields}
+                setSortingColumns={setSortingColumns}
+                sortingColumns={sortingColumns}
+                tableItems={tableItems}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
       </EuiPanel>
     );
