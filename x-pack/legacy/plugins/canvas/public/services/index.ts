@@ -45,11 +45,15 @@ class CanvasServiceProvider<Service> {
   }
 }
 
-const services: Array<CanvasServiceProvider<any>> = [];
+export type ServiceFromProvider<P> = P extends CanvasServiceProvider<infer T> ? T : never;
 
-const notifyService = new CanvasServiceProvider(notifyServiceFactory);
+export const services = {
+  notify: new CanvasServiceProvider(notifyServiceFactory),
+};
 
-services.push(notifyService);
+export interface CanvasServices {
+  notify: ServiceFromProvider<typeof services.notify>;
+}
 
 export const startServices = (
   coreSetup: CoreSetup,
@@ -57,11 +61,13 @@ export const startServices = (
   canvasSetupPlugins: CanvasSetupDeps,
   canvasStartPlugins: CanvasStartDeps
 ) => {
-  services.forEach(provider =>
+  Object.entries(services).forEach(([key, provider]) =>
     provider.start(coreSetup, coreStart, canvasSetupPlugins, canvasStartPlugins)
   );
 };
 
-export const stopServices = () => services.forEach(provider => provider.stop());
+export const stopServices = () => {
+  Object.entries(services).forEach(([key, provider]) => provider.stop());
+};
 
-export { startServices, stopServices, notifyService };
+export const { notify: notifyService } = services;

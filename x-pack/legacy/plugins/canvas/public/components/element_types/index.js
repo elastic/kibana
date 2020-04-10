@@ -11,7 +11,7 @@ import { camelCase } from 'lodash';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import * as customElementService from '../../lib/custom_element_service';
 import { elementsRegistry } from '../../lib/elements_registry';
-import { notify } from '../../lib/notify';
+import { notifyService } from '../../services';
 import { selectToplevelNodes } from '../../state/actions/transient';
 import { insertNodes, addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
@@ -56,10 +56,11 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     // custom element search
     findCustomElements: async text => {
       try {
+        throw new Error('exror');
         const { customElements } = await customElementService.find(text);
         setCustomElements(customElements);
       } catch (err) {
-        notify.error(err, { title: `Couldn't find custom elements` });
+        notifyService.getService().error(err, { title: `Couldn't find custom elements` });
       }
     },
     // remove custom element
@@ -69,7 +70,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         const { customElements } = await customElementService.find(search);
         setCustomElements(customElements);
       } catch (err) {
-        notify.error(err, { title: `Couldn't delete custom elements` });
+        notifyService.getService().error(err, { title: `Couldn't delete custom elements` });
       }
     },
     // update custom element
@@ -84,7 +85,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         const { customElements } = await customElementService.find(search);
         setCustomElements(customElements);
       } catch (err) {
-        notify.error(err, { title: `Couldn't update custom elements` });
+        notifyService.getService().error(err, { title: `Couldn't update custom elements` });
       }
     },
   };

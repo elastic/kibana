@@ -6,8 +6,7 @@
 import fileSaver from 'file-saver';
 import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../common/lib/constants';
 import { ErrorStrings } from '../../i18n';
-// @ts-ignore untyped local
-import { notify } from './notify';
+import { notifyService } from '../services';
 // @ts-ignore untyped local
 import * as workpadService from './workpad_service';
 import { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
@@ -20,7 +19,7 @@ export const downloadWorkpad = async (workpadId: string) => {
     const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
     fileSaver.saveAs(jsonBlob, `canvas-workpad-${workpad.name}-${workpad.id}.json`);
   } catch (err) {
-    notify.error(err, { title: strings.getDownloadFailureErrorMessage() });
+    notifyService.getService().error(err, { title: strings.getDownloadFailureErrorMessage() });
   }
 };
 
@@ -32,7 +31,9 @@ export const downloadRenderedWorkpad = async (renderedWorkpad: CanvasRenderedWor
       `canvas-embed-workpad-${renderedWorkpad.name}-${renderedWorkpad.id}.json`
     );
   } catch (err) {
-    notify.error(err, { title: strings.getDownloadRenderedWorkpadFailureErrorMessage() });
+    notifyService
+      .getService()
+      .error(err, { title: strings.getDownloadRenderedWorkpadFailureErrorMessage() });
   }
 };
 
@@ -42,7 +43,9 @@ export const downloadRuntime = async (basePath: string) => {
     window.open(path);
     return;
   } catch (err) {
-    notify.error(err, { title: strings.getDownloadRuntimeFailureErrorMessage() });
+    notifyService
+      .getService()
+      .error(err, { title: strings.getDownloadRuntimeFailureErrorMessage() });
   }
 };
 
@@ -51,6 +54,8 @@ export const downloadZippedRuntime = async (data: any) => {
     const zip = new Blob([data], { type: 'octet/stream' });
     fileSaver.saveAs(zip, 'canvas-workpad-embed.zip');
   } catch (err) {
-    notify.error(err, { title: strings.getDownloadZippedRuntimeFailureErrorMessage() });
+    notifyService
+      .getService()
+      .error(err, { title: strings.getDownloadZippedRuntimeFailureErrorMessage() });
   }
 };

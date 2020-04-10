@@ -7,12 +7,13 @@
 import { get } from 'lodash';
 import { CanvasServiceFactory } from '.';
 import { formatMsg } from '../../../../../../src/plugins/kibana_legacy/public';
+import { ToastInputFields } from '../../../../../../src/core/public';
 
-const getToast = (err, opts = {}) => {
-  const errData = get(err, 'response') || err;
+const getToast = (err: Error | string, opts: ToastInputFields = {}) => {
+  const errData = (get(err, 'response') || err) as Error | string;
   const errMsg = formatMsg(errData);
   const { title, ...rest } = opts;
-  let text = null;
+  let text;
 
   if (title) {
     text = errMsg;
@@ -26,10 +27,10 @@ const getToast = (err, opts = {}) => {
 };
 
 interface NotifyService {
-  error: (err: any, opts: any) => void;
-  warning: (err: any, opts: any) => void;
-  info: (err: any, opts: any) => void;
-  success: (err: any, opts: any) => void;
+  error: (err: string | Error, opts?: ToastInputFields) => void;
+  warning: (err: string | Error, opts?: ToastInputFields) => void;
+  info: (err: string | Error, opts?: ToastInputFields) => void;
+  success: (err: string | Error, opts?: ToastInputFields) => void;
 }
 
 export const notifyServiceFactory: CanvasServiceFactory<NotifyService> = (setup, start) => {

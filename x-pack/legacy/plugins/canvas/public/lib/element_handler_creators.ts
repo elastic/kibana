@@ -10,8 +10,7 @@ import { camelCase } from 'lodash';
 import { getClipboardData, setClipboardData } from './clipboard';
 // @ts-ignore unconverted local file
 import { cloneSubgraphs } from './clone_subgraphs';
-// @ts-ignore unconverted local file
-import { notify } from './notify';
+import { notifyService } from '../services';
 import * as customElementService from './custom_element_service';
 import { getId } from './get_id';
 import { PositionedElement } from '../../types';
@@ -86,15 +85,17 @@ export const basicHandlerCreators = {
       customElementService
         .create(customElement)
         .then(() =>
-          notify.success(
-            `Custom element '${customElement.displayName || customElement.id}' was saved`,
-            {
-              'data-test-subj': 'canvasCustomElementCreate-success',
-            }
-          )
+          notifyService
+            .getService()
+            .success(
+              `Custom element '${customElement.displayName || customElement.id}' was saved`,
+              {
+                'data-test-subj': 'canvasCustomElementCreate-success',
+              }
+            )
         )
         .catch((result: Http2ServerResponse) =>
-          notify.warning(result, {
+          notifyService.getService().warning(result, {
             title: `Custom element '${customElement.displayName ||
               customElement.id}' was not saved`,
           })
@@ -138,13 +139,13 @@ export const clipboardHandlerCreators = {
     if (selectedNodes.length) {
       setClipboardData({ selectedNodes });
       removeNodes(selectedNodes.map(extractId), pageId);
-      notify.success('Cut element to clipboard');
+      notifyService.getService().success('Cut element to clipboard');
     }
   },
   copyNodes: ({ selectedNodes }: Props) => (): void => {
     if (selectedNodes.length) {
       setClipboardData({ selectedNodes });
-      notify.success('Copied element to clipboard');
+      notifyService.getService().success('Copied element to clipboard');
     }
   },
   pasteNodes: ({ insertNodes, pageId, selectToplevelNodes }: Props) => (): void => {
