@@ -4,12 +4,12 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
+    "usageCollection",
     "home",
     "licensing",
     "management"
   ],
   "optionalPlugins": [
-    "usageCollection",
     "indexManagement"
   ],
   "configPath": ["xpack", "ilm"]
