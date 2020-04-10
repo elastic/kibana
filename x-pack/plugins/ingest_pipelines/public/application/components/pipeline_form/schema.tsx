@@ -87,7 +87,7 @@ export const pipelineFormSchema: FormSchema = {
   },
   onFailure: {
     label: i18n.translate('xpack.ingestPipelines.form.onFailureFieldLabel', {
-      defaultMessage: 'On failure (optional)',
+      defaultMessage: 'On-failure processors (optional)',
     }),
     // TODO: ES doesn't accept an empty array for on_failure
     serializer: onFailureProcessors => parseJson(onFailureProcessors),

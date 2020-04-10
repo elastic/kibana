@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import {
   useForm,
@@ -29,60 +29,6 @@ interface Props {
   defaultValue?: Pipeline;
 }
 
-const fieldsMeta = {
-  name: {
-    title: i18n.translate('xpack.ingestPipelines.form.nameTitle', {
-      defaultMessage: 'Name',
-    }),
-    description: i18n.translate('xpack.ingestPipelines.form.nameDescription', {
-      defaultMessage: 'A unique identifier for this pipeline.',
-    }),
-    testSubject: 'nameField',
-  },
-  description: {
-    title: i18n.translate('xpack.ingestPipelines.form.descriptionFielditle', {
-      defaultMessage: 'Description',
-    }),
-    description: i18n.translate('xpack.ingestPipelines.form.descriptionFieldDescription', {
-      defaultMessage: 'The description to apply to the pipeline.',
-    }),
-    testSubject: 'descriptionField',
-  },
-  processors: {
-    title: i18n.translate('xpack.ingestPipelines.form.processorsFielditle', {
-      defaultMessage: 'Processors',
-    }),
-    description: i18n.translate('xpack.ingestPipelines.form.processorsFieldDescription', {
-      defaultMessage: 'The processors to apply to the pipeline.',
-    }),
-    ariaLabel: i18n.translate('xpack.ingestPipelines.form.processorsFieldAriaLabel', {
-      defaultMessage: 'Processors JSON editor',
-    }),
-    testSubject: 'processorsField',
-  },
-  onFailure: {
-    title: i18n.translate('xpack.ingestPipelines.form.onFailureFielditle', {
-      defaultMessage: 'On failure',
-    }),
-    description: i18n.translate('xpack.ingestPipelines.form.onFailureFieldDescription', {
-      defaultMessage: 'The on-failure processors to apply to the pipeline.',
-    }),
-    ariaLabel: i18n.translate('xpack.ingestPipelines.form.onFailureFieldAriaLabel', {
-      defaultMessage: 'On failure processors JSON editor',
-    }),
-    testSubject: 'onFailureField',
-  },
-  version: {
-    title: i18n.translate('xpack.ingestPipelines.form.versionTitle', {
-      defaultMessage: 'Version',
-    }),
-    description: i18n.translate('xpack.ingestPipelines.form.versionDescription', {
-      defaultMessage: 'A number that identifies the pipeline to external management systems.',
-    }),
-    testSubject: 'versionField',
-  },
-};
-
 const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
 
@@ -99,6 +45,8 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
   saveError,
 }) => {
   const [isFormValid, setIsFormValid] = useState<boolean>(true);
+  const [isVersionVisible, setIsVersionVisible] = useState<boolean>(false);
+  const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(false);
 
   const setDataAndValidation: FormConfig['onSubmit'] = (formData, isValid) => {
     setIsFormValid(isValid);
@@ -113,8 +61,6 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
     defaultValue,
     onSubmit: setDataAndValidation,
   });
-
-  const { name, description, version, processors, onFailure } = fieldsMeta;
 
   return (
     <>
@@ -135,22 +81,68 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
       ) : null}
 
       <Form form={form} data-test-subj="pipelineForm">
-        {/* Name field */}
-        <FormRow title={name.title} description={name.description}>
+        {/* Name field with optional version */}
+        <FormRow
+          title={
+            <FormattedMessage id="xpack.ingestPipelines.form.nameTitle" defaultMessage="Name" />
+          }
+          description={
+            <>
+              <FormattedMessage
+                id="xpack.ingestPipelines.form.nameDescription"
+                defaultMessage="A unique identifier for this pipeline."
+              />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.form.versionToggleDescription"
+                    defaultMessage="Add version number"
+                  />
+                }
+                checked={isVersionVisible}
+                onChange={e => setIsVersionVisible(e.target.checked)}
+                data-test-subj="versionToggle"
+              />
+            </>
+          }
+        >
           <UseField
             path="name"
             componentProps={{
-              ['data-test-subj']: name.testSubject,
+              ['data-test-subj']: 'nameField',
             }}
           />
+
+          {isVersionVisible && (
+            <UseField
+              path="version"
+              componentProps={{
+                ['data-test-subj']: 'versionField',
+              }}
+            />
+          )}
         </FormRow>
 
         {/* Description */}
-        <FormRow title={description.title} description={description.description}>
+        <FormRow
+          title={
+            <FormattedMessage
+              id="xpack.ingestPipelines.form.descriptionFieldTitle"
+              defaultMessage="Description"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.ingestPipelines.form.descriptionFieldDescription"
+              defaultMessage="The description to apply to the pipeline."
+            />
+          }
+        >
           <UseField
             path="description"
             componentProps={{
-              ['data-test-subj']: description.testSubject,
+              ['data-test-subj']: 'descriptionField',
               euiFieldProps: {
                 compressed: true,
               },
@@ -159,42 +151,89 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
         </FormRow>
 
         {/* Processors field */}
-        <FormRow title={processors.title} description={processors.description}>
+        <FormRow
+          title={
+            <FormattedMessage
+              id="xpack.ingestPipelines.form.processorsFieldTitle"
+              defaultMessage="Processors"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.ingestPipelines.form.processorsFieldDescription"
+              defaultMessage="The processors to apply to the pipeline."
+            />
+          }
+        >
           <UseField
             path="processors"
             component={JsonEditorField}
             componentProps={{
+              ['data-test-subj']: 'processorsField',
               euiCodeEditorProps: {
-                height: '400px',
-                'aria-label': processors.ariaLabel,
+                height: '300px',
+                'aria-label': i18n.translate(
+                  'xpack.ingestPipelines.form.processorsFieldAriaLabel',
+                  {
+                    defaultMessage: 'Processors JSON editor',
+                  }
+                ),
               },
             }}
           />
         </FormRow>
 
-        {/* On failure field */}
-        {/* <FormRow title={onFailure.title} description={onFailure.description}>
-          <UseField
-            path="onFailure"
-            component={JsonEditorField}
-            componentProps={{
-              euiCodeEditorProps: {
-                height: '200px',
-                'aria-label': onFailure.ariaLabel,
-              },
-            }}
-          />
-        </FormRow> */}
-
-        {/* Version field */}
-        {/* <FormRow title={version.title} description={version.description}>
-          <UseField
-            path="version"
-            componentProps={{
-              ['data-test-subj']: version.testSubject,
-            }}
-          />
-        </FormRow> */}
+        {/* On-failure field */}
+        <FormRow
+          title={
+            <FormattedMessage
+              id="xpack.ingestPipelines.form.onFailureTitle"
+              defaultMessage="Failure processors"
+            />
+          }
+          description={
+            <>
+              <FormattedMessage
+                id="xpack.ingestPipelines.form.onFailureDescription"
+                defaultMessage="Define a list of processors to be executed following a failed processor."
+              />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.form.onFailureToggleDescription"
+                    defaultMessage="Add on-failure processors"
+                  />
+                }
+                checked={isOnFailureEditorVisible}
+                onChange={e => setIsOnFailureEditorVisible(e.target.checked)}
+                data-test-subj="onFailureToggle"
+              />
+            </>
+          }
+        >
+          {isOnFailureEditorVisible ? (
+            <UseField
+              path="onFailure"
+              component={JsonEditorField}
+              componentProps={{
+                ['data-test-subj']: 'onFailureEditor',
+                euiCodeEditorProps: {
+                  height: '300px',
+                  'aria-label': i18n.translate(
+                    'xpack.ingestPipelines.form.onFailureFieldAriaLabel',
+                    {
+                      defaultMessage: 'On-failure processors JSON editor',
+                    }
+                  ),
+                },
+              }}
+            />
+          ) : (
+            // <FormRow/> requires either children or a field
+            <div />
+          )}
+        </FormRow>
 
         <EuiSpacer size="l" />
 
