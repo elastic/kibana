@@ -29,7 +29,8 @@ There are no user-facing breaking changes in 7.7.
 *via [#60574](https://github.com/elastic/kibana/pull/60574)*
 
 [discrete]
-## Goodbye, legacy data plugin 👋
+## Goodbye, legacy data plugin
+{pull}60449[#60449]
 
 The legacy `data` plugin located in `src/legacy/core_plugins/data` has been removed. This change only affects legacy platform plugins which are either:
 1. Importing the `public/setup` or `public/legacy` "shim" files from the legacy data plugin to access runtime contracts; or
@@ -64,34 +65,17 @@ const myPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginAp
 
 For more information on where to locate new platform `data` services, please refer to the table of [plugins for shared application services](https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services) in `src/core/MIGRATION.md`.
 
-*via [#60449](https://github.com/elastic/kibana/pull/60449)*
+
 
 [discrete]
-## Delete FilterStateManager and QueryFilter :-D
+## Delete FilterStateManager and QueryFilter
+{pull}59872[#59872]
 
-Deleted unused legacy exports
- - Delete `FilterStateManager`  
- - Delete `QueryFilter`
- - Delete `SavedQuery` re-export from legacy
+Deleted unused legacy exports:
 
-[discrete]
-### Checklist
-
-Delete any items that are not applicable to this PR.
-
-- [ ] Any text added follows [EUI's writing guidelines](https://elastic.github.io/eui/#/guidelines/writing), uses sentence case text and includes [i18n support](https://github.com/elastic/kibana/blob/master/packages/kbn-i18n/README.md)
-- [ ] [Documentation](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#writing-documentation) was added for features that require explanation or tutorials
-- [ ] [Unit or functional tests](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility) were updated or added to match the most common scenarios
-- [ ] This was checked for [keyboard-only and screenreader accessibility](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Accessibility#Accessibility_testing_checklist)
-- [ ] This renders correctly on smaller devices using a responsive layout. (You can test this [in your browser](https://www.browserstack.com/guide/responsive-testing-on-local-server)
-- [ ] This was checked for cross-browser compatibility, [including a check against IE11](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility)
-
-[discrete]
-### For maintainers
-
-- [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
-
-*via [#59872](https://github.com/elastic/kibana/pull/59872)*
+* Delete `FilterStateManager`
+* Delete `QueryFilter`
+* Delete `SavedQuery` re-export from legacy
 
 [discrete]
 ## Add UiSettings validation & Kibana default route redirection
@@ -188,7 +172,7 @@ Add a backpressure mechanism for sending telemetry on the server. Usage data wil
 
 2. Initial server usage attempt is after 5 minutes from starting kibana. Attempt to send every 12 hours afterwards.
 
-3. Stop attempting to send usage from the server if the attempts fail three times (initial attempt 5 minutes from server start, and two consecutive 12 hours attempts). 
+3. Stop attempting to send usage from the server if the attempts fail three times (initial attempt 5 minutes from server start, and two consecutive 12 hours attempts).
 
 4. Restart attempt count after each kibana version upgrade (patch/minor/major).
 
@@ -348,7 +332,7 @@ core.application.register({
 *via [#56705](https://github.com/elastic/kibana/pull/56705)*
 
 [discrete]
-### Before 
+### Before
 NewVisModal component and showNewVisModal function were statically exported and received all the dependencies as props/parameters.
 
 [discrete]
@@ -418,7 +402,7 @@ showSaveModal(saveModal, npStart.core.i18n.Context);
 [discrete]
 ## [State Management] State syncing helpers for query service I
 
-Query service of data plugin now has state$ observable which allows to watch for query service data changes: 
+Query service of data plugin now has state$ observable which allows to watch for query service data changes:
 
 ```
 interface QueryState {
@@ -497,7 +481,7 @@ Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable t
 
 [discrete]
 ### Removed / moved modules
-In preparation for Kibana's upcoming [new platform](https://github.com/elastic/kibana/issues/9675), we are in the process of [migrating away](https://github.com/elastic/kibana/issues/26505) from the `ui/public` directory. Over time, the contents of this directory will be either deprecated or housed inside a parent plugin. If your plugin imports the listed items from the following `ui/public` modules, you will need to either update your import statements as indicated below, so that you are pulling these modules from their new locations, or copy the relevant code directly into your plugin. 
+In preparation for Kibana's upcoming [new platform](https://github.com/elastic/kibana/issues/9675), we are in the process of [migrating away](https://github.com/elastic/kibana/issues/26505) from the `ui/public` directory. Over time, the contents of this directory will be either deprecated or housed inside a parent plugin. If your plugin imports the listed items from the following `ui/public` modules, you will need to either update your import statements as indicated below, so that you are pulling these modules from their new locations, or copy the relevant code directly into your plugin.
 
 [discrete]
 #### `ui/agg_types` [#59605](https://github.com/elastic/kibana/pull/59605)
@@ -583,7 +567,7 @@ Tests for custom `appRoute`s are now more clear and explicitly separate from tho
 [discrete]
 ## Remove the VisEditorTypesRegistryProvider
 
-The `VisEditorTypesRegistryProvider` is removed. By default, visualizations will use the `default` editor. 
+The `VisEditorTypesRegistryProvider` is removed. By default, visualizations will use the `default` editor.
 To specify a custom editor use `editor` parameter as a key and a `class` with your own controller as a value in a `vis` type definition:
 
 ```
@@ -647,7 +631,7 @@ class MyPlugin implements Plugin {
 [discrete]
 ## Refactor saved object management registry usage
 
-Registration of the following `SavedObjectLoader` in Angular was removed: 
+Registration of the following `SavedObjectLoader` in Angular was removed:
 * `savedSearches`
 * `savedVisualizations`
 * `savedDashboard`
@@ -764,6 +748,6 @@ double({ num: 3 }).then(console.log, console.error); // { num: 6 }
 [discrete]
 ## Grouped Kibana nav
 
-Plugins should now define a category if they have a navigation item: 
+Plugins should now define a category if they have a navigation item:
 - If you want to fit into our default categories, you can use our `DEFAULT_APP_CATEGORIES` defined in `src/core/utils/default_app_categories.ts`.
 - If you want to create their own category, you can also provide any object matching the `AppCategory` interface defined in `src/core/types/app_category.ts`.
