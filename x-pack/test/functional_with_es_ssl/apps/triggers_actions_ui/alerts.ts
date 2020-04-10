@@ -39,7 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/62472
-  describe('alerts', function() {
+  describe.skip('alerts', function() {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
@@ -66,22 +66,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await nameInput.click();
 
       // test for normal connector
-      await testSubjects.click('.index-ActionTypeSelectOption');
-      await testSubjects.click('createActionConnectorButton');
-      const connectorNameInput = await testSubjects.find('nameInput');
-      await connectorNameInput.click();
-      await connectorNameInput.clearValue();
-      const connectorName = generateUniqueKey();
-      await connectorNameInput.type(connectorName);
-      const indexConnectorComboBox = await find.byCssSelector(
-        '[data-test-subj="connectorIndexesComboBox"]'
-      );
-      await indexConnectorComboBox.click();
-      await indexConnectorComboBox.type('k');
-      const indexConnectorFilterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-      await indexConnectorFilterSelectItem.click();
-      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+      await testSubjects.click('.webhook-ActionTypeSelectOption');
+      const webhookBodyInput = await find.byCssSelector('.ace_text-input');
+      await webhookBodyInput.focus();
+      await webhookBodyInput.type('{\\"test\\":1}');
 
+      await testSubjects.click('addAlertActionButton');
       // pre-configured connector is loaded an displayed correctly
       await testSubjects.click('.slack-ActionTypeSelectOption');
       expect(await (await find.byCssSelector('#my-slack1')).isDisplayed()).to.be(true);
@@ -89,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await loggingMessageInput.click();
       await loggingMessageInput.clearValue();
       await loggingMessageInput.type('test message');
-      await testSubjects.click('slackAddVariableButton');
+      await testSubjects.click('messageAddVariableButton');
       const variableMenuButton = await testSubjects.find('variableMenuButton-0');
       await variableMenuButton.click();
       await testSubjects.click('saveAlertButton');
