@@ -304,14 +304,16 @@ new visualizationsStart.Vis(....);
 ```
 import { Vis } from '../../../../../core_plugins/visualizations/public';
 ```
-////
+
 *via [#56968](https://github.com/elastic/kibana/pull/56968)*
 
+[discrete]
 ## Add ScopedHistory to AppMountParams
 
 Kibana Platform applications should use the provided `history` instance to integrate routing rather than setting up their own using `appBasePath` (which is now deprecated).
 
-#### Before
+[discrete]
+### Before
 ```tsx
 core.application.register({
   id: 'myApp',
@@ -326,8 +328,8 @@ core.application.register({
   }
 });
 ```
-
-#### After
+[discrete]
+### After
 ```tsx
 core.application.register({
   id: 'myApp',
@@ -345,10 +347,12 @@ core.application.register({
 
 *via [#56705](https://github.com/elastic/kibana/pull/56705)*
 
-#### Before 
+[discrete]
+### Before 
 NewVisModal component and showNewVisModal function were statically exported and received all the dependencies as props/parameters.
 
-#### After
+[discrete]
+### After
 `showNewVisModal()` is part of the plugin contract and plugin dependencies are provided implicitly.
 ```
 npStart.plugins.visualizations.showNewVisModal();
@@ -356,6 +360,7 @@ npStart.plugins.visualizations.showNewVisModal();
 
 *via [#56654](https://github.com/elastic/kibana/pull/56654)*
 
+[discrete]
 ## UiComponent
 
 `UiComponent` interface was added to `kibana_utils` plugin. `UiComponent` represents a user interface building block, like a React component, but `UiComponent` does not have to be implemented in React&mdash;it can be implemented in plain JS or React, or Angular, etc.
@@ -380,18 +385,21 @@ const reactToUiComponent: (comp: React.ComponentType) => UiComponent;
 
 *via [#56555](https://github.com/elastic/kibana/pull/56555)*
 
+[discrete]
 ## Start consuming np logging config
 
 Provides experimental support of new logging format for **new platform plugins**. More about logging format: https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md
 
 *via [#56480](https://github.com/elastic/kibana/pull/56480)*
 
+[discrete]
 ## [State Management] State syncing utils docs
 
 Docs for state syncing utils are available at: https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync
 
 *via [#56479](https://github.com/elastic/kibana/pull/56479)*
 
+[discrete]
 ## [NP] Move saved object modal into new platform
 
 `SavedObjectSaveModal`, `showSaveModal` and `SaveResult` from _`ui/saved_objects`_, and `SavedObjectFinderUi`, `SavedObjectMetaData` and `OnSaveProps` from _`src/plugins/kibana_react/public`_ were moved to a new plugin **`src/plugins/saved_objects`**.
@@ -407,6 +415,7 @@ showSaveModal(saveModal, npStart.core.i18n.Context);
 
 *via [#56383](https://github.com/elastic/kibana/pull/56383)*
 
+[discrete]
 ## [State Management] State syncing helpers for query service I
 
 Query service of data plugin now has state$ observable which allows to watch for query service data changes: 
@@ -429,10 +438,7 @@ interface QueryStateChange {
 state$: Observable<{ changes: QueryStateChange; state: QueryState }>;
 ```
 
-
-
-
-
+[discrete]
 ### Checklist
 
 Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable to this PR.
@@ -443,6 +449,7 @@ Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable t
 - [x] [Unit or functional tests](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility) were updated or added to match the most common scenarios
 - [ ] This was checked for [keyboard-only and screenreader accessibility](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Accessibility#Accessibility_testing_checklist)
 
+[discrete]
 ### For maintainers
 
 - [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
@@ -450,6 +457,7 @@ Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable t
 
 *via [#56128](https://github.com/elastic/kibana/pull/56128)*
 
+[discrete]
 ## Migrate saved_object_save_as_checkbox directive to timelion
 
 Use our React component `SavedObjectSaveModal` with `showCopyOnSave={true}`  instead of the react directive. Note that `SavedObjectSaveModal` soon will be part of a new plugin, so the path will change.
@@ -465,9 +473,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
  />
 ```
 
-
-
-
+[discrete]
 ### Checklist
 
 Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable to this PR.
@@ -478,6 +484,7 @@ Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable t
 ~~- [ ] [Unit or functional tests](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility) were updated or added to match the most common scenarios~~
 ~~- [ ] This was checked for [keyboard-only and screenreader accessibility](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Accessibility#Accessibility_testing_checklist)~~
 
+[discrete]
 ### For maintainers
 
 ~~- [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)~~
@@ -485,11 +492,14 @@ Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable t
 
 *via [#56114](https://github.com/elastic/kibana/pull/56114)*
 
+[discrete]
 ## `ui/public` cleanup
 
+[discrete]
 ### Removed / moved modules
 In preparation for Kibana's upcoming [new platform](https://github.com/elastic/kibana/issues/9675), we are in the process of [migrating away](https://github.com/elastic/kibana/issues/26505) from the `ui/public` directory. Over time, the contents of this directory will be either deprecated or housed inside a parent plugin. If your plugin imports the listed items from the following `ui/public` modules, you will need to either update your import statements as indicated below, so that you are pulling these modules from their new locations, or copy the relevant code directly into your plugin. 
 
+[discrete]
 #### `ui/agg_types` [#59605](https://github.com/elastic/kibana/pull/59605)
 The `ui/agg_types` module has been removed in favor of the service provided by the `data` plugin in the new Kibana platform.
 
@@ -518,17 +528,19 @@ import { BUCKET_TYPES, METRIC_TYPES } from 'src/plugins/data/public';
 
 The above examples are not comprehensive, but represent some of the more common uses of `agg_types`. For more details, please refer to the interfaces in [the source code](https://github.com/elastic/kibana/blob/master/src/plugins/data/public/types.ts#L50), as well as the data plugin's [`public/index` file](https://github.com/elastic/kibana/blob/master/src/plugins/data/public/index.ts#L282).
 
+[discrete]
 #### `ui/time_buckets` [#58805](https://github.com/elastic/kibana/pull/58805)
 The `ui/time_buckets` module has been removed and is now internal to the `data` plugin's search & aggregations infrastructure. We are working on an improved set of helper utilities to eventually replace the need for the `TimeBuckets` class.
 
 In the meantime, if you currently rely on `TimeBuckets`, please copy the relevant pieces into your plugin code.
 
-
+[discrete]
 #### `ui/filter_manager` [#59872](https://github.com/elastic/kibana/pull/59872)
 The `ui/filter_manager` module has been removed and now services and UI components are available on the `data` plugin's query infrastructure.
 
 *via [#55926](https://github.com/elastic/kibana/pull/55926)*
 
+[discrete]
 ## Add savedObjects mappings API to core
 
 Added API to register savedObjects mapping from the new platform
@@ -561,12 +573,14 @@ export const mappings: SavedObjectsTypeMappingDefinitions = {
 
 *via [#55825](https://github.com/elastic/kibana/pull/55825)*
 
+[discrete]
 ## Explicitly test custom appRoutes
 
 Tests for custom `appRoute`s are now more clear and explicitly separate from those that test other rendering service interactions.
 
 *via [#55405](https://github.com/elastic/kibana/pull/55405)*
 
+[discrete]
 ## Remove the VisEditorTypesRegistryProvider
 
 The `VisEditorTypesRegistryProvider` is removed. By default, visualizations will use the `default` editor. 
@@ -584,6 +598,7 @@ To specify a custom editor use `editor` parameter as a key and a `class` with yo
 
 *via [#55370](https://github.com/elastic/kibana/pull/55370)*
 
+[discrete]
 ## [NP] Platform exposes API to get authenticated user data
 
 HttpService exposes:
@@ -596,6 +611,7 @@ HttpService exposes:
 
 *via [#55327](https://github.com/elastic/kibana/pull/55327)*
 
+[discrete]
 ## Implements `getStartServices` on server-side
 
 Adds a new API to be able to access `start` dependencies when registering handlers in `setup` phase.
@@ -618,6 +634,7 @@ class MyPlugin implements Plugin {
 
 *via [#55156](https://github.com/elastic/kibana/pull/55156)*
 
+[discrete]
 ## Expressions refactor
 
 ...
@@ -627,6 +644,7 @@ class MyPlugin implements Plugin {
 
 *via [#54342](https://github.com/elastic/kibana/pull/54342)*
 
+[discrete]
 ## Refactor saved object management registry usage
 
 Registration of the following `SavedObjectLoader` in Angular was removed: 
@@ -657,6 +675,8 @@ const savedSearches = createSavedSearchesService(services);
 const savedVisualizations = createSavedVisLoader(servicesForVisualizations);
 const savedDashboards = createSavedDashboardLoader(services);
 ```
+
+[discrete]
 ### Checklist
 
 Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable to this PR.
@@ -667,6 +687,7 @@ Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable t
 ~~- [ ] [Unit or functional tests](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility) were updated or added to match the most common scenarios~~
 ~~- [ ] This was checked for [keyboard-only and screenreader accessibility](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Accessibility#Accessibility_testing_checklist)~~
 
+[discrete]
 ### For maintainers
 
 ~~- [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)~~
@@ -674,6 +695,7 @@ Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable t
 
 *via [#54155](https://github.com/elastic/kibana/pull/54155)*
 
+[discrete]
 ## Enforce camelCase format for a plugin id
 
 When creating a new platform plugin, you need to make sure that pluginId declared in camelCase within `kibana.json` manifest file. It might not match `pluginPath`, which is recommended to be in snake_case format.
@@ -688,6 +710,7 @@ When creating a new platform plugin, you need to make sure that pluginId declare
 
 *via [#53759](https://github.com/elastic/kibana/pull/53759)*
 
+[discrete]
 ## bfetch (2)
 
 Request batching and response streaming functionality of legacy Interpreter plugin has been moved out into a separate `bfetch` Kibana platform plugin. Now every plugin can create server endpoints and browser wrappers that can batch HTTP requests and stream responses back.
@@ -738,10 +761,9 @@ double({ num: 3 }).then(console.log, console.error); // { num: 6 }
 
 *via [#53711](https://github.com/elastic/kibana/pull/53711)*
 
+[discrete]
 ## Grouped Kibana nav
 
 Plugins should now define a category if they have a navigation item: 
 - If you want to fit into our default categories, you can use our `DEFAULT_APP_CATEGORIES` defined in `src/core/utils/default_app_categories.ts`.
 - If you want to create their own category, you can also provide any object matching the `AppCategory` interface defined in `src/core/types/app_category.ts`.
-
-////
