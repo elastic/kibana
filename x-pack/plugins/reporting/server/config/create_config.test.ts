@@ -54,7 +54,7 @@ describe('Reporting server createConfig$', () => {
   it('creates random encryption key and default config using host, protocol, and port from server info', async () => {
     const result = await createConfig$(mockCoreSetup, mockInitContext, mockLogger).toPromise();
 
-    expect(result.encryptionKey).toMatch(/\S{32,}/);
+    expect(result.encryptionKey).toMatch(/\S{32,}/); // random 32 characters
     expect(result.kibanaServer).toMatchInlineSnapshot(`
       Object {
         "hostname": "kibanaHost",
