@@ -642,112 +642,60 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _setMbPointsProperties(mbMap) {
+    // Point layers symbolized as circles use MB `cirlce` layer
+    // Point layers symbolized as icons use MB `symbol` layer
+    const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
     const symbolLayerId = this._getMbSymbolLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
     const symbolLayer = mbMap.getLayer(symbolLayerId);
 
-    // Point layers symbolized as circles require 2 mapbox layers because
-    // "circle" layers do not support "text" style properties
-    // Point layers symbolized as icons only contain a single mapbox layer.
     let markerLayerId;
-    let textLayerId;
     if (this.getCurrentStyle().arePointsSymbolizedAsCircles()) {
       markerLayerId = pointLayerId;
-      textLayerId = this._getMbTextLayerId();
+      if (!pointLayer) {
+        mbMap.addLayer({
+          id: pointLayerId,
+          type: 'circle',
+          source: sourceId,
+          paint: {},
+        });
+      }
       if (symbolLayer) {
         mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
       }
-      this._setMbCircleProperties(mbMap);
+      this.getCurrentStyle().setMBPaintPropertiesForPoints({
+        alpha: this.getAlpha(),
+        mbMap,
+        pointLayerId,
+      });
     } else {
       markerLayerId = symbolLayerId;
-      textLayerId = symbolLayerId;
+      if (!symbolLayer) {
+        mbMap.addLayer({
+          id: symbolLayerId,
+          type: 'symbol',
+          source: sourceId,
+        });
+      }
       if (pointLayer) {
         mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
-        mbMap.setLayoutProperty(this._getMbTextLayerId(), 'visibility', 'none');
       }
-      this._setMbSymbolProperties(mbMap);
+
+      this.getCurrentStyle().setMBSymbolPropertiesForPoints({
+        alpha: this.getAlpha(),
+        mbMap,
+        symbolLayerId,
+      });
+    }
+
+    const filterExpr = getPointFilterExpression(this._hasJoins());
+    if (filterExpr !== mbMap.getFilter(markerLayerId)) {
+      mbMap.setFilter(markerLayerId, filterExpr);
     }
 
     this.syncVisibilityWithMb(mbMap, markerLayerId);
     mbMap.setLayerZoomRange(markerLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    if (markerLayerId !== textLayerId) {
-      this.syncVisibilityWithMb(mbMap, textLayerId);
-      mbMap.setLayerZoomRange(textLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    }
-  }
-
-  _setMbCircleProperties(mbMap) {
-    const sourceId = this.getId();
-    const pointLayerId = this._getMbPointLayerId();
-    const pointLayer = mbMap.getLayer(pointLayerId);
-    if (!pointLayer) {
-      mbMap.addLayer({
-        id: pointLayerId,
-        type: 'circle',
-        source: sourceId,
-        paint: {},
-      });
-    }
-
-    const textLayerId = this._getMbTextLayerId();
-    const textLayer = mbMap.getLayer(textLayerId);
-    if (!textLayer) {
-      mbMap.addLayer({
-        id: textLayerId,
-        type: 'symbol',
-        source: sourceId,
-      });
-    }
-
-    const filterExpr = getPointFilterExpression(this._hasJoins());
-    if (filterExpr !== mbMap.getFilter(pointLayerId)) {
-      mbMap.setFilter(pointLayerId, filterExpr);
-      mbMap.setFilter(textLayerId, filterExpr);
-    }
-
-    this.getCurrentStyle().setMBPaintPropertiesForPoints({
-      alpha: this.getAlpha(),
-      mbMap,
-      pointLayerId,
-    });
-
-    this.getCurrentStyle().setMBPropertiesForLabelText({
-      alpha: this.getAlpha(),
-      mbMap,
-      textLayerId,
-    });
-  }
-
-  _setMbSymbolProperties(mbMap) {
-    const sourceId = this.getId();
-    const symbolLayerId = this._getMbSymbolLayerId();
-    const symbolLayer = mbMap.getLayer(symbolLayerId);
-
-    if (!symbolLayer) {
-      mbMap.addLayer({
-        id: symbolLayerId,
-        type: 'symbol',
-        source: sourceId,
-      });
-    }
-
-    const filterExpr = getPointFilterExpression(this._hasJoins());
-    if (filterExpr !== mbMap.getFilter(symbolLayerId)) {
-      mbMap.setFilter(symbolLayerId, filterExpr);
-    }
-
-    this.getCurrentStyle().setMBSymbolPropertiesForPoints({
-      alpha: this.getAlpha(),
-      mbMap,
-      symbolLayerId,
-    });
-
-    this.getCurrentStyle().setMBPropertiesForLabelText({
-      alpha: this.getAlpha(),
-      mbMap,
-      textLayerId: symbolLayerId,
-    });
   }
 
   _setMbLinePolygonProperties(mbMap) {
@@ -793,9 +741,41 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
+  _setMbLabelTextProperties(mbMap) {
+    // Icon 'symbol' layer does not play nice with label 'symbol' layer
+    // When features are symbolized as icons,
+    // then the label MB properties are included with the existing `symbol` layer used for icons.
+    // When features are symbolized as circles, lines, or polygons,
+    // then a seperate `symbol` layer is required for label MB properties.
+    const requiresSeperateLayerForLabel = this.getCurrentStyle().arePointsSymbolizedAsCircles();
+    const textLayerId = this._getMbTextLayerId();
+    const textLayer = mbMap.getLayer(textLayerId);
+    if (requiresSeperateLayerForLabel && !textLayer) {
+      mbMap.addLayer({
+        id: textLayerId,
+        type: 'symbol',
+        source: this.getId(),
+      });
+    } else if (!requiresSeperateLayerForLabel && textLayer) {
+      mbMap.removeLayer(textLayerId);
+    }
+
+    this.getCurrentStyle().setMBPropertiesForLabelText({
+      alpha: this.getAlpha(),
+      mbMap,
+      textLayerId: requiresSeperateLayerForLabel ? textLayerId : this._getMbSymbolLayerId(),
+    });
+
+    if (requiresSeperateLayerForLabel) {
+      this.syncVisibilityWithMb(mbMap, textLayerId);
+      mbMap.setLayerZoomRange(textLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    }
+  }
+
   _syncStylePropertiesWithMb(mbMap) {
     this._setMbPointsProperties(mbMap);
     this._setMbLinePolygonProperties(mbMap);
+    this._setMbLabelTextProperties(mbMap);
   }
 
   _syncSourceBindingWithMb(mbMap) {

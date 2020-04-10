@@ -385,6 +385,9 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         {this._renderLineWidth()}
+        <EuiSpacer size="m" />
+
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }
@@ -399,6 +402,9 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         {this._renderLineWidth()}
+        <EuiSpacer size="m" />
+
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }
