@@ -45,7 +45,7 @@ export interface GreetingStart {
 
 export interface GreetingSetup {
   setCustomProvider: (customProvider: GreetingProvider) => void;
-  registerGreeting: (greetingDefinition: GreetingDefinition) => void;
+  registerGreeting: (greetingDefinition: GreetingDefinition) => () => Greeting;
 }
 
 export class GreetingPlugin implements Plugin<GreetingSetup, GreetingStart> {
@@ -56,8 +56,10 @@ export class GreetingPlugin implements Plugin<GreetingSetup, GreetingStart> {
   setup = () => ({
     setCustomProvider: (customProvider: GreetingProvider) =>
       (this.greetingProvider = customProvider),
-    registerGreeting: (greetingDefinition: GreetingDefinition) =>
-      (this.greetingDefinitions[greetingDefinition.id] = greetingDefinition),
+    registerGreeting: (greetingDefinition: GreetingDefinition) => {
+      this.greetingDefinitions[greetingDefinition.id] = greetingDefinition;
+      return () => this.greetingProvider(greetingDefinition);
+    },
   });
 
   start() {

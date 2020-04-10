@@ -19,7 +19,7 @@
 
 import { CoreSetup, AppMountParameters, Plugin } from 'kibana/public';
 
-import { GreetingStart, GreetingSetup } from 'examples/greeting/public';
+import { GreetingStart, GreetingSetup, Greeting } from 'examples/greeting/public';
 import { getServices } from './services';
 
 interface SetupDependencies {
@@ -32,8 +32,14 @@ interface StartDependencies {
 
 export class EnhancedPatternExplorerPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  firstGreeting?: () => Greeting;
+
   setup(core: CoreSetup<StartDependencies>, { greeting }: SetupDependencies) {
-    greeting.registerGreeting({ id: 'Casual', salutation: 'Hey there', punctuation: '.' });
+    this.firstGreeting = greeting.registerGreeting({
+      id: 'Casual',
+      salutation: 'Hey there',
+      punctuation: '.',
+    });
     greeting.registerGreeting({ id: 'Excited', salutation: 'Hi', punctuation: '!!' });
     greeting.registerGreeting({ id: 'Formal', salutation: 'Hello ', punctuation: '.' });
 
@@ -48,5 +54,9 @@ export class EnhancedPatternExplorerPlugin
     });
   }
 
-  start() {}
+  start() {
+    // an example of registering a greeting and returning a reference to the
+    // plain or enhanced result
+    setTimeout(() => this.firstGreeting && this.firstGreeting().greetMe('code ninja'), 2000);
+  }
 }
