@@ -80,7 +80,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await loggingMessageInput.click();
       await loggingMessageInput.clearValue();
       await loggingMessageInput.type('test message');
-      await testSubjects.click('slackAddVariableButton');
+      await testSubjects.click('messageAddVariableButton');
       const variableMenuButton = await testSubjects.find('variableMenuButton-0');
       await variableMenuButton.click();
       await testSubjects.click('saveAlertButton');
