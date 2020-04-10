@@ -11,6 +11,7 @@ import { map, mergeMap } from 'rxjs/operators';
 import { CoreSetup, Logger, PluginInitializerContext } from 'src/core/server';
 import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
 import { ConfigSchema } from './schema';
+
 /*
  * Set up dynamic config defaults
  * - xpack.capture.browser.chromium.disableSandbox
@@ -73,6 +74,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
         // disableSandbox was set by user
         return config;
       }
+
       // disableSandbox was not set: apply default for OS
       const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
       logger.debug(
@@ -82,9 +84,10 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
           values: { osName: os.os, dist: os.dist, release: os.release },
         })
       );
-      if (!disableSandbox) {
+
+      if (disableSandbox) {
         logger.warn(
-          i18n.translate('xpack.reporting.serverConfig.sandboxDisabled', {
+          i18n.translate('xpack.reporting.serverConfig.autoSet.sandboxDisabled', {
             defaultMessage: `Setting '{configKey}: false' in Reporting config: not supported for {osName}`,
             values: {
               configKey: 'xpack.reporting.capture.browser.chromium.disableSandbox',
@@ -93,6 +96,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
           })
         );
       }
+
       return Object.assign(config, {
         ...config,
         capture: {

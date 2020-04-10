@@ -133,18 +133,24 @@ describe('Reporting server createConfig$', () => {
 
   it('uses user-provided disableSandbox: false', async () => {
     mockInitContext = makeMockInitContext({
+      encryptionKey: '888888888888888888888888888888888',
       capture: { browser: { chromium: { disableSandbox: false } } },
     } as ReportingConfigType);
     const result = await createConfig$(mockCoreSetup, mockInitContext, mockLogger).toPromise();
+
     expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: false });
+    expect((mockLogger.warn as any).mock.calls.length).toBe(0);
   });
 
   it('uses user-provided disableSandbox: true', async () => {
     mockInitContext = makeMockInitContext({
+      encryptionKey: '888888888888888888888888888888888',
       capture: { browser: { chromium: { disableSandbox: true } } },
     } as ReportingConfigType);
     const result = await createConfig$(mockCoreSetup, mockInitContext, mockLogger).toPromise();
+
     expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: true });
+    expect((mockLogger.warn as any).mock.calls.length).toBe(0);
   });
 
   it('provides a default for disableSandbox', async () => {
@@ -152,7 +158,8 @@ describe('Reporting server createConfig$', () => {
       encryptionKey: '888888888888888888888888888888888',
     } as ReportingConfigType);
     const result = await createConfig$(mockCoreSetup, mockInitContext, mockLogger).toPromise();
-    expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: false });
+
+    expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: expect.any(Boolean) });
     expect((mockLogger.warn as any).mock.calls.length).toBe(0);
   });
 });
