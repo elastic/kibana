@@ -6,6 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { CoreSetup, Logger, PluginInitializerContext } from 'src/core/server';
+import { ConfigType as ReportingConfigType } from './schema';
 import { createConfig$ } from './';
 
 interface KibanaServer {
@@ -13,18 +14,21 @@ interface KibanaServer {
   port?: number;
   protocol?: string;
 }
-interface ReportingKibanaServer {
-  hostname?: string;
-  port?: number;
-  protocol?: string;
-}
 
 const makeMockInitContext = (config: {
+  capture?: Partial<ReportingConfigType['capture']>;
   encryptionKey?: string;
-  kibanaServer: ReportingKibanaServer;
+  kibanaServer: Partial<ReportingConfigType['kibanaServer']>;
 }): PluginInitializerContext =>
   ({
-    config: { create: () => Rx.of(config) },
+    config: {
+      create: () =>
+        Rx.of({
+          ...config,
+          capture: config.capture || { browser: { chromium: { disableSandbox: false } } },
+          kibanaServer: config.kibanaServer || {},
+        }),
+    },
   } as PluginInitializerContext);
 
 const makeMockCoreSetup = (serverInfo: KibanaServer): CoreSetup =>
@@ -40,7 +44,7 @@ describe('Reporting server createConfig$', () => {
     mockInitContext = makeMockInitContext({
       kibanaServer: {},
     });
-    mockLogger = ({ warn: jest.fn() } as unknown) as Logger;
+    mockLogger = ({ warn: jest.fn(), debug: jest.fn() } as unknown) as Logger;
   });
 
   afterEach(() => {
@@ -64,7 +68,7 @@ describe('Reporting server createConfig$', () => {
     ]);
   });
 
-  it('uses the encryption key', async () => {
+  it('uses the user-provided encryption key', async () => {
     mockInitContext = makeMockInitContext({
       encryptionKey: 'iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
       kibanaServer: {},
@@ -75,7 +79,7 @@ describe('Reporting server createConfig$', () => {
     expect((mockLogger.warn as any).mock.calls.length).toBe(0);
   });
 
-  it('uses the encryption key, reporting kibanaServer settings to override server info', async () => {
+  it('uses the user-provided encryption key, reporting kibanaServer settings to override server info', async () => {
     mockInitContext = makeMockInitContext({
       encryptionKey: 'iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
       kibanaServer: {
@@ -88,6 +92,13 @@ describe('Reporting server createConfig$', () => {
 
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "capture": Object {
+          "browser": Object {
+            "chromium": Object {
+              "disableSandbox": false,
+            },
+          },
+        },
         "encryptionKey": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
         "kibanaServer": Object {
           "hostname": "reportingHost",
@@ -115,8 +126,33 @@ describe('Reporting server createConfig$', () => {
     `);
     expect((mockLogger.warn as any).mock.calls.length).toBe(1);
     expect((mockLogger.warn as any).mock.calls[0]).toMatchObject([
-      `Found 'server.host: \"0\" in Kibana configuration. This is incompatible with Reporting. To enable Reporting to work, 'xpack.reporting.kibanaServer.hostname: 0.0.0.0' is being automatically ` +
+      `Found 'server.host: \"0\"' in Kibana configuration. This is incompatible with Reporting. To enable Reporting to work, 'xpack.reporting.kibanaServer.hostname: 0.0.0.0' is being automatically ` +
         `to the configuration. You can change the setting to 'server.host: 0.0.0.0' or add 'xpack.reporting.kibanaServer.hostname: 0.0.0.0' in kibana.yml to prevent this message.`,
     ]);
+  });
+
+  it('uses user-provided disableSandbox: false', async () => {
+    mockInitContext = makeMockInitContext({
+      capture: { browser: { chromium: { disableSandbox: false } } },
+    } as ReportingConfigType);
+    const result = await createConfig$(mockCoreSetup, mockInitContext, mockLogger).toPromise();
+    expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: false });
+  });
+
+  it('uses user-provided disableSandbox: true', async () => {
+    mockInitContext = makeMockInitContext({
+      capture: { browser: { chromium: { disableSandbox: true } } },
+    } as ReportingConfigType);
+    const result = await createConfig$(mockCoreSetup, mockInitContext, mockLogger).toPromise();
+    expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: true });
+  });
+
+  it('provides a default for disableSandbox', async () => {
+    mockInitContext = makeMockInitContext({
+      encryptionKey: '888888888888888888888888888888888',
+    } as ReportingConfigType);
+    const result = await createConfig$(mockCoreSetup, mockInitContext, mockLogger).toPromise();
+    expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: false });
+    expect((mockLogger.warn as any).mock.calls.length).toBe(0);
   });
 });
