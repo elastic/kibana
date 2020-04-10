@@ -43,7 +43,7 @@ function SimpleNumberList({
   useEffect(() => {
     if (
       isArray(value) &&
-      (value?.length !== numbers.length ||
+      (value.length !== numbers.length ||
         !value.every((numberValue, index) => numberValue === numbers[index].value))
     ) {
       setNumbers(

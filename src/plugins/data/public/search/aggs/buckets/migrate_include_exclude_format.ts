@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isString, isObject, isArray } from 'lodash';
+import { isString, isObject } from 'lodash';
 import { IBucketAggConfig, BucketAggType, BucketAggParam } from './bucket_agg_type';
 import { IAggConfig } from '../agg_config';
 
@@ -36,7 +36,7 @@ export const isStringOrNumberType = isType('string', 'number');
 export const migrateIncludeExcludeFormat = {
   serialize(this: BucketAggParam<IBucketAggConfig>, value: any, agg: IBucketAggConfig) {
     if (this.shouldShow && !this.shouldShow(agg)) return;
-    if (!value || isString(value) || isArray(value)) return value;
+    if (!value || isString(value) || Array.isArray(value)) return value;
     else return value.pattern;
   },
   write(
@@ -46,8 +46,8 @@ export const migrateIncludeExcludeFormat = {
   ) {
     const value = aggConfig.getParam(this.name);
 
-    if (isArray(value) && value.length > 0 && isNumberType(aggConfig)) {
-      const parsedValue = (value as number[]).filter((val: number) => val || val === 0);
+    if (Array.isArray(value) && value.length > 0 && isNumberType(aggConfig)) {
+      const parsedValue = value.filter((val): val is number => Number.isFinite(val));
       if (parsedValue.length) {
         output.params[this.name] = parsedValue;
       }

@@ -18,7 +18,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { isArray } from 'lodash';
 import { AggParamEditorProps } from '../agg_param_props';
 import { StringParamEditor } from './string';
 import { search } from '../../../../data/public';
@@ -31,14 +30,14 @@ export function IncludeExcludeParamEditor(props: AggParamEditorProps<string | Ar
 
   // This useEffect converts value from string type to number and back when the field type is changed
   useEffect(() => {
-    if (isAggOfNumberType && !isArray(value) && value !== undefined) {
+    if (isAggOfNumberType && !Array.isArray(value) && value !== undefined) {
       const numberArray = value
-        .split(',')
+        .split('|')
         .map(item => parseFloat(item))
-        .filter(number => !isNaN(number));
+        .filter(number => Number.isFinite(number));
       setValue(numberArray.length ? numberArray : ['']);
-    } else if (!isAggOfNumberType && isArray(value) && value !== undefined) {
-      setValue((value as Array<number | ''>).filter(item => item !== '').toString());
+    } else if (!isAggOfNumberType && Array.isArray(value) && value !== undefined) {
+      setValue(value.filter(item => item !== '').join('|'));
     }
   }, [isAggOfNumberType, setValue, value]);
 
