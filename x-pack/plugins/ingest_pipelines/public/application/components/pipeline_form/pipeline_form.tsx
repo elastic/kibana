@@ -24,7 +24,7 @@ import { SectionError } from '../section_error';
 import { pipelineFormSchema } from './schema';
 
 interface Props {
-  onSave: (pipeline: any) => void; // todo fix TS
+  onSave: (pipeline: Pipeline) => void;
   isSaving: boolean;
   saveError: any;
   defaultValue?: Pipeline;
@@ -50,16 +50,16 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(false);
   const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(false);
 
-  const setDataAndValidation: FormConfig['onSubmit'] = (formData, isValid) => {
+  const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
     if (isValid) {
-      onSave(formData);
+      onSave(formData as Pipeline);
     }
   };
 
   const { form } = useForm({
     schema: pipelineFormSchema,
     defaultValue,
-    onSubmit: setDataAndValidation,
+    onSubmit: handleSave,
   });
 
   return (

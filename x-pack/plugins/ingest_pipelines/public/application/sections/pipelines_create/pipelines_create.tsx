@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { BASE_PATH } from '../../../../common/constants';
+import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import { PipelineForm } from '../../components';
 
@@ -18,8 +19,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const onSave = async (pipeline: any) => {
-    // TODO fix TS
+  const onSave = async (pipeline: Pipeline) => {
     setIsSaving(true);
     setSaveError(null);
 

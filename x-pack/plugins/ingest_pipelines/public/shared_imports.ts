@@ -24,6 +24,7 @@ export {
   Form,
   getUseField,
   ValidationFuncArg,
+  FormData,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
