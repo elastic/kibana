@@ -44,8 +44,18 @@ export const urlSearchParams: (
 
   const query = parse(location.search);
 
-  searchParams.page_index = Number(query.page_index ?? 0);
-  searchParams.page_size = Number(query.page_size ?? 10);
+  // Search params can appear multiple times in the URL, in which case the value for them once parse
+  // would be an array. In these case, we take the last value defined
+  searchParams.page_index = Number(
+    (Array.isArray(query.page_index)
+      ? query.page_index[query.page_index.length - 1]
+      : query.page_index) ?? 0
+  );
+  searchParams.page_size = Number(
+    (Array.isArray(query.page_size)
+      ? query.page_size[query.page_size.length - 1]
+      : query.page_size) ?? 10
+  );
 
   // If pageIndex is not a valid positive integer, set it to 0
   if (!Number.isFinite(searchParams.page_index) || searchParams.page_index < 0) {
