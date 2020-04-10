@@ -6,12 +6,11 @@
 
 import { get } from 'lodash';
 import { getId } from '../../lib/get_id';
-import { notify } from '../../lib/notify';
 import { ErrorStrings } from '../../../i18n';
 
 const { WorkpadFileUpload: errors } = ErrorStrings;
 
-export const uploadWorkpad = (file, onUpload) => {
+export const uploadWorkpad = (file, onUpload, notify) => {
   if (!file) {
     return;
   }

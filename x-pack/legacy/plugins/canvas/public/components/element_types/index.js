@@ -11,11 +11,11 @@ import { camelCase } from 'lodash';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import * as customElementService from '../../lib/custom_element_service';
 import { elementsRegistry } from '../../lib/elements_registry';
-import { notify } from '../../lib/notify';
 import { selectToplevelNodes } from '../../state/actions/transient';
 import { insertNodes, addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ElementTypes as Component } from './element_types';
 
 const customElementAdded = 'elements-custom-added';
@@ -59,7 +59,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         const { customElements } = await customElementService.find(text);
         setCustomElements(customElements);
       } catch (err) {
-        notify.error(err, { title: `Couldn't find custom elements` });
+        ownProps.kibana.services.canvas.notify.error(err, {
+          title: `Couldn't find custom elements`,
+        });
       }
     },
     // remove custom element
@@ -69,7 +71,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         const { customElements } = await customElementService.find(search);
         setCustomElements(customElements);
       } catch (err) {
-        notify.error(err, { title: `Couldn't delete custom elements` });
+        ownProps.kibana.services.canvas.notify.error(err, {
+          title: `Couldn't delete custom elements`,
+        });
       }
     },
     // update custom element
@@ -84,7 +88,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         const { customElements } = await customElementService.find(search);
         setCustomElements(customElements);
       } catch (err) {
-        notify.error(err, { title: `Couldn't update custom elements` });
+        ownProps.kibana.services.canvas.notify.error(err, {
+          title: `Couldn't update custom elements`,
+        });
       }
     },
   };
@@ -95,6 +101,7 @@ export const ElementTypes = compose(
   withState('customElements', 'setCustomElements', []),
   withState('filterTags', 'setFilterTags', []),
   withProps(() => ({ elements: elementsRegistry.toJS() })),
+  withKibana,
   connect(mapStateToProps, mapDispatchToProps, mergeProps)
 )(Component);
 
