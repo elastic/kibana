@@ -90,8 +90,7 @@ describe('getAll', () => {
     const result = await getPings({
       callES: mockEsClient,
       dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
     });
@@ -113,8 +112,7 @@ describe('getAll', () => {
     await getPings({
       callES: mockEsClient,
       dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
     });
@@ -130,8 +128,7 @@ describe('getAll', () => {
     await getPings({
       callES: mockEsClient,
       dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dateRange: { from: 'now-1h', to: 'now' },
       size: 12,
     });
 
@@ -144,8 +141,7 @@ describe('getAll', () => {
     await getPings({
       callES: mockEsClient,
       dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dateRange: { from: 'now-1h', to: 'now' },
       sort: 'desc',
     });
     delete expectedGetAllParams.body.size;
@@ -160,8 +156,7 @@ describe('getAll', () => {
     await getPings({
       callES: mockEsClient,
       dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dateRange: { from: 'now-1h', to: 'now' },
       monitorId: 'testmonitorid',
     });
     delete expectedGetAllParams.body.size;
@@ -176,8 +171,7 @@ describe('getAll', () => {
     await getPings({
       callES: mockEsClient,
       dynamicSettings: defaultDynamicSettings,
-      dateRangeStart: 'now-1h',
-      dateRangeEnd: 'now',
+      dateRange: { from: 'now-1h', to: 'now' },
       status: 'down',
     });
     delete expectedGetAllParams.body.size;

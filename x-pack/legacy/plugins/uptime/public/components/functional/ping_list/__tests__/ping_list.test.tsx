@@ -167,9 +167,12 @@ describe('PingList component', () => {
   it('renders sorted list without errors', () => {
     const component = shallowWithIntl(
       <PingListComponent
-        dateRangeStart="now-15m"
-        dateRangeEnd="now"
+        dateRange={{
+          from: 'now-15m',
+          to: 'now',
+        }}
         getPings={jest.fn()}
+        lastRefresh={123}
         loading={false}
         locations={[]}
         monitorId="foo"

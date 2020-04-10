@@ -9,6 +9,7 @@ import {
   HistogramResult,
   Ping,
   PingsResponse as PingResults,
+  GetPingsParams,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import {
   GetFilterBarParams,
@@ -17,7 +18,6 @@ import {
   GetMonitorDetailsParams,
   GetMonitorLocationsParams,
   GetMonitorStatesParams,
-  GetPingsParams,
   GetPingHistogramParams,
   GetMonitorStatusParams,
   GetMonitorStatusResult,
