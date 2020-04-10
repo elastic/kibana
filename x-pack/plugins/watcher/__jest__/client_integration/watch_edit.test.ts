@@ -97,6 +97,7 @@ describe('<WatchEdit />', () => {
             name: EDITED_WATCH_NAME,
             type: watch.type,
             isNew: false,
+            isActive: true,
             actions: [
               {
                 id: DEFAULT_LOGGING_ACTION_ID,
@@ -190,6 +191,7 @@ describe('<WatchEdit />', () => {
             name: EDITED_WATCH_NAME,
             type,
             isNew: false,
+            isActive: true,
             actions: [],
             timeField,
             triggerIntervalSize,

@@ -106,6 +106,7 @@ describe('<JsonWatchEdit /> create route', () => {
               name: watch.name,
               type: watch.type,
               isNew: true,
+              isActive: true,
               actions: [
                 {
                   id: DEFAULT_LOGGING_ACTION_ID,
@@ -183,6 +184,7 @@ describe('<JsonWatchEdit /> create route', () => {
             id,
             type,
             isNew: true,
+            isActive: true,
             actions: [],
             watch: defaultWatchJson,
           };
@@ -244,6 +246,7 @@ describe('<JsonWatchEdit /> create route', () => {
             id,
             type,
             isNew: true,
+            isActive: true,
             actions: [],
             watch: defaultWatchJson,
           };
