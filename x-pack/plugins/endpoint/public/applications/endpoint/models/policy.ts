@@ -42,6 +42,8 @@ export const generatePolicy = (): PolicyConfig => {
     mac: {
       events: {
         process: true,
+        file: true,
+        network: true,
       },
       malware: {
         mode: ProtectionModes.detect,
@@ -67,6 +69,8 @@ export const generatePolicy = (): PolicyConfig => {
     linux: {
       events: {
         process: true,
+        file: true,
+        network: true,
       },
       logging: {
         stdout: 'debug',

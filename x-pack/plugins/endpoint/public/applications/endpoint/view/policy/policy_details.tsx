@@ -29,12 +29,12 @@ import {
   isLoading,
   apiError,
 } from '../../store/policy_details/selectors';
-import { WindowsEventing } from './policy_forms/eventing/windows';
 import { PageView, PageViewHeaderTitle } from '../../components/page_view';
 import { AppAction } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
+import { WindowsEvents, MacEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
 
 export const PolicyDetails = React.memo(() => {
@@ -206,7 +206,9 @@ export const PolicyDetails = React.memo(() => {
           </h4>
         </EuiText>
         <EuiSpacer size="xs" />
-        <WindowsEventing />
+        <WindowsEvents />
+        <EuiSpacer size="l" />
+        <MacEvents />
       </PageView>
     </>
   );
