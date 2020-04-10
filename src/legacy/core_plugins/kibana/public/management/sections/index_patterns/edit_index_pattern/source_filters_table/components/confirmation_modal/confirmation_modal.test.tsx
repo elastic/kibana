@@ -17,8 +17,21 @@
  * under the License.
  */
 
-/** @internal **/
-export interface SourceFiltersTableFilter {
-  value: string;
-  clientId: string | number;
-}
+import React from 'react';
+import { shallow } from 'enzyme';
+
+import { DeleteFilterConfirmationModal } from './confirmation_modal';
+
+describe('Header', () => {
+  test('should render normally', () => {
+    const component = shallow(
+      <DeleteFilterConfirmationModal
+        filterToDeleteValue={'test'}
+        onCancelConfirmationModal={() => {}}
+        onDeleteFilter={() => {}}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+});

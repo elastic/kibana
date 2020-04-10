@@ -43,7 +43,7 @@ const getTableColumnRender = (
 };
 
 describe('Table', () => {
-  it('should render normally', async () => {
+  test('should render normally', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
@@ -58,7 +58,7 @@ describe('Table', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render filter matches', async () => {
+  test('should render filter matches', () => {
     const component = shallow<Table>(
       <Table
         indexPattern={getIndexPatternMock({
