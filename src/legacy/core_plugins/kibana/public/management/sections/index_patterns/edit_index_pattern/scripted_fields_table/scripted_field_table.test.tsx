@@ -37,18 +37,20 @@ jest.mock('@elastic/eui', () => ({
     default: () => {},
   },
 }));
-jest.mock('../components/header', () => ({ Header: 'header' }));
-jest.mock('../components/call_outs', () => ({ CallOuts: 'call-outs' }));
-jest.mock('../components/table', () => ({
+jest.mock('./components/header', () => ({ Header: 'header' }));
+jest.mock('./components/call_outs', () => ({ CallOuts: 'call-outs' }));
+jest.mock('./components/table', () => ({
   // Note: this seems to fix React complaining about non lowercase attributes
   Table: () => {
     return 'table';
   },
 }));
+
 jest.mock('ui/scripting_languages', () => ({
   getSupportedScriptingLanguages: () => ['painless'],
   getDeprecatedScriptingLanguages: () => [],
 }));
+
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
     scriptedFields: {
