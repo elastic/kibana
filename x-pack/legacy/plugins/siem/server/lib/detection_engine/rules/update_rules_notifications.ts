@@ -8,7 +8,6 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { AlertsClient, AlertServices } from '../../../../../../../plugins/alerting/server';
 import { updateOrCreateRuleActionsSavedObject } from '../rule_actions/update_or_create_rule_actions_saved_object';
 import { updateNotifications } from '../notifications/update_notifications';
-import { updateRuleActions } from './update_rule_actions';
 import { RuleActions } from '../rule_actions/types';
 
 interface UpdateRulesNotifications {
@@ -37,19 +36,13 @@ export const updateRulesNotifications = async ({
     throttle,
   });
 
-  await updateRuleActions({
-    alertsClient,
-    savedObjectsClient,
-    ruleAlertId,
-  });
-
   await updateNotifications({
     alertsClient,
     ruleAlertId,
     enabled,
     name,
     actions: ruleActions.actions,
-    interval: ruleActions?.alertThrottle,
+    interval: ruleActions.alertThrottle,
   });
 
   return ruleActions;

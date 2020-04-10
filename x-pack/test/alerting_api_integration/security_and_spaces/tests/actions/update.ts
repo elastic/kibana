@@ -69,6 +69,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 id: createdAction.id,
+                isPreconfigured: false,
                 actionTypeId: 'test.index-record',
                 name: 'My action updated',
                 config: {
@@ -301,6 +302,45 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
                 error: 'Bad Request',
                 message:
                   'error validating action type secrets: [encrypted]: expected value of type [string] but got [number]',
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`shouldn't update action from preconfigured list`, async () => {
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/action/custom-system-abc-connector`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action updated',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: `Preconfigured action custom-system-abc-connector is not allowed to update.`,
               });
               break;
             default:
