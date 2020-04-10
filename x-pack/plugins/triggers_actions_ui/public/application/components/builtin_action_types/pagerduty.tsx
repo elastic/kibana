@@ -74,6 +74,32 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
+      if (actionParams.timestamp?.length) {
+        let date;
+        try {
+          date = Date.parse(actionParams.timestamp);
+        } catch (err) {
+          errors.summary.push(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.invalidTimestampText',
+              {
+                defaultMessage: 'Timestamp is not valid Date format.',
+              }
+            )
+          );
+        }
+
+        if (date && isNaN(date)) {
+          errors.summary.push(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.invalidTimestampText',
+              {
+                defaultMessage: 'Timestamp is not valid Date format.',
+              }
+            )
+          );
+        }
+      }
       return validationResult;
     },
     actionConnectorFields: PagerDutyActionConnectorFields,

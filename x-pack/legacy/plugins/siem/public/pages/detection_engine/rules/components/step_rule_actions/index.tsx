@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
+import {
+  EuiHorizontalRule,
+  EuiForm,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -16,7 +23,7 @@ import { StepContentWrapper } from '../step_content_wrapper';
 import { ThrottleSelectField, THROTTLE_OPTIONS } from '../throttle_select_field';
 import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../../lib/kibana';
-import { schema } from './schema';
+import { getSchema } from './schema';
 import * as I18n from './translations';
 
 interface StepRuleActionsProps extends RuleStepProps {
@@ -46,8 +53,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
 }) => {
   const [myStepData, setMyStepData] = useState<ActionsStepRule>(stepActionsDefaultValue);
   const {
-    services: { application },
+    services: {
+      application,
+      triggers_actions_ui: { actionTypeRegistry },
+    },
   } = useKibana();
+  const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
 
   const { form } = useForm({
     defaultValue: myStepData,
@@ -110,6 +121,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [isLoading, updateThrottle]
   );
 
+  console.error('step', myStepData, defaultValues, form, form.getErrors());
+
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription schema={schema} data={myStepData} />
@@ -118,30 +131,39 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepRuleActions">
-          <UseField
-            path="throttle"
-            component={ThrottleSelectField}
-            componentProps={throttleFieldComponentProps}
-          />
-          {myStepData.throttle !== stepActionsDefaultValue.throttle && (
-            <>
-              <EuiSpacer />
+          <EuiForm>
+            <UseField
+              path="throttle"
+              component={ThrottleSelectField}
+              componentProps={throttleFieldComponentProps}
+            />
+            {myStepData.throttle !== stepActionsDefaultValue.throttle ? (
+              <>
+                <EuiSpacer />
+
+                <UseField
+                  path="actions"
+                  defaultValue={myStepData.actions}
+                  component={RuleActionsField}
+                  componentProps={{
+                    messageVariables: actionMessageParams,
+                  }}
+                />
+                <UseField
+                  path="kibanaSiemAppUrl"
+                  defaultValue={kibanaAbsoluteUrl}
+                  component={GhostFormField}
+                />
+              </>
+            ) : (
               <UseField
                 path="actions"
                 defaultValue={myStepData.actions}
-                component={RuleActionsField}
-                componentProps={{
-                  messageVariables: actionMessageParams,
-                }}
-              />
-              <UseField
-                path="kibanaSiemAppUrl"
-                defaultValue={kibanaAbsoluteUrl}
                 component={GhostFormField}
               />
-            </>
-          )}
-          <UseField path="enabled" defaultValue={myStepData.enabled} component={GhostFormField} />
+            )}
+            <UseField path="enabled" defaultValue={myStepData.enabled} component={GhostFormField} />
+          </EuiForm>
         </Form>
       </StepContentWrapper>
 

@@ -250,14 +250,19 @@ export const signalRulesAlertType = ({
           result.searchAfterTimes.push(makeFloatString(end - start));
         }
 
+        logger.warn('rule execution');
+        logger.warn(JSON.stringify(result, null, 2));
+        logger.warn(`actions ${actions.length}`);
+        const notificationRuleParams: NotificationRuleTypeParams = {
+          ...ruleParams,
+          name,
+          id: savedObject.id,
+        };
+
+        logger.warn(`notificationRuleParams ${JSON.stringify(notificationRuleParams, null, 2)}`);
+
         if (result.success) {
           if (actions.length) {
-            const notificationRuleParams: NotificationRuleTypeParams = {
-              ...ruleParams,
-              name,
-              id: savedObject.id,
-            };
-
             const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
             const toInMs = parseScheduleDates('now')?.format('x');
 
@@ -267,20 +272,21 @@ export const signalRulesAlertType = ({
               id: savedObject.id,
               kibanaSiemAppUrl: meta?.kibana_siem_app_url,
             });
+            logger.warn(resultsLink);
 
             logger.info(
               buildRuleMessage(`Found ${result.createdSignalsCount} signals for notification.`)
             );
 
-            if (result.createdSignalsCount) {
-              const alertInstance = services.alertInstanceFactory(alertId);
-              scheduleNotificationActions({
-                alertInstance,
-                signalsCount: result.createdSignalsCount,
-                resultsLink,
-                ruleParams: notificationRuleParams,
-              });
-            }
+            // if (result.createdSignalsCount) {
+            const alertInstance = services.alertInstanceFactory(alertId);
+            scheduleNotificationActions({
+              alertInstance,
+              signalsCount: result.createdSignalsCount,
+              resultsLink,
+              ruleParams: notificationRuleParams,
+            });
+            // }
           }
 
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));

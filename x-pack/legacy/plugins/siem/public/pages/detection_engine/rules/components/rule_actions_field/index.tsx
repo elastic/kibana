@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { isEmpty } from 'lodash/fp';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import deepMerge from 'deepmerge';
+import ReactMarkdown from 'react-markdown';
+import styled from 'styled-components';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loadActionTypes } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/lib/action_connector_api';
@@ -24,7 +28,15 @@ const DEFAULT_ACTION_GROUP_ID = 'default';
 const DEFAULT_ACTION_MESSAGE =
   'Rule {{context.rule.name}} generated {{state.signals_count}} signals';
 
+const FieldErrorsContainer = styled.div`
+  p {
+    margin-bottom: 0;
+  }
+`;
+
 export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables }) => {
+  console.error('error', field);
+  const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const [supportedActionTypes, setSupportedActionTypes] = useState<ActionType[] | undefined>();
   const {
     http,
@@ -66,21 +78,60 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
     })();
   }, []);
 
+  useEffect(() => {
+    if (field.form.isSubmitting) {
+      return setFieldErrors(null);
+    }
+    if (
+      field.form.isSubmitted &&
+      !field.form.isSubmitting &&
+      field.form.isValid === false &&
+      field.errors.length
+    ) {
+      const errorsString = field.errors.map(({ message }) => message).join('\n');
+      return setFieldErrors(errorsString);
+    }
+  }, [
+    field.form.isSubmitted,
+    field.form.isSubmitting,
+    field.isChangingValue,
+    field.form.isValid,
+    field.errors,
+    setFieldErrors,
+  ]);
+
+  const actions: AlertAction[] = useMemo(
+    () => (!isEmpty(field.value) ? (field.value as AlertAction[]) : []),
+    [field.value]
+  );
+
   if (!supportedActionTypes) return <></>;
 
   return (
-    <ActionForm
-      actions={field.value as AlertAction[]}
-      messageVariables={messageVariables}
-      defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
-      setActionIdByIndex={setActionIdByIndex}
-      setAlertProperty={setAlertProperty}
-      setActionParamsProperty={setActionParamsProperty}
-      http={http}
-      actionTypeRegistry={actionTypeRegistry}
-      actionTypes={supportedActionTypes}
-      defaultActionMessage={DEFAULT_ACTION_MESSAGE}
-      toastNotifications={notifications.toasts}
-    />
+    <>
+      {fieldErrors ? (
+        <>
+          <FieldErrorsContainer>
+            <EuiCallOut title="Please fix the issues listed below" color="danger" iconType="alert">
+              <ReactMarkdown source={fieldErrors} />
+            </EuiCallOut>
+          </FieldErrorsContainer>
+          <EuiSpacer />
+        </>
+      ) : null}
+      <ActionForm
+        actions={actions}
+        messageVariables={messageVariables}
+        defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
+        setActionIdByIndex={setActionIdByIndex}
+        setAlertProperty={setAlertProperty}
+        setActionParamsProperty={setActionParamsProperty}
+        http={http}
+        actionTypeRegistry={actionTypeRegistry}
+        actionTypes={supportedActionTypes}
+        defaultActionMessage={DEFAULT_ACTION_MESSAGE}
+        toastNotifications={notifications.toasts}
+      />
+    </>
   );
 };
