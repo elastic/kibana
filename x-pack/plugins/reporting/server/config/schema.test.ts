@@ -106,18 +106,29 @@ describe('Reporting Config Schema', () => {
   });
 
   it(`allows optional settings`, () => {
+    // encryption key
     expect(
       ConfigSchema.validate({ encryptionKey: 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' })
         .encryptionKey
     ).toBe('qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq');
 
+    // disableSandbox
     expect(
       ConfigSchema.validate({ capture: { browser: { chromium: { disableSandbox: true } } } })
         .capture.browser.chromium
     ).toMatchObject({ disableSandbox: true, proxy: { enabled: false } });
 
+    // kibanaServer
     expect(
       ConfigSchema.validate({ kibanaServer: { hostname: 'Frodo' } }).kibanaServer
     ).toMatchObject({ hostname: 'Frodo' });
+  });
+
+  it(`logs the proper validation messages`, () => {
+    // kibanaServer
+    const throwValidationErr = () => ConfigSchema.validate({ kibanaServer: { hostname: '0' } });
+    expect(throwValidationErr).toThrowError(
+      `[kibanaServer.hostname]: must not be "0" for the headless browser to correctly resolve the host`
+    );
   });
 });
