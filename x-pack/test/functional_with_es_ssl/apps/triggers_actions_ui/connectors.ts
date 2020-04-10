@@ -178,23 +178,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should not be able to delete a pre-configured connector', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await testSubjects.click('connectorsTab');
       const preconfiguredConnectorName = 'Slack#xyz';
       await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
 
       const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResults.length).to.eql(1);
+      expect(searchResults.length).to.greaterThan(1);
 
       expect(await testSubjects.exists('deleteConnector')).to.be(false);
       expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
     });
 
     it('should not be able to edit a pre-configured connector', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await testSubjects.click('connectorsTab');
       const preconfiguredConnectorName = 'Slack#xyz';
 
       await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
 
       const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeEdit.length).to.eql(1);
+      expect(searchResultsBeforeEdit.length).to.greaterThan(1);
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
