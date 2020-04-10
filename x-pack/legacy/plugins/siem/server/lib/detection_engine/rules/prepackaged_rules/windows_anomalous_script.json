@@ -4,7 +4,7 @@
   "false_positives": [
     "Certain kinds of security testing may trigger this signal. PowerShell scripts that use high levels of obfuscation or have unusual script block payloads may trigger this signal."
   ],
-  "from": "now-16m",
+  "from": "now-45m",
   "interval": "15m",
   "machine_learning_job_id": "windows_anomalous_script",
   "name": "Suspicious Powershell Script",

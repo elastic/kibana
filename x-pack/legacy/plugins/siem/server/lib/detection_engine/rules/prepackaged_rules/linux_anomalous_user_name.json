@@ -4,7 +4,7 @@
   "false_positives": [
     "Uncommon user activity can be due to an engineer logging onto a server instance in order to perform manual troubleshooting or reconfiguration."
   ],
-  "from": "now-16m",
+  "from": "now-45m",
   "interval": "15m",
   "machine_learning_job_id": "linux_anomalous_user_name_ecs",
   "name": "Unusual Linux Username",
