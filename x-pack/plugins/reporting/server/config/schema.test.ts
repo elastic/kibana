@@ -54,6 +54,7 @@ describe('Reporting Config Schema', () => {
       roles: { allow: ['reporting_user'] },
     });
   });
+
   it(`context {"dev":false,"dist":true} produces correct config`, () => {
     expect(ConfigSchema.validate({}, { dev: false, dist: true })).toMatchObject({
       capture: {
@@ -102,5 +103,21 @@ describe('Reporting Config Schema', () => {
       },
       roles: { allow: ['reporting_user'] },
     });
+  });
+
+  it(`allows optional settings`, () => {
+    expect(
+      ConfigSchema.validate({ encryptionKey: 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' })
+        .encryptionKey
+    ).toBe('qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq');
+
+    expect(
+      ConfigSchema.validate({ capture: { browser: { chromium: { disableSandbox: true } } } })
+        .capture.browser.chromium
+    ).toMatchObject({ disableSandbox: true, proxy: { enabled: false } });
+
+    expect(
+      ConfigSchema.validate({ kibanaServer: { hostname: 'Frodo' } }).kibanaServer
+    ).toMatchObject({ hostname: 'Frodo' });
   });
 });

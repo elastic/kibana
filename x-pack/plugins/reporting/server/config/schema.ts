@@ -7,8 +7,13 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import moment from 'moment';
 
+/*
+ * NOTE dynamic defaults are processed in the createConfig$ function
+ */
+
 const KibanaServerSchema = schema.object({
   hostname: schema.maybe(
+    // default value is dynamic
     schema.string({
       validate(value) {
         if (value === '0') {
@@ -85,7 +90,7 @@ const CaptureSchema = schema.object({
         schema.boolean({ defaultValue: false }),
         schema.maybe(schema.never())
       ),
-      disableSandbox: schema.maybe(schema.boolean()), // leave this unset and determine the default at runtime
+      disableSandbox: schema.maybe(schema.boolean()), // default value is dynamic
       proxy: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
         server: schema.conditional(
@@ -101,7 +106,6 @@ const CaptureSchema = schema.object({
           schema.maybe(schema.never())
         ),
       }),
-      userDataDir: schema.maybe(schema.string()), // FIXME unused?
     }),
     type: schema.string({ defaultValue: 'chromium' }),
   }),
@@ -136,7 +140,7 @@ const CsvSchema = schema.object({
 const EncryptionKeySchema = schema.conditional(
   schema.contextRef('dist'),
   true,
-  schema.maybe(schema.string({ minLength: 32 })),
+  schema.maybe(schema.string({ minLength: 32 })), // default value is dynamic
   schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
 );
 
