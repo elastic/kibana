@@ -46,7 +46,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
         logger.warn(
           i18n.translate('xpack.reporting.serverConfig.invalidServerHostname', {
             defaultMessage:
-              `Found 'server.host: "0" in Kibana configuration. This is incompatible with Reporting. ` +
+              `Found 'server.host: "0"' in Kibana configuration. This is incompatible with Reporting. ` +
               `To enable Reporting to work, '{configKey}: 0.0.0.0' is being automatically to the configuration. ` +
               `You can change the setting to 'server.host: 0.0.0.0' or add '{configKey}: 0.0.0.0' in kibana.yml to prevent this message.`,
             values: { configKey: 'xpack.reporting.kibanaServer.hostname' },
@@ -76,16 +76,42 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
       };
     }),
     mergeMap(async config => {
-      // if the disableSandbox is unset / undefined, give it a default depending on the OS
       if (config.capture.browser.chromium.disableSandbox != null) {
-        // disableSandbox was set
+        // disableSandbox was set by user
         return config;
       }
 
       // disableSandbox was not set: apply default for OS
+      const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
+      logger.debug(
+        i18n.translate(`xpack.reporting.serverConfig.osDetected`, {
+          defaultMessage:
+            'Running on OS: "{osName}", distribution: "{dist}", release: "${release}"',
+          values: { osName: os.os, dist: os.dist, release: os.release },
+        })
+      );
+      if (!disableSandbox) {
+        logger.warn(
+          i18n.translate('xpack.reporting.serverConfig.sandboxDisabled', {
+            defaultMessage: `Setting '{configKey}: false' in Reporting config: not supported for {osName}`,
+            values: {
+              configKey: 'xpack.reporting.capture.browser.chromium.disableSandbox',
+              osName: `${os.os}/${os.dist}`,
+            },
+          })
+        );
+      }
       return Object.assign(config, {
+        ...config,
         capture: {
-          browser: { chromium: { disableSandbox: await getDefaultChromiumSandboxDisabled() } },
+          ...config.capture,
+          browser: {
+            ...config.capture.browser,
+            chromium: {
+              ...config.capture.browser.chromium,
+              disableSandbox,
+            },
+          },
         },
       });
     })

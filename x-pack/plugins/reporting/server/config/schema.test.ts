@@ -12,7 +12,7 @@ describe('Reporting Config Schema', () => {
       capture: {
         browser: {
           autoDownload: true,
-          chromium: { disableSandbox: false, proxy: { enabled: false } },
+          chromium: { disableSandbox: expect.any(Boolean), proxy: { enabled: false } },
           type: 'chromium',
         },
         loadDelay: 3000,
@@ -59,7 +59,11 @@ describe('Reporting Config Schema', () => {
       capture: {
         browser: {
           autoDownload: false,
-          chromium: { disableSandbox: false, inspect: false, proxy: { enabled: false } },
+          chromium: {
+            disableSandbox: expect.any(Boolean),
+            inspect: false,
+            proxy: { enabled: false },
+          },
           type: 'chromium',
         },
         loadDelay: 3000,
