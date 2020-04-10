@@ -49,15 +49,18 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
     const isCurrentlyOnListPage = isOnPolicyListPage(newState);
     const wasPreviouslyOnListPage = isOnPolicyListPage(state);
 
-    // If user just landed on the List page, then set the loading flag (data is being fetched)
-    if (isCurrentlyOnListPage && !wasPreviouslyOnListPage) {
-      newState.apiError = undefined;
-      newState.isLoading = true;
+    // If on the current page, then return new state with location information
+    // Also adjust some state if user is just entering the policy list view
+    if (isCurrentlyOnListPage) {
+      if (!wasPreviouslyOnListPage) {
+        newState.apiError = undefined;
+        newState.isLoading = true;
+      }
       return newState;
     }
     return {
       ...initialPolicyListState(),
-      location: action.payload,
+      // location: action.payload,
     };
   }
 
