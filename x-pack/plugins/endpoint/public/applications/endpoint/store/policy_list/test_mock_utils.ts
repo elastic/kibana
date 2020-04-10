@@ -63,6 +63,13 @@ export interface MiddlewareActionSpyHelper<S = GlobalState> {
  * @example
  * // Use in Policy List middleware testing
  * const { actionSpyMiddleware, waitForAction } = createSpyMiddleware<PolicyListState>();
+ * store = createStore(
+ *    policyListReducer,
+ *    applyMiddleware(
+ *      policyListMiddlewareFactory(fakeCoreStart, depsStart),
+ *      actionSpyMiddleware
+ *    )
+ *  );
  * // later in test
  * it('...', async () => {
  *   //...
