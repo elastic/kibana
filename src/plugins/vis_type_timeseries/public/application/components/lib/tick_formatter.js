@@ -20,7 +20,7 @@
 import handlebars from 'handlebars/dist/handlebars';
 import { isNumber } from 'lodash';
 import { inputFormats, outputFormats, isDuration } from '../lib/durations';
-import { getFieldFormats } from '../../services';
+import { getFieldFormats } from '../../../services';
 
 export const createTickFormatter = (format = '0,0.[00]', template, getConfig = null) => {
   const fieldFormats = getFieldFormats();

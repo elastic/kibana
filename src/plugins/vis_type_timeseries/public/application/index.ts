@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { getUISettings } from '../../services';
-
-export function getDefaultQueryLanguage() {
-  return getUISettings().get('search:queryLanguage');
-}
+// @ts-ignore
+export { EditorController } from './editor_controller';
+export * from './lib';

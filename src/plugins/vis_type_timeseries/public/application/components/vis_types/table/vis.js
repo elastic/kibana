@@ -27,7 +27,7 @@ import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
 import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getFieldFormats } from '../../../services';
+import { getFieldFormats } from '../../../../services';
 
 import { METRIC_TYPES } from '../../../../../../../plugins/vis_type_timeseries/common/metric_types';
 

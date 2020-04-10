@@ -19,7 +19,7 @@
 
 import { createTickFormatter } from './tick_formatter';
 import { getFieldFormatsRegistry } from '../../../../../../test_utils/public/stub_field_formats';
-import { setFieldFormats } from '../../services';
+import { setFieldFormats } from '../../../services';
 
 const mockUiSettings = {
   get: item => {

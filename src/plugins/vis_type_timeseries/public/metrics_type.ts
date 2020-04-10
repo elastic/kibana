@@ -21,11 +21,10 @@ import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
+import { EditorController } from './application';
 // @ts-ignore
-import { EditorController } from './editor_controller';
-// @ts-ignore
-import { PANEL_TYPES } from '../../../../plugins/vis_type_timeseries/common/panel_types';
-import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/public';
+import { PANEL_TYPES } from '../common/panel_types';
+import { defaultFeedbackMessage } from '../../kibana_utils/public';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -69,12 +68,9 @@ export const metricsVisDefinition = {
       show_legend: 1,
       show_grid: 1,
     },
-    component: require('./components/vis_editor').VisEditor,
+    component: require('./application/components/vis_editor').VisEditor,
   },
   editor: EditorController,
-  editorConfig: {
-    component: require('./components/vis_editor').VisEditor,
-  },
   options: {
     showQueryBar: false,
     showFilterBar: false,

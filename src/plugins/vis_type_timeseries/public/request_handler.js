@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { validateInterval } from './lib/validate_interval';
-import { getTimezone } from './lib/get_timezone';
+import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 
 export const metricsRequestHandler = async ({

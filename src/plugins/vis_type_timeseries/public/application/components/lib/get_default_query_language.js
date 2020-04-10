@@ -17,17 +17,8 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
-import { MetricsPluginSetupDependencies } from './plugin';
-import { plugin } from '.';
+import { getUISettings } from '../../../services';
 
-const plugins: Readonly<MetricsPluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: npSetup.plugins.visualizations,
-};
-
-const pluginInstance = plugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core, npStart.plugins);
+export function getDefaultQueryLanguage() {
+  return getUISettings().get('search:queryLanguage');
+}

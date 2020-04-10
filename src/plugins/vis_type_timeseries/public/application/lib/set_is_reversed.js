@@ -18,7 +18,7 @@
  */
 
 import color from 'color';
-import { getUISettings } from '../services';
+import { getUISettings } from '../../services';
 
 const isDarkTheme = () => getUISettings().get('theme:darkMode');
 

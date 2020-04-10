@@ -34,7 +34,7 @@ import { getInterval } from '../../lib/get_interval';
 import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
-import { getCoreStart, getUISettings } from '../../../services';
+import { getCoreStart, getUISettings } from '../../../../services';
 
 export class TimeseriesVisualization extends Component {
   static propTypes = {

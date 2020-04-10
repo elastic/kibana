@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { MetricsPlugin as Plugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+// @ts-ignore
+export { validateInterval } from './validate_interval';
+export { getTimezone } from './get_timezone';

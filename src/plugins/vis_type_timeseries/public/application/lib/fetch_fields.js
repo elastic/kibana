@@ -17,8 +17,8 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries/common/extract_index_patterns';
-import { getCoreStart } from '../services';
+import { extractIndexPatterns } from '../../../common/extract_index_patterns';
+import { getCoreStart } from '../../services';
 
 export async function fetchFields(indexPatterns = ['*']) {
   const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];

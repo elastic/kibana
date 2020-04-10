@@ -18,8 +18,8 @@
  */
 
 import { I18nStart, SavedObjectsStart, IUiSettingsClient, CoreStart } from 'src/core/public';
-import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { createGetterSetter } from '../../kibana_utils/public';
+import { DataPublicPluginStart } from '../../data/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

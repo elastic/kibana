@@ -17,10 +17,13 @@
  * under the License.
  */
 
+import './index.scss';
+
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { fetchIndexPatternFields } from './lib/fetch_fields';
-import { getSavedObjectsClient, getUISettings, getI18n } from './services';
+import { getSavedObjectsClient, getUISettings, getI18n } from '../services';
+import { VisEditor } from './components/vis_editor';
 
 export class EditorController {
   constructor(el, vis, eventEmitter, embeddableHandler) {
@@ -55,19 +58,14 @@ export class EditorController {
     this.state.isLoaded = true;
   };
 
-  getComponent = () => {
-    return this.state.vis.type.editorConfig.component;
-  };
-
   async render(params) {
-    const Component = this.getComponent();
     const I18nContext = getI18n().Context;
 
     !this.state.isLoaded && (await this.fetchDefaultParams());
 
     render(
       <I18nContext>
-        <Component
+        <VisEditor
           config={getUISettings()}
           vis={this.state.vis}
           visFields={this.state.fields}

@@ -33,7 +33,7 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
 import { eventBus, ACTIVE_CURSOR } from '../../lib/active_cursor';
-import { getUISettings } from '../../../services';
+import { getUISettings } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';

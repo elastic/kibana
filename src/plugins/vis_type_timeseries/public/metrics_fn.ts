@@ -19,12 +19,8 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  ExpressionFunctionDefinition,
-  KibanaContext,
-  Render,
-} from '../../../../plugins/expressions/public';
-import { PersistedState } from '../../../../plugins/visualizations/public';
+import { ExpressionFunctionDefinition, KibanaContext, Render } from '../../expressions/public';
+import { PersistedState } from '../../visualizations/public';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';

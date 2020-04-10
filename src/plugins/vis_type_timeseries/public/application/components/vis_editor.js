@@ -30,7 +30,7 @@ import { createBrushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries/common/extract_index_patterns';
 import { esKuery } from '../../../../../plugins/data/public';
-import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../services';
+import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../../services';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
