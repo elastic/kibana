@@ -36,6 +36,7 @@ export class GreetingEnhancedPlugin implements Plugin<void, void, SetupDependenc
         this.getStartServices().overlays.openModal(
           toMountPoint(<EuiModalBody>{`${def.salutation} ${name}${def.punctuation}`}</EuiModalBody>)
         ),
+      label: def.id,
     }));
   }
 

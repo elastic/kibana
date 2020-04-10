@@ -20,7 +20,7 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiPageContent } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
-import { EuiSelect } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { AppMountParameters } from 'kibana/public';
 
 import { EuiButton } from '@elastic/eui';
@@ -28,29 +28,40 @@ import { EuiText } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { Services } from './services';
+import { Greeting } from '../../greeting/public';
+
+function greeterToComboOption(greeter: Greeting) {
+  return {
+    value: greeter,
+    label: greeter.label,
+  };
+}
 
 function EnhancementsPatternApp(props: Services) {
   const [name, setName] = useState('');
-  const [greeterId, setGreeterId] = useState('Casual');
+  const greetersAsOptions = props.getGreeterObjects().map(greeter => greeterToComboOption(greeter));
+  const defaultGreeting = props.getGreeterObjects()[0];
+
+  const [selectedGreeter, setSelectedGreeter] = useState<Greeting | undefined>(defaultGreeting);
   return (
     <EuiPageContent>
       <EuiText>
         <h1>Enhancements pattern</h1>
         This explorer shows how one plugin can add enhancements via a{' '}
         <EuiCode>setCustomProvider</EuiCode> pattern. If you run kibana with{' '}
-        <EuiCode>syarn start --run-examples</EuiCode> and click the Greet me button, you should see
-        a modal. This is the enhanced functionality. If you set{' '}
+        <EuiCode>yarn start --run-examples</EuiCode> and click the Greet me button, you should see a
+        modal. This is the enhanced functionality. If you set{' '}
         <EuiCode>greetingEnhanced.enabled: false</EuiCode> in your kibana.yml and then run this
         example again you should only see a simple alert window, the unenhanced version.
       </EuiText>
       <EuiSpacer />
-      <EuiSelect
-        value={greeterId}
-        onChange={e => setGreeterId(e.target.value)}
-        options={props.getGreeterIds().map(id => ({
-          value: id,
-          text: id,
-        }))}
+      <EuiComboBox<Greeting>
+        selectedOptions={selectedGreeter ? [greeterToComboOption(selectedGreeter)] : undefined}
+        onChange={e => {
+          setSelectedGreeter(e[0] ? e[0].value : undefined);
+        }}
+        options={greetersAsOptions}
+        singleSelection={{ asPlainText: true }}
       />
       <EuiFieldText
         placeholder="What is your name?"
@@ -58,8 +69,12 @@ function EnhancementsPatternApp(props: Services) {
         onChange={e => setName(e.target.value)}
       />
       <EuiButton
-        disabled={greeterId === '' || name === ''}
-        onClick={() => props.greetWithGreeter(greeterId, name)}
+        disabled={selectedGreeter === undefined || name === ''}
+        onClick={() => {
+          if (selectedGreeter) {
+            props.greetWithGreeter(selectedGreeter, name);
+          }
+        }}
       >
         Greet me
       </EuiButton>

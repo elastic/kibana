@@ -27,17 +27,20 @@ export interface GreetingDefinition {
 
 export interface Greeting {
   greetMe: (name: string) => void;
+  label: string;
 }
 
 type GreetingProvider = (def: GreetingDefinition) => Greeting;
 
 const defaultGreetingProvider: GreetingProvider = (def: GreetingDefinition) => ({
   greetMe: (name: string) => alert(`${def.salutation} ${name}${def.punctuation}`),
+  label: def.id,
 });
 
 export interface GreetingStart {
   getGreeting: (id: string) => Greeting;
   getRegisteredGreetings: () => string[];
+  getRegisteredGreetingsAsObjects: () => Greeting[];
 }
 
 export interface GreetingSetup {
@@ -65,6 +68,7 @@ export class GreetingPlugin implements Plugin<GreetingSetup, GreetingStart> {
     return {
       getGreeting: (id: string) => this.greetings[id],
       getRegisteredGreetings: () => Object.keys(this.greetings),
+      getRegisteredGreetingsAsObjects: () => Object.values(this.greetings),
     };
   }
 }

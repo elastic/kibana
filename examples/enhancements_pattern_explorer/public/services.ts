@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { GreetingStart } from '../../greeting/public';
+import { GreetingStart, Greeting } from '../../greeting/public';
 
 export interface Services {
-  greetWithGreeter: (id: string, name: string) => void;
+  greetWithGreeter: (greeting: Greeting, name: string) => void;
   getGreeterIds: () => string[];
+  getGreeterObjects: () => Greeting[];
 }
 
 /**
@@ -30,15 +31,10 @@ export interface Services {
  * @param dependencies
  */
 export const getServices = (dependencies: { greetingServices: GreetingStart }): Services => ({
-  greetWithGreeter: (greeterId: string, name: string) => {
-    const greeting = dependencies.greetingServices.getGreeting(greeterId);
-
-    if (!greeting) {
-      throw new Error(`No Greeter registered with id ${greeterId}`);
-    }
-
+  greetWithGreeter: (greeting: Greeting, name: string) => {
     greeting.greetMe(name);
   },
 
   getGreeterIds: () => dependencies.greetingServices.getRegisteredGreetings(),
+  getGreeterObjects: () => dependencies.greetingServices.getRegisteredGreetingsAsObjects(),
 });
