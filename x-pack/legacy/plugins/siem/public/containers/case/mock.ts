@@ -31,11 +31,11 @@ import {
 } from '../../../../../../plugins/case/common/api/cases';
 import { LicenseType } from '../../../../../../plugins/licensing/common/types';
 
-const basicCaseId = 'basic-case-id';
+export const basicCaseId = 'basic-case-id';
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-20T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-19T15:02:57.995Z';
-const elasticUser = {
+export const elasticUser = {
   fullName: 'Leslie Knope',
   username: 'lknope',
   email: 'leslie.knope@elastic.co',
@@ -168,6 +168,7 @@ export const getUserAction = (af: UserActionField, a: UserAction) => ({
 });
 
 export const caseUserActions: CaseUserActions[] = [
+  getUserAction(['description'], 'create'),
   getUserAction(['comment'], 'create'),
   getUserAction(['description'], 'update'),
 ];
