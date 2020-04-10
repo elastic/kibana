@@ -9,10 +9,6 @@ import { Ping } from '../../../common/runtime_types';
 import { API_URLS } from '../../../common/constants';
 import { apiService } from './utils';
 
-export interface APIParams {
-  monitorId: string;
-}
-
 export const fetchMonitorStatus = async ({
   monitorId,
   dateStart,
