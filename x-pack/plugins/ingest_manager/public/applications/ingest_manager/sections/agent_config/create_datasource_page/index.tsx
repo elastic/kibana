@@ -221,7 +221,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
                     {from === 'config' ? (
                       <FormattedMessage
                         id="xpack.ingestManager.createDatasource.changePackageLinkText"
-                        defaultMessage="Change package"
+                        defaultMessage="Change integration"
                       />
                     ) : (
                       <FormattedMessage

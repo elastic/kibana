@@ -23,7 +23,7 @@ import { SavedObjectsType } from './types';
 const createType = (type: Partial<SavedObjectsType>): SavedObjectsType => ({
   name: 'unknown',
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single' as 'single',
   mappings: { properties: {} },
   migrations: {},
   ...type,
@@ -164,18 +164,92 @@ describe('SavedObjectTypeRegistry', () => {
   });
 
   describe('#isNamespaceAgnostic', () => {
-    it('returns correct value for the type', () => {
-      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: true }));
-      registry.registerType(createType({ name: 'typeB', namespaceAgnostic: false }));
+    const expectResult = (expected: boolean, schemaDefinition?: Partial<SavedObjectsType>) => {
+      registry = new SavedObjectTypeRegistry();
+      registry.registerType(createType({ name: 'foo', ...schemaDefinition }));
+      expect(registry.isNamespaceAgnostic('foo')).toBe(expected);
+    };
 
-      expect(registry.isNamespaceAgnostic('typeA')).toEqual(true);
-      expect(registry.isNamespaceAgnostic('typeB')).toEqual(false);
-    });
-    it('returns false when the type is not registered', () => {
-      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: true }));
-      registry.registerType(createType({ name: 'typeB', namespaceAgnostic: false }));
-
+    it(`returns false when the type is not registered`, () => {
       expect(registry.isNamespaceAgnostic('unknownType')).toEqual(false);
+    });
+
+    it(`returns true for namespaceType 'agnostic'`, () => {
+      expectResult(true, { namespaceType: 'agnostic' });
+    });
+
+    it(`returns false for other namespaceType`, () => {
+      expectResult(false, { namespaceType: 'multiple' });
+      expectResult(false, { namespaceType: 'single' });
+      expectResult(false, { namespaceType: undefined });
+    });
+
+    // deprecated test cases
+    it(`returns true when namespaceAgnostic is true`, () => {
+      expectResult(true, { namespaceAgnostic: true, namespaceType: 'agnostic' });
+      expectResult(true, { namespaceAgnostic: true, namespaceType: 'multiple' });
+      expectResult(true, { namespaceAgnostic: true, namespaceType: 'single' });
+      expectResult(true, { namespaceAgnostic: true, namespaceType: undefined });
+    });
+  });
+
+  describe('#isSingleNamespace', () => {
+    const expectResult = (expected: boolean, schemaDefinition?: Partial<SavedObjectsType>) => {
+      registry = new SavedObjectTypeRegistry();
+      registry.registerType(createType({ name: 'foo', ...schemaDefinition }));
+      expect(registry.isSingleNamespace('foo')).toBe(expected);
+    };
+
+    it(`returns true when the type is not registered`, () => {
+      expect(registry.isSingleNamespace('unknownType')).toEqual(true);
+    });
+
+    it(`returns true for namespaceType 'single'`, () => {
+      expectResult(true, { namespaceType: 'single' });
+      expectResult(true, { namespaceType: undefined });
+    });
+
+    it(`returns false for other namespaceType`, () => {
+      expectResult(false, { namespaceType: 'agnostic' });
+      expectResult(false, { namespaceType: 'multiple' });
+    });
+
+    // deprecated test cases
+    it(`returns false when namespaceAgnostic is true`, () => {
+      expectResult(false, { namespaceAgnostic: true, namespaceType: 'agnostic' });
+      expectResult(false, { namespaceAgnostic: true, namespaceType: 'multiple' });
+      expectResult(false, { namespaceAgnostic: true, namespaceType: 'single' });
+      expectResult(false, { namespaceAgnostic: true, namespaceType: undefined });
+    });
+  });
+
+  describe('#isMultiNamespace', () => {
+    const expectResult = (expected: boolean, schemaDefinition?: Partial<SavedObjectsType>) => {
+      registry = new SavedObjectTypeRegistry();
+      registry.registerType(createType({ name: 'foo', ...schemaDefinition }));
+      expect(registry.isMultiNamespace('foo')).toBe(expected);
+    };
+
+    it(`returns false when the type is not registered`, () => {
+      expect(registry.isMultiNamespace('unknownType')).toEqual(false);
+    });
+
+    it(`returns true for namespaceType 'multiple'`, () => {
+      expectResult(true, { namespaceType: 'multiple' });
+    });
+
+    it(`returns false for other namespaceType`, () => {
+      expectResult(false, { namespaceType: 'agnostic' });
+      expectResult(false, { namespaceType: 'single' });
+      expectResult(false, { namespaceType: undefined });
+    });
+
+    // deprecated test cases
+    it(`returns false when namespaceAgnostic is true`, () => {
+      expectResult(false, { namespaceAgnostic: true, namespaceType: 'agnostic' });
+      expectResult(false, { namespaceAgnostic: true, namespaceType: 'multiple' });
+      expectResult(false, { namespaceAgnostic: true, namespaceType: 'single' });
+      expectResult(false, { namespaceAgnostic: true, namespaceType: undefined });
     });
   });
 
@@ -206,8 +280,8 @@ describe('SavedObjectTypeRegistry', () => {
       expect(registry.getIndex('typeWithNoIndex')).toBeUndefined();
     });
     it('returns undefined when the type is not registered', () => {
-      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: true }));
-      registry.registerType(createType({ name: 'typeB', namespaceAgnostic: false }));
+      registry.registerType(createType({ name: 'typeA', namespaceType: 'agnostic' }));
+      registry.registerType(createType({ name: 'typeB', namespaceType: 'single' }));
 
       expect(registry.getIndex('unknownType')).toBeUndefined();
     });
