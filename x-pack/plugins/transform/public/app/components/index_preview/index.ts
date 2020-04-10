@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SourceIndexPreview } from './source_index_preview';
+export { IndexPreview } from './index_preview';

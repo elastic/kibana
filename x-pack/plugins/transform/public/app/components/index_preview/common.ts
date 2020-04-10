@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PivotQuery } from '../../../../common';
+import { PivotQuery } from '../../common';
 
-export const getSourceIndexDevConsoleStatement = (query: PivotQuery, indexPatternTitle: string) => {
+export const getIndexDevConsoleStatement = (query: PivotQuery, indexPatternTitle: string) => {
   return `GET ${indexPatternTitle}/_search\n${JSON.stringify(
     {
       query,

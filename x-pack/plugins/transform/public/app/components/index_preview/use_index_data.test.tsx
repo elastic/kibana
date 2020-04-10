@@ -7,12 +7,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 import '@testing-library/jest-dom/extend-expect';
 
-import { SimpleQuery } from '../../../../common';
-import {
-  SOURCE_INDEX_STATUS,
-  useSourceIndexData,
-  UseSourceIndexDataReturnType,
-} from './use_source_index_data';
+import { SimpleQuery } from '../../common';
+import { SearchItems } from '../../hooks/use_search_items';
+import { INDEX_STATUS, useIndexData, UseIndexDataReturnType } from './use_index_data';
 
 jest.mock('../../../../hooks/use_api');
 
@@ -26,15 +23,22 @@ const query: SimpleQuery = {
 describe('useSourceIndexData', () => {
   test('indexPattern set triggers loading', async done => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useSourceIndexData({ id: 'the-id', title: 'the-title', fields: [] }, query)
+      useIndexData(
+        ({
+          id: 'the-id',
+          title: 'the-title',
+          fields: [],
+        } as unknown) as SearchItems['indexPattern'],
+        query
+      )
     );
-    const sourceIndexObj: UseSourceIndexDataReturnType = result.current;
+    const IndexObj: UseIndexDataReturnType = result.current;
 
     await waitForNextUpdate();
 
-    expect(sourceIndexObj.errorMessage).toBe('');
-    expect(sourceIndexObj.status).toBe(SOURCE_INDEX_STATUS.LOADING);
-    expect(sourceIndexObj.tableItems).toEqual([]);
+    expect(IndexObj.errorMessage).toBe('');
+    expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);
+    expect(IndexObj.tableItems).toEqual([]);
     done();
   });
 

@@ -45,7 +45,7 @@ import { dictionaryToArray, Dictionary } from '../../../../../../common/types/co
 import { DropDown } from '../aggregation_dropdown';
 import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
-import { SourceIndexPreview } from '../source_index_preview';
+import { IndexPreview } from '../../../../components/index_preview';
 import { SwitchModal } from './switch_modal';
 
 import {
@@ -973,7 +973,14 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
       </EuiFlexItem>
 
       <EuiFlexItem grow={false} style={{ maxWidth: 'calc(100% - 468px)' }}>
-        <SourceIndexPreview indexPattern={searchItems.indexPattern} query={pivotQuery} />
+        <IndexPreview
+          indexPattern={searchItems.indexPattern}
+          query={pivotQuery}
+          title={i18n.translate('xpack.transform.indexPreview.indexPatternTitle', {
+            defaultMessage: 'Index {indexPatternTitle}',
+            values: { indexPatternTitle: indexPattern.title },
+          })}
+        />
         <EuiHorizontalRule />
         <PivotPreview
           aggs={aggList}

@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SimpleQuery } from '../../../../common';
+import { SimpleQuery } from '../../common';
 
-import { getSourceIndexDevConsoleStatement } from './common';
+import { getIndexDevConsoleStatement } from './common';
 
-describe('Transform: Source Index Preview Common', () => {
-  test('getSourceIndexDevConsoleStatement()', () => {
+describe('Transform: Index Preview Common', () => {
+  test('getIndexDevConsoleStatement()', () => {
     const query: SimpleQuery = {
       query_string: {
         query: '*',
         default_operator: 'AND',
       },
     };
-    const sourceIndexPreviewDevConsoleStatement = getSourceIndexDevConsoleStatement(
+    const indexPreviewDevConsoleStatement = getIndexDevConsoleStatement(
       query,
       'the-index-pattern-title'
     );
 
-    expect(sourceIndexPreviewDevConsoleStatement).toBe(`GET the-index-pattern-title/_search
+    expect(indexPreviewDevConsoleStatement).toBe(`GET the-index-pattern-title/_search
 {
   "query": {
     "query_string": {

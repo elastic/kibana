@@ -8,15 +8,15 @@ import React from 'react';
 import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { getPivotQuery } from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import { getPivotQuery } from '../../common';
+import { SearchItems } from '../../hooks/use_search_items';
 
-import { SourceIndexPreview } from './source_index_preview';
+import { IndexPreview } from './index_preview';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../../app/app_dependencies');
 
-describe('Transform: <SourceIndexPreview />', () => {
+describe('Transform: <IndexPreview />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
   test('Minimal initialization', async done => {
     // Arrange
@@ -26,8 +26,9 @@ describe('Transform: <SourceIndexPreview />', () => {
         fields: [] as any[],
       } as SearchItems['indexPattern'],
       query: getPivotQuery('the-query'),
+      title: 'the-index-preview-title',
     };
-    const { getByText } = render(<SourceIndexPreview {...props} />);
+    const { getByText } = render(<IndexPreview {...props} />);
 
     // Act
     // Assert
