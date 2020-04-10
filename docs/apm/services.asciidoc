@@ -1,5 +1,10 @@
+[role="xpack"]
 [[services]]
 === Services overview
+
+++++
+<titleabbrev>Services</titleabbrev>
+++++
 
 The *Services* overview gives you quick insights into the health and general performance of each service.
 

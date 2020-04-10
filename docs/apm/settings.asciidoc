@@ -1,7 +1,12 @@
 // Do not link directly to this page.
 // Link to the anchor in `/docs/settings/apm-settings.asciidoc` instead.
+[role="xpack"]
 [[apm-settings-in-kibana]]
-== APM settings in Kibana
+== APM app settings
+
+++++
+<titleabbrev>Settings</titleabbrev>
+++++
 
 You do not need to configure any settings to use the APM app. It is enabled by default.
 

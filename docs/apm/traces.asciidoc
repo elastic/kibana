@@ -1,5 +1,10 @@
+[role="xpack"]
 [[traces]]
 === Traces overview
+
+++++
+<titleabbrev>Traces</titleabbrev>
+++++
 
 The *Traces* overview displays the entry transaction for all traces in your application.
 If you're using <<distributed-tracing>>, this view is key to finding the critical paths within your application.

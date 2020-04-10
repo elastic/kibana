@@ -1,5 +1,10 @@
+[role="xpack"]
 [[custom-links]]
 === Custom links
+
+++++
+<titleabbrev>Create custom links</titleabbrev>
+++++
 
 Elastic's custom link feature allows you to easily create up to 500 dynamic links
 based on your specific APM data.

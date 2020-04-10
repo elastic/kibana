@@ -1,6 +1,10 @@
 [role="xpack"]
 [[agent-configuration]]
-=== APM Agent configuration
+=== APM Agent central configuration
+
+++++
+<titleabbrev>Configure APM agents with central config</titleabbrev>
+++++
 
 APM Agent configuration allows you to fine-tune your agent configuration from within the APM app.
 Changes are automatically propagated to your APM agents so there's no need to redeploy.

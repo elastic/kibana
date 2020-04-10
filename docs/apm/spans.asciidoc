@@ -1,3 +1,4 @@
+[role="xpack"]
 [[spans]]
 === Span timeline
 

@@ -1,5 +1,10 @@
+[role="xpack"]
 [[errors]]
 === Errors overview
+
+++++
+<titleabbrev>Errors</titleabbrev>
+++++
 
 TIP: {apm-overview-ref-v}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
 
@@ -28,7 +33,7 @@ and additional contextual information to help debug the issue.
 In some cases, you might also see a Transaction sample ID.
 This feature allows you to make a connection between the errors and transactions,
 by linking you to the specific transaction where the error occurred.
-This allows you to see the whole trace, including which services the request went through. 
+This allows you to see the whole trace, including which services the request went through.
 
 [float]
 [[errors-alerts-with-watcher]]

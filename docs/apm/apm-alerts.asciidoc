@@ -1,6 +1,10 @@
 [role="xpack"]
 [[apm-alerts]]
-=== Create an alert
+=== Alerts
+
+++++
+<titleabbrev>Create an alert</titleabbrev>
+++++
 
 beta::[]
 

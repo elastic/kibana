@@ -7,9 +7,11 @@
 Elastic Application Performance Monitoring (APM) automatically collects in-depth
 performance metrics and errors from inside your applications.
 
-The **APM** app in {kib} is provided with the basic license. It
-enables developers to drill down into the performance data for their applications
-and quickly locate the performance bottlenecks.
+The APM app in {kib} is provided with the basic license.
+It allows you to monitor your software services and applications in real time — visualize
+detailed performance information on your services,
+identify and analyzing errors,
+and monitor host-level and agent-specific metrics like JVM and Go runtime metrics.
 
 * <<apm-getting-started>>
 * <<apm-ui>>
@@ -18,8 +20,8 @@ and quickly locate the performance bottlenecks.
 * <<apm-api>>
 * <<troubleshooting>>
 
-NOTE: For more information about the components of Elastic APM,
-see the {apm-get-started-ref}/overview.html[APM Overview].
+TIP: Want to learn more about the Elastic APM ecosystem?
+See the {apm-get-started-ref}/overview.html[APM Overview].
 --
 
 include::getting-started.asciidoc[]

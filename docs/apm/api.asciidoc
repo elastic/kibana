@@ -1,6 +1,10 @@
 [role="xpack"]
 [[apm-api]]
-== API
+== APM app API
+
+++++
+<titleabbrev>REST API</titleabbrev>
+++++
 
 Some APM app features are provided via a REST API:
 

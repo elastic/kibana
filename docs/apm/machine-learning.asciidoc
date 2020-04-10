@@ -1,5 +1,10 @@
+[role="xpack"]
 [[machine-learning-integration]]
 === Machine Learning integration
+
+++++
+<titleabbrev>Integrate with machine learning</titleabbrev>
+++++
 
 The Machine Learning integration will initiate a new job predefined to calculate anomaly scores on transaction response times.
 The response time graph will show the expected bounds and annotate the graph when the anomaly score is 75 or above.

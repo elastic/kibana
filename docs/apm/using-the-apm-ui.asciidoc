@@ -2,27 +2,32 @@
 [[apm-ui]]
 == Using the APM app
 
-APM is designed to be as intuitive as possible,
-but you might come across certain terms or concepts that don’t feel native to you.
-Not to worry, we've created this guide to help you get the most out of Elastic APM.
-
-APM is available via the navigation sidebar in {Kib}.
-
-
-
-
 Elastic APM captures different types of information from within instrumented applications:
 
-* {apm-overview-ref-v}/transaction-spans.html[*Spans*] contain information about a specific code path that has been executed.
+* *Spans* contain information about a specific code path that has been executed.
 They measure from the start to end of an activity,
 and they can have a parent/child relationship with other spans.
-* {apm-overview-ref-v}/transactions.html[*Transactions*] are a special kind of span that have extra metadata associated with them.
+* *Transactions* are a special kind of span that have extra metadata associated with them.
 You can think of transactions as the highest level of work you’re measuring within a service.
 As an example, a transaction could be a request to your server, a batch job, or a custom transaction type.
-* {apm-overview-ref-v}/errors.html[*Errors*] contain information about the original exception that occurred or about a log created when the exception occurred.
+* *Errors* contain information about the original exception that occurred or about a log created when the exception occurred.
 
 Each of these information types have a specific page associated with them in the APM app.
 These various pages display the captured data in curated charts and tables that allow you to easily compare and debug your applications.
+
+* <<services>>
+* <<traces>>
+* <<transactions>>
+* <<spans>>
+* <<errors>>
+* <<metrics>>
+* <<service-maps>>
+
+[float]
+[[apm-bottlenecks]]
+== Visualizing application bottlenecks
+
+Having access to application-level insights with just a few clicks can drastically decrease the time you spend debugging errors, slow response times, and crashes.
 
 For example, you can see information about response times, requests per minute, and status codes per endpoint.
 You can even dive into a specific request sample and get a complete waterfall view of what your application is spending its time on.
@@ -31,21 +36,6 @@ For each incoming request and each application error,
 you can also see contextual information such as the request header, user information,
 system values, or custom data that you manually attached to the request.
 
-Having access to application-level insights with just a few clicks can drastically decrease the time you spend debugging errors, slow response times, and crashes.
-
-
-
-
-* <<filters>>
-* <<services>>
-* <<traces>>
-* <<transactions>>
-* <<spans>>
-* <<service-maps>>
-* <<errors>>
-* <<metrics>>
-
-include::filters.asciidoc[]
 
 include::services.asciidoc[]
 
@@ -55,8 +45,8 @@ include::transactions.asciidoc[]
 
 include::spans.asciidoc[]
 
-include::service-maps.asciidoc[]
-
 include::errors.asciidoc[]
 
 include::metrics.asciidoc[]
+
+include::service-maps.asciidoc[]

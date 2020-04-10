@@ -1,5 +1,10 @@
+[role="xpack"]
 [[metrics]]
 === Metrics overview
+
+++++
+<titleabbrev>Metrics</titleabbrev>
+++++
 
 The *Metrics* overview provides agent-specific metrics,
 which lets you perform more in-depth root cause analysis investigations within the APM app.
