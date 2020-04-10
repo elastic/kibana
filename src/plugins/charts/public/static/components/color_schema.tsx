@@ -25,15 +25,15 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { SelectOption } from './select';
 import { SwitchOption } from './switch';
-import { ColorSchemaVislibParams } from './types';
+import { ColorSchemaParams } from './types';
 import { ColorSchema } from '../color_maps';
 
-export type SetColorSchemaOptionsValue = <T extends keyof ColorSchemaVislibParams>(
+export type SetColorSchemaOptionsValue = <T extends keyof ColorSchemaParams>(
   paramName: T,
-  value: ColorSchemaVislibParams[T]
+  value: ColorSchemaParams[T]
 ) => void;
 
-interface ColorSchemaOptionsProps extends ColorSchemaVislibParams {
+interface ColorSchemaOptionsProps extends ColorSchemaParams {
   disabled?: boolean;
   colorSchemas: ColorSchema[];
   uiState: VisOptionsProps['uiState'];

@@ -20,7 +20,7 @@
 import { ColorSchemas } from '../color_maps';
 import { Rotates } from './collections';
 
-export interface ColorSchemaVislibParams {
+export interface ColorSchemaParams {
   colorSchema: ColorSchemas;
   invertColors: boolean;
 }

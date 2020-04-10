@@ -25,13 +25,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ColorRanges,
   ColorSchemaOptions,
-  ColorSchemaVislibParams,
+  ColorSchemaParams,
   SetColorRangeValue,
   SwitchOption,
+  ColorSchemas,
 } from '../../../../../../../plugins/charts/public';
 import { GaugeOptionsInternalProps } from '.';
 import { Gauge } from '../../../gauge';
-import { ColorSchemas } from '../../../../../../../plugins/charts/public';
 
 function RangesPanel({
   setGaugeValue,
@@ -43,7 +43,7 @@ function RangesPanel({
   vis,
 }: GaugeOptionsInternalProps) {
   const setColorSchemaOptions = useCallback(
-    <T extends keyof ColorSchemaVislibParams>(paramName: T, value: ColorSchemaVislibParams[T]) => {
+    <T extends keyof ColorSchemaParams>(paramName: T, value: ColorSchemaParams[T]) => {
       setGaugeValue(paramName, value as Gauge[T]);
       // set outline if color schema is changed to greys
       // if outline wasn't set explicitly yet

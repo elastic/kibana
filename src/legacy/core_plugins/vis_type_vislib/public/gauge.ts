@@ -26,14 +26,14 @@ import { getGaugeCollections, Alignments, GaugeTypes } from './utils/collections
 import {
   ColorModes,
   ColorSchemas,
-  ColorSchemaVislibParams,
+  ColorSchemaParams,
   Labels,
   Style,
 } from '../../../../plugins/charts/public';
 import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
 
-export interface Gauge extends ColorSchemaVislibParams {
+export interface Gauge extends ColorSchemaParams {
   backStyle: 'Full';
   gaugeStyle: 'Full';
   orientation: 'vertical';
