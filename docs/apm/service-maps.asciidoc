@@ -3,14 +3,14 @@
 
 beta::[]
 
-A service map is a real-time diagram of the interactions occurring in your application’s architecture.
-It allows you to easily visualize data flow and high-level statistics, like average transaction duration,
-requests per minute, errors per minute, and metrics, allowing you to quickly assess the status of your services.
+A service map is a real-time visual representation of the instrumented services in your application’s architecture.
+It shows you how these services are connected, along high-level metrics like average transaction duration,
+requests per minute, and errors per minute, that allow you to quickly assess the status of your services.
 
-Our beta offering creates two types of service maps:
+We currently surface two types of service maps:
 
-* Global: All services and connections are shown.
-* Service-specific: Selecting a specific service will highlight it's connections.
+* Global: All services instrumented with APM agents and the connections between them are shown.
+* Service-specific: Highlight collections for a selected service.
 
 [role="screenshot"]
 image::apm/images/service-maps.png[Example view of service maps in the APM app in Kibana]
@@ -20,18 +20,20 @@ image::apm/images/service-maps.png[Example view of service maps in the APM app i
 === Visualize your architecture
 
 Select the **Service Map** tab to get started.
-By default, all services and connections are shown.
-Whether your onboarding a new engineer, or just trying to grasp the big picture,
+By default, all instrumented services and connections are shown.
+Whether you're onboarding a new engineer, or just trying to grasp the big picture,
 click around, zoom in and out, and begin to visualize how your services are connected.
 
 If there's a specific service that interests you, select that service to highlight its connections.
 Clicking **Focus map** will refocus the map on that specific service and lock the connection highlighting.
-From here, select **Service Details**, or click on the **Transaction** tab to jump to the Transaction overview.
+From here, select **Service Details**, or click on the **Transaction** tab to jump to the Transaction overview
+for the selected service.
 You can also use the tabs at the top of the page to easily jump to the **Errors** or **Metrics** overview.
 
-While it's not possible to query in service maps, it is possible to filter by environment.
+Filter out your maps by picking the environment form the environment dropdown filter.
 This can be useful if you have two or more services, in separate environments, but with the same name.
 Use the environment drop down to only see the data you're interested in, like `dev` or `production`.
+Additional filters are not currently available for service maps.
 
 [role="screenshot"]
 image::apm/images/service-maps-java.png[Example view of service maps with Java highlighted in the APM app in Kibana]
