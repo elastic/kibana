@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { TmsLayer } from 'ui/vis/map/service_settings';
 import { Vis } from '../../../../../plugins/visualizations/public';
 import { RegionMapVisParams } from '../../../region_map/public/types';
-import { SelectOption, SwitchOption } from '../../../vis_type_vislib/public';
+import { SelectOption, SwitchOption } from '../../../../../plugins/charts/public';
 import { WmsInternalOptions } from './wms_internal_options';
 import { WMSOptions, TileMapVisParams } from '../types';
 

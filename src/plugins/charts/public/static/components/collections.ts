@@ -17,11 +17,18 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { VisTypeVislibPlugin as Plugin } from './plugin';
+import { $Values } from '@kbn/utility-types';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+export const ColorModes = Object.freeze({
+  BACKGROUND: 'Background' as 'Background',
+  LABELS: 'Labels' as 'Labels',
+  NONE: 'None' as 'None',
+});
+export type ColorModes = $Values<typeof ColorModes>;
 
-export * from './types';
+export const Rotates = Object.freeze({
+  HORIZONTAL: 0,
+  VERTICAL: 90,
+  ANGLED: 75,
+});
+export type Rotates = $Values<typeof Rotates>;

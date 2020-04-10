@@ -24,7 +24,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FileLayerField, VectorLayer, ServiceSettings } from 'ui/vis/map/service_settings';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../../vis_type_vislib/public';
+import {
+  NumberInputOption,
+  SelectOption,
+  SwitchOption,
+} from '../../../../../plugins/charts/public';
 import { WmsOptions } from '../../../tile_map/public/components/wms_options';
 import { RegionMapVisParams } from '../types';
 

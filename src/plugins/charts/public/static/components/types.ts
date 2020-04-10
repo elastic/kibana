@@ -17,18 +17,27 @@
  * under the License.
  */
 
-import { useEffect } from 'react';
+import { ColorSchemas } from '../color_maps';
+import { Rotates } from './collections';
 
-function useValidation<ParamName extends string>(
-  setValidity: (paramName: ParamName, isValid: boolean) => void,
-  paramName: ParamName,
-  isValid: boolean
-) {
-  useEffect(() => {
-    setValidity(paramName, isValid);
-
-    return () => setValidity(paramName, true);
-  }, [isValid, paramName, setValidity]);
+export interface ColorSchemaParams {
+  colorSchema: ColorSchemas;
+  invertColors: boolean;
 }
 
-export { useValidation };
+export interface Labels {
+  color?: string;
+  filter?: boolean;
+  overwriteColor?: boolean;
+  rotate?: Rotates;
+  show: boolean;
+  truncate?: number | null;
+}
+
+export interface Style {
+  bgFill: string;
+  bgColor: boolean;
+  labelColor: boolean;
+  subText: string;
+  fontSize: number;
+}
