@@ -22,14 +22,14 @@ import ace from 'brace';
 import 'brace/mode/json';
 
 import { ElasticsearchSqlHighlightRules } from './elasticsearch_sql_highlight_rules';
-const { ScriptHighlightRules } = require('./script_highlight_rules');
+import { ScriptHighlightRules } from './script_highlight_rules';
 
 const { JsonHighlightRules } = ace.acequire('ace/mode/json_highlight_rules');
 const oop = ace.acequire('ace/lib/oop');
 
-const jsonRules = function(root) {
+const jsonRules = function(root: any) {
   root = root ? root : 'json';
-  const rules = {};
+  const rules: any = {};
   const xJsonRules = [
     {
       token: [
@@ -135,7 +135,7 @@ const jsonRules = function(root) {
       merge: false,
       push: true,
     },
-  ].concat(xJsonRules);
+  ].concat(xJsonRules as any);
 
   rules.string_literal = [
     {
@@ -151,7 +151,7 @@ const jsonRules = function(root) {
   return rules;
 };
 
-export function XJsonHighlightRules() {
+export function XJsonHighlightRules(this: any) {
   this.$rules = {
     ...jsonRules('start'),
   };
@@ -175,7 +175,7 @@ export function XJsonHighlightRules() {
 
 oop.inherits(XJsonHighlightRules, JsonHighlightRules);
 
-export function addToRules(otherRules, embedUnder) {
+export function addToRules(otherRules: any, embedUnder: any) {
   otherRules.$rules = _.defaultsDeep(otherRules.$rules, jsonRules(embedUnder));
   otherRules.embedRules(ScriptHighlightRules, 'script-', [
     {
