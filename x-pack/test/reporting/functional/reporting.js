@@ -38,7 +38,13 @@ export default function({ getService, getPageObjects }) {
     describe('Dashboard', () => {
       before('initialize tests', async () => {
         log.debug('ReportingPage:initTests');
+        await esArchiver.loadIfNeeded('reporting/ecommerce');
+        await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
         await browser.setWindowSize(1600, 850);
+      });
+      after('clean up archives', async () => {
+        await esArchiver.unload('reporting/ecommerce');
+        await esArchiver.unload('reporting/ecommerce_kibana');
       });
 
       describe('Print PDF button', () => {
@@ -57,22 +63,12 @@ export default function({ getService, getPageObjects }) {
       });
 
       describe('Print Layout', () => {
-        before('initialize archives', async () => {
-          await esArchiver.loadIfNeeded('reporting/ecommerce');
-          await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
-          await browser.setWindowSize(1600, 850);
-        });
-        after('clean up archives', async () => {
-          await esArchiver.unload('reporting/ecommerce');
-          await esArchiver.unload('reporting/ecommerce_kibana');
-        });
-
         it('downloads a PDF file', async function() {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(300000);
           await PageObjects.common.navigateToApp('dashboard');
-          await PageObjects.dashboard.gotoDashboardEditMode('Ecom Dashboard');
+          await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
@@ -101,16 +97,6 @@ export default function({ getService, getPageObjects }) {
       });
 
       describe('Preserve Layout', () => {
-        before('initialize archives', async () => {
-          await esArchiver.loadIfNeeded('reporting/ecommerce');
-          await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
-          await browser.setWindowSize(1600, 850);
-        });
-        after('clean up archives', async () => {
-          await esArchiver.unload('reporting/ecommerce');
-          await esArchiver.unload('reporting/ecommerce_kibana');
-        });
-
         it('matches baseline report', async function() {
           const writeSessionReport = async (name, rawPdf, reportExt) => {
             const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
@@ -129,7 +115,7 @@ export default function({ getService, getPageObjects }) {
           this.timeout(300000);
 
           await PageObjects.common.navigateToApp('dashboard');
-          await PageObjects.dashboard.gotoDashboardEditMode('Ecom Dashboard');
+          await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
           await PageObjects.reporting.openPngReportingPanel();
           await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
           await PageObjects.reporting.clickGenerateReportButton();
@@ -146,7 +132,6 @@ export default function({ getService, getPageObjects }) {
             log
           );
 
-          throw new Error('take snapshot here!');
           expect(percentSimilar).to.be.lessThan(0.1);
         });
       });
@@ -229,7 +214,7 @@ export default function({ getService, getPageObjects }) {
           this.timeout(180000);
 
           await PageObjects.common.navigateToApp('dashboard');
-          await PageObjects.dashboard.gotoDashboardEditMode('Ecom Dashboard');
+          await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
 
