@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Ping, GetPingsParams } from '../../../../common/runtime_types';
+import { Ping, GetPingsParams, DateRange } from '../../../../common/runtime_types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { LocationName } from './location_name';
 import { Pagination } from './../monitor_list';
@@ -60,8 +60,7 @@ const SpanWithMargin = styled.span`
 `;
 
 interface Props extends PingListProps {
-  dateRangeStart: string;
-  dateRangeEnd: string;
+  dateRange: DateRange;
   error?: Error;
   getPings: (props: GetPingsParams) => void;
   lastRefresh: number;
@@ -103,8 +102,7 @@ export const PingListComponent = (props: Props) => {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [pageIndex, setPageIndex] = useState(0);
   const {
-    dateRangeStart,
-    dateRangeEnd,
+    dateRange: { from, to },
     error,
     getPings,
     lastRefresh,
@@ -117,23 +115,17 @@ export const PingListComponent = (props: Props) => {
 
   useEffect(() => {
     getPings({
-      dateRangeStart,
-      dateRangeEnd,
+      dateRange: {
+        from,
+        to,
+      },
       location: selectedLocation,
       monitorId,
+      index: pageIndex,
       size: pageSize,
       status: status !== 'all' ? status : '',
     });
-  }, [
-    dateRangeStart,
-    dateRangeEnd,
-    getPings,
-    monitorId,
-    lastRefresh,
-    selectedLocation,
-    pageSize,
-    status,
-  ]);
+  }, [from, to, getPings, monitorId, lastRefresh, selectedLocation, pageIndex, pageSize, status]);
 
   const [expandedRows, setExpandedRows] = useState<Record<string, JSX.Element>>({});
 
@@ -246,7 +238,7 @@ export const PingListComponent = (props: Props) => {
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
-            disabled={!item.error && !(item.http?.response?.body?.content_bytes ?? 0 > 0)}
+            disabled={!item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)}
             aria-label={
               expandedRows[item['@timestamp']]
                 ? i18n.translate('xpack.uptime.pingList.collapseRow', {

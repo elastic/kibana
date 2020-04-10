@@ -5,6 +5,7 @@
  */
 
 import * as t from 'io-ts';
+import { DateRangeType } from '../common';
 
 export const HttpResponseBodyType = t.partial({
   bytes: t.number,
@@ -158,12 +159,18 @@ export const PingsResponseType = t.type({
 
 export type PingsResponse = t.TypeOf<typeof PingsResponseType>;
 
-export interface GetPingsParams {
-  dateRangeStart: string;
-  dateRangeEnd: string;
-  location?: string;
-  monitorId?: string;
-  size?: number;
-  sort?: string;
-  status?: string;
-}
+export const GetPingsParamsType = t.intersection([
+  t.type({
+    dateRange: DateRangeType,
+  }),
+  t.partial({
+    index: t.number,
+    size: t.number,
+    location: t.string,
+    monitorId: t.string,
+    sort: t.string,
+    status: t.string,
+  }),
+]);
+
+export type GetPingsParams = t.TypeOf<typeof GetPingsParamsType>;

@@ -16,18 +16,9 @@ import { apiService } from './utils';
 import { API_URLS } from '../../../common/constants/rest_api';
 
 export const fetchPings: APIFn<GetPingsParams, PingsResponse> = async ({
-  dateRangeStart,
-  dateRangeEnd,
-  location,
-  monitorId,
-  size,
-  sort,
-  status,
-}) => {
-  const params = { dateRangeStart, dateRangeEnd, monitorId, location, size, sort, status };
-
-  return await apiService.get(API_URLS.PINGS, params, PingsResponseType);
-};
+  dateRange: { from, to },
+  ...optional
+}) => await apiService.get(API_URLS.PINGS, { from, to, ...optional }, PingsResponseType);
 
 export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> = async ({
   monitorId,

@@ -26,28 +26,19 @@ export const PingList = (props: PingListProps) => {
     },
   } = useSelector(selectPingList);
 
-  const { dateRangeStart: from, dateRangeEnd: to } = useContext(UptimeSettingsContext);
+  const { dateRangeStart: drs, dateRangeEnd: dre } = useContext(UptimeSettingsContext);
 
   const dispatch = useDispatch();
-  const getPingsCallback = useCallback(
-    ({ dateRangeStart, dateRangeEnd, location, monitorId, size, status }: GetPingsParams) =>
-      dispatch(
-        getPings({
-          dateRangeStart,
-          dateRangeEnd,
-          location,
-          monitorId,
-          size,
-          status,
-        })
-      ),
-    [dispatch]
-  );
+  const getPingsCallback = useCallback((params: GetPingsParams) => dispatch(getPings(params)), [
+    dispatch,
+  ]);
 
   return (
     <PingListComponent
-      dateRangeStart={from}
-      dateRangeEnd={to}
+      dateRange={{
+        from: drs,
+        to: dre,
+      }}
       error={error}
       getPings={getPingsCallback}
       lastRefresh={lastRefresh}

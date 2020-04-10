@@ -8,53 +8,29 @@ import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
+  GetPingsParams,
   HttpResponseBody,
   PingsResponse,
   PingsResponseType,
   Ping,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
-export interface GetPingsParams {
-  /** @member dateRangeStart timestamp bounds */
-  dateRangeStart: string;
-
-  /** @member dateRangeEnd timestamp bounds */
-  dateRangeEnd: string;
-
-  /** @member monitorId optional limit by monitorId */
-  monitorId?: string | null;
-
-  /** @member status optional limit by check statuses */
-  status?: string | null;
-
-  /** @member sort optional sort by timestamp */
-  sort?: string | null;
-
-  /** @member size optional limit query size */
-  size?: number | null;
-
-  /** @member location optional location value for use in filtering*/
-  location?: string | null;
-
-  /** @member page the number to provide to Elasticsearch as the "from" parameter */
-  page?: number;
-}
+const DEFAULT_PAGE_SIZE = 25;
 
 export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = async ({
   callES,
   dynamicSettings,
-  dateRangeStart,
-  dateRangeEnd,
+  dateRange: { from, to },
+  index,
   monitorId,
   status,
   sort,
-  size,
+  size: sizeParam,
   location,
-  page,
 }) => {
+  const size = sizeParam ?? DEFAULT_PAGE_SIZE;
   const sortParam = { sort: [{ '@timestamp': { order: sort ?? 'desc' } }] };
-  const sizeParam = size ? { size } : undefined;
-  const filter: any[] = [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }];
+  const filter: any[] = [{ range: { '@timestamp': { gte: from, lte: to } } }];
   if (monitorId) {
     filter.push({ term: { 'monitor.id': monitorId } });
   }
@@ -74,7 +50,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
         ...queryContext,
       },
       ...sortParam,
-      ...sizeParam,
+      size,
       aggregations: {
         locations: {
           terms: {
@@ -88,8 +64,8 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
     },
   };
 
-  if (page) {
-    params.body.from = page * (size ?? 25);
+  if (index) {
+    params.body.from = index * size;
   }
 
   const {
