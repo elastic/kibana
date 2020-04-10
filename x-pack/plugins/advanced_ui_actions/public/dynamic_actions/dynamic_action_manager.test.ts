@@ -5,14 +5,15 @@
  */
 
 import { DynamicActionManager } from './dynamic_action_manager';
-import { ActionStorage, MemoryActionStorage, SerializedEvent } from './dynamic_action_storage';
+import { ActionStorage, MemoryActionStorage } from './dynamic_action_storage';
 import {
   UiActionsService,
-  UiActionsActionFactoryDefinition as ActionFactoryDefinition,
-  UiActionsSerializedAction as SerializedAction,
   UiActionsActionInternal as ActionInternal,
 } from '../../../../../src/plugins/ui_actions/public';
 import { of } from '../../../../../src/plugins/kibana_utils';
+import { UiActionsServiceEnhancements } from '../services';
+import { ActionFactoryDefinition } from './action_factory_definition';
+import { SerializedAction, SerializedEvent } from './types';
 
 const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
@@ -75,10 +76,11 @@ const setup = (events: readonly SerializedEvent[] = []) => {
   const uiActions = new UiActionsService({
     actions,
   });
+  const uiActionsEnhancements = new UiActionsServiceEnhancements();
   const manager = new DynamicActionManager({
     isCompatible,
     storage,
-    uiActions,
+    uiActions: { ...uiActions, ...uiActionsEnhancements },
   });
 
   uiActions.registerTrigger({
@@ -89,7 +91,7 @@ const setup = (events: readonly SerializedEvent[] = []) => {
     isCompatible,
     actions,
     storage,
-    uiActions,
+    uiActions: { ...uiActions, ...uiActionsEnhancements },
     manager,
   };
 };

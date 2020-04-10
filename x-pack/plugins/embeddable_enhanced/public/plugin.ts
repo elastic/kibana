@@ -6,7 +6,6 @@
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 import { SavedObjectAttributes } from 'kibana/public';
-import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
@@ -20,16 +19,20 @@ import {
 } from '../../../../src/plugins/embeddable/public';
 import { EnhancedEmbeddable } from './types';
 import { EmbeddableActionStorage } from './embeddables/embeddable_action_storage';
-import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '../../advanced_ui_actions/public';
+import {
+  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
+  AdvancedUiActionsSetup,
+  AdvancedUiActionsStart,
+} from '../../advanced_ui_actions/public';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
-  uiActions: UiActionsSetup;
+  advancedUiActions: AdvancedUiActionsSetup;
 }
 
 export interface StartDependencies {
   embeddable: EmbeddableStart;
-  uiActions: UiActionsStart;
+  advancedUiActions: AdvancedUiActionsStart;
 }
 
 // eslint-disable-next-line
@@ -42,7 +45,7 @@ export class EmbeddableEnhancedPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
   constructor(protected readonly context: PluginInitializerContext) {}
 
-  private uiActions?: StartDependencies['uiActions'];
+  private uiActions?: StartDependencies['advancedUiActions'];
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.setCustomEmbeddableFactoryProvider(plugins);
@@ -51,7 +54,7 @@ export class EmbeddableEnhancedPlugin
   }
 
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
-    this.uiActions = plugins.uiActions;
+    this.uiActions = plugins.advancedUiActions;
 
     return {};
   }

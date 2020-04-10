@@ -5,9 +5,11 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { AdvancedUiActionsSetup } from '../../../advanced_ui_actions/public';
+import {
+  AdvancedUiActionsSetup,
+  AdvancedUiActionsActionFactoryDefinition as ActionFactoryDefinition,
+} from '../../../advanced_ui_actions/public';
 import { DrilldownDefinition, DrilldownFactoryContext } from '../types';
-import { UiActionsActionFactoryDefinition as ActionFactoryDefinition } from '../../../../../src/plugins/ui_actions/public';
 
 export interface DrilldownServiceSetupDeps {
   advancedUiActions: AdvancedUiActionsSetup;
