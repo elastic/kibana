@@ -14,6 +14,7 @@ import {
   flattenCommentSavedObjects,
   transformComments,
   flattenCommentSavedObject,
+  sortToSnake,
 } from './utils';
 import { newCase } from './__mocks__/request_responses';
 import { isBoom, boomify } from 'boom';
@@ -339,6 +340,32 @@ describe('Utils', () => {
         version: '0',
         ...comment.attributes,
       });
+    });
+  });
+
+  describe('sortToSnake', () => {
+    it('it transforms status correctly', () => {
+      expect(sortToSnake('status')).toBe('status');
+    });
+
+    it('it transforms createdAt correctly', () => {
+      expect(sortToSnake('createdAt')).toBe('created_at');
+    });
+
+    it('it transforms created_at correctly', () => {
+      expect(sortToSnake('created_at')).toBe('created_at');
+    });
+
+    it('it transforms closedAt correctly', () => {
+      expect(sortToSnake('closedAt')).toBe('closed_at');
+    });
+
+    it('it transforms closed_at correctly', () => {
+      expect(sortToSnake('closed_at')).toBe('closed_at');
+    });
+
+    it('it transforms default correctly', () => {
+      expect(sortToSnake('not-exist')).toBe('created_at');
     });
   });
 });

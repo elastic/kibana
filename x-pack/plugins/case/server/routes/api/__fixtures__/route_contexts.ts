@@ -10,7 +10,7 @@ import { getActions } from '../__mocks__/request_responses';
 
 export const createRouteContext = (client: any) => {
   const actionsMock = actionsClientMock.create();
-  actionsMock.getAll.mockImplementation(() => getActions());
+  actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
 
   return ({
     core: {

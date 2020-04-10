@@ -151,7 +151,7 @@ export const createMockSavedObjectsRepository = ({
           id: 'mock-configuration',
           attributes,
           updated_at: '2020-04-09T09:43:51.778Z',
-          version: 'WzksMV0=',
+          version: attributes.connector_id === 'no-version' ? undefined : 'WzksMV0=',
         };
 
         caseConfigureSavedObject = [newConfiguration];
@@ -186,6 +186,16 @@ export const createMockSavedObjectsRepository = ({
         if (!caseSavedObject.find(s => s.id === id)) {
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
         }
+      }
+
+      if (type === CASE_CONFIGURE_SAVED_OBJECT) {
+        return {
+          id,
+          type,
+          updated_at: '2019-11-22T22:50:55.191Z',
+          attributes,
+          version: attributes.connector_id === 'no-version' ? undefined : 'WzE3LDFd',
+        };
       }
 
       return {

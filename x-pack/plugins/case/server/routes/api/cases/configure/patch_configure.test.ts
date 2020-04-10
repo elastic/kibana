@@ -13,7 +13,7 @@ import {
   createRouteContext,
 } from '../../__fixtures__';
 
-import { mockCaseConfigure, mockCaseComments } from '../../__fixtures__/mock_saved_objects';
+import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initPatchCaseConfigure } from './patch_configure';
 
 describe('PATCH configuration', () => {
@@ -131,5 +131,26 @@ describe('PATCH configuration', () => {
 
     expect(res.status).toEqual(409);
     expect(res.payload.isBoom).toEqual(true);
+  });
+
+  it('handles undefined version correctly', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: '/api/cases/configure',
+      method: 'patch',
+      body: { connector_id: 'no-version', version: mockCaseConfigure[0].version },
+    });
+
+    const context = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.payload).toEqual(
+      expect.objectContaining({
+        version: '',
+      })
+    );
   });
 });

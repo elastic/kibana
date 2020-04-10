@@ -78,4 +78,21 @@ describe('GET configuration', () => {
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual({});
   });
+
+  it('returns an error if find throws an error', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: '/api/cases/configure',
+      method: 'get',
+    });
+
+    const context = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: [{ ...mockCaseConfigure[0], id: 'throw-error-find' }],
+      })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(404);
+    expect(res.payload.isBoom).toEqual(true);
+  });
 });

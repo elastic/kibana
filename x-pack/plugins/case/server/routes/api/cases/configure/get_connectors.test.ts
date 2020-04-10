@@ -54,7 +54,7 @@ describe('GET connectors', () => {
       })
     );
 
-    context.actions = null;
+    context.actions = undefined;
 
     const res = await routeHandler(context, req, kibanaResponseFactory);
     expect(res.status).toEqual(404);

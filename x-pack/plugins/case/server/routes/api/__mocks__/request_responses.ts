@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CasePostRequest } from '../../../../common/api';
+import { CasePostRequest, CasesConfigureRequest } from '../../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../../actions/server/types';
 
@@ -56,3 +56,9 @@ export const getActions = (): FindActionResult[] => [
     referencedByCount: 0,
   },
 ];
+
+export const newConfiguration: CasesConfigureRequest = {
+  connector_id: '456',
+  connector_name: 'My connector 2',
+  closure_type: 'close-by-pushing',
+};

@@ -13,8 +13,9 @@ import {
   createRouteContext,
 } from '../../__fixtures__';
 
-import { mockCaseConfigure, mockCaseComments } from '../../__fixtures__/mock_saved_objects';
+import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initPostCaseConfigure } from './post_configure';
+import { newConfiguration } from '../../__mocks__/request_responses';
 
 describe('POST configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -31,11 +32,7 @@ describe('POST configuration', () => {
     const req = httpServerMock.createKibanaRequest({
       path: '/api/cases/configure',
       method: 'post',
-      body: {
-        connector_id: '456',
-        connector_name: 'My connector 2',
-        closure_type: 'close-by-pushing',
-      },
+      body: newConfiguration,
     });
 
     const context = createRouteContext(
@@ -66,11 +63,7 @@ describe('POST configuration', () => {
     const req = httpServerMock.createKibanaRequest({
       path: '/api/cases/configure',
       method: 'post',
-      body: {
-        connector_id: '456',
-        connector_name: 'My connector 2',
-        closure_type: 'close-by-pushing',
-      },
+      body: newConfiguration,
     });
 
     const context = createRouteContext(
@@ -162,11 +155,7 @@ describe('POST configuration', () => {
     const req = httpServerMock.createKibanaRequest({
       path: '/api/cases/configure',
       method: 'post',
-      body: {
-        connector_id: '456',
-        connector_name: 'My connector 2',
-        closure_type: 'close-by-pushing',
-      },
+      body: newConfiguration,
     });
 
     const savedObjectRepository = createMockSavedObjectsRepository({
@@ -185,11 +174,7 @@ describe('POST configuration', () => {
     const req = httpServerMock.createKibanaRequest({
       path: '/api/cases/configure',
       method: 'post',
-      body: {
-        connector_id: '456',
-        connector_name: 'My connector 2',
-        closure_type: 'close-by-pushing',
-      },
+      body: newConfiguration,
     });
 
     const savedObjectRepository = createMockSavedObjectsRepository({
@@ -208,11 +193,7 @@ describe('POST configuration', () => {
     const req = httpServerMock.createKibanaRequest({
       path: '/api/cases/configure',
       method: 'post',
-      body: {
-        connector_id: '456',
-        connector_name: 'My connector 2',
-        closure_type: 'close-by-pushing',
-      },
+      body: newConfiguration,
     });
 
     const savedObjectRepository = createMockSavedObjectsRepository({
@@ -235,11 +216,7 @@ describe('POST configuration', () => {
     const req = httpServerMock.createKibanaRequest({
       path: '/api/cases/configure',
       method: 'post',
-      body: {
-        connector_id: '456',
-        connector_name: 'My connector 2',
-        closure_type: 'close-by-pushing',
-      },
+      body: newConfiguration,
     });
 
     const context = createRouteContext(
@@ -257,11 +234,7 @@ describe('POST configuration', () => {
     const req = httpServerMock.createKibanaRequest({
       path: '/api/cases/configure',
       method: 'post',
-      body: {
-        connector_id: '456',
-        connector_name: 'My connector 2',
-        closure_type: 'close-by-pushing',
-      },
+      body: newConfiguration,
     });
 
     const context = createRouteContext(
@@ -295,5 +268,27 @@ describe('POST configuration', () => {
     const res = await routeHandler(context, req, kibanaResponseFactory);
     expect(res.status).toEqual(400);
     expect(res.payload.isBoom).toEqual(true);
+  });
+
+  it('handles undefined version correctly', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: '/api/cases/configure',
+      method: 'post',
+      body: { ...newConfiguration, connector_id: 'no-version' },
+    });
+
+    const context = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(200);
+    expect(res.payload).toEqual(
+      expect.objectContaining({
+        version: '',
+      })
+    );
   });
 });
