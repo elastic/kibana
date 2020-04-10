@@ -9,5 +9,7 @@ Creates an href (string) to the location. If `prependBasePath` is true (default)
 <b>Signature:</b>
 
 ```typescript
-createHref: (location: LocationDescriptorObject<HistoryLocationState>, prependBasePath?: boolean) => string;
+createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
+        prependBasePath?: boolean | undefined;
+    }) => string;
 ```
