@@ -66,6 +66,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       ownFocus
       data-test-subj="collapsedItemActions"
     >
+      <p>helloooo</p>
       <EuiFormRow>
         <EuiSwitch
           name="enable"
@@ -115,7 +116,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           <EuiButtonEmpty
             isDisabled={!canDelete}
             iconType="trash"
-            color="text"
+            color="danger"
             data-test-subj="deleteAlert"
             onClick={() => setAlertsToDelete([item.id])}
           >

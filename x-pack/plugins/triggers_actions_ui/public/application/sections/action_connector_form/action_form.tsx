@@ -25,6 +25,7 @@ import {
   EuiIconTip,
   EuiLink,
   EuiHorizontalRule,
+  EuiText,
 } from '@elastic/eui';
 import { HttpSetup, ToastsApi } from 'kibana/public';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
@@ -42,7 +43,6 @@ import { TypeRegistry } from '../../type_registry';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
-import './action_form.scss';
 
 interface ActionAccordionFormProps {
   actions: AlertAction[];
@@ -259,8 +259,8 @@ export const ActionForm = ({
                 <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h5>
+                <EuiText>
+                  <p>
                     <EuiFlexGroup gutterSize="s">
                       <EuiFlexItem grow={false}>
                         <FormattedMessage
@@ -289,8 +289,8 @@ export const ActionForm = ({
                         )}
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                  </h5>
-                </EuiTitle>
+                  </p>
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -348,8 +348,8 @@ export const ActionForm = ({
                 <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h5>
+                <EuiText>
+                  <p>
                     <FormattedMessage
                       defaultMessage="{actionConnectorName}"
                       id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
@@ -357,8 +357,8 @@ export const ActionForm = ({
                         actionConnectorName: actionTypeRegistered.actionTypeTitle,
                       }}
                     />
-                  </h5>
-                </EuiTitle>
+                  </p>
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
