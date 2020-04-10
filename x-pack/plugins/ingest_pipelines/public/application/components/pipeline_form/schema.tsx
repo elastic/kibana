@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormSchema, FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
 
-const { emptyField } = fieldValidators;
+const { emptyField, isJsonField } = fieldValidators;
 const { toInt } = fieldFormatters;
 
 const stringifyJson = (json: { [key: string]: unknown }): string =>
@@ -68,6 +68,22 @@ export const pipelineFormSchema: FormSchema = {
     }),
     serializer: processors => parseJson(processors),
     deserializer: processors => stringifyJson(processors),
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate('xpack.ingestPipelines.form.processorsRequiredError', {
+            defaultMessage: 'Processors are required.',
+          })
+        ),
+      },
+      {
+        validator: isJsonField(
+          i18n.translate('xpack.ingestPipelines.form.processorsJsonError', {
+            defaultMessage: 'The processors JSON is not valid.',
+          })
+        ),
+      },
+    ],
   },
   onFailure: {
     label: i18n.translate('xpack.ingestPipelines.form.onFailureFieldLabel', {
@@ -76,6 +92,15 @@ export const pipelineFormSchema: FormSchema = {
     // TODO: ES doesn't accept an empty array for on_failure
     serializer: onFailureProcessors => parseJson(onFailureProcessors),
     deserializer: onFailureProcessors => stringifyJson(onFailureProcessors),
+    validations: [
+      {
+        validator: isJsonField(
+          i18n.translate('xpack.ingestPipelines.form.onFailureProcessorsJsonError', {
+            defaultMessage: 'The on-failure processors JSON is not valid.',
+          })
+        ),
+      },
+    ],
   },
   version: {
     type: FIELD_TYPES.NUMBER,

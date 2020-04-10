@@ -5,3 +5,5 @@
  */
 
 export { PipelineForm } from './pipeline_form';
+
+export { SectionError } from './section_error';

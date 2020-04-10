@@ -19,6 +19,7 @@ import {
 } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
 
+import { SectionError } from '../section_error';
 import { pipelineFormSchema } from './schema';
 
 interface Props {
@@ -118,8 +119,19 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
   return (
     <>
       {saveError ? (
-        // TODO save error goes here
-        <div />
+        <>
+          <SectionError
+            title={
+              <FormattedMessage
+                id="xpack.ingestPipelines.form.savePipelineError"
+                defaultMessage="Unable to create pipeline"
+              />
+            }
+            error={saveError}
+            data-test-subj="savePipelineError"
+          />
+          <EuiSpacer size="m" />
+        </>
       ) : null}
 
       <Form form={form} data-test-subj="pipelineForm">
@@ -139,6 +151,9 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
             path="description"
             componentProps={{
               ['data-test-subj']: description.testSubject,
+              euiFieldProps: {
+                compressed: true,
+              },
             }}
           />
         </FormRow>
@@ -158,28 +173,28 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
         </FormRow>
 
         {/* On failure field */}
-        <FormRow title={onFailure.title} description={onFailure.description}>
+        {/* <FormRow title={onFailure.title} description={onFailure.description}>
           <UseField
             path="onFailure"
             component={JsonEditorField}
             componentProps={{
               euiCodeEditorProps: {
-                height: '400px',
+                height: '200px',
                 'aria-label': onFailure.ariaLabel,
               },
             }}
           />
-        </FormRow>
+        </FormRow> */}
 
         {/* Version field */}
-        <FormRow title={version.title} description={version.description}>
+        {/* <FormRow title={version.title} description={version.description}>
           <UseField
             path="version"
             componentProps={{
               ['data-test-subj']: version.testSubject,
             }}
           />
-        </FormRow>
+        </FormRow> */}
 
         <EuiSpacer size="l" />
 
