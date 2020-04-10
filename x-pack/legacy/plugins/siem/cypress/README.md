@@ -147,7 +147,7 @@ Currently there are two different ways of feeding data:
 
 When a execution of the test is going to be done an empty kibana and a set of audibteat data are loaded (empty_kibana and auditbeat). With this data usually is enough to cover most of the scenarios that we are testing.
 
-#### Specificying a specific set of data for a specific test
+#### Running tests with custom data
 
 Sometimes the default data is not enough and we need a specific set of data in order to being able to test the desired behaviour.
 
