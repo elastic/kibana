@@ -52,6 +52,16 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
         '--xpack.actions.enabled=true',
         '--xpack.alerting.enabled=true',
+        `--xpack.actions.preconfigured=${JSON.stringify([
+          {
+            id: 'my-slack1',
+            actionTypeId: '.slack',
+            name: 'Slack#xyz',
+            config: {
+              webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+            },
+          },
+        ])}`,
       ],
     },
   };
