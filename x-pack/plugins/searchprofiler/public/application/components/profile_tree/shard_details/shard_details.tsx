@@ -44,6 +44,7 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
           <EuiLink
             className="prfDevTool__profileTree__shardDetails"
             onClick={() => setShardVisibility(!shardVisibility)}
+            data-test-subj="openCloseShardDetails"
           >
             <EuiIcon type={shardVisibility ? 'arrowDown' : 'arrowRight'} />[{shard.id[0]}][
             {shard.id[2]}]

@@ -57,9 +57,15 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('click on the view details link', async () => {
+    it('click on the dropdown link', async () => {
       const viewShardDetailslink = await testSubjects.findAll('viewShardDetails');
       await viewShardDetailslink[0].click();
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on the open-close shard details link', async () => {
+      const openShardDetailslink = await testSubjects.findAll('openCloseShardDetails');
+      await openShardDetailslink[0].click();
       await a11y.testAppSnapshot();
     });
 
