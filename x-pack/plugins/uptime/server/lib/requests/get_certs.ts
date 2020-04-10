@@ -14,6 +14,7 @@ import {
 
 export interface GetCertsParams {
   from: number;
+  search: string;
   size: number;
 }
 
@@ -21,9 +22,10 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   callES,
   dynamicSettings,
   from,
+  search,
   size,
 }) => {
-  const params = {
+  const params: any = {
     index: dynamicSettings.heartbeatIndices,
     body: {
       from,
@@ -47,6 +49,8 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
         },
       },
       _source: [
+        'monitor.id',
+        'monitor.name',
         'tls.common_name',
         'tls.sha256',
         'tls.issued_by',
@@ -68,6 +72,40 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
       },
     },
   };
+
+  if (search) {
+    params.body.query.bool.should = [
+      {
+        wildcard: {
+          'tls.issued_by': {
+            value: search,
+          },
+        },
+      },
+      {
+        wildcard: {
+          'tls.common_name': {
+            value: search,
+          },
+        },
+      },
+      {
+        wildcard: {
+          'monitor.id': {
+            value: search,
+          },
+        },
+      },
+      {
+        wildcard: {
+          'monitor.name': {
+            value: search,
+          },
+        },
+      },
+    ];
+  }
+
   const result = await callES('search', params);
   const decodedResult = CertElasticsearchResponse.decode(result);
   if (isRight(decodedResult)) {

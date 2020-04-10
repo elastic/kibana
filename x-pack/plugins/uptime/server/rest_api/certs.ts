@@ -14,6 +14,7 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
   path: API_URLS.CERTS,
   validate: {
     query: schema.object({
+      search: schema.maybe(schema.string()),
       from: schema.number(),
       size: schema.number(),
     }),
@@ -23,11 +24,11 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     tags: ['access:uptime-read'],
   },
   handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
-    const { from, size } = request.query;
+    const { from, search, size } = request.query;
 
     return response.ok({
       body: {
-        certs: await libs.requests.getCerts({ callES, dynamicSettings, from, size }),
+        certs: await libs.requests.getCerts({ callES, dynamicSettings, from, search, size }),
       },
     });
   },
