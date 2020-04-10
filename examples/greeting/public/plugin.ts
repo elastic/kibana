@@ -45,32 +45,36 @@ export interface GreetingStart {
 
 export interface GreetingSetup {
   setCustomProvider: (customProvider: GreetingProvider) => void;
-  registerGreeting: (greetingDefinition: GreetingDefinition) => () => Greeting;
+  registerGreetingDefinition: (greetingDefinition: GreetingDefinition) => () => Greeting;
 }
 
 export class GreetingPlugin implements Plugin<GreetingSetup, GreetingStart> {
-  private greetings: { [key: string]: Greeting } = {};
+  // private greetings: { [key: string]: Greeting } = {};
   private greetingDefinitions: { [key: string]: GreetingDefinition } = {};
   private greetingProvider: GreetingProvider = defaultGreetingProvider;
 
   setup = () => ({
     setCustomProvider: (customProvider: GreetingProvider) =>
       (this.greetingProvider = customProvider),
-    registerGreeting: (greetingDefinition: GreetingDefinition) => {
+    registerGreetingDefinition: (greetingDefinition: GreetingDefinition) => {
       this.greetingDefinitions[greetingDefinition.id] = greetingDefinition;
       return () => this.greetingProvider(greetingDefinition);
     },
   });
 
   start() {
+    // its unclear to me why there was a second registry
+    /*
     Object.values(this.greetingDefinitions).forEach(
       greetingDefinition =>
         (this.greetings[greetingDefinition.id] = this.greetingProvider(greetingDefinition))
     );
+    */
     return {
-      getGreeting: (id: string) => this.greetings[id],
-      getRegisteredGreetings: () => Object.keys(this.greetings),
-      getRegisteredGreetingsAsObjects: () => Object.values(this.greetings),
+      getGreeting: (id: string) => this.greetingProvider(this.greetingDefinitions[id]),
+      getRegisteredGreetings: () => Object.keys(this.greetingDefinitions),
+      getRegisteredGreetingsAsObjects: () =>
+        Object.values(this.greetingDefinitions).map(this.greetingProvider),
     };
   }
 }

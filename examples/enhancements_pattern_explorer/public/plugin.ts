@@ -30,18 +30,23 @@ interface StartDependencies {
   greeting: GreetingStart;
 }
 
+interface EnhancedPatternExplorerPluginStart {
+  enhancedFirstGreeting: (name: string) => void;
+}
+
 export class EnhancedPatternExplorerPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements
+    Plugin<void, EnhancedPatternExplorerPluginStart, SetupDependencies, StartDependencies> {
   firstGreeting?: () => Greeting;
 
   setup(core: CoreSetup<StartDependencies>, { greeting }: SetupDependencies) {
-    this.firstGreeting = greeting.registerGreeting({
+    this.firstGreeting = greeting.registerGreetingDefinition({
       id: 'Casual',
       salutation: 'Hey there',
       punctuation: '.',
     });
-    greeting.registerGreeting({ id: 'Excited', salutation: 'Hi', punctuation: '!!' });
-    greeting.registerGreeting({ id: 'Formal', salutation: 'Hello ', punctuation: '.' });
+    greeting.registerGreetingDefinition({ id: 'Excited', salutation: 'Hi', punctuation: '!!' });
+    greeting.registerGreetingDefinition({ id: 'Formal', salutation: 'Hello ', punctuation: '.' });
 
     core.application.register({
       id: 'enhancingmentsPattern',
@@ -58,5 +63,12 @@ export class EnhancedPatternExplorerPlugin
     // an example of registering a greeting and returning a reference to the
     // plain or enhanced result
     setTimeout(() => this.firstGreeting && this.firstGreeting().greetMe('code ninja'), 2000);
+    return {
+      enhancedFirstGreeting: (name: string) => {
+        if (this.firstGreeting) {
+          this.firstGreeting().greetMe(name);
+        }
+      },
+    };
   }
 }
