@@ -7,6 +7,7 @@
 import { Reducer } from 'redux';
 import { PolicyListState } from '../../types';
 import { AppAction } from '../action';
+import { isOnPolicyListPage } from './selectors';
 
 const initialPolicyListState = (): PolicyListState => {
   return {
@@ -16,6 +17,7 @@ const initialPolicyListState = (): PolicyListState => {
     pageIndex: 0,
     pageSize: 10,
     total: 0,
+    location: undefined,
   };
 };
 
@@ -39,17 +41,27 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
     };
   }
 
-  if (
-    action.type === 'userPaginatedPolicyListTable' ||
-    (action.type === 'userNavigatedToPage' && action.payload === 'policyListPage')
-  ) {
-    return {
+  if (action.type === 'userChangedUrl') {
+    const newState = {
       ...state,
-      apiError: undefined,
-      isLoading: true,
+      location: action.payload,
+    };
+    const isCurrentlyOnListPage = isOnPolicyListPage(newState);
+    const wasPreviouslyOnListPage = isOnPolicyListPage(state);
+
+    // If user just landed on the List page, then set the loading flag (data is being fetched)
+    if (isCurrentlyOnListPage && !wasPreviouslyOnListPage) {
+      newState.apiError = undefined;
+      newState.isLoading = true;
+      return newState;
+    }
+    return {
+      ...initialPolicyListState(),
+      location: action.payload,
     };
   }
 
+  // FIXME: PT remove this
   if (action.type === 'userNavigatedFromPage' && action.payload === 'policyListPage') {
     return initialPolicyListState();
   }

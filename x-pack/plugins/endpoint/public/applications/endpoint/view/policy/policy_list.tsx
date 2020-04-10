@@ -9,8 +9,7 @@ import { EuiBasicTable, EuiText, EuiTableFieldDataColumnType, EuiLink } from '@e
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { usePageId } from '../use_page_id';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   selectApiError,
   selectIsLoading,
@@ -50,9 +49,9 @@ const renderPolicyNameLink = (value: string, _item: PolicyData) => {
 };
 
 export const PolicyList = React.memo(() => {
-  usePageId('policyListPage');
-
   const { services, notifications } = useKibana();
+  const history = useHistory();
+  const location = useLocation();
 
   const dispatch = useDispatch<(action: PolicyListAction) => void>();
   const policyItems = usePolicyListSelector(selectPolicyItems);
@@ -84,15 +83,9 @@ export const PolicyList = React.memo(() => {
 
   const handleTableChange = useCallback(
     ({ page: { index, size } }: TableChangeCallbackArguments) => {
-      dispatch({
-        type: 'userPaginatedPolicyListTable',
-        payload: {
-          pageIndex: index,
-          pageSize: size,
-        },
-      });
+      history.push(`${location.pathname}?page_index=${index}&page_size=${size}`);
     },
-    [dispatch]
+    [history, location.pathname]
   );
 
   const columns: Array<EuiTableFieldDataColumnType<PolicyData>> = useMemo(

@@ -41,39 +41,4 @@ describe('policy list store concerns', () => {
     await sleep();
     expect(selectIsLoading(getState())).toBe(false);
   });
-
-  // https://github.com/elastic/kibana/issues/58896
-  test.skip('it sets `isLoading` when `userPaginatedPolicyListTable`', async () => {
-    expect(selectIsLoading(getState())).toBe(false);
-    dispatch({
-      type: 'userPaginatedPolicyListTable',
-      payload: {
-        pageSize: 10,
-        pageIndex: 1,
-      },
-    });
-    expect(selectIsLoading(getState())).toBe(true);
-    await sleep();
-    expect(selectIsLoading(getState())).toBe(false);
-  });
-
-  test('it resets state on `userNavigatedFromPage` action', async () => {
-    dispatch({
-      type: 'serverReturnedPolicyListData',
-      payload: {
-        policyItems: [],
-        pageIndex: 20,
-        pageSize: 50,
-        total: 200,
-      },
-    });
-    dispatch({ type: 'userNavigatedFromPage', payload: 'policyListPage' });
-    expect(getState()).toEqual({
-      policyItems: [],
-      isLoading: false,
-      pageIndex: 0,
-      pageSize: 10,
-      total: 0,
-    });
-  });
 });
