@@ -19,7 +19,6 @@ import {
 } from './test_mock_utils';
 
 describe('policy list store concerns', () => {
-  const sleep = () => new Promise(resolve => setTimeout(resolve, 1000));
   let fakeCoreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
   let store: Store<PolicyListState>;
@@ -80,8 +79,7 @@ describe('policy list store concerns', () => {
       } as EndpointAppLocation,
     });
     expect(selectIsLoading(getState())).toBe(true);
-    // await waitForAction('name-of-action');
-    await sleep();
+    await waitForAction('serverReturnedPolicyListData');
     expect(selectIsLoading(getState())).toBe(false);
   });
 

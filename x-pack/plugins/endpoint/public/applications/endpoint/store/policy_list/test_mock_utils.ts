@@ -48,7 +48,7 @@ export interface MiddlewareActionSpyHelper<S = GlobalState> {
    *
    * @param actionType
    */
-  waitForAction: (actionType: string) => Promise<void>; // FIXME: lets see if we can type the `actionType` as well based on AppAction
+  waitForAction: (actionType: Pick<AppAction, 'type'>['type']) => Promise<void>; // FIXME: lets see if we can type the `actionType` as well based on AppAction
   /**
    * Redux middleware that enables spying on the action that are dispatched through the store
    */
