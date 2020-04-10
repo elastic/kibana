@@ -23,6 +23,7 @@ import {
   isInteractiveDisabled,
   isTooltipControlDisabled,
   isViewControlHidden,
+  getSpatialFiltersLayer,
 } from '../../../selectors/map_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../../../plugins/maps/public/reducers/non_serializable_instances';
@@ -31,6 +32,7 @@ function mapStateToProps(state = {}) {
   return {
     isMapReady: getMapReady(state),
     layerList: getLayerList(state),
+    spatialFiltersLayer: getSpatialFiltersLayer(state),
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
     scrollZoom: getScrollZoom(state),

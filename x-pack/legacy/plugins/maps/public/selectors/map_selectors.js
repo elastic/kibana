@@ -28,6 +28,9 @@ import {
 import { InnerJoin } from '../../../../../plugins/maps/public/layers/joins/inner_join';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getSourceByType } from '../../../../../plugins/maps/public/layers/sources/source_registry';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { GeojsonFileSource } from '../../../../../plugins/maps/public/layers/sources/client_file_source';
+import { LAYER_TYPE } from '../../common/constants';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -179,6 +182,38 @@ export const getDataFilters = createSelector(
       query,
       filters,
     };
+  }
+);
+
+export const getSpatialFiltersLayer = createSelector(
+  getFilters,
+  (filters) => {
+    const featureCollection = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [0, 0]
+          },
+          "properties": {
+            "name": "null island",
+            "another_prop": "something else interesting"
+          }
+        }
+      ],
+    };
+    const geoJsonSourceDescriptor = GeojsonFileSource.createDescriptor(featureCollection, 'spatialFilters');
+    console.log(geoJsonSourceDescriptor);
+    return new VectorLayer({
+      layerDescriptor: {
+        id: 'spatialFilters',
+        visible: true,
+        type: LAYER_TYPE.VECTOR,
+      },
+      source: new GeojsonFileSource(geoJsonSourceDescriptor),
+    });
   }
 );
 

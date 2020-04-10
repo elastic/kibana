@@ -78,7 +78,7 @@ export class MBMapContainer extends React.Component {
   }
 
   _debouncedSync = _.debounce(() => {
-    if (this._isMounted) {
+    if (this._isMounted && this.props.isMapReady) {
       if (!this.state.hasSyncedLayerList) {
         this.setState(
           {
@@ -90,6 +90,8 @@ export class MBMapContainer extends React.Component {
           }
         );
       }
+      console.log('syncing spatial filters with MB', this.props.spatialFiltersLayer);
+      this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
     }
   }, 256);
 
@@ -261,13 +263,9 @@ export class MBMapContainer extends React.Component {
   };
 
   _syncMbMapWithLayerList = () => {
-    if (!this.props.isMapReady) {
-      return;
-    }
-
-    removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
+    //removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
     this.props.layerList.forEach(layer => layer.syncLayerWithMB(this.state.mbMap));
-    syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
+    //syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
   };
 
   _syncMbMapWithInspector = () => {
