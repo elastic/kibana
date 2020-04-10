@@ -71,7 +71,7 @@ async function buildEuiContextMenuPanelItems<A>({
     }
 
     items.push(
-      convertPanelActionToContextMenuItem({
+      await convertPanelActionToContextMenuItem({
         action,
         actionContext,
         closeMenu,
@@ -88,9 +88,9 @@ async function buildEuiContextMenuPanelItems<A>({
  *
  * @param {ContextMenuAction} action
  * @param {Embeddable} embeddable
- * @return {EuiContextMenuPanelItemDescriptor}
+ * @return {Promise<EuiContextMenuPanelItemDescriptor>}
  */
-function convertPanelActionToContextMenuItem<A>({
+async function convertPanelActionToContextMenuItem<A>({
   action,
   actionContext,
   closeMenu,
@@ -98,7 +98,7 @@ function convertPanelActionToContextMenuItem<A>({
   action: Action<A>;
   actionContext: A;
   closeMenu: () => void;
-}): EuiContextMenuPanelItemDescriptor {
+}): Promise<EuiContextMenuPanelItemDescriptor> {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
     name: action.MenuItem
       ? React.createElement(uiToReactComponent(action.MenuItem), {
@@ -110,13 +110,19 @@ function convertPanelActionToContextMenuItem<A>({
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };
 
-  menuPanelItem.onClick = () => {
+  menuPanelItem.onClick = e => {
+    if (menuPanelItem.href) {
+      e.preventDefault();
+    }
     action.execute(actionContext);
     closeMenu();
   };
 
-  if (action.getHref && action.getHref(actionContext)) {
-    menuPanelItem.href = action.getHref(actionContext);
+  if (action.getHref) {
+    const href = await action.getHref(actionContext);
+    if (href) {
+      menuPanelItem.href = href;
+    }
   }
 
   return menuPanelItem;
