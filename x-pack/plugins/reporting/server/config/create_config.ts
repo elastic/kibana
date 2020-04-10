@@ -78,7 +78,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
       // disableSandbox was not set: apply default for OS
       const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
       logger.debug(
-        i18n.translate(`xpack.reporting.serverConfig.osDetected`, {
+        i18n.translate('xpack.reporting.serverConfig.osDetected', {
           defaultMessage:
             'Running on OS: "{osName}", distribution: "{dist}", release: "${release}"',
           values: { osName: os.os, dist: os.dist, release: os.release },
