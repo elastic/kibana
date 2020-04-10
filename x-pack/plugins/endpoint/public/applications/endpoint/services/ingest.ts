@@ -13,7 +13,7 @@ import {
 import { NewPolicyData, PolicyData } from '../types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
-const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
+export const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
 
