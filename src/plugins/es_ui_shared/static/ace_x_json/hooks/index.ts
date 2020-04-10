@@ -17,11 +17,4 @@
  * under the License.
  */
 
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-} from './lexer_rules';
-
-export { XJsonMode, installXJsonMode } from './x_json';
+export { useXJsonMode } from './use_x_json';

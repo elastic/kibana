@@ -16,5 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { XJsonMode } from './x_json_mode';
+export { installXJsonMode, XJsonMode } from './x_json';
