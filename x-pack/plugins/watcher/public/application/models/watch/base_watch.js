@@ -32,6 +32,7 @@ export class BaseWatch {
     this.isSystemWatch = Boolean(get(props, 'isSystemWatch'));
     this.watchStatus = WatchStatus.fromUpstreamJson(get(props, 'watchStatus'));
     this.watchErrors = WatchErrors.fromUpstreamJson(get(props, 'watchErrors'));
+    this.isActive = this.watchStatus.isActive ?? true;
 
     const actions = get(props, 'actions', []);
     this.actions = actions.map(Action.fromUpstreamJson);
@@ -115,6 +116,7 @@ export class BaseWatch {
       name: this.name,
       type: this.type,
       isNew: this.isNew,
+      isActive: this.isActive,
       actions: map(this.actions, action => action.upstreamJson),
     };
   }
