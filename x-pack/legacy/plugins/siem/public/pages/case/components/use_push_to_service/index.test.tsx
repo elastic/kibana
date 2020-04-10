@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 /* eslint-disable react/display-name */
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from './';
 import { TestProviders } from '../../../../mock';
-import React from 'react';
-import * as api from '../../../../containers/case/configure/api';
 import { usePostPushToService } from '../../../../containers/case/use_post_push_to_service';
 import { ClosureType } from '../../../../../../../../plugins/case/common/api/cases';
 import * as i18n from './translations';
-jest.mock('../../../../containers/case/use_post_push_to_service');
-jest.mock('../../../../containers/case/configure/api');
 import { useGetActionLicense } from '../../../../containers/case/use_get_action_license';
 import { getKibanaConfigError, getLicenseError } from './helpers';
+import * as api from '../../../../containers/case/configure/api';
 jest.mock('../../../../containers/case/use_get_action_license');
+jest.mock('../../../../containers/case/use_post_push_to_service');
+jest.mock('../../../../containers/case/configure/api');
 
 describe('usePushToService', () => {
   const caseId = '12345';
@@ -40,7 +40,7 @@ describe('usePushToService', () => {
     updatedBy: {},
     version: 'string',
   };
-  const getConfigureMock = api.getCaseConfigure as jest.Mock;
+  const getConfigureMock = jest.spyOn(api, 'getCaseConfigure');
   const actionLicense = {
     id: '.servicenow',
     name: 'ServiceNow',
