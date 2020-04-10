@@ -5,15 +5,20 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { UiStatsMetricType } from '@kbn/analytics';
 import { UIM_APP_NAME } from '../constants';
 
-export let trackUiMetric: (metricType: UiStatsMetricType, eventName: string) => void;
-export let METRIC_TYPE: UsageCollectionSetup['METRIC_TYPE'];
+export let usageCollection: UsageCollectionSetup | undefined;
 
-export function init(usageCollection: UsageCollectionSetup): void {
-  trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, UIM_APP_NAME);
-  METRIC_TYPE = usageCollection.METRIC_TYPE;
+export function init(_usageCollection: UsageCollectionSetup): void {
+  usageCollection = _usageCollection;
+}
+
+export function trackUiMetric(type: 'COUNT' | 'CLICK' | 'LOADED', name: string) {
+  if (!usageCollection) {
+    return;
+  }
+  const { reportUiStats, METRIC_TYPE } = usageCollection;
+  reportUiStats(UIM_APP_NAME, METRIC_TYPE[type], name);
 }
 
 /**
@@ -23,7 +28,7 @@ export function init(usageCollection: UsageCollectionSetup): void {
 export function trackUserRequest(request: Promise<any>, eventName: string) {
   // Only track successful actions.
   return request.then((response: any) => {
-    trackUiMetric(METRIC_TYPE.COUNT, eventName);
+    trackUiMetric('COUNT', eventName);
     // We return the response immediately without waiting for the tracking request to resolve,
     // to avoid adding additional latency.
     return response;
