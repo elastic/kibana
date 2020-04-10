@@ -54,7 +54,7 @@ module.exports = () => {
             {
               'lodash/?(((\\w*)?/?)*)': {
                 transform: 'lodash/${1}/${member}',
-                preventFullImport: true,
+                preventFullImport: false,
               },
             },
           ],
