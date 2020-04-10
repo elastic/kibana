@@ -42,92 +42,117 @@ export function extractDocumentation(
   return result;
 
   /** visit nodes finding exported schemas */
-  function visit(node: ts.Node, parentKey?: string) {
+  function visit(node: ts.Node) {
     if (isNodeExported(node) && ts.isVariableDeclaration(node)) {
-      const key = node.name.getText();
-      parentKey = key;
-      result.set(key, []);
+      const schemaName = node.name.getText();
+      const schemaType = checker.getTypeAtLocation(node);
+      result.set(schemaName, extractDocEntries(schemaType!));
     }
 
     if (node.getChildCount() > 0) {
-      ts.forEachChild(node, n => visit(n, parentKey));
-    }
-
-    if (ts.isPropertyAssignment(node) && node.name && parentKey !== undefined) {
-      const arr = result.get(parentKey);
-      const symbol = checker.getSymbolAtLocation(node.name);
-      if (symbol && arr) {
-        const foo = serializeSymbol(symbol);
-        arr.push(foo);
-      }
-    }
-
-    if (ts.isModuleDeclaration(node)) {
-      // This is a namespace, visit its children
       ts.forEachChild(node, visit);
     }
   }
 
-  /** Serialize a symbol into a json object */
-  function serializeSymbol(symbol: ts.Symbol): DocEntry {
-    const symbolType = checker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
-    const typePropertySymbol = checker.getPropertyOfType(symbolType, 'type');
-    const resultType = checker.getTypeOfSymbolAtLocation(
-      typePropertySymbol!,
-      typePropertySymbol!.valueDeclaration
-    );
+  /**
+   * Extracts doc entries for the schema definition
+   * @param schemaType
+   */
+  function extractDocEntries(schemaType: ts.Type): DocEntry[] {
+    const collection: DocEntry[] = [];
 
-    return serializeWithType(symbol, resultType);
+    const members = getTypeMembers(schemaType);
+
+    if (!members) {
+      return collection;
+    }
+
+    members.forEach(member => {
+      collection.push(serializeProperty(member));
+    });
+
+    return collection;
   }
 
-  function serializeWithType(symbol: ts.Symbol, type: ts.Type): DocEntry {
-    let typeAsString: DocEntry['type'] = checker.typeToString(type);
-    const nestedEntries = processNestedMembers(type);
+  /**
+   * Resolves members of the type
+   * @param type
+   */
+  function getTypeMembers(type: ts.Type): ts.Symbol[] | undefined {
+    const argsOfType = checker.getTypeArguments((type as unknown) as ts.TypeReference);
 
-    const resName = type && type.symbol && type.symbol.name;
+    let members = type.getProperties();
 
-    if (nestedEntries && nestedEntries.length > 0) {
-      if (resName === 'Array') {
-        typeAsString = `Array<${symbol.getName()}>`;
-      } else {
-        typeAsString = symbol.getName();
-      }
+    if (argsOfType && argsOfType.length > 0) {
+      members = argsOfType[0].getProperties();
+    }
+
+    return members;
+  }
+
+  function resolveTypeMembers(type: ts.Type): ts.SymbolTable | string {
+    // @ts-ignores
+    let members = type.members;
+
+    const typeArguments = checker.getTypeArguments((type as unknown) as ts.TypeReference);
+
+    if (type.aliasTypeArguments) {
+      // @ts-ignores
+      members = type.aliasTypeArguments[0].members;
+    }
+
+    if (typeArguments.length > 0) {
+      members = resolveTypeMembers(typeArguments[0]);
+    }
+
+    if (members === undefined) {
+      members = checker.typeToString(type);
+    }
+
+    return members;
+  }
+
+  function serializeProperty(symbol: ts.Symbol): DocEntry {
+    // @ts-ignore
+    const typeOfSymbol = symbol.type;
+    const typeArguments = checker.getTypeArguments((typeOfSymbol as unknown) as ts.TypeReference);
+
+    let resultType: ts.Type = typeArguments.length > 0 ? typeArguments[0] : typeOfSymbol;
+
+    let typeAsString = checker.typeToString(resultType);
+
+    if (typeArguments.length === 0) {
+      // @ts-ignore
+      typeAsString = checker.typeToString(symbol.type);
+    }
+
+    const typeProp = resultType.getProperty('type');
+    if (typeProp) {
+      // @ts-ignore
+      resultType = typeProp.type;
+    }
+
+    const members = resolveTypeMembers(resultType);
+
+    const resName = resultType && resultType.symbol && resultType.symbol.name;
+    if (resName && typeof members !== 'string') {
+      // we hit an object or collection
+      typeAsString = resName === 'Array' ? `${symbol.getName()}[]` : symbol.getName();
+    }
+
+    const nestedEntries: DocEntry[] = [];
+    if (typeof members !== 'string' && members.size > 0) {
+      members.forEach(member => {
+        nestedEntries.push(serializeProperty(member));
+      });
     }
 
     return {
       name: symbol.getName(),
       documentation: getCommentString(symbol),
       type: typeAsString,
-      ...(nestedEntries ? { nested: nestedEntries } : {}),
+      ...(nestedEntries.length > 0 ? { nested: nestedEntries } : {}),
     };
-  }
-
-  /** Process members of objects or collections */
-  function processNestedMembers(type: ts.Type): DocEntry[] | null {
-    const typeArguments =
-      type.aliasTypeArguments || checker.getTypeArguments(type as ts.TypeReference);
-
-    let collection = null;
-
-    if (typeArguments && typeArguments.length) {
-      const members: ts.SymbolTable =
-        // @ts-ignore
-        typeArguments[0].members ||
-        // @ts-ignore
-        (typeArguments[0].aliasTypeArguments && typeArguments[0].aliasTypeArguments[0].members);
-
-      if (!members) return collection;
-
-      collection = [];
-
-      members.forEach(member => {
-        // @ts-ignore
-        const serializedMember = serializeWithType(member, member.type);
-        collection.push(serializedMember);
-      });
-    }
-
-    return collection;
   }
 
   function getCommentString(symbol: ts.Symbol): string {

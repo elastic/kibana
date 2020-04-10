@@ -33,7 +33,9 @@ export const importFileBodySchema = schema.object({
   index: schema.maybe(schema.string()),
   data: schema.arrayOf(schema.any()),
   settings: schema.maybe(schema.any()),
+  /** Mappings */
   mappings: schema.any(),
+  /** Ingest pipeline definition */
   ingestPipeline: schema.object({
     id: schema.maybe(schema.string()),
     pipeline: schema.maybe(schema.any()),

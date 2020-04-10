@@ -59,8 +59,9 @@ export function postProcess(parsedFiles: any[]): void {
         local: { schema },
       } = block;
       if (!schema) return;
-      const { name: schemName, group: paramsGroup } = schema;
-      const schemaFields = schemaDocs.get(schemName);
+      const { name: schemaName, group: paramsGroup } = schema;
+      const schemaFields = schemaDocs.get(schemaName);
+
       if (!schemaFields) return;
 
       extractDocEntries(schemaFields, block, paramsGroup);
