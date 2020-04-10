@@ -97,7 +97,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
         );
       }
 
-      return Object.assign(config, {
+      return {
         ...config,
         capture: {
           ...config.capture,
@@ -109,7 +109,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
             },
           },
         },
-      });
+      };
     })
   );
 }
