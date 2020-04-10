@@ -99,6 +99,7 @@ export const signalRulesAlertType = ({
         params: ruleParams,
       } = savedObject.attributes;
       const updatedAt = savedObject.updated_at ?? '';
+      const refresh = actions.length ? 'wait_for' : false;
       const buildRuleMessage = buildRuleMessageFactory({
         id: alertId,
         ruleId,
@@ -182,6 +183,7 @@ export const signalRulesAlertType = ({
             updatedAt,
             interval,
             enabled,
+            refresh,
             tags,
           });
           result.success = success;
@@ -243,6 +245,7 @@ export const signalRulesAlertType = ({
             interval,
             enabled,
             pageSize: searchAfterSize,
+            refresh,
             tags,
             throttle,
           });

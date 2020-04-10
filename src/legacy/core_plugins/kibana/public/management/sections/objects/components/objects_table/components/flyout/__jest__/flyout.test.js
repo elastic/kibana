@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { mockManagementPlugin } from '../../../../../../../../../../management/public/np_ready/mocks';
+import { mockManagementPlugin } from '../../../../../../../../../../../../plugins/index_pattern_management/public/mocks';
 import { Flyout } from '../flyout';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
@@ -48,7 +48,7 @@ jest.mock('../../../../../lib/resolve_saved_objects', () => ({
   saveObjects: jest.fn(),
 }));
 
-jest.mock('../../../../../../../../../../management/public/legacy', () => ({
+jest.mock('../../../../../../../../../../../../plugins/index_pattern_management/public', () => ({
   setup: mockManagementPlugin.createSetupContract(),
   start: mockManagementPlugin.createStartContract(),
 }));
@@ -519,7 +519,8 @@ describe('Flyout', () => {
       expect(resolveIndexPatternConflicts).toHaveBeenCalledWith(
         component.instance().resolutions,
         mockConflictedIndexPatterns,
-        true
+        true,
+        defaultProps.indexPatterns
       );
       expect(saveObjects).toHaveBeenCalledWith(
         mockConflictedSavedObjectsLinkedToSavedSearches,

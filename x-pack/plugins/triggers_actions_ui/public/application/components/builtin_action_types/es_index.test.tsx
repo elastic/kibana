@@ -152,8 +152,6 @@ describe('IndexParamsFields renders', () => {
     ).toBe(`{
   "test": 123
 }`);
-    expect(
-      wrapper.find('[data-test-subj="indexDocumentAddVariableButton"]').length > 0
-    ).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="documentsAddVariableButton"]').length > 0).toBeTruthy();
   });
 });
