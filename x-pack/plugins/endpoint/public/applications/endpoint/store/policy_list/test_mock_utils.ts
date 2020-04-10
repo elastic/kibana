@@ -48,7 +48,7 @@ export interface MiddlewareActionSpyHelper<S = GlobalState> {
    *
    * @param actionType
    */
-  waitForAction: (actionType: Pick<AppAction, 'type'>['type']) => Promise<void>; // FIXME: lets see if we can type the `actionType` as well based on AppAction
+  waitForAction: (actionType: Pick<AppAction, 'type'>['type']) => Promise<void>;
   /**
    * Redux middleware that enables spying on the action that are dispatched through the store
    */
@@ -78,39 +78,42 @@ export interface MiddlewareActionSpyHelper<S = GlobalState> {
  * });
  */
 export const createSpyMiddleware = <S = GlobalState>(): MiddlewareActionSpyHelper<S> => {
-  const sleep = (ms = 10) => new Promise(resolve => setTimeout(resolve, ms));
-  const dispatchedActions: AppAction[] = [];
+  type ActionWatcher = (action: AppAction) => void;
+
+  const watchers = new Set<ActionWatcher>();
 
   return {
     waitForAction: async (actionType: string) => {
-      const interval = 10; // milliseconds
-      const timeout = 4000; // milliseconds
       // Error is defined here so that we get a better stack trace that points to the test from where it was used
       const err = new Error(`action '${actionType}' was not dispatched within the allocated time`);
-      const startCheckingFrom = dispatchedActions.length === 0 ? 0 : dispatchedActions.length - 1;
-      let elapsedTime = 0;
-      let actionWasDispatched = false;
 
-      while (!actionWasDispatched && elapsedTime < timeout) {
-        for (let i = startCheckingFrom, t = dispatchedActions.length; i < t; i++) {
-          if (dispatchedActions[i].type === actionType) {
-            actionWasDispatched = true;
-            break;
+      await new Promise((resolve, reject) => {
+        const watch: ActionWatcher = action => {
+          if (action.type === actionType) {
+            watchers.delete(watch);
+            clearTimeout(timeout);
+            resolve();
           }
-        }
-        await sleep(interval);
-        elapsedTime += interval;
-      }
+        };
 
-      if (!actionWasDispatched) {
-        throw err;
-      }
+        // We timeout before jest's default 5s, so that a better error stack is returned
+        const timeout = setTimeout(() => {
+          watchers.delete(watch);
+          reject(err);
+        }, 4500);
+        watchers.add(watch);
+      });
     },
 
     actionSpyMiddleware: api => {
       return next => action => {
         next(action);
-        dispatchedActions.push(action);
+        // If we have action watchers, then loop through them and call them with this action
+        if (watchers.size > 0) {
+          for (const watch of watchers) {
+            watch(action);
+          }
+        }
       };
     },
   };
