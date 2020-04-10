@@ -12,7 +12,11 @@ import { policyListMiddlewareFactory } from './middleware';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { isOnPolicyListPage, selectIsLoading } from './selectors';
 import { DepsStartMock, depsStartMock } from '../../mocks';
-import { setPolicyListApiMockImplementation } from './test_mock_utils';
+import {
+  createSpyMiddleware,
+  MiddlewareActionSpyHelper,
+  setPolicyListApiMockImplementation,
+} from './test_mock_utils';
 
 describe('policy list store concerns', () => {
   const sleep = () => new Promise(resolve => setTimeout(resolve, 1000));
@@ -21,14 +25,18 @@ describe('policy list store concerns', () => {
   let store: Store<PolicyListState>;
   let getState: typeof store['getState'];
   let dispatch: Dispatch<AppAction>;
+  let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
 
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     depsStart = depsStartMock();
     setPolicyListApiMockImplementation(fakeCoreStart.http);
+    let actionSpyMiddleware;
+    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<PolicyListState>());
+
     store = createStore(
       policyListReducer,
-      applyMiddleware(policyListMiddlewareFactory(fakeCoreStart, depsStart))
+      applyMiddleware(policyListMiddlewareFactory(fakeCoreStart, depsStart), actionSpyMiddleware)
     );
     getState = store.getState;
     dispatch = store.dispatch;
@@ -58,6 +66,7 @@ describe('policy list store concerns', () => {
       } as EndpointAppLocation,
     });
     expect(isOnPolicyListPage(getState())).toBe(true);
+    await waitForAction('serverReturnedPolicyListData');
   });
 
   test('it sets `isLoading` when `userChangedUrl`', async () => {
