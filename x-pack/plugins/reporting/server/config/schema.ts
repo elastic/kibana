@@ -119,6 +119,7 @@ const CsvSchema = schema.object({
   maxSizeBytes: schema.number({
     defaultValue: 1024 * 1024 * 10, // 10MB
   }), // TODO: use schema.byteSize
+  useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
     duration: schema.string({
       defaultValue: '30s',
