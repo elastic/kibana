@@ -483,6 +483,30 @@ export const ActionForm = ({
       });
   }
 
+  const emptyConnectorsActionTypes = actions.reduce(
+    (emptyActionTypes: Set<string>, actionItem: AlertAction) => {
+      const actionConnector = connectors.find(field => field.id === actionItem.id);
+      // connectors doesn't exists
+      if (
+        !actionConnector &&
+        actionItem.id !== '' &&
+        !emptyActionTypes.has(actionItem.actionTypeId)
+      ) {
+        emptyActionTypes.add(actionItem.actionTypeId);
+      }
+      return new Set(emptyActionTypes);
+    },
+    new Set()
+  );
+
+  if (emptyConnectorsActionTypes.size)
+    toastNotifications!.addDanger({
+      title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToLoadConnector', {
+        defaultMessage: 'No email connector selected.',
+        values: { actionTypes: emptyConnectorsActionTypes.join(', ') },
+      }),
+    });
+
   return (
     <Fragment>
       {actions.map((actionItem: AlertAction, index: number) => {
