@@ -27,7 +27,7 @@ export const CreateDatasourceStepsNavigation: React.FunctionComponent<{
     from === 'config'
       ? {
           title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectPackageLabel', {
-            defaultMessage: 'Select package',
+            defaultMessage: 'Select integration',
           }),
           isSelected: currentStep === 'selectPackage',
           isComplete:

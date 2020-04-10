@@ -18,3 +18,4 @@
  */
 
 export { migrations730 } from './migrations_730';
+export { migrateMatchAllQuery } from './migrate_match_all_query';

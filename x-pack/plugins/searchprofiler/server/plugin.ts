@@ -7,8 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 
-import { LICENSE_CHECK_STATE } from '../../licensing/common/types';
-
 import { LicenseStatus, PLUGIN } from '../common';
 import { AppServerPluginDependencies } from './types';
 import * as profileRoute from './routes/profile';
@@ -33,7 +31,7 @@ export class SearchProfilerServerPlugin implements Plugin {
 
     licensing.license$.subscribe(license => {
       const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
-      const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
+      const hasRequiredLicense = state === 'valid';
       if (hasRequiredLicense) {
         this.licenseStatus = { valid: true };
       } else {

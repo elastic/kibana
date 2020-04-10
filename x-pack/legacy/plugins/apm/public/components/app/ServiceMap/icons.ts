@@ -5,11 +5,12 @@
  */
 
 import cytoscape from 'cytoscape';
+import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
 import {
   AGENT_NAME,
   SERVICE_NAME,
-  SPAN_TYPE,
-  SPAN_SUBTYPE
+  SPAN_SUBTYPE,
+  SPAN_TYPE
 } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import databaseIcon from './icons/database.svg';
 import defaultIconImport from './icons/default.svg';
@@ -31,6 +32,7 @@ export const defaultIcon = defaultIconImport;
 const icons: { [key: string]: string } = {
   cache: databaseIcon,
   db: databaseIcon,
+  ext: globeIcon,
   external: globeIcon,
   messaging: documentsIcon,
   resource: globeIcon
@@ -62,7 +64,12 @@ export function iconForNode(node: cytoscape.NodeSingular) {
   const type = node.data(SPAN_TYPE);
 
   if (node.data(SERVICE_NAME)) {
-    return serviceIcons[node.data(AGENT_NAME) as string];
+    const agentName = node.data(AGENT_NAME);
+    // RUM can have multiple names. Normalize it
+    const normalizedAgentName = isRumAgentName(agentName)
+      ? 'js-base'
+      : agentName;
+    return serviceIcons[normalizedAgentName];
   } else if (isIE11) {
     return defaultIcon;
   } else if (

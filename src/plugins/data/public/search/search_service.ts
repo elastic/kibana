@@ -25,7 +25,10 @@ import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
+import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { createSearchSource } from './search_source';
 import { QuerySetup } from '../query/query_service';
+import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
@@ -44,6 +47,7 @@ import {
 interface SearchServiceSetupDependencies {
   packageInfo: PackageInfo;
   query: QuerySetup;
+  getInternalStartServices: GetInternalStartServicesFn;
 }
 
 /**
@@ -81,7 +85,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup,
-    { packageInfo, query }: SearchServiceSetupDependencies
+    { packageInfo, query, getInternalStartServices }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
     this.registerSearchStrategyProvider(SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider);
@@ -91,7 +95,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const aggTypes = getAggTypes({
       query,
       uiSettings: core.uiSettings,
-      notifications: core.notifications,
+      getInternalStartServices,
     });
 
     aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));
@@ -106,7 +110,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
 
-  public start(core: CoreStart): ISearchStart {
+  public start(core: CoreStart, indexPatterns: IndexPatternsContract): ISearchStart {
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -143,6 +147,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         // TODO: should an intercepror have a destroy method?
         this.searchInterceptor = searchInterceptor;
       },
+      createSearchSource: createSearchSource(indexPatterns),
       __LEGACY: {
         esClient: this.esClient!,
         AggConfig,

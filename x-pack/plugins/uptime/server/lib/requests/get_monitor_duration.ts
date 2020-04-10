@@ -6,7 +6,7 @@
 
 import { UMElasticsearchQueryFn } from '../adapters';
 import { getHistogramIntervalFormatted } from '../helper';
-import { LocationDurationLine, MonitorDurationResult } from '../../../common/types';
+import { LocationDurationLine, MonitorDurationResult, QUERY } from '../../../common';
 
 export interface GetMonitorChartsParams {
   /** @member monitorId ID value for the selected monitor */
@@ -59,10 +59,9 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
       size: 0,
       aggs: {
         timeseries: {
-          date_histogram: {
+          auto_date_histogram: {
             field: '@timestamp',
-            fixed_interval: getHistogramIntervalFormatted(dateStart, dateEnd),
-            min_doc_count: 0,
+            buckets: QUERY.DEFAULT_BUCKET_COUNT,
           },
           aggs: {
             location: {
