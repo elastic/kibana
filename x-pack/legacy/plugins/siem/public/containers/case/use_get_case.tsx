@@ -73,7 +73,7 @@ const initialData: Case = {
   version: '',
 };
 
-interface UseGetCase extends CaseState {
+export interface UseGetCase extends CaseState {
   fetchCase: () => void;
   updateCase: (newCase: Case) => void;
 }

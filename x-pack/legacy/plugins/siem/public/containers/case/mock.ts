@@ -12,6 +12,7 @@ import {
   Case,
   CasesStatus,
   CaseUserActions,
+  Comment,
   FetchCasesProps,
   SortFieldCase,
 } from './types';
@@ -42,7 +43,7 @@ const elasticUser = {
 
 export const tags: string[] = ['coke', 'pepsi'];
 
-export const basicComment: CommentResponse = {
+export const basicComment: Comment = {
   comment: 'Solve this fast!',
   id: basicCommentId,
   createdAt: basicCreatedAt,
@@ -75,11 +76,12 @@ export const basicCase: Case = {
 };
 
 export const basicCasePost: Case = {
+  ...basicCase,
   updatedAt: null,
   updatedBy: null,
 };
 
-export const basicCommentPatch: Case = {
+export const basicCommentPatch: Comment = {
   ...basicComment,
   updatedAt: basicUpdatedAt,
   updatedBy: {
