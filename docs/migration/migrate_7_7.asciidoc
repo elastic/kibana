@@ -25,6 +25,8 @@ There are no user-facing breaking changes in 7.7.
 
 [float]
 === Breaking changes for plugin developers
+
+////
 *via [#60574](https://github.com/elastic/kibana/pull/60574)*
 
 ## Goodbye, legacy data plugin 👋
@@ -725,3 +727,4 @@ Plugins should now define a category if they have a navigation item:
 - If you want to fit into our default categories, you can use our `DEFAULT_APP_CATEGORIES` defined in `src/core/utils/default_app_categories.ts`.
 - If you want to create their own category, you can also provide any object matching the `AppCategory` interface defined in `src/core/types/app_category.ts`.
 
+////
