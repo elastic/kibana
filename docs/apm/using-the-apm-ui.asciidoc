@@ -13,11 +13,13 @@ APM is available via the navigation sidebar in {Kib}.
 * <<traces>>
 * <<transactions>>
 * <<spans>>
+* <<service-maps>>
 * <<errors>>
 * <<metrics>>
-* <<apm-alerts>>
 * <<machine-learning-integration>>
+* <<apm-alerts>>
 * <<agent-configuration>>
+* <<custom-links>>
 * <<advanced-queries>>
 * <<apm-settings-in-kibana>>
 * <<troubleshooting>>
