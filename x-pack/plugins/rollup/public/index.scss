@@ -1,0 +1,17 @@
+// Import the EUI global scope so we can use EUI constants
+@import '@elastic/eui/src/themes/eui/eui_colors_light';
+
+@import '@elastic/eui/src/global_styling/functions/index';
+@import '@elastic/eui/src/global_styling/variables/index';
+@import '@elastic/eui/src/global_styling/mixins/index';
+
+// Index management plugin styles
+
+// Prefix all styles with "rollup" to avoid conflicts.
+// Examples
+//   rollupChart
+//   rollupChart__legend
+//   rollupChart__legend--small
+//   rollupChart__legend-isLoading
+
+@import 'crud_app/_crud_app';
