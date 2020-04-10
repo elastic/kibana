@@ -27,6 +27,9 @@ import { EuiButton } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { Services } from './services';
 import { Greeting } from '../../greeting/public';
 
@@ -39,8 +42,8 @@ function greeterToComboOption(greeter: Greeting) {
 
 function EnhancementsPatternApp(props: Services) {
   const [name, setName] = useState('');
-  const greetersAsOptions = props.getGreeterObjects().map(greeter => greeterToComboOption(greeter));
-  const defaultGreeting = props.getGreeterObjects()[0];
+  const greetersAsOptions = props.getGreeters().map(greeter => greeterToComboOption(greeter));
+  const defaultGreeting = props.getGreeters()[0];
 
   const [selectedGreeter, setSelectedGreeter] = useState<Greeting | undefined>(defaultGreeting);
   return (
@@ -55,29 +58,62 @@ function EnhancementsPatternApp(props: Services) {
         example again you should only see a simple alert window, the unenhanced version.
       </EuiText>
       <EuiSpacer />
-      <EuiComboBox<Greeting>
-        selectedOptions={selectedGreeter ? [greeterToComboOption(selectedGreeter)] : undefined}
-        onChange={e => {
-          setSelectedGreeter(e[0] ? e[0].value : undefined);
-        }}
-        options={greetersAsOptions}
-        singleSelection={{ asPlainText: true }}
-      />
-      <EuiFieldText
-        placeholder="What is your name?"
-        value={name}
-        onChange={e => setName(e.target.value)}
-      />
-      <EuiButton
-        disabled={selectedGreeter === undefined || name === ''}
-        onClick={() => {
-          if (selectedGreeter) {
-            props.greetWithGreeter(selectedGreeter, name);
-          }
-        }}
-      >
-        Greet me
-      </EuiButton>
+      <EuiFormRow>
+        <EuiFieldText
+          placeholder="What is your name?"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            helpText="This functionality will use a greeter known only at runtime, so 
+          all these greeters are accessed off the generic registry plugin."
+          >
+            <EuiFlexItem>
+              <EuiComboBox<Greeting>
+                selectedOptions={
+                  selectedGreeter ? [greeterToComboOption(selectedGreeter)] : undefined
+                }
+                onChange={e => {
+                  setSelectedGreeter(e[0] ? e[0].value : undefined);
+                }}
+                options={greetersAsOptions}
+                singleSelection={{ asPlainText: true }}
+              />
+              <EuiButton
+                disabled={selectedGreeter === undefined || name === ''}
+                onClick={() => {
+                  if (selectedGreeter) {
+                    props.greetWithGreeter(selectedGreeter, name);
+                  }
+                }}
+              >
+                Greet me
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            helpText="This button uses a greeter type known at compile time. Prefer accessing the
+           implementation directly off the plugin instead of accessing off the generic registry if possible."
+          >
+            <EuiButton
+              disabled={selectedGreeter === undefined || name === ''}
+              onClick={() => props.getCasualGreeter().greetMe(name)}
+            >
+              Greet me casually
+            </EuiButton>
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiSpacer size="l" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPageContent>
   );
 }

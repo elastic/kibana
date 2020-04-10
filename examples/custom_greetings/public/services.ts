@@ -16,8 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { GreetingPlugin } from './plugin';
 
-export const plugin = () => new GreetingPlugin();
+import { GreetingStart, Greeting } from '../../greeting/public';
 
-export { GreetingStart, GreetingSetup, Greeter as Greeting, GreetingDefinition } from './plugin';
+export interface Services {
+  greetWithGreeter: (greeting: Greeting, name: string) => void;
+  getGreeters: () => Greeting[];
+}
+
+/**
+ * Rather than pass down depencies directly, we add some indirection with this services file, to help decouple and
+ * buffer this plugin from any changes in dependency contracts.
+ * @param dependencies
+ */
+export const getServices = (dependencies: { greetingServices: GreetingStart }): Services => ({
+  greetWithGreeter: (greeting: Greeting, name: string) => greeting.greetMe(name),
+  getGreeters: () => dependencies.greetingServices.getGreeters(),
+});

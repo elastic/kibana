@@ -1,0 +1,10 @@
+{
+  "id": "customGreetings",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["custom_greetings"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["greeting"],
+  "optionalPlugins": []
+}

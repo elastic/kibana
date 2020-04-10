@@ -17,12 +17,13 @@
  * under the License.
  */
 
+import { CustomGreetingsStart } from 'examples/custom_greetings/public';
 import { GreetingStart, Greeting } from '../../greeting/public';
 
 export interface Services {
   greetWithGreeter: (greeting: Greeting, name: string) => void;
-  getGreeterIds: () => string[];
-  getGreeterObjects: () => Greeting[];
+  getGreeters: () => Greeting[];
+  getCasualGreeter: () => Greeting;
 }
 
 /**
@@ -30,8 +31,11 @@ export interface Services {
  * buffer this plugin from any changes in dependency contracts.
  * @param dependencies
  */
-export const getServices = (dependencies: { greetingServices: GreetingStart }): Services => ({
+export const getServices = (dependencies: {
+  greeting: GreetingStart;
+  customGreetings: CustomGreetingsStart;
+}): Services => ({
   greetWithGreeter: (greeting: Greeting, name: string) => greeting.greetMe(name),
-  getGreeterIds: () => dependencies.greetingServices.getRegisteredGreetings(),
-  getGreeterObjects: () => dependencies.greetingServices.getRegisteredGreetingsAsObjects(),
+  getGreeters: () => dependencies.greeting.getGreeters(),
+  getCasualGreeter: () => dependencies.customGreetings.getCasualGreeter(),
 });

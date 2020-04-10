@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { GreetingPlugin } from './plugin';
 
-export const plugin = () => new GreetingPlugin();
+import { CustomGreetingsPlugin } from './plugin';
 
-export { GreetingStart, GreetingSetup, Greeter as Greeting, GreetingDefinition } from './plugin';
+export const plugin = () => new CustomGreetingsPlugin();
+
+export { CustomGreetingsStart } from './plugin';

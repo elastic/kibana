@@ -19,56 +19,33 @@
 
 import { CoreSetup, AppMountParameters, Plugin } from 'kibana/public';
 
-import { GreetingStart, GreetingSetup, Greeting } from 'examples/greeting/public';
+import { GreetingStart } from 'examples/greeting/public';
+import { CustomGreetingsStart } from 'examples/custom_greetings/public';
 import { getServices } from './services';
-
-interface SetupDependencies {
-  greeting: GreetingSetup;
-}
 
 interface StartDependencies {
   greeting: GreetingStart;
+  customGreetings: CustomGreetingsStart;
 }
 
-interface EnhancedPatternExplorerPluginStart {
-  enhancedFirstGreeting: (name: string) => void;
-}
-
-export class EnhancedPatternExplorerPlugin
-  implements
-    Plugin<void, EnhancedPatternExplorerPluginStart, SetupDependencies, StartDependencies> {
-  firstGreeting?: () => Greeting;
-
-  setup(core: CoreSetup<StartDependencies>, { greeting }: SetupDependencies) {
-    this.firstGreeting = greeting.registerGreetingDefinition({
-      id: 'Casual',
-      salutation: 'Hey there',
-      punctuation: '.',
-    });
-    greeting.registerGreetingDefinition({ id: 'Excited', salutation: 'Hi', punctuation: '!!' });
-    greeting.registerGreetingDefinition({ id: 'Formal', salutation: 'Hello ', punctuation: '.' });
-
+export class EnhancedPatternExplorerPlugin implements Plugin<void, void, {}, StartDependencies> {
+  setup(core: CoreSetup<StartDependencies>) {
     core.application.register({
       id: 'enhancingmentsPattern',
       title: 'Ennhancements pattern',
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./app');
         const [, depsStart] = await core.getStartServices();
-        return renderApp(getServices({ greetingServices: depsStart.greeting }), params.element);
+        return renderApp(
+          getServices({
+            greeting: depsStart.greeting,
+            customGreetings: depsStart.customGreetings,
+          }),
+          params.element
+        );
       },
     });
   }
 
-  start() {
-    // an example of registering a greeting and returning a reference to the
-    // plain or enhanced result
-    setTimeout(() => this.firstGreeting && this.firstGreeting().greetMe('code ninja'), 2000);
-    return {
-      enhancedFirstGreeting: (name: string) => {
-        if (this.firstGreeting) {
-          this.firstGreeting().greetMe(name);
-        }
-      },
-    };
-  }
+  start() {}
 }
