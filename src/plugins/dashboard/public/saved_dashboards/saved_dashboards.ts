@@ -18,13 +18,14 @@
  */
 
 import { SavedObjectsClientContract, ChromeStart, OverlayStart } from 'kibana/public';
-import { IndexPatternsContract } from '../../../../plugins/data/public';
+import { DataPublicPluginStart, IndexPatternsContract } from '../../../../plugins/data/public';
 import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import { createSavedDashboardClass } from './saved_dashboard';
 
 interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
+  search: DataPublicPluginStart['search'];
   chrome: ChromeStart;
   overlays: OverlayStart;
 }

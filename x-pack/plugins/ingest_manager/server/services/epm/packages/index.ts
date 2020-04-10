@@ -21,7 +21,6 @@ export {
   getPackageInfo,
   getPackages,
   SearchParams,
-  findInstalledPackageByName,
 } from './get';
 
 export { installKibanaAssets, installPackage, ensureInstalledPackage } from './install';
