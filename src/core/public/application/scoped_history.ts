@@ -226,7 +226,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    */
   public createHref = (
     location: LocationDescriptorObject<HistoryLocationState>,
-    prependBasePath: boolean = true
+    { prependBasePath = true }: { prependBasePath?: boolean } = {}
   ): Href => {
     this.verifyActive();
     if (prependBasePath) {

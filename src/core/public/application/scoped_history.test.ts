@@ -289,10 +289,10 @@ describe('ScopedHistory', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
       const h = new ScopedHistory(gh, '/app/wow');
-      expect(h.createHref({ pathname: '' }, false)).toEqual(`/`);
-      expect(h.createHref({ pathname: '/new-page', search: '?alpha=true' }, false)).toEqual(
-        `/new-page?alpha=true`
-      );
+      expect(h.createHref({ pathname: '' }, { prependBasePath: false })).toEqual(`/`);
+      expect(
+        h.createHref({ pathname: '/new-page', search: '?alpha=true' }, { prependBasePath: false })
+      ).toEqual(`/new-page?alpha=true`);
     });
   });
 
