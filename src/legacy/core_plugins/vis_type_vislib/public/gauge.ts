@@ -22,13 +22,18 @@ import { i18n } from '@kbn/i18n';
 import { RangeValues, Schemas } from '../../../../plugins/vis_default_editor/public';
 import { AggGroupNames } from '../../../../plugins/data/public';
 import { GaugeOptions } from './components/options';
-import { getGaugeCollections, Alignments, ColorModes, GaugeTypes } from './utils/collections';
+import { getGaugeCollections, Alignments, GaugeTypes } from './utils/collections';
+import {
+  ColorModes,
+  ColorSchemas,
+  ColorSchemaParams,
+  Labels,
+  Style,
+} from '../../../../plugins/charts/public';
 import { createVislibVisController } from './vis_controller';
-import { ColorSchemaVislibParams, Labels, Style } from './types';
 import { VisTypeVislibDependencies } from './plugin';
-import { ColorSchemas } from '../../../../plugins/charts/public';
 
-export interface Gauge extends ColorSchemaVislibParams {
+export interface Gauge extends ColorSchemaParams {
   backStyle: 'Full';
   gaugeStyle: 'Full';
   orientation: 'vertical';
