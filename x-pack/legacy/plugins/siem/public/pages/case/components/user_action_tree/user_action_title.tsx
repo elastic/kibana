@@ -52,18 +52,18 @@ interface UserActionTitleProps {
 export const UserActionTitle = ({
   createdAt,
   disabled,
+  fullName,
   id,
   isLoading,
   labelEditAction,
   labelQuoteAction,
   labelTitle,
   linkId,
-  fullName,
-  username,
-  updatedAt,
   onEdit,
   onQuote,
   outlineComment,
+  updatedAt,
+  username,
 }: UserActionTitleProps) => {
   const { detailName: caseId } = useParams();
   const urlSearch = useGetUrlSearch(navTabs.case);
@@ -94,10 +94,7 @@ export const UserActionTitle = ({
 
   const handleAnchorLink = useCallback(() => {
     copy(
-      `${window.location.origin}${window.location.pathname}#${SiemPageName.case}/${caseId}/${id}${urlSearch}`,
-      {
-        debug: true,
-      }
+      `${window.location.origin}${window.location.pathname}#${SiemPageName.case}/${caseId}/${id}${urlSearch}`
     );
   }, [caseId, id, urlSearch]);
 
@@ -106,7 +103,6 @@ export const UserActionTitle = ({
       outlineComment(linkId);
     }
   }, [linkId, outlineComment]);
-
   return (
     <EuiText size="s" className="userAction__title" data-test-subj={`user-action-title`}>
       <EuiFlexGroup
@@ -155,6 +151,7 @@ export const UserActionTitle = ({
                 <EuiToolTip position="top" content={<p>{i18n.MOVE_TO_ORIGINAL_COMMENT}</p>}>
                   <EuiButtonIcon
                     aria-label={i18n.MOVE_TO_ORIGINAL_COMMENT}
+                    data-test-subj={`move-to-link`}
                     onClick={handleMoveToLink}
                     iconType="arrowUp"
                   />
@@ -165,6 +162,7 @@ export const UserActionTitle = ({
               <EuiToolTip position="top" content={<p>{i18n.COPY_REFERENCE_LINK}</p>}>
                 <EuiButtonIcon
                   aria-label={i18n.COPY_REFERENCE_LINK}
+                  data-test-subj={`copy-link`}
                   onClick={handleAnchorLink}
                   iconType="link"
                   id={`${id}-permLink`}
@@ -173,7 +171,7 @@ export const UserActionTitle = ({
             </EuiFlexItem>
             {propertyActions.length > 0 && (
               <EuiFlexItem grow={false}>
-                {isLoading && <MySpinner />}
+                {isLoading && <MySpinner data-test-subj="user-action-title-loading" />}
                 {!isLoading && <PropertyActions propertyActions={propertyActions} />}
               </EuiFlexItem>
             )}
