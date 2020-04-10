@@ -16,7 +16,6 @@ import { beats } from './legacy/plugins/beats_management';
 import { apm } from './legacy/plugins/apm';
 import { maps } from './legacy/plugins/maps';
 import { indexManagement } from './legacy/plugins/index_management';
-import { indexLifecycleManagement } from './legacy/plugins/index_lifecycle_management';
 import { spaces } from './legacy/plugins/spaces';
 import { canvas } from './legacy/plugins/canvas';
 import { infra } from './legacy/plugins/infra';
@@ -50,7 +49,6 @@ module.exports = function(kibana) {
     maps(kibana),
     canvas(kibana),
     indexManagement(kibana),
-    indexLifecycleManagement(kibana),
     infra(kibana),
     taskManager(kibana),
     rollup(kibana),
