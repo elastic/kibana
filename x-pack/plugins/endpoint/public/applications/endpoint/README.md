@@ -16,7 +16,7 @@ This contains helper code for unit tests.
 This contains domain models. By convention, each submodule here contains methods for a single type. Domain model classes would also live here.
 
 ## `store`
-This contains the _model_ of the application. All Redux and Redux middleware code (including API interactions) happen here. This module also contains the types and interfaces defining Redux actions. Each action type or interface should becommented and if it has fields, each field should be commented. Comments should be of `tsdoc` style.
+This contains the _model_ of the application. All Redux and Redux middleware code (including API interactions) happen here. This module also contains the types and interfaces defining Redux actions. Each action type or interface should be commented and if it has fields, each field should be commented. Comments should be of `tsdoc` style.
 
 ## `view`
 This contains the code which renders elements to the DOM. All React code goes here.
@@ -26,4 +26,3 @@ This exports `renderApp` which instantiates the React view with the _model_.
 
 ## `types.ts`
 This contains the types and interfaces. All `export`ed types or interfaces (except ones defining Redux actions, which live in `store`) should be here. Each type or interface should have a `tsdoc` style comment. Interfaces should have `tsdoc` comments on each field and types which have fields should do the same.
-
