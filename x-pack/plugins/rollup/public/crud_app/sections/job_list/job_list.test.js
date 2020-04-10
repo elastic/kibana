@@ -13,8 +13,6 @@ import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_r
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
 
-jest.mock('ui/new_platform');
-
 jest.mock('../../services', () => {
   const services = require.requireActual('../../services');
   return {

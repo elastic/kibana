@@ -147,7 +147,7 @@ describe('Create Rollup Job, step 6: Review', () => {
         expect(startMock.http.get).not.toHaveBeenCalledWith(jobStartApiPath); // make sure it hasn't been called
 
         actions.clickSave();
-        // Given the following anti-jitter sleep x-pack/legacy/plugins/rollup/public/crud_app/store/actions/create_job.js
+        // Given the following anti-jitter sleep x-pack/plugins/rollup/public/crud_app/store/actions/create_job.js
         // we add a longer sleep here :(
         await new Promise(res => setTimeout(res, 750));
 
@@ -171,7 +171,7 @@ describe('Create Rollup Job, step 6: Review', () => {
         expect(startMock.http.post).not.toHaveBeenCalledWith(jobStartApiPath); // make sure it hasn't been called
 
         actions.clickSave();
-        // Given the following anti-jitter sleep x-pack/legacy/plugins/rollup/public/crud_app/store/actions/create_job.js
+        // Given the following anti-jitter sleep x-pack/plugins/rollup/public/crud_app/store/actions/create_job.js
         // we add a longer sleep here :(
         await new Promise(res => setTimeout(res, 750));
 

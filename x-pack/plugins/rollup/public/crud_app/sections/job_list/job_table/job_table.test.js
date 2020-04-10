@@ -7,7 +7,7 @@
 import { Pager } from '@elastic/eui';
 
 import { registerTestBed } from '../../../../../../../test_utils';
-import { getJobs, jobCount } from '../../../../../../../legacy/plugins/rollup/fixtures';
+import { getJobs, jobCount } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
 

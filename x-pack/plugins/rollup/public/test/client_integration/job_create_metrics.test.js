@@ -8,8 +8,6 @@ import { setHttp } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('ui/new_platform');
-
 jest.mock('lodash/function/debounce', () => fn => fn);
 
 const { setup } = pageHelpers.jobCreate;

@@ -5,7 +5,7 @@
  */
 
 import { registerTestBed } from '../../../../../../../test_utils';
-import { getJob } from '../../../../../../../legacy/plugins/rollup/fixtures';
+import { getJob } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { DetailPanel } from './detail_panel';
 import {
