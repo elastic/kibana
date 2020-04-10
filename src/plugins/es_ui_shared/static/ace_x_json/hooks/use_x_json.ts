@@ -17,13 +17,22 @@
  * under the License.
  */
 
-// Lib is intentionally not included in this barrel export file to separate worker logic
-// from being imported with pure functions
+import { useState } from 'react';
+import { XJsonMode, collapseLiteralStrings, expandLiteralStrings } from '../../../public';
 
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-  XJsonMode,
-} from './ace/modes';
+const xJsonMode = new XJsonMode();
+
+export const useXJsonMode = (json: Record<string, any> | string | null) => {
+  const [xJson, setXJson] = useState(() =>
+    json === null
+      ? ''
+      : expandLiteralStrings(typeof json === 'string' ? json : JSON.stringify(json, null, 2))
+  );
+
+  return {
+    xJson,
+    setXJson,
+    xJsonMode,
+    convertToJson: collapseLiteralStrings,
+  };
+};
