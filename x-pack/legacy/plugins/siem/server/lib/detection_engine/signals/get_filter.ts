@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { assertUnreachable } from '../../../utils/build_query';
 import {
@@ -16,79 +15,14 @@ import {
 } from '../../../../../../../../src/plugins/data/server';
 import { PartialFilter, RuleAlertParams } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
-
-export const evaluateValues = listItem => {
-  const queryBuilder = [];
-  if (listItem.values_operator === 'excluded') {
-    queryBuilder.push(`not ${listItem.field}: `);
-  } else {
-    queryBuilder.push(`${listItem.field}: `);
-  }
-
-  switch (listItem.values_type) {
-    case 'exists':
-      queryBuilder.push('*');
-      break;
-    case 'match':
-      queryBuilder.push(listItem.values[0].name);
-      break;
-    case 'match_all':
-      const length = listItem.values?.length;
-      // eslint-disable-next-line no-unused-expressions
-      listItem.values?.forEach((element, index) => {
-        if (index !== length - 1) {
-          queryBuilder.push(index === 0 ? `(${element.name} or ` : `${element.name} or `);
-        } else {
-          queryBuilder.push(`${element.name})`);
-        }
-      });
-      break;
-    default:
-      break;
-  }
-
-  return queryBuilder.join('');
-};
-
-export const buildQueryExceptions = (
-  query: string,
-  language: string,
-  lists: RuleAlertParams['lists']
-): Query[] => {
-  if (!isEmpty(lists)) {
-    const queries: query[] = lists?.reduce((acc, listItem, i) => {
-      const queryBuilder = ['('];
-
-      queryBuilder.push(evaluateValues(listItem));
-
-      if (listItem.and) {
-        listItem.and.forEach(item => {
-          queryBuilder.push(`and ${evaluateValues(item)}`);
-        });
-      }
-
-      queryBuilder.push(')');
-
-      if (lists.length > 1 && i !== lists.length - 1) {
-        queryBuilder.push(' or ');
-        return `${acc}${queryBuilder.join('')}`;
-      }
-
-      return `${acc}${queryBuilder.join('')}`;
-    }, `${query} and not `);
-
-    return [{ query: queries, language }];
-  } else {
-    return [{ query, language }];
-  }
-};
+import { buildQueryExceptions } from './build_exceptions_query';
 
 export const getQueryFilter = (
   query: string,
   language: string,
   filters: PartialFilter[],
   index: string[],
-  lists: RuleAlertParams['lists']
+  lists?: RuleAlertParams['lists']
 ) => {
   const indexPattern = {
     fields: [],
@@ -96,6 +30,7 @@ export const getQueryFilter = (
   } as IIndexPattern;
 
   const queries: Query[] = buildQueryExceptions(query, language, lists);
+
   const config = {
     allowLeadingWildcards: true,
     queryStringOptions: { analyze_wildcard: true },
@@ -119,7 +54,7 @@ interface GetFilterArgs {
   savedId: string | undefined | null;
   services: AlertServices;
   index: string[] | undefined | null;
-  lists: RuleAlertParams['lists'];
+  lists?: RuleAlertParams['lists'];
 }
 
 interface QueryAttributes {

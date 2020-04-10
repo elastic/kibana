@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getQueryFilter, getFilter, buildQueryExceptions } from './get_filter';
+import { getQueryFilter, getFilter } from './get_filter';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { PartialFilter } from '../types';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
@@ -382,6 +382,68 @@ describe('get_filter', () => {
         },
       });
     });
+
+    test('it should work with a list', () => {
+      const esQuery = getQueryFilter(
+        'host.name: linux',
+        'kuery',
+        [],
+        ['auditbeat-*'],
+        [
+          {
+            field: 'event.module',
+            values_operator: 'excluded',
+            values_type: 'match',
+            values: [
+              {
+                name: 'suricata',
+              },
+            ],
+          },
+        ]
+      );
+      expect(esQuery).toEqual({
+        bool: {
+          filter: [
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [{ match: { 'host.name': 'linux' } }],
+                    },
+                  },
+                  {
+                    bool: {
+                      must_not: {
+                        bool: {
+                          must_not: {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match: {
+                                    'event.module': 'suricata',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
+    });
   });
 
   describe('getFilter', () => {
@@ -658,146 +720,17 @@ describe('get_filter', () => {
         },
       });
     });
-  });
 
-  describe('buildQueryExceptions', () => {
-    test('it should return orginal query if no lists exist', () => {
-      // create signals when host name exists
-      const query = buildQueryExceptions('host.name: *', 'kuery', []);
-      const expectedQuery = 'host.name: *';
-
-      expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-    });
-
-    test('it should return expected query when lists exists', () => {
-      // create signals when host.name exists, and when event.module is not suricata or auditd and source.ip is 34.66.418
-      // OR when event.action is bound-socket or network_flow
-      const lists = [
-        {
-          field: 'event.module',
-          values_operator: 'included',
-          values_type: 'match_all',
-          values: [
-            {
-              name: 'suricata',
-            },
-            {
-              name: 'auditd',
-            },
-          ],
-          and: [
-            {
-              field: 'source.ip',
-              values_operator: 'excluded',
-              values_type: 'match',
-              values: [
-                {
-                  name: '34.66.418',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          field: 'event.action',
-          values_operator: 'excluded',
-          values_type: 'match_all',
-          values: [
-            {
-              name: 'bound-socket',
-            },
-            {
-              name: 'network_flow',
-            },
-          ],
-        },
-      ];
-      const query = buildQueryExceptions('host.name: *', 'kuery', lists);
-      const expectedQuery =
-        'host.name: * and not ((event.module: (suricata or auditd) and not source.ip:34.66.418) or (not event.action: (bound-socket or network_flow)))';
-
-      expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-    });
-
-    describe('values_operator is included', () => {
-      test('it should return expected query when values_type is exists', () => {
-        // don't create signals when event.module exists
-        const lists = [
-          {
-            field: 'event.module',
-            values_operator: 'included',
-            values_type: 'exists',
-          },
-        ];
-        const query = buildQueryExceptions('host.name: *', 'kuery', lists);
-        const expectedQuery = 'host.name: * and not (event.module: *)';
-
-        expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-      });
-
-      test('it should return expected query when values_type is match', () => {
-        // don't create signals when event.module is suricata
-        const lists = [
-          {
-            field: 'event.module',
-            values_operator: 'included',
-            values_type: 'match',
-            values: [
-              {
-                name: 'suricata',
-              },
-            ],
-          },
-        ];
-        const query = buildQueryExceptions('host.name: *', 'kuery', lists);
-        const expectedQuery = 'host.name: * and not (event.module: suricata)';
-
-        expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-      });
-
-      test('it should return expected query when values_type is match_all', () => {
-        // don't create signals when event.module is suricata or auditd
-        const lists = [
-          {
-            field: 'event.module',
-            values_operator: 'included',
-            values_type: 'match_all',
-            values: [
-              {
-                name: 'suricata',
-              },
-              {
-                name: 'auditd',
-              },
-            ],
-          },
-        ];
-        const query = buildQueryExceptions('host.name: *', 'kuery', lists);
-        const expectedQuery = 'host.name: * and not (event.module: (suricata or auditd))';
-
-        expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-      });
-    });
-
-    describe('values_operator is excluded', () => {
-      test('it should return expected query when values_type is exists', () => {
-        // don't create signals when event.module does not exist
-        const lists = [
-          {
-            field: 'event.module',
-            values_operator: 'excluded',
-            values_type: 'exists',
-          },
-        ];
-        const query = buildQueryExceptions('host.name: *', 'kuery', lists);
-        const expectedQuery = 'host.name: * and not (not event.module: *)';
-
-        expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-      });
-
-      test('it should return expected query when values_type is match', () => {
-        // don't create signals when event.module is not suricata
-        const lists = [
+    test('returns a query when given a list', async () => {
+      const filter = await getFilter({
+        type: 'query',
+        filters: undefined,
+        language: 'kuery',
+        query: 'host.name: siem',
+        savedId: undefined,
+        services: servicesMock,
+        index: ['auditbeat-*'],
+        lists: [
           {
             field: 'event.module',
             values_operator: 'excluded',
@@ -808,108 +741,54 @@ describe('get_filter', () => {
               },
             ],
           },
-        ];
-        const query = buildQueryExceptions('host.name: *', 'kuery', lists);
-        const expectedQuery = 'host.name: * and not (not event.module: suricata)';
-
-        expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
+        ],
       });
-
-      test('it should return expected query when values_type is match_all', () => {
-        // don't create signals when event.module is not suricata or auditd
-        const lists = [
-          {
-            field: 'event.module',
-            values_operator: 'excluded',
-            values_type: 'match_all',
-            values: [
-              {
-                name: 'suricata',
-              },
-              {
-                name: 'auditd',
-              },
-            ],
-          },
-        ];
-        const query = buildQueryExceptions('host.name: *', 'kuery', lists);
-        const expectedQuery = 'host.name: * and not (not event.module: (suricata or auditd))';
-
-        expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-      });
-    });
-
-    describe('and', () => {
-      test('it should return expected query when and values_operator is excluded', () => {
-        // create signals when query matches and event.module is not suricata or auditd and source.ip is 34.66.418
-        const lists = [
-          {
-            field: 'event.module',
-            values_operator: 'included',
-            values_type: 'match_all',
-            values: [
-              {
-                name: 'suricata',
-              },
-              {
-                name: 'auditd',
-              },
-            ],
-            and: [
-              {
-                field: 'source.ip',
-                values_operator: 'excluded',
-                values_type: 'match',
-                values: [
+      expect(filter).toEqual({
+        bool: {
+          filter: [
+            {
+              bool: {
+                filter: [
                   {
-                    name: '34.66.418',
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'host.name': 'siem',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must_not: {
+                        bool: {
+                          must_not: {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match: {
+                                    'event.module': 'suricata',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    },
                   },
                 ],
               },
-            ],
-          },
-        ];
-        const query = buildQueryExceptions('host.name: *', 'kuery', lists);
-        const expectedQuery =
-          'host.name: * and not ((event.module: (suricata or auditd) and not source.ip: 34.66.418))';
-
-        expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-      });
-
-      test('it should return expected query when and values_operator is included', () => {
-        // create signals when query matches and event.module is not suricata or auditd and source.ip is 34.66.418
-        const lists = [
-          {
-            field: 'event.module',
-            values_operator: 'included',
-            values_type: 'match_all',
-            values: [
-              {
-                name: 'suricata',
-              },
-              {
-                name: 'auditd',
-              },
-            ],
-            and: [
-              {
-                field: 'source.ip',
-                values_operator: 'included',
-                values_type: 'match',
-                values: [
-                  {
-                    name: '34.66.418',
-                  },
-                ],
-              },
-            ],
-          },
-        ];
-        const query = buildQueryExceptions('host.name: *', 'kuery', lists);
-        const expectedQuery =
-          'host.name: * and not ((event.module: (suricata or auditd) and source.ip: 34.66.418))';
-
-        expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
+            },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
       });
     });
   });

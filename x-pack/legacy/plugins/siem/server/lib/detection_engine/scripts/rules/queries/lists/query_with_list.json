@@ -1,0 +1,42 @@
+{
+  "name": "Query with a list",
+  "description": "Query with a list. This rule should only produce signals when host.name exists and event.module is not suricata or auditd and source.ip exists OR when event.action is not file_create_event",
+  "rule_id": "query-with-list",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "query",
+  "query": "host.name: *",
+  "interval": "30s",
+  "lists": [
+    {
+      "field": "event.module",
+      "values_operator": "included",
+      "values_type": "match_all",
+      "values": [
+        {
+          "name": "suricata"
+        },
+        {
+          "name": "auditd"
+        }
+      ],
+      "and": [
+        {
+          "field": "source.ip",
+          "values_operator": "excluded",
+          "values_type": "exists"
+        }
+      ]
+    },
+    {
+      "field": "event.action",
+      "values_operator": "included",
+      "values_type": "match",
+      "values": [
+        {
+          "name": "file_create_event"
+        }
+      ]
+    }
+  ]
+}
