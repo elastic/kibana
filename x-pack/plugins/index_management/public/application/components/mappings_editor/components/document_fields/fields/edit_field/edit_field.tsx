@@ -119,27 +119,29 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                       </EuiFlexItem>
 
                       {/* Documentation link */}
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          size="s"
-                          flush="right"
-                          href={linkDocumentation}
-                          target="_blank"
-                          iconType="help"
-                        >
-                          {i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.editField.typeDocumentation',
-                            {
-                              defaultMessage: '{type} documentation',
-                              values: {
-                                type: subTypeDefinition
-                                  ? subTypeDefinition.label
-                                  : typeDefinition.label,
-                              },
-                            }
-                          )}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
+                      {linkDocumentation && (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="s"
+                            flush="right"
+                            href={linkDocumentation}
+                            target="_blank"
+                            iconType="help"
+                          >
+                            {i18n.translate(
+                              'xpack.idxMgmt.mappingsEditor.editField.typeDocumentation',
+                              {
+                                defaultMessage: '{type} documentation',
+                                values: {
+                                  type: subTypeDefinition
+                                    ? subTypeDefinition.label
+                                    : typeDefinition.label,
+                                },
+                              }
+                            )}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                      )}
                     </EuiFlexGroup>
 
                     {/* Field path */}

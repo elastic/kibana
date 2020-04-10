@@ -57,8 +57,8 @@ export const Settings: React.FC = props => {
                     isSelected: pathname === '/settings/apm-indices'
                   },
                   {
-                    name: i18n.translate('xpack.apm.settings.customizeUI', {
-                      defaultMessage: 'Customize UI'
+                    name: i18n.translate('xpack.apm.settings.customizeApp', {
+                      defaultMessage: 'Customize app'
                     }),
                     id: '3',
                     href: getAPMHref('/settings/customize-ui', search),
