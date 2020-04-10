@@ -50,6 +50,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        isPreconfigured: false,
         name: 'A pagerduty action',
         actionTypeId: '.pagerduty',
         config: {
@@ -65,6 +66,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'A pagerduty action',
         actionTypeId: '.pagerduty',
         config: {
