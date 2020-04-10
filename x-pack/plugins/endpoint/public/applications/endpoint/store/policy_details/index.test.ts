@@ -71,9 +71,31 @@ describe('policy details: ', () => {
       });
     });
 
-    it('windows process eventing is enabled', async () => {
+    it('windows process events is enabled', () => {
       const config = policyConfig(getState());
       expect(config!.windows.events.process).toEqual(true);
+    });
+  });
+
+  describe('when the user has enabled mac file events', () => {
+    beforeEach(() => {
+      const config = policyConfig(getState());
+      if (!config) {
+        throw new Error();
+      }
+
+      const newPayload1 = clone(config);
+      newPayload1.mac.events.file = true;
+
+      dispatch({
+        type: 'userChangedPolicyConfig',
+        payload: { policyConfig: newPayload1 },
+      });
+    });
+
+    it('windows process eventing is enabled', () => {
+      const config = policyConfig(getState());
+      expect(config!.mac.events.file).toEqual(true);
     });
   });
 });
