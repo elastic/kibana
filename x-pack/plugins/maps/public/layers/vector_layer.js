@@ -5,6 +5,9 @@
  */
 
 import turf from 'turf';
+import { featureCollection as turfFeatureCollection } from '@turf/helpers';
+import area from '@turf/area';
+import { flattenReduce } from '@turf/meta';
 import React from 'react';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector/vector_style';
@@ -741,6 +744,17 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
+  _createTextLayerSource() {
+    const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection || !featureCollection.hasOwnProperty('features')) return;
+    const largestFeatures = featureCollection.features.map(feature => {
+      return flattenReduce(feature, (prev, cur) => {
+        return area(prev) > area(cur) ? prev : cur;
+      });
+    });
+    return turfFeatureCollection(largestFeatures);
+  }
+
   _setMbLabelTextProperties(mbMap) {
     // Icon 'symbol' layer does not play nice with label 'symbol' layer
     // When features are symbolized as icons,
@@ -754,7 +768,10 @@ export class VectorLayer extends AbstractLayer {
       mbMap.addLayer({
         id: textLayerId,
         type: 'symbol',
-        source: this.getId(),
+        source: {
+          type: 'geojson',
+          data: this._createTextLayerSource(),
+        },
       });
     } else if (!requiresSeperateLayerForLabel && textLayer) {
       mbMap.removeLayer(textLayerId);
