@@ -32,6 +32,7 @@ export const defaultIcon = defaultIconImport;
 const icons: { [key: string]: string } = {
   cache: databaseIcon,
   db: databaseIcon,
+  ext: globeIcon,
   external: globeIcon,
   messaging: documentsIcon,
   resource: globeIcon

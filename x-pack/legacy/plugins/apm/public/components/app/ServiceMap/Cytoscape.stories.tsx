@@ -85,6 +85,7 @@ storiesOf('app/ServiceMap/Cytoscape', module)
           }
         },
         { data: { id: 'external', 'span.type': 'external' } },
+        { data: { id: 'ext', 'span.type': 'ext' } },
         { data: { id: 'messaging', 'span.type': 'messaging' } },
         {
           data: {
