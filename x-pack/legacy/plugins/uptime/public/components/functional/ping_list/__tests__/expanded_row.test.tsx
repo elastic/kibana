@@ -14,7 +14,7 @@ describe('PingListExpandedRow', () => {
   let ping: Ping;
   beforeEach(() => {
     ping = {
-      '@timestamp': '19290310',
+      timestamp: '19290310',
       monitor: {
         duration: {
           us: 12345,

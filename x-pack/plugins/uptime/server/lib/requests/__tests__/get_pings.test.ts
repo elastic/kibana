@@ -66,7 +66,7 @@ describe('getAll', () => {
       body: {
         query: {
           bool: {
-            filter: [{ range: { '@timestamp': { gte: 'now-1h', lte: 'now' } } }],
+            filter: [{ range: { timestamp: { gte: 'now-1h', lte: 'now' } } }],
           },
         },
         aggregations: {
@@ -78,7 +78,7 @@ describe('getAll', () => {
             },
           },
         },
-        sort: [{ '@timestamp': { order: 'desc' } }],
+        sort: [{ timestamp: { order: 'desc' } }],
       },
     };
   });
@@ -99,9 +99,9 @@ describe('getAll', () => {
 
     const pings = result.pings!;
     expect(pings).toHaveLength(count);
-    expect(pings[0]['@timestamp']).toBe('2018-10-30T18:51:59.792Z');
-    expect(pings[1]['@timestamp']).toBe('2018-10-30T18:53:59.792Z');
-    expect(pings[2]['@timestamp']).toBe('2018-10-30T18:55:59.792Z');
+    expect(pings[0].timestamp).toBe('2018-10-30T18:51:59.792Z');
+    expect(pings[1].timestamp).toBe('2018-10-30T18:53:59.792Z');
+    expect(pings[2].timestamp).toBe('2018-10-30T18:55:59.792Z');
     expect(mockEsClient).toHaveBeenCalledTimes(1);
   });
 
@@ -115,7 +115,7 @@ describe('getAll', () => {
       sort: 'asc',
       size: 12,
     });
-    set(expectedGetAllParams, 'body.sort[0]', { '@timestamp': { order: 'asc' } });
+    set(expectedGetAllParams, 'body.sort[0]', { timestamp: { order: 'asc' } });
 
     expect(mockEsClient).toHaveBeenCalledTimes(1);
     expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`

@@ -47,7 +47,7 @@ export type Monitor = t.TypeOf<typeof MonitorType>;
 
 export const PingType = t.intersection([
   t.type({
-    '@timestamp': t.string,
+    timestamp: t.string,
     monitor: MonitorType,
   }),
   t.partial({

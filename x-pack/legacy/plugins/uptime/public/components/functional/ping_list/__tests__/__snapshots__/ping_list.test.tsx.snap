@@ -141,12 +141,11 @@ exports[`PingList component renders sorted list without errors 1`] = `
     }
     hasActions={true}
     isExpandable={true}
-    itemId="@timestamp"
+    itemId="timestamp"
     itemIdToExpandedRowMap={Object {}}
     items={
       Array [
         Object {
-          "@timestamp": "2019-01-28T17:47:08.078Z",
           "error": Object {
             "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
             "type": "io",
@@ -161,9 +160,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "status": "down",
             "type": "tcp",
           },
+          "timestamp": "2019-01-28T17:47:08.078Z",
         },
         Object {
-          "@timestamp": "2019-01-28T17:47:09.075Z",
           "error": Object {
             "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
             "type": "io",
@@ -178,9 +177,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "status": "down",
             "type": "tcp",
           },
+          "timestamp": "2019-01-28T17:47:09.075Z",
         },
         Object {
-          "@timestamp": "2019-01-28T17:47:06.077Z",
           "monitor": Object {
             "duration": Object {
               "us": 1452,
@@ -191,9 +190,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "status": "up",
             "type": "tcp",
           },
+          "timestamp": "2019-01-28T17:47:06.077Z",
         },
         Object {
-          "@timestamp": "2019-01-28T17:47:07.075Z",
           "error": Object {
             "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
             "type": "io",
@@ -208,9 +207,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "status": "down",
             "type": "tcp",
           },
+          "timestamp": "2019-01-28T17:47:07.075Z",
         },
         Object {
-          "@timestamp": "2019-01-28T17:47:07.074Z",
           "error": Object {
             "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
             "type": "io",
@@ -225,9 +224,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "status": "down",
             "type": "http",
           },
+          "timestamp": "2019-01-28T17:47:07.074Z",
         },
         Object {
-          "@timestamp": "2019-01-28T17:47:18.080Z",
           "error": Object {
             "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
             "type": "io",
@@ -242,9 +241,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "status": "down",
             "type": "tcp",
           },
+          "timestamp": "2019-01-28T17:47:18.080Z",
         },
         Object {
-          "@timestamp": "2019-01-28T17:47:19.076Z",
           "error": Object {
             "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
             "type": "io",
@@ -259,9 +258,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "status": "down",
             "type": "tcp",
           },
+          "timestamp": "2019-01-28T17:47:19.076Z",
         },
         Object {
-          "@timestamp": "2019-01-28T17:47:19.076Z",
           "error": Object {
             "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
             "type": "io",
@@ -276,9 +275,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "status": "down",
             "type": "http",
           },
+          "timestamp": "2019-01-28T17:47:19.076Z",
         },
         Object {
-          "@timestamp": "2019-01-28T17:47:19.077Z",
           "http": Object {
             "response": Object {
               "status_code": 200,
@@ -294,9 +293,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "status": "up",
             "type": "http",
           },
+          "timestamp": "2019-01-28T17:47:19.077Z",
         },
         Object {
-          "@timestamp": "2019-01-28T17:47:19.077Z",
           "http": Object {
             "response": Object {
               "status_code": 200,
@@ -312,6 +311,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "status": "up",
             "type": "http",
           },
+          "timestamp": "2019-01-28T17:47:19.077Z",
         },
       ]
     }

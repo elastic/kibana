@@ -80,9 +80,10 @@ describe('getLatestMonitor', () => {
           "status": "down",
           "type": "http",
         },
+        "timestamp": "123456",
       }
     `);
-    expect(result['@timestamp']).toBe('123456');
+    expect(result.timestamp).toBe('123456');
     expect(result.monitor).not.toBeFalsy();
     expect(result?.monitor?.id).toBe('testMonitor');
     expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetLatestSearchParams);

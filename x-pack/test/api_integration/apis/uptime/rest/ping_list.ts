@@ -132,7 +132,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(total).to.be(20);
       expect(locations).to.eql(['mpls']);
       pings.forEach(({ monitor: { id } }) => expect(id).to.eql('0001-up'));
-      expect(pings.map(({ '@timestamp': timestamp }) => timestamp)).to.eql([
+      expect(pings.map(({ timestamp }) => timestamp)).to.eql([
         '2019-09-11T03:40:34.371Z',
         '2019-09-11T03:40:04.370Z',
         '2019-09-11T03:39:34.370Z',
@@ -166,7 +166,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(total).to.be(20);
       expect(locations).to.eql(['mpls']);
-      expect(pings.map(({ '@timestamp': timestamp }) => timestamp)).to.eql([
+      expect(pings.map(({ timestamp }) => timestamp)).to.eql([
         '2019-09-11T03:31:04.380Z',
         '2019-09-11T03:31:34.366Z',
         '2019-09-11T03:32:04.372Z',

@@ -19,7 +19,7 @@ describe('PingList component', () => {
       locations: ['nyc'],
       pings: [
         {
-          '@timestamp': '2019-01-28T17:47:08.078Z',
+          timestamp: '2019-01-28T17:47:08.078Z',
           error: {
             message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
             type: 'io',
@@ -34,7 +34,7 @@ describe('PingList component', () => {
           },
         },
         {
-          '@timestamp': '2019-01-28T17:47:09.075Z',
+          timestamp: '2019-01-28T17:47:09.075Z',
           error: {
             message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
             type: 'io',
@@ -49,7 +49,7 @@ describe('PingList component', () => {
           },
         },
         {
-          '@timestamp': '2019-01-28T17:47:06.077Z',
+          timestamp: '2019-01-28T17:47:06.077Z',
           monitor: {
             duration: { us: 1452 },
             id: 'auto-tcp-0X81440A68E839814D',
@@ -60,7 +60,7 @@ describe('PingList component', () => {
           },
         },
         {
-          '@timestamp': '2019-01-28T17:47:07.075Z',
+          timestamp: '2019-01-28T17:47:07.075Z',
           error: {
             message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
             type: 'io',
@@ -75,7 +75,7 @@ describe('PingList component', () => {
           },
         },
         {
-          '@timestamp': '2019-01-28T17:47:07.074Z',
+          timestamp: '2019-01-28T17:47:07.074Z',
           error: {
             message:
               'Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused',
@@ -91,7 +91,7 @@ describe('PingList component', () => {
           },
         },
         {
-          '@timestamp': '2019-01-28T17:47:18.080Z',
+          timestamp: '2019-01-28T17:47:18.080Z',
           error: {
             message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
             type: 'io',
@@ -106,7 +106,7 @@ describe('PingList component', () => {
           },
         },
         {
-          '@timestamp': '2019-01-28T17:47:19.076Z',
+          timestamp: '2019-01-28T17:47:19.076Z',
           error: {
             message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
             type: 'io',
@@ -121,7 +121,7 @@ describe('PingList component', () => {
           },
         },
         {
-          '@timestamp': '2019-01-28T17:47:19.076Z',
+          timestamp: '2019-01-28T17:47:19.076Z',
           error: {
             message:
               'Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused',
@@ -137,7 +137,7 @@ describe('PingList component', () => {
           },
         },
         {
-          '@timestamp': '2019-01-28T17:47:19.077Z',
+          timestamp: '2019-01-28T17:47:19.077Z',
           http: { response: { status_code: 200 } },
           monitor: {
             duration: { us: 127511 },
@@ -149,7 +149,7 @@ describe('PingList component', () => {
           },
         },
         {
-          '@timestamp': '2019-01-28T17:47:19.077Z',
+          timestamp: '2019-01-28T17:47:19.077Z',
           http: { response: { status_code: 200 } },
           monitor: {
             duration: { us: 287543 },
@@ -202,7 +202,6 @@ describe('PingList component', () => {
           "2019-01-28T17:47:08.078Z": <PingListExpandedRowComponent
             ping={
               Object {
-                "@timestamp": "2019-01-28T17:47:08.078Z",
                 "error": Object {
                   "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
                   "type": "io",
@@ -217,6 +216,7 @@ describe('PingList component', () => {
                   "status": "down",
                   "type": "tcp",
                 },
+                "timestamp": "2019-01-28T17:47:08.078Z",
               }
             }
           />,
@@ -236,12 +236,11 @@ describe('PingList component', () => {
       const pingB = pings[1];
       toggleDetails(pingA, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
       toggleDetails(pingB, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
-      expect(pingA['@timestamp']).not.toEqual(pingB['@timestamp']);
-      expect(itemIdToExpandedRowMap[pingB['@timestamp']]).toMatchInlineSnapshot(`
+      expect(pingA.timestamp).not.toEqual(pingB.timestamp);
+      expect(itemIdToExpandedRowMap[pingB.timestamp]).toMatchInlineSnapshot(`
         <PingListExpandedRowComponent
           ping={
             Object {
-              "@timestamp": "2019-01-28T17:47:09.075Z",
               "error": Object {
                 "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
                 "type": "io",
@@ -256,6 +255,7 @@ describe('PingList component', () => {
                 "status": "down",
                 "type": "tcp",
               },
+              "timestamp": "2019-01-28T17:47:09.075Z",
             }
           }
         />

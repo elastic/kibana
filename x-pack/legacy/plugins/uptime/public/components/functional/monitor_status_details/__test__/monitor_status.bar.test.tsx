@@ -16,7 +16,7 @@ describe('MonitorStatusBar component', () => {
 
   beforeEach(() => {
     monitorStatus = {
-      '@timestamp': moment(new Date())
+      timestamp: moment(new Date())
         .subtract(15, 'm')
         .toString(),
       monitor: {

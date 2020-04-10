@@ -84,7 +84,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
       httpBody.content_bytes = Buffer.byteLength(httpBody.content);
     }
 
-    return _source;
+    return { ..._source, timestamp: _source['@timestamp'] };
   });
 
   const decoded = PingsResponseType.decode({

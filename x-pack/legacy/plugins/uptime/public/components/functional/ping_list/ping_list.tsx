@@ -42,8 +42,8 @@ export const toggleDetails = (
   setExpandedRows: (update: Record<string, JSX.Element>) => any
 ) => {
   // If already expanded, collapse
-  if (expandedRows[ping['@timestamp']]) {
-    delete expandedRows[ping['@timestamp']];
+  if (expandedRows[ping.timestamp]) {
+    delete expandedRows[ping.timestamp];
     setExpandedRows({ ...expandedRows });
     return;
   }
@@ -51,7 +51,7 @@ export const toggleDetails = (
   // Otherwise expand this row
   setExpandedRows({
     ...expandedRows,
-    [ping['@timestamp']]: <PingListExpandedRowComponent ping={ping} />,
+    [ping.timestamp]: <PingListExpandedRowComponent ping={ping} />,
   });
 };
 
@@ -152,7 +152,7 @@ export const PingListComponent = (props: Props) => {
         defaultMessage: 'Status',
       }),
       render: (pingStatus: string, item: Ping) => (
-        <div data-test-subj={`xpack.uptime.pingList.ping-${item['@timestamp']}`}>
+        <div data-test-subj={`xpack.uptime.pingList.ping-${item.timestamp}`}>
           <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
             {pingStatus === 'up'
               ? i18n.translate('xpack.uptime.pingList.statusColumnHealthUpLabel', {
@@ -164,7 +164,7 @@ export const PingListComponent = (props: Props) => {
           </EuiHealth>
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.uptime.pingList.recencyMessage', {
-              values: { fromNow: moment(item['@timestamp']).fromNow() },
+              values: { fromNow: moment(item.timestamp).fromNow() },
               defaultMessage: 'Checked {fromNow}',
               description:
                 'A string used to inform our users how long ago Heartbeat pinged the selected host.',
@@ -240,13 +240,13 @@ export const PingListComponent = (props: Props) => {
             onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
             disabled={!item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)}
             aria-label={
-              expandedRows[item['@timestamp']]
+              expandedRows[item.timestamp]
                 ? i18n.translate('xpack.uptime.pingList.collapseRow', {
                     defaultMessage: 'Collapse',
                   })
                 : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
             }
-            iconType={expandedRows[item['@timestamp']] ? 'arrowUp' : 'arrowDown'}
+            iconType={expandedRows[item.timestamp] ? 'arrowUp' : 'arrowDown'}
           />
         );
       },
@@ -323,7 +323,7 @@ export const PingListComponent = (props: Props) => {
         isExpandable={true}
         hasActions={true}
         items={pings}
-        itemId="@timestamp"
+        itemId="timestamp"
         itemIdToExpandedRowMap={expandedRows}
         pagination={pagination}
         onChange={(criteria: any) => {
