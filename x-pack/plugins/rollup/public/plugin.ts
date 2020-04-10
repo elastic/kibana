@@ -21,11 +21,11 @@ import {
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 // @ts-ignore
-import { CRUD_APP_BASE_PATH } from './crud_app/constants/index';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { IndexMgmtSetup } from '../../index_management/public';
-import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
-import { DataPublicPluginStart, search } from '../../../../src/plugins/data/public';
+import { CRUD_APP_BASE_PATH } from './crud_app/constants';
+import { ManagementSetup } from '../../../../../src/plugins/management/public';
+import { IndexManagementPluginSetup } from '../../../../plugins/index_management/public';
+import { IndexPatternManagementSetup } from '../../../../../src/plugins/index_pattern_management/public';
+import { search } from '../../../../../src/plugins/data/public';
 // @ts-ignore
 import { setEsBaseAndXPackBase, setHttp } from './crud_app/services/index';
 import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
@@ -34,7 +34,7 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/p
 export interface RollupPluginSetupDependencies {
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
-  indexManagement?: IndexMgmtSetup;
+  indexManagement?: IndexManagementPluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
   usageCollection?: UsageCollectionSetup;
 }
