@@ -49,7 +49,6 @@ export interface GreetingSetup {
 }
 
 export class GreetingPlugin implements Plugin<GreetingSetup, GreetingStart> {
-  // private greetings: { [key: string]: Greeting } = {};
   private greetingDefinitions: { [key: string]: GreetingDefinition } = {};
   private greetingProvider: GreetingProvider = defaultGreetingProvider;
 
@@ -63,13 +62,6 @@ export class GreetingPlugin implements Plugin<GreetingSetup, GreetingStart> {
   });
 
   start() {
-    // its unclear to me why there was a second registry
-    /*
-    Object.values(this.greetingDefinitions).forEach(
-      greetingDefinition =>
-        (this.greetings[greetingDefinition.id] = this.greetingProvider(greetingDefinition))
-    );
-    */
     return {
       getGreeting: (id: string) => this.greetingProvider(this.greetingDefinitions[id]),
       getRegisteredGreetings: () => Object.keys(this.greetingDefinitions),

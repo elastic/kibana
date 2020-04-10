@@ -31,10 +31,7 @@ export interface Services {
  * @param dependencies
  */
 export const getServices = (dependencies: { greetingServices: GreetingStart }): Services => ({
-  greetWithGreeter: (greeting: Greeting, name: string) => {
-    greeting.greetMe(name);
-  },
-
+  greetWithGreeter: (greeting: Greeting, name: string) => greeting.greetMe(name),
   getGreeterIds: () => dependencies.greetingServices.getRegisteredGreetings(),
   getGreeterObjects: () => dependencies.greetingServices.getRegisteredGreetingsAsObjects(),
 });
