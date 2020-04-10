@@ -26,9 +26,9 @@ There are no user-facing breaking changes in 7.7.
 [float]
 === Breaking changes for plugin developers
 
-////
 *via [#60574](https://github.com/elastic/kibana/pull/60574)*
 
+[discrete]
 ## Goodbye, legacy data plugin 👋
 
 The legacy `data` plugin located in `src/legacy/core_plugins/data` has been removed. This change only affects legacy platform plugins which are either:
@@ -66,6 +66,7 @@ For more information on where to locate new platform `data` services, please ref
 
 *via [#60449](https://github.com/elastic/kibana/pull/60449)*
 
+[discrete]
 ## Delete FilterStateManager and QueryFilter :-D
 
 Deleted unused legacy exports
@@ -73,6 +74,7 @@ Deleted unused legacy exports
  - Delete `QueryFilter`
  - Delete `SavedQuery` re-export from legacy
 
+[discrete]
 ### Checklist
 
 Delete any items that are not applicable to this PR.
@@ -84,12 +86,14 @@ Delete any items that are not applicable to this PR.
 - [ ] This renders correctly on smaller devices using a responsive layout. (You can test this [in your browser](https://www.browserstack.com/guide/responsive-testing-on-local-server)
 - [ ] This was checked for cross-browser compatibility, [including a check against IE11](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility)
 
+[discrete]
 ### For maintainers
 
 - [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
 
 *via [#59872](https://github.com/elastic/kibana/pull/59872)*
 
+[discrete]
 ## Add UiSettings validation & Kibana default route redirection
 
 UiSettings definition allows to specify validation functions:
@@ -107,6 +111,7 @@ uiSettings.register({
 
 *via [#59694](https://github.com/elastic/kibana/pull/59694)*
 
+[discrete]
 ## Allow disabling xsrf protection per an endpoint
 
 Route configuration allows to disable xsrf protection for destructive HTTP methods:
@@ -116,6 +121,7 @@ routet.get({ path: ..., validate: ..., options: { xsrfRequired: false } })
 
 *via [#58717](https://github.com/elastic/kibana/pull/58717)*
 
+[discrete]
 ## Add core metrics service
 
 A new `metrics` API is available from core, and allow retrieving various metrics regarding the http server, process and os load/usages
@@ -128,6 +134,7 @@ core.metrics.getOpsMetrics$().subscribe(metrics => {
 
 *via [#58623](https://github.com/elastic/kibana/pull/58623)*
 
+[discrete]
 ## Add an optional authentication mode for HTTP resources
 
 A route config accepts `authRequired: 'optional'`. A user can access a resource if has valid credentials or no credentials at all. Can be useful when we grant access to a resource but want to identify a user if possible.
@@ -137,6 +144,7 @@ router.get( { path: '/',  options: { authRequired: 'optional' } }, handler);
 
 *via [#58589](https://github.com/elastic/kibana/pull/58589)*
 
+[discrete]
 ## Migrate doc view part of discover
 
 The extension point for registering custom doc views was migrateed and can be used directly within the new platform.
@@ -163,14 +171,17 @@ export class MyPlugin implements Plugin<void, void> {
 
 *via [#58094](https://github.com/elastic/kibana/pull/58094)*
 
+[discrete]
 ## [Telemetry] Server backpressure mechanism
 
 Add a backpressure mechanism for sending telemetry on the server. Usage data will always be sent from the browser even if we are also sending it from the server. Server side Telemetry usage data sender will send an `OPTIONS` request before `POST`ing the data to our cluster to ensure the endpoint is reachable.
 
+[discrete]
 ### Fallback mechanism
 
 1. Always send usage from browser regardless of the `telemetry.sendUsageFrom` kibana config.
 
+[discrete]
 ### Server usage backpressure
 
 1. Send usage from server in addition to browser if `telemetry.sendUsageFrom` is set to `server`.
@@ -183,6 +194,7 @@ Add a backpressure mechanism for sending telemetry on the server. Usage data wil
 
 5. Restart attempt count if it succeeds in any of the 3 tries.
 
+[discrete]
 ### Sending usage mechanism from server:
 
 Send `OPTIONS` request before attempting to send telemetry from server. `OPTIONS` is less intrusive as it does not contain any payload and is used to check if the endpoint is reachable. We can also use it in the future to check for allowed headers to use etc.
@@ -193,6 +205,7 @@ Send `OPTIONS` request before attempting to send telemetry from server. `OPTIONS
 
 *via [#57556](https://github.com/elastic/kibana/pull/57556)*
 
+[discrete]
 ## Expressions server-side
 
 It is now possible to register expression functions and types on the Kibana server and execute expressions on the server. The API is the same as in the browser-side plugin, e.g:
@@ -204,6 +217,7 @@ const result = await plugins.expressions.run('var_set name="foo" value="bar" | v
 
 *via [#57537](https://github.com/elastic/kibana/pull/57537)*
 
+[discrete]
 ## Local actions
 
 `actionIds` property has been removed from`Trigger` interface in `ui_actions` plugin. Use `attachAction()` method instead, for example:
@@ -223,12 +237,14 @@ const trigger = {
 
 *via [#57451](https://github.com/elastic/kibana/pull/57451)*
 
+[discrete]
 ## Use log4j pattern syntax
 
 Logging output of the New platform plugins can use adjusted via [new config.](https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md)
 
 *via [#57433](https://github.com/elastic/kibana/pull/57433)*
 
+[discrete]
 ## Allow savedObjects types registration from NP
 
 A new `registerType` API has been added to the core savedObjects `setup` API, allowing to register savedObject types from new platform plugins
@@ -273,6 +289,7 @@ Please check the migration guide for more complete examples and migration proced
 
 *via [#57430](https://github.com/elastic/kibana/pull/57430)*
 
+[discrete]
 ## Expose Vis on the contract as it requires visTypes
 
 In most of the places `Vis` used as a type, but in couple places it is used as a class.
@@ -287,7 +304,7 @@ new visualizationsStart.Vis(....);
 ```
 import { Vis } from '../../../../../core_plugins/visualizations/public';
 ```
-
+////
 *via [#56968](https://github.com/elastic/kibana/pull/56968)*
 
 ## Add ScopedHistory to AppMountParams
