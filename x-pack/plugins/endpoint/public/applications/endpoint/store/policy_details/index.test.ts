@@ -55,7 +55,7 @@ describe('policy details: ', () => {
     });
   });
 
-  describe('when the user has enabled windows process eventing', () => {
+  describe('when the user has enabled windows process events', () => {
     beforeEach(() => {
       const config = policyConfig(getState());
       if (!config) {
@@ -93,7 +93,7 @@ describe('policy details: ', () => {
       });
     });
 
-    it('windows process eventing is enabled', () => {
+    it('mac file events is enabled', () => {
       const config = policyConfig(getState());
       expect(config!.mac.events.file).toEqual(true);
     });
