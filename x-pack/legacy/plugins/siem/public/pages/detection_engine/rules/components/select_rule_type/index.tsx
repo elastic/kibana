@@ -40,7 +40,7 @@ const MlCardDescription = ({
           subscriptionsLink: (
             <EuiLink href={subscriptionUrl} target="_blank">
               <FormattedMessage
-                id="xpack.siem.components.stepDefineRule.ruleTypeField.platinumSubscription"
+                id="xpack.siem.components.stepDefineRule.ruleTypeField.subscriptionsLink"
                 defaultMessage="Platinum subscription"
               />
             </EuiLink>
