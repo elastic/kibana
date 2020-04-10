@@ -11,8 +11,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import numeral from '@elastic/numeral';
 import { ErrorResponse } from '../../../../../../common/types/errors';
-
-const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
+import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../../common/constants/file_datavisualizer';
 
 interface FileTooLargeProps {
   fileSize: number;
@@ -81,7 +80,7 @@ interface FileCouldNotBeReadProps {
 }
 
 export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({ error, loaded }) => {
-  const message = error.body.message;
+  const message = error?.body?.message || '';
   return (
     <EuiCallOut
       title={
@@ -110,7 +109,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({ error, loaded 
 };
 
 export const Explanation: FC<{ error: ErrorResponse }> = ({ error }) => {
-  if (!error.body.attributes?.body?.error?.suppressed?.length) {
+  if (!error?.body?.attributes?.body?.error?.suppressed?.length) {
     return null;
   }
   const reason: string = error.body.attributes.body.error.suppressed[0].reason;
