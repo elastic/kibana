@@ -274,7 +274,7 @@ describe('terms', () => {
       expect(updatedColumn).toBe(initialColumn);
     });
 
-    it('should switch to alphabetical ordering if the order column is removed', () => {
+    it('should switch to alphabetical ordering if there are no columns to order by', () => {
       const termsColumn = termsOperation.onOtherColumnChanged!(
         {
           label: 'Top value of category',
