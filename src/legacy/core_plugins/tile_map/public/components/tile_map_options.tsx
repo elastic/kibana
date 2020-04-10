@@ -21,13 +21,13 @@ import React, { useEffect } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import {
   BasicOptions,
   RangeOption,
   SelectOption,
   SwitchOption,
-} from '../../../vis_type_vislib/public';
+} from '../../../../../plugins/charts/public';
 import { WmsOptions } from './wms_options';
 import { TileMapVisParams } from '../types';
 import { MapTypes } from '../map_types';

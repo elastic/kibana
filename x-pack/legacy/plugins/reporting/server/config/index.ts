@@ -77,9 +77,8 @@ export const buildConfig = (
     },
   };
 
-  // spreading arguments as an array allows the return type to be known by the compiler
   return {
-    get: (...keys: string[]) => get(reportingConfig, keys.join('.'), null),
+    get: (...keys: string[]) => get(reportingConfig, keys.join('.'), null), // spreading arguments as an array allows the return type to be known by the compiler
     kbnConfig: {
       get: (...keys: string[]) => get(kbnConfig, keys.join('.'), null),
     },

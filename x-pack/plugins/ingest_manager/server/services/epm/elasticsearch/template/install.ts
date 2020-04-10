@@ -20,11 +20,12 @@ import * as Registry from '../../registry';
 export const installTemplates = async (
   registryPackage: RegistryPackage,
   callCluster: CallESAsCurrentUser,
-  pkgkey: string
+  pkgName: string,
+  pkgVersion: string
 ) => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global template
-  installPreBuiltTemplates(pkgkey, callCluster);
+  installPreBuiltTemplates(pkgName, pkgVersion, callCluster);
 
   // build templates per dataset from yml files
   const datasets = registryPackage.datasets;
@@ -45,9 +46,15 @@ export const installTemplates = async (
 };
 
 // this is temporary until we update the registry to use index templates v2 structure
-const installPreBuiltTemplates = async (pkgkey: string, callCluster: CallESAsCurrentUser) => {
-  const templatePaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
-    isTemplate(entry)
+const installPreBuiltTemplates = async (
+  pkgName: string,
+  pkgVersion: string,
+  callCluster: CallESAsCurrentUser
+) => {
+  const templatePaths = await Registry.getArchiveInfo(
+    pkgName,
+    pkgVersion,
+    (entry: Registry.ArchiveEntry) => isTemplate(entry)
   );
   templatePaths.forEach(async path => {
     const { file } = Registry.pathParts(path);
