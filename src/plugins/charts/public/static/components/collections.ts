@@ -17,18 +17,14 @@
  * under the License.
  */
 
-import { $Values } from '@kbn/utility-types';
+export enum ColorModes {
+  BACKGROUND = 'Background',
+  LABELS = 'Labels',
+  NONE = 'None',
+}
 
-export const ColorModes = Object.freeze({
-  BACKGROUND: 'Background' as 'Background',
-  LABELS: 'Labels' as 'Labels',
-  NONE: 'None' as 'None',
-});
-export type ColorModes = $Values<typeof ColorModes>;
-
-export const Rotates = Object.freeze({
-  HORIZONTAL: 0,
-  VERTICAL: 90,
-  ANGLED: 75,
-});
-export type Rotates = $Values<typeof Rotates>;
+export enum Rotates {
+  HORIZONTAL = 0,
+  VERTICAL = 90,
+  ANGLED = 75,
+}

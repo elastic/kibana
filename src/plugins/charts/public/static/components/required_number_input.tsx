@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import React, { ReactNode, useCallback, ChangeEvent } from 'react';
+import React, { ReactNode, useCallback, ChangeEvent, useEffect } from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
-import { useValidation } from './utils';
 
 interface NumberInputOptionProps<ParamName extends string> {
   disabled?: boolean;
@@ -57,7 +56,12 @@ function RequiredNumberInputOption<ParamName extends string>({
   'data-test-subj': dataTestSubj,
 }: NumberInputOptionProps<ParamName>) {
   const isValid = value !== null;
-  useValidation(setValidity, paramName, isValid);
+
+  useEffect(() => {
+    setValidity(paramName, isValid);
+
+    return () => setValidity(paramName, true);
+  }, [isValid, paramName, setValidity]);
 
   const onChange = useCallback(
     (ev: ChangeEvent<HTMLInputElement>) =>
