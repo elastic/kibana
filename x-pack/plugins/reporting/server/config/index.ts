@@ -15,9 +15,9 @@ import { ConfigSchema, ConfigType } from './schema';
 
 /*
  * Set up dynamic config defaults
- * - xpack.reporting.encryptionKey
- * - xpack.kibanaServer
  * - xpack.capture.browser.chromium.disableSandbox
+ * - xpack.kibanaServer
+ * - xpack.reporting.encryptionKey
  */
 export function createConfig$(core: CoreSetup, context: PluginInitializerContext, logger: Logger) {
   return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(
