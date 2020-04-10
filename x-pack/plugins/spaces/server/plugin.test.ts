@@ -81,7 +81,7 @@ describe('Spaces Plugin', () => {
 
       expect(core.savedObjects.registerType).toHaveBeenCalledWith({
         name: 'space',
-        namespaceAgnostic: true,
+        namespaceType: 'agnostic',
         hidden: true,
         mappings: expect.any(Object),
         migrations: expect.any(Object),

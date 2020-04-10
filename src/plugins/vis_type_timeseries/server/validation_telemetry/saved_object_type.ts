@@ -31,7 +31,7 @@ const resetCount: SavedObjectMigrationFn = doc => ({
 export const tsvbTelemetrySavedObjectType: SavedObjectsType = {
   name: 'tsvb-validation-telemetry',
   hidden: false,
-  namespaceAgnostic: true,
+  namespaceType: 'agnostic',
   mappings: {
     properties: {
       failedRequests: {

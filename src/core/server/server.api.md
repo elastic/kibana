@@ -2253,9 +2253,7 @@ export interface SavedObjectsType {
     mappings: SavedObjectsTypeMappingDefinition;
     migrations?: SavedObjectMigrationMap;
     name: string;
-    // @deprecated
-    namespaceAgnostic?: boolean;
-    namespaceType?: SavedObjectsNamespaceType;
+    namespaceType: SavedObjectsNamespaceType;
 }
 
 // @public

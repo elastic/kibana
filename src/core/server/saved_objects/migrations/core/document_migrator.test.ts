@@ -32,7 +32,7 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   types.forEach(type =>
     registry.registerType({
       name: 'unknown',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       hidden: false,
       mappings: { properties: {} },
       migrations: {},

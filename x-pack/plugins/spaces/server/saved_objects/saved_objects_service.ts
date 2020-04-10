@@ -20,7 +20,7 @@ export class SpacesSavedObjectsService {
     core.savedObjects.registerType({
       name: 'space',
       hidden: true,
-      namespaceAgnostic: true,
+      namespaceType: 'agnostic',
       mappings: SpacesSavedObjectMappings,
       migrations: {
         '6.6.0': migrateToKibana660,

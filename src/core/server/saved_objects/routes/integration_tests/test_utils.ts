@@ -49,7 +49,7 @@ export const createExportableType = (name: string): SavedObjectsType => {
   return {
     name,
     hidden: false,
-    namespaceAgnostic: false,
+    namespaceType: 'single',
     mappings: {
       properties: {},
     },

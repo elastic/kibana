@@ -33,7 +33,7 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
   registerType({
     name: 'application_usage_totals',
     hidden: false,
-    namespaceAgnostic: true,
+    namespaceType: 'agnostic',
     mappings: {
       properties: {
         appId: { type: 'keyword' },
@@ -46,7 +46,7 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
   registerType({
     name: 'application_usage_transactional',
     hidden: false,
-    namespaceAgnostic: true,
+    namespaceType: 'agnostic',
     mappings: {
       properties: {
         timestamp: { type: 'date' },

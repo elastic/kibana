@@ -26,7 +26,7 @@ export const settingsObjectId = 'uptime-dynamic-settings-singleton';
 export const umDynamicSettings: SavedObjectsType = {
   name: settingsObjectType,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       heartbeatIndices: {
