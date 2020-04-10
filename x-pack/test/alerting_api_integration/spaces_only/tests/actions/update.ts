@@ -48,6 +48,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         })
         .expect(200, {
           id: createdAction.id,
+          isPreconfigured: false,
           actionTypeId: 'test.index-record',
           name: 'My action updated',
           config: {
@@ -97,6 +98,26 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           statusCode: 404,
           error: 'Not Found',
           message: `Saved object [action/${createdAction.id}] not found`,
+        });
+    });
+
+    it(`shouldn't update action from preconfigured list`, async () => {
+      await supertest
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/action/custom-system-abc-connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: `Preconfigured action custom-system-abc-connector is not allowed to update.`,
         });
     });
   });

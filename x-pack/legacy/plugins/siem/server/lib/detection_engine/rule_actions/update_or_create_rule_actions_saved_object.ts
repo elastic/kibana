@@ -15,7 +15,7 @@ interface UpdateOrCreateRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: AlertServices['savedObjectsClient'];
   actions: RuleAlertAction[] | undefined;
-  throttle: string | undefined;
+  throttle: string | null | undefined;
 }
 
 export const updateOrCreateRuleActionsSavedObject = async ({
@@ -24,16 +24,17 @@ export const updateOrCreateRuleActionsSavedObject = async ({
   actions,
   throttle,
 }: UpdateOrCreateRuleActionsSavedObject): Promise<RuleActions> => {
-  const currentRuleActions = await getRuleActionsSavedObject({ ruleAlertId, savedObjectsClient });
+  const ruleActions = await getRuleActionsSavedObject({ ruleAlertId, savedObjectsClient });
 
-  if (currentRuleActions) {
+  if (ruleActions != null) {
     return updateRuleActionsSavedObject({
       ruleAlertId,
       savedObjectsClient,
       actions,
       throttle,
-    }) as Promise<RuleActions>;
+      ruleActions,
+    });
+  } else {
+    return createRuleActionsSavedObject({ ruleAlertId, savedObjectsClient, actions, throttle });
   }
-
-  return createRuleActionsSavedObject({ ruleAlertId, savedObjectsClient, actions, throttle });
 };
