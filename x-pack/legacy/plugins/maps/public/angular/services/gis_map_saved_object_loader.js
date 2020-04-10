@@ -7,21 +7,30 @@
 import { createSavedGisMapClass } from './saved_gis_map';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
-import { npStart } from '../../../../../../../src/legacy/ui/public/new_platform';
+import {
+  getCoreChrome,
+  getSavedObjectsClient,
+  getIndexPatternService,
+  getCoreOverlays,
+  getDataSearch,
+} from '../../kibana_services';
+
+export function getMapsSavedObjectLoader() {
+  const services = {
+    savedObjectsClient: getSavedObjectsClient(),
+    indexPatterns: getIndexPatternService(),
+    search: getDataSearch(),
+    chrome: getCoreChrome(),
+    overlays: getCoreOverlays(),
+  };
+  const SavedGisMap = createSavedGisMapClass(services);
+
+  return new SavedObjectLoader(SavedGisMap, getSavedObjectsClient(), getCoreChrome());
+}
 
 const module = uiModules.get('app/maps');
 
 // This is the only thing that gets injected into controllers
 module.service('gisMapSavedObjectLoader', function() {
-  const savedObjectsClient = npStart.core.savedObjects.client;
-  const services = {
-    savedObjectsClient,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    search: npStart.plugins.data.search,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
-  const SavedGisMap = createSavedGisMapClass(services);
-
-  return new SavedObjectLoader(SavedGisMap, npStart.core.savedObjects.client, npStart.core.chrome);
+  return getMapsSavedObjectLoader();
 });

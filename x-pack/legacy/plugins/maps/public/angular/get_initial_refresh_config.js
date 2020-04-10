@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import chrome from 'ui/chrome';
-
-const uiSettings = chrome.getUiSettingsClient();
+import { getUiSettings } from '../kibana_services';
 
 export function getInitialRefreshConfig({ mapStateJSON, globalState = {} }) {
+  const uiSettings = getUiSettings();
+
   if (mapStateJSON) {
     const mapState = JSON.parse(mapStateJSON);
     if (mapState.refreshConfig) {

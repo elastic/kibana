@@ -5,14 +5,13 @@
  */
 
 import _ from 'lodash';
-import chrome from 'ui/chrome';
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
 import { npSetup, npStart } from 'ui/new_platform';
-import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 import { IIndexPattern } from 'src/plugins/data/public';
+import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
 import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
-import { getIndexPatternService } from '../kibana_services';
+import { getIndexPatternService, getHttp } from '../kibana_services';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
@@ -96,8 +95,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   }
 
   async _fetchSavedMap(savedObjectId: string) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const savedObjectLoader = $injector.get<SavedObjectLoader>('gisMapSavedObjectLoader');
+    const savedObjectLoader = getMapsSavedObjectLoader();
     return await savedObjectLoader.get(savedObjectId);
   }
 
@@ -114,7 +112,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
       {
         layerList,
         title: savedMap.title,
-        editUrl: chrome.addBasePath(createMapPath(savedObjectId)),
+        editUrl: getHttp().basePath.prepend(createMapPath(savedObjectId)),
         indexPatterns,
         editable: await this.isEditable(),
       },

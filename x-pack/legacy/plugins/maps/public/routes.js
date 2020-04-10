@@ -8,12 +8,7 @@ import { i18n } from '@kbn/i18n';
 import routes from 'ui/routes';
 import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
-import {
-  getSavedObjectsClient,
-  getRecentlyAccessed,
-  getDocTitle,
-  getSaveCapabilities,
-} from './kibana_services';
+import { getSavedObjectsClient, getCoreChrome, getMapsCapabilities } from './kibana_services';
 
 routes.enable();
 
@@ -45,7 +40,7 @@ routes
       $scope.delete = ids => {
         return gisMapSavedObjectLoader.delete(ids);
       };
-      $scope.readOnly = !getSaveCapabilities();
+      $scope.readOnly = !getMapsCapabilities().save;
     },
     resolve: {
       hasMaps: function(kbnUrl) {
@@ -83,8 +78,8 @@ routes
         return gisMapSavedObjectLoader
           .get(id)
           .then(savedMap => {
-            getRecentlyAccessed().add(savedMap.getFullPath(), savedMap.title, id);
-            getDocTitle().change(savedMap.title);
+            getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
+            getCoreChrome().docTitle.change(savedMap.title);
             return savedMap;
           })
           .catch(

@@ -25,9 +25,14 @@ import {
   setInjectedVarFunc,
   setIndexPatternService,
   setSavedObjectsClient,
-  setRecentlyAccessed,
-  setDocTitle,
-  setSaveCapabilities,
+  setCoreChrome,
+  setMapsCapabilities,
+  setVisualizations,
+  setDocLinks,
+  setUiSettings,
+  setCoreOverlays,
+  setDataSearch,
+  setHttp,
 } from './kibana_services';
 // @ts-ignore
 import {
@@ -66,9 +71,12 @@ interface MapsPluginStartDependencies {
 }
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
-  const { injectedMetadata } = core;
+  const { injectedMetadata, uiSettings, http } = core;
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
-  setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+  setInjectedVarFunc(injectedMetadata.getInjectedVar);
+  setVisualizations(plugins.visualizations);
+  setUiSettings(core.uiSettings);
+  setHttp(http);
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
@@ -78,9 +86,11 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setTimeFilter(data.query.timefilter.timefilter);
   setIndexPatternService(data.indexPatterns);
   setSavedObjectsClient(core.savedObjects.client);
-  setRecentlyAccessed(core.chrome.recentlyAccessed);
-  setDocTitle(core.chrome.docTitle);
-  setSaveCapabilities(core.application.capabilities.maps.save);
+  setCoreChrome(core.chrome);
+  setCoreOverlays(core.overlays);
+  setMapsCapabilities(core.application.capabilities.maps);
+  setDocLinks(core.docLinks);
+  setDataSearch(plugins.data.search);
 };
 
 /** @internal */

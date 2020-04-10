@@ -33,16 +33,35 @@ export const setSavedObjectsClient = coreSavedObjectsClient =>
   (savedObjectsClient = coreSavedObjectsClient);
 export const getSavedObjectsClient = () => savedObjectsClient;
 
-let recentlyAccessed;
-export const setRecentlyAccessed = coreChromeRecentlyAccessed =>
-  (recentlyAccessed = coreChromeRecentlyAccessed);
-export const getRecentlyAccessed = () => recentlyAccessed;
+let chrome;
+export const setCoreChrome = coreChrome => (chrome = coreChrome);
+export const getCoreChrome = () => chrome;
 
-let docTitle;
-export const setDocTitle = coreChromeDocTitle => (docTitle = coreChromeDocTitle);
-export const getDocTitle = () => docTitle;
+let mapsCapabilities;
+export const setMapsCapabilities = coreAppMapsCapabilities =>
+  (mapsCapabilities = coreAppMapsCapabilities);
+export const getMapsCapabilities = () => mapsCapabilities;
 
-let mapsSaveCapabilities;
-export const setSaveCapabilities = coreAppMapsSaveCapabilities =>
-  (mapsSaveCapabilities = coreAppMapsSaveCapabilities);
-export const getSaveCapabilities = () => mapsSaveCapabilities;
+let visualizations;
+export const setVisualizations = visPlugin => (visualizations = visPlugin);
+export const getVisualizations = () => visualizations;
+
+let docLinks;
+export const setDocLinks = coreDocLinks => (docLinks = coreDocLinks);
+export const getDocLinks = () => docLinks;
+
+let uiSettings;
+export const setUiSettings = coreUiSettings => (uiSettings = coreUiSettings);
+export const getUiSettings = () => uiSettings;
+
+let overlays;
+export const setCoreOverlays = coreOverlays => (overlays = coreOverlays);
+export const getCoreOverlays = () => overlays;
+
+let search;
+export const setDataSearch = dataSearch => (search = dataSearch);
+export const getDataSearch = () => search;
+
+let coreHttp;
+export const setHttp = http => (coreHttp = http);
+export const getHttp = () => coreHttp;

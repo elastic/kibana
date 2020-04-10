@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-
-const settings = chrome.getUiSettingsClient();
+import { getUiSettings } from '../kibana_services';
 
 export function getInitialQuery({ mapStateJSON, appState = {}, userQueryLanguage }) {
+  const settings = getUiSettings();
+
   if (appState.query) {
     return appState.query;
   }

@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { getDocLinks, getCoreChrome } from './kibana_services';
 
-export function addHelpMenuToAppChrome(chrome) {
-  chrome.helpExtension.set({
+export function addHelpMenuToAppChrome() {
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+
+  getCoreChrome().helpExtension.set({
     appName: 'Maps',
     links: [
       {

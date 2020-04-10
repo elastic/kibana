@@ -482,7 +482,7 @@ app.controller(
     };
     updateBreadcrumbs();
 
-    addHelpMenuToAppChrome(chrome);
+    addHelpMenuToAppChrome();
 
     async function doSave(saveOptions) {
       await store.dispatch(clearTransientLayerStateAndCloseFlyout());
