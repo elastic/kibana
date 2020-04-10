@@ -79,14 +79,8 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
   }
 );
 
-/** Returns an object of all the windows eventing configuration */
-export const windowsEventing = (state: PolicyDetailsState) => {
-  const config = policyConfig(state);
-  return config && config.windows.events;
-};
-
 /** Returns the total number of possible windows eventing configurations */
-export const totalWindowsEventing = (state: PolicyDetailsState): number => {
+export const totalWindowsEvents = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {
     return Object.keys(config.windows.events).length;
@@ -95,7 +89,7 @@ export const totalWindowsEventing = (state: PolicyDetailsState): number => {
 };
 
 /** Returns the number of selected windows eventing configurations */
-export const selectedWindowsEventing = (state: PolicyDetailsState): number => {
+export const selectedWindowsEvents = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {
     return Object.values(config.windows.events).reduce((count, event) => {
@@ -105,14 +99,8 @@ export const selectedWindowsEventing = (state: PolicyDetailsState): number => {
   return 0;
 };
 
-/** Returns an object of all the mac eventing configurations */
-export const macEventing = (state: PolicyDetailsState) => {
-  const config = policyConfig(state);
-  return config && config.mac.events;
-};
-
 /** Returns the total number of possible mac eventing configurations */
-export const totalMacEventing = (state: PolicyDetailsState): number => {
+export const totalMacEvents = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {
     return Object.keys(config.mac.events).length;
@@ -121,7 +109,7 @@ export const totalMacEventing = (state: PolicyDetailsState): number => {
 };
 
 /** Returns the number of selected mac eventing configurations */
-export const selectedMacEventing = (state: PolicyDetailsState): number => {
+export const selectedMacEvents = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {
     return Object.values(config.mac.events).reduce((count, event) => {

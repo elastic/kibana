@@ -8,49 +8,45 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
-import { EventingCheckbox } from './checkbox';
+import { EventsCheckbox } from './checkbox';
 import { OS, UIPolicyConfig } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { selectedMacEventing, totalMacEventing } from '../../../../store/policy_details/selectors';
+import {
+  selectedWindowsEvents,
+  totalWindowsEvents,
+} from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
-import { getIn, setIn } from '../../../../models/policy_details_config';
+import { setIn, getIn } from '../../../../models/policy_details_config';
 
-export const MacEventing = React.memo(() => {
-  const selected = usePolicyDetailsSelector(selectedMacEventing);
-  const total = usePolicyDetailsSelector(totalMacEventing);
+export const WindowsEvents = React.memo(() => {
+  const selected = usePolicyDetailsSelector(selectedWindowsEvents);
+  const total = usePolicyDetailsSelector(totalWindowsEvents);
 
   const checkboxes: Array<{
     name: string;
-    os: 'mac';
-    protectionField: keyof UIPolicyConfig['mac']['events'];
+    os: 'windows';
+    protectionField: keyof UIPolicyConfig['windows']['events'];
   }> = useMemo(
     () => [
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.mac.events.file', {
-          defaultMessage: 'File',
-        }),
-        os: OS.mac,
-        protectionField: 'file',
-      },
-      {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.mac.events.process', {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.process', {
           defaultMessage: 'Process',
         }),
-        os: OS.mac,
+        os: OS.windows,
         protectionField: 'process',
       },
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.mac.events.network', {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.network', {
           defaultMessage: 'Network',
         }),
-        os: OS.mac,
+        os: OS.windows,
         protectionField: 'network',
       },
     ],
     []
   );
 
-  const renderCheckboxes = () => {
+  const renderCheckboxes = useMemo(() => {
     return (
       <>
         <EuiTitle size="xxs">
@@ -64,7 +60,7 @@ export const MacEventing = React.memo(() => {
         <EuiSpacer size="s" />
         {checkboxes.map((item, index) => {
           return (
-            <EventingCheckbox
+            <EventsCheckbox
               name={item.name}
               key={index}
               setter={(config, checked) =>
@@ -76,9 +72,9 @@ export const MacEventing = React.memo(() => {
         })}
       </>
     );
-  };
+  }, [checkboxes]);
 
-  const collectionsEnabled = () => {
+  const collectionsEnabled = useMemo(() => {
     return (
       <EuiText size="s" color="subdued">
         <FormattedMessage
@@ -88,19 +84,22 @@ export const MacEventing = React.memo(() => {
         />
       </EuiText>
     );
-  };
+  }, [selected, total]);
 
   return (
     <ConfigForm
       type={i18n.translate('xpack.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      supportedOss={[
-        i18n.translate('xpack.endpoint.policy.details.mac', { defaultMessage: 'Mac' }),
-      ]}
-      id="macEventingForm"
-      rightCorner={collectionsEnabled()}
-      children={renderCheckboxes()}
+      supportedOss={useMemo(
+        () => [
+          i18n.translate('xpack.endpoint.policy.details.windows', { defaultMessage: 'Windows' }),
+        ],
+        []
+      )}
+      id="windowsEventingForm"
+      rightCorner={collectionsEnabled}
+      children={renderCheckboxes}
     />
   );
 });

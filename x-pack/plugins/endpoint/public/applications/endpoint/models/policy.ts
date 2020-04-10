@@ -42,9 +42,7 @@ export const generatePolicy = (): PolicyConfig => {
     mac: {
       events: {
         process: true,
-        // TODO, is this right?
         file: true,
-        // TODO, is this right?
         network: true,
       },
       malware: {
@@ -71,9 +69,7 @@ export const generatePolicy = (): PolicyConfig => {
     linux: {
       events: {
         process: true,
-        // TODO, is this right?
         file: true,
-        // TODO, is this right?
         network: true,
       },
       logging: {

@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { WindowsEventing } from './windows';
-export { MacEventing } from './mac';
+export { WindowsEvents } from './windows';
+export { MacEvents } from './mac';

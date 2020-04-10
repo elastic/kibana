@@ -7,7 +7,7 @@
 import { PolicyDetailsState } from '../../types';
 import { createStore, Dispatch, Store } from 'redux';
 import { policyDetailsReducer, PolicyDetailsAction } from './index';
-import { policyConfig, windowsEventing } from './selectors';
+import { policyConfig } from './selectors';
 import { clone } from '../../models/policy_details_config';
 import { generatePolicy } from '../../models/policy';
 
@@ -72,7 +72,8 @@ describe('policy details: ', () => {
     });
 
     it('windows process eventing is enabled', async () => {
-      expect(windowsEventing(getState())!.process).toEqual(true);
+      const config = policyConfig(getState());
+      expect(config!.windows.events.process).toEqual(true);
     });
   });
 });
