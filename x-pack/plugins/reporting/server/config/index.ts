@@ -9,7 +9,7 @@ import { TypeOf } from '@kbn/config-schema';
 import crypto from 'crypto';
 import { map } from 'rxjs/operators';
 import { PluginConfigDescriptor } from 'kibana/server';
-import { CoreSetup, Logger, PluginInitializerContext } from '../../../../../src/core/server';
+import { CoreSetup, Logger, PluginInitializerContext } from 'src/core/server';
 import { ConfigSchema, ConfigType } from './schema';
 
 /*

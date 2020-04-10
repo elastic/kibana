@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { CoreSetup, Logger, PluginInitializerContext } from '../../../../../src/core/server';
+import { CoreSetup, Logger, PluginInitializerContext } from 'src/core/server';
 import { createConfig$ } from './';
 
 interface KibanaServer {
