@@ -5,19 +5,24 @@
  */
 
 import * as Rx from 'rxjs';
-import { createMockReportingCore } from '../../../../test_helpers';
+import { createMockReportingCore, createMockBrowserDriverFactory } from '../../../../test_helpers';
 import { cryptoFactory } from '../../../../server/lib/crypto';
-import { executeJobFactory } from './index';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { LevelLogger } from '../../../../server/lib';
+import { CancellationToken } from '../../../../types';
+import { ReportingCore, CaptureConfig } from '../../../../server/types';
+import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { JobDocPayloadPDF } from '../../types';
+import { executeJobFactory } from './index';
 
 jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
 
-let mockReporting;
+let mockReporting: ReportingCore;
 
-const cancellationToken = {
+const cancellationToken = ({
   on: jest.fn(),
-};
+} as unknown) as CancellationToken;
+
+const captureConfig = {} as CaptureConfig;
 
 const mockLoggerFactory = {
   get: jest.fn().mockImplementation(() => ({
@@ -29,10 +34,12 @@ const mockLoggerFactory = {
 const getMockLogger = () => new LevelLogger(mockLoggerFactory);
 
 const mockEncryptionKey = 'testencryptionkey';
-const encryptHeaders = async headers => {
+const encryptHeaders = async (headers: Record<string, string>) => {
   const crypto = cryptoFactory(mockEncryptionKey);
   return await crypto.encrypt(headers);
 };
+
+const getJobDocPayload = (baseObj: any) => baseObj as JobDocPayloadPDF;
 
 beforeEach(async () => {
   const kbnConfig = {
@@ -45,8 +52,8 @@ beforeEach(async () => {
     'kibanaServer.protocol': 'http',
   };
   const mockReportingConfig = {
-    get: (...keys) => reportingConfig[keys.join('.')],
-    kbnConfig: { get: (...keys) => kbnConfig[keys.join('.')] },
+    get: (...keys: string[]) => (reportingConfig as any)[keys.join('.')],
+    kbnConfig: { get: (...keys: string[]) => (kbnConfig as any)[keys.join('.')] },
   };
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
@@ -60,21 +67,26 @@ beforeEach(async () => {
   mockGetElasticsearch.mockImplementation(() => Promise.resolve(mockElasticsearch));
   mockReporting.getElasticsearchService = mockGetElasticsearch;
 
-  generatePdfObservableFactory.mockReturnValue(jest.fn());
+  (generatePdfObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });
 
-afterEach(() => generatePdfObservableFactory.mockReset());
+afterEach(() => (generatePdfObservableFactory as jest.Mock).mockReset());
 
 test(`returns content_type of application/pdf`, async () => {
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const logger = getMockLogger();
+  const executeJob = await executeJobFactory(mockReporting, logger);
+  const mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger);
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+  const generatePdfObservable = generatePdfObservableFactory(
+    captureConfig,
+    mockBrowserDriverFactory
+  );
+  (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of(Buffer.from('')));
 
   const { content_type: contentType } = await executeJob(
     'pdfJobId',
-    { relativeUrls: [], timeRange: {}, headers: encryptedHeaders },
+    getJobDocPayload({ relativeUrls: [], headers: encryptedHeaders }),
     cancellationToken
   );
   expect(contentType).toBe('application/pdf');
@@ -82,15 +94,19 @@ test(`returns content_type of application/pdf`, async () => {
 
 test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const testContent = 'test content';
+  const mockBrowserDriverFactory = await createMockBrowserDriverFactory(getMockLogger());
 
-  const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
+  const generatePdfObservable = generatePdfObservableFactory(
+    captureConfig,
+    mockBrowserDriverFactory
+  );
+  (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pdfJobId',
-    { relativeUrls: [], timeRange: {}, headers: encryptedHeaders },
+    getJobDocPayload({ relativeUrls: [], headers: encryptedHeaders }),
     cancellationToken
   );
 

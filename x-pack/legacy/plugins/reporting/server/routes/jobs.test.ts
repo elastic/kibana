@@ -6,7 +6,10 @@
 
 import Hapi from 'hapi';
 import { createMockReportingCore } from '../../test_helpers';
+import { ExportTypeDefinition } from '../../types';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
+import { LevelLogger } from '../lib/level_logger';
+import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../types';
 
 jest.mock('./lib/authorized_user_pre_routing', () => ({
   authorizedUserPreRoutingFactory: () => () => ({}),
@@ -19,14 +22,14 @@ jest.mock('./lib/reporting_feature_pre_routing', () => ({
 
 import { registerJobInfoRoutes } from './jobs';
 
-let mockServer;
-let exportTypesRegistry;
-let mockReportingPlugin;
-let mockReportingConfig;
-const mockLogger = {
+let mockServer: any;
+let exportTypesRegistry: ExportTypesRegistry;
+let mockReportingPlugin: ReportingCore;
+let mockReportingConfig: ReportingConfig;
+const mockLogger = ({
   error: jest.fn(),
   debug: jest.fn(),
-};
+} as unknown) as LevelLogger;
 
 beforeEach(async () => {
   mockServer = new Hapi.Server({ debug: false, port: 8080, routes: { log: { collect: true } } });
@@ -35,38 +38,39 @@ beforeEach(async () => {
     id: 'unencoded',
     jobType: 'unencodedJobType',
     jobContentExtension: 'csv',
-  });
+  } as ExportTypeDefinition<unknown, unknown, unknown, unknown>);
   exportTypesRegistry.register({
     id: 'base64Encoded',
     jobType: 'base64EncodedJobType',
     jobContentEncoding: 'base64',
     jobContentExtension: 'pdf',
-  });
+  } as ExportTypeDefinition<unknown, unknown, unknown, unknown>);
 
   mockReportingConfig = { get: jest.fn(), kbnConfig: { get: jest.fn() } };
   mockReportingPlugin = await createMockReportingCore(mockReportingConfig);
   mockReportingPlugin.getExportTypesRegistry = () => exportTypesRegistry;
 });
 
-const mockPlugins = {
+const mockPlugins = ({
   elasticsearch: {
     adminClient: { callAsInternalUser: jest.fn() },
   },
   security: null,
-};
+} as unknown) as ReportingSetupDeps;
 
-const getHits = (...sources) => {
+const getHits = (...sources: any) => {
   return {
     hits: {
-      hits: sources.map(source => ({ _source: source })),
+      hits: sources.map((source: object) => ({ _source: source })),
     },
   };
 };
 
-const getErrorsFromRequest = request =>
-  request.logs.filter(log => log.tags.includes('error')).map(log => log.error);
+const getErrorsFromRequest = (request: any) =>
+  request.logs.filter((log: any) => log.tags.includes('error')).map((log: any) => log.error);
 
 test(`returns 404 if job not found`, async () => {
+  // @ts-ignore
   mockPlugins.elasticsearch.adminClient = {
     callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(getHits())),
   };
@@ -84,6 +88,7 @@ test(`returns 404 if job not found`, async () => {
 });
 
 test(`returns 401 if not valid job type`, async () => {
+  // @ts-ignore
   mockPlugins.elasticsearch.adminClient = {
     callAsInternalUser: jest
       .fn()
@@ -103,6 +108,7 @@ test(`returns 401 if not valid job type`, async () => {
 
 describe(`when job is incomplete`, () => {
   const getIncompleteResponse = async () => {
+    // @ts-ignore
     mockPlugins.elasticsearch.adminClient = {
       callAsInternalUser: jest
         .fn()
@@ -149,6 +155,7 @@ describe(`when job is failed`, () => {
       status: 'failed',
       output: { content: 'job failure message' },
     });
+    // @ts-ignore
     mockPlugins.elasticsearch.adminClient = {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
     };
@@ -194,6 +201,7 @@ describe(`when job is completed`, () => {
         title,
       },
     });
+    // @ts-ignore
     mockPlugins.elasticsearch.adminClient = {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
     };

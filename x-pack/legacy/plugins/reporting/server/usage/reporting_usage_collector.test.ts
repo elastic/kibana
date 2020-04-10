@@ -11,18 +11,21 @@ import {
   registerReportingUsageCollector,
   getReportingUsageCollector,
 } from './reporting_usage_collector';
+import { ReportingConfig } from '../types';
 
 const exportTypesRegistry = getExportTypesRegistry();
 
 function getMockUsageCollection() {
   class MockUsageCollector {
-    constructor(_server, { fetch }) {
+    // @ts-ignore fetch is not used
+    private fetch: any;
+    constructor(_server: any, { fetch }: any) {
       this.fetch = fetch;
     }
   }
   return {
-    makeUsageCollector: options => {
-      return new MockUsageCollector(this, options);
+    makeUsageCollector: (options: any) => {
+      return new MockUsageCollector(null, options);
     },
     registerCollector: sinon.stub(),
   };
@@ -51,7 +54,7 @@ function getPluginsMock(
         xpack_main: mockXpackMain,
       },
     },
-  };
+  } as any;
 }
 
 const getMockReportingConfig = () => ({
@@ -61,13 +64,13 @@ const getMockReportingConfig = () => ({
 const getResponseMock = (customization = {}) => customization;
 
 describe('license checks', () => {
-  let mockConfig;
+  let mockConfig: ReportingConfig;
   beforeAll(async () => {
     mockConfig = getMockReportingConfig();
   });
 
   describe('with a basic license', () => {
-    let usageStats;
+    let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'basic' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
@@ -75,9 +78,12 @@ describe('license checks', () => {
         mockConfig,
         plugins.usageCollection,
         plugins.__LEGACY.plugins.xpack_main.info,
-        exportTypesRegistry
+        exportTypesRegistry,
+        function isReady() {
+          return Promise.resolve(true);
+        }
       );
-      usageStats = await fetch(callClusterMock, exportTypesRegistry);
+      usageStats = await fetch(callClusterMock as any);
     });
 
     test('sets enables to true', async () => {
@@ -94,7 +100,7 @@ describe('license checks', () => {
   });
 
   describe('with no license', () => {
-    let usageStats;
+    let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'none' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
@@ -102,9 +108,12 @@ describe('license checks', () => {
         mockConfig,
         plugins.usageCollection,
         plugins.__LEGACY.plugins.xpack_main.info,
-        exportTypesRegistry
+        exportTypesRegistry,
+        function isReady() {
+          return Promise.resolve(true);
+        }
       );
-      usageStats = await fetch(callClusterMock, exportTypesRegistry);
+      usageStats = await fetch(callClusterMock as any);
     });
 
     test('sets enables to true', async () => {
@@ -121,7 +130,7 @@ describe('license checks', () => {
   });
 
   describe('with platinum license', () => {
-    let usageStats;
+    let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'platinum' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
@@ -129,9 +138,12 @@ describe('license checks', () => {
         mockConfig,
         plugins.usageCollection,
         plugins.__LEGACY.plugins.xpack_main.info,
-        exportTypesRegistry
+        exportTypesRegistry,
+        function isReady() {
+          return Promise.resolve(true);
+        }
       );
-      usageStats = await fetch(callClusterMock, exportTypesRegistry);
+      usageStats = await fetch(callClusterMock as any);
     });
 
     test('sets enables to true', async () => {
@@ -148,7 +160,7 @@ describe('license checks', () => {
   });
 
   describe('with no usage data', () => {
-    let usageStats;
+    let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'basic' });
       const callClusterMock = jest.fn(() => Promise.resolve({}));
@@ -156,9 +168,12 @@ describe('license checks', () => {
         mockConfig,
         plugins.usageCollection,
         plugins.__LEGACY.plugins.xpack_main.info,
-        exportTypesRegistry
+        exportTypesRegistry,
+        function isReady() {
+          return Promise.resolve(true);
+        }
       );
-      usageStats = await fetch(callClusterMock, exportTypesRegistry);
+      usageStats = await fetch(callClusterMock as any);
     });
 
     test('sets enables to true', async () => {
@@ -179,7 +194,10 @@ describe('data modeling', () => {
       mockConfig,
       plugins.usageCollection,
       plugins.__LEGACY.plugins.xpack_main.info,
-      exportTypesRegistry
+      exportTypesRegistry,
+      function isReady() {
+        return Promise.resolve(true);
+      }
     );
     const callClusterMock = jest.fn(() =>
       Promise.resolve(
@@ -303,7 +321,7 @@ describe('data modeling', () => {
       )
     );
 
-    const usageStats = await fetch(callClusterMock);
+    const usageStats = await fetch(callClusterMock as any);
     expect(usageStats).toMatchInlineSnapshot(`
       Object {
         "PNG": Object {
@@ -406,7 +424,7 @@ describe('Ready for collection observable', () => {
     const makeCollectorSpy = sinon.spy();
     usageCollection.makeUsageCollector = makeCollectorSpy;
 
-    const plugins = getPluginsMock({ usageCollection });
+    const plugins = getPluginsMock({ usageCollection } as any);
     registerReportingUsageCollector(mockReporting, plugins);
 
     const [args] = makeCollectorSpy.firstCall.args;

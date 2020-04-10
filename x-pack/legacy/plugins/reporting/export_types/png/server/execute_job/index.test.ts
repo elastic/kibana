@@ -5,19 +5,22 @@
  */
 
 import * as Rx from 'rxjs';
-import { createMockReportingCore } from '../../../../test_helpers';
+import { createMockReportingCore, createMockBrowserDriverFactory } from '../../../../test_helpers';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';
 import { generatePngObservableFactory } from '../lib/generate_png';
+import { CancellationToken } from '../../../../common/cancellation_token';
 import { LevelLogger } from '../../../../server/lib';
+import { ReportingCore, CaptureConfig } from '../../../../server/types';
+import { JobDocPayloadPNG } from '../../types';
 
 jest.mock('../lib/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
 
-let mockReporting;
+let mockReporting: ReportingCore;
 
-const cancellationToken = {
+const cancellationToken = ({
   on: jest.fn(),
-};
+} as unknown) as CancellationToken;
 
 const mockLoggerFactory = {
   get: jest.fn().mockImplementation(() => ({
@@ -28,11 +31,15 @@ const mockLoggerFactory = {
 };
 const getMockLogger = () => new LevelLogger(mockLoggerFactory);
 
+const captureConfig = {} as CaptureConfig;
+
 const mockEncryptionKey = 'abcabcsecuresecret';
-const encryptHeaders = async headers => {
+const encryptHeaders = async (headers: Record<string, string>) => {
   const crypto = cryptoFactory(mockEncryptionKey);
   return await crypto.encrypt(headers);
 };
+
+const getJobDocPayload = (baseObj: any) => baseObj as JobDocPayloadPNG;
 
 beforeEach(async () => {
   const kbnConfig = {
@@ -45,8 +52,8 @@ beforeEach(async () => {
     'kibanaServer.protocol': 'http',
   };
   const mockReportingConfig = {
-    get: (...keys) => reportingConfig[keys.join('.')],
-    kbnConfig: { get: (...keys) => kbnConfig[keys.join('.')] },
+    get: (...keys: string[]) => (reportingConfig as any)[keys.join('.')],
+    kbnConfig: { get: (...keys: string[]) => (kbnConfig as any)[keys.join('.')] },
   };
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
@@ -60,22 +67,30 @@ beforeEach(async () => {
   mockGetElasticsearch.mockImplementation(() => Promise.resolve(mockElasticsearch));
   mockReporting.getElasticsearchService = mockGetElasticsearch;
 
-  generatePngObservableFactory.mockReturnValue(jest.fn());
+  (generatePngObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });
 
-afterEach(() => generatePngObservableFactory.mockReset());
+afterEach(() => (generatePngObservableFactory as jest.Mock).mockReset());
 
 test(`passes browserTimezone to generatePng`, async () => {
   const encryptedHeaders = await encryptHeaders({});
+  const mockBrowserDriverFactory = await createMockBrowserDriverFactory(getMockLogger());
 
-  const generatePngObservable = generatePngObservableFactory();
-  generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
+  const generatePngObservable = generatePngObservableFactory(
+    captureConfig,
+    mockBrowserDriverFactory
+  );
+  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
   await executeJob(
     'pngJobId',
-    { relativeUrl: '/app/kibana#/something', browserTimezone, headers: encryptedHeaders },
+    getJobDocPayload({
+      relativeUrl: '/app/kibana#/something',
+      browserTimezone,
+      headers: encryptedHeaders,
+    }),
     cancellationToken
   );
 
@@ -92,12 +107,17 @@ test(`returns content_type of application/png`, async () => {
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePngObservable = generatePngObservableFactory();
-  generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
+  const mockBrowserDriverFactory = await createMockBrowserDriverFactory(getMockLogger());
+
+  const generatePngObservable = generatePngObservableFactory(
+    captureConfig,
+    mockBrowserDriverFactory
+  );
+  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of(Buffer.from('')));
 
   const { content_type: contentType } = await executeJob(
     'pngJobId',
-    { relativeUrl: '/app/kibana#/something', timeRange: {}, headers: encryptedHeaders },
+    getJobDocPayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
     cancellationToken
   );
   expect(contentType).toBe('image/png');
@@ -106,14 +126,19 @@ test(`returns content_type of application/png`, async () => {
 test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const testContent = 'test content';
 
-  const generatePngObservable = generatePngObservableFactory();
-  generatePngObservable.mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
+  const mockBrowserDriverFactory = await createMockBrowserDriverFactory(getMockLogger());
+
+  const generatePngObservable = generatePngObservableFactory(
+    captureConfig,
+    mockBrowserDriverFactory
+  );
+  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pngJobId',
-    { relativeUrl: '/app/kibana#/something', timeRange: {}, headers: encryptedHeaders },
+    getJobDocPayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
     cancellationToken
   );
 

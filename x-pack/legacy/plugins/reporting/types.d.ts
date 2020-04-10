@@ -186,7 +186,7 @@ export type ESQueueWorkerExecuteFn<JobDocPayloadType> = (
   jobId: string,
   job: JobDocPayloadType,
   cancellationToken?: CancellationToken
-) => void;
+) => Promise<any>;
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
