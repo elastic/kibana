@@ -70,7 +70,7 @@ export class AssetManager extends PureComponent<Props, State> {
           onClose();
         }}
         onAssetDelete={(asset: AssetType) => this.setState({ deleteId: asset.id })}
-        onClose={() => onClose()}
+        onClose={onClose}
         onFileUpload={this.handleFileUpload}
       />
     );

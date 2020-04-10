@@ -198,4 +198,5 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
 
 ElementMenu.propTypes = {
   elements: PropTypes.object,
+  addElement: PropTypes.func.isRequired,
 };

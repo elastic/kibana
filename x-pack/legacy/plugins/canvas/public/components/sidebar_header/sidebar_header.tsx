@@ -22,7 +22,7 @@ import { CustomElementModal } from '../custom_element_modal';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
 import { ComponentStrings } from '../../../i18n/components';
 import { ShortcutStrings } from '../../../i18n/shortcuts';
-import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../common/lib';
+import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../common/lib/constants';
 
 const { SidebarHeader: strings } = ComponentStrings;
 const shortcutHelp = ShortcutStrings.getShortcutHelp();

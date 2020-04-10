@@ -8,7 +8,7 @@ import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ShareWebsiteFlyout } from '../share_website_flyout';
 
-storiesOf('components/Export/ShareWebsiteFlyout', module)
+storiesOf('components/WorkpadHeader/ShareMenu/ShareWebsiteFlyout', module)
   .addParameters({
     info: {
       inline: true,

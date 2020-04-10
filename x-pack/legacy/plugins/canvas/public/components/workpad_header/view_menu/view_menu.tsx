@@ -12,7 +12,7 @@ import {
   EuiIcon,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL } from '../../../../common/lib';
+import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL } from '../../../../common/lib/constants';
 import { Popover, ClosePopoverFn } from '../../popover';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { ComponentStrings } from '../../../../i18n/components';
@@ -22,6 +22,9 @@ const { WorkpadHeaderViewMenu: strings } = ComponentStrings;
 const QUICK_ZOOM_LEVELS = [0.5, 1, 2];
 
 export interface Props {
+  /**
+   * Is the workpad edittable?
+   */
   isWriteable: boolean;
   /**
    * current workpad zoom level
