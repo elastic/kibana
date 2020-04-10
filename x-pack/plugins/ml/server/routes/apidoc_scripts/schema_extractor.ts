@@ -90,7 +90,10 @@ export function extractDocumentation(
     return members;
   }
 
-  function resolveTypeMembers(type: ts.Type): ts.SymbolTable | string {
+  function resolveTypeArgument(type: ts.Type): ts.SymbolTable | string {
+    // required to extract members
+    type.getProperty('type');
+
     // @ts-ignores
     let members = type.members;
 
@@ -102,7 +105,7 @@ export function extractDocumentation(
     }
 
     if (typeArguments.length > 0) {
-      members = resolveTypeMembers(typeArguments[0]);
+      members = resolveTypeArgument(typeArguments[0]);
     }
 
     if (members === undefined) {
@@ -117,31 +120,24 @@ export function extractDocumentation(
     const typeOfSymbol = symbol.type;
     const typeArguments = checker.getTypeArguments((typeOfSymbol as unknown) as ts.TypeReference);
 
-    let resultType: ts.Type = typeArguments.length > 0 ? typeArguments[0] : typeOfSymbol;
+    let resultType: ts.Type = typeOfSymbol;
+
+    let members;
+    if (typeArguments.length > 0) {
+      members = resolveTypeArgument(typeArguments[0]);
+      resultType = typeArguments[0];
+    }
 
     let typeAsString = checker.typeToString(resultType);
 
-    if (typeArguments.length === 0) {
-      // @ts-ignore
-      typeAsString = checker.typeToString(symbol.type);
-    }
-
-    const typeProp = resultType.getProperty('type');
-    if (typeProp) {
-      // @ts-ignore
-      resultType = typeProp.type;
-    }
-
-    const members = resolveTypeMembers(resultType);
-
-    const resName = resultType && resultType.symbol && resultType.symbol.name;
-    if (resName && typeof members !== 'string') {
-      // we hit an object or collection
-      typeAsString = resName === 'Array' ? `${symbol.getName()}[]` : symbol.getName();
-    }
-
     const nestedEntries: DocEntry[] = [];
-    if (typeof members !== 'string' && members.size > 0) {
+    if (members && typeof members !== 'string' && members.size > 0) {
+      // we hit an object or collection
+      typeAsString =
+        resultType.symbol.name === 'Array' || typeOfSymbol.symbol.name === 'Array'
+          ? `${symbol.getName()}[]`
+          : symbol.getName();
+
       members.forEach(member => {
         nestedEntries.push(serializeProperty(member));
       });

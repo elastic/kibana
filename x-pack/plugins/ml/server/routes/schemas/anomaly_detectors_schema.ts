@@ -26,6 +26,7 @@ const detectorSchema = schema.object({
   over_field_name: schema.maybe(schema.string()),
   partition_field_name: schema.maybe(schema.string()),
   detector_description: schema.maybe(schema.string()),
+  /** Custom rules */
   custom_rules: customRulesSchema,
 });
 

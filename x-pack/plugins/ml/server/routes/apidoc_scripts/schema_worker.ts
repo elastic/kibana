@@ -46,7 +46,7 @@ interface Block {
 }
 
 export function postProcess(parsedFiles: any[]): void {
-  const schemasDirPath = `${__dirname}${path.sep}..${path.sep}..${path.sep}schemas/`;
+  const schemasDirPath = `${__dirname}${path.sep}..${path.sep}..${path.sep}schemas${path.sep}`;
   const schemaFiles = fs
     .readdirSync(schemasDirPath)
     .map(filename => path.resolve(schemasDirPath + filename));
