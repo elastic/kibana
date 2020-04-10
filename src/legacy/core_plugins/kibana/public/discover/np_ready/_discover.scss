@@ -141,6 +141,7 @@ discover-app {
 .dscSidebarItem__label {
   overflow: hidden; /* 1 */
   text-overflow: ellipsis; /* 1 */
+  width: 100%;
 }
 
 /**
