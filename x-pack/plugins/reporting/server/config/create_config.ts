@@ -18,7 +18,12 @@ import { ConfigSchema } from './schema';
  * - xpack.kibanaServer
  * - xpack.reporting.encryptionKey
  */
-export function createConfig$(core: CoreSetup, context: PluginInitializerContext, logger: Logger) {
+export function createConfig$(
+  core: CoreSetup,
+  context: PluginInitializerContext,
+  reportingLogger: Logger
+) {
+  const logger = reportingLogger.get('create_config');
   return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(
     map(config => {
       // encryption key
@@ -88,7 +93,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
       if (disableSandbox) {
         logger.warn(
           i18n.translate('xpack.reporting.serverConfig.autoSet.sandboxDisabled', {
-            defaultMessage: `Setting '{configKey}: false' in Reporting config: not supported for {osName}`,
+            defaultMessage: `Automatically setting '{configKey}: false' in Reporting plugin configuration. Chromium sandbox is not supported for '{osName}.'`,
             values: {
               configKey: 'xpack.reporting.capture.browser.chromium.disableSandbox',
               osName: `${os.os}/${os.dist}`,
