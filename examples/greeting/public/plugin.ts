@@ -87,7 +87,7 @@ export class GreetingPlugin implements Plugin<GreetingSetup, GreetingStart> {
      * to come up with a pattern that allowed for multiple custom providers to be registered.
      */
     setCustomProvider: (customProvider: GreetingProvider) => {
-      if (this.greetingProvider) {
+      if (this.customGreetingProvider) {
         throw new Error(
           'Only one custom greeting provider is allowed, and one has already been registered.'
         );
