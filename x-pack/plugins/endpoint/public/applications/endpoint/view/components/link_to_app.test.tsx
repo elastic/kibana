@@ -7,9 +7,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { LinkToApp } from './link_to_app';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { CoreStart } from 'kibana/public';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 type LinkToAppOnClickMock<Return = void> = jest.Mock<
   Return,

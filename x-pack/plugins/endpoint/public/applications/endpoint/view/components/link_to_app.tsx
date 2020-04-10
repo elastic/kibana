@@ -7,7 +7,7 @@
 import React, { memo, MouseEventHandler } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { EuiLinkProps } from '@elastic/eui';
-import { useNavigateToAppEventHandler } from '../view/hooks/use_navigate_to_app_event_handler';
+import { useNavigateToAppEventHandler } from '../hooks/use_navigate_to_app_event_handler';
 
 type LinkToAppProps = EuiLinkProps & {
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */
