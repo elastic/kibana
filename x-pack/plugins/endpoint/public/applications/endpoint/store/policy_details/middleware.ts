@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MiddlewareFactory, PolicyData, PolicyDetailsState } from '../../types';
+import {
+  MiddlewareFactory,
+  PolicyData,
+  PolicyDetailsState,
+  UpdateDatasourceResponse,
+} from '../../types';
 import { policyIdFromParams, isOnPolicyDetailsPage, policyDetails } from './selectors';
+import { generatePolicy } from '../../models/policy';
 import {
   sendGetDatasource,
   sendGetFleetAgentStatusForConfig,
   sendPutDatasource,
-  UpdateDatasourceResponse,
-} from '../../services/ingest';
-import { generatePolicy } from '../../models/policy';
+} from '../policy_list/services/ingest';
 
 export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
   const http = coreStart.http;
