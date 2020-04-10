@@ -35,7 +35,7 @@ After selecting a Service name and environment in the APM app,
 a list of all supported configuration options,
 including descriptions and default values, will be displayed.
 
-Supported configurations are also tagged with the <<dynamic-configuration, image:./images/dynamic-config.svg[] >> badge in each Agent's configuration reference:
+Supported configurations are also tagged with the image:./images/dynamic-config.svg[] badge in each Agent's configuration reference:
 
 [horizontal]
 Go Agent:: {apm-go-ref}/configuration.html[Configuration reference]

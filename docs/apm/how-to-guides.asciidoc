@@ -1,0 +1,21 @@
+[role="xpack"]
+[[apm-how-to]]
+== How-to guides
+
+
+
+* <<agent-configuration>>
+* <<custom-links>>
+* <<machine-learning-integration>>
+* <<advanced-queries>>
+* <<apm-alerts>>
+
+include::agent-configuration.asciidoc[]
+
+include::custom-links.asciidoc[]
+
+include::machine-learning.asciidoc[]
+
+include::advanced-queries.asciidoc[]
+
+include::apm-alerts.asciidoc[]

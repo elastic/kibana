@@ -12,8 +12,11 @@ enables developers to drill down into the performance data for their application
 and quickly locate the performance bottlenecks.
 
 * <<apm-getting-started>>
-* <<apm-bottlenecks>>
 * <<apm-ui>>
+* <<apm-how-to>>
+* <<apm-settings-in-kibana>>
+* <<apm-api>>
+* <<troubleshooting>>
 
 NOTE: For more information about the components of Elastic APM,
 see the {apm-get-started-ref}/overview.html[APM Overview].
@@ -21,8 +24,12 @@ see the {apm-get-started-ref}/overview.html[APM Overview].
 
 include::getting-started.asciidoc[]
 
-include::bottlenecks.asciidoc[]
-
 include::using-the-apm-ui.asciidoc[]
 
+include::how-to-guides.asciidoc[]
+
+include::settings.asciidoc[]
+
 include::api.asciidoc[]
+
+include::troubleshooting.asciidoc[]
