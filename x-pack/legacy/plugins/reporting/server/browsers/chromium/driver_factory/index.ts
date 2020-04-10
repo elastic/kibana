@@ -57,15 +57,16 @@ export class HeadlessChromiumDriverFactory {
 
   type = BROWSER_TYPE;
 
-  async screenshotPage(): Promise<Buffer | null> {
-    if (this.page) {
-      return this.page.screenshot({
-        type: 'jpeg',
-        quality: 50,
-        fullPage: true,
-      });
+  async screenshotPage() {
+    if (!this.page) {
+      throw new Error(`Page creation hasn't happened yet`);
     }
-    return null;
+
+    return this.page.screenshot({
+      type: 'jpeg',
+      quality: 50,
+      fullPage: true,
+    });
   }
 
   test(logger: Logger) {

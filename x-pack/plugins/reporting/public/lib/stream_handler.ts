@@ -26,6 +26,7 @@ import {
   getFailureToast,
   getWarningFormulasToast,
   getWarningMaxSizeToast,
+  getGenericWarningToast,
   getGeneralErrorToast,
 } from '../components';
 import { ReportingAPIClient } from './reporting_api_client';
@@ -42,6 +43,7 @@ function summarizeJob(src: SourceJob): JobSummary {
     type: src._source.payload.type,
     maxSizeReached: src._source.output.max_size_reached,
     csvContainsFormulas: src._source.output.csv_contains_formulas,
+    warning: src._source.output.warnings ? src._source.output.warnings.join('\n') : '',
   };
 }
 
@@ -69,6 +71,14 @@ export class ReportingNotifierStreamHandler {
         } else if (job.maxSizeReached) {
           this.notifications.toasts.addWarning(
             getWarningMaxSizeToast(
+              job,
+              this.apiClient.getManagementLink,
+              this.apiClient.getDownloadLink
+            )
+          );
+        } else if (job.warning) {
+          this.notifications.toasts.addWarning(
+            getGenericWarningToast(
               job,
               this.apiClient.getManagementLink,
               this.apiClient.getDownloadLink

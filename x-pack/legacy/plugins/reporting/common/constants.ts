@@ -63,6 +63,7 @@ export const PNG_JOB_TYPE = 'PNG';
 export const CSV_JOB_TYPE = 'csv';
 export const CSV_FROM_SAVEDOBJECT_JOB_TYPE = 'csv_from_savedobject';
 export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
+export const PDF_JOB_BREACH_TIME = 10000;
 
 export const LICENSE_TYPE_TRIAL = 'trial';
 export const LICENSE_TYPE_BASIC = 'basic';

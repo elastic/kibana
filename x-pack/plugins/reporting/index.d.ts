@@ -26,6 +26,7 @@ export interface SourceJob {
     output: {
       max_size_reached: boolean;
       csv_contains_formulas: boolean;
+      warnings?: string[];
     };
     payload: {
       type: string;
@@ -45,6 +46,7 @@ export interface JobSummary {
   type: string;
   maxSizeReached: boolean;
   csvContainsFormulas: boolean;
+  warning: string;
 }
 
 export interface JobStatusBuckets {

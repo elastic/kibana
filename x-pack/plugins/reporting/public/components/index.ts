@@ -8,4 +8,5 @@ export { getSuccessToast } from './job_success';
 export { getFailureToast } from './job_failure';
 export { getWarningFormulasToast } from './job_warning_formulas';
 export { getWarningMaxSizeToast } from './job_warning_max_size';
+export { getGenericWarningToast } from './job_warning_generic';
 export { getGeneralErrorToast } from './general_error';
