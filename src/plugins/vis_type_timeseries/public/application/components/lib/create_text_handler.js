@@ -26,8 +26,6 @@ export const createTextHandler = handleChange => {
     if (!detectIE() || e.keyCode === 13) e.preventDefault();
 
     const value = _.get(e, 'target.value', defaultValue);
-    if (_.isFunction(handleChange)) {
-      return handleChange({ [name]: value });
-    }
+    return handleChange?.({ [name]: value });
   };
 };

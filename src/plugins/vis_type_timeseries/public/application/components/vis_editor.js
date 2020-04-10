@@ -96,7 +96,7 @@ export class VisEditor extends Component {
     return true;
   };
 
-  handleChange = async partialModel => {
+  handleChange = partialModel => {
     if (isEmpty(partialModel)) {
       return;
     }
