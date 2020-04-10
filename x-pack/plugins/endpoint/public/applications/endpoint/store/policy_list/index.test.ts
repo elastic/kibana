@@ -10,13 +10,14 @@ import { AppAction } from '../action';
 import { policyListReducer } from './reducer';
 import { policyListMiddlewareFactory } from './middleware';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { isOnPolicyListPage, selectIsLoading } from './selectors';
+import { isOnPolicyListPage, selectIsLoading, urlSearchParams } from './selectors';
 import { DepsStartMock, depsStartMock } from '../../mocks';
 import {
   createSpyMiddleware,
   MiddlewareActionSpyHelper,
   setPolicyListApiMockImplementation,
 } from './test_mock_utils';
+import { INGEST_API_DATASOURCES } from '../../services/ingest';
 
 describe('policy list store concerns', () => {
   let fakeCoreStart: ReturnType<typeof coreMock.createStart>;
@@ -41,7 +42,7 @@ describe('policy list store concerns', () => {
     dispatch = store.dispatch;
   });
 
-  test('it does nothing on `userChangedUrl` if pathname is NOT `/policy`', async () => {
+  it('it does nothing on `userChangedUrl` if pathname is NOT `/policy`', async () => {
     const state = getState();
     expect(isOnPolicyListPage(state)).toBe(false);
     dispatch({
@@ -55,20 +56,19 @@ describe('policy list store concerns', () => {
     expect(getState()).toEqual(state);
   });
 
-  test('it sets `isOnPage` when `userChangedUrl` with pathname `/policy`', async () => {
+  it('it reports `isOnPolicyListPage` correctly when router pathname is `/policy`', async () => {
     dispatch({
       type: 'userChangedUrl',
       payload: {
         pathname: '/policy',
         search: '',
         hash: '',
-      } as EndpointAppLocation,
+      },
     });
     expect(isOnPolicyListPage(getState())).toBe(true);
-    await waitForAction('serverReturnedPolicyListData');
   });
 
-  test('it sets `isLoading` when `userChangedUrl`', async () => {
+  it('it sets `isLoading` when `userChangedUrl`', async () => {
     expect(selectIsLoading(getState())).toBe(false);
     dispatch({
       type: 'userChangedUrl',
@@ -76,38 +76,30 @@ describe('policy list store concerns', () => {
         pathname: '/policy',
         search: '',
         hash: '',
-      } as EndpointAppLocation,
+      },
     });
     expect(selectIsLoading(getState())).toBe(true);
     await waitForAction('serverReturnedPolicyListData');
     expect(selectIsLoading(getState())).toBe(false);
   });
 
-  test('it resets state on `userChangedUrl` and pathname is NOT `/policy`', async () => {
+  it('it resets state on `userChangedUrl` and pathname is NOT `/policy`', async () => {
     dispatch({
       type: 'userChangedUrl',
       payload: {
         pathname: '/policy',
         search: '',
         hash: '',
-      } as EndpointAppLocation,
-    });
-    dispatch({
-      type: 'serverReturnedPolicyListData',
-      payload: {
-        policyItems: [],
-        pageIndex: 20,
-        pageSize: 50,
-        total: 200,
       },
     });
+    await waitForAction('serverReturnedPolicyListData');
     dispatch({
       type: 'userChangedUrl',
       payload: {
         pathname: '/foo',
         search: '',
         hash: '',
-      } as EndpointAppLocation,
+      },
     });
     expect(getState()).toEqual({
       apiError: undefined,
@@ -117,6 +109,87 @@ describe('policy list store concerns', () => {
       pageIndex: 0,
       pageSize: 10,
       total: 0,
+    });
+  });
+  it('uses default pagination params when not included in url', async () => {
+    dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        pathname: '/policy',
+        search: '',
+        hash: '',
+      },
+    });
+    await waitForAction('serverReturnedPolicyListData');
+    expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
+      query: { kuery: 'datasources.package.name: endpoint', page: 1, perPage: 10 },
+    });
+  });
+
+  describe('when url contains search params', () => {
+    const dispatchUserChangedUrl = (searchParams: string = '') =>
+      dispatch({
+        type: 'userChangedUrl',
+        payload: {
+          pathname: '/policy',
+          search: searchParams,
+          hash: '',
+        },
+      });
+
+    it('uses pagination params from url', async () => {
+      dispatchUserChangedUrl('?page_size=50&page_index=0');
+      await waitForAction('serverReturnedPolicyListData');
+      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
+        query: { kuery: 'datasources.package.name: endpoint', page: 1, perPage: 50 },
+      });
+    });
+    it('uses defaults for params not in url', async () => {
+      dispatchUserChangedUrl('?page_index=99');
+      expect(urlSearchParams(getState())).toEqual({
+        page_index: 99,
+        page_size: 10,
+      });
+      dispatchUserChangedUrl('?page_size=50');
+      expect(urlSearchParams(getState())).toEqual({
+        page_index: 0,
+        page_size: 50,
+      });
+    });
+    it('accepts only positive numbers for page_index and page_size', async () => {
+      dispatchUserChangedUrl('?page_size=-50&page_index=-99');
+      await waitForAction('serverReturnedPolicyListData');
+      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
+        query: { kuery: 'datasources.package.name: endpoint', page: 1, perPage: 10 },
+      });
+    });
+    it('it ignores non-numeric values for page_index and page_size', async () => {
+      dispatchUserChangedUrl('?page_size=fifty&page_index=ten');
+      await waitForAction('serverReturnedPolicyListData');
+      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
+        query: { kuery: 'datasources.package.name: endpoint', page: 1, perPage: 10 },
+      });
+    });
+    it('accepts only known values for `page_size`', async () => {
+      dispatchUserChangedUrl('?page_size=300&page_index=10');
+      await waitForAction('serverReturnedPolicyListData');
+      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
+        query: { kuery: 'datasources.package.name: endpoint', page: 11, perPage: 10 },
+      });
+    });
+    it(`ignores unknown url search params`, async () => {
+      dispatchUserChangedUrl('?page_size=20&page_index=10&foo=bar');
+      expect(urlSearchParams(getState())).toEqual({
+        page_index: 10,
+        page_size: 20,
+      });
+    });
+    it(`uses last param value if param is defined multiple times`, async () => {
+      dispatchUserChangedUrl('?page_size=20&page_size=50&page_index=20&page_index=40');
+      expect(urlSearchParams(getState())).toEqual({
+        page_index: 40,
+        page_size: 50,
+      });
     });
   });
 });
