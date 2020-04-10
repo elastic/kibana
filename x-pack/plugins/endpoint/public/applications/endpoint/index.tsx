@@ -16,7 +16,7 @@ import { AlertIndex } from './view/alerts';
 import { HostList } from './view/hosts';
 import { PolicyList } from './view/policy';
 import { PolicyDetails } from './view/policy';
-import { HeaderNavigation } from './components/header_nav';
+import { HeaderNavigation } from './components/header_navigation';
 import { AppRootProvider } from './view/app_root_provider';
 import { Setup } from './view/setup';
 
