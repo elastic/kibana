@@ -23,28 +23,32 @@ export const TlsType = t.partial({
 
 export type Tls = t.TypeOf<typeof TlsType>;
 
+export const MonitorType = t.intersection([
+  t.type({
+    duration: t.type({
+      us: t.number,
+    }),
+    id: t.string,
+    status: t.string,
+    type: t.string,
+  }),
+  t.partial({
+    check_group: t.string,
+    ip: t.string,
+    name: t.string,
+    timespan: t.partial({
+      gte: t.string,
+      lte: t.string,
+    }),
+  }),
+]);
+
+export type Monitor = t.TypeOf<typeof MonitorType>;
+
 export const PingType = t.intersection([
   t.type({
     '@timestamp': t.string,
-    monitor: t.intersection([
-      t.type({
-        duration: t.type({
-          us: t.number,
-        }),
-        id: t.string,
-        status: t.string,
-        type: t.string,
-      }),
-      t.partial({
-        check_group: t.string,
-        ip: t.string,
-        name: t.string,
-        timespan: t.partial({
-          gte: t.string,
-          lte: t.string,
-        }),
-      }),
-    ]),
+    monitor: MonitorType,
   }),
   t.partial({
     agent: t.intersection([
