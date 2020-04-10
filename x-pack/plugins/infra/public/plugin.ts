@@ -19,9 +19,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
-
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
-import { getAlertType } from './components/alerting/metrics/metric_threshold_alert_type';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -52,8 +50,6 @@ export class Plugin
   setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
-
     core.application.register({
       id: 'logs',
       title: i18n.translate('xpack.infra.logs.pluginTitle', {
@@ -67,6 +63,11 @@ export class Plugin
         const [coreStart, pluginsStart] = await core.getStartServices();
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp, composeLibs, LogsRouter } = await this.downloadAssets();
+        const { getAlertType } = await import(
+          './components/alerting/metrics/metric_threshold_alert_type'
+        );
+
+        pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
 
         return startApp(
           composeLibs(coreStart),
