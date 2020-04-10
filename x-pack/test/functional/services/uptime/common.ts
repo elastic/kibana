@@ -66,8 +66,6 @@ export function UptimeCommonProvider({ getService }: FtrProviderContext) {
       if (await downFilter.elementHasClass('euiFilterButton-hasActiveFilters')) {
         this.setStatusFilterDown();
       }
-
-      return true;
     },
     async selectFilterItem(filterType: string, option: string) {
       const popoverId = `filter-popover_${filterType}`;

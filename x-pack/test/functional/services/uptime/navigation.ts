@@ -40,8 +40,8 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
       await testSubjects.existOrFail('uptimeSettingsPage', { timeout: 2000 });
     },
 
-    checkIfOnMonitorPage: async (monitorId?: string) => {
-      const monitorPage = await testSubjects.exists('uptimeMonitorPage', { timeout: 0 });
+    checkIfOnMonitorPage: async (monitorId: string) => {
+      const monitorPage = await testSubjects.exists('uptimeMonitorPage', { timeout: 1000 });
       if (monitorId && monitorPage) {
         const thisMonitorPage =
           (await testSubjects.getVisibleText('monitor-page-title')) === monitorId;
