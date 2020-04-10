@@ -7,7 +7,7 @@
 import * as Rx from 'rxjs';
 import { CoreSetup, Logger, PluginInitializerContext } from 'src/core/server';
 import { ConfigType as ReportingConfigType } from './schema';
-import { createConfig$ } from './';
+import { createConfig$ } from './create_config';
 
 interface KibanaServer {
   host?: string;
