@@ -24,7 +24,11 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elasti
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const Header = ({ addScriptedFieldUrl }) => (
+interface HeaderProps {
+  addScriptedFieldUrl: string;
+}
+
+export const Header = ({ addScriptedFieldUrl }: HeaderProps) => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem>
       <EuiTitle size="s">

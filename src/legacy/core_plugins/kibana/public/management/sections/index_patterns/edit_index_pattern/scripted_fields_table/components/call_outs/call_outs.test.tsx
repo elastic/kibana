@@ -23,7 +23,7 @@ import { shallow } from 'enzyme';
 import { CallOuts } from '../call_outs';
 
 describe('CallOuts', () => {
-  it('should render normally', async () => {
+  test('should render normally', () => {
     const component = shallow(
       <CallOuts
         deprecatedLangsInUse={['php']}
@@ -34,7 +34,7 @@ describe('CallOuts', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render without any call outs', async () => {
+  test('should render without any call outs', () => {
     const component = shallow(
       <CallOuts deprecatedLangsInUse={[]} painlessDocLink="http://www.elastic.co/painlessDocs" />
     );

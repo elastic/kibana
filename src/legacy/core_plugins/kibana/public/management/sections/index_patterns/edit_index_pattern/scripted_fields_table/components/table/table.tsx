@@ -19,12 +19,21 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-
-import { EuiInMemoryTable } from '@elastic/eui';
-
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
-export class Table extends PureComponent {
+import { ScriptedFieldItem } from '../../types';
+import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
+
+interface TableProps {
+  indexPattern: IIndexPattern;
+  items: ScriptedFieldItem[];
+  editField: (field: ScriptedFieldItem) => void;
+  deleteField: (field: ScriptedFieldItem) => void;
+}
+
+export class Table extends PureComponent<TableProps> {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     items: PropTypes.array.isRequired,
@@ -32,13 +41,9 @@ export class Table extends PureComponent {
     deleteField: PropTypes.func.isRequired,
   };
 
-  renderFormatCell = value => {
+  renderFormatCell = (value: string) => {
     const { indexPattern } = this.props;
-
-    const title =
-      indexPattern.fieldFormatMap[value] && indexPattern.fieldFormatMap[value].type
-        ? indexPattern.fieldFormatMap[value].type.title
-        : '';
+    const title = get(indexPattern, ['fieldFormatMap', value, 'type', 'title'], '');
 
     return <span>{title}</span>;
   };
@@ -46,7 +51,7 @@ export class Table extends PureComponent {
   render() {
     const { items, editField, deleteField } = this.props;
 
-    const columns = [
+    const columns: Array<EuiBasicTableColumn<ScriptedFieldItem>> = [
       {
         field: 'displayName',
         name: i18n.translate('kbn.management.editIndexPattern.scripted.table.nameHeader', {
@@ -101,6 +106,7 @@ export class Table extends PureComponent {
         name: '',
         actions: [
           {
+            type: 'button',
             name: i18n.translate('kbn.management.editIndexPattern.scripted.table.editHeader', {
               defaultMessage: 'Edit',
             }),
@@ -108,10 +114,11 @@ export class Table extends PureComponent {
               'kbn.management.editIndexPattern.scripted.table.editDescription',
               { defaultMessage: 'Edit this field' }
             ),
-            icon: 'pencil',
+            //  icon: 'pencil',
             onClick: editField,
           },
           {
+            type: 'button',
             name: i18n.translate('kbn.management.editIndexPattern.scripted.table.deleteHeader', {
               defaultMessage: 'Delete',
             }),
@@ -119,7 +126,7 @@ export class Table extends PureComponent {
               'kbn.management.editIndexPattern.scripted.table.deleteDescription',
               { defaultMessage: 'Delete this field' }
             ),
-            icon: 'trash',
+            //  icon: 'trash',
             color: 'danger',
             onClick: deleteField,
           },

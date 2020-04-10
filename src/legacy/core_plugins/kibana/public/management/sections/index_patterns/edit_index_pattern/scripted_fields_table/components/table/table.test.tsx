@@ -19,45 +19,50 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 import { Table } from '../table';
+import { ScriptedFieldItem } from '../../types';
+import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
 
-const indexPattern = {
-  fieldFormatMap: {
-    Elastic: {
-      type: {
-        title: 'string',
-      },
-    },
-  },
-};
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 
-const items = [{ id: 1, name: 'Elastic' }];
+const items: ScriptedFieldItem[] = [{ name: '1', lang: 'Elastic', script: '' }];
 
 describe('Table', () => {
-  it('should render normally', async () => {
-    const component = shallowWithI18nProvider(
+  let indexPattern: IIndexPattern;
+
+  beforeEach(() => {
+    indexPattern = getIndexPatternMock({
+      fieldFormatMap: {
+        Elastic: {
+          type: {
+            title: 'string',
+          },
+        },
+      },
+    });
+  });
+
+  test('should render normally', () => {
+    const component = shallow<Table>(
       <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
         deleteField={() => {}}
-        onChange={() => {}}
       />
     );
 
     expect(component).toMatchSnapshot();
   });
 
-  it('should render the format', async () => {
-    const component = shallowWithI18nProvider(
+  test('should render the format', () => {
+    const component = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
         deleteField={() => {}}
-        onChange={() => {}}
       />
     );
 
@@ -65,16 +70,15 @@ describe('Table', () => {
     expect(formatTableCell).toMatchSnapshot();
   });
 
-  it('should allow edits', () => {
+  test('should allow edits', () => {
     const editField = jest.fn();
 
-    const component = shallowWithI18nProvider(
+    const component = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
         editField={editField}
         deleteField={() => {}}
-        onChange={() => {}}
       />
     );
 
@@ -83,16 +87,15 @@ describe('Table', () => {
     expect(editField).toBeCalled();
   });
 
-  it('should allow deletes', () => {
+  test('should allow deletes', () => {
     const deleteField = jest.fn();
 
-    const component = shallowWithI18nProvider(
+    const component = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
         deleteField={deleteField}
-        onChange={() => {}}
       />
     );
 

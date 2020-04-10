@@ -17,15 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-
-import { Header } from '../header';
-
-describe('Header', () => {
-  it('should render normally', async () => {
-    const component = shallow(<Header addScriptedFieldUrl="" />);
-
-    expect(component).toMatchSnapshot();
-  });
-});
+export { Table } from './table';
+export { Header } from './header';
+export { CallOuts } from './call_outs';
+export { DeleteScritpedFieldConfirmationModal } from './confirmation_modal';

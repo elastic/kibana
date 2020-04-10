@@ -38,16 +38,16 @@ exports[`Table should render normally 1`] = `
         "actions": Array [
           Object {
             "description": "Edit this field",
-            "icon": "pencil",
             "name": "Edit",
             "onClick": [Function],
+            "type": "button",
           },
           Object {
             "color": "danger",
             "description": "Delete this field",
-            "icon": "trash",
             "name": "Delete",
             "onClick": [Function],
+            "type": "button",
           },
         ],
         "name": "",
@@ -58,8 +58,9 @@ exports[`Table should render normally 1`] = `
   items={
     Array [
       Object {
-        "id": 1,
-        "name": "Elastic",
+        "lang": "Elastic",
+        "name": "1",
+        "script": "",
       },
     ]
   }

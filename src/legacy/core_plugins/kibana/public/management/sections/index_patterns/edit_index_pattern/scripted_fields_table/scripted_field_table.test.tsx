@@ -18,9 +18,10 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
+import { IIndexPattern } from '../../../../../../../../../plugins/data/common/index_patterns';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -61,16 +62,22 @@ const helpers = {
   getRouteHref: () => '#',
 };
 
-const indexPattern = {
-  getScriptedFields: () => [
-    { name: 'ScriptedField', lang: 'painless', script: 'x++' },
-    { name: 'JustATest', lang: 'painless', script: 'z++' },
-  ],
-};
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 
 describe('ScriptedFieldsTable', () => {
-  it('should render normally', async () => {
-    const component = shallowWithI18nProvider(
+  let indexPattern: IIndexPattern;
+
+  beforeEach(() => {
+    indexPattern = getIndexPatternMock({
+      getScriptedFields: () => [
+        { name: 'ScriptedField', lang: 'painless', script: 'x++' },
+        { name: 'JustATest', lang: 'painless', script: 'z++' },
+      ],
+    });
+  });
+
+  test('should render normally', async () => {
+    const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable indexPattern={indexPattern} helpers={helpers} />
     );
 
@@ -82,8 +89,8 @@ describe('ScriptedFieldsTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should filter based on the query bar', async () => {
-    const component = shallowWithI18nProvider(
+  test('should filter based on the query bar', async () => {
+    const component = shallow(
       <ScriptedFieldsTable indexPattern={indexPattern} helpers={helpers} />
     );
 
@@ -98,16 +105,16 @@ describe('ScriptedFieldsTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should filter based on the lang filter', async () => {
-    const component = shallowWithI18nProvider(
+  test('should filter based on the lang filter', async () => {
+    const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable
-        indexPattern={{
+        indexPattern={getIndexPatternMock({
           getScriptedFields: () => [
             { name: 'ScriptedField', lang: 'painless', script: 'x++' },
             { name: 'JustATest', lang: 'painless', script: 'z++' },
             { name: 'Bad', lang: 'somethingElse', script: 'z++' },
           ],
-        }}
+        })}
         helpers={helpers}
       />
     );
@@ -123,12 +130,12 @@ describe('ScriptedFieldsTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should hide the table if there are no scripted fields', async () => {
-    const component = shallowWithI18nProvider(
+  test('should hide the table if there are no scripted fields', async () => {
+    const component = shallow(
       <ScriptedFieldsTable
-        indexPattern={{
+        indexPattern={getIndexPatternMock({
           getScriptedFields: () => [],
-        }}
+        })}
         helpers={helpers}
       />
     );
@@ -141,22 +148,22 @@ describe('ScriptedFieldsTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should show a delete modal', async () => {
-    const component = shallowWithI18nProvider(
+  test('should show a delete modal', async () => {
+    const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable indexPattern={indexPattern} helpers={helpers} />
     );
 
     await component.update(); // Fire `componentWillMount()`
-    component.instance().startDeleteField({ name: 'ScriptedField' });
+    component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
     await component.update();
 
     // Ensure the modal is visible
     expect(component).toMatchSnapshot();
   });
 
-  it('should delete a field', async () => {
+  test('should delete a field', async () => {
     const removeScriptedField = jest.fn();
-    const component = shallowWithI18nProvider(
+    const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable
         indexPattern={{
           ...indexPattern,
@@ -167,10 +174,12 @@ describe('ScriptedFieldsTable', () => {
     );
 
     await component.update(); // Fire `componentWillMount()`
-    component.instance().startDeleteField({ name: 'ScriptedField' });
+    component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
+
     await component.update();
     await component.instance().deleteField();
     await component.update();
+
     expect(removeScriptedField).toBeCalled();
   });
 });
