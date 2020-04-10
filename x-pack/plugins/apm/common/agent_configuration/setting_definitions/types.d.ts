@@ -76,7 +76,7 @@ interface FloatSetting extends BaseSetting {
 
 interface SelectSetting extends BaseSetting {
   type: 'select';
-  options: Array<{ text: string }>;
+  options: Array<{ text: string; value: string }>;
 }
 
 interface BooleanSetting extends BaseSetting {
@@ -91,6 +91,7 @@ interface BytesSetting extends BaseSetting {
 interface DurationSetting extends BaseSetting {
   type: 'duration';
   units?: string[];
+  min?: number;
 }
 
 export type RawSettingDefinition =
