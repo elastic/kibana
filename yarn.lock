@@ -1401,10 +1401,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.4.0.tgz#883197b7f4bf3c2dd994f53b274769ddfa2bf79a"
   integrity sha512-uGBKGCNghTgUZPHClji/00v+AKt5nidPTGOIbcT+lbTPVxNB6QPpPLGWtXyrg3QZAxobPM/LAZB1mAqtJeq44Q==
 
-"@elastic/request-crypto@1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.1.2.tgz#2e323550f546f6286994126d462a9ea480a3bfb1"
-  integrity sha512-i73wjj1Qi8dGJIy170Z8xyJ760mFNjTbdmcp/nEczqWD0miNW6I5wZ5MNrv7M6CXn2m1wMXiT6qzDYd93Hv1Dw==
+"@elastic/request-crypto@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.1.4.tgz#2189d5fea65f7afe1de9f5fa3d0dd420e93e3124"
+  integrity sha512-D5CzSGKkM6BdrVB/HRRTheMsNQOcd2FMUup0O/1hIGUBE8zHh2AYbmSNSpD6LyQAgY39mGkARUi/x+SO0ccVvg==
   dependencies:
     "@elastic/node-crypto" "1.1.1"
     "@types/node-jose" "1.1.0"
