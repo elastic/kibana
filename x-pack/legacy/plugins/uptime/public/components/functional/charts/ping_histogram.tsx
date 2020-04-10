@@ -37,6 +37,12 @@ export interface PingHistogramComponentProps {
   loading?: boolean;
 }
 
+interface BarPoint {
+  x?: number;
+  y?: number;
+  type: string;
+}
+
 export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   absoluteStartDate,
   absoluteEndDate,
@@ -65,8 +71,8 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   } else {
     const { histogram } = data;
 
-    const downSpecId = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
-      defaultMessage: 'Down Monitors',
+    const downSpecId = i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
+      defaultMessage: 'Down',
     });
 
     const upMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
@@ -79,6 +85,16 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
         dateRangeEnd: moment(max).toISOString(),
       });
     };
+
+    const barData: BarPoint[] = [];
+
+    histogram.forEach(({ x, upCount, downCount }) => {
+      barData.push(
+        { x, y: downCount ?? 0, type: downSpecId },
+        { x, y: upCount ?? 0, type: upMonitorsId }
+      );
+    });
+
     content = (
       <ChartWrapper
         height={height}
@@ -122,29 +138,18 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
           />
 
           <BarSeries
-            color={danger}
-            data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
+            color={[danger, gray]}
+            data={barData}
             id={downSpecId}
-            name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
-              defaultMessage: 'Down',
+            name={i18n.translate('xpack.uptime.snapshotHistogram.series.pings', {
+              defaultMessage: 'Monitor Pings',
             })}
-            stackAccessors={[0]}
+            stackAccessors={['x']}
+            splitSeriesAccessors={['type']}
             timeZone="local"
-            xAccessor={0}
+            xAccessor="x"
             xScaleType="time"
-            yAccessors={[1]}
-            yScaleType="linear"
-          />
-          <BarSeries
-            color={gray}
-            data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
-            id={upMonitorsId}
-            name={upMonitorsId}
-            stackAccessors={[0]}
-            timeZone="local"
-            xAccessor={0}
-            xScaleType="time"
-            yAccessors={[1]}
+            yAccessors={['y']}
             yScaleType="linear"
           />
         </Chart>

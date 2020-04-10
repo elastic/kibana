@@ -15,18 +15,20 @@
 /src/legacy/core_plugins/metrics/ @elastic/kibana-app
 /src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
 /src/legacy/core_plugins/vis_type_xy/ @elastic/kibana-app
-# Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
-/src/plugins/home/public @elastic/kibana-app
-/src/plugins/home/server/*.ts @elastic/kibana-app
-/src/plugins/home/server/services/ @elastic/kibana-app
-# Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
-/src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/home/*.scss @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
-/src/plugins/dev_tools/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
+/src/plugins/discover/ @elastic/kibana-app
+
+# Core UI
+# Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
+/src/plugins/home/public @elastic/kibana-core-ui
+/src/plugins/home/server/*.ts @elastic/kibana-core-ui
+/src/plugins/home/server/services/ @elastic/kibana-core-ui
+# Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
+/src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-core-ui
+/src/legacy/core_plugins/kibana/public/home/*.scss @elastic/kibana-core-ui
+/src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-core-ui
 
 # App Architecture
 /examples/url_generators_examples/ @elastic/kibana-app-arch
@@ -85,9 +87,8 @@
 /x-pack/test/functional/apps/machine_learning/  @elastic/ml-ui
 /x-pack/test/functional/services/machine_learning/  @elastic/ml-ui
 /x-pack/test/functional/services/ml.ts  @elastic/ml-ui
-# ML team owns the transform plugin, ES team added here for visibility
-# because the plugin lives in Kibana's Elasticsearch management section.
-/x-pack/plugins/transform/  @elastic/ml-ui @elastic/es-ui
+# ML team owns and maintains the transform plugin despite it living in the Elasticsearch management section.
+/x-pack/plugins/transform/  @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/transform_ui/ @elastic/ml-ui
 /x-pack/test/functional/services/transform.ts @elastic/ml-ui
@@ -175,10 +176,11 @@
 **/*.scss  @elastic/kibana-design
 
 # Elasticsearch UI
+/src/plugins/dev_tools/ @elastic/es-ui
 /src/plugins/console/  @elastic/es-ui
 /src/plugins/es_ui_shared/  @elastic/es-ui
 /x-pack/legacy/plugins/cross_cluster_replication/  @elastic/es-ui
-/x-pack/legacy/plugins/index_lifecycle_management/  @elastic/es-ui
+/x-pack/plugins/index_lifecycle_management/  @elastic/es-ui
 /x-pack/legacy/plugins/index_management/  @elastic/es-ui
 /x-pack/legacy/plugins/license_management/  @elastic/es-ui
 /x-pack/legacy/plugins/rollup/  @elastic/es-ui
@@ -200,7 +202,8 @@
 # Endpoint
 /x-pack/plugins/endpoint/ @elastic/endpoint-app-team
 /x-pack/test/api_integration/apis/endpoint/ @elastic/endpoint-app-team
-/x-pack/test/functional/apps/endpoint/ @elastic/endpoint-app-team
+/x-pack/test/functional_endpoint/ @elastic/endpoint-app-team
+/x-pack/test/functional_endpoint_ingest_failure/ @elastic/endpoint-app-team
 /x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team
 
 # SIEM

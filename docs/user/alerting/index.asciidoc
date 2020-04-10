@@ -163,7 +163,8 @@ If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-w
 [[alerting-security]]
 == Security
 
-To access alerting in a space, a user must have access to one of the following features: 
+To access alerting in a space, a user must have access to one of the following features:
+
 * <<xpack-apm,*APM*>>
 * <<xpack-infra,*Metrics*>>
 * <<xpack-siem,*SIEM*>>
