@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { VisTypeVislibPlugin as Plugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
-
-export * from './types';
+export { BasicOptions } from './basic_options';
+export { ColorModes, Rotates } from './collections';
+export { ColorRanges, SetColorRangeValue } from './color_ranges';
+export { ColorSchemaOptions, SetColorSchemaOptionsValue } from './color_schema';
+export { ColorSchemaParams, Labels, Style } from './types';
+export { NumberInputOption } from './number_input';
+export { RangeOption } from './range';
+export { RequiredNumberInputOption } from './required_number_input';
+export { SelectOption } from './select';
+export { SwitchOption } from './switch';
+export { TextInputOption } from './text_input';
