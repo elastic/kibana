@@ -244,6 +244,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'logging_1',
@@ -314,6 +315,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'index_1',
@@ -376,6 +378,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'slack_1',
@@ -448,6 +451,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'email_1',
@@ -540,6 +544,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'webhook_1',
@@ -629,6 +634,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'jira_1',
@@ -709,6 +715,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'pagerduty_1',
@@ -772,6 +779,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [],
             index: MATCH_INDICES,
             timeField: WATCH_TIME_FIELD,
