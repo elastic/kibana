@@ -8,8 +8,12 @@ import { schema } from '@kbn/config-schema';
 import { isFunction } from 'lodash';
 import {
   ALERT_TYPE_LICENSE_EXPIRATION,
+  ALERT_TYPE_CLUSTER_STATE,
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
+  ALERT_TYPES,
 } from '../../../../../common/constants';
+import { handleError } from '../../../../lib/errors';
+import { fetchStatus } from '../../../../lib/alerts/fetch_status';
 
 async function createAlerts(req, alertsClient, { selectedEmailActionId }) {
   const createdAlerts = [];
@@ -17,7 +21,21 @@ async function createAlerts(req, alertsClient, { selectedEmailActionId }) {
   // Create alerts
   const ALERT_TYPES = {
     [ALERT_TYPE_LICENSE_EXPIRATION]: {
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
+      actions: [
+        {
+          group: 'default',
+          id: selectedEmailActionId,
+          params: {
+            subject: '{{context.subject}}',
+            message: `{{context.message}}`,
+            to: ['{{context.to}}'],
+          },
+        },
+      ],
+    },
+    [ALERT_TYPE_CLUSTER_STATE]: {
+      schedule: { interval: '1m' },
       actions: [
         {
           group: 'default',
@@ -84,6 +102,39 @@ export function createKibanaAlertsRoute(server) {
       ]);
 
       return { alerts, emailResponse };
+    },
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/monitoring/v1/alert_status',
+    config: {
+      validate: {
+        payload: schema.object({
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+        }),
+      },
+    },
+    async handler(req, headers) {
+      const alertsClient = isFunction(req.getAlertsClient) ? req.getAlertsClient() : null;
+      if (!alertsClient) {
+        return headers.response().code(404);
+      }
+
+      const start = req.payload.timeRange.min;
+      const end = req.payload.timeRange.max;
+      let alerts;
+
+      try {
+        alerts = await fetchStatus(alertsClient, ALERT_TYPES, start, end, req.logger);
+      } catch (err) {
+        throw handleError(err, req);
+      }
+
+      return { alerts };
     },
   });
 }

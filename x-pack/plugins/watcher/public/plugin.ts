@@ -7,18 +7,19 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart } from 'kibana/public';
 import { first, map, skip } from 'rxjs/operators';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { search } from '../../../../src/plugins/data/public';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 
 import { LicenseStatus } from '../common/types/license_status';
-import { ILicense, LICENSE_CHECK_STATE } from '../../licensing/public';
+
+import { ILicense } from '../../licensing/public';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
 
 const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
   const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
   return {
-    valid: state === LICENSE_CHECK_STATE.Valid && license.getFeature(PLUGIN.ID).isAvailable,
+    valid: state === 'valid' && license.getFeature(PLUGIN.ID).isAvailable,
     message,
   };
 };
@@ -26,7 +27,7 @@ const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
 export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
   setup(
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
-    { licensing, management, home, charts }: Dependencies
+    { licensing, management, data, home, charts }: Dependencies
   ) {
     const esSection = management.sections.getSection('elasticsearch');
 
@@ -54,7 +55,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           theme: charts.theme,
           savedObjects: savedObjects.client,
           I18nContext: i18nDep.Context,
-          createTimeBuckets: () => new search.aggs.TimeBuckets({ uiSettings }),
+          createTimeBuckets: () => new search.aggs.TimeBuckets(uiSettings, data),
         });
       },
     });

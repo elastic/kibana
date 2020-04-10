@@ -64,7 +64,7 @@ export const getActionsStepsData = (
     actions: actions?.map(transformRuleToAlertAction),
     isNew: false,
     throttle,
-    kibanaSiemAppUrl: meta?.kibanaSiemAppUrl,
+    kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,
   };
 };
@@ -267,3 +267,7 @@ export const getActionMessageParams = memoizeOne((ruleType: RuleType | undefined
     ...actionMessageRuleParams.map(param => `context.rule.${param}`),
   ];
 });
+
+// typed as null not undefined as the initial state for this value is null.
+export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>
+  canUserCRUD != null ? !canUserCRUD : false;

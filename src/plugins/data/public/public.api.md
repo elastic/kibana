@@ -12,8 +12,8 @@ import { Assign } from '@kbn/utility-types';
 import { Breadcrumb } from '@elastic/eui';
 import { Component } from 'react';
 import { CoreSetup } from 'src/core/public';
-import { CoreStart } from 'kibana/public';
-import { CoreStart as CoreStart_2 } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
+import { CoreStart as CoreStart_2 } from 'kibana/public';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -45,6 +45,7 @@ import * as React_2 from 'react';
 import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
 import { SavedObject as SavedObject_2 } from 'src/core/public';
+import { SavedObjectReference } from 'kibana/public';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { SearchParams } from 'elasticsearch';
 import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
@@ -208,6 +209,9 @@ export const connectToQueryState: <S extends QueryState>({ timefilter: { timefil
 //
 // @public (undocumented)
 export const createSavedQueryService: (savedObjectsClient: Pick<import("../../../../../core/public").SavedObjectsClient, "update" | "find" | "get" | "delete" | "create" | "bulkCreate" | "bulkGet" | "bulkUpdate">) => SavedQueryService;
+
+// @public
+export const createSearchSource: (indexPatterns: Pick<import("../../index_patterns/index_patterns").IndexPatternsService, "get" | "clearCache" | "getFieldsForTimePattern" | "getFieldsForWildcard" | "getIds" | "getTitles" | "getFields" | "getCache" | "getDefault" | "make">) => (searchSourceJson: string, references: SavedObjectReference[]) => Promise<SearchSource>;
 
 // Warning: (ae-missing-release-tag) "CustomFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -632,21 +636,21 @@ export type IAggType = AggType;
 // Warning: (ae-missing-release-tag) "IDataPluginServices" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IDataPluginServices extends Partial<CoreStart_2> {
+export interface IDataPluginServices extends Partial<CoreStart> {
     // (undocumented)
     appName: string;
     // (undocumented)
     data: DataPublicPluginStart;
     // (undocumented)
-    http: CoreStart_2['http'];
+    http: CoreStart['http'];
     // (undocumented)
-    notifications: CoreStart_2['notifications'];
+    notifications: CoreStart['notifications'];
     // (undocumented)
-    savedObjects: CoreStart_2['savedObjects'];
+    savedObjects: CoreStart['savedObjects'];
     // (undocumented)
     storage: IStorageWrapper;
     // (undocumented)
-    uiSettings: CoreStart_2['uiSettings'];
+    uiSettings: CoreStart['uiSettings'];
 }
 
 // Warning: (ae-missing-release-tag) "IEsSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1094,7 +1098,7 @@ export type ISearch<T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY> =
 // @public (undocumented)
 export interface ISearchContext {
     // (undocumented)
-    core: CoreStart;
+    core: CoreStart_2;
     // (undocumented)
     getSearchStrategy: <T extends TStrategyTypes>(name: T) => TSearchStrategyProvider<T>;
 }
@@ -1307,7 +1311,7 @@ export class Plugin implements Plugin_2<DataPublicPluginSetup, DataPublicPluginS
     // Warning: (ae-forgotten-export) The symbol "DataStartDependencies" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    start(core: CoreStart_2, { uiActions }: DataStartDependencies): DataPublicPluginStart;
+    start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart;
     // (undocumented)
     stop(): void;
     }
@@ -1533,7 +1537,7 @@ export const search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("./search/aggs/buckets/_bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("./search/aggs/buckets/bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
         } | {
             display: string;
             val: string;
@@ -1668,6 +1672,10 @@ export class SearchSource {
     // (undocumented)
     history: SearchRequest[];
     onRequestStart(handler: (searchSource: ISearchSource, options?: FetchOptions) => Promise<unknown>): void;
+    serialize(): {
+        searchSourceJSON: string;
+        references: SavedObjectReference[];
+    };
     // (undocumented)
     setField<K extends keyof SearchSourceFields>(field: K, value: SearchSourceFields[K]): this;
     // (undocumented)

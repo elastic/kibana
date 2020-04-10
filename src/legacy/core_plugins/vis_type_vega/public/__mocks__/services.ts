@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/common';
+import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { IUiSettingsClient, NotificationsStart, SavedObjectsStart } from 'kibana/public';
 import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
