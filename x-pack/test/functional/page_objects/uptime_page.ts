@@ -101,6 +101,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       alertTags,
       alertThrottleInterval,
       alertTimerangeSelection,
+      alertType,
       filters,
     }: {
       alertName: string;
@@ -109,11 +110,14 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       alertThrottleInterval: string;
       alertNumTimes: string;
       alertTimerangeSelection: string;
+      alertType?: string;
       filters?: string;
     }) {
       const { setKueryBarText } = commonService;
       await alerts.openFlyout();
-      await alerts.openMonitorStatusAlertType();
+      if (alertType) {
+        await alerts.openMonitorStatusAlertType(alertType);
+      }
       await alerts.setAlertName(alertName);
       await alerts.setAlertTags(alertTags);
       await alerts.setAlertInterval(alertInterval);
