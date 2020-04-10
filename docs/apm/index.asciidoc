@@ -13,20 +13,23 @@ detailed performance information on your services,
 identify and analyzing errors,
 and monitor host-level and agent-specific metrics like JVM and Go runtime metrics.
 
-* <<apm-getting-started>>
-* <<apm-ui>>
-* <<apm-how-to>>
-* <<apm-settings-in-kibana>>
-* <<apm-api>>
-* <<troubleshooting>>
+[float]
+[[apm-bottlenecks]]
+== Visualizing application bottlenecks
 
-TIP: Want to learn more about the Elastic APM ecosystem?
-See the {apm-get-started-ref}/overview.html[APM Overview].
+Having access to application-level insights with just a few clicks can drastically decrease the time you spend debugging errors, slow response times, and crashes.
+
+For example, you can see information about response times, requests per minute, and status codes per endpoint.
+You can even dive into a specific request sample and get a complete waterfall view of what your application is spending its time on.
+You might see that your bottlenecks are in database queries, cache calls, or external requests.
+For each incoming request and each application error,
+you can also see contextual information such as the request header, user information,
+system values, or custom data that you manually attached to the request.
 --
 
-include::getting-started.asciidoc[]
+include::set-up.asciidoc[]
 
-include::using-the-apm-ui.asciidoc[]
+include::getting-started.asciidoc[]
 
 include::how-to-guides.asciidoc[]
 

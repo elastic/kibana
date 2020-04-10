@@ -6,30 +6,40 @@
 <titleabbrev>Get started</titleabbrev>
 ++++
 
-APM is available via the navigation sidebar in {Kib}.
-If you have not already installed and configured Elastic APM,
-the *Setup Instructions* in Kibana will get you started.
+Elastic APM captures different types of information from within instrumented applications:
 
-[role="screenshot"]
-image::apm/images/apm-setup.png[Installation instructions on the APM page in Kibana]
+* *Spans* contain information about a specific code path that has been executed.
+They measure from the start to end of an activity,
+and they can have a parent/child relationship with other spans.
+* *Transactions* are a special kind of span that have extra metadata associated with them.
+You can think of transactions as the highest level of work you’re measuring within a service.
+As an example, a transaction could be a request to your server, a batch job, or a custom transaction type.
+* *Errors* contain information about the original exception that occurred or about a log created when the exception occurred.
 
-[float]
-[[apm-configure-index-pattern]]
-=== Load the index pattern
+TIP: Want to learn more about the Elastic APM ecosystem?
+See the {apm-get-started-ref}/overview.html[APM Overview].
 
-Index patterns tell Kibana which Elasticsearch indices you want to explore.
-An APM index pattern is necessary for certain features in the APM app, like the query bar.
-To set up the correct index pattern,
-simply click *Load Kibana objects* at the bottom of the Setup Instructions.
+Each of these information types have a specific page associated with them in the APM app.
+These various pages display the captured data in curated charts and tables that allow you to easily compare and debug your applications.
 
-[role="screenshot"]
-image::apm/images/apm-index-pattern.png[Setup index pattern for APM in Kibana]
+* <<services>>
+* <<traces>>
+* <<transactions>>
+* <<spans>>
+* <<errors>>
+* <<metrics>>
+* <<service-maps>>
 
-To use a custom index pattern, see <<apm-settings-in-kibana>>.
+include::services.asciidoc[]
 
-[float]
-[[apm-getting-started-next]]
-=== Next steps
+include::traces.asciidoc[]
 
-No further configuration in the APM app is required.
-Install an APM Agent library in your service to begin visualizing and analyzing your data!
+include::transactions.asciidoc[]
+
+include::spans.asciidoc[]
+
+include::errors.asciidoc[]
+
+include::metrics.asciidoc[]
+
+include::service-maps.asciidoc[]
