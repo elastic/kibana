@@ -50,6 +50,7 @@ Object {
     "timeouts": Object {
       "openUrl": 30000,
       "renderComplete": 30000,
+      "timeBeforeTimeoutBreachHandler": 10000,
       "waitForElements": 30000,
     },
     "viewport": Object {
@@ -147,6 +148,7 @@ Object {
     "timeouts": Object {
       "openUrl": 30000,
       "renderComplete": 30000,
+      "timeBeforeTimeoutBreachHandler": 10000,
       "waitForElements": 30000,
     },
     "viewport": Object {
@@ -243,6 +245,7 @@ Object {
     "timeouts": Object {
       "openUrl": 30000,
       "renderComplete": 30000,
+      "timeBeforeTimeoutBreachHandler": 10000,
       "waitForElements": 30000,
     },
     "viewport": Object {
@@ -340,6 +343,7 @@ Object {
     "timeouts": Object {
       "openUrl": 30000,
       "renderComplete": 30000,
+      "timeBeforeTimeoutBreachHandler": 10000,
       "waitForElements": 30000,
     },
     "viewport": Object {

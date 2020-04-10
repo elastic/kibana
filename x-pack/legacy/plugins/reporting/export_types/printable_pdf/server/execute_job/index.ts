@@ -6,7 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, take } from 'rxjs/operators';
-import { PDF_JOB_TYPE, PDF_JOB_BREACH_TIME } from '../../../../common/constants';
+import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput, Logger } from '../../../../types';
 import {
@@ -36,7 +36,11 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
     const generatePdfObservable = generatePdfObservableFactory(captureConfig, browserDriverFactory);
 
     const jobLogger = logger.clone([jobId]);
-    const timeout = config.get('queue', 'timeout') - PDF_JOB_BREACH_TIME;
+    const timeout =
+      config.get('queue', 'timeout') -
+      config.get('capture', 'timeouts', 'timeBeforeTimeoutBreachHandler');
+
+    let timeoutId: NodeJS.Timeout;
 
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
@@ -69,25 +73,33 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
       })
     );
 
-    const timeout$ = Rx.fromEventPattern(resolve => {
-      setTimeout(async () => {
-        jobLogger.warn('PDF export timeout breach, attempting to capture page screenshot');
-        return browserDriverFactory
-          .screenshotPage()
-          .then(lastScreen => {
-            resolve({
-              content_type: 'image/jpeg',
-              content: lastScreen.toString('base64'),
-              size: lastScreen.byteLength,
-              warnings: ['PDF export timed out, debug screenshot captured'],
+    const timeout$ = Rx.fromEventPattern(
+      resolve => {
+        timeoutId = setTimeout(async () => {
+          jobLogger.warn('PDF export timeout breach, attempting to capture page screenshot');
+          return browserDriverFactory
+            .screenshotPage()
+            .then(lastScreen => {
+              resolve({
+                content_type: 'image/jpeg',
+                content: lastScreen.toString('base64'),
+                size: lastScreen.byteLength,
+                warnings: ['PDF export timed out, debug screenshot captured'],
+              });
+            })
+            .catch((err: Error) => {
+              jobLogger.error(err);
+              return Rx.throwError(err);
             });
-          })
-          .catch((err: Error) => {
-            jobLogger.error(err);
-            return Rx.throwError(err);
-          });
-      }, timeout);
-    });
+        }, timeout);
+      },
+      () => {
+        jobLogger.info('clearing timeout-breach handler');
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      }
+    );
 
     return Rx.race(process$, timeout$)
       .pipe(take(1))

@@ -83,6 +83,7 @@ interface CaptureConfig {
     openUrl: number;
     waitForElements: number;
     renderComplete: number;
+    timeBeforeTimeoutBreachHandler: number;
   };
   viewport: any;
   zoom: any;

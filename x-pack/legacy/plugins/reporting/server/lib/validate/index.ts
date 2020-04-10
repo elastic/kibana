@@ -11,6 +11,7 @@ import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_fa
 import { ReportingConfig } from '../../types';
 import { validateBrowser } from './validate_browser';
 import { validateMaxContentLength } from './validate_max_content_length';
+import { validateTimeoutHandlers } from './validate_timeout_handlers';
 
 export async function runValidations(
   config: ReportingConfig,
@@ -22,6 +23,7 @@ export async function runValidations(
     await Promise.all([
       validateBrowser(browserFactory, logger),
       validateMaxContentLength(config, elasticsearch, logger),
+      validateTimeoutHandlers(config),
     ]);
     logger.debug(
       i18n.translate('xpack.reporting.selfCheck.ok', {

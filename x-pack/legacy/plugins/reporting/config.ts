@@ -41,6 +41,9 @@ export async function config(Joi: any) {
         renderComplete: Joi.number()
           .integer()
           .default(30000),
+        timeBeforeTimeoutBreachHandler: Joi.number()
+          .integer()
+          .default(10000),
       }).default(),
       networkPolicy: Joi.object({
         enabled: Joi.boolean().default(true),
