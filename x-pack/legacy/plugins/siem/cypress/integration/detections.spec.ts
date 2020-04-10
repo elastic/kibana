@@ -23,7 +23,7 @@ import {
   waitForSignals,
   waitForSignalsToBeLoaded,
 } from '../tasks/detections';
-import { esArchiverLoad } from '../tasks/es_archiver';
+import { archiverLoad } from '../tasks/archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
@@ -31,7 +31,7 @@ import { DETECTIONS } from '../urls/navigation';
 describe('Detections', () => {
   context('Closing signals', () => {
     beforeEach(() => {
-      esArchiverLoad('signals');
+      archiverLoad('signals');
       loginAndWaitForPage(DETECTIONS);
     });
 
@@ -163,7 +163,7 @@ describe('Detections', () => {
   });
   context('Opening signals', () => {
     beforeEach(() => {
-      esArchiverLoad('closed_signals');
+      archiverLoad('closed_signals');
       loginAndWaitForPage(DETECTIONS);
     });
 

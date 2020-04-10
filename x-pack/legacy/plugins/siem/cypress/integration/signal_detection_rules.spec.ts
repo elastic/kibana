@@ -12,7 +12,7 @@ import {
 } from '../screens/signal_detection_rules';
 
 import { goToManageSignalDetectionRules } from '../tasks/detections';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { archiverLoad, archiverUnload } from '../tasks/archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import {
   activateRule,
@@ -25,11 +25,11 @@ import { DETECTIONS } from '../urls/navigation';
 
 describe('Signal detection rules', () => {
   before(() => {
-    esArchiverLoad('prebuilt_rules_loaded');
+    archiverLoad('prebuilt_rules_loaded');
   });
 
   after(() => {
-    esArchiverUnload('prebuilt_rules_loaded');
+    archiverUnload('prebuilt_rules_loaded');
   });
 
   it.skip('Sorts by activated rules', () => {

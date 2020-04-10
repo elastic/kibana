@@ -12,19 +12,19 @@ import {
   investigateFirstSignalInTimeline,
   waitForSignalsPanelToBeLoaded,
 } from '../tasks/detections';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { archiverLoad, archiverUnload } from '../tasks/archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
 describe('Detections timeline', () => {
   beforeEach(() => {
-    esArchiverLoad('timeline_signals');
+    archiverLoad('timeline_signals');
     loginAndWaitForPage(DETECTIONS);
   });
 
   afterEach(() => {
-    esArchiverUnload('timeline_signals');
+    archiverUnload('timeline_signals');
   });
 
   it('Investigate signal in default timeline', () => {

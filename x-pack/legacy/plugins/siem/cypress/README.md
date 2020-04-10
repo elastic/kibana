@@ -130,14 +130,14 @@ yarn cypress:run-as-ci
 
 Note that with this type of execution you don't need to have running a kibana and elasticsearch instance. This is because
  the command, as it would happen in the CI, will launch the instances. The elasticsearch instance will be fed with the data 
- placed in: `x-pack/test/siem_cypress/es_archives`
+ placed in: `x-pack/test/siem_cypress/archives`
  
 As in this case we want to mimic a CI execution we want to execute the tests with the same set of data, this is why 
 in this case does not make sense to override Cypress environment variables. 
 
 ### Test data
 
-As said before when running the tests as Jenkins the tests are fed with the data placed in: `x-pack/test/siem_cypress/es_archives`.
+As said before when running the tests as Jenkins the tests are fed with the data placed in: `x-pack/test/siem_cypress/archives`.
 
 Currently there are two different ways of feeding data:
 1. By default
@@ -156,7 +156,7 @@ In that case in the hooks of the test use the function `esArchiverLoad` to load 
 Example:
 
 ```typescript
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/archiver';
 
 describe('This are going to be a set of tests', () => {
   before(() => {
@@ -178,7 +178,7 @@ Note that loading and unloading data takes a signifcant amount of time so try to
 
 ### Current sets of data
 
-The current sets of data can be found in: `x-pack/test/siem_cypress/es_archives` folder.
+The current sets of data can be found in: `x-pack/test/siem_cypress/archives` folder.
 
 - auditbeat
   - Auditbeat data generated in Sep, 2019 with the following hosts present: 
@@ -199,19 +199,19 @@ The current sets of data can be found in: `x-pack/test/siem_cypress/es_archives`
 
 ### How to generate new test data
 
-We are using es_archiver in order to generate the data that our Cypress tests needs.
+We are using archiver in order to generate the data that our Cypress tests needs.
 
 1. Setup if possible a clean instance of kibana and elasticsearch (if not, possible please try to clean the data that you are going to generate).
 2. With the kibana and elasticsearch instance up and running, create the data that you need for your test.
 3. When you are sure that you have all the data you need run the following command from: `x-pack/legacy/plugins/siem`
 
 ```sh 
-node ../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../../test/siem_cypress/es_archives --config ../../../../test/functional/config.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+node ../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../../test/siem_cypress/archives --config ../../../../test/functional/config.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
 ```
 
 Example: 
 ```sh
-node ../../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../../test/siem_cypress/es_archives --config ../../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9220
+node ../../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../../test/siem_cypress/archives --config ../../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9220
 ```
 
 Note that the command is going to create the folder if does not exist in the directory with the imported data.

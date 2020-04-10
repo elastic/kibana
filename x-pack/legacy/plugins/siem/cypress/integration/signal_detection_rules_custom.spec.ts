@@ -59,18 +59,18 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/signal_detection_rules';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { archiverLoad, archiverUnload } from '../tasks/archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
 describe('Signal detection rules, custom', () => {
   before(() => {
-    esArchiverLoad('prebuilt_rules_loaded');
+    archiverLoad('prebuilt_rules_loaded');
   });
 
   after(() => {
-    esArchiverUnload('prebuilt_rules_loaded');
+    archiverUnload('prebuilt_rules_loaded');
   });
 
   it('Creates and activates a new custom rule', () => {
@@ -210,7 +210,7 @@ describe('Signal detection rules, custom', () => {
 
 describe('Deletes custom rules', () => {
   beforeEach(() => {
-    esArchiverLoad('custom_rules');
+    archiverLoad('custom_rules');
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
     waitForSignalsPanelToBeLoaded();
     waitForSignalsIndexToBeCreated();
@@ -218,7 +218,7 @@ describe('Deletes custom rules', () => {
   });
 
   after(() => {
-    esArchiverUnload('custom_rules');
+    archiverUnload('custom_rules');
   });
 
   it('Deletes one rule', () => {

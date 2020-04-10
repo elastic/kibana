@@ -26,7 +26,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     testRunner: SiemCypressTestRunner,
 
     esArchiver: {
-      directory: resolve(__dirname, 'es_archives'),
+      directory: resolve(__dirname, 'archives'),
     },
 
     esTestCluster: {
