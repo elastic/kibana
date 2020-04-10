@@ -88,7 +88,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
                     <EuiDescriptionListTitle>
                       <FormattedMessage
                         id="xpack.ingestManager.createDatasource.packageNameLabel"
-                        defaultMessage="Package"
+                        defaultMessage="Integration"
                       />
                     </EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
