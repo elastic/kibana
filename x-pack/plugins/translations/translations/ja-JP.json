@@ -138,7 +138,6 @@
     "charts.controls.rangeErrorMessage": "値は {min} と {max} の間でなければなりません",
     "charts.controls.vislibBasicOptions.legendPositionLabel": "凡例位置",
     "charts.controls.vislibBasicOptions.showTooltipLabel": "ツールヒントを表示",
-    "common.ui.aggResponse.allDocsTitle": "すべてのドキュメント",
     "common.ui.errorAutoCreateIndex.breadcrumbs.errorText": "エラー",
     "common.ui.errorAutoCreateIndex.errorDescription": "Elasticsearch クラスターの {autoCreateIndexActionConfig} 設定が原因で、Kibana が保存されたオブジェクトを格納するインデックスを自動的に作成できないようです。Kibana は、保存されたオブジェクトインデックスが適切なマッピング/スキーマを使用し Kibana から Elasticsearch へのポーリングの回数を減らすための最適な手段であるため、この Elasticsearch の機能を使用します。",
     "common.ui.errorAutoCreateIndex.errorDisclaimer": "申し訳ございませんが、この問題が解決されるまで Kibana で何も保存することができません。",
