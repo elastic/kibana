@@ -24,6 +24,7 @@ import {
   EuiToolTip,
   EuiIconTip,
   EuiLink,
+  EuiCallOut,
 } from '@elastic/eui';
 import { HttpSetup, ToastsApi } from 'kibana/public';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
@@ -88,6 +89,7 @@ export const ActionForm = ({
   const [isLoadingConnectors, setIsLoadingConnectors] = useState<boolean>(false);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
+  const [emptyActionsIds, setEmptyActionsIds] = useState<string[]>([]);
 
   // load action types
   useEffect(() => {
@@ -382,13 +384,25 @@ export const ActionForm = ({
       >
         <EuiEmptyPrompt
           title={
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
-              defaultMessage="No {actionTypeName} connectors."
-              values={{
-                actionTypeName,
-              }}
-            />
+            emptyActionsIds.find((emptyId: string) => actionItem.id === emptyId) ? (
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
+                defaultMessage="No {actionTypeName} connectors."
+                values={{
+                  actionTypeName,
+                }}
+              />
+            ) : (
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle',
+                  {
+                    defaultMessage: 'Unable to load connector.',
+                  }
+                )}
+                color="warning"
+              />
+            )
           }
           actions={[
             <EuiButton
@@ -443,6 +457,7 @@ export const ActionForm = ({
         params: {},
       });
       setActionIdByIndex(actions.length.toString(), actions.length - 1);
+      setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
     }
   }
 
