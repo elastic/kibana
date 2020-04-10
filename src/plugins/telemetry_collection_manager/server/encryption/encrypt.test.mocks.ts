@@ -17,16 +17,11 @@
  * under the License.
  */
 
-import { createRequestEncryptor } from '@elastic/request-crypto';
-import { telemetryJWKS } from './telemetry_jwks';
+export const mockEncrypt = jest.fn();
+export const createRequestEncryptor = jest.fn().mockResolvedValue({
+  encrypt: mockEncrypt,
+});
 
-export function getKID(isProd = false): string {
-  return isProd ? 'kibana' : 'kibana_dev';
-}
-
-export async function encryptTelemetry(payload: any, { isProd = false } = {}): Promise<string[]> {
-  const kid = getKID(isProd);
-  const encryptor = await createRequestEncryptor(telemetryJWKS);
-  const clusters = [].concat(payload);
-  return Promise.all(clusters.map((cluster: any) => encryptor.encrypt(kid, cluster)));
-}
+jest.doMock('@elastic/request-crypto', () => ({
+  createRequestEncryptor,
+}));
