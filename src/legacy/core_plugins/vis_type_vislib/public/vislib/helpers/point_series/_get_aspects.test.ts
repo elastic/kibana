@@ -17,37 +17,37 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { getAspects } from '../_get_aspects';
+import { getAspects } from './_get_aspects';
+import { Dimension, Dimensions, Aspect } from './point_series';
+import { Table, Row } from '../../types';
 
 describe('getAspects', function() {
-  let table;
-  let dimensions;
+  let table: Table;
+  let dimensions: Dimensions;
 
-  function validate(aspect, i) {
-    expect(aspect)
-      .to.be.an('object')
-      .and.have.property('accessor', i);
+  function validate(aspect: Aspect, i: string) {
+    expect(aspect).toEqual(expect.any(Object));
+    expect(aspect).toHaveProperty('accessor', i);
   }
 
-  function init(group, x, y) {
+  function init(group: number, x: number | null, y: number) {
     table = {
       columns: [
-        { id: '0', title: 'date' }, // date
-        { id: '1', title: 'date utc_time' }, // date
-        { id: '2', title: 'ext' }, // extension
-        { id: '3', title: 'geo.src' }, // extension
-        { id: '4', title: 'count' }, // count
-        { id: '5', title: 'avg bytes' }, // avg
+        { id: '0', name: 'date' }, // date
+        { id: '1', name: 'date utc_time' }, // date
+        { id: '2', name: 'ext' }, // extension
+        { id: '3', name: 'geo.src' }, // extension
+        { id: '4', name: 'count' }, // count
+        { id: '5', name: 'avg bytes' }, // avg
       ],
-      rows: [],
-    };
+      rows: [] as Row[],
+    } as Table;
 
     dimensions = {
-      x: { accessor: x },
-      y: { accessor: y },
-      series: { accessor: group },
-    };
+      x: { accessor: x } as Dimension,
+      y: [{ accessor: y } as Dimension],
+      series: [{ accessor: group } as Dimension],
+    } as Dimensions;
   }
 
   it('produces an aspect object for each of the aspect types found in the columns', function() {
@@ -55,8 +55,8 @@ describe('getAspects', function() {
 
     const aspects = getAspects(table, dimensions);
     validate(aspects.x[0], '0');
-    validate(aspects.series[0], '1');
-    validate(aspects.y[0], '2');
+    validate(aspects.series![0], '1');
+    validate(aspects.y![0], '2');
   });
 
   it('creates a fake x aspect if the column does not exist', function() {
@@ -64,9 +64,8 @@ describe('getAspects', function() {
 
     const aspects = getAspects(table, dimensions);
 
-    expect(aspects.x[0])
-      .to.be.an('object')
-      .and.have.property('accessor', -1)
-      .and.have.property('title');
+    expect(aspects.x[0]).toEqual(expect.any(Object));
+    expect(aspects.x[0]).toHaveProperty('accessor', -1);
+    expect(aspects.x[0]).toHaveProperty('title');
   });
 });

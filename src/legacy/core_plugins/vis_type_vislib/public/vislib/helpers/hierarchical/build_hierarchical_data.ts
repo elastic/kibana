@@ -18,11 +18,41 @@
  */
 
 import { toArray } from 'lodash';
-import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { SerializedFieldFormat } from '../../../../../../../plugins/expressions/common/types';
+import { getFormatService } from '../../../services';
+import { Table } from '../../types';
 
-export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
-  let slices;
-  const names = {};
+export interface Dimension {
+  accessor: number;
+  format: {
+    id?: string;
+    params?: SerializedFieldFormat<object>;
+  };
+}
+
+export interface Dimensions {
+  metric: Dimension;
+  buckets?: Dimension[];
+  splitRow?: Dimension[];
+  splitColumn?: Dimension[];
+}
+
+interface Slice {
+  name: string;
+  size: number;
+  parent?: Slice;
+  children?: [];
+  rawData?: {
+    table: Table;
+    row: number;
+    column: number;
+    value: string | number | object;
+  };
+}
+
+export const buildHierarchicalData = (table: Table, { metric, buckets = [] }: Dimensions) => {
+  let slices: Slice[];
+  const names: { [key: string]: string } = {};
   const metricColumn = table.columns[metric.accessor];
   const metricFieldFormatter = metric.format;
 
@@ -30,25 +60,25 @@ export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
     slices = [
       {
         name: metricColumn.name,
-        size: table.rows[0][metricColumn.id],
+        size: table.rows[0][metricColumn.id] as number,
       },
     ];
     names[metricColumn.name] = metricColumn.name;
   } else {
     slices = [];
     table.rows.forEach((row, rowIndex) => {
-      let parent;
+      let parent: Slice;
       let dataLevel = slices;
 
       buckets.forEach(bucket => {
         const bucketColumn = table.columns[bucket.accessor];
         const bucketValueColumn = table.columns[bucket.accessor + 1];
-        const bucketFormatter = getFormat(bucket.format);
+        const bucketFormatter = getFormatService().deserialize(bucket.format);
         const name = bucketFormatter.convert(row[bucketColumn.id]);
-        const size = row[bucketValueColumn.id];
+        const size = row[bucketValueColumn.id] as number;
         names[name] = name;
 
-        let slice = dataLevel.find(slice => slice.name === name);
+        let slice = dataLevel.find(dataLevelSlice => dataLevelSlice.name === name);
         if (!slice) {
           slice = {
             name,
@@ -66,7 +96,7 @@ export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
         }
 
         parent = slice;
-        dataLevel = slice.children;
+        dataLevel = slice.children as [];
       });
     });
   }
