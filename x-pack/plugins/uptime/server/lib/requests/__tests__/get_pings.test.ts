@@ -79,7 +79,6 @@ describe('getAll', () => {
           },
         },
         sort: [{ '@timestamp': { order: 'desc' } }],
-        size: 12,
       },
     };
   });
@@ -119,7 +118,47 @@ describe('getAll', () => {
     set(expectedGetAllParams, 'body.sort[0]', { '@timestamp': { order: 'asc' } });
 
     expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
+    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "search",
+        Object {
+          "body": Object {
+            "aggregations": Object {
+              "locations": Object {
+                "terms": Object {
+                  "field": "observer.geo.name",
+                  "missing": "N/A",
+                  "size": 1000,
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-1h",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 12,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "asc",
+                },
+              },
+            ],
+          },
+          "index": "heartbeat-8*",
+        },
+      ]
+    `);
   });
 
   it('omits the sort param when no sort passed', async () => {
@@ -132,7 +171,48 @@ describe('getAll', () => {
       size: 12,
     });
 
-    expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
+    expect(mockEsClient).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "search",
+        Object {
+          "body": Object {
+            "aggregations": Object {
+              "locations": Object {
+                "terms": Object {
+                  "field": "observer.geo.name",
+                  "missing": "N/A",
+                  "size": 1000,
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-1h",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 12,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "desc",
+                },
+              },
+            ],
+          },
+          "index": "heartbeat-8*",
+        },
+      ]
+    `);
   });
 
   it('omits the size param when no size passed', async () => {
@@ -144,10 +224,49 @@ describe('getAll', () => {
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'desc',
     });
-    delete expectedGetAllParams.body.size;
-    set(expectedGetAllParams, 'body.sort[0].@timestamp.order', 'desc');
 
-    expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
+    expect(mockEsClient).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "search",
+        Object {
+          "body": Object {
+            "aggregations": Object {
+              "locations": Object {
+                "terms": Object {
+                  "field": "observer.geo.name",
+                  "missing": "N/A",
+                  "size": 1000,
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-1h",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 25,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "desc",
+                },
+              },
+            ],
+          },
+          "index": "heartbeat-8*",
+        },
+      ]
+    `);
   });
 
   it('adds a filter for monitor ID', async () => {
@@ -159,10 +278,54 @@ describe('getAll', () => {
       dateRange: { from: 'now-1h', to: 'now' },
       monitorId: 'testmonitorid',
     });
-    delete expectedGetAllParams.body.size;
-    expectedGetAllParams.body.query.bool.filter.push({ term: { 'monitor.id': 'testmonitorid' } });
 
-    expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
+    expect(mockEsClient).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "search",
+        Object {
+          "body": Object {
+            "aggregations": Object {
+              "locations": Object {
+                "terms": Object {
+                  "field": "observer.geo.name",
+                  "missing": "N/A",
+                  "size": 1000,
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-1h",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "monitor.id": "testmonitorid",
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 25,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "desc",
+                },
+              },
+            ],
+          },
+          "index": "heartbeat-8*",
+        },
+      ]
+    `);
   });
 
   it('adds a filter for monitor status', async () => {
@@ -174,9 +337,53 @@ describe('getAll', () => {
       dateRange: { from: 'now-1h', to: 'now' },
       status: 'down',
     });
-    delete expectedGetAllParams.body.size;
-    expectedGetAllParams.body.query.bool.filter.push({ term: { 'monitor.status': 'down' } });
 
-    expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
+    expect(mockEsClient).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "search",
+        Object {
+          "body": Object {
+            "aggregations": Object {
+              "locations": Object {
+                "terms": Object {
+                  "field": "observer.geo.name",
+                  "missing": "N/A",
+                  "size": 1000,
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-1h",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "monitor.status": "down",
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 25,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "desc",
+                },
+              },
+            ],
+          },
+          "index": "heartbeat-8*",
+        },
+      ]
+    `);
   });
 });

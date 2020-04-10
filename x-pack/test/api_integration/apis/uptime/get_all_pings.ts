@@ -22,7 +22,7 @@ export default function({ getService }: FtrProviderContext) {
     it('should get all pings stored in index', async () => {
       const { body: apiResponse } = await supertest
         .get(
-          `/api/uptime/pings?sort=desc&dateRangeStart=${PINGS_DATE_RANGE_START}&dateRangeEnd=${PINGS_DATE_RANGE_END}`
+          `/api/uptime/pings?sort=desc&from=${PINGS_DATE_RANGE_START}&to=${PINGS_DATE_RANGE_END}`
         )
         .expect(200);
 
@@ -33,9 +33,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('should sort pings according to timestamp', async () => {
       const { body: apiResponse } = await supertest
-        .get(
-          `/api/uptime/pings?sort=asc&dateRangeStart=${PINGS_DATE_RANGE_START}&dateRangeEnd=${PINGS_DATE_RANGE_END}`
-        )
+        .get(`/api/uptime/pings?sort=asc&from=${PINGS_DATE_RANGE_START}&to=${PINGS_DATE_RANGE_END}`)
         .expect(200);
 
       expect(apiResponse.total).to.be(2);
@@ -47,7 +45,7 @@ export default function({ getService }: FtrProviderContext) {
     it('should return results of n length', async () => {
       const { body: apiResponse } = await supertest
         .get(
-          `/api/uptime/pings?sort=desc&size=1&dateRangeStart=${PINGS_DATE_RANGE_START}&dateRangeEnd=${PINGS_DATE_RANGE_END}`
+          `/api/uptime/pings?sort=desc&size=1&from=${PINGS_DATE_RANGE_START}&to=${PINGS_DATE_RANGE_END}`
         )
         .expect(200);
 
@@ -57,10 +55,10 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('should miss pings outside of date range', async () => {
-      const dateRangeStart = moment('2002-01-01').valueOf();
-      const dateRangeEnd = moment('2002-01-02').valueOf();
+      const from = moment('2002-01-01').valueOf();
+      const to = moment('2002-01-02').valueOf();
       const { body: apiResponse } = await supertest
-        .get(`/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`)
+        .get(`/api/uptime/pings?from=${from}&to=${to}`)
         .expect(200);
 
       expect(apiResponse.total).to.be(0);

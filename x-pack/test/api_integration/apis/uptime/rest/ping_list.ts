@@ -25,12 +25,10 @@ export default function({ getService }: FtrProviderContext) {
     after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
 
     it('returns a list of pings for the given date range and default size', async () => {
-      const dateRangeStart = '2019-01-28T17:40:08.078Z';
-      const dateRangeEnd = '2025-01-28T19:00:16.078Z';
+      const from = '2019-01-28T17:40:08.078Z';
+      const to = '2025-01-28T19:00:16.078Z';
 
-      const apiResponse = await supertest.get(
-        `/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
-      );
+      const apiResponse = await supertest.get(`/api/uptime/pings?from=${from}&to=${to}&size=10`);
 
       const { total, locations, pings } = decodePingsResponseData(apiResponse.body);
 
@@ -52,12 +50,12 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('returns a list of pings for the date range and given size', async () => {
-      const dateRangeStart = '2019-01-28T17:40:08.078Z';
-      const dateRangeEnd = '2025-01-28T19:00:16.078Z';
+      const from = '2019-01-28T17:40:08.078Z';
+      const to = '2025-01-28T19:00:16.078Z';
       const size = 50;
 
       const apiResponse = await supertest.get(
-        `/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}&size=${size}`
+        `/api/uptime/pings?from=${from}&to=${to}&size=${size}`
       );
 
       const { total, locations, pings } = decodePingsResponseData(apiResponse.body);
@@ -120,13 +118,13 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('returns a list of pings for a monitor ID', async () => {
-      const dateRangeStart = '2019-01-28T17:40:08.078Z';
-      const dateRangeEnd = '2025-01-28T19:00:16.078Z';
+      const from = '2019-01-28T17:40:08.078Z';
+      const to = '2025-01-28T19:00:16.078Z';
       const monitorId = '0001-up';
       const size = 15;
 
       const apiResponse = await supertest.get(
-        `/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}&monitorId=${monitorId}&size=${size}`
+        `/api/uptime/pings?from=${from}&to=${to}&monitorId=${monitorId}&size=${size}`
       );
 
       const { total, locations, pings } = decodePingsResponseData(apiResponse.body);
@@ -154,14 +152,14 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('returns a list of pings sorted ascending', async () => {
-      const dateRangeStart = '2019-01-28T17:40:08.078Z';
-      const dateRangeEnd = '2025-01-28T19:00:16.078Z';
+      const from = '2019-01-28T17:40:08.078Z';
+      const to = '2025-01-28T19:00:16.078Z';
       const monitorId = '0001-up';
       const size = 5;
       const sort = 'asc';
 
       const apiResponse = await supertest.get(
-        `/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}&monitorId=${monitorId}&size=${size}&sort=${sort}`
+        `/api/uptime/pings?from=${from}&to=${to}&monitorId=${monitorId}&size=${size}&sort=${sort}`
       );
 
       const { total, locations, pings } = decodePingsResponseData(apiResponse.body);
