@@ -22,7 +22,6 @@ import {
   PartitionFillLabel,
   RecursivePartial,
   LayerValue,
-  PartitionElementEvent,
 } from '@elastic/charts';
 import {
   KibanaDatatableColumn,
