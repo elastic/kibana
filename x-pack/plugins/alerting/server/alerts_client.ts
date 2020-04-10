@@ -34,6 +34,7 @@ import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_sav
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 
+type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginGrantAPIKeyResult };
@@ -92,7 +93,7 @@ interface CreateOptions {
     | 'muteAll'
     | 'mutedInstanceIds'
     | 'actions'
-  > & { actions: AlertAction[] };
+  > & { actions: NormalizedAlertAction[] };
   options?: {
     migrationVersion?: Record<string, string>;
   };
@@ -104,7 +105,7 @@ interface UpdateOptions {
     name: string;
     tags: string[];
     schedule: IntervalSchedule;
-    actions: AlertAction[];
+    actions: NormalizedAlertAction[];
     params: Record<string, any>;
     throttle: string | null;
   };
@@ -636,7 +637,7 @@ export class AlertsClient {
     };
   }
 
-  private validateActions(alertType: AlertType, actions: AlertAction[]): void {
+  private validateActions(alertType: AlertType, actions: NormalizedAlertAction[]): void {
     const { actionGroups: alertTypeActionGroups } = alertType;
     const usedAlertActionGroups = actions.map(action => action.group);
     const availableAlertTypeActionGroups = new Set(pluck(alertTypeActionGroups, 'id'));
@@ -656,7 +657,7 @@ export class AlertsClient {
   }
 
   private async denormalizeActions(
-    alertActions: AlertAction[]
+    alertActions: NormalizedAlertAction[]
   ): Promise<{ actions: RawAlert['actions']; references: SavedObjectReference[] }> {
     // Fetch action objects in bulk
     const actionIds = [...new Set(alertActions.map(alertAction => alertAction.id))];
@@ -664,12 +665,6 @@ export class AlertsClient {
     const bulkGetResult = await this.savedObjectsClient.bulkGet(bulkGetOpts);
     const actionMap = new Map<string, any>();
     for (const action of bulkGetResult.saved_objects) {
-      // No email connector selected
-      if (action.error && action.error.statusCode === 404) {
-        const actionType = alertActions.find(alertAction => alertAction.id === action.id)
-          ?.actionTypeId;
-        throw Boom.badRequest(`No ${actionType} connector selected.`);
-      }
       if (action.error) {
         throw Boom.badRequest(
           `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
