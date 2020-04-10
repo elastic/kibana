@@ -55,8 +55,8 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
                 disabled={!epm?.enabled}
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.appNavigation.packagesLinkText"
-                  defaultMessage="Packages"
+                  id="xpack.ingestManager.appNavigation.epmLinkText"
+                  defaultMessage="Integrations"
                 />
               </EuiTab>
               <EuiTab isSelected={section === 'agent_config'} href={useLink(AGENT_CONFIG_PATH)}>
