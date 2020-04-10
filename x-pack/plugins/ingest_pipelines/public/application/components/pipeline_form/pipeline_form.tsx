@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch, EuiLink } from '@elastic/eui';
 
 import {
   useForm,
@@ -16,6 +16,7 @@ import {
   Field,
   FormConfig,
   JsonEditorField,
+  useKibana,
 } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
 
@@ -36,21 +37,20 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
   defaultValue = {
     name: '',
     description: '',
-    processors: [],
-    onFailure: [],
+    processors: '',
+    onFailure: '',
     version: '',
   },
   onSave,
   isSaving,
   saveError,
 }) => {
-  const [isFormValid, setIsFormValid] = useState<boolean>(true);
+  const { services } = useKibana();
+
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(false);
   const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(false);
 
   const setDataAndValidation: FormConfig['onSubmit'] = (formData, isValid) => {
-    setIsFormValid(isValid);
-
     if (isValid) {
       onSave(formData);
     }
@@ -81,7 +81,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
       ) : null}
 
       <Form form={form} data-test-subj="pipelineForm">
-        {/* Name field with optional version */}
+        {/* Name field with optional version field */}
         <FormRow
           title={
             <FormattedMessage id="xpack.ingestPipelines.form.nameTitle" defaultMessage="Name" />
@@ -161,7 +161,16 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
           description={
             <FormattedMessage
               id="xpack.ingestPipelines.form.processorsFieldDescription"
-              defaultMessage="The processors to apply to the pipeline."
+              defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink href={services.documentation.getProcessorsUrl()} target="_blank">
+                    {i18n.translate('xpack.ingestPipelines.form.processorsDocumentionLink', {
+                      defaultMessage: 'Learn more.',
+                    })}
+                  </EuiLink>
+                ),
+              }}
             />
           }
         >
@@ -195,7 +204,16 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
             <>
               <FormattedMessage
                 id="xpack.ingestPipelines.form.onFailureDescription"
-                defaultMessage="Define a list of processors to be executed following a failed processor."
+                defaultMessage="Processors to be executed following a failed processor. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink href={services.documentation.getHandlingFailureUrl()} target="_blank">
+                      {i18n.translate('xpack.ingestPipelines.form.onFailureDocumentionLink', {
+                        defaultMessage: 'Learn more.',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
               />
               <EuiSpacer size="m" />
               <EuiSwitch
@@ -230,7 +248,8 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
               }}
             />
           ) : (
-            // <FormRow/> requires either children or a field
+            // <FormRow/> requires children or a field
+            // For now, we return an empty <div> if the editor is not visible
             <div />
           )}
         </FormRow>
@@ -248,7 +267,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
                   iconType="check"
                   onClick={form.submit}
                   data-test-subj="submitButton"
-                  disabled={isFormValid === false}
+                  disabled={form.isValid === false}
                   isLoading={isSaving}
                 >
                   {
