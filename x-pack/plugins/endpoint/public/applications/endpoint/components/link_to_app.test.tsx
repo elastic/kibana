@@ -11,6 +11,11 @@ import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_r
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { CoreStart } from 'kibana/public';
 
+type LinkToAppOnClickMock<Return = void> = jest.Mock<
+  Return,
+  [React.MouseEvent<HTMLAnchorElement, MouseEvent>]
+>;
+
 describe('LinkToApp component', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   const render = (ui: Parameters<typeof mount>[0]) =>
@@ -38,7 +43,8 @@ describe('LinkToApp component', () => {
     ).toMatchSnapshot();
   });
   it('should support onClick prop', () => {
-    const spyOnClickHandler = jest.fn();
+    // Take `_event` (even though it is not used) so that `jest.fn` will have a type that expects to be called with an event
+    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn(_event => {});
     const renderResult = render(
       <LinkToApp appId="ingestManager" href="/app/ingest" onClick={spyOnClickHandler}>
         link
@@ -91,7 +97,8 @@ describe('LinkToApp component', () => {
     });
   });
   it('should still preventDefault if onClick callback throws', () => {
-    const spyOnClickHandler = jest.fn(ev => {
+    // Take `_event` (even though it is not used) so that `jest.fn` will have a type that expects to be called with an event
+    const spyOnClickHandler: LinkToAppOnClickMock<never> = jest.fn(_event => {
       throw new Error('test');
     });
     const renderResult = render(
@@ -104,7 +111,7 @@ describe('LinkToApp component', () => {
     expect(clickEventArg.isDefaultPrevented()).toBe(true);
   });
   it('should not navigate if onClick callback prevents defalut', () => {
-    const spyOnClickHandler = jest.fn(ev => {
+    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn(ev => {
       ev.preventDefault();
     });
     const renderResult = render(
