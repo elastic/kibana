@@ -17,7 +17,6 @@ const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
 
-// FIXME: Import from ingest after - https://github.com/elastic/kibana/issues/60677
 export interface GetDatasourcesResponse {
   items: PolicyData[];
   total: number;
@@ -26,13 +25,11 @@ export interface GetDatasourcesResponse {
   success: boolean;
 }
 
-// FIXME: Import from Ingest after - https://github.com/elastic/kibana/issues/60677
 export interface GetDatasourceResponse {
   item: PolicyData;
   success: boolean;
 }
 
-// FIXME: Import from Ingest after - https://github.com/elastic/kibana/issues/60677
 export type UpdateDatasourceResponse = CreateDatasourceResponse & {
   item: PolicyData;
 };
