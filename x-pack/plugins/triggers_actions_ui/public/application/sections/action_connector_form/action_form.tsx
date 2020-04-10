@@ -502,6 +502,20 @@ export const ActionForm = ({
       });
   }
 
+  const alertActionsList = actions.map((actionItem: AlertAction, index: number) => {
+    const actionConnector = connectors.find(field => field.id === actionItem.id);
+    // connectors doesn't exists
+    if (!actionConnector) {
+      return getAddConnectorsForm(actionItem, index);
+    }
+
+    const actionErrors: { errors: IErrorObject } = actionTypeRegistry
+      .get(actionItem.actionTypeId)
+      ?.validateParams(actionItem.params);
+
+    return getActionTypeForm(actionItem, actionConnector, actionErrors, index);
+  });
+
   return (
     <Fragment>
       {isLoadingConnectors ? (
@@ -512,80 +526,70 @@ export const ActionForm = ({
           />
         </SectionLoading>
       ) : (
-        actions.map((actionItem: AlertAction, index: number) => {
-          const actionConnector = connectors.find(field => field.id === actionItem.id);
-          // connectors doesn't exists
-          if (!actionConnector) {
-            return getAddConnectorsForm(actionItem, index);
-          }
-
-          const actionErrors: { errors: IErrorObject } = actionTypeRegistry
-            .get(actionItem.actionTypeId)
-            ?.validateParams(actionItem.params);
-
-          return getActionTypeForm(actionItem, actionConnector, actionErrors, index);
-        })
-      )}
-      <EuiSpacer size="m" />
-      {isAddActionPanelOpen === false ? (
-        <EuiButton
-          iconType="plusInCircle"
-          data-test-subj="addAlertActionButton"
-          onClick={() => setIsAddActionPanelOpen(true)}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
-            defaultMessage="Add action"
-          />
-        </EuiButton>
-      ) : null}
-      {isAddActionPanelOpen ? (
         <Fragment>
-          <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h5>
-                  <FormattedMessage
-                    defaultMessage="Actions: Select an action type"
-                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
-                  />
-                </h5>
-              </EuiTitle>
-            </EuiFlexItem>
-            {hasDisabledByLicenseActionTypes && (
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h5>
-                    <EuiLink
-                      href={VIEW_LICENSE_OPTIONS_LINK}
-                      target="_blank"
-                      className="actActionForm__getMoreActionsLink"
-                    >
+          {alertActionsList}
+          <EuiSpacer size="m" />
+          {isAddActionPanelOpen === false ? (
+            <EuiButton
+              iconType="plusInCircle"
+              data-test-subj="addAlertActionButton"
+              onClick={() => setIsAddActionPanelOpen(true)}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
+                defaultMessage="Add action"
+              />
+            </EuiButton>
+          ) : null}
+          {isAddActionPanelOpen ? (
+            <Fragment>
+              <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h5>
                       <FormattedMessage
-                        defaultMessage="Get more actions"
-                        id="xpack.triggersActionsUI.sections.actionForm.getMoreActionsTitle"
+                        defaultMessage="Actions: Select an action type"
+                        id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
                       />
-                    </EuiLink>
-                  </h5>
-                </EuiTitle>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer />
-          <EuiFlexGroup gutterSize="s" wrap>
-            {isLoadingActionTypes ? (
-              <SectionLoading>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
-                  defaultMessage="Loading action types…"
-                />
-              </SectionLoading>
-            ) : (
-              actionTypeNodes
-            )}
-          </EuiFlexGroup>
+                    </h5>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {hasDisabledByLicenseActionTypes && (
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xs">
+                      <h5>
+                        <EuiLink
+                          href={VIEW_LICENSE_OPTIONS_LINK}
+                          target="_blank"
+                          className="actActionForm__getMoreActionsLink"
+                        >
+                          <FormattedMessage
+                            defaultMessage="Get more actions"
+                            id="xpack.triggersActionsUI.sections.actionForm.getMoreActionsTitle"
+                          />
+                        </EuiLink>
+                      </h5>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+              <EuiSpacer />
+              <EuiFlexGroup gutterSize="s" wrap>
+                {isLoadingActionTypes ? (
+                  <SectionLoading>
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
+                      defaultMessage="Loading action types…"
+                    />
+                  </SectionLoading>
+                ) : (
+                  actionTypeNodes
+                )}
+              </EuiFlexGroup>
+            </Fragment>
+          ) : null}
         </Fragment>
-      ) : null}
+      )}
       {actionTypesIndex && activeActionItem ? (
         <ConnectorAddModal
           key={activeActionItem.index}
