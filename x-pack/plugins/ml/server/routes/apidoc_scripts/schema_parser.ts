@@ -19,11 +19,11 @@ function parse(content?: string) {
     );
   }
 
+  const group = result[1];
+
   return {
-    schema: {
-      group: result[1],
-      name: result[2],
-    },
+    group,
+    name: result[2],
   };
 }
 
@@ -32,6 +32,6 @@ function parse(content?: string) {
  */
 module.exports = {
   parse,
-  path: 'local',
-  method: 'insert',
+  path: 'local.schemas',
+  method: 'push',
 };

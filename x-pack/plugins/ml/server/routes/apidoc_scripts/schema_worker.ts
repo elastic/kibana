@@ -34,10 +34,10 @@ interface Local {
   success: { fields: ObjectConstructor[] };
   version: string;
   filename: string;
-  schema?: {
+  schemas?: Array<{
     name: string;
     group: string;
-  };
+  }>;
 }
 
 interface Block {
@@ -56,15 +56,18 @@ export function postProcess(parsedFiles: any[]): void {
   parsedFiles.forEach(parsedFile => {
     parsedFile.forEach((block: Block) => {
       const {
-        local: { schema },
+        local: { schemas },
       } = block;
-      if (!schema) return;
-      const { name: schemaName, group: paramsGroup } = schema;
-      const schemaFields = schemaDocs.get(schemaName);
+      if (!schemas || schemas.length === 0) return;
 
-      if (!schemaFields) return;
+      for (const schema of schemas) {
+        const { name: schemaName, group: paramsGroup } = schema;
+        const schemaFields = schemaDocs.get(schemaName);
 
-      extractDocEntries(schemaFields, block, paramsGroup);
+        if (!schemaFields) return;
+
+        updateBlockParameters(schemaFields, block, paramsGroup);
+      }
     });
   });
 }
@@ -75,7 +78,7 @@ export function postProcess(parsedFiles: any[]): void {
  * @param block
  * @param paramsGroup
  */
-function extractDocEntries(docEntries: DocEntry[], block: Block, paramsGroup: string): void {
+function updateBlockParameters(docEntries: DocEntry[], block: Block, paramsGroup: string): void {
   if (!block.local.parameter) {
     block.local.parameter = {
       fields: {},
@@ -100,7 +103,7 @@ function extractDocEntries(docEntries: DocEntry[], block: Block, paramsGroup: st
     });
 
     if (field.nested) {
-      extractDocEntries(field.nested, block, field.name);
+      updateBlockParameters(field.nested, block, field.name);
     }
   }
 }
