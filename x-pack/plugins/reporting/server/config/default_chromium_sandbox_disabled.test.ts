@@ -21,7 +21,7 @@ function defaultTest(os: TestObject, expectedDefault: boolean) {
   test(`${expectedDefault ? 'disabled' : 'enabled'} on ${JSON.stringify(os)}`, async () => {
     (getos as jest.Mock).mockImplementation(cb => cb(null, os));
     const actualDefault = await getDefaultChromiumSandboxDisabled();
-    expect(actualDefault).toBe(expectedDefault);
+    expect(actualDefault.disableSandbox).toBe(expectedDefault);
   });
 }
 
