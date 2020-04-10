@@ -20,10 +20,10 @@ const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
  */
 
 export default function({ getService, getPageObjects }) {
-  const browser = getService('browser');
-  const config = getService('config');
   const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
   const log = getService('log');
+  const config = getService('config');
   const PageObjects = getPageObjects([
     'reporting',
     'common',
@@ -38,18 +38,13 @@ export default function({ getService, getPageObjects }) {
     describe('Dashboard', () => {
       before('initialize tests', async () => {
         log.debug('ReportingPage:initTests');
-        await esArchiver.loadIfNeeded('reporting/ecommerce');
-        await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
         await browser.setWindowSize(1600, 850);
-      });
-      after('clean up archives', async () => {
-        await esArchiver.unload('reporting/ecommerce');
-        await esArchiver.unload('reporting/ecommerce_kibana');
       });
 
       describe('Print PDF button', () => {
         it('is not available if new', async () => {
-          await PageObjects.common.navigateToUrl('dashboard', 'new');
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.clickNewDashboard();
           await PageObjects.reporting.openPdfReportingPanel();
           expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         });
@@ -62,7 +57,20 @@ export default function({ getService, getPageObjects }) {
       });
 
       describe('Print Layout', () => {
+        before('initialize archives', async () => {
+          await esArchiver.loadIfNeeded('reporting/ecommerce');
+          await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
+          await browser.setWindowSize(1600, 850);
+        });
+        after('clean up archives', async () => {
+          await esArchiver.unload('reporting/ecommerce');
+          await esArchiver.unload('reporting/ecommerce_kibana');
+        });
+
         it('downloads a PDF file', async function() {
+          // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
+          // function is taking about 15 seconds per comparison in jenkins.
+          this.timeout(300000);
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.gotoDashboardEditMode('Ecom Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
@@ -79,7 +87,8 @@ export default function({ getService, getPageObjects }) {
 
       describe('Print PNG button', () => {
         it('is not available if new', async () => {
-          await PageObjects.common.navigateToUrl('dashboard', 'new');
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.clickNewDashboard();
           await PageObjects.reporting.openPngReportingPanel();
           expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         });
@@ -92,15 +101,25 @@ export default function({ getService, getPageObjects }) {
       });
 
       describe('Preserve Layout', () => {
+        before('initialize archives', async () => {
+          await esArchiver.loadIfNeeded('reporting/ecommerce');
+          await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
+          await browser.setWindowSize(1600, 850);
+        });
+        after('clean up archives', async () => {
+          await esArchiver.unload('reporting/ecommerce');
+          await esArchiver.unload('reporting/ecommerce_kibana');
+        });
+
         it('matches baseline report', async function() {
-          const writeSessionReport = async (name, rawPdf, reportExt = 'pdf') => {
+          const writeSessionReport = async (name, rawPdf, reportExt) => {
             const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
             await mkdirAsync(sessionDirectory, { recursive: true });
             const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
             await writeFileAsync(sessionReportPath, rawPdf);
             return sessionReportPath;
           };
-          const getBaselineReportPath = (fileName, reportExt = 'pdf') => {
+          const getBaselineReportPath = (fileName, reportExt) => {
             const baselineFolder = path.resolve(REPORTS_FOLDER, 'baseline');
             const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
             log.debug(`getBaselineReportPath (${fullPath})`);
@@ -127,6 +146,7 @@ export default function({ getService, getPageObjects }) {
             log
           );
 
+          throw new Error('take snapshot here!');
           expect(percentSimilar).to.be.lessThan(0.1);
         });
       });
@@ -136,12 +156,10 @@ export default function({ getService, getPageObjects }) {
       before('initialize tests', async () => {
         log.debug('ReportingPage:initTests');
         await esArchiver.loadIfNeeded('reporting/ecommerce');
-        await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
         await browser.setWindowSize(1600, 850);
       });
       after('clean up archives', async () => {
         await esArchiver.unload('reporting/ecommerce');
-        await esArchiver.unload('reporting/ecommerce_kibana');
       });
 
       describe('Generate CSV button', () => {
@@ -205,11 +223,16 @@ export default function({ getService, getPageObjects }) {
           expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
 
-        it('matches baseline report', async function() {
+        it('downloaded PDF has OK status', async function() {
+          // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
+          // function is taking about 15 seconds per comparison in jenkins.
+          this.timeout(180000);
+
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.gotoDashboardEditMode('Ecom Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
+
           const url = await PageObjects.reporting.getReportURL(60000);
           const res = await PageObjects.reporting.getResponse(url);
 
