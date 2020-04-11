@@ -18,12 +18,7 @@ import { ConfigSchema } from './schema';
  * - xpack.kibanaServer
  * - xpack.reporting.encryptionKey
  */
-export function createConfig$(
-  core: CoreSetup,
-  context: PluginInitializerContext,
-  reportingLogger: Logger
-) {
-  const logger = reportingLogger.get('create_config');
+export function createConfig$(core: CoreSetup, context: PluginInitializerContext, logger: Logger) {
   return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(
     map(config => {
       // encryption key
@@ -82,7 +77,7 @@ export function createConfig$(
 
       // disableSandbox was not set: apply default for OS
       const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
-      const osName = `${os.os} ${os.dist} ${os.release || ''}`;
+      const osName = [os.os, os.dist, os.release].filter(Boolean).join(' ');
 
       logger.debug(
         i18n.translate('xpack.reporting.serverConfig.osDetected', {
