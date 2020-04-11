@@ -1,5 +1,9 @@
 [[troubleshooting]]
-== Troubleshooting common problems
+== Troubleshoot common problems
+
+++++
+<titleabbrev>Troubleshooting</titleabbrev>
+++++
 
 If you have something to add to this section, please consider creating a pull request with
 your proposed changes at https://github.com/elastic/kibana.

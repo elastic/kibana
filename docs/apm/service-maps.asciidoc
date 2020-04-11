@@ -5,13 +5,13 @@
 beta::[]
 
 A service map is a real-time visual representation of the instrumented services in your application’s architecture.
-It shows you how these services are connected, along high-level metrics like average transaction duration,
+It shows you how these services are connected, along with high-level metrics like average transaction duration,
 requests per minute, and errors per minute, that allow you to quickly assess the status of your services.
 
 We currently surface two types of service maps:
 
 * Global: All services instrumented with APM agents and the connections between them are shown.
-* Service-specific: Highlight collections for a selected service.
+* Service-specific: Highlight connections for a selected service.
 
 [role="screenshot"]
 image::apm/images/service-maps.png[Example view of service maps in the APM app in Kibana]

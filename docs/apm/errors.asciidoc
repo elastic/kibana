@@ -34,18 +34,3 @@ In some cases, you might also see a Transaction sample ID.
 This feature allows you to make a connection between the errors and transactions,
 by linking you to the specific transaction where the error occurred.
 This allows you to see the whole trace, including which services the request went through.
-
-[float]
-[[errors-alerts-with-watcher]]
-==== Error reports with Watcher
-
-You can use the power of the alerting features with Watcher to get reports on error occurrences.
-The Watcher assistant, which is available on the errors overview, can help you set up a watch per service.
-
-Configure the watch with an occurrences threshold, time interval, and the desired actions, such as email or Slack notifications.
-With Watcher, your team can set up reports within minutes.
-
-Watches are managed separately in the dedicated Watcher UI available in Advanced Settings.
-
-[role="screenshot"]
-image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher assistant for errors in APM app in Kibana]
