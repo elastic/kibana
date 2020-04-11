@@ -22,4 +22,4 @@ export {
   getRouterLinkProps,
 } from './routing';
 
-export { trackUiMetric } from './ui_metric';
+export { trackUiMetric, METRIC_TYPE } from './ui_metric';

@@ -9,7 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { toasts } from '../../services/notification';
 import { UIM_CLUSTER_REMOVE, UIM_CLUSTER_REMOVE_MANY } from '../../constants';
 
-import { removeClusterRequest as sendRemoveClusterRequest, trackUiMetric } from '../../services';
+import {
+  removeClusterRequest as sendRemoveClusterRequest,
+  trackUiMetric,
+  METRIC_TYPE,
+} from '../../services';
 
 import { REMOVE_CLUSTERS_START, REMOVE_CLUSTERS_FINISH } from '../action_types';
 
@@ -72,7 +76,10 @@ export const removeClusters = names => async (dispatch, getState) => {
 
   if (itemsDeleted.length > 0) {
     // Only track successful requests.
-    trackUiMetric('COUNT', names.length > 1 ? UIM_CLUSTER_REMOVE_MANY : UIM_CLUSTER_REMOVE);
+    trackUiMetric(
+      METRIC_TYPE.COUNT,
+      names.length > 1 ? UIM_CLUSTER_REMOVE_MANY : UIM_CLUSTER_REMOVE
+    );
 
     if (itemsDeleted.length === 1) {
       toasts.addSuccess(
