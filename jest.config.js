@@ -1,4 +1,5 @@
 module.exports = {
+  snapshotSerializers: ['jest-snapshot-serializer-ansi'],
   setupFiles: ['./src/test/automatic-mocks.ts'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest',

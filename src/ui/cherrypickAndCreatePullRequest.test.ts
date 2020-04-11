@@ -224,32 +224,32 @@ describe('cherrypickAndCreatePullRequest', () => {
       expect(promptSpy.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
-            "[0mThe following files have conflicts:[0m
-        [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
+            "The following files have conflicts:
+         - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
-        [0m[3mYou do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.[23m[0m
-
-        Press ENTER to continue",
-          ],
-          Array [
-            "[0mThe following files have conflicts:[0m
-        [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
-
-        [0m[3mYou do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.[23m[0m
+        You do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.
 
         Press ENTER to continue",
           ],
           Array [
-            "[0mThe following files have conflicts:[0m
-        [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
+            "The following files have conflicts:
+         - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
-        [0m[3mYou do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.[23m[0m
+        You do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.
 
         Press ENTER to continue",
           ],
           Array [
-            "[0mThe following files are unstaged:[0m
-        [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
+            "The following files have conflicts:
+         - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
+
+        You do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.
+
+        Press ENTER to continue",
+          ],
+          Array [
+            "The following files are unstaged:
+         - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
         Press ENTER to stage them",
           ],
@@ -260,7 +260,7 @@ describe('cherrypickAndCreatePullRequest', () => {
         Array [
           Array [
             "
-        [1mBackporting the following commits to 6.x:[22m
+        Backporting the following commits to 6.x:
          - myCommitMessage
         ",
           ],

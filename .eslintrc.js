@@ -4,7 +4,7 @@ module.exports = {
     node: true,
   },
   ignorePatterns: ['dist/', 'node_modules/'],
-  plugins: ['@typescript-eslint', 'jest', 'import', 'import-order'],
+  plugins: ['@typescript-eslint', 'jest', 'import'],
   parser: '@typescript-eslint/parser', // Specifies the ESLint parser
   extends: [
     'plugin:@typescript-eslint/recommended', // Uses the recommended rules from the @typescript-eslint/eslint-plugin

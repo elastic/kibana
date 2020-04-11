@@ -85,7 +85,7 @@ Array [
       Object {
         "choices": Array [
           Object {
-            "name": "[90m1.[39m Add 👻 (2e63475c) ",
+            "name": "1. Add 👻 (2e63475c) ",
             "short": "Add 👻 (2e63475c)",
             "value": Object {
               "branch": "mySourceBranch",
@@ -96,7 +96,7 @@ Array [
             },
           },
           Object {
-            "name": "[90m2.[39m Add witch (#85) ",
+            "name": "2. Add witch (#85) ",
             "short": "Add witch (#85)",
             "value": Object {
               "branch": "mySourceBranch",
@@ -107,7 +107,7 @@ Array [
             },
           },
           Object {
-            "name": "[90m3.[39m Add SF mention (#80) [32m6.3[39m",
+            "name": "3. Add SF mention (#80) 6.3",
             "short": "Add SF mention (#80)",
             "value": Object {
               "branch": "mySourceBranch",
@@ -123,7 +123,7 @@ Array [
             },
           },
           Object {
-            "name": "[90m4.[39m Add backport config (3827bbba) ",
+            "name": "4. Add backport config (3827bbba) ",
             "short": "Add backport config (3827bbba)",
             "value": Object {
               "branch": "mySourceBranch",
@@ -134,7 +134,7 @@ Array [
             },
           },
           Object {
-            "name": "[90m5.[39m Initial commit (5ea0da55) ",
+            "name": "5. Initial commit (5ea0da55) ",
             "short": "Initial commit (5ea0da55)",
             "value": Object {
               "branch": "mySourceBranch",
