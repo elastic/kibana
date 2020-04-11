@@ -2,11 +2,7 @@
 [[errors]]
 === Errors overview
 
-++++
-<titleabbrev>Errors</titleabbrev>
-++++
-
-TIP: {apm-overview-ref-v}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
+TIP: {apm-overview-ref-v}/errors.html[Errors] are groups of exceptions with a similar exception or log message.
 
 The *Errors* overview provides a high-level view of the error message and culprit,
 the number of occurrences, and the most recent occurrence.
@@ -25,7 +21,7 @@ image::apm/images/apm-error-group.png[Example view of the error group page in th
 Here, you'll see the error message, culprit, and the number of occurrences over time.
 
 Further down, you'll see the Error occurrence table.
-This is where you can see the details of a sampled error within this group.
+This table shows the details of a sampled error within this group.
 The error shown is always the most recent to occur.
 
 Each error occurrence features a breakdown of the exception, including the stack trace from when the error occurred,

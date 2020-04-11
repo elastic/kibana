@@ -47,7 +47,7 @@ It allows you to view only relevant data, and is especially useful for separatin
 By default, all environments are displayed. If there are no environment options, you'll see "not defined".
 
 Service environments are defined when configuring your APM agents.
-It's very important to be consistent when naming environments in your agents.
+It's vital to be consistent when naming environments in your agents.
 See the documentation for each agent you're using to learn how to configure service environments:
 
 * *Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONMENT`]

@@ -14,7 +14,7 @@ or, to only show transactions that are slower than a specified time threshold.
 * Filter by response status code: `context.response.status_code >= 400`
 * Filter by single user ID: `context.user.id : 12`
 
-When querying in the APM app, you're simply searching and selecting data from fields in Elasticsearch documents.
+When querying in the APM app, you're merely searching and selecting data from fields in Elasticsearch documents.
 Queries entered into the query bar are also added as parameters to the URL,
 so it's easy to share a specific query or view with others.
 
@@ -31,7 +31,7 @@ TIP: Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] 
 
 Alternatively, you can query your APM documents in {kibana-ref}/discover.html[*Discover*].
 Querying documents in *Discover* works the same way as querying in the APM app,
-and all of the example APM app queries can also be used in *Discover*.
+and *Discover* supports all of the example APM app queries shown on this page.
 
 [float]
 ==== Example Discover query
@@ -39,7 +39,7 @@ and all of the example APM app queries can also be used in *Discover*.
 One example where you may want to make use of *Discover*,
 is for viewing  _all_ transactions for an endpoint, instead of just a sample.
 
-TIP: Starting in v7.6, you can view 10 samples per bucket in the APM app, instead of just one.
+TIP: Starting in v7.6, you can view ten samples per bucket in the APM app, instead of just one.
 
 Use the APM app to find a transaction name and time bucket that you're interested in learning more about.
 Then, switch to *Discover* and make a search:

@@ -2,10 +2,6 @@
 [[transactions]]
 === Transaction overview
 
-++++
-<titleabbrev>Transactions</titleabbrev>
-++++
-
 TIP: A {apm-overview-ref-v}/transactions.html[transaction] describes an event captured by an Elastic APM agent instrumenting a service.
 APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
 
@@ -73,7 +69,7 @@ image::apm/images/apm-geo-ui.jpg[average page load duration distribution]
 This data is available due to the geo-ip and user agent pipelines being enabled by default,
 which allows for the capture of geo-location and user agent data.
 These visualizations make it easy for you to visualize performance information about your
-end users' experience based on their location.
+end-users' experience based on their location.
 
 [[transaction-details]]
 ==== Transaction details
@@ -94,7 +90,7 @@ The number of requests per bucket is displayed when hovering over the graph, and
 [role="screenshot"]
 image::apm/images/apm-transaction-duration-dist.png[Example view of transactions duration distribution graph]
 
-This graph shows a typical distribution, and indicates most of our requests were served quickly - awesome!
+This graph shows a typical distribution, and indicates most of our requests were served quickly--awesome!
 It's the requests on the right, the ones taking longer than average, that we probably want to focus on.
 
 When you select one of these buckets,
