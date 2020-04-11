@@ -139,7 +139,7 @@ export class Plugin
 
   // NOTE: apm is importing from `infra/public` and async importing that
   // allow us to reduce the apm bundle size
-  private async registerAlertType(pluginsSetup) {
+  private async registerAlertType(pluginsSetup: ClientPluginsSetup) {
     const { getAlertType } = await import(
       './components/alerting/metrics/metric_threshold_alert_type'
     );
