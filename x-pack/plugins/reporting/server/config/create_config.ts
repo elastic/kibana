@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n/';
 import { TypeOf } from '@kbn/config-schema';
 import crypto from 'crypto';
+import { capitalize } from 'lodash';
 import { map, mergeMap } from 'rxjs/operators';
 import { CoreSetup, Logger, PluginInitializerContext } from 'src/core/server';
 import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
@@ -75,9 +76,12 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
         return config;
       }
 
-      // disableSandbox was not set: apply default for OS
+      // disableSandbox was not set by user, apply default for OS
       const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
-      const osName = [os.os, os.dist, os.release].filter(Boolean).join(' ');
+      const osName = [os.os, os.dist, os.release]
+        .filter(Boolean)
+        .map(capitalize)
+        .join(' ');
 
       logger.debug(
         i18n.translate('xpack.reporting.serverConfig.osDetected', {
@@ -86,11 +90,10 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
         })
       );
 
-      const sandboxEnabled = !disableSandbox;
-      if (sandboxEnabled) {
-        logger.info(
-          i18n.translate('xpack.reporting.serverConfig.autoSet.sandboxEnabled', {
-            defaultMessage: `Automatically setting '{configKey}: true'. Supported OS: {osName}`,
+      if (disableSandbox === true) {
+        logger.warn(
+          i18n.translate('xpack.reporting.serverConfig.autoSet.sandboxDisabled', {
+            defaultMessage: `Chromium sandbox provides an additional layer of protection, but is not supported for {osName} OS. Automatically setting '{configKey}: true'.`,
             values: {
               configKey: 'xpack.reporting.capture.browser.chromium.disableSandbox',
               osName,
@@ -98,13 +101,10 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
           })
         );
       } else {
-        logger.warn(
-          i18n.translate('xpack.reporting.serverConfig.autoSet.sandboxDisabled', {
-            defaultMessage: `Automatically setting '{configKey}: false'. Chromium sandbox is not supported for '{osName}.'`,
-            values: {
-              configKey: 'xpack.reporting.capture.browser.chromium.disableSandbox',
-              osName,
-            },
+        logger.info(
+          i18n.translate('xpack.reporting.serverConfig.autoSet.sandboxEnabled', {
+            defaultMessage: `Chromium sandbox provides an additional layer of protection, and is supported for {osName} OS. Automatically enabling Chromium sandbox.`,
+            values: { osName },
           })
         );
       }
