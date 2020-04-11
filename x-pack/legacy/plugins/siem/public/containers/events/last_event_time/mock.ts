@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultIndexPattern } from '../../../../default_index_pattern';
+import { defaultIndexPattern } from '../../../../../../../plugins/siem/common/default_index_pattern';
 import { GetLastEventTimeQuery, LastEventIndexKey } from '../../../graphql/types';
 
 import { LastEventTimeGqlQuery } from './last_event_time.gql_query';

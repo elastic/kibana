@@ -31,7 +31,7 @@ import {
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
 } from '../../../plugins/siem/common/constants';
-import { defaultIndexPattern } from './default_index_pattern';
+import { defaultIndexPattern } from '../../../plugins/siem/common/default_index_pattern';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

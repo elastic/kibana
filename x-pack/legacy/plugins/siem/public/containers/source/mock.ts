@@ -6,7 +6,7 @@
 
 import { BrowserFields } from '.';
 import { sourceQuery } from './index.gql_query';
-import { defaultIndexPattern } from '../../../default_index_pattern';
+import { defaultIndexPattern } from '../../../../../../plugins/siem/common/default_index_pattern';
 
 export const mocksSource = [
   {

@@ -6,7 +6,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { defaultIndexPattern } from '../../../../default_index_pattern';
+import { defaultIndexPattern } from '../../../../../../../plugins/siem/common/default_index_pattern';
 import { useApolloClient } from '../../../utils/apollo_context';
 import { mocksSource } from '../../source/mock';
 

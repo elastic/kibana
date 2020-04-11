@@ -24,7 +24,7 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_BYTES_FORMAT,
 } from '../../../../../plugins/siem/common/constants';
-import { defaultIndexPattern } from '../../default_index_pattern';
+import { defaultIndexPattern } from '../../../../../plugins/siem/common/default_index_pattern';
 import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
