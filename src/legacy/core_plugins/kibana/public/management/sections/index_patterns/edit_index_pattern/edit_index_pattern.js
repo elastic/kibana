@@ -97,8 +97,11 @@ function updateScriptedFieldsTable($scope) {
           fieldFilter={$scope.fieldFilter}
           scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
           helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.changeToRoute(obj, route);
+            redirectToRoute: field => {
+              $scope.kbnUrl.changePath(
+                '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
+                field
+              );
               $scope.$apply();
             },
             getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),

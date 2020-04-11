@@ -106,7 +106,7 @@ export class IndexedFieldsTable extends Component {
         <Table
           indexPattern={indexPattern}
           items={fields}
-          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+          editField={field => this.props.helpers.redirectToRoute(field)}
         />
       </div>
     );
