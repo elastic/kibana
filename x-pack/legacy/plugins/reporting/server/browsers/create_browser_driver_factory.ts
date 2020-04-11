@@ -16,7 +16,6 @@ export async function createBrowserDriverFactory(
   logger: Logger
 ): Promise<HeadlessChromiumDriverFactory> {
   const captureConfig = config.get('capture');
-  const browserConfig = captureConfig.browser.chromium;
   const browserAutoDownload = captureConfig.browser.autoDownload;
   const browserType = captureConfig.browser.type;
   const dataDir = config.kbnConfig.get('path', 'data');
