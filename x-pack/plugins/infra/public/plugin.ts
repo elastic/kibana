@@ -50,8 +50,6 @@ export class Plugin
   setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
-
     core.application.register({
       id: 'logs',
       title: i18n.translate('xpack.infra.logs.pluginTitle', {
@@ -66,7 +64,7 @@ export class Plugin
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp, composeLibs, LogsRouter } = await this.downloadAssets();
 
-        await this.registerAlertType();
+        await this.registerAlertType(pluginsSetup);
 
         return startApp(
           composeLibs(coreStart),
@@ -93,7 +91,7 @@ export class Plugin
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp, composeLibs, MetricsRouter } = await this.downloadAssets();
 
-        await this.registerAlertType();
+        await this.registerAlertType(pluginsSetup);
 
         return startApp(
           composeLibs(coreStart),
@@ -141,7 +139,7 @@ export class Plugin
 
   // NOTE: apm is importing from `infra/public` and async importing that
   // allow us to reduce the apm bundle size
-  private async registerAlertType() {
+  private async registerAlertType(pluginsSetup) {
     const { getAlertType } = await import(
       './components/alerting/metrics/metric_threshold_alert_type'
     );
