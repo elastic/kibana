@@ -23,7 +23,7 @@ import { LegacyPluginSpec } from '../types';
 const internalPaths = ['/src/legacy/core_plugins', '/x-pack'];
 
 const breakingChangesUrl =
-  'https://github.com/elastic/kibana/blob/master/docs/migration/migrate_8_0.asciidoc';
+  'https://www.elastic.co/guide/en/kibana/master/breaking-changes-8.0.html';
 const migrationGuideUrl = 'https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md';
 
 export const logLegacyThirdPartyPluginDeprecationWarning = ({
