@@ -66,7 +66,9 @@ import { ScriptingHelpFlyout } from './components/scripting_help';
 import { FieldFormatEditor } from './components/field_format_editor';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
-import { copyField, executeScript, isScriptValid } from './lib';
+import { executeScript, isScriptValid } from './lib';
+//import { copyField, executeScript, isScriptValid } from './lib';
+// import { Field } from '../../../../plugins/data/public';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -112,8 +114,6 @@ export class FieldEditor extends PureComponent {
 
     const { field, indexPattern } = props;
 
-    // console.log('field_editors', Field);
-
     this.state = {
       isReady: false,
       isCreating: false,
@@ -122,8 +122,9 @@ export class FieldEditor extends PureComponent {
       fieldTypes: [],
       fieldTypeFormats: [],
       existingFieldNames: indexPattern.fields.map(f => f.name),
-      field: copyField(field, indexPattern),
-      // field: new Field(indexPattern, field), // what about short dots?
+      // field: copyField(field, indexPattern),
+      //field: new Field(indexPattern, field.$$spec), // what about short dots?
+      field: { ...field.$$spec },
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
