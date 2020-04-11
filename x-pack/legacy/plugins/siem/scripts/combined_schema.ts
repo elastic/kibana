@@ -6,7 +6,7 @@
 
 import { buildSchemaFromTypeDefinitions } from 'graphql-tools';
 
-import { schemas as serverSchemas } from '../server/graphql';
+import { schemas as serverSchemas } from '../../../../plugins/siem/server/graphql';
 
 export const schemas = [...serverSchemas];
 

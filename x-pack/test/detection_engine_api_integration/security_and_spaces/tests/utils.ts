@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OutputRuleAlertRest } from '../../../../legacy/plugins/siem/server/lib/detection_engine/types';
+import { OutputRuleAlertRest } from '../../../../plugins/siem/server/lib/detection_engine/types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../legacy/plugins/siem/common/constants';
 
 /**

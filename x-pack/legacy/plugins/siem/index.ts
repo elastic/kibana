@@ -9,8 +9,8 @@ import { resolve } from 'path';
 import { Server } from 'hapi';
 import { Root } from 'joi';
 
-import { plugin } from './server';
-import { savedObjectMappings } from './server/saved_objects';
+import { plugin } from '../../../plugins/siem/server';
+import { savedObjectMappings } from '../../../plugins/siem/server/saved_objects';
 
 import {
   APP_ID,
