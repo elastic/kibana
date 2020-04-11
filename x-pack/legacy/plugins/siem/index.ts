@@ -30,7 +30,7 @@ import {
   SIGNALS_INDEX_KEY,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
-} from './common/constants';
+} from '../../../plugins/siem/common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 

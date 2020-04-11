@@ -5,7 +5,7 @@
  */
 
 import { OutputRuleAlertRest } from '../../../../plugins/siem/server/lib/detection_engine/types';
-import { DETECTION_ENGINE_INDEX_URL } from '../../../../legacy/plugins/siem/common/constants';
+import { DETECTION_ENGINE_INDEX_URL } from '../../../../plugins/siem/common/constants';
 
 /**
  * This will remove server generated properties such as date times, etc...

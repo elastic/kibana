@@ -11,7 +11,7 @@ import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_qu
 import { processFieldsMap, userFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { HostHits, TermAggregation } from '../types';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from 'siem/common/constants';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { buildQuery } from './query.dsl';
 import {
   UncommonProcessBucket,

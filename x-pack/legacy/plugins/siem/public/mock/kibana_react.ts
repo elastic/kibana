@@ -23,7 +23,7 @@ import {
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_BYTES_FORMAT,
-} from '../../common/constants';
+} from '../../../../../plugins/siem/common/constants';
 import { defaultIndexPattern } from '../../default_index_pattern';
 import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
 

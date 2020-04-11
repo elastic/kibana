@@ -14,7 +14,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
-import { UNAUTHENTICATED_USER } from 'siem/common/constants';
+import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import {
   PageInfoNote,
   ResponseNote,

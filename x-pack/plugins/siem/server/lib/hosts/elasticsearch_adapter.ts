@@ -26,7 +26,7 @@ import {
   HostsRequestOptions,
   HostValue,
 } from './types';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from 'siem/common/constants';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { rootSchema } from 'siem/common/graphql/root';
-import { sharedSchema } from 'siem/common/graphql/shared';
+import { rootSchema } from '../../common/graphql/root';
+import { sharedSchema } from '../../common/graphql/shared';
 
 import { authenticationsSchema } from './authentications';
 import { ecsSchema } from './ecs';

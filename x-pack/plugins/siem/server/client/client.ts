@@ -6,7 +6,7 @@
 
 import { Legacy } from 'kibana';
 
-import { APP_ID, SIGNALS_INDEX_KEY } from 'siem/common/constants';
+import { APP_ID, SIGNALS_INDEX_KEY } from '../../common/constants';
 
 export class SiemClient {
   public readonly signalsIndex: string;

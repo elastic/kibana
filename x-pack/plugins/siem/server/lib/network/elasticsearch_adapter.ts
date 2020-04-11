@@ -22,7 +22,7 @@ import {
 import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from 'siem/common/constants';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import {
   NetworkDnsRequestOptions,

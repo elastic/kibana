@@ -10,7 +10,7 @@ import { AuthenticationsData, AuthenticationsEdges } from '../../graphql/types';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { TermAggregation } from '../types';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from 'siem/common/constants';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import { auditdFieldsMap, buildQuery } from './query.dsl';
 import {

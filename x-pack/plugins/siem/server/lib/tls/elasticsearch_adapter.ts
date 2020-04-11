@@ -10,7 +10,7 @@ import { TlsData, TlsEdges } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from 'siem/common/constants';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { TlsRequestOptions } from './index';
 
 import { TlsAdapter, TlsBuckets } from './types';

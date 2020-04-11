@@ -8,7 +8,7 @@ import { CallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
 import { ListsDefaultArraySchema } from './routes/schemas/types/lists_default_array';
-import { RuleAlertAction, RuleType } from 'siem/common/detection_engine/types';
+import { RuleAlertAction, RuleType } from '../../../common/detection_engine/types';
 
 export type PartialFilter = Partial<Filter>;
 

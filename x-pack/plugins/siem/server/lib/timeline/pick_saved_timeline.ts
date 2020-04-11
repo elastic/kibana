@@ -5,7 +5,7 @@
  */
 
 import { AuthenticatedUser } from '../../../../security/common/model';
-import { UNAUTHENTICATED_USER } from 'siem/common/constants';
+import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import { SavedTimeline } from './types';
 
 export const pickSavedTimeline = (
