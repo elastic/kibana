@@ -49,6 +49,8 @@ const TAB_INDEXED_FIELDS = 'indexedFields';
 const TAB_SCRIPTED_FIELDS = 'scriptedFields';
 const TAB_SOURCE_FILTERS = 'sourceFilters';
 
+const EDIT_FIELD_PATH = '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}';
+
 function updateSourceFiltersTable($scope) {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_SOURCE_FILTERS_DOM_ELEMENT_ID);
@@ -98,10 +100,7 @@ function updateScriptedFieldsTable($scope) {
           scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
           helpers={{
             redirectToRoute: field => {
-              $scope.kbnUrl.changePath(
-                '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
-                field
-              );
+              $scope.kbnUrl.changePath(EDIT_FIELD_PATH, field);
               $scope.$apply();
             },
             getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
@@ -144,10 +143,7 @@ function updateIndexedFieldsTable($scope) {
           indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
           helpers={{
             redirectToRoute: field => {
-              $scope.kbnUrl.changePath(
-                '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
-                field
-              );
+              $scope.kbnUrl.changePath(EDIT_FIELD_PATH, field);
               $scope.$apply();
             },
             getFieldInfo: $scope.getFieldInfo,

@@ -65,9 +65,6 @@ export class IndexedFieldsTable extends Component {
           return {
             ...field,
             displayName: field.displayName,
-            routes: {
-              edit: '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
-            },
             indexPattern: field.indexPattern,
             format: getFieldFormat(indexPattern, field.name),
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
