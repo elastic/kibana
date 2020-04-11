@@ -21,9 +21,6 @@ export async function createBrowserDriverFactory(
   const browserType = captureConfig.browser.type;
   const dataDir = config.kbnConfig.get('path', 'data');
 
-  if (browserConfig.disableSandbox) {
-    logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
-  }
   if (browserAutoDownload) {
     await ensureBrowserDownloaded(browserType);
   }

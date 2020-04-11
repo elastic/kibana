@@ -5,7 +5,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
-import { logConfiguration } from '../log_configuration';
 import { createBrowserDriverFactory } from './browsers';
 import { ReportingCore, ReportingConfig } from './core';
 import { createQueueFactory, enqueueJobFactory, LevelLogger, runValidations } from './lib';
@@ -58,8 +57,6 @@ export class ReportingPlugin
     });
 
     setFieldFormats(plugins.data.fieldFormats);
-
-    logConfiguration(this.config.get('capture'), this.logger);
 
     return {};
   }

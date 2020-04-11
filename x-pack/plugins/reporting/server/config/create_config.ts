@@ -82,21 +82,33 @@ export function createConfig$(
 
       // disableSandbox was not set: apply default for OS
       const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
+      const osName = `${os.os} ${os.dist} ${os.release || ''}`;
+
       logger.debug(
         i18n.translate('xpack.reporting.serverConfig.osDetected', {
-          defaultMessage:
-            'Running on OS: "{osName}", distribution: "{dist}", release: "${release}"',
-          values: { osName: os.os, dist: os.dist, release: os.release },
+          defaultMessage: `Running on OS: '{osName}'`,
+          values: { osName },
         })
       );
 
-      if (disableSandbox) {
-        logger.warn(
-          i18n.translate('xpack.reporting.serverConfig.autoSet.sandboxDisabled', {
-            defaultMessage: `Automatically setting '{configKey}: false' in Reporting plugin configuration. Chromium sandbox is not supported for '{osName}.'`,
+      const sandboxEnabled = !disableSandbox;
+      if (sandboxEnabled) {
+        logger.info(
+          i18n.translate('xpack.reporting.serverConfig.autoSet.sandboxEnabled', {
+            defaultMessage: `Automatically setting '{configKey}: true'. Supported OS: {osName}`,
             values: {
               configKey: 'xpack.reporting.capture.browser.chromium.disableSandbox',
-              osName: `${os.os}/${os.dist}`,
+              osName,
+            },
+          })
+        );
+      } else {
+        logger.warn(
+          i18n.translate('xpack.reporting.serverConfig.autoSet.sandboxDisabled', {
+            defaultMessage: `Automatically setting '{configKey}: false'. Chromium sandbox is not supported for '{osName}.'`,
+            values: {
+              configKey: 'xpack.reporting.capture.browser.chromium.disableSandbox',
+              osName,
             },
           })
         );
@@ -108,10 +120,7 @@ export function createConfig$(
           ...config.capture,
           browser: {
             ...config.capture.browser,
-            chromium: {
-              ...config.capture.browser.chromium,
-              disableSandbox,
-            },
+            chromium: { ...config.capture.browser.chromium, disableSandbox },
           },
         },
       };
