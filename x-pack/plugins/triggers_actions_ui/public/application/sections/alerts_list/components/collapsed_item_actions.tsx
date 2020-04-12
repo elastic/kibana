@@ -66,7 +66,6 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       ownFocus
       data-test-subj="collapsedItemActions"
     >
-      <p>helloooo</p>
       <EuiFormRow>
         <EuiSwitch
           name="enable"

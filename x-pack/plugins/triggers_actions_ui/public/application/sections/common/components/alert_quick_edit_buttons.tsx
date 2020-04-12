@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 
 import { Alert } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
@@ -15,6 +15,7 @@ import {
   withBulkAlertOperations,
   ComponentOpts as BulkOperationsComponentOpts,
 } from './with_bulk_alert_api_operations';
+import './alert_quick_edit_buttons.scss';
 
 export type ComponentOpts = {
   selectedItems: Alert[];
@@ -147,9 +148,9 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   return (
-    <Fragment>
+    <EuiContextMenuPanel>
       {!allAlertsMuted && (
-        <EuiButtonEmpty
+        <EuiContextMenuItem
           onClick={onmMuteAllClick}
           isLoading={isMutingAlerts}
           isDisabled={isPerformingAction}
@@ -157,12 +158,12 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
-            defaultMessage="Mute"
+            defaultMessage="Mute all"
           />
-        </EuiButtonEmpty>
+        </EuiContextMenuItem>
       )}
       {allAlertsMuted && (
-        <EuiButtonEmpty
+        <EuiContextMenuItem
           onClick={onUnmuteAllClick}
           isLoading={isUnmutingAlerts}
           isDisabled={isPerformingAction}
@@ -170,12 +171,12 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
-            defaultMessage="Unmute"
+            defaultMessage="Unmute all"
           />
-        </EuiButtonEmpty>
+        </EuiContextMenuItem>
       )}
       {allAlertsDisabled && (
-        <EuiButtonEmpty
+        <EuiContextMenuItem
           onClick={onEnableAllClick}
           isLoading={isEnablingAlerts}
           isDisabled={isPerformingAction}
@@ -183,12 +184,12 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
-            defaultMessage="Enable"
+            defaultMessage="Enable all"
           />
-        </EuiButtonEmpty>
+        </EuiContextMenuItem>
       )}
       {!allAlertsDisabled && (
-        <EuiButtonEmpty
+        <EuiContextMenuItem
           onClick={onDisableAllClick}
           isLoading={isDisablingAlerts}
           isDisabled={isPerformingAction}
@@ -196,23 +197,25 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
-            defaultMessage="Disable"
+            defaultMessage="Disable all"
           />
-        </EuiButtonEmpty>
+        </EuiContextMenuItem>
       )}
 
-      <EuiButtonEmpty
+      <EuiContextMenuItem
         onClick={deleteSelectedItems}
         isLoading={isDeletingAlerts}
+        icon="trash"
         isDisabled={isPerformingAction}
         data-test-subj="deleteAll"
+        className="actBulkActionPopover__deleteAll"
       >
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
-          defaultMessage="Delete"
+          defaultMessage="Delete all"
         />
-      </EuiButtonEmpty>
-    </Fragment>
+      </EuiContextMenuItem>
+    </EuiContextMenuPanel>
   );
 };
 
