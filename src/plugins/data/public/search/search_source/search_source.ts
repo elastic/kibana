@@ -234,7 +234,6 @@ export class SearchSource {
       );
     } else {
       const { searching, abort } = this.runSearch(searchRequest, esShardTimeout);
-
       response = searching.then(result => handleResponse(searchRequest, result));
       if (options.abortSignal) options.abortSignal.addEventListener('abort', abort);
     }

@@ -18,17 +18,16 @@
  */
 
 import { FetchHandlers } from '../fetch';
-import { IndexPattern } from '../../index_patterns';
 import { SearchRequest, SearchResponse } from '..';
 
 export interface SearchStrategySearchParams extends FetchHandlers {
   searchRequests: SearchRequest[];
 }
 
+// @deprecated
 export interface SearchStrategyProvider {
   id: string;
   search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
-  isViable: (indexPattern: IndexPattern) => boolean;
 }
 
 export interface SearchStrategyResponse {
