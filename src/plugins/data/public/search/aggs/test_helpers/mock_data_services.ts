@@ -18,8 +18,8 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../public/mocks';
+import { coreMock } from '../../../../../../core/public/mocks';
+import { dataPluginMock } from '../../../mocks';
 import {
   setFieldFormats,
   setIndexPatterns,
@@ -29,7 +29,7 @@ import {
   setQueryService,
   setSearchService,
   setUiSettings,
-} from '../../../../public/services';
+} from '../../../services';
 
 /**
  * Testing helper which calls all of the service setters used in the
@@ -49,4 +49,9 @@ export function mockDataServices() {
   setQueryService(data.query);
   setSearchService(data.search);
   setUiSettings(core.uiSettings);
+
+  return {
+    core,
+    data,
+  };
 }
