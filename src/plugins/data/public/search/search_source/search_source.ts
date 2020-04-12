@@ -76,14 +76,13 @@ import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
 import { IIndexPattern, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
+import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';
 
 import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
-import { handleResponse } from '../fetch/handle_response';
-import { getSearchParams } from '../search_strategy/get_search_params';
 import { ISearchStart } from '../types';
+import { fetchSoon } from '../legacy/fetch_soon';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 

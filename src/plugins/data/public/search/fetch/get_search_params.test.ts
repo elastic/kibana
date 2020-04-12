@@ -18,7 +18,7 @@
  */
 
 import { getSearchParams } from './get_search_params';
-import { IUiSettingsClient } from '../../../../../core/public';
+import { IUiSettingsClient } from 'kibana/public';
 
 function getConfigStub(config: any = {}) {
   return {

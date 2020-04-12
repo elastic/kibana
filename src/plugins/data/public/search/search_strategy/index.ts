@@ -22,5 +22,3 @@ export { SearchError, getSearchErrorType } from './search_error';
 export { SearchStrategyProvider, SearchStrategySearchParams } from './types';
 
 export { defaultSearchStrategy } from '../legacy/default_search_strategy';
-
-export { getIgnoreThrottled, getMaxConcurrentShardRequests } from './get_search_params';

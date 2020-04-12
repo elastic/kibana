@@ -18,5 +18,12 @@
  */
 
 export * from './types';
-export { fetchSoon } from '../legacy/fetch_soon';
+export {
+  getSearchParams,
+  getPreference,
+  getTimeout,
+  getIgnoreThrottled,
+  getMaxConcurrentShardRequests,
+} from './get_search_params';
 export { RequestFailure } from './errors';
+export { handleResponse } from './handle_response';

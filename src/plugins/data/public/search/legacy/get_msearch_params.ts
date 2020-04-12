@@ -18,7 +18,7 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { getIgnoreThrottled, getMaxConcurrentShardRequests } from '../search_strategy';
+import { getIgnoreThrottled, getMaxConcurrentShardRequests } from '../fetch';
 
 export function getMSearchParams(config: IUiSettingsClient) {
   return {

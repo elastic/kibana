@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from '../../../../../core/public';
+import { IUiSettingsClient } from 'kibana/public';
 
 const sessionId = Date.now();
 
