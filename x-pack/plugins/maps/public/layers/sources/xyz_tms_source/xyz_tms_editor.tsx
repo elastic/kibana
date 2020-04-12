@@ -55,17 +55,23 @@ export class XYZTMSEditor extends Component<Props, State> {
   }
 
   _handleTMSAttributionChange(attributionUpdate: AttributionDescriptor) {
-    this.setState(attributionUpdate, () => {
-      const { attributionText, attributionUrl, tmsInput } = this.state;
+    this.setState(
+      {
+        attributionUrl: attributionUpdate.attributionUrl || '',
+        attributionText: attributionUpdate.attributionText || '',
+      },
+      () => {
+        const { attributionText, attributionUrl, tmsInput } = this.state;
 
-      if (tmsInput && attributionText && attributionUrl) {
-        this._sourceConfigChange({
-          urlTemplate: tmsInput,
-          attributionText,
-          attributionUrl,
-        });
+        if (tmsInput && attributionText && attributionUrl) {
+          this._sourceConfigChange({
+            urlTemplate: tmsInput,
+            attributionText,
+            attributionUrl,
+          });
+        }
       }
-    });
+    );
   }
 
   render() {
