@@ -131,6 +131,10 @@ export const TAGS = i18n.translate('xpack.siem.case.caseView.tags', {
   defaultMessage: 'Tags',
 });
 
+export const ACTIONS = i18n.translate('xpack.siem.case.allCases.actions', {
+  defaultMessage: 'Actions',
+});
+
 export const NO_TAGS_AVAILABLE = i18n.translate('xpack.siem.case.allCases.noTagsAvailable', {
   defaultMessage: 'No tags available',
 });
