@@ -63,7 +63,7 @@ describe('useUpdateComment', () => {
     });
   });
 
-  it('patch case', async () => {
+  it('patch comment', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateComment>(() =>
         useUpdateComment()

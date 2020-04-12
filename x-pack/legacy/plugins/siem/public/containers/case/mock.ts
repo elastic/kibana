@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as rt from 'io-ts';
 import {
   ActionLicense,
   AllCases,
@@ -25,11 +24,15 @@ import {
   CommentRequest,
   ServiceConnectorCaseParams,
   ServiceConnectorCaseResponse,
-  User,
+  Status,
   UserAction,
   UserActionField,
+  CaseResponse,
+  CasesStatusResponse,
+  CaseUserActionsResponse,
+  CasesResponse,
+  CasesFindResponse,
 } from '../../../../../../plugins/case/common/api/cases';
-import { LicenseType } from '../../../../../../plugins/licensing/common/types';
 
 export const basicCaseId = 'basic-case-id';
 const basicCommentId = 'basic-comment-id';
@@ -37,6 +40,12 @@ const basicCreatedAt = '2020-02-20T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-19T15:02:57.995Z';
 export const elasticUser = {
   fullName: 'Leslie Knope',
+  username: 'lknope',
+  email: 'leslie.knope@elastic.co',
+};
+
+export const elasticUserSnake = {
+  full_name: 'Leslie Knope',
   username: 'lknope',
   email: 'leslie.knope@elastic.co',
 };
@@ -69,10 +78,32 @@ export const basicCase: Case = {
   title: 'Another horrible breach!!',
   totalComment: 1,
   updatedAt: basicUpdatedAt,
-  updatedBy: {
-    username: 'updateuser',
-  },
+  updatedBy: elasticUser,
   version: 'WzQ3LDFd',
+};
+export const basicCommentSnake: CommentResponse = {
+  ...basicComment,
+  comment: 'Solve this fast!',
+  id: basicCommentId,
+  created_at: basicCreatedAt,
+  created_by: elasticUserSnake,
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: null,
+  updated_by: null,
+};
+
+export const basicCaseSnake: CaseResponse = {
+  ...basicCase,
+  status: 'open' as Status,
+  closed_at: null,
+  closed_by: null,
+  comments: [basicCommentSnake],
+  created_at: basicCreatedAt,
+  created_by: elasticUserSnake,
+  external_service: null,
+  updated_at: basicUpdatedAt,
+  updated_by: elasticUserSnake,
 };
 
 export const basicCasePost: Case = {
@@ -99,6 +130,11 @@ export const casesStatus: CasesStatus = {
   countOpenCases: 20,
 };
 
+export const casesStatusSnake: CasesStatusResponse = {
+  count_closed_cases: 130,
+  count_open_cases: 20,
+};
+
 export const reporters: string[] = ['alexis', 'kim', 'maria', 'steph'];
 export const respReporters = [
   { username: 'alexis' },
@@ -106,14 +142,22 @@ export const respReporters = [
   { username: 'maria' },
   { username: 'steph' },
 ];
-const basicPush = {
+export const push = {
   connector_id: 'connector_id',
   connector_name: 'connector name',
   external_id: 'external_id',
   external_title: 'external title',
   external_url: 'basicPush.com',
+};
+const basicPush = {
+  ...push,
   pushed_at: basicUpdatedAt,
-  pushed_by: elasticUser.username,
+  pushed_by: elasticUserSnake,
+};
+
+export const basicPushCaseSnake = {
+  ...basicCaseSnake,
+  external_service: basicPush,
 };
 
 const basicPushCamel = {
@@ -123,7 +167,7 @@ const basicPushCamel = {
   externalTitle: 'external title',
   externalUrl: 'basicPush.com',
   pushedAt: basicUpdatedAt,
-  pushedBy: elasticUser.username,
+  pushedBy: elasticUser,
 };
 
 export const pushedCase: Case = {
@@ -134,9 +178,7 @@ export const pushedCase: Case = {
   title: 'Another horrible breach!!',
   totalComment: 1,
   updatedAt: basicUpdatedAt,
-  updatedBy: {
-    username: 'updateuser',
-  },
+  updatedBy: elasticUser,
   version: 'WzQ3LDFd',
 };
 
@@ -161,6 +203,24 @@ const basicAction = {
   caseId: basicCaseId,
   commentId: null,
 };
+
+export const casePushParams = {
+  actionBy: elasticUser,
+  caseId: basicCaseId,
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  incidentId: null,
+  title: 'what a cool value',
+  commentId: null,
+  updatedAt: basicCreatedAt,
+  updatedBy: elasticUser,
+  description: 'nice',
+};
+export const actionTypeExecutorResult = {
+  actionId: 'string',
+  status: 'ok',
+  data: serviceConnector,
+};
 export const getUserAction = (af: UserActionField, a: UserAction) => ({
   ...basicAction,
   actionId: `${af[0]}-${a}`,
@@ -173,10 +233,35 @@ export const getUserAction = (af: UserActionField, a: UserAction) => ({
       : basicAction.newValue,
 });
 
+const basicActionSnake = {
+  action_at: basicCreatedAt,
+  action_by: elasticUserSnake,
+  old_value: null,
+  new_value: 'what a cool value',
+  case_id: basicCaseId,
+  comment_id: null,
+};
+export const getUserActionSnake = (af: UserActionField, a: UserAction) => ({
+  ...basicActionSnake,
+  action_id: `${af[0]}-${a}`,
+  action_field: af,
+  action: a,
+  comment_id: af[0] === 'comment' ? basicCommentId : null,
+  new_value:
+    a === 'push-to-service' && af[0] === 'pushed'
+      ? JSON.stringify(basicPush)
+      : basicAction.newValue,
+});
+
 export const caseUserActions: CaseUserActions[] = [
   getUserAction(['description'], 'create'),
   getUserAction(['comment'], 'create'),
   getUserAction(['description'], 'update'),
+];
+export const caseUserActionsSnake: CaseUserActionsResponse = [
+  getUserActionSnake(['description'], 'create'),
+  getUserActionSnake(['comment'], 'create'),
+  getUserActionSnake(['description'], 'update'),
 ];
 
 export const cases: Case[] = [
@@ -193,6 +278,22 @@ export const allCases: AllCases = {
   perPage: 5,
   total: 20,
   ...casesStatus,
+};
+
+export const casesSnake: CasesResponse = [
+  basicCaseSnake,
+  { ...basicCaseSnake, id: '1', totalComment: 0, comments: [] },
+  { ...basicCaseSnake, id: '2', totalComment: 0, comments: [] },
+  { ...basicCaseSnake, id: '3', totalComment: 0, comments: [] },
+  { ...basicCaseSnake, id: '4', totalComment: 0, comments: [] },
+];
+
+export const allCasesSnake: CasesFindResponse = {
+  cases: casesSnake,
+  page: 1,
+  per_page: 5,
+  total: 20,
+  ...casesStatusSnake,
 };
 export const actionLicenses: ActionLicense[] = [
   {

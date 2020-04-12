@@ -59,7 +59,7 @@ const dataFetchReducer = (state: DeleteState, action: Action): DeleteState => {
   }
 };
 
-interface UseDeleteCase extends DeleteState {
+export interface UseDeleteCase extends DeleteState {
   dispatchResetIsDeleted: () => void;
   handleOnDeleteConfirm: (caseIds: DeleteCase[]) => void;
   handleToggleModal: () => void;
