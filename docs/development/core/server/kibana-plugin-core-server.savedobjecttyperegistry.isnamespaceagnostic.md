@@ -4,7 +4,7 @@
 
 ## SavedObjectTypeRegistry.isNamespaceAgnostic() method
 
-Returns the `namespaceAgnostic` property for given type, or `false` if the type is not registered.
+Returns whether the type is namespace-agnostic (global); resolves to `false` if the type is not registered
 
 <b>Signature:</b>
 
