@@ -9,7 +9,7 @@ import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 
 export interface PluginsDependencies {
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
   management: ManagementSetup;
   indexManagement?: IndexManagementPluginSetup;
 }
