@@ -51,10 +51,17 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
       <EuiFlexItem>
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">
-          <FormattedMessage
-            id="xpack.ingestManager.createDatasource.pageDescription"
-            defaultMessage="Follow the instructions below to add a data source to the selected agent configuration."
-          />
+          {from === 'config' ? (
+            <FormattedMessage
+              id="xpack.ingestManager.createDatasource.pageDescriptionfromConfig"
+              defaultMessage="Follow the instructions below to add an integration to this agent configuration."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ingestManager.createDatasource.pageDescriptionfromPackage"
+              defaultMessage="Follow the instructions below to add this integration to an agent configuration."
+            />
+          )}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

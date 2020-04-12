@@ -200,7 +200,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     from === 'package'
       ? {
           title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectAgentConfigTitle', {
-            defaultMessage: 'Select an Agent configuration',
+            defaultMessage: 'Select an agent configuration',
           }),
           children: (
             <StepSelectConfig
