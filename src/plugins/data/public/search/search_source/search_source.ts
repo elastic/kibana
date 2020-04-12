@@ -81,6 +81,9 @@ import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
 import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
+import { handleResponse } from '../fetch/handle_response';
+import { getSearchParams } from '../search_strategy/get_search_params';
+import { ISearchStart } from '../types';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
@@ -184,6 +187,26 @@ export class SearchSource {
     return this.parent;
   }
 
+  private search(searchRequest: SearchRequest, searchService: ISearchStart, searchParams: any) {
+    const abortController = new AbortController();
+    const { index, indexType, body } = searchRequest;
+    const params = {
+      index: index.title || index,
+      body,
+      ...searchParams,
+    };
+    const { signal } = abortController;
+    const promise = searchService
+      .search({ params, indexType }, { signal })
+      .toPromise()
+      .then(({ rawResponse }) => rawResponse);
+
+    return {
+      searching: promise,
+      abort: () => abortController.abort(),
+    };
+  }
+
   /**
    * Fetch this source and reject the returned Promise on error
    *
@@ -196,18 +219,28 @@ export class SearchSource {
     this.history = [searchRequest];
 
     const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
-    const response = await fetchSoon(
-      searchRequest,
-      {
-        ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
-        ...options,
-      },
-      {
-        searchService: getSearchService(),
-        config: getUiSettings(),
-        esShardTimeout,
-      }
-    );
+    const legacySearch = getUiSettings().get('courier:batchSearches');
+    let response;
+    if (legacySearch) {
+      response = await fetchSoon(
+        searchRequest,
+        {
+          ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
+          ...options,
+        },
+        {
+          searchService: getSearchService(),
+          config: getUiSettings(),
+          esShardTimeout,
+        }
+      );
+    } else {
+      const searchParams = getSearchParams(getUiSettings(), esShardTimeout);
+      const { searching, abort } = this.search(searchRequest, getSearchService(), searchParams);
+
+      response = searching.then(result => handleResponse(searchRequest, result));
+      if (options.abortSignal) options.abortSignal.addEventListener('abort', abort);
+    }
 
     if (response.error) {
       throw new RequestFailure(null, response);
@@ -246,7 +279,6 @@ export class SearchSource {
 
   /**
    *  Called by requests of this search source when they are started
-   *  @param  {Courier.Request} request
    *  @param options
    *  @return {Promise<undefined>}
    */
@@ -430,7 +462,6 @@ export class SearchSource {
    * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
    *
    * Using `createSearchSource`, the instance can be re-created.
-   * @param searchSource The search source to serialize
    * @public */
   public serialize() {
     const references: SavedObjectReference[] = [];
