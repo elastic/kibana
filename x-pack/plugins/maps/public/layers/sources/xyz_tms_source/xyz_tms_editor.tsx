@@ -54,7 +54,7 @@ export class XYZTMSEditor extends Component<Props, State> {
     );
   }
 
-  _handleTMSAttributionChange(attributionUpdate: AttributionUpdate) {
+  _handleTMSAttributionChange(attributionUpdate: AttributionDescriptor) {
     this.setState(attributionUpdate, () => {
       const { attributionText, attributionUrl, tmsInput } = this.state;
 
