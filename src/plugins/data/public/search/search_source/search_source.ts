@@ -81,7 +81,6 @@ import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '.
 import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
-import { ISearchStart } from '../types';
 import { fetchSoon } from '../legacy';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
@@ -186,17 +185,17 @@ export class SearchSource {
     return this.parent;
   }
 
-  private search(searchRequest: SearchRequest, searchService: ISearchStart, searchParams: any) {
+  private runSearch(searchRequest: SearchRequest, esShardTimeout: number) {
+    const searchParams = getSearchParams(getUiSettings(), esShardTimeout);
     const abortController = new AbortController();
-    const { index, indexType, body } = searchRequest;
     const params = {
-      index: index.title || index,
-      body,
+      index: searchRequest.index.title || searchRequest.index,
+      body: searchRequest.body,
       ...searchParams,
     };
     const { signal } = abortController;
-    const promise = searchService
-      .search({ params, indexType }, { signal })
+    const promise = getSearchService()
+      .search({ params, indexType: searchRequest.indexType }, { signal })
       .toPromise()
       .then(({ rawResponse }) => rawResponse);
 
@@ -234,8 +233,7 @@ export class SearchSource {
         }
       );
     } else {
-      const searchParams = getSearchParams(getUiSettings(), esShardTimeout);
-      const { searching, abort } = this.search(searchRequest, getSearchService(), searchParams);
+      const { searching, abort } = this.runSearch(searchRequest, esShardTimeout);
 
       response = searching.then(result => handleResponse(searchRequest, result));
       if (options.abortSignal) options.abortSignal.addEventListener('abort', abort);
