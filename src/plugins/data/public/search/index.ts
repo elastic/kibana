@@ -46,7 +46,7 @@ export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search
 
 export { LegacyApiCaller, SearchRequest, SearchResponse } from './es_client';
 
-export { SearchError, SearchStrategyProvider, getSearchErrorType } from './search_strategy';
+export { SearchError, getSearchErrorType } from './fetch';
 
 export {
   ISearchSource,

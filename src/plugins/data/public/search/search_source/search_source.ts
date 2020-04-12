@@ -82,7 +82,7 @@ import { getSearchService, getUiSettings, getInjectedMetadata } from '../../serv
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { ISearchStart } from '../types';
-import { fetchSoon } from '../legacy/fetch_soon';
+import { fetchSoon } from '../legacy';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 

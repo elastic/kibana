@@ -17,8 +17,21 @@
  * under the License.
  */
 
-export { SearchError, getSearchErrorType } from './search_error';
+import { FetchHandlers } from '../fetch';
+import { IndexPattern } from '../../index_patterns';
+import { SearchRequest, SearchResponse } from '..';
 
-export { SearchStrategyProvider, SearchStrategySearchParams } from './types';
+export interface SearchStrategySearchParams extends FetchHandlers {
+  searchRequests: SearchRequest[];
+}
 
-export { defaultSearchStrategy } from '../legacy/default_search_strategy';
+export interface SearchStrategyProvider {
+  id: string;
+  search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
+  isViable: (indexPattern: IndexPattern) => boolean;
+}
+
+export interface SearchStrategyResponse {
+  searching: Promise<SearchResponse[]>;
+  abort: () => void;
+}

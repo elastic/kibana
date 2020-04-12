@@ -25,5 +25,7 @@ export {
   getIgnoreThrottled,
   getMaxConcurrentShardRequests,
 } from './get_search_params';
-export { RequestFailure } from './errors';
+
+export { SearchError, getSearchErrorType } from './search_error';
+export { RequestFailure } from './request_error';
 export { handleResponse } from './handle_response';

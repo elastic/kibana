@@ -18,9 +18,9 @@
  */
 
 import { callClient } from './call_client';
-import { handleResponse } from '../fetch/handle_response';
-import { FetchHandlers } from '../fetch/types';
-import { SearchStrategySearchParams, defaultSearchStrategy } from '../search_strategy';
+import { SearchStrategySearchParams } from './types';
+import { defaultSearchStrategy } from './default_search_strategy';
+import { handleResponse, FetchHandlers } from '../fetch';
 
 const mockAbortFn = jest.fn();
 jest.mock('./handle_response', () => ({

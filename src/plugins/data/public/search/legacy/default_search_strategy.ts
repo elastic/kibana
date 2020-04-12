@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { SearchStrategyProvider, SearchStrategySearchParams } from '../search_strategy';
 import { isDefault } from '../../index_patterns';
 import { getSearchParams, getPreference, getTimeout } from '../fetch';
 import { getMSearchParams } from './get_msearch_params';
+import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
 
 export const defaultSearchStrategy: SearchStrategyProvider = {
   id: 'default',

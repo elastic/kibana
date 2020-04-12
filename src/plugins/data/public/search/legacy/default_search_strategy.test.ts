@@ -18,9 +18,9 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { SearchStrategySearchParams } from '../search_strategy/types';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { searchStartMock } from '../mocks';
+import { SearchStrategySearchParams } from './types';
 
 const { search } = defaultSearchStrategy;
 
