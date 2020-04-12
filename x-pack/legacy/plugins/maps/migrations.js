@@ -11,6 +11,7 @@ import { moveApplyGlobalQueryToSources } from './common/migrations/move_apply_gl
 import { addFieldMetaOptions } from './common/migrations/add_field_meta_options';
 import { migrateSymbolStyleDescriptor } from './common/migrations/migrate_symbol_style_descriptor';
 import { migrateUseTopHitsToScalingType } from './common/migrations/scaling_type';
+import { migrateJoinAggKey } from './common/migrations/join_agg_key';
 
 export const migrations = {
   map: {
@@ -55,6 +56,14 @@ export const migrations = {
       return {
         ...doc,
         attributes: attributesPhase2,
+      };
+    },
+    '7.8.0': doc => {
+      const attributes = migrateJoinAggKey(doc);
+
+      return {
+        ...doc,
+        attributes,
       };
     },
   },

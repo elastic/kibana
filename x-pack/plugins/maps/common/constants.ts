@@ -70,6 +70,14 @@ export enum FIELD_ORIGIN {
   SOURCE = 'source',
   JOIN = 'join',
 }
+export const JOIN_FIELD_NAME_PREFIX = '__kbnjoin__';
+
+// function in common since its needed by migration
+export function getJoinAggKey({ aggType, aggFieldName, joinRightSourceId }) {
+  const metricKey =
+    aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${aggFieldName}` : aggType;
+  return `${JOIN_FIELD_NAME_PREFIX}${metricKey}__${joinRightSourceId}`;
+}
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 export const META_ID_ORIGIN_SUFFIX = 'meta';
@@ -129,6 +137,7 @@ export enum DRAW_TYPE {
   POLYGON = 'POLYGON',
 }
 
+export const AGG_DELIMITER = '_of_';
 export enum AGG_TYPE {
   AVG = 'avg',
   COUNT = 'count',
