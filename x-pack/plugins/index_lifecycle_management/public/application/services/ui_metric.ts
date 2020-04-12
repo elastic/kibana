@@ -23,10 +23,12 @@ import {
 
 import { defaultColdPhase, defaultWarmPhase, defaultHotPhase } from '../store/defaults';
 
-export let trackUiMetric: (metricType: UiStatsMetricType, eventName: string) => void;
+export let trackUiMetric = (metricType: UiStatsMetricType, eventName: string) => {};
 
-export function init(usageCollection: UsageCollectionSetup): void {
-  trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, UIM_APP_NAME);
+export function init(usageCollection?: UsageCollectionSetup): void {
+  if (usageCollection) {
+    trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, UIM_APP_NAME);
+  }
 }
 
 export function getUiMetricsForPhases(phases: any): any {
