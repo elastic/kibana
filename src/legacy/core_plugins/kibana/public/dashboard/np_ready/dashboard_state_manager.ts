@@ -200,8 +200,10 @@ export class DashboardStateManager {
       },
       stateStorage: this.kbnUrlStateStorage,
     });
+  }
 
-    // actually start syncing state with container
+  public startStateSyncing() {
+    this.saveState({ replace: true });
     this.stateSyncRef.start();
   }
 
