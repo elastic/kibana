@@ -29,8 +29,13 @@ describe('when a single commit is backported', () => {
   );
 
   it('should create PR for forked branch', () => {
-    const { createPullRequestPayload } = spies.getAxiosCalls();
+    const { createPullRequestPayload } = spies.getSpyCalls();
     expect(createPullRequestPayload.head).toBe('sqren:backport/6.0/pr-85');
+  });
+
+  it('should call logger correctly', () => {
+    const { loggerCalls } = spies.getSpyCalls();
+    expect(loggerCalls).toMatchSnapshot();
   });
 
   it('should make correct API requests', () => {
@@ -39,7 +44,7 @@ describe('when a single commit is backported', () => {
       getAuthorRequestConfig,
       getCommitsRequestConfig,
       createPullRequestPayload,
-    } = spies.getAxiosCalls();
+    } = spies.getSpyCalls();
 
     expect(getDefaultRepoBranchAndPerformStartupChecks).toMatchSnapshot();
     expect(getAuthorRequestConfig).toMatchSnapshot();
@@ -99,7 +104,7 @@ describe('when a multiple commits are backported', () => {
       getAuthorRequestConfig,
       getCommitsRequestConfig,
       createPullRequestPayload,
-    } = spies.getAxiosCalls();
+    } = spies.getSpyCalls();
 
     expect(getAuthorRequestConfig).toMatchSnapshot();
     expect(getCommitsRequestConfig).toMatchSnapshot();
@@ -167,7 +172,7 @@ describe('when disabling fork mode', () => {
   );
 
   it('should create PR for non-forked branch', () => {
-    const { createPullRequestPayload } = spies.getAxiosCalls();
+    const { createPullRequestPayload } = spies.getSpyCalls();
     expect(createPullRequestPayload.head).toBe('elastic:backport/6.0/pr-85');
   });
 

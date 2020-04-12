@@ -11,6 +11,7 @@ const { combine } = format;
 export function consoleLog(message: string) {
   // eslint-disable-next-line no-console
   console.log(message);
+  //process.stdout.write(message);
 }
 
 const { argv } = yargs.help(false);
@@ -23,7 +24,7 @@ export const logLevel = argv.verbose
 let winstonInstance: winston.Logger;
 
 export const logger = {
-  info: (message: string, meta?: unknown) => {
+  info: (message: string, meta?: string | Record<string, unknown>) => {
     if (winstonInstance) {
       winstonInstance.info(message, { meta });
     }

@@ -4,17 +4,17 @@ import { chmod, writeFile } from '../../services/fs-promisified';
 import { readConfigFile } from './readConfigFile';
 
 export async function getGlobalConfig() {
-  await maybeCreateGlobalConfigAndFolder();
+  await createGlobalConfigAndFolderIfNotExist();
   const globalConfigPath = getGlobalConfigPath();
   return readConfigFile(globalConfigPath);
 }
 
-export async function maybeCreateGlobalConfigAndFolder() {
+export async function createGlobalConfigAndFolderIfNotExist() {
   const reposPath = getReposPath();
   const globalConfigPath = getGlobalConfigPath();
   const configTemplate = await getConfigTemplate();
   await makeDir(reposPath);
-  const didCreate = await maybeCreateGlobalConfig(
+  const didCreate = await createGlobalConfigIfNotExist(
     globalConfigPath,
     configTemplate
   );
@@ -26,7 +26,7 @@ function ensureCorrectPermissions(globalConfigPath: string) {
   return chmod(globalConfigPath, '600');
 }
 
-export async function maybeCreateGlobalConfig(
+export async function createGlobalConfigIfNotExist(
   globalConfigPath: string,
   configTemplate: string
 ) {

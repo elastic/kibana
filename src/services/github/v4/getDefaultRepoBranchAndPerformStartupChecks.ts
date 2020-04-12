@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios';
+import ora from 'ora';
 import { validateRequiredOptions } from '../../../options/options';
 import { HandledError } from '../../HandledError';
 import {
@@ -41,6 +42,7 @@ export async function getDefaultRepoBranchAndPerformStartupChecks({
   `;
 
   let res: DataResponse;
+  const spinner = ora().start('Initializing...');
   try {
     res = await apiRequestV4<DataResponse>({
       githubApiBaseUrlV4,
@@ -52,16 +54,17 @@ export async function getDefaultRepoBranchAndPerformStartupChecks({
       },
       handleError: false,
     });
+    spinner.stop();
   } catch (e) {
+    spinner.stop();
     const error = e as AxiosError<GithubV4Response<null>>;
 
-    if (error.response) {
-      throwOnInvalidAccessToken({
-        errorResponse: error.response,
-        repoName,
-        repoOwner,
-      });
-    }
+    throwOnInvalidAccessToken({
+      error,
+      repoName,
+      repoOwner,
+    });
+
     throw handleGithubV4Error(error);
   }
 

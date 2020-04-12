@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import ora from 'ora';
 import { getOptions } from './options/options';
 import { runWithOptions } from './runWithOptions';
 import { HandledError } from './services/HandledError';
@@ -9,14 +8,10 @@ import { initLogger, consoleLog } from './services/logger';
 export async function runWithArgs(args: string[]) {
   const logger = initLogger();
 
-  const spinner = ora().start('Initializing');
   try {
     const options = await getOptions(args);
-    spinner.stop();
     await runWithOptions(options);
   } catch (e) {
-    spinner.stop();
-
     if (e instanceof HandledError) {
       consoleLog(e.message);
     } else {

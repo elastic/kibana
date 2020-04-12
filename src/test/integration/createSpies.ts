@@ -3,6 +3,8 @@ import axios from 'axios';
 import inquirer from 'inquirer';
 import { commitsWithPullRequestsMock } from '../../services/github/v4/mocks/commitsByAuthorMock';
 import childProcess = require('child_process');
+import { logger } from '../../services/logger';
+import { SpyHelper } from '../../types/SpyHelper';
 import {
   HOMEDIR_PATH,
   REMOTE_ORIGIN_REPO_PATH,
@@ -39,6 +41,8 @@ export function createSpies({ commitCount }: { commitCount: number }) {
       data: {
         data: { repository: { defaultBranchRef: { name: 'master' } } },
       },
+      headers: { 'custom-header': 'foo' },
+      status: 200,
     })
 
     // mock `getIdByLogin`
@@ -50,13 +54,15 @@ export function createSpies({ commitCount }: { commitCount: number }) {
           },
         },
       },
+      headers: { 'custom-header': 'foo' },
+      status: 200,
     })
 
     // mock `fetchCommitsByAuthor`
     .mockResolvedValueOnce({
-      data: {
-        data: commitsWithPullRequestsMock,
-      },
+      data: { data: commitsWithPullRequestsMock },
+      headers: { 'custom-header': 'foo' },
+      status: 200,
     });
 
   // mock githb API v3
@@ -64,7 +70,11 @@ export function createSpies({ commitCount }: { commitCount: number }) {
     .spyOn(axios, 'request')
 
     // mock create pull request
-    .mockResolvedValueOnce({ data: {} });
+    .mockResolvedValueOnce({
+      data: {},
+      headers: { 'custom-header': 'foo' },
+      status: 200,
+    });
 
   // mock prompt
   jest
@@ -83,7 +93,7 @@ export function createSpies({ commitCount }: { commitCount: number }) {
     }) as any);
 
   return {
-    getAxiosCalls: () => {
+    getSpyCalls: () => {
       const [
         getDefaultRepoBranchAndPerformStartupChecks,
         getAuthorRequestConfig,
@@ -94,7 +104,25 @@ export function createSpies({ commitCount }: { commitCount: number }) {
         (call) => call[0].data
       );
 
+      const loggerSpy = (logger as any).spy as SpyHelper<typeof logger.info>;
+      const loggerCalls = loggerSpy.mock.calls.map(([msg, meta]) => {
+        return [
+          msg,
+
+          typeof meta === 'string'
+            ? meta
+                // remove commit hash in commit summary
+                .replace?.(/\b[0-9a-f]{5,40}\b/g, '<COMMIT HASH>')
+
+                // remove author in commit summary (response from `git cherrypick`)
+                .replace(/^\s+Author:.+$\n/gm, '')
+            : meta,
+        ];
+      });
+
       return {
+        // all log calls (info, verbose and debug) are al routed to the same spy
+        loggerCalls,
         getDefaultRepoBranchAndPerformStartupChecks,
         getAuthorRequestConfig,
         getCommitsRequestConfig,

@@ -14,9 +14,12 @@ node_js:
 cache: yarn
 before_script:
   - yarn
+  - git config --global user.email "travis-backport@travis-ci.org"
+  - git config --global user.name "Travis Backport"
 script:
-  - yarn lint
-  - yarn cover
+  - yarn tsc
+  - yarn lint # lint ts and eslint
+  - yarn jest --coverage # run tests and publish coverage
 after_success:
   - npm install -g coveralls
   - cat coverage/lcov.info | coveralls

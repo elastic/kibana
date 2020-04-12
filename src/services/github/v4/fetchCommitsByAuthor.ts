@@ -125,11 +125,13 @@ export async function fetchCommitsByAuthor(
     const commitMessage = edge.node.message;
     const sha = edge.node.oid;
 
-    const associatedPullRequest = getAssociatedPullRequest(
+    const associatedPullRequest = isAssociatedPullRequest({
       pullRequestEdge,
       options,
-      sha
-    );
+      sha,
+    })
+      ? pullRequestEdge
+      : undefined;
 
     const existingBackports = getExistingBackportPRs(
       commitMessage,
@@ -163,19 +165,20 @@ function getPullNumberFromMessage(firstMessageLine: string) {
   }
 }
 
-function getAssociatedPullRequest(
-  pullRequestEdge: PullRequestEdge | undefined,
-  options: BackportOptions,
-  sha: string
-) {
-  const isAssociated =
+function isAssociatedPullRequest({
+  pullRequestEdge,
+  options,
+  sha,
+}: {
+  pullRequestEdge: PullRequestEdge | undefined;
+  options: BackportOptions;
+  sha: string;
+}) {
+  return (
     pullRequestEdge?.node.repository.name === options.repoName &&
     pullRequestEdge?.node.repository.owner.login === options.repoOwner &&
-    pullRequestEdge?.node.mergeCommit.oid === sha;
-
-  if (isAssociated) {
-    return pullRequestEdge;
-  }
+    pullRequestEdge?.node.mergeCommit.oid === sha
+  );
 }
 
 export function getExistingBackportPRs(

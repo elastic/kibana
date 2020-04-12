@@ -114,6 +114,447 @@ Object {
 }
 `;
 
+exports[`when a single commit is backported should call logger correctly 1`] = `
+Array [
+  Array [
+    "[INFO] POST https://api.github.com/graphql (status: 200)",
+    undefined,
+  ],
+  Array [
+    "[VERBOSE] Query:",
+    "
+    query getDefaultRepoBranchAndPerformStartupChecks(
+      $repoOwner: String!
+      $repoName: String!
+    ) {
+      repository(owner: $repoOwner, name: $repoName) {
+        # check whether \\"backport\\" branch exists
+        ref(qualifiedName: \\"refs/heads/backport\\") {
+          name
+        }
+
+        # get default branch
+        defaultBranchRef {
+          name
+        }
+      }
+    }
+  ",
+  ],
+  Array [
+    "[VERBOSE] Variables:",
+    Object {
+      "repoName": "backport-demo",
+      "repoOwner": "elastic",
+    },
+  ],
+  Array [
+    "[DEBUG] Response headers:",
+    Object {
+      "custom-header": "foo",
+    },
+  ],
+  Array [
+    "[VERBOSE] Response data:",
+    Object {
+      "data": Object {
+        "repository": Object {
+          "defaultBranchRef": Object {
+            "name": "master",
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "[INFO] POST https://api.github.com/graphql (status: 200)",
+    undefined,
+  ],
+  Array [
+    "[VERBOSE] Query:",
+    "
+    query getIdByLogin($login: String!) {
+      user(login: $login) {
+        id
+      }
+    }
+  ",
+  ],
+  Array [
+    "[VERBOSE] Variables:",
+    Object {
+      "login": "sqren",
+    },
+  ],
+  Array [
+    "[DEBUG] Response headers:",
+    Object {
+      "custom-header": "foo",
+    },
+  ],
+  Array [
+    "[VERBOSE] Response data:",
+    Object {
+      "data": Object {
+        "user": Object {
+          "id": "sqren_author_id",
+        },
+      },
+    },
+  ],
+  Array [
+    "[INFO] POST https://api.github.com/graphql (status: 200)",
+    undefined,
+  ],
+  Array [
+    "[VERBOSE] Query:",
+    "
+    query getCommitsByAuthorQuery(
+      $repoOwner: String!
+      $repoName: String!
+      $commitsCount: Int!
+      $sourceBranch: String!
+      $authorId: ID
+      $historyPath: String
+    ) {
+      repository(owner: $repoOwner, name: $repoName) {
+        ref(qualifiedName: $sourceBranch) {
+          target {
+            ... on Commit {
+              history(
+                first: $commitsCount
+                author: { id: $authorId }
+                path: $historyPath
+              ) {
+                edges {
+                  node {
+                    oid
+                    message
+                    associatedPullRequests(first: 1) {
+                      edges {
+                        node {
+                          repository {
+                            owner {
+                              login
+                            }
+                            name
+                          }
+                          number
+                          mergeCommit {
+                            oid
+                          }
+                          timelineItems(
+                            last: 20
+                            itemTypes: CROSS_REFERENCED_EVENT
+                          ) {
+                            edges {
+                              node {
+                                ... on CrossReferencedEvent {
+                                  source {
+                                    __typename
+                                    ... on PullRequest {
+                                      title
+                                      state
+                                      baseRefName
+                                      commits(first: 20) {
+                                        edges {
+                                          node {
+                                            commit {
+                                              message
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ",
+  ],
+  Array [
+    "[VERBOSE] Variables:",
+    Object {
+      "authorId": "sqren_author_id",
+      "commitsCount": 10,
+      "historyPath": null,
+      "repoName": "backport-demo",
+      "repoOwner": "elastic",
+      "sourceBranch": "master",
+    },
+  ],
+  Array [
+    "[DEBUG] Response headers:",
+    Object {
+      "custom-header": "foo",
+    },
+  ],
+  Array [
+    "[VERBOSE] Response data:",
+    Object {
+      "data": Object {
+        "repository": Object {
+          "ref": Object {
+            "target": Object {
+              "history": Object {
+                "edges": Array [
+                  Object {
+                    "node": Object {
+                      "associatedPullRequests": Object {
+                        "edges": Array [],
+                      },
+                      "message": "Add 👻",
+                      "oid": "2e63475c483f7844b0f2833bc57fdee32095bacb",
+                    },
+                  },
+                  Object {
+                    "node": Object {
+                      "associatedPullRequests": Object {
+                        "edges": Array [
+                          Object {
+                            "node": Object {
+                              "mergeCommit": Object {
+                                "oid": "f3b618b9421fdecdb36862f907afbdd6344b361d",
+                              },
+                              "number": 85,
+                              "repository": Object {
+                                "name": "kibana",
+                                "owner": Object {
+                                  "login": "elastic",
+                                },
+                              },
+                              "timelineItems": Object {
+                                "edges": Array [],
+                              },
+                            },
+                          },
+                        ],
+                      },
+                      "message": "Add witch (#85)",
+                      "oid": "f3b618b9421fdecdb36862f907afbdd6344b361d",
+                    },
+                  },
+                  Object {
+                    "node": Object {
+                      "associatedPullRequests": Object {
+                        "edges": Array [
+                          Object {
+                            "node": Object {
+                              "mergeCommit": Object {
+                                "oid": "79cf18453ec32a4677009dcbab1c9c8c73fc14fe",
+                              },
+                              "number": 80,
+                              "repository": Object {
+                                "name": "kibana",
+                                "owner": Object {
+                                  "login": "elastic",
+                                },
+                              },
+                              "timelineItems": Object {
+                                "edges": Array [
+                                  Object {
+                                    "node": Object {
+                                      "source": Object {
+                                        "__typename": "PullRequest",
+                                        "baseRefName": "6.3",
+                                        "commits": Object {
+                                          "edges": Array [
+                                            Object {
+                                              "node": Object {
+                                                "commit": Object {
+                                                  "message": "Add SF mention (#80)
+
+* Add SF mention
+
+* Add several emojis!",
+                                                },
+                                              },
+                                            },
+                                          ],
+                                        },
+                                        "state": "MERGED",
+                                        "title": "some title",
+                                      },
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                        ],
+                      },
+                      "message": "Add SF mention (#80)
+
+* Add SF mention
+
+* Add several emojis!",
+                      "oid": "79cf18453ec32a4677009dcbab1c9c8c73fc14fe",
+                    },
+                  },
+                  Object {
+                    "node": Object {
+                      "associatedPullRequests": Object {
+                        "edges": Array [],
+                      },
+                      "message": "Add backport config",
+                      "oid": "3827bbbaf39914eda4f02f6940189844375fd097",
+                    },
+                  },
+                  Object {
+                    "node": Object {
+                      "associatedPullRequests": Object {
+                        "edges": Array [],
+                      },
+                      "message": "Initial commit",
+                      "oid": "5ea0da550ac191029459289d67f99ad7d310812b",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "[INFO] exec: \`git remote rm origin\`",
+    undefined,
+  ],
+  Array [
+    "[VERBOSE] exec response (success):",
+    "",
+  ],
+  Array [
+    "[INFO] exec: \`git remote rm sqren\`",
+    undefined,
+  ],
+  Array [
+    "[INFO] exec response (error):",
+    [Error: Command failed: git remote rm sqren
+fatal: No such remote: 'sqren'
+],
+  ],
+  Array [
+    "[INFO] exec: \`git remote add sqren https://myAccessToken@github.com/sqren/backport-demo.git\`",
+    undefined,
+  ],
+  Array [
+    "[VERBOSE] exec response (success):",
+    "",
+  ],
+  Array [
+    "[INFO] exec: \`git remote rm elastic\`",
+    undefined,
+  ],
+  Array [
+    "[INFO] exec response (error):",
+    [Error: Command failed: git remote rm elastic
+fatal: No such remote: 'elastic'
+],
+  ],
+  Array [
+    "[INFO] exec: \`git remote add elastic https://myAccessToken@github.com/elastic/backport-demo.git\`",
+    undefined,
+  ],
+  Array [
+    "[VERBOSE] exec response (success):",
+    "",
+  ],
+  Array [
+    "[INFO] Backporting [{\\"branch\\":\\"master\\",\\"sha\\":\\"f3b618b9421fdecdb36862f907afbdd6344b361d\\",\\"formattedMessage\\":\\"Add witch (#85)\\",\\"pullNumber\\":85,\\"existingBackports\\":[]}] to 6.0",
+    undefined,
+  ],
+  Array [
+    "[INFO] Pulling latest changes",
+    undefined,
+  ],
+  Array [
+    "[INFO] exec: \`git reset --hard && git clean -d --force && git fetch elastic 6.0 && git checkout -B backport/6.0/pr-85 elastic/6.0 --no-track\`",
+    undefined,
+  ],
+  Array [
+    "[VERBOSE] exec response (success):",
+    "HEAD is now at <COMMIT HASH> Add 👻
+",
+  ],
+  Array [
+    "[INFO] exec: \`git fetch elastic master:master --force\`",
+    undefined,
+  ],
+  Array [
+    "[VERBOSE] exec response (success):",
+    "",
+  ],
+  Array [
+    "[INFO] exec: \`git cherry-pick f3b618b9421fdecdb36862f907afbdd6344b361d\`",
+    undefined,
+  ],
+  Array [
+    "[VERBOSE] exec response (success):",
+    "[backport/6.0/pr-85 <COMMIT HASH>] Add witch (#85)
+ Date: Thu Apr 11 00:46:08 2019 +0200
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+",
+  ],
+  Array [
+    "[INFO] Pushing branch \\"sqren:backport/6.0/pr-85\\"",
+    undefined,
+  ],
+  Array [
+    "[INFO] exec: \`git push sqren backport/6.0/pr-85:backport/6.0/pr-85 --force\`",
+    undefined,
+  ],
+  Array [
+    "[VERBOSE] exec response (success):",
+    "",
+  ],
+  Array [
+    "[INFO] exec: \`git checkout master && git branch -D backport/6.0/pr-85\`",
+    undefined,
+  ],
+  Array [
+    "[VERBOSE] exec response (success):",
+    "Deleted branch backport/6.0/pr-85 (was <COMMIT HASH>).
+",
+  ],
+  Array [
+    "[INFO] Creating pull request",
+    undefined,
+  ],
+  Array [
+    "[INFO] Creating PR with title: \\"[6.0] Add witch (#85)\\". sqren:backport/6.0/pr-85 -> 6.0",
+    undefined,
+  ],
+  Array [
+    "[INFO] POST https://api.github.com/repos/elastic/backport-demo/pulls (status: 200)",
+    undefined,
+  ],
+  Array [
+    "[DEBUG] Response headers:",
+    Object {
+      "custom-header": "foo",
+    },
+  ],
+  Array [
+    "[VERBOSE] Response data:",
+    Object {},
+  ],
+]
+`;
+
 exports[`when a single commit is backported should make correct API requests 1`] = `
 Object {
   "query": "

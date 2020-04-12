@@ -35,7 +35,7 @@ export async function apiRequestV3<T>(config: AxiosRequestConfig) {
         e.response?.status
       })`
     );
-    logger.info('Response headers:', e.response?.headers);
+    logger.debug('Response headers:', e.response?.headers);
     logger.info('Response data:', e.response?.data);
 
     throw handleGithubV3Error(e);

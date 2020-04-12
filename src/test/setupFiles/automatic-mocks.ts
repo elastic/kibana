@@ -1,10 +1,15 @@
+/*
+ * This file is included in `setupFiles` in jest.config.js
+ * It will be run once per test file
+ */
+
 /* eslint-disable @typescript-eslint/no-empty-function */
 import os from 'os';
 import { last } from 'lodash';
 
 jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
 
-jest.mock('../services/child-process-promisified', () => {
+jest.mock('../../services/child-process-promisified', () => {
   return {
     exec: jest.fn(async (cmd: string) => {
       throw new Error(`Mock required for exec with cmd: "${cmd}"`);
@@ -21,7 +26,7 @@ jest.mock('../services/child-process-promisified', () => {
   };
 });
 
-jest.mock('../services/fs-promisified', () => {
+jest.mock('../../services/fs-promisified', () => {
   return {
     writeFile: jest.fn(async () => 'fs.writeFile mock value'),
 
@@ -81,4 +86,15 @@ jest.mock('ora', () => {
 });
 
 // silence logger
-jest.mock('../services/logger');
+jest.mock('../../services/logger', () => {
+  const spy = jest.fn();
+  return {
+    consoleLog: jest.fn(),
+    logger: {
+      spy: spy,
+      info: (msg: string, meta: unknown) => spy(`[INFO] ${msg}`, meta),
+      verbose: (msg: string, meta: unknown) => spy(`[VERBOSE] ${msg}`, meta),
+      debug: (msg: string, meta: unknown) => spy(`[DEBUG] ${msg}`, meta),
+    },
+  };
+});

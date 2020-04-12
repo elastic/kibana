@@ -1,7 +1,7 @@
 import makeDir from 'make-dir';
 import * as fs from '../../services/fs-promisified';
 import { PromiseReturnType } from '../../types/PromiseReturnType';
-import { getGlobalConfig, maybeCreateGlobalConfig } from './globalConfig';
+import { getGlobalConfig, createGlobalConfigIfNotExist } from './globalConfig';
 
 describe('config', () => {
   afterEach(() => jest.clearAllMocks());
@@ -49,10 +49,10 @@ describe('config', () => {
     });
   });
 
-  describe('maybeCreateGlobalConfig', () => {
+  describe('createGlobalConfigIfNotExist', () => {
     it('should create config and succeed', async () => {
       jest.spyOn(fs, 'writeFile').mockResolvedValueOnce(undefined);
-      const didCreate = await maybeCreateGlobalConfig(
+      const didCreate = await createGlobalConfigIfNotExist(
         '/path/to/globalConfig',
         'myConfigTemplate'
       );
@@ -71,7 +71,7 @@ describe('config', () => {
       (err as any).code = 'EEXIST';
       jest.spyOn(fs, 'writeFile').mockRejectedValueOnce(err);
 
-      const didCreate = await maybeCreateGlobalConfig(
+      const didCreate = await createGlobalConfigIfNotExist(
         'myPath',
         'myConfigTemplate'
       );

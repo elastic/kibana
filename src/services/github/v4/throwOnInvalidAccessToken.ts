@@ -1,4 +1,4 @@
-import { AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 import { HandledError } from '../../HandledError';
 import { getGlobalConfigPath } from '../../env';
 import { GithubV4Response } from './apiRequestV4';
@@ -6,11 +6,11 @@ import { GithubV4Response } from './apiRequestV4';
 export function throwOnInvalidAccessToken({
   repoOwner,
   repoName,
-  errorResponse,
+  error,
 }: {
   repoOwner: string;
   repoName: string;
-  errorResponse: AxiosResponse<GithubV4Response<null>>;
+  error: AxiosError<GithubV4Response<null>>;
 }) {
   type MaybeString = string | undefined;
 
@@ -21,21 +21,21 @@ export function throwOnInvalidAccessToken({
     }
   }
 
-  const statusCode = errorResponse.status;
+  const statusCode = error.response?.status;
 
   switch (statusCode) {
     case 200: {
-      const repoNotFound = errorResponse.data.errors?.some(
+      const repoNotFound = error.response?.data.errors?.some(
         (error) => error.type === 'NOT_FOUND'
       );
 
       const grantedScopes: MaybeString =
-        errorResponse.headers['x-oauth-scopes'];
+        error.response?.headers['x-oauth-scopes'];
 
       const requiredScopes: MaybeString =
-        errorResponse.headers['x-accepted-oauth-scopes'];
+        error.response?.headers['x-accepted-oauth-scopes'];
 
-      const ssoHeader: MaybeString = errorResponse.headers['x-github-sso'];
+      const ssoHeader: MaybeString = error.response?.headers['x-github-sso'];
 
       if (repoNotFound) {
         // repo does not exist
@@ -51,7 +51,7 @@ export function throwOnInvalidAccessToken({
         );
       }
 
-      const repoAccessForbidden = errorResponse.data.errors?.some(
+      const repoAccessForbidden = error.response?.data.errors?.some(
         (error) => error.type === 'FORBIDDEN'
       );
 
