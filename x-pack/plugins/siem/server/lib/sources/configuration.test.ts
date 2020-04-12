@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 import { InmemoryConfigurationAdapter } from '../configuration/inmemory_configuration_adapter';
-import { defaultIndexPattern } from '../../../common/default_index_pattern';
-
 import { ConfigurationSourcesAdapter } from './configuration';
 import { PartialSourceConfiguration } from './types';
 
@@ -76,7 +75,7 @@ describe('the ConfigurationSourcesAdapter', () => {
       new InmemoryConfigurationAdapter({
         sources: {
           sourceOne: {
-            defaultIndex: defaultIndexPattern,
+            defaultIndex: DEFAULT_INDEX_PATTERN,
             fields: {
               container: 'DIFFERENT_CONTAINER_FIELD',
             },

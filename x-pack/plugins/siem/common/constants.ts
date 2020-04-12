@@ -29,6 +29,16 @@ export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 
+/** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
+export const DEFAULT_INDEX_PATTERN = [
+  'apm-*-transaction*',
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+];
+
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'siem:enableNewsFeed';
 

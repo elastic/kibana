@@ -30,8 +30,8 @@ import {
   SIGNALS_INDEX_KEY,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
+  DEFAULT_INDEX_PATTERN,
 } from '../../../plugins/siem/common/constants';
-import { defaultIndexPattern } from '../../../plugins/siem/common/default_index_pattern';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -102,7 +102,7 @@ export const siem = (kibana: any) => {
           name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
             defaultMessage: 'Elasticsearch indices',
           }),
-          value: defaultIndexPattern,
+          value: DEFAULT_INDEX_PATTERN,
           description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
             defaultMessage:
               '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',

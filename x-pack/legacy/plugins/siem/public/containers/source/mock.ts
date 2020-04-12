@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_INDEX_PATTERN } from '../../../../../../plugins/siem/common/constants';
+
 import { BrowserFields } from '.';
 import { sourceQuery } from './index.gql_query';
-import { defaultIndexPattern } from '../../../../../../plugins/siem/common/default_index_pattern';
 
 export const mocksSource = [
   {
@@ -14,7 +15,7 @@ export const mocksSource = [
       query: sourceQuery,
       variables: {
         sourceId: 'default',
-        defaultIndex: defaultIndexPattern,
+        defaultIndex: DEFAULT_INDEX_PATTERN,
       },
     },
     result: {
@@ -333,7 +334,7 @@ export const mocksSource = [
                   'event.end contains the date when the event ended or when the activity was last observed.',
                 example: null,
                 format: '',
-                indexes: defaultIndexPattern,
+                indexes: DEFAULT_INDEX_PATTERN,
                 name: 'event.end',
                 searchable: true,
                 type: 'date',
@@ -661,7 +662,7 @@ export const mockBrowserFields: BrowserFields = {
           'event.end contains the date when the event ended or when the activity was last observed.',
         example: null,
         format: '',
-        indexes: defaultIndexPattern,
+        indexes: DEFAULT_INDEX_PATTERN,
         name: 'event.end',
         searchable: true,
         type: 'date',

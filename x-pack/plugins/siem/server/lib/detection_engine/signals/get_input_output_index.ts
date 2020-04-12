@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { AlertServices } from '../../../../../alerting/server';
-import { defaultIndexPattern } from '../../../../common/default_index_pattern';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 
 export const getInputIndex = async (
   services: AlertServices,
@@ -22,7 +21,7 @@ export const getInputIndex = async (
     if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
       return configuration.attributes[DEFAULT_INDEX_KEY];
     } else {
-      return defaultIndexPattern;
+      return DEFAULT_INDEX_PATTERN;
     }
   }
 };

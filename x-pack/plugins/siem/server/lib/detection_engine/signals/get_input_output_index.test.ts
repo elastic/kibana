@@ -5,8 +5,7 @@
  */
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { defaultIndexPattern } from '../../../../common/default_index_pattern';
+import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { getInputIndex } from './get_input_output_index';
 
 describe('get_input_output_index', () => {
@@ -78,7 +77,7 @@ describe('get_input_output_index', () => {
         },
       }));
       const inputIndex = await getInputIndex(servicesMock, '8.0.0', null);
-      expect(inputIndex).toEqual(defaultIndexPattern);
+      expect(inputIndex).toEqual(DEFAULT_INDEX_PATTERN);
     });
 
     test('Returns a saved object inputIndex default from constants if inputIndex passed in is undefined and the key is also null', async () => {
@@ -91,17 +90,17 @@ describe('get_input_output_index', () => {
         },
       }));
       const inputIndex = await getInputIndex(servicesMock, '8.0.0', undefined);
-      expect(inputIndex).toEqual(defaultIndexPattern);
+      expect(inputIndex).toEqual(DEFAULT_INDEX_PATTERN);
     });
 
     test('Returns a saved object inputIndex default from constants if both passed in inputIndex and configuration attributes are missing and the index is undefined', async () => {
       const inputIndex = await getInputIndex(servicesMock, '8.0.0', undefined);
-      expect(inputIndex).toEqual(defaultIndexPattern);
+      expect(inputIndex).toEqual(DEFAULT_INDEX_PATTERN);
     });
 
     test('Returns a saved object inputIndex default from constants if both passed in inputIndex and configuration attributes are missing and the index is null', async () => {
       const inputIndex = await getInputIndex(servicesMock, '8.0.0', null);
-      expect(inputIndex).toEqual(defaultIndexPattern);
+      expect(inputIndex).toEqual(DEFAULT_INDEX_PATTERN);
     });
   });
 });
