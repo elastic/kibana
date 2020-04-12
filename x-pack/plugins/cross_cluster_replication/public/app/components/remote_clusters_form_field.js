@@ -18,7 +18,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 
-import routing from '../services/routing';
+import { routing } from '../services/routing';
 import { BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
 const errorMessages = {

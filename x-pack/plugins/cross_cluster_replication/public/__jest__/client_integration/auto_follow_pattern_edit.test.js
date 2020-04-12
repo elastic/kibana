@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../app/services/breadcrumbs.mock';
 import { AutoFollowPatternForm } from '../../app/components/auto_follow_pattern_form';
+import './mocks';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { AUTO_FOLLOW_PATTERN_EDIT } from './helpers/constants';
-
-jest.mock('ui/new_platform');
 
 const { setup } = pageHelpers.autoFollowPatternEdit;
 const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;

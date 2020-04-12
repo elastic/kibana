@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../app/services/breadcrumbs.mock';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { FollowerIndexForm } from '../../app/components/follower_index_form/follower_index_form';
+import './mocks';
 import { FOLLOWER_INDEX_EDIT } from './helpers/constants';
-
-jest.mock('ui/new_platform');
+import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 
 const { setup } = pageHelpers.followerIndexEdit;
 const { setup: setupFollowerIndexAdd } = pageHelpers.followerIndexAdd;

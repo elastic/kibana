@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb } from 'src/core/public';
 
@@ -10,19 +11,12 @@ import { ManagementAppMountParams } from '../../../../../../src/plugins/manageme
 
 import { BASE_PATH } from '../../../common/constants';
 
-let setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
-export const setBreadcrumbSetter = ({
-  __LEGACY,
-}: {
-  __LEGACY: {
-    chrome: any;
-    MANAGEMENT_BREADCRUMB: ChromeBreadcrumb;
-  };
-}): void => {
-  setBreadcrumbs = (crumbs: ChromeBreadcrumb[]) => {
-    __LEGACY.chrome.breadcrumbs.set([__LEGACY.MANAGEMENT_BREADCRUMB, ...crumbs]);
-  };
+let setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+
+export const init = (_setBreadcrumbs: SetBreadcrumbs): void => {
+  setBreadcrumbs = _setBreadcrumbs;
 };
 
 export const listBreadcrumb = {

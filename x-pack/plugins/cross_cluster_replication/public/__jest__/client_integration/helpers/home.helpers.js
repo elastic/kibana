@@ -5,10 +5,10 @@
  */
 
 import { registerTestBed } from '../../../../../../test_utils';
+import { BASE_PATH } from '../../../../common/constants';
 import { CrossClusterReplicationHome } from '../../../app/sections/home/home';
 import { ccrStore } from '../../../app/store';
-import routing from '../../../app/services/routing';
-import { BASE_PATH } from '../../../../../../legacy/common/constants';
+import { routing } from '../../../app/services/routing';
 
 const testBedConfig = {
   store: ccrStore,

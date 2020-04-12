@@ -17,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import routing from '../../../services/routing';
+import { routing } from '../../../services/routing';
 import { extractQueryParams } from '../../../services/query_params';
 import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
 import { API_STATUS, UIM_FOLLOWER_INDEX_LIST_LOAD } from '../../../constants';

@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
-import routing from '../../services/routing';
+import { routing } from '../../services/routing';
 import {
   FollowerIndexForm,
   FollowerIndexPageTitle,

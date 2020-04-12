@@ -7,7 +7,7 @@
 import { registerTestBed, findTestSubject } from '../../../../../../test_utils';
 import { FollowerIndicesList } from '../../../app/sections/home/follower_indices_list';
 import { ccrStore } from '../../../app/store';
-import routing from '../../../app/services/routing';
+import { routing } from '../../../app/services/routing';
 
 const testBedConfig = {
   store: ccrStore,

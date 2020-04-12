@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import '../../app/services/breadcrumbs.mock';
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
 
-jest.mock('ui/new_platform');
+import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import './mocks';
+import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.autoFollowPatternAdd;
 

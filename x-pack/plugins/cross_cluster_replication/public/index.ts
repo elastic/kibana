@@ -6,6 +6,7 @@
 
 import { PluginInitializerContext } from 'src/core/public';
 
-import { CrossClusterReplicationUIPlugin } from './plugin';
+import { CrossClusterReplicationPlugin } from './plugin';
 
-export const plugin = (ctx: PluginInitializerContext) => new CrossClusterReplicationUIPlugin(ctx);
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new CrossClusterReplicationPlugin(initializerContext);

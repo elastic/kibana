@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPageContent, EuiSpacer } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
-import routing from '../../services/routing';
+import { routing } from '../../services/routing';
 import {
   AutoFollowPatternForm,
   AutoFollowPatternPageTitle,

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { AutoFollowPatternDeleteProvider } from '../auto_follow_pattern_delete_provider';
 
 // @ts-ignore
-import routing from '../../services/routing';
+import { routing } from '../../services/routing';
 
 const actionsAriaLabel = i18n.translate(
   'xpack.crossClusterReplication.autoFollowActionMenu.autoFollowPatternActionMenuButtonAriaLabel',

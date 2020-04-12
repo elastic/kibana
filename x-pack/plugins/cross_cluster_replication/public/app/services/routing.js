@@ -32,7 +32,6 @@ const appToBasePathMap = {
 };
 
 class Routing {
-  _userHasLeftApp = false;
   _reactRouter = null;
 
   /**
@@ -97,14 +96,6 @@ class Routing {
   set reactRouter(router) {
     this._reactRouter = router;
   }
-
-  get userHasLeftApp() {
-    return this._userHasLeftApp;
-  }
-
-  set userHasLeftApp(hasLeft) {
-    this._userHasLeftApp = hasLeft;
-  }
 }
 
-export default new Routing();
+export const routing = new Routing();

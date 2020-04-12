@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../app/services/breadcrumbs.mock';
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
-
 import { getAutoFollowPatternClientMock } from '../../../fixtures/auto_follow_pattern';
-
-jest.mock('ui/new_platform');
+import './mocks';
+import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.autoFollowPatternList;
 

@@ -3,18 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NotificationsSetup, IToasts, FatalErrorsSetup } from 'src/core/public';
 
-let _notifications: IToasts;
+import { IToasts, FatalErrorsSetup } from 'src/core/public';
+
+let _toasts: IToasts;
 let _fatalErrors: FatalErrorsSetup;
 
-export const setNotifications = (
-  notifications: NotificationsSetup,
-  fatalErrorsSetup: FatalErrorsSetup
-) => {
-  _notifications = notifications.toasts;
-  _fatalErrors = fatalErrorsSetup;
+export const init = (toasts: IToasts, fatalErrors: FatalErrorsSetup) => {
+  _toasts = toasts;
+  _fatalErrors = fatalErrors;
 };
 
-export const getNotifications = () => _notifications;
+export const getToasts = () => _toasts;
 export const getFatalErrors = () => _fatalErrors;

@@ -7,7 +7,7 @@
 import { registerTestBed } from '../../../../../../test_utils';
 import { FollowerIndexEdit } from '../../../app/sections/follower_index_edit';
 import { ccrStore } from '../../../app/store';
-import routing from '../../../app/services/routing';
+import { routing } from '../../../app/services/routing';
 
 import { FOLLOWER_INDEX_EDIT_NAME } from './constants';
 

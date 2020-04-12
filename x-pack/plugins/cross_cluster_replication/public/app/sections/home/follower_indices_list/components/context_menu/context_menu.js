@@ -15,7 +15,7 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 
-import routing from '../../../../../services/routing';
+import { routing } from '../../../../../services/routing';
 import {
   FollowerIndexPauseProvider,
   FollowerIndexResumeProvider,

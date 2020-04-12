@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { getNotifications } from '../../services/notifications';
+import { getToasts } from '../../services/notifications';
 import { SECTIONS, API_STATUS } from '../../constants';
 import {
   loadAutoFollowPatterns as loadAutoFollowPatternsRequest,
@@ -15,7 +15,7 @@ import {
   pauseAutoFollowPattern as pauseAutoFollowPatternRequest,
   resumeAutoFollowPattern as resumeAutoFollowPatternRequest,
 } from '../../services/api';
-import routing from '../../services/routing';
+import { routing } from '../../services/routing';
 import * as t from '../action_types';
 import { sendApiRequest } from './api';
 import { getSelectedAutoFollowPatternId } from '../selectors';
@@ -75,7 +75,7 @@ export const saveAutoFollowPattern = (id, autoFollowPattern, isUpdating = false)
             }
           );
 
-      getNotifications().addSuccess(successMessage);
+      getToasts().addSuccess(successMessage);
       routing.navigate(`/auto_follow_patterns`, undefined, {
         pattern: encodeURIComponent(id),
       });
@@ -111,7 +111,7 @@ export const deleteAutoFollowPattern = id =>
               }
             );
 
-        getNotifications().addDanger(errorMessage);
+        getToasts().addDanger(errorMessage);
       }
 
       if (response.itemsDeleted.length) {
@@ -133,7 +133,7 @@ export const deleteAutoFollowPattern = id =>
               }
             );
 
-        getNotifications().addSuccess(successMessage);
+        getToasts().addSuccess(successMessage);
 
         // If we've just deleted a pattern we were looking at, we need to close the panel.
         const autoFollowPatternId = getSelectedAutoFollowPatternId('detail')(getState());
@@ -173,7 +173,7 @@ export const pauseAutoFollowPattern = id =>
               }
             );
 
-        getNotifications().addDanger(errorMessage);
+        getToasts().addDanger(errorMessage);
       }
 
       if (response.itemsPaused.length) {
@@ -195,7 +195,7 @@ export const pauseAutoFollowPattern = id =>
               }
             );
 
-        getNotifications().addSuccess(successMessage);
+        getToasts().addSuccess(successMessage);
       }
     },
   });
@@ -229,7 +229,7 @@ export const resumeAutoFollowPattern = id =>
               }
             );
 
-        getNotifications().addDanger(errorMessage);
+        getToasts().addDanger(errorMessage);
       }
 
       if (response.itemsResumed.length) {
@@ -251,7 +251,7 @@ export const resumeAutoFollowPattern = id =>
               }
             );
 
-        getNotifications().addSuccess(successMessage);
+        getToasts().addSuccess(successMessage);
       }
     },
   });

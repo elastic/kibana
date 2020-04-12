@@ -5,8 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
+import { Route, Switch, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -23,9 +22,11 @@ import {
 import { BASE_PATH } from '../../common/constants';
 import { getFatalErrors } from './services/notifications';
 import { SectionError } from './components';
-import routing from './services/routing';
+import { routing } from './services/routing';
+// @ts-ignore
 import { loadPermissions } from './services/api';
 
+// @ts-ignore
 import {
   CrossClusterReplicationHome,
   AutoFollowPatternAdd,
@@ -34,16 +35,24 @@ import {
   FollowerIndexEdit,
 } from './sections';
 
-class AppComponent extends Component {
-  static propTypes = {
-    history: PropTypes.shape({
-      push: PropTypes.func.isRequired,
-      createHref: PropTypes.func.isRequired,
-    }).isRequired,
+interface AppProps {
+  history: {
+    push: any;
+    createHref: any;
   };
+  location: any;
+}
 
-  constructor(...args) {
-    super(...args);
+interface AppState {
+  isFetchingPermissions: boolean;
+  fetchPermissionError: any;
+  hasPermission: boolean;
+  missingClusterPrivileges: any[];
+}
+
+class AppComponent extends Component<RouteComponentProps & AppProps, AppState> {
+  constructor(props: any) {
+    super(props);
     this.registerRouter();
 
     this.state = {
@@ -54,16 +63,8 @@ class AppComponent extends Component {
     };
   }
 
-  UNSAFE_componentWillMount() {
-    routing.userHasLeftApp = false;
-  }
-
   componentDidMount() {
     this.checkPermissions();
-  }
-
-  componentWillUnmount() {
-    routing.userHasLeftApp = true;
   }
 
   async checkPermissions() {
@@ -163,7 +164,6 @@ class AppComponent extends Component {
         <EuiPageContent horizontalPosition="center">
           <EuiEmptyPrompt
             iconType="securityApp"
-            iconColor={null}
             title={
               <h2>
                 <FormattedMessage

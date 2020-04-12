@@ -7,7 +7,7 @@
 import { registerTestBed, findTestSubject } from '../../../../../../test_utils';
 import { AutoFollowPatternList } from '../../../app/sections/home/auto_follow_pattern_list';
 import { ccrStore } from '../../../app/store';
-import routing from '../../../app/services/routing';
+import { routing } from '../../../app/services/routing';
 
 const testBedConfig = {
   store: ccrStore,

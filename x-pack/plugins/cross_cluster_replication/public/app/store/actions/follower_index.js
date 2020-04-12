@@ -5,8 +5,8 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import routing from '../../services/routing';
-import { getNotifications } from '../../services/notifications';
+import { routing } from '../../services/routing';
+import { getToasts } from '../../services/notifications';
 import { SECTIONS, API_STATUS } from '../../constants';
 import {
   loadFollowerIndices as loadFollowerIndicesRequest,
@@ -76,7 +76,7 @@ export const saveFollowerIndex = (name, followerIndex, isUpdating = false) =>
             }
           );
 
-      getNotifications().addSuccess(successMessage);
+      getToasts().addSuccess(successMessage);
       routing.navigate(`/follower_indices`, undefined, {
         name: encodeURIComponent(name),
       });
@@ -112,7 +112,7 @@ export const pauseFollowerIndex = id =>
               }
             );
 
-        getNotifications().addDanger(errorMessage);
+        getToasts().addDanger(errorMessage);
       }
 
       if (response.itemsPaused.length) {
@@ -134,7 +134,7 @@ export const pauseFollowerIndex = id =>
               }
             );
 
-        getNotifications().addSuccess(successMessage);
+        getToasts().addSuccess(successMessage);
 
         // Refresh list
         dispatch(loadFollowerIndices(true));
@@ -171,7 +171,7 @@ export const resumeFollowerIndex = id =>
               }
             );
 
-        getNotifications().addDanger(errorMessage);
+        getToasts().addDanger(errorMessage);
       }
 
       if (response.itemsResumed.length) {
@@ -193,7 +193,7 @@ export const resumeFollowerIndex = id =>
               }
             );
 
-        getNotifications().addSuccess(successMessage);
+        getToasts().addSuccess(successMessage);
       }
 
       // Refresh list
@@ -230,7 +230,7 @@ export const unfollowLeaderIndex = id =>
               }
             );
 
-        getNotifications().addDanger(errorMessage);
+        getToasts().addDanger(errorMessage);
       }
 
       if (response.itemsUnfollowed.length) {
@@ -252,7 +252,7 @@ export const unfollowLeaderIndex = id =>
               }
             );
 
-        getNotifications().addSuccess(successMessage);
+        getToasts().addSuccess(successMessage);
       }
 
       if (response.itemsNotOpen.length) {
@@ -274,7 +274,7 @@ export const unfollowLeaderIndex = id =>
               }
             );
 
-        getNotifications().addWarning(warningMessage);
+        getToasts().addWarning(warningMessage);
       }
 
       // If we've just unfollowed a follower index we were looking at, we need to close the panel.

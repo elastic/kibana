@@ -7,7 +7,7 @@
 import { registerTestBed } from '../../../../../../test_utils';
 import { AutoFollowPatternEdit } from '../../../app/sections/auto_follow_pattern_edit';
 import { ccrStore } from '../../../app/store';
-import routing from '../../../app/services/routing';
+import { routing } from '../../../app/services/routing';
 
 import { AUTO_FOLLOW_PATTERN_EDIT_NAME } from './constants';
 

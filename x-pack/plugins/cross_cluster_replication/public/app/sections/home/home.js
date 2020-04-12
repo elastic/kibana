@@ -12,7 +12,7 @@ import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } fro
 
 import { BASE_PATH } from '../../../../common/constants';
 import { setBreadcrumbs, listBreadcrumb } from '../../services/breadcrumbs';
-import routing from '../../services/routing';
+import { routing } from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
 import { FollowerIndicesList } from './follower_indices_list';
 

@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../app/services/breadcrumbs.mock';
+import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import './mocks';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { RemoteClustersFormField } from '../../app/components';
-
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
-
-jest.mock('ui/new_platform');
 
 const { setup } = pageHelpers.followerIndexAdd;
 const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;

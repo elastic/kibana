@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiLink, EuiOverlayMask } from '@elastic/eui';
 
-import routing from '../services/routing';
+import { routing } from '../services/routing';
 import { resumeFollowerIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
 

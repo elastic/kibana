@@ -30,7 +30,7 @@ import {
 
 import { indices } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
-import routing from '../../services/routing';
+import { routing } from '../../services/routing';
 import { getFatalErrors } from '../../services/notifications';
 import { loadIndices } from '../../services/api';
 import { API_STATUS } from '../../constants';

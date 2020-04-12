@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
-
 import { getFollowerIndexMock } from '../../../fixtures/follower_index';
-
-jest.mock('ui/new_platform');
+import './mocks';
+import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.followerIndexList;
 

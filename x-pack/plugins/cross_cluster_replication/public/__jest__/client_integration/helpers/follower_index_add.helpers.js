@@ -7,7 +7,7 @@
 import { registerTestBed } from '../../../../../../test_utils';
 import { FollowerIndexAdd } from '../../../app/sections/follower_index_add';
 import { ccrStore } from '../../../app/store';
-import routing from '../../../app/services/routing';
+import { routing } from '../../../app/services/routing';
 
 const testBedConfig = {
   store: ccrStore,

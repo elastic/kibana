@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './register_routes';
+export declare const ccrStore: any;

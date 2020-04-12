@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../app/services/breadcrumbs.mock';
+import './mocks';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
-
-jest.mock('ui/new_platform');
 
 const { setup } = pageHelpers.home;
 
@@ -36,7 +34,7 @@ describe('<CrossClusterReplicationHome />', () => {
       ({ exists, find, component } = setup());
     });
 
-    test('should set the correct an app title', () => {
+    test('should set the correct app title', () => {
       expect(exists('appTitle')).toBe(true);
       expect(find('appTitle').text()).toEqual('Cross-Cluster Replication');
     });

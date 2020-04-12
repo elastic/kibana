@@ -20,8 +20,8 @@ import {
   AutoFollowPatternDeleteProvider,
   AutoFollowPatternActionMenu,
 } from '../../../../../components';
-import routing from '../../../../../services/routing';
-import { trackUiMetric, METRIC_TYPE } from '../../../../../services/track_ui_metric';
+import { routing } from '../../../../../services/routing';
+import { trackUiMetric } from '../../../../../services/track_ui_metric';
 
 export class AutoFollowPatternTable extends PureComponent {
   static propTypes = {
@@ -86,7 +86,7 @@ export class AutoFollowPatternTable extends PureComponent {
           return (
             <EuiLink
               onClick={() => {
-                trackUiMetric(METRIC_TYPE.CLICK, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK);
+                trackUiMetric('click', UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK);
                 selectAutoFollowPattern(name);
               }}
               data-test-subj="autoFollowPatternLink"

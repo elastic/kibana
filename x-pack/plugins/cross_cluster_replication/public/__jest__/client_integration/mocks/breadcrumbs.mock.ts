@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('./breadcrumbs', () => ({
-  ...jest.requireActual('./breadcrumbs'),
+jest.mock('../../../app/services/breadcrumbs', () => ({
+  ...jest.requireActual('../../../app/services/breadcrumbs'),
   setBreadcrumbs: jest.fn(),
 }));
