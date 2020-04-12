@@ -41,37 +41,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
   class CommonPage {
     /**
-     * Navigates the browser window to provided URL
-     * @param url URL
-     * @param shouldAcceptAlert pass 'true' if browser alert should be accepted
-     */
-    private static async navigateToUrlAndHandleAlert(url: string, shouldAcceptAlert: boolean) {
-      log.debug('Navigate to: ' + url);
-      try {
-        await browser.get(url);
-      } catch (navigationError) {
-        log.debug('Error navigating to url');
-        const alert = await browser.getAlert();
-        if (alert && alert.accept) {
-          if (shouldAcceptAlert) {
-            log.debug('Should accept alert');
-            try {
-              await alert.accept();
-            } catch (alertException) {
-              log.debug('Error accepting alert');
-              throw alertException;
-            }
-          } else {
-            log.debug('Will not accept alert');
-            throw navigationError;
-          }
-        } else {
-          throw navigationError;
-        }
-      }
-    }
-
-    /**
      * Returns Kibana host URL
      */
     public getHostPort() {
@@ -144,7 +113,9 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           log.debug(`navigateToActualUrl ${appUrl}`);
           await browser.get(appUrl);
         } else {
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+          await browser.get(appUrl);
+          const alert = await browser.getAlert();
+          await alert?.accept();
         }
 
         const currentUrl = shouldLoginIfPrompted
@@ -212,7 +183,9 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await retry.tryForTime(defaultTryTimeout * 2, async () => {
         let lastUrl = await retry.try(async () => {
           // since we're using hash URLs, always reload first to force re-render
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+          await browser.get(appUrl);
+          const alert = await browser.getAlert();
+          await alert?.accept();
           await this.sleep(700);
           log.debug('returned from get, calling refresh');
           await browser.refresh();
