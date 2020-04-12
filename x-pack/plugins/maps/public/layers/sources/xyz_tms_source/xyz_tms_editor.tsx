@@ -3,19 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import React, { Fragment, Component, ChangeEvent } from 'react';
 import _ from 'lodash';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AttributionDescriptor } from '../../../../common/descriptor_types';
 
-interface AttributionUpdate {
-  attributionText?: string;
-  attributionUrl?: string;
-}
-export interface XYZTMSSourceConfig extends AttributionUpdate {
+export type XYZTMSSourceConfig = AttributionDescriptor & {
   urlTemplate: string;
-}
+};
 
 export interface Props {
   onSourceConfigChange: (sourceConfig: XYZTMSSourceConfig) => void;
@@ -24,8 +22,8 @@ export interface Props {
 interface State {
   tmsInput: string;
   tmsCanPreview: boolean;
-  attributionText?: string;
-  attributionUrl?: string;
+  attributionText: string;
+  attributionUrl: string;
 }
 
 export class XYZTMSEditor extends Component<Props, State> {
