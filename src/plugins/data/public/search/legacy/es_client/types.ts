@@ -17,5 +17,13 @@
  * under the License.
  */
 
-export { getEsClient } from './get_es_client';
-export { SearchRequest, SearchResponse, LegacyApiCaller } from './types';
+import { SearchRequest, SearchResponse } from '../../fetch';
+
+export interface LegacyApiCaller {
+  search: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
+  msearch: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
+}
+
+interface LegacyApiCallerResponse extends Promise<SearchResponse> {
+  abort: () => void;
+}
