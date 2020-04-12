@@ -53,7 +53,7 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
       return state;
   }
 };
-const initialData: Case = {
+export const initialData: Case = {
   id: '',
   closedAt: null,
   closedBy: null,

@@ -5,32 +5,11 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useGetCase, UseGetCase } from './use_get_case';
+import { initialData, useGetCase, UseGetCase } from './use_get_case';
 import { basicCase } from './mock';
-import { Case } from './types';
 import * as api from './api';
 
 jest.mock('./api');
-
-const initialCaseState: Case = {
-  id: '',
-  closedAt: null,
-  closedBy: null,
-  createdAt: '',
-  comments: [],
-  createdBy: {
-    username: '',
-  },
-  description: '',
-  externalService: null,
-  status: '',
-  tags: [],
-  title: '',
-  totalComment: 0,
-  updatedAt: null,
-  updatedBy: null,
-  version: '',
-};
 
 describe('useGetCase', () => {
   const abortCtrl = new AbortController();
@@ -46,7 +25,7 @@ describe('useGetCase', () => {
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        data: initialCaseState,
+        data: initialData,
         isLoading: true,
         isError: false,
         fetchCase: result.current.fetchCase,
@@ -122,7 +101,7 @@ describe('useGetCase', () => {
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
-        data: initialCaseState,
+        data: initialData,
         isLoading: false,
         isError: true,
         fetchCase: result.current.fetchCase,

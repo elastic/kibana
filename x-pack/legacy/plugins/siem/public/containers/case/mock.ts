@@ -100,6 +100,12 @@ export const casesStatus: CasesStatus = {
 };
 
 export const reporters: string[] = ['alexis', 'kim', 'maria', 'steph'];
+export const respReporters = [
+  { username: 'alexis' },
+  { username: 'kim' },
+  { username: 'maria' },
+  { username: 'steph' },
+];
 const basicPush = {
   connector_id: 'connector_id',
   connector_name: 'connector name',
@@ -173,7 +179,7 @@ export const caseUserActions: CaseUserActions[] = [
   getUserAction(['description'], 'update'),
 ];
 
-const cases: Case[] = [
+export const cases: Case[] = [
   basicCase,
   { ...basicCase, id: '1', totalComment: 0, comments: [] },
   { ...basicCase, id: '2', totalComment: 0, comments: [] },

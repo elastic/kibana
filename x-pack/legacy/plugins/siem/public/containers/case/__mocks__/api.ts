@@ -23,7 +23,7 @@ import {
   casesStatus,
   caseUserActions,
   pushedCase,
-  reporters,
+  respReporters,
   serviceConnector,
   tags,
 } from '../mock';
@@ -51,7 +51,7 @@ export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> 
 export const getTags = async (signal: AbortSignal): Promise<string[]> => Promise.resolve(tags);
 
 export const getReporters = async (signal: AbortSignal): Promise<User[]> =>
-  Promise.resolve(reporters);
+  Promise.resolve(respReporters);
 
 export const getCaseUserActions = async (
   caseId: string,
