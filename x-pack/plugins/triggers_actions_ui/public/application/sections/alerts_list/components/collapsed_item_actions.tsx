@@ -8,11 +8,10 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
-  EuiFormRow,
   EuiPopover,
-  EuiPopoverFooter,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiSwitch,
 } from '@elastic/eui';
 
@@ -23,6 +22,7 @@ import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
+import './collapsed_item_actions.scss';
 
 export type ComponentOpts = {
   item: AlertTableItem;
@@ -66,66 +66,65 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       ownFocus
       data-test-subj="collapsedItemActions"
     >
-      <EuiFormRow>
-        <EuiSwitch
-          name="enable"
-          disabled={!canSave}
-          checked={item.enabled}
-          data-test-subj="enableSwitch"
-          onChange={async () => {
-            if (item.enabled) {
-              await disableAlert(item);
-            } else {
-              await enableAlert(item);
+      <EuiContextMenuPanel>
+        <EuiContextMenuItem>
+          <EuiSwitch
+            name="enable"
+            disabled={!canSave}
+            checked={item.enabled}
+            data-test-subj="enableSwitch"
+            onChange={async () => {
+              if (item.enabled) {
+                await disableAlert(item);
+              } else {
+                await enableAlert(item);
+              }
+              onAlertChanged();
+            }}
+            label={
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.enableTitle"
+                defaultMessage="Enable"
+              />
             }
-            onAlertChanged();
-          }}
-          label={
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.enableTitle"
-              defaultMessage="Enable"
-            />
-          }
-        />
-      </EuiFormRow>
-      <EuiFormRow>
-        <EuiSwitch
-          name="mute"
-          checked={item.muteAll}
-          disabled={!(canSave && item.enabled)}
-          data-test-subj="muteSwitch"
-          onChange={async () => {
-            if (item.muteAll) {
-              await unmuteAlert(item);
-            } else {
-              await muteAlert(item);
+          />
+        </EuiContextMenuItem>
+        <EuiContextMenuItem>
+          <EuiSwitch
+            name="mute"
+            checked={item.muteAll}
+            disabled={!(canSave && item.enabled)}
+            data-test-subj="muteSwitch"
+            onChange={async () => {
+              if (item.muteAll) {
+                await unmuteAlert(item);
+              } else {
+                await muteAlert(item);
+              }
+              onAlertChanged();
+            }}
+            label={
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteTitle"
+                defaultMessage="Mute"
+              />
             }
-            onAlertChanged();
-          }}
-          label={
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteTitle"
-              defaultMessage="Mute"
-            />
-          }
-        />
-      </EuiFormRow>
-      <EuiPopoverFooter>
-        <EuiFormRow>
-          <EuiButtonEmpty
-            isDisabled={!canDelete}
-            iconType="trash"
-            color="danger"
-            data-test-subj="deleteAlert"
-            onClick={() => setAlertsToDelete([item.id])}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.deleteTitle"
-              defaultMessage="Delete"
-            />
-          </EuiButtonEmpty>
-        </EuiFormRow>
-      </EuiPopoverFooter>
+          />
+        </EuiContextMenuItem>
+        <EuiContextMenuItem
+          disabled={!canDelete}
+          icon="trash"
+          color="danger"
+          data-test-subj="deleteAlert"
+          onClick={() => setAlertsToDelete([item.id])}
+          className="actCollapsedItemActions__delete"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.deleteTitle"
+            defaultMessage="Delete"
+          />
+        </EuiContextMenuItem>
+      </EuiContextMenuPanel>
     </EuiPopover>
   );
 };

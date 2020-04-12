@@ -1,0 +1,8 @@
+.actCollapsedItemActions__delete {
+  color: $euiColorDanger;
+
+  .euiContextMenu__itemLayout {
+    @include euiFontSizeS;
+    align-items: baseline;
+  }
+}
