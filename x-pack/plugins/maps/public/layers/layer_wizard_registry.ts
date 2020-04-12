@@ -5,9 +5,10 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { ReactElement } from 'react';
 import { ISource } from './sources/source';
 
-export type PreviewSourceHandler = (source: ISource) => void;
+export type PreviewSourceHandler = (source: ISource | null) => void;
 
 export type RenderWizardArguments = {
   onPreviewSource: PreviewSourceHandler;
@@ -18,7 +19,7 @@ export type LayerWizard = {
   description: string;
   icon: string;
   isIndexingSource?: boolean;
-  renderWizard(renderWizardArguments: RenderWizardArguments): unknown;
+  renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
 };
 

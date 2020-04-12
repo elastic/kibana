@@ -9,7 +9,6 @@ import { AbstractLayer } from './layer';
 import { IVectorSource } from './sources/vector_source';
 import {
   MapFilters,
-  PartialVectorLayerDescriptor,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
 } from '../../common/descriptor_types';
@@ -33,7 +32,7 @@ export interface IVectorLayer extends ILayer {
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static createDescriptor(
-    options: PartialVectorLayerDescriptor,
+    options: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor;
 

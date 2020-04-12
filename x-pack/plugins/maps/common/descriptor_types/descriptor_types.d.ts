@@ -123,14 +123,10 @@ export type LayerDescriptor = {
   visible?: boolean;
 };
 
-export type PartialLayerDescriptor = Partial<LayerDescriptor>;
-
 export type VectorLayerDescriptor = LayerDescriptor & {
   joins?: JoinDescriptor[];
   style?: VectorStyleDescriptor;
 };
-
-export type PartialVectorLayerDescriptor = Partial<VectorLayerDescriptor>;
 
 export type RangeFieldMeta = {
   min: number;

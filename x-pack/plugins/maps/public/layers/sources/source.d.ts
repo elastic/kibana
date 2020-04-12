@@ -38,7 +38,7 @@ export class AbstractSource implements ISource {
   constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters?: object);
 
   destroy(): void;
-  createDefaultLayer(layerDescriptor?: LayerDescriptor): ILayer;
+  createDefaultLayer(options?: LayerDescriptor, mapColors?: string[]): ILayer;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): object;
   isFieldAware(): boolean;
