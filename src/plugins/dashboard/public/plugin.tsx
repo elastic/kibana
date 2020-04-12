@@ -183,7 +183,7 @@ export class DashboardPlugin
           targetAppName === DashboardConstants.DASHBOARD_ID
         );
       },
-      storageKey: 'lastUrl:dashboard',
+      storageKey: `lastUrl:${core.http.basePath.get()}:dashboard`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
@@ -284,7 +284,7 @@ export class DashboardPlugin
     const { notifications } = core;
     const {
       uiActions,
-      data: { indexPatterns },
+      data: { indexPatterns, search },
     } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
@@ -300,6 +300,7 @@ export class DashboardPlugin
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,
+      search,
       chrome: core.chrome,
       overlays: core.overlays,
     });

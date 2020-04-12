@@ -6,7 +6,7 @@
 
 import * as i18n from './translations';
 
-export const getSavedObjectReadOnly = () => ({
+export const savedObjectReadOnly = {
   title: i18n.READ_ONLY_SAVED_OBJECT_TITLE,
   description: i18n.READ_ONLY_SAVED_OBJECT_MSG,
-});
+};

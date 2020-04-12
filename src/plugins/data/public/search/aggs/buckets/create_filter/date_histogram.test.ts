@@ -29,8 +29,9 @@ import {
 } from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { RangeFilter } from '../../../../../common';
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { coreMock, notificationServiceMock } from '../../../../../../../core/public/mocks';
 import { queryServiceMock } from '../../../../query/mocks';
+import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
@@ -46,6 +47,10 @@ describe('AggConfig Filters', () => {
       aggTypesDependencies = {
         uiSettings,
         query: queryServiceMock.createSetupContract(),
+        getInternalStartServices: () => ({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
+        }),
       };
 
       mockDataServices();
@@ -90,7 +95,7 @@ describe('AggConfig Filters', () => {
       filter = createFilterDateHistogram(agg, bucketKey);
     };
 
-    it('creates a valid range filter', () => {
+    test('creates a valid range filter', () => {
       init();
 
       expect(filter).toHaveProperty('range');
@@ -110,7 +115,7 @@ describe('AggConfig Filters', () => {
       expect(filter.meta).toHaveProperty('index', '1234');
     });
 
-    it('extends the filter edge to 1ms before the next bucket for all interval options', () => {
+    test('extends the filter edge to 1ms before the next bucket for all interval options', () => {
       intervalOptions.forEach(option => {
         let duration;
         if (option.val !== 'custom' && moment(1, option.val).isValid()) {

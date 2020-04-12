@@ -116,10 +116,6 @@ export interface ConditionalHeadersConditions {
   basePath: string;
 }
 
-export interface CryptoFactory {
-  decrypt: (headers?: string) => any;
-}
-
 export interface IndexPatternSavedObject {
   attributes: {
     fieldFormatMap: string;
@@ -190,7 +186,7 @@ export type ESQueueWorkerExecuteFn<JobDocPayloadType> = (
   jobId: string,
   job: JobDocPayloadType,
   cancellationToken?: CancellationToken
-) => void;
+) => Promise<any>;
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
