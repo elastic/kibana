@@ -24,6 +24,6 @@ export const storybookAliases = {
   drilldowns: 'x-pack/plugins/drilldowns/scripts/storybook.js',
   embeddable: 'src/plugins/embeddable/scripts/storybook.js',
   infra: 'x-pack/legacy/plugins/infra/scripts/storybook.js',
-  siem: 'x-pack/legacy/plugins/siem/scripts/storybook.js',
+  siem: 'x-pack/plugins/siem/scripts/storybook.js',
   ui_actions: 'x-pack/plugins/advanced_ui_actions/scripts/storybook.js',
 };

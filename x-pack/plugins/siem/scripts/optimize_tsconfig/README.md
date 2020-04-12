@@ -8,9 +8,9 @@ Kibana and X-Pack are very large TypeScript projects, and it comes at a cost. Ed
 
 To run the optimization:
 
-`$ node x-pack/legacy/plugins/siem/scripts/optimize_tsconfig`
+`$ node x-pack/plugins/siem/scripts/optimize_tsconfig`
 
 To undo the optimization:
 
-`$ node x-pack/legacy/plugins/siem/scripts/unoptimize_tsconfig`
+`$ node x-pack/plugins/siem/scripts/unoptimize_tsconfig`
 

@@ -10,7 +10,7 @@
   "exclude": [
     "test/**/*",
     "**/__fixtures__/**/*",
-    "legacy/plugins/siem/cypress/**/*",
+    "plugins/siem/cypress/**/*",
     "**/typespec_tests.ts"
   ]
 }

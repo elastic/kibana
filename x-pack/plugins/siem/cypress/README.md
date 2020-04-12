@@ -124,7 +124,7 @@ yarn kbn bootstrap
 2. Launch Cypress command line test runner:
 
 ```sh 
-cd x-pack/legacy/plugins/siem
+cd x-pack/plugins/siem
 yarn cypress:run-as-ci
 ```
 
@@ -193,7 +193,7 @@ We are using es_archiver in order to manage the data that our Cypress tests need
 
 1. Setup if possible a clean instance of kibana and elasticsearch (if not, possible please try to clean the data that you are going to generate).
 2. With the kibana and elasticsearch instance up and running, create the data that you need for your test.
-3. When you are sure that you have all the data you need run the following command from: `x-pack/legacy/plugins/siem`
+3. When you are sure that you have all the data you need run the following command from: `x-pack/plugins/siem`
 
 ```sh 
 node ../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../../test/siem_cypress/es_archives --config ../../../../test/functional/config.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
@@ -236,7 +236,7 @@ yarn start --no-base-path
 `baseUrl`, as configured in `plugins/siem/cypress.json`:
 
 ```sh
-cd x-pack/legacy/plugins/siem
+cd x-pack/plugins/siem
 yarn cypress:open
 ```
 
@@ -245,7 +245,7 @@ yarn cypress:open
 test runner, as shown in the following example:
 
 ```sh
-cd x-pack/legacy/plugins/siem
+cd x-pack/plugins/siem
 CYPRESS_baseUrl=http://localhost:5601 yarn cypress:open
 ```
 
@@ -253,7 +253,7 @@ CYPRESS_baseUrl=http://localhost:5601 yarn cypress:open
 running tests interactively:
 
 ```sh
-cd x-pack/legacy/plugins/siem
+cd x-pack/plugins/siem
 CYPRESS_baseUrl=http://localhost:5601 CYPRESS_ELASTICSEARCH_USERNAME=elastic CYPRESS_ELASTICSEARCH_PASSWORD=<password> yarn cypress:open
 ```
 
@@ -285,7 +285,7 @@ yarn start --no-base-path
 `baseUrl`, as configured in `plugins/siem/cypress.json`:
 
 ```sh
-cd x-pack/legacy/plugins/siem
+cd x-pack/plugins/siem
 yarn cypress:run
 ```
 
@@ -294,7 +294,7 @@ yarn cypress:run
 the following example:
 
 ```sh
-cd x-pack/legacy/plugins/siem
+cd x-pack/plugins/siem
 CYPRESS_baseUrl=http://localhost:5601 yarn cypress:run
 ```
 
@@ -302,7 +302,7 @@ CYPRESS_baseUrl=http://localhost:5601 yarn cypress:run
 running via the command line:
 
 ```sh
-cd x-pack/legacy/plugins/siem
+cd x-pack/plugins/siem
 CYPRESS_baseUrl=http://localhost:5601 CYPRESS_ELASTICSEARCH_USERNAME=elastic CYPRESS_ELASTICSEARCH_PASSWORD=<password> yarn cypress:run
 ```
 

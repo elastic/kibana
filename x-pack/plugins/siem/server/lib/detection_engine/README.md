@@ -46,7 +46,7 @@ server log [22:05:22.277] [info][status][plugin:alerting@8.0.0] Status changed f
 server log [22:05:22.270] [info][status][plugin:actions@8.0.0] Status changed from uninitialized to green - Ready
 ```
 
-Go to the scripts folder `cd kibana/x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts` and run:
+Go to the scripts folder `cd kibana/x-pack/plugins/siem/server/lib/detection_engine/scripts` and run:
 
 ```sh
 ./hard_reset.sh
@@ -159,7 +159,7 @@ https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions
 
 To update the status of a signal or group of signals, the following scripts provide an example of how to
 go about doing so.
-`cd x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts`
+`cd x-pack/plugins/siem/server/lib/detection_engine/scripts`
 `./signals/put_signal_doc.sh` will post a sample signal doc into the signals index to play with
 `./signals/set_status_with_id.sh closed` will update the status of the sample signal to closed
 `./signals/set_status_with_id.sh open` will update the status of the sample signal to open
