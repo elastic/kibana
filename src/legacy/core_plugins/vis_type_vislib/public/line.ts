@@ -32,7 +32,6 @@ import {
   AxisTypes,
   ScaleTypes,
   AxisModes,
-  Rotates,
   ThresholdLineStyles,
   InterpolationModes,
   getConfigCollections,
@@ -40,6 +39,7 @@ import {
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
+import { Rotates } from '../../../../plugins/charts/public';
 
 export const createLineVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'line',
