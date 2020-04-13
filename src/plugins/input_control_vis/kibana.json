@@ -1,0 +1,8 @@
+{
+  "id": "input_control_vis",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["data", "expressions", "visualizations"]
+}
