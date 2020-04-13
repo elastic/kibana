@@ -24,7 +24,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
-import { ORIGIN } from '../../../../core_plugins/tile_map/common/origin';
+import { ORIGIN } from '../common/origin';
 
 function makeFitControl(fitContainer, kibanaMap) {
   const FitControl = L.Control.extend({
@@ -39,7 +39,7 @@ function makeFitControl(fitContainer, kibanaMap) {
     onAdd: function(leafletMap) {
       this._leafletMap = leafletMap;
       const fitDatBoundsLabel = i18n.translate(
-        'common.ui.vis.kibanaMap.leaflet.fitDataBoundsAriaLabel',
+        'maps_legacy.kibanaMap.leaflet.fitDataBoundsAriaLabel',
         { defaultMessage: 'Fit Data Bounds' }
       );
       $(this._fitContainer)
@@ -101,7 +101,7 @@ function makeLegendControl(container, kibanaMap, position) {
  * Serves as simple abstraction for leaflet as well.
  */
 export class KibanaMap extends EventEmitter {
-  constructor(containerNode, options) {
+  constructor(containerNode, options, services) {
     super();
     this._containerNode = containerNode;
     this._leafletBaseLayer = null;
@@ -116,6 +116,7 @@ export class KibanaMap extends EventEmitter {
     this._layers = [];
     this._listeners = [];
     this._showTooltip = false;
+    this.toastService = services ? services.toastService : null;
 
     const leafletOptions = {
       minZoom: options.minZoom,
@@ -482,15 +483,21 @@ export class KibanaMap extends EventEmitter {
   }
 
   _addMaxZoomMessage = layer => {
-    const zoomWarningMsg = createZoomWarningMsg(this.getZoomLevel, this.getMaxZoomLevel);
+    if (this.toastService) {
+      const zoomWarningMsg = createZoomWarningMsg(
+        this.toastService,
+        this.getZoomLevel,
+        this.getMaxZoomLevel
+      );
 
-    this._leafletMap.on('zoomend', zoomWarningMsg);
-    this._containerNode.setAttribute('data-test-subj', 'zoomWarningEnabled');
+      this._leafletMap.on('zoomend', zoomWarningMsg);
+      this._containerNode.setAttribute('data-test-subj', 'zoomWarningEnabled');
 
-    layer.on('remove', () => {
-      this._leafletMap.off('zoomend', zoomWarningMsg);
-      this._containerNode.removeAttribute('data-test-subj');
-    });
+      layer.on('remove', () => {
+        this._leafletMap.off('zoomend', zoomWarningMsg);
+        this._containerNode.removeAttribute('data-test-subj');
+      });
+    }
   };
 
   setLegendPosition(position) {

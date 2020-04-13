@@ -17,35 +17,14 @@
  * under the License.
  */
 
-export interface TmsLayer {
-  id: string;
-  origin: string;
-  minZoom: string;
-  maxZoom: number;
-  attribution: string;
-}
+let toast;
+export const setToasts = notificationToast => (toast = notificationToast);
+export const getToasts = () => toast;
 
-export interface FileLayer {
-  name: string;
-  origin: string;
-  id: string;
-  format: string | { type: string };
-  fields: FileLayerField[];
-}
+let uiSettings;
+export const setUiSettings = coreUiSettings => (uiSettings = coreUiSettings);
+export const getUiSettings = () => uiSettings;
 
-export interface FileLayerField {
-  name: string;
-  description: string;
-  type: string;
-}
-
-export interface VectorLayer extends FileLayer {
-  layerId: string;
-  isEMS: boolean;
-}
-
-export interface ServiceSettings {
-  getEMSHotLink(layer: FileLayer): Promise<string>;
-  getTMSServices(): Promise<TmsLayer[]>;
-  getFileLayers(): Promise<FileLayer[]>;
-}
+let getInjectedVar;
+export const setInjectedVarFunc = getInjectedVarFunc => (getInjectedVar = getInjectedVarFunc);
+export const getInjectedVarFunc = () => getInjectedVar;

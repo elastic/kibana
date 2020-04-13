@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VectorLayer, FileLayerField } from 'ui/vis/map/service_settings';
+import { VectorLayer, FileLayerField } from '../../../../plugins/maps_legacy/public';
 import { WMSOptions } from '../../tile_map/public/types';
 
 export interface RegionMapVisParams {
