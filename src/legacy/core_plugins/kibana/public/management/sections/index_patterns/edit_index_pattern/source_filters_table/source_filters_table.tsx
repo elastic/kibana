@@ -18,7 +18,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { createSelector } from 'reselect';
 
 import { EuiSpacer } from '@elastic/eui';
@@ -44,13 +43,6 @@ export class SourceFiltersTable extends Component<
   SourceFiltersTableProps,
   SourceFiltersTableState
 > {
-  static propTypes = {
-    indexPattern: PropTypes.object.isRequired,
-    filterFilter: PropTypes.string,
-    fieldWildcardMatcher: PropTypes.func.isRequired,
-    onAddOrRemoveFilter: PropTypes.func,
-  };
-
   // Source filters do not have any unique ids, only the value is stored.
   // To ensure we can create a consistent and expected UX when managing
   // source filters, we are assigning a unique id to each filter on the

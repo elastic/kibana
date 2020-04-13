@@ -230,7 +230,7 @@ describe('Table', () => {
     );
     deleteCellComponent
       .find('EuiButtonIcon')
-      .at(0)
+      .at(1)
       .simulate('click');
     expect(deleteFilter).toBeCalled();
   });
@@ -256,7 +256,7 @@ describe('Table', () => {
     );
     editingComponent
       .find('EuiButtonIcon')
-      .at(1)
+      .at(0)
       .simulate('click');
 
     component.update();
@@ -297,7 +297,7 @@ describe('Table', () => {
 
     editingComponent
       .find('EuiButtonIcon')
-      .at(1)
+      .at(0)
       .simulate('click');
 
     // Ensure the state change propagates

@@ -18,7 +18,6 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import PropTypes from 'prop-types';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -61,8 +60,4 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-AddFilter.propTypes = {
-  onAddFilter: PropTypes.func.isRequired,
 };

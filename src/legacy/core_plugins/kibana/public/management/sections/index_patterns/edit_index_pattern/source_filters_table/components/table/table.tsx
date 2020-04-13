@@ -18,7 +18,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 
 import {
   keyCodes,
@@ -84,15 +83,6 @@ export interface TableState {
 }
 
 export class Table extends Component<TableProps, TableState> {
-  static propTypes = {
-    indexPattern: PropTypes.object.isRequired,
-    items: PropTypes.array.isRequired,
-    deleteFilter: PropTypes.func.isRequired,
-    fieldWildcardMatcher: PropTypes.func.isRequired,
-    saveFilter: PropTypes.func.isRequired,
-    isSaving: PropTypes.bool.isRequired,
-  };
-
   constructor(props: TableProps) {
     super(props);
     this.state = {
@@ -155,16 +145,13 @@ export class Table extends Component<TableProps, TableState> {
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
+          const wildcardMatcher = fieldWildcardMatcher([
+            this.state.editingFilterId === filter.clientId ? this.state.editingFilterValue : value,
+          ]);
           const matches = indexPattern
             .getNonScriptedFields()
             .map((currentFilter: any) => currentFilter.name)
-            .filter(
-              fieldWildcardMatcher([
-                this.state.editingFilterId === filter.clientId
-                  ? this.state.editingFilterValue
-                  : value,
-              ])
-            )
+            .filter(wildcardMatcher)
             .sort();
 
           if (matches.length) {
@@ -217,16 +204,16 @@ export class Table extends Component<TableProps, TableState> {
             <>
               <EuiButtonIcon
                 size="s"
+                onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
+                iconType="pencil"
+                aria-label={editAria}
+              />
+              <EuiButtonIcon
+                size="s"
                 color="danger"
                 onClick={() => deleteFilter(filter)}
                 iconType="trash"
                 aria-label={deleteAria}
-              />
-              <EuiButtonIcon
-                size="s"
-                onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
-                iconType="pencil"
-                aria-label={editAria}
               />
             </>
           );
