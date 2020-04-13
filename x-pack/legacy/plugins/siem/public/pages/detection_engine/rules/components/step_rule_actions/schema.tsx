@@ -4,66 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import mustache from 'mustache';
-import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectAttribute } from 'kibana/public';
 import {
   ActionTypeModel,
-  IErrorObject,
   AlertAction,
-} from '../../../../../../../../../plugins/triggers_actions_ui/public/types'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TypeRegistry } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/type_registry';
 import { FormSchema, FormData, ValidationFunc, ERROR_CODE } from '../../../../../shared_imports';
 import * as I18n from './translations';
+import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } from './utils';
 
-const UUID_V4_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-
-const isUuidv4 = (id: string) => !!id.match(UUID_V4_REGEX);
-
-const getActionTypeName = (actionTypeId: string) => startCase(actionTypeId.split('.')[1]);
-
-const validateMustache = (params: Record<string, SavedObjectAttribute>) => {
-  const errors: string[] = [];
-  Object.entries(params).forEach(([paramKey, paramValue]) => {
-    if (!isString(paramValue)) return;
-    try {
-      mustache.render(paramValue, {});
-    } catch (e) {
-      errors.push(I18n.INVALID_MUSTACHE_TEMPLATE(paramKey));
-    }
-  });
-
-  return errors;
-};
-
-const validateActionParams = (
-  actionItem: AlertAction,
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>
-): string[] => {
-  const actionErrors: { errors: IErrorObject } = actionTypeRegistry
-    .get(actionItem.actionTypeId)
-    ?.validateParams(actionItem.params);
-  const actionErrorsValues = Object.values(actionErrors.errors);
-
-  if (actionErrorsValues.length) {
-    // @ts-ignore
-    const filteredObjects: Array<string | string[]> = actionErrorsValues.filter(
-      item => isString(item) || isArray(item)
-    );
-    const uniqActionErrors = uniq(flattenDeep(filteredObjects));
-
-    if (uniqActionErrors.length) {
-      return uniqActionErrors;
-    }
-  }
-
-  return [];
-};
-
-const validateSingleAction = (
+export const validateSingleAction = (
   actionItem: AlertAction,
   actionTypeRegistry: TypeRegistry<ActionTypeModel>
 ): string[] => {
@@ -77,7 +31,7 @@ const validateSingleAction = (
   return [...actionParamsErrors, ...mustacheErrors];
 };
 
-const validateRuleActionsField = (actionTypeRegistry: TypeRegistry<ActionTypeModel>) => (
+export const validateRuleActionsField = (actionTypeRegistry: TypeRegistry<ActionTypeModel>) => (
   ...data: Parameters<ValidationFunc>
 ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
   const [{ value, path }] = data as [{ value: AlertAction[]; path: string }];
@@ -89,7 +43,7 @@ const validateRuleActionsField = (actionTypeRegistry: TypeRegistry<ActionTypeMod
       const actionTypeName = getActionTypeName(actionItem.actionTypeId);
       const errorsListItems = errorsArray.map(error => `*   ${error}`);
 
-      return [...acc, `\n\n**${actionTypeName}:**\n${errorsListItems}`];
+      return [...acc, `\n**${actionTypeName}:**\n${errorsListItems}`];
     }
 
     return acc;
