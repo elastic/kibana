@@ -6,11 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger, startTrace } from '../../../../server/lib';
-import { ConditionalHeaders, ServerFacade } from '../../../../types';
-import { LevelLogger } from '../../../../server/lib';
+import { startTrace } from '../../../../server/lib';
+import { ConditionalHeaders, Logger } from '../../../../types';
 import { CaptureConfig } from '../../../../server/types';
-import { ConditionalHeaders } from '../../../../types';
 import { PAGELOAD_SELECTOR } from '../../constants';
 
 export const openUrl = async (
@@ -18,7 +16,7 @@ export const openUrl = async (
   browser: HeadlessBrowser,
   url: string,
   conditionalHeaders: ConditionalHeaders,
-  logger: LevelLogger
+  logger: Logger
 ): Promise<void> => {
   const endTrace = startTrace('open_url', 'wait');
   try {

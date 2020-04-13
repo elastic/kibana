@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger, startTrace } from '../../../../server/lib';
-import { LevelLogger } from '../../../../server/lib';
 import { CaptureConfig } from '../../../../server/types';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_WAITFORRENDER } from './constants';

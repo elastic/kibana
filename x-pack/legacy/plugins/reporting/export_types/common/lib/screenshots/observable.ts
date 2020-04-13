@@ -16,7 +16,6 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
-import { CaptureConfig, HeadlessChromiumDriverFactory, ServerFacade } from '../../../../types';
 import { CaptureConfig } from '../../../../server/types';
 import { HeadlessChromiumDriverFactory } from '../../../../types';
 import { getElementPositionAndAttributes } from './get_element_position_data';

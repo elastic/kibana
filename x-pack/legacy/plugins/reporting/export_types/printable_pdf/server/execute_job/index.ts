@@ -5,7 +5,6 @@
  */
 
 import apm from 'elastic-apm-node';
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
