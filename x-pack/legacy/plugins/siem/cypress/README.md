@@ -111,6 +111,112 @@ elasticsearch:
   hosts: ['https://<server>:9200']
 ```
 
+## Running (Headless) Tests on the Command Line as a Jenkins execution (The preferred way)
+
+To run (headless) tests as a Jenkins execution.
+
+1. First bootstrap kibana changes from the Kibana root directory:
+
+```sh
+yarn kbn bootstrap
+```
+
+2. Launch Cypress command line test runner:
+
+```sh 
+cd x-pack/legacy/plugins/siem
+yarn cypress:run-as-ci
+```
+
+Note that with this type of execution you don't need to have running a kibana and elasticsearch instance. This is because
+ the command, as it would happen in the CI, will launch the instances. The elasticsearch instance will be fed with the data 
+ placed in: `x-pack/test/siem_cypress/es_archives`
+ 
+As in this case we want to mimic a CI execution we want to execute the tests with the same set of data, this is why 
+in this case does not make sense to override Cypress environment variables. 
+
+### Test data
+
+As said before when running the tests as Jenkins the tests are fed with the data placed in: `x-pack/test/siem_cypress/es_archives`.
+
+Currently there are two different ways of feeding data:
+1. By default
+2. Specifying a specific set of data for a specific test
+
+#### By default
+
+When a execution of the test is going to be done an empty kibana and a set of audibteat data are loaded (empty_kibana and auditbeat). With this data usually is enough to cover most of the scenarios that we are testing.
+
+#### Running tests with custom data
+
+Sometimes the default data is not enough and we need a specific set of data in order to being able to test the desired behaviour.
+
+In that case in the hooks of the test use the function `esArchiverLoad` to load the set of data neeed and `esArchiverUnload` to remove the changes done in the data.
+
+Example:
+
+```typescript
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+
+describe('This are going to be a set of tests', () => {
+  before(() => {
+    esArchiverLoad('name_of_the_data_set_you_want_to_load');
+  });
+
+  after(() => {
+    esArchiverUnload('name_of_the_data_set_you_want_to_unload');
+  });
+
+  it('Going to test something awesome', () => {
+    hereGoesYourAwesomeTestcode     
+  });
+});
+
+```
+
+Note that loading and unloading data takes a signifcant amount of time so try to minimize the use of it when possible.
+
+### Current sets of data
+
+The current sets of data can be found in: `x-pack/test/siem_cypress/es_archives` folder.
+
+- auditbeat
+  - Auditbeat data generated in Sep, 2019 with the following hosts present: 
+    - suricata-iowa
+    - siem-kibana
+    - siem-es
+    - jessie
+- closed_signals
+  - Set of data with 108 closed signals linked to "Signals test" custom rule.
+- custome_rules
+  - Set if data with just 4 custom activated rules. 
+- empty_kibana
+  - Empty kibana board.
+- prebuilt_rules_loaded
+  - Elastic prebuilt loaded rules and deactivated. 
+- signals
+  - Set of data with 108 opened signals linked to "Signals test" custom rule.
+
+### How to generate new test data
+
+We are using es_archiver in order to generate the data that our Cypress tests needs.
+
+1. Setup if possible a clean instance of kibana and elasticsearch (if not, possible please try to clean the data that you are going to generate).
+2. With the kibana and elasticsearch instance up and running, create the data that you need for your test.
+3. When you are sure that you have all the data you need run the following command from: `x-pack/legacy/plugins/siem`
+
+```sh 
+node ../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../../test/siem_cypress/es_archives --config ../../../../test/functional/config.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+```
+
+Example: 
+```sh
+node ../../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../../test/siem_cypress/es_archives --config ../../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9220
+```
+
+Note that the command is going to create the folder if does not exist in the directory with the imported data.
+
+
 ## Running Tests Interactively
 
 Use the Cypress interactive test runner to develop and debug specific tests
@@ -209,30 +315,6 @@ running via the command line:
 cd x-pack/legacy/plugins/siem
 CYPRESS_baseUrl=http://localhost:5601 CYPRESS_ELASTICSEARCH_USERNAME=elastic CYPRESS_ELASTICSEARCH_PASSWORD=<password> yarn cypress:run
 ```
-
-## Running (Headless) Tests on the Command Line as a Jenkins execution
-
-To run (headless) tests as a Jenkins execution.
-
-1. First bootstrap kibana changes from the Kibana root directory:
-
-```sh
-yarn kbn bootstrap
-```
-
-2. Launch Cypress command line test runner:
-
-```sh 
-cd x-pack/legacy/plugins/siem
-yarn cypress:run-as-ci
-```
-
-Note that with this type of execution you don't need to have running a kibana and elasticsearch instance. This is because
- the command, as it would happen in the CI, will launch the instances. The elasticsearch instance will be fed with the data 
- placed in: `x-pack/test/siem_cypress/es_archives`.
- 
-As in this case we want to mimic a CI execution we want to execute the tests with the same set of data, this is why 
-in this case does not make sense to override Cypress environment variables.    
 
 ## Reporting
 
