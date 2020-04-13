@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SourceFiltersTable should add a filter 1`] = `
-<div>
+<Fragment>
   <header />
   <AddFilter
     onAddFilter={[Function]}
@@ -50,11 +50,11 @@ exports[`SourceFiltersTable should add a filter 1`] = `
     }
     saveFilter={[Function]}
   />
-</div>
+</Fragment>
 `;
 
 exports[`SourceFiltersTable should filter based on the query bar 1`] = `
-<div>
+<Fragment>
   <header />
   <AddFilter
     onAddFilter={[Function]}
@@ -91,11 +91,11 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
     }
     saveFilter={[Function]}
   />
-</div>
+</Fragment>
 `;
 
 exports[`SourceFiltersTable should remove a filter 1`] = `
-<div>
+<Fragment>
   <header />
   <AddFilter
     onAddFilter={[Function]}
@@ -121,10 +121,6 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
         },
         "sourceFilters": Array [
           Object {
-            "clientId": 1,
-            "value": "tim*",
-          },
-          Object {
             "clientId": 2,
             "value": "na*",
           },
@@ -136,21 +132,17 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
       Array [
         Object {
           "clientId": 3,
-          "value": "tim*",
-        },
-        Object {
-          "clientId": 4,
           "value": "na*",
         },
       ]
     }
     saveFilter={[Function]}
   />
-</div>
+</Fragment>
 `;
 
 exports[`SourceFiltersTable should render normally 1`] = `
-<div>
+<Fragment>
   <header />
   <AddFilter
     onAddFilter={[Function]}
@@ -195,11 +187,11 @@ exports[`SourceFiltersTable should render normally 1`] = `
     }
     saveFilter={[Function]}
   />
-</div>
+</Fragment>
 `;
 
 exports[`SourceFiltersTable should should a loading indicator when saving 1`] = `
-<div>
+<Fragment>
   <header />
   <AddFilter
     onAddFilter={[Function]}
@@ -230,11 +222,11 @@ exports[`SourceFiltersTable should should a loading indicator when saving 1`] = 
     }
     saveFilter={[Function]}
   />
-</div>
+</Fragment>
 `;
 
 exports[`SourceFiltersTable should show a delete modal 1`] = `
-<div>
+<Fragment>
   <header />
   <AddFilter
     onAddFilter={[Function]}
@@ -265,43 +257,16 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
     }
     saveFilter={[Function]}
   />
-  <eui-overlay-mask>
-    <eui-confirm-modal
-      buttonColor="danger"
-      cancelButtonText={
-        <FormattedMessage
-          defaultMessage="Cancel"
-          id="kbn.management.editIndexPattern.source.deleteFilter.cancelButtonLabel"
-          values={Object {}}
-        />
-      }
-      confirmButtonText={
-        <FormattedMessage
-          defaultMessage="Delete"
-          id="kbn.management.editIndexPattern.source.deleteFilter.deleteButtonLabel"
-          values={Object {}}
-        />
-      }
-      onCancel={[Function]}
-      onConfirm={[Function]}
-      title={
-        <FormattedMessage
-          defaultMessage="Delete source filter '{value}'?"
-          id="kbn.management.editIndexPattern.source.deleteSourceFilterLabel"
-          values={
-            Object {
-              "value": "tim*",
-            }
-          }
-        />
-      }
-    />
-  </eui-overlay-mask>
-</div>
+  <DeleteFilterConfirmationModal
+    filterToDeleteValue="tim*"
+    onCancelConfirmationModal={[Function]}
+    onDeleteFilter={[Function]}
+  />
+</Fragment>
 `;
 
 exports[`SourceFiltersTable should update a filter 1`] = `
-<div>
+<Fragment>
   <header />
   <AddFilter
     onAddFilter={[Function]}
@@ -344,5 +309,5 @@ exports[`SourceFiltersTable should update a filter 1`] = `
     }
     saveFilter={[Function]}
   />
-</div>
+</Fragment>
 `;

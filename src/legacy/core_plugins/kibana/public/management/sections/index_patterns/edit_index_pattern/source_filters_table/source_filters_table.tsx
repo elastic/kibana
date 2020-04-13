@@ -18,32 +18,39 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { createSelector } from 'reselect';
 
-import { EuiSpacer, EuiOverlayMask, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { AddFilter, Table, Header, DeleteFilterConfirmationModal } from './components';
+import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
+import { SourceFiltersTableFilter } from './types';
 
-import { Table } from './components/table';
-import { Header } from './components/header';
-import { AddFilter } from './components/add_filter';
-import { FormattedMessage } from '@kbn/i18n/react';
+export interface SourceFiltersTableProps {
+  indexPattern: IIndexPattern;
+  filterFilter: string;
+  fieldWildcardMatcher: Function;
+  onAddOrRemoveFilter?: Function;
+}
 
-export class SourceFiltersTable extends Component {
-  static propTypes = {
-    indexPattern: PropTypes.object.isRequired,
-    filterFilter: PropTypes.string,
-    fieldWildcardMatcher: PropTypes.func.isRequired,
-    onAddOrRemoveFilter: PropTypes.func,
-  };
+export interface SourceFiltersTableState {
+  filterToDelete: any;
+  isDeleteConfirmationModalVisible: boolean;
+  isSaving: boolean;
+  filters: SourceFiltersTableFilter[];
+}
 
-  constructor(props) {
+export class SourceFiltersTable extends Component<
+  SourceFiltersTableProps,
+  SourceFiltersTableState
+> {
+  // Source filters do not have any unique ids, only the value is stored.
+  // To ensure we can create a consistent and expected UX when managing
+  // source filters, we are assigning a unique id to each filter on the
+  // client side only
+  private clientSideId: number = 0;
+
+  constructor(props: SourceFiltersTableProps) {
     super(props);
-
-    // Source filters do not have any unique ids, only the value is stored.
-    // To ensure we can create a consistent and expected UX when managing
-    // source filters, we are assigning a unique id to each filter on the
-    // client side only
-    this.clientSideId = 0;
 
     this.state = {
       filterToDelete: undefined,
@@ -58,9 +65,9 @@ export class SourceFiltersTable extends Component {
   }
 
   updateFilters = () => {
-    const sourceFilters = this.props.indexPattern.sourceFilters || [];
-    const filters = sourceFilters.map(filter => ({
-      ...filter,
+    const sourceFilters = this.props.indexPattern.sourceFilters;
+    const filters = (sourceFilters || []).map((sourceFilter: any) => ({
+      ...sourceFilter,
       clientId: ++this.clientSideId,
     }));
 
@@ -68,8 +75,8 @@ export class SourceFiltersTable extends Component {
   };
 
   getFilteredFilters = createSelector(
-    state => state.filters,
-    (state, props) => props.filterFilter,
+    (state: SourceFiltersTableState) => state.filters,
+    (state: SourceFiltersTableState, props: SourceFiltersTableProps) => props.filterFilter,
     (filters, filterFilter) => {
       if (filterFilter) {
         const filterFilterToLowercase = filterFilter.toLowerCase();
@@ -82,7 +89,7 @@ export class SourceFiltersTable extends Component {
     }
   );
 
-  startDeleteFilter = filter => {
+  startDeleteFilter = (filter: SourceFiltersTableFilter) => {
     this.setState({
       filterToDelete: filter,
       isDeleteConfirmationModalVisible: true,
@@ -106,35 +113,44 @@ export class SourceFiltersTable extends Component {
 
     this.setState({ isSaving: true });
     await indexPattern.save();
-    onAddOrRemoveFilter && onAddOrRemoveFilter();
+
+    if (onAddOrRemoveFilter) {
+      onAddOrRemoveFilter();
+    }
+
     this.updateFilters();
     this.setState({ isSaving: false });
     this.hideDeleteConfirmationModal();
   };
 
-  onAddFilter = async value => {
+  onAddFilter = async (value: string) => {
     const { indexPattern, onAddOrRemoveFilter } = this.props;
 
     indexPattern.sourceFilters = [...(indexPattern.sourceFilters || []), { value }];
 
     this.setState({ isSaving: true });
     await indexPattern.save();
-    onAddOrRemoveFilter && onAddOrRemoveFilter();
+
+    if (onAddOrRemoveFilter) {
+      onAddOrRemoveFilter();
+    }
+
     this.updateFilters();
     this.setState({ isSaving: false });
   };
 
-  saveFilter = async ({ filterId, newFilterValue }) => {
+  saveFilter = async ({ clientId, value }: SourceFiltersTableFilter) => {
     const { indexPattern } = this.props;
     const { filters } = this.state;
 
     indexPattern.sourceFilters = filters.map(filter => {
-      if (filter.clientId === filterId) {
+      if (filter.clientId === clientId) {
         return {
-          value: newFilterValue,
-          clientId: filter.clientId,
+          value,
+          clientId,
         };
       }
+
       return filter;
     });
 
@@ -144,55 +160,13 @@ export class SourceFiltersTable extends Component {
     this.setState({ isSaving: false });
   };
 
-  renderDeleteConfirmationModal() {
-    const { filterToDelete } = this.state;
-
-    if (!filterToDelete) {
-      return null;
-    }
-
-    return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="kbn.management.editIndexPattern.source.deleteSourceFilterLabel"
-              defaultMessage="Delete source filter '{value}'?"
-              values={{
-                value: filterToDelete.value,
-              }}
-            />
-          }
-          onCancel={this.hideDeleteConfirmationModal}
-          onConfirm={this.deleteFilter}
-          cancelButtonText={
-            <FormattedMessage
-              id="kbn.management.editIndexPattern.source.deleteFilter.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          buttonColor="danger"
-          confirmButtonText={
-            <FormattedMessage
-              id="kbn.management.editIndexPattern.source.deleteFilter.deleteButtonLabel"
-              defaultMessage="Delete"
-            />
-          }
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        />
-      </EuiOverlayMask>
-    );
-  }
-
   render() {
     const { indexPattern, fieldWildcardMatcher } = this.props;
-
-    const { isSaving } = this.state;
-
+    const { isSaving, filterToDelete } = this.state;
     const filteredFilters = this.getFilteredFilters(this.state, this.props);
 
     return (
-      <div>
+      <>
         <Header />
         <AddFilter onAddFilter={this.onAddFilter} />
         <EuiSpacer size="l" />
@@ -205,8 +179,14 @@ export class SourceFiltersTable extends Component {
           saveFilter={this.saveFilter}
         />
 
-        {this.renderDeleteConfirmationModal()}
-      </div>
+        {filterToDelete && (
+          <DeleteFilterConfirmationModal
+            filterToDeleteValue={filterToDelete.value}
+            onCancelConfirmationModal={this.hideDeleteConfirmationModal}
+            onDeleteFilter={this.deleteFilter}
+          />
+        )}
+      </>
     );
   }
 }
