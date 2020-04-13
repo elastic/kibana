@@ -1570,7 +1570,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
           "children": <EuiText>
             <p>
               <ForwardRef
-                href="https://www.elastic.co/guide/en/logstash/current/monitoring-with-metricbeat.html"
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1629,7 +1629,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
+                              href="https://www.elastic.co/guide/en/logstash/current/monitoring-with-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1696,7 +1696,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
+                              href="https://www.elastic.co/guide/en/logstash/current/monitoring-with-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
