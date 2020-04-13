@@ -1,14 +1,14 @@
 [role="xpack"]
 
 [[example-using-index-lifecycle-policy]]
-=== Tutorial:  Use {ilm-init} to manage {filebeat} time-based indices
+=== Tutorial: Use {ilm-init} to manage {filebeat} time-based indices
 
-With {ilm} ({ilm-init}), you can create policies perform actions automatically 
-against indices as they age and grow. {ilm-init} policies help you to manage
-performance, resilience, and retention of your data during its lifecycle. This tutorial will show
+With {ilm} ({ilm-init}), you can create policies that perform actions automatically 
+on indices as they age and grow. {ilm-init} policies help you to manage
+performance, resilience, and retention of your data during its lifecycle. This tutorial shows
 you how to use {kib}’s *Index Lifecycle Policies* to modify and create {ilm-init}
 policies. You can learn more about all of the actions, benefits, and lifecycle
-phases in the {ref}/overview-index-lifecycle-management.html[{ilm} overview].
+phases in the {ref}/overview-index-lifecycle-management.html[{ilm-init} overview].
 
 
 [discrete]
@@ -56,7 +56,7 @@ output as described in {filebeat-ref}/filebeat-getting-started.html[Getting Star
 [[example-using-index-lifecycle-policy-view-fb-ilm-policy]]
 ==== View the {filebeat} {ilm-init} policy
 
-{filebeat} includes a default {ilm-init} policy that enables rollover. {ilm-cap}
+{filebeat} includes a default {ilm-init} policy that enables rollover. {ilm-init}
 is enabled automatically if you’re using the default `filebeat.yml` and index template.
 
 To view the default policy in {kib}, go to *Management > Index Lifecycle Policies*,
@@ -86,7 +86,7 @@ rollover occurred.
 
 ** Enable *Move to warm phase on rollover*. The index might move to the warm phase
 more quickly than intended if it reaches the *Maximum index size* before the
-*Maximum age*.
+the *Maximum age*.
 
 . In the *Select a node attribute to control shard allocation* dropdown, select
 *data:warm(2)* to migrate shards to warm data nodes.
