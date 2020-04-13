@@ -162,8 +162,17 @@ interface PolicyConfigAdvancedOptions {
 export type UIPolicyConfig = {
   windows: {
     events: {
-      process: boolean;
+      api: boolean;
+      clr: boolean;
+      dll_and_driver_load: boolean;
+      dns: boolean;
+      file: boolean;
       network: boolean;
+      powershell: boolean;
+      process: boolean;
+      registry: boolean;
+      security: boolean;
+      wmi: boolean;
     };
     /** malware mode can be off, detect, prevent or prevent and notify user */
     malware: MalwareFields;
@@ -194,13 +203,6 @@ export enum OS {
   windows = 'windows',
   mac = 'mac',
   linux = 'linux',
-}
-
-/** Used in Policy */
-export enum EventingFields {
-  process = 'process',
-  network = 'network',
-  file = 'file',
 }
 
 /**
