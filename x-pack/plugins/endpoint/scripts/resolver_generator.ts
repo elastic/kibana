@@ -8,6 +8,7 @@ import seedrandom from 'seedrandom';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { EndpointDocGenerator, Event } from '../common/generate_data';
+import { EndpointAppConstants } from '../common/types';
 import { default as eventMapping } from './event_mapping.json';
 import { default as alertMapping } from './alert_mapping.json';
 
@@ -29,13 +30,13 @@ async function main() {
     alertIndex: {
       alias: 'ai',
       describe: 'index to store alerts in',
-      default: '.alerts-endpoint-000001',
+      default: EndpointAppConstants.ALERT_INDEX_NAME,
       type: 'string',
     },
     eventIndex: {
       alias: 'ei',
       describe: 'index to store events in',
-      default: 'events-endpoint-1',
+      default: EndpointAppConstants.EVENT_INDEX_NAME,
       type: 'string',
     },
     metadataIndex: {
