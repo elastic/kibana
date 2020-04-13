@@ -23,5 +23,5 @@ Note that the pattern set here only restricts what the Uptime app shows. Users m
 to manually query Elasticsearch for data outside this pattern!
 
 See the <<uptime-security,Uptime Elasticsearch Security>>
-and {heartbeat-ref}/feature-roles.html[Heartbeat security]
+and {heartbeat-ref}/securing-heartbeat.html[Heartbeat security]
 docs for more information.
