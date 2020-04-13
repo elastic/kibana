@@ -55,7 +55,10 @@ export const SettingsPanel = (
           <p>
             <FormattedMessage
               id="xpack.ingestManager.integrations.settings.packageInstallDescription"
-              defaultMessage="Install this integration to setup Kibana and Elasticsearch assets designed for Nginx data."
+              defaultMessage="Install this integration to setup Kibana and Elasticsearch assets designed for {title} data."
+              values={{
+                title,
+              }}
             />
           </p>
         </div>
@@ -95,8 +98,9 @@ export const SettingsPanel = (
         <p>
           <FormattedMessage
             id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
-            defaultMessage="{strongNote} Nginx cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all Nginx data sources from your agent configurations."
+            defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} data sources from your agent configurations."
             values={{
+              title,
               strongNote: (
                 <strong>
                   <FormattedMessage
