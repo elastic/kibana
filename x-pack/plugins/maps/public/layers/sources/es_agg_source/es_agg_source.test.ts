@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractESAggSource } from './es_agg_source';
-import { IField } from '../fields/field';
-import { IESAggField } from '../fields/es_agg_field';
+import { AbstractESAggSource } from '../es_agg_source';
+import { IField } from '../../fields/field';
+import { IESAggField } from '../../fields/es_agg_field';
 import _ from 'lodash';
-import { AGG_TYPE } from '../../../common/constants';
-import { AggDescriptor } from '../../../common/descriptor_types';
+import { AGG_TYPE } from '../../../../common/constants';
+import { AggDescriptor } from '../../../../common/descriptor_types';
 
 jest.mock('ui/new_platform');
 
