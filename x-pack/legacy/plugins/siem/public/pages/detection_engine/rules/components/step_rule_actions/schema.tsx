@@ -8,6 +8,7 @@ import mustache from 'mustache';
 import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 
+import { SavedObjectAttribute } from 'kibana/public';
 import {
   ActionTypeModel,
   IErrorObject,
@@ -23,6 +24,57 @@ const isUuidv4 = (id: string) => !!id.match(UUID_V4_REGEX);
 
 const getActionTypeName = (actionTypeId: string) => startCase(actionTypeId.split('.')[1]);
 
+const validateMustache = (params: Record<string, SavedObjectAttribute>) => {
+  const errors: string[] = [];
+  Object.entries(params).forEach(([paramKey, paramValue]) => {
+    if (!isString(paramValue)) return;
+    try {
+      mustache.render(paramValue, {});
+    } catch (e) {
+      errors.push(`${startCase(paramKey)} is not valid mustache template`);
+    }
+  });
+
+  return errors;
+};
+
+const validateActionParams = (
+  actionItem: AlertAction,
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>
+): string[] => {
+  const actionErrors: { errors: IErrorObject } = actionTypeRegistry
+    .get(actionItem.actionTypeId)
+    ?.validateParams(actionItem.params);
+  const actionErrorsValues = Object.values(actionErrors.errors);
+
+  if (actionErrorsValues.length) {
+    // @ts-ignore
+    const filteredObjects: Array<string | string[]> = actionErrorsValues.filter(
+      item => isString(item) || isArray(item)
+    );
+    const uniqActionErrors = uniq(flattenDeep(filteredObjects));
+
+    if (uniqActionErrors.length) {
+      return uniqActionErrors;
+    }
+  }
+
+  return [];
+};
+
+const validateSingleAction = (
+  actionItem: AlertAction,
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>
+): string[] => {
+  if (!isUuidv4(actionItem.id)) {
+    return ['No connector selected'];
+  }
+  const actionParamsErrors = validateActionParams(actionItem, actionTypeRegistry);
+  const mustacheErrors = validateMustache(actionItem.params);
+
+  return [...actionParamsErrors, ...mustacheErrors];
+};
+
 const validateRuleActionsField = (actionTypeRegistry: TypeRegistry<ActionTypeModel>) => (
   ...data: Parameters<ValidationFunc>
 ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
@@ -30,40 +82,10 @@ const validateRuleActionsField = (actionTypeRegistry: TypeRegistry<ActionTypeMod
   const [{ value, path }] = data as [{ value: AlertAction[]; path: string }];
 
   const errors = value.reduce((acc, actionItem) => {
-    const actionTypeName = getActionTypeName(actionItem.actionTypeId);
-
-    const errorsArray = [];
-
-    if (!isUuidv4(actionItem.id)) {
-      errorsArray.push('No connector selected');
-    } else {
-      const actionErrors: { errors: IErrorObject } = actionTypeRegistry
-        .get(actionItem.actionTypeId)
-        ?.validateParams(actionItem.params);
-
-      if (Object.values(actionErrors.errors).length) {
-        // @ts-ignore
-        const filteredObjects: Array<string | string[]> = Object.values(actionErrors.errors).filter(
-          item => isString(item) || isArray(item)
-        );
-        const uniqActionErrors = uniq(flattenDeep(filteredObjects));
-
-        if (uniqActionErrors.length) {
-          errorsArray.push(uniqActionErrors);
-        }
-      }
-
-      Object.entries(actionItem.params).forEach(([paramKey, paramValue]) => {
-        if (!isString(paramValue)) return;
-        try {
-          mustache.render(paramValue, {});
-        } catch (e) {
-          errorsArray.push(`${startCase(paramKey)} is not valid mustache template`);
-        }
-      });
-    }
+    const errorsArray = validateSingleAction(actionItem, actionTypeRegistry);
 
     if (errorsArray.length) {
+      const actionTypeName = getActionTypeName(actionItem.actionTypeId);
       const errorsListItems = errorsArray.map(error => `*   ${error}`);
 
       return [...acc, `\n\n**${actionTypeName}:**\n${errorsListItems}`];
