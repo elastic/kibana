@@ -1,0 +1,18 @@
+{
+  "id": "visualize",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "embeddable",
+    "kibanaLegacy",
+    "navigation",
+    "savedObjects",
+    "visualizations"
+  ],
+  "optionalPlugins": [
+    "home",
+    "share"
+  ]
+}

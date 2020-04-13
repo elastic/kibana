@@ -17,16 +17,18 @@
  * under the License.
  */
 
+import './index.scss';
+
 import angular, { IModule } from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { AppMountContext } from 'kibana/public';
-import { configureAppAngularModule } from '../legacy_imports';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
+import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import {
+  configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
-} from '../../../../../../plugins/kibana_legacy/public';
+} from '../../../kibana_legacy/public';
 
 // @ts-ignore
 import { initVisualizeApp } from './legacy_app';

@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import { IModule } from 'angular';
-import { VisualizeKibanaServices } from '../kibana_services';
+import { PluginInitializerContext } from 'kibana/public';
+import { VisualizePlugin } from './plugin';
 
-// @ts-ignore
-import { initEditorDirective } from './editor/editor';
-// @ts-ignore
-import { initListingDirective } from './listing/visualize_listing';
+export { EditorRenderProps } from './application/types';
+export { VisualizeConstants, createVisualizeEditUrl } from './application/visualize_constants';
 
-export function initVisualizeAppDirective(app: IModule, deps: VisualizeKibanaServices) {
-  initEditorDirective(app, deps);
-  initListingDirective(app, deps.core.i18n.Context);
-}
+export const plugin = (context: PluginInitializerContext) => {
+  return new VisualizePlugin(context);
+};
