@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
+import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -40,6 +41,15 @@ const stepActionsDefaultValue = {
 };
 
 const GhostFormField = () => <></>;
+
+const getThrottleOptions = (throttle?: string | null) => {
+  // Add support for throttle options set by the API
+  if (throttle && findIndex(['value', throttle], THROTTLE_OPTIONS) < 0) {
+    return [...THROTTLE_OPTIONS, { value: throttle, text: throttle }];
+  }
+
+  return THROTTLE_OPTIONS;
+};
 
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   addPadding = false,
@@ -107,6 +117,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     setMyStepData,
   ]);
 
+  const throttleOptions = useMemo(() => {
+    const throttle = myStepData.throttle;
+
+    return getThrottleOptions(throttle);
+  }, [myStepData]);
+
   const throttleFieldComponentProps = useMemo(
     () => ({
       idAria: 'detectionEngineStepRuleActionsThrottle',
@@ -115,7 +131,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       hasNoInitialSelection: false,
       handleChange: updateThrottle,
       euiFieldProps: {
-        options: THROTTLE_OPTIONS,
+        options: throttleOptions,
       },
     }),
     [isLoading, updateThrottle]
