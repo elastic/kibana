@@ -372,7 +372,7 @@ export function XYChart({
                     if (i === 0 && splitHint) {
                       return formatFactory(splitHint).convert(key);
                     }
-                    return columnToLabelMap[key] ?? key;
+                    return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? '';
                   })
                   .join(' - ');
               }
@@ -383,9 +383,9 @@ export function XYChart({
                 return formatFactory(splitHint).convert(d.seriesKeys[0]);
               }
               // This handles both split and single-y cases:
-              // * If single Y, the seriesKey will be the acccessor, so we show the human-readable name
               // * If split series without formatting, show the value literally
-              return columnToLabelMap[d.seriesKeys[0]] ?? d.seriesKeys[0];
+              // * If single Y, the seriesKey will be the acccessor, so we show the human-readable name
+              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? '';
             },
           };
 

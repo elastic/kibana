@@ -710,8 +710,30 @@ describe('xy_expression', () => {
         const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
 
         // In this case, the ID is used as the name. This shouldn't happen in practice
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('a');
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('nonsense');
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('');
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
+      });
+
+      test('simplest xy chart with empty name', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a'],
+              splitAccessor: undefined,
+              columnToLabel: '{"a":""}',
+            },
+          ],
+        };
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+        // In this case, the ID is used as the name. This shouldn't happen in practice
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('');
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
       });
 
       test('simplest xy chart with human-readable name', () => {
@@ -754,8 +776,8 @@ describe('xy_expression', () => {
         // This accessor has a human-readable name
         expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
         // This accessor does not
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('b');
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('nonsense');
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('');
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
       });
 
       test('split series without formatting and single y accessor', () => {
