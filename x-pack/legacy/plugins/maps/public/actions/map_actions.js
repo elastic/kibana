@@ -663,10 +663,36 @@ export function updateSourceProp(layerId, propName, value, newLayerType) {
       layerId,
       propName,
       value,
-      newLayerType,
     });
+    if (newLayerType) {
+      dispatch(updateLayerType(layerId, newLayerType));
+    }
     await dispatch(clearMissingStyleProperties(layerId));
     dispatch(syncDataForLayer(layerId));
+  };
+}
+
+function updateLayerType(layerId, newLayerType) {
+  return (dispatch, getState) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer || layer.getType() === newLayerType) {
+      return;
+    }
+    layer.getInFlightRequestTokens().forEach(requestToken => {
+      dispatch(cancelRequest(requestToken));
+    });
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layerId,
+      propName: '__dataRequests',
+      newValue: [],
+    });
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layerId,
+      propName: 'type',
+      newValue: newLayerType,
+    });
   };
 }
 
