@@ -5,7 +5,7 @@
  */
 
 import { Immutable } from '../../../../../common/types';
-import { EndpointAppLocation, PageId } from '../../types';
+import { EndpointAppLocation } from '../../types';
 
 interface UserChangedUrl {
   readonly type: 'userChangedUrl';

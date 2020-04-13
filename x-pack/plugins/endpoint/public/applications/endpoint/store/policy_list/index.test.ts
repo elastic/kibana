@@ -17,7 +17,7 @@ import {
   MiddlewareActionSpyHelper,
   setPolicyListApiMockImplementation,
 } from './test_mock_utils';
-import { INGEST_API_DATASOURCES } from '../../services/ingest';
+import { INGEST_API_DATASOURCES } from './services/ingest';
 
 describe('policy list store concerns', () => {
   let fakeCoreStart: ReturnType<typeof coreMock.createStart>;

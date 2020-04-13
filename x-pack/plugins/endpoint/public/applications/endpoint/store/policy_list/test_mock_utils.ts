@@ -6,9 +6,9 @@
 
 import { HttpStart } from 'kibana/public';
 import { Dispatch } from 'redux';
-import { GetDatasourcesResponse, INGEST_API_DATASOURCES } from '../../services/ingest';
+import { INGEST_API_DATASOURCES } from './services/ingest';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
-import { AppAction, GlobalState, MiddlewareFactory } from '../../types';
+import { AppAction, GetDatasourcesResponse, GlobalState, MiddlewareFactory } from '../../types';
 
 const generator = new EndpointDocGenerator('policy-list');
 
