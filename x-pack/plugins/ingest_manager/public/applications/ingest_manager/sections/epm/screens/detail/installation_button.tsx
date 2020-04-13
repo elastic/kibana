@@ -8,8 +8,8 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PackageInfo, InstallStatus } from '../../../../types';
 import { useCapabilities } from '../../../../hooks';
-import { useDeletePackage, useGetPackageInstallStatus, useInstallPackage } from '../../hooks';
-import { ConfirmPackageDelete } from './confirm_package_delete';
+import { useUninstallPackage, useGetPackageInstallStatus, useInstallPackage } from '../../hooks';
+import { ConfirmPackageUninstall } from './confirm_package_uninstall';
 import { ConfirmPackageInstall } from './confirm_package_install';
 
 type InstallationButtonProps = Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'> & {
@@ -19,7 +19,7 @@ export function InstallationButton(props: InstallationButtonProps) {
   const { assets, name, title, version, disabled = true } = props;
   const hasWriteCapabilites = useCapabilities().write;
   const installPackage = useInstallPackage();
-  const deletePackage = useDeletePackage();
+  const uninstallPackage = useUninstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const installationStatus = getPackageInstallStatus(name);
 
@@ -36,10 +36,10 @@ export function InstallationButton(props: InstallationButtonProps) {
     toggleModal();
   }, [installPackage, name, title, toggleModal, version]);
 
-  const handleClickDelete = useCallback(() => {
-    deletePackage({ name, version, title });
+  const handleClickUninstall = useCallback(() => {
+    uninstallPackage({ name, version, title });
     toggleModal();
-  }, [deletePackage, name, title, toggleModal, version]);
+  }, [uninstallPackage, name, title, toggleModal, version]);
 
   // counts the number of assets in the package
   const numOfAssets = useMemo(
@@ -107,14 +107,14 @@ export function InstallationButton(props: InstallationButtonProps) {
   );
 
   const uninstallModal = (
-    <ConfirmPackageDelete
+    <ConfirmPackageUninstall
       // this is number of which would be installed
       // deleted includes ingest-pipelines etc so could be larger
       // not sure how to do this at the moment so using same value
       numOfAssets={numOfAssets}
       packageName={title}
       onCancel={toggleModal}
-      onConfirm={handleClickDelete}
+      onConfirm={handleClickUninstall}
     />
   );
 
