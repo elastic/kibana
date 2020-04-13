@@ -141,11 +141,12 @@ exports[`PingList component renders sorted list without errors 1`] = `
     }
     hasActions={true}
     isExpandable={true}
-    itemId="timestamp"
+    itemId="docId"
     itemIdToExpandedRowMap={Object {}}
     items={
       Array [
         Object {
+          "docId": "fewjio21",
           "error": Object {
             "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
             "type": "io",
@@ -163,6 +164,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           "timestamp": "2019-01-28T17:47:08.078Z",
         },
         Object {
+          "docId": "fewjoo21",
           "error": Object {
             "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
             "type": "io",
@@ -180,6 +182,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           "timestamp": "2019-01-28T17:47:09.075Z",
         },
         Object {
+          "docId": "fejjio21",
           "monitor": Object {
             "duration": Object {
               "us": 1452,
@@ -193,6 +196,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           "timestamp": "2019-01-28T17:47:06.077Z",
         },
         Object {
+          "docId": "fewzio21",
           "error": Object {
             "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
             "type": "io",
@@ -210,6 +214,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           "timestamp": "2019-01-28T17:47:07.075Z",
         },
         Object {
+          "docId": "fewpi321",
           "error": Object {
             "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
             "type": "io",
@@ -227,6 +232,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           "timestamp": "2019-01-28T17:47:07.074Z",
         },
         Object {
+          "docId": "0ewjio21",
           "error": Object {
             "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
             "type": "io",
@@ -244,6 +250,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           "timestamp": "2019-01-28T17:47:18.080Z",
         },
         Object {
+          "docId": "3ewjio21",
           "error": Object {
             "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
             "type": "io",
@@ -261,6 +268,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           "timestamp": "2019-01-28T17:47:19.076Z",
         },
         Object {
+          "docId": "fewjip21",
           "error": Object {
             "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
             "type": "io",
@@ -278,6 +286,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           "timestamp": "2019-01-28T17:47:19.076Z",
         },
         Object {
+          "docId": "fewjio21",
           "http": Object {
             "response": Object {
               "status_code": 200,
@@ -296,6 +305,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           "timestamp": "2019-01-28T17:47:19.077Z",
         },
         Object {
+          "docId": "fewjik81",
           "http": Object {
             "response": Object {
               "status_code": 200,

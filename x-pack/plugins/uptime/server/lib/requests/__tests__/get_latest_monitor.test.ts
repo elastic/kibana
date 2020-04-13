@@ -42,6 +42,7 @@ describe('getLatestMonitor', () => {
       hits: {
         hits: [
           {
+            _id: 'fejwio32',
             _source: {
               '@timestamp': '123456',
               monitor: {
@@ -72,6 +73,7 @@ describe('getLatestMonitor', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "@timestamp": "123456",
+        "docId": "fejwio32",
         "monitor": Object {
           "duration": Object {
             "us": 12345,
