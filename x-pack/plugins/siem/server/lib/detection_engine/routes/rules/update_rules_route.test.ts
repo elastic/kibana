@@ -16,7 +16,7 @@ import {
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
-import { DETECTION_ENGINE_RULES_URL } from 'siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 jest.mock('../../rules/update_rules_notifications');

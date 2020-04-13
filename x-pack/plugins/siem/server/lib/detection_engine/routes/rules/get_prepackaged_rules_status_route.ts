@@ -5,7 +5,7 @@
  */
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import { DETECTION_ENGINE_PREPACKAGED_URL } from 'siem/common/constants';
+import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';

@@ -5,7 +5,7 @@
  */
 
 import { FindResult } from '../../../../../alerting/server';
-import { SIGNALS_ID } from 'siem/common/constants';
+import { SIGNALS_ID } from '../../../../common/constants';
 import { FindRuleParams } from './types';
 
 export const getFilter = (filter: string | null | undefined) => {

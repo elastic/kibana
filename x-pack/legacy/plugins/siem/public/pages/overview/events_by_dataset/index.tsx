@@ -7,8 +7,9 @@
 import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo } from 'react';
-
 import { Position } from '@elastic/charts';
+
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../../../plugins/siem/common/constants';
 import { SHOWING, UNIT } from '../../../components/events_viewer/translations';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { getTabsOnHostsUrl } from '../../../components/link_to/redirect_to_hosts';
@@ -24,7 +25,6 @@ import {
 } from '../../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../store';
 import { HostsTableType, HostsType } from '../../../store/hosts/model';
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 
 import * as i18n from '../translations';
 import { MatrixHisrogramConfigs } from '../../../components/matrix_histogram/types';

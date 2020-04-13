@@ -5,7 +5,7 @@
  */
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from 'siem/common/constants';
+import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import { SignalsStatusRestParams } from '../../signals/types';
 import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
 import { transformError, buildRouteValidation, buildSiemResponse } from '../utils';

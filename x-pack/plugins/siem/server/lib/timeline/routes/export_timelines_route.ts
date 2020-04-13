@@ -5,11 +5,12 @@
  */
 
 import { set as _set } from 'lodash/fp';
+
+import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { IRouter } from '../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
 
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
-import { TIMELINE_EXPORT_URL } from 'siem/common/constants';
 
 import { getExportTimelineByObjectIds } from './utils/export_timelines';
 import {

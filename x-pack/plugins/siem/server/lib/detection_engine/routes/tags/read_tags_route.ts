@@ -5,7 +5,7 @@
  */
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import { DETECTION_ENGINE_TAGS_URL } from 'siem/common/constants';
+import { DETECTION_ENGINE_TAGS_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
 import { readTags } from '../../tags/read_tags';
 

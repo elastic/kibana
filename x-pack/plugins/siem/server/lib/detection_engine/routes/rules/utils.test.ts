@@ -18,7 +18,7 @@ import {
   getTupleDuplicateErrorsAndUniqueRules,
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
-import { INTERNAL_IDENTIFIER } from 'siem/common/constants';
+import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { ImportRuleAlertRest, RuleAlertParamsRest, RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { getSimpleRule, getOutputRuleAlertForRest } from '../__mocks__/utils';

@@ -7,6 +7,7 @@
 import { extname } from 'path';
 import { chunk, omit, set } from 'lodash/fp';
 
+import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
 import {
   buildSiemResponse,
   createBulkErrorObject,
@@ -28,7 +29,6 @@ import {
 } from './utils/import_timelines';
 
 import { IRouter } from '../../../../../../../src/core/server';
-import { TIMELINE_IMPORT_URL } from 'siem/common/constants';
 import { SetupPlugins } from '../../../plugin';
 import { ImportTimelinesPayloadSchemaRt } from './schemas/import_timelines_schema';
 import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';

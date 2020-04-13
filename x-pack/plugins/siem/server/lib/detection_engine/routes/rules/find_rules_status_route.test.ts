@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DETECTION_ENGINE_RULES_URL } from 'siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getFindResultStatus, ruleStatusRequest } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';

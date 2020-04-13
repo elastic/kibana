@@ -6,7 +6,7 @@
 
 import { omit } from 'lodash/fp';
 
-import { defaultIndexPattern } from 'siem/default_index_pattern';
+import { defaultIndexPattern } from '../../../common/default_index_pattern';
 import { Direction } from '../../graphql/types';
 import { RequestOptions } from '../../lib/framework';
 

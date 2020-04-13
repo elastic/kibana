@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { transformDataToNdjson } from './create_stream_from_ndjson';
-import { ImportRuleAlertRest } from 'siem-legacy-ui/server/lib/detection_engine/types';
-import { sampleRule } from 'siem-legacy-ui/server/lib/detection_engine/signals/__mocks__/es_results';
+import { ImportRuleAlertRest } from '../../lib/detection_engine/types';
+import { sampleRule } from '../../lib/detection_engine/signals/__mocks__/es_results';
 
 export const getOutputSample = (): Partial<ImportRuleAlertRest> => ({
   rule_id: 'rule-1',

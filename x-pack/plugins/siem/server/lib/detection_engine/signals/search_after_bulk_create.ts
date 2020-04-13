@@ -5,7 +5,7 @@
  */
 
 import { AlertServices } from '../../../../../alerting/server';
-import { RuleAlertAction } from 'siem/common/detection_engine/types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { Logger } from '../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';

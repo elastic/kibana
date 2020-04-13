@@ -12,7 +12,7 @@ import {
   removeInternalTagsFromRule,
 } from './build_signal';
 import { Signal, Ancestor } from './types';
-import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from 'siem/common/constants';
+import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 
 describe('buildSignal', () => {
   beforeEach(() => {

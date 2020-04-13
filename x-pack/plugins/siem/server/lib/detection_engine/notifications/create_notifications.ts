@@ -5,10 +5,10 @@
  */
 
 import { Alert } from '../../../../../alerting/common';
-import { APP_ID, NOTIFICATIONS_ID } from 'siem/common/constants';
+import { APP_ID, NOTIFICATIONS_ID } from '../../../../common/constants';
 import { CreateNotificationParams } from './types';
 import { addTags } from './add_tags';
-import { transformRuleToAlertAction } from 'siem/common/detection_engine/transform_actions';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
 export const createNotifications = async ({
   alertsClient,

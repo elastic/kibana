@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TIMELINE_EXPORT_URL, TIMELINE_IMPORT_URL } from 'siem/common/constants';
+import { TIMELINE_EXPORT_URL, TIMELINE_IMPORT_URL } from '../../../../../common/constants';
 import { requestMock } from '../../../detection_engine/routes/__mocks__';
 import stream from 'stream';
 const readable = new stream.Readable();

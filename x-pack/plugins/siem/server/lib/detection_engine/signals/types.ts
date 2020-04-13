@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleAlertAction } from 'siem/common/detection_engine/types';
+import { AlertType, State, AlertExecutorOptions } from '../../../../../alerting/server';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
-import {
-  AlertType,
-  State,
-  AlertExecutorOptions,
-} from '../../../../../alerting/server';
 
 export interface SignalsParams {
   signalIds: string[] | undefined | null;

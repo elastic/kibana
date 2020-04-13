@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INTERNAL_IMMUTABLE_KEY } from 'siem/common/constants';
+import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 import { AlertsClient } from '../../../../../alerting/server';
 import { RuleAlertType, isAlertTypes } from './types';
 import { findRules } from './find_rules';

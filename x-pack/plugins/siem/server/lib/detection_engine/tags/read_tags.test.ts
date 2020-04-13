@@ -6,7 +6,7 @@
 
 import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { getResult, getFindResultWithMultiHits } from '../routes/__mocks__/request_responses';
-import { INTERNAL_RULE_ID_KEY, INTERNAL_IDENTIFIER } from 'siem/common/constants';
+import { INTERNAL_RULE_ID_KEY, INTERNAL_IDENTIFIER } from '../../../../common/constants';
 import { readRawTags, readTags, convertTagsToSet, convertToTags, isTags } from './read_tags';
 
 describe('read_tags', () => {

@@ -30,7 +30,7 @@ import { Policy } from '../store/inputs/model';
 // we have to repeat ourselves once
 const DEFAULT_FROM_DATE = '1983-05-31T13:03:54.234Z';
 const DEFAULT_TO_DATE = '1990-05-31T13:03:54.234Z';
-jest.mock('../../common/constants', () => ({
+jest.mock('../../../../../plugins/siem/common/constants', () => ({
   DEFAULT_FROM: '1983-05-31T13:03:54.234Z',
   DEFAULT_TO: '1990-05-31T13:03:54.234Z',
   DEFAULT_INTERVAL_PAUSE: true,

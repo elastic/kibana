@@ -5,7 +5,7 @@
  */
 
 import { InmemoryConfigurationAdapter } from '../configuration/inmemory_configuration_adapter';
-import { defaultIndexPattern } from 'siem/default_index_pattern';
+import { defaultIndexPattern } from '../../../common/default_index_pattern';
 
 import { ConfigurationSourcesAdapter } from './configuration';
 import { PartialSourceConfiguration } from './types';

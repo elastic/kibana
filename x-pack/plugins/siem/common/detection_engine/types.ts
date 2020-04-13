@@ -5,7 +5,7 @@
  */
 import * as t from 'io-ts';
 
-import { AlertAction } from '../../../../../plugins/alerting/common';
+import { AlertAction } from '../../../alerting/common';
 
 export type RuleAlertAction = Omit<AlertAction, 'actionTypeId'> & {
   action_type_id: string;

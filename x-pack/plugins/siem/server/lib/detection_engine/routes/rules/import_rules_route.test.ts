@@ -23,7 +23,7 @@ import {
 } from '../__mocks__/request_responses';
 import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { importRulesRoute } from './import_rules_route';
-import { DEFAULT_SIGNALS_INDEX } from 'siem/common/constants';
+import { DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
 import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 

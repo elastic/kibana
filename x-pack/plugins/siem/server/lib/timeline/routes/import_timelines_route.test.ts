@@ -10,7 +10,7 @@ import {
   requestContextMock,
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
-import { TIMELINE_EXPORT_URL } from 'siem/common/constants';
+import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { SecurityPluginSetup } from '../../../../../security/server';
 
 import {
@@ -65,7 +65,7 @@ describe('import timelines', () => {
       };
     });
 
-    jest.doMock('../../../../../../../../src/legacy/utils', () => {
+    jest.doMock('../../../../../../../src/legacy/utils', () => {
       return {
         createPromiseFromStreams: jest.fn().mockReturnValue(mockParsedObjects),
       };

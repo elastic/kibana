@@ -9,7 +9,7 @@ import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
 
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
-import { INTERNAL_IDENTIFIER } from 'siem/common/constants';
+import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
   isAlertType,

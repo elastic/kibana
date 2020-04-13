@@ -15,7 +15,7 @@ import {
 } from 'kibana/server';
 import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
 import { Alert } from '../../../../../alerting/common';
-import { SIGNALS_ID } from 'siem/common/constants';
+import { SIGNALS_ID } from '../../../../common/constants';
 import { ActionsClient } from '../../../../../actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 

@@ -19,7 +19,7 @@ import {
   INTERNAL_RULE_ID_KEY,
   INTERNAL_IMMUTABLE_KEY,
   DETECTION_ENGINE_PREPACKAGED_URL,
-} from 'siem/common/constants';
+} from '../../../../../common/constants';
 import { ShardsResponse } from '../../../types';
 import {
   RuleAlertType,

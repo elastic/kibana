@@ -5,7 +5,7 @@
  */
 
 import { has } from 'lodash/fp';
-import { INTERNAL_IDENTIFIER } from 'siem/common/constants';
+import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
 import { AlertsClient } from '../../../../../alerting/server';
 import { findRules } from '../rules/find_rules';
 

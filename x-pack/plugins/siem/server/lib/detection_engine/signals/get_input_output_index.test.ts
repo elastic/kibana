@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_INDEX_KEY } from 'siem/common/constants';
-import { getInputIndex } from './get_input_output_index';
-import { defaultIndexPattern } from 'siem/default_index_pattern';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { defaultIndexPattern } from '../../../../common/default_index_pattern';
+import { getInputIndex } from './get_input_output_index';
 
 describe('get_input_output_index', () => {
   let servicesMock: AlertServicesMock;

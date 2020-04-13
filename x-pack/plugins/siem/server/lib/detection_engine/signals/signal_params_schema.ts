@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { DEFAULT_MAX_SIGNALS } from 'siem/common/constants';
+import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 
 /**
  * This is the schema for the Alert Rule that represents the SIEM alert for signals

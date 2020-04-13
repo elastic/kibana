@@ -5,7 +5,7 @@
  */
 
 import { FindResult } from '../../../../../alerting/server';
-import { NOTIFICATIONS_ID } from 'siem/common/constants';
+import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { FindNotificationParams } from './types';
 
 export const getFilter = (filter: string | null | undefined) => {

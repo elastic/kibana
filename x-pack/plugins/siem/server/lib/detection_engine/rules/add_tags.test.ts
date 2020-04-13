@@ -5,7 +5,7 @@
  */
 
 import { addTags } from './add_tags';
-import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from 'siem/common/constants';
+import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 
 describe('add_tags', () => {
   test('it should add a rule id as an internal structure with immutable true', () => {

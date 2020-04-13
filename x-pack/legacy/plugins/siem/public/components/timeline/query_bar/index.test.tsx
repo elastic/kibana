@@ -7,7 +7,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
+import { DEFAULT_FROM, DEFAULT_TO } from '../../../../../../../plugins/siem/common/constants';
 import { mockBrowserFields } from '../../../containers/source/mock';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
 import { mockIndexPattern, TestProviders } from '../../../mock';

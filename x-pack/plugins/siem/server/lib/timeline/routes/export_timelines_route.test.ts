@@ -17,7 +17,7 @@ import {
   requestContextMock,
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
-import { TIMELINE_EXPORT_URL } from 'siem/common/constants';
+import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { convertSavedObjectToSavedNote } from '../../note/saved_object';
 import { convertSavedObjectToSavedPinnedEvent } from '../../pinned_event/saved_object';
 import { convertSavedObjectToSavedTimeline } from '../convert_saved_object_to_savedtimeline';

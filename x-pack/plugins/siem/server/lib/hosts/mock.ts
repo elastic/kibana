@@ -5,7 +5,7 @@
  */
 
 import { Direction, HostsFields } from '../../graphql/types';
-import { defaultIndexPattern } from 'siem/default_index_pattern';
+import { defaultIndexPattern } from '../../../common/default_index_pattern';
 
 import {
   HostOverviewRequestOptions,

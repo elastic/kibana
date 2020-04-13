@@ -9,10 +9,10 @@ import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
+import { DEFAULT_INDEX_KEY } from '../../../../../../../../../plugins/siem/common/constants';
+import { isMlRule } from '../../../../../../../../../plugins/siem/common/detection_engine/ml_helpers';
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
-import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
-import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 import { useMlCapabilities } from '../../../../../components/ml_popover/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../../lib/kibana';

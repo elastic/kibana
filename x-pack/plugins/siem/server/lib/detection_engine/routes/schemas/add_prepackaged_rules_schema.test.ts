@@ -5,7 +5,7 @@
  */
 
 import { AlertAction } from '../../../../../../alerting/common';
-import { RuleAlertAction } from 'siem/common/detection_engine/types';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { ThreatParams, PrepackagedRules } from '../../types';
 import { addPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';

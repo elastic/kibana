@@ -5,7 +5,7 @@
  */
 
 import { getFilter } from './find_rules';
-import { SIGNALS_ID } from 'siem/common/constants';
+import { SIGNALS_ID } from '../../../../common/constants';
 
 describe('find_rules', () => {
   test('it returns a full filter with an AND if sent down', () => {

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { transformRuleToAlertAction } from 'siem/common/detection_engine/transform_actions';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { Alert } from '../../../../../alerting/common';
-import { APP_ID, SIGNALS_ID } from 'siem/common/constants';
+import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { hasListsFeature } from '../feature_flags';

@@ -48,7 +48,7 @@ import {
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
-import { DEFAULT_MAX_SIGNALS } from 'siem/common/constants';
+import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 import { hasListsFeature } from '../../feature_flags';
 
 /**

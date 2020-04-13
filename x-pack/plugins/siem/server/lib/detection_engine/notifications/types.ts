@@ -12,8 +12,8 @@ import {
   AlertExecutorOptions,
 } from '../../../../../alerting/server';
 import { Alert } from '../../../../../alerting/common';
-import { NOTIFICATIONS_ID } from 'siem/common/constants';
-import { RuleAlertAction } from 'siem/common/detection_engine/types';
+import { NOTIFICATIONS_ID } from '../../../../common/constants';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
 export interface RuleNotificationAlertType extends Alert {
   params: {

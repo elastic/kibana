@@ -7,7 +7,7 @@
 import { AlertAction } from '../../../../../../alerting/common';
 import { createRulesSchema } from './create_rules_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
-import { RuleAlertAction } from 'siem/common/detection_engine/types';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { ThreatParams, RuleAlertParamsRest } from '../../types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 

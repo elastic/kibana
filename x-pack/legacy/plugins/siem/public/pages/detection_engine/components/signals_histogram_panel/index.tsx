@@ -10,10 +10,10 @@ import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../../../../plugins/siem/common/constants';
 import { HeaderSection } from '../../../../components/header_section';
 
 import { Filter, esQuery, Query } from '../../../../../../../../../src/plugins/data/public';
-import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { useQuerySignals } from '../../../../containers/detection_engine/signals/use_query';
 import { getDetectionEngineUrl } from '../../../../components/link_to';
 import { InspectButtonContainer } from '../../../../components/inspect';

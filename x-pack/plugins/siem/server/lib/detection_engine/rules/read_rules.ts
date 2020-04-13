@@ -5,7 +5,7 @@
  */
 
 import { SanitizedAlert } from '../../../../../alerting/common';
-import { INTERNAL_RULE_ID_KEY } from 'siem/common/constants';
+import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
 import { ReadRuleParams, isAlertType } from './types';
 

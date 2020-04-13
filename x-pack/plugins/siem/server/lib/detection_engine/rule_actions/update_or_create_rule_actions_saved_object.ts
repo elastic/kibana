@@ -5,7 +5,7 @@
  */
 
 import { AlertServices } from '../../../../../alerting/server';
-import { RuleAlertAction } from 'siem/common/detection_engine/types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { getRuleActionsSavedObject } from './get_rule_actions_saved_object';
 import { createRuleActionsSavedObject } from './create_rule_actions_saved_object';
 import { updateRuleActionsSavedObject } from './update_rule_actions_saved_object';

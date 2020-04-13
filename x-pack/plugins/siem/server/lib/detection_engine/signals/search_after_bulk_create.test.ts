@@ -15,7 +15,7 @@ import {
   sampleDocSearchResultsNoSortIdNoHits,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
-import { DEFAULT_SIGNALS_INDEX } from 'siem/common/constants';
+import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import uuid from 'uuid';
 

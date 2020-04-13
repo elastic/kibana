@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleAlertAction } from 'siem/common/detection_engine/types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { AlertsClient, AlertServices } from '../../../../../alerting/server';
 import { updateOrCreateRuleActionsSavedObject } from '../rule_actions/update_or_create_rule_actions_saved_object';
 import { updateNotifications } from '../notifications/update_notifications';

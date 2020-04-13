@@ -9,7 +9,7 @@ import { SearchResponse } from 'elasticsearch';
 
 import { Logger } from '../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server';
-import { RuleAlertAction } from 'siem/common/detection_engine/types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';

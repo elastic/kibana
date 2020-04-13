@@ -5,7 +5,7 @@
  */
 
 import { getFilter } from './find_notifications';
-import { NOTIFICATIONS_ID } from 'siem/common/constants';
+import { NOTIFICATIONS_ID } from '../../../../common/constants';
 
 describe('find_notifications', () => {
   test('it returns a full filter with an AND if sent down', () => {

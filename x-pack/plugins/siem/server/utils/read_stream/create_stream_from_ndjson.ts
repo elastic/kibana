@@ -5,10 +5,10 @@
  */
 import { Transform } from 'stream';
 import { has, isString } from 'lodash/fp';
-import { ImportRuleAlertRest } from 'siem-legacy-ui/server/lib/detection_engine/types';
+import { ImportRuleAlertRest } from '../../lib/detection_engine/types';
 import { createMapStream, createFilterStream } from '../../../../../../src/legacy/utils/streams';
-import { importRulesSchema } from 'siem-legacy-ui/server/lib/detection_engine/routes/schemas/import_rules_schema';
-import { BadRequestError } from 'siem-legacy-ui/server/lib/detection_engine/errors/bad_request_error';
+import { importRulesSchema } from '../../lib/detection_engine/routes/schemas/import_rules_schema';
+import { BadRequestError } from '../../lib/detection_engine/errors/bad_request_error';
 
 export interface RulesObjectsExportResultDetails {
   /** number of successfully exported objects */

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from 'siem/common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import {
   getSignalsQueryRequest,
   getSignalsAggsQueryRequest,

@@ -7,8 +7,8 @@
 import { performance } from 'perf_hooks';
 import { Logger } from 'src/core/server';
 
-import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from 'siem/common/constants';
-import { isJobStarted, isMlRule } from 'siem/common/detection_engine/ml_helpers';
+import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
+import { isJobStarted, isMlRule } from '../../../../common/detection_engine/ml_helpers';
 import { SetupPlugins } from '../../../plugin';
 
 import { buildEventsSearchQuery } from './build_events_query';

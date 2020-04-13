@@ -6,7 +6,7 @@
 
 import { get } from 'lodash/fp';
 import { SavedObject, SavedObjectAttributes, SavedObjectsFindResponse } from 'kibana/server';
-import { RuleAlertAction } from 'siem/common/detection_engine/types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleActionsAttributes extends Record<string, any> {

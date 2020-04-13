@@ -5,8 +5,8 @@
  */
 
 import { AlertServices } from '../../../../../alerting/server';
-import { defaultIndexPattern } from 'siem/default_index_pattern';
-import { DEFAULT_INDEX_KEY } from 'siem/common/constants';
+import { defaultIndexPattern } from '../../../../common/default_index_pattern';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 
 export const getInputIndex = async (
   services: AlertServices,

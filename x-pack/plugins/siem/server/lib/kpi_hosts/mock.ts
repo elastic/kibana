@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultIndexPattern } from 'siem/default_index_pattern';
+import { defaultIndexPattern } from '../../../common/default_index_pattern';
 import { RequestBasicOptions } from '../framework/types';
 
 const FROM = new Date('2019-05-03T13:24:00.660Z').valueOf();

@@ -5,7 +5,7 @@
  */
 
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
-import { TlsData } from 'siem/public/graphql/types';
+import { TlsData } from '../../graphql/types';
 
 export interface TlsAdapter {
   getTls(request: FrameworkRequest, options: RequestBasicOptions): Promise<TlsData>;

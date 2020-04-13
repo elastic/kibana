@@ -6,7 +6,7 @@
 
 import { Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { NOTIFICATIONS_ID } from 'siem/common/constants';
+import { NOTIFICATIONS_ID } from '../../../../common/constants';
 
 import { NotificationAlertTypeDefinition } from './types';
 import { getSignalsCount } from './get_signals_count';

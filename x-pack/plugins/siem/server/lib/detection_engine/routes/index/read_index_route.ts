@@ -5,7 +5,7 @@
  */
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import { DETECTION_ENGINE_INDEX_URL } from 'siem/common/constants';
+import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 

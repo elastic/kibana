@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INTERNAL_IDENTIFIER } from 'siem/common/constants';
+import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
 import { SignalSourceHit, Signal, Ancestor } from './types';
 import { OutputRuleAlertRest } from '../types';
 

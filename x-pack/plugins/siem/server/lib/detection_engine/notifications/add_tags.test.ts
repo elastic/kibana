@@ -5,7 +5,7 @@
  */
 
 import { addTags } from './add_tags';
-import { INTERNAL_RULE_ALERT_ID_KEY } from 'siem/common/constants';
+import { INTERNAL_RULE_ALERT_ID_KEY } from '../../../../common/constants';
 
 describe('add_tags', () => {
   test('it should add a rule id as an internal structure', () => {

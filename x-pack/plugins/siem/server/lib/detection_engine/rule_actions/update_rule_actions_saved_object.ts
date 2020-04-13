@@ -7,7 +7,7 @@
 import { AlertServices } from '../../../../../alerting/server';
 import { ruleActionsSavedObjectType } from './saved_object_mappings';
 import { RulesActionsSavedObject } from './get_rule_actions_saved_object';
-import { RuleAlertAction } from 'siem/common/detection_engine/types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { getThrottleOptions } from './utils';
 import { IRuleActionsAttributesSavedObjectAttributes } from './types';
 

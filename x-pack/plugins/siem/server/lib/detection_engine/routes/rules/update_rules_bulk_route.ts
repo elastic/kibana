@@ -5,7 +5,7 @@
  */
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import { DETECTION_ENGINE_RULES_URL } from 'siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   IRuleSavedAttributesSavedObjectAttributes,
   UpdateRuleAlertParamsRest,

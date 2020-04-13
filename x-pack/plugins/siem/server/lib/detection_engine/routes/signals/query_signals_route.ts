@@ -5,7 +5,7 @@
  */
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from 'siem/common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { SignalsQueryRestParams } from '../../signals/types';
 import { querySignalsSchema } from '../schemas/query_signals_index_schema';
 import { transformError, buildRouteValidation, buildSiemResponse } from '../utils';

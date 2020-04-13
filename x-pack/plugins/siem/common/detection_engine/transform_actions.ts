@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertAction } from '../../../../../plugins/alerting/common';
+import { AlertAction } from '../../../alerting/common';
 import { RuleAlertAction } from './types';
 
 export const transformRuleToAlertAction = ({

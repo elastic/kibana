@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useEffect, useState, useRef } from 'react';
+import { DEFAULT_INDEX_KEY } from '../../../../../../plugins/siem/common/constants';
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { useUiSetting$ } from '../../lib/kibana';
 import { createFilter } from '../helpers';

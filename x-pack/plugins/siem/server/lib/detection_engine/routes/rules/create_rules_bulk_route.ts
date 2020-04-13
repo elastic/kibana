@@ -7,7 +7,7 @@
 import uuid from 'uuid';
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import { DETECTION_ENGINE_RULES_URL } from 'siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
 import { RuleAlertParamsRest } from '../../types';
 import { readRules } from '../../rules/read_rules';

@@ -5,7 +5,7 @@
  */
 
 import { pickBy } from 'lodash/fp';
-import { RuleAlertAction } from 'siem/common/detection_engine/types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, OutputRuleAlertRest } from '../types';
 
 interface BuildRuleParams {

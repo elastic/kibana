@@ -7,7 +7,7 @@
 import { merge } from 'lodash/fp';
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import { DETECTION_ENGINE_PRIVILEGES_URL } from 'siem/common/constants';
+import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildSiemResponse, transformError } from '../utils';
 import { readPrivileges } from '../../privileges/read_privileges';
