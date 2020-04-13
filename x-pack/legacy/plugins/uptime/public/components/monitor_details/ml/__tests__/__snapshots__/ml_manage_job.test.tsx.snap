@@ -9,6 +9,7 @@ exports[`Manage ML Job renders without errors 1`] = `
   >
     <button
       class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
+      data-test-subj="uptimeManageMLJobBtn"
       type="button"
     >
       <span

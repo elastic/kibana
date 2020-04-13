@@ -116,7 +116,8 @@ export const createVegaVisualization = ({ serviceSettings }) =>
         };
 
         if (vegaParser.useMap) {
-          this._vegaView = new VegaMapView(vegaViewParams);
+          const services = { toastService: getNotifications().toasts };
+          this._vegaView = new VegaMapView(vegaViewParams, services);
         } else {
           this._vegaView = new VegaView(vegaViewParams);
         }

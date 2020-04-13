@@ -25,11 +25,11 @@ import { AxisTypes, getHeatmapCollections, Positions, ScaleTypes } from './utils
 import { HeatmapOptions } from './components/options';
 import { createVislibVisController } from './vis_controller';
 import { TimeMarker } from './vislib/visualizations/time_marker';
-import { CommonVislibParams, ColorSchemaVislibParams, ValueAxis } from './types';
+import { CommonVislibParams, ValueAxis } from './types';
 import { VisTypeVislibDependencies } from './plugin';
-import { ColorSchemas } from '../../../../plugins/charts/public';
+import { ColorSchemas, ColorSchemaParams } from '../../../../plugins/charts/public';
 
-export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaVislibParams {
+export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams {
   type: 'heatmap';
   addLegend: boolean;
   enableHover: boolean;
