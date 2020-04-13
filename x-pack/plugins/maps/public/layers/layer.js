@@ -203,7 +203,7 @@ export class AbstractLayer {
   }
 
   showAtZoomLevel(zoom) {
-    return zoom >= this._descriptor.minZoom && zoom <= this._descriptor.maxZoom;
+    return zoom >= this.getMinZoom() && zoom <= this.getMaxZoom();
   }
 
   getMinZoom() {

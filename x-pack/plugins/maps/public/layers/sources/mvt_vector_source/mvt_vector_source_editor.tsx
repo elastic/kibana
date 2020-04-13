@@ -29,7 +29,7 @@ export class MVTVectorSourceEditor extends React.Component {
         maxZoom: this.state.maxZoom,
       });
     }
-  }, 2000);
+  }, 200);
 
   // @ts-ignore
   _handleUrlTemplateChange = e => {
