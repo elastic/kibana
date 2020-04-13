@@ -5,7 +5,6 @@
  */
 
 import { IRouter } from '../../../../../src/core/server';
-import { LegacyServices } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
@@ -32,10 +31,11 @@ import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/r
 import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_route';
 import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
 import { SetupPlugins } from '../plugin';
+import { ConfigType } from '..';
 
 export const initRoutes = (
   router: IRouter,
-  config: LegacyServices['config'],
+  config: ConfigType,
   usingEphemeralEncryptionKey: boolean,
   security: SetupPlugins['security']
 ) => {

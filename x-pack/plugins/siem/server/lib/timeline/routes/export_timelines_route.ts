@@ -8,8 +8,7 @@ import { set as _set } from 'lodash/fp';
 
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { IRouter } from '../../../../../../../src/core/server';
-import { LegacyServices } from '../../../types';
-
+import { ConfigType } from '../../..';
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 
 import { getExportTimelineByObjectIds } from './utils/export_timelines';
@@ -19,7 +18,7 @@ import {
 } from './schemas/export_timelines_schema';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 
-export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['config']) => {
+export const exportTimelinesRoute = (router: IRouter, config: ConfigType) => {
   router.post(
     {
       path: TIMELINE_EXPORT_URL,
@@ -35,7 +34,7 @@ export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['co
       try {
         const siemResponse = buildSiemResponse(response);
         const savedObjectsClient = context.core.savedObjects.client;
-        const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
+        const exportSizeLimit = config.maxImportExportSize;
 
         if (request.body?.ids != null && request.body.ids.length > exportSizeLimit) {
           return siemResponse.error({

@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
-
 import { KibanaRequest } from '../../../../../src/core/server';
 import { SiemClient } from './client';
+import { ConfigType } from '..';
 
 interface SetupDependencies {
   getSpaceId?: (request: KibanaRequest) => string | undefined;
-  config: Legacy.Server['config'];
+  config: ConfigType;
 }
 
 export class SiemClientFactory {

@@ -5,6 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -24,7 +25,6 @@ import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { PluginStartContract as ActionsStart } from '../../actions/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { LegacyServices } from './types';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
@@ -73,11 +73,12 @@ export class Plugin {
     this.config$ = createConfig$(context);
     this.siemClientFactory = new SiemClientFactory();
 
-    this.logger.debug('Shim plugin initialized');
+    this.logger.debug('plugin initialized');
   }
 
-  public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: LegacyServices) {
-    this.logger.debug('Shim plugin setup');
+  public async setup(core: CoreSetup, plugins: SetupPlugins) {
+    this.logger.debug('plugin setup');
+
     if (hasListsFeature()) {
       // TODO: Remove this once we have the lists feature supported
       this.logger.error(
@@ -90,14 +91,16 @@ export class Plugin {
       getSiemClient: () => this.siemClientFactory.create(request),
     }));
 
+    const config = await this.config$.pipe(first()).toPromise();
+
     this.siemClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
-      config: __legacy.config,
+      config,
     });
 
     initRoutes(
       router,
-      __legacy.config,
+      config,
       plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false,
       plugins.security
     );

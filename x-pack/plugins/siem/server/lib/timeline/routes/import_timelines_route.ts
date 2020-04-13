@@ -32,7 +32,7 @@ import { IRouter } from '../../../../../../../src/core/server';
 import { SetupPlugins } from '../../../plugin';
 import { ImportTimelinesPayloadSchemaRt } from './schemas/import_timelines_schema';
 import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
-import { LegacyServices } from '../../../types';
+import { ConfigType } from '../../..';
 
 import { Timeline } from '../saved_object';
 import { validate } from '../../detection_engine/routes/rules/validate';
@@ -44,7 +44,7 @@ const timelineLib = new Timeline();
 
 export const importTimelinesRoute = (
   router: IRouter,
-  config: LegacyServices['config'],
+  config: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.post(
@@ -56,7 +56,7 @@ export const importTimelinesRoute = (
       options: {
         tags: ['access:siem'],
         body: {
-          maxBytes: config().get('savedObjects.maxImportPayloadBytes'),
+          maxBytes: config.maxImportPayloadBytes,
           output: 'stream',
         },
       },
@@ -81,7 +81,7 @@ export const importTimelinesRoute = (
           });
         }
 
-        const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
+        const objectLimit = config.maxImportExportSize;
 
         const readStream = createTimelinesStreamFromNdJson(objectLimit);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([

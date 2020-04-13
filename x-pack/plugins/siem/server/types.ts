@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import { SiemClient } from './client';
-
-export interface LegacyServices {
-  config: Legacy.Server['config'];
-}
 
 export { SiemClient };
 
