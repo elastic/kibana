@@ -976,7 +976,7 @@ export class IndexPatternFieldList extends Array<IndexPatternField> implements I
     // (undocumented)
     remove: (field: IFieldType) => void;
     // (undocumented)
-    update: (field: IndexPatternField) => void;
+    update: (field: Record<string, any>) => void;
 }
 
 // Warning: (ae-missing-release-tag) "indexPatterns" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
