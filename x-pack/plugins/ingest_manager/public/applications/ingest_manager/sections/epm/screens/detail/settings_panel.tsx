@@ -4,23 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallStatus, PackageInfo } from '../../../../types';
 import { InstallationButton } from './installation_button';
+import { useGetDatasources } from '../../../../hooks';
 
 export const SettingsPanel = (
   props: Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'>
 ) => {
   const getPackageInstallStatus = useGetPackageInstallStatus();
+  const { data: datasourcesData } = useGetDatasources({
+    perPage: 0,
+    page: 1,
+    kuery: `datasources.package.name:${props.name}`,
+  });
   const { name, title } = props;
   const packageInstallStatus = getPackageInstallStatus(name);
+  const packageHasDatasources = !!datasourcesData?.total;
 
   return (
     <EuiText>
-      <EuiTitle size="xs">
+      <EuiTitle>
         <h3>
           <FormattedMessage
             id="xpack.ingestManager.integrations.settings.packageSettingsTitle"
@@ -28,49 +36,79 @@ export const SettingsPanel = (
           />
         </h3>
       </EuiTitle>
+      <EuiSpacer size="s" />
       {packageInstallStatus === InstallStatus.notInstalled ||
       packageInstallStatus === InstallStatus.installing ? (
-        <Fragment>
-          <h4>
-            <FormattedMessage
-              id="xpack.ingestManager.integrations.settings.packageInstallTitle"
-              defaultMessage="Install {title}"
-              values={{
-                title,
-              }}
-            />
-          </h4>
+        <div>
+          <EuiTitle>
+            <h4>
+              <FormattedMessage
+                id="xpack.ingestManager.integrations.settings.packageInstallTitle"
+                defaultMessage="Install {title}"
+                values={{
+                  title,
+                }}
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <p>
             <FormattedMessage
               id="xpack.ingestManager.integrations.settings.packageInstallDescription"
               defaultMessage="Install this integration to setup Kibana and Elasticsearch assets designed for Nginx data."
             />
           </p>
-        </Fragment>
+        </div>
       ) : (
-        <Fragment>
-          <h4>
-            <FormattedMessage
-              id="xpack.ingestManager.integrations.settings.packageUninstallTitle"
-              defaultMessage="Uninstall {title}"
-              values={{
-                title,
-              }}
-            />
-          </h4>
+        <div>
+          <EuiTitle>
+            <h4>
+              <FormattedMessage
+                id="xpack.ingestManager.integrations.settings.packageUninstallTitle"
+                defaultMessage="Uninstall {title}"
+                values={{
+                  title,
+                }}
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <p>
             <FormattedMessage
               id="xpack.ingestManager.integrations.settings.packageUninstallDescription"
               defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this Integration."
             />
           </p>
-        </Fragment>
+        </div>
       )}
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <InstallationButton {...props} />
+          <p>
+            <InstallationButton
+              {...props}
+              disabled={!datasourcesData ? true : packageHasDatasources}
+            />
+          </p>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {packageHasDatasources && (
+        <p>
+          <FormattedMessage
+            id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
+            defaultMessage="{strongNote} Nginx cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all Nginx data sources from your agent configurations."
+            values={{
+              strongNote: (
+                <strong>
+                  <FormattedMessage
+                    id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteLabel"
+                    defaultMessage="Note:"
+                  />
+                </strong>
+              ),
+            }}
+          />
+        </p>
+      )}
     </EuiText>
   );
 };

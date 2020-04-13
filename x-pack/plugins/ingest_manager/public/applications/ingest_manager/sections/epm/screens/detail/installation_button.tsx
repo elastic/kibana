@@ -12,10 +12,11 @@ import { useDeletePackage, useGetPackageInstallStatus, useInstallPackage } from 
 import { ConfirmPackageDelete } from './confirm_package_delete';
 import { ConfirmPackageInstall } from './confirm_package_install';
 
-export function InstallationButton(
-  props: Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'>
-) {
-  const { assets, name, title, version } = props;
+type InstallationButtonProps = Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'> & {
+  disabled: boolean;
+};
+export function InstallationButton(props: InstallationButtonProps) {
+  const { assets, name, title, version, disabled = true } = props;
   const hasWriteCapabilites = useCapabilities().write;
   const installPackage = useInstallPackage();
   const deletePackage = useDeletePackage();
@@ -78,7 +79,13 @@ export function InstallationButton(
   );
 
   const uninstallButton = (
-    <EuiButton iconType={'trash'} isLoading={isRemoving} onClick={toggleModal} color="danger">
+    <EuiButton
+      iconType={'trash'}
+      isLoading={isRemoving}
+      onClick={toggleModal}
+      color="danger"
+      disabled={disabled || isRemoving ? true : false}
+    >
       {isRemoving ? (
         <FormattedMessage
           id="xpack.ingestManager.integrations.uninstallPackage.uninstallingPackageButtonLabel"
