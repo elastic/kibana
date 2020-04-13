@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './saga';
+export { WindowsEvents } from './windows';
+export { MacEvents } from './mac';
