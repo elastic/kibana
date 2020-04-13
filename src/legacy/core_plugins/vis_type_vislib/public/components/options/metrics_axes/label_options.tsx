@@ -24,8 +24,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Axis } from '../../../types';
-import { SelectOption, SwitchOption, TruncateLabelsOption } from '../../common';
+import { TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../utils/collections';
+import { SelectOption, SwitchOption } from '../../../../../../../plugins/charts/public';
 
 export type SetAxisLabel = <T extends keyof Axis['labels']>(
   paramName: T,
