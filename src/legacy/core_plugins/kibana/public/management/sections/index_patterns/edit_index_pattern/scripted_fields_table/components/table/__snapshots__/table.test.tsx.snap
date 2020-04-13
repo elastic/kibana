@@ -41,6 +41,7 @@ exports[`Table should render normally 1`] = `
             "icon": "pencil",
             "name": "Edit",
             "onClick": [Function],
+            "type": "icon",
           },
           Object {
             "color": "danger",
@@ -48,6 +49,7 @@ exports[`Table should render normally 1`] = `
             "icon": "trash",
             "name": "Delete",
             "onClick": [Function],
+            "type": "icon",
           },
         ],
         "name": "",
@@ -58,8 +60,9 @@ exports[`Table should render normally 1`] = `
   items={
     Array [
       Object {
-        "id": 1,
-        "name": "Elastic",
+        "lang": "Elastic",
+        "name": "1",
+        "script": "",
       },
     ]
   }
