@@ -1,0 +1,32 @@
+.canvasVarHeader__triggerWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.canvasVarHeader__button {
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: left;
+
+  width: 100%;
+  flex-grow: 1;
+
+  display: flex;
+  align-items: center;
+}
+
+.canvasVarHeader__iconWrapper {
+  width: 16px;
+  height: 16px;
+
+  border-radius: 4px;
+
+  margin-right: 8px;
+  margin-left: 4px;
+
+  flex-shrink: 0;
+}
+
+.canvasVarHeader__anchor {
+  display: inline-block;
+}

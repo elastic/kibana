@@ -157,11 +157,17 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   public async interpret<T>(
     ast: ExpressionAstNode,
     input: T,
+    context: Record<string, unknown>,
     options?: ExpressionExecOptions
   ): Promise<unknown> {
     switch (getType(ast)) {
       case 'expression':
-        return await this.interpretExpression(ast as ExpressionAstExpression, input, options);
+        return await this.interpretExpression(
+          ast as ExpressionAstExpression,
+          input,
+          context,
+          options
+        );
       case 'string':
       case 'number':
       case 'null':
@@ -175,9 +181,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   public async interpretExpression<T>(
     ast: string | ExpressionAstExpression,
     input: T,
+    context: Record<string, unknown>,
     options?: ExpressionExecOptions
   ): Promise<unknown> {
-    const execution = this.createExecution(ast, undefined, options);
+    const execution = this.createExecution(ast, context, options);
     execution.start(input);
     return await execution.result;
   }

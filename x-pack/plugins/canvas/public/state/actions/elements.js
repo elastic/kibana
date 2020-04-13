@@ -9,7 +9,13 @@ import immutable from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
 import { createThunk } from '../../lib/create_thunk';
-import { getPages, getNodeById, getNodes, getSelectedPageIndex } from '../selectors/workpad';
+import {
+  getPages,
+  getWorkpadVariables,
+  getNodeById,
+  getNodes,
+  getSelectedPageIndex,
+} from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { ErrorStrings } from '../../../i18n';
@@ -96,13 +102,16 @@ export const fetchContext = createThunk(
       return i < index;
     });
 
+    const workpadVars = getWorkpadVariables(getState());
+    const variables = workpadVars.reduce((vars, v) => ({ ...vars, [v.name]: v.value }), {});
+
     // get context data from a partial AST
     return interpretAst(
       {
         ...element.ast,
         chain: astChain,
       },
-      prevContextValue
+      variables
     ).then((value) => {
       dispatch(
         args.setValue({
@@ -114,7 +123,9 @@ export const fetchContext = createThunk(
   }
 );
 
-const fetchRenderableWithContextFn = ({ dispatch }, element, ast, context) => {
+const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, context) => {
+  const workpadVars = getWorkpadVariables(getState());
+
   const argumentPath = [element.id, 'expressionRenderable'];
   dispatch(
     args.setLoading({
@@ -128,7 +139,9 @@ const fetchRenderableWithContextFn = ({ dispatch }, element, ast, context) => {
       value: renderable,
     });
 
-  return runInterpreter(ast, context, { castToRender: true })
+  const variables = workpadVars.reduce((vars, v) => ({ ...vars, [v.name]: v.value }), {});
+
+  return runInterpreter(ast, context, variables, { castToRender: true })
     .then((renderable) => {
       dispatch(getAction(renderable));
     })
@@ -152,6 +165,7 @@ export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, ele
 export const fetchAllRenderables = createThunk(
   'fetchAllRenderables',
   ({ dispatch, getState }, { onlyActivePage = false } = {}) => {
+    const workpadVars = getWorkpadVariables(getState());
     const workpadPages = getPages(getState());
     const currentPageIndex = getSelectedPageIndex(getState());
 
@@ -172,7 +186,9 @@ export const fetchAllRenderables = createThunk(
         const ast = element.ast || safeElementFromExpression(element.expression);
         const argumentPath = [element.id, 'expressionRenderable'];
 
-        return runInterpreter(ast, null, { castToRender: true })
+        const variables = workpadVars.reduce((vars, v) => ({ ...vars, [v.name]: v.value }), {});
+
+        return runInterpreter(ast, null, variables, { castToRender: true })
           .then((renderable) => ({ path: argumentPath, value: renderable }))
           .catch((err) => {
             services.notify.getService().error(err);

@@ -1,0 +1,75 @@
+.canvasVarConfig__container {
+  width: 100%;
+  position: relative;
+
+  &.canvasVarConfig-isEditMode {
+    .canvasVarConfig__innerContainer {
+      left: calc(-100% - 24px); // Account for the extra padding
+    }
+  }
+}
+
+.canvasVarConfig__list {
+  .euiTable {
+    background-color: transparent;
+  }
+
+  .euiTableHeaderCell:first-child .euiTableCellContent,
+  .euiTableRowCell:first-child .euiTableCellContent {
+    padding-left: 0;
+  }
+
+  .euiTableFooterCell,
+  .euiTableHeaderCell {
+    border-bottom: none;
+    border-top: none;
+  }
+
+  .euiTableRowCell {
+    border-top: none;
+    border-bottom: none;
+
+    .euiTableCellContent {
+      padding-right: 0;
+    }
+  }
+
+  .euiTableRow:last-child .euiTableRowCell {
+    border-bottom: none;
+  }
+}
+
+.canvasVarConfig__innerContainer {
+  width: calc(200% + 48px); // Account for the extra padding
+
+  position: relative;
+  left: 0;
+
+  transition-property: left;
+  transition-duration: $euiAnimSpeedNormal;
+
+  display: flex;
+  flex-direction: row;
+  align-content: stretch;
+
+  .canvasVarConfig__editView {
+    margin-left: 0;
+  }
+
+  .canvasVarConfig__listView {
+    margin-right: 0;
+  }
+}
+
+.canvasVarConfig__editView {
+  width: 50%;
+  height: 100%;
+
+  flex-shrink: 0;
+}
+
+.canvasVarConfig__listView {
+  width: 50%;
+
+  flex-shrink: 0;
+}

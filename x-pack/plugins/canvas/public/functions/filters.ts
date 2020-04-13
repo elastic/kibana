@@ -79,7 +79,7 @@ export function filtersFunctionFactory(initialize: InitializeArguments): () => F
         if (filterList && filterList.length) {
           const filterExpression = filterList.join(' | ');
           const filterAST = fromExpression(filterExpression);
-          return interpretAst(filterAST);
+          return interpretAst(filterAST, {});
         } else {
           const filterType = initialize.typesRegistry.get('filter');
           return filterType?.from(null, {});

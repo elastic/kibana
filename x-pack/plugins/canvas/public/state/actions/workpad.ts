@@ -18,6 +18,7 @@ export const setWriteable = createAction<boolean>('setWriteable');
 export const setColors = createAction<string[]>('setColors');
 export const setRefreshInterval = createAction<number>('setRefreshInterval');
 export const setWorkpadCSS = createAction<string>('setWorkpadCSS');
+export const setWorkpadVariables = createAction<any>('setWorkpadVariables'); // TODO FIX
 export const enableAutoplay = createAction<boolean>('enableAutoplay');
 export const setAutoplayInterval = createAction<number>('setAutoplayInterval');
 export const resetWorkpad = createAction<void>('resetWorkpad');
@@ -37,6 +38,14 @@ export const addColor = createThunk('addColor', ({ dispatch, getState }, color: 
 export const removeColor = createThunk('removeColor', ({ dispatch, getState }, color: string) => {
   dispatch(setColors(without(getWorkpadColors(getState()), color)));
 });
+
+export const updateWorkpadVariables = createThunk(
+  'updateWorkpadVariables',
+  ({ dispatch }, vars) => {
+    dispatch(setWorkpadVariables(vars));
+    dispatch(fetchAllRenderables());
+  }
+);
 
 export const setWorkpad = createThunk(
   'setWorkpad',

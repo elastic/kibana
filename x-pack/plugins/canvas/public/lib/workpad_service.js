@@ -21,6 +21,7 @@ const validKeys = [
   'assets',
   'colors',
   'css',
+  'variables',
   'height',
   'id',
   'isWriteable',
@@ -73,7 +74,7 @@ export async function createFromTemplate(templateId) {
 export function get(workpadId) {
   return fetch.get(`${getApiPath()}/${workpadId}`).then(({ data: workpad }) => {
     // shim old workpads with new properties
-    return { css: DEFAULT_WORKPAD_CSS, ...workpad };
+    return { css: DEFAULT_WORKPAD_CSS, variables: [], ...workpad };
   });
 }
 

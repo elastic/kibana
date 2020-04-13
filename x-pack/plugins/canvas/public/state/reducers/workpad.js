@@ -14,6 +14,7 @@ import {
   setName,
   setWriteable,
   setWorkpadCSS,
+  setWorkpadVariables,
   resetWorkpad,
 } from '../actions/workpad';
 
@@ -57,6 +58,10 @@ export const workpadReducer = handleActions(
 
     [setWorkpadCSS]: (workpadState, { payload }) => {
       return { ...workpadState, css: payload };
+    },
+
+    [setWorkpadVariables]: (workpadState, { payload }) => {
+      return { ...workpadState, variables: payload };
     },
 
     [resetWorkpad]: () => ({ ...getDefaultWorkpad() }),

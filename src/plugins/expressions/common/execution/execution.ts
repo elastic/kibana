@@ -91,6 +91,7 @@ export class Execution<
    * to every function.
    */
   public readonly context: ExecutionContext<Input, InspectorAdapters> & ExtraContext;
+  private readonly extraContext: ExtraContext;
 
   /**
    * AbortController to cancel this Execution.
@@ -157,6 +158,8 @@ export class Execution<
       state: 'not-started',
       ast,
     });
+
+    this.extraContext = params.context || ({} as ExtraContext);
 
     this.context = {
       getInitialInput: () => this.input,
@@ -382,7 +385,7 @@ export class Execution<
     const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
       return asts.map((item: ExpressionAstExpression) => {
         return async (subInput = input) => {
-          const output = await this.params.executor.interpret(item, subInput, {
+          const output = await this.params.executor.interpret(item, subInput, this.extraContext, {
             debug: this.params.debug,
           });
           if (isExpressionValueError(output)) throw output.error;

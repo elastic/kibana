@@ -49,6 +49,11 @@ export function getWorkpadPersisted(state: State) {
   return getWorkpad(state);
 }
 
+export function getWorkpadVariables(state: State) {
+  const workpad = getWorkpad(state);
+  return get(workpad, 'variables', []);
+}
+
 export function getWorkpadInfo(state: State): WorkpadInfo {
   return omit(getWorkpad(state), ['pages']);
 }
@@ -321,7 +326,9 @@ export function getElements(
     return elements.map((el) => omit(el, ['ast']));
   }
 
-  return elements.map(appendAst);
+  const elementAppendAst = (elem: CanvasElement) => appendAst(elem);
+
+  return elements.map(elementAppendAst);
 }
 
 const augment = (type: string) => <T extends CanvasElement | CanvasGroup>(n: T): T => ({

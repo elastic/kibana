@@ -899,6 +899,126 @@ export const ComponentStrings = {
         defaultMessage: 'Close tray',
       }),
   },
+  VarConfig: {
+    getAddButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.addButtonLabel', {
+        defaultMessage: 'Add a variable',
+      }),
+    getAddTooltipLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.addTooltipLabel', {
+        defaultMessage: 'Add a variable',
+      }),
+    getCopyActionButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.copyActionButtonLabel', {
+        defaultMessage: 'Copy snippet',
+      }),
+    getCopyActionTooltipLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.copyActionTooltipLabel', {
+        defaultMessage: 'Copy variable syntax to clipboard',
+      }),
+    getCopyNotificationDescription: () =>
+      i18n.translate('xpack.canvas.varConfig.copyNotificationDescription', {
+        defaultMessage: 'Variable syntax copied to clipboard',
+      }),
+    getDeleteActionButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.deleteActionButtonLabel', {
+        defaultMessage: 'Delete variable',
+      }),
+    getDeleteNotificationDescription: () =>
+      i18n.translate('xpack.canvas.varConfig.deleteNotificationDescription', {
+        defaultMessage: 'Variable successfully deleted',
+      }),
+    getEditActionButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.editActionButtonLabel', {
+        defaultMessage: 'Edit variable',
+      }),
+    getEmptyDescription: () =>
+      i18n.translate('xpack.canvas.varConfig.emptyDescription', {
+        defaultMessage:
+          'This workpad has no variables currently. You may add variables to store and edit common values. These variables can then be used in elements or within the expression editor.',
+      }),
+    getTableNameLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.tableNameLabel', {
+        defaultMessage: 'Name',
+      }),
+    getTableTypeLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.tableTypeLabel', {
+        defaultMessage: 'Type',
+      }),
+    getTableValueLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.tableValueLabel', {
+        defaultMessage: 'Value',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.varConfig.titleLabel', {
+        defaultMessage: 'Variables',
+      }),
+  },
+  VarConfigDeleteVar: {
+    getCancelButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfigDeleteVar.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+    getDeleteButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfigDeleteVar.deleteButtonLabel', {
+        defaultMessage: 'Delete Variable',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.varConfigDeleteVar.titleLabel', {
+        defaultMessage: 'Delete Variable?',
+      }),
+    getWarningDescription: () =>
+      i18n.translate('xpack.canvas.varConfigDeleteVar.warningDescription', {
+        defaultMessage:
+          'Deleting this variable may adversely affect the workpad. Are you sure you wish to continue?',
+      }),
+  },
+  VarConfigEditVar: {
+    getAddTitle: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.addTitleLabel', {
+        defaultMessage: 'Add Variable',
+      }),
+    getCancelButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+    getDuplicateNameError: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.duplicateNameError', {
+        defaultMessage: 'Variable name already in use',
+      }),
+    getEditTitle: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.editTitleLabel', {
+        defaultMessage: 'Edit Variable',
+      }),
+    getNameFieldLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.nameFieldLabel', {
+        defaultMessage: 'Name',
+      }),
+    getSaveButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.saveButtonLabel', {
+        defaultMessage: 'Save Changes',
+      }),
+    getTypeBooleanLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.typeBooleanLabel', {
+        defaultMessage: 'Boolean',
+      }),
+    getTypeFieldLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.typeFieldLabel', {
+        defaultMessage: 'Type',
+      }),
+    getTypeNumberLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.typeNumberLabel', {
+        defaultMessage: 'Number',
+      }),
+    getTypeStringLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.typeStringLabel', {
+        defaultMessage: 'String',
+      }),
+    getValueFieldLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.valueFieldLabel', {
+        defaultMessage: 'Value',
+      }),
+  },
   WorkpadConfig: {
     getApplyStylesheetButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadConfig.applyStylesheetButtonLabel', {
