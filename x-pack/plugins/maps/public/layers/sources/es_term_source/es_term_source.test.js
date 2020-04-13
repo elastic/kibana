@@ -7,7 +7,7 @@
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
 jest.mock('ui/new_platform');
-jest.mock('../vector_layer', () => {});
+jest.mock('../../vector_layer', () => {});
 
 const indexPatternTitle = 'myIndex';
 const termFieldName = 'myTermField';
