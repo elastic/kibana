@@ -69,7 +69,7 @@ export class ESTermSource extends AbstractESAggSource {
     return getJoinAggKey({
       aggType,
       aggFieldName: fieldName,
-      joinRightSourceId: this._descriptor.id,
+      rightSourceId: this._descriptor.id,
     });
   }
 

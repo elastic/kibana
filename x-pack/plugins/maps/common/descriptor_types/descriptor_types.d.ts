@@ -95,7 +95,7 @@ export type JoinDescriptor = {
   right: ESTermSourceDescriptor;
 };
 
-export type LayerDescriptor = {
+type BaseLayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
   __errorMessage?: string;
@@ -109,10 +109,12 @@ export type LayerDescriptor = {
   visible?: boolean;
 };
 
-export type VectorLayerDescriptor = LayerDescriptor & {
+export type VectorLayerDescriptor = BaseLayerDescriptor & {
   joins?: JoinDescriptor[];
   style?: VectorStyleDescriptor;
 };
+
+export type LayerDescriptor = VectorLayerDescriptor;
 
 export type RangeFieldMeta = {
   min: number;

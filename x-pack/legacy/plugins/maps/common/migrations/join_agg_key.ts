@@ -12,27 +12,38 @@ import {
   getJoinAggKey,
   JOIN_FIELD_NAME_PREFIX,
   LAYER_TYPE,
+  VECTOR_STYLES,
 } from '../constants';
 import { AggDescriptor, JoinDescriptor, LayerDescriptor } from '../descriptor_types';
 import { MapSavedObjectAttributes } from '../../../../../plugins/maps/common/map_saved_object_type';
 
 const GROUP_BY_DELIMITER = '_groupby_';
 
-function getLegacyAggKey({ aggType, aggFieldName, indexPatternTitle, termFieldName }): string {
+function getLegacyAggKey({
+  aggType,
+  aggFieldName,
+  indexPatternTitle,
+  termFieldName,
+}: {
+  aggType: AGG_TYPE;
+  aggFieldName?: string;
+  indexPatternTitle: string;
+  termFieldName: string;
+}): string {
   const metricKey =
     aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${aggFieldName}` : aggType;
   return `${JOIN_FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${indexPatternTitle}.${termFieldName}`;
 }
 
-function parseLegacyAggKey(legacyAggKey: string): string {
+function parseLegacyAggKey(legacyAggKey: string): { aggType: AGG_TYPE; aggFieldName?: string } {
   const groupBySplit = legacyAggKey
     .substring(JOIN_FIELD_NAME_PREFIX.length)
     .split(GROUP_BY_DELIMITER);
   const metricKey = groupBySplit[0];
   const metricKeySplit = metricKey.split(AGG_DELIMITER);
   return {
-    aggType: metricKeySplit[0],
-    aggFieldName: metricKeySplit.length === 2 ? metricKeySplit[1] : null,
+    aggType: metricKeySplit[0] as AGG_TYPE,
+    aggFieldName: metricKeySplit.length === 2 ? metricKeySplit[1] : undefined,
   };
 }
 
@@ -50,6 +61,7 @@ export function migrateJoinAggKey({
     if (
       (layerDescriptor.type === LAYER_TYPE.VECTOR ||
         layerDescriptor.type === LAYER_TYPE.BLENDED_VECTOR) &&
+      layerDescriptor.style &&
       layerDescriptor.joins &&
       layerDescriptor.joins.length
     ) {
@@ -73,7 +85,7 @@ export function migrateJoinAggKey({
       });
 
       Object.keys(layerDescriptor.style.properties).forEach(key => {
-        const style = layerDescriptor.style.properties[key];
+        const style: any = layerDescriptor.style!.properties[key as VECTOR_STYLES];
         if (_.get(style, 'options.field.origin') === FIELD_ORIGIN.JOIN) {
           const joinDescriptor = legacyJoinFields.get(style.options.field.name);
           if (joinDescriptor) {
@@ -82,7 +94,7 @@ export function migrateJoinAggKey({
             style.options.field.name = getJoinAggKey({
               aggType,
               aggFieldName,
-              joinRightSourceId: joinDescriptor.right.id,
+              rightSourceId: joinDescriptor.right.id!,
             });
           }
         }

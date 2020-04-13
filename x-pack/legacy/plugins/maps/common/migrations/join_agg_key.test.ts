@@ -126,7 +126,7 @@ describe('migrateJoinAggKey', () => {
       layerListJSON,
     };
     const { layerListJSON: migratedLayerListJSON } = migrateJoinAggKey({ attributes });
-    const migratedLayerList = JSON.parse(migratedLayerListJSON);
+    const migratedLayerList = JSON.parse(migratedLayerListJSON!);
     expect(migratedLayerList[0].style.properties.fillColor.options.field.name).toBe(
       '__kbnjoin__avg_of_bytes__9055b4aa-136a-4b6d-90ab-9f94ccfe5eb5'
     );

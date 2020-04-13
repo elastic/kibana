@@ -73,10 +73,18 @@ export enum FIELD_ORIGIN {
 export const JOIN_FIELD_NAME_PREFIX = '__kbnjoin__';
 
 // function in common since its needed by migration
-export function getJoinAggKey({ aggType, aggFieldName, joinRightSourceId }) {
+export function getJoinAggKey({
+  aggType,
+  aggFieldName,
+  rightSourceId,
+}: {
+  aggType: AGG_TYPE;
+  aggFieldName?: string;
+  rightSourceId: string;
+}) {
   const metricKey =
     aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${aggFieldName}` : aggType;
-  return `${JOIN_FIELD_NAME_PREFIX}${metricKey}__${joinRightSourceId}`;
+  return `${JOIN_FIELD_NAME_PREFIX}${metricKey}__${rightSourceId}`;
 }
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
