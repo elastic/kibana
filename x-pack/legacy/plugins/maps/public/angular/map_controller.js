@@ -59,13 +59,15 @@ import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
 import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../common/constants';
-import { npStart } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 import { esFilters } from '../../../../../../src/plugins/data/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../../src/plugins/saved_objects/public';
 import { loadKbnTopNavDirectives } from '../../../../../../src/plugins/kibana_legacy/public';
+import { bindSetupCoreAndPlugins, bindStartCoreAndPlugins } from '../plugin';
+
 loadKbnTopNavDirectives(npStart.plugins.navigation.ui);
 
 const savedQueryService = npStart.plugins.data.query.savedQueries;
@@ -103,6 +105,10 @@ function getInitialLayersFromUrlParam() {
 app.controller(
   'GisMapController',
   ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
+    // Bind kibana services
+    bindSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
+    bindStartCoreAndPlugins(npStart.core, npStart.plugins);
+
     const { filterManager } = npStart.plugins.data.query;
     const savedMap = $route.current.locals.map;
     $scope.screenTitle = savedMap.title;

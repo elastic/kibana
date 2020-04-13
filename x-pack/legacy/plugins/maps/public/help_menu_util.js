@@ -8,7 +8,7 @@ import { getDocLinks, getCoreChrome } from './kibana_services';
 export function addHelpMenuToAppChrome() {
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
 
-  getCoreChrome().helpExtension.set({
+  getCoreChrome().setHelpExtension({
     appName: 'Maps',
     links: [
       {
