@@ -11,8 +11,10 @@ import { alertingIndexGetQuerySchema } from './schema/alert_index';
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
  */
-export type Immutable<T> = T extends undefined | null | boolean | string | number | unknown
+export type Immutable<T> = T extends undefined | null | boolean | string | number
   ? T
+  : unknown extends T
+  ? unknown
   : T extends Array<infer U>
   ? ImmutableArray<U>
   : T extends Map<infer K, infer V>
