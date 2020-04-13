@@ -60,7 +60,7 @@ const services = {
 };
 
 describe('CreateIndexPatternWizard', () => {
-  it(`defaults to the loading state`, async () => {
+  test(`defaults to the loading state`, async () => {
     const component = shallow(
       <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
     );
@@ -68,7 +68,7 @@ describe('CreateIndexPatternWizard', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders the empty state when there are no indices', async () => {
+  test('renders the empty state when there are no indices', async () => {
     const component = shallow(
       <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
     );
@@ -83,7 +83,7 @@ describe('CreateIndexPatternWizard', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders when there are no indices but there are remote clusters', async () => {
+  test('renders when there are no indices but there are remote clusters', async () => {
     const component = shallow(
       <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
     );
@@ -98,7 +98,7 @@ describe('CreateIndexPatternWizard', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('shows system indices even if there are no other indices if the include system indices is toggled', async () => {
+  test('shows system indices even if there are no other indices if the include system indices is toggled', async () => {
     const component = shallow(
       <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
     );
@@ -113,7 +113,7 @@ describe('CreateIndexPatternWizard', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders index pattern step when there are indices', async () => {
+  test('renders index pattern step when there are indices', async () => {
     const component = shallow(
       <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
     );
@@ -127,7 +127,7 @@ describe('CreateIndexPatternWizard', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders time field step when step is set to 2', async () => {
+  test('renders time field step when step is set to 2', async () => {
     const component = shallow(
       <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
     );
@@ -142,7 +142,7 @@ describe('CreateIndexPatternWizard', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('invokes the provided services when creating an index pattern', async () => {
+  test('invokes the provided services when creating an index pattern', async () => {
     const create = jest.fn().mockImplementation(() => 'id');
     const clear = jest.fn();
     services.indexPatterns.clearCache = clear;
@@ -157,12 +157,12 @@ describe('CreateIndexPatternWizard', () => {
       return indexPattern;
     };
 
-    const component = shallow(
+    const component = shallow<CreateIndexPatternWizard>(
       <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
     );
 
     component.setState({ indexPattern: 'foo' });
-    await (component.instance() as CreateIndexPatternWizard).createIndexPattern(undefined, 'id');
+    await component.instance().createIndexPattern(undefined, 'id');
     expect(services.config.get).toBeCalled();
     expect(create).toBeCalled();
     expect(clear).toBeCalledWith('id');
