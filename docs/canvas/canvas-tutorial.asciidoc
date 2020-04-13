@@ -18,7 +18,7 @@ Your first step to working with Canvas is to create a workpad.
 
 . Click *Create workpad*.
 
-. To add a *Name* for your workpad, use the editor on the right. For example, `My Canvas Workpad`.
+. To add a *Name* for your workpad, use the editor. For example, `My Canvas Workpad`.
 
 [float]
 === Customize your workpad with images
@@ -29,7 +29,7 @@ To customize your workpad to look the way you want, add your own images.
 +
 The default Elastic logo image appears on your page.
 
-. To replace the Elastic logo with your own image, select the image, then use the editor on the right.
+. To replace the Elastic logo with your own image, select the image, then use the editor.
 
 . To move the image, click and drag it to your preferred location.
 
@@ -73,7 +73,7 @@ You'll notice that the error is gone, but the number could use some formatting.
 
 . To format the number, use the Canvas expression language.
 
-.. In the lower right corner, click *Expression editor*.
+.. Click *Expression editor*.
 +
 You're now looking at the raw data syntax that Canvas uses to display the element.
 

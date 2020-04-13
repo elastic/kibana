@@ -5,6 +5,7 @@
  */
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType, EuiButton } from '@elastic/eui';
 import { PackageInfo } from '../../../../types';
@@ -41,7 +42,12 @@ export function Header(props: HeaderProps) {
   return (
     <Fragment>
       <FullWidthNavRow>
-        <NavButtonBack href={toListView()} text="Browse Packages" />
+        <NavButtonBack
+          href={toListView()}
+          text={i18n.translate('xpack.ingestManager.epm.browseAllButtonText', {
+            defaultMessage: 'Browse all integrations',
+          })}
+        />
       </FullWidthNavRow>
       <EuiFlexGroup>
         {iconType ? (
