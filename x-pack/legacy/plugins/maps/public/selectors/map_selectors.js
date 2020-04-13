@@ -210,7 +210,7 @@ export const getSpatialFiltersLayer = createSelector(getFilters, filters => {
     layerDescriptor: {
       id: 'spatialFilters',
       visible: true,
-      alpha: 0.5,
+      alpha: 0.3,
       type: LAYER_TYPE.VECTOR,
       __dataRequests: [
         {
