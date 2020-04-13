@@ -73,3 +73,11 @@ export const getUiActions = () => uiActions;
 let core;
 export const setCore = kibanaCore => (core = kibanaCore);
 export const getCore = () => core;
+
+let navigation;
+export const setNavigation = pluginNavigation => (navigation = pluginNavigation);
+export const getNavigation = () => navigation;
+
+let coreI18n;
+export const setCoreI18n = kibanaCoreI18n => (coreI18n = kibanaCoreI18n);
+export const getCoreI18n = () => coreI18n;

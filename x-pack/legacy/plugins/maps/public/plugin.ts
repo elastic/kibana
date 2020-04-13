@@ -35,6 +35,8 @@ import {
   setCore,
   setHttp,
   setUiActions,
+  setNavigation,
+  setCoreI18n,
 } from './kibana_services';
 // @ts-ignore
 import {
@@ -94,6 +96,8 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setDocLinks(core.docLinks);
   setData(plugins.data);
   setUiActions(plugins.uiActions);
+  setNavigation(plugins.navigation);
+  setCoreI18n(core.i18n);
 };
 
 /** @internal */

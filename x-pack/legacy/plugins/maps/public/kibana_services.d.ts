@@ -30,3 +30,5 @@ export function setCoreOverlays(args: unknown): void;
 export function setData(args: unknown): void;
 export function setUiActions(args: unknown): void;
 export function setCore(args: unknown): void;
+export function setNavigation(args: unknown): void;
+export function setCoreI18n(args: unknown): void;
