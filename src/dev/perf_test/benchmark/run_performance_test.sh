@@ -142,13 +142,13 @@ export NODE_OPTIONS="--max_old_space_size=4096"
 loadNvm
 nvm use
 cleanEs
-# TODO-TRE: Uncomment next line
-#bootstrapKibana
+bootstrapKibana
 
 gitDate=$(git show -s --format=%cI ${gitHash})
 #echo "### gitDate: ${gitDate}"
 #logstashTracking="PACKET_DELAY:${PACKET_DELAY} GIT_HASH:${gitHash} DESCRIPTION:\"${gitDescription}\" GIT_DATE:${gitDate}"
-logstashTracking="PACKET_DELAY:${PACKET_DELAY} GIT_HEAD:${GIT_HEAD} GIT_HASH:${gitHash} DESCRIPTION:\"${gitDescription}\" GIT_DATE:${gitDate}"
+#logstashTracking="PACKET_DELAY:${PACKET_DELAY} GIT_HEAD:${GIT_HEAD} GIT_HASH:${gitHash} DESCRIPTION:\"${gitDescription}\" GIT_DATE:${gitDate}"
+logstashTracking="PACKET_DELAY:${PACKET_DELAY} GIT_HASH:${gitHash} DESCRIPTION:\"${gitDescription}\" GIT_DATE:${gitDate}"
 echo "### logstashTracking: ${logstashTracking}"
 
 if [ "$prNumber" != "" ]; then
