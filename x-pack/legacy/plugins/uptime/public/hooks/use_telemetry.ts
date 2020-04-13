@@ -5,7 +5,7 @@
  */
 
 import { useEffect } from 'react';
-import { useUrlParams } from './use_url_params';
+import { useGetUrlParams } from './use_url_params';
 import { apiService } from '../state/api/utils';
 import { API_URLS } from '../../common/constants';
 
@@ -17,8 +17,12 @@ export enum UptimePage {
 }
 
 export const useUptimeTelemetry = (page?: UptimePage) => {
-  const [getUrlParams] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd, autorefreshInterval, autorefreshIsPaused } = getUrlParams();
+  const {
+    dateRangeStart,
+    dateRangeEnd,
+    autorefreshInterval,
+    autorefreshIsPaused,
+  } = useGetUrlParams();
 
   useEffect(() => {
     if (!apiService.http) throw new Error('Core http services are not defined');

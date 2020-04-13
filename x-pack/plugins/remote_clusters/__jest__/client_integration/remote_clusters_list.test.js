@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { act } from 'react-dom/test-utils';
 
 import {
   pageHelpers,
@@ -16,8 +17,6 @@ import { getRouter } from '../../public/application/services';
 import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 
 import { PROXY_MODE } from '../../common/constants';
-
-jest.mock('ui/new_platform');
 
 const { setup } = pageHelpers.remoteClustersList;
 
@@ -78,6 +77,7 @@ describe('<RemoteClusterList />', () => {
     let actions;
     let tableCellsValues;
     let rows;
+    let waitFor;
 
     // For deterministic tests, we need to make sure that remoteCluster1 comes before remoteCluster2
     // in the table list that is rendered. As the table orders alphabetically by index name
@@ -110,11 +110,11 @@ describe('<RemoteClusterList />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
-      // Mount the component
-      ({ component, find, exists, table, actions } = setup());
+      await act(async () => {
+        ({ component, find, exists, table, actions, waitFor } = setup());
 
-      await nextTick(100); // Make sure that the Http request is fulfilled
-      component.update();
+        await waitFor('remoteClusterListTable');
+      });
 
       // Read the remote clusters list table
       ({ rows, tableCellsValues } = table.getMetaData('remoteClusterListTable'));
@@ -241,8 +241,10 @@ describe('<RemoteClusterList />', () => {
         actions.clickBulkDeleteButton();
         actions.clickConfirmModalDeleteRemoteCluster();
 
-        await nextTick(600); // there is a 500ms timeout in the api action
-        component.update();
+        await act(async () => {
+          await nextTick(600); // there is a 500ms timeout in the api action
+          component.update();
+        });
 
         ({ rows } = table.getMetaData('remoteClusterListTable'));
 
