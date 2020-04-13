@@ -20,14 +20,15 @@
 import { callClient } from './call_client';
 import { SearchStrategySearchParams } from './types';
 import { defaultSearchStrategy } from './default_search_strategy';
-import { handleResponse, FetchHandlers } from '../fetch';
+import { FetchHandlers } from '../fetch';
+import { handleResponse } from '../fetch/handle_response';
 
 const mockAbortFn = jest.fn();
-jest.mock('./handle_response', () => ({
+jest.mock('../fetch/handle_response', () => ({
   handleResponse: jest.fn((request, response) => response),
 }));
 
-jest.mock('../search_strategy', () => {
+jest.mock('./default_search_strategy', () => {
   return {
     defaultSearchStrategy: {
       search: jest.fn(({ searchRequests }: SearchStrategySearchParams) => {
