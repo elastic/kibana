@@ -15,7 +15,7 @@ export const tilemap = kibana => {
     require: ['xpack_main', 'vis_type_vislib'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      visTypeEnhancers: ['plugins/tilemap/vis_type_enhancers/update_tilemap_settings'],
+      hacks: ['plugins/tilemap/vis_type_enhancers/update_tilemap_settings'],
     },
     init: function(server) {
       const thisPlugin = this;

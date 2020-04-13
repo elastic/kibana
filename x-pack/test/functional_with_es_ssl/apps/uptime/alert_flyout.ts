@@ -33,7 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // put the fetch code in a retry block with a timeout.
       let alert: any;
       await retry.tryForTime(15000, async () => {
-        const apiResponse = await supertest.get('/api/alert/_find');
+        const apiResponse = await supertest.get('/api/alert/_find?search=uptime-test');
         const alertsFromThisTest = apiResponse.body.data.filter(
           ({ name }: { name: string }) => name === 'uptime-test'
         );
@@ -54,25 +54,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         tags,
       } = alert;
 
-      // we're not testing the flyout's ability to associate alerts with action connectors
-      expect(actions).to.eql([]);
+      try {
+        // we're not testing the flyout's ability to associate alerts with action connectors
+        expect(actions).to.eql([]);
 
-      expect(alertTypeId).to.eql('xpack.uptime.alerts.monitorStatus');
-      expect(consumer).to.eql('uptime');
-      expect(interval).to.eql('11m');
-      expect(tags).to.eql(['uptime', 'another']);
-      expect(numTimes).to.be(3);
-      expect(timerange.from).to.be('now-1h');
-      expect(timerange.to).to.be('now');
-      expect(locations).to.eql(['mpls']);
-      expect(filters).to.eql(
-        '{"bool":{"should":[{"match_phrase":{"monitor.id":"0001-up"}}],"minimum_should_match":1}}'
-      );
-
-      await supertest
-        .delete(`/api/alert/${id}`)
-        .set('kbn-xsrf', 'true')
-        .expect(204);
+        expect(alertTypeId).to.eql('xpack.uptime.alerts.monitorStatus');
+        expect(consumer).to.eql('uptime');
+        expect(interval).to.eql('11m');
+        expect(tags).to.eql(['uptime', 'another']);
+        expect(numTimes).to.be(3);
+        expect(timerange.from).to.be('now-1h');
+        expect(timerange.to).to.be('now');
+        expect(locations).to.eql(['mpls']);
+        expect(filters).to.eql(
+          '{"bool":{"should":[{"match_phrase":{"monitor.id":"0001-up"}}],"minimum_should_match":1}}'
+        );
+      } finally {
+        await supertest
+          .delete(`/api/alert/${id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(204);
+      }
     });
   });
 };
