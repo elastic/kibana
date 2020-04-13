@@ -942,7 +942,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
+                              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1009,7 +1009,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
+                              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
