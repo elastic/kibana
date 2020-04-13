@@ -47,7 +47,7 @@ export { CoreSetup, CoreStart };
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
-  encryptedSavedObjects: EncryptedSavedObjectsSetup;
+  encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
   licensing: LicensingPluginSetup;
   security?: SecuritySetup;
