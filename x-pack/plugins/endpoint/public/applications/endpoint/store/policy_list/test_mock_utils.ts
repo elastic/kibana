@@ -49,7 +49,7 @@ export interface MiddlewareActionSpyHelper<S = GlobalState> {
    *
    * @param actionType
    */
-  waitForAction: (actionType: Pick<AppAction, 'type'>['type']) => Promise<void>;
+  waitForAction: (actionType: AppAction['type']) => Promise<void>;
   /**
    * A property holding the information around the calls that were processed by the  internal
    * `actionSpyMiddlware`. This property holds the information typically found in Jets's mocked
@@ -138,11 +138,9 @@ export const createSpyMiddleware = <S = GlobalState>(): MiddlewareActionSpyHelpe
       return next => {
         spyDispatch = jest.fn(action => {
           next(action);
-          // If we have action watchers, then loop through them and call them with this action
-          if (watchers.size > 0) {
-            for (const watch of watchers) {
-              watch(action);
-            }
+          // loop through the list of watcher (if any) and call them with this action
+          for (const watch of watchers) {
+            watch(action);
           }
           return action;
         });

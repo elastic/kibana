@@ -26,7 +26,7 @@ export const isOnPolicyListPage = (state: PolicyListState) => {
   return state.location?.pathname === '/policy';
 };
 
-export const routeLocation = (state: PolicyListState) => state.location;
+const routeLocation = (state: PolicyListState) => state.location;
 
 /**
  * Returns the supported URL search params, populated with defaults if none where present in the URL
