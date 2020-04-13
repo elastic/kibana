@@ -1,0 +1,7 @@
+{
+  "id": "visTypeXy",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["charts", "expressions", "visualizations"]
+}

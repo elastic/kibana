@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
+import { PluginInitializerContext } from '../../../core/public';
 import { VisTypeXyPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {

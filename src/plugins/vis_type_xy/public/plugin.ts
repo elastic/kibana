@@ -25,12 +25,9 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 
-import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import {
-  VisualizationsSetup,
-  VisualizationsStart,
-} from '../../../../plugins/visualizations/public';
-import { ChartsPluginSetup } from '../../../../plugins/charts/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
+import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
+import { ChartsPluginSetup } from '../../charts/public';
 
 export interface VisTypeXyDependencies {
   uiSettings: IUiSettingsClient;

@@ -39,7 +39,7 @@ import {
   createGoalVisTypeDefinition,
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
-import { ConfigSchema as VisTypeXyConfigSchema } from '../../vis_type_xy';
+import { ConfigSchema as VisTypeXyConfigSchema } from '../../../../plugins/vis_type_xy';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { setFormatService, setDataActions } from './services';
 
@@ -86,9 +86,12 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
     ];
     const vislibFns = [createVisTypeVislibVisFn(), createPieVisFn()];
 
-    const visTypeXy = core.injectedMetadata.getInjectedVar('visTypeXy') as
-      | VisTypeXyConfigSchema['visTypeXy']
-      | undefined;
+    debugger;
+    const config = this.initializerContext.config.get();
+
+    // const visTypeXy = core.injectedMetadata.getInjectedVar('visTypeXy') as
+    //   | { enabled: boolean }
+    //   | undefined;
 
     // if visTypeXy plugin is disabled it's config will be undefined
     if (!visTypeXy || !visTypeXy.enabled) {
