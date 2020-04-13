@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { PageView } from './page_view';
-import { EuiThemeProvider } from '../../../../../../legacy/common/eui_styled_components';
+import { EuiThemeProvider } from '../../../../../../../legacy/common/eui_styled_components';
 
 describe('PageView component', () => {
   const render = (ui: Parameters<typeof mount>[0]) =>

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
 import { sendGetDatasource, sendGetEndpointSpecificDatasources } from './ingest';
+import { httpServiceMock } from '../../../../../../../../../src/core/public/mocks';
 
 describe('ingest service', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
