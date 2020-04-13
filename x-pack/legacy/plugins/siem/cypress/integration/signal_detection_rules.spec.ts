@@ -7,11 +7,16 @@ import {
   FIFTH_RULE,
   FIRST_RULE,
   RULE_NAME,
+  RULE_SWITCH,
   SECOND_RULE,
   SEVENTH_RULE,
 } from '../screens/signal_detection_rules';
 
-import { goToManageSignalDetectionRules } from '../tasks/detections';
+import {
+  goToManageSignalDetectionRules,
+  waitForSignalsPanelToBeLoaded,
+  waitForSignalsIndexToBeCreated,
+} from '../tasks/detections';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import {
@@ -32,8 +37,10 @@ describe('Signal detection rules', () => {
     esArchiverUnload('prebuilt_rules_loaded');
   });
 
-  it.skip('Sorts by activated rules', () => {
+  it('Sorts by activated rules', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
+    waitForSignalsPanelToBeLoaded();
+    waitForSignalsIndexToBeCreated();
     goToManageSignalDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     cy.get(RULE_NAME)
@@ -52,10 +59,24 @@ describe('Signal detection rules', () => {
 
             cy.get(RULE_NAME)
               .eq(FIRST_RULE)
-              .should('have.text', fifthRuleName);
-            cy.get(RULE_NAME)
+              .invoke('text')
+              .then(firstRuleName => {
+                cy.get(RULE_NAME)
+                  .eq(SECOND_RULE)
+                  .invoke('text')
+                  .then(secondRuleName => {
+                    const expectedRulesNames = `${firstRuleName} ${secondRuleName}`;
+                    cy.wrap(expectedRulesNames).should('include', fifthRuleName);
+                    cy.wrap(expectedRulesNames).should('include', seventhRuleName);
+                  });
+              });
+
+            cy.get(RULE_SWITCH)
+              .eq(FIRST_RULE)
+              .should('have.attr', 'role', 'switch');
+            cy.get(RULE_SWITCH)
               .eq(SECOND_RULE)
-              .should('have.text', seventhRuleName);
+              .should('have.attr', 'role', 'switch');
           });
       });
   });
