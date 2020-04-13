@@ -94,7 +94,7 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
         }, timeout);
       },
       () => {
-        jobLogger.info('clearing timeout-breach handler');
+        jobLogger.debug('clearing timeout-breach handler');
         if (timeoutId) {
           clearTimeout(timeoutId);
         }

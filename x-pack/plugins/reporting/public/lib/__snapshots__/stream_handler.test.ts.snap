@@ -10,6 +10,7 @@ Object {
       "status": "completed",
       "title": "specimen",
       "type": "spectacular",
+      "warning": "",
     },
   ],
   "failed": Array [
@@ -20,6 +21,7 @@ Object {
       "status": "failed",
       "title": "specimen",
       "type": "spectacular",
+      "warning": "",
     },
   ],
 }

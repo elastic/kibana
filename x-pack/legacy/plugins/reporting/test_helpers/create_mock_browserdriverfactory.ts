@@ -95,7 +95,12 @@ export const createMockBrowserDriverFactory = async (
   opts: Partial<CreateMockBrowserDriverFactoryOpts> = {}
 ): Promise<HeadlessChromiumDriverFactory> => {
   const captureConfig = {
-    timeouts: { openUrl: 30000, waitForElements: 30000, renderComplete: 30000 },
+    timeouts: {
+      openUrl: 30000,
+      waitForElements: 30000,
+      renderComplete: 30000,
+      timeBeforeTimeoutBreachHandler: 0,
+    },
     browser: {
       type: 'chromium',
       chromium: {

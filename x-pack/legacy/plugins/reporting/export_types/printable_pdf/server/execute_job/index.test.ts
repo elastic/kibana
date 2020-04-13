@@ -50,6 +50,8 @@ beforeEach(async () => {
     'kibanaServer.hostname': 'localhost',
     'kibanaServer.port': 5601,
     'kibanaServer.protocol': 'http',
+    'queue.timeout': 2000,
+    'capture.timeouts.timeBeforeTimeoutBreachHandler': 0,
   };
   const mockReportingConfig = {
     get: (...keys: string[]) => (reportingConfig as any)[keys.join('.')],

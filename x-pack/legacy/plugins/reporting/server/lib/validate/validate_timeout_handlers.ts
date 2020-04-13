@@ -6,6 +6,12 @@
 
 import { ReportingConfig } from '../../types';
 
+type timeoutConfig = [
+  'capture',
+  'timeouts',
+  'openUrl' | 'waitForElements' | 'renderComplete' | 'timeBeforeTimeoutBreachHandler'
+];
+
 const reportingPath = 'xpack.reporting';
 const queueTimeoutPath: ['queue', 'timeout'] = ['queue', 'timeout'];
 const timeoutPaths: [
@@ -23,9 +29,8 @@ const timeoutPaths: [
 export function validateTimeoutHandlers(config: ReportingConfig): void {
   const totalQueueTime = config.get(...queueTimeoutPath);
 
-  // @ts-ignore splatted arrays seems to lose their types
   return timeoutPaths
-    .map(path => [path.join('.'), config.get(...path)])
+    .map((path: timeoutConfig) => [path.join('.'), config.get(...path)])
     .forEach(([timeoutPath, timeoutValue]) => {
       if (timeoutValue >= totalQueueTime) {
         throw new Error(
