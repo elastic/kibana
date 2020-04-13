@@ -86,7 +86,7 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value, newLay
   };
   if (newLayerType && newLayerType !== layerList[layerIdx].type) {
     // clear out data requests for previous layer type
-    delete updatedLayer.__dataRequests;
+    updatedLayer.__dataRequests = [];
     updatedLayer.type = newLayerType;
   }
   const updatedList = [
