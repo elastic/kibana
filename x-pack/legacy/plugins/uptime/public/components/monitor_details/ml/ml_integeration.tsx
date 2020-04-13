@@ -57,7 +57,7 @@ export const MLIntegrationComponent = () => {
     if (isConfirmDeleteJobOpen && jobDeletionSuccess?.[getMLJobId(monitorId as string)]?.deleted) {
       setIsConfirmDeleteJobOpen(false);
       notifications.toasts.success({
-        title: <p>{labels.JOB_DELETION}</p>,
+        title: <p data-test-subj="uptimeMLJobSuccessfullyDeleted">{labels.JOB_DELETION}</p>,
         body: <p>{labels.JOB_DELETION_SUCCESS}</p>,
         toastLifeTimeMs: 3000,
       });

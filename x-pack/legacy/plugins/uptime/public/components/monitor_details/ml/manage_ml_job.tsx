@@ -34,6 +34,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
 
   const button = (
     <EuiButtonEmpty
+      data-test-subj={hasMLJob ? 'uptimeManageMLJobBtn' : 'uptimeEnableAnomalyBtn'}
       iconType={hasMLJob ? 'arrowDown' : 'machineLearningApp'}
       iconSide={hasMLJob ? 'right' : 'left'}
       onClick={hasMLJob ? () => setIsPopOverOpen(true) : onEnableJob}
@@ -60,6 +61,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         },
         {
           name: labels.DISABLE_ANOMALY_DETECTION,
+          'data-test-subj': 'uptimeDeleteMLJobBtn',
           icon: <EuiIcon type="trash" size="m" />,
           onClick: () => {
             setIsPopOverOpen(false);
@@ -72,7 +74,11 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
 
   return (
     <EuiPopover button={button} isOpen={isPopOverOpen} closePopover={() => setIsPopOverOpen(false)}>
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={panels}
+        data-test-subj="uptimeManageMLContextMenu"
+      />
     </EuiPopover>
   );
 };
