@@ -134,7 +134,7 @@ describe('IndexParamsFields renders', () => {
       ActionParamsProps<IndexActionParams>
     >;
     const actionParams = {
-      documents: ['test'],
+      documents: [{ test: 123 }],
     };
     const wrapper = mountWithIntl(
       <ParamsFields
@@ -149,6 +149,9 @@ describe('IndexParamsFields renders', () => {
         .find('[data-test-subj="actionIndexDoc"]')
         .first()
         .prop('value')
-    ).toBe('"test"');
+    ).toBe(`{
+  "test": 123
+}`);
+    expect(wrapper.find('[data-test-subj="documentsAddVariableButton"]').length > 0).toBeTruthy();
   });
 });

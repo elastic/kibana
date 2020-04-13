@@ -47,7 +47,7 @@ const getPayload = (
     interval: ruleAlert.schedule.interval,
     name: ruleAlert.name,
     tags: ruleAlert.tags,
-    throttle: ruleAlert.throttle!,
+    throttle: ruleAlert.throttle,
     scrollSize: 10,
     scrollLock: '0',
   },
@@ -105,6 +105,7 @@ describe('rules_notification_alert_type', () => {
     };
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(0));
+    (searchAfterAndBulkCreate as jest.Mock).mockClear();
     (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
       success: true,
       searchAfterTimes: [],
@@ -147,6 +148,37 @@ describe('rules_notification_alert_type', () => {
       expect(ruleStatusService.error.mock.calls[0][1]).toEqual({
         gap: 'a few seconds',
       });
+    });
+
+    it("should set refresh to 'wait_for' when actions are present", async () => {
+      const ruleAlert = getResult();
+      ruleAlert.actions = [
+        {
+          actionTypeId: '.slack',
+          params: {
+            message:
+              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+          },
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        },
+      ];
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      await alert.executor(payload);
+      expect((searchAfterAndBulkCreate as jest.Mock).mock.calls[0][0].refresh).toEqual('wait_for');
+      (searchAfterAndBulkCreate as jest.Mock).mockClear();
+    });
+
+    it('should set refresh to false when actions are not present', async () => {
+      await alert.executor(payload);
+      expect((searchAfterAndBulkCreate as jest.Mock).mock.calls[0][0].refresh).toEqual(false);
+      (searchAfterAndBulkCreate as jest.Mock).mockClear();
     });
 
     it('should call scheduleActions if signalsCount was greater than 0 and rule has actions defined', async () => {
