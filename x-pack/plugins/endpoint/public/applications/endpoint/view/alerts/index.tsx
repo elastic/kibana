@@ -26,6 +26,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useDispatch } from 'react-redux';
+import { EuiOverlayMask } from '@elastic/eui';
+import { EuiModalHeader } from '@elastic/eui';
+import { EuiModal } from '@elastic/eui';
+import { EuiModalFooter } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiModalBody } from '@elastic/eui';
+import { EuiModalHeaderTitle } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/types';
 import * as selectors from '../../store/alerts/selectors';
@@ -33,9 +42,12 @@ import { useAlertListSelector } from './hooks/use_alerts_selector';
 import { AlertDetailsOverview } from './details';
 import { FormattedDate } from './formatted_date';
 import { AlertIndexSearchBar } from './index_search_bar';
+import { AlertAction } from '../../store/alerts';
+import { AllowlistForm } from './allowlist_form';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
+  const dispatch: (action: AlertAction) => unknown = useDispatch();
 
   const columns = useMemo((): EuiDataGridColumn[] => {
     return [
@@ -94,6 +106,7 @@ export const AlertIndex = memo(() => {
   const alertListData = useAlertListSelector(selectors.alertListData);
   const hasSelectedAlert = useAlertListSelector(selectors.hasSelectedAlert);
   const queryParams = useAlertListSelector(selectors.uiQueryParams);
+  const allowlistModalIsOpen = useAlertListSelector(selectors.allowlistModalIsOpen);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => {
@@ -209,6 +222,10 @@ export const AlertIndex = memo(() => {
 
   const selectedAlertData = useAlertListSelector(selectors.selectedAlertDetailsData);
 
+  const closeAllowlistModal = useCallback(() => {
+    dispatch({ type: 'userClosedAllowlistModal' });
+  }, [dispatch]);
+
   return (
     <>
       {hasSelectedAlert && (
@@ -226,6 +243,43 @@ export const AlertIndex = memo(() => {
             {selectedAlertData ? <AlertDetailsOverview /> : <EuiLoadingSpinner size="xl" />}
           </EuiFlyoutBody>
         </EuiFlyout>
+      )}
+      {allowListModalIsOpen && (
+        <EuiOverlayMask>
+          <EuiModal onClose={closeAllowlistModal}>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>
+                {i18n.translate('xpack.endpoint.application.endpoint.alerts.allowModal.title', {
+                  defaultMessage: 'Allowlist and restore',
+                })}
+              </EuiModalHeaderTitle>
+            </EuiModalHeader>
+
+            <EuiModalBody>
+              <AllowlistForm />
+            </EuiModalBody>
+
+            <EuiModalFooter>
+              <EuiButtonEmpty onClick={closeAllowListModal}>
+                {i18n.translate(
+                  'xpack.endpoint.application.endpoint.alerts.allowlistModal.cancel',
+                  {
+                    defaultMessage: 'Cancel',
+                  }
+                )}
+              </EuiButtonEmpty>
+
+              <EuiButton onClick={closeAllowListModal} fill>
+                {i18n.translate(
+                  'xpack.endpoint.application.endpoint.alerts.allowlistModal.submit',
+                  {
+                    defaultMessage: 'Allowlist and restore',
+                  }
+                )}
+              </EuiButton>
+            </EuiModalFooter>
+          </EuiModal>
+        </EuiOverlayMask>
       )}
       <EuiPage data-test-subj="alertListPage">
         <EuiPageBody>

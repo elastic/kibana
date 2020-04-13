@@ -19,6 +19,7 @@ const initialState = (): AlertListState => {
     searchBar: {
       patterns: [],
     },
+    allowlistModalIsOpen: false,
   };
 };
 
@@ -59,6 +60,16 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
         ...state.searchBar,
         patterns: action.payload,
       },
+    };
+  } else if (action.type === 'userOpenedAllowlistModal') {
+    return {
+      ...state,
+      allowlistModalIsOpen: true,
+    };
+  } else if (action.type === 'userClosedAllowlistModal') {
+    return {
+      ...state,
+      allowlistModalIsOpen: false,
     };
   }
 

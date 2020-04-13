@@ -312,6 +312,8 @@ export interface AlertListState {
 
   /** Search bar state including indexPatterns */
   readonly searchBar: AlertsSearchBarState;
+
+  readonly allowlistModalIsOpen: boolean;
 }
 
 /**

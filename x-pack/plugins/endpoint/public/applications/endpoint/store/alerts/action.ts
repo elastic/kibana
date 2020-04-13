@@ -19,11 +19,21 @@ interface ServerReturnedAlertDetailsData {
 }
 
 interface ServerReturnedSearchBarIndexPatterns {
-  type: 'serverReturnedSearchBarIndexPatterns';
-  payload: IIndexPattern[];
+  readonly type: 'serverReturnedSearchBarIndexPatterns';
+  readonly payload: IIndexPattern[];
+}
+
+interface UserOpenedAllowlistModal {
+  readonly type: 'userOpenedAllowlistModal';
+}
+
+interface UserClosedAllowlistModal {
+  readonly type: 'userClosedAllowlistModal';
 }
 
 export type AlertAction =
   | ServerReturnedAlertsData
   | ServerReturnedAlertDetailsData
-  | ServerReturnedSearchBarIndexPatterns;
+  | ServerReturnedSearchBarIndexPatterns
+  | UserOpenedAllowlistModal
+  | UserClosedAllowlistModal;

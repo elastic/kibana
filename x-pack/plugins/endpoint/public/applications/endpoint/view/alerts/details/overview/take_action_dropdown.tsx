@@ -7,6 +7,8 @@
 import React, { memo, useState, useCallback } from 'react';
 import { EuiPopover, EuiFormRow, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useDispatch } from 'react-redux';
+import { AlertAction } from '../../../../store/alerts';
 
 const TakeActionButton = memo(({ onClick }: { onClick: () => void }) => (
   <EuiButton
@@ -23,6 +25,7 @@ const TakeActionButton = memo(({ onClick }: { onClick: () => void }) => (
 ));
 
 export const TakeActionDropdown = memo(() => {
+  const dispatch: (action: AlertAction) => unknown = useDispatch();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const onClick = useCallback(() => {
@@ -32,6 +35,10 @@ export const TakeActionDropdown = memo(() => {
   const closePopover = useCallback(() => {
     setIsDropdownOpen(false);
   }, []);
+
+  const openAllowlistModal = useCallback(() => {
+    dispatch({ type: 'userOpenedAllowListModal' });
+  }, [dispatch]);
 
   return (
     <EuiPopover
@@ -59,6 +66,7 @@ export const TakeActionDropdown = memo(() => {
           data-test-subj="alertDetailTakeActionWhitelistButton"
           color="text"
           iconType="listAdd"
+          onClick={openAllowlistModal}
         >
           <FormattedMessage
             id="xpack.endpoint.application.endpoint.alertDetails.takeAction.whitelist"
