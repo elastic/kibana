@@ -162,5 +162,10 @@ export interface AlertAttributes {
 }
 
 export interface RuleAlertAttributes extends AlertAttributes {
-  params: RuleAlertParams;
+  params: Omit<
+    RuleAlertParams,
+    'ruleId' | 'name' | 'enabled' | 'interval' | 'tags' | 'actions' | 'throttle'
+  > & {
+    ruleId: string;
+  };
 }

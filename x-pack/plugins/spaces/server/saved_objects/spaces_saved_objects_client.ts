@@ -13,6 +13,8 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
+  SavedObjectsAddToNamespacesOptions,
+  SavedObjectsDeleteFromNamespacesOptions,
   ISavedObjectTypeRegistry,
 } from 'src/core/server';
 import { SpacesServiceSetup } from '../spaces_service/spaces_service';
@@ -208,6 +210,50 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.update(type, id, attributes, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Adds namespaces to a SavedObject
+   *
+   * @param type
+   * @param id
+   * @param namespaces
+   * @param options
+   */
+  public async addToNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsAddToNamespacesOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+
+    return await this.client.addToNamespaces(type, id, namespaces, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Removes namespaces from a SavedObject
+   *
+   * @param type
+   * @param id
+   * @param namespaces
+   * @param options
+   */
+  public async deleteFromNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsDeleteFromNamespacesOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+
+    return await this.client.deleteFromNamespaces(type, id, namespaces, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
