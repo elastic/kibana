@@ -757,3 +757,187 @@ Plugins should now define a category if they have a navigation item:
 * If you want to create their own category, you can also provide any object matching the `AppCategory` interface defined in `src/core/types/app_category.ts`.
 
 *via {pull}53545[#53545]*
+
+[discrete]
+==== Expose Elasticsearch from start and deprecate from setup
+
+Remove any API that could allow access/query to savedObjects from core setup
+contract, and move them to the start contract instead. Deprecate
+the `CoreSetup.elasticsearch` API and expose `CoreStart.elasticsearch` instead.
+
+
+*via {pull}59886[#59886]*
+
+[discrete]
+==== Embeddable triggers
+
+* Adds ability to embeddable to report what triggers it executes through
+`.supportedTriggers()` method.
+* Adds to `VisualizationEmbeddable` an implementation of `.supportedTriggers()` method.
+
+*via {pull}58440[#58440]*
+
+[discrete]
+==== Force savedObject API consumers to define SO type explicitly
+
+The new interface enforces API consumers to specify SO type explicitly.
+Plugins can use `SavedObjectAttributes` to ensure their type are serializable,
+but it shouldn't be used as their domain-specific type.
+
+*via {pull}58022[#58022]*
+
+[discrete]
+==== Trigger context
+
+This PR makes trigger context type typed in TypeScript and linked to `Trigger` type.
+Now when you execute a trigger or when an action receives trigger context it
+can be well typed. This functionality was added to visualization embeddable
+in the place where it executes a trigger.
+
+*via {pull}57870[#57870]*
+
+[discrete]
+==== Expressions debug mode
+
+Add ability to execute expression in "debug" mode, which would collect execution
+information about each function. This is used in the Expression Explorer
+(developed by Canvas) and in Canvas when the expression editor is open.
+
+*via {pull}57841[#57841]*
+
+[discrete]
+==== Move ui/agg_types in to shim data plugin
+
+* Moves the contents of `ui/agg_types` into the legacy shim data plugin
+* Re-exports contracts `ui/agg_types` for BWC
+* Creates dedicated interfaces for classes commonly being used as types: IAggConfig, IAggConfigs, IAggType, IFieldParamType, IMetricAggType
+** Right now these are just re-exporting the class as a type;
+eventually we should put more detailed typings in place.
+
+*via {pull}56353[#56353]*
+
+[discrete]
+==== Stateful search bar default behaviors
+
+The goal of the stateful version of SearchBar / TopNavMenu is to be an easy way
+to consume the services offered by `plugins.data.query` where developers
+should be able to provide minimal configuration and get a fully working SearchBar.
+
+*via {pull}56160[#56160]*
+
+[discrete]
+==== Guide for creating alert / action types in the UI
+
+Documentation to help developers integrate their alert / action type within
+our Management UIs
+
+*via {pull}55963[#55963]*
+
+[discrete]
+==== Move search service code to NP
+
+Move all of the search service code to Kibana new platform. Also to telete `courier` folder
+and move `getFlattenedObject` to `src/core/utils`.
+
+*via {pull}55430[#55430]*
+
+[discrete]
+==== Expose NP FieldFormats service to server side
+
+The fieldFormats service is used on the server side as well.
+At the moment, it resides in `src/legacy/ui/field_formats/mixin/field_formats_service.ts`
+and only the FE plugin exposes it.
+
+*via {pull}55419[#55419]*
+
+[discrete]
+==== Update plugin generator to generate NP plugins
+
+Add more options for Kibana new platform plugin generator.
+
+* Generate FE components
+* Generate server side endpoint
+* Generate SCSS
+* Generate an optional .eslintrc.js file (for 3rd party plugins mostly)
+* Init git repo (for 3rd party plugins)
+
+*via {pull}55281[#55281]*
+
+[discrete]
+==== Run SO migration after plugins setup phase
+
+* Moves `createScopedRepository` and `createInternalRepository` from `setup`
+contract to `start` contract, and removes `getScopedClient` from the `setup` contract.
+There is no longer a possibility to be performing any call to SO before core's `start` is done.
+* Creates the migrator, the repository accessors and runs the SO migration
+at the start of `SavedObjectsService.start()`, meaning that any SO call performed
+is assured to be done after the migration.
+* Changes the `setClientFactory` API to `setClientFactoryProvider` to provide a
+SO repository provider when registering the client factory.
+* Adapts the existing plugin calls to the removed APIs from `setup` to be now
+using `getStartServices` to access them on the core `start` contract.
+
+*via {pull}55012[#55012]*
+
+[discrete]
+==== Build immutable bundles for new platform plugins
+
+Plugins that have been migrated to the "new platform" are built with a new system
+into their own `target/public` directory. To build third-party plugin's with
+this new system either pass `--plugin-path` to `node scripts/build_new_platform_plugins`
+or use the `@kbn/optimizer` package in the Kibana repo to build your plugin as
+described in the readme for that package.
+
+*via {pull}53976[#53976]*
+
+
+[discrete]
+==== [Search service] Asynchronous ES search strategy
+
+Adds an async {es} search strategy, which utilizes the async search strategy to
+call the `_async_search` APIs in Elasticsearch, returning an observable over the responses.
+
+*via {pull}53538[#53538]*
+
+[discrete]
+==== [Vis: Default editor] EUIficate and Reactify the sidebar
+
+If you are using the `default` editor in your `VisType` visualization definition,
+remove the `editor: 'default'` param from it. The default editor controller
+will be used by default.
+
+The default editor controller receives an `optionsTemplate` or `optionTabs` parameter.
+These tabs should be React components:
+
+```ts
+{
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    editorConfig: {
+       optionsTemplate: MyReactComponent // or if multiple tabs are required:
+       optionTabs: [
+           { title: 'tab 3', editor: MyReactComponent }
+       ]
+    }
+  }
+```
+
+*via {pull}49864[#49864]*
+
+[discrete]
+==== [test] Consolidate top-level yarn scripts
+
+Over time Kibana has added a number of testing frameworks,
+but our top-level scripts have remained the same to avoid workflow changes.
+The current naming convention with the number of test options can leave room for ambiguity.
+
+You'll see two general changes:
+* docs will refer to the yarn script, giving us an abstraction to migrate
+frameworks out and avoid workflow interruptions (`grunt/gulp -> node scripts/*`)
+* test scripts now refer to the test runner, as opposed to the test
+type (`yarn test:server -> yarn test:mocha`)
+
+
+*via {pull}44679[#44679]*
