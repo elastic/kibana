@@ -29,20 +29,6 @@ export const WindowsEvents = React.memo(() => {
   }> = useMemo(
     () => [
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.api', {
-          defaultMessage: 'API',
-        }),
-        os: OS.windows,
-        protectionField: 'api',
-      },
-      {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.clr', {
-          defaultMessage: 'CLR',
-        }),
-        os: OS.windows,
-        protectionField: 'clr',
-      },
-      {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.dllDriverLoad', {
           defaultMessage: 'DLL and Driver Load',
         }),
@@ -71,13 +57,6 @@ export const WindowsEvents = React.memo(() => {
         protectionField: 'network',
       },
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.powershell', {
-          defaultMessage: 'Powershell',
-        }),
-        os: OS.windows,
-        protectionField: 'powershell',
-      },
-      {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.process', {
           defaultMessage: 'Process',
         }),
@@ -97,13 +76,6 @@ export const WindowsEvents = React.memo(() => {
         }),
         os: OS.windows,
         protectionField: 'security',
-      },
-      {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.wmi', {
-          defaultMessage: 'WMI',
-        }),
-        os: OS.windows,
-        protectionField: 'wmi',
       },
     ],
     []

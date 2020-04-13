@@ -120,17 +120,13 @@ export interface PolicyDetailsState {
 export interface PolicyConfig {
   windows: {
     events: {
-      api: boolean;
-      clr: boolean;
       dll_and_driver_load: boolean;
       dns: boolean;
       file: boolean;
       network: boolean;
-      powershell: boolean;
       process: boolean;
       registry: boolean;
       security: boolean;
-      wmi: boolean;
     };
     malware: MalwareFields;
     logging: {

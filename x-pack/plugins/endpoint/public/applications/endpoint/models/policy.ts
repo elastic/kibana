@@ -15,17 +15,13 @@ export const generatePolicy = (): PolicyConfig => {
   return {
     windows: {
       events: {
-        api: true,
-        clr: true,
         dll_and_driver_load: true,
         dns: true,
         file: true,
         network: true,
-        powershell: true,
         process: true,
         registry: true,
         security: true,
-        wmi: true,
       },
       malware: {
         mode: ProtectionModes.prevent,
