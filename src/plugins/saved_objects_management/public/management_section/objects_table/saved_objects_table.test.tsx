@@ -236,7 +236,7 @@ describe('SavedObjectsTable', () => {
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
         _id: obj.id,
-        _type: obj._type,
+        _type: obj.type,
         _source: {},
       }));
 
@@ -273,7 +273,7 @@ describe('SavedObjectsTable', () => {
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
         _id: obj.id,
-        _type: obj._type,
+        _type: obj.type,
         _source: {},
       }));
 
