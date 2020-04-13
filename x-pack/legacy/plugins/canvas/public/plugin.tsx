@@ -18,7 +18,7 @@ import { legacyRegistries } from './legacy_plugin_support';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { initFunctions } from './functions';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
-export { CoreStart };
+export { CoreStart, CoreSetup };
 
 /**
  * These are the private interfaces for the services your plugin depends on.
