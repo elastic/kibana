@@ -5,13 +5,12 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { ISource } from './source';
 
 type SourceRegistryEntry = {
   ConstructorFunction: new (
-    sourceDescriptor: AbstractSourceDescriptor,
-    inspectorAdapters?: object
+    sourceDescriptor: any, // this is the source-descriptor that corresponds specifically to the particular ISource instance
+    inspectorAdapters: unknown
   ) => ISource;
   type: string;
 };

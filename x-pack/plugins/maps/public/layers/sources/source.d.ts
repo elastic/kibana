@@ -3,12 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { AbstractSourceDescriptor, LayerDescriptor } from '../../../common/descriptor_types';
 import { ILayer } from '../layer';
 
+export type ImmutableSourceProperty = {
+  label: string;
+  value: string;
+};
+
+export type Attribution = {
+  url: string;
+  label: string;
+};
+
 export interface ISource {
-  createDefaultLayer(options?: LayerDescriptor): ILayer;
+  createDefaultLayer(): ILayer;
   destroy(): void;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): object;
@@ -18,6 +29,8 @@ export interface ISource {
   isQueryAware(): boolean;
   isRefreshTimerAware(): Promise<boolean>;
   isTimeAware(): Promise<boolean>;
+  getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
+  getAttributions(): Promise<Attribution[]>;
 }
 
 export class AbstractSource implements ISource {
@@ -25,7 +38,7 @@ export class AbstractSource implements ISource {
   constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters?: object);
 
   destroy(): void;
-  createDefaultLayer(options?: LayerDescriptor): ILayer;
+  createDefaultLayer(options?: LayerDescriptor, mapColors?: string[]): ILayer;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): object;
   isFieldAware(): boolean;
@@ -34,5 +47,6 @@ export class AbstractSource implements ISource {
   isQueryAware(): boolean;
   isRefreshTimerAware(): Promise<boolean>;
   isTimeAware(): Promise<boolean>;
-  getFieldNames(): string[];
+  getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
+  getAttributions(): Promise<Attribution[]>;
 }

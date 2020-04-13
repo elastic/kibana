@@ -24,7 +24,6 @@ describe('createNotifications', () => {
       enabled: true,
       interval: '',
       name: '',
-      tags: [],
     });
 
     expect(alertsClient.create).toHaveBeenCalledWith(
@@ -52,7 +51,6 @@ describe('createNotifications', () => {
       enabled: true,
       interval: '',
       name: '',
-      tags: [],
     });
 
     expect(alertsClient.create).toHaveBeenCalledWith(

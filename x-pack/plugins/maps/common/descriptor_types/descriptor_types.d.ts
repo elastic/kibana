@@ -9,6 +9,11 @@ import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER, SCALING_TYPES } from 
 import { VectorStyleDescriptor } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 
+export type AttributionDescriptor = {
+  attributionText?: string;
+  attributionUrl?: string;
+};
+
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
@@ -84,6 +89,11 @@ export type WMSSourceDescriptor = {
   attributionUrl: string;
 };
 
+export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
+  AttributionDescriptor & {
+    urlTemplate: string;
+  };
+
 export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & {
   urlTemplate: string;
   layerName: string;
@@ -96,14 +106,20 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & 
   maxZoom: number;
 };
 
-export type XYZTMSSourceDescriptor = AbstractSourceDescriptor & {
-  urlTemplate: string;
-};
-
 export type JoinDescriptor = {
   leftField: string;
   right: ESTermSourceDescriptor;
 };
+
+export type SourceDescriptor =
+  | XYZTMSSourceDescriptor
+  | WMSSourceDescriptor
+  | KibanaTilemapSourceDescriptor
+  | KibanaRegionmapSourceDescriptor
+  | ESTermSourceDescriptor
+  | ESSearchSourceDescriptor
+  | ESGeoGridSourceDescriptor
+  | EMSFileSourceDescriptor;
 
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
@@ -114,7 +130,7 @@ export type LayerDescriptor = {
   label?: string;
   minZoom?: number;
   maxZoom?: number;
-  sourceDescriptor: AbstractSourceDescriptor;
+  sourceDescriptor: SourceDescriptor;
   type?: string;
   visible?: boolean;
 };

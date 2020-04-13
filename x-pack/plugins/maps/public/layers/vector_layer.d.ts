@@ -8,7 +8,6 @@
 import { AbstractLayer } from './layer';
 import { IVectorSource } from './sources/vector_source';
 import {
-  LayerDescriptor,
   MapFilters,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
@@ -33,10 +32,14 @@ export interface IVectorLayer extends ILayer {
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
-  readonly _style: IVectorStyle;
-  static createDescriptor(options: LayerDescriptor, mapColors: string[]): VectorLayerDescriptor;
+  static createDescriptor(
+    options: Partial<VectorLayerDescriptor>,
+    mapColors?: string[]
+  ): VectorLayerDescriptor;
 
   protected readonly _source: IVectorSource;
+  protected readonly _style: IVectorStyle;
+
   constructor(options: VectorLayerArguments);
   getLayerTypeIconName(): string;
   getFields(): Promise<IField[]>;
@@ -53,6 +56,11 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     style: IVectorStyle
   ): Promise<void>;
   syncLayerWithMB(mbMap: unknown): void;
+  _getSearchFilters(
+    dataFilters: MapFilters,
+    source: IVectorSource,
+    style: IVectorStyle
+  ): VectorSourceRequestMeta;
   _syncData(syncContext: SyncContext, source: IVectorSource, style: IVectorStyle): Promise<void>;
   ownsMbSourceId(sourceId: string): boolean;
   ownsMbLayerId(sourceId: string): boolean;
