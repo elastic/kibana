@@ -46,7 +46,9 @@ export const getCasesColumns = (
     render: (theCase: Case) => {
       if (theCase.id != null && theCase.title != null) {
         const caseDetailsLinkComponent = (
-          <CaseDetailsLink detailName={theCase.id}>{theCase.title}</CaseDetailsLink>
+          <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+            {theCase.title}
+          </CaseDetailsLink>
         );
         return theCase.status === 'open' ? (
           caseDetailsLinkComponent
@@ -71,11 +73,11 @@ export const getCasesColumns = (
           <>
             <EuiAvatar
               className="userAction__circle"
-              name={createdBy.fullName ? createdBy.fullName : createdBy.username}
+              name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
               size="s"
             />
             <Spacer data-test-subj="case-table-column-createdBy">
-              {createdBy.fullName ?? createdBy.username ?? 'N/A'}
+              {createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
             </Spacer>
           </>
         );
@@ -112,7 +114,9 @@ export const getCasesColumns = (
     name: i18n.COMMENTS,
     sortable: true,
     render: (totalComment: Case['totalComment']) =>
-      renderStringField(`${totalComment}`, `case-table-column-commentCount`),
+      totalComment != null
+        ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
+        : getEmptyTagValue(),
   },
   filterStatus === 'open'
     ? {
@@ -148,7 +152,7 @@ export const getCasesColumns = (
         },
       },
   {
-    name: 'ServiceNow Incident',
+    name: i18n.SERVICENOW_INCIDENT,
     render: (theCase: Case) => {
       if (theCase.id != null) {
         return <ServiceNowColumn theCase={theCase} />;
@@ -157,7 +161,7 @@ export const getCasesColumns = (
     },
   },
   {
-    name: 'Actions',
+    name: i18n.ACTIONS,
     actions,
   },
 ];
@@ -166,7 +170,7 @@ interface Props {
   theCase: Case;
 }
 
-const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
+export const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
   const handleRenderDataToPush = useCallback(() => {
     const lastCaseUpdate = theCase.updatedAt != null ? new Date(theCase.updatedAt) : null;
     const lastCasePush =
@@ -184,10 +188,13 @@ const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
           data-test-subj={`case-table-column-external`}
           href={theCase.externalService?.externalUrl}
           target="_blank"
+          aria-label={i18n.SERVICENOW_LINK_ARIA}
         >
           {theCase.externalService?.externalTitle}
         </EuiLink>
-        {hasDataToPush ? i18n.REQUIRES_UPDATE : i18n.UP_TO_DATE}
+        {hasDataToPush
+          ? renderStringField(i18n.REQUIRES_UPDATE, `case-table-column-external-requiresUpdate`)
+          : renderStringField(i18n.UP_TO_DATE, `case-table-column-external-upToDate`)}
       </p>
     );
   }, [theCase]);

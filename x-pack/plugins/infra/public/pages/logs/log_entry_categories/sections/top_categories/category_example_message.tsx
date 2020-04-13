@@ -34,12 +34,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   return (
     <LogEntryRowWrapper scale={exampleMessageScale}>
       <LogEntryColumn {...columnWidths[timestampColumnId]}>
-        <LogEntryTimestampColumn
-          format={exampleTimestampFormat}
-          isHighlighted={false}
-          isHovered={false}
-          time={timestamp}
-        />
+        <LogEntryTimestampColumn format={exampleTimestampFormat} time={timestamp} />
       </LogEntryColumn>
       <LogEntryColumn {...columnWidths[messageColumnId]}>
         <LogEntryMessageColumn
@@ -48,8 +43,6 @@ export const CategoryExampleMessage: React.FunctionComponent<{
             message: [{ field: 'message', value: message, highlights: [] }],
           }}
           highlights={noHighlights}
-          isHovered={false}
-          isHighlighted={false}
           isActiveHighlight={false}
           wrapMode="none"
         />
@@ -63,8 +56,6 @@ export const CategoryExampleMessage: React.FunctionComponent<{
             highlights: [],
           }}
           highlights={noHighlights}
-          isHovered={false}
-          isHighlighted={false}
           isActiveHighlight={false}
           wrapMode="none"
         />

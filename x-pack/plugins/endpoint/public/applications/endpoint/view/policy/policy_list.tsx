@@ -23,8 +23,8 @@ import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../../store/policy_list';
 import { PolicyData } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { PageView } from '../../components/page_view';
-import { LinkToApp } from '../../components/link_to_app';
+import { PageView } from '../components/page_view';
+import { LinkToApp } from '../components/link_to_app';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -151,6 +151,7 @@ export const PolicyList = React.memo(() => {
 
   return (
     <PageView
+      viewType="list"
       data-test-subj="policyListPage"
       headerLeft={i18n.translate('xpack.endpoint.policyList.viewTitle', {
         defaultMessage: 'Policies',

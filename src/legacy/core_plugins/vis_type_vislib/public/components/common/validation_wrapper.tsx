@@ -19,7 +19,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 
-import { VisOptionsProps } from '../../../../vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 
 export interface ValidationVisOptionsProps<T> extends VisOptionsProps<T> {
   setMultipleValidity(paramName: string, isValid: boolean): void;

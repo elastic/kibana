@@ -8,7 +8,7 @@ import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
 import { ListsDefaultArraySchema } from './routes/schemas/types/lists_default_array';
-import { RuleAlertAction } from '../../../common/detection_engine/types';
+import { RuleAlertAction, RuleType } from '../../../common/detection_engine/types';
 
 export type PartialFilter = Partial<Filter>;
 
@@ -28,7 +28,11 @@ export interface ThreatParams {
 // TODO: Eventually this whole RuleAlertParams will be replaced with io-ts. For now we can slowly strangle it out and reduce duplicate types
 // We don't have the input types defined through io-ts just yet but as we being introducing types from there we will more and more remove
 // types and share them between input and output schema but have an input Rule Schema and an output Rule Schema.
-export type RuleType = 'query' | 'saved_query' | 'machine_learning';
+
+export interface Meta {
+  [key: string]: {} | string | undefined | null;
+  kibana_siem_app_url?: string | undefined;
+}
 
 export interface RuleAlertParams {
   actions: RuleAlertAction[];
@@ -52,7 +56,7 @@ export interface RuleAlertParams {
   query: string | undefined | null;
   references: string[];
   savedId?: string | undefined | null;
-  meta: Record<string, {} | string> | undefined | null;
+  meta: Meta | undefined | null;
   severity: string;
   tags: string[];
   to: string;
@@ -61,7 +65,7 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: RuleType;
   version: number;
-  throttle: string | null;
+  throttle: string | undefined | null;
   lists: ListsDefaultArraySchema | null | undefined;
 }
 
@@ -119,7 +123,6 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
   immutable: boolean;
-  throttle: string | undefined | null;
 };
 
 export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {
@@ -146,3 +149,5 @@ export type CallWithRequest<T extends Record<string, any>, V> = (
   params: T,
   options?: CallAPIOptions
 ) => Promise<V>;
+
+export type RefreshTypes = false | 'wait_for';

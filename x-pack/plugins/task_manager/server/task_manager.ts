@@ -9,7 +9,7 @@ import { filter } from 'rxjs/operators';
 import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Option, none, some, map as mapOptional } from 'fp-ts/lib/Option';
+import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import {
   SavedObjectsSerializer,
   IScopedClusterClient,
@@ -156,8 +156,8 @@ export class TaskManager {
     this.events$.next(event);
   };
 
-  private attemptToRun(task: Option<string> = none) {
-    this.claimRequests$.next(task);
+  private attemptToRun(task: string) {
+    this.claimRequests$.next(some(task));
   }
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
@@ -280,9 +280,7 @@ export class TaskManager {
       ...options,
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
-    const result = await this.store.schedule(modifiedTask);
-    this.attemptToRun();
-    return result;
+    return await this.store.schedule(modifiedTask);
   }
 
   /**
@@ -298,7 +296,7 @@ export class TaskManager {
         .then(resolve)
         .catch(reject);
 
-      this.attemptToRun(some(taskId));
+      this.attemptToRun(taskId);
     });
   }
 
@@ -411,7 +409,7 @@ export async function claimAvailableTasks(
     }
   } else {
     performance.mark('claimAvailableTasks.noAvailableWorkers');
-    logger.info(
+    logger.debug(
       `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
     );
   }

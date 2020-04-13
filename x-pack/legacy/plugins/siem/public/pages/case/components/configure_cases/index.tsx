@@ -84,7 +84,11 @@ const actionTypes: ActionType[] = [
   },
 ];
 
-const ConfigureCasesComponent: React.FC = () => {
+interface ConfigureCasesComponentProps {
+  userCanCrud: boolean;
+}
+
+const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
   const search = useGetUrlSearch(navTabs.case);
   const { http, triggers_actions_ui, notifications, application } = useKibana().services;
 
@@ -136,6 +140,7 @@ const ConfigureCasesComponent: React.FC = () => {
     setClosureType,
     setCurrentConfiguration,
   });
+
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
 
   // ActionsConnectorsContextProvider reloadConnectors prop expects a Promise<void>.
@@ -247,7 +252,12 @@ const ConfigureCasesComponent: React.FC = () => {
     <FormWrapper>
       {!connectorIsValid && (
         <SectionWrapper style={{ marginTop: 0 }}>
-          <EuiCallOut title={i18n.WARNING_NO_CONNECTOR_TITLE} color="warning" iconType="help">
+          <EuiCallOut
+            title={i18n.WARNING_NO_CONNECTOR_TITLE}
+            color="warning"
+            iconType="help"
+            data-test-subj="configure-cases-warning-callout"
+          >
             {i18n.WARNING_NO_CONNECTOR_MESSAGE}
           </EuiCallOut>
         </SectionWrapper>
@@ -255,7 +265,7 @@ const ConfigureCasesComponent: React.FC = () => {
       <SectionWrapper>
         <Connectors
           connectors={connectors ?? []}
-          disabled={persistLoading || isLoadingConnectors}
+          disabled={persistLoading || isLoadingConnectors || !userCanCrud}
           isLoading={isLoadingConnectors}
           onChangeConnector={setConnectorId}
           handleShowAddFlyout={onClickAddConnector}
@@ -265,25 +275,27 @@ const ConfigureCasesComponent: React.FC = () => {
       <SectionWrapper>
         <ClosureOptions
           closureTypeSelected={closureType}
-          disabled={persistLoading || isLoadingConnectors || connectorId === 'none'}
+          disabled={persistLoading || isLoadingConnectors || connectorId === 'none' || !userCanCrud}
           onChangeClosureType={setClosureType}
         />
       </SectionWrapper>
       <SectionWrapper>
         <Mapping
           disabled
-          updateConnectorDisabled={updateConnectorDisabled}
+          updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
           mapping={mapping}
           onChangeMapping={setMapping}
           setEditFlyoutVisibility={onClickUpdateConnector}
         />
       </SectionWrapper>
       {actionBarVisible && (
-        <EuiBottomBar>
+        <EuiBottomBar data-test-subj="case-configure-action-bottom-bar">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
-                <EuiText>{i18n.UNSAVED_CHANGES(totalConfigurationChanges)}</EuiText>
+                <EuiText data-test-subj="case-configure-action-bottom-bar-total-changes">
+                  {i18n.UNSAVED_CHANGES(totalConfigurationChanges)}
+                </EuiText>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -294,8 +306,9 @@ const ConfigureCasesComponent: React.FC = () => {
                     iconType="cross"
                     isDisabled={isLoadingAny}
                     isLoading={persistLoading}
-                    aria-label="Cancel"
+                    aria-label={i18n.CANCEL}
                     href={getCaseUrl(search)}
+                    data-test-subj="case-configure-action-bottom-bar-cancel-button"
                   >
                     {i18n.CANCEL}
                   </EuiButtonEmpty>
@@ -305,10 +318,11 @@ const ConfigureCasesComponent: React.FC = () => {
                     fill
                     color="secondary"
                     iconType="save"
-                    aria-label="Save"
+                    aria-label={i18n.SAVE_CHANGES}
                     isDisabled={isLoadingAny}
                     isLoading={persistLoading}
                     onClick={handleSubmit}
+                    data-test-subj="case-configure-action-bottom-bar-save-button"
                   >
                     {i18n.SAVE_CHANGES}
                   </EuiButton>

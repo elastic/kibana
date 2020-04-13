@@ -11,14 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { npSetup, npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 import { IIndexPattern } from 'src/plugins/data/public';
-import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  IContainer,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
 import { getIndexPatternService } from '../kibana_services';
+import {
+  EmbeddableFactoryDefinition,
+  IContainer,
+} from '../../../../../../src/plugins/embeddable/public';
 
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -29,28 +27,27 @@ import { getInitialLayers } from '../angular/get_initial_layers';
 import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 import '../angular/services/gis_map_saved_object_loader';
 import { bindSetupCoreAndPlugins, bindStartCoreAndPlugins } from '../plugin';
-import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
+// @ts-ignore
 import {
-  EventHandlers,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
+  bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
+  bindStartCoreAndPlugins as bindNpStartCoreAndPlugins,
+} from '../../../../../plugins/maps/public/plugin'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 
-export class MapEmbeddableFactory extends EmbeddableFactory {
+export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
-
+  savedObjectMetaData = {
+    name: i18n.translate('xpack.maps.mapSavedObjectLabel', {
+      defaultMessage: 'Map',
+    }),
+    type: MAP_SAVED_OBJECT_TYPE,
+    getIconForSavedObject: () => APP_ICON,
+  };
   constructor() {
-    super({
-      savedObjectMetaData: {
-        name: i18n.translate('xpack.maps.mapSavedObjectLabel', {
-          defaultMessage: 'Map',
-        }),
-        type: MAP_SAVED_OBJECT_TYPE,
-        getIconForSavedObject: () => APP_ICON,
-      },
-    });
     // Init required services. Necessary while in legacy
     bindSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
+    bindNpSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
     bindStartCoreAndPlugins(npStart.core, npStart.plugins);
+    bindNpStartCoreAndPlugins(npStart.core, npStart.plugins);
   }
 
   async isEditable() {
@@ -104,11 +101,11 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     return await savedObjectLoader.get(savedObjectId);
   }
 
-  async createFromSavedObject(
+  createFromSavedObject = async (
     savedObjectId: string,
     input: MapEmbeddableInput,
     parent?: IContainer
-  ) {
+  ) => {
     const savedMap = await this._fetchSavedMap(savedObjectId);
     const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
@@ -136,39 +133,26 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     }
 
     return embeddable;
-  }
+  };
 
-  async createFromState(
-    state: { title?: string; layerList?: unknown[] },
-    input: MapEmbeddableInput,
-    parent: IContainer,
-    renderTooltipContent: RenderToolTipContent,
-    eventHandlers: EventHandlers
-  ) {
-    const layerList = state && state.layerList ? state.layerList : getInitialLayers();
+  create = async (input: MapEmbeddableInput, parent?: IContainer) => {
+    const layerList = getInitialLayers();
     const indexPatterns = await this._getIndexPatterns(layerList);
 
     return new MapEmbeddable(
       {
         layerList,
-        title: state && state.title ? state.title : '',
+        title: input.title ?? '',
         indexPatterns,
         editable: false,
       },
       input,
-      parent,
-      renderTooltipContent,
-      eventHandlers
+      parent
     );
-  }
-
-  async create(input: MapEmbeddableInput) {
-    window.location.href = chrome.addBasePath(createMapPath(''));
-    return new ErrorEmbeddable(
-      'Maps can only be created with createFromSavedObject or createFromState',
-      input
-    );
-  }
+  };
 }
 
-setup.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+npSetup.plugins.embeddable.registerEmbeddableFactory(
+  MAP_SAVED_OBJECT_TYPE,
+  new MapEmbeddableFactory()
+);

@@ -5,9 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ServerFacade } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger, startTrace } from '../../../../server/lib';
+import { LevelLogger } from '../../../../server/lib';
+import { CaptureConfig } from '../../../../server/types';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
 
@@ -23,14 +24,13 @@ const getCompletedItemsCount = ({ renderCompleteSelector }: SelectorArgs) => {
  * 3. Wait for the render complete event to be fired once for each item
  */
 export const waitForVisualizations = async (
-  server: ServerFacade,
+  captureConfig: CaptureConfig,
   browser: HeadlessBrowser,
   itemsCount: number,
   layout: LayoutInstance,
   logger: LevelLogger
 ): Promise<void> => {
   const endTrace = startTrace('wait_for_visualizations', 'wait');
-  const config = server.config();
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
   logger.debug(
@@ -46,7 +46,7 @@ export const waitForVisualizations = async (
         fn: getCompletedItemsCount,
         args: [{ renderCompleteSelector }],
         toEqual: itemsCount,
-        timeout: config.get('xpack.reporting.capture.timeouts.renderComplete'),
+        timeout: captureConfig.timeouts.renderComplete,
       },
       { context: CONTEXT_WAITFORELEMENTSTOBEINDOM },
       logger
