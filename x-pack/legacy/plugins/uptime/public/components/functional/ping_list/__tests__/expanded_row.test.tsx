@@ -14,6 +14,7 @@ describe('PingListExpandedRow', () => {
   let ping: Ping;
   beforeEach(() => {
     ping = {
+      docId: 'fdeio12',
       timestamp: '19290310',
       monitor: {
         duration: {
