@@ -5,11 +5,13 @@
  */
 
 import _ from 'lodash';
-import { ES_GEO_GRID, ES_PEW_PEW, ES_SEARCH } from '../constants';
+import { SOURCE_TYPES } from '../constants';
 
 function isEsSource(layerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
-  return [ES_GEO_GRID, ES_PEW_PEW, ES_SEARCH].includes(sourceType);
+  return [SOURCE_TYPES.ES_GEO_GRID, SOURCE_TYPES.ES_PEW_PEW, SOURCE_TYPES.ES_SEARCH].includes(
+    sourceType
+  );
 }
 
 // Migration to move applyGlobalQuery from layer to sources.
