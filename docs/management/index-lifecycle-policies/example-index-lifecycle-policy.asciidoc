@@ -169,7 +169,7 @@ Policies*
 NOTE: If you initially used the default {filebeat} {ilm-init} policy, you will
 see a notice that the template already has a policy associated with it. Confirm
 that you want to overwrite that configuration.
-
++
 TIP: When you change the policy associated with the index template, the active
 index will continue to use the policy it was associated with at index creation
 unless you manually update it. The next new index will use the updated policy.
