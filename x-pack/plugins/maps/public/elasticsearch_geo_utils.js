@@ -456,8 +456,15 @@ export function extractFeaturesFromFilters(filters) {
         const distance = parseFloat(distanceSplit[0]);
         const circleFeature = turfCircle(filter.geo_distance[filter.meta.key], distance);
         geometry = circleFeature.geometry;
+      } else if (
+        filter.geo_shape &&
+        filter.geo_shape[filter.meta.key] &&
+        filter.geo_shape[filter.meta.key].shape
+      ) {
+        geometry = filter.geo_shape[filter.meta.key].shape;
       } else {
         // do not know how to convert spatial filter to geometry
+        // this includes pre-indexed shapes
         return;
       }
 

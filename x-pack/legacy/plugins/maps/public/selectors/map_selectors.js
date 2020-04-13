@@ -185,42 +185,43 @@ export const getDataFilters = createSelector(
   }
 );
 
-export const getSpatialFiltersLayer = createSelector(
-  getFilters,
-  (filters) => {
-    const featureCollection = {
-      type: 'FeatureCollection',
-      features: [
-        {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [0, 0]
-          },
-          "properties": {
-            "name": "null island",
-            "another_prop": "something else interesting"
-          }
-        }
-      ],
-    };
-    const geoJsonSourceDescriptor = GeojsonFileSource.createDescriptor(featureCollection, 'spatialFilters');
-    return new VectorLayer({
-      layerDescriptor: {
-        id: 'spatialFilters',
-        visible: true,
-        type: LAYER_TYPE.VECTOR,
-        __dataRequests: [
-          {
-            dataId: SOURCE_DATA_ID_ORIGIN,
-            data: featureCollection
-          }
-        ]
+export const getSpatialFiltersLayer = createSelector(getFilters, filters => {
+  console.log(JSON.stringify(filters, null, ' '));
+  const featureCollection = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [0, 0],
+        },
+        properties: {
+          name: 'null island',
+          another_prop: 'something else interesting',
+        },
       },
-      source: new GeojsonFileSource(geoJsonSourceDescriptor),
-    });
-  }
-);
+    ],
+  };
+  const geoJsonSourceDescriptor = GeojsonFileSource.createDescriptor(
+    featureCollection,
+    'spatialFilters'
+  );
+  return new VectorLayer({
+    layerDescriptor: {
+      id: 'spatialFilters',
+      visible: true,
+      type: LAYER_TYPE.VECTOR,
+      __dataRequests: [
+        {
+          dataId: SOURCE_DATA_ID_ORIGIN,
+          data: featureCollection,
+        },
+      ],
+    },
+    source: new GeojsonFileSource(geoJsonSourceDescriptor),
+  });
+});
 
 export const getLayerList = createSelector(
   getLayerListRaw,
