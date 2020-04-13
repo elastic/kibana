@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { IFieldType } from '../../../../../../../../../plugins/data/public';
 
-export function getFieldFormat(indexPattern, fieldName) {
-  return indexPattern && fieldName
-    ? get(indexPattern, ['fieldFormatMap', fieldName, 'type', 'title'])
-    : '';
+export interface IndexedFieldItem extends IFieldType {
+  info: string[];
+  excluded: boolean;
 }

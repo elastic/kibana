@@ -19,8 +19,8 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-
-import { IndexedFieldsTable } from '../indexed_fields_table';
+import { IndexPatternField, IIndexPattern } from '../../../../../../../../../plugins/data/public';
+import { IndexedFieldsTable } from './indexed_fields_table';
 
 jest.mock('@elastic/eui', () => ({
   EuiFlexGroup: 'eui-flex-group',
@@ -29,7 +29,7 @@ jest.mock('@elastic/eui', () => ({
   EuiInMemoryTable: 'eui-in-memory-table',
 }));
 
-jest.mock('../components/table', () => ({
+jest.mock('./components/table', () => ({
   // Note: this seems to fix React complaining about non lowercase attributes
   Table: () => {
     return 'table';
@@ -37,27 +37,37 @@ jest.mock('../components/table', () => ({
 }));
 
 const helpers = {
-  redirectToRoute: () => {},
+  redirectToRoute: (obj: any, route: string) => {},
+  getFieldInfo: () => [],
 };
 
 const fields = [
-  { name: 'Elastic', displayName: 'Elastic', searchable: true },
+  {
+    name: 'Elastic',
+    displayName: 'Elastic',
+    searchable: true,
+    type: 'name',
+  },
   { name: 'timestamp', displayName: 'timestamp', type: 'date' },
   { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },
-];
+] as IndexPatternField[];
 
-const indexPattern = {
+const indexPattern = ({
   getNonScriptedFields: () => fields,
-};
+} as unknown) as IIndexPattern;
 
 describe('IndexedFieldsTable', () => {
-  it('should render normally', async () => {
+  test('should render normally', async () => {
     const component = shallow(
       <IndexedFieldsTable
         fields={fields}
         indexPattern={indexPattern}
         helpers={helpers}
-        fieldWildcardMatcher={() => {}}
+        fieldWildcardMatcher={() => {
+          return () => false;
+        }}
+        indexedFieldTypeFilter=""
+        fieldFilter=""
       />
     );
 
@@ -67,13 +77,17 @@ describe('IndexedFieldsTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should filter based on the query bar', async () => {
+  test('should filter based on the query bar', async () => {
     const component = shallow(
       <IndexedFieldsTable
         fields={fields}
         indexPattern={indexPattern}
         helpers={helpers}
-        fieldWildcardMatcher={() => {}}
+        fieldWildcardMatcher={() => {
+          return () => false;
+        }}
+        indexedFieldTypeFilter=""
+        fieldFilter=""
       />
     );
 
@@ -84,13 +98,17 @@ describe('IndexedFieldsTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should filter based on the type filter', async () => {
+  test('should filter based on the type filter', async () => {
     const component = shallow(
       <IndexedFieldsTable
         fields={fields}
         indexPattern={indexPattern}
         helpers={helpers}
-        fieldWildcardMatcher={() => {}}
+        fieldWildcardMatcher={() => {
+          return () => false;
+        }}
+        indexedFieldTypeFilter=""
+        fieldFilter=""
       />
     );
 
