@@ -669,7 +669,6 @@ export class VectorLayer extends AbstractLayer {
       this._setMbSymbolProperties(mbMap, options);
     }
 
-    console.log('set layer zoom range', this._descriptor.minZoom, this._descriptor.maxZoom);
     this.syncVisibilityWithMb(mbMap, markerLayerId);
     mbMap.setLayerZoomRange(markerLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     if (markerLayerId !== textLayerId) {
