@@ -51,7 +51,8 @@ const openModalWithJsonContent = ({ find, waitFor }: TestBed) => async (json: an
   });
 };
 
-describe('<LoadMappingsProvider />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/59030
+describe.skip('<LoadMappingsProvider />', () => {
   test('it should forward valid mapping definition', async () => {
     const mappingsToLoad = {
       properties: {

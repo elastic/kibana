@@ -271,19 +271,24 @@ export class Plugin {
       catalogue: ['monitoring'],
       privileges: null,
       reserved: {
-        privilege: {
-          api: ['monitoring'],
-          app: ['monitoring', 'kibana'],
-          catalogue: ['monitoring'],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
         }),
+        privileges: [
+          {
+            id: 'monitoring',
+            privilege: {
+              api: ['monitoring'],
+              app: ['monitoring', 'kibana'],
+              catalogue: ['monitoring'],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
+          },
+        ],
       },
     });
   }
