@@ -4,25 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ActionLicense,
-  AllCases,
-  BulkUpdateStatus,
-  Case,
-  CasesStatus,
-  CaseUserActions,
-  Comment,
-  FetchCasesProps,
-  SortFieldCase,
-} from './types';
+import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
 import {
   CommentResponse,
-  CaseExternalServiceRequest,
-  CasePatchRequest,
-  CasePostRequest,
-  CommentRequest,
-  ServiceConnectorCaseParams,
   ServiceConnectorCaseResponse,
   Status,
   UserAction,
@@ -137,10 +122,10 @@ export const casesStatusSnake: CasesStatusResponse = {
 
 export const reporters: string[] = ['alexis', 'kim', 'maria', 'steph'];
 export const respReporters = [
-  { username: 'alexis' },
-  { username: 'kim' },
-  { username: 'maria' },
-  { username: 'steph' },
+  { username: 'alexis', full_name: null, email: null },
+  { username: 'kim', full_name: null, email: null },
+  { username: 'maria', full_name: null, email: null },
+  { username: 'steph', full_name: null, email: null },
 ];
 export const push = {
   connector_id: 'connector_id',
