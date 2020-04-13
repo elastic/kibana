@@ -1,0 +1,379 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
+Array [
+  <div
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={0}
+  />,
+  <div
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={1}
+  />,
+  <div
+    data-focus-lock-disabled={false}
+    onBlur={[Function]}
+    onFocus={[Function]}
+  >
+    <div
+      className="euiModal canvasModal--fixedSize"
+      onKeyDown={[Function]}
+      style={
+        Object {
+          "maxWidth": "1000px",
+        }
+      }
+      tabIndex={0}
+    >
+      <button
+        aria-label="Closes this modal window"
+        className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+        onClick={[Function]}
+        type="button"
+      >
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="cross"
+          size="m"
+        />
+      </button>
+      <div
+        className="euiModal__flex"
+      >
+        <div
+          className="euiModalHeader canvasAssetManager__modalHeader"
+        >
+          <div
+            className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
+          >
+            My elements
+          </div>
+        </div>
+        <div
+          className="euiModalBody"
+          style={
+            Object {
+              "paddingRight": "1px",
+            }
+          }
+        >
+          <div
+            className="euiModalBody__overflow"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--fullWidth"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  className="euiFieldSearch euiFieldSearch--fullWidth"
+                  onChange={[Function]}
+                  onKeyUp={[Function]}
+                  placeholder="Find element"
+                  type="search"
+                  value=""
+                />
+                <div
+                  className="euiFormControlLayoutIcons"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <div
+                      aria-hidden="true"
+                      className="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="search"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              className="euiSpacer euiSpacer--l"
+            />
+            <div
+              className="euiEmptyPrompt"
+            >
+              <div
+                color="subdued"
+                data-euiicon-type="vector"
+                size="xxl"
+              />
+              <div
+                className="euiSpacer euiSpacer--s"
+              />
+              <span
+                className="euiTextColor euiTextColor--subdued"
+              >
+                <h2
+                  className="euiTitle euiTitle--small"
+                >
+                  Add new elements
+                </h2>
+                <div
+                  className="euiSpacer euiSpacer--m"
+                />
+                <div
+                  className="euiText euiText--medium"
+                >
+                  <p>
+                    Group and save workpad elements to create new elements
+                  </p>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiModalFooter"
+        >
+          <button
+            className="euiButton euiButton--primary euiButton--small"
+            data-test-subj="saved-elements-modal-close-button"
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Close
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={0}
+  />,
+]
+`;
+
+exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
+Array [
+  <div
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={0}
+  />,
+  <div
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={1}
+  />,
+  <div
+    data-focus-lock-disabled={false}
+    onBlur={[Function]}
+    onFocus={[Function]}
+  >
+    <div
+      className="euiModal canvasModal--fixedSize"
+      onKeyDown={[Function]}
+      style={
+        Object {
+          "maxWidth": "1000px",
+        }
+      }
+      tabIndex={0}
+    >
+      <button
+        aria-label="Closes this modal window"
+        className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+        onClick={[Function]}
+        type="button"
+      >
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="cross"
+          size="m"
+        />
+      </button>
+      <div
+        className="euiModal__flex"
+      >
+        <div
+          className="euiModalHeader canvasAssetManager__modalHeader"
+        >
+          <div
+            className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
+          >
+            My elements
+          </div>
+        </div>
+        <div
+          className="euiModalBody"
+          style={
+            Object {
+              "paddingRight": "1px",
+            }
+          }
+        >
+          <div
+            className="euiModalBody__overflow"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--fullWidth"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  className="euiFieldSearch euiFieldSearch--fullWidth"
+                  onChange={[Function]}
+                  onKeyUp={[Function]}
+                  placeholder="Find element"
+                  type="search"
+                  value=""
+                />
+                <div
+                  className="euiFormControlLayoutIcons"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <div
+                      aria-hidden="true"
+                      className="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="search"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              className="euiSpacer euiSpacer--l"
+            />
+            <div
+              className="euiEmptyPrompt"
+            >
+              <div
+                color="subdued"
+                data-euiicon-type="vector"
+                size="xxl"
+              />
+              <div
+                className="euiSpacer euiSpacer--s"
+              />
+              <span
+                className="euiTextColor euiTextColor--subdued"
+              >
+                <h2
+                  className="euiTitle euiTitle--small"
+                >
+                  Add new elements
+                </h2>
+                <div
+                  className="euiSpacer euiSpacer--m"
+                />
+                <div
+                  className="euiText euiText--medium"
+                >
+                  <p>
+                    Group and save workpad elements to create new elements
+                  </p>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiModalFooter"
+        >
+          <button
+            className="euiButton euiButton--primary euiButton--small"
+            data-test-subj="saved-elements-modal-close-button"
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Close
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={0}
+  />,
+]
+`;
