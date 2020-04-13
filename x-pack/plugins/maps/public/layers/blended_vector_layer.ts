@@ -34,6 +34,7 @@ import {
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
+  VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
@@ -147,7 +148,10 @@ function getClusterStyleDescriptor(
 export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   static type = LAYER_TYPE.BLENDED_VECTOR;
 
-  static createDescriptor(options: VectorLayerArguments, mapColors: string[]) {
+  static createDescriptor(
+    options: VectorLayerDescriptor,
+    mapColors: string[]
+  ): VectorLayerDescriptor {
     const layerDescriptor = VectorLayer.createDescriptor(options, mapColors);
     layerDescriptor.type = BlendedVectorLayer.type;
     return layerDescriptor;
