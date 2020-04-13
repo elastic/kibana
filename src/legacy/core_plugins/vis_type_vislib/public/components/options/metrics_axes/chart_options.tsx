@@ -25,7 +25,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { Vis } from '../../../../../../../plugins/visualizations/public';
 import { SeriesParam, ValueAxis } from '../../../types';
 import { ChartTypes } from '../../../utils/collections';
-import { SelectOption } from '../../common';
+import { SelectOption } from '../../../../../../../plugins/charts/public';
 import { LineOptions } from './line_options';
 import { SetParamByIndex, ChangeValueAxis } from './';
 
