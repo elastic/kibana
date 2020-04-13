@@ -18,6 +18,8 @@ import { HeatmapLayer } from '../../../../../plugins/maps/public/layers/heatmap_
 import { BlendedVectorLayer } from '../../../../../plugins/maps/public/layers/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getUiSettings } from '../../../../../plugins/maps/public/kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import {
   copyPersistentState,
@@ -30,7 +32,14 @@ import { InnerJoin } from '../../../../../plugins/maps/public/layers/joins/inner
 import { getSourceByType } from '../../../../../plugins/maps/public/layers/sources/source_registry';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { GeojsonFileSource } from '../../../../../plugins/maps/public/layers/sources/client_file_source';
-import { LAYER_TYPE, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import {
+  LAYER_TYPE,
+  SOURCE_DATA_ID_ORIGIN,
+  STYLE_TYPE,
+  VECTOR_STYLES,
+} from '../../common/constants';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { extractFeaturesFromFilters } from '../../../../../plugins/maps/public/elasticsearch_geo_utils';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -186,31 +195,22 @@ export const getDataFilters = createSelector(
 );
 
 export const getSpatialFiltersLayer = createSelector(getFilters, filters => {
-  console.log(JSON.stringify(filters, null, ' '));
   const featureCollection = {
     type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [0, 0],
-        },
-        properties: {
-          name: 'null island',
-          another_prop: 'something else interesting',
-        },
-      },
-    ],
+    features: extractFeaturesFromFilters(filters),
   };
   const geoJsonSourceDescriptor = GeojsonFileSource.createDescriptor(
     featureCollection,
     'spatialFilters'
   );
+
+  // TODO make alpha, fillColor, and lineColor configurable as map properties
+  const isDarkMode = getUiSettings().get('theme:darkMode', false);
   return new VectorLayer({
     layerDescriptor: {
       id: 'spatialFilters',
       visible: true,
+      alpha: 0.5,
       type: LAYER_TYPE.VECTOR,
       __dataRequests: [
         {
@@ -218,6 +218,22 @@ export const getSpatialFiltersLayer = createSelector(getFilters, filters => {
           data: featureCollection,
         },
       ],
+      style: {
+        properties: {
+          [VECTOR_STYLES.FILL_COLOR]: {
+            type: STYLE_TYPE.STATIC,
+            options: {
+              color: isDarkMode ? '#DCDCDC' : '#696969',
+            },
+          },
+          [VECTOR_STYLES.LINE_COLOR]: {
+            type: STYLE_TYPE.STATIC,
+            options: {
+              color: isDarkMode ? '#FFF' : '#000',
+            },
+          },
+        },
+      },
     },
     source: new GeojsonFileSource(geoJsonSourceDescriptor),
   });
