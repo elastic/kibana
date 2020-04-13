@@ -98,6 +98,8 @@ export interface PolicyListState {
   pageIndex: number;
   /** data is being retrieved from server */
   isLoading: boolean;
+  /** current location information */
+  location?: Immutable<EndpointAppLocation>;
 }
 
 /**
@@ -118,6 +120,14 @@ export interface PolicyDetailsState {
     success: boolean;
     error?: ServerApiError;
   };
+}
+
+/**
+ * The URL search params that are supported by the Policy List page view
+ */
+export interface PolicyListUrlSearchParams {
+  page_index: number;
+  page_size: number;
 }
 
 /**
