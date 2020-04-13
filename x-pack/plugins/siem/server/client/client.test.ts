@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SiemClient } from './client';
+import { SIGNALS_INDEX_KEY } from '../../common/constants';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
+import { SiemClient } from './client';
 
 describe('SiemClient', () => {
   describe('#signalsIndex', () => {
     it('returns the index scoped to the specified spaceId', () => {
-      let mockConfig = createMockConfig();
-      mockConfig = () => ({
-        get: jest.fn(() => 'mockSignalsIndex'),
-        has: jest.fn(),
-      });
+      const mockConfig = {
+        ...createMockConfig(),
+        [SIGNALS_INDEX_KEY]: 'mockSignalsIndex',
+      };
       const spaceId = 'fooSpace';
       const client = new SiemClient(spaceId, mockConfig);
 

@@ -6,6 +6,7 @@
 
 import { getImportTimelinesRequest } from './__mocks__/request_responses';
 import {
+  createMockConfig,
   serverMock,
   requestContextMock,
   requestMock,
@@ -14,7 +15,6 @@ import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { SecurityPluginSetup } from '../../../../../security/server';
 
 import {
-  mockConfig,
   mockUniqueParsedObjects,
   mockParsedObjects,
   mockDuplicateIdErrors,
@@ -24,7 +24,7 @@ import {
 } from './__mocks__/import_timelines';
 
 describe('import timelines', () => {
-  let config: jest.Mock;
+  let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
   let securitySetup: SecurityPluginSetup;
@@ -43,9 +43,7 @@ describe('import timelines', () => {
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;
-    config = jest.fn().mockImplementation(() => {
-      return mockConfig;
-    });
+    config = createMockConfig();
 
     securitySetup = ({
       authc: {

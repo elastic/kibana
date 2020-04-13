@@ -163,13 +163,6 @@ export const mockParsedTimelineObject = omit(
   mockUniqueParsedObjects[0]
 );
 
-export const mockConfig = {
-  get: () => {
-    return 100000000;
-  },
-  has: jest.fn(),
-};
-
 export const mockGetCurrentUser = {
   user: {
     username: 'mockUser',

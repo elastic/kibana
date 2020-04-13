@@ -16,6 +16,7 @@ import {
   serverMock,
   requestContextMock,
   requestMock,
+  createMockConfig,
 } from '../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { convertSavedObjectToSavedNote } from '../../note/saved_object';
@@ -41,14 +42,6 @@ jest.mock('../../pinned_event/saved_object', () => {
 describe('export timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  const config = jest.fn().mockImplementation(() => {
-    return {
-      get: () => {
-        return 100;
-      },
-      has: jest.fn(),
-    };
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -61,7 +54,7 @@ describe('export timelines', () => {
     ((convertSavedObjectToSavedPinnedEvent as unknown) as jest.Mock).mockReturnValue(
       mockPinnedEvents()
     );
-    exportTimelinesRoute(server.router, config);
+    exportTimelinesRoute(server.router, createMockConfig());
   });
 
   describe('status codes', () => {

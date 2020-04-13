@@ -5,6 +5,7 @@
  */
 
 import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import { SiemClientFactory } from './factory';
 import { SiemClient } from './client';
 
@@ -16,7 +17,7 @@ describe('SiemClientFactory', () => {
     it('constructs a client with the current spaceId', () => {
       const factory = new SiemClientFactory();
       const mockRequest = httpServerMock.createKibanaRequest();
-      factory.setup({ getSpaceId: () => 'mockSpace', config: jest.fn() });
+      factory.setup({ getSpaceId: () => 'mockSpace', config: createMockConfig() });
       factory.create(mockRequest);
 
       expect(mockClient).toHaveBeenCalledWith('mockSpace', expect.anything());
@@ -25,7 +26,7 @@ describe('SiemClientFactory', () => {
     it('constructs a client with the default spaceId if spaces are disabled', () => {
       const factory = new SiemClientFactory();
       const mockRequest = httpServerMock.createKibanaRequest();
-      factory.setup({ getSpaceId: undefined, config: jest.fn() });
+      factory.setup({ getSpaceId: undefined, config: createMockConfig() });
       factory.create(mockRequest);
 
       expect(mockClient).toHaveBeenCalledWith('default', expect.anything());

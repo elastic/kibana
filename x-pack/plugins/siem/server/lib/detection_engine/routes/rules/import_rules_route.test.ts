@@ -23,7 +23,6 @@ import {
 } from '../__mocks__/request_responses';
 import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { importRulesRoute } from './import_rules_route';
-import { DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
 import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
@@ -36,7 +35,7 @@ describe('import_rules_route', () => {
     unSetFeatureFlagsForTestsOnly();
   });
 
-  let config = createMockConfig();
+  let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -51,29 +50,9 @@ describe('import_rules_route', () => {
 
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+    config = createMockConfig();
     const hapiStream = buildHapiStream(ruleIdsToNdJsonString(['rule-1']));
     request = getImportRulesRequest(hapiStream);
-
-    config = () => ({
-      get: jest.fn(value => {
-        switch (value) {
-          case 'savedObjects.maxImportPayloadBytes': {
-            return 10000;
-          }
-          case 'savedObjects.maxImportExportSize': {
-            return 10000;
-          }
-          case 'xpack.siem.signalsIndex': {
-            return DEFAULT_SIGNALS_INDEX;
-          }
-          default: {
-            const dummyMock = jest.fn();
-            return dummyMock();
-          }
-        }
-      }),
-      has: jest.fn(),
-    });
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
