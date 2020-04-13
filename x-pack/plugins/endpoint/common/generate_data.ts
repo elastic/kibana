@@ -7,6 +7,10 @@
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import { AlertEvent, EndpointEvent, HostMetadata, OSFields, HostFields } from './types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { PolicyData } from '../public/applications/endpoint/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { generatePolicy } from '../public/applications/endpoint/models/policy';
 
 export type Event = AlertEvent | EndpointEvent;
 
@@ -450,6 +454,39 @@ export class EndpointDocGenerator {
         eventType: eventInfo.creationType,
       });
     }
+  }
+
+  /**
+   * Generates an Ingest `datasource` that includes the Endpoint Policy data
+   */
+  public generatePolicyDatasource(): PolicyData {
+    return {
+      id: this.seededUUIDv4(),
+      name: 'Endpoint Policy',
+      description: 'Policy to protect the worlds data',
+      config_id: this.seededUUIDv4(),
+      enabled: true,
+      output_id: '',
+      inputs: [
+        {
+          type: 'endpoint',
+          enabled: true,
+          streams: [],
+          config: {
+            policy: {
+              value: generatePolicy(),
+            },
+          },
+        },
+      ],
+      namespace: 'default',
+      package: {
+        name: 'endpoint',
+        title: 'Elastic Endpoint',
+        version: '1.0.0',
+      },
+      revision: 1,
+    };
   }
 
   private randomN(n: number): number {

@@ -4,6 +4,7 @@ exports[`ShowLicenseInfo renders without errors 1`] = `
 Array [
   <div
     class="euiCallOut euiCallOut--primary license-info-trial"
+    data-test-subj="uptimeMLLicenseInfo"
   >
     <div
       class="euiCallOutHeader"
@@ -54,6 +55,7 @@ exports[`ShowLicenseInfo shallow renders without errors 1`] = `
   <EuiCallOut
     className="license-info-trial"
     color="primary"
+    data-test-subj="uptimeMLLicenseInfo"
     iconType="help"
     title="Start free 14-day trial"
   >

@@ -9,9 +9,13 @@ import { ResponseError, CustomHttpResponseOptions } from 'kibana/server';
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
   const boom = isBoom(error) ? error : boomify(error, { statusCode: error.status });
+  const statusCode = boom.output.statusCode;
   return {
-    body: boom,
+    body: {
+      message: boom,
+      ...(statusCode !== 500 && error.body ? { attributes: { body: error.body } } : {}),
+    },
     headers: boom.output.headers,
-    statusCode: boom.output.statusCode,
+    statusCode,
   };
 }
