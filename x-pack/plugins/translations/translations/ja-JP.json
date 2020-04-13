@@ -319,8 +319,6 @@
     "common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage": "セッションがいっぱいで安全に削除できるアイテムが見つからないため、Kibana は履歴アイテムを保存できません。\n\nこれは大抵新規タブに移動することで解決されますが、より大きな問題が原因である可能性もあります。このメッセージが定期的に表示される場合は、{gitHubIssuesUrl} で問題を報告してください。",
     "common.ui.url.replacementFailedErrorMessage": "置換に失敗、未解決の表現式: {expr}",
     "common.ui.url.savedObjectIsMissingNotificationMessage": "保存されたオブジェクトがありません",
-    "common.ui.vis.kibanaMap.leaflet.fitDataBoundsAriaLabel": "データバウンドを合わせる",
-    "common.ui.vis.kibanaMap.zoomWarning": "ズームレベルが最大に達しました。完全にズームインするには、Elasticsearch と Kibana の {defaultDistribution} にアップグレードしてください。{ems} でより多くのズームレベルが利用できます。または、独自のマップサーバーを構成できます。詳細は { wms } または { configSettings} をご覧ください。",
     "console.autocomplete.addMethodMetaText": "メソド",
     "console.consoleDisplayName": "コンソール",
     "console.consoleMenu.copyAsCurlMessage": "リクエストが URL としてコピーされました",

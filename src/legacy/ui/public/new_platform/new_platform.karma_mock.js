@@ -309,6 +309,12 @@ export const npSetup = {
       registerAlias: sinon.fake(),
       hideTypes: sinon.fake(),
     },
+
+    mapsLegacy: {
+      serviceSettings: sinon.fake(),
+      getPrecision: sinon.fake(),
+      getZoomPrecision: sinon.fake(),
+    },
   },
 };
 

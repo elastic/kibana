@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { toastNotifications } from 'ui/notify';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
-import { toMountPoint } from '../../../../../plugins/kibana_react/public';
+import { toMountPoint } from '../../../kibana_react/public';
 
 export const createZoomWarningMsg = (function() {
   let disableZoomMsg = false;
@@ -40,7 +39,7 @@ export const createZoomWarningMsg = (function() {
         <div>
           <p>
             <FormattedMessage
-              id="common.ui.vis.kibanaMap.zoomWarning"
+              id="maps_legacy.kibanaMap.zoomWarning"
               defaultMessage="You've reached the maximum number of zoom
               levels. To zoom all the way in, upgrade to the
               {defaultDistribution} of Elasticsearch and Kibana. You'll get
@@ -105,12 +104,12 @@ export const createZoomWarningMsg = (function() {
     'data-test-subj': 'maxZoomWarning',
   };
 
-  return (getZoomLevel, getMaxZoomLevel) => {
+  return (toastService, getZoomLevel, getMaxZoomLevel) => {
     return () => {
       const zoomLevel = getZoomLevel();
       const maxMapZoom = getMaxZoomLevel();
       if (!disableZoomMsg && zoomLevel === maxMapZoom) {
-        toastNotifications.addDanger(zoomToast);
+        toastService.addDanger(zoomToast);
       }
     };
   };

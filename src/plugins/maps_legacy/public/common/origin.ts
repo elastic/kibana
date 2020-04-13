@@ -17,4 +17,7 @@
  * under the License.
  */
 
-export * from './legacy_dependencies_plugin';
+export const ORIGIN = {
+  EMS: 'elastic_maps_service',
+  KIBANA_YML: 'self_hosted',
+};

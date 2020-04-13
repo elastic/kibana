@@ -24,6 +24,7 @@
       "src/legacy/core_plugins/management",
       "src/plugins/management"
     ],
+    "maps_legacy": "src/plugins/maps_legacy",
     "indexPatternManagement": "src/plugins/index_pattern_management",
     "advancedSettings": "src/plugins/advanced_settings",
     "kibana_legacy": "src/plugins/kibana_legacy",

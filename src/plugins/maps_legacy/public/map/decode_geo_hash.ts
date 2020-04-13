@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
 import _ from 'lodash';
-
-const config = chrome.getUiSettingsClient();
 
 interface DecodedGeoHash {
   latitude: number[];
@@ -74,6 +71,10 @@ function refineInterval(interval: number[], cd: number, mask: number) {
   }
 }
 
+export function geohashColumns(precision: number): number {
+  return geohashCells(precision, 0);
+}
+
 /**
  * Get the number of geohash cells for a given precision
  *
@@ -88,51 +89,6 @@ function geohashCells(precision: number, axis: number) {
     cells *= i % 2 === axis ? 4 : 8;
   }
   return cells;
-}
-
-/**
- * Get the number of geohash columns (world-wide) for a given precision
- * @param precision the geohash precision
- * @returns {number} the number of columns
- */
-export function geohashColumns(precision: number): number {
-  return geohashCells(precision, 0);
-}
-
-const defaultPrecision = 2;
-const maxPrecision = parseInt(config.get('visualization:tileMap:maxPrecision'), 10) || 12;
-/**
- * Map Leaflet zoom levels to geohash precision levels.
- * The size of a geohash column-width on the map should be at least `minGeohashPixels` pixels wide.
- */
-export const zoomPrecision: any = {};
-const minGeohashPixels = 16;
-
-for (let zoom = 0; zoom <= 21; zoom += 1) {
-  const worldPixels = 256 * Math.pow(2, zoom);
-  zoomPrecision[zoom] = 1;
-  for (let precision = 2; precision <= maxPrecision; precision += 1) {
-    const columns = geohashColumns(precision);
-    if (worldPixels / columns >= minGeohashPixels) {
-      zoomPrecision[zoom] = precision;
-    } else {
-      break;
-    }
-  }
-}
-
-export function getPrecision(val: string) {
-  let precision = parseInt(val, 10);
-
-  if (Number.isNaN(precision)) {
-    precision = defaultPrecision;
-  }
-
-  if (precision > maxPrecision) {
-    return maxPrecision;
-  }
-
-  return precision;
 }
 
 interface GeoBoundingBoxCoordinate {

@@ -319,8 +319,6 @@
     "common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage": "Kibana 无法将历史记录项存储在您的会话中，因为其已满，并且似乎没有任何可安全删除的项。\n\n通常可通过移至新的标签页来解决此问题，但这会导致更大的问题。如果您有规律地看到此消息，请在 {gitHubIssuesUrl} 提交问题。",
     "common.ui.url.replacementFailedErrorMessage": "替换失败，未解析的表达式：{expr}",
     "common.ui.url.savedObjectIsMissingNotificationMessage": "已保存对象缺失",
-    "common.ui.vis.kibanaMap.leaflet.fitDataBoundsAriaLabel": "适应数据边界",
-    "common.ui.vis.kibanaMap.zoomWarning": "已达到缩放级别最大数目。要一直放大，请升级到 Elasticsearch 和 Kibana 的 {defaultDistribution}。您可以通过 {ems} 免费使用其他缩放级别。或者，您可以配置自己的地图服务器。请前往 { wms } 或 { configSettings} 以获取详细信息。",
     "console.autocomplete.addMethodMetaText": "方法",
     "console.consoleDisplayName": "控制台",
     "console.consoleMenu.copyAsCurlMessage": "请求已复制为 cURL",
