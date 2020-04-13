@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../layers/vector_layer', () => {});
-jest.mock('../layers/blended_vector_layer', () => {});
-jest.mock('../layers/heatmap_layer', () => {});
-jest.mock('../layers/vector_tile_layer', () => {});
-jest.mock('../layers/joins/inner_join', () => {});
+jest.mock('../../../../../plugins/maps/public/layers/vector_layer', () => {});
+jest.mock('../../../../../plugins/maps/public/layers/blended_vector_layer', () => {});
+jest.mock('../../../../../plugins/maps/public/layers/heatmap_layer', () => {});
+jest.mock('../../../../../plugins/maps/public/layers/vector_tile_layer', () => {});
+jest.mock('../../../../../plugins/maps/public/layers/joins/inner_join', () => {});
 jest.mock('../../../../../plugins/maps/public/reducers/non_serializable_instances', () => ({
   getInspectorAdapters: () => {
     return {};

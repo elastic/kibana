@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IBucketAggConfig } from '../_bucket_agg_type';
+import { IBucketAggConfig } from '../bucket_agg_type';
 import { buildRangeFilter, RangeFilterParams } from '../../../../../common';
 
 export const createFilterHistogram = (aggConfig: IBucketAggConfig, key: string) => {
