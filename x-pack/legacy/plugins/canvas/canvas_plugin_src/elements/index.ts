@@ -16,7 +16,7 @@ import { horizontalProgressPill } from './horizontal_progress_pill';
 import { image } from './image';
 import { lineChart } from './line_chart';
 import { markdown } from './markdown';
-import { metric } from './metric';
+import { metricElementInitializer } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
 import { progressGauge } from './progress_gauge';
@@ -32,7 +32,10 @@ import { verticalBarChart } from './vert_bar_chart';
 import { verticalProgressBar } from './vertical_progress_bar';
 import { verticalProgressPill } from './vertical_progress_pill';
 
-export const elementSpecs = applyElementStrings([
+import { SetupInitializer } from '../plugin';
+import { ElementFactory } from '../../types';
+
+const elementSpecs = [
   areaChart,
   bubbleChart,
   debug,
@@ -44,7 +47,6 @@ export const elementSpecs = applyElementStrings([
   horizontalProgressPill,
   lineChart,
   markdown,
-  metric,
   pie,
   plot,
   progressGauge,
@@ -59,4 +61,15 @@ export const elementSpecs = applyElementStrings([
   verticalBarChart,
   verticalProgressBar,
   verticalProgressPill,
-]);
+];
+
+const initializeElementFactories = [metricElementInitializer];
+
+export const initializeElements: SetupInitializer<ElementFactory[]> = (core, plugins) => {
+  const specs = [
+    ...elementSpecs,
+    ...initializeElementFactories.map(factory => factory(core, plugins)),
+  ];
+
+  return applyElementStrings(specs);
+};

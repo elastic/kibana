@@ -8,7 +8,7 @@ import { dropdownControl } from './dropdownControl';
 import { getCell } from './getCell';
 import { image } from './image';
 import { markdown } from './markdown';
-import { metric } from './metric';
+import { metricInitializer } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
 import { progress } from './progress';
@@ -19,12 +19,13 @@ import { shape } from './shape';
 import { table } from './table';
 import { timefilterControl } from './timefilterControl';
 
+import { SetupInitializer } from '../../plugin';
+
 export const viewSpecs = [
   dropdownControl,
   getCell,
   image,
   markdown,
-  metric,
   pie,
   plot,
   progress,
@@ -35,3 +36,9 @@ export const viewSpecs = [
   table,
   timefilterControl,
 ];
+
+export const viewInitializers = [metricInitializer];
+
+export const initializeViews: SetupInitializer<unknown> = (core, plugins) => {
+  return [...viewSpecs, ...viewInitializers.map(initializer => initializer(core, plugins))];
+};

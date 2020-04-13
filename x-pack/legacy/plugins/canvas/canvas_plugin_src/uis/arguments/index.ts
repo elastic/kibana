@@ -6,11 +6,11 @@
 
 import { axisConfig } from './axis_config';
 import { datacolumn } from './datacolumn';
-import { dateFormat } from './date_format';
+import { dateFormatInitializer } from './date_format';
 import { filterGroup } from './filter_group';
 import { imageUpload } from './image_upload';
 import { number } from './number';
-import { numberFormat } from './number_format';
+import { numberFormatInitializer } from './number_format';
 import { palette } from './palette';
 import { percentage } from './percentage';
 import { range } from './range';
@@ -20,14 +20,14 @@ import { string } from './string';
 import { textarea } from './textarea';
 import { toggle } from './toggle';
 
+import { SetupInitializer } from '../../plugin';
+
 export const args = [
   axisConfig,
   datacolumn,
-  dateFormat,
   filterGroup,
   imageUpload,
   number,
-  numberFormat,
   palette,
   percentage,
   range,
@@ -37,3 +37,9 @@ export const args = [
   textarea,
   toggle,
 ];
+
+export const initializers = [dateFormatInitializer, numberFormatInitializer];
+
+export const initializeArgs: SetupInitializer<any> = (core, plugins) => {
+  return [...args, ...initializers.map(initializer => initializer(core, plugins))];
+};
