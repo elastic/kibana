@@ -20,11 +20,24 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { Header } from '../header';
+import { CallOuts } from '../call_outs';
 
-describe('Header', () => {
-  it('should render normally', async () => {
-    const component = shallow(<Header addScriptedFieldUrl="" />);
+describe('CallOuts', () => {
+  test('should render normally', () => {
+    const component = shallow(
+      <CallOuts
+        deprecatedLangsInUse={['php']}
+        painlessDocLink="http://www.elastic.co/painlessDocs"
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should render without any call outs', () => {
+    const component = shallow(
+      <CallOuts deprecatedLangsInUse={[]} painlessDocLink="http://www.elastic.co/painlessDocs" />
+    );
 
     expect(component).toMatchSnapshot();
   });

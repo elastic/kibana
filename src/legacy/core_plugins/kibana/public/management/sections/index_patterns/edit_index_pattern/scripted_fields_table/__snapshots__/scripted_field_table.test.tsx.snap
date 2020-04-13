@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
-<div>
+<Fragment>
   <header
     addScriptedFieldUrl="#"
   />
@@ -39,11 +39,11 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
       ]
     }
   />
-</div>
+</Fragment>
 `;
 
 exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
-<div>
+<Fragment>
   <header
     addScriptedFieldUrl="#"
   />
@@ -72,11 +72,11 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
       ]
     }
   />
-</div>
+</Fragment>
 `;
 
 exports[`ScriptedFieldsTable should hide the table if there are no scripted fields 1`] = `
-<div>
+<Fragment>
   <header
     addScriptedFieldUrl="#"
   />
@@ -97,11 +97,11 @@ exports[`ScriptedFieldsTable should hide the table if there are no scripted fiel
     }
     items={Array []}
   />
-</div>
+</Fragment>
 `;
 
 exports[`ScriptedFieldsTable should render normally 1`] = `
-<div>
+<Fragment>
   <header
     addScriptedFieldUrl="#"
   />
@@ -135,11 +135,11 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
       ]
     }
   />
-</div>
+</Fragment>
 `;
 
 exports[`ScriptedFieldsTable should show a delete modal 1`] = `
-<div>
+<Fragment>
   <header
     addScriptedFieldUrl="#"
   />
@@ -173,14 +173,16 @@ exports[`ScriptedFieldsTable should show a delete modal 1`] = `
       ]
     }
   />
-  <eui-overlay-mask>
-    <eui-confirm-modal
-      cancelButtonText="Cancel"
-      confirmButtonText="Delete"
-      onCancel={[Function]}
-      onConfirm={[Function]}
-      title="Delete scripted field 'ScriptedField'?"
-    />
-  </eui-overlay-mask>
-</div>
+  <DeleteScritpedFieldConfirmationModal
+    deleteField={[Function]}
+    field={
+      Object {
+        "lang": "",
+        "name": "ScriptedField",
+        "script": "",
+      }
+    }
+    hideDeleteConfirmationModal={[Function]}
+  />
+</Fragment>
 `;

@@ -18,31 +18,42 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   getSupportedScriptingLanguages,
   getDeprecatedScriptingLanguages,
 } from 'ui/scripting_languages';
 import { documentationLinks } from 'ui/documentation_links';
 
-import { EuiSpacer, EuiOverlayMask, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 
-import { Table, Header, CallOuts } from './components';
+import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
+import { ScriptedFieldItem } from './types';
 
-export class ScriptedFieldsTable extends Component {
-  static propTypes = {
-    indexPattern: PropTypes.object.isRequired,
-    fieldFilter: PropTypes.string,
-    scriptedFieldLanguageFilter: PropTypes.string,
-    helpers: PropTypes.shape({
-      redirectToRoute: PropTypes.func.isRequired,
-      getRouteHref: PropTypes.func.isRequired,
-    }),
-    onRemoveField: PropTypes.func,
+import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
+
+interface ScriptedFieldsTableProps {
+  indexPattern: IIndexPattern;
+  fieldFilter?: string;
+  scriptedFieldLanguageFilter?: string;
+  helpers: {
+    redirectToRoute: Function;
+    getRouteHref: Function;
   };
+  onRemoveField?: () => void;
+}
 
-  constructor(props) {
+interface ScriptedFieldsTableState {
+  deprecatedLangsInUse: string[];
+  fieldToDelete: ScriptedFieldItem | undefined;
+  isDeleteConfirmationModalVisible: boolean;
+  fields: ScriptedFieldItem[];
+}
+
+export class ScriptedFieldsTable extends Component<
+  ScriptedFieldsTableProps,
+  ScriptedFieldsTableState
+> {
+  constructor(props: ScriptedFieldsTableProps) {
     super(props);
 
     this.state = {
@@ -64,7 +75,8 @@ export class ScriptedFieldsTable extends Component {
     const deprecatedLangs = getDeprecatedScriptingLanguages();
     const supportedLangs = getSupportedScriptingLanguages();
 
-    for (const { lang } of fields) {
+    for (const field of fields) {
+      const lang: string = field.lang;
       if (deprecatedLangs.includes(lang) || !supportedLangs.includes(lang)) {
         deprecatedLangsInUse.push(lang);
       }
@@ -91,7 +103,8 @@ export class ScriptedFieldsTable extends Component {
     let filteredFields = languageFilteredFields;
 
     if (fieldFilter) {
-      const normalizedFieldFilter = this.props.fieldFilter.toLowerCase();
+      const normalizedFieldFilter = fieldFilter.toLowerCase();
+
       filteredFields = languageFilteredFields.filter(field =>
         field.name.toLowerCase().includes(normalizedFieldFilter)
       );
@@ -100,18 +113,7 @@ export class ScriptedFieldsTable extends Component {
     return filteredFields;
   };
 
-  renderCallOuts() {
-    const { deprecatedLangsInUse } = this.state;
-
-    return (
-      <CallOuts
-        deprecatedLangsInUse={deprecatedLangsInUse}
-        painlessDocLink={documentationLinks.scriptedFields.painless}
-      />
-    );
-  }
-
-  startDeleteField = field => {
+  startDeleteField = (field: ScriptedFieldItem) => {
     this.setState({ fieldToDelete: field, isDeleteConfirmationModalVisible: true });
   };
 
@@ -124,55 +126,29 @@ export class ScriptedFieldsTable extends Component {
     const { fieldToDelete } = this.state;
 
     indexPattern.removeScriptedField(fieldToDelete);
-    onRemoveField && onRemoveField();
+
+    if (onRemoveField) {
+      onRemoveField();
+    }
+
     this.fetchFields();
     this.hideDeleteConfirmationModal();
   };
 
-  renderDeleteConfirmationModal() {
-    const { fieldToDelete } = this.state;
-
-    if (!fieldToDelete) {
-      return null;
-    }
-
-    const title = i18n.translate('kbn.management.editIndexPattern.scripted.deleteFieldLabel', {
-      defaultMessage: "Delete scripted field '{fieldName}'?",
-      values: { fieldName: fieldToDelete.name },
-    });
-    const cancelButtonText = i18n.translate(
-      'kbn.management.editIndexPattern.scripted.deleteField.cancelButton',
-      { defaultMessage: 'Cancel' }
-    );
-    const confirmButtonText = i18n.translate(
-      'kbn.management.editIndexPattern.scripted.deleteField.deleteButton',
-      { defaultMessage: 'Delete' }
-    );
-
-    return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={title}
-          onCancel={this.hideDeleteConfirmationModal}
-          onConfirm={this.deleteField}
-          cancelButtonText={cancelButtonText}
-          confirmButtonText={confirmButtonText}
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        />
-      </EuiOverlayMask>
-    );
-  }
-
   render() {
     const { helpers, indexPattern } = this.props;
+    const { fieldToDelete, deprecatedLangsInUse } = this.state;
 
     const items = this.getFilteredItems();
 
     return (
-      <div>
+      <>
         <Header addScriptedFieldUrl={helpers.getRouteHref(indexPattern, 'addField')} />
 
-        {this.renderCallOuts()}
+        <CallOuts
+          deprecatedLangsInUse={deprecatedLangsInUse}
+          painlessDocLink={documentationLinks.scriptedFields.painless}
+        />
 
         <EuiSpacer size="l" />
 
@@ -183,8 +159,14 @@ export class ScriptedFieldsTable extends Component {
           deleteField={this.startDeleteField}
         />
 
-        {this.renderDeleteConfirmationModal()}
-      </div>
+        {fieldToDelete && (
+          <DeleteScritpedFieldConfirmationModal
+            deleteField={this.deleteField}
+            field={fieldToDelete}
+            hideDeleteConfirmationModal={this.hideDeleteConfirmationModal}
+          />
+        )}
+      </>
     );
   }
 }
