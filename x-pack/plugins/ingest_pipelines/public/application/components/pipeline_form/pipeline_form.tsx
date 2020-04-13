@@ -204,7 +204,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
             <>
               <FormattedMessage
                 id="xpack.ingestPipelines.form.onFailureDescription"
-                defaultMessage="Processors to be executed following a failed processor. {learnMoreLink}"
+                defaultMessage="The processors to be executed following a failed processor. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
                     <EuiLink href={services.documentation.getHandlingFailureUrl()} target="_blank">

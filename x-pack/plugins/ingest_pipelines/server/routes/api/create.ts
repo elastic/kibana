@@ -23,7 +23,7 @@ export const registerCreateRoute = ({
   license,
   lib: { isEsError },
 }: RouteDependencies): void => {
-  router.put(
+  router.post(
     {
       path: API_BASE_PATH,
       validate: {

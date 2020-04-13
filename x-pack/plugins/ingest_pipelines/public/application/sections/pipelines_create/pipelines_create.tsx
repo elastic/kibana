@@ -46,7 +46,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
           <h1 data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.create.pageTitle"
-              defaultMessage="Create a pipeline"
+              defaultMessage="Create pipeline"
             />
           </h1>
         </EuiTitle>

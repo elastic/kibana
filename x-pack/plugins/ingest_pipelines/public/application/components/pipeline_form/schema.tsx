@@ -74,8 +74,8 @@ export const pipelineFormSchema: FormSchema = {
     label: i18n.translate('xpack.ingestPipelines.form.processorsFieldLabel', {
       defaultMessage: 'Processors',
     }),
-    serializer: processors => parseJson(processors),
-    deserializer: processors => stringifyJson(processors),
+    serializer: parseJson,
+    deserializer: stringifyJson,
     validations: [
       {
         validator: emptyField(
@@ -97,8 +97,8 @@ export const pipelineFormSchema: FormSchema = {
     label: i18n.translate('xpack.ingestPipelines.form.onFailureFieldLabel', {
       defaultMessage: 'On-failure processors (optional)',
     }),
-    serializer: onFailureProcessors => parseJson(onFailureProcessors),
-    deserializer: onFailureProcessors => stringifyJson(onFailureProcessors),
+    serializer: parseJson,
+    deserializer: stringifyJson,
     validations: [
       {
         validator: ({ value }: ValidationFuncArg<any, any>) => {

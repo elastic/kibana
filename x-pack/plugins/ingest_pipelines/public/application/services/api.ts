@@ -57,7 +57,7 @@ export class ApiService {
   public async createPipeline(pipeline: Pipeline) {
     const result = await this.sendRequest({
       path: API_BASE_PATH,
-      method: 'put',
+      method: 'post',
       body: JSON.stringify(pipeline),
     });
 
