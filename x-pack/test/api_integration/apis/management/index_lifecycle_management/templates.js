@@ -16,7 +16,7 @@ export default function({ getService }) {
 
   const { createIndexTemplate, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
 
-  const { loadTemplates, getTemplate, addPolicyToTemplate } = registerTemplatesHelpers({
+  const { loadTemplates, addPolicyToTemplate } = registerTemplatesHelpers({
     supertest,
   });
 
@@ -48,18 +48,6 @@ export default function({ getService }) {
       });
     });
 
-    describe('get', () => {
-      it('should fetch a single template', async () => {
-        // Create a template with the ES client
-        const templateName = getRandomString();
-        const template = getTemplatePayload();
-        await createIndexTemplate(templateName, template);
-
-        const { body } = await getTemplate(templateName).expect(200);
-        expect(body.index_patterns).to.eql(template.index_patterns);
-      });
-    });
-
     describe('update', () => {
       it('should add a policy to a template', async () => {
         // Create policy
@@ -78,12 +66,13 @@ export default function({ getService }) {
         await addPolicyToTemplate(templateName, policyName, rolloverAlias).expect(200);
 
         // Fetch the template and verify that the policy has been attached
-        const { body } = await getTemplate(templateName);
+        const { body } = await loadTemplates();
+        const fetchedTemplate = body.find(({ name }) => templateName === name);
         const {
           settings: {
             index: { lifecycle },
           },
-        } = body;
+        } = fetchedTemplate;
         expect(lifecycle.name).to.equal(policyName);
         expect(lifecycle.rollover_alias).to.equal(rolloverAlias);
       });
