@@ -58,10 +58,18 @@ let overlays;
 export const setCoreOverlays = coreOverlays => (overlays = coreOverlays);
 export const getCoreOverlays = () => overlays;
 
-let search;
-export const setDataSearch = dataSearch => (search = dataSearch);
-export const getDataSearch = () => search;
+let data;
+export const setData = dataPlugin => (data = dataPlugin);
+export const getData = () => data;
 
 let coreHttp;
 export const setHttp = http => (coreHttp = http);
 export const getHttp = () => coreHttp;
+
+let uiActions;
+export const setUiActions = pluginUiActions => (uiActions = pluginUiActions);
+export const getUiActions = () => uiActions;
+
+let core;
+export const setCore = kibanaCore => (core = kibanaCore);
+export const getCore = () => core;

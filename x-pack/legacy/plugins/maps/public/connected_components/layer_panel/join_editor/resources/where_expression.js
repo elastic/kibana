@@ -8,8 +8,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { npStart } from 'ui/new_platform';
-const { SearchBar } = npStart.plugins.data.ui;
+import { getUiSettings, getData } from '../../../../kibana_services';
 
 export class WhereExpression extends Component {
   state = {
@@ -34,6 +33,7 @@ export class WhereExpression extends Component {
   };
 
   render() {
+    const { SearchBar } = getData().ui;
     const { whereQuery, indexPattern } = this.props;
     const expressionValue =
       whereQuery && whereQuery.query
@@ -41,8 +41,6 @@ export class WhereExpression extends Component {
         : i18n.translate('xpack.maps.layerPanel.whereExpression.expressionValuePlaceholder', {
             defaultMessage: '-- add filter --',
           });
-
-    const { uiSettings } = npStart.core;
 
     return (
       <EuiPopover
@@ -81,7 +79,7 @@ export class WhereExpression extends Component {
             query={
               whereQuery
                 ? whereQuery
-                : { language: uiSettings.get('search:queryLanguage'), query: '' }
+                : { language: getUiSettings().get('search:queryLanguage'), query: '' }
             }
             onQuerySubmit={this._onQueryChange}
             indexPatterns={[indexPattern]}

@@ -12,14 +12,14 @@ import {
   getSavedObjectsClient,
   getIndexPatternService,
   getCoreOverlays,
-  getDataSearch,
+  getData,
 } from '../../kibana_services';
 
 export function getMapsSavedObjectLoader() {
   const services = {
     savedObjectsClient: getSavedObjectsClient(),
     indexPatterns: getIndexPatternService(),
-    search: getDataSearch(),
+    search: getData().search,
     chrome: getCoreChrome(),
     overlays: getCoreOverlays(),
   };

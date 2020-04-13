@@ -31,8 +31,10 @@ import {
   setDocLinks,
   setUiSettings,
   setCoreOverlays,
-  setDataSearch,
+  setData,
+  setCore,
   setHttp,
+  setUiActions,
 } from './kibana_services';
 // @ts-ignore
 import {
@@ -73,14 +75,14 @@ interface MapsPluginStartDependencies {
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
   const { injectedMetadata, uiSettings, http } = core;
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
-  setInjectedVarFunc(injectedMetadata.getInjectedVar);
   setVisualizations(plugins.visualizations);
-  setUiSettings(core.uiSettings);
+  setUiSettings(uiSettings);
   setHttp(http);
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   const { data, inspector } = plugins;
+  setCore(core);
   setInspector(inspector);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
@@ -90,7 +92,8 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setCoreOverlays(core.overlays);
   setMapsCapabilities(core.application.capabilities.maps);
   setDocLinks(core.docLinks);
-  setDataSearch(plugins.data.search);
+  setData(plugins.data);
+  setUiActions(plugins.uiActions);
 };
 
 /** @internal */
