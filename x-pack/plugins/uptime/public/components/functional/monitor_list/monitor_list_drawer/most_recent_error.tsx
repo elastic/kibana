@@ -8,7 +8,7 @@ import { EuiText, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { MonitorPageLink } from '../monitor_page_link';
-import { useUrlParams } from '../../../../hooks';
+import { useGetUrlParams } from '../../../../hooks';
 import { stringifyUrlParams } from '../../../../lib/helper/stringify_url_params';
 import { MonitorError } from '../../../../../common/runtime_types';
 
@@ -30,8 +30,7 @@ interface MostRecentErrorProps {
 }
 
 export const MostRecentError = ({ error, monitorId, timestamp }: MostRecentErrorProps) => {
-  const [getUrlParams] = useUrlParams();
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
   params.selectedPingStatus = 'down';
   const linkParameters = stringifyUrlParams(params, true);
 
