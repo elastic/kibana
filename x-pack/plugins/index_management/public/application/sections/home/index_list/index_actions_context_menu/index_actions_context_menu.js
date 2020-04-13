@@ -46,11 +46,7 @@ export class IndexActionsContextMenu extends Component {
   confirmAction = isActionConfirmed => {
     this.setState({ isActionConfirmed });
   };
-  panels({
-    core: { fatalErrors },
-    services: { extensionsService, httpService, notificationService },
-    plugins: { usageCollection },
-  }) {
+  panels({ services: { extensionsService } }) {
     const {
       closeIndices,
       openIndices,
@@ -218,15 +214,6 @@ export class IndexActionsContextMenu extends Component {
       const actionExtensionDefinition = actionExtension({
         indices,
         reloadIndices,
-        // These config options can be removed once the NP migration out of legacy is complete.
-        // They're needed for now because ILM's extensions make API calls which require these
-        // dependencies, but they're not available unless the app's "setup" lifecycle stage occurs.
-        // Within the old platform, "setup" only occurs once the user actually visits the app.
-        // Once ILM and IM have been moved out of legacy this hack won't be necessary.
-        usageCollection,
-        toasts: notificationService.toasts,
-        fatalErrors,
-        httpClient: httpService.httpClient,
       });
       if (actionExtensionDefinition) {
         const {

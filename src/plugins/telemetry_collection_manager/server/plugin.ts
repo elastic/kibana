@@ -158,7 +158,7 @@ export class TelemetryCollectionManagerPlugin
           if (config.unencrypted) {
             return optInStats;
           }
-          return encryptTelemetry(optInStats, this.isDev);
+          return encryptTelemetry(optInStats, { isProd: !this.isDev });
         }
       } catch (err) {
         this.logger.debug(`Failed to collect any opt in stats with registered collections.`);
@@ -205,7 +205,8 @@ export class TelemetryCollectionManagerPlugin
           if (config.unencrypted) {
             return usageData;
           }
-          return encryptTelemetry(usageData, this.isDev);
+
+          return encryptTelemetry(usageData, { isProd: !this.isDev });
         }
       } catch (err) {
         this.logger.debug(
