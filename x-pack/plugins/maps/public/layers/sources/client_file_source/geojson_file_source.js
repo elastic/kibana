@@ -10,11 +10,11 @@ import {
   ES_GEO_FIELD_TYPE,
   GEOJSON_FILE,
   DEFAULT_MAX_RESULT_WINDOW,
+  SCALING_TYPES,
 } from '../../../../common/constants';
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 import { ESSearchSource } from '../es_search_source';
 import uuid from 'uuid/v4';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { registerSource } from '../source_registry';
 
@@ -91,23 +91,22 @@ const viewIndexedData = (
       importErrorHandler(indexResponses);
       return;
     }
-    const { fields, id } = indexPatternResp;
-    const geoFieldArr = fields.filter(field =>
-      Object.values(ES_GEO_FIELD_TYPE).includes(field.type)
-    );
-    const geoField = _.get(geoFieldArr, '[0].name');
-    const indexPatternId = id;
+    const { fields, id: indexPatternId } = indexPatternResp;
+    const geoField = fields.find(field => Object.values(ES_GEO_FIELD_TYPE).includes(field.type));
     if (!indexPatternId || !geoField) {
       addAndViewSource(null);
     } else {
-      // Only turn on bounds filter for large doc counts
-      const filterByMapBounds = indexDataResp.docCount > DEFAULT_MAX_RESULT_WINDOW;
       const source = new ESSearchSource(
         {
           id: uuid(),
           indexPatternId,
-          geoField,
-          filterByMapBounds,
+          geoField: geoField.name,
+          // Only turn on bounds filter for large doc counts
+          filterByMapBounds: indexDataResp.docCount > DEFAULT_MAX_RESULT_WINDOW,
+          scalingType:
+            geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT
+              ? SCALING_TYPES.CLUSTERS
+              : SCALING_TYPES.LIMIT,
         },
         inspectorAdapters
       );
