@@ -27,7 +27,11 @@ import {
   VectorLayer,
   IServiceSettings,
 } from '../../../../../plugins/maps_legacy/public';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../../vis_type_vislib/public';
+import {
+  NumberInputOption,
+  SelectOption,
+  SwitchOption,
+} from '../../../../../plugins/charts/public';
 import { WmsOptions } from '../../../tile_map/public/components/wms_options';
 import { RegionMapVisParams } from '../types';
 
