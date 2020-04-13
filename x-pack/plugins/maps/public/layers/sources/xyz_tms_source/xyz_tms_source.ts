@@ -83,5 +83,5 @@ export class XYZTMSSource extends AbstractTMSSource {
 
 registerSource({
   ConstructorFunction: XYZTMSSource,
-  type: EMS_XYZ,
+  type: SOURCE_TYPES.EMS_XYZ,
 });
