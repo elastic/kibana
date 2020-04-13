@@ -15,6 +15,9 @@ import {
   EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBetaBadge,
+  EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -200,31 +203,58 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       },
     },
     {
-      field: '',
+      field: 'isPreconfigured',
       name: '',
-      actions: [
-        {
-          enabled: () => canDelete,
-          'data-test-subj': 'deleteConnector',
-          name: i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
-            { defaultMessage: 'Delete' }
-          ),
-          description: canDelete
-            ? i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription',
-                { defaultMessage: 'Delete this connector' }
-              )
-            : i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription',
-                { defaultMessage: 'Unable to delete connectors' }
-              ),
-          type: 'icon',
-          icon: 'trash',
-          color: 'danger',
-          onClick: (item: ActionConnectorTableItem) => setConnectorsToDelete([item.id]),
-        },
-      ],
+      render: (value: number, item: ActionConnectorTableItem) => {
+        if (item.isPreconfigured) {
+          return (
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  data-test-subj="preConfiguredTitleMessage"
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
+                    {
+                      defaultMessage: 'Pre-configured',
+                    }
+                  )}
+                  tooltipContent="This connector can't be deleted."
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+        return (
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  canDelete
+                    ? i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription',
+                        { defaultMessage: 'Delete this connector' }
+                      )
+                    : i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription',
+                        { defaultMessage: 'Unable to delete connectors' }
+                      )
+                }
+              >
+                <EuiButtonIcon
+                  isDisabled={!canDelete}
+                  data-test-subj="deleteConnector"
+                  aria-label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
+                    { defaultMessage: 'Delete' }
+                  )}
+                  onClick={() => setConnectorsToDelete([item.id])}
+                  iconType={'trash'}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
     },
   ];
 
