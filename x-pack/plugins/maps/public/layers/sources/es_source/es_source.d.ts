@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractVectorSource } from './vector_source';
-import { IVectorSource } from './vector_source';
-import { IndexPattern, SearchSource } from '../../../../../../src/plugins/data/public';
-import { VectorSourceRequestMeta } from '../../../common/descriptor_types';
+import { AbstractVectorSource } from '../vector_source';
+import { IVectorSource } from '../vector_source';
+import { IndexPattern, SearchSource } from '../../../../../../../src/plugins/data/public';
+import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 
 export interface IESSource extends IVectorSource {
   getId(): string;
