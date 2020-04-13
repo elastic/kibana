@@ -345,8 +345,3 @@ export interface GetPolicyResponse extends GetOneDatasourceResponse {
 export interface UpdatePolicyResponse extends UpdateDatasourceResponse {
   item: PolicyData;
 }
-
-/**
- * The PageId type is used for the payload when firing userNavigatedToPage actions
- */
-export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
