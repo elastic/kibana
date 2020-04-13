@@ -33,11 +33,12 @@ import {
   QueryStringInput,
 } from '../../../../../../../../../src/plugins/data/public';
 
+import { useXJsonMode } from '../../../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
+
 import { PivotPreview } from '../../../../components/pivot_preview';
 
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SavedSearchQuery, SearchItems } from '../../../../hooks/use_search_items';
-import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
 import { useToastNotifications } from '../../../../app_dependencies';
 import { TransformPivotConfig } from '../../../../common';
 import { dictionaryToArray, Dictionary } from '../../../../../../common/types/common';
@@ -432,6 +433,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
     convertToJson,
     setXJson: setAdvancedEditorConfig,
     xJson: advancedEditorConfig,
+    xJsonMode,
   } = useXJsonMode(stringifiedPivotConfig);
 
   useEffect(() => {

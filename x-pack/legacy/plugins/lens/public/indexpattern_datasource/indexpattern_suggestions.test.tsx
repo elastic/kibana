@@ -824,10 +824,10 @@ describe('IndexPattern Data Source suggestions', () => {
             state: expect.objectContaining({
               layers: expect.objectContaining({
                 currentLayer: expect.objectContaining({
-                  columnOrder: ['cola', 'id1'],
+                  columnOrder: ['cola', 'colb'],
                   columns: {
                     cola: initialState.layers.currentLayer.columns.cola,
-                    id1: expect.objectContaining({
+                    colb: expect.objectContaining({
                       operationType: 'avg',
                       sourceField: 'memory',
                     }),
