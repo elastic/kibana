@@ -177,7 +177,7 @@ module.exports = async ({ config }) => {
     }),
 
     // Mock out libs used by a few componets to avoid loading in kibana_legacy and platform
-    new webpack.NormalModuleReplacementPlugin(/(lib)?\/notify/, path.resolve(__dirname, '../tasks/mocks/uiNotify')),
+    new webpack.NormalModuleReplacementPlugin(/lib\/notify/, path.resolve(__dirname, '../tasks/mocks/uiNotify')),
     new webpack.NormalModuleReplacementPlugin(/lib\/download_workpad/, path.resolve(__dirname, '../tasks/mocks/downloadWorkpad')),
   );
 
