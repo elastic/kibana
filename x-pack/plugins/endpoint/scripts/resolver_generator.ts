@@ -36,7 +36,7 @@ async function main() {
     eventIndex: {
       alias: 'ei',
       describe: 'index to store events in',
-      default: EndpointAppConstants.EVENT_INDEX_NAME,
+      default: EndpointAppConstants.ALERT_INDEX_NAME,
       type: 'string',
     },
     metadataIndex: {
