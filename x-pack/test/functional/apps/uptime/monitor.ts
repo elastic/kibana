@@ -35,16 +35,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('displays ping data as expected', async () => {
         await uptime.checkPingListInteractions(
           [
-            '2019-09-11T03:40:34.371Z',
-            '2019-09-11T03:40:04.370Z',
-            '2019-09-11T03:39:34.370Z',
-            '2019-09-11T03:39:04.370Z',
-            '2019-09-11T03:38:34.370Z',
-            '2019-09-11T03:38:04.370Z',
-            '2019-09-11T03:37:34.370Z',
-            '2019-09-11T03:37:04.371Z',
-            '2019-09-11T03:36:34.370Z',
-            '2019-09-11T03:36:04.370Z',
+            'XZtoHm0B0I9WX_CznN-6',
+            '7ZtoHm0B0I9WX_CzJ96M',
+            'pptnHm0B0I9WX_Czst5X',
+            'I5tnHm0B0I9WX_CzPd46',
+            'y5tmHm0B0I9WX_Czx93x',
+            'XZtmHm0B0I9WX_CzUt3H',
+            '-JtlHm0B0I9WX_Cz3dyX',
+            'k5tlHm0B0I9WX_CzaNxm',
+            'NZtkHm0B0I9WX_Cz89w9',
+            'zJtkHm0B0I9WX_CzftsN',
           ],
           'mpls',
           'up'
