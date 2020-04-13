@@ -19,6 +19,7 @@ import { ManageCustomLink } from './ManageCustomLink';
 import { px } from '../../../../style/variables';
 
 const ScrollableContainer = styled.div`
+  -ms-overflow-style: none;
   max-height: ${px(535)};
   overflow: scroll;
 `;

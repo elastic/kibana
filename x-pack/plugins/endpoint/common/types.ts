@@ -376,11 +376,6 @@ export interface EndpointEvent {
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 
 /**
- * The PageId type is used for the payload when firing userNavigatedToPage actions
- */
-export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
-
-/**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
  * Similar to `TypeOf`, but allows strings as input for `schema.number()` (which is inline
  * with the behavior of the validator.) Also, for `schema.object`, when a value is a `schema.maybe`
