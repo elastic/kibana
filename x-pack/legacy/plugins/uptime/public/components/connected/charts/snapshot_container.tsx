@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { useGetUrlParams } from '../../../hooks';
 import { AppState } from '../../../state';
 import { getSnapshotCountAction } from '../../../state/actions';
-import { SnapshotComponent } from '../../functional/snapshot';
+import { SnapshotComponent } from '../../overview/snapshot';
 import { Snapshot as SnapshotType } from '../../../../common/runtime_types';
 import { SnapShotQueryParams } from '../../../state/api';
 

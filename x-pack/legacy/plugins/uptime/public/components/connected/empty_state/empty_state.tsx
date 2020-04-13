@@ -8,7 +8,7 @@ import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { indexStatusAction } from '../../../state/actions';
 import { indexStatusSelector } from '../../../state/selectors';
-import { EmptyStateComponent } from '../../functional/empty_state/empty_state';
+import { EmptyStateComponent } from '../../overview/empty_state';
 import { UptimeRefreshContext } from '../../../contexts';
 
 export const EmptyState: React.FC = ({ children }) => {

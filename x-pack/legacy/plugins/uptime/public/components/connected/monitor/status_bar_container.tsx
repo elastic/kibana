@@ -5,45 +5,30 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
-import { AppState } from '../../../state';
+import { useDispatch, useSelector } from 'react-redux';
 import { monitorLocationsSelector, monitorStatusSelector } from '../../../state/selectors';
-import { MonitorStatusBarComponent } from '../../functional/monitor_status_details/monitor_status_bar';
+import { MonitorStatusBarComponent } from '../../monitor_details/monitor_status_details/monitor_status_bar';
 import { getMonitorStatusAction } from '../../../state/actions';
 import { useGetUrlParams } from '../../../hooks';
-import { Ping } from '../../../../common/graphql/types';
-import { MonitorLocations } from '../../../../common/runtime_types/monitor';
 import { UptimeRefreshContext } from '../../../contexts';
 
-interface StateProps {
-  monitorStatus: Ping;
-  monitorLocations: MonitorLocations;
-}
-
-interface DispatchProps {
-  loadMonitorStatus: typeof getMonitorStatusAction;
-}
-
-interface OwnProps {
+interface Props {
   monitorId: string;
 }
 
-type Props = OwnProps & StateProps & DispatchProps;
-
-const Container: React.FC<Props> = ({
-  loadMonitorStatus,
-  monitorId,
-  monitorStatus,
-  monitorLocations,
-}: Props) => {
+export const MonitorStatusBar: React.FC<Props> = ({ monitorId }: Props) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
 
+  const dispatch = useDispatch();
+
+  const monitorStatus = useSelector(monitorStatusSelector);
+  const monitorLocations = useSelector(state => monitorLocationsSelector(state, monitorId));
+
   useEffect(() => {
-    loadMonitorStatus({ dateStart, dateEnd, monitorId });
-  }, [monitorId, dateStart, dateEnd, loadMonitorStatus, lastRefresh]);
+    dispatch(getMonitorStatusAction({ dateStart, dateEnd, monitorId }));
+  }, [monitorId, dateStart, dateEnd, lastRefresh, dispatch]);
 
   return (
     <MonitorStatusBarComponent
@@ -53,19 +38,3 @@ const Container: React.FC<Props> = ({
     />
   );
 };
-
-const mapStateToProps = (state: AppState, ownProps: OwnProps) => ({
-  monitorStatus: monitorStatusSelector(state),
-  monitorLocations: monitorLocationsSelector(state, ownProps.monitorId),
-});
-
-const mapDispatchToProps = (dispatch: Dispatch<any>): DispatchProps => ({
-  loadMonitorStatus: params => dispatch(getMonitorStatusAction(params)),
-});
-
-// @ts-ignore TODO: Investigate typescript issues here
-export const MonitorStatusBar = connect<StateProps, DispatchProps, MonitorStatusBarProps>(
-  // @ts-ignore TODO: Investigate typescript issues here
-  mapStateToProps,
-  mapDispatchToProps
-)(Container);

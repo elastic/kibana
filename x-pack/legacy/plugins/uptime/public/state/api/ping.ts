@@ -7,7 +7,7 @@
 import { APIFn } from './types';
 import { GetPingHistogramParams, HistogramResult } from '../../../common/types';
 import { apiService } from './utils';
-import { API_URLS } from '../../../common/constants/rest_api';
+import { API_URLS } from '../../../common/constants';
 
 export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> = async ({
   monitorId,

@@ -17,4 +17,3 @@ export const setDynamicSettingsSuccess = createAction<DynamicSettings>(
   'SET_DYNAMIC_SETTINGS_SUCCESS'
 );
 export const setDynamicSettingsFail = createAction<Error>('SET_DYNAMIC_SETTINGS_FAIL');
-export const acknowledgeSetDynamicSettings = createAction<{}>('ACKNOWLEDGE_SET_DYNAMIC_SETTINGS');

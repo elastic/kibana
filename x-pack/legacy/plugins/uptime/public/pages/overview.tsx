@@ -8,11 +8,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import {
-  MonitorList,
-  OverviewPageParsingErrorCallout,
-  StatusPanel,
-} from '../components/functional';
 import { useUptimeTelemetry, UptimePage, useGetUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
@@ -22,6 +17,9 @@ import { EmptyState, FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { MonitorList } from '../components/overview/monitor_list';
+import { ParsingErrorCallout } from '../components/overview';
+import { StatusPanel } from '../components/overview/status_panel';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
@@ -112,7 +110,7 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
           <EuiFlexItemStyled grow={true}>
             <FilterGroup esFilters={esFilters} />
           </EuiFlexItemStyled>
-          {error && <OverviewPageParsingErrorCallout error={error} />}
+          {error && <ParsingErrorCallout error={error} />}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <StatusPanel />

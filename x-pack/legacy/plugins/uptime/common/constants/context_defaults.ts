@@ -11,7 +11,7 @@ import { SortOrder, CursorDirection } from '../graphql/types';
  */
 export const CONTEXT_DEFAULTS = {
   /**
-   * The application cannot assume a basepath.
+   * The application cannot assume a basePath.
    */
   BASE_PATH: '',
 

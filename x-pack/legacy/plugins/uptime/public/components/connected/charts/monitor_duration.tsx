@@ -12,7 +12,7 @@ import {
   getMLCapabilitiesAction,
   getMonitorDurationAction,
 } from '../../../state/actions';
-import { DurationChartComponent } from '../../functional/charts';
+import { DurationChartComponent } from '../../common/charts';
 import {
   anomaliesSelector,
   hasMLFeatureAvailable,

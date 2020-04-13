@@ -49,7 +49,7 @@ const dateStops: Array<{ key: number; value: string }> = [
 ];
 
 /**
- * Returns an appropriate label format bbased on pre-defined intervals.
+ * Returns an appropriate label format based on pre-defined intervals.
  * @param delta The length of the timespan in milliseconds
  */
 export const getLabelFormat = (delta: number): string => {

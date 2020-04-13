@@ -266,7 +266,7 @@ export interface Monitor {
 
   check_group?: string | null;
 }
-/** Metadata added by a proccessor, which is specified in its configuration. */
+/** Metadata added by a processor, which is specified in its configuration. */
 export interface Observer {
   /** Geolocation data for the agent. */
   geo?: Geo | null;
@@ -360,10 +360,6 @@ export interface Url {
   path?: string | null;
 
   query?: string | null;
-}
-
-export interface DocCount {
-  count: UnsignedInteger;
 }
 
 export interface Snapshot {

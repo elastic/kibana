@@ -7,10 +7,10 @@
 import React, { useContext, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useUrlParams } from '../../../hooks';
-import { parseFiltersMap } from '../../functional/filter_group/parse_filter_map';
+import { parseFiltersMap } from '../../overview/filter_group/parse_filter_map';
 import { AppState } from '../../../state';
 import { fetchOverviewFilters, GetOverviewFiltersPayload } from '../../../state/actions';
-import { FilterGroupComponent } from '../../functional/filter_group';
+import { FilterGroupComponent } from '../../overview/filter_group';
 import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 import { UptimeRefreshContext } from '../../../contexts';
 

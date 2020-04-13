@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { UptimeAlertsFlyoutWrapperComponent } from '../../functional';
 import { setAlertFlyoutVisible } from '../../../state/actions';
 import { selectAlertFlyoutVisibility } from '../../../state/selectors';
+import { UptimeAlertsFlyoutWrapperComponent } from '../../overview/alerts';
 
 interface Props {
   alertTypeId?: string;

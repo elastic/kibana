@@ -10,7 +10,7 @@ import { AppState } from '../../../state';
 import { monitorDetailsSelector } from '../../../state/selectors';
 import { MonitorDetailsActionPayload } from '../../../state/actions/types';
 import { getMonitorDetailsAction } from '../../../state/actions/monitor';
-import { MonitorListDrawerComponent } from '../../functional/monitor_list/monitor_list_drawer/monitor_list_drawer';
+import { MonitorListDrawerComponent } from '../../overview/monitor_list/monitor_list_drawer/monitor_list_drawer';
 import { useGetUrlParams } from '../../../hooks';
 import { MonitorSummary } from '../../../../common/graphql/types';
 import { MonitorDetails } from '../../../../common/runtime_types/monitor';

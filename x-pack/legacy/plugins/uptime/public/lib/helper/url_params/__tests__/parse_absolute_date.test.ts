@@ -24,7 +24,7 @@ describe('parseAbsoluteDate', () => {
 
   it('returns the default value if the parser provides `undefined`', () => {
     dateMathSpy.mockReturnValue(undefined);
-    const result = parseAbsoluteDate('this is not a valid datae', 12345);
+    const result = parseAbsoluteDate('this is not a valid date', 12345);
     expect(result).toBe(12345);
   });
 });

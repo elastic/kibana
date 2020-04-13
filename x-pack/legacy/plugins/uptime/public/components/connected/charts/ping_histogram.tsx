@@ -10,10 +10,10 @@ import { AppState } from '../../../state';
 import {
   PingHistogramComponent,
   PingHistogramComponentProps,
-} from '../../functional/charts/ping_histogram';
+} from '../../common/charts/ping_histogram';
 import { getPingHistogram } from '../../../state/actions';
 import { selectPingHistogram } from '../../../state/selectors';
-import { withResponsiveWrapper, ResponsiveWrapperProps } from '../../higher_order';
+import { withResponsiveWrapper, ResponsiveWrapperProps } from '../../common/higher_order';
 import { GetPingHistogramParams, HistogramResult } from '../../../../common/types';
 import { useGetUrlParams } from '../../../hooks';
 

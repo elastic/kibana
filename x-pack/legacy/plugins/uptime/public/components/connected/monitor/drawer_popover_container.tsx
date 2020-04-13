@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { AppState } from '../../../state';
 import { isIntegrationsPopupOpen } from '../../../state/selectors';
 import { PopoverState, toggleIntegrationsPopover } from '../../../state/actions';
-import { MonitorListActionsPopoverComponent } from '../../functional/monitor_list/monitor_list_drawer';
+import { MonitorListActionsPopoverComponent } from '../../overview/monitor_list/monitor_list_drawer';
 
 const mapStateToProps = (state: AppState) => ({
   popoverState: isIntegrationsPopupOpen(state),

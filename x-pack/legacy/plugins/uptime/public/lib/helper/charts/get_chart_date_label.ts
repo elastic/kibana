@@ -11,7 +11,7 @@ import { CHART_FORMAT_LIMITS } from '../../../../common/constants';
 /**
  * Generates an appropriate date formatting string intended for the y-axis
  * label of timeseries charts. The function will return day/month values for shorter
- * timespans that cross the local date threshold, otherwise it estimates an appropriate
+ * time spans that cross the local date threshold, otherwise it estimates an appropriate
  * label for several different stops.
  * @param dateRangeStart the beginning of the date range
  * @param dateRangeEnd the end of the date range

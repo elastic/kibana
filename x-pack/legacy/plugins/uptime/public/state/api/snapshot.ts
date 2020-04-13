@@ -6,7 +6,7 @@
 
 import { SnapshotType, Snapshot } from '../../../common/runtime_types';
 import { apiService } from './utils';
-import { API_URLS } from '../../../common/constants/rest_api';
+import { API_URLS } from '../../../common/constants';
 
 export interface SnapShotQueryParams {
   dateRangeStart: string;
