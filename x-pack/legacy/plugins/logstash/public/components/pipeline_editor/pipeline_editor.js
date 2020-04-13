@@ -236,15 +236,7 @@ class PipelineEditorUi extends React.Component {
   };
 
   getPipelineHeadingText = () => {
-    const {
-      routeService: {
-        current: {
-          params: { clone, id },
-        },
-      },
-      isNewPipeline,
-      intl,
-    } = this.props;
+    const { clone, id, isNewPipeline, intl } = this.props;
 
     if (!!clone && id) {
       return intl.formatMessage(
@@ -502,6 +494,8 @@ class PipelineEditorUi extends React.Component {
 }
 
 PipelineEditorUi.propTypes = {
+  id: PropTypes.string,
+  clone: PropTypes.bool.isRequired,
   close: PropTypes.func.isRequired,
   isNewPipeline: PropTypes.bool.isRequired,
   licenseService: PropTypes.shape({
@@ -526,14 +520,6 @@ PipelineEditorUi.propTypes = {
   pipelineService: PropTypes.shape({
     deletePipeline: PropTypes.func.isRequired,
     savePipeline: PropTypes.func.isRequired,
-  }).isRequired,
-  routeService: PropTypes.shape({
-    current: PropTypes.shape({
-      params: PropTypes.shape({
-        clone: PropTypes.oneOf([true, undefined]),
-        id: PropTypes.string,
-      }),
-    }),
   }).isRequired,
   toastNotifications: PropTypes.shape({
     addWarning: PropTypes.func.isRequired,

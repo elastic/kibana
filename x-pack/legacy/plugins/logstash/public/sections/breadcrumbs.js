@@ -5,11 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 export function getPipelineListBreadcrumbs() {
   return [
-    MANAGEMENT_BREADCRUMB,
     {
       text: i18n.translate('xpack.logstash.pipelines.listBreadcrumb', {
         defaultMessage: 'Pipelines',
@@ -19,12 +17,11 @@ export function getPipelineListBreadcrumbs() {
   ];
 }
 
-export function getPipelineEditBreadcrumbs($route) {
-  const { pipeline } = $route.current.locals;
+export function getPipelineEditBreadcrumbs(pipelineId) {
   return [
     ...getPipelineListBreadcrumbs(),
     {
-      text: pipeline.id,
+      text: pipelineId,
     },
   ];
 }

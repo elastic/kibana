@@ -20,11 +20,8 @@ export const logstash = kibana =>
       }).default();
     },
     uiExports: {
-      managementSections: [
-        'plugins/logstash/sections/pipeline_list',
-        'plugins/logstash/sections/pipeline_edit',
-      ],
-      home: ['plugins/logstash/lib/register_home_feature'],
+      managementSections: ['plugins/logstash/shim'],
+      home: ['plugins/logstash/shim'],
     },
     init: server => {
       registerLicenseChecker(server);

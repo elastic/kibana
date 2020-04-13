@@ -5,17 +5,15 @@
  */
 
 import moment from 'moment';
-import chrome from 'ui/chrome';
 import { ROUTES, MONITORING } from '../../../../../../plugins/logstash/common/constants';
-import { PipelineListItem } from 'plugins/logstash/models/pipeline_list_item';
+import { PipelineListItem } from '../../models/pipeline_list_item';
 
 export class MonitoringService {
-  constructor($http, Promise, monitoringUiEnabled, clusterService) {
-    this.$http = $http;
-    this.Promise = Promise;
+  constructor(http, monitoringUiEnabled, clusterService) {
+    this.http = http;
     this.monitoringUiEnabled = monitoringUiEnabled;
     this.clusterService = clusterService;
-    this.basePath = chrome.addBasePath(ROUTES.MONITORING_API_ROOT);
+    this.basePath = http.basePath.prepend(ROUTES.MONITORING_API_ROOT);
   }
 
   isMonitoringEnabled() {
@@ -32,16 +30,16 @@ export class MonitoringService {
       .then(cluster => {
         const url = `${this.basePath}/v1/clusters/${cluster.uuid}/logstash/pipeline_ids`;
         const now = moment.utc();
-        const body = {
+        const body = JSON.stringify({
           timeRange: {
             max: now.toISOString(),
             min: now.subtract(MONITORING.ACTIVE_PIPELINE_RANGE_S, 'seconds').toISOString(),
           },
-        };
-        return this.$http.post(url, body);
+        });
+        return this.http.post(url, { body });
       })
       .then(response =>
-        response.data.map(pipeline => PipelineListItem.fromUpstreamMonitoringJSON(pipeline))
+        response.map(pipeline => PipelineListItem.fromUpstreamMonitoringJSON(pipeline))
       )
       .catch(() => []);
   }

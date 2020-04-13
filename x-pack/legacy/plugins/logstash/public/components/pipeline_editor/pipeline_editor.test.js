@@ -17,7 +17,6 @@ describe('PipelineEditor component', () => {
   let open;
   let pipeline;
   let pipelineService;
-  let routeService;
   let toastNotifications;
   let username;
 
@@ -47,14 +46,6 @@ describe('PipelineEditor component', () => {
       deletePipeline: jest.fn(),
       savePipeline: jest.fn(),
     };
-    routeService = {
-      current: {
-        params: {
-          clone: undefined,
-          id: undefined,
-        },
-      },
-    };
     toastNotifications = {
       addWarning: jest.fn(),
       addSuccess: jest.fn(),
@@ -62,13 +53,14 @@ describe('PipelineEditor component', () => {
     };
     username = 'elastic';
     props = {
+      clone: false,
+      id: 'pipelineId',
       close,
       isNewPipeline,
       licenseService,
       open,
       pipeline,
       pipelineService,
-      routeService,
       toastNotifications,
       username,
     };
@@ -79,10 +71,8 @@ describe('PipelineEditor component', () => {
   });
 
   it('matches snapshot for clone pipeline', () => {
-    routeService.current.params = {
-      clone: true,
-      id: 'pipelineToClone',
-    };
+    props.clone = true;
+    props.id = 'pipelineToClone';
     expect(shallowWithIntl(<PipelineEditor.WrappedComponent {...props} />)).toMatchSnapshot();
   });
 

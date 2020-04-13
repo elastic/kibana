@@ -4,68 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { ROUTES, MONITORING } from '../../../../../../plugins/logstash/common/constants';
-import { PipelineListItem } from 'plugins/logstash/models/pipeline_list_item';
+import { PipelineListItem } from '../../models/pipeline_list_item';
 
 const RECENTLY_DELETED_PIPELINE_IDS_STORAGE_KEY = 'xpack.logstash.recentlyDeletedPipelines';
 
 export class PipelinesService {
-  constructor($http, $window, Promise, monitoringService) {
-    this.$http = $http;
-    this.$window = $window;
-    this.Promise = Promise;
+  constructor(http, monitoringService) {
+    this.http = http;
     this.monitoringService = monitoringService;
-    this.basePath = chrome.addBasePath(ROUTES.API_ROOT);
+    this.basePath = http.basePath.prepend(ROUTES.API_ROOT);
   }
 
   getPipelineList() {
-    return this.Promise.all([
-      this.getManagementPipelineList(),
-      this.getMonitoringPipelineList(),
-    ]).then(([managementPipelines, monitoringPipelines]) => {
-      const now = Date.now();
+    return Promise.all([this.getManagementPipelineList(), this.getMonitoringPipelineList()]).then(
+      ([managementPipelines, monitoringPipelines]) => {
+        const now = Date.now();
 
-      // Monitoring will report centrally-managed pipelines as well, including recently-deleted centrally-managed ones.
-      // If there's a recently-deleted pipeline we're keeping track of BUT monitoring doesn't report it, that means
-      // it's not running in Logstash any more. So we can stop tracking it as a recently-deleted pipeline.
-      const monitoringPipelineIds = monitoringPipelines.map(pipeline => pipeline.id);
-      this.getRecentlyDeleted().forEach(recentlyDeletedPipeline => {
-        // We don't want to stop tracking the recently-deleted pipeline until Monitoring has had some
-        // time to report on it. Otherwise, if we stop tracking first, *then* Monitoring reports it, we'll
-        // still end up showing it in the list until Monitoring stops reporting it.
-        if (now - recentlyDeletedPipeline.deletedOn < MONITORING.ACTIVE_PIPELINE_RANGE_S * 1000) {
-          return;
-        }
+        // Monitoring will report centrally-managed pipelines as well, including recently-deleted centrally-managed ones.
+        // If there's a recently-deleted pipeline we're keeping track of BUT monitoring doesn't report it, that means
+        // it's not running in Logstash any more. So we can stop tracking it as a recently-deleted pipeline.
+        const monitoringPipelineIds = monitoringPipelines.map(pipeline => pipeline.id);
+        this.getRecentlyDeleted().forEach(recentlyDeletedPipeline => {
+          // We don't want to stop tracking the recently-deleted pipeline until Monitoring has had some
+          // time to report on it. Otherwise, if we stop tracking first, *then* Monitoring reports it, we'll
+          // still end up showing it in the list until Monitoring stops reporting it.
+          if (now - recentlyDeletedPipeline.deletedOn < MONITORING.ACTIVE_PIPELINE_RANGE_S * 1000) {
+            return;
+          }
 
-        // If Monitoring is still reporting the pipeline, don't stop tracking it yet
-        if (monitoringPipelineIds.includes(recentlyDeletedPipeline.id)) {
-          return;
-        }
+          // If Monitoring is still reporting the pipeline, don't stop tracking it yet
+          if (monitoringPipelineIds.includes(recentlyDeletedPipeline.id)) {
+            return;
+          }
 
-        this.removeFromRecentlyDeleted(recentlyDeletedPipeline.id);
-      });
+          this.removeFromRecentlyDeleted(recentlyDeletedPipeline.id);
+        });
 
-      // Merge centrally-managed pipelines with pipelines reported by monitoring. Take care to dedupe
-      // while merging because monitoring will (rightly) report centrally-managed pipelines as well,
-      // including recently-deleted ones!
-      const managementPipelineIds = managementPipelines.map(pipeline => pipeline.id);
-      return managementPipelines.concat(
-        monitoringPipelines.filter(
-          monitoringPipeline =>
-            !managementPipelineIds.includes(monitoringPipeline.id) &&
-            !this.isRecentlyDeleted(monitoringPipeline.id)
-        )
-      );
-    });
+        // Merge centrally-managed pipelines with pipelines reported by monitoring. Take care to dedupe
+        // while merging because monitoring will (rightly) report centrally-managed pipelines as well,
+        // including recently-deleted ones!
+        const managementPipelineIds = managementPipelines.map(pipeline => pipeline.id);
+        return managementPipelines.concat(
+          monitoringPipelines.filter(
+            monitoringPipeline =>
+              !managementPipelineIds.includes(monitoringPipeline.id) &&
+              !this.isRecentlyDeleted(monitoringPipeline.id)
+          )
+        );
+      }
+    );
   }
 
   getManagementPipelineList() {
-    return this.$http
-      .get(`${this.basePath}/pipelines`)
-      .then(response =>
-        response.data.pipelines.map(pipeline => PipelineListItem.fromUpstreamJSON(pipeline))
-      );
+    return this.http.get(`${this.basePath}/pipelines`).then(response => {
+      return response.pipelines.map(pipeline => PipelineListItem.fromUpstreamJSON(pipeline));
+    });
   }
 
   getMonitoringPipelineList() {
@@ -79,12 +73,12 @@ export class PipelinesService {
    * @return Promise { numSuccesses, numErrors }
    */
   deletePipelines(pipelineIds) {
-    const body = {
+    const body = JSON.stringify({
       pipelineIds,
-    };
-    return this.$http.post(`${this.basePath}/pipelines/delete`, body).then(response => {
+    });
+    return this.http.post(`${this.basePath}/pipelines/delete`, { body }).then(response => {
       this.addToRecentlyDeleted(...pipelineIds);
-      return response.data.results;
+      return response.results;
     });
   }
 
@@ -116,7 +110,7 @@ export class PipelinesService {
   }
 
   getRecentlyDeleted() {
-    const recentlyDeletedPipelines = this.$window.localStorage.getItem(
+    const recentlyDeletedPipelines = window.localStorage.getItem(
       RECENTLY_DELETED_PIPELINE_IDS_STORAGE_KEY
     );
     if (!recentlyDeletedPipelines) {
@@ -127,7 +121,7 @@ export class PipelinesService {
   }
 
   setRecentlyDeleted(recentlyDeletedPipelineIds) {
-    this.$window.localStorage.setItem(
+    window.localStorage.setItem(
       RECENTLY_DELETED_PIPELINE_IDS_STORAGE_KEY,
       JSON.stringify(recentlyDeletedPipelineIds)
     );
