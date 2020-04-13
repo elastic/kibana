@@ -9,7 +9,7 @@ Alerts and actions are enabled by default in {kib}, but require you configure th
 
 . <<using-kibana-with-security,Set up {kib} to work with {stack} {security-features}>>.
 . <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.
-. <<general-alert-action-settings,Specify a value for `xpack.encrypted_saved_objects.encryptionKey`>>.
+. <<general-alert-action-settings,Specify a value for `xpack.encryptedSavedObjects.encryptionKey`>>.
 
 You can configure the following settings in the `kibana.yml` file.
 
@@ -18,7 +18,7 @@ You can configure the following settings in the `kibana.yml` file.
 [[general-alert-action-settings]]
 ==== General settings
 
-`xpack.encrypted_saved_objects.encryptionKey`::
+`xpack.encryptedSavedObjects.encryptionKey`::
 
 A string of 32 or more characters used to encrypt sensitive properties on alerts and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.  
 +

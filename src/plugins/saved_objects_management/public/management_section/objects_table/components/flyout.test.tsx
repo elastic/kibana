@@ -498,7 +498,8 @@ describe('Flyout', () => {
       expect(resolveIndexPatternConflictsMock).toHaveBeenCalledWith(
         component.instance().resolutions,
         mockConflictedIndexPatterns,
-        true
+        true,
+        defaultProps.indexPatterns
       );
       expect(saveObjectsMock).toHaveBeenCalledWith(
         mockConflictedSavedObjectsLinkedToSavedSearches,

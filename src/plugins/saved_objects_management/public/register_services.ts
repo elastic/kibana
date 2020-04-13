@@ -50,6 +50,7 @@ export const registerServices = async (
       service: discover.savedSearches.createLoader({
         savedObjectsClient: coreStart.savedObjects.client,
         indexPatterns: data.indexPatterns,
+        search: data.search,
         chrome: coreStart.chrome,
         overlays: coreStart.overlays,
       }),
