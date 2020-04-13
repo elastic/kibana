@@ -3,9 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export const WeightedCreateDatasourceSteps = [
-  'selectConfig',
-  'selectPackage',
-  'configure',
-  'review',
-];
+
+export * from './xyz_tms_source';
+export * from './layer_wizard';
