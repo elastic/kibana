@@ -6,36 +6,20 @@
 
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
 import {
-  CreateDatasourceResponse,
-  GetAgentStatusResponse,
   GetDatasourcesRequest,
-} from '../../../../../ingest_manager/common/types/rest_spec';
-import { NewPolicyData, PolicyData } from '../types';
+  GetAgentStatusResponse,
+} from '../../../../../../../ingest_manager/common';
+import {
+  NewPolicyData,
+  GetDatasourcesResponse,
+  GetDatasourceResponse,
+  UpdateDatasourceResponse,
+} from '../../../types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
 const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
-
-// FIXME: Import from ingest after - https://github.com/elastic/kibana/issues/60677
-export interface GetDatasourcesResponse {
-  items: PolicyData[];
-  total: number;
-  page: number;
-  perPage: number;
-  success: boolean;
-}
-
-// FIXME: Import from Ingest after - https://github.com/elastic/kibana/issues/60677
-export interface GetDatasourceResponse {
-  item: PolicyData;
-  success: boolean;
-}
-
-// FIXME: Import from Ingest after - https://github.com/elastic/kibana/issues/60677
-export type UpdateDatasourceResponse = CreateDatasourceResponse & {
-  item: PolicyData;
-};
 
 /**
  * Retrieves a list of endpoint specific datasources (those created with a `package.name` of
