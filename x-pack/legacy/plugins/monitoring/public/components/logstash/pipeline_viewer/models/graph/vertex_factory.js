@@ -7,6 +7,7 @@
 import { PluginVertex } from './plugin_vertex';
 import { IfVertex } from './if_vertex';
 import { QueueVertex } from './queue_vertex';
+import { SeparatorVertex } from './separator_vertex';
 
 export function vertexFactory(graph, vertexJson) {
   const type = vertexJson.type;
@@ -17,6 +18,8 @@ export function vertexFactory(graph, vertexJson) {
       return new IfVertex(graph, vertexJson);
     case 'queue':
       return new QueueVertex(graph, vertexJson);
+    case 'separator':
+      return new SeparatorVertex(graph, vertexJson);
     default:
       throw new Error(`Unknown vertex type ${type}! This shouldn't happen!`);
   }

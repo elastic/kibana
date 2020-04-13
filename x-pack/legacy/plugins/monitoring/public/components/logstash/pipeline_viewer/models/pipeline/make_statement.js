@@ -7,6 +7,7 @@
 import { PluginStatement } from './plugin_statement';
 import { IfStatement } from './if_statement';
 import { Queue } from './queue';
+import { SeparatorStatement } from './separator_statement';
 
 export function makeStatement(pipelineGraphVertex, pipelineStage) {
   const klass = pipelineGraphVertex.constructor.name;
@@ -17,6 +18,8 @@ export function makeStatement(pipelineGraphVertex, pipelineStage) {
       return IfStatement.fromPipelineGraphVertex(pipelineGraphVertex, pipelineStage);
     case 'QueueVertex':
       return Queue.fromPipelineGraphVertex(pipelineGraphVertex, pipelineStage);
+    case 'SeparatorVertex':
+      return SeparatorStatement.fromPipelineGraphVertex(pipelineGraphVertex, pipelineStage);
     default:
       throw new Error(`Unknown vertex class: ${klass}`);
   }
