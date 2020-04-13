@@ -47,9 +47,9 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
-  getFieldByName(fieldName: string): IField;
+  getFieldByName(fieldName: string): IField | null;
   getSyncMeta(): VectorSourceSyncMeta;
-  getSupportedShapeTypes(): VECTOR_SHAPE_TYPES[];
+  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPES[]>;
   canFormatFeatureProperties(): boolean;
   getApplyGlobalQuery(): boolean;
   getFieldNames(): string[];

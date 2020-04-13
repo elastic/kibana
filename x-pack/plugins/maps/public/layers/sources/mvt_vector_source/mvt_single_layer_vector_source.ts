@@ -6,9 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { AbstractSource, ImmutableSourceProperty } from '../source';
+import { ImmutableSourceProperty } from '../source';
 import { SingleTiledVectorLayer } from '../../tiled_vector_layer';
-import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
+import {
+  AbstractVectorSource,
+  GeoJsonWithMeta,
+  ITiledSingleLayerVectorSource,
+} from '../vector_source';
 import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { IField } from '../../fields/field';
@@ -27,7 +31,7 @@ export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle'
   defaultMessage: 'Vector Tile Layer',
 });
 
-export class MVTSingleLayerVectorSource extends AbstractSource
+export class MVTSingleLayerVectorSource extends AbstractVectorSource
   implements ITiledSingleLayerVectorSource {
   static type = SOURCE_TYPES.MVT_SINGLE_LAYER;
   static title = i18n.translate('xpack.maps.source.tiledSingleLayerVectorTitle', {
@@ -98,8 +102,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return [];
   }
 
-  //  getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
-
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
@@ -123,7 +125,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     };
   }
 
-  async getSupportedShapeTypes() {
+  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPES[]> {
     return [VECTOR_SHAPE_TYPES.POINT, VECTOR_SHAPE_TYPES.LINE, VECTOR_SHAPE_TYPES.POLYGON];
   }
 

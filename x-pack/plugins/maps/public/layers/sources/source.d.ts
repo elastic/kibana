@@ -19,7 +19,7 @@ export type Attribution = {
 };
 
 export interface ISource {
-  createDefaultLayer(): ILayer;
+  createDefaultLayer(options?: LayerDescriptor): ILayer;
   destroy(): void;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): object;

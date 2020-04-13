@@ -24,10 +24,11 @@ export interface Props {
 }
 
 interface State {
-  tmsInput: string;
-  tmsCanPreview: boolean;
-  attributionText: string;
-  attributionUrl: string;
+  urlTemplate: string;
+  layerName: string;
+  minZoom: number;
+  maxZoom: number;
+  mvtCanPreview: boolean;
 }
 
 export class MVTVectorSourceEditor extends Component<Props, State> {
