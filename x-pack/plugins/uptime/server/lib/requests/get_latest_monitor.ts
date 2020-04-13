@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { PingType, Ping } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { Ping } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
 export interface GetLatestMonitorParams {
   /** @member dateRangeStart timestamp bounds */
@@ -55,11 +53,9 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   };
 
   const result = await callES('search', params);
-  const source = result.hits?.hits?.[0]?._source ?? {};
+  const doc = result.hits?.hits?.[0];
+  const source = doc?._source ?? {};
+  const docId = doc?._id ?? '';
 
-  const decoded = PingType.decode({ ...source, timestamp: source['@timestamp'] });
-  if (isRight(decoded)) {
-    return decoded.right;
-  }
-  throw new Error(JSON.stringify(PathReporter.report(decoded)));
+  return { ...source, docId, timestamp: source['@timestamp'] };
 };

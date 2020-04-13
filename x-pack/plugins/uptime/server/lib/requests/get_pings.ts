@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
   GetPingsParams,
   HttpResponseBody,
   PingsResponse,
-  PingsResponseType,
   Ping,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
@@ -75,7 +72,8 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
 
   const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
 
-  const pings: Ping[] = hits.map(({ _source }: any) => {
+  const pings: Ping[] = hits.map((doc: any) => {
+    const { _id, _source } = doc;
     // Calculate here the length of the content string in bytes, this is easier than in client JS, where
     // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
     // client but this is cleaner.
@@ -84,16 +82,12 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
       httpBody.content_bytes = Buffer.byteLength(httpBody.content);
     }
 
-    return { ..._source, timestamp: _source['@timestamp'] };
+    return { ..._source, timestamp: _source['@timestamp'], docId: _id };
   });
 
-  const decoded = PingsResponseType.decode({
+  return {
     total: total.value,
     locations: locations.buckets.map((bucket: { key: string }) => bucket.key),
     pings,
-  });
-  if (isRight(decoded)) {
-    return decoded.right;
-  }
-  throw new Error(JSON.stringify(PathReporter.report(decoded)));
+  };
 };

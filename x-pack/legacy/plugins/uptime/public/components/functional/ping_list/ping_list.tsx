@@ -42,8 +42,8 @@ export const toggleDetails = (
   setExpandedRows: (update: Record<string, JSX.Element>) => any
 ) => {
   // If already expanded, collapse
-  if (expandedRows[ping.timestamp]) {
-    delete expandedRows[ping.timestamp];
+  if (expandedRows[ping.docId]) {
+    delete expandedRows[ping.docId];
     setExpandedRows({ ...expandedRows });
     return;
   }
@@ -51,7 +51,7 @@ export const toggleDetails = (
   // Otherwise expand this row
   setExpandedRows({
     ...expandedRows,
-    [ping.timestamp]: <PingListExpandedRowComponent ping={ping} />,
+    [ping.docId]: <PingListExpandedRowComponent ping={ping} />,
   });
 };
 
@@ -152,7 +152,7 @@ export const PingListComponent = (props: Props) => {
         defaultMessage: 'Status',
       }),
       render: (pingStatus: string, item: Ping) => (
-        <div data-test-subj={`xpack.uptime.pingList.ping-${item.timestamp}`}>
+        <div data-test-subj={`xpack.uptime.pingList.ping-${item.docId}`}>
           <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
             {pingStatus === 'up'
               ? i18n.translate('xpack.uptime.pingList.statusColumnHealthUpLabel', {
@@ -240,13 +240,13 @@ export const PingListComponent = (props: Props) => {
             onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
             disabled={!item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)}
             aria-label={
-              expandedRows[item.timestamp]
+              expandedRows[item.docId]
                 ? i18n.translate('xpack.uptime.pingList.collapseRow', {
                     defaultMessage: 'Collapse',
                   })
                 : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
             }
-            iconType={expandedRows[item.timestamp] ? 'arrowUp' : 'arrowDown'}
+            iconType={expandedRows[item.docId] ? 'arrowUp' : 'arrowDown'}
           />
         );
       },
@@ -323,7 +323,7 @@ export const PingListComponent = (props: Props) => {
         isExpandable={true}
         hasActions={true}
         items={pings}
-        itemId="timestamp"
+        itemId="docId"
         itemIdToExpandedRowMap={expandedRows}
         pagination={pagination}
         onChange={(criteria: any) => {

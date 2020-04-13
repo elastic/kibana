@@ -49,6 +49,7 @@ export const PingType = t.intersection([
   t.type({
     timestamp: t.string,
     monitor: MonitorType,
+    docId: t.string,
   }),
   t.partial({
     agent: t.intersection([
@@ -134,7 +135,7 @@ export const PingType = t.intersection([
       down: t.number,
       up: t.number,
     }),
-    tags: t.string,
+    tags: t.array(t.string),
     tcp: t.partial({
       rtt: t.partial({
         connect: t.partial({
