@@ -20,16 +20,20 @@
 import React from 'react';
 
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }) => {
+interface CallOutsProps {
+  deprecatedLangsInUse: string[];
+  painlessDocLink: string;
+}
+
+export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProps) => {
   if (!deprecatedLangsInUse.length) {
     return null;
   }
 
   return (
-    <div>
+    <>
       <EuiCallOut
         title={
           <FormattedMessage
@@ -60,6 +64,6 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }) => {
         </p>
       </EuiCallOut>
       <EuiSpacer size="m" />
-    </div>
+    </>
   );
 };

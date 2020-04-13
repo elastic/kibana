@@ -18,27 +18,24 @@
  */
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-
-import { EuiInMemoryTable } from '@elastic/eui';
-
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
-export class Table extends PureComponent {
-  static propTypes = {
-    indexPattern: PropTypes.object.isRequired,
-    items: PropTypes.array.isRequired,
-    editField: PropTypes.func.isRequired,
-    deleteField: PropTypes.func.isRequired,
-  };
+import { ScriptedFieldItem } from '../../types';
+import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
 
-  renderFormatCell = value => {
+interface TableProps {
+  indexPattern: IIndexPattern;
+  items: ScriptedFieldItem[];
+  editField: (field: ScriptedFieldItem) => void;
+  deleteField: (field: ScriptedFieldItem) => void;
+}
+
+export class Table extends PureComponent<TableProps> {
+  renderFormatCell = (value: string) => {
     const { indexPattern } = this.props;
-
-    const title =
-      indexPattern.fieldFormatMap[value] && indexPattern.fieldFormatMap[value].type
-        ? indexPattern.fieldFormatMap[value].type.title
-        : '';
+    const title = get(indexPattern, ['fieldFormatMap', value, 'type', 'title'], '');
 
     return <span>{title}</span>;
   };
@@ -46,7 +43,7 @@ export class Table extends PureComponent {
   render() {
     const { items, editField, deleteField } = this.props;
 
-    const columns = [
+    const columns: Array<EuiBasicTableColumn<ScriptedFieldItem>> = [
       {
         field: 'displayName',
         name: i18n.translate('kbn.management.editIndexPattern.scripted.table.nameHeader', {
@@ -101,6 +98,7 @@ export class Table extends PureComponent {
         name: '',
         actions: [
           {
+            type: 'icon',
             name: i18n.translate('kbn.management.editIndexPattern.scripted.table.editHeader', {
               defaultMessage: 'Edit',
             }),
@@ -112,6 +110,7 @@ export class Table extends PureComponent {
             onClick: editField,
           },
           {
+            type: 'icon',
             name: i18n.translate('kbn.management.editIndexPattern.scripted.table.deleteHeader', {
               defaultMessage: 'Delete',
             }),
