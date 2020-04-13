@@ -25,6 +25,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   search,
   size,
 }) => {
+  const searchWrapper = `*${search}*`;
   const params: any = {
     index: dynamicSettings.heartbeatIndices,
     body: {
@@ -78,28 +79,28 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
       {
         wildcard: {
           'tls.issued_by': {
-            value: search,
+            value: searchWrapper,
           },
         },
       },
       {
         wildcard: {
           'tls.common_name': {
-            value: search,
+            value: searchWrapper,
           },
         },
       },
       {
         wildcard: {
           'monitor.id': {
-            value: search,
+            value: searchWrapper,
           },
         },
       },
       {
         wildcard: {
           'monitor.name': {
-            value: search,
+            value: searchWrapper,
           },
         },
       },
