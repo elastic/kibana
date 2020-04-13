@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MiddlewareFactory, PolicyListState, GetDatasourcesResponse } from '../../types';
+import { MiddlewareFactory, PolicyListState, GetPolicyListResponse } from '../../types';
 import { sendGetEndpointSpecificDatasources } from './services/ingest';
 
 export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = coreStart => {
@@ -29,7 +29,7 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
         pageIndex = state.pageIndex;
       }
 
-      let response: GetDatasourcesResponse;
+      let response: GetPolicyListResponse;
 
       try {
         response = await sendGetEndpointSpecificDatasources(http, {
