@@ -64,10 +64,5 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
     };
   }
 
-  // FIXME: PT remove this
-  if (action.type === 'userNavigatedFromPage' && action.payload === 'policyListPage') {
-    return initialPolicyListState();
-  }
-
   return state;
 };
