@@ -20,26 +20,37 @@
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { getAggTypes } from './index';
 
-import { isBucketAggType } from './buckets/_bucket_agg_type';
+import { isBucketAggType } from './buckets/bucket_agg_type';
 import { isMetricAggType } from './metrics/metric_agg_type';
-
-const aggTypes = getAggTypes({ uiSettings: coreMock.createStart().uiSettings });
-
-const bucketAggs = aggTypes.buckets;
-const metricAggs = aggTypes.metrics;
+import { QueryStart } from '../../query';
+import { FieldFormatsStart } from '../../field_formats';
 
 describe('AggTypesComponent', () => {
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createSetup();
+
+  const aggTypes = getAggTypes({
+    uiSettings: coreSetup.uiSettings,
+    query: {} as QueryStart,
+    getInternalStartServices: () => ({
+      notifications: coreStart.notifications,
+      fieldFormats: {} as FieldFormatsStart,
+    }),
+  });
+
+  const { buckets, metrics } = aggTypes;
+
   describe('bucket aggs', () => {
-    it('all extend BucketAggType', () => {
-      bucketAggs.forEach(bucketAgg => {
+    test('all extend BucketAggType', () => {
+      buckets.forEach(bucketAgg => {
         expect(isBucketAggType(bucketAgg)).toBeTruthy();
       });
     });
   });
 
   describe('metric aggs', () => {
-    it('all extend MetricAggType', () => {
-      metricAggs.forEach(metricAgg => {
+    test('all extend MetricAggType', () => {
+      metrics.forEach(metricAgg => {
         expect(isMetricAggType(metricAgg)).toBeTruthy();
       });
     });

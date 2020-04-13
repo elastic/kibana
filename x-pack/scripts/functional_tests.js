@@ -17,7 +17,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/alerting_api_integration/spaces_only/config.ts'),
   require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/detection_engine_api_integration/security_and_spaces/config.ts'),
-  require.resolve('../test/plugin_api_integration/config.js'),
+  require.resolve('../test/plugin_api_integration/config.ts'),
   require.resolve('../test/plugin_functional/config.ts'),
   require.resolve('../test/kerberos_api_integration/config.ts'),
   require.resolve('../test/kerberos_api_integration/anonymous_access.config.ts'),
@@ -27,6 +27,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/oidc_api_integration/implicit_flow.config.ts'),
   require.resolve('../test/pki_api_integration/config.ts'),
   require.resolve('../test/login_selector_api_integration/config.ts'),
+  require.resolve('../test/encrypted_saved_objects_api_integration/config.ts'),
   require.resolve('../test/spaces_api_integration/spaces_only/config.ts'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_trial.ts'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_basic.ts'),
@@ -42,6 +43,8 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/licensing_plugin/config.ts'),
   require.resolve('../test/licensing_plugin/config.public.ts'),
   require.resolve('../test/licensing_plugin/config.legacy.ts'),
+  require.resolve('../test/functional_endpoint_ingest_failure/config.ts'),
+  require.resolve('../test/functional_endpoint/config.ts'),
 ];
 
 require('@kbn/plugin-helpers').babelRegister();

@@ -12,11 +12,13 @@ import {
   AlertResultList,
   Immutable,
   ImmutableArray,
+  AlertDetails,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
-import { Datasource } from '../../../../ingest_manager/common/types/models';
+import { Datasource, NewDatasource } from '../../../../ingest_manager/common/types/models';
+import { GetAgentStatusResponse } from '../../../../ingest_manager/common/types/rest_spec';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -52,9 +54,27 @@ export interface ServerApiError {
 }
 
 /**
- * An Endpoint Policy.
+ * New policy data. Used when updating the policy record via ingest APIs
  */
-export type PolicyData = Datasource;
+export type NewPolicyData = NewDatasource & {
+  inputs: [
+    {
+      type: 'endpoint';
+      enabled: boolean;
+      streams: [];
+      config: {
+        policy: {
+          value: PolicyConfig;
+        };
+      };
+    }
+  ];
+};
+
+/**
+ * Endpoint Policy data, which extends Ingest's `Datasource` type
+ */
+export type PolicyData = Datasource & NewPolicyData;
 
 /**
  * Policy list store state
@@ -80,58 +100,94 @@ export interface PolicyListState {
 export interface PolicyDetailsState {
   /** A single policy item  */
   policyItem?: PolicyData;
-  /** data is being retrieved from server */
-  policyConfig?: PolicyConfig;
+  /** API error if loading data failed */
+  apiError?: ServerApiError;
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<EndpointAppLocation>;
+  /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
+  agentStatusSummary: GetAgentStatusResponse['results'];
+  /** Status of an update to the policy  */
+  updateStatus?: {
+    success: boolean;
+    error?: ServerApiError;
+  };
 }
 
 /**
- * Policy Details configuration
+ * Endpoint Policy configuration
  */
 export interface PolicyConfig {
-  windows: WindowsPolicyConfig;
-  mac: MacPolicyConfig;
-  linux: LinuxPolicyConfig;
+  windows: UIPolicyConfig['windows'] & {
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  mac: UIPolicyConfig['mac'] & {
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  linux: UIPolicyConfig['linux'] & {
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+}
+
+interface PolicyConfigAdvancedOptions {
+  elasticsearch: {
+    indices: {
+      control: string;
+      event: string;
+      logging: string;
+    };
+    kernel: {
+      connect: boolean;
+      process: boolean;
+    };
+  };
 }
 
 /**
- * Windows-specific policy configuration
+ * The set of Policy configuration settings that are show/edited via the UI
  */
-interface WindowsPolicyConfig {
-  /** malware mode can be detect, prevent or prevent and notify user */
-  malware: {
-    mode: string;
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
+export type UIPolicyConfig = {
+  windows: {
+    events: {
+      process: boolean;
+      network: boolean;
+    };
+    /** malware mode can be off, detect, prevent or prevent and notify user */
+    malware: MalwareFields;
   };
-  eventing: {
-    process: boolean;
-    network: boolean;
+  mac: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    malware: MalwareFields;
   };
-}
 
-/**
- * Mac-specific policy configuration
- */
-interface MacPolicyConfig {
-  /** malware mode can be detect, prevent or prevent and notify user */
-  malware: {
-    mode: string;
+  /**
+   * Linux-specific policy configuration that is supported via the UI
+   */
+  linux: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
   };
-  eventing: {
-    process: boolean;
-    network: boolean;
-  };
-}
-/**
- * Linux-specific policy configuration
- */
-interface LinuxPolicyConfig {
-  eventing: {
-    process: boolean;
-    network: boolean;
-  };
-}
+};
 
 /** OS used in Policy */
 export enum OS {
@@ -144,6 +200,45 @@ export enum OS {
 export enum EventingFields {
   process = 'process',
   network = 'network',
+  file = 'file',
+}
+
+/**
+ * Returns the keys of an object whose values meet a criteria.
+ *  Ex) interface largeNestedObject = {
+ *         a: {
+ *           food: Foods;
+ *           toiletPaper: true;
+ *         };
+ *         b: {
+ *           food: Foods;
+ *           streamingServices: Streams;
+ *         };
+ *         c: {};
+ *    }
+ *
+ *    type hasFoods = KeysByValueCriteria<largeNestedObject, { food: Foods }>;
+ *    The above type will be: [a, b] only, and will not include c.
+ *
+ */
+export type KeysByValueCriteria<O, Criteria> = {
+  [K in keyof O]: O[K] extends Criteria ? K : never;
+}[keyof O];
+
+/** Returns an array of the policy OSes that have a malware protection field */
+
+export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
+/** Policy: Malware protection fields */
+export interface MalwareFields {
+  mode: ProtectionModes;
+}
+
+/** Policy protection mode options */
+export enum ProtectionModes {
+  detect = 'detect',
+  prevent = 'prevent',
+  preventNotify = 'preventNotify',
+  off = 'off',
 }
 
 export interface GlobalState {
@@ -196,7 +291,7 @@ export interface AlertListState {
   readonly location?: Immutable<EndpointAppLocation>;
 
   /** Specific Alert data to be shown in the details view */
-  readonly alertDetails?: Immutable<AlertData>;
+  readonly alertDetails?: Immutable<AlertDetails>;
 
   /** Search bar state including indexPatterns */
   readonly searchBar: AlertsSearchBarState;

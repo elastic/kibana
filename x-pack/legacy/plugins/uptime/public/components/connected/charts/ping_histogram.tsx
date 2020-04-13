@@ -15,7 +15,7 @@ import { getPingHistogram } from '../../../state/actions';
 import { selectPingHistogram } from '../../../state/selectors';
 import { withResponsiveWrapper, ResponsiveWrapperProps } from '../../higher_order';
 import { GetPingHistogramParams, HistogramResult } from '../../../../common/types';
-import { useUrlParams } from '../../../hooks';
+import { useGetUrlParams } from '../../../hooks';
 
 type Props = ResponsiveWrapperProps &
   Pick<PingHistogramComponentProps, 'height' | 'data' | 'loading'> &
@@ -30,14 +30,13 @@ const PingHistogramContainer: React.FC<Props> = ({
   loading,
   esKuery,
 }) => {
-  const [getUrlParams] = useUrlParams();
   const {
     absoluteDateRangeStart,
     absoluteDateRangeEnd,
     dateRangeStart: dateStart,
     dateRangeEnd: dateEnd,
     statusFilter,
-  } = getUrlParams();
+  } = useGetUrlParams();
 
   useEffect(() => {
     loadData({ monitorId, dateStart, dateEnd, statusFilter, filters: esKuery });

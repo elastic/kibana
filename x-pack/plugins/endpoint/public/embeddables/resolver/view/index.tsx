@@ -59,6 +59,7 @@ export const Resolver = styled(
 
     const { projectionMatrix, ref, onMouseDown } = useCamera();
     const isLoading = useSelector(selectors.isLoading);
+    const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
 
     useLayoutEffect(() => {
       dispatch({
@@ -66,6 +67,7 @@ export const Resolver = styled(
         payload: { selectedEvent },
       });
     }, [dispatch, selectedEvent]);
+
     return (
       <div data-test-subj="resolverEmbeddable" className={className}>
         {isLoading ? (
@@ -79,6 +81,7 @@ export const Resolver = styled(
             ref={ref}
             role="tree"
             tabIndex={0}
+            aria-activedescendant={activeDescendantId || undefined}
           >
             {edgeLineSegments.map(([startPosition, endPosition], index) => (
               <EdgeLine
@@ -88,15 +91,22 @@ export const Resolver = styled(
                 projectionMatrix={projectionMatrix}
               />
             ))}
-            {Array.from(processNodePositions).map(([processEvent, position], index) => (
-              <ProcessEventDot
-                key={index}
-                position={position}
-                projectionMatrix={projectionMatrix}
-                event={processEvent}
-                adjacentNodeMap={processToAdjacencyMap.get(processEvent)}
-              />
-            ))}
+            {[...processNodePositions].map(([processEvent, position], index) => {
+              const adjacentNodeMap = processToAdjacencyMap.get(processEvent);
+              if (!adjacentNodeMap) {
+                // This should never happen
+                throw new Error('Issue calculating adjacency node map.');
+              }
+              return (
+                <ProcessEventDot
+                  key={index}
+                  position={position}
+                  projectionMatrix={projectionMatrix}
+                  event={processEvent}
+                  adjacentNodeMap={adjacentNodeMap}
+                />
+              );
+            })}
           </StyledResolverContainer>
         )}
         <StyledPanel />

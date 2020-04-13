@@ -7,9 +7,14 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
+import { npStart } from 'ui/new_platform';
 
-import { ViewMode } from '../../../../../../../../../src/plugins/embeddable/public';
-import { start } from '../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import {
+  ViewMode,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
+} from '../../../../../../../../../src/plugins/embeddable/public';
 import * as i18n from './translations';
 import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../maps/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../../plugins/maps/public';
@@ -45,9 +50,13 @@ const EmbeddedPanel = styled.div`
 
 export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProps) => {
   const { colors } = useContext(UptimeThemeContext);
-  const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
+  const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
-  const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const factory = npStart.plugins.embeddable.getEmbeddableFactory<
+    MapEmbeddableInput,
+    EmbeddableOutput,
+    MapEmbeddable
+  >(MAP_SAVED_OBJECT_TYPE);
 
   const input: MapEmbeddableInput = {
     id: uuid.v4(),
@@ -76,12 +85,17 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
 
   useEffect(() => {
     async function setupEmbeddable() {
-      const mapState = {
-        layerList: getLayerList(upPoints, downPoints, colors),
+      if (!factory) {
+        throw new Error('Map embeddable not found.');
+      }
+      const embeddableObject = await factory.create({
+        ...input,
         title: i18n.MAP_TITLE,
-      };
-      // @ts-ignore
-      const embeddableObject = await factory.createFromState(mapState, input, undefined);
+      });
+
+      if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
+        embeddableObject.setLayerList(getLayerList(upPoints, downPoints, colors));
+      }
 
       setEmbeddable(embeddableObject);
     }
@@ -93,7 +107,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
 
   // update map layers based on points
   useEffect(() => {
-    if (embeddable) {
+    if (embeddable && !isErrorEmbeddable(embeddable)) {
       embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
     }
   }, [upPoints, downPoints, embeddable, colors]);
@@ -107,7 +121,11 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
 
   return (
     <EmbeddedPanel>
-      <div className="embPanel__content" ref={embeddableRoot} />
+      <div
+        data-test-subj="xpack.uptime.locationMap.embeddedPanel"
+        className="embPanel__content"
+        ref={embeddableRoot}
+      />
     </EmbeddedPanel>
   );
 });
