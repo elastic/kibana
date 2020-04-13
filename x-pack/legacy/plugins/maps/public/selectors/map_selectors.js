@@ -30,7 +30,7 @@ import { InnerJoin } from '../../../../../plugins/maps/public/layers/joins/inner
 import { getSourceByType } from '../../../../../plugins/maps/public/layers/sources/source_registry';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { GeojsonFileSource } from '../../../../../plugins/maps/public/layers/sources/client_file_source';
-import { LAYER_TYPE } from '../../common/constants';
+import { LAYER_TYPE, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -205,12 +205,17 @@ export const getSpatialFiltersLayer = createSelector(
       ],
     };
     const geoJsonSourceDescriptor = GeojsonFileSource.createDescriptor(featureCollection, 'spatialFilters');
-    console.log(geoJsonSourceDescriptor);
     return new VectorLayer({
       layerDescriptor: {
         id: 'spatialFilters',
         visible: true,
         type: LAYER_TYPE.VECTOR,
+        __dataRequests: [
+          {
+            dataId: SOURCE_DATA_ID_ORIGIN,
+            data: featureCollection
+          }
+        ]
       },
       source: new GeojsonFileSource(geoJsonSourceDescriptor),
     });
