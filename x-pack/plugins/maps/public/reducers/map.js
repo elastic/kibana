@@ -74,7 +74,7 @@ const updateLayerInList = (state, layerId, attribute, newValue) => {
   return { ...state, layerList: updatedList };
 };
 
-const updateLayerSourceDescriptorProp = (state, layerId, propName, value, newLayerType) => {
+const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
   const { layerList } = state;
   const layerIdx = getLayerIndex(layerList, layerId);
   const updatedLayer = {
@@ -84,9 +84,6 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value, newLay
       [propName]: value,
     },
   };
-  if (newLayerType) {
-    updatedLayer.type = newLayerType;
-  }
   const updatedList = [
     ...layerList.slice(0, layerIdx),
     updatedLayer,
@@ -261,13 +258,7 @@ export function map(state = INITIAL_STATE, action) {
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
     case UPDATE_SOURCE_PROP:
-      return updateLayerSourceDescriptorProp(
-        state,
-        action.layerId,
-        action.propName,
-        action.value,
-        action.newLayerType
-      );
+      return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:
       const layerDescriptor = state.layerList.find(
         descriptor => descriptor.id === action.layer.getId()
