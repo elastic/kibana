@@ -3,14 +3,15 @@
 exports[`Table editing should show a save button 1`] = `
 <div>
   <EuiButtonIcon
-    aria-label="Save"
-    iconType="checkInCircleFilled"
+    aria-label="Edit"
+    iconType="pencil"
     onClick={[Function]}
     size="s"
   />
   <EuiButtonIcon
-    aria-label="Cancel"
-    iconType="cross"
+    aria-label="Delete"
+    color="danger"
+    iconType="trash"
     onClick={[Function]}
     size="s"
   />
@@ -18,27 +19,20 @@ exports[`Table editing should show a save button 1`] = `
 `;
 
 exports[`Table editing should show an input field 1`] = `
-<EuiFormControlLayout
-  fullWidth={false}
->
-  <EuiValidatableControl>
-    <input
-      autoFocus={true}
-      className="euiFieldText"
-      onChange={[Function]}
-      onKeyDown={[Function]}
-      type="text"
-      value="tim*"
-    />
-  </EuiValidatableControl>
-</EuiFormControlLayout>
+<span>
+  tim*
+</span>
 `;
 
 exports[`Table editing should update the matches dynamically as input value is changed 1`] = `
 <div>
-  <span>
-    time, value
-  </span>
+  <em>
+    <FormattedMessage
+      defaultMessage="The source filter doesn't match any known fields."
+      id="kbn.management.editIndexPattern.source.table.notMatchedLabel"
+      values={Object {}}
+    />
+  </em>
 </div>
 `;
 
@@ -79,6 +73,7 @@ exports[`Table should render normally 1`] = `
   items={
     Array [
       Object {
+        "clientId": "",
         "value": "tim*",
       },
     ]
