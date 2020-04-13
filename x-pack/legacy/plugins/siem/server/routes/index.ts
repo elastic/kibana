@@ -31,21 +31,21 @@ import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/fin
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_route';
 import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
-import { createListsRoute } from '../lib/detection_engine/routes/lists/create_lists_route';
 import { hasListsFeature } from '../lib/detection_engine/feature_flags';
-import { readListsRoute } from '../lib/detection_engine/routes/lists/read_lists_route';
-import { readListsItemsRoute } from '../lib/detection_engine/routes/lists/read_lists_items_route';
-import { createListsItemsRoute } from '../lib/detection_engine/routes/lists/create_lists_items_route';
-import { importListsItemsRoute } from '../lib/detection_engine/routes/lists/import_lists_items_route';
-import { exportListsItemsRoute } from '../lib/detection_engine/routes/lists/export_lists_items_route';
-import { patchListsRoute } from '../lib/detection_engine/routes/lists/patch_lists_route';
-import { patchListsItemsRoute } from '../lib/detection_engine/routes/lists/patch_lists_items_route';
-import { deleteListsRoute } from '../lib/detection_engine/routes/lists/delete_lists_route';
-import { createListsIndexRoute } from '../lib/detection_engine/routes/lists/create_lists_index_route';
-import { deleteListsIndexRoute } from '../lib/detection_engine/routes/lists/delete_lists_index_route';
-import { readListsIndexRoute } from '../lib/detection_engine/routes/lists/read_lists_index_route';
+import { createListsRoute } from '../lib/lists/routes/create_lists_route';
+import { readListsRoute } from '../lib/lists/routes/read_lists_route';
+import { readListsItemsRoute } from '../lib/lists/routes/read_lists_items_route';
+import { createListsItemsRoute } from '../lib/lists/routes/create_lists_items_route';
+import { importListsItemsRoute } from '../lib/lists/routes/import_lists_items_route';
+import { exportListsItemsRoute } from '../lib/lists/routes/export_lists_items_route';
+import { patchListsRoute } from '../lib/lists/routes/patch_lists_route';
+import { patchListsItemsRoute } from '../lib/lists/routes/patch_lists_items_route';
+import { deleteListsRoute } from '../lib/lists/routes/delete_lists_route';
+import { createListsIndexRoute } from '../lib/lists/routes/create_lists_index_route';
+import { deleteListsIndexRoute } from '../lib/lists/routes/delete_lists_index_route';
+import { readListsIndexRoute } from '../lib/lists/routes/read_lists_index_route';
 import { SetupPlugins } from '../plugin';
-import { deleteListsItemsRoute } from '../lib/detection_engine/routes/lists/delete_lists_items_route';
+import { deleteListsItemsRoute } from '../lib/lists/routes/delete_lists_items_route';
 
 export const initRoutes = (
   router: IRouter,

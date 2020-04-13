@@ -21,7 +21,3 @@ set -e
 # re-create the signal index
 ./delete_signal_index.sh
 ./post_signal_index.sh
-
-# re-create the list and list item indexes
-./delete_list_index.sh
-./post_list_index.sh

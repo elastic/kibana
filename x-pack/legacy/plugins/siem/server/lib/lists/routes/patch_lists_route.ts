@@ -1,0 +1,62 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { IRouter } from '../../../../../../../../src/core/server';
+import { DETECTION_ENGINE_LIST_URL } from '../../../../common/constants';
+
+// TODO: Move these utilities out of detection engine and into a more generic area
+import {
+  transformError,
+  buildSiemResponse,
+  buildRouteValidationIoTS,
+} from '../../detection_engine/routes/utils';
+
+import { patchListsSchema, PatchListsSchema } from '../schemas/request/patch_lists_schema';
+import { updateList } from '../list/update_list';
+
+// TODO: Make sure you write updateListRoute and update_list.sh routes
+
+export const patchListsRoute = (router: IRouter): void => {
+  router.patch(
+    {
+      path: DETECTION_ENGINE_LIST_URL,
+      validate: {
+        body: buildRouteValidationIoTS<PatchListsSchema>(patchListsSchema),
+      },
+      options: {
+        tags: ['access:siem'],
+      },
+    },
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+      try {
+        const { name, description, id } = request.body;
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const siemClient = context.siem?.getSiemClient();
+        if (!siemClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+        const listsIndex = siemClient.listsIndex;
+        const list = await updateList({ id, name, description, listsIndex, clusterClient });
+        if (list == null) {
+          return siemResponse.error({
+            statusCode: 404,
+            body: `list_id: "${id}" found found`,
+          });
+        } else {
+          // TODO: Transform and check the list on exit as well as validate it
+          return response.ok({ body: list });
+        }
+      } catch (err) {
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
+      }
+    }
+  );
+};
