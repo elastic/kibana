@@ -19,6 +19,7 @@ import {
   createExtentFilter,
   convertMapExtentToPolygon,
   roundCoordinates,
+  extractFeaturesFromFilters,
 } from './elasticsearch_geo_utils';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 
@@ -484,5 +485,53 @@ describe('roundCoordinates', () => {
       [-105.3062, 40.23193],
       [-105.3062, 30.64713],
     ]);
+  });
+});
+
+describe('extractFeaturesFromFilters', () => {
+  it('should ignore non-spatial filers', () => {
+    const phraseFilter = {
+      meta: {
+        alias: null,
+        disabled: false,
+        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        key: 'machine.os',
+        negate: false,
+        params: {
+          query: 'ios',
+        },
+        type: 'phrase',
+      },
+      query: {
+        match_phrase: {
+          'machine.os': 'ios',
+        },
+      },
+    };
+    expect(extractFeaturesFromFilters([phraseFilter])).toEqual([]);
+  });
+
+  it('should convert geo_distance filter to feature', () => {
+    const spatialFilter = {
+      geo_distance: {
+        distance: '1096km',
+        'geo.coordinates': [-89.87125, 53.49454],
+      },
+      meta: {
+        alias: 'geo.coordinates within 1096km of -89.87125,53.49454',
+        disabled: false,
+        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        key: 'geo.coordinates',
+        negate: false,
+        type: 'spatial_filter',
+        value: '',
+      },
+    };
+
+    const features = extractFeaturesFromFilters([spatialFilter]);
+    expect(features[0].geometry.coordinates[0][0]).toEqual([-89.87125, 63.35109118642093]);
+    expect(features[0].properties).toEqual({
+      filter: 'geo.coordinates within 1096km of -89.87125,53.49454',
+    });
   });
 });

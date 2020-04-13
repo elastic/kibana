@@ -90,7 +90,6 @@ export class MBMapContainer extends React.Component {
           }
         );
       }
-      this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
     }
   }, 256);
 
@@ -262,9 +261,11 @@ export class MBMapContainer extends React.Component {
   };
 
   _syncMbMapWithLayerList = () => {
-    //removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
+    removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
     this.props.layerList.forEach(layer => layer.syncLayerWithMB(this.state.mbMap));
-    //syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
+    syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
+
+    this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
   };
 
   _syncMbMapWithInspector = () => {
