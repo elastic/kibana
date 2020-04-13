@@ -39,7 +39,7 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
   const hasPlatinumLicense = license?.getFeature('ml')?.isAvailable;
 
   return (
-    <EuiFlyout onClose={onClose} size="s">
+    <EuiFlyout onClose={onClose} size="s" data-test-subj="uptimeMLFlyout">
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2>{labels.ENABLE_ANOMALY_DETECTION}</h2>
@@ -76,6 +76,7 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="uptimeMLCreateJobBtn"
               onClick={() => onClickCreate()}
               fill
               isLoading={isCreatingJob}
