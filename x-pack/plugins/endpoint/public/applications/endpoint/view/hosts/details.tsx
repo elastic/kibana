@@ -28,7 +28,7 @@ import { useHostListSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
 import { FormattedDateAndTime } from '../formatted_date_time';
 import { uiQueryParams, detailsData, detailsError } from './../../store/hosts/selectors';
-import { LinkToApp } from '../../components/link_to_app';
+import { LinkToApp } from '../components/link_to_app';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
