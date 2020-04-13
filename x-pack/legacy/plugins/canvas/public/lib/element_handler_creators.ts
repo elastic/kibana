@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Http2ServerResponse } from 'http2';
 import { camelCase } from 'lodash';
 // @ts-ignore unconverted local file
 import { getClipboardData, setClipboardData } from './clipboard';
