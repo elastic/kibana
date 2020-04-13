@@ -60,7 +60,6 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
     }
     return {
       ...initialPolicyListState(),
-      // location: action.payload,
     };
   }
 
