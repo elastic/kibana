@@ -11,7 +11,13 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
+import {
+  CoreSetup,
+  IRouter,
+  kibanaResponseFactory,
+  RouteValidatorConfig,
+  SavedObjectsErrorHelpers,
+} from 'src/core/server';
 import {
   loggingServiceMock,
   httpServiceMock,
@@ -75,6 +81,7 @@ describe('Spaces Public API', () => {
     return {
       routeValidation: routeDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
       routeHandler,
+      savedObjectsRepositoryMock,
     };
   };
 
@@ -141,6 +148,27 @@ describe('Spaces Public API', () => {
     const { status } = response;
 
     expect(status).toEqual(404);
+  });
+
+  it(`returns http/400 when scripts cannot be executed in Elasticsearch`, async () => {
+    const { routeHandler, savedObjectsRepositoryMock } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'a-space',
+      },
+      method: 'delete',
+    });
+    // @ts-ignore
+    savedObjectsRepositoryMock.deleteByNamespace.mockRejectedValue(
+      SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(new Error())
+    );
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    const { status, payload } = response;
+
+    expect(status).toEqual(400);
+    expect(payload.message).toEqual('Cannot execute script in Elasticsearch query');
   });
 
   it(`DELETE spaces/{id}' cannot delete reserved spaces`, async () => {
