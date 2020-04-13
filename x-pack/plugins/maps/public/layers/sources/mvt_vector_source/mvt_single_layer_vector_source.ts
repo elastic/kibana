@@ -6,8 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import React from 'react';
-import { MVTVectorSourceEditor } from './mvt_vector_source_editor';
 import { AbstractSource, ImmutableSourceProperty } from '../source';
 import { SingleTiledVectorLayer } from '../../tiled_vector_layer';
 import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
@@ -20,13 +18,12 @@ import {
   LayerDescriptor,
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
-  VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { VectorLayerArguments } from '../../vector_layer';
 
-const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
+export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
   defaultMessage: 'Vector Tile Layer',
 });
 
@@ -168,41 +165,3 @@ registerSource({
   ConstructorFunction: MVTSingleLayerVectorSource,
   type: SOURCE_TYPES.MVT_SINGLE_LAYER,
 });
-
-export const mvtVectorSourceWizardConfig = {
-  description: i18n.translate('xpack.maps.source.mvtVectorSourceWizard', {
-    defaultMessage: 'Vector source wizard',
-  }),
-  icon: 'grid',
-  renderWizard: ({
-    onPreviewSource,
-    inspectorAdapters,
-  }: {
-    onPreviewSource: (source: MVTSingleLayerVectorSource) => void;
-    inspectorAdapters: object;
-  }) => {
-    const onSourceConfigChange = ({
-      urlTemplate,
-      layerName,
-      minZoom,
-      maxZoom,
-    }: {
-      urlTemplate: string;
-      layerName: string;
-      minZoom: number;
-      maxZoom: number;
-    }) => {
-      const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor({
-        urlTemplate,
-        layerName,
-        minZoom,
-        maxZoom,
-        type: MVTSingleLayerVectorSource.type,
-      });
-      const source = new MVTSingleLayerVectorSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-    return <MVTVectorSourceEditor onSourceConfigChange={onSourceConfigChange} />;
-  },
-  title: sourceTitle,
-};

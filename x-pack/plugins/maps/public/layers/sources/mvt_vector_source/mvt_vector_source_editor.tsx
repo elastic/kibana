@@ -3,15 +3,34 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, Component, ChangeEvent } from 'react';
 import _ from 'lodash';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kibana_react/public';
 
-export class MVTVectorSourceEditor extends React.Component {
+export type MVTSingleLayerVectorSourceConfig = {
+  urlTemplate: string;
+  layerName: string;
+  minZoom: number;
+  maxZoom: number;
+};
+
+export interface Props {
+  onSourceConfigChange: (sourceConfig: MVTSingleLayerVectorSourceConfig) => void;
+}
+
+interface State {
+  tmsInput: string;
+  tmsCanPreview: boolean;
+  attributionText: string;
+  attributionUrl: string;
+}
+
+export class MVTVectorSourceEditor extends Component<Props, State> {
   state = {
     urlTemplate: '',
     layerName: '',
@@ -32,9 +51,8 @@ export class MVTVectorSourceEditor extends React.Component {
   }, 200);
 
   // @ts-ignore
-  _handleUrlTemplateChange = e => {
+  _handleUrlTemplateChange = (e: ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
-
     const canPreview =
       url.indexOf('{x}') >= 0 && url.indexOf('{y}') >= 0 && url.indexOf('{z}') >= 0;
     this.setState(
@@ -47,7 +65,7 @@ export class MVTVectorSourceEditor extends React.Component {
   };
 
   // @ts-ignore
-  _handleLayerNameInputChange = e => {
+  _handleLayerNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const layerName = e.target.value;
     this.setState(
       {
