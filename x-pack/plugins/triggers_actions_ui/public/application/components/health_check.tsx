@@ -132,7 +132,7 @@ const EncryptionError = ({
               defaultMessage: 'To create an alert, set a value for ',
             }
           )}
-          <EuiCode>{'xpack.encrypted_saved_objects.encryptionKey'}</EuiCode>
+          <EuiCode>{'xpack.encryptedSavedObjects.encryptionKey'}</EuiCode>
           {i18n.translate(
             'xpack.triggersActionsUI.components.healthCheck.encryptionErrorAfterKey',
             {

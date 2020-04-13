@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { useUrlParams } from '../../../hooks';
+import { useGetUrlParams } from '../../../hooks';
 import { AppState } from '../../../state';
 import { getSnapshotCountAction } from '../../../state/actions';
 import { SnapshotComponent } from '../../functional/snapshot';
@@ -54,8 +54,7 @@ export const Container: React.FC<Props> = ({
   esKuery,
   loadSnapshotCount,
 }: Props) => {
-  const [getUrlParams] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd, statusFilter } = getUrlParams();
+  const { dateRangeStart, dateRangeEnd, statusFilter } = useGetUrlParams();
 
   useEffect(() => {
     loadSnapshotCount({ dateRangeStart, dateRangeEnd, filters: esKuery, statusFilter });
