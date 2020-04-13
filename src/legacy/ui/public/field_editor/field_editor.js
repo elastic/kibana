@@ -67,7 +67,7 @@ import { FieldFormatEditor } from './components/field_format_editor';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { executeScript, isScriptValid } from './lib';
-//import { copyField, executeScript, isScriptValid } from './lib';
+// import { copyField, executeScript, isScriptValid } from './lib';
 // import { Field } from '../../../../plugins/data/public';
 
 import { i18n } from '@kbn/i18n';
@@ -97,6 +97,12 @@ const getFieldTypeFormatsList = (field, defaultFieldFormat) => {
   ];
 };
 
+const copyFieldMk = field => {
+  // console.log('copyField', field.format.params());
+  const obj = { ...field, format: field.format };
+  return obj;
+};
+
 export class FieldEditor extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
@@ -122,9 +128,9 @@ export class FieldEditor extends PureComponent {
       fieldTypes: [],
       fieldTypeFormats: [],
       existingFieldNames: indexPattern.fields.map(f => f.name),
-      // field: copyField(field, indexPattern),
+      //field: copyField(field, indexPattern),
       //field: new Field(indexPattern, field.$$spec), // what about short dots?
-      field: { ...field.$$spec },
+      field: copyFieldMk(field),
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -237,6 +243,7 @@ export class FieldEditor extends PureComponent {
   renderName() {
     const { isCreating, field } = this.state;
     const isInvalid = !field.name || !field.name.trim();
+    // console.log('renderName', this.state.field);
 
     return isCreating ? (
       <EuiFormRow
@@ -437,6 +444,8 @@ export class FieldEditor extends PureComponent {
     ) : (
       <FormattedMessage id="common.ui.fieldEditor.formatHeader" defaultMessage="Format" />
     );
+
+    // console.log('field_editor render fieldFormat', field.format);
 
     return (
       <Fragment>
