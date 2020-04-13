@@ -6,7 +6,7 @@
 
 import { AbstractVectorSource } from '../vector_source';
 import { IVectorSource } from '../vector_source';
-import { IndexPattern, SearchSource } from '../../../../../../../src/plugins/data/public';
+import { IndexPattern, ISearchSource } from '../../../../../../../src/plugins/data/public';
 import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 
 export interface IESSource extends IVectorSource {
@@ -19,7 +19,7 @@ export interface IESSource extends IVectorSource {
     searchFilters: VectorSourceRequestMeta,
     limit: number,
     initialSearchContext?: object
-  ): Promise<SearchSource>;
+  ): Promise<ISearchSource>;
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
@@ -32,5 +32,5 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchFilters: VectorSourceRequestMeta,
     limit: number,
     initialSearchContext?: object
-  ): Promise<SearchSource>;
+  ): Promise<ISearchSource>;
 }

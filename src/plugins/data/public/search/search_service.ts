@@ -26,7 +26,7 @@ import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
-import { createSearchSource } from './search_source';
+import { createSearchSource, getSearchSource } from './search_source';
 import { QuerySetup } from '../query/query_service';
 import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
@@ -47,6 +47,11 @@ import {
 interface SearchServiceSetupDependencies {
   packageInfo: PackageInfo;
   query: QuerySetup;
+  getInternalStartServices: GetInternalStartServicesFn;
+}
+
+interface SearchServiceStartDependencies {
+  indexPatterns: IndexPatternsContract;
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
@@ -110,7 +115,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
 
-  public start(core: CoreStart, indexPatterns: IndexPatternsContract): ISearchStart {
+  public start(
+    core: CoreStart,
+    { indexPatterns, getInternalStartServices }: SearchServiceStartDependencies
+  ): ISearchStart {
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -124,6 +132,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
 
     const aggTypesStart = this.aggTypesRegistry.start();
+    const SearchSource = getSearchSource({ getInternalStartServices });
 
     return {
       aggs: {
@@ -147,7 +156,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         // TODO: should an intercepror have a destroy method?
         this.searchInterceptor = searchInterceptor;
       },
-      createSearchSource: createSearchSource(indexPatterns),
+      SearchSource,
+      createSearchSource: createSearchSource(SearchSource, indexPatterns),
       __LEGACY: {
         esClient: this.esClient!,
         AggConfig,

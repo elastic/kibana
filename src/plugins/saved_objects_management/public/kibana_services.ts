@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { Class } from '@kbn/utility-types';
-import { SearchSource as SearchSourceClass, ISearchSource } from '../../../../plugins/data/public';
+import { createGetterSetter } from '../../kibana_utils/public';
+import { DataPublicPluginStart } from '../../data/public';
 
-export { SearchSourceFields } from '../../../../plugins/data/public';
-
-export type SearchSource = Class<ISearchSource>;
-export const SearchSource = SearchSourceClass;
+export const [getSearchService, setSearchService] = createGetterSetter<
+  DataPublicPluginStart['search']
+>('Search');

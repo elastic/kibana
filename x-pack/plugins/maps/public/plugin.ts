@@ -20,6 +20,7 @@ import {
   setTimeFilter,
   setToasts,
   setUiSettings,
+  setSearchService,
   // @ts-ignore
 } from './kibana_services';
 
@@ -48,6 +49,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setFileUpload(fileUpload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
+  setSearchService(data.search);
   setIndexPatternService(data.indexPatterns);
   setAutocompleteService(data.autocomplete);
 };

@@ -25,13 +25,15 @@ import { AggParamType } from '../aggs/param_types/agg';
 import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 import { notificationServiceMock } from '../../../../../../src/core/public/mocks';
 import { AggTypeDependencies } from './agg_type';
+import { InternalStartServices } from '../../types';
 
 describe('AggParams class', () => {
   const aggTypesDependencies: AggTypeDependencies = {
-    getInternalStartServices: () => ({
-      fieldFormats: fieldFormatsServiceMock.createStartContract(),
-      notifications: notificationServiceMock.createStartContract(),
-    }),
+    getInternalStartServices: () =>
+      (({
+        fieldFormats: fieldFormatsServiceMock.createStartContract(),
+        notifications: notificationServiceMock.createStartContract(),
+      } as unknown) as InternalStartServices),
   };
 
   describe('constructor args', () => {

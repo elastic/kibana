@@ -9,7 +9,7 @@ import {
   getAutocompleteService,
   fetchSearchSourceAndRecordWithInspector,
   getIndexPatternService,
-  SearchSource,
+  getSearchService,
   getTimeFilter,
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../elasticsearch_geo_utils';
@@ -126,6 +126,7 @@ export class AbstractESSource extends AbstractVectorSource {
       allFilters.push(getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters));
     }
 
+    const { SearchSource } = getSearchService();
     const searchSource = new SearchSource(initialSearchContext);
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
@@ -294,6 +295,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }, {});
 
     const indexPattern = await this.getIndexPattern();
+    const { SearchSource } = getSearchService();
     const searchSource = new SearchSource();
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);

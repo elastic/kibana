@@ -50,7 +50,7 @@ export { SearchError, SearchStrategyProvider, getSearchErrorType } from './searc
 
 export {
   ISearchSource,
-  SearchSource,
+  SearchSourceType,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,

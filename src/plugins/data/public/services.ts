@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { NotificationsStart, CoreSetup, CoreStart } from 'src/core/public';
+import { NotificationsStart, CoreStart } from 'src/core/public';
 import { FieldFormatsStart } from './field_formats';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { IndexPatternsContract } from './index_patterns';
@@ -48,7 +48,7 @@ export const [getQueryService, setQueryService] = createGetterSetter<
 >('Query');
 
 export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
-  CoreSetup['injectedMetadata']
+  CoreStart['injectedMetadata']
 >('InjectedMetadata');
 
 export const [getSearchService, setSearchService] = createGetterSetter<

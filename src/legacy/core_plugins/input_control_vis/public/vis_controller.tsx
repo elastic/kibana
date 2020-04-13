@@ -21,8 +21,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nStart } from 'kibana/public';
-import { SearchSource } from './legacy_imports';
-
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
@@ -100,8 +98,11 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
         }
       );
 
+      const [, { data }] = await deps.core.getStartServices();
+      const SearchSource = data.search.SearchSource;
       const controlFactoryPromises = controlParamsList.map(controlParams => {
         const factory = getControlFactory(controlParams);
+
         return factory(controlParams, this.visParams?.useTimeFilter, SearchSource, deps);
       });
       const controls = await Promise.all<RangeControl | ListControl>(controlFactoryPromises);

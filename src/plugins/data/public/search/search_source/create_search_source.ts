@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
+import { transform, defaults, isFunction } from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
 import { migrateLegacyQuery } from '../../../../kibana_legacy/public';
 import { InvalidJSONProperty } from '../../../../kibana_utils/public';
-import { SearchSource } from './search_source';
+import { SearchSourceType } from './search_source';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { SearchSourceFields } from './types';
 
@@ -32,6 +32,7 @@ import { SearchSourceFields } from './types';
  * required service dependency (index patterns contract). A pre-wired version is also exposed in
  * the start contract of the data plugin as part of the search service
  *
+ * @param SearchSource
  * @param indexPatterns The index patterns contract of the data plugin
  *
  * @return Wired utility function taking two parameters `searchSourceJson`, the json string
@@ -39,10 +40,10 @@ import { SearchSourceFields } from './types';
  * returned by `serializeSearchSource`.
  *
  * @public */
-export const createSearchSource = (indexPatterns: IndexPatternsContract) => async (
-  searchSourceJson: string,
-  references: SavedObjectReference[]
-) => {
+export const createSearchSource = (
+  SearchSource: SearchSourceType,
+  indexPatterns: IndexPatternsContract
+) => async (searchSourceJson: string, references: SavedObjectReference[]) => {
   const searchSource = new SearchSource();
 
   // if we have a searchSource, set its values based on the searchSourceJson field
@@ -90,17 +91,17 @@ export const createSearchSource = (indexPatterns: IndexPatternsContract) => asyn
   }
 
   const searchSourceFields = searchSource.getFields();
-  const fnProps = _.transform(
+  const fnProps = transform(
     searchSourceFields,
     function(dynamic, val, name) {
-      if (_.isFunction(val) && name) dynamic[name] = val;
+      if (isFunction(val) && name) dynamic[name] = val;
     },
     {}
   );
 
   // This assignment might hide problems because the type of values passed from the parsed JSON
   // might not fit the SearchSourceFields interface.
-  const newFields: SearchSourceFields = _.defaults(searchSourceValues, fnProps);
+  const newFields: SearchSourceFields = defaults(searchSourceValues, fnProps);
 
   searchSource.setFields(newFields);
   const query = searchSource.getOwnField('query');

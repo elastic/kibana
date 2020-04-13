@@ -5,8 +5,6 @@
  */
 import { esFilters, search } from '../../../../src/plugins/data/public';
 
-export { SearchSource } from '../../../../src/plugins/data/public';
-
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 const { getRequestInspectorStats, getResponseInspectorStats } = search;
 
@@ -57,6 +55,10 @@ export const getHttp = () => coreHttp;
 let dataTimeFilter;
 export const setTimeFilter = timeFilter => (dataTimeFilter = timeFilter);
 export const getTimeFilter = () => dataTimeFilter;
+
+let dataSearchService;
+export const setSearchService = searchService => (dataSearchService = searchService);
+export const getSearchService = () => dataSearchService;
 
 let toast;
 export const setToasts = notificationToast => (toast = notificationToast);

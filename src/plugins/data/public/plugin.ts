@@ -50,6 +50,9 @@ import {
   setUiSettings,
   getFieldFormats,
   getNotifications,
+  getUiSettings,
+  getSearchService,
+  getInjectedMetadata,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { esaggs } from './search/expressions';
@@ -95,18 +98,19 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     this.packageInfo = initializerContext.env.packageInfo;
   }
 
+  getInternalStartServices: GetInternalStartServicesFn = () => ({
+    fieldFormats: getFieldFormats(),
+    notifications: getNotifications(),
+    uiSettings: getUiSettings(),
+    injectedMetadata: getInjectedMetadata(),
+    searchService: getSearchService(),
+  });
+
   public setup(
     core: CoreSetup,
     { expressions, uiActions }: DataSetupDependencies
   ): DataPublicPluginSetup {
-    setInjectedMetadata(core.injectedMetadata);
-
     expressions.registerFunction(esaggs);
-
-    const getInternalStartServices: GetInternalStartServicesFn = () => ({
-      fieldFormats: getFieldFormats(),
-      notifications: getNotifications(),
-    });
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
@@ -130,7 +134,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     return {
       autocomplete: this.autocomplete.setup(core),
       search: this.searchService.setup(core, {
-        getInternalStartServices,
+        getInternalStartServices: this.getInternalStartServices,
         packageInfo: this.packageInfo,
         query: queryService,
       }),
@@ -145,6 +149,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
+    setInjectedMetadata(core.injectedMetadata);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
@@ -155,7 +160,10 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const query = this.queryService.start(savedObjects);
     setQueryService(query);
 
-    const search = this.searchService.start(core, indexPatterns);
+    const search = this.searchService.start(core, {
+      indexPatterns,
+      getInternalStartServices: this.getInternalStartServices,
+    });
     setSearchService(search);
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));

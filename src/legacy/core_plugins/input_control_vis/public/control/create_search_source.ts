@@ -17,11 +17,16 @@
  * under the License.
  */
 
-import { PhraseFilter, IndexPattern, TimefilterContract } from '../../../../../plugins/data/public';
-import { SearchSource as SearchSourceClass, SearchSourceFields } from '../legacy_imports';
+import {
+  SearchSourceFields,
+  SearchSourceType,
+  PhraseFilter,
+  IndexPattern,
+  TimefilterContract,
+} from '../../../../../plugins/data/public';
 
 export function createSearchSource(
-  SearchSource: SearchSourceClass,
+  SearchSource: SearchSourceType,
   initialState: SearchSourceFields | null,
   indexPattern: IndexPattern,
   aggs: any,

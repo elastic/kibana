@@ -16,10 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { getSearchSource } from './search_source';
 import { createSearchSource as createSearchSourceFactory } from './create_search_source';
 import { IIndexPattern } from '../../../common/index_patterns';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { Filter } from '../../../common/es_query/filters';
+import { coreMock } from '../../../../../core/public/mocks';
+import { dataPluginMock } from '../../mocks';
+import { InternalStartServices } from '../../types';
 
 describe('createSearchSource', function() {
   let createSearchSource: ReturnType<typeof createSearchSourceFactory>;
@@ -27,10 +31,23 @@ describe('createSearchSource', function() {
   let indexPatternContractMock: jest.Mocked<IndexPatternsContract>;
 
   beforeEach(() => {
+    const core = coreMock.createStart();
+    const data = dataPluginMock.createStartContract();
+
     indexPatternContractMock = ({
       get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
     } as unknown) as jest.Mocked<IndexPatternsContract>;
-    createSearchSource = createSearchSourceFactory(indexPatternContractMock);
+
+    const SearchSource = getSearchSource({
+      getInternalStartServices: () =>
+        (({
+          searchService: data.search,
+          uiSettings: core.uiSettings,
+          injectedMetadata: core.injectedMetadata,
+        } as unknown) as InternalStartServices),
+    });
+
+    createSearchSource = createSearchSourceFactory(SearchSource, indexPatternContractMock);
   });
 
   it('should fail if JSON is invalid', () => {

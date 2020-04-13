@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import { Control } from './control';
 import { ControlParams } from '../editor_utils';
 import { FilterManager as BaseFilterManager } from './filter_manager/filter_manager';
-import { SearchSource } from '../legacy_imports';
+import { SearchSourceType } from '../../../../../plugins/data/public';
 
 function createControlParams(id: string, label: string): ControlParams {
   return {
@@ -51,7 +51,7 @@ class ControlMock extends Control<BaseFilterManager> {
 
   destroy() {}
 }
-const mockKbnApi: SearchSource = {} as SearchSource;
+const mockKbnApi: SearchSourceType = {} as SearchSourceType;
 
 describe('hasChanged', () => {
   let control: ControlMock;

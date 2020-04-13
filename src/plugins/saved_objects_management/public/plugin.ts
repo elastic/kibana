@@ -32,6 +32,7 @@ import {
   SavedObjectsManagementServiceRegistry,
   ISavedObjectsManagementServiceRegistry,
 } from './services';
+import { setSearchService } from './kibana_services';
 import { registerServices } from './register_services';
 
 export interface SavedObjectsManagementPluginSetup {
@@ -116,8 +117,11 @@ export class SavedObjectsManagementPlugin
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { data }: StartDependencies) {
     const actionStart = this.actionService.start();
+
+    setSearchService(data.search);
+
     return {
       actions: actionStart,
     };

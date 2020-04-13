@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { OverlayStart, SavedObjectReference } from 'src/core/public';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
+import { getSearchService } from '../kibana_services';
 import { IndexPatternsContract, IIndexPattern, createSearchSource } from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
@@ -208,7 +209,9 @@ export async function resolveIndexPatternConflicts(
       // The user decided to skip this conflict so do nothing
       return;
     }
-    obj.searchSource = await createSearchSource(indexPatterns)(
+    const { SearchSource } = getSearchService();
+
+    obj.searchSource = await createSearchSource(SearchSource, indexPatterns)(
       JSON.stringify(serializedSearchSource),
       replacedReferences
     );

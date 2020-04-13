@@ -69,7 +69,7 @@
  *    `appSearchSource`.
  */
 
-import _ from 'lodash';
+import { uniqueId, uniq, extend, pick, difference, set, omit, keys, isFunction } from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
@@ -77,428 +77,437 @@ import { fieldWildcardFilter } from '../../../../kibana_utils/public';
 import { IIndexPattern, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
-
-import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
+import { GetInternalStartServicesFn } from '../../types';
 
-export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
+interface SearchSourceDependencies {
+  getInternalStartServices: GetInternalStartServicesFn;
+}
 
-export class SearchSource {
-  private id: string = _.uniqueId('data_source');
-  private searchStrategyId?: string;
-  private parent?: SearchSource;
-  private requestStartHandlers: Array<
-    (searchSource: ISearchSource, options?: FetchOptions) => Promise<unknown>
-  > = [];
-  private inheritOptions: SearchSourceOptions = {};
-  public history: SearchRequest[] = [];
+export type SearchSourceType = ReturnType<typeof getSearchSource>;
+export type ISearchSource = InstanceType<SearchSourceType>;
 
-  constructor(private fields: SearchSourceFields = {}) {}
+/** @internal **/
+export const getSearchSource = ({ getInternalStartServices }: SearchSourceDependencies) => {
+  const { injectedMetadata, uiSettings, searchService } = getInternalStartServices();
 
-  /** ***
-   * PUBLIC API
-   *****/
+  return class SearchSource {
+    private id: string = uniqueId('data_source');
+    private searchStrategyId?: string;
+    private parent?: SearchSource;
+    private requestStartHandlers: Array<
+      (searchSource: ISearchSource, options?: FetchOptions) => Promise<unknown>
+    > = [];
+    private inheritOptions: SearchSourceOptions = {};
+    public history: SearchRequest[] = [];
 
-  setPreferredSearchStrategyId(searchStrategyId: string) {
-    this.searchStrategyId = searchStrategyId;
-  }
+    constructor(private fields: SearchSourceFields = {}) {}
 
-  setFields(newFields: SearchSourceFields) {
-    this.fields = newFields;
-    return this;
-  }
+    /** ***
+     * PUBLIC API
+     *****/
 
-  setField<K extends keyof SearchSourceFields>(field: K, value: SearchSourceFields[K]) {
-    if (value == null) {
-      delete this.fields[field];
-    } else {
-      this.fields[field] = value;
+    setPreferredSearchStrategyId(searchStrategyId: string) {
+      this.searchStrategyId = searchStrategyId;
     }
-    return this;
-  }
 
-  getId() {
-    return this.id;
-  }
-
-  getFields() {
-    return { ...this.fields };
-  }
-
-  /**
-   * Get fields from the fields
-   */
-  getField<K extends keyof SearchSourceFields>(field: K, recurse = true): SearchSourceFields[K] {
-    if (!recurse || this.fields[field] !== void 0) {
-      return this.fields[field];
+    setFields(newFields: SearchSourceFields) {
+      this.fields = newFields;
+      return this;
     }
-    const parent = this.getParent();
-    return parent && parent.getField(field);
-  }
 
-  /**
-   * Get the field from our own fields, don't traverse up the chain
-   */
-  getOwnField<K extends keyof SearchSourceFields>(field: K): SearchSourceFields[K] {
-    return this.getField(field, false);
-  }
-
-  create() {
-    return new SearchSource();
-  }
-
-  createCopy() {
-    const newSearchSource = new SearchSource();
-    newSearchSource.setFields({ ...this.fields });
-    // when serializing the internal fields we lose the internal classes used in the index
-    // pattern, so we have to set it again to workaround this behavior
-    newSearchSource.setField('index', this.getField('index'));
-    newSearchSource.setParent(this.getParent());
-    return newSearchSource;
-  }
-
-  createChild(options = {}) {
-    const childSearchSource = new SearchSource();
-    childSearchSource.setParent(this, options);
-    return childSearchSource;
-  }
-
-  /**
-   * Set a searchSource that this source should inherit from
-   * @param  {SearchSource} parent - the parent searchSource
-   * @param  {SearchSourceOptions} options - the inherit options
-   * @return {this} - chainable
-   */
-  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}) {
-    this.parent = parent as SearchSource;
-    this.inheritOptions = options;
-    return this;
-  }
-
-  /**
-   * Get the parent of this SearchSource
-   * @return {undefined|searchSource}
-   */
-  getParent() {
-    return this.parent;
-  }
-
-  /**
-   * Fetch this source and reject the returned Promise on error
-   *
-   * @async
-   */
-  async fetch(options: FetchOptions = {}) {
-    await this.requestIsStarting(options);
-
-    const searchRequest = await this.flatten();
-    this.history = [searchRequest];
-
-    const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
-    const response = await fetchSoon(
-      searchRequest,
-      {
-        ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
-        ...options,
-      },
-      {
-        searchService: getSearchService(),
-        config: getUiSettings(),
-        esShardTimeout,
+    setField<K extends keyof SearchSourceFields>(field: K, value: SearchSourceFields[K]) {
+      if (value == null) {
+        delete this.fields[field];
+      } else {
+        this.fields[field] = value;
       }
-    );
-
-    if (response.error) {
-      throw new RequestFailure(null, response);
+      return this;
     }
 
-    return response;
-  }
-
-  /**
-   *  Add a handler that will be notified whenever requests start
-   *  @param  {Function} handler
-   *  @return {undefined}
-   */
-  onRequestStart(
-    handler: (searchSource: ISearchSource, options?: FetchOptions) => Promise<unknown>
-  ) {
-    this.requestStartHandlers.push(handler);
-  }
-
-  async getSearchRequestBody() {
-    const searchRequest = await this.flatten();
-    return searchRequest.body;
-  }
-
-  /**
-   * Completely destroy the SearchSource.
-   * @return {undefined}
-   */
-  destroy() {
-    this.requestStartHandlers.length = 0;
-  }
-
-  /** ****
-   * PRIVATE APIS
-   ******/
-
-  /**
-   *  Called by requests of this search source when they are started
-   *  @param  {Courier.Request} request
-   *  @param options
-   *  @return {Promise<undefined>}
-   */
-  private requestIsStarting(options: FetchOptions = {}) {
-    const handlers = [...this.requestStartHandlers];
-    // If callParentStartHandlers has been set to true, we also call all
-    // handlers of parent search sources.
-    if (this.inheritOptions.callParentStartHandlers) {
-      let searchSource = this.getParent();
-      while (searchSource) {
-        handlers.push(...searchSource.requestStartHandlers);
-        searchSource = searchSource.getParent();
-      }
+    getId() {
+      return this.id;
     }
 
-    return Promise.all(handlers.map(fn => fn(this, options)));
-  }
-
-  /**
-   * Used to merge properties into the data within ._flatten().
-   * The data is passed in and modified by the function
-   *
-   * @param  {object} data - the current merged data
-   * @param  {*} val - the value at `key`
-   * @param  {*} key - The key of `val`
-   * @return {undefined}
-   */
-  private mergeProp<K extends keyof SearchSourceFields>(
-    data: SearchRequest,
-    val: SearchSourceFields[K],
-    key: K
-  ) {
-    val = typeof val === 'function' ? val(this) : val;
-    if (val == null || !key) return;
-
-    const addToRoot = (rootKey: string, value: any) => {
-      data[rootKey] = value;
-    };
+    getFields() {
+      return { ...this.fields };
+    }
 
     /**
-     * Add the key and val to the body of the request
+     * Get fields from the fields
      */
-    const addToBody = (bodyKey: string, value: any) => {
-      // ignore if we already have a value
-      if (data.body[bodyKey] == null) {
-        data.body[bodyKey] = value;
+    getField<K extends keyof SearchSourceFields>(field: K, recurse = true): SearchSourceFields[K] {
+      if (!recurse || this.fields[field] !== void 0) {
+        return this.fields[field];
       }
-    };
-
-    switch (key) {
-      case 'filter':
-        return addToRoot('filters', (data.filters || []).concat(val));
-      case 'query':
-        return addToRoot(key, (data[key] || []).concat(val));
-      case 'fields':
-        const fields = _.uniq((data[key] || []).concat(val));
-        return addToRoot(key, fields);
-      case 'index':
-      case 'type':
-      case 'highlightAll':
-        return key && data[key] == null && addToRoot(key, val);
-      case 'searchAfter':
-        return addToBody('search_after', val);
-      case 'source':
-        return addToBody('_source', val);
-      case 'sort':
-        const sort = normalizeSortRequest(
-          val,
-          this.getField('index'),
-          getUiSettings().get('sort:options')
-        );
-        return addToBody(key, sort);
-      default:
-        return addToBody(key, val);
-    }
-  }
-
-  /**
-   * Walk the inheritance chain of a source and return its
-   * flat representation (taking into account merging rules)
-   * @returns {Promise}
-   * @resolved {Object|null} - the flat data of the SearchSource
-   */
-  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }) {
-    Object.entries(this.fields).forEach(([key, value]) => {
-      this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
-    });
-    if (this.parent) {
-      this.parent.mergeProps(root, searchRequest);
-    }
-    return searchRequest;
-  }
-
-  private getIndexType(index: IIndexPattern) {
-    if (this.searchStrategyId) {
-      return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
-    } else {
-      return index?.type;
-    }
-  }
-
-  private flatten() {
-    const searchRequest = this.mergeProps();
-
-    searchRequest.body = searchRequest.body || {};
-    const { body, index, fields, query, filters, highlightAll } = searchRequest;
-    searchRequest.indexType = this.getIndexType(index);
-
-    const computedFields = index ? index.getComputedFields() : {};
-
-    body.stored_fields = computedFields.storedFields;
-    body.script_fields = body.script_fields || {};
-    _.extend(body.script_fields, computedFields.scriptFields);
-
-    const defaultDocValueFields = computedFields.docvalueFields
-      ? computedFields.docvalueFields
-      : [];
-    body.docvalue_fields = body.docvalue_fields || defaultDocValueFields;
-
-    if (!body.hasOwnProperty('_source') && index) {
-      body._source = index.getSourceFiltering();
+      const parent = this.getParent();
+      return parent && parent.getField(field);
     }
 
-    if (body._source) {
-      // exclude source fields for this index pattern specified by the user
-      const filter = fieldWildcardFilter(body._source.excludes, getUiSettings().get('metaFields'));
-      body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
-        filter(docvalueField.field)
-      );
+    /**
+     * Get the field from our own fields, don't traverse up the chain
+     */
+    getOwnField<K extends keyof SearchSourceFields>(field: K): SearchSourceFields[K] {
+      return this.getField(field, false);
     }
 
-    // if we only want to search for certain fields
-    if (fields) {
-      // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
-      body.docvalue_fields = filterDocvalueFields(body.docvalue_fields, fields);
-      body.script_fields = _.pick(body.script_fields, fields);
-
-      // request the remaining fields from both stored_fields and _source
-      const remainingFields = _.difference(fields, _.keys(body.script_fields));
-      body.stored_fields = remainingFields;
-      _.set(body, '_source.includes', remainingFields);
+    create() {
+      return new SearchSource();
     }
 
-    const esQueryConfigs = getEsQueryConfig(getUiSettings());
-    body.query = buildEsQuery(index, query, filters, esQueryConfigs);
-
-    if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, getUiSettings().get('doc_table:highlight'));
-      delete searchRequest.highlightAll;
+    createCopy() {
+      const newSearchSource = new SearchSource();
+      newSearchSource.setFields({ ...this.fields });
+      // when serializing the internal fields we lose the internal classes used in the index
+      // pattern, so we have to set it again to workaround this behavior
+      newSearchSource.setField('index', this.getField('index'));
+      newSearchSource.setParent(this.getParent());
+      return newSearchSource;
     }
 
-    const translateToQuery = (filter: Filter) => filter && (filter.query || filter);
+    createChild(options = {}) {
+      const childSearchSource = new SearchSource();
+      childSearchSource.setParent(this, options);
+      return childSearchSource;
+    }
 
-    // re-write filters within filter aggregations
-    (function recurse(aggBranch) {
-      if (!aggBranch) return;
-      Object.keys(aggBranch).forEach(function(id) {
-        const agg = aggBranch[id];
+    /**
+     * Set a searchSource that this source should inherit from
+     * @param  {SearchSource} parent - the parent searchSource
+     * @param  {SearchSourceOptions} options - the inherit options
+     * @return {this} - chainable
+     */
+    setParent(parent?: ISearchSource, options: SearchSourceOptions = {}) {
+      this.parent = parent as SearchSource;
+      this.inheritOptions = options;
+      return this;
+    }
 
-        if (agg.filters) {
-          // translate filters aggregations
-          const { filters: aggFilters } = agg.filters;
-          Object.keys(aggFilters).forEach(filterId => {
-            aggFilters[filterId] = translateToQuery(aggFilters[filterId]);
-          });
+    /**
+     * Get the parent of this SearchSource
+     * @return {undefined|searchSource}
+     */
+    getParent() {
+      return this.parent;
+    }
+
+    /**
+     * Fetch this source and reject the returned Promise on error
+     *
+     * @async
+     */
+    async fetch(options: FetchOptions = {}) {
+      await this.requestIsStarting(options);
+
+      const searchRequest = await this.flatten();
+      this.history = [searchRequest];
+
+      const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
+      const response = await fetchSoon(
+        searchRequest,
+        {
+          ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
+          ...options,
+        },
+        {
+          searchService,
+          config: uiSettings,
+          esShardTimeout,
         }
+      );
 
-        recurse(agg.aggs || agg.aggregations);
-      });
-    })(body.aggs || body.aggregations);
+      if (response.error) {
+        throw new RequestFailure(null, response);
+      }
 
-    return searchRequest;
-  }
-
-  /**
-   * Serializes the instance to a JSON string and a set of referenced objects.
-   * Use this method to get a representation of the search source which can be stored in a saved object.
-   *
-   * The references returned by this function can be mixed with other references in the same object,
-   * however make sure there are no name-collisions. The references will be named `kibanaSavedObjectMeta.searchSourceJSON.index`
-   * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
-   *
-   * Using `createSearchSource`, the instance can be re-created.
-   * @param searchSource The search source to serialize
-   * @public */
-  public serialize() {
-    const references: SavedObjectReference[] = [];
-
-    const {
-      filter: originalFilters,
-      ...searchSourceFields
-    }: Omit<SearchSourceFields, 'sort' | 'size'> = _.omit(this.getFields(), ['sort', 'size']);
-    let serializedSearchSourceFields: Omit<SearchSourceFields, 'sort' | 'size' | 'filter'> & {
-      indexRefName?: string;
-      filter?: Array<Omit<Filter, 'meta'> & { meta: Filter['meta'] & { indexRefName?: string } }>;
-    } = searchSourceFields;
-    if (searchSourceFields.index) {
-      const indexId = searchSourceFields.index.id!;
-      const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-      references.push({
-        name: refName,
-        type: 'index-pattern',
-        id: indexId,
-      });
-      serializedSearchSourceFields = {
-        ...serializedSearchSourceFields,
-        indexRefName: refName,
-        index: undefined,
-      };
+      return response;
     }
-    if (originalFilters) {
-      const filters = this.getFilters(originalFilters);
-      serializedSearchSourceFields = {
-        ...serializedSearchSourceFields,
-        filter: filters.map((filterRow, i) => {
-          if (!filterRow.meta || !filterRow.meta.index) {
-            return filterRow;
+
+    /**
+     *  Add a handler that will be notified whenever requests start
+     *  @param  {Function} handler
+     *  @return {undefined}
+     */
+    onRequestStart(
+      handler: (searchSource: ISearchSource, options?: FetchOptions) => Promise<unknown>
+    ) {
+      this.requestStartHandlers.push(handler);
+    }
+
+    async getSearchRequestBody() {
+      const searchRequest = await this.flatten();
+      return searchRequest.body;
+    }
+
+    /**
+     * Completely destroy the SearchSource.
+     * @return {undefined}
+     */
+    destroy() {
+      this.requestStartHandlers.length = 0;
+    }
+
+    /** ****
+     * PRIVATE APIS
+     ******/
+
+    /**
+     *  Called by requests of this search source when they are started
+     *  @param  {Courier.Request} request
+     *  @param options
+     *  @return {Promise<undefined>}
+     */
+    private requestIsStarting(options: FetchOptions = {}) {
+      const handlers = [...this.requestStartHandlers];
+      // If callParentStartHandlers has been set to true, we also call all
+      // handlers of parent search sources.
+      if (this.inheritOptions.callParentStartHandlers) {
+        let searchSource = this.getParent();
+        while (searchSource) {
+          handlers.push(...searchSource.requestStartHandlers);
+          searchSource = searchSource.getParent();
+        }
+      }
+
+      return Promise.all(handlers.map(fn => fn(this, options)));
+    }
+
+    /**
+     * Used to merge properties into the data within ._flatten().
+     * The data is passed in and modified by the function
+     *
+     * @param  {object} data - the current merged data
+     * @param  {*} val - the value at `key`
+     * @param  {*} key - The key of `val`
+     * @return {undefined}
+     */
+    private mergeProp<K extends keyof SearchSourceFields>(
+      data: SearchRequest,
+      val: SearchSourceFields[K],
+      key: K
+    ) {
+      val = typeof val === 'function' ? val(this) : val;
+      if (val == null || !key) return;
+
+      const addToRoot = (rootKey: string, value: any) => {
+        data[rootKey] = value;
+      };
+
+      /**
+       * Add the key and val to the body of the request
+       */
+      const addToBody = (bodyKey: string, value: any) => {
+        // ignore if we already have a value
+        if (data.body[bodyKey] == null) {
+          data.body[bodyKey] = value;
+        }
+      };
+
+      switch (key) {
+        case 'filter':
+          return addToRoot('filters', (data.filters || []).concat(val));
+        case 'query':
+          return addToRoot(key, (data[key] || []).concat(val));
+        case 'fields':
+          const fields = uniq((data[key] || []).concat(val));
+          return addToRoot(key, fields);
+        case 'index':
+        case 'type':
+        case 'highlightAll':
+          return key && data[key] == null && addToRoot(key, val);
+        case 'searchAfter':
+          return addToBody('search_after', val);
+        case 'source':
+          return addToBody('_source', val);
+        case 'sort':
+          const sort = normalizeSortRequest(
+            val,
+            this.getField('index'),
+            uiSettings.get('sort:options')
+          );
+          return addToBody(key, sort);
+        default:
+          return addToBody(key, val);
+      }
+    }
+
+    /**
+     * Walk the inheritance chain of a source and return its
+     * flat representation (taking into account merging rules)
+     * @returns {Promise}
+     * @resolved {Object|null} - the flat data of the SearchSource
+     */
+    private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }) {
+      Object.entries(this.fields).forEach(([key, value]) => {
+        this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
+      });
+      if (this.parent) {
+        this.parent.mergeProps(root, searchRequest);
+      }
+      return searchRequest;
+    }
+
+    private getIndexType(index: IIndexPattern) {
+      if (this.searchStrategyId) {
+        return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
+      } else {
+        return index?.type;
+      }
+    }
+
+    private flatten() {
+      const searchRequest = this.mergeProps();
+
+      searchRequest.body = searchRequest.body || {};
+      const { body, index, fields, query, filters, highlightAll } = searchRequest;
+      searchRequest.indexType = this.getIndexType(index);
+
+      const computedFields = index ? index.getComputedFields() : {};
+
+      body.stored_fields = computedFields.storedFields;
+      body.script_fields = body.script_fields || {};
+      extend(body.script_fields, computedFields.scriptFields);
+
+      const defaultDocValueFields = computedFields.docvalueFields
+        ? computedFields.docvalueFields
+        : [];
+      body.docvalue_fields = body.docvalue_fields || defaultDocValueFields;
+
+      if (!body.hasOwnProperty('_source') && index) {
+        body._source = index.getSourceFiltering();
+      }
+
+      if (body._source) {
+        // exclude source fields for this index pattern specified by the user
+        const filter = fieldWildcardFilter(body._source.excludes, uiSettings.get('metaFields'));
+        body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
+          filter(docvalueField.field)
+        );
+      }
+
+      // if we only want to search for certain fields
+      if (fields) {
+        // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
+        body.docvalue_fields = filterDocvalueFields(body.docvalue_fields, fields);
+        body.script_fields = pick(body.script_fields, fields);
+
+        // request the remaining fields from both stored_fields and _source
+        const remainingFields = difference(fields, keys(body.script_fields));
+        body.stored_fields = remainingFields;
+        set(body, '_source.includes', remainingFields);
+      }
+
+      const esQueryConfigs = getEsQueryConfig(uiSettings);
+      body.query = buildEsQuery(index, query, filters, esQueryConfigs);
+
+      if (highlightAll && body.query) {
+        body.highlight = getHighlightRequest(body.query, uiSettings.get('doc_table:highlight'));
+        delete searchRequest.highlightAll;
+      }
+
+      const translateToQuery = (filter: Filter) => filter && (filter.query || filter);
+
+      // re-write filters within filter aggregations
+      (function recurse(aggBranch) {
+        if (!aggBranch) return;
+        Object.keys(aggBranch).forEach(function(id) {
+          const agg = aggBranch[id];
+
+          if (agg.filters) {
+            // translate filters aggregations
+            const { filters: aggFilters } = agg.filters;
+            Object.keys(aggFilters).forEach(filterId => {
+              aggFilters[filterId] = translateToQuery(aggFilters[filterId]);
+            });
           }
-          const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
-          references.push({
-            name: refName,
-            type: 'index-pattern',
-            id: filterRow.meta.index,
-          });
-          return {
-            ...filterRow,
-            meta: {
-              ...filterRow.meta,
-              indexRefName: refName,
-              index: undefined,
-            },
-          };
-        }),
-      };
+
+          recurse(agg.aggs || agg.aggregations);
+        });
+      })(body.aggs || body.aggregations);
+
+      return searchRequest;
     }
 
-    return { searchSourceJSON: JSON.stringify(serializedSearchSourceFields), references };
-  }
+    /**
+     * Serializes the instance to a JSON string and a set of referenced objects.
+     * Use this method to get a representation of the search source which can be stored in a saved object.
+     *
+     * The references returned by this function can be mixed with other references in the same object,
+     * however make sure there are no name-collisions. The references will be named `kibanaSavedObjectMeta.searchSourceJSON.index`
+     * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
+     *
+     * Using `createSearchSource`, the instance can be re-created.
+     * @param searchSource The search source to serialize
+     * @public */
+    public serialize() {
+      const references: SavedObjectReference[] = [];
 
-  private getFilters(filterField: SearchSourceFields['filter']): Filter[] {
-    if (!filterField) {
-      return [];
+      const {
+        filter: originalFilters,
+        ...searchSourceFields
+      }: Omit<SearchSourceFields, 'sort' | 'size'> = omit(this.getFields(), ['sort', 'size']);
+      let serializedSearchSourceFields: Omit<SearchSourceFields, 'sort' | 'size' | 'filter'> & {
+        indexRefName?: string;
+        filter?: Array<Omit<Filter, 'meta'> & { meta: Filter['meta'] & { indexRefName?: string } }>;
+      } = searchSourceFields;
+      if (searchSourceFields.index) {
+        const indexId = searchSourceFields.index.id!;
+        const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+        references.push({
+          name: refName,
+          type: 'index-pattern',
+          id: indexId,
+        });
+        serializedSearchSourceFields = {
+          ...serializedSearchSourceFields,
+          indexRefName: refName,
+          index: undefined,
+        };
+      }
+      if (originalFilters) {
+        const filters = this.getFilters(originalFilters);
+        serializedSearchSourceFields = {
+          ...serializedSearchSourceFields,
+          filter: filters.map((filterRow, i) => {
+            if (!filterRow.meta || !filterRow.meta.index) {
+              return filterRow;
+            }
+            const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+            references.push({
+              name: refName,
+              type: 'index-pattern',
+              id: filterRow.meta.index,
+            });
+            return {
+              ...filterRow,
+              meta: {
+                ...filterRow.meta,
+                indexRefName: refName,
+                index: undefined,
+              },
+            };
+          }),
+        };
+      }
+
+      return { searchSourceJSON: JSON.stringify(serializedSearchSourceFields), references };
     }
 
-    if (Array.isArray(filterField)) {
-      return filterField;
-    }
+    private getFilters(filterField: SearchSourceFields['filter']): Filter[] {
+      if (!filterField) {
+        return [];
+      }
 
-    if (_.isFunction(filterField)) {
-      return this.getFilters(filterField());
-    }
+      if (Array.isArray(filterField)) {
+        return filterField;
+      }
 
-    return [filterField];
-  }
-}
+      if (isFunction(filterField)) {
+        return this.getFilters(filterField());
+      }
+
+      return [filterField];
+    }
+  };
+};
