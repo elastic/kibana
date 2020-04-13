@@ -23,6 +23,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   constructor(sourceDescriptor: ESGeoGridSourceDescriptor, inspectorAdapters: unknown);
 
+  getFieldNames(): string[];
   getGridResolution(): GRID_RESOLUTION;
   getGeoGridPrecision(zoom: number): number;
 }

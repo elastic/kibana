@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import React from 'react';
 import { MVTVectorSourceEditor } from './mvt_vector_source_editor';
-import { AbstractSource } from '../source';
+import { AbstractSource, ImmutableSourceProperty } from '../source';
 import { SingleTiledVectorLayer } from '../../tiled_vector_layer';
 import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
@@ -17,6 +17,7 @@ import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
+  LayerDescriptor,
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
@@ -71,15 +72,16 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return null;
   }
 
-  createDefaultLayer(options: VectorLayerDescriptor): SingleTiledVectorLayer {
+  getFieldNames(): string[] {
+    return [];
+  }
+
+  createDefaultLayer(options: LayerDescriptor): SingleTiledVectorLayer {
     const layerDescriptor = {
       sourceDescriptor: this._descriptor,
       ...options,
     };
-    const normalizedLayerDescriptor: VectorLayerDescriptor = SingleTiledVectorLayer.createDescriptor(
-      layerDescriptor,
-      []
-    );
+    const normalizedLayerDescriptor = SingleTiledVectorLayer.createDescriptor(layerDescriptor, []);
     const vectorLayerArguments: VectorLayerArguments = {
       layerDescriptor: normalizedLayerDescriptor,
       source: this,
@@ -99,13 +101,15 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return [];
   }
 
-  async getImmutableProperties() {
+  //  getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
+
+  async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
       { label: getUrlLabel(), value: this._descriptor.urlTemplate },
       { label: 'Layer name', value: this._descriptor.layerName },
-      { label: 'Min zoom', value: this._descriptor.minZoom },
-      { label: 'Max zoom', value: this._descriptor.maxZoom },
+      { label: 'Min zoom', value: this._descriptor.minZoom.toString() },
+      { label: 'Max zoom', value: this._descriptor.maxZoom.toString() },
     ];
   }
 

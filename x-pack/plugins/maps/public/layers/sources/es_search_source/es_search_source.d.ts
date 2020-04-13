@@ -9,4 +9,5 @@ import { ESSearchSourceDescriptor } from '../../../../common/descriptor_types';
 
 export class ESSearchSource extends AbstractESSource {
   constructor(sourceDescriptor: Partial<ESSearchSourceDescriptor>, inspectorAdapters: unknown);
+  getFieldNames(): string[];
 }

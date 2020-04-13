@@ -52,6 +52,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getSupportedShapeTypes(): VECTOR_SHAPE_TYPES[];
   canFormatFeatureProperties(): boolean;
   getApplyGlobalQuery(): boolean;
+  getFieldNames(): string[];
 }
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {
