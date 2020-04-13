@@ -29,13 +29,13 @@ import {
   allCasesSnake,
   basicCaseSnake,
   actionTypeExecutorResult,
-  basicPushCaseSnake,
+  pushedCaseSnake,
   casesStatus,
   casesSnake,
   cases,
   caseUserActions,
   pushedCase,
-  push,
+  pushSnake,
   respReporters,
   serviceConnector,
   casePushParams,
@@ -72,7 +72,7 @@ describe('Case Configuration API', () => {
 
     test('happy path', async () => {
       const resp = await deleteCases(data, abortCtrl.signal);
-      expect(resp).toEqual(true);
+      expect(resp).toEqual('true');
     });
   });
   describe('getActionLicense', () => {
@@ -362,20 +362,20 @@ describe('Case Configuration API', () => {
   describe('pushCase', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(basicPushCaseSnake);
+      fetchMock.mockResolvedValue(pushedCaseSnake);
     });
 
     test('check url, method, signal', async () => {
-      await pushCase(basicCase.id, push, abortCtrl.signal);
+      await pushCase(basicCase.id, pushSnake, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/_push`, {
         method: 'POST',
-        body: JSON.stringify(push),
+        body: JSON.stringify(pushSnake),
         signal: abortCtrl.signal,
       });
     });
 
     test('happy path', async () => {
-      const resp = await pushCase(basicCase.id, push, abortCtrl.signal);
+      const resp = await pushCase(basicCase.id, pushSnake, abortCtrl.signal);
       expect(resp).toEqual(pushedCase);
     });
   });
