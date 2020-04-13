@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MiddlewareFactory, PolicyListState } from '../../types';
-import { GetDatasourcesResponse, sendGetEndpointSpecificDatasources } from '../../services/ingest';
+import { MiddlewareFactory, PolicyListState, GetDatasourcesResponse } from '../../types';
+import { sendGetEndpointSpecificDatasources } from './services/ingest';
 
 export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = coreStart => {
   const http = coreStart.http;
