@@ -17,7 +17,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const dateStart = 'Sep 10, 2019 @ 12:40:08.078';
     const dateEnd = 'Sep 11, 2019 @ 19:40:08.078';
     const monitorId = '0000-intermittent';
-    const monitorName = '0000-intermittent';
 
     before(async () => {
       await esArchiver.loadIfNeeded(archive);
@@ -30,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('navigation to monitor page', () => {
       before(async () => {
-        await uptime.loadDataAndGoToMonitorPage(dateStart, dateEnd, monitorId, monitorName);
+        await uptime.loadDataAndGoToMonitorPage(dateStart, dateEnd, monitorId);
       });
 
       it('displays ping data as expected', async () => {

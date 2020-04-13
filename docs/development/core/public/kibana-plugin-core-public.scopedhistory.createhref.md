@@ -4,10 +4,12 @@
 
 ## ScopedHistory.createHref property
 
-Creates an href (string) to the location.
+Creates an href (string) to the location. If `prependBasePath` is true (default), it will prepend the location's path with the scoped history basePath.
 
 <b>Signature:</b>
 
 ```typescript
-createHref: (location: LocationDescriptorObject<HistoryLocationState>) => string;
+createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
+        prependBasePath?: boolean | undefined;
+    }) => string;
 ```

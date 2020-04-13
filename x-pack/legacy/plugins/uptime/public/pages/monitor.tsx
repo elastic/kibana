@@ -6,7 +6,6 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { MonitorStatusDetails, PingList } from '../components/connected';
@@ -14,12 +13,10 @@ import { monitorStatusSelector } from '../state/selectors';
 import { PageHeader } from './page_header';
 import { MonitorCharts } from '../components/functional';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { useUptimeTelemetry, UptimePage } from '../hooks';
+import { useMonitorId, useUptimeTelemetry, UptimePage } from '../hooks';
 
 export const MonitorPage: React.FC = () => {
-  // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
-  let { monitorId } = useParams();
-  monitorId = atob(monitorId || '');
+  const monitorId = useMonitorId();
 
   const selectedMonitor = useSelector(monitorStatusSelector);
 
