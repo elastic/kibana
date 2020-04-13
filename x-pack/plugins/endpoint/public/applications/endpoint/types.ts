@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, MiddlewareAPI } from 'redux';
+import { Dispatch, MiddlewareAPI, Action as ReduxAction, AnyAction as ReduxAnyAction } from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
   HostMetadata,
@@ -349,3 +349,28 @@ export interface GetPolicyResponse extends GetOneDatasourceResponse {
 export interface UpdatePolicyResponse extends UpdateDatasourceResponse {
   item: PolicyData;
 }
+
+/**
+ * Like `Reducer` from `redux` but it accepts immutable versions of `state` and `action`.
+ * Use this type for all Reducers in order to help enforce our pattern of immutable state.
+ */
+export type ImmutableReducer<State, Action> = (
+  state: Immutable<State> | undefined,
+  action: Immutable<Action>
+) => State | Immutable<State>;
+
+/**
+ * A alternate interface for `redux`'s `combineReducers`. Will work with the same underlying implementation,
+ * but will enforce that `Immutable` versions of `state` and `action` are received.
+ */
+export type ImmutableCombineReducers = <S, A extends ReduxAction = ReduxAnyAction>(
+  reducers: ImmutableReducersMapObject<S, A>
+) => ImmutableReducer<S, A>;
+
+/**
+ * Like `redux`'s `ReducersMapObject` (which is used by `combineReducers`) but enforces that
+ * the `state` and `action` received are `Immutable` versions.
+ */
+type ImmutableReducersMapObject<S, A extends ReduxAction = ReduxAction> = {
+  [K in keyof S]: ImmutableReducer<S[K], A>;
+};

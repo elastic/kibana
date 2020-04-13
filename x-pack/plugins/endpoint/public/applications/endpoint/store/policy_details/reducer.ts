@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Reducer } from 'redux';
-import { PolicyDetailsState, UIPolicyConfig } from '../../types';
 import { AppAction } from '../action';
 import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
+import { UIPolicyConfig, PolicyDetailsState, ImmutableReducer } from '../../types';
 
 const initialPolicyDetailsState = (): PolicyDetailsState => {
   return {
@@ -23,7 +22,7 @@ const initialPolicyDetailsState = (): PolicyDetailsState => {
   };
 };
 
-export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
+export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (
   state = initialPolicyDetailsState(),
   action
 ) => {

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Reducer } from 'redux';
-import { PolicyListState } from '../../types';
+import { PolicyListState, ImmutableReducer } from '../../types';
 import { AppAction } from '../action';
 import { isOnPolicyListPage } from './selectors';
 
@@ -21,7 +20,7 @@ const initialPolicyListState = (): PolicyListState => {
   };
 };
 
-export const policyListReducer: Reducer<PolicyListState, AppAction> = (
+export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
   state = initialPolicyListState(),
   action
 ) => {

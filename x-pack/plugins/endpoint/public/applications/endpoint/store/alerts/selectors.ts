@@ -44,9 +44,9 @@ export const isOnAlertPage = (state: AlertListState): boolean => {
  * Used to calculate urls for links and such.
  */
 export const uiQueryParams: (
-  state: AlertListState
+  state: Immutable<AlertListState>
 ) => Immutable<AlertingIndexUIQueryParams> = createSelector(
-  (state: AlertListState) => state.location,
+  state => state.location,
   (location: AlertListState['location']) => {
     const data: AlertingIndexUIQueryParams = {};
     if (location) {
@@ -97,16 +97,15 @@ export const searchBarQuery: (state: AlertListState) => Query = createSelector(
  * Parses the ui query params and returns a rison encoded string that represents the search bar's date range.
  * A default is provided if 'date_range' is not present in the url params.
  */
-export const encodedSearchBarDateRange: (state: AlertListState) => string = createSelector(
-  uiQueryParams,
-  ({ date_range: dateRange }) => {
-    if (dateRange === undefined) {
-      return encode({ from: 'now-24h', to: 'now' });
-    } else {
-      return dateRange;
-    }
+export const encodedSearchBarDateRange: (
+  state: Immutable<AlertListState>
+) => string = createSelector(uiQueryParams, ({ date_range: dateRange }) => {
+  if (dateRange === undefined) {
+    return encode({ from: 'now-24h', to: 'now' });
+  } else {
+    return dateRange;
   }
-);
+});
 
 /**
  * Parses the ui query params and returns a object that represents the dateRange used by the SearchBar component.
@@ -142,7 +141,7 @@ export const searchBarIndexPatterns = (state: AlertListState) => state.searchBar
  * query params to use when requesting alert data.
  */
 export const apiQueryParams: (
-  state: AlertListState
+  state: Immutable<AlertListState>
 ) => Immutable<AlertingIndexGetQueryInput> = createSelector(
   uiQueryParams,
   encodedSearchBarDateRange,
