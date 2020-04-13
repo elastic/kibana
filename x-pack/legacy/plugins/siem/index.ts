@@ -6,10 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-import { Server } from 'hapi';
 import { Root } from 'joi';
 
-import { plugin } from '../../../plugins/siem/server';
 import { savedObjectMappings } from '../../../plugins/siem/server/saved_objects';
 
 import {
@@ -23,11 +21,9 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_FROM,
   DEFAULT_TO,
-  DEFAULT_SIGNALS_INDEX,
   ENABLE_NEWS_FEED_SETTING,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
-  SIGNALS_INDEX_KEY,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   DEFAULT_INDEX_PATTERN,
@@ -162,31 +158,12 @@ export const siem = (kibana: any) => {
       },
       mappings: savedObjectMappings,
     },
-    init(server: Server) {
-      const { coreContext, env, setup, start } = server.newPlatform;
-      const initializerContext = { ...coreContext, env };
-      const __legacy = {
-        config: server.config,
-        route: server.route.bind(server),
-      };
-
-      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
-      const pluginInstance = plugin(initializerContext);
-      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
-      pluginInstance.setup(setup.core, setup.plugins, __legacy);
-      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
-      pluginInstance.start(start.core, start.plugins);
-    },
     config(Joi: Root) {
-      // See x-pack/plugins/siem/server/config.ts if you're adding another
-      // value where the configuration has to be duplicated at the moment.
-      // When we move over to the new platform completely this will be
-      // removed and only server/config.ts should be used.
       return Joi.object()
         .keys({
           enabled: Joi.boolean().default(true),
-          [SIGNALS_INDEX_KEY]: Joi.string().default(DEFAULT_SIGNALS_INDEX),
         })
+        .unknown(true)
         .default();
     },
   });
