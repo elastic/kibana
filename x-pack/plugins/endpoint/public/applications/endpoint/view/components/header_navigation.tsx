@@ -8,15 +8,16 @@ import React, { MouseEvent, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { Immutable } from '../../../../../common/types';
 
-export interface NavTabs {
+interface NavTabs {
   name: string;
   id: string;
   href: string;
 }
 
-export const navTabs: NavTabs[] = [
+const navTabs: Immutable<NavTabs[]> = [
   {
     id: 'home',
     name: i18n.translate('xpack.endpoint.headerNav.home', {
