@@ -28,10 +28,16 @@ import { Observable } from 'rxjs';
 import { ConfigSchema } from '../config';
 import { getDashboardConfig } from './dashboard_config';
 
-interface ForwardDefinition {
+interface LegacyAppAliasDefinition {
   legacyAppId: string;
   newAppId: string;
   keepPrefix: boolean;
+}
+
+interface ForwardDefinition {
+  legacyAppId: string;
+  newAppId: string;
+  rewritePath: (legacyPath: string) => string;
 }
 
 export type AngularRenderedAppUpdater = (
@@ -54,7 +60,8 @@ export interface AngularRenderedApp extends App {
 
 export class KibanaLegacyPlugin {
   private apps: AngularRenderedApp[] = [];
-  private forwards: ForwardDefinition[] = [];
+  private legacyAppAliases: LegacyAppAliasDefinition[] = [];
+  private forwardDefinitions: ForwardDefinition[] = [];
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -94,6 +101,24 @@ export class KibanaLegacyPlugin {
        * renaming or nesting plugins. For route changes after the prefix, please
        * use the routing mechanism of your app.
        *
+       * This method just redirects URLs within the legacy `kibana` app.
+       *
+       * @param legacyAppId The name of the old app to forward URLs from
+       * @param newAppId The name of the new app that handles the URLs now
+       * @param options Whether the prefix of the old app is kept to nest the legacy
+       * path into the new path
+       */
+      registerLegacyAppAlias: (
+        legacyAppId: string,
+        newAppId: string,
+        options: { keepPrefix: boolean } = { keepPrefix: false }
+      ) => {
+        this.legacyAppAliases.push({ legacyAppId, newAppId, ...options });
+      },
+
+      /**
+       * Forwards URLs within the legacy `kibana` app to a new platform application.
+       *
        * @param legacyAppId The name of the old app to forward URLs from
        * @param newAppId The name of the new app that handles the URLs now
        * @param options Whether the prefix of the old app is kept to nest the legacy
@@ -102,9 +127,9 @@ export class KibanaLegacyPlugin {
       forwardApp: (
         legacyAppId: string,
         newAppId: string,
-        options: { keepPrefix: boolean } = { keepPrefix: false }
+        rewritePath: (legacyPath: string) => string
       ) => {
-        this.forwards.push({ legacyAppId, newAppId, ...options });
+        this.forwardDefinitions.push({ legacyAppId, newAppId, rewritePath });
       },
 
       /**
@@ -132,7 +157,12 @@ export class KibanaLegacyPlugin {
        * @deprecated
        * Just exported for wiring up with legacy platform, should not be used.
        */
-      getForwards: () => this.forwards,
+      getLegacyAppAliases: () => this.legacyAppAliases,
+      /**
+       * @deprecated
+       * Just exported for wiring up with legacy platform, should not be used.
+       */
+      getForwards: () => this.forwardDefinitions,
       config: this.initializerContext.config.get(),
       dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
     };

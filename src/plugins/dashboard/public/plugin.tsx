@@ -173,6 +173,7 @@ export class DashboardPlugin
     const factory = new DashboardContainerFactory(getStartServices);
     embeddable.registerEmbeddableFactory(factory.type, factory);
 
+    // TODO this doesn't work yet because the new platform doesn't allow it: https://github.com/elastic/kibana/issues/56027
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: `#${DashboardConstants.LANDING_PAGE_PATH}`,
@@ -207,8 +208,10 @@ export class DashboardPlugin
     };
 
     const app: App = {
-      id: '',
+      id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboards',
+      order: -1001,
+      euiIconType: 'dashboardApp',
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         appMounted();
@@ -254,14 +257,28 @@ export class DashboardPlugin
 
     initAngularBootstrap();
 
-    kibanaLegacy.registerLegacyApp({
-      ...app,
-      id: DashboardConstants.DASHBOARD_ID,
-      // only register the updater in once app, otherwise all updates would happen twice
-      updater$: this.appStateUpdater.asObservable(),
-      navLinkId: 'kibana:dashboard',
-    });
-    kibanaLegacy.registerLegacyApp({ ...app, id: DashboardConstants.DASHBOARDS_ID });
+    core.application.register(app);
+    kibanaLegacy.forwardApp(
+      DashboardConstants.DASHBOARD_ID,
+      DashboardConstants.DASHBOARDS_ID,
+      path => {
+        if (path === '#/dashboard') {
+          return '#/create';
+        }
+        const id = /dashboard\/(.*)$/.exec(path)?.[2];
+        if (!id) {
+          return '#/list';
+        }
+        return `#/view/${id}`;
+      }
+    );
+    kibanaLegacy.forwardApp(
+      DashboardConstants.DASHBOARDS_ID,
+      DashboardConstants.DASHBOARDS_ID,
+      () => {
+        return `#/list`;
+      }
+    );
 
     if (home) {
       home.featureCatalogue.register({

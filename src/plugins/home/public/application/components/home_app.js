@@ -71,12 +71,12 @@ export function HomeApp({ directories }) {
     <I18nProvider>
       <Router>
         <Switch>
-          <Route path="/home/tutorial/:id" render={renderTutorial} />
-          <Route path="/home/tutorial_directory/:tab?" render={renderTutorialDirectory} />
-          <Route exact path="/home/feature_directory">
+          <Route path="/tutorial/:id" render={renderTutorial} />
+          <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
+          <Route exact path="/feature_directory">
             <FeatureDirectory addBasePath={addBasePath} directories={directories} />
           </Route>
-          <Route exact path="/home">
+          <Route exact path="/">
             <Home
               addBasePath={addBasePath}
               directories={directories}
@@ -88,6 +88,7 @@ export function HomeApp({ directories }) {
               telemetry={telemetry}
             />
           </Route>
+          {/* TODO redirect this right */}
           <Route path="/home">
             <Redirect to={`/${defaultAppId}`} />
           </Route>

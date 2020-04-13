@@ -63,9 +63,10 @@ export class HomePublicPlugin
     core: CoreSetup<HomePluginStartDependencies>,
     { kibanaLegacy, usageCollection }: HomePluginSetupDependencies
   ): HomePublicPluginSetup {
-    kibanaLegacy.registerLegacyApp({
+    core.application.register({
       id: 'home',
       title: 'Home',
+      navLinkStatus: 3, // TODO should be fetched by enum
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home')

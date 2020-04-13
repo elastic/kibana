@@ -85,17 +85,7 @@ export default function(kibana) {
           disableSubUrlTracking: true,
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
-        {
-          id: 'kibana:dashboard',
-          title: i18n.translate('kbn.dashboardTitle', {
-            defaultMessage: 'Dashboard',
-          }),
-          order: -1001,
-          url: `${kbnBaseUrl}#/dashboards`,
-          euiIconType: 'dashboardApp',
-          disableSubUrlTracking: true,
-          category: DEFAULT_APP_CATEGORIES.analyze,
-        },
+        // TODO get rid of kibana:dashboard references
         {
           id: 'kibana:dev_tools',
           title: i18n.translate('kbn.devToolsTitle', {

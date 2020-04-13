@@ -101,11 +101,11 @@ class TutorialUi extends React.Component {
     getServices().chrome.setBreadcrumbs([
       {
         text: homeTitle,
-        href: '#/home',
+        href: '#/',
       },
       {
         text: addDataTitle,
-        href: '#/home/tutorial_directory',
+        href: '#/tutorial_directory',
       },
       {
         text: tutorial ? tutorial.name : this.props.tutorialId,

@@ -46,6 +46,9 @@ import {
 } from '../../../kibana_legacy/public';
 import { SavedObjectLoader } from '../../../saved_objects/public';
 
+// required for i18nIdDirective
+import 'angular-sanitize';
+
 export interface RenderDeps {
   pluginInitializerContext: PluginInitializerContext;
   core: CoreStart;
