@@ -18,7 +18,6 @@ import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   SOURCE_TYPES,
-  ES_SEARCH,
   ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
   SORT_ORDER,
@@ -70,7 +69,7 @@ function getDocValueAndSourceFields(indexPattern, fieldNames) {
 }
 
 export class ESSearchSource extends AbstractESSource {
-  static type = ES_SEARCH;
+  static type = SOURCE_TYPES.ES_SEARCH;
 
   constructor(descriptor, inspectorAdapters) {
     super(
@@ -405,7 +404,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       data: featureCollection,
-      meta: { ...meta, sourceType: ES_SEARCH },
+      meta: { ...meta, sourceType: SOURCE_TYPES.ES_SEARCH },
     };
   }
 
