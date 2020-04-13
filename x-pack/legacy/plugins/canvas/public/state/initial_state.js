@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { getCoreStart } from '../legacy';
+import { platformService } from '../services';
 import { getDefaultWorkpad } from './defaults';
 
 export const getInitialState = path => {
@@ -13,7 +13,7 @@ export const getInitialState = path => {
     app: {}, // Kibana stuff in here
     assets: {}, // assets end up here
     transient: {
-      canUserWrite: getCoreStart().application.capabilities.canvas.save,
+      canUserWrite: platformService.getService().coreStart.application.capabilities.canvas.save,
       zoomScale: 1,
       elementStats: {
         total: 0,
