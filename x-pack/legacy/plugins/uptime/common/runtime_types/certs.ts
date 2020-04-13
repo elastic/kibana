@@ -6,40 +6,6 @@
 
 import * as t from 'io-ts';
 
-export const CertElasticsearchResponse = t.type({
-  hits: t.type({
-    hits: t.array(
-      t.type({
-        _source: t.type({
-          tls: t.partial({
-            certificate_not_valid_before: t.string,
-            issued_by: t.string,
-            sha256: t.string,
-            common_name: t.string,
-            certificate_not_valid_after: t.string,
-          }),
-        }),
-        inner_hits: t.type({
-          monitors: t.type({
-            hits: t.type({
-              hits: t.array(
-                t.partial({
-                  _source: t.type({
-                    monitor: t.type({
-                      name: t.string,
-                      id: t.string,
-                    }),
-                  }),
-                })
-              ),
-            }),
-          }),
-        }),
-      })
-    ),
-  }),
-});
-
 export const CertType = t.intersection([
   t.type({
     monitors: t.array(
@@ -53,7 +19,8 @@ export const CertType = t.intersection([
     certificate_not_valid_after: t.string,
     certificate_not_valid_before: t.string,
     common_name: t.string,
-    issued_by: t.string,
+    issuer: t.string,
+    sha1: t.string,
     sha256: t.string,
   }),
 ]);
