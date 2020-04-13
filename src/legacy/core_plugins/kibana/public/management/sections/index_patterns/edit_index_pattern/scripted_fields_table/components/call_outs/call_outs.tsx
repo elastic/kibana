@@ -20,9 +20,7 @@
 import React from 'react';
 
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
-import PropTypes from 'prop-types';
 
 interface CallOutsProps {
   deprecatedLangsInUse: string[];
@@ -68,9 +66,4 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProp
       <EuiSpacer size="m" />
     </>
   );
-};
-
-CallOuts.propTypes = {
-  deprecatedLangsInUse: PropTypes.array.isRequired,
-  painlessDocLink: PropTypes.string.isRequired,
 };

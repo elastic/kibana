@@ -17,8 +17,6 @@
  * under the License.
  */
 import React from 'react';
-import PropTypes from 'prop-types';
-
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
@@ -62,10 +60,4 @@ export const DeleteScritpedFieldConfirmationModal = ({
       />
     </EuiOverlayMask>
   );
-};
-
-DeleteScritpedFieldConfirmationModal.propTypes = {
-  field: PropTypes.object.isRequired,
-  hideDeleteConfirmationModal: PropTypes.func.isRequired,
-  deleteField: PropTypes.func.isRequired,
 };

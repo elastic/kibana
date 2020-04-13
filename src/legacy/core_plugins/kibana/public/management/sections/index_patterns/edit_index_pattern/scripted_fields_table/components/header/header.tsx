@@ -18,8 +18,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -60,7 +58,3 @@ export const Header = ({ addScriptedFieldUrl }: HeaderProps) => (
     </EuiFlexItem>
   </EuiFlexGroup>
 );
-
-Header.propTypes = {
-  addScriptedFieldUrl: PropTypes.string.isRequired,
-};

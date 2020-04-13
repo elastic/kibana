@@ -18,7 +18,6 @@
  */
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
@@ -34,13 +33,6 @@ interface TableProps {
 }
 
 export class Table extends PureComponent<TableProps> {
-  static propTypes = {
-    indexPattern: PropTypes.object.isRequired,
-    items: PropTypes.array.isRequired,
-    editField: PropTypes.func.isRequired,
-    deleteField: PropTypes.func.isRequired,
-  };
-
   renderFormatCell = (value: string) => {
     const { indexPattern } = this.props;
     const title = get(indexPattern, ['fieldFormatMap', value, 'type', 'title'], '');

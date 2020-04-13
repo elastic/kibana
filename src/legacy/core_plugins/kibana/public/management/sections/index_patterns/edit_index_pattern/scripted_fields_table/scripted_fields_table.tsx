@@ -18,7 +18,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   getSupportedScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -54,17 +53,6 @@ export class ScriptedFieldsTable extends Component<
   ScriptedFieldsTableProps,
   ScriptedFieldsTableState
 > {
-  static propTypes = {
-    indexPattern: PropTypes.object.isRequired,
-    fieldFilter: PropTypes.string,
-    scriptedFieldLanguageFilter: PropTypes.string,
-    helpers: PropTypes.shape({
-      redirectToRoute: PropTypes.func.isRequired,
-      getRouteHref: PropTypes.func.isRequired,
-    }),
-    onRemoveField: PropTypes.func,
-  };
-
   constructor(props: ScriptedFieldsTableProps) {
     super(props);
 
