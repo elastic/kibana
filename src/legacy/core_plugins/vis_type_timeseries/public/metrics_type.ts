@@ -25,7 +25,7 @@ import { metricsRequestHandler } from './request_handler';
 import { EditorController } from './editor_controller';
 // @ts-ignore
 import { PANEL_TYPES } from '../../../../plugins/vis_type_timeseries/common/panel_types';
-import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/common';
+import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/public';
 
 export const metricsVisDefinition = {
   name: 'metrics',
