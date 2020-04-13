@@ -8,6 +8,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import React, { useState } from 'react';
+import { px, unit } from '../../../../../../style/variables';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 
@@ -31,6 +32,7 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
         setIsDeleting(false);
         onDelete();
       }}
+      style={{ marginRight: px(unit) }}
     >
       {i18n.translate('xpack.apm.settings.customizeUI.customLink.delete', {
         defaultMessage: 'Delete'
