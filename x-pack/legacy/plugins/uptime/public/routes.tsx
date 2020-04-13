@@ -23,11 +23,6 @@ interface RouterProps {
 
 export const PageRouter: FC<RouterProps> = ({ autocomplete }) => (
   <Switch>
-    <Route path={CERTIFICATES_ROUTE}>
-      <div data-test-subj="uptimeCertificatesPage">
-        <CertificatesPage autocomplete={autocomplete} />
-      </div>
-    </Route>
     <Route path={MONITOR_ROUTE}>
       <div data-test-subj="uptimeMonitorPage">
         <MonitorPage />
@@ -36,6 +31,11 @@ export const PageRouter: FC<RouterProps> = ({ autocomplete }) => (
     <Route path={SETTINGS_ROUTE}>
       <div data-test-subj="uptimeSettingsPage">
         <SettingsPage />
+      </div>
+    </Route>
+    <Route path={CERTIFICATES_ROUTE}>
+      <div data-test-subj="uptimeCertificatesPage">
+        <CertificatesPage autocomplete={autocomplete} />
       </div>
     </Route>
     <Route path={OVERVIEW_ROUTE}>

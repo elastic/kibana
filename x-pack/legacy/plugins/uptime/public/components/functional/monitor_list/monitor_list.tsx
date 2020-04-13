@@ -18,6 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
 import {
@@ -34,6 +35,7 @@ import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListDrawer } from '../../connected';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
+import { CERTIFICATES_ROUTE } from '../../../../common/constants';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -155,14 +157,31 @@ export const MonitorListComponent = (props: Props) => {
   return (
     <>
       <EuiPanel>
-        <EuiTitle size="xs">
-          <h5>
-            <FormattedMessage
-              id="xpack.uptime.monitorList.monitoringStatusTitle"
-              defaultMessage="Monitor status"
-            />
-          </h5>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h5>
+                <FormattedMessage
+                  id="xpack.uptime.monitorList.monitoringStatusTitle"
+                  defaultMessage="Monitor status"
+                />
+              </h5>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h5>
+                <Link to={CERTIFICATES_ROUTE}>
+                  <FormattedMessage
+                    id="xpack.uptime.monitorList.monitoringStatusTitle"
+                    defaultMessage="View Certificates Status"
+                  />
+                </Link>
+              </h5>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <EuiSpacer size="s" />
         <EuiBasicTable
           aria-label={labels.getDescriptionLabel(items.length)}
