@@ -25,6 +25,7 @@ export const ConfirmJobDeletion: React.FC<Props> = ({ loading, onConfirm, onCanc
         confirmButtonText="Delete"
         buttonColor="danger"
         defaultFocusedButton="confirm"
+        data-test-subj="uptimeMLJobDeleteConfirmModel"
       >
         {!loading ? (
           <p>
