@@ -4,23 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractVectorSource } from './vector_source';
+import { AbstractVectorSource } from '../vector_source';
 import {
   getAutocompleteService,
   fetchSearchSourceAndRecordWithInspector,
   getIndexPatternService,
   SearchSource,
   getTimeFilter,
-} from '../../kibana_services';
-import { createExtentFilter } from '../../elasticsearch_geo_utils';
+} from '../../../kibana_services';
+import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { copyPersistentState } from '../../reducers/util';
-import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
-import { DataRequestAbortError } from '../util/data_request';
-import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';
+import { copyPersistentState } from '../../../reducers/util';
+import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import { DataRequestAbortError } from '../../util/data_request';
+import { expandToTileBoundaries } from '../es_geo_grid_source/geo_tile_utils';
 
 export class AbstractESSource extends AbstractVectorSource {
   constructor(descriptor, inspectorAdapters) {

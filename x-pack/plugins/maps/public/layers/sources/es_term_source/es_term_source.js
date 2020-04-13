@@ -7,10 +7,10 @@
 import _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_MAX_BUCKETS_LIMIT, FIELD_ORIGIN, AGG_TYPE } from '../../../common/constants';
-import { ESDocField } from '../fields/es_doc_field';
-import { AbstractESAggSource, AGG_DELIMITER } from './es_agg_source';
-import { getField, addFieldToDSL, extractPropertiesFromBucket } from '../util/es_agg_utils';
+import { DEFAULT_MAX_BUCKETS_LIMIT, FIELD_ORIGIN, AGG_TYPE } from '../../../../common/constants';
+import { ESDocField } from '../../fields/es_doc_field';
+import { AbstractESAggSource, AGG_DELIMITER } from '../es_agg_source';
+import { getField, addFieldToDSL, extractPropertiesFromBucket } from '../../util/es_agg_utils';
 
 const TERMS_AGG_NAME = 'join';
 

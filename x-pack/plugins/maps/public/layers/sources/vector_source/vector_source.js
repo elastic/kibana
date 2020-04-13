@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VectorLayer } from '../vector_layer';
-import { TooltipProperty } from '../tooltips/tooltip_property';
-import { VectorStyle } from '../styles/vector/vector_style';
-import { AbstractSource } from './source';
+import { VectorLayer } from '../../vector_layer';
+import { TooltipProperty } from '../../tooltips/tooltip_property';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { AbstractSource } from './../source';
 import * as topojson from 'topojson-client';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { VECTOR_SHAPE_TYPES } from './vector_feature_types';
+import { VECTOR_SHAPE_TYPES } from './../vector_feature_types';
 
 export class AbstractVectorSource extends AbstractSource {
   static async getGeoJson({ format, featureCollectionPath, fetchUrl }) {

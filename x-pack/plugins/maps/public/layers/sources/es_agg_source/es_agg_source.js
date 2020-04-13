@@ -5,15 +5,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AbstractESSource } from './es_source';
-import { esAggFieldsFactory } from '../fields/es_agg_field';
+import { AbstractESSource } from '../es_source';
+import { esAggFieldsFactory } from '../../fields/es_agg_field';
 
 import {
   AGG_TYPE,
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
   FIELD_ORIGIN,
-} from '../../../common/constants';
+} from '../../../../common/constants';
 
 export const AGG_DELIMITER = '_of_';
 
