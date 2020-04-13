@@ -11,7 +11,7 @@ import { MVTVectorSourceEditor } from './mvt_vector_source_editor';
 import { AbstractSource } from '../source';
 import { SingleTiledVectorLayer } from '../../tiled_vector_layer';
 import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
-import { MAX_ZOOM, MIN_ZOOM, MVT_SINGLE_LAYER } from '../../../../common/constants';
+import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
@@ -31,7 +31,7 @@ const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
 
 export class MVTSingleLayerVectorSource extends AbstractSource
   implements ITiledSingleLayerVectorSource {
-  static type = MVT_SINGLE_LAYER;
+  static type = SOURCE_TYPES.MVT_SINGLE_LAYER;
   static title = i18n.translate('xpack.maps.source.tiledSingleLayerVectorTitle', {
     defaultMessage: 'Tiled vector',
   });
@@ -162,7 +162,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
 registerSource({
   ConstructorFunction: MVTSingleLayerVectorSource,
-  type: MVT_SINGLE_LAYER,
+  type: SOURCE_TYPES.MVT_SINGLE_LAYER,
 });
 
 export const mvtVectorSourceWizardConfig = {
