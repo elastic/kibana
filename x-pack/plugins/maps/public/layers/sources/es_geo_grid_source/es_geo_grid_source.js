@@ -17,8 +17,8 @@ import { COLOR_GRADIENTS } from '../../styles/color_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
+  SOURCE_TYPES,
   DEFAULT_MAX_BUCKETS_LIMIT,
-  ES_GEO_GRID,
   COUNT_PROP_NAME,
   COLOR_MAP_TYPE,
   RENDER_AS,
@@ -45,7 +45,7 @@ const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle', {
 });
 
 export class ESGeoGridSource extends AbstractESAggSource {
-  static type = ES_GEO_GRID;
+  static type = SOURCE_TYPES.ES_GEO_GRID;
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
     return {
@@ -311,7 +311,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       },
       meta: {
         areResultsTrimmed: false,
-        sourceType: ES_GEO_GRID,
+        sourceType: SOURCE_TYPES.ES_GEO_GRID,
       },
     };
   }
@@ -420,7 +420,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
 registerSource({
   ConstructorFunction: ESGeoGridSource,
-  type: ES_GEO_GRID,
+  type: SOURCE_TYPES.ES_GEO_GRID,
 });
 
 export const clustersLayerWizardConfig = {
