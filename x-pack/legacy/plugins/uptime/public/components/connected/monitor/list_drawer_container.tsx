@@ -11,7 +11,7 @@ import { monitorDetailsSelector } from '../../../state/selectors';
 import { MonitorDetailsActionPayload } from '../../../state/actions/types';
 import { getMonitorDetailsAction } from '../../../state/actions/monitor';
 import { MonitorListDrawerComponent } from '../../functional/monitor_list/monitor_list_drawer/monitor_list_drawer';
-import { useUrlParams } from '../../../hooks';
+import { useGetUrlParams } from '../../../hooks';
 import { MonitorSummary } from '../../../../common/graphql/types';
 import { MonitorDetails } from '../../../../common/runtime_types/monitor';
 
@@ -24,8 +24,7 @@ interface ContainerProps {
 const Container: React.FC<ContainerProps> = ({ summary, loadMonitorDetails, monitorDetails }) => {
   const monitorId = summary?.monitor_id;
 
-  const [getUrlParams] = useUrlParams();
-  const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = getUrlParams();
+  const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
 
   useEffect(() => {
     loadMonitorDetails({

@@ -87,6 +87,8 @@ export function buildMapsTelemetry({
   const mapsCount = layerLists.length;
 
   const dataSourcesCount = layerLists.map(lList => {
+    // todo: not every source-descriptor has an id
+    // @ts-ignore
     const sourceIdList = lList.map((layer: LayerDescriptor) => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
