@@ -9,13 +9,14 @@ import routes from 'ui/routes';
 import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
 import { getSavedObjectsClient, getCoreChrome, getMapsCapabilities } from './kibana_services';
+import { getMapsSavedObjectLoader } from './angular/services/gis_map_saved_object_loader';
 
 routes.enable();
 
 routes
   .defaults(/.*/, {
-    badge: uiCapabilities => {
-      if (uiCapabilities.maps.save) {
+    badge: () => {
+      if (getMapsCapabilities().save) {
         return undefined;
       }
 
@@ -32,7 +33,8 @@ routes
   })
   .when('/', {
     template: listingTemplate,
-    controller($scope, gisMapSavedObjectLoader, config) {
+    controller($scope, config) {
+      const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
       $scope.listingLimit = config.get('savedObjects:listingLimit');
       $scope.find = search => {
         return gisMapSavedObjectLoader.find(search, $scope.listingLimit);
@@ -60,7 +62,9 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function(gisMapSavedObjectLoader, redirectWhenMissing) {
+      map: function(redirectWhenMissing, $scope, config) {
+        const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
+        $scope.listingLimit = config.get('savedObjects:listingLimit');
         return gisMapSavedObjectLoader.get().catch(
           redirectWhenMissing({
             map: '/',
@@ -73,7 +77,8 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function(gisMapSavedObjectLoader, redirectWhenMissing, $route) {
+      map: function(redirectWhenMissing, $route) {
+        const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
         const id = $route.current.params.id;
         return gisMapSavedObjectLoader
           .get(id)

@@ -10,7 +10,7 @@ import { npSetup, npStart } from 'ui/new_platform';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
 import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
-import { getIndexPatternService, getHttp, getMapsCapabilties } from '../kibana_services';
+import { getIndexPatternService, getHttp, getMapsCapabilities } from '../kibana_services';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
@@ -49,7 +49,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   }
 
   async isEditable() {
-    return getMapsCapabilties().save as boolean;
+    return getMapsCapabilities().save as boolean;
   }
 
   // Not supported yet for maps types.
