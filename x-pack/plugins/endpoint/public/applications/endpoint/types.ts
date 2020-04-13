@@ -18,7 +18,10 @@ import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
 import { Datasource, NewDatasource } from '../../../../ingest_manager/common/types/models';
-import { GetAgentStatusResponse } from '../../../../ingest_manager/common/types/rest_spec';
+import {
+  GetAgentStatusResponse,
+  CreateDatasourceResponse,
+} from '../../../../ingest_manager/common/types/rest_spec';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -327,3 +330,25 @@ export interface AlertingIndexUIQueryParams {
   date_range?: string;
   filters?: string;
 }
+
+export interface GetDatasourcesResponse {
+  items: PolicyData[];
+  total: number;
+  page: number;
+  perPage: number;
+  success: boolean;
+}
+
+export interface GetDatasourceResponse {
+  item: PolicyData;
+  success: boolean;
+}
+
+export type UpdateDatasourceResponse = CreateDatasourceResponse & {
+  item: PolicyData;
+};
+
+/**
+ * The PageId type is used for the payload when firing userNavigatedToPage actions
+ */
+export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';

@@ -9,7 +9,7 @@ import { EuiLink } from '@elastic/eui';
 import { EuiLinkProps } from '@elastic/eui';
 import { useNavigateToAppEventHandler } from '../hooks/use_navigate_to_app_event_handler';
 
-export type LinkToAppProps = EuiLinkProps & {
+type LinkToAppProps = EuiLinkProps & {
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */
   appId: string;
   /** Any app specific path (route) */
