@@ -41,7 +41,9 @@ const showMLJobNotification = (
 ) => {
   if (success) {
     notifications.toasts.success({
-      title: <p>{labels.JOB_CREATED_SUCCESS_TITLE}</p>,
+      title: (
+        <p data-test-subj="uptimeMLJobSuccessfullyCreated">{labels.JOB_CREATED_SUCCESS_TITLE}</p>
+      ),
       body: (
         <p>
           {labels.JOB_CREATED_SUCCESS_MESSAGE}
@@ -54,7 +56,7 @@ const showMLJobNotification = (
     });
   } else {
     notifications.toasts.danger({
-      title: <p>{labels.JOB_CREATION_FAILED}</p>,
+      title: <p data-test-subj="uptimeMLJobCreationFailed">{labels.JOB_CREATION_FAILED}</p>,
       body: message ?? <p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>,
       toastLifeTimeMs: 10000,
     });

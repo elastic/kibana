@@ -6,8 +6,8 @@
 
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { PageId } from '../../../../common/types';
 import { RoutingAction } from '../store/routing';
+import { PageId } from '../types';
 
 /**
  * Dispatches a 'userNavigatedToPage' action with the given 'pageId' as the action payload.

@@ -30,7 +30,7 @@ import {
   apiError,
 } from '../../store/policy_details/selectors';
 import { WindowsEventing } from './policy_forms/eventing/windows';
-import { PageView, PageViewHeaderTitle } from '../../components/page_view';
+import { PageView, PageViewHeaderTitle } from '../components/page_view';
 import { AppAction } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
@@ -82,7 +82,7 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [notifications.toasts, policyItem, policyName, policyUpdateStatus]);
 
-  const handleBackToListOnClick = useCallback(
+  const handleBackToListOnClick: React.MouseEventHandler = useCallback(
     ev => {
       ev.preventDefault();
       history.push(`/policy`);
@@ -161,7 +161,6 @@ export const PolicyDetails = React.memo(() => {
           fill={true}
           iconType="save"
           data-test-subj="policyDetailsSaveButton"
-          // FIXME: need to disable if User has no write permissions to ingest - see: https://github.com/elastic/endpoint-app-team/issues/296
           onClick={handleSaveOnClick}
           isLoading={isPolicyLoading}
         >

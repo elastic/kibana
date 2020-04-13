@@ -28,6 +28,7 @@ export enum KibanaAssetType {
   visualization = 'visualization',
   search = 'search',
   indexPattern = 'index-pattern',
+  map = 'map',
 }
 
 export enum ElasticsearchAssetType {
