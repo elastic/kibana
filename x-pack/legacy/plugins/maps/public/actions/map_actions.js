@@ -125,9 +125,21 @@ async function syncDataForAllLayers(dispatch, getState, dataFilters) {
 export function cancelAllInFlightRequests() {
   return (dispatch, getState) => {
     getLayerList(getState()).forEach(layer => {
-      layer.getInFlightRequestTokens().forEach(requestToken => {
-        dispatch(cancelRequest(requestToken));
-      });
+      dispatch(clearDataRequests(layer));
+    });
+  };
+}
+
+function clearDataRequests(layer) {
+  return dispatch => {
+    layer.getInFlightRequestTokens().forEach(requestToken => {
+      dispatch(cancelRequest(requestToken));
+    });
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layer.getId(),
+      propName: '__dataRequests',
+      newValue: [],
     });
   };
 }
@@ -678,15 +690,7 @@ function updateLayerType(layerId, newLayerType) {
     if (!layer || layer.getType() === newLayerType) {
       return;
     }
-    layer.getInFlightRequestTokens().forEach(requestToken => {
-      dispatch(cancelRequest(requestToken));
-    });
-    dispatch({
-      type: UPDATE_LAYER_PROP,
-      id: layerId,
-      propName: '__dataRequests',
-      newValue: [],
-    });
+    dispatch(clearDataRequests(layer));
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: layerId,
