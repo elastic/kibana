@@ -33,6 +33,7 @@ function HasExtendedBoundsParamEditor(props: AggParamEditorProps<boolean>) {
 
   return (
     <SwitchParamEditor
+      {...props}
       displayLabel={i18n.translate('visDefaultEditor.controls.extendedBoundsLabel', {
         defaultMessage: 'Extend bounds',
       })}
@@ -44,7 +45,6 @@ function HasExtendedBoundsParamEditor(props: AggParamEditorProps<boolean>) {
         !props.agg.params.min_doc_count ||
         !(isType('number')(props.agg) || isType('date')(props.agg))
       }
-      {...props}
     />
   );
 }
