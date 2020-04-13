@@ -157,7 +157,7 @@ Pre-packaged *alert types* simplify setup, hide the details complex domain-speci
 If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-with-security, *security*>>:
 
 * TLS must be configured for communication <<configuring-tls-kib-es, between {es} and {kib}>>. {kib} alerting uses <<api-keys, API keys>> to secure background alert checks and actions, and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
-* In the kibana.yml configuration file, add the <<alert-action-settings-kb,`xpack.encrypted_saved_objects.encryptionKey` setting>> 
+* In the kibana.yml configuration file, add the <<alert-action-settings-kb,`xpack.encryptedSavedObjects.encryptionKey` setting>> 
 
 [float]
 [[alerting-security]]
