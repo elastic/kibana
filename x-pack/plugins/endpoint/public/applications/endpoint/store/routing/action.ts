@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PageId, Immutable } from '../../../../../common/types';
-import { EndpointAppLocation } from '../alerts';
+import { Immutable } from '../../../../../common/types';
+import { EndpointAppLocation, PageId } from '../../types';
 
 interface UserNavigatedToPage {
   readonly type: 'userNavigatedToPage';
