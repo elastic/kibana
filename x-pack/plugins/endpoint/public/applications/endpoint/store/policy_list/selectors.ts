@@ -44,8 +44,8 @@ export const urlSearchParams: (
 
   const query = parse(location.search);
 
-  // Search params can appear multiple times in the URL, in which case the value for them once parse
-  // would be an array. In these case, we take the last value defined
+  // Search params can appear multiple times in the URL, in which case the value for them,
+  // once parsed, would be an array. In these case, we take the last value defined
   searchParams.page_index = Number(
     (Array.isArray(query.page_index)
       ? query.page_index[query.page_index.length - 1]

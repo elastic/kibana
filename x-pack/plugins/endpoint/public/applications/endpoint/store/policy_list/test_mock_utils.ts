@@ -5,6 +5,7 @@
  */
 
 import { HttpStart } from 'kibana/public';
+import { Dispatch } from 'redux';
 import { GetDatasourcesResponse, INGEST_API_DATASOURCES } from '../../services/ingest';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
 import { AppAction, GlobalState, MiddlewareFactory } from '../../types';
@@ -50,6 +51,18 @@ export interface MiddlewareActionSpyHelper<S = GlobalState> {
    */
   waitForAction: (actionType: Pick<AppAction, 'type'>['type']) => Promise<void>;
   /**
+   * A property holding the information around the calls that were processed by the  internal
+   * `actionSpyMiddlware`. This property holds the information typically found in Jets's mocked
+   * function `mock` property - [see here for more information](https://jestjs.io/docs/en/mock-functions#mock-property)
+   *
+   * **Note**: this property will only be set **after* the `actionSpyMiddlware` has been
+   * initialized (ex. via `createStore()`. Attempting to reference this property before that time
+   * will throw an error.
+   * Also - do not hold on to references to this property value if `jest.clearAllMocks()` or
+   * `jest.resetAllMocks()` is called between usages of the value.
+   */
+  dispatchSpy: jest.Mock<Dispatch<AppAction>>['mock'];
+  /**
    * Redux middleware that enables spying on the action that are dispatched through the store
    */
   actionSpyMiddleware: ReturnType<MiddlewareFactory<S>>;
@@ -62,25 +75,32 @@ export interface MiddlewareActionSpyHelper<S = GlobalState> {
  *
  * @example
  * // Use in Policy List middleware testing
- * const { actionSpyMiddleware, waitForAction } = createSpyMiddleware<PolicyListState>();
+ * const middlewareSpyUtils = createSpyMiddleware<PolicyListState>();
  * store = createStore(
  *    policyListReducer,
  *    applyMiddleware(
  *      policyListMiddlewareFactory(fakeCoreStart, depsStart),
- *      actionSpyMiddleware
+ *      middlewareSpyUtils.actionSpyMiddleware
  *    )
- *  );
+ * );
+ * // Reference `dispatchSpy` ONLY after creating the store that includes `actionSpyMiddleware`
+ * const { waitForAction, dispatchSpy } = middlewareSpyUtils;
+ * //
  * // later in test
+ * //
  * it('...', async () => {
  *   //...
  *   await waitForAction('serverReturnedPolicyListData');
- *   // do assertion
+ *   // do assertions
+ *   // or check how action was called
+ *   expect(dispatchSpy.calls.length).toBe(2)
  * });
  */
 export const createSpyMiddleware = <S = GlobalState>(): MiddlewareActionSpyHelper<S> => {
   type ActionWatcher = (action: AppAction) => void;
 
   const watchers = new Set<ActionWatcher>();
+  let spyDispatch: jest.Mock<Dispatch<AppAction>>;
 
   return {
     waitForAction: async (actionType: string) => {
@@ -105,15 +125,28 @@ export const createSpyMiddleware = <S = GlobalState>(): MiddlewareActionSpyHelpe
       });
     },
 
+    get dispatchSpy() {
+      if (!spyDispatch) {
+        throw new Error(
+          'Spy Middleware has not been initialized. Access this property only after using `actionSpyMiddleware` in a redux store'
+        );
+      }
+      return spyDispatch.mock;
+    },
+
     actionSpyMiddleware: api => {
-      return next => action => {
-        next(action);
-        // If we have action watchers, then loop through them and call them with this action
-        if (watchers.size > 0) {
-          for (const watch of watchers) {
-            watch(action);
+      return next => {
+        spyDispatch = jest.fn(action => {
+          next(action);
+          // If we have action watchers, then loop through them and call them with this action
+          if (watchers.size > 0) {
+            for (const watch of watchers) {
+              watch(action);
+            }
           }
-        }
+          return action;
+        });
+        return spyDispatch;
       };
     },
   };
