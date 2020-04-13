@@ -17,6 +17,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TypeRegistry } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/type_registry';
 import { FormSchema, FormData, ValidationFunc, ERROR_CODE } from '../../../../../shared_imports';
+import * as I18n from './translations';
 
 const UUID_V4_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
@@ -31,7 +32,7 @@ const validateMustache = (params: Record<string, SavedObjectAttribute>) => {
     try {
       mustache.render(paramValue, {});
     } catch (e) {
-      errors.push(`${startCase(paramKey)} is not valid mustache template`);
+      errors.push(I18n.INVALID_MUSTACHE_TEMPLATE(paramKey));
     }
   });
 
@@ -67,8 +68,9 @@ const validateSingleAction = (
   actionTypeRegistry: TypeRegistry<ActionTypeModel>
 ): string[] => {
   if (!isUuidv4(actionItem.id)) {
-    return ['No connector selected'];
+    return [I18n.NO_CONNECTOR_SELECTED];
   }
+
   const actionParamsErrors = validateActionParams(actionItem, actionTypeRegistry);
   const mustacheErrors = validateMustache(actionItem.params);
 
@@ -78,7 +80,6 @@ const validateSingleAction = (
 const validateRuleActionsField = (actionTypeRegistry: TypeRegistry<ActionTypeModel>) => (
   ...data: Parameters<ValidationFunc>
 ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-  console.error('validation', data);
   const [{ value, path }] = data as [{ value: AlertAction[]; path: string }];
 
   const errors = value.reduce((acc, actionItem) => {

@@ -121,8 +121,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [isLoading, updateThrottle]
   );
 
-  console.error('step', myStepData, defaultValues, form, form.getErrors());
-
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription schema={schema} data={myStepData} />

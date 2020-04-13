@@ -21,6 +21,7 @@ import {
 import { AlertAction } from '../../../../../../../../../plugins/alerting/common';
 import { useKibana } from '../../../../../lib/kibana';
 import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../../common/constants';
+import { FORM_ERRORS_TITLE } from './translations';
 
 type ThrottleSelectField = typeof SelectField;
 
@@ -35,7 +36,6 @@ const FieldErrorsContainer = styled.div`
 `;
 
 export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables }) => {
-  console.error('error', field);
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const [supportedActionTypes, setSupportedActionTypes] = useState<ActionType[] | undefined>();
   const {
@@ -112,7 +112,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
       {fieldErrors ? (
         <>
           <FieldErrorsContainer>
-            <EuiCallOut title="Please fix the issues listed below" color="danger" iconType="alert">
+            <EuiCallOut title={FORM_ERRORS_TITLE} color="danger" iconType="alert">
               <ReactMarkdown source={fieldErrors} />
             </EuiCallOut>
           </FieldErrorsContainer>

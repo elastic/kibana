@@ -66,10 +66,6 @@ export const rulesNotificationAlertType = ({
       kibanaSiemAppUrl: ruleAlertParams.meta?.kibana_siem_app_url,
     });
 
-    logger.warn('notification');
-    logger.warn(`signalsCount ${signalsCount}`);
-    logger.warn(resultsLink);
-
     logger.info(
       `Found ${signalsCount} signals using signal rule name: "${ruleParams.name}", id: "${params.ruleAlertId}", rule_id: "${ruleParams.ruleId}" in "${ruleParams.outputIndex}" index`
     );

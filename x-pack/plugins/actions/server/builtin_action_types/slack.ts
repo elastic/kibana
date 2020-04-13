@@ -102,8 +102,6 @@ async function slackExecutor(
   const { webhookUrl } = secrets;
   const { message } = params;
 
-  console.error('slackExecutor', message);
-
   try {
     const webhook = new IncomingWebhook(webhookUrl);
     result = await webhook.send(message);
