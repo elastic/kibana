@@ -62,12 +62,24 @@ export const UserActionMarkdown = ({
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={cancelAction} iconType="cross">
+            <EuiButtonEmpty
+              data-test-subj="user-action-cancel-markdown"
+              size="s"
+              onClick={cancelAction}
+              iconType="cross"
+            >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton color="secondary" fill iconType="save" onClick={saveAction} size="s">
+            <EuiButton
+              data-test-subj="user-action-save-markdown"
+              color="secondary"
+              fill
+              iconType="save"
+              onClick={saveAction}
+              size="s"
+            >
               {i18n.SAVE}
             </EuiButton>
           </EuiFlexItem>
@@ -77,7 +89,7 @@ export const UserActionMarkdown = ({
     [handleCancelAction, handleSaveAction]
   );
   return isEditable ? (
-    <Form form={form}>
+    <Form form={form} data-test-subj="user-action-markdown-form">
       <UseField
         path="content"
         component={MarkdownEditorForm}
@@ -99,7 +111,7 @@ export const UserActionMarkdown = ({
     </Form>
   ) : (
     <ContentWrapper>
-      <Markdown raw={content} data-test-subj="case-view-description" />
+      <Markdown raw={content} data-test-subj="user-action-markdown" />
     </ContentWrapper>
   );
 };
