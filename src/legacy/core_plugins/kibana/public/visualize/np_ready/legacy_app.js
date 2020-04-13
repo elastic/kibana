@@ -70,6 +70,7 @@ const getResolvedResults = deps => {
           return createSavedSearchesLoader({
             savedObjectsClient: core.savedObjects.client,
             indexPatterns: data.indexPatterns,
+            search: data.search,
             chrome: core.chrome,
             overlays: core.overlays,
           }).get(results.vis.data.savedSearchId);

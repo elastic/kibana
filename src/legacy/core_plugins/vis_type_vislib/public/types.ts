@@ -25,37 +25,14 @@ import {
   AxisModes,
   AxisTypes,
   InterpolationModes,
-  Rotates,
   ScaleTypes,
   ThresholdLineStyles,
 } from './utils/collections';
-import { ColorSchemas } from '../../../../plugins/charts/public';
+import { Labels, Style } from '../../../../plugins/charts/public';
 
 export interface CommonVislibParams {
   addTooltip: boolean;
   legendPosition: Positions;
-}
-
-export interface ColorSchemaVislibParams {
-  colorSchema: ColorSchemas;
-  invertColors: boolean;
-}
-
-export interface Labels {
-  color?: string;
-  filter?: boolean;
-  overwriteColor?: boolean;
-  rotate?: Rotates;
-  show: boolean;
-  truncate?: number | null;
-}
-
-export interface Style {
-  bgFill: string;
-  bgColor: boolean;
-  labelColor: boolean;
-  subText: string;
-  fontSize: number;
 }
 
 export interface Scale {
