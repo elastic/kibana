@@ -185,24 +185,32 @@ export class SearchSource {
     return this.parent;
   }
 
-  private runSearch(searchRequest: SearchRequest, esShardTimeout: number) {
-    const searchParams = getSearchParams(getUiSettings(), esShardTimeout);
+  /**
+   * Run a search using the search service
+   * @return {Promise<SearchResponse<unknown>>}
+   */
+  private runSearch(
+    searchRequest: SearchRequest,
+    esShardTimeout: number,
+    abortSignal?: AbortSignal
+  ) {
     const abortController = new AbortController();
+    const { signal } = abortController;
+    const searchParams = getSearchParams(getUiSettings(), esShardTimeout);
     const params = {
       index: searchRequest.index.title || searchRequest.index,
       body: searchRequest.body,
       ...searchParams,
     };
-    const { signal } = abortController;
-    const promise = getSearchService()
+    const searching = getSearchService()
       .search({ params, indexType: searchRequest.indexType }, { signal })
       .toPromise()
       .then(({ rawResponse }) => rawResponse);
 
-    return {
-      searching: promise,
-      abort: () => abortController.abort(),
-    };
+    const response = searching.then(result => handleResponse(searchRequest, result));
+    if (abortSignal) abortSignal.addEventListener('abort', () => abortController.abort());
+
+    return response;
   }
 
   /**
@@ -233,9 +241,7 @@ export class SearchSource {
         }
       );
     } else {
-      const { searching, abort } = this.runSearch(searchRequest, esShardTimeout);
-      response = searching.then(result => handleResponse(searchRequest, result));
-      if (options.abortSignal) options.abortSignal.addEventListener('abort', abort);
+      response = this.runSearch(searchRequest, esShardTimeout, options.abortSignal);
     }
 
     if (response.error) {
