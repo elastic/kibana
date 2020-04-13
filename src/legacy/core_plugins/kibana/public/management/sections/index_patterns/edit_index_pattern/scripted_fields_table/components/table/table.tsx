@@ -98,7 +98,7 @@ export class Table extends PureComponent<TableProps> {
         name: '',
         actions: [
           {
-            type: 'button',
+            type: 'icon',
             name: i18n.translate('kbn.management.editIndexPattern.scripted.table.editHeader', {
               defaultMessage: 'Edit',
             }),
@@ -106,11 +106,11 @@ export class Table extends PureComponent<TableProps> {
               'kbn.management.editIndexPattern.scripted.table.editDescription',
               { defaultMessage: 'Edit this field' }
             ),
-            //  icon: 'pencil',
+            icon: 'pencil',
             onClick: editField,
           },
           {
-            type: 'button',
+            type: 'icon',
             name: i18n.translate('kbn.management.editIndexPattern.scripted.table.deleteHeader', {
               defaultMessage: 'Delete',
             }),
@@ -118,7 +118,7 @@ export class Table extends PureComponent<TableProps> {
               'kbn.management.editIndexPattern.scripted.table.deleteDescription',
               { defaultMessage: 'Delete this field' }
             ),
-            //  icon: 'trash',
+            icon: 'trash',
             color: 'danger',
             onClick: deleteField,
           },

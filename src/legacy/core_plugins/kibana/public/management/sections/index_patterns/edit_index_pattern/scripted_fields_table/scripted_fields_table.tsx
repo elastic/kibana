@@ -39,7 +39,7 @@ interface ScriptedFieldsTableProps {
     redirectToRoute: Function;
     getRouteHref: Function;
   };
-  onRemoveField?: Function;
+  onRemoveField?: () => void;
 }
 
 interface ScriptedFieldsTableState {

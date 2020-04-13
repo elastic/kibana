@@ -38,16 +38,18 @@ exports[`Table should render normally 1`] = `
         "actions": Array [
           Object {
             "description": "Edit this field",
+            "icon": "pencil",
             "name": "Edit",
             "onClick": [Function],
-            "type": "button",
+            "type": "icon",
           },
           Object {
             "color": "danger",
             "description": "Delete this field",
+            "icon": "trash",
             "name": "Delete",
             "onClick": [Function],
-            "type": "button",
+            "type": "icon",
           },
         ],
         "name": "",
