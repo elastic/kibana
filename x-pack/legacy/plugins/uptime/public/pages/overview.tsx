@@ -8,11 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import {
-  MonitorList,
-  OverviewPageParsingErrorCallout,
-  StatusPanel,
-} from '../components/functional';
+import { OverviewPageParsingErrorCallout, StatusPanel } from '../components/functional';
 import { useUptimeTelemetry, UptimePage, useGetUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
@@ -40,10 +36,6 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
 `;
 
 export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFilters }: Props) => {
-  // TODO: this is temporary until we migrate the monitor list to our Redux implementation
-  const [monitorListPageSize, setMonitorListPageSize] = useState<number>(
-    getMonitorListPageSizeValue()
-  );
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
   const { search, filters: urlFilters } = params;
 

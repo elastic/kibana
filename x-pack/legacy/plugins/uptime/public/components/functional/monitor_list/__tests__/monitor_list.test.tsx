@@ -99,6 +99,7 @@ describe('MonitorList component', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, errors: [], loading: false }}
+        lastRefresh={123}
         getMonitorList={jest.fn()}
       />
     );
@@ -119,6 +120,7 @@ describe('MonitorList component', () => {
           errors: [],
           loading: true,
         }}
+        lastRefresh={123}
         getMonitorList={jest.fn()}
       />
     );
@@ -129,6 +131,7 @@ describe('MonitorList component', () => {
     const component = renderWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, errors: [], loading: false }}
+        lastRefresh={123}
         getMonitorList={jest.fn()}
       />
     );
@@ -140,6 +143,7 @@ describe('MonitorList component', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, errors: [new Error('foo message')], loading: false }}
+        lastRefresh={123}
         getMonitorList={jest.fn()}
       />
     );
@@ -151,6 +155,7 @@ describe('MonitorList component', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, errors: [], loading: true }}
+        lastRefresh={123}
         getMonitorList={jest.fn()}
       />
     );
@@ -250,6 +255,7 @@ describe('MonitorList component', () => {
             errors: [],
             loading: false,
           }}
+          lastRefresh={123}
           getMonitorList={jest.fn()}
         />
       );
@@ -270,6 +276,7 @@ describe('MonitorList component', () => {
             errors: [],
             loading: false,
           }}
+          lastRefresh={123}
           getMonitorList={jest.fn()}
         />
       );
