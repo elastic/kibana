@@ -269,7 +269,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       )}
       <EuiSteps steps={steps} />
       <EuiSpacer size="l" />
-      <EuiBottomBar className="ingestManager__bottomBar" paddingSize="s">
+      <EuiBottomBar css={{ zIndex: 5 }} paddingSize="s">
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty color="ghost" href={cancelUrl}>

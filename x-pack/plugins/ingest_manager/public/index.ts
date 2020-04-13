@@ -5,7 +5,6 @@
  */
 import { PluginInitializerContext } from 'src/core/public';
 import { IngestManagerPlugin } from './plugin';
-import './styles/_index.scss';
 
 export { IngestManagerStart } from './plugin';
 
