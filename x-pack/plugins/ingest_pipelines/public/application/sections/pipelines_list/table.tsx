@@ -85,7 +85,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
               ),
               type: 'icon',
               icon: 'pencil',
-              onClick: onEditPipelineClick,
+              onClick: ({ name }) => onEditPipelineClick(name),
             },
             {
               name: i18n.translate('xpack.ingestPipelines.list.table.deleteActionLabel', {

@@ -15,7 +15,7 @@ import {
   useRequest as _useRequest,
 } from '../../shared_imports';
 import { UiMetricService } from './ui_metric';
-import { UIM_PIPELINE_CREATE } from '../constants';
+import { UIM_PIPELINE_CREATE, UIM_PIPELINE_UPDATE } from '../constants';
 
 export class ApiService {
   private client: HttpSetup | undefined;
@@ -54,6 +54,13 @@ export class ApiService {
     });
   }
 
+  public useLoadPipeline(name: string) {
+    return this.useRequest<Pipeline[]>({
+      path: `${API_BASE_PATH}/${encodeURIComponent(name)}`,
+      method: 'get',
+    });
+  }
+
   public async createPipeline(pipeline: Pipeline) {
     const result = await this.sendRequest({
       path: API_BASE_PATH,
@@ -62,6 +69,19 @@ export class ApiService {
     });
 
     this.trackUiMetric(UIM_PIPELINE_CREATE);
+
+    return result;
+  }
+
+  public async updatePipeline(pipeline: Pipeline) {
+    const { name, ...body } = pipeline;
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/${encodeURIComponent(name)}`,
+      method: 'put',
+      body: JSON.stringify(body),
+    });
+
+    this.trackUiMetric(UIM_PIPELINE_UPDATE);
 
     return result;
   }

@@ -13,7 +13,7 @@ const bodySchema = schema.object({
   description: schema.string(),
   processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
   version: schema.maybe(schema.number()),
-  onFailure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
+  on_failure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
 });
 
 const paramsSchema = schema.object({
@@ -38,7 +38,7 @@ export const registerUpdateRoute = ({
       const { name } = req.params;
       const pipeline = req.body as Pipeline;
 
-      const { description, processors, version, onFailure } = pipeline;
+      const { description, processors, version, on_failure } = pipeline;
 
       try {
         // Verify pipeline exists; ES will throw 404 if it doesn't
@@ -50,7 +50,7 @@ export const registerUpdateRoute = ({
             description,
             processors,
             version,
-            on_failure: onFailure,
+            on_failure,
           },
         });
 

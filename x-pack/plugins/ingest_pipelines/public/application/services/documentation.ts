@@ -26,6 +26,10 @@ export class DocumentationService {
   public getHandlingFailureUrl() {
     return `${this.esDocBasePath}/handling-failure-in-pipelines.html`;
   }
+
+  public getPutPipelineApiUrl() {
+    return `${this.esDocBasePath}/put-pipeline-api.html`;
+  }
 }
 
 export const documentationService = new DocumentationService();

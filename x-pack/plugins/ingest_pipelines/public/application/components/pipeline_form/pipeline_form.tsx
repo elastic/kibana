@@ -28,6 +28,7 @@ interface Props {
   isSaving: boolean;
   saveError: any;
   defaultValue?: Pipeline;
+  isEditing?: boolean;
 }
 
 const UseField = getUseField({ component: Field });
@@ -38,17 +39,20 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
     name: '',
     description: '',
     processors: '',
-    onFailure: '',
+    on_failure: '',
     version: '',
   },
   onSave,
   isSaving,
   saveError,
+  isEditing,
 }) => {
   const { services } = useKibana();
 
-  const [isVersionVisible, setIsVersionVisible] = useState<boolean>(false);
-  const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(false);
+  const [isVersionVisible, setIsVersionVisible] = useState<boolean>(Boolean(defaultValue.version));
+  const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(
+    Boolean(defaultValue.on_failure)
+  );
 
   const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
     if (isValid) {
@@ -116,6 +120,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
             path="name"
             componentProps={{
               ['data-test-subj']: 'nameField',
+              euiFieldProps: { disabled: Boolean(isEditing) },
             }}
           />
 
@@ -237,7 +242,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
         >
           {isOnFailureEditorVisible ? (
             <UseField
-              path="onFailure"
+              path="on_failure"
               component={JsonEditorField}
               componentProps={{
                 ['data-test-subj']: 'onFailureEditor',
@@ -275,12 +280,22 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
                   disabled={form.isSubmitted && form.isValid === false}
                   isLoading={isSaving}
                 >
-                  {
+                  {isSaving ? (
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.form.savingButtonLabel"
+                      defaultMessage="Saving..."
+                    />
+                  ) : isEditing ? (
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.form.saveButtonLabel"
+                      defaultMessage="Save pipeline"
+                    />
+                  ) : (
                     <FormattedMessage
                       id="xpack.ingestPipelines.form.createButtonLabel"
                       defaultMessage="Create pipeline"
                     />
-                  }
+                  )}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

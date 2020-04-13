@@ -10,17 +10,10 @@ export function deserializePipelines(pipelinesByName: PipelinesByName): Pipeline
   const pipelineNames: string[] = Object.keys(pipelinesByName);
 
   const deserializedPipelines = pipelineNames.map((name: string) => {
-    const { description, version, processors, on_failure } = pipelinesByName[name];
-
-    const pipeline = {
+    return {
+      ...pipelinesByName[name],
       name,
-      description,
-      version,
-      processors,
-      onFailure: on_failure,
     };
-
-    return pipeline;
   });
 
   return deserializedPipelines;

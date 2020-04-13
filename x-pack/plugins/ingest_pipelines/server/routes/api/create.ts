@@ -15,7 +15,7 @@ const bodySchema = schema.object({
   description: schema.string(),
   processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
   version: schema.maybe(schema.number()),
-  onFailure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
+  on_failure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
 });
 
 export const registerCreateRoute = ({
@@ -34,7 +34,7 @@ export const registerCreateRoute = ({
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const pipeline = req.body as Pipeline;
 
-      const { name, description, processors, version, onFailure } = pipeline;
+      const { name, description, processors, version, on_failure } = pipeline;
 
       try {
         // Check that a pipeline with the same name doesn't already exist
@@ -63,7 +63,7 @@ export const registerCreateRoute = ({
             description,
             processors,
             version,
-            on_failure: onFailure,
+            on_failure,
           },
         });
 
