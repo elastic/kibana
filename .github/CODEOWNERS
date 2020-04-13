@@ -19,6 +19,7 @@
 /src/plugins/timelion/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
+/src/plugins/input_control_vis/ @elastic/kibana-app
 
 # Core UI
 # Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
