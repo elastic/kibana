@@ -5,11 +5,11 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { MAX_BYTES } from '../constants/file_datavisualizer';
+import { MAX_FILE_SIZE } from '../constants/file_datavisualizer';
 
 export const configSchema = schema.object({
   file_data_visualizer: schema.object({
-    max_file_size_bytes: schema.number({ defaultValue: MAX_BYTES }),
+    max_file_size: schema.string({ defaultValue: MAX_FILE_SIZE }),
   }),
 });
 
