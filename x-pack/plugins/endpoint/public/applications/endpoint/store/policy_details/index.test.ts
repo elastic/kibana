@@ -98,4 +98,26 @@ describe('policy details: ', () => {
       expect(config!.mac.events.file).toEqual(true);
     });
   });
+
+  describe('when the user has enabled linux process events', () => {
+    beforeEach(() => {
+      const config = policyConfig(getState());
+      if (!config) {
+        throw new Error();
+      }
+
+      const newPayload1 = clone(config);
+      newPayload1.linux.events.file = true;
+
+      dispatch({
+        type: 'userChangedPolicyConfig',
+        payload: { policyConfig: newPayload1 },
+      });
+    });
+
+    it('linux file events is enabled', () => {
+      const config = policyConfig(getState());
+      expect(config!.linux.events.file).toEqual(true);
+    });
+  });
 });
