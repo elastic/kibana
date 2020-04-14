@@ -69,7 +69,7 @@ const ChildEventsButton = () => {
 
 const RelatedAlertsButton = () => {
   return (
-    <EuiButton onClick={() => {}} color="ghost" size="s" iconType="arrowDown" iconSide="right">
+    <EuiButton onClick={() => {}} color="ghost" size="s">
       Related Alerts
     </EuiButton>
   );
@@ -279,14 +279,17 @@ export const ProcessEventDot = styled(
             </svg>
             <div
               style={{
+                display: 'flex',
+                flexFlow: 'column',
                 left: '25%',
                 top: '30%',
                 position: 'absolute',
                 width: '50%',
-                color: 'white',
+                color: NamedColors.empty,
                 fontSize: `${scaledTypeSize}px`,
                 lineHeight: '140%',
                 backgroundColor: NamedColors.resolverBackground,
+                padding: '.25rem',
               }}
             >
               <div
@@ -295,11 +298,11 @@ export const ProcessEventDot = styled(
                   textTransform: 'uppercase',
                   letterSpacing: '-0.01px',
                   backgroundColor: NamedColors.resolverBackground,
-                  lineHeight: '1.2',
+                  lineHeight: '1',
                   fontWeight: 'bold',
-                  fontSize: '.5em',
+                  fontSize: '0.8rem',
                   width: '100%',
-                  margin: '0 0 .05em 0',
+                  margin: '0',
                   textAlign: 'left',
                   padding: '0',
                 }}
@@ -307,29 +310,37 @@ export const ProcessEventDot = styled(
                 {descriptionText}
               </div>
               <div
+                className="euiButton"
                 data-test-subject="nodeLabel"
                 id={labelId}
                 style={{
                   backgroundColor: labelBackground,
-                  padding: '.15em 0',
+                  padding: '.15rem 0',
                   textAlign: 'center',
-                  maxWidth: '100%',
+                  width: '100%',
+                  maxWidth: '20rem',
+                  minWidth: '12rem',
                   overflow: 'hidden',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
                   contain: 'content',
+                  margin: '.25rem 0 .35rem 0',
                 }}
               >
-                {eventModel.eventName(event)}
+                <span className="euiButton__content">
+                  <span className="euiButton__text">{eventModel.eventName(event)}</span>
+                </span>
               </div>
-              <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <RelatedAlertsButton />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ChildEventsButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              {magFactorX >= 2 && (
+                <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <RelatedAlertsButton />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ChildEventsButton />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
             </div>
           </div>
         </EuiKeyboardAccessible>
