@@ -8,7 +8,8 @@ import _ from 'lodash';
 import { KibanaTilemapSource } from '../../../../../plugins/maps/public/layers/sources/kibana_tilemap_source';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EMSTMSSource } from '../../../../../plugins/maps/public/layers/sources/ems_tms_source';
-import { getInjectedVarFunc } from '../kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInjectedVarFunc } from '../../../../../plugins/maps/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getKibanaTileMap } from '../../../../../plugins/maps/public/meta';
 

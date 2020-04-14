@@ -8,7 +8,12 @@ import { i18n } from '@kbn/i18n';
 import routes from 'ui/routes';
 import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
-import { getSavedObjectsClient, getCoreChrome, getMapsCapabilities } from './kibana_services';
+import {
+  getSavedObjectsClient,
+  getCoreChrome,
+  getMapsCapabilities,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/maps/public/kibana_services';
 import { getMapsSavedObjectLoader } from './angular/services/gis_map_saved_object_loader';
 
 routes.enable();
@@ -63,7 +68,9 @@ routes
     controller: 'GisMapController',
     resolve: {
       map: function(redirectWhenMissing, $scope, config) {
+        console.log($scope, config);
         const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
+        console.log(gisMapSavedObjectLoader);
         $scope.listingLimit = config.get('savedObjects:listingLimit');
         return gisMapSavedObjectLoader.get().catch(
           redirectWhenMissing({

@@ -10,7 +10,12 @@ import { npSetup, npStart } from 'ui/new_platform';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
 import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
-import { getIndexPatternService, getHttp, getMapsCapabilities } from '../kibana_services';
+import {
+  getIndexPatternService,
+  getHttp,
+  getMapsCapabilities,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/kibana_services';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
@@ -24,7 +29,6 @@ import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInitialLayers } from '../angular/get_initial_layers';
 import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 import '../angular/services/gis_map_saved_object_loader';
-import { bindSetupCoreAndPlugins, bindStartCoreAndPlugins } from '../plugin';
 // @ts-ignore
 import {
   bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
@@ -42,9 +46,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
   constructor() {
     // Init required services. Necessary while in legacy
-    bindSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
     bindNpSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
-    bindStartCoreAndPlugins(npStart.core, npStart.plugins);
     bindNpStartCoreAndPlugins(npStart.core, npStart.plugins);
   }
 

@@ -24,7 +24,8 @@ import { getTermsFields } from '../../../../../../../../plugins/maps/public/inde
 import {
   getIndexPatternService,
   getIndexPatternSelectComponent,
-} from '../../../../kibana_services';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../plugins/maps/public/kibana_services';
 
 export class JoinExpression extends Component {
   state = {

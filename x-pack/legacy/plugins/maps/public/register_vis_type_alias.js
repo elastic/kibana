@@ -6,7 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_BASE_URL } from '../common/constants';
-import { getInjectedVarFunc, getVisualizations } from './kibana_services';
+import {
+  getInjectedVarFunc,
+  getVisualizations,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/maps/public/kibana_services';
 
 const showMapVisualizationTypes = getInjectedVarFunc()('showMapVisualizationTypes', false);
 

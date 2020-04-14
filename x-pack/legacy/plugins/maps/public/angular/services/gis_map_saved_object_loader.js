@@ -13,7 +13,8 @@ import {
   getIndexPatternService,
   getCoreOverlays,
   getData,
-} from '../../kibana_services';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/maps/public/kibana_services';
 
 export const getMapsSavedObjectLoader = _.once(function() {
   const services = {

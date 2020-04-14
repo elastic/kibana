@@ -58,7 +58,8 @@ import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_se
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { RenderToolTipContent } from '../../../../../plugins/maps/public/layers/tooltips/tooltip_property';
-import { getUiActions } from '../kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getUiActions } from '../../../../../plugins/maps/public/kibana_services';
 
 interface MapEmbeddableConfig {
   editUrl?: string;

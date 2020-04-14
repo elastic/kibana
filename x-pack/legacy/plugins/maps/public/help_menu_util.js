@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getDocLinks, getCoreChrome } from './kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getDocLinks, getCoreChrome } from '../../../../plugins/maps/public/kibana_services';
 
 export function addHelpMenuToAppChrome() {
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();

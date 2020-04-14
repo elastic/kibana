@@ -22,12 +22,12 @@ import {
   getCoreI18n,
   getCoreChrome,
   getMapsCapabilities,
-} from '../kibana_services';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getToasts } from '../../../../../plugins/maps/public/kibana_services';
-import { Provider } from 'react-redux';
+  getToasts,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
+import { Provider } from 'react-redux';
 import { GisMap } from '../connected_components/gis_map';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import {
@@ -72,7 +72,6 @@ import {
   showSaveModal,
 } from '../../../../../../src/plugins/saved_objects/public';
 import { loadKbnTopNavDirectives } from '../../../../../../src/plugins/kibana_legacy/public';
-import { bindSetupCoreAndPlugins, bindStartCoreAndPlugins } from '../plugin';
 import {
   bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
   bindStartCoreAndPlugins as bindNpStartCoreAndPlugins,
@@ -83,9 +82,7 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 const app = uiModules.get(MAP_APP_PATH, []);
 
 // Init required services. Necessary while in legacy
-bindSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
 bindNpSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
-bindStartCoreAndPlugins(npStart.core, npStart.plugins);
 bindNpStartCoreAndPlugins(npStart.core, npStart.plugins);
 
 loadKbnTopNavDirectives(getNavigation().ui);
