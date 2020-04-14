@@ -37,6 +37,7 @@ import { getDerivativeMetricAgg } from './metrics/derivative';
 import { getCumulativeSumMetricAgg } from './metrics/cumulative_sum';
 import { getMovingAvgMetricAgg } from './metrics/moving_avg';
 import { getSerialDiffMetricAgg } from './metrics/serial_diff';
+
 import { getDateHistogramBucketAgg } from './buckets/date_histogram';
 import { getHistogramBucketAgg } from './buckets/histogram';
 import { getRangeBucketAgg } from './buckets/range';
@@ -102,4 +103,11 @@ export const getAggTypes = ({
     getGeoHashBucketAgg({ getInternalStartServices }),
     getGeoTitleBucketAgg({ getInternalStartServices }),
   ],
+});
+
+import { aggTypeTerms } from './buckets/terms_fn';
+
+export const getAggTypesFunctions = () => ({
+  buckets: [aggTypeTerms],
+  metrics: [],
 });
