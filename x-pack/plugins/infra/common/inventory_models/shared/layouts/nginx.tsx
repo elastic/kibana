@@ -16,9 +16,14 @@ import { ChartSectionVis } from '../../../../public/pages/metrics/components/cha
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { withTheme } from '../../../../../observability/public';
 
-export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>
-    <Section navLabel="Nginx" sectionLabel="Nginx" metrics={metrics}>
+    <Section
+      navLabel="Nginx"
+      sectionLabel="Nginx"
+      metrics={metrics}
+      onChangeRangeTime={onChangeRangeTime}
+    >
       <SubSection
         id="nginxHits"
         label={i18n.translate(
