@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useMemo } from 'react';
 import {
   EuiOverlayMask,
   EuiModal,
@@ -12,12 +12,25 @@ import {
   EuiTitle,
   EuiText,
   EuiTextColor,
+  EuiSpacer,
 } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { LogEntry } from '../../../../common/http_api';
+import { Source } from '../../../containers/source';
+import { useColumnWidths } from '../../../components/logging/log_text_stream/log_entry_column';
+import { LogEntryRow } from '../../../components/logging/log_text_stream/log_entry_row';
+import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 
 export const PageViewLogInContext: React.FC = () => {
+  const { source } = useContext(Source.Context);
+  const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
+  const columnConfigurations = useMemo(() => (source && source.configuration.logColumns) || [], [
+    source,
+  ]);
+  const { columnWidths, CharacterDimensionsProbe } = useColumnWidths({
+    columnConfigurations,
+    scale: textScale, // FIXME
+  });
   const [{ contextEntry, entries }, { setContextEntry }] = useContext(ViewLogInContext.Context);
 
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
@@ -33,13 +46,18 @@ export const PageViewLogInContext: React.FC = () => {
           <EuiTitle size="xxxs">
             <h2>Selected log message</h2>
           </EuiTitle>
-
-          <p>
-            Selected Entry: <code>{JSON.stringify(contextEntry.columns)}</code>
-          </p>
-
+          <CharacterDimensionsProbe />
+          <LogEntryRow
+            columnConfigurations={columnConfigurations}
+            columnWidths={columnWidths}
+            logEntry={contextEntry}
+            highlights={[]}
+            isActiveHighlight={false}
+            isHighlighted={true}
+            scale={textScale}
+            wrap={textWrap}
+          />
           <EuiSpacer />
-
           <LogEntryContext context={contextEntry.context} />
 
           <EuiSpacer />
