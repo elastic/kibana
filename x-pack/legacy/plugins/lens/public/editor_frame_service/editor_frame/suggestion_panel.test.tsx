@@ -16,6 +16,7 @@ import {
 } from '../mocks';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
+import { esFilters, IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
@@ -243,14 +244,25 @@ describe('suggestion_panel', () => {
     (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    mount(<SuggestionPanel {...defaultProps} />);
+    const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+    const field = ({ name: 'myfield' } as unknown) as IFieldType;
+
+    mount(
+      <SuggestionPanel
+        {...defaultProps}
+        frame={{
+          ...createMockFramePublicAPI(),
+          filters: [esFilters.buildExistsFilter(field, indexPattern)],
+        }}
+      />
+    );
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
     const passedExpression = (expressionRendererMock as jest.Mock).mock.calls[0][0].expression;
 
     expect(passedExpression).toMatchInlineSnapshot(`
       "kibana
-      | kibana_context timeRange=\\"{\\\\\\"from\\\\\\":\\\\\\"now-7d\\\\\\",\\\\\\"to\\\\\\":\\\\\\"now\\\\\\"}\\" query=\\"{\\\\\\"query\\\\\\":\\\\\\"\\\\\\",\\\\\\"language\\\\\\":\\\\\\"lucene\\\\\\"}\\" filters=\\"[]\\"
+      | kibana_context timeRange=\\"{\\\\\\"from\\\\\\":\\\\\\"now-7d\\\\\\",\\\\\\"to\\\\\\":\\\\\\"now\\\\\\"}\\" query=\\"{\\\\\\"query\\\\\\":\\\\\\"\\\\\\",\\\\\\"language\\\\\\":\\\\\\"lucene\\\\\\"}\\" filters=\\"[{\\\\\\"meta\\\\\\":{\\\\\\"index\\\\\\":\\\\\\"index1\\\\\\"},\\\\\\"exists\\\\\\":{\\\\\\"field\\\\\\":\\\\\\"myfield\\\\\\"}}]\\"
       | lens_merge_tables layerIds=\\"first\\" tables={datasource_expression}
       | test
       | expression"
