@@ -53,7 +53,10 @@ describe('alert_add', () => {
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
 
-    mockes.http.get.mockResolvedValue({ isSufficientlySecure: true });
+    mockes.http.get.mockResolvedValue({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
+    });
 
     const alertType = {
       id: 'my-alert-type',

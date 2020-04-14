@@ -16,16 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { createRequestEncryptor, mockEncrypt } from './encrypt.test.mocks';
 import { telemetryJWKS } from './telemetry_jwks';
 import { encryptTelemetry, getKID } from './encrypt';
-import { createRequestEncryptor } from '@elastic/request-crypto';
-
-jest.mock('@elastic/request-crypto', () => ({
-  createRequestEncryptor: jest.fn().mockResolvedValue({
-    encrypt: jest.fn(),
-  }),
-}));
 
 describe('getKID', () => {
   it(`returns 'kibana_dev' kid for development`, async () => {
@@ -42,9 +35,25 @@ describe('getKID', () => {
 });
 
 describe('encryptTelemetry', () => {
+  afterEach(() => {
+    mockEncrypt.mockReset();
+  });
+
   it('encrypts payload', async () => {
     const payload = { some: 'value' };
-    await encryptTelemetry(payload, true);
+    await encryptTelemetry(payload, { isProd: true });
     expect(createRequestEncryptor).toBeCalledWith(telemetryJWKS);
+  });
+
+  it('uses kibana kid on { isProd: true }', async () => {
+    const payload = { some: 'value' };
+    await encryptTelemetry(payload, { isProd: true });
+    expect(mockEncrypt).toBeCalledWith('kibana', payload);
+  });
+
+  it('uses kibana_dev kid on { isProd: false }', async () => {
+    const payload = { some: 'value' };
+    await encryptTelemetry(payload, { isProd: false });
+    expect(mockEncrypt).toBeCalledWith('kibana_dev', payload);
   });
 });

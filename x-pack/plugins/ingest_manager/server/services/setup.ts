@@ -121,7 +121,8 @@ async function addPackageToConfig(
   const pkgkey = `${packageToInstall.name}/${packageToInstall.version}`;
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
-    pkgkey,
+    pkgName: packageToInstall.name,
+    pkgVersion: packageToInstall.version,
   });
 
   const newDatasource = packageToConfigDatasource(

@@ -4,7 +4,7 @@
   "false_positives": [
     "A new and unusual program or artifact download in the course of software upgrades, debugging, or troubleshooting could trigger this signal."
   ],
-  "from": "now-16m",
+  "from": "now-45m",
   "interval": "15m",
   "machine_learning_job_id": "linux_anomalous_network_url_activity_ecs",
   "name": "Unusual Linux Web Activity",

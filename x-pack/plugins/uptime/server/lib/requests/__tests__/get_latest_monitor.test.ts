@@ -42,10 +42,16 @@ describe('getLatestMonitor', () => {
       hits: {
         hits: [
           {
+            _id: 'fejwio32',
             _source: {
-              timestamp: 123456,
+              '@timestamp': '123456',
               monitor: {
+                duration: {
+                  us: 12345,
+                },
                 id: 'testMonitor',
+                status: 'down',
+                type: 'http',
               },
             },
           },
@@ -64,7 +70,22 @@ describe('getLatestMonitor', () => {
       monitorId: 'testMonitor',
     });
 
-    expect(result.timestamp).toBe(123456);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "@timestamp": "123456",
+        "docId": "fejwio32",
+        "monitor": Object {
+          "duration": Object {
+            "us": 12345,
+          },
+          "id": "testMonitor",
+          "status": "down",
+          "type": "http",
+        },
+        "timestamp": "123456",
+      }
+    `);
+    expect(result.timestamp).toBe('123456');
     expect(result.monitor).not.toBeFalsy();
     expect(result?.monitor?.id).toBe('testMonitor');
     expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetLatestSearchParams);

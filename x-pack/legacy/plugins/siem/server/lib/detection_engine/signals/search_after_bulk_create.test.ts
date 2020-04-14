@@ -52,6 +52,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -126,6 +127,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -156,6 +158,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -198,6 +201,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -240,6 +244,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -284,6 +289,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -328,6 +334,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -374,6 +381,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
