@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { copyField } from './copy_field';
 export { executeScript, isScriptValid } from './validate_script';
