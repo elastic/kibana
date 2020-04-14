@@ -285,12 +285,15 @@ export class Worker extends events.EventEmitter {
         const completedTime = moment().toISOString();
         const docOutput = this._formatOutput(output);
 
-        const status =
-          output && output.warnings
-            ? constants.JOB_STATUS_WARNINGS
-            : constants.JOB_STATUS_COMPLETED;
+        let status;
+        if (output && output.warnings && output.warnings.length > 0) {
+          status = constants.JOB_STATUS_WARNINGS;
+        } else {
+          status = constants.JOB_STATUS_COMPLETED;
+        }
+
         const doc = {
-          status,
+          status: status,
           completed_at: completedTime,
           output: docOutput,
         };

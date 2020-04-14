@@ -14,7 +14,7 @@ type Props = { record: ListingJob } & ListingProps;
 export const ReportDownloadButton: FunctionComponent<Props> = (props: Props) => {
   const { record, apiClient, intl } = props;
 
-  if (record.status !== JobStatuses.COMPLETED) {
+  if (!([JobStatuses.COMPLETED, JobStatuses.WARNINGS] as string[]).includes(record.status)) {
     return null;
   }
 
