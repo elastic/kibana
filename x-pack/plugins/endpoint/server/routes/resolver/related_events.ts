@@ -56,10 +56,7 @@ export function handleRelatedEvents(
       const pagination = getPaginationParams(limit, after);
 
       const client = context.core.elasticsearch.dataClient;
-      const indexPattern = await indexRetriever.get(
-        context.core.savedObjects.client,
-        EndpointAppConstants.EVENT_DATASET
-      );
+      const indexPattern = await indexRetriever.getEventIndexPattern(context);
       // Retrieve the related non-process events for a given process
       const relatedEventsQuery = new RelatedEventsQuery(indexPattern, legacyEndpointID, pagination);
       const relatedEvents = await relatedEventsQuery.search(client, id);

@@ -57,10 +57,7 @@ export function handleChildren(
     } = req;
     try {
       const pagination = getPaginationParams(limit, after);
-      const indexPattern = await indexRetriever.get(
-        context.core.savedObjects.client,
-        EndpointAppConstants.EVENT_DATASET
-      );
+      const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
       const client = context.core.elasticsearch.dataClient;
       const childrenQuery = new ChildrenQuery(indexPattern, legacyEndpointID, pagination);

@@ -28,10 +28,7 @@ export const alertDetailsHandlerWrapper = function(
         id: alertId,
       })) as GetResponse<AlertEvent>;
 
-      const indexPattern = await endpointAppContext.indexPatternRetriever.get(
-        ctx.core.savedObjects.client,
-        EndpointAppConstants.EVENT_DATASET
-      );
+      const indexPattern = await endpointAppContext.indexPatternRetriever.getEventIndexPattern(ctx);
 
       const config = await endpointAppContext.config();
       const pagination: AlertDetailsPagination = new AlertDetailsPagination(

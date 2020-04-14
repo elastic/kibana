@@ -59,10 +59,7 @@ export function handleLifecycle(
     try {
       const ancestorLifecycles = [];
       const client = context.core.elasticsearch.dataClient;
-      const indexPattern = await indexRetriever.get(
-        context.core.savedObjects.client,
-        EndpointAppConstants.EVENT_DATASET
-      );
+      const indexPattern = await indexRetriever.getEventIndexPattern(context);
       const lifecycleQuery = new LifecycleQuery(indexPattern, legacyEndpointID);
       const { results: processLifecycle } = await lifecycleQuery.search(client, id);
       let nextParentID = getParentEntityID(processLifecycle);
