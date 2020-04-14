@@ -9,13 +9,7 @@ import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
 import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
-import {
-  HostInfo,
-  HostMetadata,
-  HostResultList,
-  HostStatus,
-  EndpointAppConstants,
-} from '../../../common/types';
+import { HostInfo, HostMetadata, HostResultList, HostStatus } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
 
 interface HitSource {
