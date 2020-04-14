@@ -13,6 +13,7 @@ export const ShowLicenseInfo = () => {
   return (
     <>
       <EuiCallOut
+        data-test-subj="uptimeMLLicenseInfo"
         className="license-info-trial"
         title={labels.START_TRAIL}
         color="primary"

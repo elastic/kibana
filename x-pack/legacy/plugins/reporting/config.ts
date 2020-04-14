@@ -135,6 +135,7 @@ export async function config(Joi: any) {
         .default(),
     }).default(),
     csv: Joi.object({
+      useByteOrderMarkEncoding: Joi.boolean().default(false),
       checkForFormulas: Joi.boolean().default(true),
       enablePanelActionDownload: Joi.boolean().default(true),
       maxSizeBytes: Joi.number()

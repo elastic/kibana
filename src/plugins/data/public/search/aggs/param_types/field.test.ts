@@ -18,11 +18,20 @@
  */
 
 import { BaseParamType } from './base';
-import { FieldParamType } from './field';
+import { FieldParamType, FieldParamTypeDependencies } from './field';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../common';
 import { IAggConfig } from '../agg_config';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
 describe('Field', () => {
+  const fieldParamTypeDependencies: FieldParamTypeDependencies = {
+    getInternalStartServices: () => ({
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      notifications: notificationServiceMock.createStartContract(),
+    }),
+  };
+
   const indexPattern = {
     id: '1234',
     title: 'logstash-*',
@@ -52,10 +61,13 @@ describe('Field', () => {
 
   describe('constructor', () => {
     it('it is an instance of BaseParamType', () => {
-      const aggParam = new FieldParamType({
-        name: 'field',
-        type: 'field',
-      });
+      const aggParam = new FieldParamType(
+        {
+          name: 'field',
+          type: 'field',
+        },
+        fieldParamTypeDependencies
+      );
 
       expect(aggParam instanceof BaseParamType).toBeTruthy();
     });
@@ -63,10 +75,13 @@ describe('Field', () => {
 
   describe('getAvailableFields', () => {
     it('should return only aggregatable fields by default', () => {
-      const aggParam = new FieldParamType({
-        name: 'field',
-        type: 'field',
-      });
+      const aggParam = new FieldParamType(
+        {
+          name: 'field',
+          type: 'field',
+        },
+        fieldParamTypeDependencies
+      );
 
       const fields = aggParam.getAvailableFields(agg);
 
@@ -78,10 +93,13 @@ describe('Field', () => {
     });
 
     it('should return all fields if onlyAggregatable is false', () => {
-      const aggParam = new FieldParamType({
-        name: 'field',
-        type: 'field',
-      });
+      const aggParam = new FieldParamType(
+        {
+          name: 'field',
+          type: 'field',
+        },
+        fieldParamTypeDependencies
+      );
 
       aggParam.onlyAggregatable = false;
 
@@ -91,10 +109,13 @@ describe('Field', () => {
     });
 
     it('should return all fields if filterFieldTypes was not specified', () => {
-      const aggParam = new FieldParamType({
-        name: 'field',
-        type: 'field',
-      });
+      const aggParam = new FieldParamType(
+        {
+          name: 'field',
+          type: 'field',
+        },
+        fieldParamTypeDependencies
+      );
 
       indexPattern.fields[1].aggregatable = true;
 

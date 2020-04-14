@@ -21,19 +21,19 @@ import { i18n } from '@kbn/i18n';
 import chrome from '../chrome';
 import { toastNotifications } from '../notify';
 
-export function getSupportedScriptingLanguages() {
+export function getSupportedScriptingLanguages(): string[] {
   return ['painless'];
 }
 
-export function getDeprecatedScriptingLanguages() {
+export function getDeprecatedScriptingLanguages(): string[] {
   return [];
 }
 
-export function GetEnabledScriptingLanguagesProvider($http) {
+export function GetEnabledScriptingLanguagesProvider($http: IHttpService) {
   return () => {
     return $http
       .get(chrome.addBasePath('/api/kibana/scripts/languages'))
-      .then(res => res.data)
+      .then((res: any) => res.data)
       .catch(() => {
         toastNotifications.addDanger(
           i18n.translate('common.ui.scriptingLanguages.errorFetchingToastDescription', {

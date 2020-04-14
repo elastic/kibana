@@ -8,12 +8,49 @@ import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
+import {
+  setAutocompleteService,
+  setFileUpload,
+  setHttp,
+  setIndexPatternSelect,
+  setIndexPatternService,
+  setInjectedVarFunc,
+  setInspector,
+  setLicenseId,
+  setTimeFilter,
+  setToasts,
+  setUiSettings,
+  // @ts-ignore
+} from './kibana_services';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
+
+export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
+  const { licensing } = plugins;
+  const { injectedMetadata, http } = core;
+  if (licensing) {
+    licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
+  }
+  setInjectedVarFunc(injectedMetadata.getInjectedVar);
+  setHttp(http);
+  setUiSettings(core.uiSettings);
+  setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+  setToasts(core.notifications.toasts);
+};
+
+export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
+  const { fileUpload, data, inspector } = plugins;
+  setInspector(inspector);
+  setFileUpload(fileUpload);
+  setIndexPatternSelect(data.ui.IndexPatternSelect);
+  setTimeFilter(data.query.timefilter.timefilter);
+  setIndexPatternService(data.indexPatterns);
+  setAutocompleteService(data.autocomplete);
+};
 
 /**
  * These are the interfaces with your public contracts. You should export these

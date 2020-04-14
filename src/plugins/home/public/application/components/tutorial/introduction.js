@@ -76,7 +76,7 @@ function IntroductionUI({
   if (iconType) {
     icon = (
       <EuiFlexItem grow={false}>
-        <EuiIcon type={iconType} size="xl" />
+        <EuiIcon size="xl" title="" type={iconType} />
       </EuiFlexItem>
     );
   }
@@ -99,8 +99,13 @@ function IntroductionUI({
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h1>
-                {title} &nbsp;
-                {betaBadge}
+                {title}
+                {betaBadge && (
+                  <>
+                    &nbsp;
+                    {betaBadge}
+                  </>
+                )}
               </h1>
             </EuiTitle>
           </EuiFlexItem>
