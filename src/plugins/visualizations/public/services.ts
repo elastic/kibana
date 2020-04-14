@@ -63,6 +63,8 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatt
   'IndexPatterns'
 );
 
+export const [getSearch, setSearch] = createGetterSetter<DataPublicPluginStart['search']>('Search');
+
 export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
   'UsageCollection'
 );

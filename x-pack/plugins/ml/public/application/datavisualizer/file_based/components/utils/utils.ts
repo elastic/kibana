@@ -5,8 +5,14 @@
  */
 
 import { isEqual } from 'lodash';
+import numeral from '@elastic/numeral';
 import { ml } from '../../../../services/ml_api_service';
 import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
+import {
+  ABSOLUTE_MAX_BYTES,
+  FILE_SIZE_DISPLAY_FORMAT,
+} from '../../../../../../common/constants/file_datavisualizer';
+import { getMlConfig } from '../../../../util/dependency_cache';
 
 const DEFAULT_LINES_TO_SAMPLE = 1000;
 
@@ -52,6 +58,15 @@ export function reduceData(data: string, mb: number) {
   // supported for the read data
   const size = mb * Math.pow(2, 20);
   return data.length >= size ? data.slice(0, size) : data;
+}
+
+export function getMaxBytes() {
+  const maxBytes = getMlConfig().file_data_visualizer.max_file_size_bytes;
+  return maxBytes < ABSOLUTE_MAX_BYTES ? maxBytes : ABSOLUTE_MAX_BYTES;
+}
+
+export function getMaxBytesFormatted() {
+  return numeral(getMaxBytes()).format(FILE_SIZE_DISPLAY_FORMAT);
 }
 
 export function createUrlOverrides(overrides: InputOverrides, originalSettings: InputOverrides) {

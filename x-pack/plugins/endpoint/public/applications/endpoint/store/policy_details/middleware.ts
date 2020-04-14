@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MiddlewareFactory, PolicyData, PolicyDetailsState } from '../../types';
+import {
+  MiddlewareFactory,
+  PolicyData,
+  PolicyDetailsState,
+  UpdatePolicyResponse,
+} from '../../types';
 import { policyIdFromParams, isOnPolicyDetailsPage, policyDetails } from './selectors';
+import { generatePolicy } from '../../models/policy';
 import {
   sendGetDatasource,
   sendGetFleetAgentStatusForConfig,
   sendPutDatasource,
-  UpdateDatasourceResponse,
-} from '../../services/ingest';
-import { generatePolicy } from '../../models/policy';
+} from '../policy_list/services/ingest';
 
 export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
   const http = coreStart.http;
@@ -35,7 +39,6 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
         return;
       }
 
-      // FIXME: remove this code once the Default Policy is available in the endpoint package - see: https://github.com/elastic/endpoint-app-team/issues/295
       // Until we get the Default configuration into the Endpoint package so that the datasource has
       // the expected data structure, we will add it here manually.
       if (!policyItem.inputs.length) {
@@ -62,7 +65,6 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
 
       // Agent summary is secondary data, so its ok for it to come after the details
       // page is populated with the main content
-      // FIXME: need to only do this IF fleet is enabled - see: https://github.com/elastic/endpoint-app-team/issues/296
       if (policyItem.config_id) {
         const { results } = await sendGetFleetAgentStatusForConfig(http, policyItem.config_id);
         dispatch({
@@ -75,7 +77,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
       const { id, revision, ...updatedPolicyItem } = policyDetails(state) as PolicyData;
 
-      let apiResponse: UpdateDatasourceResponse;
+      let apiResponse: UpdatePolicyResponse;
       try {
         apiResponse = await sendPutDatasource(http, id, updatedPolicyItem);
       } catch (error) {

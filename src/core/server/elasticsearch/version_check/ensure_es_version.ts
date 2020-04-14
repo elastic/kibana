@@ -142,7 +142,7 @@ export const pollEsNodesVersion = ({
   kibanaVersion,
   ignoreVersionMismatch,
   esVersionCheckInterval: healthCheckInterval,
-}: PollEsNodesVersionOptions): Observable<any> => {
+}: PollEsNodesVersionOptions): Observable<NodesVersionCompatibility> => {
   log.debug('Checking Elasticsearch version');
   return timer(0, healthCheckInterval).pipe(
     exhaustMap(() => {
