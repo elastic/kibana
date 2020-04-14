@@ -3,41 +3,102 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
+
 import _ from 'lodash';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import uuid from 'uuid/v4';
+import { i18n } from '@kbn/i18n';
+import { FeatureCollection } from 'geojson';
 import { DataRequest } from './util/data_request';
 import {
+  LAYER_TYPE,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
   SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
-import uuid from 'uuid/v4';
+// @ts-ignore
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../reducers/util.js';
-import { i18n } from '@kbn/i18n';
+import {
+  LayerDescriptor,
+  MapExtent,
+  MapFilters,
+  Query,
+  StyleDescriptor,
+} from '../../common/descriptor_types';
+import { Attribution, ImmutableSourceProperty, ISource } from './sources/source';
+import { SyncContext } from '../actions/map_actions';
+import { IStyle } from './styles/abstract_style';
 
-export class AbstractLayer {
-  constructor({ layerDescriptor, source }) {
-    this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
-    this._source = source;
-    if (this._descriptor.__dataRequests) {
-      this._dataRequests = this._descriptor.__dataRequests.map(
-        dataRequest => new DataRequest(dataRequest)
-      );
-    } else {
-      this._dataRequests = [];
-    }
-  }
+export interface ILayer {
+  getBounds(mapFilters: MapFilters): Promise<MapExtent>;
+  getDataRequest(id: string): DataRequest | undefined;
+  getDisplayName(source?: ISource): Promise<string>;
+  getId(): string;
+  getSourceDataRequest(): DataRequest | undefined;
+  getSource(): ISource;
+  getSourceForEditing(): ISource;
+  syncData(syncContext: SyncContext): Promise<void>;
+  supportsElasticsearchFilters(): boolean;
+  supportsFitToBounds(): Promise<boolean>;
+  getAttributions(): Promise<Attribution[]>;
+  getLabel(): string;
+  getCustomIconAndTooltipContent(): IconAndTooltipContent;
+  getIconAndTooltipContent(): IconAndTooltipContent;
+  renderLegendDetails(): ReactElement<any> | null;
+  showAtZoomLevel(zoom: number): boolean;
+  getMinZoom(): number;
+  getMaxZoom(): number;
+  getAlpha(): number;
+  getQuery(): Query;
+  getStyle(): IStyle;
+  getStyleForEditing(): IStyle;
+  getCurrentStyle(): IStyle;
+  getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
+  renderSourceSettingsEditor({ onChange }: { onChange: () => void }): ReactElement<any> | null;
+  isLayerLoading(): boolean;
+  hasErrors(): boolean;
+  getErrors(): string;
+  toLayerDescriptor(): LayerDescriptor;
+  getMbLayerIds(): string[];
+  ownsMbLayerId(mbLayerId: string): boolean;
+  ownsMbSourceId(mbSourceId: string): boolean;
+  canShowTooltip(): boolean;
+  syncLayerWithMB(mbMap: unknown): void;
+  getLayerTypeIconName(): string;
+  isDataLoaded(): boolean;
+  getIndexPatternIds(): string[];
+  getQueryableIndexPatternIds(): string[];
+  getType(): LAYER_TYPE;
+  cloneDescriptor(): LayerDescriptor;
+}
+export type Footnote = {
+  icon: ReactElement<any>;
+  message: string | undefined;
+};
+export type IconAndTooltipContent = {
+  icon: ReactElement<any>;
+  tooltipContent?: string | null;
+  footnotes?: Footnote[];
+  areResultsTrimmed?: boolean;
+};
 
-  static getBoundDataForSource(mbMap, sourceId) {
-    const mbStyle = mbMap.getStyle();
-    return mbStyle.sources[sourceId].data;
-  }
+export interface ILayerArguments {
+  layerDescriptor: LayerDescriptor;
+  source: ISource;
+}
 
-  static createDescriptor(options = {}) {
-    const layerDescriptor = { ...options };
+export class AbstractLayer implements ILayer {
+  protected readonly _descriptor: LayerDescriptor;
+  protected readonly _source: ISource;
+  protected readonly _style: IStyle;
+  protected readonly _dataRequests: DataRequest[];
+
+  static createDescriptor(options: Partial<LayerDescriptor>): LayerDescriptor {
+    const layerDescriptor: LayerDescriptor = { ...options };
 
     layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
     layerDescriptor.id = _.get(options, 'id', uuid());
@@ -57,7 +118,26 @@ export class AbstractLayer {
     }
   }
 
-  async cloneDescriptor() {
+  constructor({ layerDescriptor, source }: ILayerArguments) {
+    this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
+    this._source = source;
+    if (this._descriptor.__dataRequests) {
+      this._dataRequests = this._descriptor.__dataRequests.map(
+        dataRequest => new DataRequest(dataRequest)
+      );
+    } else {
+      this._dataRequests = [];
+    }
+  }
+
+  static getBoundDataForSource(mbMap: unkown, sourceId: string): FeatureCollection {
+    // @ts-ignore
+    const mbStyle = mbMap.getStyle();
+    return mbStyle.sources[sourceId].data;
+  }
+
+  async cloneDescriptor(): Promise<LayerDescriptor> {
+    // @ts-ignore
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
     clonedDescriptor.id = uuid();
@@ -73,23 +153,23 @@ export class AbstractLayer {
     return clonedDescriptor;
   }
 
-  makeMbLayerId(layerNameSuffix) {
+  makeMbLayerId(layerNameSuffix: string): string {
     return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
   }
 
-  isJoinable() {
+  isJoinable(): boolean {
     return this.getSource().isJoinable();
   }
 
-  supportsElasticsearchFilters() {
+  supportsElasticsearchFilters(): boolean {
     return this.getSource().isESSource();
   }
 
-  async supportsFitToBounds() {
+  async supportsFitToBounds(): Promise<boolean> {
     return await this.getSource().supportsFitToBounds();
   }
 
-  async getDisplayName(source) {
+  async getDisplayName(source?: ISource): Promise<string> {
     if (this._descriptor.label) {
       return this._descriptor.label;
     }
@@ -100,24 +180,28 @@ export class AbstractLayer {
     return sourceDisplayName || `Layer ${this._descriptor.id}`;
   }
 
-  async getAttributions() {
+  async getAttributions(): Promise<Attribution[]> {
     if (!this.hasErrors()) {
       return await this.getSource().getAttributions();
     }
     return [];
   }
 
-  getLabel() {
+  getStyle() {
+    return this._style;
+  }
+
+  getLabel(): string {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getCustomIconAndTooltipContent() {
+  getCustomIconAndTooltipContent(): IconAndTooltipContent {
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };
   }
 
-  getIconAndTooltipContent(zoomLevel, isUsingSearch) {
+  getIconAndTooltipContent(zoomLevel: number, isUsingSearch: boolean): IconAndTooltipContent {
     let icon;
     let tooltipContent = null;
     const footnotes = [];
@@ -178,74 +262,72 @@ export class AbstractLayer {
     };
   }
 
-  async hasLegendDetails() {
+  async hasLegendDetails(): Promise<boolean> {
     return false;
   }
 
-  renderLegendDetails() {
+  renderLegendDetails(): ReactElement<any> | null {
     return null;
   }
 
-  getId() {
+  getId(): string {
     return this._descriptor.id;
   }
 
-  getSource() {
+  getSource(): ISource {
     return this._source;
   }
 
-  getSourceForEditing() {
+  getSourceForEditing(): ISource {
     return this._source;
   }
 
-  isVisible() {
+  isVisible(): boolean {
     return this._descriptor.visible;
   }
 
-  showAtZoomLevel(zoom) {
+  showAtZoomLevel(zoom: number): boolean {
     return zoom >= this._descriptor.minZoom && zoom <= this._descriptor.maxZoom;
   }
 
-  getMinZoom() {
+  getMinZoom(): number {
     return this._descriptor.minZoom;
   }
 
-  getMaxZoom() {
+  getMaxZoom(): number {
     return this._descriptor.maxZoom;
   }
 
-  getAlpha() {
+  getAlpha(): number {
     return this._descriptor.alpha;
   }
 
-  getQuery() {
+  getQuery(): Query {
     return this._descriptor.query;
   }
 
-  getZoomConfig() {
+  getZoomConfig(): { minZoom: number | undefined; maxZoom: number | undefined } {
     return {
       minZoom: this._descriptor.minZoom,
       maxZoom: this._descriptor.maxZoom,
     };
   }
 
-  getCurrentStyle() {
-    return this._style;
-  }
-
-  getStyleForEditing() {
+  getCurrentStyle(): IStyle {
     return this._style;
   }
 
   async getImmutableSourceProperties() {
-    return this.getSource().getImmutableProperties();
+    const source = this.getSource();
+    return await source.getImmutableProperties();
   }
 
-  renderSourceSettingsEditor = ({ onChange }) => {
-    return this.getSourceForEditing().renderSourceSettingsEditor({ onChange });
-  };
+  renderSourceSettingsEditor({ onChange }: { onChange: () => void }) {
+    const source = this.getSourceForEditing();
+    return source.renderSourceSettingsEditor({ onChange });
+  }
 
-  getPrevRequestToken(dataId) {
+  getPrevRequestToken(dataId): symbol | undefined {
     const prevDataRequest = this.getDataRequest(dataId);
     if (!prevDataRequest) {
       return;
@@ -254,7 +336,7 @@ export class AbstractLayer {
     return prevDataRequest.getRequestToken();
   }
 
-  getInFlightRequestTokens() {
+  getInFlightRequestTokens(): symbol[] {
     if (!this._dataRequests) {
       return [];
     }
@@ -263,39 +345,39 @@ export class AbstractLayer {
     return _.compact(requestTokens);
   }
 
-  getSourceDataRequest() {
+  getSourceDataRequest(): DataRequest | undefined {
     return this.getDataRequest(SOURCE_DATA_ID_ORIGIN);
   }
 
-  getDataRequest(id) {
+  getDataRequest(id): DataRequest | undefined {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === id);
   }
 
-  isLayerLoading() {
+  isLayerLoading(): boolean {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
   }
 
-  hasErrors() {
+  hasErrors(): boolean {
     return _.get(this._descriptor, '__isInErrorState', false);
   }
 
-  getErrors() {
+  getErrors(): string {
     return this.hasErrors() ? this._descriptor.__errorMessage : '';
   }
 
-  toLayerDescriptor() {
+  toLayerDescriptor(): LayerDescriptor {
     return this._descriptor;
   }
 
-  async syncData() {
-    //no-op by default
+  syncData(syncContext: SyncContext): Promise<void> {
+    // no-op by default
   }
 
-  getMbLayerIds() {
+  getMbLayerIds(): string[] {
     throw new Error('Should implement AbstractLayer#getMbLayerIds');
   }
 
-  ownsMbLayerId() {
+  ownsMbLayerId(): boolean {
     throw new Error('Should implement AbstractLayer#ownsMbLayerId');
   }
 
@@ -311,16 +393,16 @@ export class AbstractLayer {
     throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
 
-  getLayerTypeIconName() {
+  getLayerTypeIconName(): string {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
-  isDataLoaded() {
+  isDataLoaded(): boolean {
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest && sourceDataRequest.hasData();
   }
 
-  async getBounds(/* mapFilters: MapFilters */) {
+  async getBounds(mapFilters: MapFilters): Promise<MapExtent> {
     return {
       minLon: -180,
       maxLon: 180,
@@ -329,7 +411,11 @@ export class AbstractLayer {
     };
   }
 
-  renderStyleEditor({ onStyleDescriptorChange }) {
+  renderStyleEditor({
+    onStyleDescriptorChange,
+  }: {
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
+  }): ReactElement<any> {
     const style = this.getStyleForEditing();
     if (!style) {
       return null;
@@ -337,19 +423,20 @@ export class AbstractLayer {
     return style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
-  getIndexPatternIds() {
+  getIndexPatternIds(): string[] {
     return [];
   }
 
-  getQueryableIndexPatternIds() {
+  getQueryableIndexPatternIds(): string[] {
     return [];
   }
 
-  syncVisibilityWithMb(mbMap, mbLayerId) {
+  syncVisibilityWithMb(mbMap: unknown, mbLayerId: string) {
+    // @ts-ignore
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
-  getType() {
+  getType(): LAYER_TYPE {
     return this._descriptor.type;
   }
 }

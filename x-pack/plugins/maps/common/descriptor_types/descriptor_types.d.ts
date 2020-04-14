@@ -109,6 +109,11 @@ export type SourceDescriptor =
   | ESGeoGridSourceDescriptor
   | EMSFileSourceDescriptor;
 
+export type Query = {
+  query?: string;
+  language?: string;
+};
+
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;

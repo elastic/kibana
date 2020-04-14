@@ -17,6 +17,7 @@ import { IJoin } from './joins/join';
 import { IVectorStyle } from './styles/vector/vector_style';
 import { IField } from './fields/field';
 import { SyncContext } from '../actions/map_actions';
+import { IStyle } from './styles/abstract_style';
 
 type VectorLayerArguments = {
   source: IVectorSource;
@@ -36,11 +37,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     mapColors?: string[]
   ): VectorLayerDescriptor;
 
-  protected readonly _source: IVectorSource;
-  protected readonly _style: IVectorStyle;
-
   constructor(options: VectorLayerArguments);
 
+  getStyle(): IStyle;
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];

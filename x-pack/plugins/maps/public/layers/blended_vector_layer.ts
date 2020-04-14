@@ -233,7 +233,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._isClustered ? this._clusterStyle : this._documentStyle;
   }
 
-  getStyleForEditing() {
+  getStyleForEditing(): IStyle {
     return this._documentStyle;
   }
 
