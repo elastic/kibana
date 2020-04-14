@@ -220,7 +220,9 @@ export class Server {
     });
 
     await this.http.start();
-    await this.rendering.start();
+    await this.rendering.start({
+      legacy: this.legacy,
+    });
     await this.metrics.start();
 
     return this.coreStart;

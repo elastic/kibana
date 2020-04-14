@@ -27,6 +27,7 @@ import { UiPlugins } from '../plugins';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
+import { LegacyService } from '../legacy';
 import {
   IRenderOptions,
   RenderingSetupDeps,
@@ -36,6 +37,7 @@ import {
 
 /** @internal */
 export class RenderingService implements CoreService<InternalRenderingServiceSetup> {
+  private legacyInternals?: LegacyService['legacyInternals'];
   constructor(private readonly coreContext: CoreContext) {}
 
   public async setup({
@@ -47,12 +49,11 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
       render: async (
         request,
         uiSettings,
-        {
-          app = { getId: () => 'core' },
-          includeUserSettings = true,
-          vars = {},
-        }: IRenderOptions = {}
+        { app = { getId: () => 'core' }, includeUserSettings = true, vars }: IRenderOptions = {}
       ) => {
+        if (!this.legacyInternals) {
+          throw new Error('Cannot render before "start"');
+        }
         const { env } = this.coreContext;
         const basePath = http.basePath.get(request);
         const serverBasePath = http.basePath.serverBasePath;
@@ -82,7 +83,7 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
               translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
             },
             csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
-            vars,
+            vars: vars ?? (await this.legacyInternals!.getVars('core', request)),
             uiPlugins: await Promise.all(
               [...uiPlugins.public].map(async ([id, plugin]) => ({
                 id,
@@ -111,7 +112,9 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
     };
   }
 
-  public async start() {}
+  public async start({ legacy }: { legacy: LegacyService }) {
+    this.legacyInternals = legacy.legacyInternals;
+  }
 
   public async stop() {}
 
