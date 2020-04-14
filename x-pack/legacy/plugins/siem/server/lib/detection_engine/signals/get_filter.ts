@@ -29,7 +29,7 @@ export const getQueryFilter = (
     title: index.join(),
   } as IIndexPattern;
 
-  const queries: Query[] = buildQueryExceptions(query, language, lists);
+  const queries: Query[] = buildQueryExceptions({ query, language, lists });
 
   const config = {
     allowLeadingWildcards: true,
