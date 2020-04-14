@@ -16,6 +16,7 @@ import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 // @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
+// @ts-ignore
 import { MapListing } from './components/map_listing';
 // @ts-ignore
 import {

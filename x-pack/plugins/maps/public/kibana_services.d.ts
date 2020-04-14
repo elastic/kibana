@@ -6,9 +6,30 @@
 
 import { IIndexPattern } from 'src/plugins/data/public';
 
+export function getLicenseId(): any;
+export function getInspector(): any;
+export function getFileUpload(): any;
+export function getIndexPatternSelect(): any;
+export function getHttp(): any;
+export function getTimeFilter(): any;
+export function getInjectedVarFunc(): any;
+export function getToasts(): any;
 export function getIndexPatternService(): {
   get: (id: string) => IIndexPattern | undefined;
 };
+export function getAutocompleteService(): any;
+export function getSavedObjectsClient(): any;
+export function getMapsCapabilities(): any;
+export function getVisualizations(): any;
+export function getDocLinks(): any;
+export function getCoreChrome(): any;
+export function getUiSettings(): any;
+export function getCoreOverlays(): any;
+export function getData(): any;
+export function getUiActions(): any;
+export function getCore(): any;
+export function getNavigation(): any;
+export function getCoreI18n(): any;
 
 export function setLicenseId(args: unknown): void;
 export function setInspector(args: unknown): void;

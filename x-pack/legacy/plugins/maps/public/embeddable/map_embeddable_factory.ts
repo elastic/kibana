@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npSetup, npStart } from 'ui/new_platform';
 import { IIndexPattern } from 'src/plugins/data/public';
+// @ts-ignore
 import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
 import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
 import {
