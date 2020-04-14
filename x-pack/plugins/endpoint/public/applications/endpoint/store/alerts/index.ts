@@ -6,4 +6,3 @@
 
 export { alertListReducer } from './reducer';
 export { AlertAction } from './action';
-export * from '../../types';

@@ -18,7 +18,10 @@ import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
 import { Datasource, NewDatasource } from '../../../../ingest_manager/common/types/models';
-import { GetAgentStatusResponse } from '../../../../ingest_manager/common/types/rest_spec';
+import {
+  GetAgentStatusResponse,
+  CreateDatasourceResponse,
+} from '../../../../ingest_manager/common/types/rest_spec';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -92,6 +95,8 @@ export interface PolicyListState {
   pageIndex: number;
   /** data is being retrieved from server */
   isLoading: boolean;
+  /** current location information */
+  location?: Immutable<EndpointAppLocation>;
 }
 
 /**
@@ -115,37 +120,32 @@ export interface PolicyDetailsState {
 }
 
 /**
+ * The URL search params that are supported by the Policy List page view
+ */
+export interface PolicyListUrlSearchParams {
+  page_index: number;
+  page_size: number;
+}
+
+/**
  * Endpoint Policy configuration
  */
 export interface PolicyConfig {
-  windows: {
-    events: {
-      process: boolean;
-      network: boolean;
-    };
-    /** malware mode can be off, detect, prevent or prevent and notify user */
-    malware: MalwareFields;
+  windows: UIPolicyConfig['windows'] & {
     logging: {
       stdout: string;
       file: string;
     };
     advanced: PolicyConfigAdvancedOptions;
   };
-  mac: {
-    events: {
-      process: boolean;
-    };
-    malware: MalwareFields;
+  mac: UIPolicyConfig['mac'] & {
     logging: {
       stdout: string;
       file: string;
     };
     advanced: PolicyConfigAdvancedOptions;
   };
-  linux: {
-    events: {
-      process: boolean;
-    };
+  linux: UIPolicyConfig['linux'] & {
     logging: {
       stdout: string;
       file: string;
@@ -169,28 +169,38 @@ interface PolicyConfigAdvancedOptions {
 }
 
 /**
- * Windows-specific policy configuration that is supported via the UI
- */
-type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'events' | 'malware'>;
-
-/**
- * Mac-specific policy configuration that is supported via the UI
- */
-type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
-
-/**
- * Linux-specific policy configuration that is supported via the UI
- */
-type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
-
-/**
  * The set of Policy configuration settings that are show/edited via the UI
  */
-export interface UIPolicyConfig {
-  windows: WindowsPolicyConfig;
-  mac: MacPolicyConfig;
-  linux: LinuxPolicyConfig;
-}
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
+export type UIPolicyConfig = {
+  windows: {
+    events: {
+      process: boolean;
+      network: boolean;
+    };
+    /** malware mode can be off, detect, prevent or prevent and notify user */
+    malware: MalwareFields;
+  };
+  mac: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    malware: MalwareFields;
+  };
+
+  /**
+   * Linux-specific policy configuration that is supported via the UI
+   */
+  linux: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+  };
+};
 
 /** OS used in Policy */
 export enum OS {
@@ -203,6 +213,7 @@ export enum OS {
 export enum EventingFields {
   process = 'process',
   network = 'network',
+  file = 'file',
 }
 
 /**
@@ -319,3 +330,25 @@ export interface AlertingIndexUIQueryParams {
   date_range?: string;
   filters?: string;
 }
+
+export interface GetDatasourcesResponse {
+  items: PolicyData[];
+  total: number;
+  page: number;
+  perPage: number;
+  success: boolean;
+}
+
+export interface GetDatasourceResponse {
+  item: PolicyData;
+  success: boolean;
+}
+
+export type UpdateDatasourceResponse = CreateDatasourceResponse & {
+  item: PolicyData;
+};
+
+/**
+ * The PageId type is used for the payload when firing userNavigatedToPage actions
+ */
+export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
