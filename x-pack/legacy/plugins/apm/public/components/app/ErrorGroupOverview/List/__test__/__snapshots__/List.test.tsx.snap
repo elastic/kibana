@@ -163,6 +163,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Type"
                 >
                   Type
                 </span>
@@ -545,6 +546,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Type"
                 >
                   Type
                 </span>
