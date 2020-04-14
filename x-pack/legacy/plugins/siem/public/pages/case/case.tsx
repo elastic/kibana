@@ -26,7 +26,6 @@ export const CasesPage = React.memo(() => {
             message={savedObjectReadOnly.description}
           />
         )}
-        <CaseCallOut title={savedObjectReadOnly.title} message={savedObjectReadOnly.description} />
         <AllCases userCanCrud={userPermissions?.crud ?? false} />
       </WrapperPage>
       <SpyRoute />
