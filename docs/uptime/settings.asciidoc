@@ -11,9 +11,9 @@ by the uptime app. Users must have the 'all' permission to modify items on this 
 Uptime settings apply to the current space only. Use different settings in different
 spaces to segment different uptime use cases and domains.
 
-As an example, imagine your organization one team for internal IT services, and another
-for public services. Each team operates independently and is only responsible for their
-own services. In this scenario you might setup separate Heartbeat instances for each team,
+As an example, imagine your organization has one team for internal IT services, and another
+for public services. Each team operates independently and is only responsible for its
+own services. In this scenario, you might set up separate Heartbeat instances for each team,
 writing out to index patterns named `it-heartbeat-\*`, and `external-heartbeat-\*`. You would
 create separate roles and users for each in Elasticsearch, each with access to their own spaces,
 named `it` and `external` respectively. Within each space you would navigate to the settings page
