@@ -27,22 +27,12 @@ import {
 } from '../../../../common/descriptor_types';
 import { VectorLayerArguments } from '../../vector_layer';
 
-export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
+export const sourceTitle = i18n.translate('xpack.maps.source.tiledVectorTitle', {
   defaultMessage: 'Vector Tile Layer',
 });
 
 export class MVTSingleLayerVectorSource extends AbstractVectorSource
   implements ITiledSingleLayerVectorSource {
-  static type = SOURCE_TYPES.MVT_SINGLE_LAYER;
-  static title = i18n.translate('xpack.maps.source.tiledSingleLayerVectorTitle', {
-    defaultMessage: 'Tiled vector',
-  });
-  static description = i18n.translate('xpack.maps.source.tiledSingleLayerVectorDescription', {
-    defaultMessage: 'Tiled vector with url template',
-  });
-
-  static icon = 'logoElasticsearch';
-
   static createDescriptor({
     urlTemplate,
     layerName,
