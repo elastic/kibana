@@ -43,7 +43,7 @@ import {
 import { createSavedSearchesLoader } from '../../../../../../plugins/discover/public';
 
 const getResolvedResults = deps => {
-  const { core, data, visualizations } = deps;
+  const { core, data, visualizations, createVisEmbeddableFromObject } = deps;
 
   const results = {};
 
@@ -60,7 +60,7 @@ const getResolvedResults = deps => {
       })
       .then(vis => {
         results.vis = vis;
-        return deps.embeddable.getEmbeddableFactory('visualization').createFromObject(results.vis, {
+        return createVisEmbeddableFromObject(vis, {
           timeRange: data.query.timefilter.timefilter.getTime(),
           filters: data.query.filterManager.getFilters(),
         });
@@ -71,6 +71,7 @@ const getResolvedResults = deps => {
           return createSavedSearchesLoader({
             savedObjectsClient: core.savedObjects.client,
             indexPatterns: data.indexPatterns,
+            search: data.search,
             chrome: core.chrome,
             overlays: core.overlays,
           }).get(results.vis.data.savedSearchId);
@@ -204,6 +205,9 @@ export function initVisualizeApp(app, deps) {
                       '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
                   },
                   toastNotifications,
+                  onBeforeRedirect() {
+                    deps.setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
+                  },
                 })
               );
           },

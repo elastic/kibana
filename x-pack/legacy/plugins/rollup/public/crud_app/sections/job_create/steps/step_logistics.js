@@ -24,8 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CronEditor } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
+import { CronEditor } from '../../../../../../../../../src/plugins/es_ui_shared/public';
 import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
 
 import { indices } from '../../../../shared_imports';

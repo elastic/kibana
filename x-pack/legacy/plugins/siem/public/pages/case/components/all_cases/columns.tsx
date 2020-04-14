@@ -11,7 +11,6 @@ import {
   EuiTableActionsColumnType,
   EuiAvatar,
   EuiLink,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
@@ -21,7 +20,6 @@ import { FormattedRelativePreferenceDate } from '../../../../components/formatte
 import { CaseDetailsLink } from '../../../../components/links';
 import { TruncatableText } from '../../../../components/truncatable_text';
 import * as i18n from './translations';
-import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 
 export type CasesColumns =
   | EuiTableFieldDataColumnType<Case>
@@ -48,7 +46,9 @@ export const getCasesColumns = (
     render: (theCase: Case) => {
       if (theCase.id != null && theCase.title != null) {
         const caseDetailsLinkComponent = (
-          <CaseDetailsLink detailName={theCase.id}>{theCase.title}</CaseDetailsLink>
+          <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+            {theCase.title}
+          </CaseDetailsLink>
         );
         return theCase.status === 'open' ? (
           caseDetailsLinkComponent
@@ -73,11 +73,11 @@ export const getCasesColumns = (
           <>
             <EuiAvatar
               className="userAction__circle"
-              name={createdBy.fullName ? createdBy.fullName : createdBy.username}
+              name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
               size="s"
             />
             <Spacer data-test-subj="case-table-column-createdBy">
-              {createdBy.fullName ?? createdBy.username ?? 'N/A'}
+              {createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
             </Spacer>
           </>
         );
@@ -114,7 +114,9 @@ export const getCasesColumns = (
     name: i18n.COMMENTS,
     sortable: true,
     render: (totalComment: Case['totalComment']) =>
-      renderStringField(`${totalComment}`, `case-table-column-commentCount`),
+      totalComment != null
+        ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
+        : getEmptyTagValue(),
   },
   filterStatus === 'open'
     ? {
@@ -150,7 +152,7 @@ export const getCasesColumns = (
         },
       },
   {
-    name: 'ServiceNow Incident',
+    name: i18n.SERVICENOW_INCIDENT,
     render: (theCase: Case) => {
       if (theCase.id != null) {
         return <ServiceNowColumn theCase={theCase} />;
@@ -159,7 +161,7 @@ export const getCasesColumns = (
     },
   },
   {
-    name: 'Actions',
+    name: i18n.ACTIONS,
     actions,
   },
 ];
@@ -168,26 +170,34 @@ interface Props {
   theCase: Case;
 }
 
-const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
-  const { hasDataToPush, isLoading } = useGetCaseUserActions(theCase.id);
-  const handleRenderDataToPush = useCallback(
-    () =>
-      isLoading ? (
-        <EuiLoadingSpinner />
-      ) : (
-        <p>
-          <EuiLink
-            data-test-subj={`case-table-column-external`}
-            href={theCase.externalService?.externalUrl}
-            target="_blank"
-          >
-            {theCase.externalService?.externalTitle}
-          </EuiLink>
-          {hasDataToPush ? i18n.REQUIRES_UPDATE : i18n.UP_TO_DATE}
-        </p>
-      ),
-    [hasDataToPush, isLoading, theCase.externalService]
-  );
+export const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
+  const handleRenderDataToPush = useCallback(() => {
+    const lastCaseUpdate = theCase.updatedAt != null ? new Date(theCase.updatedAt) : null;
+    const lastCasePush =
+      theCase.externalService?.pushedAt != null
+        ? new Date(theCase.externalService?.pushedAt)
+        : null;
+    const hasDataToPush =
+      lastCasePush === null ||
+      (lastCasePush != null &&
+        lastCaseUpdate != null &&
+        lastCasePush.getTime() < lastCaseUpdate?.getTime());
+    return (
+      <p>
+        <EuiLink
+          data-test-subj={`case-table-column-external`}
+          href={theCase.externalService?.externalUrl}
+          target="_blank"
+          aria-label={i18n.SERVICENOW_LINK_ARIA}
+        >
+          {theCase.externalService?.externalTitle}
+        </EuiLink>
+        {hasDataToPush
+          ? renderStringField(i18n.REQUIRES_UPDATE, `case-table-column-external-requiresUpdate`)
+          : renderStringField(i18n.UP_TO_DATE, `case-table-column-external-upToDate`)}
+      </p>
+    );
+  }, [theCase]);
   if (theCase.externalService !== null) {
     return handleRenderDataToPush();
   }

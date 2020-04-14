@@ -43,6 +43,7 @@ export const ruleOutput: RulesSchema = {
   tags: [],
   to: 'now',
   type: 'query',
+  throttle: 'no_actions',
   threat: [
     {
       framework: 'MITRE ATT&CK',
@@ -73,25 +74,31 @@ export const ruleOutput: RulesSchema = {
   lists: [
     {
       field: 'source.ip',
-      boolean_operator: 'and',
-      values: [
-        {
-          name: '127.0.0.1',
-          type: 'value',
-        },
-      ],
+      values_operator: 'included',
+      values_type: 'exists',
     },
     {
       field: 'host.name',
-      boolean_operator: 'and not',
+      values_operator: 'excluded',
+      values_type: 'match',
       values: [
         {
           name: 'rock01',
-          type: 'value',
         },
+      ],
+      and: [
         {
-          name: 'mothra',
-          type: 'value',
+          field: 'host.id',
+          values_operator: 'included',
+          values_type: 'match_all',
+          values: [
+            {
+              name: '123',
+            },
+            {
+              name: '678',
+            },
+          ],
         },
       ],
     },
@@ -154,7 +161,7 @@ describe('validate', () => {
   describe('transformValidateFindAlerts', () => {
     test('it should do a validation correctly of a find alert', () => {
       const findResult: FindResult = { data: [getResult()], page: 1, perPage: 0, total: 0 };
-      const [validated, errors] = transformValidateFindAlerts(findResult);
+      const [validated, errors] = transformValidateFindAlerts(findResult, []);
       expect(validated).toEqual({ data: [ruleOutput], page: 1, perPage: 0, total: 0 });
       expect(errors).toEqual(null);
     });
@@ -162,7 +169,7 @@ describe('validate', () => {
     test('it should do an in-validation correctly of a partial alert', () => {
       const findResult: FindResult = { data: [getResult()], page: 1, perPage: 0, total: 0 };
       delete findResult.page;
-      const [validated, errors] = transformValidateFindAlerts(findResult);
+      const [validated, errors] = transformValidateFindAlerts(findResult, []);
       expect(validated).toEqual(null);
       expect(errors).toEqual('Invalid value "undefined" supplied to "page"');
     });

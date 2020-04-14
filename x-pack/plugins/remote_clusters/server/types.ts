@@ -6,14 +6,19 @@
 
 import { IRouter } from 'kibana/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { CloudSetup } from '../../cloud/server';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
+  cloud: CloudSetup;
 }
 
 export interface RouteDependencies {
   router: IRouter;
   getLicenseStatus: () => LicenseStatus;
+  config: {
+    isCloudEnabled: boolean;
+  };
 }
 
 export interface LicenseStatus {

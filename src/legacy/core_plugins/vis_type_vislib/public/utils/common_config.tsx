@@ -20,7 +20,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from '../../../vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { PointSeriesOptions, MetricsAxisOptions } from '../components/options';
 import { ValidationWrapper } from '../components/common';
 import { BasicVislibParams } from '../types';

@@ -28,7 +28,7 @@ export const Title = () => (
                 'xpack.apm.settings.customizeUI.customLink.info',
                 {
                   defaultMessage:
-                    "These links will be shown in the 'Actions' context menu for the transaction detail."
+                    'These links will be shown in the Actions context menu for transactions.'
                 }
               )}
             />

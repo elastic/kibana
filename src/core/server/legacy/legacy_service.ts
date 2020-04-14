@@ -306,13 +306,16 @@ export class LegacyService implements CoreService {
         registerType: setupDeps.core.savedObjects.registerType,
         getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
       },
+      status: {
+        core$: setupDeps.core.status.core$,
+      },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
-      getStartServices: () => Promise.resolve([coreStart, startDeps.plugins]),
+      getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -334,6 +337,9 @@ export class LegacyService implements CoreService {
           plugins: startDeps.plugins,
         },
         __internals: {
+          http: {
+            registerStaticDir: setupDeps.core.http.registerStaticDir,
+          },
           hapiServer: setupDeps.core.http.server,
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,

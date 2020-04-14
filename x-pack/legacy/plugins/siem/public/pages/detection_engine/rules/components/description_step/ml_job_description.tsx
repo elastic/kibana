@@ -11,8 +11,8 @@ import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { useKibana } from '../../../../../lib/kibana';
 import { SiemJob } from '../../../../../components/ml_popover/types';
 import { ListItems } from './types';
-import { isJobStarted } from '../../../../../components/ml/helpers';
 import { ML_JOB_STARTED, ML_JOB_STOPPED } from './translations';
+import { isJobStarted } from '../../../../../../common/detection_engine/ml_helpers';
 
 enum MessageLevels {
   info = 'info',
@@ -47,11 +47,13 @@ const AuditIcon: React.FC<{
 
 export const JobStatusBadge: React.FC<{ job: SiemJob }> = ({ job }) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
+  const color = isStarted ? 'secondary' : 'danger';
+  const text = isStarted ? ML_JOB_STARTED : ML_JOB_STOPPED;
 
-  return isStarted ? (
-    <EuiBadge color="secondary">{ML_JOB_STARTED}</EuiBadge>
-  ) : (
-    <EuiBadge color="danger">{ML_JOB_STOPPED}</EuiBadge>
+  return (
+    <EuiBadge data-test-subj="machineLearningJobStatus" color={color}>
+      {text}
+    </EuiBadge>
   );
 };
 
@@ -64,12 +66,14 @@ const Wrapper = styled.div`
 `;
 
 export const MlJobDescription: React.FC<{ job: SiemJob }> = ({ job }) => {
-  const jobUrl = useKibana().services.application.getUrlForApp('ml#/jobs');
+  const jobUrl = useKibana().services.application.getUrlForApp(
+    `ml#/jobs?mlManagement=(jobId:${encodeURI(job.id)})`
+  );
 
   return (
     <Wrapper>
       <div>
-        <JobLink href={jobUrl} target="_blank">
+        <JobLink data-test-subj="machineLearningJobId" href={jobUrl} target="_blank">
           {job.id}
         </JobLink>
         <AuditIcon message={job.auditMessage} />

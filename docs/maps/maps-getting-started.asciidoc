@@ -80,7 +80,7 @@ To symbolize countries by web traffic, you'll need to augment the world country 
 To do this, you'll create a <<terms-join, term join>> to link the vector source *World Countries* to
 the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 
-. Click plus image:maps/images/gs_plus_icon.png[] to the right of *Term Joins* label.
+. Click plus image:maps/images/gs_plus_icon.png[] next to the *Term Joins* label.
 . Click *Join --select--*
 . Set *Left field* to *ISO 3166-1 alpha-2 code*.
 . Set *Right source* to *kibana_sample_data_logs*.
@@ -238,7 +238,7 @@ The *machine.os.keyword: osx* filter appears in the dashboard query bar.
 +
 . Click the *x* to remove the *machine.os.keyword: osx* filter.
 . In the map, click in the United States vector.
-. Click plus image:maps/images/gs_plus_icon.png[] to the right of *iso2* row in the tooltip.
+. Click plus image:maps/images/gs_plus_icon.png[] next to the *iso2* row in the tooltip.
 +
 Both the visualizations and the map are filtered to only show documents where *geo.src* is *US*.
 The *geo.src: US* filter appears in the dashboard query bar.
@@ -247,4 +247,3 @@ Your dashboard should look like this:
 +
 [role="screenshot"]
 image::maps/images/gs_dashboard_with_terms_filter.png[]
-

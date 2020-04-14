@@ -75,27 +75,18 @@ storiesOf('app/ServiceMap/Cytoscape', module)
       const cy = cytoscape();
       const elements = [
         { data: { id: 'default' } },
-        { data: { id: 'cache', label: 'cache', 'span.type': 'cache' } },
-        { data: { id: 'database', label: 'database', 'span.type': 'db' } },
+        { data: { id: 'cache', 'span.type': 'cache' } },
+        { data: { id: 'database', 'span.type': 'db' } },
         {
           data: {
             id: 'elasticsearch',
-            label: 'elasticsearch',
             'span.type': 'db',
             'span.subtype': 'elasticsearch'
           }
         },
-        {
-          data: { id: 'external', label: 'external', 'span.type': 'external' }
-        },
-        {
-          data: {
-            id: 'messaging',
-            label: 'messaging',
-            'span.type': 'messaging'
-          }
-        },
-
+        { data: { id: 'external', 'span.type': 'external' } },
+        { data: { id: 'ext', 'span.type': 'ext' } },
+        { data: { id: 'messaging', 'span.type': 'messaging' } },
         {
           data: {
             id: 'dotnet',
@@ -119,9 +110,16 @@ storiesOf('app/ServiceMap/Cytoscape', module)
         },
         {
           data: {
-            id: 'js-base',
-            'service.name': 'js-base service',
+            id: 'RUM (js-base)',
+            'service.name': 'RUM service',
             'agent.name': 'js-base'
+          }
+        },
+        {
+          data: {
+            id: 'RUM (rum-js)',
+            'service.name': 'RUM service',
+            'agent.name': 'rum-js'
           }
         },
         {
@@ -163,7 +161,8 @@ storiesOf('app/ServiceMap/Cytoscape', module)
                 description={
                   <pre>
                     agent.name: {node.data('agent.name') || 'undefined'},
-                    span.type: {node.data('span.type') || 'undefined'}
+                    span.type: {node.data('span.type') || 'undefined'},
+                    span.subtype: {node.data('span.subtype') || 'undefined'}
                   </pre>
                 }
                 icon={
@@ -174,7 +173,7 @@ storiesOf('app/ServiceMap/Cytoscape', module)
                     width={80}
                   />
                 }
-                title={node.data('label')}
+                title={node.data('id')}
               />
             </EuiFlexItem>
           ))}

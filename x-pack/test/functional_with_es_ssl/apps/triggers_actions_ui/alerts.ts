@@ -38,7 +38,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAlert;
   }
 
-  describe('alerts', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/62472
+  describe.skip('alerts', function() {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
@@ -64,23 +65,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // need this two out of popup clicks to close them
       await nameInput.click();
 
+      // test for normal connector
+      await testSubjects.click('.webhook-ActionTypeSelectOption');
+      const webhookBodyInput = await find.byCssSelector('.ace_text-input');
+      await webhookBodyInput.focus();
+      await webhookBodyInput.type('{\\"test\\":1}');
+
+      await testSubjects.click('addAlertActionButton');
+      // pre-configured connector is loaded an displayed correctly
       await testSubjects.click('.slack-ActionTypeSelectOption');
-      await testSubjects.click('createActionConnectorButton');
-      const connectorNameInput = await testSubjects.find('nameInput');
-      await connectorNameInput.click();
-      await connectorNameInput.clearValue();
-      const connectorName = generateUniqueKey();
-      await connectorNameInput.type(connectorName);
-      const slackWebhookUrlInput = await testSubjects.find('slackWebhookUrlInput');
-      await slackWebhookUrlInput.click();
-      await slackWebhookUrlInput.clearValue();
-      await slackWebhookUrlInput.type('https://test');
-      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+      expect(await (await find.byCssSelector('#my-slack1')).isDisplayed()).to.be(true);
       const loggingMessageInput = await testSubjects.find('slackMessageTextArea');
       await loggingMessageInput.click();
       await loggingMessageInput.clearValue();
       await loggingMessageInput.type('test message');
-      await testSubjects.click('slackAddVariableButton');
+      await testSubjects.click('messageAddVariableButton');
       const variableMenuButton = await testSubjects.find('variableMenuButton-0');
       await variableMenuButton.click();
       await testSubjects.click('saveAlertButton');
@@ -92,7 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: alertName,
           tagsText: '',
-          alertType: 'Index Threshold',
+          alertType: 'Index threshold',
           interval: '1m',
         },
       ]);
@@ -154,7 +153,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: createdAlert.name,
           tagsText: 'foo, bar',
-          alertType: 'Index Threshold',
+          alertType: 'Index threshold',
           interval: '1m',
         },
       ]);
@@ -179,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: updatedAlertName,
           tagsText: 'foo, bar',
-          alertType: 'Index Threshold',
+          alertType: 'Index threshold',
           interval: '1m',
         },
       ]);
@@ -210,7 +209,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: createdAlert.name,
           tagsText: 'foo, bar',
-          alertType: 'Index Threshold',
+          alertType: 'Index threshold',
           interval: '1m',
         },
       ]);
@@ -260,7 +259,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: createdAlert.name,
           tagsText: 'foo, bar',
-          alertType: 'Index Threshold',
+          alertType: 'Index threshold',
           interval: '1m',
         },
       ]);

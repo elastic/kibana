@@ -73,7 +73,10 @@ export class Plugin {
       });
 
       if (this.publicDir) {
-        server.exposeStaticDir(`/plugins/${id}/{path*}`, this.publicDir);
+        server.newPlatform.__internals.http.registerStaticDir(
+          `/plugins/${id}/{path*}`,
+          this.publicDir
+        );
       }
 
       // Many of the plugins are simply adding static assets to the server and we don't need

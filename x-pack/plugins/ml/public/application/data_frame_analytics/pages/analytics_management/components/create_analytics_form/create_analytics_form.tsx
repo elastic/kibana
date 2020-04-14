@@ -10,6 +10,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiForm,
+  EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
   EuiLink,
@@ -41,6 +42,9 @@ import {
   ANALYSIS_CONFIG_TYPE,
   DfAnalyticsExplainResponse,
   FieldSelectionItem,
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
+  TRAINING_PERCENT_MIN,
+  TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { shouldAddAsDepVarOption, OMIT_FIELDS } from './form_options_validation';
 
@@ -51,7 +55,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const { setFormState, setEstimatedModelMemoryLimit } = actions;
   const mlContext = useMlContext();
-  const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
+  const {
+    estimatedModelMemoryLimit,
+    form,
+    indexPatternsMap,
+    isAdvancedEditorEnabled,
+    isJobCreated,
+    requestMessages,
+  } = state;
 
   const forceInput = useRef<HTMLInputElement | null>(null);
   const firstUpdate = useRef<boolean>(true);
@@ -81,6 +92,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     maxDistinctValuesError,
     modelMemoryLimit,
     modelMemoryLimitValidationResult,
+    numTopFeatureImportanceValues,
+    numTopFeatureImportanceValuesValid,
     previousJobType,
     previousSourceIndex,
     sourceIndex,
@@ -146,6 +159,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
   const debouncedGetExplainData = debounce(async () => {
     const shouldUpdateModelMemoryLimit = !firstUpdate.current || !modelMemoryLimit;
+    const shouldUpdateEstimatedMml =
+      !firstUpdate.current || !modelMemoryLimit || estimatedModelMemoryLimit === '';
+
     if (firstUpdate.current) {
       firstUpdate.current = false;
     }
@@ -161,13 +177,12 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       const jobConfig = getJobConfigFromFormState(form);
       delete jobConfig.dest;
       delete jobConfig.model_memory_limit;
-      delete jobConfig.analyzed_fields;
       const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
         jobConfig
       );
       const expectedMemoryWithoutDisk = resp.memory_estimation?.expected_memory_without_disk;
 
-      if (shouldUpdateModelMemoryLimit) {
+      if (shouldUpdateEstimatedMml) {
         setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
       }
 
@@ -244,7 +259,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
           dependentVariableOptions: [] as State['form']['dependentVariableOptions'],
         };
 
-        await newJobCapsService.initializeFromIndexPattern(indexPattern);
+        await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
 
@@ -334,7 +349,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     return () => {
       debouncedGetExplainData.cancel();
     };
-  }, [jobType, sourceIndex, sourceIndexNameEmpty, dependentVariable, trainingPercent]);
+  }, [
+    jobType,
+    sourceIndex,
+    sourceIndexNameEmpty,
+    dependentVariable,
+    trainingPercent,
+    JSON.stringify(excludes),
+  ]);
 
   // Temp effect to close the context menu popover on Clone button click
   useEffect(() => {
@@ -631,16 +653,64 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                 })}
               >
                 <EuiRange
-                  min={0}
-                  max={100}
+                  min={TRAINING_PERCENT_MIN}
+                  max={TRAINING_PERCENT_MAX}
                   step={1}
                   showLabels
                   showRange
                   showValue
                   value={trainingPercent}
                   // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
-                  onChange={e => setFormState({ trainingPercent: e.target.value })}
+                  onChange={e => setFormState({ trainingPercent: +e.target.value })}
                   data-test-subj="mlAnalyticsCreateJobFlyoutTrainingPercentSlider"
+                />
+              </EuiFormRow>
+              {/* num_top_feature_importance_values */}
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesLabel',
+                  {
+                    defaultMessage: 'Feature importance values',
+                  }
+                )}
+                helpText={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesHelpText',
+                  {
+                    defaultMessage:
+                      'Specify the maximum number of feature importance values per document to return.',
+                  }
+                )}
+                isInvalid={numTopFeatureImportanceValuesValid === false}
+                error={[
+                  ...(numTopFeatureImportanceValuesValid === false
+                    ? [
+                        <Fragment>
+                          {i18n.translate(
+                            'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesErrorText',
+                            {
+                              defaultMessage:
+                                'Invalid maximum number of feature importance values.',
+                            }
+                          )}
+                        </Fragment>,
+                      ]
+                    : []),
+                ]}
+              >
+                <EuiFieldNumber
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesInputAriaLabel',
+                    {
+                      defaultMessage: 'Maximum number of feature importance values per document.',
+                    }
+                  )}
+                  data-test-subj="mlAnalyticsCreateJobFlyoutnumTopFeatureImportanceValuesInput"
+                  disabled={false}
+                  isInvalid={numTopFeatureImportanceValuesValid === false}
+                  min={NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN}
+                  onChange={e => setFormState({ numTopFeatureImportanceValues: +e.target.value })}
+                  step={1}
+                  value={numTopFeatureImportanceValues}
                 />
               </EuiFormRow>
             </Fragment>

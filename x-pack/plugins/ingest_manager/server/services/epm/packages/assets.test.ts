@@ -11,19 +11,18 @@ const tests = [
   {
     package: {
       assets: [
-        '/package/coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
-        '/package/coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-json.json',
+        '/package/coredns/1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
+        '/package/coredns/1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-json.json',
       ],
-      name: 'coredns',
-      version: '1.0.1',
+      path: '/package/coredns/1.0.1',
     },
     dataset: 'log',
     filter: (path: string) => {
       return true;
     },
     expected: [
-      '/package/coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
-      '/package/coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-json.json',
+      '/package/coredns/1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
+      '/package/coredns/1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-json.json',
     ],
   },
   {
@@ -32,8 +31,7 @@ const tests = [
         '/package/coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
         '/package/coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-json.json',
       ],
-      name: 'coredns',
-      version: '1.0.1',
+      path: '/package/coredns/1.0.1',
     },
     // Non existant dataset
     dataset: 'foo',

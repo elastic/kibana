@@ -24,7 +24,7 @@ import {
   IUiSettingsClient,
 } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 
@@ -32,16 +32,22 @@ import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim'
 import { createTileMapFn } from './tile_map_fn';
 // @ts-ignore
 import { createTileMapTypeDefinition } from './tile_map_type';
+import { IServiceSettings, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 /** @private */
 interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
+  serviceSettings: IServiceSettings;
   uiSettings: IUiSettingsClient;
+  getZoomPrecision: any;
+  getPrecision: any;
+  notificationService: any;
 }
 
 /** @internal */
 export interface TileMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  mapsLegacy: MapsLegacyPluginSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
 
@@ -55,9 +61,14 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, __LEGACY }: TileMapPluginSetupDependencies
+    { expressions, visualizations, mapsLegacy, __LEGACY }: TileMapPluginSetupDependencies
   ) {
+    const { getZoomPrecision, getPrecision, serviceSettings } = mapsLegacy;
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
+      serviceSettings,
+      getZoomPrecision,
+      getPrecision,
+      notificationService: core.notifications.toasts,
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };

@@ -76,6 +76,7 @@ export const FilterPopoverComponent = ({
           numFilters={options.length}
           hasActiveFilters={selectedOptions.length > 0}
           numActiveFilters={selectedOptions.length}
+          aria-label={buttonLabel}
         >
           {buttonLabel}
         </EuiFilterButton>
@@ -88,6 +89,7 @@ export const FilterPopoverComponent = ({
         {options.map((option, index) => (
           <EuiFilterSelectItem
             checked={selectedOptions.includes(option) ? 'on' : undefined}
+            data-test-subj={`options-filter-popover-item-${index}`}
             key={`${index}-${option}`}
             onClick={toggleSelectedGroupCb.bind(null, option)}
           >

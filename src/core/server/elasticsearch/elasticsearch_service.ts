@@ -45,6 +45,7 @@ import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
 import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './types';
 import { CallAPIOptions } from './api_types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
+import { calculateStatus$ } from './status';
 
 /** @internal */
 interface CoreClusterClients {
@@ -193,6 +194,7 @@ export class ElasticsearchService
       adminClient: this.adminClient,
       dataClient,
       createClient: this.createClient,
+      status$: calculateStatus$(esNodesCompatibility$),
     };
   }
 

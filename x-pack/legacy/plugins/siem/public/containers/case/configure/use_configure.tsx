@@ -7,11 +7,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 
-import { useStateToaster, errorToToaster } from '../../../components/toasters';
-import * as i18n from '../translations';
+import { useStateToaster, errorToToaster, displaySuccessToast } from '../../../components/toasters';
+import * as i18n from './translations';
 import { ClosureType } from './types';
+import { CurrentConfiguration } from '../../../pages/case/components/configure_cases/reducer';
 
-interface PersistCaseConfigure {
+export interface PersistCaseConfigure {
   connectorId: string;
   connectorName: string;
   closureType: ClosureType;
@@ -20,21 +21,28 @@ interface PersistCaseConfigure {
 export interface ReturnUseCaseConfigure {
   loading: boolean;
   refetchCaseConfigure: () => void;
-  persistCaseConfigure: ({ connectorId, closureType }: PersistCaseConfigure) => unknown;
+  persistCaseConfigure: ({
+    connectorId,
+    connectorName,
+    closureType,
+  }: PersistCaseConfigure) => unknown;
   persistLoading: boolean;
 }
 
 interface UseCaseConfigure {
   setConnector: (newConnectorId: string, newConnectorName?: string) => void;
   setClosureType?: (newClosureType: ClosureType) => void;
+  setCurrentConfiguration?: (configuration: CurrentConfiguration) => void;
 }
 
 export const useCaseConfigure = ({
   setConnector,
   setClosureType,
+  setCurrentConfiguration,
 }: UseCaseConfigure): ReturnUseCaseConfigure => {
   const [, dispatchToaster] = useStateToaster();
   const [loading, setLoading] = useState(true);
+  const [firstLoad, setFirstLoad] = useState(false);
   const [persistLoading, setPersistLoading] = useState(false);
   const [version, setVersion] = useState('');
 
@@ -47,14 +55,24 @@ export const useCaseConfigure = ({
         setLoading(true);
         const res = await getCaseConfigure({ signal: abortCtrl.signal });
         if (!didCancel) {
-          setLoading(false);
           if (res != null) {
             setConnector(res.connectorId, res.connectorName);
             if (setClosureType != null) {
               setClosureType(res.closureType);
             }
             setVersion(res.version);
+
+            if (!firstLoad) {
+              setFirstLoad(true);
+              if (setCurrentConfiguration != null) {
+                setCurrentConfiguration({
+                  connectorId: res.connectorId,
+                  closureType: res.closureType,
+                });
+              }
+            }
           }
+          setLoading(false);
         }
       } catch (error) {
         if (!didCancel) {
@@ -83,27 +101,36 @@ export const useCaseConfigure = ({
       const saveCaseConfiguration = async () => {
         try {
           setPersistLoading(true);
+          const connectorObj = {
+            connector_id: connectorId,
+            connector_name: connectorName,
+            closure_type: closureType,
+          };
           const res =
             version.length === 0
-              ? await postCaseConfigure(
-                  {
-                    connector_id: connectorId,
-                    connector_name: connectorName,
-                    closure_type: closureType,
-                  },
-                  abortCtrl.signal
-                )
+              ? await postCaseConfigure(connectorObj, abortCtrl.signal)
               : await patchCaseConfigure(
-                  { connector_id: connectorId, closure_type: closureType, version },
+                  {
+                    ...connectorObj,
+                    version,
+                  },
                   abortCtrl.signal
                 );
           if (!didCancel) {
-            setPersistLoading(false);
             setConnector(res.connectorId);
             if (setClosureType) {
               setClosureType(res.closureType);
             }
             setVersion(res.version);
+            if (setCurrentConfiguration != null) {
+              setCurrentConfiguration({
+                connectorId: res.connectorId,
+                closureType: res.closureType,
+              });
+            }
+
+            displaySuccessToast(i18n.SUCCESS_CONFIGURE, dispatchToaster);
+            setPersistLoading(false);
           }
         } catch (error) {
           if (!didCancel) {

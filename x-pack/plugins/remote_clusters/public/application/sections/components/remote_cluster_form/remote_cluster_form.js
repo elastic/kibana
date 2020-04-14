@@ -42,15 +42,22 @@ import {
 
 import { RequestFlyout } from './request_flyout';
 
-import { validateName, validateSeeds, validateProxy, validateSeed } from './validators';
+import {
+  validateName,
+  validateSeeds,
+  validateProxy,
+  validateSeed,
+  validateServerName,
+} from './validators';
 
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../common/constants';
+
+import { AppContext } from '../../../app_context';
 
 const defaultFields = {
   name: '',
   seeds: [],
   skipUnavailable: false,
-  mode: SNIFF_MODE,
   nodeConnections: 3,
   proxyAddress: '',
   proxySocketConnections: 18,
@@ -75,11 +82,17 @@ export class RemoteClusterForm extends Component {
     disabledFields: {},
   };
 
-  constructor(props) {
-    super(props);
+  static contextType = AppContext;
+
+  constructor(props, context) {
+    super(props, context);
 
     const { fields, disabledFields } = props;
-    const fieldsState = merge({}, defaultFields, fields);
+    const { isCloudEnabled } = context;
+
+    // Connection mode should default to "proxy" in cloud
+    const defaultMode = isCloudEnabled ? PROXY_MODE : SNIFF_MODE;
+    const fieldsState = merge({}, { ...defaultFields, mode: defaultMode }, fields);
 
     this.generateId = htmlIdGenerator();
     this.state = {
@@ -100,12 +113,15 @@ export class RemoteClusterForm extends Component {
   };
 
   getFieldsErrors(fields, seedInput = '') {
-    const { name, seeds, mode, proxyAddress } = fields;
+    const { name, seeds, mode, proxyAddress, serverName } = fields;
+    const { isCloudEnabled } = this.context;
 
     return {
       name: validateName(name),
       seeds: mode === SNIFF_MODE ? validateSeeds(seeds, seedInput) : null,
       proxyAddress: mode === PROXY_MODE ? validateProxy(proxyAddress) : null,
+      // server name is only required in cloud when proxy mode is enabled
+      serverName: isCloudEnabled && mode === PROXY_MODE ? validateServerName(serverName) : null,
     };
   }
 
@@ -135,6 +151,7 @@ export class RemoteClusterForm extends Component {
         skipUnavailable,
       },
     } = this.state;
+    const { fields } = this.props;
 
     let modeSettings;
 
@@ -155,6 +172,7 @@ export class RemoteClusterForm extends Component {
       name,
       skipUnavailable,
       mode,
+      hasDeprecatedProxySetting: fields.hasDeprecatedProxySetting,
       ...modeSettings,
     };
   }
@@ -347,8 +365,10 @@ export class RemoteClusterForm extends Component {
     const {
       areErrorsVisible,
       fields: { proxyAddress, proxySocketConnections, serverName },
-      fieldsErrors: { proxyAddress: errorProxyAddress },
+      fieldsErrors: { proxyAddress: errorProxyAddress, serverName: errorServerName },
     } = this.state;
+
+    const { isCloudEnabled } = this.context;
 
     return (
       <>
@@ -386,6 +406,49 @@ export class RemoteClusterForm extends Component {
         </EuiFormRow>
 
         <EuiFormRow
+          data-test-subj="remoteClusterFormServerNameFormRow"
+          isInvalid={Boolean(areErrorsVisible && errorServerName)}
+          error={errorServerName}
+          label={
+            isCloudEnabled ? (
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.fieldServerNameRequiredLabel"
+                defaultMessage="Server name"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.fieldServerNameOptionalLabel"
+                defaultMessage="Server name (optional)"
+              />
+            )
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
+              defaultMessage="A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink href={proxySettingsUrl} target="_blank">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
+                      defaultMessage="Learn more."
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+          fullWidth
+        >
+          <EuiFieldText
+            value={serverName}
+            onChange={e => this.onFieldsChange({ serverName: e.target.value })}
+            isInvalid={Boolean(areErrorsVisible && errorServerName)}
+            fullWidth
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
           data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
           label={
             <FormattedMessage
@@ -409,38 +472,6 @@ export class RemoteClusterForm extends Component {
             fullWidth
           />
         </EuiFormRow>
-        <EuiFormRow
-          data-test-subj="remoteClusterFormServerNameFormRow"
-          label={
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
-              defaultMessage="Server name (optional)"
-            />
-          }
-          helpText={
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
-              defaultMessage="A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink href={proxySettingsUrl} target="_blank">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
-                      defaultMessage="Learn more."
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          }
-          fullWidth
-        >
-          <EuiFieldText
-            value={serverName}
-            onChange={e => this.onFieldsChange({ serverName: e.target.value })}
-            fullWidth
-          />
-        </EuiFormRow>
       </>
     );
   }
@@ -449,6 +480,8 @@ export class RemoteClusterForm extends Component {
     const {
       fields: { mode },
     } = this.state;
+
+    const { isCloudEnabled } = this.context;
 
     return (
       <EuiDescribedFormGroup
@@ -466,14 +499,14 @@ export class RemoteClusterForm extends Component {
           <>
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
-              defaultMessage="Use seed nodes by default, or switch to a single proxy address."
+              defaultMessage="Use seed nodes by default, or switch to proxy mode."
             />
             <EuiFormRow hasEmptyLabelSpace fullWidth>
               <EuiSwitch
                 label={
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
-                    defaultMessage="Use a single proxy address"
+                    defaultMessage="Use proxy mode"
                   />
                 }
                 checked={mode === PROXY_MODE}
@@ -483,6 +516,44 @@ export class RemoteClusterForm extends Component {
                 }
               />
             </EuiFormRow>
+            {isCloudEnabled && mode === PROXY_MODE ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  iconType="pin"
+                  size="s"
+                  title={
+                    <FormattedMessage
+                      id="xpack.remoteClusters.cloudClusterInformationTitle"
+                      defaultMessage="Use proxy mode for Elasticsearch Cloud deployment"
+                    />
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.remoteClusters.cloudClusterInformationDescription"
+                    defaultMessage="To find the proxy address and server name of your cluster, go to the {security} page of your deployment menu and search for {searchString}."
+                    values={{
+                      security: (
+                        <strong>
+                          <FormattedMessage
+                            id="xpack.remoteClusters.cloudClusterSecurityDescription"
+                            defaultMessage="Security"
+                          />
+                        </strong>
+                      ),
+                      searchString: (
+                        <strong>
+                          <FormattedMessage
+                            id="xpack.remoteClusters.cloudClusterSearchDescription"
+                            defaultMessage="Remote cluster parameters"
+                          />
+                        </strong>
+                      ),
+                    }}
+                  />
+                </EuiCallOut>
+              </>
+            ) : null}
           </>
         }
         fullWidth
@@ -813,7 +884,7 @@ export class RemoteClusterForm extends Component {
       <Fragment>
         {this.renderSaveErrorFeedback()}
 
-        <EuiForm>
+        <EuiForm data-test-subj="remoteClusterForm">
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="s">

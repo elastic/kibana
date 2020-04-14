@@ -25,3 +25,10 @@ import { MapsPlugin } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new MapsPlugin();
 };
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export {
+  RenderTooltipContentParams,
+  ITooltipProperty,
+} from '../../../../plugins/maps/public/layers/tooltips/tooltip_property';
+export { MapEmbeddable, MapEmbeddableInput } from './embeddable';

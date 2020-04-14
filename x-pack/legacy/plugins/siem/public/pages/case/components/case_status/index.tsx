@@ -8,6 +8,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonToggle,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -18,6 +19,7 @@ import {
 import * as i18n from '../case_view/translations';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { CaseViewActions } from '../case_view/actions';
+import { Case } from '../../../../containers/case/types';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -32,11 +34,12 @@ interface CaseStatusProps {
   'data-test-subj': string;
   badgeColor: string;
   buttonLabel: string;
-  caseId: string;
-  caseTitle: string;
+  caseData: Case;
+  disabled?: boolean;
   icon: string;
   isLoading: boolean;
   isSelected: boolean;
+  onRefresh: () => void;
   status: string;
   title: string;
   toggleStatusCase: (evt: unknown) => void;
@@ -46,11 +49,12 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
   'data-test-subj': dataTestSubj,
   badgeColor,
   buttonLabel,
-  caseId,
-  caseTitle,
+  caseData,
+  disabled = false,
   icon,
   isLoading,
   isSelected,
+  onRefresh,
   status,
   title,
   toggleStatusCase,
@@ -80,8 +84,14 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="l" alignItems="center">
         <EuiFlexItem>
+          <EuiButtonEmpty data-test-subj="case-refresh" iconType="refresh" onClick={onRefresh}>
+            {i18n.CASE_REFRESH}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <EuiButtonToggle
             data-test-subj="toggle-case-status"
+            isDisabled={disabled}
             iconType={icon}
             isLoading={isLoading}
             isSelected={isSelected}
@@ -90,7 +100,7 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <CaseViewActions caseId={caseId} caseTitle={caseTitle} />
+          <CaseViewActions caseData={caseData} disabled={disabled} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

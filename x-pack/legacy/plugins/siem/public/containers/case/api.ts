@@ -8,10 +8,10 @@ import {
   CaseResponse,
   CasesResponse,
   CasesFindResponse,
-  CaseRequest,
+  CasePatchRequest,
+  CasePostRequest,
   CasesStatusResponse,
   CommentRequest,
-  CommentResponse,
   User,
   CaseUserActionsResponse,
   CaseExternalServiceRequest,
@@ -19,19 +19,22 @@ import {
   ServiceConnectorCaseResponse,
   ActionTypeExecutorResult,
 } from '../../../../../../plugins/case/common/api';
+
 import { KibanaServices } from '../../lib/kibana';
+
 import {
   ActionLicense,
   AllCases,
   BulkUpdateStatus,
   Case,
   CasesStatus,
-  Comment,
   FetchCasesProps,
   SortFieldCase,
   CaseUserActions,
 } from './types';
+
 import { CASES_URL } from './constants';
+
 import {
   convertToCamelCase,
   convertAllCasesToCamel,
@@ -40,17 +43,23 @@ import {
   decodeCasesResponse,
   decodeCasesFindResponse,
   decodeCasesStatusResponse,
-  decodeCommentResponse,
   decodeCaseUserActionsResponse,
   decodeServiceConnectorCaseResponse,
 } from './utils';
 
-export const getCase = async (caseId: string, includeComments: boolean = true): Promise<Case> => {
+import * as i18n from './translations';
+
+export const getCase = async (
+  caseId: string,
+  includeComments: boolean = true,
+  signal: AbortSignal
+): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(`${CASES_URL}/${caseId}`, {
     method: 'GET',
     query: {
       includeComments,
     },
+    signal,
   });
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
@@ -66,9 +75,10 @@ export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> 
   return convertToCamelCase<CasesStatusResponse, CasesStatus>(decodeCasesStatusResponse(response));
 };
 
-export const getTags = async (): Promise<string[]> => {
+export const getTags = async (signal: AbortSignal): Promise<string[]> => {
   const response = await KibanaServices.get().http.fetch<string[]>(`${CASES_URL}/tags`, {
     method: 'GET',
+    signal,
   });
   return response ?? [];
 };
@@ -108,9 +118,10 @@ export const getCases = async ({
     sortField: SortFieldCase.createdAt,
     sortOrder: 'desc',
   },
+  signal,
 }: FetchCasesProps): Promise<AllCases> => {
   const query = {
-    reporters: filterOptions.reporters.map(r => r.username),
+    reporters: filterOptions.reporters.map(r => r.username ?? '').filter(r => r !== ''),
     tags: filterOptions.tags,
     ...(filterOptions.status !== '' ? { status: filterOptions.status } : {}),
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
@@ -119,71 +130,87 @@ export const getCases = async ({
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
     method: 'GET',
     query,
+    signal,
   });
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
 };
 
-export const postCase = async (newCase: CaseRequest): Promise<Case> => {
+export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(CASES_URL, {
     method: 'POST',
     body: JSON.stringify(newCase),
+    signal,
   });
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
 export const patchCase = async (
   caseId: string,
-  updatedCase: Partial<CaseRequest>,
-  version: string
+  updatedCase: Pick<CasePatchRequest, 'description' | 'status' | 'tags' | 'title'>,
+  version: string,
+  signal: AbortSignal
 ): Promise<Case[]> => {
   const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases: [{ ...updatedCase, id: caseId, version }] }),
+    signal,
   });
   return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
 };
 
-export const patchCasesStatus = async (cases: BulkUpdateStatus[]): Promise<Case[]> => {
+export const patchCasesStatus = async (
+  cases: BulkUpdateStatus[],
+  signal: AbortSignal
+): Promise<Case[]> => {
   const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases }),
+    signal,
   });
   return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
 };
 
-export const postComment = async (newComment: CommentRequest, caseId: string): Promise<Comment> => {
-  const response = await KibanaServices.get().http.fetch<CommentResponse>(
+export const postComment = async (
+  newComment: CommentRequest,
+  caseId: string,
+  signal: AbortSignal
+): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(
     `${CASES_URL}/${caseId}/comments`,
     {
       method: 'POST',
       body: JSON.stringify(newComment),
+      signal,
     }
   );
-  return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response));
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
 export const patchComment = async (
   caseId: string,
   commentId: string,
   commentUpdate: string,
-  version: string
-): Promise<Partial<Comment>> => {
-  const response = await KibanaServices.get().http.fetch<CommentResponse>(
+  version: string,
+  signal: AbortSignal
+): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(
     `${CASES_URL}/${caseId}/comments`,
     {
       method: 'PATCH',
       body: JSON.stringify({ comment: commentUpdate, id: commentId, version }),
+      signal,
     }
   );
-  return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response));
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
-export const deleteCases = async (caseIds: string[]): Promise<boolean> => {
+export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promise<string> => {
   const response = await KibanaServices.get().http.fetch<string>(CASES_URL, {
     method: 'DELETE',
     query: { ids: JSON.stringify(caseIds) },
+    signal,
   });
-  return response === 'true' ? true : false;
+  return response;
 };
 
 export const pushCase = async (
@@ -215,6 +242,11 @@ export const pushToService = async (
       signal,
     }
   );
+
+  if (response.status === 'error') {
+    throw new Error(response.serviceMessage ?? response.message ?? i18n.ERROR_PUSH_TO_SERVICE);
+  }
+
   return decodeServiceConnectorCaseResponse(response.data);
 };
 

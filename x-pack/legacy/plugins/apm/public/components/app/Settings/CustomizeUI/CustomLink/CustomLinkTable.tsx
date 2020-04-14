@@ -13,8 +13,8 @@ import {
   EuiSpacer
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import { CustomLink } from '../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { units, px } from '../../../../../style/variables';
-import { CustomLink } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import { ManagedTable } from '../../../../shared/ManagedTable';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
