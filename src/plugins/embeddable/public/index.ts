@@ -57,6 +57,8 @@ export {
   OutputSpec,
   PANEL_BADGE_TRIGGER,
   panelBadgeTrigger,
+  PANEL_NOTIFICATION_TRIGGER,
+  panelNotificationTrigger,
   PanelNotFoundError,
   PanelState,
   PropertySpec,
