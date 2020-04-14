@@ -12,20 +12,20 @@ import { alertMiddlewareFactory } from './middleware';
 import { AppAction } from '../action';
 import { coreMock } from 'src/core/public/mocks';
 import { DepsStartMock, depsStartMock } from '../../mocks';
-import { AlertResultList } from '../../../../../common/types';
+import { AlertResultList, Immutable } from '../../../../../common/types';
 import { isOnAlertPage } from './selectors';
 import { createBrowserHistory } from 'history';
 import { mockAlertResultList } from './mock_alert_result_list';
 
 describe('alert list tests', () => {
-  let store: Store<AlertListState, AppAction>;
+  let store: Store<Immutable<AlertListState>, Immutable<AppAction>>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
   let history: History<never>;
   /**
    * A function that waits until a selector returns true.
    */
-  let selectorIsTrue: (selector: (state: AlertListState) => boolean) => Promise<void>;
+  let selectorIsTrue: (selector: (state: Immutable<AlertListState>) => boolean) => Promise<void>;
   beforeEach(() => {
     coreStart = coreMock.createStart();
     depsStart = depsStartMock();

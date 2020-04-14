@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UIPolicyConfig } from '../types';
+import { UIPolicyConfig } from '../../../../common/types';
 
 /**
  * A typed Object.entries() function where the keys and values are typed based on the given object

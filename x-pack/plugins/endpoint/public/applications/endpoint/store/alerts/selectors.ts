@@ -19,23 +19,23 @@ const createStructuredSelector: CreateStructuredSelector = createStructuredSelec
 /**
  * Returns the Alert Data array from state
  */
-export const alertListData = (state: AlertListState) => state.alerts;
+export const alertListData = (state: Immutable<AlertListState>) => state.alerts;
 
-export const selectedAlertDetailsData = (state: AlertListState) => state.alertDetails;
+export const selectedAlertDetailsData = (state: Immutable<AlertListState>) => state.alertDetails;
 
 /**
  * Returns the alert list pagination data from state
  */
 export const alertListPagination = createStructuredSelector({
-  pageIndex: (state: AlertListState) => state.pageIndex,
-  pageSize: (state: AlertListState) => state.pageSize,
-  total: (state: AlertListState) => state.total,
+  pageIndex: (state: Immutable<AlertListState>) => state.pageIndex,
+  pageSize: (state: Immutable<AlertListState>) => state.pageSize,
+  total: (state: Immutable<AlertListState>) => state.total,
 });
 
 /**
  * Returns a boolean based on whether or not the user is on the alerts page
  */
-export const isOnAlertPage = (state: AlertListState): boolean => {
+export const isOnAlertPage = (state: Immutable<AlertListState>): boolean => {
   return state.location ? state.location.pathname === '/alerts' : false;
 };
 
@@ -47,7 +47,7 @@ export const uiQueryParams: (
   state: Immutable<AlertListState>
 ) => Immutable<AlertingIndexUIQueryParams> = createSelector(
   state => state.location,
-  (location: AlertListState['location']) => {
+  (location: Immutable<AlertListState>['location']) => {
     const data: AlertingIndexUIQueryParams = {};
     if (location) {
       // Removes the `?` from the beginning of query string if it exists
@@ -82,7 +82,7 @@ export const uiQueryParams: (
  * Parses the ui query params and returns a object that represents the query used by the SearchBar component.
  * If the query url param is undefined, a default is returned.
  */
-export const searchBarQuery: (state: AlertListState) => Query = createSelector(
+export const searchBarQuery: (state: Immutable<AlertListState>) => Query = createSelector(
   uiQueryParams,
   ({ query }) => {
     if (query !== undefined) {
@@ -110,7 +110,7 @@ export const encodedSearchBarDateRange: (
 /**
  * Parses the ui query params and returns a object that represents the dateRange used by the SearchBar component.
  */
-export const searchBarDateRange: (state: AlertListState) => TimeRange = createSelector(
+export const searchBarDateRange: (state: Immutable<AlertListState>) => TimeRange = createSelector(
   encodedSearchBarDateRange,
   encodedDateRange => {
     return (decode(encodedDateRange) as unknown) as TimeRange;
@@ -121,7 +121,7 @@ export const searchBarDateRange: (state: AlertListState) => TimeRange = createSe
  * Parses the ui query params and returns an array of filters used by the SearchBar component.
  * If the 'filters' param is not present, a default is returned.
  */
-export const searchBarFilters: (state: AlertListState) => Filter[] = createSelector(
+export const searchBarFilters: (state: Immutable<AlertListState>) => Filter[] = createSelector(
   uiQueryParams,
   ({ filters }) => {
     if (filters !== undefined) {
@@ -135,7 +135,8 @@ export const searchBarFilters: (state: AlertListState) => Filter[] = createSelec
 /**
  * Returns the indexPatterns used by the SearchBar component
  */
-export const searchBarIndexPatterns = (state: AlertListState) => state.searchBar.patterns;
+export const searchBarIndexPatterns = (state: Immutable<AlertListState>) =>
+  state.searchBar.patterns;
 
 /**
  * query params to use when requesting alert data.
@@ -160,7 +161,7 @@ export const apiQueryParams: (
  * True if the user has selected an alert to see details about.
  * Populated via the browsers query params.
  */
-export const hasSelectedAlert: (state: AlertListState) => boolean = createSelector(
+export const hasSelectedAlert: (state: Immutable<AlertListState>) => boolean = createSelector(
   uiQueryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
 );

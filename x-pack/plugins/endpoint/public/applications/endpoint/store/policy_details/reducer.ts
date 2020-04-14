@@ -6,8 +6,8 @@
 
 import { AppAction } from '../action';
 import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
-import { UIPolicyConfig, PolicyDetailsState, ImmutableReducer, PolicyConfig } from '../../types';
-import { Immutable } from '../../../../../common/types';
+import { PolicyDetailsState, ImmutableReducer } from '../../types';
+import { Immutable, PolicyConfig, UIPolicyConfig } from '../../../../../common/types';
 
 const initialPolicyDetailsState = (): PolicyDetailsState => {
   return {

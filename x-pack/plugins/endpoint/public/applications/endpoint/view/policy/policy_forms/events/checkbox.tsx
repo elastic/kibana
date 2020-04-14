@@ -11,7 +11,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../../store/policy_details/selectors';
 import { PolicyDetailsAction } from '../../../../store/policy_details';
-import { UIPolicyConfig } from '../../../../types';
+import { UIPolicyConfig } from '../../../../../../../common/types';
 
 export const EventsCheckbox = React.memo(function({
   name,

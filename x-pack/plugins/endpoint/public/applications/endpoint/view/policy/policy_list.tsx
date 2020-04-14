@@ -20,10 +20,10 @@ import {
 } from '../../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../../store/policy_list';
-import { PolicyData } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { PageView } from '../components/page_view';
 import { LinkToApp } from '../components/link_to_app';
+import { Immutable, PolicyData } from '../../../../../common/types';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -44,8 +44,8 @@ const PolicyLink: React.FC<{ name: string; route: string }> = ({ name, route }) 
   );
 };
 
-const renderPolicyNameLink = (value: string, _item: PolicyData) => {
-  return <PolicyLink name={value} route={`/policy/${_item.id}`} />;
+const renderPolicyNameLink = (value: string, item: Immutable<PolicyData>) => {
+  return <PolicyLink name={value} route={`/policy/${item.id}`} />;
 };
 
 export const PolicyList = React.memo(() => {
@@ -88,7 +88,7 @@ export const PolicyList = React.memo(() => {
     [history, location.pathname]
   );
 
-  const columns: Array<EuiTableFieldDataColumnType<PolicyData>> = useMemo(
+  const columns: Array<EuiTableFieldDataColumnType<Immutable<PolicyData>>> = useMemo(
     () => [
       {
         field: 'name',
@@ -160,7 +160,7 @@ export const PolicyList = React.memo(() => {
       }
     >
       <EuiBasicTable
-        items={policyItems}
+        items={useMemo(() => [...policyItems], [policyItems])}
         columns={columns}
         loading={loading}
         pagination={paginationSetup}

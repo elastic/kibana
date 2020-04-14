@@ -9,12 +9,8 @@ import {
   GetDatasourcesRequest,
   GetAgentStatusResponse,
 } from '../../../../../../../ingest_manager/common';
-import {
-  NewPolicyData,
-  GetPolicyListResponse,
-  GetPolicyResponse,
-  UpdatePolicyResponse,
-} from '../../../types';
+import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
+import { NewPolicyData } from '../../../../../../common/types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
 export const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;

@@ -7,32 +7,33 @@
 import { createSelector } from 'reselect';
 import { parse } from 'query-string';
 import { PolicyListState, PolicyListUrlSearchParams } from '../../types';
+import { Immutable } from '../../../../../common/types';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
 
-export const selectPolicyItems = (state: PolicyListState) => state.policyItems;
+export const selectPolicyItems = (state: Immutable<PolicyListState>) => state.policyItems;
 
-export const selectPageIndex = (state: PolicyListState) => state.pageIndex;
+export const selectPageIndex = (state: Immutable<PolicyListState>) => state.pageIndex;
 
-export const selectPageSize = (state: PolicyListState) => state.pageSize;
+export const selectPageSize = (state: Immutable<PolicyListState>) => state.pageSize;
 
-export const selectTotal = (state: PolicyListState) => state.total;
+export const selectTotal = (state: Immutable<PolicyListState>) => state.total;
 
-export const selectIsLoading = (state: PolicyListState) => state.isLoading;
+export const selectIsLoading = (state: Immutable<PolicyListState>) => state.isLoading;
 
-export const selectApiError = (state: PolicyListState) => state.apiError;
+export const selectApiError = (state: Immutable<PolicyListState>) => state.apiError;
 
-export const isOnPolicyListPage = (state: PolicyListState) => {
+export const isOnPolicyListPage = (state: Immutable<PolicyListState>) => {
   return state.location?.pathname === '/policy';
 };
 
-const routeLocation = (state: PolicyListState) => state.location;
+const routeLocation = (state: Immutable<PolicyListState>) => state.location;
 
 /**
  * Returns the supported URL search params, populated with defaults if none where present in the URL
  */
 export const urlSearchParams: (
-  state: PolicyListState
+  state: Immutable<PolicyListState>
 ) => PolicyListUrlSearchParams = createSelector(routeLocation, location => {
   const searchParams = {
     page_index: 0,

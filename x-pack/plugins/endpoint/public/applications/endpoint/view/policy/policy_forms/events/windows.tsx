@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { EventsCheckbox } from './checkbox';
-import { OS, UIPolicyConfig } from '../../../../types';
+import { OS } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   selectedWindowsEvents,
@@ -17,17 +17,18 @@ import {
 } from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
 import { setIn, getIn } from '../../../../models/policy_details_config';
+import { UIPolicyConfig, ImmutableArray } from '../../../../../../../common/types';
 
 export const WindowsEvents = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedWindowsEvents);
   const total = usePolicyDetailsSelector(totalWindowsEvents);
 
-  const checkboxes: Array<{
-    name: string;
-    os: 'windows';
-    protectionField: keyof UIPolicyConfig['windows']['events'];
-  }> = useMemo(
-    () => [
+  const checkboxes = useMemo(() => {
+    const items: ImmutableArray<{
+      name: string;
+      os: 'windows';
+      protectionField: keyof UIPolicyConfig['windows']['events'];
+    }> = [
       {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.dllDriverLoad', {
           defaultMessage: 'DLL and Driver Load',
@@ -77,11 +78,7 @@ export const WindowsEvents = React.memo(() => {
         os: OS.windows,
         protectionField: 'security',
       },
-    ],
-    []
-  );
-
-  const renderCheckboxes = useMemo(() => {
+    ];
     return (
       <>
         <EuiTitle size="xxs">
@@ -93,7 +90,7 @@ export const WindowsEvents = React.memo(() => {
           </h5>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {checkboxes.map((item, index) => {
+        {items.map((item, index) => {
           return (
             <EventsCheckbox
               name={item.name}
@@ -107,7 +104,7 @@ export const WindowsEvents = React.memo(() => {
         })}
       </>
     );
-  }, [checkboxes]);
+  }, []);
 
   const collectionsEnabled = useMemo(() => {
     return (
@@ -126,15 +123,16 @@ export const WindowsEvents = React.memo(() => {
       type={i18n.translate('xpack.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      supportedOss={useMemo(
-        () => [
-          i18n.translate('xpack.endpoint.policy.details.windows', { defaultMessage: 'Windows' }),
-        ],
-        []
-      )}
-      id="windowsEventingForm"
+      description={i18n.translate('xpack.endpoint.policy.details.windowsLabel', {
+        defaultMessage: 'Windows',
+      })}
+      supportedOss={i18n.translate('xpack.endpoint.policy.details.windows', {
+        defaultMessage: 'Windows',
+      })}
+      dataTestSubj="windowsEventingForm"
       rightCorner={collectionsEnabled}
-      children={renderCheckboxes}
-    />
+    >
+      {checkboxes}
+    </ConfigForm>
   );
 });

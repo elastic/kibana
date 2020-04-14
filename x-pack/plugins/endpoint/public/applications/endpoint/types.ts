@@ -13,13 +13,14 @@ import {
   Immutable,
   ImmutableArray,
   AlertDetails,
+  MalwareFields,
+  UIPolicyConfig,
+  PolicyData,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
-  Datasource,
-  NewDatasource,
   GetAgentStatusResponse,
   GetDatasourcesResponse,
   GetOneDatasourceResponse,
@@ -58,29 +59,6 @@ export interface ServerApiError {
   error: string;
   message: string;
 }
-
-/**
- * New policy data. Used when updating the policy record via ingest APIs
- */
-export type NewPolicyData = NewDatasource & {
-  inputs: [
-    {
-      type: 'endpoint';
-      enabled: boolean;
-      streams: [];
-      config: {
-        policy: {
-          value: PolicyConfig;
-        };
-      };
-    }
-  ];
-};
-
-/**
- * Endpoint Policy data, which extends Ingest's `Datasource` type
- */
-export type PolicyData = Datasource & NewPolicyData;
 
 /**
  * Policy list store state
@@ -192,30 +170,6 @@ interface PolicyConfigAdvancedOptions {
   };
 }
 
-/**
- * Windows-specific policy configuration that is supported via the UI
- */
-type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'events' | 'malware'>;
-
-/**
- * Mac-specific policy configuration that is supported via the UI
- */
-type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
-
-/**
- * Linux-specific policy configuration that is supported via the UI
- */
-type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
-
-/**
- * The set of Policy configuration settings that are show/edited via the UI
- */
-export interface UIPolicyConfig {
-  windows: WindowsPolicyConfig;
-  mac: MacPolicyConfig;
-  linux: LinuxPolicyConfig;
-}
-
 /** OS used in Policy */
 export enum OS {
   windows = 'windows',
@@ -246,20 +200,7 @@ export type KeysByValueCriteria<O, Criteria> = {
 }[keyof O];
 
 /** Returns an array of the policy OSes that have a malware protection field */
-
 export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
-/** Policy: Malware protection fields */
-export interface MalwareFields {
-  mode: ProtectionModes;
-}
-
-/** Policy protection mode options */
-export enum ProtectionModes {
-  detect = 'detect',
-  prevent = 'prevent',
-  preventNotify = 'preventNotify',
-  off = 'off',
-}
 
 export interface GlobalState {
   readonly hostList: HostListState;

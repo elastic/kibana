@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyData, ServerApiError } from '../../types';
+import { ServerApiError } from '../../types';
+import { PolicyData } from '../../../../../common/types';
 
 interface ServerReturnedPolicyListData {
   type: 'serverReturnedPolicyListData';

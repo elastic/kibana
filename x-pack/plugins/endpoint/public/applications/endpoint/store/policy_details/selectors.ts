@@ -5,9 +5,9 @@
  */
 
 import { createSelector } from 'reselect';
-import { PolicyConfig, PolicyDetailsState, UIPolicyConfig } from '../../types';
-import { generatePolicy } from '../../models/policy';
-import { Immutable } from '../../../../../common/types';
+import { PolicyDetailsState } from '../../types';
+import { Immutable, PolicyConfig, UIPolicyConfig } from '../../../../../common/types';
+import { factory as policyConfigFactory } from '../../../../../common/models/policy_config';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -33,6 +33,8 @@ export const policyIdFromParams: (state: PolicyDetailsState) => string = createS
   }
 );
 
+const defaultFullPolicy: Immutable<PolicyConfig> = policyConfigFactory();
+
 /**
  * Returns the full Endpoint Policy, which will include private settings not shown on the UI.
  * Note: this will return a default full policy if the `policyItem` is `undefined`
@@ -40,7 +42,7 @@ export const policyIdFromParams: (state: PolicyDetailsState) => string = createS
 export const fullPolicy: (s: Immutable<PolicyDetailsState>) => PolicyConfig = createSelector(
   policyDetails,
   policyData => {
-    return policyData?.inputs[0]?.config?.policy?.value ?? generatePolicy();
+    return policyData?.inputs[0]?.config?.policy?.value ?? defaultFullPolicy;
   }
 );
 

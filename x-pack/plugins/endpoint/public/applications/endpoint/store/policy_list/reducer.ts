@@ -7,6 +7,7 @@
 import { PolicyListState, ImmutableReducer } from '../../types';
 import { AppAction } from '../action';
 import { isOnPolicyListPage } from './selectors';
+import { Immutable } from '../../../../../common/types';
 
 const initialPolicyListState = (): PolicyListState => {
   return {
@@ -41,7 +42,7 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
   }
 
   if (action.type === 'userChangedUrl') {
-    const newState = {
+    const newState: Immutable<PolicyListState> = {
       ...state,
       location: action.payload,
     };
@@ -52,14 +53,15 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
     // Also adjust some state if user is just entering the policy list view
     if (isCurrentlyOnListPage) {
       if (!wasPreviouslyOnListPage) {
-        newState.apiError = undefined;
-        newState.isLoading = true;
+        return {
+          ...newState,
+          apiError: undefined,
+          isLoading: true,
+        };
       }
       return newState;
     }
-    return {
-      ...initialPolicyListState(),
-    };
+    return initialPolicyListState();
   }
 
   return state;

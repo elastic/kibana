@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CoreStart, HttpSetup } from 'kibana/public';
-import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
+import { applyMiddleware, createStore, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
 import { hostListReducer, hostMiddlewareFactory } from './index';
-import { HostResultList } from '../../../../../common/types';
+import { HostResultList, Immutable } from '../../../../../common/types';
 import { HostListState } from '../../types';
 import { AppAction } from '../action';
 import { listData } from './selectors';
@@ -20,9 +20,10 @@ describe('host list middleware', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  let store: Store<HostListState>;
-  let getState: typeof store['getState'];
-  let dispatch: Dispatch<AppAction>;
+  type HostListStore = Store<Immutable<HostListState>, Immutable<AppAction>>;
+  let store: HostListStore;
+  let getState: HostListStore['getState'];
+  let dispatch: HostListStore['dispatch'];
 
   let history: History<never>;
   const getEndpointListApiResponse = (): HostResultList => {
