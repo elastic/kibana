@@ -7,3 +7,5 @@
 // UI metric constants
 export const UIM_APP_NAME = 'ingest_pipelines';
 export const UIM_PIPELINES_LIST_LOAD = 'pipelines_list_load';
+export const UIM_PIPELINE_CREATE = 'pipeline_create';
+export const UIM_PIPELINE_UPDATE = 'pipeline_update';

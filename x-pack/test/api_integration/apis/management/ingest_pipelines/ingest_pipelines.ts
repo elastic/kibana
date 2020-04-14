@@ -23,7 +23,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should create a pipeline', async () => {
         const { body } = await supertest
-          .put(API_BASE_PATH)
+          .post(API_BASE_PATH)
           .set('kbn-xsrf', 'xxx')
           .send({
             name: PIPELINE_ID,
@@ -54,7 +54,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should not allow creation of an existing pipeline', async () => {
         const { body } = await supertest
-          .put(API_BASE_PATH)
+          .post(API_BASE_PATH)
           .set('kbn-xsrf', 'xxx')
           .send({
             name: PIPELINE_ID,

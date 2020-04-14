@@ -18,6 +18,14 @@ export class DocumentationService {
   public getIngestNodeUrl() {
     return `${this.esDocBasePath}/ingest.html`;
   }
+
+  public getProcessorsUrl() {
+    return `${this.esDocBasePath}/ingest-processors.html`;
+  }
+
+  public getHandlingFailureUrl() {
+    return `${this.esDocBasePath}/handling-failure-in-pipelines.html`;
+  }
 }
 
 export const documentationService = new DocumentationService();

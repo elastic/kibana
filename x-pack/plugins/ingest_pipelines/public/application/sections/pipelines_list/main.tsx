@@ -36,7 +36,8 @@ export const PipelinesList: React.FunctionComponent = () => {
   // Track component loaded
   useEffect(() => {
     services.metric.trackUiMetric(UIM_PIPELINES_LIST_LOAD);
-  }, [services.metric]);
+    services.breadcrumbs.setBreadcrumbs('home');
+  }, [services.metric, services.breadcrumbs]);
 
   const { data, isLoading, error, sendRequest } = services.api.useLoadPipelines();
 
@@ -64,7 +65,7 @@ export const PipelinesList: React.FunctionComponent = () => {
       />
     );
   } else {
-    content = <EmptyList onClick={() => {}} />;
+    content = <EmptyList />;
   }
 
   return (

@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PipelinesList } from './pipelines_list';
+export { PipelineForm } from './pipeline_form';
 
-export { PipelinesCreate } from './pipelines_create';
+export { SectionError } from './section_error';

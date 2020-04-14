@@ -17,8 +17,8 @@ export class IngestPipelinesPlugin implements Plugin {
     const { http } = coreSetup;
 
     // Initialize services
-    apiService.setup(http);
     uiMetricService.setup(usageCollection);
+    apiService.setup(http, uiMetricService);
 
     management.sections.getSection('elasticsearch')!.registerApp({
       id: PLUGIN_ID,

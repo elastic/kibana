@@ -7,6 +7,7 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiLink, EuiButton } from '@elastic/eui';
 
+import { BASE_PATH } from '../../../../common/constants';
 import { Pipeline } from '../../../../common/types';
 
 export interface Props {
@@ -27,13 +28,30 @@ export const PipelineTable: FunctionComponent<Props> = ({
   return (
     <EuiInMemoryTable
       search={{
-        toolsRight: (
-          <EuiButton iconType="refresh" color="secondary" onClick={onReloadClick}>
+        toolsRight: [
+          <EuiButton
+            key="reloadButton"
+            iconType="refresh"
+            color="secondary"
+            data-test-subj="reloadButton"
+            onClick={onReloadClick}
+          >
             {i18n.translate('xpack.ingestPipelines.list.table.reloadButtonLabel', {
               defaultMessage: 'Reload',
             })}
-          </EuiButton>
-        ),
+          </EuiButton>,
+          <EuiButton
+            href={`#${BASE_PATH}/create`}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="createPipelineButton"
+            key="createPipelineButton"
+          >
+            {i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
+              defaultMessage: 'Create a pipeline',
+            })}
+          </EuiButton>,
+        ],
         box: {
           incremental: true,
         },
