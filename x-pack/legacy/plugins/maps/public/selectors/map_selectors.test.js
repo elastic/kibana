@@ -5,6 +5,7 @@
  */
 
 jest.mock('../../../../../plugins/maps/public/layers/vector_layer', () => {});
+jest.mock('../../../../../plugins/maps/public/layers/tiled_vector_layer', () => {});
 jest.mock('../../../../../plugins/maps/public/layers/blended_vector_layer', () => {});
 jest.mock('../../../../../plugins/maps/public/layers/heatmap_layer', () => {});
 jest.mock('../../../../../plugins/maps/public/layers/vector_tile_layer', () => {});
