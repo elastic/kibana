@@ -5,7 +5,6 @@
  */
 
 import { pick, mapValues, omit, without } from 'lodash';
-import Boom from 'boom';
 import { Logger, SavedObject } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
@@ -27,6 +26,7 @@ import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { AlertInstances } from '../alert_instance/alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger } from '../../../event_log/server';
+import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 
 const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
 
@@ -408,12 +408,4 @@ async function errorAsAlertTaskRunResult(
       runAt: asErr(e),
     };
   }
-}
-
-function isAlertSavedObjectNotFoundError(err: Error | Boom, alertId: string) {
-  return (
-    Boom.isBoom(err) &&
-    err?.output?.statusCode === 404 &&
-    err?.output?.payload?.message?.includes(alertId)
-  );
 }

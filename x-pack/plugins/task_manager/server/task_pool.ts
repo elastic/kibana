@@ -12,6 +12,7 @@ import { performance } from 'perf_hooks';
 import Boom from 'boom';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
+import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
 
 interface Opts {
   maxWorkers: number;
@@ -168,12 +169,4 @@ export class TaskPool {
 function partitionListByCount<T>(list: T[], count: number): [T[], T[]] {
   const listInCount = list.splice(0, count);
   return [listInCount, list];
-}
-
-function isTaskSavedObjectNotFoundError(err: Error | Boom, taskId: string) {
-  return (
-    Boom.isBoom(err) &&
-    err?.output?.statusCode === 404 &&
-    err?.output?.payload?.message?.includes(taskId)
-  );
 }
