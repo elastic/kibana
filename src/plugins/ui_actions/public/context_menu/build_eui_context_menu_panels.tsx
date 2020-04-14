@@ -110,11 +110,25 @@ async function convertPanelActionToContextMenuItem<A>({
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };
 
-  menuPanelItem.onClick = e => {
-    if (menuPanelItem.href) {
-      e.preventDefault();
+  menuPanelItem.onClick = event => {
+    if (event.target instanceof HTMLAnchorElement) {
+      // from react-router's <Link/>
+      if (
+        !event.defaultPrevented && // onClick prevented default
+        event.button === 0 && // ignore everything but left clicks
+        (!event.target.target || event.target.target === '_self') && // let browser handle "target=_blank" etc.
+        !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
+      ) {
+        event.preventDefault();
+        action.execute(actionContext);
+      } else {
+        // let browser handle navigation
+      }
+    } else {
+      // not a link
+      action.execute(actionContext);
     }
-    action.execute(actionContext);
+
     closeMenu();
   };
 
