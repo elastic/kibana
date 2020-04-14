@@ -36,6 +36,7 @@ import { IIndexPattern, ISearchSource, SearchSource } from '../../../../plugins/
 import { ISavedVis, SerializedVis } from '../types';
 import { createSavedSearchesLoader } from '../../../../plugins/discover/public';
 import { getChrome, getOverlays, getIndexPatterns, getSavedObjects, getSearch } from '../services';
+import { SavedObjectAttributes } from '../../../../core/types';
 
 export const convertToSerializedVis = async (savedVis: ISavedVis): Promise<SerializedVis> => {
   const { visState } = savedVis;
@@ -125,7 +126,14 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
         type: SavedVis.type,
         mapping: SavedVis.mapping,
         searchSource: SavedVis.searchSource,
-        extractReferences,
+        extractReferences: ({ attributes, references }) => {
+          const [newState, newReferences] = extractReferences(attributes as any);
+          const allReferences = [...references, ...newReferences];
+          return {
+            references: allReferences,
+            attributes: (newState as any) as SavedObjectAttributes,
+          };
+        },
         injectReferences,
         id: (opts.id as string) || '',
         indexPattern: opts.indexPattern as IIndexPattern,

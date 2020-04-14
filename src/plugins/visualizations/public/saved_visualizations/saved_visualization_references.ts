@@ -16,18 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/public';
+import { SavedObjectReference } from '../../../../core/public';
 import { VisSavedObject } from '../types';
 
-export function extractReferences({
-  attributes,
-  references = [],
-}: {
-  attributes: SavedObjectAttributes;
-  references: SavedObjectReference[];
-}) {
+export function extractReferences(
+  attributes: VisSavedObject
+): [VisSavedObject, SavedObjectReference[]] {
   const updatedAttributes = { ...attributes };
-  const updatedReferences = [...references];
+  const updatedReferences = [];
 
   // Extract saved search
   if (updatedAttributes.savedSearchId) {
@@ -46,7 +42,7 @@ export function extractReferences({
     const controls = (visState.params && visState.params.controls) || [];
     controls.forEach((control: Record<string, string>, i: number) => {
       if (!control.indexPattern) {
-        return;
+        return [];
       }
       control.indexPatternRefName = `control_${i}_index_pattern`;
       updatedReferences.push({
@@ -56,13 +52,10 @@ export function extractReferences({
       });
       delete control.indexPattern;
     });
-    updatedAttributes.visState = JSON.stringify(visState);
+    updatedAttributes.visState = visState;
   }
 
-  return {
-    references: updatedReferences,
-    attributes: updatedAttributes,
-  };
+  return [updatedAttributes, updatedReferences];
 }
 
 export function injectReferences(savedObject: VisSavedObject, references: SavedObjectReference[]) {
@@ -90,4 +83,5 @@ export function injectReferences(savedObject: VisSavedObject, references: SavedO
       delete control.indexPatternRefName;
     });
   }
+  return savedObject;
 }

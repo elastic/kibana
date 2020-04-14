@@ -20,6 +20,7 @@
 import { SavedObject } from '../../../plugins/saved_objects/public';
 import { ISearchSource, AggConfigOptions } from '../../../plugins/data/public';
 import { SerializedVis, Vis, VisParams } from './vis';
+import { PersistableState } from '../../share/public';
 
 export { Vis, SerializedVis, VisParams };
 
@@ -58,4 +59,10 @@ export interface VisResponseValue {
   visData: object;
   visConfig: object;
   params?: object;
+}
+
+declare module '../../share/public' {
+  interface PersistableStates {
+    visualization: PersistableState<VisSavedObject>;
+  }
 }

@@ -64,7 +64,13 @@ import {
   convertFromSerializedVis,
   convertToSerializedVis,
 } from './saved_visualizations/_saved_vis';
-
+import { SharePluginSetup } from '../../share/public';
+import {
+  extractReferences,
+  injectReferences,
+} from './saved_visualizations/saved_visualization_references';
+// @ts-ignore
+import { updateOldState } from './legacy/vis_update_state';
 /**
  * Interface for this plugin's returned setup/start contracts.
  *
@@ -88,6 +94,7 @@ export interface VisualizationsSetupDeps {
   expressions: ExpressionsSetup;
   inspector: InspectorSetup;
   usageCollection: UsageCollectionSetup;
+  share: SharePluginSetup;
 }
 
 export interface VisualizationsStartDeps {
@@ -120,7 +127,7 @@ export class VisualizationsPlugin
 
   public setup(
     core: CoreSetup<VisualizationsStartDeps, VisualizationsStart>,
-    { expressions, embeddable, usageCollection, data }: VisualizationsSetupDeps
+    { expressions, embeddable, usageCollection, data, share }: VisualizationsSetupDeps
   ): VisualizationsSetup {
     const start = (this.getStartServicesOrDie = createStartServicesGetter(core.getStartServices));
 
@@ -131,6 +138,13 @@ export class VisualizationsPlugin
     expressions.registerRenderer(visualizationRenderer);
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
+
+    share.persistableState.register({
+      id: 'visualization',
+      injectReferences,
+      extractReferences,
+      migrate: updateOldState,
+    });
 
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
