@@ -110,6 +110,7 @@ export const MarkdownEditor = React.memo<{
           name: i18n.MARKDOWN,
           content: (
             <TextArea
+              data-test-subj="textAreaInput"
               onChange={handleOnChange}
               onBlur={setCursorPosition}
               aria-label={`markdown-editor-comment`}

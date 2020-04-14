@@ -126,10 +126,9 @@ export const getCasesColumns = (
         render: (createdAt: Case['createdAt']) => {
           if (createdAt != null) {
             return (
-              <FormattedRelativePreferenceDate
-                value={createdAt}
-                data-test-subj={`case-table-column-createdAt`}
-              />
+              <span data-test-subj={`case-table-column-createdAt`}>
+                <FormattedRelativePreferenceDate value={createdAt} />
+              </span>
             );
           }
           return getEmptyTagValue();
@@ -142,10 +141,9 @@ export const getCasesColumns = (
         render: (closedAt: Case['closedAt']) => {
           if (closedAt != null) {
             return (
-              <FormattedRelativePreferenceDate
-                value={closedAt}
-                data-test-subj={`case-table-column-closedAt`}
-              />
+              <span data-test-subj={`case-table-column-closedAt`}>
+                <FormattedRelativePreferenceDate value={closedAt} />
+              </span>
             );
           }
           return getEmptyTagValue();
