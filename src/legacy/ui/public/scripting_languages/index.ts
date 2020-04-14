@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { HttpStart } from 'src/core/public';
 import chrome from '../chrome';
 import { toastNotifications } from '../notify';
 
@@ -29,7 +30,8 @@ export function getDeprecatedScriptingLanguages(): string[] {
   return [];
 }
 
-export function GetEnabledScriptingLanguagesProvider($http: IHttpService) {
+// todo move to ui/field_editor
+export function GetEnabledScriptingLanguagesProvider($http: HttpStart) {
   return () => {
     return $http
       .get(chrome.addBasePath('/api/kibana/scripts/languages'))

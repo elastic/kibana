@@ -23,8 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { Sample, ConverterType } from '../../../../types';
 
 export const convertSampleInput = (
-  converter: (input: string | number) => string,
-  inputs: Array<string | number>
+  converter: (input: string | number | Array<string | number>) => string,
+  inputs: Array<string | number | Array<string | number>>
 ) => {
   let error = null;
   let samples: Sample[] = [];
@@ -59,6 +59,7 @@ export interface FormatEditorProps<P> {
   formatParams: { type?: string } & P; // todo
   onChange: (newParams: any) => void; // todo
   onError: (error: any) => void; // todo
+  basePath: string;
 }
 
 export interface FormatEditorState {

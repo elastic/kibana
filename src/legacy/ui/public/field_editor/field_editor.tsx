@@ -19,6 +19,7 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
+import { HttpStart } from 'src/core/public';
 
 // todo move into ui/field_editor
 import {
@@ -119,7 +120,7 @@ export interface FieldEdiorProps {
   field: Field;
   helpers: {
     getConfig: () => any;
-    $http: () => any;
+    getHttpStart: () => HttpStart;
     fieldFormatEditors: any;
     redirectAway: () => void;
   };
@@ -156,11 +157,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   }
 
   async init() {
-    const { $http } = this.props.helpers;
+    const { getHttpStart } = this.props.helpers;
     const { field } = this.state;
     const { indexPattern } = this.props;
 
-    const getEnabledScriptingLanguages = GetEnabledScriptingLanguagesProvider($http);
+    const getEnabledScriptingLanguages = GetEnabledScriptingLanguagesProvider(getHttpStart());
     const enabledLangs = await getEnabledScriptingLanguages();
     const scriptingLangs = intersection(
       enabledLangs,

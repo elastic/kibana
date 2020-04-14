@@ -28,7 +28,6 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DefaultFormatEditor, FormatEditorProps } from '../default';
 
@@ -62,16 +61,22 @@ interface UrlFormatEditorFormatState {
   showUrlTemplateHelp: boolean;
 }
 
+interface UrlType {
+  kind: string;
+  text: string;
+}
+
 export class UrlFormatEditor extends DefaultFormatEditor<
   UrlFormatEditorFormatParams,
   UrlFormatEditorFormatState
 > {
   static formatId = 'url';
+  iconPattern: string;
 
   constructor(props: FormatEditorProps<UrlFormatEditorFormatParams>) {
     super(props);
-    const bp = chrome.getBasePath();
-    this.iconPattern = `${bp}/bundles/src/legacy/ui/public/field_editor/components/field_format_editor/editors/url/icons/{{value}}.png`;
+
+    this.iconPattern = `${props.basePath}/bundles/src/legacy/ui/public/field_editor/components/field_format_editor/editors/url/icons/{{value}}.png`;
     this.state = {
       ...this.state,
       sampleInputsByType: {
@@ -193,7 +198,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           <EuiSelect
             data-test-subj="urlEditorType"
             value={formatParams.type}
-            options={format.type.urlTypes.map(type => {
+            options={format.type.urlTypes.map((type: UrlType) => {
               return {
                 value: type.kind,
                 text: type.text,

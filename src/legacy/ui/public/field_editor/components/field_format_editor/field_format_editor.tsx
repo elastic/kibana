@@ -25,12 +25,20 @@ interface FieldFormatEditorProps {
   fieldFormatId: string;
   fieldFormatParams: any; // todo
   fieldFormatEditors: any; // todo
-  onChange: () => void;
-  onError: () => void;
+  onChange: (change: { fieldType: string; [key: string]: any }) => void; // todo define next to caller
+  onError: (error: string) => void;
+}
+
+interface EditorComponentProps {
+  fieldType: FieldFormatEditorProps['fieldType'];
+  format: FieldFormatEditorProps['fieldFormat'];
+  formatParams: FieldFormatEditorProps['fieldFormatParams'];
+  onChange: FieldFormatEditorProps['onChange'];
+  onError: FieldFormatEditorProps['onError'];
 }
 
 interface FieldFormatEditorState {
-  EditorComponent?: React.FC; // todo
+  EditorComponent?: React.FC<EditorComponentProps>;
 }
 
 export class FieldFormatEditor extends PureComponent<
@@ -39,7 +47,7 @@ export class FieldFormatEditor extends PureComponent<
 > {
   static getDerivedStateFromProps(nextProps: FieldFormatEditorProps) {
     return {
-      EditorComponent: nextProps.fieldFormatEditors.getEditor(nextProps.fieldFormatId) || null,
+      EditorComponent: nextProps.fieldFormatEditors.byFormatId[nextProps.fieldFormatId] || null,
     };
   }
 

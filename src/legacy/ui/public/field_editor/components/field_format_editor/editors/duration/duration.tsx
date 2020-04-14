@@ -36,10 +36,20 @@ interface DurationFormatEditorState {
   hasDecimalError: boolean;
 }
 
+interface InputFormat {
+  kind: string;
+  text: string;
+}
+
+interface OutputFormat {
+  method: string;
+  text: string;
+}
+
 interface DurationFormatEditorFormatParams {
   outputPrecision: number;
-  inputFormat: any;
-  outputFormat: any; // todo
+  inputFormat: string;
+  outputFormat: string;
 }
 
 export class DurationFormatEditor extends DefaultFormatEditor<
@@ -96,7 +106,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
         >
           <EuiSelect
             value={formatParams.inputFormat}
-            options={format.type.inputFormats.map(fmt => {
+            options={format.type.inputFormats.map((fmt: InputFormat) => {
               return {
                 value: fmt.kind,
                 text: fmt.text,
@@ -119,7 +129,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
         >
           <EuiSelect
             value={formatParams.outputFormat}
-            options={format.type.outputFormats.map(fmt => {
+            options={format.type.outputFormats.map((fmt: OutputFormat) => {
               return {
                 value: fmt.method,
                 text: fmt.text,

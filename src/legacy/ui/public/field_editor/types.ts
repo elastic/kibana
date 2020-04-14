@@ -20,7 +20,7 @@
 import { ReactText } from 'react';
 
 export interface Sample {
-  input: ReactText;
+  input: ReactText | ReactText[];
   output: string;
 }
 

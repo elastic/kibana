@@ -26,15 +26,21 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DefaultFormatEditor } from '../default';
 
 interface StaticLookupFormatEditorFormatParams {
-  lookupEntries: Array<{}>;
+  lookupEntries: Array<{ key: string; value: string }>;
   unknownKeyValue: string;
+}
+
+interface StaticLookupItem {
+  key: string;
+  value: string;
+  index: number;
 }
 
 export class StaticLookupFormatEditor extends DefaultFormatEditor<
   StaticLookupFormatEditorFormatParams
 > {
   static formatId = 'static_lookup';
-  onLookupChange = (newLookupParams, index) => {
+  onLookupChange = (newLookupParams: { value?: string; key?: string }, index: number) => {
     const lookupEntries = [...this.props.formatParams.lookupEntries];
     lookupEntries[index] = {
       ...lookupEntries[index],
@@ -80,7 +86,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
         name: (
           <FormattedMessage id="common.ui.fieldEditor.staticLookup.keyLabel" defaultMessage="Key" />
         ),
-        render: (value, item) => {
+        render: (value: number, item: StaticLookupItem) => {
           return (
             <EuiFieldText
               value={value || ''}
@@ -104,7 +110,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
             defaultMessage="Value"
           />
         ),
-        render: (value, item) => {
+        render: (value: number, item: StaticLookupItem) => {
           return (
             <EuiFieldText
               value={value || ''}
@@ -133,7 +139,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
             description: i18n.translate('common.ui.fieldEditor.staticLookup.deleteTitle', {
               defaultMessage: 'Delete entry',
             }),
-            onClick: item => {
+            onClick: (item: StaticLookupItem) => {
               this.removeLookup(item.index);
             },
             type: 'icon',

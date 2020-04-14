@@ -30,6 +30,11 @@ interface StringFormatEditorFormatParams {
   transform: string;
 }
 
+interface TransformOptions {
+  kind: string;
+  text: string;
+}
+
 export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFormatParams> {
   static formatId = 'string';
   state = {
@@ -63,7 +68,7 @@ export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFo
           <EuiSelect
             data-test-subj="stringEditorTransform"
             defaultValue={formatParams.transform}
-            options={format.type.transformOptions.map(option => {
+            options={format.type.transformOptions.map((option: TransformOptions) => {
               return {
                 value: option.kind,
                 text: option.text,

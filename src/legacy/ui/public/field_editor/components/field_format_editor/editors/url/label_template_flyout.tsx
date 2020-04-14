@@ -24,6 +24,43 @@ import { EuiBasicTable, EuiCode, EuiFlyout, EuiFlyoutBody, EuiText } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+interface LabelTemplateExampleItem {
+  input: string | number;
+  urlTemplate: string;
+  labelTemplate: string;
+  output: string;
+}
+
+const items: LabelTemplateExampleItem[] = [
+  {
+    input: 1234,
+    urlTemplate: 'http://company.net/profiles?user_id={{value}}',
+    labelTemplate: i18n.translate('common.ui.fieldEditor.labelTemplate.example.idLabel', {
+      defaultMessage: 'User #{value}',
+      values: { value: '{{value}}' },
+    }),
+    output:
+      '<a href="http://company.net/profiles?user_id=1234">' +
+      i18n.translate('common.ui.fieldEditor.labelTemplate.example.output.idLabel', {
+        defaultMessage: 'User',
+      }) +
+      ' #1234</a>',
+  },
+  {
+    input: '/assets/main.css',
+    urlTemplate: 'http://site.com{{rawValue}}',
+    labelTemplate: i18n.translate('common.ui.fieldEditor.labelTemplate.example.pathLabel', {
+      defaultMessage: 'View Asset',
+    }),
+    output:
+      '<a href="http://site.com/assets/main.css">' +
+      i18n.translate('common.ui.fieldEditor.labelTemplate.example.output.pathLabel', {
+        defaultMessage: 'View Asset',
+      }) +
+      '</a>',
+  },
+];
+
 export const LabelTemplateFlyout = ({ isVisible = false, onClose = () => {} }) => {
   return isVisible ? (
     <EuiFlyout onClose={onClose}>
@@ -66,40 +103,8 @@ export const LabelTemplateFlyout = ({ isVisible = false, onClose = () => {} }) =
               defaultMessage="Examples"
             />
           </h4>
-          <EuiBasicTable
-            items={[
-              {
-                input: 1234,
-                urlTemplate: 'http://company.net/profiles?user_id={{value}}',
-                labelTemplate: i18n.translate(
-                  'common.ui.fieldEditor.labelTemplate.example.idLabel',
-                  {
-                    defaultMessage: 'User #{value}',
-                    values: { value: '{{value}}' },
-                  }
-                ),
-                output:
-                  '<a href="http://company.net/profiles?user_id=1234">' +
-                  i18n.translate('common.ui.fieldEditor.labelTemplate.example.output.idLabel', {
-                    defaultMessage: 'User',
-                  }) +
-                  ' #1234</a>',
-              },
-              {
-                input: '/assets/main.css',
-                urlTemplate: 'http://site.com{{rawValue}}',
-                labelTemplate: i18n.translate(
-                  'common.ui.fieldEditor.labelTemplate.example.pathLabel',
-                  { defaultMessage: 'View Asset' }
-                ),
-                output:
-                  '<a href="http://site.com/assets/main.css">' +
-                  i18n.translate('common.ui.fieldEditor.labelTemplate.example.output.pathLabel', {
-                    defaultMessage: 'View Asset',
-                  }) +
-                  '</a>',
-              },
-            ]}
+          <EuiBasicTable<LabelTemplateExampleItem>
+            items={items}
             columns={[
               {
                 field: 'input',
@@ -125,7 +130,7 @@ export const LabelTemplateFlyout = ({ isVisible = false, onClose = () => {} }) =
                 name: i18n.translate('common.ui.fieldEditor.labelTemplate.outputHeader', {
                   defaultMessage: 'Output',
                 }),
-                render: value => {
+                render: (value: LabelTemplateExampleItem['output']) => {
                   return (
                     <span
                       /*

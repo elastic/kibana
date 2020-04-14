@@ -23,16 +23,16 @@ import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Sample } from '../../../types';
+import { Sample, ConverterType } from '../../../types';
 
 interface FormatEditorSamplesProps {
   samples: Sample[];
-  sampleType: 'html' | 'text';
+  sampleType: ConverterType;
 }
 
 export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps> {
   static defaultProps = {
-    sampleType: 'text',
+    sampleType: ConverterType.TEXT,
   };
 
   render() {
@@ -54,7 +54,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
           defaultMessage: 'Output',
         }),
         render: (output: string) => {
-          return sampleType === 'html' ? (
+          return sampleType === ConverterType.HTML ? (
             <div
               /*
                * Justification for dangerouslySetInnerHTML:
@@ -75,7 +75,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
           <FormattedMessage id="common.ui.fieldEditor.samplesHeader" defaultMessage="Samples" />
         }
       >
-        <EuiBasicTable
+        <EuiBasicTable<Sample>
           className="kbnFieldFormatEditor__samples"
           compressed={true}
           items={samples}
