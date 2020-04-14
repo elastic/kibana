@@ -26,6 +26,7 @@ import {
 import { useEditTimelinBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { EditOneTimelineAction } from './export_timeline';
+import { EuiTab } from '@elastic/eui';
 
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
@@ -116,6 +117,38 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       }
     }, [setImportDataModalToggle, refetch]);
 
+    const tabs = [
+      {
+        id: 'timeline',
+        name: 'timeline',
+        disabled: false,
+      },
+      {
+        id: 'template',
+        name: 'template',
+        disabled: false,
+      },
+    ];
+
+    const onSelectedTabChanged = id => {
+      this.setState({
+        selectedTabId: id,
+      });
+    };
+
+    const renderTabs = () => {
+      return tabs.map((tab, index) => (
+        <EuiTab
+          onClick={() => this.onSelectedTabChanged(tab.id)}
+          isSelected={tab.id === this.state.selectedTabId}
+          disabled={tab.disabled}
+          key={index}
+        >
+          {tab.name}
+        </EuiTab>
+      ));
+    };
+
     return (
       <>
         <EditOneTimelineAction
@@ -143,6 +176,8 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
+          <EuiTabs>{renderTabs()}</EuiTabs>
+
           <TitleRow
             data-test-subj="title-row"
             onAddTimelinesToFavorites={onAddTimelinesToFavorites}
