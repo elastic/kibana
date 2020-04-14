@@ -133,10 +133,14 @@ export interface PolicyListUrlSearchParams {
 export interface PolicyConfig {
   windows: {
     events: {
-      process: boolean;
+      dll_and_driver_load: boolean;
+      dns: boolean;
+      file: boolean;
       network: boolean;
+      process: boolean;
+      registry: boolean;
+      security: boolean;
     };
-    /** malware mode can be off, detect, prevent or prevent and notify user */
     malware: MalwareFields;
     logging: {
       stdout: string;
@@ -146,7 +150,9 @@ export interface PolicyConfig {
   };
   mac: {
     events: {
+      file: boolean;
       process: boolean;
+      network: boolean;
     };
     malware: MalwareFields;
     logging: {
@@ -157,7 +163,9 @@ export interface PolicyConfig {
   };
   linux: {
     events: {
+      file: boolean;
       process: boolean;
+      network: boolean;
     };
     logging: {
       stdout: string;
@@ -210,12 +218,6 @@ export enum OS {
   windows = 'windows',
   mac = 'mac',
   linux = 'linux',
-}
-
-/** Used in Policy */
-export enum EventingFields {
-  process = 'process',
-  network = 'network',
 }
 
 /**
