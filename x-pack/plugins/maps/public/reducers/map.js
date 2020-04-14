@@ -442,7 +442,7 @@ function updateWithDataResponse(state, action) {
 
   dataRequest.data = action.data;
   dataRequest.dataMeta = { ...dataRequest.dataMetaAtStart, ...action.meta };
-  delete dataRequest.dataMetaAtStart;
+  dataRequest.dataMetaAtStart = null;
   return resetDataRequest(state, action, dataRequest);
 }
 
