@@ -4895,7 +4895,7 @@ class ProcRunner {
             if (wait instanceof RegExp) {
                 // wait for process to log matching line
                 await proc.lines$
-                    .pipe(operators_1.filter((line) => wait.test(line)), operators_1.first(), operators_1.catchError(err => {
+                    .pipe(operators_1.filter(line => wait.test(line)), operators_1.first(), operators_1.catchError(err => {
                     if (err.name !== 'EmptyError') {
                         throw errors_1.createCliError(`[${name}] exited without matching pattern: ${wait}`);
                     }
