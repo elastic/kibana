@@ -9,7 +9,6 @@
  * tasks at once in a given Kibana instance.
  */
 import { performance } from 'perf_hooks';
-import Boom from 'boom';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
