@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import Hapi from 'hapi';
 import { IUiSettingsClient, KibanaRequest } from '../../../../../../../src/core/server';
-import { CSV_JOB_TYPE } from '../../../common/constants';
+import { CSV_JOB_TYPE, CSV_BOM_CHARS } from '../../../common/constants';
 import { ReportingCore } from '../../../server/core';
 import { cryptoFactory } from '../../../server/lib';
 import { getFieldFormats } from '../../../server/services';
@@ -121,6 +121,8 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
     ]);
 
     const generateCsv = createGenerateCsv(jobLogger);
+    const bom = config.get('csv', 'useByteOrderMarkEncoding') ? CSV_BOM_CHARS : '';
+
     const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv({
       searchRequest,
       fields,
@@ -139,7 +141,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
 
     return {
       content_type: 'text/csv',
-      content,
+      content: bom + content,
       max_size_reached: maxSizeReached,
       size,
       csv_contains_formulas: csvContainsFormulas,

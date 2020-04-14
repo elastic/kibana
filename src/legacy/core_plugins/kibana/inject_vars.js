@@ -20,10 +20,7 @@
 export function injectVars(server) {
   const serverConfig = server.config();
 
-  const { importAndExportableTypes } = server.savedObjects;
-
   return {
-    importAndExportableTypes,
     autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
     autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),
   };
