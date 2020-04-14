@@ -22,6 +22,7 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiText } from '@elastic/eui';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { HostMetadata } from '../../../../../common/types';
 import { useHostListSelector } from './hooks';
@@ -92,7 +93,7 @@ const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         title: i18n.translate('xpack.endpoint.host.details.hostname', {
           defaultMessage: 'Hostname',
         }),
-        description: details.host.hostname,
+        description: <EuiText className="eui-textBreakAll">{details.host.hostname}</EuiText>,
       },
       {
         title: i18n.translate('xpack.endpoint.host.details.sensorVersion', {
@@ -168,7 +169,7 @@ export const HostDetailsFlyout = () => {
   return (
     <EuiFlyout onClose={handleFlyoutClose} data-test-subj="hostDetailsFlyout">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
+        <EuiTitle size="s" className="eui-textBreakAll">
           <h2 data-test-subj="hostDetailsFlyoutTitle">
             {details === undefined ? <EuiLoadingContent lines={1} /> : details.host.hostname}
           </h2>

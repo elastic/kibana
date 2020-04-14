@@ -79,6 +79,7 @@ export const HostList = () => {
             // eslint-disable-next-line @elastic/eui/href-or-on-click
             <EuiLink
               data-test-subj="hostnameCellLink"
+              className="eui-textTruncate"
               href={'?' + urlFromQueryParams({ ...queryParams, selected_host: id }).search}
               onClick={(ev: React.MouseEvent) => {
                 ev.preventDefault();
@@ -95,6 +96,7 @@ export const HostList = () => {
         name: i18n.translate('xpack.endpoint.host.list.policy', {
           defaultMessage: 'Policy',
         }),
+        truncateText: true,
         render: () => {
           return 'Policy Name';
         },
@@ -129,6 +131,7 @@ export const HostList = () => {
         name: i18n.translate('xpack.endpoint.host.list.ip', {
           defaultMessage: 'IP Address',
         }),
+        truncateText: true,
       },
       {
         field: '',
