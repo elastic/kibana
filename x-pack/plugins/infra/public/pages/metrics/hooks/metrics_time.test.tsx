@@ -6,7 +6,7 @@
 
 import { mountHook } from 'test_utils/enzyme_helpers';
 
-import { useMetricsTime } from './with_metrics_time';
+import { useMetricsTime } from './use_metrics_time';
 
 describe('useMetricsTime hook', () => {
   describe('timeRange state', () => {
