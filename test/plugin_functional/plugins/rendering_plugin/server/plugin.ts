@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, IRenderOptions } from 'kibana/server';
+import { Plugin, CoreSetup } from 'kibana/server';
 
 import { schema } from '@kbn/config-schema';
 
@@ -39,15 +39,12 @@ export class RenderingPlugin implements Plugin {
         },
       },
       async (context, req, res) => {
-        const { id } = req.params;
         const { includeUserSettings } = req.query;
-        const app = { getId: () => id! };
-        const options: Partial<IRenderOptions> = { app, includeUserSettings };
 
         if (includeUserSettings) {
-          return res.renderCoreApp(options as any);
+          return res.renderCoreApp();
         }
-        return res.renderAnonymousCoreApp(options as any);
+        return res.renderAnonymousCoreApp();
       }
     );
   }
