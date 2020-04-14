@@ -62,3 +62,18 @@ Nodes appear on the map in one of two shapes:
 * **Diamond**: Databases, external, and messaging. Interior icons represent the generic type,
 with specific icons for known entities, like Elasticsearch.
 Type and subtype are based on `span.type`, and `span.subtype`.
+
+[float]
+[[service-maps-supported]]
+=== Supported APM Agents
+
+Service maps are supported for the following Agent versions:
+
+[horizontal]
+Go Agent:: >= v1.7.0
+Java Agent:: >= v1.13.0
+.NET Agent:: Not supported
+Node.js Agent:: >= v3.6.0
+Python Agent:: >= v5.5.0
+Ruby Agent:: >= v3.6.0
+Real User Monitoring (RUM) Agent:: >= v4.7.0
