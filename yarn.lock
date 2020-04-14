@@ -4379,10 +4379,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@8.10.54", "@types/node@>=12.12.31 <12.17.0", "@types/node@>=8.9.0", "@types/node@^12.0.2":
-  version "12.12.31"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.31.tgz#d6b4f9645fee17f11319b508fb1001797425da51"
-  integrity sha512-T+wnJno8uh27G9c+1T+a1/WYCHzLeDqtsGJkoEdSp2X8RTh3oOCZQcUnjAx90CS8cmmADX51O0FI/tu9s0yssg==
+"@types/node@*", "@types/node@8.10.54", "@types/node@>=12.12.35 <12.17.0", "@types/node@>=8.9.0", "@types/node@^12.0.2":
+  version "12.12.35"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.35.tgz#1e61b226c14380f4384f70cfe49a65c2c553ad2b"
+  integrity sha512-ASYsaKecA7TUsDrqIGPNk3JeEox0z/0XR/WsJJ8BIX/9+SkMSImQXKWfU/yBrSyc7ZSE/NPqLu36Nur0miCFfQ==
 
 "@types/nodemailer@^6.2.1":
   version "6.2.1"
