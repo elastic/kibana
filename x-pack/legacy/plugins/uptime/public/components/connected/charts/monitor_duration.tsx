@@ -6,7 +6,7 @@
 
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useUrlParams } from '../../../hooks';
+import { useGetUrlParams } from '../../../hooks';
 import {
   getAnomalyRecordsAction,
   getMLCapabilitiesAction,
@@ -28,13 +28,12 @@ interface Props {
 }
 
 export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
-  const [getUrlParams] = useUrlParams();
   const {
     dateRangeStart,
     dateRangeEnd,
     absoluteDateRangeStart,
     absoluteDateRangeEnd,
-  } = getUrlParams();
+  } = useGetUrlParams();
 
   const { durationLines, loading } = useSelector(selectDurationLines);
 
