@@ -24,7 +24,7 @@ interface LogEntryActionsColumnProps {
   isMenuOpen: boolean;
   onOpenMenu: () => void;
   onCloseMenu: () => void;
-  onViewDetails: () => void;
+  onViewDetails?: () => void;
   onViewLogInContext?: () => void;
 }
 
@@ -53,7 +53,10 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
 }) => {
   const handleClickViewDetails = useCallback(() => {
     onCloseMenu();
-    onViewDetails();
+
+    // Function might be `undefined` and the linter doesn't like that.
+    // eslint-disable-next-line no-unused-expressions
+    onViewDetails?.();
   }, [onCloseMenu, onViewDetails]);
 
   const handleClickViewInContext = useCallback(() => {

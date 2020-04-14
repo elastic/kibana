@@ -72,6 +72,9 @@ export const LogEntryRow = memo(
     ]);
 
     const hasContext = useMemo(() => !isEmpty(logEntry.context), [logEntry]);
+    const hasActionFlyoutWithItem = openFlyoutWithItem !== undefined;
+    const hasActionViewLogInContext = hasContext && openViewLogInContext !== undefined;
+    const hasActionsMenu = hasActionFlyoutWithItem || hasActionViewLogInContext;
 
     const logEntryColumnsById = useMemo(
       () =>
@@ -175,19 +178,23 @@ export const LogEntryRow = memo(
             );
           }
         })}
-        <LogEntryColumn
-          key="logColumn iconLogColumn iconLogColumn:details"
-          {...columnWidths[iconColumnId]}
-        >
-          <LogEntryActionsColumn
-            isHovered={isHovered}
-            isMenuOpen={isMenuOpen}
-            onOpenMenu={openMenu}
-            onCloseMenu={closeMenu}
-            onViewDetails={openFlyout}
-            onViewLogInContext={hasContext ? handleOpenViewLogInContext : undefined}
-          />
-        </LogEntryColumn>
+        {hasActionsMenu ? (
+          <LogEntryColumn
+            key="logColumn iconLogColumn iconLogColumn:details"
+            {...columnWidths[iconColumnId]}
+          >
+            <LogEntryActionsColumn
+              isHovered={isHovered}
+              isMenuOpen={isMenuOpen}
+              onOpenMenu={openMenu}
+              onCloseMenu={closeMenu}
+              onViewDetails={hasActionFlyoutWithItem ? openFlyout : undefined}
+              onViewLogInContext={
+                hasActionViewLogInContext ? handleOpenViewLogInContext : undefined
+              }
+            />
+          </LogEntryColumn>
+        ) : null}
       </LogEntryRowWrapper>
     );
   }
