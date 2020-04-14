@@ -73,6 +73,7 @@ export interface ILayer {
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getType(): LAYER_TYPE | undefined;
+  isVisible(): boolean;
   cloneDescriptor(): LayerDescriptor;
   renderStyleEditor({
     onStyleDescriptorChange,
@@ -234,7 +235,8 @@ export class AbstractLayer implements ILayer {
         defaultMessage: `Layer is hidden.`,
       });
     } else if (!this.showAtZoomLevel(zoomLevel)) {
-      const { minZoom, maxZoom } = this.getZoomConfig();
+      const minZoom = this.getMinZoom();
+      const maxZoom = this.getMaxZoom();
       icon = <EuiIcon size="m" type="expand" />;
       tooltipContent = i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
         defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
@@ -292,7 +294,7 @@ export class AbstractLayer implements ILayer {
   }
 
   isVisible(): boolean {
-    return this._descriptor.visible;
+    return !!this._descriptor.visible;
   }
 
   showAtZoomLevel(zoom: number): boolean {
@@ -300,26 +302,19 @@ export class AbstractLayer implements ILayer {
   }
 
   getMinZoom(): number {
-    return this._descriptor.minZoom;
+    return typeof this._descriptor.minZoom === 'number' ? this._descriptor.minZoom : MIN_ZOOM;
   }
 
   getMaxZoom(): number {
-    return this._descriptor.maxZoom;
+    return typeof this._descriptor.maxZoom === 'number' ? this._descriptor.maxZoom : MAX_ZOOM;
   }
 
   getAlpha(): number {
-    return this._descriptor.alpha;
+    return typeof this._descriptor.alpha === 'number' ? this._descriptor.alpha : 1;
   }
 
   getQuery(): Query {
     return this._descriptor.query;
-  }
-
-  getZoomConfig(): { minZoom: number | undefined; maxZoom: number | undefined } {
-    return {
-      minZoom: this._descriptor.minZoom,
-      maxZoom: this._descriptor.maxZoom,
-    };
   }
 
   getCurrentStyle(): IStyle {
@@ -390,7 +385,7 @@ export class AbstractLayer implements ILayer {
     throw new Error('Should implement AbstractLayer#ownsMbLayerId');
   }
 
-  ownsMbSourceId() {
+  ownsMbSourceId(): boolean {
     throw new Error('Should implement AbstractLayer#ownsMbSourceId');
   }
 

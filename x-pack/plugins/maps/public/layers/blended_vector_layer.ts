@@ -167,7 +167,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     super(options);
 
     this._documentSource = this._source as IESSource; // VectorLayer constructor sets _source as document source
-    this._documentStyle = this._style; // VectorLayer constructor sets _style as document source
+    this._documentStyle = this._style as IVectorStyle; // VectorLayer constructor sets _style as document source
 
     this._clusterSource = getClusterSource(this._documentSource, this._documentStyle);
     const clusterStyleDescriptor = getClusterStyleDescriptor(
@@ -242,8 +242,8 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
     const searchFilters = this._getSearchFilters(
       syncContext.dataFilters,
-      this.getSource(),
-      this.getCurrentStyle()
+      this.getSource() as IVectorStyle,
+      this.getCurrentStyle() as IVectorStyle
     );
     const canSkipFetch = await canSkipSourceUpdate({
       source: this.getSource(),
