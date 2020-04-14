@@ -20,7 +20,7 @@ export async function removeInstallation(options: {
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const [pkgName] = pkgkey.split('-');
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  const installedObjects = installation?.installed || { references: [], patterns: {} };
+  const installedObjects = installation?.installed || { references: [], es_index_patterns: {} };
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
