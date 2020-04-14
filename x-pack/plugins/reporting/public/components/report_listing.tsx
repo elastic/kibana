@@ -410,7 +410,7 @@ class ReportListingUi extends Component<Props, State> {
             statusTimestamp = this.formatDate(record.started_at);
           } else if (
             record.completed_at &&
-            (status === JobStatuses.COMPLETED || status === JobStatuses.FAILED)
+            [JobStatuses.COMPLETED, JobStatuses.FAILED, JobStatuses.WARNINGS].includes(status)
           ) {
             statusTimestamp = this.formatDate(record.completed_at);
           }

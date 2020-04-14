@@ -24,6 +24,7 @@ export const REPORTING_MANAGEMENT_HOME = '/app/kibana#/management/kibana/reporti
 // Statuses
 export const JOB_STATUS_FAILED = 'failed';
 export const JOB_STATUS_COMPLETED = 'completed';
+export const JOB_STATUS_WARNINGS = 'completed_with_warnings';
 
 export enum JobStatuses {
   PENDING = 'pending',
@@ -31,6 +32,7 @@ export enum JobStatuses {
   COMPLETED = 'completed',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
+  WARNINGS = 'completed_with_warnings',
 }
 
 // Types

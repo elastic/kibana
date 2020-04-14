@@ -760,6 +760,8 @@ describe('Worker class', function() {
         });
       });
 
+      it('handle warnings in the output by reflecting a warning status', () => {});
+
       it('should emit completion event', function(done) {
         worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
 
