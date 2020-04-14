@@ -95,14 +95,6 @@ const getFieldTypeFormatsList = (field, defaultFieldFormat) => {
   ];
 };
 
-/*
-const copyFieldMk = field => {
-  // console.log('copyField', field.format.params());
-  const obj = { ...field, format: field.format };
-  return obj;
-};
-*/
-
 export class FieldEditor extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
