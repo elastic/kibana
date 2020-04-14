@@ -27,7 +27,7 @@ import * as selectors from '../store/selectors';
 const nodeAssets = {
   runningProcessCube: {
     cubeSymbol: `#${SymbolIds.runningProcessCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.labelBackgroundRunningProcess,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningProcess', {
       defaultMessage: 'Running Process',
@@ -35,7 +35,7 @@ const nodeAssets = {
   },
   runningTriggerCube: {
     cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.labelBackgroundRunningTrigger,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningTrigger', {
       defaultMessage: 'Running Trigger',
@@ -43,7 +43,7 @@ const nodeAssets = {
   },
   terminatedProcessCube: {
     cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.labelBackgroundTerminatedProcess,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedProcess', {
       defaultMessage: 'Terminated Process',
@@ -51,7 +51,7 @@ const nodeAssets = {
   },
   terminatedTriggerCube: {
     cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.labelBackgroundTerminatedTrigger,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedTrigger', {
       defaultMessage: 'Terminated Trigger',
@@ -285,7 +285,7 @@ export const ProcessEventDot = styled(
                 top: '30%',
                 position: 'absolute',
                 width: '50%',
-                color: NamedColors.empty,
+                color: NamedColors.full,
                 fontSize: `${scaledTypeSize}px`,
                 lineHeight: '140%',
                 backgroundColor: NamedColors.resolverBackground,
@@ -305,6 +305,7 @@ export const ProcessEventDot = styled(
                   margin: '0',
                   textAlign: 'left',
                   padding: '0',
+                  color: NamedColors.empty,
                 }}
               >
                 {descriptionText}
