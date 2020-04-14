@@ -6,7 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
-import { EndpointAppConstants } from '../../../common/types';
 import { getPaginationParams } from './utils/pagination';
 import { RelatedEventsQuery } from './queries/related_events';
 import { IndexPatternRetriever } from '../../index_pattern';

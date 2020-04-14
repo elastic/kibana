@@ -10,7 +10,6 @@ import { RequestHandler, Logger } from 'kibana/server';
 import { extractParentEntityID } from './utils/normalize';
 import { LifecycleQuery } from './queries/lifecycle';
 import { ResolverEvent } from '../../../common/types';
-import { EndpointAppConstants } from '../../../common/types';
 import { IndexPatternRetriever } from '../../index_pattern';
 
 interface LifecycleQueryParams {

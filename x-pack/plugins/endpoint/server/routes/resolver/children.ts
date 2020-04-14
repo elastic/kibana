@@ -11,7 +11,6 @@ import { extractEntityID } from './utils/normalize';
 import { getPaginationParams } from './utils/pagination';
 import { LifecycleQuery } from './queries/lifecycle';
 import { ChildrenQuery } from './queries/children';
-import { EndpointAppConstants } from '../../../common/types';
 import { IndexPatternRetriever } from '../../index_pattern';
 
 interface ChildrenQueryParams {
