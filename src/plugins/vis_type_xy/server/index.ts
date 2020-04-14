@@ -20,7 +20,7 @@
 import { schema } from '@kbn/config-schema';
 
 export const config = {
-  schema: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+  schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
 };
 
 export const plugin = () => ({
