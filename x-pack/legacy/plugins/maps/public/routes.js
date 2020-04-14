@@ -67,11 +67,8 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function(redirectWhenMissing, $scope, config) {
-        console.log($scope, config);
+      map: function(redirectWhenMissing) {
         const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
-        console.log(gisMapSavedObjectLoader);
-        $scope.listingLimit = config.get('savedObjects:listingLimit');
         return gisMapSavedObjectLoader.get().catch(
           redirectWhenMissing({
             map: '/',
