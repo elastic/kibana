@@ -5,21 +5,11 @@
  */
 
 import { Immutable } from '../../../../../common/types';
-import { EndpointAppLocation, PageId } from '../../types';
-
-interface UserNavigatedToPage {
-  readonly type: 'userNavigatedToPage';
-  readonly payload: PageId;
-}
-
-interface UserNavigatedFromPage {
-  readonly type: 'userNavigatedFromPage';
-  readonly payload: PageId;
-}
+import { EndpointAppLocation } from '../../types';
 
 interface UserChangedUrl {
   readonly type: 'userChangedUrl';
   readonly payload: Immutable<EndpointAppLocation>;
 }
 
-export type RoutingAction = UserNavigatedToPage | UserNavigatedFromPage | UserChangedUrl;
+export type RoutingAction = UserChangedUrl;
