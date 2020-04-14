@@ -11,9 +11,9 @@ import { getDefaultDynamicProperties } from './styles/vector/vector_style_defaul
 import { IDynamicStyleProperty } from './styles/vector/properties/dynamic_style_property';
 import { IStyleProperty } from './styles/vector/properties/style_property';
 import {
+  SOURCE_TYPES,
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
-  ES_GEO_GRID,
   LAYER_TYPE,
   AGG_TYPE,
   RENDER_AS,
@@ -34,6 +34,7 @@ import {
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
+  VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
@@ -147,7 +148,10 @@ function getClusterStyleDescriptor(
 export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   static type = LAYER_TYPE.BLENDED_VECTOR;
 
-  static createDescriptor(options: VectorLayerArguments, mapColors: string[]) {
+  static createDescriptor(
+    options: VectorLayerDescriptor,
+    mapColors: string[]
+  ): VectorLayerDescriptor {
     const layerDescriptor = VectorLayer.createDescriptor(options, mapColors);
     layerDescriptor.type = BlendedVectorLayer.type;
     return layerDescriptor;
@@ -176,7 +180,11 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     const sourceDataRequest = this.getSourceDataRequest();
     if (sourceDataRequest) {
       const requestMeta = sourceDataRequest.getMeta();
-      if (requestMeta && requestMeta.sourceType && requestMeta.sourceType === ES_GEO_GRID) {
+      if (
+        requestMeta &&
+        requestMeta.sourceType &&
+        requestMeta.sourceType === SOURCE_TYPES.ES_GEO_GRID
+      ) {
         isClustered = true;
       }
     }
