@@ -6,7 +6,7 @@
 
 import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 import { ViewMode } from '../../../../../src/plugins/embeddable/public';
-import { EnhancedEmbeddableContext } from '../types';
+import { EnhancedEmbeddableContext, EnhancedEmbeddable } from '../types';
 
 export const ACTION_PANEL_NOTIFICATIONS = 'ACTION_PANEL_NOTIFICATIONS';
 
@@ -17,13 +17,17 @@ export const ACTION_PANEL_NOTIFICATIONS = 'ACTION_PANEL_NOTIFICATIONS';
 export class PanelNotificationsAction implements ActionDefinition<EnhancedEmbeddableContext> {
   public readonly id = ACTION_PANEL_NOTIFICATIONS;
 
-  public readonly getDisplayName = (context: EnhancedEmbeddableContext) => {
-    return String(context.embeddable.enhancements.dynamicActions.state.get().events.length);
+  private getEventCount(embeddable: EnhancedEmbeddable): number {
+    return embeddable.enhancements.dynamicActions.state.get().events.length;
+  }
+
+  public readonly getDisplayName = ({ embeddable }: EnhancedEmbeddableContext) => {
+    return String(this.getEventCount(embeddable));
   };
 
   public readonly isCompatible = async ({ embeddable }: EnhancedEmbeddableContext) => {
     if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
-    return embeddable.enhancements.dynamicActions.state.get().events.length > 0;
+    return this.getEventCount(embeddable) > 0;
   };
 
   public readonly execute = async () => {};
