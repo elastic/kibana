@@ -286,6 +286,7 @@ export const ProcessEventDot = styled(
                 color: 'white',
                 fontSize: `${scaledTypeSize}px`,
                 lineHeight: '140%',
+                backgroundColor: NamedColors.resolverBackground,
               }}
             >
               <div
@@ -321,7 +322,7 @@ export const ProcessEventDot = styled(
               >
                 {eventModel.eventName(event)}
               </div>
-              <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
+              <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <RelatedAlertsButton />
                 </EuiFlexItem>
