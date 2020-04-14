@@ -411,27 +411,25 @@ describe('get_filter', () => {
                   {
                     bool: {
                       minimum_should_match: 1,
-                      should: [{ match: { 'host.name': 'linux' } }],
+                      should: [
+                        {
+                          match: {
+                            'host.name': 'linux',
+                          },
+                        },
+                      ],
                     },
                   },
                   {
                     bool: {
-                      must_not: {
-                        bool: {
-                          must_not: {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  match: {
-                                    'event.module': 'suricata',
-                                  },
-                                },
-                              ],
-                            },
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'event.module': 'suricata',
                           },
                         },
-                      },
+                      ],
                     },
                   },
                 ],
@@ -763,22 +761,14 @@ describe('get_filter', () => {
                   },
                   {
                     bool: {
-                      must_not: {
-                        bool: {
-                          must_not: {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  match: {
-                                    'event.module': 'suricata',
-                                  },
-                                },
-                              ],
-                            },
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'event.module': 'suricata',
                           },
                         },
-                      },
+                      ],
                     },
                   },
                 ],
