@@ -564,7 +564,7 @@ export const ActionForm = ({
           {isAddActionPanelOpen === false ? (
             <div>
               <EuiHorizontalRule />
-              <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"

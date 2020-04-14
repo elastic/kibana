@@ -283,7 +283,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   const firstSetOfSteps = [
     {
       title: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.selectIndex', {
-        defaultMessage: 'Select an index.',
+        defaultMessage: 'Select an index',
       }),
       children: (
         <>
@@ -395,7 +395,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     },
     {
       title: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.conditionPrompt', {
-        defaultMessage: 'Define the condition.',
+        defaultMessage: 'Define the condition',
       }),
       children: (
         <>
@@ -444,7 +444,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </Fragment>
       ) : null}
       <EuiSpacer size="l" />
-      <EuiSteps steps={firstSetOfSteps} />
+      <EuiSteps className="actAddAlertSteps" steps={firstSetOfSteps} />
       <div className="actAlertVisualization__chart">
         {canShowVizualization ? (
           <Fragment>
