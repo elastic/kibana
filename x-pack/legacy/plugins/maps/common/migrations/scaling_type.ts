@@ -5,13 +5,13 @@
  */
 
 import _ from 'lodash';
-import { ES_SEARCH, SCALING_TYPES } from '../constants';
+import { SOURCE_TYPES, SCALING_TYPES } from '../constants';
 import { LayerDescriptor, ESSearchSourceDescriptor } from '../descriptor_types';
 import { MapSavedObjectAttributes } from '../../../../../plugins/maps/common/map_saved_object_type';
 
 function isEsDocumentSource(layerDescriptor: LayerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
-  return sourceType === ES_SEARCH;
+  return sourceType === SOURCE_TYPES.ES_SEARCH;
 }
 
 export function migrateUseTopHitsToScalingType({

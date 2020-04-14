@@ -21,9 +21,12 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { FileLayerField, VectorLayer, ServiceSettings } from 'ui/vis/map/service_settings';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import {
+  FileLayerField,
+  VectorLayer,
+  IServiceSettings,
+} from '../../../../../plugins/maps_legacy/public';
 import {
   NumberInputOption,
   SelectOption,
@@ -43,7 +46,7 @@ const mapFieldForOption = ({ description, name }: FileLayerField) => ({
 });
 
 export type RegionMapOptionsProps = {
-  serviceSettings: ServiceSettings;
+  serviceSettings: IServiceSettings;
 } & VisOptionsProps<RegionMapVisParams>;
 
 function RegionMapOptions(props: RegionMapOptionsProps) {

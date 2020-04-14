@@ -86,7 +86,7 @@ export const EnrollmentInstructions: React.FunctionComponent<Props> = ({ selecte
           steps={[
             {
               title: i18n.translate('xpack.ingestManager.agentEnrollment.stepSetupAgents', {
-                defaultMessage: 'Setup Beats agent',
+                defaultMessage: 'Setup Elastic agent',
               }),
               children: (
                 <ShellEnrollmentInstructions
