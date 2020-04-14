@@ -60,9 +60,9 @@ describe('find_statuses', () => {
   describe('request validation', () => {
     test('disallows singular id query param', async () => {
       const request = requestMock.create({
-        method: 'get',
+        method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
-        query: { id: ['someId'] },
+        body: { id: ['someId'] },
       });
       const result = server.validate(request);
 
