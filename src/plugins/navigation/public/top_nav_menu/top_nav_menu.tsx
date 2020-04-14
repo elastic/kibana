@@ -21,6 +21,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import classNames from 'classnames';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { StatefulSearchBarProps, DataPublicPluginStart } from '../../../data/public';
@@ -29,7 +30,7 @@ export type TopNavMenuProps = StatefulSearchBarProps & {
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
   data?: DataPublicPluginStart;
-  noPadding?: boolean;
+  className?: string;
 };
 
 /*
@@ -66,7 +67,7 @@ export function TopNavMenu(props: TopNavMenuProps) {
   }
 
   function renderLayout() {
-    const className = props.noPadding ? undefined : 'kbnTopNavMenu';
+    const className = classNames('kbnTopNavMenu', props.className);
     return (
       <span className="kbnTopNavMenu__wrapper">
         <EuiFlexGroup
@@ -94,5 +95,4 @@ TopNavMenu.defaultProps = {
   showDatePicker: true,
   showFilterBar: true,
   screenTitle: '',
-  noPadding: false,
 };
