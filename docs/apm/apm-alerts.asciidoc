@@ -34,7 +34,7 @@ From the APM app, navigate to the `opbeans-java` service and select
 
 `Transaction duration | opbeans-java` is automatically set as the name of the alert,
 and `apm` and `service.name:opbeans-java` are added as tags.
-Feel free to edit either of these defaults.
+It's fine to change the name of the alert, but do not edit the tags.
 
 Based on the alert criteria, define the following alert details:
 
@@ -69,7 +69,7 @@ From the APM app, navigate to the `opbeans-python` service and select
 
 `Error rate | opbeans-python` is automatically set as the name of the alert,
 and `apm` and `service.name:opbeans-python` are added as tags.
-Feel free to edit either of these defaults.
+It's fine to change the name of the alert, but do not edit the tags.
 
 Based on the alert criteria, define the following alert details:
 
