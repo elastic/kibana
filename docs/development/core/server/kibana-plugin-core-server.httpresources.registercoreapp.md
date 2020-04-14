@@ -4,6 +4,8 @@
 
 ## HttpResources.registerCoreApp property
 
+To register a route handler rendering HTML bootstrapping Kibana application.
+
 <b>Signature:</b>
 
 ```typescript

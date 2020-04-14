@@ -4,6 +4,8 @@
 
 ## HttpResourcesServiceToolkit.renderAnonymousCoreApp property
 
+To respond with HTML page bootstrapping Kibana application without retrieving user-specific information.
+
 <b>Signature:</b>
 
 ```typescript

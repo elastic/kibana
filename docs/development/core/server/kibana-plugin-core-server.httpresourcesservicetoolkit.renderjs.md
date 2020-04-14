@@ -4,6 +4,8 @@
 
 ## HttpResourcesServiceToolkit.renderJs property
 
+To respond with a custom JS script file.
+
 <b>Signature:</b>
 
 ```typescript

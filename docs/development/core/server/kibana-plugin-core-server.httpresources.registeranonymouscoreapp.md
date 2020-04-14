@@ -4,6 +4,8 @@
 
 ## HttpResources.registerAnonymousCoreApp property
 
+To register a route handler rendering HTML bootstrapping Kibana application without retrieving user-specific information.
+
 <b>Signature:</b>
 
 ```typescript

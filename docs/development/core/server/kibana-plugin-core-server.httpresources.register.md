@@ -4,6 +4,8 @@
 
 ## HttpResources.register property
 
+To register a route handler executing passed function to form response.
+
 <b>Signature:</b>
 
 ```typescript

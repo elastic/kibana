@@ -865,11 +865,8 @@ export type Headers = {
 
 // @public
 export interface HttpResources {
-    // (undocumented)
     register: <P, Q, B>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B>) => void;
-    // (undocumented)
     registerAnonymousCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
-    // (undocumented)
     registerCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
 }
 
@@ -886,13 +883,9 @@ export type HttpResourcesResponseOptions = HttpResponseOptions;
 
 // @public
 export interface HttpResourcesServiceToolkit {
-    // (undocumented)
     renderAnonymousCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
-    // (undocumented)
     renderCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
-    // (undocumented)
     renderHtml: (options: HttpResourcesResponseOptions) => IKibanaResponse;
-    // (undocumented)
     renderJs: (options: HttpResourcesResponseOptions) => IKibanaResponse;
 }
 

@@ -4,6 +4,8 @@
 
 ## HttpResourcesServiceToolkit.renderHtml property
 
+To respond with a custom HTML page.
+
 <b>Signature:</b>
 
 ```typescript

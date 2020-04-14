@@ -4,10 +4,15 @@
 
 ## HttpResourcesRenderOptions.headers property
 
-HTTP Headers with additional information about response
+HTTP Headers with additional information about response.
 
 <b>Signature:</b>
 
 ```typescript
 headers?: ResponseHeaders;
 ```
+
+## Remarks
+
+All HTML pages are already pre-configured with `content-security-policy` header that cannot be overridden.
+

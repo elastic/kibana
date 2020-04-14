@@ -4,6 +4,8 @@
 
 ## HttpResourcesServiceToolkit.renderCoreApp property
 
+To respond with HTML page bootstrapping Kibana application.
+
 <b>Signature:</b>
 
 ```typescript
