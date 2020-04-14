@@ -7,4 +7,7 @@
 import { combineReducers } from 'redux';
 import { ImmutableCombineReducers } from '../types';
 
+/**
+ * Works the same as `combineReducers` from `redux`, but uses the `ImmutableCombineReducers` type.
+ */
 export const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
