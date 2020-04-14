@@ -8,6 +8,6 @@
 
 ```typescript
 actions: {
-        createFiltersFromEvent: typeof createFiltersFromEvent;
+        createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
     };
 ```
