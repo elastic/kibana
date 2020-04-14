@@ -80,7 +80,7 @@ describe('useGetActionLicense', () => {
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
-        ...initialData,
+        actionLicense: null,
         isLoading: false,
         isError: true,
       });

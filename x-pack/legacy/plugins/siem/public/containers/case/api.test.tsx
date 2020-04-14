@@ -36,6 +36,7 @@ import {
   caseUserActions,
   pushedCase,
   pushSnake,
+  reporters,
   respReporters,
   serviceConnector,
   casePushParams,
@@ -45,6 +46,7 @@ import {
 } from './mock';
 import { CASES_URL } from './constants';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
+import * as i18n from './translations';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -57,7 +59,7 @@ describe('Case Configuration API', () => {
   describe('deleteCases', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue('true');
+      fetchMock.mockResolvedValue('');
     });
     const data = ['1', '2'];
 
@@ -72,7 +74,7 @@ describe('Case Configuration API', () => {
 
     test('happy path', async () => {
       const resp = await deleteCases(data, abortCtrl.signal);
-      expect(resp).toEqual('true');
+      expect(resp).toEqual('');
     });
   });
   describe('getActionLicense', () => {
@@ -132,6 +134,29 @@ describe('Case Configuration API', () => {
           reporters: [],
           tags: [],
           status: 'open',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+    test('correctly applies filters', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          reporters: [...respReporters, { username: null, full_name: null, email: null }],
+          tags,
+          status: '',
+          search: 'hello',
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          reporters,
+          tags,
+          search: 'hello',
         },
         signal: abortCtrl.signal,
       });
@@ -397,6 +422,42 @@ describe('Case Configuration API', () => {
     test('happy path', async () => {
       const resp = await pushToService(connectorId, casePushParams, abortCtrl.signal);
       expect(resp).toEqual(serviceConnector);
+    });
+
+    test('unhappy path - serviceMessage', async () => {
+      const theError = 'the error';
+      fetchMock.mockResolvedValue({
+        ...actionTypeExecutorResult,
+        status: 'error',
+        serviceMessage: theError,
+        message: 'not it',
+      });
+      await expect(
+        pushToService(connectorId, casePushParams, abortCtrl.signal)
+      ).rejects.toMatchObject({ message: theError });
+    });
+
+    test('unhappy path - message', async () => {
+      const theError = 'the error';
+      fetchMock.mockResolvedValue({
+        ...actionTypeExecutorResult,
+        status: 'error',
+        message: theError,
+      });
+      await expect(
+        pushToService(connectorId, casePushParams, abortCtrl.signal)
+      ).rejects.toMatchObject({ message: theError });
+    });
+
+    test('unhappy path - no message', async () => {
+      const theError = i18n.ERROR_PUSH_TO_SERVICE;
+      fetchMock.mockResolvedValue({
+        ...actionTypeExecutorResult,
+        status: 'error',
+      });
+      await expect(
+        pushToService(connectorId, casePushParams, abortCtrl.signal)
+      ).rejects.toMatchObject({ message: theError });
     });
   });
 });

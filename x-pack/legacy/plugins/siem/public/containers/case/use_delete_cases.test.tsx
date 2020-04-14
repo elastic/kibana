@@ -12,6 +12,8 @@ jest.mock('./api');
 
 describe('useDeleteCases', () => {
   const abortCtrl = new AbortController();
+  const deleteObj = [{ id: '1' }, { id: '2' }, { id: '3' }];
+  const deleteArr = ['1', '2', '3'];
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
@@ -39,9 +41,9 @@ describe('useDeleteCases', () => {
       );
       await waitForNextUpdate();
 
-      result.current.handleOnDeleteConfirm([{ id: '1' }, { id: '2' }, { id: '3' }]);
+      result.current.handleOnDeleteConfirm(deleteObj);
       await waitForNextUpdate();
-      expect(spyOnDeleteCases).toBeCalledWith(['1', '2', '3'], abortCtrl.signal);
+      expect(spyOnDeleteCases).toBeCalledWith(deleteArr, abortCtrl.signal);
     });
   });
 
@@ -52,7 +54,7 @@ describe('useDeleteCases', () => {
       );
       await waitForNextUpdate();
       result.current.handleToggleModal();
-      result.current.handleOnDeleteConfirm([{ id: '1' }, { id: '2' }, { id: '3' }]);
+      result.current.handleOnDeleteConfirm(deleteObj);
       await waitForNextUpdate();
       expect(result.current).toEqual({
         isDisplayConfirmDeleteModal: false,
@@ -73,7 +75,7 @@ describe('useDeleteCases', () => {
       );
       await waitForNextUpdate();
       result.current.handleToggleModal();
-      result.current.handleOnDeleteConfirm([{ id: '1' }, { id: '2' }, { id: '3' }]);
+      result.current.handleOnDeleteConfirm(deleteObj);
       await waitForNextUpdate();
       expect(result.current.isDeleted).toBeTruthy();
       result.current.handleToggleModal();
@@ -89,7 +91,7 @@ describe('useDeleteCases', () => {
       );
       await waitForNextUpdate();
       result.current.handleToggleModal();
-      result.current.handleOnDeleteConfirm([{ id: '1' }, { id: '2' }, { id: '3' }]);
+      result.current.handleOnDeleteConfirm(deleteObj);
       expect(result.current.isLoading).toBe(true);
     });
   });
@@ -106,7 +108,7 @@ describe('useDeleteCases', () => {
       );
       await waitForNextUpdate();
       result.current.handleToggleModal();
-      result.current.handleOnDeleteConfirm([{ id: '1' }, { id: '2' }, { id: '3' }]);
+      result.current.handleOnDeleteConfirm(deleteObj);
 
       expect(result.current).toEqual({
         isDisplayConfirmDeleteModal: false,
