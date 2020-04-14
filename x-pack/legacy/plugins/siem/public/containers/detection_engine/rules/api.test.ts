@@ -501,9 +501,7 @@ describe('Detections Rules API', () => {
     test('check parameter url, query', async () => {
       await getRuleStatusById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find_statuses', {
-        body: `{
-          ids: ["mySuperRuleId"],
-        }`,
+        body: '{"ids":["mySuperRuleId"]}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
