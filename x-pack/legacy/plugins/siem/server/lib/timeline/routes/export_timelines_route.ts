@@ -15,21 +15,16 @@ import { getExportTimelineByObjectIds } from './utils/export_timelines';
 import {
   exportTimelinesQuerySchema,
   exportTimelinesRequestBodySchema,
-  buildRouteValidation,
 } from './schemas/export_timelines_schema';
-import { ExportTimelinesQuery, ExportTimelinesRequestBody } from '../types';
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 
 export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['config']) => {
   router.post(
     {
       path: TIMELINE_EXPORT_URL,
       validate: {
-        query: buildRouteValidation<ExportTimelinesQuery, ExportTimelinesQuery, unknown>(
-          exportTimelinesQuerySchema
-        ),
-        body: buildRouteValidation<ExportTimelinesRequestBody, ExportTimelinesRequestBody, unknown>(
-          exportTimelinesRequestBodySchema
-        ),
+        query: buildRouteValidation(exportTimelinesQuerySchema),
+        body: buildRouteValidation(exportTimelinesRequestBodySchema),
       },
       options: {
         tags: ['access:siem'],

@@ -4,16 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { failure } from 'io-ts/lib/PathReporter';
-
-import {
-  RouteValidationFunction,
-  RouteValidationResultFactory,
-} from '../../../../../../../../../src/core/server';
-import { RequestValidationResult } from '../../types';
 
 const ids = rt.array(rt.string);
 export const exportTimelinesSchema = rt.type({ ids });
@@ -26,19 +17,3 @@ export const exportTimelinesQuerySchema = rt.type({
 export const exportTimelinesRequestBodySchema = rt.type({
   ids,
 });
-
-export const decodeOrThrow = <A, O, I>(runtimeType: rt.Type<A, O, I>) => (
-  inputValue: I,
-  validationResult: RouteValidationResultFactory
-) =>
-  pipe(
-    runtimeType.decode(inputValue),
-    fold<rt.Errors, A, RequestValidationResult<A>>(
-      (errors: rt.Errors) => validationResult.badRequest(failure(errors).join('\n')),
-      (validatedInput: A) => validationResult.ok(validatedInput)
-    )
-  );
-
-export const buildRouteValidation = <A, O, I>(
-  schema: rt.Type<A, O, I>
-): RouteValidationFunction<A> => decodeOrThrow(schema);
