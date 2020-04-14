@@ -67,20 +67,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const nameInput = await testSubjects.find('alertNameInput');
       await nameInput.click();
 
-      // test for normal connector
-      await testSubjects.click('.webhook-ActionTypeSelectOption');
-      const webhookBodyInput = await find.byCssSelector('.ace_text-input');
-      await webhookBodyInput.focus();
-      await webhookBodyInput.type('{\\"test\\":1}');
-
-      await testSubjects.click('addAlertActionButton');
-      // pre-configured connector is loaded an displayed correctly
       await testSubjects.click('.slack-ActionTypeSelectOption');
-      expect(await (await find.byCssSelector('#my-slack1')).isDisplayed()).to.be(true);
+      await testSubjects.click('createActionConnectorButton');
+      const slackConnectorName = generateUniqueKey();
+      await testSubjects.setValue('nameInput', slackConnectorName);
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+      const createdConnectorToastTitle = await pageObjects.common.closeToast();
+      expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
       await testSubjects.setValue('slackMessageTextArea', 'test message');
       await testSubjects.click('messageAddVariableButton');
-      const variableMenuButton = await testSubjects.find('variableMenuButton-0');
-      await variableMenuButton.click();
+      await testSubjects.click('variableMenuButton-0');
+
       await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Saved '${alertName}'`);
