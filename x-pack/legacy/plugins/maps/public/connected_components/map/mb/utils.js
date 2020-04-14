@@ -79,7 +79,7 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
 
   const mbLayers = mbMap.getStyle().layers.slice();
   const layerIds = [];
-  mbLayers.map(mbLayer => {
+  mbLayers.forEach(mbLayer => {
     const layer = layerList.find(layer => layer.ownsMbLayerId(mbLayer.id));
     if (layer) {
       layerIds.push(layer.getId());
