@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { MarkdownSimple } from '../../../../../../src/plugins/kibana_react/public';
-import { PLUGIN } from '../../../common/constants';
 
 export class LogstashLicenseService {
   constructor(license, navigateToApp, toasts) {
@@ -38,9 +37,7 @@ export class LogstashLicenseService {
 
   notifyAndRedirect() {
     this.toasts.addDanger({
-      title: (
-        <MarkdownSimple>{this.license.getFeature(`features.${PLUGIN.ID}.message`)}</MarkdownSimple>
-      ),
+      title: <MarkdownSimple>{this.calculated.message}</MarkdownSimple>,
     });
     this.navigateToApp('kibana', '#/management');
   }

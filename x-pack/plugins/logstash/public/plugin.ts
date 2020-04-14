@@ -5,8 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { first, map } from 'rxjs/operators';
+import { once } from 'lodash';
+
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
@@ -27,9 +29,10 @@ import { registerListSection } from './sections/pipeline_list';
 import { SecurityPluginSetup } from '../../security/public';
 
 interface SetupDeps {
-  home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   management: ManagementSetup;
+
+  home?: HomePublicPluginSetup;
   security?: SecurityPluginSetup;
 }
 
@@ -57,26 +60,32 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
       .pipe(first())
       .toPromise()
       .then((license: any) => {
-        if (plugins.home && license.enableLinks) {
-          plugins.home.featureCatalogue.register({
-            id: 'management_logstash',
-            title: i18n.translate('xpack.logstash.homeFeature.logstashPipelinesTitle', {
-              defaultMessage: 'Logstash Pipelines',
-            }),
-            description: i18n.translate('xpack.logstash.homeFeature.logstashPipelinesDescription', {
-              defaultMessage: 'Create, delete, update, and clone data ingestion pipelines.',
-            }),
-            icon: 'pipelineApp',
-            path: '/app/kibana#/management/logstash/pipelines',
-            showOnHomePage: true,
-            category: FeatureCatalogueCategory.ADMIN,
-          });
-        }
-
         if (license.enableLinks) {
           managementApp.enable();
         } else {
           managementApp.disable();
+        }
+
+        if (plugins.home && license.enableLinks) {
+          // Ensure that we don't register the feature more than once
+          once(() => {
+            plugins.home!.featureCatalogue.register({
+              id: 'management_logstash',
+              title: i18n.translate('xpack.logstash.homeFeature.logstashPipelinesTitle', {
+                defaultMessage: 'Logstash Pipelines',
+              }),
+              description: i18n.translate(
+                'xpack.logstash.homeFeature.logstashPipelinesDescription',
+                {
+                  defaultMessage: 'Create, delete, update, and clone data ingestion pipelines.',
+                }
+              ),
+              icon: 'pipelineApp',
+              path: '/app/kibana#/management/logstash/pipelines',
+              showOnHomePage: true,
+              category: FeatureCatalogueCategory.ADMIN,
+            });
+          });
         }
       });
   }
