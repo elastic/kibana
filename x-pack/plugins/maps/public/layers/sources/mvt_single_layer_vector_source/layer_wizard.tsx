@@ -9,7 +9,7 @@ import React from 'react';
 import {
   MVTSingleLayerVectorSourceEditor,
   MVTSingleLayerVectorSourceConfig,
-} from './mvt_single_layer_vector_source';
+} from './mvt_single_layer_vector_source_editor';
 import { MVTSingleLayerVectorSource, sourceTitle } from './mvt_single_layer_vector_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { SOURCE_TYPES } from '../../../../common/constants';
