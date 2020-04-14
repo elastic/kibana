@@ -31,7 +31,7 @@ interface State {
   mvtCanPreview: boolean;
 }
 
-export class MVTVectorSourceEditor extends Component<Props, State> {
+export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
   state = {
     urlTemplate: '',
     layerName: '',

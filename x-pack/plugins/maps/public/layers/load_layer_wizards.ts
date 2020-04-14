@@ -24,7 +24,7 @@ import { kibanaBasemapLayerWizardConfig } from './sources/kibana_tilemap_source'
 import { tmsLayerWizardConfig } from './sources/xyz_tms_source';
 // @ts-ignore
 import { wmsLayerWizardConfig } from './sources/wms_source';
-import { mvtVectorSourceWizardConfig } from './sources/mvt_vector_source';
+import { mvtVectorSourceWizardConfig } from './sources/mvt_single_layer_vector_source';
 // @ts-ignore
 import { getInjectedVarFunc } from '../kibana_services';
 

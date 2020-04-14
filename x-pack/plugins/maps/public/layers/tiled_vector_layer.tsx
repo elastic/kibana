@@ -19,7 +19,7 @@ import {
   VectorSourceRequestMeta,
 } from '../../common/descriptor_types';
 
-export class SingleTiledVectorLayer extends VectorLayer {
+export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
   static createDescriptor(
@@ -27,7 +27,7 @@ export class SingleTiledVectorLayer extends VectorLayer {
     mapColors: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(descriptor, mapColors);
-    layerDescriptor.type = SingleTiledVectorLayer.type;
+    layerDescriptor.type = TiledVectorLayer.type;
 
     if (!layerDescriptor.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors);

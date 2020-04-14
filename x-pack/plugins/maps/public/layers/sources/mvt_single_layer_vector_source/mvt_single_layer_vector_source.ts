@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { ImmutableSourceProperty } from '../source';
-import { SingleTiledVectorLayer } from '../../tiled_vector_layer';
+import { TiledVectorLayer } from '../../tiled_vector_layer';
 import {
   AbstractVectorSource,
   GeoJsonWithMeta,
@@ -40,7 +40,7 @@ export class MVTSingleLayerVectorSource extends AbstractVectorSource
     maxSourceZoom,
   }: TiledSingleLayerVectorSourceDescriptor) {
     return {
-      type: MVTSingleLayerVectorSource.type,
+      type: SOURCE_TYPES.MVT_SINGLE_LAYER,
       id: uuid(),
       urlTemplate,
       layerName,
@@ -67,17 +67,17 @@ export class MVTSingleLayerVectorSource extends AbstractVectorSource
     return [];
   }
 
-  createDefaultLayer(options: LayerDescriptor): SingleTiledVectorLayer {
+  createDefaultLayer(options: LayerDescriptor): TiledVectorLayer {
     const layerDescriptor = {
       sourceDescriptor: this._descriptor,
       ...options,
     };
-    const normalizedLayerDescriptor = SingleTiledVectorLayer.createDescriptor(layerDescriptor, []);
+    const normalizedLayerDescriptor = TiledVectorLayer.createDescriptor(layerDescriptor, []);
     const vectorLayerArguments: VectorLayerArguments = {
       layerDescriptor: normalizedLayerDescriptor,
       source: this,
     };
-    return new SingleTiledVectorLayer(vectorLayerArguments);
+    return new TiledVectorLayer(vectorLayerArguments);
   }
 
   getGeoJsonWithMeta(

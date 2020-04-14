@@ -7,11 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
-  MVTVectorSourceEditor,
+  MVTSingleLayerVectorSourceEditor,
   MVTSingleLayerVectorSourceConfig,
-} from './mvt_vector_source_editor';
+} from './mvt_single_layer_vector_source';
 import { MVTSingleLayerVectorSource, sourceTitle } from './mvt_single_layer_vector_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+import { SOURCE_TYPES } from '../../../../common/constants';
 
 export const mvtVectorSourceWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.mvtVectorSourceWizard', {
@@ -30,12 +31,12 @@ export const mvtVectorSourceWizardConfig: LayerWizard = {
         layerName,
         minSourceZoom,
         maxSourceZoom,
-        type: MVTSingleLayerVectorSource.type,
+        type: SOURCE_TYPES.MVT_SINGLE_LAYER,
       });
       const source = new MVTSingleLayerVectorSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
-    return <MVTVectorSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+    return <MVTSingleLayerVectorSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
   title: sourceTitle,
 };
