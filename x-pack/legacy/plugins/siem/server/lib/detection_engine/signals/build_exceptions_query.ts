@@ -41,8 +41,8 @@ export const getLanguageBooleanOperator = (language: string, value: string) => {
 
 export const operatorBuilder = (operator: ListOperator, language: string): string => {
   return operator === 'excluded'
-    ? `${getLanguageBooleanOperator(language, 'and')} `
-    : `${getLanguageBooleanOperator(language, 'and')} ${getLanguageBooleanOperator(
+    ? ` ${getLanguageBooleanOperator(language, 'and')} `
+    : ` ${getLanguageBooleanOperator(language, 'and')} ${getLanguageBooleanOperator(
         language,
         'not'
       )} `;
@@ -106,15 +106,7 @@ export const buildMatchAll = ({
   }
 };
 
-export const evaluateValues = ({
-  list,
-  language,
-}: {
-  list: List | string;
-  language: string;
-}): string => {
-  if (typeof list === 'string') return list;
-
+export const evaluateValues = ({ list, language }: { list: List; language: string }): string => {
   const { values_operator: operator, values_type: type, field, values } = list;
   switch (type) {
     case 'exists':
@@ -132,35 +124,28 @@ export const buildExceptions = ({
   query,
   lists,
   language,
+  accumulator = [],
 }: {
   query: string;
-  lists: Array<string[] | List[]>;
+  lists: List[];
   language: string;
-}): Array<string | List> => {
-  if (lists.length === 1) {
-    return lists[0];
-  } else {
-    const result: string[] = [];
-    const exceptions = buildExceptions({ lists: lists.slice(1), language, query });
-    let i = 0;
+  accumulator?: string[];
+}): string[] => {
+  return lists.reduce((acc, item) => {
+    const exception: string[] = [query];
+    const { and, ...exceptionDetails } = { ...item };
 
-    while (i < exceptions.length) {
-      for (let j = 0; j < lists[0].length; j++) {
-        const left: string = evaluateValues({ list: lists[0][j], language });
-        const right: string = evaluateValues({
-          list: exceptions[i],
-          language,
-        });
-        const constructedException = left === query ? `(${query} ${right})` : `${left} ${right}`;
+    exception.push(evaluateValues({ list: exceptionDetails, language }));
 
-        result.push(constructedException);
-      }
-
-      i++;
+    if (and && !isEmpty(and)) {
+      and.forEach(i => {
+        exception.push(evaluateValues({ list: i, language }));
+      });
     }
 
-    return result;
-  }
+    acc.push(`(${exception.join('')})`);
+    return acc;
+  }, accumulator);
 };
 
 export const buildQueryExceptions = ({
@@ -173,8 +158,7 @@ export const buildQueryExceptions = ({
   lists?: RuleAlertParams['lists'];
 }): Query[] => {
   if (lists && lists !== null && !isEmpty(lists)) {
-    const flattenedLists = flatten([[query]], lists);
-    const exceptions = buildExceptions({ lists: flattenedLists, language, query });
+    const exceptions = buildExceptions({ lists, language, query });
 
     return [
       {

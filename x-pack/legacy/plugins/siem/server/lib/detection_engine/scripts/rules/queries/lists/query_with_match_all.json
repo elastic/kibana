@@ -7,7 +7,7 @@
   "type": "query",
   "query": "host.name: *",
   "interval": "30s",
-  "language": "lucene",
+  "language": "kuery",
   "lists": [
     {
       "field": "event.module",
