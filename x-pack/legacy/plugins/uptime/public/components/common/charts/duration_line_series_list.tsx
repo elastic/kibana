@@ -21,7 +21,7 @@ export const DurationLineSeriesList = ({ lines }: Props) => (
         // this id is used for the line chart representing the average duration length
         data={line.map(({ x, y }) => [x, microsToMillis(y || null)])}
         id={`loc-avg-${name}`}
-        key={`locline-${name}`}
+        key={`loc-line-${name}`}
         name={name}
         xAccessor={0}
         xScaleType="time"

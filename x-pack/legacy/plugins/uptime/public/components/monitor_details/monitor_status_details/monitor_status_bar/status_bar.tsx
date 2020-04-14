@@ -22,7 +22,7 @@ import { MonitorLocations } from '../../../../../common/runtime_types';
 
 interface MonitorStatusBarProps {
   monitorId: string;
-  monitorStatus: Ping;
+  monitorStatus: Ping | null;
   monitorLocations: MonitorLocations;
 }
 

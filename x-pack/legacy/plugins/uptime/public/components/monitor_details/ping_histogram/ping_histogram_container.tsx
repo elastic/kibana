@@ -11,38 +11,38 @@ import { getPingHistogram } from '../../../state/actions';
 import { selectPingHistogram } from '../../../state/selectors';
 import { useGetUrlParams } from '../../../hooks';
 import { useMonitorId } from '../../../hooks/use_monitor';
-import { withResponsiveWrapper, ResponsiveWrapperProps } from '../../common/higher_order';
+import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../common/higher_order';
 
 interface Props {
   height: string;
 }
 
-export const PingHistogram: React.FC<Props & ResponsiveWrapperProps> = withResponsiveWrapper(
-  ({ height }) => {
-    const {
-      statusFilter,
-      absoluteDateRangeStart,
-      absoluteDateRangeEnd,
-      dateRangeStart: dateStart,
-      dateRangeEnd: dateEnd,
-    } = useGetUrlParams();
+const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
+  const {
+    statusFilter,
+    absoluteDateRangeStart,
+    absoluteDateRangeEnd,
+    dateRangeStart: dateStart,
+    dateRangeEnd: dateEnd,
+  } = useGetUrlParams();
 
-    const dispatch = useDispatch();
-    const monitorId = useMonitorId();
+  const dispatch = useDispatch();
+  const monitorId = useMonitorId();
 
-    const { loading, data, esKuery, lastRefresh } = useSelector(selectPingHistogram);
+  const { loading, data, esKuery, lastRefresh } = useSelector(selectPingHistogram);
 
-    useEffect(() => {
-      dispatch(getPingHistogram({ monitorId, dateStart, dateEnd, statusFilter, filters: esKuery }));
-    }, [dateStart, dateEnd, monitorId, statusFilter, lastRefresh, esKuery, dispatch]);
-    return (
-      <PingHistogramComponent
-        data={data}
-        absoluteStartDate={absoluteDateRangeStart}
-        absoluteEndDate={absoluteDateRangeEnd}
-        height={height}
-        loading={loading}
-      />
-    );
-  }
-);
+  useEffect(() => {
+    dispatch(getPingHistogram({ monitorId, dateStart, dateEnd, statusFilter, filters: esKuery }));
+  }, [dateStart, dateEnd, monitorId, statusFilter, lastRefresh, esKuery, dispatch]);
+  return (
+    <PingHistogramComponent
+      data={data}
+      absoluteStartDate={absoluteDateRangeStart}
+      absoluteEndDate={absoluteDateRangeEnd}
+      height={height}
+      loading={loading}
+    />
+  );
+};
+
+export const PingHistogram = withResponsiveWrapper(Container);

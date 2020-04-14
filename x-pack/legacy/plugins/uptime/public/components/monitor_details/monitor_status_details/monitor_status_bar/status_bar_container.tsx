@@ -11,12 +11,10 @@ import { MonitorStatusBarComponent } from './index';
 import { getMonitorStatusAction } from '../../../../state/actions';
 import { useGetUrlParams } from '../../../../hooks';
 import { UptimeRefreshContext } from '../../../../contexts';
+import { MonitorIdParam } from '../../../../../common/types';
+import { AppState } from '../../../../state';
 
-interface Props {
-  monitorId: string;
-}
-
-export const MonitorStatusBar: React.FC<Props> = ({ monitorId }: Props) => {
+export const MonitorStatusBar: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
@@ -24,7 +22,9 @@ export const MonitorStatusBar: React.FC<Props> = ({ monitorId }: Props) => {
   const dispatch = useDispatch();
 
   const monitorStatus = useSelector(monitorStatusSelector);
-  const monitorLocations = useSelector(state => monitorLocationsSelector(state, monitorId));
+  const monitorLocations = useSelector((state: AppState) =>
+    monitorLocationsSelector(state, monitorId)
+  );
 
   useEffect(() => {
     dispatch(getMonitorStatusAction({ dateStart, dateEnd, monitorId }));
@@ -34,7 +34,7 @@ export const MonitorStatusBar: React.FC<Props> = ({ monitorId }: Props) => {
     <MonitorStatusBarComponent
       monitorId={monitorId}
       monitorStatus={monitorStatus}
-      monitorLocations={monitorLocations}
+      monitorLocations={monitorLocations!}
     />
   );
 };

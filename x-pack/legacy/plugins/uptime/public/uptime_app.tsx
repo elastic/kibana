@@ -23,8 +23,10 @@ import { CommonlyUsedRange } from './components/common/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
-import { UptimeAlertsFlyoutWrapper } from './components/connected';
-import { UptimeAlertsContextProvider } from './components/overview/alerts';
+import {
+  UptimeAlertsContextProvider,
+  UptimeAlertsFlyoutWrapper,
+} from './components/overview/alerts';
 import { kibanaService } from './state/kibana_service';
 
 export interface UptimeAppColors {

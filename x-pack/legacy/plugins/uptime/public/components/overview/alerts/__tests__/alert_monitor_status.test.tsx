@@ -14,8 +14,8 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('alert monitor status component', () => {
   describe('handleAlertFieldNumberChange', () => {
-    let mockSetIsInvalid: jest.Mock<any, any>;
-    let mockSetFieldValue: jest.Mock<any, any>;
+    let mockSetIsInvalid: jest.Mock;
+    let mockSetFieldValue: jest.Mock;
 
     beforeEach(() => {
       mockSetIsInvalid = jest.fn();

@@ -14,9 +14,9 @@ import { apiService } from './utils';
 
 const apiPath = '/api/uptime/dynamic_settings';
 
-type SaveApiRequest = BaseApiRequest & {
+interface SaveApiRequest {
   settings: DynamicSettings;
-};
+}
 
 export const getDynamicSettings = async (): Promise<DynamicSettings> => {
   return await apiService.get(apiPath, undefined, DynamicSettingsType);

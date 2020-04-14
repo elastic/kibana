@@ -44,7 +44,7 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
 export const snapshotDataSelector = ({
   snapshot: { count, loading },
   ui: { lastRefresh, esKuery },
-}: AppState): StoreProps => ({
+}: AppState) => ({
   count,
   lastRefresh,
   loading,

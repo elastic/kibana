@@ -11,24 +11,24 @@ import { monitorLocationsSelector } from '../../../state/selectors';
 import { getMonitorLocationsAction } from '../../../state/actions/monitor';
 import { MonitorStatusDetailsComponent } from './index';
 import { UptimeRefreshContext } from '../../../contexts';
+import { AppState } from '../../../state';
+import { MonitorIdParam } from '../../../../common/types';
 
-interface Props {
-  monitorId: string;
-}
-
-export const MonitorStatusDetails: React.FC<Props> = ({ monitorId }: Props) => {
+export const MonitorStatusDetails: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
 
   const dispatch = useDispatch();
-  const monitorLocations = useSelector(state => monitorLocationsSelector(state, monitorId));
+  const monitorLocations = useSelector((state: AppState) =>
+    monitorLocationsSelector(state, monitorId)
+  );
 
   useEffect(() => {
     dispatch(getMonitorLocationsAction({ dateStart, dateEnd, monitorId }));
   }, [monitorId, dateStart, dateEnd, lastRefresh, dispatch]);
 
   return (
-    <MonitorStatusDetailsComponent monitorId={monitorId} monitorLocations={monitorLocations} />
+    <MonitorStatusDetailsComponent monitorId={monitorId} monitorLocations={monitorLocations!} />
   );
 };
