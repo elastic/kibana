@@ -8,35 +8,21 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
-export function defineCheckPrivilegesRoutes({
+export function defineEnabledApiKeysRoutes({
   router,
   clusterClient,
   authc,
 }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/api_key/privileges',
+      path: '/internal/security/api_key/_enabled',
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const scopedClusterClient = clusterClient.asScoped(request);
+        const apiKeysEnabled = await authc.areAPIKeysEnabled();
 
-        const [
-          {
-            cluster: { manage_security: manageSecurity, manage_api_key: manageApiKey },
-          },
-          areApiKeysEnabled,
-        ] = await Promise.all([
-          scopedClusterClient.callAsCurrentUser('shield.hasPrivileges', {
-            body: { cluster: ['manage_security', 'manage_api_key'] },
-          }),
-          authc.areAPIKeysEnabled(),
-        ]);
-
-        return response.ok({
-          body: { areApiKeysEnabled, isAdmin: manageSecurity || manageApiKey },
-        });
+        return response.ok({ body: { apiKeysEnabled } });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
       }

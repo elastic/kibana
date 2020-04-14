@@ -13,6 +13,7 @@ export default function({ loadTestFile }: FtrProviderContext) {
     // Updates here should be mirrored in `./index.js` if tests
     // should also run under a trial/platinum license.
 
+    loadTestFile(require.resolve('./api_keys'));
     loadTestFile(require.resolve('./basic_login'));
     loadTestFile(require.resolve('./builtin_es_privileges'));
     loadTestFile(require.resolve('./change_password'));

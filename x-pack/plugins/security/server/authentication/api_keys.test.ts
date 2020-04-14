@@ -40,6 +40,105 @@ describe('API Keys', () => {
     });
   });
 
+  describe('areAPIKeysEnabled()', () => {
+    it('returns false when security feature is disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      const result = await apiKeys.areAPIKeysEnabled();
+      expect(result).toEqual(false);
+      expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
+      expect(mockScopedClusterClient.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockClusterClient.callAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('returns false when the exception metadata indicates api keys are disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      const error = new Error();
+      (error as any).response = JSON.stringify({
+        error: {
+          ['disabled.feature']: 'api_keys',
+        },
+      });
+      mockClusterClient.callAsInternalUser.mockRejectedValue(error);
+      const result = await apiKeys.areAPIKeysEnabled();
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(false);
+    });
+
+    it('returns true when the operation completes without error', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.callAsInternalUser.mockResolvedValue({});
+      const result = await apiKeys.areAPIKeysEnabled();
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(true);
+    });
+
+    it('throws the original error when exception metadata does not indicate that api keys are disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      const error = new Error();
+      (error as any).response = JSON.stringify({
+        error: {
+          ['disabled.feature']: 'something_else',
+        },
+      });
+
+      mockClusterClient.callAsInternalUser.mockRejectedValue(error);
+      expect(apiKeys.areAPIKeysEnabled()).rejects.toThrowError(error);
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws the original error when exception metadata cannot be parsed', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      const error = new Error();
+      (error as any).response = '{ a string of invalid JSON';
+
+      mockClusterClient.callAsInternalUser.mockRejectedValue(error);
+      expect(apiKeys.areAPIKeysEnabled()).rejects.toThrowError(error);
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws the original error when exception contains no metadatat', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      const error = new Error();
+
+      mockClusterClient.callAsInternalUser.mockRejectedValue(error);
+      expect(apiKeys.areAPIKeysEnabled()).rejects.toThrowError(error);
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls callCluster with proper parameters', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.callAsInternalUser.mockResolvedValueOnce({});
+
+      const result = await apiKeys.areAPIKeysEnabled();
+      expect(result).toEqual(true);
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.invalidateAPIKey', {
+        body: {
+          id: expect.stringMatching(/^kibana-api-key-service-test-.*/),
+        },
+      });
+    });
+
+    it('generates a unique bogus key id for each call', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.callAsInternalUser.mockResolvedValue({});
+
+      await Promise.all([
+        apiKeys.areAPIKeysEnabled(),
+        apiKeys.areAPIKeysEnabled(),
+        apiKeys.areAPIKeysEnabled(),
+      ]);
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(3);
+
+      const calls = mockClusterClient.callAsInternalUser.mock.calls.map(
+        ([, payload]) => payload?.body?.id
+      );
+      expect(calls).toHaveLength(3);
+      calls.forEach(call => expect(call).toMatch(/^kibana-api-key-service-test-.*/));
+      expect(new Set(calls).size).toEqual(3);
+    });
+  });
+
   describe('create()', () => {
     it('returns null when security feature is disabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
