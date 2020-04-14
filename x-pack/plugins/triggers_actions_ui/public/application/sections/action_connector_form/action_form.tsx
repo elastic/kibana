@@ -402,6 +402,7 @@ export const ActionForm = ({
               <EuiButton
                 color="primary"
                 fill
+                size="s"
                 data-test-subj="createActionConnectorButton"
                 onClick={() => {
                   setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
@@ -527,7 +528,7 @@ export const ActionForm = ({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
-                iconType="plusInCircle"
+                size="s"
                 data-test-subj="addAlertActionButton"
                 onClick={() => setIsAddActionPanelOpen(true)}
               >
@@ -574,7 +575,7 @@ export const ActionForm = ({
             )}
           </EuiFlexGroup>
           <EuiSpacer />
-          <EuiFlexGroup gutterSize="s" wrap>
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" wrap>
             {isLoadingActionTypes ? (
               <SectionLoading>
                 <FormattedMessage

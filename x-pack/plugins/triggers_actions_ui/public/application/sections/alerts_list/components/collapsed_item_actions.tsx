@@ -13,6 +13,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiSwitch,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import { AlertTableItem } from '../../../../types';
@@ -64,6 +65,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       ownFocus
+      panelPaddingSize="s"
       data-test-subj="collapsedItemActions"
     >
       <EuiContextMenuPanel>
@@ -71,6 +73,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           <EuiSwitch
             name="enable"
             disabled={!canSave}
+            compressed
             checked={item.enabled}
             data-test-subj="enableSwitch"
             onChange={async () => {
@@ -94,6 +97,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             name="mute"
             checked={item.muteAll}
             disabled={!(canSave && item.enabled)}
+            compressed
             data-test-subj="muteSwitch"
             onChange={async () => {
               if (item.muteAll) {
@@ -111,10 +115,10 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             }
           />
         </EuiContextMenuItem>
+        <EuiHorizontalRule margin="none" />
         <EuiContextMenuItem
           disabled={!canDelete}
           icon="trash"
-          color="danger"
           data-test-subj="deleteAlert"
           onClick={() => setAlertsToDelete([item.id])}
           className="actCollapsedItemActions__delete"

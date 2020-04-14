@@ -16,6 +16,7 @@ export const BulkOperationPopover: React.FunctionComponent = ({ children }) => {
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       data-test-subj="bulkAction"
+      panelPaddingSize="s"
       button={
         <EuiButton
           iconType="arrowDown"
