@@ -67,7 +67,7 @@ export class EndpointPlugin
     });
     const endpointContext = {
       indexPatternRetriever: new IngestIndexPatternRetriever(
-        plugins.ingestManager.indexPatternService,
+        plugins.ingestManager.esIndexPatternService,
         this.initializerContext.logger
       ),
       logFactory: this.initializerContext.logger,

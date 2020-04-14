@@ -21,8 +21,8 @@ export const createMockMetadataIPRetriever = () => {
 
 export const createMockIndexPatternService = (indexPattern: string) => {
   return {
-    indexPatternService: {
-      get: jest.fn().mockResolvedValue(indexPattern),
+    esIndexPatternService: {
+      getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },
   };
 };

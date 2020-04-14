@@ -218,7 +218,7 @@ export type PackageInfo = Installable<
 
 export interface InstalledReferences extends SavedObjectAttributes {
   references: AssetReference[];
-  patterns: Record<string, string>;
+  es_index_patterns: Record<string, string>;
 }
 
 export interface Installation extends SavedObjectAttributes {

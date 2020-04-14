@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger, LoggerFactory, RequestHandlerContext } from 'kibana/server';
-import { IndexPatternService } from '../../ingest_manager/server';
+import { ESIndexPatternService } from '../../ingest_manager/server';
 import { EndpointAppConstants } from '../common/types';
 
 export interface IndexPatternRetriever {
@@ -17,7 +17,7 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
   private static endpointPackageName = 'endpoint';
   private static metadataDataset = 'metadata';
   private readonly log: Logger;
-  constructor(private readonly service: IndexPatternService, loggerFactory: LoggerFactory) {
+  constructor(private readonly service: ESIndexPatternService, loggerFactory: LoggerFactory) {
     this.log = loggerFactory.get('index-pattern-retriever');
   }
 
@@ -30,7 +30,7 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
   }
 
   async getIndexPattern(ctx: RequestHandlerContext, datasetPath: string) {
-    const pattern = await this.service.get(
+    const pattern = await this.service.getESIndexPattern(
       ctx.core.savedObjects.client,
       IngestIndexPatternRetriever.endpointPackageName,
       datasetPath

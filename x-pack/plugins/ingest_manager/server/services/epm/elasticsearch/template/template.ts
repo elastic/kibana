@@ -137,10 +137,10 @@ export function generateTemplateName(dataset: Dataset): string {
 }
 
 /**
- * Returns a map of the dataset path fields to index pattern.
+ * Returns a map of the dataset path fields to elasticsearch index pattern.
  * @param datasets an array of Dataset objects
  */
-export function generateIndexPatterns(datasets: Dataset[] | undefined): Record<string, string> {
+export function generateESIndexPatterns(datasets: Dataset[] | undefined): Record<string, string> {
   if (!datasets) {
     return {};
   }

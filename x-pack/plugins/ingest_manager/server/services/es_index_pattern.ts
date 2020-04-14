@@ -6,21 +6,21 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { getInstallation } from './epm/packages/get';
 
-export interface IndexPatternService {
-  get(
+export interface ESIndexPatternService {
+  getESIndexPattern(
     savedObjectsClient: SavedObjectsClientContract,
     pkgName: string,
     datasetPath: string
   ): Promise<string | undefined>;
 }
 
-export class IndexPatternSavedObjectService implements IndexPatternService {
-  public async get(
+export class ESIndexPatternSavedObjectService implements ESIndexPatternService {
+  public async getESIndexPattern(
     savedObjectsClient: SavedObjectsClientContract,
     pkgName: string,
     datasetPath: string
   ): Promise<string | undefined> {
     const installation = await getInstallation({ savedObjectsClient, pkgName });
-    return installation?.installed.patterns[datasetPath];
+    return installation?.installed.es_index_patterns[datasetPath];
   }
 }

@@ -158,7 +158,7 @@ export const savedObjectMappings = {
               type: { type: 'keyword' },
             },
           },
-          patterns: {
+          es_index_patterns: {
             dynamic: false,
             type: 'object',
           },
