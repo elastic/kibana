@@ -23,4 +23,3 @@ import { DataPublicPluginStart } from '../../data/public';
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('data.fieldFormats');
-

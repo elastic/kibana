@@ -22,7 +22,7 @@ import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { VisOptionsProps } from '../../../vis_default_editor/public';
 import { ValidatedDualRange } from '../../../kibana_react/public';
-import { SelectOption, SwitchOption } from '../../../charts/public/static/components';
+import { SelectOption, SwitchOption } from '../../../charts/public';
 import { TagCloudVisParams } from '../types';
 
 function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps<TagCloudVisParams>) {
