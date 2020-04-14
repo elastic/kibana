@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { ICustomClusterClient, IRouter } from 'src/core/server';
+import { IRouter } from 'src/core/server';
 
 import { INDEX_NAMES } from '../../../common/constants';
 import { Pipeline } from '../../models/pipeline';
-import { licenseCheckerRouteHandlerWrapper } from '../../../../licensing/server';
+import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 import { checkLicense } from '../../lib/check_license';
 
-export function registerPipelineLoadRoute(router: IRouter, esClient: ICustomClusterClient) {
+export function registerPipelineLoadRoute(router: IRouter) {
   router.get(
     {
       path: '/api/logstash/pipeline/{id}',
@@ -21,10 +21,10 @@ export function registerPipelineLoadRoute(router: IRouter, esClient: ICustomClus
         }),
       },
     },
-    licenseCheckerRouteHandlerWrapper(
+    wrapRouteWithLicenseCheck(
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
-        const client = esClient.asScoped(request);
+        const client = context.logstash!.esClient;
 
         const result = await client.callAsCurrentUser('get', {
           index: INDEX_NAMES.PIPELINES,

@@ -18,7 +18,7 @@ export type CheckLicense = (
   license: ILicense
 ) => { valid: false; message: string } | { valid: true; message: null };
 
-export function licenseCheckerRouteHandlerWrapper<P, Q, B>(
+export function wrapRouteWithLicenseCheck<P, Q, B>(
   checkLicense: CheckLicense,
   handler: RequestHandler<P, Q, B>
 ): RequestHandler<P, Q, B> {

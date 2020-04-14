@@ -5,19 +5,15 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { ICustomClusterClient, IRouter } from 'src/core/server';
+import { IRouter } from 'src/core/server';
 
 import { INDEX_NAMES } from '../../../common/constants';
 import { Pipeline } from '../../models/pipeline';
-import { licenseCheckerRouteHandlerWrapper } from '../../../../licensing/server';
+import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 import { SecurityPluginSetup } from '../../../../security/server';
 import { checkLicense } from '../../lib/check_license';
 
-export function registerPipelineSaveRoute(
-  router: IRouter,
-  esClient: ICustomClusterClient,
-  security?: SecurityPluginSetup
-) {
+export function registerPipelineSaveRoute(router: IRouter, security?: SecurityPluginSetup) {
   router.put(
     {
       path: '/api/logstash/pipeline/{id}',
@@ -34,7 +30,7 @@ export function registerPipelineSaveRoute(
         }),
       },
     },
-    licenseCheckerRouteHandlerWrapper(
+    wrapRouteWithLicenseCheck(
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
         try {
@@ -44,7 +40,7 @@ export function registerPipelineSaveRoute(
             username = user?.username;
           }
 
-          const client = esClient.asScoped(request);
+          const client = context.logstash!.esClient;
           const pipeline = Pipeline.fromDownstreamJSON(request.body, request.params.id, username);
 
           await client.callAsCurrentUser('index', {

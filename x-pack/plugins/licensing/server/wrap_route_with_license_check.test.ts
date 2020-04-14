@@ -6,10 +6,7 @@
 
 import { httpServerMock } from 'src/core/server/mocks';
 
-import {
-  licenseCheckerRouteHandlerWrapper,
-  CheckLicense,
-} from './license_checker_route_handler_wrapper';
+import { wrapRouteWithLicenseCheck, CheckLicense } from './wrap_route_with_license_check';
 
 const context = {
   licensing: {
@@ -18,11 +15,11 @@ const context = {
 } as any;
 const request = httpServerMock.createKibanaRequest();
 
-describe('licenseCheckerRouteHandlerWrapper', () => {
+describe('wrapRouteWithLicenseCheck', () => {
   it('calls route handler if checkLicense returns "valid": true', async () => {
     const checkLicense: CheckLicense = () => ({ valid: true, message: null });
     const routeHandler = jest.fn();
-    const wrapper = licenseCheckerRouteHandlerWrapper(checkLicense, routeHandler);
+    const wrapper = wrapRouteWithLicenseCheck(checkLicense, routeHandler);
     const response = httpServerMock.createResponseFactory();
 
     await wrapper(context, request, response);
@@ -34,7 +31,7 @@ describe('licenseCheckerRouteHandlerWrapper', () => {
   it('does not call route handler if checkLicense returns "valid": false', async () => {
     const checkLicense: CheckLicense = () => ({ valid: false, message: 'reason' });
     const routeHandler = jest.fn();
-    const wrapper = licenseCheckerRouteHandlerWrapper(checkLicense, routeHandler);
+    const wrapper = wrapRouteWithLicenseCheck(checkLicense, routeHandler);
     const response = httpServerMock.createResponseFactory();
 
     await wrapper(context, request, response);
@@ -49,11 +46,26 @@ describe('licenseCheckerRouteHandlerWrapper', () => {
     const routeHandler = () => {
       throw new Error('reason');
     };
-    const wrapper = licenseCheckerRouteHandlerWrapper(checkLicense, routeHandler);
+    const wrapper = wrapRouteWithLicenseCheck(checkLicense, routeHandler);
     const response = httpServerMock.createResponseFactory();
 
     await expect(wrapper(context, request, response)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"reason"`
     );
+  });
+
+  it('allows an exception to bubble up if "checkLicense" throws', async () => {
+    const checkLicense: CheckLicense = () => {
+      throw new Error('reason');
+    };
+    const routeHandler = jest.fn();
+    const wrapper = wrapRouteWithLicenseCheck(checkLicense, routeHandler);
+    const response = httpServerMock.createResponseFactory();
+
+    await expect(wrapper(context, request, response)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"reason"`
+    );
+
+    expect(routeHandler).toHaveBeenCalledTimes(0);
   });
 });

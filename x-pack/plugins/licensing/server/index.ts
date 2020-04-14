@@ -12,7 +12,4 @@ export const plugin = (context: PluginInitializerContext) => new LicensingPlugin
 export * from '../common/types';
 export * from './types';
 export { config } from './licensing_config';
-export {
-  CheckLicense,
-  licenseCheckerRouteHandlerWrapper,
-} from './license_checker_route_handler_wrapper';
+export { CheckLicense, wrapRouteWithLicenseCheck } from './wrap_route_with_license_check';

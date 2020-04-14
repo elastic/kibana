@@ -3,22 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ICustomClusterClient, IRouter } from 'src/core/server';
-import { licenseCheckerRouteHandlerWrapper } from '../../../../licensing/server';
+import { IRouter } from 'src/core/server';
+import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
 import { INDEX_NAMES } from '../../../common/constants';
 import { checkLicense } from '../../lib/check_license';
 
-export function registerUpgradeRoute(router: IRouter, esClient: ICustomClusterClient) {
+export function registerUpgradeRoute(router: IRouter) {
   router.post(
     {
       path: '/api/logstash/upgrade',
       validate: false,
     },
-    licenseCheckerRouteHandlerWrapper(
+    wrapRouteWithLicenseCheck(
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
-        const client = esClient.asScoped(request);
+        const client = context.logstash!.esClient;
 
         const doesIndexExist = await client.callAsCurrentUser('indices.exists', {
           index: INDEX_NAMES.PIPELINES,

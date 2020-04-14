@@ -5,6 +5,7 @@
  */
 import {
   CoreSetup,
+  CoreStart,
   ICustomClusterClient,
   Logger,
   Plugin,
@@ -23,18 +24,25 @@ interface SetupDeps {
 export class LogstashPlugin implements Plugin {
   private readonly logger: Logger;
   private esClient?: ICustomClusterClient;
+  private coreSetup?: CoreSetup;
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
   }
 
   setup(core: CoreSetup, deps: SetupDeps) {
     this.logger.debug('Setting up Logstash plugin');
-    const esClient = core.elasticsearch.createClient('logstash');
 
-    registerRoutes(core.http.createRouter(), esClient, deps.security);
+    this.coreSetup = core;
+    registerRoutes(core.http.createRouter(), deps.security);
   }
 
-  start() {}
+  start(core: CoreStart) {
+    const esClient = core.elasticsearch.legacy.createClient('logstash');
+
+    this.coreSetup!.http.registerRouteHandlerContext('logstash', async (context, request) => {
+      return { esClient: esClient.asScoped(request) };
+    });
+  }
   stop() {
     if (this.esClient) {
       this.esClient.close();

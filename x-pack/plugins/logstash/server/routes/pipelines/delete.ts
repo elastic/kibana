@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { APICaller, ICustomClusterClient, IRouter } from 'src/core/server';
-import { licenseCheckerRouteHandlerWrapper } from '../../../../licensing/server';
+import { APICaller, IRouter } from 'src/core/server';
+import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
 import { INDEX_NAMES } from '../../../common/constants';
 import { checkLicense } from '../../lib/check_license';
@@ -31,7 +31,7 @@ async function deletePipelines(callWithRequest: APICaller, pipelineIds: string[]
   };
 }
 
-export function registerPipelinesDeleteRoute(router: IRouter, esClient: ICustomClusterClient) {
+export function registerPipelinesDeleteRoute(router: IRouter) {
   router.post(
     {
       path: '/api/logstash/pipelines/delete',
@@ -41,10 +41,10 @@ export function registerPipelinesDeleteRoute(router: IRouter, esClient: ICustomC
         }),
       },
     },
-    licenseCheckerRouteHandlerWrapper(
+    wrapRouteWithLicenseCheck(
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
-        const client = esClient.asScoped(request);
+        const client = context.logstash!.esClient;
         const results = await deletePipelines(client.callAsCurrentUser, request.body.pipelineIds);
 
         return response.ok({ body: { results } });

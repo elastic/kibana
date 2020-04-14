@@ -5,8 +5,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { SearchResponse } from 'elasticsearch';
-import { APICaller, ICustomClusterClient, IRouter } from 'src/core/server';
-import { licenseCheckerRouteHandlerWrapper } from '../../../../licensing/server';
+import { APICaller, IRouter } from 'src/core/server';
+import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../common/constants';
 import { PipelineListItem } from '../../models/pipeline_list_item';
@@ -27,17 +27,17 @@ async function fetchPipelines(callWithRequest: APICaller) {
   return fetchAllFromScroll(response, callWithRequest);
 }
 
-export function registerPipelinesListRoute(router: IRouter, esClient: ICustomClusterClient) {
+export function registerPipelinesListRoute(router: IRouter) {
   router.get(
     {
       path: '/api/logstash/pipelines',
       validate: false,
     },
-    licenseCheckerRouteHandlerWrapper(
+    wrapRouteWithLicenseCheck(
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
         try {
-          const client = esClient.asScoped(request);
+          const client = context.logstash!.esClient;
           const pipelinesHits = await fetchPipelines(client.callAsCurrentUser);
 
           const pipelines = pipelinesHits.map(pipeline => {

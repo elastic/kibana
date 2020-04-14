@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IRouter, ICustomClusterClient } from 'src/core/server';
+import { IRouter } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { registerClusterLoadRoute } from './cluster';
 import {
@@ -14,19 +14,15 @@ import {
 import { registerPipelinesListRoute, registerPipelinesDeleteRoute } from './pipelines';
 import { registerUpgradeRoute } from './upgrade';
 
-export function registerRoutes(
-  router: IRouter,
-  esClient: ICustomClusterClient,
-  security?: SecurityPluginSetup
-) {
-  registerClusterLoadRoute(router, esClient);
+export function registerRoutes(router: IRouter, security?: SecurityPluginSetup) {
+  registerClusterLoadRoute(router);
 
-  registerPipelineDeleteRoute(router, esClient);
-  registerPipelineLoadRoute(router, esClient);
-  registerPipelineSaveRoute(router, esClient, security);
+  registerPipelineDeleteRoute(router);
+  registerPipelineLoadRoute(router);
+  registerPipelineSaveRoute(router, security);
 
-  registerPipelinesListRoute(router, esClient);
-  registerPipelinesDeleteRoute(router, esClient);
+  registerPipelinesListRoute(router);
+  registerPipelinesDeleteRoute(router);
 
-  registerUpgradeRoute(router, esClient);
+  registerUpgradeRoute(router);
 }
