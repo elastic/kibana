@@ -4,7 +4,7 @@
   "false_positives": [
     "A newly installed program or one that runs rarely as part of a monthly or quarterly workflow could trigger this signal."
   ],
-  "from": "now-16m",
+  "from": "now-45m",
   "interval": "15m",
   "machine_learning_job_id": "rare_process_by_host_linux_ecs",
   "name": "Unusual Process For a Linux Host",
@@ -20,5 +20,6 @@
     "ML"
   ],
   "type": "machine_learning",
+  "note": "### Investigating an Unusual Linux Process ###\nSignals from this rule indicate the presence of a Linux process that is rare and unusual for the host it ran on. Here are some possible avenues of investigation:\n- Consider the user as identified by the username field. Is this program part of an expected workflow for the user who ran this program on this host?\n- Examine the history of execution. If this process manifested only very recently, it might be part of a new software package. If it has a consistent cadence - for example if it runs monthly or quarterly - it might be part of a monthly or quarterly business process.\n- Examine the process arguments, title and working directory. These may provide indications as to the source of the program or the nature of the tasks it is performing.",
   "version": 1
 }

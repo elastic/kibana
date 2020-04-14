@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { npStart } from 'ui/new_platform';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import {
   SavedObjectFinderUi,
@@ -13,6 +12,7 @@ import {
 } from '../../../../../../../src/plugins/saved_objects/public/';
 import { ComponentStrings } from '../../../i18n';
 import { CoreStart } from '../../../../../../../src/core/public';
+import { CanvasStartDeps } from '../../plugin';
 
 const { AddEmbeddableFlyout: strings } = ComponentStrings;
 
@@ -22,11 +22,12 @@ export interface Props {
   availableEmbeddables: string[];
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
+  getEmbeddableFactories: CanvasStartDeps['embeddable']['getEmbeddableFactories'];
 }
 
 export class AddEmbeddableFlyout extends React.Component<Props> {
   onAddPanel = (id: string, savedObjectType: string, name: string) => {
-    const embeddableFactories = npStart.plugins.embeddable.getEmbeddableFactories();
+    const embeddableFactories = this.props.getEmbeddableFactories();
 
     // Find the embeddable type from the saved object type
     const found = Array.from(embeddableFactories).find(embeddableFactory => {
@@ -42,7 +43,7 @@ export class AddEmbeddableFlyout extends React.Component<Props> {
   };
 
   render() {
-    const embeddableFactories = npStart.plugins.embeddable.getEmbeddableFactories();
+    const embeddableFactories = this.props.getEmbeddableFactories();
 
     const availableSavedObjects = Array.from(embeddableFactories)
       .filter(factory => {

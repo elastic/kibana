@@ -19,7 +19,7 @@ import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
 
-interface UsePushToService {
+export interface UsePushToService {
   caseId: string;
   caseStatus: string;
   isNew: boolean;
@@ -32,7 +32,7 @@ interface Connector {
   connectorName: string;
 }
 
-interface ReturnUsePushToService {
+export interface ReturnUsePushToService {
   pushButton: JSX.Element;
   pushCallouts: JSX.Element | null;
 }
@@ -122,6 +122,7 @@ export const usePushToService = ({
   const pushToServiceButton = useMemo(
     () => (
       <EuiButton
+        data-test-subj="push-to-service-now"
         fill
         iconType="importAction"
         onClick={handlePushToService}
