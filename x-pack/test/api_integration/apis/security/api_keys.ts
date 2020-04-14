@@ -12,7 +12,7 @@ export default function({ getService }: FtrProviderContext) {
 
   describe('API Keys', () => {
     describe('GET /internal/security/api_key/_enabled', () => {
-      it('should indicate that API Keys are disabled', async () => {
+      it('should indicate that API Keys are enabled', async () => {
         await supertest
           .get('/internal/security/api_key/_enabled')
           .set('kbn-xsrf', 'xxx')
@@ -20,7 +20,7 @@ export default function({ getService }: FtrProviderContext) {
           .expect(200)
           .then((response: Record<string, any>) => {
             const payload = response.body;
-            expect(payload).to.eql({ apiKeysEnabled: false });
+            expect(payload).to.eql({ apiKeysEnabled: true });
           });
       });
     });

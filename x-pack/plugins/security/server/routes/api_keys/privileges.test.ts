@@ -117,7 +117,10 @@ describe('Check API keys privileges', () => {
       callAsInternalUserResponses: [async () => {}],
       asserts: {
         callAsCurrentUserAPIArguments: [
-          ['shield.hasPrivileges', { body: { cluster: ['manage_security', 'manage_api_key'] } }],
+          [
+            'shield.hasPrivileges',
+            { body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] } },
+          ],
         ],
         callAsInternalUserAPIArguments: [
           ['shield.invalidateAPIKey', { body: { id: expect.any(String) } }],
@@ -134,7 +137,7 @@ describe('Check API keys privileges', () => {
         async () => ({
           username: 'elastic',
           has_all_requested: true,
-          cluster: { manage_api_key: true, manage_security: true },
+          cluster: { manage_api_key: true, manage_security: true, manage_own_api_key: false },
           index: {},
           application: {},
         }),
@@ -156,13 +159,16 @@ describe('Check API keys privileges', () => {
       ],
       asserts: {
         callAsCurrentUserAPIArguments: [
-          ['shield.hasPrivileges', { body: { cluster: ['manage_security', 'manage_api_key'] } }],
+          [
+            'shield.hasPrivileges',
+            { body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] } },
+          ],
         ],
         callAsInternalUserAPIArguments: [
           ['shield.invalidateAPIKey', { body: { id: expect.any(String) } }],
         ],
         statusCode: 200,
-        result: { areApiKeysEnabled: true, isAdmin: true },
+        result: { areApiKeysEnabled: true, isAdmin: true, canManage: true },
       },
     });
 
@@ -173,7 +179,7 @@ describe('Check API keys privileges', () => {
           async () => ({
             username: 'elastic',
             has_all_requested: true,
-            cluster: { manage_api_key: true, manage_security: true },
+            cluster: { manage_api_key: true, manage_security: true, manage_own_api_key: true },
             index: {},
             application: {},
           }),
@@ -191,13 +197,16 @@ describe('Check API keys privileges', () => {
         ],
         asserts: {
           callAsCurrentUserAPIArguments: [
-            ['shield.hasPrivileges', { body: { cluster: ['manage_security', 'manage_api_key'] } }],
+            [
+              'shield.hasPrivileges',
+              { body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] } },
+            ],
           ],
           callAsInternalUserAPIArguments: [
             ['shield.invalidateAPIKey', { body: { id: expect.any(String) } }],
           ],
           statusCode: 200,
-          result: { areApiKeysEnabled: false, isAdmin: true },
+          result: { areApiKeysEnabled: false, isAdmin: true, canManage: true },
         },
       }
     );
@@ -207,7 +216,7 @@ describe('Check API keys privileges', () => {
         async () => ({
           username: 'elastic',
           has_all_requested: true,
-          cluster: { manage_api_key: false, manage_security: false },
+          cluster: { manage_api_key: false, manage_security: false, manage_own_api_key: false },
           index: {},
           application: {},
         }),
@@ -215,13 +224,42 @@ describe('Check API keys privileges', () => {
       callAsInternalUserResponses: [async () => ({})],
       asserts: {
         callAsCurrentUserAPIArguments: [
-          ['shield.hasPrivileges', { body: { cluster: ['manage_security', 'manage_api_key'] } }],
+          [
+            'shield.hasPrivileges',
+            { body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] } },
+          ],
         ],
         callAsInternalUserAPIArguments: [
           ['shield.invalidateAPIKey', { body: { id: expect.any(String) } }],
         ],
         statusCode: 200,
-        result: { areApiKeysEnabled: true, isAdmin: false },
+        result: { areApiKeysEnabled: true, isAdmin: false, canManage: false },
+      },
+    });
+
+    getPrivilegesTest('returns canManage=true when user can manage their own API Keys', {
+      callAsCurrrentUserResponses: [
+        async () => ({
+          username: 'elastic',
+          has_all_requested: true,
+          cluster: { manage_api_key: false, manage_security: false, manage_own_api_key: true },
+          index: {},
+          application: {},
+        }),
+      ],
+      callAsInternalUserResponses: [async () => ({})],
+      asserts: {
+        callAsCurrentUserAPIArguments: [
+          [
+            'shield.hasPrivileges',
+            { body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] } },
+          ],
+        ],
+        callAsInternalUserAPIArguments: [
+          ['shield.invalidateAPIKey', { body: { id: expect.any(String) } }],
+        ],
+        statusCode: 200,
+        result: { areApiKeysEnabled: true, isAdmin: false, canManage: true },
       },
     });
   });

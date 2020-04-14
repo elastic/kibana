@@ -48,6 +48,7 @@ describe('APIKeysGridPage', () => {
     apiClientMock.checkPrivileges.mockResolvedValue({
       isAdmin: true,
       areApiKeysEnabled: true,
+      canManage: true,
     });
     apiClientMock.getApiKeys.mockResolvedValue({
       apiKeys: [
@@ -82,6 +83,7 @@ describe('APIKeysGridPage', () => {
   it('renders a callout when API keys are not enabled', async () => {
     apiClientMock.checkPrivileges.mockResolvedValue({
       isAdmin: true,
+      canManage: true,
       areApiKeysEnabled: false,
     });
 
@@ -95,7 +97,11 @@ describe('APIKeysGridPage', () => {
   });
 
   it('renders permission denied if user does not have required permissions', async () => {
-    apiClientMock.checkPrivileges.mockRejectedValue(mock403());
+    apiClientMock.checkPrivileges.mockResolvedValue({
+      canManage: false,
+      isAdmin: false,
+      areApiKeysEnabled: true,
+    });
 
     const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
 
@@ -152,6 +158,7 @@ describe('APIKeysGridPage', () => {
     beforeEach(() => {
       apiClientMock.checkPrivileges.mockResolvedValue({
         isAdmin: false,
+        canManage: true,
         areApiKeysEnabled: true,
       });
 
