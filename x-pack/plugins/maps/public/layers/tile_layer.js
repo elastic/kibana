@@ -11,8 +11,8 @@ import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 export class TileLayer extends AbstractLayer {
   static type = LAYER_TYPE.TILE;
 
-  static createDescriptor(options) {
-    const tileLayerDescriptor = super.createDescriptor(options);
+  static createDescriptor(options, mapColors) {
+    const tileLayerDescriptor = super.createDescriptor(options, mapColors);
     tileLayerDescriptor.type = TileLayer.type;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     return tileLayerDescriptor;
