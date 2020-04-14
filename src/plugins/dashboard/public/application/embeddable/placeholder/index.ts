@@ -17,18 +17,5 @@
  * under the License.
  */
 
-export {
-  ExpandPanelAction,
-  ExpandPanelActionContext,
-  ACTION_EXPAND_PANEL,
-} from './expand_panel_action';
-export {
-  ReplacePanelAction,
-  ReplacePanelActionContext,
-  ACTION_REPLACE_PANEL,
-} from './replace_panel_action';
-export {
-  ClonePanelAction,
-  ClonePanelActionContext,
-  ACTION_CLONE_PANEL,
-} from './clone_panel_action';
+export * from './placeholder_embeddable';
+export * from './placeholder_embeddable_factory';

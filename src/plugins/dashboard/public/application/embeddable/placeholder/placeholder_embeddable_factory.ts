@@ -17,18 +17,29 @@
  * under the License.
  */
 
-export {
-  ExpandPanelAction,
-  ExpandPanelActionContext,
-  ACTION_EXPAND_PANEL,
-} from './expand_panel_action';
-export {
-  ReplacePanelAction,
-  ReplacePanelActionContext,
-  ACTION_REPLACE_PANEL,
-} from './replace_panel_action';
-export {
-  ClonePanelAction,
-  ClonePanelActionContext,
-  ACTION_CLONE_PANEL,
-} from './clone_panel_action';
+import { i18n } from '@kbn/i18n';
+
+import {
+  EmbeddableFactoryDefinition,
+  EmbeddableInput,
+  IContainer,
+} from '../../../embeddable_plugin';
+import { PlaceholderEmbeddable, PLACEHOLDER_EMBEDDABLE } from './placeholder_embeddable';
+
+export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition {
+  public readonly type = PLACEHOLDER_EMBEDDABLE;
+
+  public async isEditable() {
+    return false;
+  }
+
+  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+    return new PlaceholderEmbeddable(initialInput, parent);
+  }
+
+  public getDisplayName() {
+    return i18n.translate('dashboard.placeholder.factory.displayName', {
+      defaultMessage: 'placeholder',
+    });
+  }
+}

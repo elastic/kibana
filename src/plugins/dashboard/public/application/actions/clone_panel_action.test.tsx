@@ -28,7 +28,7 @@ import {
 } from '../../embeddable_plugin_test_samples';
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
-import { DuplicatePanelAction } from '.';
+import { ClonePanelAction } from '.';
 
 // eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
@@ -88,21 +88,21 @@ beforeEach(async () => {
   }
 });
 
-test('Duplicates an embeddable without a saved object ID', async () => {
+test('Clones an embeddable without a saved object ID', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
-  const action = new DuplicatePanelAction(coreStart);
+  const action = new ClonePanelAction(coreStart);
   await action.execute({ embeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount + 1);
 });
 
-test('Duplicates an embeddable with a saved object ID', async () => {
+test('Clones an embeddable with a saved object ID', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
   const panel = dashboard.getInput().panels[embeddable.id];
   panel.savedObjectId = 'holySavedObjectBatman';
-  const action = new DuplicatePanelAction(coreStart);
+  const action = new ClonePanelAction(coreStart);
   await action.execute({ embeddable });
   expect(coreStart.savedObjects.client.get).toHaveBeenCalledTimes(1);
   expect(coreStart.savedObjects.client.find).toHaveBeenCalledTimes(1);
@@ -122,7 +122,7 @@ test('Gets a unique title ', async () => {
     else if (search === '"testSecondTitle"') return { total: 41 };
     else if (search === '"testThirdTitle"') return { total: 90 };
   });
-  const action = new DuplicatePanelAction(coreStart);
+  const action = new ClonePanelAction(coreStart);
   // @ts-ignore
   expect(await action.getUniqueTitle('testFirstTitle', embeddable.type)).toEqual(
     'testFirstTitle (copy)'

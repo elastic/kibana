@@ -22,19 +22,20 @@ import { DashboardPanelState } from '../types';
 import { createPanelState } from './create_panel_state';
 import { EmbeddableInput } from '../../../embeddable_plugin';
 import { CONTACT_CARD_EMBEDDABLE } from '../../../embeddable_plugin_test_samples';
+import { IPanelPlacementArgs } from './dashboard_panel_placement';
 
 interface TestInput extends EmbeddableInput {
   test: string;
 }
-const panels: DashboardPanelState[] = [];
+const panels: { [key: string]: DashboardPanelState } = {};
 
 test('createPanelState adds a new panel state in 0,0 position', () => {
-  const panelState = createPanelState<TestInput>(
+  const panelState = createPanelState<TestInput, IPanelPlacementArgs>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'hi', id: '123' },
     },
-    []
+    panels
   );
   expect(panelState.explicitInput.test).toBe('hi');
   expect(panelState.type).toBe(CONTACT_CARD_EMBEDDABLE);
@@ -44,11 +45,11 @@ test('createPanelState adds a new panel state in 0,0 position', () => {
   expect(panelState.gridData.h).toBe(DEFAULT_PANEL_HEIGHT);
   expect(panelState.gridData.w).toBe(DEFAULT_PANEL_WIDTH);
 
-  panels.push(panelState);
+  panels[panelState.explicitInput.id] = panelState;
 });
 
 test('createPanelState adds a second new panel state', () => {
-  const panelState = createPanelState<TestInput>(
+  const panelState = createPanelState<TestInput, IPanelPlacementArgs>(
     { type: CONTACT_CARD_EMBEDDABLE, explicitInput: { test: 'bye', id: '456' } },
     panels
   );
@@ -58,11 +59,11 @@ test('createPanelState adds a second new panel state', () => {
   expect(panelState.gridData.h).toBe(DEFAULT_PANEL_HEIGHT);
   expect(panelState.gridData.w).toBe(DEFAULT_PANEL_WIDTH);
 
-  panels.push(panelState);
+  panels[panelState.explicitInput.id] = panelState;
 });
 
 test('createPanelState adds a third new panel state', () => {
-  const panelState = createPanelState<TestInput>(
+  const panelState = createPanelState<TestInput, IPanelPlacementArgs>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'bye', id: '789' },
@@ -74,17 +75,17 @@ test('createPanelState adds a third new panel state', () => {
   expect(panelState.gridData.h).toBe(DEFAULT_PANEL_HEIGHT);
   expect(panelState.gridData.w).toBe(DEFAULT_PANEL_WIDTH);
 
-  panels.push(panelState);
+  panels[panelState.explicitInput.id] = panelState;
 });
 
 test('createPanelState adds a new panel state in the top most position', () => {
-  const panelsWithEmptySpace = panels.filter(panel => panel.gridData.x === 0);
-  const panelState = createPanelState<TestInput>(
+  delete panels['456'];
+  const panelState = createPanelState<TestInput, IPanelPlacementArgs>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'bye', id: '987' },
     },
-    panelsWithEmptySpace
+    panels
   );
   expect(panelState.gridData.x).toBe(DEFAULT_PANEL_WIDTH);
   expect(panelState.gridData.y).toBe(0);
