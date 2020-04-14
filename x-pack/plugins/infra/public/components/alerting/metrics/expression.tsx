@@ -417,7 +417,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
             </StyledExpression>
             {aggType !== 'count' && (
               <StyledExpression>
-                {!props.canEditAggField && <DiasabledAggField text={metric || ''} />}
+                {!props.canEditAggField && <DisabledAggField text={metric || ''} />}
                 {props.canEditAggField && (
                   <OfExpression
                     customAggTypesOptions={aggregationType}
@@ -462,7 +462,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
   );
 };
 
-export const DiasabledAggField = ({ text }: { text: string }) => {
+export const DisabledAggField = ({ text }: { text: string }) => {
   return (
     <EuiExpression
       description={i18n.translate('xpack.triggersActionsUI.common.expressionItems.of.buttonLabel', {
