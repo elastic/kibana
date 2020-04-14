@@ -18,7 +18,6 @@ import { APIKeysGridPage } from './api_keys_grid_page';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { apiKeysAPIClientMock } from '../index.mock';
 
-const mock403 = () => ({ body: { statusCode: 403 } });
 const mock500 = () => ({ body: { error: 'Internal Server Error', message: '', statusCode: 500 } });
 
 const waitForRender = async (
