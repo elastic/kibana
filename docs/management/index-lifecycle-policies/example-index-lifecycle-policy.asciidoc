@@ -8,7 +8,7 @@ on indices as they age and grow. {ilm-init} policies help you to manage
 performance, resilience, and retention of your data during its lifecycle. This tutorial shows
 you how to use {kib}’s *Index Lifecycle Policies* to modify and create {ilm-init}
 policies. You can learn more about all of the actions, benefits, and lifecycle
-phases in the {ref}/overview-index-lifecycle-management.html[{ilm-init} overview].
+phases in the {ref}/index-lifecycle-management.html[{ilm-init} overview].
 
 
 [discrete]
