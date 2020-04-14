@@ -28,7 +28,7 @@ import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../li
 import { LocationName } from './location_name';
 import { Pagination } from '../../overview/monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
-import { PingListProps } from '../../overview/pings';
+import { PingListProps } from './ping_list_container';
 
 export const AllLocationOption = {
   'data-test-subj': 'xpack.uptime.pingList.locationOptions.all',
