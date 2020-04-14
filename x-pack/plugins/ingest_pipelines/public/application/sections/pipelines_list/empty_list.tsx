@@ -8,11 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { BASE_PATH } from '../../../../common/constants';
 
-interface Props {
-  onClick: () => void;
-}
-
-export const EmptyList: FunctionComponent<Props> = ({ onClick }) => (
+export const EmptyList: FunctionComponent = () => (
   <EuiEmptyPrompt
     iconType="managementApp"
     title={
