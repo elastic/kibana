@@ -17,42 +17,36 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { identity } from 'lodash';
-import {
-  PersistableStateDefinition,
-  PersistableStateContract,
-  ExtractReferences,
-  MigrateState,
-  PersistableStates,
-} from './types';
+import { PersistableStateDefinition, PersistableStateContract } from './types';
 
 export interface PersistableStateSetup {
-  register: <K extends string>(id: K, definition: PersistableStateDefinition<K>) => Promise<void>;
+  register: <Id extends string>(
+    id: Id,
+    definition?: PersistableStateDefinition<Id>
+  ) => Promise<void>;
 }
 
 export interface PersistableStateStart {
-  get: <K extends string>(definitionId: K) => Promise<PersistableStateContract<K>>;
+  get: <Id extends string>(definitionId: Id) => Promise<PersistableStateContract<Id>>;
 }
-
-const defaultExtractReferences = ((state: any) => {
-  return [state, []];
-}) as ExtractReferences<string>;
 
 export class PersistableStateService
   implements Plugin<PersistableStateSetup, PersistableStateStart> {
-  private definitions: Map<keyof PersistableStates, PersistableStateContract<string>> = new Map();
+  private definitions = new Map();
 
   public setup(core: CoreSetup): PersistableStateSetup {
     return {
-      register: async (id, definition) => {
+      register: async (id, definition = {}) => {
         const { extractReferences, injectReferences, migrate } = definition;
 
         this.definitions.set(id, {
           id,
-          extractReferences: (extractReferences as any) || defaultExtractReferences,
-          injectReferences: (injectReferences as any) || identity,
-          migrate: migrate || (identity as MigrateState<string>),
+          extractReferences: extractReferences || ((s: unknown) => [s, []]),
+          injectReferences: injectReferences || identity,
+          migrate: migrate || identity,
         });
       },
     };
@@ -60,17 +54,17 @@ export class PersistableStateService
 
   public start(core: CoreStart): PersistableStateStart {
     return {
-      get: async (id: string) => {
-        const d = this.definitions.get(id);
-        if (!d) {
-          return {
-            id,
-            migrate: identity,
-            injectReferences: identity,
-            extractReferences: defaultExtractReferences,
-          };
+      get: async id => {
+        const definition = this.definitions.get(id);
+        if (!definition) {
+          throw new Error(
+            i18n.translate('share.persistableState.errors.noStateWithId', {
+              defaultMessage: 'No persistable state found with id {id}',
+              values: { id },
+            })
+          );
         }
-        return d as any;
+        return definition;
       },
     };
   }

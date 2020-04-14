@@ -24,6 +24,7 @@ import { coreMock } from '../../../core/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
 import { dataPluginMock } from '../../../plugins/data/public/mocks';
+import { sharePluginMock } from '../../../plugins/share/public/mocks';
 import { usageCollectionPluginMock } from '../../../plugins/usage_collection/public/mocks';
 import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
 import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
@@ -57,6 +58,7 @@ const createInstance = async () => {
     embeddable: embeddablePluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
     inspector: inspectorPluginMock.createSetupContract(),
+    share: sharePluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
   });
   const doStart = () =>

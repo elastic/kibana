@@ -19,6 +19,43 @@
 
 import { SavedObjectReference } from 'src/core/public';
 
+type State = string | number | boolean | null | undefined | SerializableState;
+
+interface SerializableState {
+  [key: string]: State | State[];
+}
+
+type ExtractReferences<Id extends string> = (
+  state: PersistableStates[Id]['state']
+) => [PersistableStates[Id]['state'], SavedObjectReference[]];
+
+type InjectReferences<Id extends string> = (
+  state: PersistableStates[Id]['state'],
+  references: SavedObjectReference[]
+) => PersistableStates[Id]['state'];
+
+type MigrateState<Id extends string> = <T extends SerializableState>(
+  oldState: T
+) => PersistableStates[Id]['state'];
+
+/** @internal */
+export interface PersistableStateContract<Id extends string> {
+  id: Id;
+  extractReferences: ExtractReferences<Id>;
+  injectReferences: InjectReferences<Id>;
+  migrate: MigrateState<Id>;
+}
+
+/**
+ * Use this generic to wrap your persistable state interface before
+ * adding it to the PersistableStates interface via `declare module`.
+ *
+ * We are providing this as a generic to make things more flexible
+ * should we choose to add properties to the interface in the future.
+ *
+ * @public
+ * TODO: should be <S extends SerializableState>
+ */
 export interface PersistableState<S extends unknown> {
   state: S;
 }
@@ -30,36 +67,28 @@ export interface PersistableState<S extends unknown> {
  *
  *  declare module '../../plugins/share/public' {
  *    interface PersistableStates {
- *      myId: PersistableState<myState, myMigratedId, myMigratedState>;
+ *      myId: PersistableState<MySerializableStateInterface>;
  *    }
  *  }
  *
  * @public
  */
 export interface PersistableStates {
-  [key: string]: PersistableState<any>;
+  // Fallback state for if someone forgets to use `declare module` to
+  // add their state to this interface.
+  // TODO: should be PersistableState<SerializableState>
+  [key: string]: PersistableState<unknown>;
 }
 
-export type ExtractReferences<Id extends string> = (
-  state: PersistableStates[Id]['state']
-) => [PersistableStates[Id]['state'], SavedObjectReference[]];
-
-export type InjectReferences<Id extends string> = (
-  state: PersistableStates[Id]['state'],
-  references: SavedObjectReference[]
-) => PersistableStates[Id]['state'];
-
-export type MigrateState<Id extends string> = (oldState: unknown) => PersistableStates[Id]['state'];
-
+/**
+ * These are options that can be added when registering persistable state.
+ * If they are not provided, default noop functions will be provided by
+ * the service.
+ *
+ * @public
+ */
 export interface PersistableStateDefinition<Id extends string> {
   extractReferences?: ExtractReferences<Id>;
   injectReferences?: InjectReferences<Id>;
   migrate?: MigrateState<Id>;
-}
-
-export interface PersistableStateContract<Id extends string> {
-  id: Id;
-  extractReferences: ExtractReferences<Id>;
-  injectReferences: InjectReferences<Id>;
-  migrate: MigrateState<Id>;
 }
