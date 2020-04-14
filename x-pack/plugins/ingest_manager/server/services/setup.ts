@@ -118,7 +118,6 @@ async function addPackageToConfig(
   config: AgentConfig,
   defaultOutput: Output
 ) {
-  const pkgkey = `${packageToInstall.name}/${packageToInstall.version}`;
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
     pkgName: packageToInstall.name,
@@ -132,8 +131,10 @@ async function addPackageToConfig(
     undefined,
     config.namespace
   );
-
-  newDatasource.inputs = await datasourceService.assignPackageStream(pkgkey, newDatasource.inputs);
+  newDatasource.inputs = await datasourceService.assignPackageStream(
+    { pkgName: packageToInstall.name, pkgVersion: packageToInstall.version },
+    newDatasource.inputs
+  );
 
   await datasourceService.create(soClient, newDatasource);
 }

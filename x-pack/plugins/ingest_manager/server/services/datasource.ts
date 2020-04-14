@@ -201,35 +201,51 @@ class DatasourceService {
   }
 
   public async assignPackageStream(
-    pkgKey: string,
+    pkgInfo: { pkgName: string; pkgVersion: string },
     inputs: DatasourceInput[]
   ): Promise<DatasourceInput[]> {
-    const inputsPromises = inputs.map(input => _assignPackageStreamToInput(pkgKey, input));
+    const inputsPromises = inputs.map(input => _assignPackageStreamToInput(pkgInfo, input));
     return Promise.all(inputsPromises);
   }
 }
+
 const _isAgentStream = (p: string) => !!p.match(/agent\/stream\/stream\.yml/);
 
-async function _assignPackageStreamToInput(pkgKey: string, input: DatasourceInput) {
-  const streamsPromises = input.streams.map(stream => _assignPackageStreamToStream(pkgKey, stream));
+async function _assignPackageStreamToInput(
+  pkgInfo: { pkgName: string; pkgVersion: string },
+  input: DatasourceInput
+) {
+  const streamsPromises = input.streams.map(stream =>
+    _assignPackageStreamToStream(pkgInfo, input, stream)
+  );
 
   const streams = await Promise.all(streamsPromises);
   return { ...input, streams };
 }
 
-async function _assignPackageStreamToStream(pkgKey: string, stream: DatasourceInputStream) {
+async function _assignPackageStreamToStream(
+  pkgInfo: { pkgName: string; pkgVersion: string },
+  input: DatasourceInput,
+  stream: DatasourceInputStream
+) {
   if (!stream.enabled) {
     return { ...stream, pkg_stream: undefined };
   }
   const dataset = getDataset(stream.dataset);
-  const assetsData = await getAssetsDataForPackageKey(pkgKey, _isAgentStream, dataset);
+  const assetsData = await getAssetsDataForPackageKey(pkgInfo, _isAgentStream, dataset);
 
   const [pkgStream] = assetsData;
   if (!pkgStream || !pkgStream.buffer) {
     throw new Error(`Stream template not found for dataset ${dataset}`);
   }
 
+  // Populate template variables from input config and stream config
   const data: { [k: string]: string | string[] } = {};
+  if (input.config) {
+    for (const key of Object.keys(input.config)) {
+      data[key] = input.config[key].value;
+    }
+  }
   if (stream.config) {
     for (const key of Object.keys(stream.config)) {
       data[key] = stream.config[key].value;

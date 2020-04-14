@@ -73,11 +73,11 @@ export async function getAssetsData(
 }
 
 export async function getAssetsDataForPackageKey(
-  pkgkey: string,
+  { pkgName, pkgVersion }: { pkgName: string; pkgVersion: string },
   filter = (path: string): boolean => true,
   datasetName?: string
 ): Promise<Registry.ArchiveEntry[]> {
-  const registryPkgInfo = await Registry.fetchInfo(pkgkey);
+  const registryPkgInfo = await Registry.fetchInfo(pkgName, pkgVersion);
 
   return getAssetsData(registryPkgInfo, filter, datasetName);
 }

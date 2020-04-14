@@ -86,9 +86,11 @@ export const createDatasourceHandler: RequestHandler<
         callCluster,
       });
 
-      const pkgkey = `${request.body.package.name}-${request.body.package.version}`;
       newData.inputs = (await datasourceService.assignPackageStream(
-        pkgkey,
+        {
+          pkgName: request.body.package.name,
+          pkgVersion: request.body.package.version,
+        },
         request.body.inputs
       )) as TypeOf<typeof CreateDatasourceRequestSchema.body>['inputs'];
     }
@@ -125,10 +127,13 @@ export const updateDatasourceHandler: RequestHandler<
     const pkg = newData.package || datasource.package;
     const inputs = newData.inputs || datasource.inputs;
     if (pkg && (newData.inputs || newData.package)) {
-      const pkgkey = `${pkg.name}-${pkg.version}`;
-      newData.inputs = (await datasourceService.assignPackageStream(pkgkey, inputs)) as TypeOf<
-        typeof CreateDatasourceRequestSchema.body
-      >['inputs'];
+      newData.inputs = (await datasourceService.assignPackageStream(
+        {
+          pkgName: pkg.name,
+          pkgVersion: pkg.version,
+        },
+        inputs
+      )) as TypeOf<typeof CreateDatasourceRequestSchema.body>['inputs'];
     }
 
     const updatedDatasource = await datasourceService.update(
