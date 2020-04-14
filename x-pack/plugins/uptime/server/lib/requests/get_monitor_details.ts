@@ -68,11 +68,11 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
   const data = result.hits.hits[0]?._source;
 
   const monitorError: MonitorError | undefined = data?.error;
-  const errorTimeStamp: string | undefined = data?.['@timestamp'];
+  const errorTimestamp: string | undefined = data?.['@timestamp'];
 
   return {
     monitorId,
     error: monitorError,
-    timestamp: errorTimeStamp,
+    timestamp: errorTimestamp,
   };
 };
