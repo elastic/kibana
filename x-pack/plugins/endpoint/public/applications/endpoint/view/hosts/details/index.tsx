@@ -12,10 +12,10 @@ import {
   EuiTitle,
   EuiLoadingContent,
   EuiSpacer,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { useHostListSelector } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
@@ -23,6 +23,7 @@ import { uiQueryParams, detailsData, detailsError, showView } from '../../../sto
 import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
 import { HostMetadata } from '../../../../../../common/types';
+import { FlyoutSubHeader } from './components/flyout_sub_header';
 
 export const HostDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -93,47 +94,35 @@ const PolicyResponseFlyoutPanel = memo<{
 }>(({ hostMeta }) => {
   const history = useHistory();
   const { show, ...queryParams } = useHostListSelector(uiQueryParams);
-  const detailsUri = useMemo(() => {
-    return urlFromQueryParams({
+  const backButtonProp = useMemo(() => {
+    const detailsUri = urlFromQueryParams({
       ...queryParams,
       selected_host: hostMeta.host.id,
     });
-  }, [hostMeta.host.id, queryParams]);
-  const buttonContentProps = useMemo(() => {
-    return { style: { paddingLeft: '0' } };
-  }, []);
+    return {
+      title: i18n.translate('xpack.endpoint.host.policyResponse.backLinkTitle', {
+        defaultMessage: 'Endpoint Details',
+      }),
+      href: '?' + detailsUri.search,
+      onClick: ev => {
+        ev.preventDefault();
+        history.push(detailsUri);
+      },
+    };
+  }, [history, hostMeta.host.id, queryParams]);
 
   return (
     <>
-      <EuiFlyoutHeader hasBorder>
-        <>
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-          <EuiButtonEmpty
-            data-test-subj="backToHostDetails"
-            iconType="arrowLeft"
-            contentProps={buttonContentProps}
-            size="xs"
-            href={'?' + detailsUri.search}
-            onClick={(ev: React.MouseEvent) => {
-              ev.preventDefault();
-              history.push(detailsUri);
-            }}
-          >
+      <FlyoutSubHeader backButton={backButtonProp}>
+        <EuiTitle size="xxs">
+          <h3>
             <FormattedMessage
-              id="xpack.endpoint.host.policyResponse.detailsLinkTitle"
-              defaultMessage="Endpoint Details"
+              id="xpack.endpoint.host.policyResponse.title"
+              defaultMessage="Policy Response"
             />
-          </EuiButtonEmpty>
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.endpoint.host.policyResponse.title"
-                defaultMessage="Policy Response"
-              />
-            </h3>
-          </EuiTitle>
-        </>
-      </EuiFlyoutHeader>
+          </h3>
+        </EuiTitle>
+      </FlyoutSubHeader>
       <EuiFlyoutBody>
         <PolicyResponse />
       </EuiFlyoutBody>
