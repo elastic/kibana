@@ -69,6 +69,10 @@ export class ServiceSettings {
     return origin === ORIGIN.EMS && this._showZoomMessage;
   }
 
+  enableZoomMessage() {
+    this._showZoomMessage = true;
+  }
+
   disableZoomMessage() {
     this._showZoomMessage = false;
   }

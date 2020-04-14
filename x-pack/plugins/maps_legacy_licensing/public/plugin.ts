@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore
-import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -23,7 +23,23 @@ export type MapsLegacyLicensingStart = ReturnType<MapsLegacyLicensing['start']>;
 
 export class MapsLegacyLicensing
   implements Plugin<MapsLegacyLicensingSetup, MapsLegacyLicensingStart> {
-  public setup(core: CoreSetup, plugins: MapsLegacyLicensingSetupDependencies) {}
+  public setup(core: CoreSetup, plugins: MapsLegacyLicensingSetupDependencies) {
+    const {
+      licensing,
+      mapsLegacy: { serviceSettings },
+    } = plugins;
+    if (licensing) {
+      licensing.license$.subscribe(({ uid, isActive }: { uid: string; isActive: boolean }) => {
+        if (isActive) {
+          serviceSettings.addQueryParams({ license: uid });
+          serviceSettings.disableZoomMessage();
+        } else {
+          serviceSettings.addQueryParams({ license: undefined });
+          serviceSettings.enableZoomMessage();
+        }
+      });
+    }
+  }
 
   public start(core: CoreStart, plugins: MapsLegacyLicensingStartDependencies) {}
 }
