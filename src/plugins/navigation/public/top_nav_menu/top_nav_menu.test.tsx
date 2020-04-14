@@ -76,11 +76,16 @@ describe('TopNavMenu', () => {
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
   });
 
-  it('Should render without padding', () => {
+  it('Should render with a class name', () => {
     const component = shallowWithIntl(
-      <TopNavMenu appName={'test'} showSearchBar={true} data={dataShim as any} noPadding={true} />
+      <TopNavMenu
+        appName={'test'}
+        showSearchBar={true}
+        data={dataShim as any}
+        className={'myCoolClass'}
+      />
     );
-
-    expect(component.find('.kbnTopNavMenu').length).toBe(0);
+    expect(component.find('.kbnTopNavMenu').length).toBe(1);
+    expect(component.find('.myCoolClass').length).toBeTruthy();
   });
 });

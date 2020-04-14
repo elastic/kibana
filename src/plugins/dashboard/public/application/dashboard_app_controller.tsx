@@ -250,7 +250,7 @@ export class DashboardAppController {
       return {
         appName: 'dashboard',
         config: $scope.isVisible ? $scope.topNavMenu : undefined,
-        noPadding: isFullScreenMode,
+        className: isFullScreenMode ? 'kbnTopNavMenu__noPadding' : undefined,
         showSearchBar,
         showFilterBar: showFilterBar(),
         showQueryBar,
