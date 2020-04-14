@@ -24,7 +24,7 @@ image::apm/images/service-maps.png[Example view of service maps in the APM app i
 === How do service maps work?
 
 Service maps rely on distributed traces to draw connections between services.
-As {apm-overview-ref}/distribute-tracing.html[distributed tracing] is enabled out-of-the-box for supported technologies, so are service maps.
+As {apm-overview-ref-v}/distributed-tracing.html[distributed tracing] is enabled out-of-the-box for supported technologies, so are service maps.
 However, if a service isn't instrumented,
 or a `traceparent` header isn't being propagated to it,
 distributed tracing will not work, and the connection will not be drawn on the map.

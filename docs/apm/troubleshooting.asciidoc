@@ -99,7 +99,7 @@ Selecting the `apm-*` index pattern shows a listing of every field defined in th
 *Ensure a field is searchable*
 There are two things you can do to if you'd like to ensure a field is searchable:
 
-1. Index your additional data as {apm-overview-ref}/metadata.html[labels] instead.
+1. Index your additional data as {apm-overview-ref-v}/metadata.html[labels] instead.
 These are dynamic by default, which means they will be indexed and become searchable and aggregatable.
 
 2. Use the {apm-server-ref}/configuration-template.html[`append_fields`] feature. As an example,
