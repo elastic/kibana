@@ -321,7 +321,7 @@ export function createDistanceFilterWithMeta({
           values: {
             distanceKm,
             geoFieldName,
-            pointLabel: point.join(','),
+            pointLabel: point.join(', '),
           },
         }),
   };
