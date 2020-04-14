@@ -7,7 +7,13 @@
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { htmlIdGenerator, EuiKeyboardAccessible } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiKeyboardAccessible,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
@@ -53,8 +59,24 @@ const nodeAssets = {
   },
 };
 
+const ChildEventsButton = () => {
+  return (
+    <EuiButton onClick={() => {}} color="ghost" size="s" iconType="arrowDown" iconSide="right">
+      Events
+    </EuiButton>
+  );
+};
+
+const RelatedAlertsButton = () => {
+  return (
+    <EuiButton onClick={() => {}} color="ghost" size="s" iconType="arrowDown" iconSide="right">
+      Related Alerts
+    </EuiButton>
+  );
+};
+
 /**
- * A placeholder view for a process node.
+ * An artefact that represents a process node.
  */
 export const ProcessEventDot = styled(
   React.memo(
@@ -184,6 +206,7 @@ export const ProcessEventDot = styled(
         },
         [animationTarget, dispatch, nodeId]
       );
+
       /* eslint-disable jsx-a11y/click-events-have-key-events */
       /**
        * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
@@ -298,6 +321,14 @@ export const ProcessEventDot = styled(
               >
                 {eventModel.eventName(event)}
               </div>
+              <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <RelatedAlertsButton />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ChildEventsButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </div>
           </div>
         </EuiKeyboardAccessible>
