@@ -80,7 +80,12 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
         </>
       ) : null}
 
-      <Form form={form} data-test-subj="pipelineForm">
+      <Form
+        form={form}
+        data-test-subj="pipelineForm"
+        isInvalid={form.isSubmitted && !form.isValid}
+        error={form.getErrors()}
+      >
         {/* Name field with optional version field */}
         <FormRow
           title={
@@ -267,7 +272,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
                   iconType="check"
                   onClick={form.submit}
                   data-test-subj="submitButton"
-                  disabled={form.isValid === false}
+                  disabled={form.isSubmitted && form.isValid === false}
                   isLoading={isSaving}
                 >
                   {

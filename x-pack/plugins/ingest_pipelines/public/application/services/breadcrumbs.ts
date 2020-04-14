@@ -9,6 +9,10 @@ import { ManagementAppMountParams } from '../../../../../../src/plugins/manageme
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
+const homeBreadcrumbText = i18n.translate('xpack.ingestPipelines.breadcrumb.pipelinesLabel', {
+  defaultMessage: 'Ingest Pipelines',
+});
+
 export class BreadcrumbService {
   private breadcrumbs: {
     [key: string]: Array<{
@@ -16,24 +20,12 @@ export class BreadcrumbService {
       href?: string;
     }>;
   } = {
-    home: [],
-  };
-  private setBreadcrumbsHandler?: SetBreadcrumbs;
-
-  public setup(setBreadcrumbsHandler: SetBreadcrumbs): void {
-    const homeBreadcrumbText = i18n.translate('xpack.ingestPipelines.breadcrumb.pipelinesLabel', {
-      defaultMessage: 'Ingest Pipelines',
-    });
-
-    this.setBreadcrumbsHandler = setBreadcrumbsHandler;
-
-    this.breadcrumbs.home = [
+    home: [
       {
         text: homeBreadcrumbText,
       },
-    ];
-
-    this.breadcrumbs.create = [
+    ],
+    create: [
       {
         text: homeBreadcrumbText,
         href: `#${BASE_PATH}`,
@@ -43,7 +35,13 @@ export class BreadcrumbService {
           defaultMessage: 'Create pipeline',
         }),
       },
-    ];
+    ],
+  };
+
+  private setBreadcrumbsHandler?: SetBreadcrumbs;
+
+  public setup(setBreadcrumbsHandler: SetBreadcrumbs): void {
+    this.setBreadcrumbsHandler = setBreadcrumbsHandler;
   }
 
   public setBreadcrumbs(type: 'create' | 'home'): void {

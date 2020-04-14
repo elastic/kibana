@@ -6,6 +6,7 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { BASE_PATH } from '../../../../common/constants';
 
 interface Props {
   onClick: () => void;
@@ -22,7 +23,7 @@ export const EmptyList: FunctionComponent<Props> = ({ onClick }) => (
       </h2>
     }
     actions={
-      <EuiButton onClick={onClick}>
+      <EuiButton href={`#${BASE_PATH}/create`}>
         {i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel', {
           defaultMessage: 'Create pipeline',
         })}

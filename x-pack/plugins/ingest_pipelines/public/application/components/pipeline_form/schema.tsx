@@ -22,8 +22,8 @@ const { toInt } = fieldFormatters;
 const stringifyJson = (json: { [key: string]: unknown }): string =>
   Array.isArray(json) ? JSON.stringify(json, null, 2) : '[\n\n]';
 
-const parseJson = (jsonString: string) => {
-  let parsedJSON;
+const parseJson = (jsonString: string): object[] => {
+  let parsedJSON: any;
 
   try {
     parsedJSON = JSON.parse(jsonString);

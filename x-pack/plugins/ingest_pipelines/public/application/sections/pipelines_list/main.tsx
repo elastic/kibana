@@ -65,7 +65,7 @@ export const PipelinesList: React.FunctionComponent = () => {
       />
     );
   } else {
-    content = <EmptyList onClick={() => {}} />;
+    content = <EmptyList />;
   }
 
   return (
