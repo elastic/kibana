@@ -11,21 +11,36 @@ import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants'
 import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { MonitorSummaryResultType } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
-const checkMonitorStatesResponse = (
-  response: any,
-  statesIds: string[],
-  absFrom: number,
-  absTo: number,
-  size: number,
-  prevPagination: null | string,
-  nextPagination: null | string
-) => {
+interface ExpectedMonitorStatesPage {
+  response: any;
+  statesIds: string[];
+  statuses: string[];
+  absFrom: number;
+  absTo: number;
+  size: number;
+  prevPagination: null | string;
+  nextPagination: null | string;
+}
+
+const checkMonitorStatesResponse = ({
+  response,
+  statesIds,
+  statuses,
+  absFrom,
+  absTo,
+  size,
+  prevPagination,
+  nextPagination,
+}: ExpectedMonitorStatesPage) => {
   const decoded = MonitorSummaryResultType.decode(response);
   expect(isRight(decoded)).to.be.ok();
   if (isRight(decoded)) {
     const { summaries, prevPagePagination, nextPagePagination, totalSummaryCount } = decoded.right;
     expect(summaries).to.have.length(size);
     expect(summaries?.map(s => s.monitor_id)).to.eql(statesIds);
+    expect(
+      summaries?.map(s => (s.state.summary?.up && !s.state.summary?.down ? 'up' : 'down'))
+    ).to.eql(statuses);
     (summaries ?? []).forEach(s => {
       expect(s.state.url.full).to.be.ok();
       expect(s.histogram?.count).to.be(20);
@@ -45,15 +60,27 @@ export default function({ getService }: FtrProviderContext) {
   describe('monitor states endpoint', () => {
     const from = '2019-09-11T03:30:04.380Z';
     const to = '2019-09-11T03:40:34.410Z';
+    const absFrom = new Date(from).valueOf();
+    const absTo = new Date(to).valueOf();
 
     it('will fetch monitor state data for the given filters and range', async () => {
       const statusFilter = 'up';
+      const size = 10;
       const filters =
         '{"bool":{"must":[{"match":{"monitor.id":{"query":"0002-up","operator":"and"}}}]}}';
       const apiResponse = await supertest.get(
-        `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&statusFilter=${statusFilter}&filters=${filters}&pageSize=10`
+        `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&statusFilter=${statusFilter}&filters=${filters}&pageSize=${size}`
       );
-      expectFixtureEql(apiResponse.body, 'monitor_states_id_filtered');
+      checkMonitorStatesResponse({
+        response: apiResponse.body,
+        statesIds: ['0002-up'],
+        statuses: ['up'],
+        absFrom,
+        absTo,
+        size: 1,
+        prevPagination: null,
+        nextPagination: null,
+      });
     });
 
     it('can navigate forward and backward using pagination', async () => {
@@ -81,14 +108,12 @@ export default function({ getService }: FtrProviderContext) {
 
     it('will fetch monitor state data for the given date range', async () => {
       const LENGTH = 10;
-      const absFrom = new Date(from).valueOf();
-      const absTo = new Date(to).valueOf();
       const { body } = await supertest.get(
         `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&pageSize=${LENGTH}`
       );
-      checkMonitorStatesResponse(
-        body,
-        [
+      checkMonitorStatesResponse({
+        response: body,
+        statesIds: [
           '0000-intermittent',
           '0001-up',
           '0002-up',
@@ -100,12 +125,14 @@ export default function({ getService }: FtrProviderContext) {
           '0008-up',
           '0009-up',
         ],
+        statuses: ['up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up'],
         absFrom,
         absTo,
-        LENGTH,
-        null,
-        '{"cursorDirection":"AFTER","sortOrder":"ASC","cursorKey":{"monitor_id":"0009-up"}}'
-      );
+        size: LENGTH,
+        prevPagination: null,
+        nextPagination:
+          '{"cursorDirection":"AFTER","sortOrder":"ASC","cursorKey":{"monitor_id":"0009-up"}}',
+      });
     });
   });
 }
