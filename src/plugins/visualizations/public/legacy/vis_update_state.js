@@ -24,9 +24,6 @@ import {
   Positions,
   ScaleTypes,
 } from '../../../../legacy/core_plugins/vis_type_vislib/public/utils/collections';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Rotates } from '../../../charts/public/static/components';
-import { countLabel } from '../../../../legacy/core_plugins/vis_type_vislib/public/utils/common_config';
 
 /**
  * Will figure out if an heatmap state was saved before the auto coloring
@@ -111,12 +108,12 @@ function convertSeriesParams(visState) {
         },
         labels: {
           show: true,
-          rotate: Rotates.HORIZONTAL,
+          rotate: 0,
           filter: false,
           truncate: 100,
         },
         title: {
-          text: countLabel,
+          text: 'Count',
         },
       },
     ];
@@ -146,7 +143,7 @@ function convertSeriesParams(visState) {
       showCircles: visState.params.showCircles,
       radiusRatio: visState.params.radiusRatio,
       data: {
-        label: countLabel,
+        label: 'Count',
         id: '1',
       },
       lineWidth: 2,
