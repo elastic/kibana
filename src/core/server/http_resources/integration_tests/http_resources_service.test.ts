@@ -78,7 +78,6 @@ describe('http resources service', () => {
         await root.start();
         const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
 
-        expect(response.header).toHaveProperty('content-security-policy');
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
       });
 
@@ -99,7 +98,6 @@ describe('http resources service', () => {
         await root.start();
         const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
 
-        expect(response.header).toHaveProperty('content-security-policy');
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
         expect(response.header['x-kibana']).toBe('42');
       });
@@ -127,7 +125,6 @@ describe('http resources service', () => {
         const response = await kbnTestServer.request.get(root, '/render-html').expect(200);
 
         expect(response.text).toBe(htmlBody);
-        expect(response.header).toHaveProperty('content-type');
         expect(response.header['content-type']).toBe('text/html; charset=utf-8');
       });
 
@@ -145,7 +142,6 @@ describe('http resources service', () => {
         const response = await kbnTestServer.request.get(root, '/render-js').expect(200);
 
         expect(response.text).toBe(jsBody);
-        expect(response.header).toHaveProperty('content-type');
         expect(response.header['content-type']).toBe('text/javascript; charset=utf-8');
       });
 
@@ -169,7 +165,6 @@ describe('http resources service', () => {
         await root.start();
         const response = await kbnTestServer.request.get(root, '/render-html').expect(200);
 
-        expect(response.header).toHaveProperty('content-security-policy');
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
       });
 
@@ -192,7 +187,6 @@ describe('http resources service', () => {
         await root.start();
         const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
 
-        expect(response.header).toHaveProperty('content-security-policy');
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
         expect(response.header['x-kibana']).toBe('42');
       });

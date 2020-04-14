@@ -324,7 +324,6 @@ export type RequestHandler<
 
 /**
  * Type-safe wrapper for {@link RequestHandler} function.
- * @public
  * @example
  * ```typescript
  * export const wrapper: RequestHandlerWrapper = handler => {
@@ -334,6 +333,7 @@ export type RequestHandler<
  *   };
  * }
  * ```
+ * @public
  */
 export type RequestHandlerWrapper = <
   P,

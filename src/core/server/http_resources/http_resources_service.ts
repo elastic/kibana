@@ -63,45 +63,33 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
   stop() {}
 
   private createRegistrar(deps: SetupDeps, router: IRouter): HttpResources {
+    const register = <P, Q, B>(
+      route: RouteConfig<P, Q, B, 'get'>,
+      handler: HttpResourcesRequestHandler<P, Q, B>
+    ) => {
+      return router.get<P, Q, B>(route, (context, request, response) => {
+        return handler(context, request, {
+          ...response,
+          ...this.createResponseToolkit(deps, context, request, response),
+        });
+      });
+    };
+
     return {
       registerCoreApp: (options: StaticHttpResourcesRenderOptions) => {
-        router.get({ path: options.path, validate: false }, async (context, request, response) => {
-          const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-            includeUserSettings: true,
-          });
-
-          return response.ok({
-            body,
-            headers: { ...options.headers, 'content-security-policy': deps.http.csp.header },
-          });
+        register({ path: options.path, validate: false }, async (context, request, response) => {
+          return response.renderCoreApp({ headers: options.headers });
         });
       },
       registerAnonymousCoreApp: (options: StaticHttpResourcesRenderOptions) => {
-        router.get(
+        register(
           { path: options.path, validate: false, options: { authRequired: false } },
           async (context, request, response) => {
-            const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-              includeUserSettings: false,
-            });
-
-            return response.ok({
-              body,
-              headers: { ...options.headers, 'content-security-policy': deps.http.csp.header },
-            });
+            return response.renderAnonymousCoreApp({ headers: options.headers });
           }
         );
       },
-      register: <P, Q, B>(
-        route: RouteConfig<P, Q, B, 'get'>,
-        handler: HttpResourcesRequestHandler<P, Q, B>
-      ) => {
-        return router.get<P, Q, B>(route, (context, request, response) => {
-          return handler(context, request, {
-            ...response,
-            ...this.createResponseToolkit(deps, context, request, response),
-          });
-        });
-      },
+      register,
     };
   }
 
@@ -114,7 +102,10 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     const cspHeader = deps.http.csp.header;
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
+        // restOptions might contain `app` & `vars` options passed from the legacy platform.
+        const { headers, ...restOptions } = options;
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
+          ...restOptions,
           includeUserSettings: true,
         });
 
@@ -124,7 +115,10 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
+        // restOptions might contain `app` & `vars` options passed from the legacy platform.
+        const { headers, ...restOptions } = options;
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
+          ...restOptions,
           includeUserSettings: false,
         });
 

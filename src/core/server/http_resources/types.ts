@@ -40,7 +40,11 @@ export interface StaticHttpResourcesRenderOptions extends HttpResourcesRenderOpt
  * @public
  */
 export interface HttpResourcesRenderOptions {
-  /** HTTP Headers with additional information about response */
+  /**
+   * HTTP Headers with additional information about response.
+   * @remarks
+   * All HTML pages are already pre-configured with `content-security-policy` header that cannot be overridden.
+   * */
   headers?: ResponseHeaders;
 }
 
@@ -55,13 +59,13 @@ export type HttpResourcesResponseOptions = HttpResponseOptions;
  * @public
  */
 export interface HttpResourcesServiceToolkit {
-  /* To respond with HTML page bootstrapping Kibana application. */
+  /** To respond with HTML page bootstrapping Kibana application. */
   renderCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
-  /* To respond with HTML page bootstrapping Kibana application without retrieving user-specific information. */
+  /** To respond with HTML page bootstrapping Kibana application without retrieving user-specific information. */
   renderAnonymousCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
-  /* To respond with a custom HTML page. */
+  /** To respond with a custom HTML page. */
   renderHtml: (options: HttpResourcesResponseOptions) => IKibanaResponse;
-  /* To respond with a custom JS script file. */
+  /** To respond with a custom JS script file. */
   renderJs: (options: HttpResourcesResponseOptions) => IKibanaResponse;
 }
 
@@ -112,11 +116,11 @@ export interface InternalHttpResourcesSetup {
  * @public
  */
 export interface HttpResources {
-  /* To register a route handler rendering HTML bootstrapping Kibana application. */
+  /** To register a route handler rendering HTML bootstrapping Kibana application. */
   registerCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
-  /* To register a route handler rendering HTML bootstrapping Kibana application without retrieving user-specific information. */
+  /** To register a route handler rendering HTML bootstrapping Kibana application without retrieving user-specific information. */
   registerAnonymousCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
-  /* To register a route handler executing passed function to form response. */
+  /** To register a route handler executing passed function to form response. */
   register: <P, Q, B>(
     route: RouteConfig<P, Q, B, 'get'>,
     handler: HttpResourcesRequestHandler<P, Q, B>

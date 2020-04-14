@@ -371,6 +371,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup & {
+    /** {@link HttpResources} */
     resources: HttpResources;
   };
   /** {@link MetricsServiceSetup} */
