@@ -6,15 +6,15 @@
 
 import React from 'react';
 
-import { MetricsTimeContainer } from './containers/with_metrics_time';
 import { Source } from '../../containers/source';
+import { MetricsTimeProvider } from './hooks/use_metrics_time';
 
 export const withMetricPageProviders = <T extends object>(Component: React.ComponentType<T>) => (
   props: T
 ) => (
   <Source.Provider sourceId="default">
-    <MetricsTimeContainer.Provider>
+    <MetricsTimeProvider>
       <Component {...props} />
-    </MetricsTimeContainer.Provider>
+    </MetricsTimeProvider>
   </Source.Provider>
 );
