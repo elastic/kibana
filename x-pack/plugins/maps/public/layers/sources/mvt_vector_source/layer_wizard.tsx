@@ -22,14 +22,14 @@ export const mvtVectorSourceWizardConfig: LayerWizard = {
     const onSourceConfigChange = ({
       urlTemplate,
       layerName,
-      minZoom,
-      maxZoom,
+      minSourceZoom,
+      maxSourceZoom,
     }: MVTSingleLayerVectorSourceConfig) => {
       const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor({
         urlTemplate,
         layerName,
-        minZoom,
-        maxZoom,
+        minSourceZoom,
+        maxSourceZoom,
         type: MVTSingleLayerVectorSource.type,
       });
       const source = new MVTSingleLayerVectorSource(sourceDescriptor, inspectorAdapters);

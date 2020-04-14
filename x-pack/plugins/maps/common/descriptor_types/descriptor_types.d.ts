@@ -98,12 +98,12 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & 
   urlTemplate: string;
   layerName: string;
 
-  // These are the min/max zoom levels of the availability of the a particle layerName in the tileset at urlTemplate.
+  // These are the min/max zoom levels of the availability of the a particular layerName in the tileset at urlTemplate.
   // These are _not_ the visible zoom-range of the data on a map.
   // Tiled data can be displayed at higher levels of zoom than that they are stored in the tileset.
   // e.g. EMS basemap data from level 14 is at most detailed resolution and can be displayed at higher levels
-  minZoom: number;
-  maxZoom: number;
+  minSourceZoom: number;
+  maxSourceZoom: number;
 };
 
 export type JoinDescriptor = {

@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import _ from 'lodash';
 import { IVectorStyle, VectorStyle } from './styles/vector/vector_style';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 import { VectorLayer, VectorLayerArguments } from './vector_layer';
@@ -121,13 +120,13 @@ export class SingleTiledVectorLayer extends VectorLayer {
       const sourceMeta: {
         layerName: string;
         urlTemplate: string;
-        minZoom: number;
-        maxZoom: number;
+        minSourceZoom: number;
+        maxSourceZoom: number;
       } | null = sourceDataRequest.getData() as {
         layerName: string;
         urlTemplate: string;
-        minZoom: number;
-        maxZoom: number;
+        minSourceZoom: number;
+        maxSourceZoom: number;
       };
       if (!sourceMeta) {
         return;
@@ -139,8 +138,8 @@ export class SingleTiledVectorLayer extends VectorLayer {
       mbMap.addSource(sourceId, {
         type: 'vector',
         tiles: [sourceMeta.urlTemplate],
-        minzoom: sourceMeta.minZoom,
-        maxzoom: sourceMeta.maxZoom,
+        minzoom: sourceMeta.minSourceZoom,
+        maxzoom: sourceMeta.maxSourceZoom,
       });
     }
   }
@@ -179,17 +178,17 @@ export class SingleTiledVectorLayer extends VectorLayer {
     }
     const tiledSourceMeta: {
       urlTemplate: string;
-      minZoom: number;
-      maxZoom: number;
+      minSourceZoom: number;
+      maxSourceZoom: number;
     } | null = dataRequest.getData() as {
       urlTemplate: string;
-      minZoom: number;
-      maxZoom: number;
+      minSourceZoom: number;
+      maxSourceZoom: number;
     };
     if (
       mbTileSource.tiles[0] === tiledSourceMeta.urlTemplate &&
-      mbTileSource.minzoom === tiledSourceMeta.minZoom &&
-      mbTileSource.maxzoom === tiledSourceMeta.maxZoom
+      mbTileSource.minzoom === tiledSourceMeta.minSourceZoom &&
+      mbTileSource.maxzoom === tiledSourceMeta.maxSourceZoom
     ) {
       // TileURL and zoom-range captures all the state. If this does not change, no updates are required.
       return false;

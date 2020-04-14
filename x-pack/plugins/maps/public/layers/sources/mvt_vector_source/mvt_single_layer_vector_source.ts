@@ -46,16 +46,16 @@ export class MVTSingleLayerVectorSource extends AbstractVectorSource
   static createDescriptor({
     urlTemplate,
     layerName,
-    minZoom,
-    maxZoom,
+    minSourceZoom,
+    maxSourceZoom,
   }: TiledSingleLayerVectorSourceDescriptor) {
     return {
       type: MVTSingleLayerVectorSource.type,
       id: uuid(),
       urlTemplate,
       layerName,
-      minZoom: Math.max(MIN_ZOOM, minZoom),
-      maxZoom: Math.min(MAX_ZOOM, maxZoom),
+      minSourceZoom: Math.max(MIN_ZOOM, minSourceZoom),
+      maxSourceZoom: Math.min(MAX_ZOOM, maxSourceZoom),
     };
   }
 
@@ -107,8 +107,8 @@ export class MVTSingleLayerVectorSource extends AbstractVectorSource
       { label: getDataSourceLabel(), value: sourceTitle },
       { label: getUrlLabel(), value: this._descriptor.urlTemplate },
       { label: 'Layer name', value: this._descriptor.layerName },
-      { label: 'Min zoom', value: this._descriptor.minZoom.toString() },
-      { label: 'Max zoom', value: this._descriptor.maxZoom.toString() },
+      { label: 'Min zoom', value: this._descriptor.minSourceZoom.toString() },
+      { label: 'Max zoom', value: this._descriptor.maxSourceZoom.toString() },
     ];
   }
 
@@ -120,8 +120,8 @@ export class MVTSingleLayerVectorSource extends AbstractVectorSource
     return {
       urlTemplate: this._descriptor.urlTemplate,
       layerName: this._descriptor.layerName,
-      minZoom: this._descriptor.minZoom,
-      maxZoom: this._descriptor.maxZoom,
+      minSourceZoom: this._descriptor.minSourceZoom,
+      maxSourceZoom: this._descriptor.maxSourceZoom,
     };
   }
 
@@ -134,11 +134,11 @@ export class MVTSingleLayerVectorSource extends AbstractVectorSource
   }
 
   getMinZoom() {
-    return this._descriptor.minZoom;
+    return this._descriptor.minSourceZoom;
   }
 
   getMaxZoom() {
-    return this._descriptor.maxZoom;
+    return this._descriptor.maxSourceZoom;
   }
 
   getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent {

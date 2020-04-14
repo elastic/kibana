@@ -63,13 +63,10 @@ export class AddLayerPanel extends Component {
       return;
     }
 
-    let styleDescriptor;
-    if (this.state.layer && this.state.layer.getCurrentStyle()) {
-      const currentStyle = this.state.layer.getCurrentStyle();
-      styleDescriptor = currentStyle.getDescriptor();
-    } else {
-      styleDescriptor = null;
-    }
+    const styleDescriptor =
+      this.state.layer && this.state.layer.getCurrentStyle()
+        ? this.state.layer.getCurrentStyle().getDescriptor()
+        : null;
     const layerInitProps = {
       ...options,
       style: styleDescriptor,

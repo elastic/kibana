@@ -59,8 +59,8 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
   getUrlTemplateWithMeta(): Promise<{
     layerName: string;
     urlTemplate: string;
-    minZoom: number;
-    maxZoom: number;
+    minSourceZoom: number;
+    maxSourceZoom: number;
   }>;
   getMinZoom(): number;
   getMaxZoom(): number;

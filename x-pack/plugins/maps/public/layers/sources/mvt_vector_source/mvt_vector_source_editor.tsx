@@ -15,8 +15,8 @@ import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kiba
 export type MVTSingleLayerVectorSourceConfig = {
   urlTemplate: string;
   layerName: string;
-  minZoom: number;
-  maxZoom: number;
+  minSourceZoom: number;
+  maxSourceZoom: number;
 };
 
 export interface Props {
@@ -26,8 +26,8 @@ export interface Props {
 interface State {
   urlTemplate: string;
   layerName: string;
-  minZoom: number;
-  maxZoom: number;
+  minSourceZoom: number;
+  maxSourceZoom: number;
   mvtCanPreview: boolean;
 }
 
@@ -35,8 +35,8 @@ export class MVTVectorSourceEditor extends Component<Props, State> {
   state = {
     urlTemplate: '',
     layerName: '',
-    minZoom: MIN_ZOOM,
-    maxZoom: MAX_ZOOM,
+    minSourceZoom: MIN_ZOOM,
+    maxSourceZoom: MAX_ZOOM,
     mvtCanPreview: false,
   };
 
@@ -45,8 +45,8 @@ export class MVTVectorSourceEditor extends Component<Props, State> {
       this.props.onSourceConfigChange({
         urlTemplate: this.state.urlTemplate,
         layerName: this.state.layerName,
-        minZoom: this.state.minZoom,
-        maxZoom: this.state.maxZoom,
+        minSourceZoom: this.state.minSourceZoom,
+        maxSourceZoom: this.state.maxSourceZoom,
       });
     }
   }, 200);
@@ -77,11 +77,11 @@ export class MVTVectorSourceEditor extends Component<Props, State> {
   };
 
   _handleZoomRangeChange = (e: Value) => {
-    const minZoom = parseInt(e[0] as string, 10);
-    const maxZoom = parseInt(e[1] as string, 10);
+    const minSourceZoom = parseInt(e[0] as string, 10);
+    const maxSourceZoom = parseInt(e[1] as string, 10);
 
-    if (this.state.minZoom !== minZoom || this.state.maxZoom !== maxZoom) {
-      this.setState({ minZoom, maxZoom }, () => this._sourceConfigChange());
+    if (this.state.minSourceZoom !== minSourceZoom || this.state.maxSourceZoom !== maxSourceZoom) {
+      this.setState({ minSourceZoom, maxSourceZoom }, () => this._sourceConfigChange());
     }
   };
 
@@ -95,13 +95,13 @@ export class MVTVectorSourceEditor extends Component<Props, State> {
           <EuiFieldText value={this.state.layerName} onChange={this._handleLayerNameInputChange} />
         </EuiFormRow>
         <ValidatedDualRange
-          label={i18n.translate('xpack.maps.source.mvtVectorSource.dataZoomRangeLabel', {
-            defaultMessage: 'Data Range',
+          label={i18n.translate('xpack.maps.source.mvtVectorSource.sourceZoomRangeLabel', {
+            defaultMessage: 'Zoom range for layer data',
           })}
           formRowDisplay="columnCompressed"
           min={MIN_ZOOM}
           max={MAX_ZOOM}
-          value={[this.state.minZoom, this.state.maxZoom]}
+          value={[this.state.minSourceZoom, this.state.maxSourceZoom]}
           showInput="inputWithPopover"
           showRange
           showLabels
