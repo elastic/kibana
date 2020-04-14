@@ -29,7 +29,6 @@ export {
   ruleActionsSavedObjectType,
   timelineSavedObjectType,
 };
-
 export const savedObjectMappings = {
   ...timelineSavedObjectMappings,
   ...noteSavedObjectMappings,

@@ -80,13 +80,6 @@ export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 
-/**
- * Lists routes
- */
-export const DETECTION_ENGINE_LIST_URL = `/api/lists`;
-export const DETECTION_ENGINE_LIST_INDEX = `${DETECTION_ENGINE_LIST_URL}/index`;
-export const DETECTION_ENGINE_LIST_ITEM_URL = `${DETECTION_ENGINE_LIST_URL}/items`;
-
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
@@ -95,16 +88,6 @@ export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
  * Default signals index key for kibana.dev.yml
  */
 export const SIGNALS_INDEX_KEY = 'signalsIndex';
-
-/**
- * Default lists index key for kibana.dev.yml
- */
-export const LISTS_INDEX_KEY = 'listsIndex';
-
-/**
- * Default lists items index key for kibana.dev.yml
- */
-export const LISTS_ITEMS_INDEX_KEY = 'listsItemsIndex';
 
 export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals`;
 export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status`;
