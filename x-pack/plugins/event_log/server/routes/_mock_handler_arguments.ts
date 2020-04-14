@@ -50,9 +50,9 @@ export function fakeEvent(overrides = {}) {
         duration: 1000000,
       },
       kibana: {
-        namespace: 'default',
         saved_objects: [
           {
+            namespace: 'default',
             type: 'action',
             id: '968f1b82-0414-4a10-becc-56b6473e4a29',
           },
