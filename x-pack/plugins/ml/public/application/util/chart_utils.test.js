@@ -29,8 +29,8 @@ const timefilter = getTimefilter();
 
 import d3 from 'd3';
 import moment from 'moment';
-import { mount } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import {
   chartLimits,
@@ -413,8 +413,8 @@ describe('ML - chart utils', () => {
     // We set up this boilerplate so we can then run removeLabelOverlap()
     // on some "real" structure.
     function axisSetup({ interval, plotEarliest, plotLatest, startTimeMs, xAxisTickFormat }) {
-      const wrapper = mount(<div className="content-wrapper" />);
-      const node = wrapper.getDOMNode();
+      const { container } = render(<div className="content-wrapper" />);
+      const node = container.querySelector('.content-wrapper');
 
       const chartHeight = 170;
       const margin = { top: 10, right: 0, bottom: 30, left: 60 };
