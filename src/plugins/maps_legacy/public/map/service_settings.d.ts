@@ -17,7 +17,35 @@
  * under the License.
  */
 
-// @ts-ignore
-export { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
-// @ts-ignore
-export { KibanaMap } from 'ui/vis/map/kibana_map';
+export interface TmsLayer {
+  id: string;
+  origin: string;
+  minZoom: string;
+  maxZoom: number;
+  attribution: string;
+}
+
+export interface FileLayer {
+  name: string;
+  origin: string;
+  id: string;
+  format: string | { type: string };
+  fields: FileLayerField[];
+}
+
+export interface FileLayerField {
+  name: string;
+  description: string;
+  type: string;
+}
+
+export interface VectorLayer extends FileLayer {
+  layerId: string;
+  isEMS: boolean;
+}
+
+export interface IServiceSettings {
+  getEMSHotLink(layer: FileLayer): Promise<string>;
+  getTMSServices(): Promise<TmsLayer[]>;
+  getFileLayers(): Promise<FileLayer[]>;
+}

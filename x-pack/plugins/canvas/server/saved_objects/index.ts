@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CANVAS_TYPE } from './common/lib';
+import { workpadType } from './workpad';
+import { customElementType } from './custom_element';
 
-export const migrations = {
-  [CANVAS_TYPE]: {
-    '7.0.0': doc => {
-      if (doc.attributes) {
-        delete doc.attributes.id;
-      }
-      return doc;
-    },
-  },
-};
+export { customElementType, workpadType };
