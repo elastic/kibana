@@ -19,6 +19,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { createHashHistory } from 'history';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular, { auto } from 'angular';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
@@ -47,7 +48,6 @@ import {
   VisualizationsSetup,
 } from '../../../../../plugins/visualizations/public';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
-import { createHashHistory } from 'history';
 
 export interface DiscoverSetupPlugins {
   uiActions: UiActionsSetup;
