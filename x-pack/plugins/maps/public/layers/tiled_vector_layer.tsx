@@ -61,6 +61,7 @@ export class SingleTiledVectorLayer extends VectorLayer {
     const requestMeta: VectorSourceRequestMeta = {
       ...mapFilters,
       applyGlobalQuery: this._source.getApplyGlobalQuery(),
+      sourceMeta: this._source.getSyncMeta(),
       fieldNames,
       sourceQuery: this.getQuery(),
     };
