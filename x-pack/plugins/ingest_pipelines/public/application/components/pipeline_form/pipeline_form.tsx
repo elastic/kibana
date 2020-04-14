@@ -6,7 +6,15 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSwitch,
+  EuiLink,
+} from '@elastic/eui';
 
 import {
   useForm,
@@ -20,7 +28,7 @@ import {
 } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
 
-import { SectionError } from '../section_error';
+import { SectionError, PipelineRequestFlyout } from '../';
 import { pipelineFormSchema } from './schema';
 
 interface Props {
@@ -53,6 +61,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
   const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(
     Boolean(defaultValue.on_failure)
   );
+  const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
   const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
     if (isValid) {
@@ -65,6 +74,18 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
     defaultValue,
     onSubmit: handleSave,
   });
+
+  const saveButtonLabel = isEditing ? (
+    <FormattedMessage
+      id="xpack.ingestPipelines.form.saveButtonLabel"
+      defaultMessage="Save pipeline"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.ingestPipelines.form.createButtonLabel"
+      defaultMessage="Create pipeline"
+    />
+  );
 
   return (
     <>
@@ -269,38 +290,49 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
         {/* Form submission */}
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="secondary"
-                  iconType="check"
-                  onClick={form.submit}
-                  data-test-subj="submitButton"
-                  disabled={form.isSubmitted && form.isValid === false}
-                  isLoading={isSaving}
-                >
-                  {isSaving ? (
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.form.savingButtonLabel"
-                      defaultMessage="Saving..."
-                    />
-                  ) : isEditing ? (
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.form.saveButtonLabel"
-                      defaultMessage="Save pipeline"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.form.createButtonLabel"
-                      defaultMessage="Create pipeline"
-                    />
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiButton
+              fill
+              color="secondary"
+              iconType="check"
+              onClick={form.submit}
+              data-test-subj="submitButton"
+              disabled={form.isSubmitted && form.isValid === false}
+              isLoading={isSaving}
+            >
+              {isSaving ? (
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.savingButtonLabel"
+                  defaultMessage="Saving..."
+                />
+              ) : (
+                saveButtonLabel
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
+            >
+              {isRequestVisible ? (
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.hideRequestButtonLabel"
+                  defaultMessage="Hide request"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.showRequestButtonLabel"
+                  defaultMessage="Show request"
+                />
+              )}
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {isRequestVisible ? (
+          <PipelineRequestFlyout
+            pipeline={form.getFormData() as Pipeline}
+            closeFlyout={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
+          />
+        ) : null}
       </Form>
 
       <EuiSpacer size="m" />

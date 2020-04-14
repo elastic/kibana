@@ -75,7 +75,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
         title={
           <FormattedMessage
             id="xpack.ingestPipelines.edit.fetchPipelineError"
-            defaultMessage="Error loading pipelime"
+            defaultMessage="Error loading pipeline"
           />
         }
         error={error}
