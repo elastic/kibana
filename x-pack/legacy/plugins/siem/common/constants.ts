@@ -17,8 +17,6 @@ export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults
 export const DEFAULT_SIEM_TIME_RANGE = 'siem:timeDefaults';
 export const DEFAULT_SIEM_REFRESH_INTERVAL = 'siem:refreshIntervalDefaults';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
-export const DEFAULT_LISTS_INDEX = '.siem-lists';
-export const DEFAULT_LISTS_ITEMS_INDEX = '.siem-items';
 export const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'siem:defaultAnomalyScore';
@@ -88,7 +86,6 @@ export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
  * Default signals index key for kibana.dev.yml
  */
 export const SIGNALS_INDEX_KEY = 'signalsIndex';
-
 export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals`;
 export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status`;
 export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/search`;
