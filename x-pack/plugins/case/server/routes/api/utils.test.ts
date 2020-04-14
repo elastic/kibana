@@ -230,23 +230,70 @@ describe('Utils', () => {
 
   describe('flattenCaseSavedObjects', () => {
     it('flattens correctly', () => {
-      const totalCommentsByCase = [
-        { caseId: mockCases[0].id, totalComments: 2 },
-        { caseId: mockCases[1].id, totalComments: 1 },
-      ];
-      const cases = [{ ...mockCases[0] }, { ...mockCases[1] }];
-      const res = flattenCaseSavedObjects(cases, totalCommentsByCase);
+      const totalCommentsByCase = [{ caseId: mockCases[0].id, totalComments: 2 }];
+
+      const res = flattenCaseSavedObjects([mockCases[0]], totalCommentsByCase);
       expect(res).toEqual([
-        flattenCaseSavedObject(cases[0], [], totalCommentsByCase[0].totalComments),
-        flattenCaseSavedObject(cases[1], [], totalCommentsByCase[1].totalComments),
+        {
+          id: 'mock-id-1',
+          closed_at: null,
+          closed_by: null,
+          created_at: '2019-11-25T21:54:48.952Z',
+          created_by: {
+            full_name: 'elastic',
+            email: 'testemail@elastic.co',
+            username: 'elastic',
+          },
+          description: 'This is a brand new case of a bad meanie defacing data',
+          external_service: null,
+          title: 'Super Bad Security Issue',
+          status: 'open',
+          tags: ['defacement'],
+          updated_at: '2019-11-25T21:54:48.952Z',
+          updated_by: {
+            full_name: 'elastic',
+            email: 'testemail@elastic.co',
+            username: 'elastic',
+          },
+          comments: [],
+          totalComment: 2,
+          version: 'WzAsMV0=',
+        },
       ]);
     });
 
     it('it handles total comments correctly', () => {
       const totalCommentsByCase = [{ caseId: 'not-exist', totalComments: 2 }];
-      const cases = [{ ...mockCases[0] }];
-      const res = flattenCaseSavedObjects(cases, totalCommentsByCase);
-      expect(res).toEqual([flattenCaseSavedObject(cases[0], [], 0)]);
+
+      const res = flattenCaseSavedObjects([mockCases[0]], totalCommentsByCase);
+
+      expect(res).toEqual([
+        {
+          id: 'mock-id-1',
+          closed_at: null,
+          closed_by: null,
+          created_at: '2019-11-25T21:54:48.952Z',
+          created_by: {
+            full_name: 'elastic',
+            email: 'testemail@elastic.co',
+            username: 'elastic',
+          },
+          description: 'This is a brand new case of a bad meanie defacing data',
+          external_service: null,
+          title: 'Super Bad Security Issue',
+          status: 'open',
+          tags: ['defacement'],
+          updated_at: '2019-11-25T21:54:48.952Z',
+          updated_by: {
+            full_name: 'elastic',
+            email: 'testemail@elastic.co',
+            username: 'elastic',
+          },
+          comments: [],
+          totalComment: 0,
+          version: 'WzAsMV0=',
+        },
+      ]);
     });
   });
 
