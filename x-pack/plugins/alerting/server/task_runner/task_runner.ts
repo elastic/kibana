@@ -173,7 +173,7 @@ export class TaskRunner {
     const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
-      kibana: { namespace, saved_objects: [{ type: 'alert', id: alertId }] },
+      kibana: { saved_objects: [{ type: 'alert', id: alertId, namespace }] },
     };
     eventLogger.startTiming(event);
 
@@ -378,11 +378,10 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
         action,
       },
       kibana: {
-        namespace: params.namespace,
         alerting: {
           instance_id: id,
         },
-        saved_objects: [{ type: 'alert', id: params.alertId }],
+        saved_objects: [{ type: 'alert', id: params.alertId, namespace: params.namespace }],
       },
       message,
     };

@@ -75,7 +75,8 @@ export class ActionExecutor {
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
-    const namespace = spaces && spaces.getSpaceId(request);
+    const spaceId = spaces && spaces.getSpaceId(request);
+    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
     // Ensure user can read the action before processing
     const {
@@ -91,9 +92,7 @@ export class ActionExecutor {
     } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAction>(
       'action',
       actionId,
-      {
-        namespace: namespace === 'default' ? undefined : namespace,
-      }
+      namespace
     );
     const actionType = actionTypeRegistry.get(actionTypeId);
 
@@ -112,7 +111,7 @@ export class ActionExecutor {
     const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
-      kibana: { namespace, saved_objects: [{ type: 'action', id: actionId }] },
+      kibana: { saved_objects: [{ type: 'action', id: actionId, ...namespace }] },
     };
 
     eventLogger.startTiming(event);
