@@ -309,9 +309,14 @@ export interface ESTotal {
 }
 
 /**
+ * `Hits` wrapper in responses from ES search API, including total.
+ */
+export type AlertHitsWrapper = SearchResponse<AlertEvent>['hits'];
+
+/**
  * `Hits` array in responses from ES search API.
  */
-export type AlertHits = SearchResponse<AlertEvent>['hits']['hits'];
+export type AlertHits = AlertHitsWrapper['hits'];
 
 export interface LegacyEndpointEvent {
   '@timestamp': number;

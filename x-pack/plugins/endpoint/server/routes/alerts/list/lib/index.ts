@@ -104,7 +104,7 @@ export async function mapToAlertResultList(
   }
 
   const config = await endpointAppContext.config();
-  const hits = searchResponse.hits.hits;
+  const hits = searchResponse.hits;
   const pagination: AlertListPagination = new AlertListPagination(config, reqCtx, reqData, hits);
 
   function mapHit(entry: AlertHits[0]): AlertData {
@@ -123,7 +123,7 @@ export async function mapToAlertResultList(
     result_from_index: reqData.fromIndex,
     next: await pagination.getNextUrl(),
     prev: await pagination.getPrevUrl(),
-    alerts: hits.map(mapHit),
+    alerts: hits.hits.map(mapHit),
     total: totalNumberOfAlerts,
   };
 }

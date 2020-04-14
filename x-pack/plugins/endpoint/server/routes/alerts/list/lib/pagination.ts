@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { RisonValue, encode } from 'rison-node';
 import { RequestHandlerContext } from 'src/core/server';
-import { AlertHits } from '../../../../../common/types';
+import { AlertHitsWrapper } from '../../../../../common/types';
 import { EndpointConfigType } from '../../../../config';
 import { AlertSearchQuery } from '../../types';
 import { Pagination } from '../../lib';
@@ -16,21 +16,26 @@ import { BASE_ALERTS_ROUTE } from '../..';
 /**
  * Pagination class for alert list.
  */
-export class AlertListPagination extends Pagination<AlertSearchQuery, AlertHits> {
+export class AlertListPagination extends Pagination<AlertSearchQuery, AlertHitsWrapper> {
   protected hitLen: number;
 
   constructor(
     config: EndpointConfigType,
     requestContext: RequestHandlerContext,
     state: AlertSearchQuery,
-    data: AlertHits
+    data: AlertHitsWrapper
   ) {
     super(config, requestContext, state, data);
-    this.hitLen = data.length;
+    this.hitLen = data.hits.length;
+  }
+
+  protected isUsingSimplePagination(): boolean {
+    return this.state.pageIndex !== undefined;
   }
 
   protected getBasePaginationParams(): string {
-    let pageParams: string = '';
+    let pageParams: string = `page_size=${this.state.pageSize}&`;
+
     if (this.state.query) {
       pageParams += `query=${encode((this.state.query as unknown) as RisonValue)}&`;
     }
@@ -48,41 +53,72 @@ export class AlertListPagination extends Pagination<AlertSearchQuery, AlertHits>
     if (this.state.order !== undefined) {
       pageParams += `order=${this.state.order}&`;
     }
-
-    pageParams += `page_size=${this.state.pageSize}&`;
-
-    // NOTE: `search_after` and `search_before` are appended later.
     return pageParams.slice(0, -1); // strip trailing `&`
   }
 
-  /**
-   * Gets the next set of alerts after this one.
-   */
-  async getNextUrl(): Promise<string | null> {
-    // TODO: update for simple pagination
+  protected getNextUrlSimple(): string | null {
+    let url = null;
+    // const total: ESTotal = (this.data.total as unknown) as ESTotal;
+
+    if (this.state.fromIndex + this.state.pageSize < this.data.total.value) {
+      url = `${BASE_ALERTS_ROUTE}?page_index=${this.state.pageIndex +
+        1}&${this.getBasePaginationParams()}`;
+    }
+    return url;
+  }
+
+  protected getNextUrlAdvanced(): string | null {
     let url = null;
     if (this.hitLen > 0 && this.hitLen <= this.state.pageSize) {
       const lastCustomSortValue: string = get(
-        this.data[this.hitLen - 1]._source,
+        this.data.hits[this.hitLen - 1]._source,
         this.state.sort
       ) as string;
-      const lastEventId: string = this.data[this.hitLen - 1]._source.event.id;
+      const lastEventId: string = this.data.hits[this.hitLen - 1]._source.event.id;
       url = `${BASE_ALERTS_ROUTE}?${this.getBasePaginationParams()}&after=${lastCustomSortValue}&after=${lastEventId}`;
     }
     return url;
   }
 
   /**
-   * Gets the previous set of alerts before this one.
+   * Gets the next set of alerts after this one.
    */
-  async getPrevUrl(): Promise<string | null> {
-    // TODO: update for simple pagination
+  async getNextUrl(): Promise<string | null> {
+    if (this.isUsingSimplePagination()) {
+      return this.getNextUrlSimple();
+    }
+    return this.getNextUrlAdvanced();
+  }
+
+  protected getPrevUrlSimple(): string | null {
+    let url = null;
+    if (this.state.pageIndex > 0) {
+      url = `${BASE_ALERTS_ROUTE}?page_index=${this.state.pageIndex -
+        1}&${this.getBasePaginationParams()}`;
+    }
+    return url;
+  }
+
+  protected getPrevUrlAdvanced(): string | null {
     let url = null;
     if (this.hitLen > 0) {
-      const firstCustomSortValue: string = get(this.data[0]._source, this.state.sort) as string;
-      const firstEventId: string = this.data[0]._source.event.id;
+      const firstCustomSortValue: string = get(
+        this.data.hits[0]._source,
+        this.state.sort
+      ) as string;
+      const firstEventId: string = this.data.hits[0]._source.event.id;
       url = `${BASE_ALERTS_ROUTE}?${this.getBasePaginationParams()}&before=${firstCustomSortValue}&before=${firstEventId}`;
     }
     return url;
+  }
+
+  /**
+   * Gets the next set of alerts after this one.
+   */
+  async getPrevUrl(): Promise<string | null> {
+    if (this.isUsingSimplePagination()) {
+      return this.getPrevUrlSimple();
+    }
+    return this.getPrevUrlAdvanced();
   }
 }
