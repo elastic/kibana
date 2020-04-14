@@ -113,7 +113,7 @@ export class ReportingNotifierStreamHandler {
             _source: { status: jobStatus },
           } = job;
           if (storedJobs.includes(jobId)) {
-            if (jobStatus === JOB_STATUS_COMPLETED || JOB_STATUS_WARNINGS) {
+            if (jobStatus === JOB_STATUS_COMPLETED || jobStatus === JOB_STATUS_WARNINGS) {
               completedJobs.push(summarizeJob(job));
             } else if (jobStatus === JOB_STATUS_FAILED) {
               failedJobs.push(summarizeJob(job));
