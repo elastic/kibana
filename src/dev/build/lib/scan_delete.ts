@@ -27,7 +27,7 @@ import { count, map, mergeAll, mergeMap } from 'rxjs/operators';
 // @ts-ignore
 import { assertAbsolute } from './fs';
 
-const getStat$ = Rx.bindNodeCallback(Fs.stat);
+const getStat$ = Rx.bindNodeCallback<Fs.PathLike, Fs.Stats>(Fs.stat);
 const getReadDir$ = Rx.bindNodeCallback<string, string[]>(Fs.readdir);
 
 interface Options {
@@ -71,7 +71,7 @@ export async function scanDelete(options: Options) {
     }
 
     return getStat$(path).pipe(
-      mergeMap(stat => ((stat as Fs.Stats).isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
+      mergeMap(stat => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
       mergeMap(getPathsToDelete$)
     );
   };

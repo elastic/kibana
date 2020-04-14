@@ -22,7 +22,7 @@ import Fs from 'fs';
 import * as Rx from 'rxjs';
 import { mergeMap, toArray, map, catchError } from 'rxjs/operators';
 
-const stat$ = Rx.bindNodeCallback(Fs.stat);
+const stat$ = Rx.bindNodeCallback<Fs.PathLike, Fs.Stats>(Fs.stat);
 
 /**
  * get mtimes of referenced paths concurrently, limit concurrency to 100
@@ -35,7 +35,7 @@ export async function getMtimes(paths: Iterable<string>) {
       mergeMap(
         path =>
           stat$(path).pipe(
-            map(stat => [path, (stat as Fs.Stats).mtimeMs] as const),
+            map(stat => [path, stat.mtimeMs] as const),
             catchError((error: any) => (error?.code === 'ENOENT' ? Rx.EMPTY : Rx.throwError(error)))
           ),
         100
