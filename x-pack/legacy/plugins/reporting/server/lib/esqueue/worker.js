@@ -293,7 +293,7 @@ export class Worker extends events.EventEmitter {
         }
 
         const doc = {
-          status: status,
+          status,
           completed_at: completedTime,
           output: docOutput,
         };
