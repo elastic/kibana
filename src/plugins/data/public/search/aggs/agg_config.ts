@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Assign } from '@kbn/utility-types';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
@@ -27,17 +28,19 @@ import { ISearchSource } from '../search_source';
 import { FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../common';
 import { FieldFormatsStart } from '../../field_formats';
 
-export interface AggConfigOptions {
-  type: IAggType;
+export interface AggConfigJson {
+  type: string;
   enabled?: boolean;
   id?: string;
-  params?: Record<string, any>;
+  params?: Record<string, any>; // TODO: this should enforce serializable state
   schema?: string;
 }
 
 export interface AggConfigDependencies {
   fieldFormats: FieldFormatsStart;
 }
+
+export type AggConfigOptions = Assign<AggConfigJson, { type: IAggType }>;
 
 /**
  * @name AggConfig
@@ -257,7 +260,7 @@ export class AggConfig {
     return configDsl;
   }
 
-  toJSON() {
+  toJSON(): AggConfigJson {
     const params = this.params;
 
     const outParams = _.transform(
