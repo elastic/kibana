@@ -10,9 +10,6 @@
 // vis_type_vislib UI styles
 @import 'src/legacy/core_plugins/vis_type_vislib/public/index';
 
-// Discover styles
-@import 'discover/index';
-
 // Visualize styles
 @import './visualize/index';
 // Has to come after visualize because of some

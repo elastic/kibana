@@ -17,12 +17,26 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { DiscoverPlugin } from './plugin';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from 'src/plugins/embeddable/public';
+import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
+import { Filter, IIndexPattern, TimeRange, Query } from '../../../../data/public';
+import { SavedSearch } from '../..';
 
-export { DiscoverSetup, DiscoverStart } from './plugin';
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DiscoverPlugin(initializerContext);
+export interface SearchInput extends EmbeddableInput {
+  timeRange: TimeRange;
+  query?: Query;
+  filters?: Filter[];
+  hidePanelTitles?: boolean;
+  columns?: string[];
+  sort?: SortOrder[];
 }
 
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
+export interface SearchOutput extends EmbeddableOutput {
+  editUrl: string;
+  indexPatterns?: IIndexPattern[];
+  editable: boolean;
+}
+
+export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
+  getSavedSearch(): SavedSearch;
+}

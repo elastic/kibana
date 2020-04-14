@@ -16,13 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { shallow } from 'enzyme';
+import { JsonCodeBlock } from './json_code_block';
+import { IndexPattern } from '../../../../../data/public';
 
-import { PluginInitializerContext } from 'kibana/public';
-import { DiscoverPlugin } from './plugin';
-
-export { DiscoverSetup, DiscoverStart } from './plugin';
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DiscoverPlugin(initializerContext);
-}
-
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
+it('returns the `JsonCodeEditor` component', () => {
+  const props = {
+    hit: { _index: 'test', _source: { test: 123 } },
+    columns: [],
+    indexPattern: {} as IndexPattern,
+    filter: jest.fn(),
+    onAddColumn: jest.fn(),
+    onRemoveColumn: jest.fn(),
+  };
+  expect(shallow(<JsonCodeBlock {...props} />)).toMatchSnapshot();
+});

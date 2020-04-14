@@ -16,13 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 
-import { PluginInitializerContext } from 'kibana/public';
-import { DiscoverPlugin } from './plugin';
-
-export { DiscoverSetup, DiscoverStart } from './plugin';
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DiscoverPlugin(initializerContext);
+export function registerFeature(home: HomePublicPluginSetup) {
+  home.featureCatalogue.register({
+    id: 'discover',
+    title: i18n.translate('kbn.discover.discoverTitle', {
+      defaultMessage: 'Discover',
+    }),
+    description: i18n.translate('kbn.discover.discoverDescription', {
+      defaultMessage: 'Interactively explore your data by querying and filtering raw documents.',
+    }),
+    icon: 'discoverApp',
+    path: '/app/kibana#/discover',
+    showOnHomePage: true,
+    category: FeatureCatalogueCategory.DATA,
+  });
 }
-
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
