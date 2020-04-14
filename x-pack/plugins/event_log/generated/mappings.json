@@ -72,10 +72,6 @@
                     "type": "keyword",
                     "ignore_above": 1024
                 },
-                "namespace": {
-                    "type": "keyword",
-                    "ignore_above": 1024
-                },
                 "alerting": {
                     "properties": {
                         "instance_id": {
@@ -86,7 +82,7 @@
                 },
                 "saved_objects": {
                     "properties": {
-                        "store": {
+                        "namespace": {
                             "type": "keyword",
                             "ignore_above": 1024
                         },

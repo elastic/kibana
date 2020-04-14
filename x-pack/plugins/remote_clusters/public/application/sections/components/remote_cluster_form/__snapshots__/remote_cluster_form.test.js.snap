@@ -118,9 +118,12 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
   }
   save={[Function]}
 >
-  <EuiForm>
+  <EuiForm
+    data-test-subj="remoteClusterForm"
+  >
     <div
       className="euiForm"
+      data-test-subj="remoteClusterForm"
     >
       <EuiDescribedFormGroup
         description={
@@ -1351,6 +1354,7 @@ exports[`RemoteClusterForm renders untouched state 1`] = `
 Array [
   <div
     class="euiForm"
+    data-test-subj="remoteClusterForm"
   >
     <div
       class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
