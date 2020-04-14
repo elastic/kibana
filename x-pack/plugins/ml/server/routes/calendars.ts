@@ -73,7 +73,7 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
    * @apiName GetCalendarById
    * @apiDescription Gets calendar by id
    *
-   * @apiSchema (params) calendarIdSchema
+   * @apiSchema (params) calendarIdsSchema
    */
   router.get(
     {
