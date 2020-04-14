@@ -57,6 +57,7 @@ import {
 } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
+import { validateSavedObjectAggs } from './aggs_utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -592,6 +593,7 @@ export class SavedObjectsRepository {
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
+   * @property {object} [options.aggs] - see ./saved_object_aggs for more insight
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find<T = unknown>({
@@ -607,6 +609,7 @@ export class SavedObjectsRepository {
     namespace,
     type,
     filter,
+    aggs,
   }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
     if (!type) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -647,6 +650,14 @@ export class SavedObjectsRepository {
       }
     }
 
+    try {
+      if (aggs) {
+        validateSavedObjectAggs(allowedTypes, aggs, this._mappings);
+      }
+    } catch (e) {
+      throw e;
+    }
+
     const esOptions = {
       index: this.getIndicesForTypes(allowedTypes),
       size: perPage,
@@ -656,6 +667,7 @@ export class SavedObjectsRepository {
       rest_total_hits_as_int: true,
       body: {
         seq_no_primary_term: true,
+        ...(aggs != null ? { aggs } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,
           defaultSearchOperator,

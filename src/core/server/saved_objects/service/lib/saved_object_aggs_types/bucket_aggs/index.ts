@@ -17,18 +17,32 @@
  * under the License.
  */
 
-export { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
+import * as rt from 'io-ts';
 
-export {
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
-  ISavedObjectsClientProvider,
-  SavedObjectsClientProvider,
-  SavedObjectsClientProviderOptions,
-  SavedObjectsClientFactory,
-  SavedObjectsClientFactoryProvider,
-} from './scoped_client_provider';
+import { FieldBasicRT } from '../helpers';
 
-export { SavedObjectsErrorHelpers } from './errors';
-
-export { SavedObjectAggs } from './saved_object_aggs_types';
+export const BucketAggsTypeRt = rt.partial({
+  filter: rt.type({
+    term: rt.record(rt.string, rt.string),
+  }),
+  histogram: rt.intersection([
+    FieldBasicRT,
+    rt.type({ interval: rt.number }),
+    rt.partial({
+      min_doc_count: rt.number,
+      extended_bounds: rt.type({ min: rt.number, max: rt.number }),
+      keyed: rt.boolean,
+      missing: rt.number,
+      order: rt.record(rt.string, rt.literal('asc', 'desc')),
+    }),
+  ]),
+  terms: rt.intersection([
+    FieldBasicRT,
+    rt.partial({
+      field: rt.string,
+      size: rt.number,
+      show_term_doc_count_error: rt.boolean,
+      order: rt.record(rt.string, rt.literal('asc', 'desc')),
+    }),
+  ]),
+});

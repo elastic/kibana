@@ -306,6 +306,7 @@ export class SavedObjectsClient {
       sortField: 'sort_field',
       type: 'type',
       filter: 'filter',
+      aggs: 'aggs',
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);

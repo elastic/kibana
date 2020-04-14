@@ -34,7 +34,7 @@ export interface FindTestCase {
   failure?: 400 | 403;
 }
 
-export const getTestCases = (spaceId?: string) => ({
+export const getTestCases = (spaceId?: string): Record<string, FindTestCase> => ({
   singleNamespaceType: {
     title: 'find single-namespace type',
     query: 'type=isolatedtype&fields=title',
@@ -46,7 +46,7 @@ export const getTestCases = (spaceId?: string) => ({
           ? CASES.SINGLE_NAMESPACE_SPACE_2
           : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
     },
-  } as FindTestCase,
+  },
   multiNamespaceType: {
     title: 'find multi-namespace type',
     query: 'type=sharedtype&fields=title',
@@ -58,41 +58,41 @@ export const getTestCases = (spaceId?: string) => ({
           ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
           : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
     },
-  } as FindTestCase,
+  },
   namespaceAgnosticType: {
     title: 'find namespace-agnostic type',
     query: 'type=globaltype&fields=title',
     successResult: { savedObjects: CASES.NAMESPACE_AGNOSTIC },
-  } as FindTestCase,
-  hiddenType: { title: 'find hidden type', query: 'type=hiddentype&fields=name' } as FindTestCase,
-  unknownType: { title: 'find unknown type', query: 'type=wigwags' } as FindTestCase,
+  },
+  hiddenType: { title: 'find hidden type', query: 'type=hiddentype&fields=name' },
+  unknownType: { title: 'find unknown type', query: 'type=wigwags' },
   pageBeyondTotal: {
     title: 'find page beyond total',
     query: 'type=isolatedtype&page=100&per_page=100',
     successResult: { page: 100, perPage: 100, total: 1, savedObjects: [] },
-  } as FindTestCase,
+  },
   unknownSearchField: {
     title: 'find unknown search field',
     query: 'type=url&search_fields=a',
-  } as FindTestCase,
+  },
   filterWithNamespaceAgnosticType: {
     title: 'filter with namespace-agnostic type',
     query: 'type=globaltype&filter=globaltype.attributes.title:*global*',
     successResult: { savedObjects: CASES.NAMESPACE_AGNOSTIC },
-  } as FindTestCase,
+  },
   filterWithHiddenType: {
     title: 'filter with hidden type',
     query: `type=hiddentype&fields=name&filter=hiddentype.attributes.title:'hello'`,
-  } as FindTestCase,
+  },
   filterWithUnknownType: {
     title: 'filter with unknown type',
     query: `type=wigwags&filter=wigwags.attributes.title:'unknown'`,
-  } as FindTestCase,
+  },
   filterWithDisallowedType: {
     title: 'filter with disallowed type',
     query: `type=globaltype&filter=dashboard.title:'Requests'`,
     failure: 400,
-  } as FindTestCase,
+  },
 });
 export const createRequest = ({ query }: FindTestCase) => ({ query });
 const getTestTitle = ({ failure, title }: FindTestCase) => {
