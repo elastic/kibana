@@ -40,7 +40,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const executePingsRequest = async (username: string, password: string, spaceId?: string) => {
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
-    const url = `${basePath}${API_URLS.PINGS}?sort=desc&dateRangeStart=${PINGS_DATE_RANGE_START}&dateRangeEnd=${PINGS_DATE_RANGE_END}`;
+    const url = `${basePath}${API_URLS.PINGS}?sort=desc&from=${PINGS_DATE_RANGE_START}&to=${PINGS_DATE_RANGE_END}`;
     return await supertest
       .get(url)
       .auth(username, password)

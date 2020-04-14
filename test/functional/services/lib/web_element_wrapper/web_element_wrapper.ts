@@ -55,7 +55,6 @@ export class WebElementWrapper {
   private driver: WebDriver = this.webDriver.driver;
   private Keys = Key;
   public isW3CEnabled: boolean = (this.webDriver.driver as any).executor_.w3c === true;
-  public isChromium: boolean = [Browsers.Chrome, Browsers.ChromiumEdge].includes(this.browserType);
 
   public static create(
     webElement: WebElement | WebElementWrapper,
@@ -64,7 +63,7 @@ export class WebElementWrapper {
     timeout: number,
     fixedHeaderHeight: number,
     logger: ToolingLog,
-    browserType: Browsers
+    browserType: string
   ): WebElementWrapper {
     if (webElement instanceof WebElementWrapper) {
       return webElement;
@@ -88,7 +87,7 @@ export class WebElementWrapper {
     private timeout: number,
     private fixedHeaderHeight: number,
     private logger: ToolingLog,
-    private browserType: Browsers
+    private browserType: string
   ) {}
 
   private async _findWithCustomTimeout(
@@ -244,7 +243,7 @@ export class WebElementWrapper {
       return this.clearValueWithKeyboard();
     }
     await this.retryCall(async function clearValue(wrapper) {
-      if (wrapper.isChromium || options.withJS) {
+      if (wrapper.browserType === Browsers.Chrome || options.withJS) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
         await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
       } else {
@@ -276,7 +275,7 @@ export class WebElementWrapper {
         await delay(100);
       }
     } else {
-      if (this.isChromium) {
+      if (this.browserType === Browsers.Chrome) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
         await this.retryCall(async function clearValueWithKeyboard(wrapper) {
           await wrapper.driver.executeScript(`arguments[0].select();`, wrapper._webElement);
