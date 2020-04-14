@@ -121,7 +121,7 @@ export class KibanaLegacyPlugin {
        *
        * @param legacyAppId The name of the old app to forward URLs from
        * @param newAppId The name of the new app that handles the URLs now
-       * @param options Whether the prefix of the old app is kept to nest the legacy
+       * @param rewritePath Function to rewrite the legacy sub path of the app to the new path in the core app
        * path into the new path
        */
       forwardApp: (

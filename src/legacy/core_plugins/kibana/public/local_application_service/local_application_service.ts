@@ -103,6 +103,7 @@ export class LocalApplicationService {
         outerAngularWrapperRoute: true,
         reloadOnSearch: false,
         reloadOnUrl: false,
+        template: '<span></span>',
         controller($location: ILocationService) {
           const newPath = forwardDefinition.rewritePath($location.url());
           npStart.core.application.navigateToApp(forwardDefinition.newAppId, { path: newPath });

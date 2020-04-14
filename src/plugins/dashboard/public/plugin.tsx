@@ -262,21 +262,26 @@ export class DashboardPlugin
       DashboardConstants.DASHBOARD_ID,
       DashboardConstants.DASHBOARDS_ID,
       path => {
-        if (path === '#/dashboard') {
-          return '#/create';
-        }
-        const id = /dashboard\/(.*)$/.exec(path)?.[2];
-        if (!id) {
+        const [, id, tail] = /dashboard\/(.*?)($|\?)(.*)/.exec(path) || [];
+        if (!id && !tail) {
+          // unrecognized sub url
           return '#/list';
         }
-        return `#/view/${id}`;
+        if (!id && tail) {
+          // unsaved dashboard, but probably state in URL
+          return `#/create${tail || ''}`;
+        }
+        // persisted dashboard, probably with url state
+        return `#/view/${id}${tail || ''}`;
       }
     );
     kibanaLegacy.forwardApp(
       DashboardConstants.DASHBOARDS_ID,
       DashboardConstants.DASHBOARDS_ID,
-      () => {
-        return `#/list`;
+      path => {
+        const [, tail] = /(\?.*)/.exec(path) || [];
+        // carry over query if it exists
+        return `#/list${tail || ''}`;
       }
     );
 

@@ -248,8 +248,9 @@ export function initDashboardApp(app, deps) {
         },
       })
       .otherwise({
+        template: '<span></span>',
         controller: function() {
-          // TODO this should probably be smarter and avoid the redirect if possible
+          // TODO this should probably be smarter and avoid the double-redirect if possible
           window.location = deps.core.http.basePath.prepend(
             `app/kibana#/${deps.config.defaultAppId}`
           );
