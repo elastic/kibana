@@ -1,12 +1,13 @@
 {
-  "name": "List - and",
-  "description": "Query with a list that includes and. This rule should only produce signals when host.name exists and when both event.module is endgame and event.category is file",
-  "rule_id": "query-with-list-and",
+  "name": "List - and- kuery",
+  "description": "Query with a list that includes and. This rule should only produce signals when host.name exists and when both event.module is endgame and event.category is anything other than file",
+  "rule_id": "query-with-list-and-kuery",
   "risk_score": 1,
   "severity": "high",
   "type": "query",
   "query": "host.name: *",
   "interval": "30s",
+  "language": "kuery",
   "lists": [
     {
       "field": "event.module",
@@ -20,7 +21,7 @@
       "and": [
         {
           "field": "event.category",
-          "values_operator": "excluded",
+          "values_operator": "included",
           "values_type": "match",
           "values": [
             {

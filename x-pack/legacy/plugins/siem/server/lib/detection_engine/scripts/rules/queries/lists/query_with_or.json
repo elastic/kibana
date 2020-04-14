@@ -1,6 +1,6 @@
 {
   "name": "List - or",
-  "description": "Query with a list that includes or. This rule should only produce signals when host.name exists and when event.module is endgame or when event.category is file",
+  "description": "Query with a list that includes or. This rule should only produce signals when host.name exists and event.module is suricata and source.ip is 10.128.0.51",
   "rule_id": "query-with-list-or",
   "risk_score": 1,
   "severity": "high",
@@ -14,17 +14,17 @@
       "values_type": "match",
       "values": [
         {
-          "name": "endgame"
+          "name": "suricata"
         }
       ]
     },
     {
-      "field": "event.category",
+      "field": "source.ip",
       "values_operator": "excluded",
       "values_type": "match",
       "values": [
         {
-          "name": "file"
+          "name": "10.128.0.51"
         }
       ]
     }
