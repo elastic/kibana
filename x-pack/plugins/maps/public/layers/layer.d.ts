@@ -19,8 +19,6 @@ export interface ILayer {
   syncData(syncContext: SyncContext): Promise<void>;
   isVisible(): boolean;
   showAtZoomLevel(zoomLevel: number): boolean;
-  getMinZoomForData(): number;
-  getMaxZoomForData(): number;
   getMinZoom(): number;
   getMaxZoom(): number;
 }
@@ -43,8 +41,6 @@ export class AbstractLayer implements ILayer {
   syncData(syncContext: SyncContext): Promise<void>;
   isVisible(): boolean;
   showAtZoomLevel(zoomLevel: number): boolean;
-  getMinZoomForData(): number;
-  getMaxZoomForData(): number;
   getMinZoom(): number;
   getMaxZoom(): number;
   getQuery(): MapQuery;

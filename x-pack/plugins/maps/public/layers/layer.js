@@ -352,12 +352,4 @@ export class AbstractLayer {
   getType() {
     return this._descriptor.type;
   }
-
-  getMinZoomForData() {
-    return MIN_ZOOM;
-  }
-
-  getMaxZoomForData() {
-    return MAX_ZOOM;
-  }
 }

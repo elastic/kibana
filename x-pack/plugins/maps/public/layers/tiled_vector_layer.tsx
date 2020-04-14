@@ -226,12 +226,8 @@ export class SingleTiledVectorLayer extends VectorLayer {
     return [];
   }
 
-  getMinZoomForData(): number {
-    return this._source.getMinZoom();
-  }
-
   getMinZoom() {
     // higher resolution vector tiles cannot be displayed at lower-res
-    return Math.max(this.getMinZoomForData(), super.getMinZoom());
+    return Math.max(this._source.getMinZoom(), super.getMinZoom());
   }
 }
