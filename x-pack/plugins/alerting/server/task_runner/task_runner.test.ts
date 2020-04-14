@@ -169,10 +169,10 @@ describe('Task Runner', () => {
           "action": "execute",
         },
         "kibana": Object {
-          "namespace": undefined,
           "saved_objects": Array [
             Object {
               "id": "1",
+              "namespace": undefined,
               "type": "alert",
             },
           ],
@@ -229,10 +229,10 @@ describe('Task Runner', () => {
               "action": "execute",
             },
             "kibana": Object {
-              "namespace": undefined,
               "saved_objects": Array [
                 Object {
                   "id": "1",
+                  "namespace": undefined,
                   "type": "alert",
                 },
               ],
@@ -249,10 +249,10 @@ describe('Task Runner', () => {
               "alerting": Object {
                 "instance_id": "1",
               },
-              "namespace": undefined,
               "saved_objects": Array [
                 Object {
                   "id": "1",
+                  "namespace": undefined,
                   "type": "alert",
                 },
               ],
@@ -269,14 +269,15 @@ describe('Task Runner', () => {
               "alerting": Object {
                 "instance_id": "1",
               },
-              "namespace": undefined,
               "saved_objects": Array [
                 Object {
                   "id": "1",
+                  "namespace": undefined,
                   "type": "alert",
                 },
                 Object {
                   "id": "1",
+                  "namespace": undefined,
                   "type": "action",
                 },
               ],
@@ -344,10 +345,10 @@ describe('Task Runner', () => {
               "action": "execute",
             },
             "kibana": Object {
-              "namespace": undefined,
               "saved_objects": Array [
                 Object {
                   "id": "1",
+                  "namespace": undefined,
                   "type": "alert",
                 },
               ],
@@ -364,10 +365,10 @@ describe('Task Runner', () => {
               "alerting": Object {
                 "instance_id": "2",
               },
-              "namespace": undefined,
               "saved_objects": Array [
                 Object {
                   "id": "1",
+                  "namespace": undefined,
                   "type": "alert",
                 },
               ],
@@ -560,10 +561,10 @@ describe('Task Runner', () => {
               "action": "execute",
             },
             "kibana": Object {
-              "namespace": undefined,
               "saved_objects": Array [
                 Object {
                   "id": "1",
+                  "namespace": undefined,
                   "type": "alert",
                 },
               ],
