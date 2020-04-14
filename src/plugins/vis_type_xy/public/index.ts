@@ -20,6 +20,8 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { VisTypeXyPlugin as Plugin } from './plugin';
 
+export { VisTypeXyPluginSetup } from './plugin';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }

@@ -34,6 +34,9 @@ export interface VisTypeXyDependencies {
   charts: ChartsPluginSetup;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface VisTypeXyPluginSetup {}
+
 /** @internal */
 export interface VisTypeXyPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
@@ -50,7 +53,7 @@ export interface VisTypeXyPluginStartDependencies {
 type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies, void>;
 
 /** @internal */
-export class VisTypeXyPlugin implements Plugin<void, void> {
+export class VisTypeXyPlugin implements Plugin<VisTypeXyPluginSetup, void> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(
@@ -74,6 +77,8 @@ export class VisTypeXyPlugin implements Plugin<void, void> {
     visTypeDefinitions.forEach((vis: any) =>
       visualizations.createBaseVisualization(vis(visualizationDependencies))
     );
+
+    return {};
   }
 
   public start(core: CoreStart, deps: VisTypeXyPluginStartDependencies) {
