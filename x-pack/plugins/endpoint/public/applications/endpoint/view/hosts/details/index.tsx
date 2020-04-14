@@ -23,7 +23,7 @@ import { uiQueryParams, detailsData, detailsError, showView } from '../../../sto
 import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
 import { HostMetadata } from '../../../../../../common/types';
-import { FlyoutSubHeader } from './components/flyout_sub_header';
+import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
 
 export const HostDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -94,7 +94,7 @@ const PolicyResponseFlyoutPanel = memo<{
 }>(({ hostMeta }) => {
   const history = useHistory();
   const { show, ...queryParams } = useHostListSelector(uiQueryParams);
-  const backButtonProp = useMemo(() => {
+  const backButtonProp = useMemo((): FlyoutSubHeaderProps['backButton'] => {
     const detailsUri = urlFromQueryParams({
       ...queryParams,
       selected_host: hostMeta.host.id,
