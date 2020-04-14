@@ -7,7 +7,7 @@
 jest.mock('../../../../../plugins/maps/public/meta', () => {
   return {};
 });
-jest.mock('../kibana_services');
+jest.mock('../../../../../plugins/maps/public/kibana_services');
 
 import { getInitialLayers } from './get_initial_layers';
 

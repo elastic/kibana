@@ -5,7 +5,7 @@
  */
 
 jest.mock('../selectors/map_selectors', () => ({}));
-jest.mock('../kibana_services', () => ({}));
+jest.mock('../../../../../plugins/maps/public/kibana_services', () => ({}));
 
 import { mapExtentChanged, setMouseCoordinates } from './map_actions';
 
