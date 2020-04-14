@@ -48,7 +48,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
   }
 };
 
-interface UsePostCase extends NewCaseState {
+export interface UsePostCase extends NewCaseState {
   postCase: (data: CasePostRequest) => void;
 }
 export const usePostCase = (): UsePostCase => {
