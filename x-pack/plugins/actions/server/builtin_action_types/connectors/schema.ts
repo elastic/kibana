@@ -39,7 +39,6 @@ export const ConnectorSecretConfigurationSchema = schema.object(ConnectorSecretC
 export const UserSchema = schema.object({
   fullName: schema.oneOf([schema.nullable(schema.string()), schema.maybe(schema.string())]),
   username: schema.oneOf([schema.nullable(schema.string()), schema.maybe(schema.string())]),
-  email: schema.oneOf([schema.nullable(schema.string()), schema.maybe(schema.string())]),
 });
 
 const EntityInformation = {
@@ -69,7 +68,7 @@ export const ExecutorActionParams = {
   title: schema.string(),
   description: schema.maybe(schema.string()),
   comments: schema.maybe(schema.arrayOf(CommentSchema)),
-  externalCaseId: schema.nullable(schema.string()),
+  externalId: schema.nullable(schema.string()),
   ...EntityInformation,
 };
 

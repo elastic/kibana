@@ -16,7 +16,7 @@ const COMMENT_URL = `api/now/${API_VERSION}/table/incident`;
 // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
 const VIEW_INCIDENT_URL = `nav_to.do?uri=incident.do?sys_id=`;
 
-const getErrorMessage = (msg: string) => {
+export const getErrorMessage = (msg: string) => {
   return `[Action][ServiceNow]: ${msg}`;
 };
 

@@ -32,14 +32,14 @@ const pushToServiceHandler = async ({
   mapping,
   params,
 }: ConnectorApiHandlerArgs): Promise<PushToServiceResponse> => {
-  const { externalCaseId, comments } = params;
-  const updateIncident = externalCaseId ? true : false;
+  const { externalId, comments } = params;
+  const updateIncident = externalId ? true : false;
   const defaultPipes = updateIncident ? ['informationUpdated'] : ['informationCreated'];
   let currentIncident: ExternalServiceParams | undefined;
   let res: PushToServiceResponse;
 
-  if (externalCaseId) {
-    currentIncident = await externalService.getIncident(externalCaseId);
+  if (externalId) {
+    currentIncident = await externalService.getIncident(externalId);
   }
 
   const fields = prepareFieldsForTransformation({
@@ -55,7 +55,7 @@ const pushToServiceHandler = async ({
   });
 
   if (updateIncident) {
-    res = await externalService.updateIncident({ incidentId: externalCaseId, incident });
+    res = await externalService.updateIncident({ incidentId: externalId, incident });
   } else {
     res = await externalService.createIncident({ incident });
   }

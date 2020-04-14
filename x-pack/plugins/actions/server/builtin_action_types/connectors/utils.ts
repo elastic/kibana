@@ -76,7 +76,7 @@ export const createConnectorExecutor = ({
   const { username, password } = execOptions.secrets as ConnectorSecretConfigurationType;
   const params = execOptions.params as ExecutorParams;
   const { action, actionParams } = params;
-  const { comments, externalCaseId, ...restParams } = actionParams;
+  const { comments, externalId, ...restParams } = actionParams;
 
   const mapping = buildMap(configurationMapping);
   const externalCase = mapParams(restParams, mapping);
@@ -207,8 +207,12 @@ export const transformFields = ({ params, fields, currentIncident }: TransformFi
       date: params.updatedAt ?? params.createdAt,
       user:
         params.updatedBy != null
-          ? params.updatedBy.fullName ?? params.updatedBy.username
-          : params.createdBy.fullName ?? params.createdBy.username,
+          ? params.updatedBy.fullName
+            ? params.updatedBy.fullName
+            : params.updatedBy.username
+          : params.createdBy.fullName
+          ? params.createdBy.fullName
+          : params.createdBy.username,
       previousValue: currentIncident ? currentIncident[cur.key] : '',
     }).value;
     return prev;
@@ -223,8 +227,12 @@ export const transformComments = (comments: Comment[], pipes: string[]): Comment
       date: c.updatedAt ?? c.createdAt,
       user:
         c.updatedBy != null
-          ? c.updatedBy.fullName ?? c.updatedBy.username
-          : c.createdBy.fullName ?? c.createdBy.username,
+          ? c.updatedBy.fullName
+            ? c.updatedBy.fullName
+            : c.updatedBy.username
+          : c.createdBy.fullName
+          ? c.createdBy.fullName
+          : c.createdBy.username,
     }).value,
   }));
 };

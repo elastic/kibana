@@ -132,7 +132,7 @@ export const ServiceConnectorCaseParamsRt = rt.intersection([
     caseId: rt.string,
     createdAt: rt.string,
     createdBy: ServiceConnectorUserParams,
-    incidentId: rt.union([rt.string, rt.null]),
+    externalId: rt.union([rt.string, rt.null]),
     title: rt.string,
     updatedAt: rt.union([rt.string, rt.null]),
     updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
@@ -145,8 +145,8 @@ export const ServiceConnectorCaseParamsRt = rt.intersection([
 
 export const ServiceConnectorCaseResponseRt = rt.intersection([
   rt.type({
-    number: rt.string,
-    incidentId: rt.string,
+    title: rt.string,
+    id: rt.string,
     pushedDate: rt.string,
     url: rt.string,
   }),
