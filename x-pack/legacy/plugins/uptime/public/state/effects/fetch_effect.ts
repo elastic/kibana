@@ -16,7 +16,7 @@ import { IHttpFetchError } from '../../../../../../../target/types/core/public/h
  * @param fail creates a failure action
  * @template T the action type expected by the fetch action
  * @template R the type that the API request should return on success
- * @template S tye type of the success action
+ * @template S the type of the success action
  * @template F the type of the failure action
  */
 export function fetchEffectFactory<T, R, S, F>(
