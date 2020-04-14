@@ -640,6 +640,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
+    status: StatusServiceSetup;
+    // (undocumented)
     uiSettings: UiSettingsServiceSetup;
     // (undocumented)
     uuid: UuidServiceSetup;
@@ -655,6 +657,14 @@ export interface CoreStart {
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
     uiSettings: UiSettingsServiceStart;
+}
+
+// @public
+export interface CoreStatus {
+    // (undocumented)
+    elasticsearch: ServiceStatus;
+    // (undocumented)
+    savedObjects: ServiceStatus;
 }
 
 // @public
@@ -794,6 +804,14 @@ export interface ElasticsearchServiceStart {
         readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
         readonly client: IClusterClient;
     };
+}
+
+// @public (undocumented)
+export interface ElasticsearchStatusMeta {
+    // (undocumented)
+    incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
+    // (undocumented)
+    warningNodes: NodesVersionCompatibility['warningNodes'];
 }
 
 // @public (undocumented)
@@ -1020,7 +1038,7 @@ export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolea
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
 // @public
-export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden' | 'getImportableAndExportableTypes' | 'isImportableAndExportable'>;
+export type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerType'>;
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
@@ -1282,6 +1300,24 @@ export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critica
 
 // @public
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
+
+// Warning: (ae-missing-release-tag) "NodesVersionCompatibility" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface NodesVersionCompatibility {
+    // Warning: (ae-forgotten-export) The symbol "NodeInfo" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    incompatibleNodes: NodeInfo[];
+    // (undocumented)
+    isCompatible: boolean;
+    // (undocumented)
+    kibanaVersion: string;
+    // (undocumented)
+    message?: string;
+    // (undocumented)
+    warningNodes: NodeInfo[];
+}
 
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 //
@@ -1628,6 +1664,7 @@ export interface SavedObject<T = unknown> {
     };
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    namespaces?: string[];
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;
@@ -1670,6 +1707,12 @@ export interface SavedObjectReference {
     name: string;
     // (undocumented)
     type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
+    version?: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "SavedObjectDoc" needs to be exported by the entry point index.d.ts
@@ -1739,11 +1782,13 @@ export interface SavedObjectsBulkUpdateResponse<T = unknown> {
 export class SavedObjectsClient {
     // @internal
     constructor(repository: ISavedObjectsRepository);
+    addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<{}>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
+    deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
     // (undocumented)
     static errors: typeof SavedObjectsErrorHelpers;
     // (undocumented)
@@ -1825,6 +1870,11 @@ export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOp
 }
 
 // @public (undocumented)
+export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public (undocumented)
 export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
     refresh?: MutatingOperationRefreshSetting;
 }
@@ -1833,6 +1883,8 @@ export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
 export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createBadRequestError(reason?: string): DecoratedError;
+    // (undocumented)
+    static createConflictError(type: string, id: string): DecoratedError;
     // (undocumented)
     static createEsAutoCreateIndexError(): DecoratedError;
     // (undocumented)
@@ -1845,6 +1897,8 @@ export class SavedObjectsErrorHelpers {
     static decorateBadRequestError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
     static decorateConflictError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateEsCannotExecuteScriptError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
     static decorateEsUnavailableError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
@@ -1861,6 +1915,8 @@ export class SavedObjectsErrorHelpers {
     static isConflictError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isEsAutoCreateIndexError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isEsCannotExecuteScriptError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isEsUnavailableError(error: Error | DecoratedError): boolean;
     // (undocumented)
@@ -2049,8 +2105,6 @@ export interface SavedObjectsLegacyService {
     // (undocumented)
     getScopedSavedObjectsClient: SavedObjectsClientProvider['getClient'];
     // (undocumented)
-    importAndExportableTypes: string[];
-    // (undocumented)
     importExport: {
         objectLimit: number;
         importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
@@ -2092,6 +2146,9 @@ export interface SavedObjectsMigrationVersion {
 }
 
 // @public
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
+
+// @public
 export interface SavedObjectsRawDoc {
     // (undocumented)
     _id: string;
@@ -2109,6 +2166,7 @@ export interface SavedObjectsRawDoc {
 
 // @public (undocumented)
 export class SavedObjectsRepository {
+    addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<{}>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
@@ -2119,6 +2177,7 @@ export class SavedObjectsRepository {
     static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
+    deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
     // (undocumented)
     find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
@@ -2160,7 +2219,11 @@ export class SavedObjectsSchema {
     // (undocumented)
     isHiddenType(type: string): boolean;
     // (undocumented)
+    isMultiNamespace(type: string): boolean;
+    // (undocumented)
     isNamespaceAgnostic(type: string): boolean;
+    // (undocumented)
+    isSingleNamespace(type: string): boolean;
 }
 
 // @public
@@ -2190,6 +2253,16 @@ export interface SavedObjectsServiceStart {
     getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
+// @public
+export interface SavedObjectStatusMeta {
+    // (undocumented)
+    migratedIndices: {
+        [status: string]: number;
+        skipped: number;
+        migrated: number;
+    };
+}
+
 // @public (undocumented)
 export interface SavedObjectsType {
     convertToAliasScript?: string;
@@ -2199,7 +2272,9 @@ export interface SavedObjectsType {
     mappings: SavedObjectsTypeMappingDefinition;
     migrations?: SavedObjectMigrationMap;
     name: string;
-    namespaceAgnostic: boolean;
+    // @deprecated
+    namespaceAgnostic?: boolean;
+    namespaceType?: SavedObjectsNamespaceType;
 }
 
 // @public
@@ -2244,7 +2319,9 @@ export class SavedObjectTypeRegistry {
     getType(type: string): SavedObjectsType | undefined;
     isHidden(type: string): boolean;
     isImportableAndExportable(type: string): boolean;
+    isMultiNamespace(type: string): boolean;
     isNamespaceAgnostic(type: string): boolean;
+    isSingleNamespace(type: string): boolean;
     registerType(type: SavedObjectsType): void;
     }
 
@@ -2257,6 +2334,38 @@ export class ScopedClusterClient implements IScopedClusterClient {
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
     }
+
+// @public
+export interface ServiceStatus<Meta extends Record<string, any> | unknown = unknown> {
+    detail?: string;
+    documentationUrl?: string;
+    level: ServiceStatusLevel;
+    meta?: Meta;
+    summary: string;
+}
+
+// @public
+export type ServiceStatusLevel = typeof ServiceStatusLevels[keyof typeof ServiceStatusLevels];
+
+// @public
+export const ServiceStatusLevels: Readonly<{
+    available: Readonly<{
+        toString: () => "available";
+        valueOf: () => 0;
+    }>;
+    degraded: Readonly<{
+        toString: () => "degraded";
+        valueOf: () => 1;
+    }>;
+    unavailable: Readonly<{
+        toString: () => "unavailable";
+        valueOf: () => 2;
+    }>;
+    critical: Readonly<{
+        toString: () => "critical";
+        valueOf: () => 3;
+    }>;
+}>;
 
 // @public
 export interface SessionCookieValidationResult {
@@ -2299,6 +2408,11 @@ export type StartServicesAccessor<TPluginsStart extends object = object, TStart 
 export interface StaticHttpResourcesRenderOptions extends HttpResourcesRenderOptions {
     // (undocumented)
     path: string;
+}
+
+// @public
+export interface StatusServiceSetup {
+    core$: Observable<CoreStatus>;
 }
 
 // @public

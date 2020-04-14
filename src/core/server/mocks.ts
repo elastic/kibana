@@ -35,6 +35,7 @@ import { InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { metricsServiceMock } from './metrics/metrics_service.mock';
 import { uuidServiceMock } from './uuid/uuid_service.mock';
+import { statusServiceMock } from './status/status_service.mock';
 
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
@@ -138,9 +139,10 @@ function createCoreSetupMock({
     elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
+    status: statusServiceMock.createSetupContract(),
+    metrics: metricsServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
-    metrics: metricsServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
@@ -166,12 +168,13 @@ function createInternalCoreSetupMock() {
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
     http: httpServiceMock.createSetupContract(),
-    uiSettings: uiSettingsServiceMock.createSetupContract(),
-    savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
-    uuid: uuidServiceMock.createSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
+    savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
+    status: statusServiceMock.createInternalSetupContract(),
+    uuid: uuidServiceMock.createSetupContract(),
     httpResources: httpResourcesMock.createSetupContract(),
     rendering: renderingMock.createSetupContract(),
+    uiSettings: uiSettingsServiceMock.createSetupContract(),
   };
   return setupDeps;
 }

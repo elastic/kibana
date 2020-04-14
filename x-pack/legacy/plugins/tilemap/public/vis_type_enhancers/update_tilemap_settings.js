@@ -4,20 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uiRoutes from 'ui/routes';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import 'ui/vis/map/service_settings';
+import { npSetup } from 'ui/new_platform';
 
-uiRoutes.addSetupWork(function($injector, serviceSettings) {
-  const tileMapPluginInfo = xpackInfo.get('features.tilemap');
+const tileMapPluginInfo = xpackInfo.get('features.tilemap');
 
-  if (!tileMapPluginInfo) {
-    return;
-  }
-
-  if (!tileMapPluginInfo.license.active || !tileMapPluginInfo.license.valid) {
-    return;
-  }
+if (tileMapPluginInfo && (tileMapPluginInfo.license.active || tileMapPluginInfo.license.valid)) {
+  const { serviceSettings } = npSetup.plugins.mapsLegacy;
   serviceSettings.addQueryParams({ license: tileMapPluginInfo.license.uid });
   serviceSettings.disableZoomMessage();
-});
+}

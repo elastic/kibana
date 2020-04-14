@@ -33,6 +33,7 @@ import { UuidServiceSetup } from './uuid';
 import { InternalMetricsServiceSetup } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
+import { InternalStatusServiceSetup } from './status';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -40,10 +41,11 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  uiSettings: InternalUiSettingsServiceSetup;
-  savedObjects: InternalSavedObjectsServiceSetup;
-  uuid: UuidServiceSetup;
   metrics: InternalMetricsServiceSetup;
+  savedObjects: InternalSavedObjectsServiceSetup;
+  status: InternalStatusServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
+  uuid: UuidServiceSetup;
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
 }

@@ -178,6 +178,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerType: deps.savedObjects.registerType,
       getImportExportObjectLimit: deps.savedObjects.getImportExportObjectLimit,
     },
+    status: {
+      core$: deps.status.core$,
+    },
     uiSettings: {
       register: deps.uiSettings.register,
     },
