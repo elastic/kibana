@@ -109,10 +109,6 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         {
           type: 'test-logs',
           enabled: true,
-          inputVar: 'input-value',
-          inputVar3: {
-            testField: 'test',
-          },
           streams: [
             {
               id: 'test-logs-foo',
@@ -152,10 +148,6 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         {
           type: 'test-logs',
           enabled: true,
-          inputVar: 'input-value',
-          inputVar3: {
-            testField: 'test',
-          },
           streams: [
             {
               id: 'test-logs-foo',

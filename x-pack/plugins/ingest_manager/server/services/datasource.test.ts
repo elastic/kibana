@@ -31,28 +31,32 @@ jest.mock('./epm/packages/assets', () => {
 });
 
 describe('Datasource service', () => {
-  const pkgKey = 'package-1.0.0';
-
   describe('assignPackageStream', () => {
-    it('should work', async () => {
-      const inputs = await datasourceService.assignPackageStream(pkgKey, [
+    it('should work with cofig variables from the stream', async () => {
+      const inputs = await datasourceService.assignPackageStream(
         {
-          type: 'log',
-          enabled: true,
-          streams: [
-            {
-              id: 'dataset01',
-              dataset: 'package.dataset1',
-              enabled: true,
-              config: {
-                paths: {
-                  value: ['/var/log/set.log'],
+          pkgName: 'package',
+          pkgVersion: '1.0.0',
+        },
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'dataset01',
+                dataset: 'package.dataset1',
+                enabled: true,
+                config: {
+                  paths: {
+                    value: ['/var/log/set.log'],
+                  },
                 },
               },
-            },
-          ],
-        },
-      ]);
+            ],
+          },
+        ]
+      );
 
       expect(inputs).toEqual([
         {
@@ -68,6 +72,57 @@ describe('Datasource service', () => {
                   value: ['/var/log/set.log'],
                 },
               },
+              pkg_stream: {
+                metricset: ['dataset1'],
+                paths: ['/var/log/set.log'],
+                type: 'log',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should work with config variables at the input level', async () => {
+      const inputs = await datasourceService.assignPackageStream(
+        {
+          pkgName: 'package',
+          pkgVersion: '1.0.0',
+        },
+        [
+          {
+            type: 'log',
+            enabled: true,
+            config: {
+              paths: {
+                value: ['/var/log/set.log'],
+              },
+            },
+            streams: [
+              {
+                id: 'dataset01',
+                dataset: 'package.dataset1',
+                enabled: true,
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          config: {
+            paths: {
+              value: ['/var/log/set.log'],
+            },
+          },
+          streams: [
+            {
+              id: 'dataset01',
+              dataset: 'package.dataset1',
+              enabled: true,
               pkg_stream: {
                 metricset: ['dataset1'],
                 paths: ['/var/log/set.log'],
