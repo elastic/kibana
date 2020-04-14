@@ -90,6 +90,14 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   private readonly storage: IStorageWrapper;
   private readonly packageInfo: PackageInfo;
 
+  private readonly getInternalStartServices: GetInternalStartServicesFn = () => ({
+    fieldFormats: getFieldFormats(),
+    notifications: getNotifications(),
+    uiSettings: getUiSettings(),
+    injectedMetadata: getInjectedMetadata(),
+    searchService: getSearchService(),
+  });
+
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService();
     this.queryService = new QueryService();
@@ -97,14 +105,6 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     this.storage = new Storage(window.localStorage);
     this.packageInfo = initializerContext.env.packageInfo;
   }
-
-  getInternalStartServices: GetInternalStartServicesFn = () => ({
-    fieldFormats: getFieldFormats(),
-    notifications: getNotifications(),
-    uiSettings: getUiSettings(),
-    injectedMetadata: getInjectedMetadata(),
-    searchService: getSearchService(),
-  });
 
   public setup(
     core: CoreSetup,
