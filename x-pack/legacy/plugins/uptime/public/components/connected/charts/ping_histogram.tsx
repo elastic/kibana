@@ -14,7 +14,7 @@ import {
 import { getPingHistogram } from '../../../state/actions';
 import { selectPingHistogram } from '../../../state/selectors';
 import { withResponsiveWrapper, ResponsiveWrapperProps } from '../../higher_order';
-import { GetPingHistogramParams, HistogramResult } from '../../../../common/types';
+import { GetPingHistogramParams, HistogramResult } from '../../../../common/runtime_types';
 import { useGetUrlParams } from '../../../hooks';
 
 type Props = ResponsiveWrapperProps &

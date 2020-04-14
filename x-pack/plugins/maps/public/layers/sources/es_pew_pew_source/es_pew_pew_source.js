@@ -16,7 +16,7 @@ import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_de
 import { i18n } from '@kbn/i18n';
 import {
   FIELD_ORIGIN,
-  ES_PEW_PEW,
+  SOURCE_TYPES,
   COUNT_PROP_NAME,
   VECTOR_STYLES,
 } from '../../../../common/constants';
@@ -35,7 +35,7 @@ const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
 });
 
 export class ESPewPewSource extends AbstractESAggSource {
-  static type = ES_PEW_PEW;
+  static type = SOURCE_TYPES.ES_PEW_PEW;
 
   static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
     return {
@@ -232,7 +232,7 @@ export class ESPewPewSource extends AbstractESAggSource {
 
 registerSource({
   ConstructorFunction: ESPewPewSource,
-  type: ES_PEW_PEW,
+  type: SOURCE_TYPES.ES_PEW_PEW,
 });
 
 export const point2PointLayerWizardConfig = {

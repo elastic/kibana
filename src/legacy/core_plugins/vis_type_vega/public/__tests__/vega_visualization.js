@@ -49,6 +49,10 @@ import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_ty
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
 import { setInjectedVars } from '../services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -69,9 +73,34 @@ describe('VegaVisualizations', () => {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject($injector => {
+    ngMock.inject(() => {
+      setInjectedVarFunc(injectedVar => {
+        switch (injectedVar) {
+          case 'mapConfig':
+            return {
+              emsFileApiUrl: '',
+              emsTileApiUrl: '',
+              emsLandingPageUrl: '',
+            };
+          case 'tilemapsConfig':
+            return {
+              deprecated: {
+                config: {
+                  options: {
+                    attribution: '123',
+                  },
+                },
+              },
+            };
+          case 'version':
+            return '123';
+          default:
+            return 'not found';
+        }
+      });
+      const serviceSettings = new ServiceSettings();
       vegaVisualizationDependencies = {
-        serviceSettings: $injector.get('serviceSettings'),
+        serviceSettings,
         core: {
           uiSettings: npStart.core.uiSettings,
         },

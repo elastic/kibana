@@ -8,7 +8,7 @@ import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
 import {
   ES_GEO_FIELD_TYPE,
-  GEOJSON_FILE,
+  SOURCE_TYPES,
   DEFAULT_MAX_RESULT_WINDOW,
   SCALING_TYPES,
 } from '../../../../common/constants';
@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { registerSource } from '../source_registry';
 
 export class GeojsonFileSource extends AbstractVectorSource {
-  static type = GEOJSON_FILE;
+  static type = SOURCE_TYPES.GEOJSON_FILE;
 
   static isIndexingSource = true;
 
@@ -130,7 +130,7 @@ const previewGeojsonFile = (onPreviewSource, inspectorAdapters) => {
 
 registerSource({
   ConstructorFunction: GeojsonFileSource,
-  type: GEOJSON_FILE,
+  type: SOURCE_TYPES.GEOJSON_FILE,
 });
 
 export const uploadLayerWizardConfig = {
