@@ -29,10 +29,10 @@ describe('getApmHref', () => {
                 uid: 'test-pod-id',
               },
             },
-            '@timestamp': 123,
+            timestamp: 123,
           },
         ],
-        '@timestamp': '123',
+        timestamp: '123',
         url: {
           full: 'https://www.elastic.co/',
           domain: 'www.elastic.co',

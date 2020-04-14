@@ -23,14 +23,14 @@ describe('MonitorListDrawer component', () => {
               ip: '127.0.0.1',
               status: 'up',
             },
-            '@timestamp': 121,
+            timestamp: 121,
           },
         ],
         summary: {
           up: 1,
           down: 0,
         },
-        '@timestamp': '123',
+        timestamp: '123',
         url: {
           domain: 'expired.badssl.com',
           full: 'https://expired.badssl.com',
@@ -76,21 +76,21 @@ describe('MonitorListDrawer component', () => {
           ip: '127.0.0.1',
           status: 'up',
         },
-        '@timestamp': 121,
+        timestamp: 121,
       },
       {
         monitor: {
           ip: '127.0.0.2',
           status: 'down',
         },
-        '@timestamp': 123,
+        timestamp: 123,
       },
       {
         monitor: {
           ip: '127.0.0.3',
           status: 'up',
         },
-        '@timestamp': 125,
+        timestamp: 125,
       },
     ];
     summary.state.checks = checks;

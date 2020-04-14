@@ -43,7 +43,7 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        '@timestamp': 1579794631464,
+        timestamp: 1579794631464,
       },
       {
         monitor: {
@@ -60,7 +60,7 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        '@timestamp': 1579794634220,
+        timestamp: 1579794634220,
       },
       {
         monitor: {
@@ -77,7 +77,7 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        '@timestamp': 1579794628368,
+        timestamp: 1579794628368,
       },
     ];
 
@@ -97,7 +97,7 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        '@timestamp': 1579794631464,
+        timestamp: 1579794631464,
       },
       {
         monitor: {
@@ -114,7 +114,7 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        '@timestamp': 1579794634220,
+        timestamp: 1579794634220,
       },
       {
         monitor: {
@@ -131,7 +131,7 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        '@timestamp': 1579794628368,
+        timestamp: 1579794628368,
       },
     ];
 
@@ -151,7 +151,7 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        '@timestamp': 1579794631464,
+        timestamp: 1579794631464,
       },
       {
         monitor: {
@@ -168,7 +168,7 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        '@timestamp': 1579794634220,
+        timestamp: 1579794634220,
       },
       {
         monitor: {
@@ -185,7 +185,7 @@ describe('MonitorListStatusColumn', () => {
             },
           },
         },
-        '@timestamp': 1579794628368,
+        timestamp: 1579794628368,
       },
     ];
   });

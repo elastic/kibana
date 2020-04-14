@@ -60,7 +60,7 @@ const simpleEnricher = (monitorGroups: MonitorGroups[]): MonitorEnricher => {
         monitor_id: monitorGroup.id,
         state: {
           summary: {},
-          '@timestamp': new Date(Date.parse('1999-12-31')).valueOf().toString(),
+          timestamp: new Date(Date.parse('1999-12-31')).valueOf().toString(),
           url: {},
         },
       };

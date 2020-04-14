@@ -41,7 +41,7 @@ export const CheckType = t.intersection([
   }),
   t.type({
     monitor: CheckMonitorType,
-    '@timestamp': t.number,
+    timestamp: t.number,
   }),
 ]);
 
@@ -68,7 +68,7 @@ export const StateType = t.intersection([
     }),
   }),
   t.type({
-    '@timestamp': t.string,
+    timestamp: t.string,
     url: t.partial({
       domain: t.string,
       full: t.string,

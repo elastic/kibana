@@ -33,10 +33,10 @@ describe('getLoggingHref', () => {
                 uid: 'test-pod-id',
               },
             },
-            '@timestamp': 123,
+            timestamp: 123,
           },
         ],
-        '@timestamp': '123',
+        timestamp: '123',
         url: {},
       },
     };

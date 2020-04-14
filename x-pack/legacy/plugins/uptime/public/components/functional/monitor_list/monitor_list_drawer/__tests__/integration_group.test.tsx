@@ -18,7 +18,7 @@ describe('IntegrationGroup', () => {
       state: {
         summary: {},
         checks: [],
-        '@timestamp': '123',
+        timestamp: '123',
         url: {},
       },
     };

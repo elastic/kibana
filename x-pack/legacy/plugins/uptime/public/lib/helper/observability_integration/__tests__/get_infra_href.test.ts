@@ -27,12 +27,12 @@ describe('getInfraHref', () => {
                 uid: 'test-pod-uid',
               },
             },
-            '@timestamp': 123,
+            timestamp: 123,
           },
         ],
         summary: {},
         url: {},
-        '@timestamp': '123',
+        timestamp: '123',
       },
     };
   });
@@ -70,7 +70,7 @@ describe('getInfraHref', () => {
             uid: 'test-pod-uid',
           },
         },
-        '@timestamp': 123,
+        timestamp: 123,
       },
       {
         monitor: {
@@ -85,7 +85,7 @@ describe('getInfraHref', () => {
             uid: 'test-pod-uid-bar',
           },
         },
-        '@timestamp': 123,
+        timestamp: 123,
       },
     ];
     expect(getInfraContainerHref(summary, 'bar')).toMatchInlineSnapshot(
@@ -130,7 +130,7 @@ describe('getInfraHref', () => {
             uid: 'test-pod-uid',
           },
         },
-        '@timestamp': 123,
+        timestamp: 123,
       },
       {
         monitor: {
@@ -145,7 +145,7 @@ describe('getInfraHref', () => {
             uid: 'test-pod-uid-bar',
           },
         },
-        '@timestamp': 123,
+        timestamp: 123,
       },
     ];
     expect(getInfraKubernetesHref(summary, '')).toMatchInlineSnapshot(
@@ -189,7 +189,7 @@ describe('getInfraHref', () => {
   it('getInfraIpHref returns a url for ors between multiple ips', () => {
     summary.state.checks = [
       {
-        '@timestamp': 123,
+        timestamp: 123,
         monitor: {
           ip: '152.151.23.192',
           status: 'up',
@@ -208,7 +208,7 @@ describe('getInfraHref', () => {
             uid: 'test-pod-uid',
           },
         },
-        '@timestamp': 123,
+        timestamp: 123,
       },
     ];
     expect(getInfraIpHref(summary, 'foo')).toMatchInlineSnapshot(
