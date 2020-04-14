@@ -111,6 +111,7 @@ describe('actions_connectors_list component with items', () => {
         id: '1',
         actionTypeId: 'test',
         description: 'My test',
+        isPreconfigured: false,
         referencedByCount: 1,
         config: {},
       },
@@ -119,6 +120,15 @@ describe('actions_connectors_list component with items', () => {
         actionTypeId: 'test2',
         description: 'My test 2',
         referencedByCount: 1,
+        isPreconfigured: false,
+        config: {},
+      },
+      {
+        id: '3',
+        actionTypeId: 'test2',
+        description: 'My preconfigured test 2',
+        referencedByCount: 1,
+        isPreconfigured: true,
         config: {},
       },
     ]);
@@ -185,7 +195,11 @@ describe('actions_connectors_list component with items', () => {
 
   it('renders table of connectors', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(3);
+  });
+
+  it('renders table with preconfigured connectors', () => {
+    expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
   });
 
   test('if select item for edit should render ConnectorEditFlyout', () => {

@@ -22,12 +22,16 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ColorRanges, ColorSchemaOptions, SwitchOption } from '../../common';
+import {
+  ColorRanges,
+  ColorSchemaOptions,
+  ColorSchemaParams,
+  SetColorRangeValue,
+  SwitchOption,
+  ColorSchemas,
+} from '../../../../../../../plugins/charts/public';
 import { GaugeOptionsInternalProps } from '.';
-import { ColorSchemaVislibParams } from '../../../types';
 import { Gauge } from '../../../gauge';
-import { SetColorRangeValue } from '../../common/color_ranges';
-import { ColorSchemas } from '../../../../../../../plugins/charts/public';
 
 function RangesPanel({
   setGaugeValue,
@@ -39,7 +43,7 @@ function RangesPanel({
   vis,
 }: GaugeOptionsInternalProps) {
   const setColorSchemaOptions = useCallback(
-    <T extends keyof ColorSchemaVislibParams>(paramName: T, value: ColorSchemaVislibParams[T]) => {
+    <T extends keyof ColorSchemaParams>(paramName: T, value: ColorSchemaParams[T]) => {
       setGaugeValue(paramName, value as Gauge[T]);
       // set outline if color schema is changed to greys
       // if outline wasn't set explicitly yet
