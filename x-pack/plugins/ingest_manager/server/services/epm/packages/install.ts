@@ -16,7 +16,7 @@ import {
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
 import { getObject } from './get_objects';
-import { getInstallation } from './index';
+import { getInstallation, getInstallationObject } from './index';
 import { installTemplates } from '../elasticsearch/template/install';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
@@ -30,6 +30,13 @@ export async function installPackage(options: {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO: change epm API to /packageName/version so we don't need to do this
   const [pkgName, pkgVersion] = pkgkey.split('-');
+  // see if some version of this package is already installed
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  if (installedPkg?.attributes.version === pkgVersion) {
+    // for now return asset references if this version is already installed
+    return installedPkg.attributes.installed;
+  }
+
   const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
   const { internal = false } = registryPackageInfo;
 
