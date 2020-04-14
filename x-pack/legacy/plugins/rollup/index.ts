@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { PluginInitializerContext } from 'src/core/server';
 import { RollupSetup } from '../../../plugins/rollup/server';
 import { PLUGIN, CONFIG_ROLLUPS } from './common';
@@ -15,22 +14,6 @@ export function rollup(kibana: any) {
     id: PLUGIN.ID,
     configPrefix: 'xpack.rollup',
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-    uiExports: {
-      uiSettingDefaults: {
-        [CONFIG_ROLLUPS]: {
-          name: i18n.translate('xpack.rollupJobs.rollupIndexPatternsTitle', {
-            defaultMessage: 'Enable rollup index patterns',
-          }),
-          value: true,
-          description: i18n.translate('xpack.rollupJobs.rollupIndexPatternsDescription', {
-            defaultMessage: `Enable the creation of index patterns which capture rollup indices,
-              which in turn enable visualizations based on rollup data. Refresh
-              the page to apply the changes.`,
-          }),
-          category: ['rollups'],
-        },
-      },
-    },
     init(server: any) {
       const { core: coreSetup, plugins } = server.newPlatform.setup;
       const { usageCollection, metrics, indexManagement } = plugins;
