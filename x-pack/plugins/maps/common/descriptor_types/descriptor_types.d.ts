@@ -17,6 +17,7 @@ export type AttributionDescriptor = {
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
+  applyGlobalQuery?: boolean;
 };
 
 export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
@@ -99,6 +100,8 @@ export type JoinDescriptor = {
   right: ESTermSourceDescriptor;
 };
 
+// todo : this union type is incompatible with dynamic extensibility of sources.
+// Reconsider using SourceDescriptor in type signatures for top-level classes
 export type SourceDescriptor =
   | XYZTMSSourceDescriptor
   | WMSSourceDescriptor
@@ -107,6 +110,7 @@ export type SourceDescriptor =
   | ESTermSourceDescriptor
   | ESSearchSourceDescriptor
   | ESGeoGridSourceDescriptor
+  | EMSTMSSourceDescriptor
   | EMSFileSourceDescriptor;
 
 export type Query = {

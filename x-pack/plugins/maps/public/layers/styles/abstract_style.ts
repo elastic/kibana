@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReactElement } from 'react';
 import { StyleDescriptor } from '../../../common/descriptor_types';
 import { ILayer } from '../layer';
 
@@ -18,14 +19,14 @@ export interface IStyle {
   }: {
     layer: ILayer;
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
-  }): ReactElemeny<any> | null;
+  }): ReactElement<any> | null;
   getSourceFieldNames(): string[];
 }
 
 export class AbstractStyle implements IStyle {
   readonly _descriptor: StyleDescriptor;
 
-  constructor(descriptor) {
+  constructor(descriptor: StyleDescriptor) {
     this._descriptor = descriptor;
   }
 

@@ -187,6 +187,10 @@ export class AbstractLayer implements ILayer {
     return [];
   }
 
+  getStyleForEditing(): IStyle {
+    return this._style;
+  }
+
   getStyle() {
     return this._style;
   }

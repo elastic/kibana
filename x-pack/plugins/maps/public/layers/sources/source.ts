@@ -6,8 +6,9 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ReactElement } from 'react';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../reducers/util';
 
 import { LayerDescriptor, SourceDescriptor } from '../../../common/descriptor_types';
@@ -32,12 +33,6 @@ export type PreIndexedShape = {
 
 export type FieldFormatter = (value: string | number | null | undefined | boolean) => string;
 
-// layerName,
-//   style,
-//   dynamicStyleProps,
-//   registerCancelCallback,
-//   searchFilters
-
 export interface ISource {
   createDefaultLayer(options?: LayerDescriptor): ILayer;
   destroy(): void;
@@ -47,7 +42,7 @@ export interface ISource {
   isFilterByMapBounds(): boolean;
   isGeoGridPrecisionAware(): boolean;
   isQueryAware(): boolean;
-  isRefreshTimerAware(): Promise<boolean>;
+  isRefreshTimerAware(): boolean;
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributions(): Promise<Attribution[]>;
@@ -61,10 +56,10 @@ export interface ISource {
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(): number;
-  shouldBeIndexed(): number;
-  getPreIndexedShape(): PreIndexedShape | null;
-  createFieldFormatter(field: IField): FieldFormatter | null;
-  loadStylePropsMeta(args: unknown): unknown; // todo
+  shouldBeIndexed(): boolean;
+  getPreIndexedShape(): Promise<PreIndexedShape | null>;
+  createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
+  loadStylePropsMeta(args: unknown): Promise<unknown>; // todo
   getValueSuggestions(field: IField, query: string): string[];
 }
 
@@ -86,10 +81,11 @@ export class AbstractSource implements ISource {
   destroy(): void {}
 
   cloneDescriptor(): SourceDescriptor {
+    // @ts-ignore
     return copyPersistentState(this._descriptor);
   }
 
-  async supportsFitToBounds(): boolean {
+  async supportsFitToBounds(): Promise<boolean> {
     return true;
   }
 
@@ -105,7 +101,7 @@ export class AbstractSource implements ISource {
     return this._inspectorAdapters;
   }
 
-  createDefaultLayer() {
+  createDefaultLayer(): ILayer {
     throw new Error(`Source#createDefaultLayer not implemented`);
   }
 
@@ -118,7 +114,7 @@ export class AbstractSource implements ISource {
    * e.g. [{ url: 'example.com', label: 'foobar' }]
    * @return {Promise<null>}
    */
-  async getAttributions(): Promise<Attribution> {
+  async getAttributions(): Promise<Attribution[]> {
     return [];
   }
 
@@ -175,20 +171,28 @@ export class AbstractSource implements ISource {
   }
 
   // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
-  async getPreIndexedShape(/* properties */): PreIndexedShape | null {
+  async getPreIndexedShape(/* properties */): Promise<PreIndexedShape | null> {
     return null;
   }
 
   // Returns function used to format value
-  async createFieldFormatter(field: IField): FieldFormatter | null {
+  async createFieldFormatter(field: IField): Promise<FieldFormatter | null> {
     return null;
   }
 
-  async loadStylePropsMeta(args: unknown): unknown {
+  async loadStylePropsMeta(args: unknown): Promise<unknown> {
     throw new Error(`Source#loadStylePropsMeta not implemented`);
   }
 
   async getValueSuggestions(field: IField, query: string): string[] {
     return [];
+  }
+
+  async isTimeAware(): Promise<boolean> {
+    return false;
+  }
+
+  isFilterByMapBounds(): boolean {
+    return false;
   }
 }
