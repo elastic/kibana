@@ -6,15 +6,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButtonEmpty,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiSelectable,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer } from '@elastic/eui';
 import { Error } from '../../../components';
 import { AgentConfig, PackageInfo } from '../../../types';
 import { useGetOneAgentConfig, useGetPackages, sendGetPackageInfoByKey } from '../../../hooks';
@@ -25,14 +17,11 @@ export const StepSelectPackage: React.FunctionComponent<{
   updateAgentConfig: (config: AgentConfig | undefined) => void;
   packageInfo?: PackageInfo;
   updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
-  cancelUrl: string;
-  onNext: () => void;
-}> = ({ agentConfigId, updateAgentConfig, packageInfo, updatePackageInfo, cancelUrl, onNext }) => {
+}> = ({ agentConfigId, updateAgentConfig, packageInfo, updatePackageInfo }) => {
   // Selected package state
   const [selectedPkgKey, setSelectedPkgKey] = useState<string | undefined>(
     packageInfo ? `${packageInfo.name}-${packageInfo.version}` : undefined
   );
-  const [selectedPkgLoading, setSelectedPkgLoading] = useState<boolean>(false);
   const [selectedPkgError, setSelectedPkgError] = useState<Error>();
 
   // Fetch agent config info
@@ -57,9 +46,7 @@ export const StepSelectPackage: React.FunctionComponent<{
   useEffect(() => {
     const fetchPackageInfo = async () => {
       if (selectedPkgKey) {
-        setSelectedPkgLoading(true);
         const { data, error } = await sendGetPackageInfoByKey(selectedPkgKey);
-        setSelectedPkgLoading(false);
         if (error) {
           setSelectedPkgError(error);
           updatePackageInfo(undefined);
@@ -99,7 +86,7 @@ export const StepSelectPackage: React.FunctionComponent<{
         title={
           <FormattedMessage
             id="xpack.ingestManager.createDatasource.stepSelectPackage.errorLoadingPackagesTitle"
-            defaultMessage="Error loading packages"
+            defaultMessage="Error loading integrations"
           />
         }
         error={packagesError}
@@ -109,16 +96,6 @@ export const StepSelectPackage: React.FunctionComponent<{
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="xpack.ingestManager.createDatasource.stepSelectPackage.selectPackageTitle"
-              defaultMessage="Select a package"
-            />
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
       <EuiFlexItem>
         <EuiSelectable
           searchable
@@ -149,7 +126,7 @@ export const StepSelectPackage: React.FunctionComponent<{
             placeholder: i18n.translate(
               'xpack.ingestManager.createDatasource.stepSelectPackage.filterPackagesInputPlaceholder',
               {
-                defaultMessage: 'Search for packages',
+                defaultMessage: 'Search for integrations',
               }
             ),
           }}
@@ -179,40 +156,13 @@ export const StepSelectPackage: React.FunctionComponent<{
             title={
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.stepSelectPackage.errorLoadingSelectedPackageTitle"
-                defaultMessage="Error loading selected package"
+                defaultMessage="Error loading selected integration"
               />
             }
             error={selectedPkgError}
           />
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty href={cancelUrl}>
-              <FormattedMessage
-                id="xpack.ingestManager.createDatasource.cancelLinkText"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="arrowRight"
-              iconSide="right"
-              isLoading={selectedPkgLoading}
-              disabled={!selectedPkgKey || !!selectedPkgError || selectedPkgLoading}
-              onClick={() => onNext()}
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.createDatasource.continueButtonText"
-                defaultMessage="Continue"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

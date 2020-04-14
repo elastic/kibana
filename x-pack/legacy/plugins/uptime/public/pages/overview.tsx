@@ -13,7 +13,7 @@ import {
   OverviewPageParsingErrorCallout,
   StatusPanel,
 } from '../components/functional';
-import { useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
+import { useUptimeTelemetry, UptimePage, useGetUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plugins/data/public';
@@ -55,12 +55,11 @@ const getMonitorListPageSizeValue = () => {
 
 export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFilters }: Props) => {
   const { colors } = useContext(UptimeThemeContext);
-  const [getUrlParams] = useUrlParams();
   // TODO: this is temporary until we migrate the monitor list to our Redux implementation
   const [monitorListPageSize, setMonitorListPageSize] = useState<number>(
     getMonitorListPageSizeValue()
   );
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
   const {
     dateRangeStart,
     dateRangeEnd,

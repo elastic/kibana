@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IndexPatternListConfig } from '../../../../../../src/legacy/core_plugins/management/public';
+import { IndexPatternListConfig } from '../../../../../../src/plugins/index_pattern_management/public';
 
 function isRollup(indexPattern) {
   return (

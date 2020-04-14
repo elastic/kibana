@@ -170,8 +170,9 @@ export default function({ getService }) {
                       id: '1',
                       type: 'dashboard',
                       error: {
+                        error: 'Not Found',
+                        message: 'Saved object [dashboard/1] not found',
                         statusCode: 404,
-                        message: 'Not found',
                       },
                     },
                   ],

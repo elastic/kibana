@@ -955,6 +955,7 @@ export interface SavedObject<T = unknown> {
     };
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    namespaces?: string[];
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;
@@ -1194,7 +1195,9 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
     constructor(parentHistory: History, basePath: string);
     get action(): Action;
     block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
-    createHref: (location: LocationDescriptorObject<HistoryLocationState>) => string;
+    createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
+        prependBasePath?: boolean | undefined;
+    }) => string;
     createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
     go: (n: number) => void;
     goBack: () => void;
