@@ -1,0 +1,33 @@
+[role="xpack"]
+[[pagerduty-action-type]]
+== PagerDuty action type
+
+The PagerDuty action type uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API] to trigger, acknowledge, and resolve PagerDuty alerts.
+
+[float]
+[[pagerduty-connector-configuration]]
+==== Connector configuration
+
+PagerDuty connectors have the following configuration properties:
+
+Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.whitelistedHosts`>> setting, make sure the hostname is whitelisted. 
+Routing Key::   A 32 character PagerDuty Integration Key for an integration on a service or on a global ruleset.
+
+[float]
+[[pagerduty-action-configuration]]
+==== Action configuration
+
+PagerDuty actions have the following properties:
+
+Severity::      The perceived severity of on the affected system. This can be one of `Critical`, `Error`, `Warning` or `Info`(default).
+Event action::  One of `Trigger` (default), `Resolve`, or `Acknowledge`. See https://v2.developer.pagerduty.com/docs/events-api-v2#event-action[event action] for more details.
+Dedup Key::     All actions sharing this key will be associated with the same PagerDuty alert. This value is used to correlate trigger and resolution. This value is *optional*, and if unset defaults to `action:<action saved object id>`. The maximum length is *255* characters. See https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication[alert deduplication] for details.
+Timestamp::     An *optional* https://v2.developer.pagerduty.com/v2/docs/types#datetime[ISO-8601 format date-time], indicating the time the event was detected or generated.
+Component::     An *optional* value indicating the component of the source machine that is responsible for the event, for example `mysql` or `eth0`.
+Group::         An *optional* value indicating the logical grouping of components of a service, for example `app-stack`.
+Source::        An *optional* value indicating the affected system, preferably a hostname or fully qualified domain name. Defaults to the {kib} saved object id of the action. 
+Summary::       An *optional* text summary of the event, defaults to `No summary provided`. The maximum length is 1024 characters.
+Class::         An *optional* value indicating the class/type of the event, for example `ping failure` or `cpu load`.
+
+For more details on these properties, see https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[PagerDuty v2 event parameters].
