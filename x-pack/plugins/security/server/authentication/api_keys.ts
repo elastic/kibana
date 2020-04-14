@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { HTTPAuthorizationHeader } from './http_authentication';
@@ -134,7 +133,7 @@ export class APIKeys {
       return false;
     }
 
-    const id = `kibana-api-key-service-test-${uuid.v4()}`;
+    const id = `kibana-api-key-service-test`;
 
     this.logger.debug(
       `Testing if API Keys are enabled by attempting to invalidate a non-existant key: ${id}`

@@ -114,28 +114,9 @@ describe('API Keys', () => {
       expect(result).toEqual(true);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.invalidateAPIKey', {
         body: {
-          id: expect.stringMatching(/^kibana-api-key-service-test-.*/),
+          id: 'kibana-api-key-service-test',
         },
       });
-    });
-
-    it('generates a unique bogus key id for each call', async () => {
-      mockLicense.isEnabled.mockReturnValue(true);
-      mockClusterClient.callAsInternalUser.mockResolvedValue({});
-
-      await Promise.all([
-        apiKeys.areAPIKeysEnabled(),
-        apiKeys.areAPIKeysEnabled(),
-        apiKeys.areAPIKeysEnabled(),
-      ]);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(3);
-
-      const calls = mockClusterClient.callAsInternalUser.mock.calls.map(
-        ([, payload]) => payload?.body?.id
-      );
-      expect(calls).toHaveLength(3);
-      calls.forEach(call => expect(call).toMatch(/^kibana-api-key-service-test-.*/));
-      expect(new Set(calls).size).toEqual(3);
     });
   });
 
