@@ -45,11 +45,18 @@ export default function({ getService }: FtrProviderContext) {
       );
     });
 
+    it('should return error message if provider is regostered', async () => {
+      await registerProviderActions('duplication', ['action1', 'action2']);
+
+      const result = await registerProviderActions('duplication', ['action3']);
+      expect(result.body).to.be.eql('');
+    });
+
     it('should allow to register provider actions and return all provider actions', async () => {
       await registerProviderActions('provider1', ['action1', 'action2']);
 
       const providerActions = await getProviderActions();
-      expect(providerActions.body.actions).to.be.eql(['action1', 'action2']);
+      expect(providerActions.body.actions).to.be.eql({ provider1: ['action1', 'action2'] });
     });
 
     it('should allow to get event logger if it is registered', async () => {
@@ -122,9 +129,9 @@ export default function({ getService }: FtrProviderContext) {
   });
 
   async function registerProviderActions(provider: string, actions: string[]) {
-    log.debug(`/api/log_event_fixture/${provider}/setup`);
+    log.debug(`registerProviderActions ${provider}`);
     return await supertest
-      .post(`/api/log_event_fixture/${provider}/setup`)
+      .post(`/api/log_event_fixture/${provider}/_registerProviderActions`)
       .set('kbn-xsrf', 'xxx')
       .send(actions)
       .expect(200);
@@ -142,7 +149,7 @@ export default function({ getService }: FtrProviderContext) {
     log.debug(`getProviderActions`);
     return await supertest
       .get(`/api/log_event_fixture/getProviderActions`)
-      .set('kbn-xsrf', 'foo')
+      .set('kbn-xsrf', 'xxx')
       .expect(200);
   }
 

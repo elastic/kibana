@@ -66,12 +66,16 @@ export const registerProviderActionsRoute = (
     (context, request, response) => {
       const { provider } = request.params as { provider: string };
       const actions = request.body;
-      logger.info(
-        `test register provider actions: ${provider}, actions: ${JSON.stringify(actions)}`
-      );
+      try {
+        logger.info(
+          `test register provider actions: ${provider}, actions: ${JSON.stringify(actions)}`
+        );
 
-      eventLogService.registerProviderActions(provider, actions);
-      logger.info(`registered`);
+        eventLogService.registerProviderActions(provider, actions);
+        logger.info(`registered`);
+      } catch (e) {
+        response.badRequest({ body: e });
+      }
       return response.ok({ body: {} });
     }
   );
