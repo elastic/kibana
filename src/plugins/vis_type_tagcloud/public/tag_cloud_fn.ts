@@ -19,11 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  ExpressionFunctionDefinition,
-  KibanaDatatable,
-  Render,
-} from '../../../../plugins/expressions/public';
+import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
 import { TagCloudVisParams } from './types';
 
 const name = 'tagcloud';

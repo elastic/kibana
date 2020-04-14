@@ -1,0 +1,6 @@
+{
+  "id": "tagcloud",
+  "version": "kibana",
+  "ui": true,
+  "requiredPlugins": ["data", "expressions", "visualizations", "charts"]
+}
