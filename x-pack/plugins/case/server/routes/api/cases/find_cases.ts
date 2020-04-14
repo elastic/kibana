@@ -31,9 +31,10 @@ const buildFilter = (
 ): string =>
   filters != null && filters.length > 0
     ? Array.isArray(filters)
-      ? filters
+      ? // Be aware of the surrounding parenthesis (as string inside literal) around filters.
+        `(${filters
           .map(filter => `${CASE_SAVED_OBJECT}.attributes.${field}: ${filter}`)
-          ?.join(` ${operator} `)
+          ?.join(` ${operator} `)})`
       : `${CASE_SAVED_OBJECT}.attributes.${field}: ${filters}`
     : '';
 

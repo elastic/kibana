@@ -41,6 +41,11 @@
   pointer-events: none !important;
 }
 
+.mapTocEntry-isSelected {
+  background-color: tintOrShade($euiColorLightShade, 60%, 20%);
+}
+
+
 .mapTocEntry-visible,
 .mapTocEntry-notVisible {
   display: flex;

@@ -9,7 +9,7 @@ import { DeleteDatasourcesResponse, packageToConfigDatasource } from '../../comm
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';
 import { NewDatasource, Datasource, ListWithKuery } from '../types';
 import { agentConfigService } from './agent_config';
-import { findInstalledPackageByName, getPackageInfo } from './epm/packages';
+import { getPackageInfo, getInstallation } from './epm/packages';
 import { outputService } from './output';
 
 const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
@@ -172,15 +172,13 @@ class DatasourceService {
     soClient: SavedObjectsClientContract,
     pkgName: string
   ): Promise<NewDatasource | undefined> {
-    const pkgInstall = await findInstalledPackageByName({
-      savedObjectsClient: soClient,
-      pkgName,
-    });
+    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
     if (pkgInstall) {
       const [pkgInfo, defaultOutputId] = await Promise.all([
         getPackageInfo({
           savedObjectsClient: soClient,
-          pkgkey: `${pkgInstall.name}-${pkgInstall.version}`,
+          pkgName: pkgInstall.name,
+          pkgVersion: pkgInstall.version,
         }),
         outputService.getDefaultOutputId(soClient),
       ]);

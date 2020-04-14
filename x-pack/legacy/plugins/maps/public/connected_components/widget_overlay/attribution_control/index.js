@@ -7,10 +7,12 @@
 import { connect } from 'react-redux';
 import { AttributionControl } from './view';
 import { getLayerList } from '../../../selectors/map_selectors';
+import { getIsFullScreen } from '../../../selectors/ui_selectors';
 
 function mapStateToProps(state = {}) {
   return {
     layerList: getLayerList(state),
+    isFullScreen: getIsFullScreen(state),
   };
 }
 

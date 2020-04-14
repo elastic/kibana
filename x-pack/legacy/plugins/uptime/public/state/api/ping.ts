@@ -5,9 +5,20 @@
  */
 
 import { APIFn } from './types';
-import { GetPingHistogramParams, HistogramResult } from '../../../common/types';
+import {
+  PingsResponseType,
+  PingsResponse,
+  GetPingsParams,
+  GetPingHistogramParams,
+  HistogramResult,
+} from '../../../common/runtime_types';
 import { apiService } from './utils';
 import { API_URLS } from '../../../common/constants/rest_api';
+
+export const fetchPings: APIFn<GetPingsParams, PingsResponse> = async ({
+  dateRange: { from, to },
+  ...optional
+}) => await apiService.get(API_URLS.PINGS, { from, to, ...optional }, PingsResponseType);
 
 export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> = async ({
   monitorId,
@@ -19,9 +30,9 @@ export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> 
   const queryParams = {
     dateStart,
     dateEnd,
-    ...(monitorId && { monitorId }),
-    ...(statusFilter && { statusFilter }),
-    ...(filters && { filters }),
+    monitorId,
+    statusFilter,
+    filters,
   };
 
   return await apiService.get(API_URLS.PING_HISTOGRAM, queryParams);

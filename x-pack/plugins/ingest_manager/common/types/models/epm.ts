@@ -19,7 +19,7 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
-export type DetailViewPanelName = 'overview' | 'data-sources';
+export type DetailViewPanelName = 'overview' | 'data-sources' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
 
@@ -28,6 +28,7 @@ export enum KibanaAssetType {
   visualization = 'visualization',
   search = 'search',
   indexPattern = 'index-pattern',
+  map = 'map',
 }
 
 export enum ElasticsearchAssetType {
@@ -251,6 +252,7 @@ export enum IngestAssetType {
 export enum DefaultPackages {
   base = 'base',
   system = 'system',
+  endpoint = 'endpoint',
 }
 
 export interface IndexTemplate {

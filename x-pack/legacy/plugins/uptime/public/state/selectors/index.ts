@@ -22,9 +22,7 @@ export const monitorLocationsSelector = (state: AppState, monitorId: string) => 
   return state.monitor.monitorLocationsList?.get(monitorId);
 };
 
-export const selectSelectedMonitor = (state: AppState) => state.monitorStatus.monitor;
-
-export const selectMonitorStatus = (state: AppState) => state.monitorStatus.status;
+export const monitorStatusSelector = (state: AppState) => state.monitorStatus.status;
 
 export const selectDynamicSettings = (state: AppState) => {
   return state.dynamicSettings;
@@ -42,6 +40,11 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
     esKuery: ui.esKuery,
   };
 };
+
+export const selectPingList = ({ pingList, ui: { lastRefresh } }: AppState) => ({
+  pings: pingList,
+  lastRefresh,
+});
 
 const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
 

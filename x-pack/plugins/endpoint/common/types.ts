@@ -108,7 +108,7 @@ export interface AlertResultList {
 
 export interface HostResultList {
   /* the hosts restricted by the page size */
-  hosts: HostMetadata[];
+  hosts: HostInfo[];
   /* the total number of unique hosts in the index */
   total: number;
   /* the page size requested */
@@ -135,7 +135,7 @@ export interface HashFields {
   sha1: string;
   sha256: string;
 }
-export interface MalwareClassifierFields {
+export interface MalwareClassificationFields {
   identifier: string;
   score: number;
   threshold: number;
@@ -164,7 +164,7 @@ export interface DllFields {
   };
   compile_time: number;
   hash: HashFields;
-  malware_classifier: MalwareClassifierFields;
+  malware_classification: MalwareClassificationFields;
   mapped_address: number;
   mapped_size: number;
   path: string;
@@ -216,7 +216,7 @@ export type AlertEvent = Immutable<{
     executable: string;
     sid?: string;
     start: number;
-    malware_classifier?: MalwareClassifierFields;
+    malware_classification?: MalwareClassificationFields;
     token: {
       domain: string;
       type: string;
@@ -246,7 +246,7 @@ export type AlertEvent = Immutable<{
       trusted: boolean;
       subject_name: string;
     };
-    malware_classifier: MalwareClassifierFields;
+    malware_classification: MalwareClassificationFields;
     temp_file_path: string;
   };
   host: HostFields;
@@ -274,10 +274,41 @@ export type AlertData = AlertEvent & AlertMetadata;
 
 export type AlertDetails = AlertData & AlertState;
 
+/**
+ * The status of the host
+ */
+export enum HostStatus {
+  /**
+   * Default state of the host when no host information is present or host information cannot
+   * be retrieved. e.g. API error
+   */
+  ERROR = 'error',
+
+  /**
+   * Host is online as indicated by its checkin status during the last checkin window
+   */
+  ONLINE = 'online',
+
+  /**
+   * Host is offline as indicated by its checkin status during the last checkin window
+   */
+  OFFLINE = 'offline',
+}
+
+export type HostInfo = Immutable<{
+  metadata: HostMetadata;
+  host_status: HostStatus;
+}>;
+
 export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
+  };
+  elastic: {
+    agent: {
+      id: string;
+    };
   };
   endpoint: {
     policy: {
@@ -365,11 +396,6 @@ export interface EndpointEvent {
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
-
-/**
- * The PageId type is used for the payload when firing userNavigatedToPage actions
- */
-export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
 
 /**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.

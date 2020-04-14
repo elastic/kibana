@@ -22,8 +22,8 @@ describe('CopySavedObjectsToSpaceService', () => {
       const service = new CopySavedObjectsToSpaceService();
       service.setup(deps);
 
-      expect(deps.savedObjectsManagementSetup.actionRegistry.register).toHaveBeenCalledTimes(1);
-      expect(deps.savedObjectsManagementSetup.actionRegistry.register).toHaveBeenCalledWith(
+      expect(deps.savedObjectsManagementSetup.actions.register).toHaveBeenCalledTimes(1);
+      expect(deps.savedObjectsManagementSetup.actions.register).toHaveBeenCalledWith(
         expect.any(CopyToSpaceSavedObjectsManagementAction)
       );
     });

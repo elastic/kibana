@@ -16,7 +16,8 @@ const executor = createMetricThresholdExecutor('test') as (opts: {
 const alertInstances = new Map();
 
 const services = {
-  callCluster(_: string, { body }: any) {
+  callCluster(_: string, { body, index }: any) {
+    if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
     const metric = body.query.bool.filter[1]?.exists.field;
     if (body.aggs.groupings) {
       if (body.aggs.groupings.composite.after) {
@@ -55,6 +56,13 @@ const services = {
       },
     };
   },
+  savedObjectsClient: {
+    get(_: string, sourceId: string) {
+      if (sourceId === 'alternate')
+        return { id: 'alternate', attributes: { metricAlias: 'alternatebeat-*' } };
+      return { id: 'default', attributes: { metricAlias: 'metricbeat-*' } };
+    },
+  },
 };
 
 const baseCriterion = {
@@ -62,15 +70,15 @@ const baseCriterion = {
   metric: 'test.metric.1',
   timeSize: 1,
   timeUnit: 'm',
-  indexPattern: 'metricbeat-*',
 };
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     const instanceID = 'test-*';
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         services,
         params: {
+          sourceId,
           criteria: [
             {
               ...baseCriterion,
@@ -126,6 +134,22 @@ describe('The metric threshold alert type', () => {
       expect(alertInstances.get(instanceID).mostRecentAction).toBe(undefined);
       expect(alertInstances.get(instanceID).state.alertState).toBe(AlertStates.OK);
     });
+    test('reports expected values to the action context', async () => {
+      await execute(Comparator.GT, [0.75]);
+      const mostRecentAction = alertInstances.get(instanceID).mostRecentAction;
+      expect(mostRecentAction.action.group).toBe('*');
+      expect(mostRecentAction.action.valueOf.condition0).toBe(1);
+      expect(mostRecentAction.action.thresholdOf.condition0).toStrictEqual([0.75]);
+      expect(mostRecentAction.action.metricOf.condition0).toBe('test.metric.1');
+    });
+    test('fetches the index pattern dynamically', async () => {
+      await execute(Comparator.LT, [17], 'alternate');
+      expect(alertInstances.get(instanceID).mostRecentAction.id).toBe(FIRED_ACTIONS.id);
+      expect(alertInstances.get(instanceID).state.alertState).toBe(AlertStates.ALERT);
+      await execute(Comparator.LT, [1.5], 'alternate');
+      expect(alertInstances.get(instanceID).mostRecentAction).toBe(undefined);
+      expect(alertInstances.get(instanceID).state.alertState).toBe(AlertStates.OK);
+    });
   });
 
   describe('querying with a groupBy parameter', () => {
@@ -165,6 +189,11 @@ describe('The metric threshold alert type', () => {
       expect(alertInstances.get(instanceIdA).state.alertState).toBe(AlertStates.OK);
       expect(alertInstances.get(instanceIdB).mostRecentAction).toBe(undefined);
       expect(alertInstances.get(instanceIdB).state.alertState).toBe(AlertStates.OK);
+    });
+    test('reports group values to the action context', async () => {
+      await execute(Comparator.GT, [0.75]);
+      expect(alertInstances.get(instanceIdA).mostRecentAction.action.group).toBe('a');
+      expect(alertInstances.get(instanceIdB).mostRecentAction.action.group).toBe('b');
     });
   });
 
@@ -214,6 +243,17 @@ describe('The metric threshold alert type', () => {
       expect(alertInstances.get(instanceIdA).state.alertState).toBe(AlertStates.ALERT);
       expect(alertInstances.get(instanceIdB).mostRecentAction).toBe(undefined);
       expect(alertInstances.get(instanceIdB).state.alertState).toBe(AlertStates.OK);
+    });
+    test('sends all criteria to the action context', async () => {
+      const instanceID = 'test-*';
+      await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
+      const mostRecentAction = alertInstances.get(instanceID).mostRecentAction;
+      expect(mostRecentAction.action.valueOf.condition0).toBe(1);
+      expect(mostRecentAction.action.valueOf.condition1).toBe(3.5);
+      expect(mostRecentAction.action.thresholdOf.condition0).toStrictEqual([1.0]);
+      expect(mostRecentAction.action.thresholdOf.condition1).toStrictEqual([3.0]);
+      expect(mostRecentAction.action.metricOf.condition0).toBe('test.metric.1');
+      expect(mostRecentAction.action.metricOf.condition1).toBe('test.metric.2');
     });
   });
   describe('querying with the count aggregator', () => {
