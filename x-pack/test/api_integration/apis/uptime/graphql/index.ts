@@ -13,6 +13,5 @@ export default function({ loadTestFile }: FtrProviderContext) {
     // verifying the pre-loaded documents are returned in a way that
     // matches the snapshots contained in './fixtures'
     loadTestFile(require.resolve('./monitor_states'));
-    loadTestFile(require.resolve('./ping_list'));
   });
 }
