@@ -72,7 +72,7 @@ export const HostDetailsFlyout = () => {
         ) : (
           <>
             {show === 'details' && <HostDetails details={details} />}
-            {show === 'policy_response' && <PolicyResponse />}
+            {show === 'policy_response' && <PolicyResponse hostMeta={details} />}
           </>
         )}
       </EuiFlyoutBody>
