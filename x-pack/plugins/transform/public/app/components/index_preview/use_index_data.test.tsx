@@ -9,9 +9,11 @@ import '@testing-library/jest-dom/extend-expect';
 
 import { SimpleQuery } from '../../common';
 import { SearchItems } from '../../hooks/use_search_items';
-import { INDEX_STATUS, useIndexData, UseIndexDataReturnType } from './use_index_data';
+import { useIndexData } from './use_index_data';
+import { INDEX_STATUS, UseIndexDataReturnType } from './types';
 
-jest.mock('../../../../hooks/use_api');
+jest.mock('../../../shared_imports');
+jest.mock('../../hooks/use_api');
 
 const query: SimpleQuery = {
   query_string: {

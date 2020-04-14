@@ -5,11 +5,11 @@
  */
 
 import moment from 'moment-timezone';
-import { useCallback, useEffect, useMemo, useState, Dispatch, SetStateAction } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { EuiDataGridPaginationProps, EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGridSorting } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
@@ -30,12 +30,15 @@ import {
 import { SearchItems } from '../../hooks/use_search_items';
 import { useApi } from '../../hooks/use_api';
 
-export enum INDEX_STATUS {
-  UNUSED,
-  LOADING,
-  LOADED,
-  ERROR,
-}
+import {
+  IndexPagination,
+  OnChangeItemsPerPage,
+  OnChangePage,
+  OnSort,
+  RenderCellValue,
+  UseIndexDataReturnType,
+  INDEX_STATUS,
+} from './types';
 
 type EsSorting = Dictionary<{
   order: 'asc' | 'desc';
@@ -53,44 +56,7 @@ interface SearchResponse7 extends SearchResponse<any> {
 
 type IndexSearchResponse = SearchResponse7;
 
-type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 const defaultPagination: IndexPagination = { pageIndex: 0, pageSize: 5 };
-
-type OnChangeItemsPerPage = (pageSize: any) => void;
-type OnChangePage = (pageIndex: any) => void;
-type OnSort = (
-  sc: Array<{
-    id: string;
-    direction: 'asc' | 'desc';
-  }>
-) => void;
-type RenderCellValue = ({
-  rowIndex,
-  columnId,
-  setCellProps,
-}: {
-  rowIndex: number;
-  columnId: string;
-  setCellProps: any;
-}) => any;
-
-export interface UseIndexDataReturnType {
-  columns: Array<{ id: string; schema: string | undefined }>;
-  errorMessage: string;
-  invalidSortingColumnns: EsFieldName[];
-  onChangeItemsPerPage: OnChangeItemsPerPage;
-  onChangePage: OnChangePage;
-  onSort: OnSort;
-  pagination: IndexPagination;
-  setPagination: Dispatch<SetStateAction<IndexPagination>>;
-  setVisibleColumns: Dispatch<SetStateAction<EsFieldName[]>>;
-  renderCellValue: RenderCellValue;
-  rowCount: number;
-  sortingColumns: EuiDataGridSorting['columns'];
-  status: INDEX_STATUS;
-  tableItems: EsDocSource[];
-  visibleColumns: EsFieldName[];
-}
 
 export const useIndexData = (
   indexPattern: SearchItems['indexPattern'],
@@ -106,7 +72,9 @@ export const useIndexData = (
 
   useEffect(() => {
     setPagination(defaultPagination);
-  }, [query]);
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(query)]);
 
   const getIndexData = async function() {
     setErrorMessage('');
@@ -281,6 +249,7 @@ export const useIndexData = (
     onChangeItemsPerPage,
     onChangePage,
     onSort,
+    noDataMessage: '',
     pagination,
     setPagination,
     setVisibleColumns,

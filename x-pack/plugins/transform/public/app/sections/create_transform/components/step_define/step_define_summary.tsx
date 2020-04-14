@@ -17,8 +17,19 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { getPivotQuery, isDefaultQuery, isMatchAllQuery } from '../../../../common';
-import { PivotPreview } from '../../../../components/pivot_preview';
+import { dictionaryToArray } from '../../../../../../common/types/common';
+
+import {
+  getPivotQuery,
+  getPreviewRequestBody,
+  isDefaultQuery,
+  isMatchAllQuery,
+} from '../../../../common';
+import {
+  getPivotPreviewDevConsoleStatement,
+  usePivotData,
+  IndexPreview,
+} from '../../../../components/index_preview';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { AggListSummary } from '../aggregation_list';
@@ -35,7 +46,23 @@ export const StepDefineSummary: FC<Props> = ({
   formState: { searchString, searchQuery, groupByList, aggList },
   searchItems,
 }) => {
+  const pivotAggsArr = dictionaryToArray(aggList);
+  const pivotGroupByArr = dictionaryToArray(groupByList);
   const pivotQuery = getPivotQuery(searchQuery);
+
+  const previewRequest = getPreviewRequestBody(
+    searchItems.indexPattern.title,
+    pivotQuery,
+    pivotGroupByArr,
+    pivotAggsArr
+  );
+
+  const pivotPreviewProps = usePivotData(
+    searchItems.indexPattern.title,
+    pivotQuery,
+    aggList,
+    groupByList
+  );
 
   return (
     <EuiFlexGroup>
@@ -117,11 +144,19 @@ export const StepDefineSummary: FC<Props> = ({
 
       <EuiFlexItem>
         <EuiText>
-          <PivotPreview
-            aggs={aggList}
-            groupBy={groupByList}
-            indexPatternTitle={searchItems.indexPattern.title}
-            query={pivotQuery}
+          <IndexPreview
+            {...pivotPreviewProps}
+            copyToClipboard={getPivotPreviewDevConsoleStatement(previewRequest)}
+            copyToClipboardDescription={i18n.translate(
+              'xpack.transform.pivotPreview.copyClipboardTooltip',
+              {
+                defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+              }
+            )}
+            dataTestSubj="transformPivotPreview"
+            title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
+              defaultMessage: 'Transform pivot preview',
+            })}
           />
         </EuiText>
       </EuiFlexItem>

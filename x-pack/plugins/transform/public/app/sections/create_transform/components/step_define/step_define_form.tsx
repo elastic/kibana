@@ -35,8 +35,6 @@ import {
 
 import { useXJsonMode } from '../../../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 
-import { PivotPreview } from '../../../../components/pivot_preview';
-
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SavedSearchQuery, SearchItems } from '../../../../hooks/use_search_items';
 import { useToastNotifications } from '../../../../app_dependencies';
@@ -45,7 +43,14 @@ import { dictionaryToArray, Dictionary } from '../../../../../../common/types/co
 import { DropDown } from '../aggregation_dropdown';
 import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
-import { IndexPreview } from '../../../../components/index_preview';
+import {
+  getIndexDevConsoleStatement,
+  useIndexData,
+  usePivotData,
+  IndexPreview,
+} from '../../../../components/index_preview';
+import { getPivotPreviewDevConsoleStatement } from '../../../../components/index_preview';
+
 import { SwitchModal } from './switch_modal';
 
 import {
@@ -296,7 +301,6 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
           return;
       }
     } catch (e) {
-      console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
       setErrorMessage({ query: query.query as string, message: e.message });
     }
   };
@@ -592,6 +596,9 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
     valid,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
+
+  const indexPreviewProps = useIndexData(indexPattern, pivotQuery);
+  const pivotPreviewProps = usePivotData(indexPattern.title, pivotQuery, aggList, groupByList);
 
   // TODO This should use the actual value of `indices.query.bool.max_clause_count`
   const maxIndexFields = 1024;
@@ -974,19 +981,34 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
 
       <EuiFlexItem grow={false} style={{ maxWidth: 'calc(100% - 468px)' }}>
         <IndexPreview
-          indexPattern={searchItems.indexPattern}
-          query={pivotQuery}
+          {...indexPreviewProps}
+          copyToClipboard={getIndexDevConsoleStatement(pivotQuery, indexPattern.title)}
+          copyToClipboardDescription={i18n.translate(
+            'xpack.transform.indexPreview.copyClipboardTooltip',
+            {
+              defaultMessage: 'Copy Dev Console statement of the index preview to the clipboard.',
+            }
+          )}
+          dataTestSubj="transformIndexPreview"
           title={i18n.translate('xpack.transform.indexPreview.indexPatternTitle', {
             defaultMessage: 'Index {indexPatternTitle}',
             values: { indexPatternTitle: indexPattern.title },
           })}
         />
         <EuiHorizontalRule />
-        <PivotPreview
-          aggs={aggList}
-          groupBy={groupByList}
-          indexPatternTitle={searchItems.indexPattern.title}
-          query={pivotQuery}
+        <IndexPreview
+          {...pivotPreviewProps}
+          copyToClipboard={getPivotPreviewDevConsoleStatement(previewRequest)}
+          copyToClipboardDescription={i18n.translate(
+            'xpack.transform.pivotPreview.copyClipboardTooltip',
+            {
+              defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+            }
+          )}
+          dataTestSubj="transformPivotPreview"
+          title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
+            defaultMessage: 'Transform pivot preview',
+          })}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

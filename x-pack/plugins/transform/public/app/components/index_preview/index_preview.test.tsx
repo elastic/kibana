@@ -8,31 +8,39 @@ import React from 'react';
 import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { getPivotQuery } from '../../common';
 import { SearchItems } from '../../hooks/use_search_items';
 
+import { useIndexData } from './use_index_data';
 import { IndexPreview } from './index_preview';
 
-jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../shared_imports');
+jest.mock('../../app_dependencies');
 
 describe('Transform: <IndexPreview />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
   test('Minimal initialization', async done => {
     // Arrange
-    const props = {
-      indexPattern: {
-        title: 'the-index-pattern-title',
-        fields: [] as any[],
-      } as SearchItems['indexPattern'],
-      query: getPivotQuery('the-query'),
-      title: 'the-index-preview-title',
+    const indexPattern = {
+      title: 'the-index-pattern-title',
+      fields: [] as any[],
+    } as SearchItems['indexPattern'];
+
+    const Wrapper = () => {
+      const props = {
+        ...useIndexData(indexPattern, { match_all: {} }),
+        title: 'the-index-preview-title',
+        copyToClipboard: 'the-copy-to-clipboard-code',
+        copyToClipboardDescription: 'the-copy-to-clipboard-description',
+        dataTestSubj: 'the-data-test-subj',
+      };
+
+      return <IndexPreview {...props} />;
     };
-    const { getByText } = render(<IndexPreview {...props} />);
+    const { getByText } = render(<Wrapper />);
 
     // Act
     // Assert
-    expect(getByText(`Source index ${props.indexPattern.title}`)).toBeInTheDocument();
+    expect(getByText('the-index-preview-title')).toBeInTheDocument();
     await wait();
     done();
   });

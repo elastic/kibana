@@ -6,15 +6,14 @@
 
 import React, { FC } from 'react';
 
-import { SearchItems } from '../../../../hooks/use_search_items';
-
 import { getPivotQuery, TransformPivotConfig } from '../../../../common';
+import { usePivotData, IndexPreview } from '../../../../components/index_preview';
+import { SearchItems } from '../../../../hooks/use_search_items';
 
 import {
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
 } from '../../../create_transform/components/step_define/';
-import { PivotPreview } from '../../../../components/pivot_preview';
 
 interface Props {
   transformConfig: TransformPivotConfig;
@@ -26,17 +25,15 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
     transformConfig
   );
 
+  const { aggList, groupByList, searchQuery } = previewConfig;
+
+  const pivotQuery = getPivotQuery(searchQuery);
+
   const indexPatternTitle = Array.isArray(transformConfig.source.index)
     ? transformConfig.source.index.join(',')
     : transformConfig.source.index;
 
-  return (
-    <PivotPreview
-      aggs={previewConfig.aggList}
-      groupBy={previewConfig.groupByList}
-      indexPatternTitle={indexPatternTitle}
-      query={getPivotQuery(previewConfig.searchQuery)}
-      showHeader={false}
-    />
-  );
+  const pivotPreviewProps = usePivotData(indexPatternTitle, pivotQuery, aggList, groupByList);
+
+  return <IndexPreview {...pivotPreviewProps} dataTestSubj="transformPivotPreview" />;
 };

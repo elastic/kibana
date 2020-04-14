@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -21,26 +21,35 @@ import {
 } from '@elastic/eui';
 
 import { useToastNotifications } from '../../app_dependencies';
-import { euiDataGridStyle, euiDataGridToolbarSettings, PivotQuery } from '../../common';
-import { SearchItems } from '../../hooks/use_search_items';
+import { euiDataGridStyle, euiDataGridToolbarSettings } from '../../common';
 
-import { getIndexDevConsoleStatement } from './common';
 import { IndexPreviewTitle } from './index_preview_title';
-import { INDEX_STATUS, useIndexData } from './use_index_data';
+import { INDEX_STATUS, UseIndexDataReturnType } from './types';
 
-interface Props {
-  indexPattern: SearchItems['indexPattern'];
-  query: PivotQuery;
+interface PropsWithHeader extends UseIndexDataReturnType {
+  copyToClipboard: string;
+  copyToClipboardDescription: string;
+  dataTestSubj: string;
   title: string;
 }
 
-export const IndexPreview: React.FC<Props> = React.memo(({ indexPattern, query, title }) => {
-  const toastNotifications = useToastNotifications();
+interface PropsWithoutHeader extends UseIndexDataReturnType {
+  dataTestSubj: string;
+}
 
+function isWithHeader(arg: any): arg is PropsWithHeader {
+  return typeof arg?.title === 'string' && arg?.title !== '';
+}
+
+type Props = PropsWithHeader | PropsWithoutHeader;
+
+export const IndexPreview: FC<Props> = props => {
   const {
     columns,
+    dataTestSubj,
     errorMessage,
     invalidSortingColumnns,
+    noDataMessage,
     onChangeItemsPerPage,
     onChangePage,
     onSort,
@@ -52,7 +61,9 @@ export const IndexPreview: React.FC<Props> = React.memo(({ indexPattern, query, 
     status,
     tableItems: data,
     visibleColumns,
-  } = useIndexData(indexPattern, query);
+  } = props;
+
+  const toastNotifications = useToastNotifications();
 
   useEffect(() => {
     if (invalidSortingColumnns.length > 0) {
@@ -69,8 +80,8 @@ export const IndexPreview: React.FC<Props> = React.memo(({ indexPattern, query, 
 
   if (status === INDEX_STATUS.LOADED && data.length === 0) {
     return (
-      <div data-test-subj="transformIndexPreview empty">
-        <IndexPreviewTitle indexPreviewTitle={title} />
+      <div data-test-subj={`${dataTestSubj} empty`}>
+        {isWithHeader(props) && <IndexPreviewTitle indexPreviewTitle={props.title} />}
         <EuiCallOut
           title={i18n.translate('xpack.transform.indexPreview.IndexNoDataCalloutTitle', {
             defaultMessage: 'Empty index query result.',
@@ -88,29 +99,45 @@ export const IndexPreview: React.FC<Props> = React.memo(({ indexPattern, query, 
     );
   }
 
-  const euiCopyText = i18n.translate('xpack.transform.indexPreview.copyClipboardTooltip', {
-    defaultMessage: 'Copy Dev Console statement of the index preview to the clipboard.',
-  });
+  if (noDataMessage !== '') {
+    return (
+      <div data-test-subj={`${dataTestSubj} empty`}>
+        {isWithHeader(props) && <IndexPreviewTitle indexPreviewTitle={props.title} />}
+        <EuiCallOut
+          title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutTitle', {
+            defaultMessage: 'Pivot preview not available',
+          })}
+          color="primary"
+        >
+          <p>{noDataMessage}</p>
+        </EuiCallOut>
+      </div>
+    );
+  }
 
   return (
-    <div
-      data-test-subj={`transformIndexPreview ${status === INDEX_STATUS.ERROR ? 'error' : 'loaded'}`}
-    >
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <IndexPreviewTitle indexPreviewTitle={title} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiCopy
-            beforeMessage={euiCopyText}
-            textToCopy={getIndexDevConsoleStatement(query, indexPattern.title)}
-          >
-            {(copy: () => void) => (
-              <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
-            )}
-          </EuiCopy>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <div data-test-subj={`${dataTestSubj} ${status === INDEX_STATUS.ERROR ? 'error' : 'loaded'}`}>
+      {isWithHeader(props) && (
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <IndexPreviewTitle indexPreviewTitle={props.title} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiCopy
+              beforeMessage={props.copyToClipboardDescription}
+              textToCopy={props.copyToClipboard}
+            >
+              {(copy: () => void) => (
+                <EuiButtonIcon
+                  onClick={copy}
+                  iconType="copyClipboard"
+                  aria-label={props.copyToClipboardDescription}
+                />
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <div className="transform__progress">
         {status === INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
         {status !== INDEX_STATUS.LOADING && (
@@ -118,9 +145,9 @@ export const IndexPreview: React.FC<Props> = React.memo(({ indexPattern, query, 
         )}
       </div>
       {status === INDEX_STATUS.ERROR && (
-        <div data-test-subj="transformIndexPreview error">
+        <div data-test-subj={`${dataTestSubj} error`}>
           <EuiCallOut
-            title={i18n.translate('xpack.transform.indexPreview.indexPatternError', {
+            title={i18n.translate('xpack.transform.indexPreview.indexDataError', {
               defaultMessage: 'An error occurred loading the index data.',
             })}
             color="danger"
@@ -134,7 +161,7 @@ export const IndexPreview: React.FC<Props> = React.memo(({ indexPattern, query, 
         </div>
       )}
       <EuiDataGrid
-        aria-label={title}
+        aria-label={isWithHeader(props) ? props.title : ''}
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         gridStyle={euiDataGridStyle}
@@ -151,4 +178,4 @@ export const IndexPreview: React.FC<Props> = React.memo(({ indexPattern, query, 
       />
     </div>
   );
-});
+};
