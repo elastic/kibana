@@ -18,13 +18,13 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaMap } from 'ui/vis/map/kibana_map';
 import { GeohashLayer } from '../geohash_layer';
 // import heatmapPng from './heatmap.png';
 import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 // import shadedCircleMarkersPng from './shadedCircleMarkers.png';
 import { ImageComparator } from 'test_utils/image_comparator';
 import GeoHashSampleData from './dummy_es_response.json';
+import { KibanaMap } from '../../../../../plugins/maps_legacy/public';
 
 describe('geohash_layer', function() {
   let domNode;
