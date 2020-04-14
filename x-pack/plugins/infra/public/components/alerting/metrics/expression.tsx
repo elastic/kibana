@@ -466,7 +466,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
 export const DisabledAggField = ({ text }: { text: string }) => {
   return (
     <EuiExpression
-      description={i18n.translate('xpack.triggersActionsUI.common.expressionItems.of.buttonLabel', {
+      description={i18n.translate('xpack.infra.metrics.alertFlyout.of.buttonLabel', {
         defaultMessage: 'of',
       })}
       value={text}
