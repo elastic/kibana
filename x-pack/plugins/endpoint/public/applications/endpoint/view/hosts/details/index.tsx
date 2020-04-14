@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, memo, useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -12,6 +12,7 @@ import {
   EuiTitle,
   EuiLoadingContent,
   EuiSpacer,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -21,8 +22,9 @@ import { urlFromQueryParams } from '../url_from_query_params';
 import { uiQueryParams, detailsData, detailsError, showView } from '../../../store/hosts/selectors';
 import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
+import { HostMetadata } from '../../../../../../common/types';
 
-export const HostDetailsFlyout = () => {
+export const HostDetailsFlyout = memo(() => {
   const history = useHistory();
   const { notifications } = useKibana();
   const queryParams = useHostListSelector(uiQueryParams);
@@ -64,18 +66,77 @@ export const HostDetailsFlyout = () => {
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {details === undefined ? (
-          <>
+      {details === undefined ? (
+        <>
+          <EuiFlyoutBody>
             <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
-          </>
-        ) : (
-          <>
-            {show === 'details' && <HostDetails details={details} />}
-            {show === 'policy_response' && <PolicyResponse hostMeta={details} />}
-          </>
-        )}
-      </EuiFlyoutBody>
+          </EuiFlyoutBody>
+        </>
+      ) : (
+        <>
+          {show === 'details' && (
+            <>
+              <EuiFlyoutBody>
+                <HostDetails details={details} />
+              </EuiFlyoutBody>
+            </>
+          )}
+          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={details} />}
+        </>
+      )}
     </EuiFlyout>
   );
-};
+});
+
+const PolicyResponseFlyoutPanel = memo<{
+  hostMeta: HostMetadata;
+}>(({ hostMeta }) => {
+  const history = useHistory();
+  const { show, ...queryParams } = useHostListSelector(uiQueryParams);
+  const detailsUri = useMemo(() => {
+    return urlFromQueryParams({
+      ...queryParams,
+      selected_host: hostMeta.host.id,
+    });
+  }, [hostMeta.host.id, queryParams]);
+  const buttonContentProps = useMemo(() => {
+    return { style: { paddingLeft: '0' } };
+  }, []);
+
+  return (
+    <>
+      <EuiFlyoutHeader hasBorder>
+        <>
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+          <EuiButtonEmpty
+            data-test-subj="backToHostDetails"
+            iconType="arrowLeft"
+            contentProps={buttonContentProps}
+            size="xs"
+            href={'?' + detailsUri.search}
+            onClick={(ev: React.MouseEvent) => {
+              ev.preventDefault();
+              history.push(detailsUri);
+            }}
+          >
+            <FormattedMessage
+              id="xpack.endpoint.host.policyResponse.detailsLinkTitle"
+              defaultMessage="Endpoint Details"
+            />
+          </EuiButtonEmpty>
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.endpoint.host.policyResponse.title"
+                defaultMessage="Policy Response"
+              />
+            </h3>
+          </EuiTitle>
+        </>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <PolicyResponse />
+      </EuiFlyoutBody>
+    </>
+  );
+});
