@@ -588,6 +588,7 @@ describe('xy_expression', () => {
           data={dateHistogramData}
           args={{
             ...args,
+            xAxisFieldName: 'order_date',
             layers: [dateHistogramLayer],
           }}
           formatFactory={getFormatSpy}

@@ -251,6 +251,7 @@ export interface OperationMetadata {
   // treated as unique
   isBucketed: boolean;
   scale?: 'ordinal' | 'interval' | 'ratio';
+  sourceField?: string;
   // Extra meta-information like cardinality, color
   // TODO currently it's not possible to differentiate between a field from a raw
   // document and an aggregated metric which might be handy in some cases. Once we

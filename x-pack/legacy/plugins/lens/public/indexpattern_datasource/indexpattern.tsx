@@ -55,12 +55,13 @@ export interface DraggedField {
 }
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
-  const { dataType, label, isBucketed, scale } = column;
+  const { dataType, label, isBucketed, scale, sourceField } = column;
   return {
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
     label: uniqueLabel || label,
+    sourceField,
   };
 }
 

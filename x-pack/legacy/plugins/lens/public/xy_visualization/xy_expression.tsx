@@ -84,6 +84,10 @@ export const xyChart: ExpressionFunctionDefinition<
       types: ['string'],
       help: 'Y axis title',
     },
+    xAxisFieldName: {
+      types: ['string'],
+      help: 'X xxis fieldname',
+    },
     legend: {
       types: ['lens_xy_legendConfig'],
       help: i18n.translate('xpack.lens.xyChart.legend.help', {
@@ -213,7 +217,6 @@ export function XYChart({
   const shouldRotate = isHorizontalChart(layers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
-
   // add minInterval only for single row value as it cannot be determined from dataset
   const minInterval = layers.every(layer => data.tables[layer.layerId].rows.length <= 1)
     ? parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds()
@@ -244,9 +247,11 @@ export function XYChart({
             return;
           }
 
-          const table = data.tables[layers[0].layerId];
-          const xAxisFieldName: string | undefined = xAxisColumn?.meta?.aggConfigParams?.field;
-          const timeFieldName = xDomain && xAxisFieldName;
+          const firstLayerWithData =
+            layers[layers.findIndex(layer => data.tables[layer.layerId].rows.length)];
+          const table = data.tables[firstLayerWithData.layerId];
+
+          const timeFieldName = xDomain && args.xAxisFieldName;
 
           // TODO: simplify the context structure: https://github.com/elastic/kibana/issues/62936
           const context: EmbeddableVisTriggerContext = {
@@ -261,7 +266,9 @@ export function XYChart({
                     values: table.rows.map((row, rowIndex) => ({
                       xRaw: {
                         table,
-                        column: table.columns.findIndex(el => el.id === layers[0].xAccessor), // index of X accessor in the table:
+                        column: table.columns.findIndex(
+                          el => el.id === firstLayerWithData.xAccessor
+                        ), // index of X accessor in the table:
                         row: rowIndex,
                       },
                     })),
@@ -309,11 +316,7 @@ export function XYChart({
             });
           }
 
-          const xAxisFieldName: string | undefined = table.columns.find(
-            col => col.id === layer.xAccessor
-          )?.meta?.aggConfigParams?.field;
-
-          const timeFieldName = xDomain && xAxisFieldName;
+          const timeFieldName = xDomain && args.xAxisFieldName;
 
           const context: EmbeddableVisTriggerContext = {
             data: {

@@ -35,6 +35,18 @@ function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
   };
 }
 
+function getXAxisFieldName(layer: LayerConfig, frame: FramePublicAPI) {
+  if (!layer?.xAccessor) {
+    return;
+  }
+  const datasource = frame.datasourceLayers[layer.layerId];
+  if (!datasource) {
+    return;
+  }
+  const fieldName = datasource.getOperationForColumnId(layer.xAccessor)?.sourceField;
+  return fieldName;
+}
+
 export const toExpression = (state: State, frame: FramePublicAPI): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
@@ -52,7 +64,13 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
     });
   });
 
-  return buildExpression(state, metadata, frame, xyTitles(state.layers[0], frame));
+  return buildExpression(
+    state,
+    metadata,
+    frame,
+    xyTitles(state.layers[0], frame),
+    getXAxisFieldName(state.layers[0], frame)
+  );
 };
 
 export function toPreviewExpression(state: State, frame: FramePublicAPI) {
@@ -100,7 +118,8 @@ export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   frame?: FramePublicAPI,
-  { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' }
+  { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' },
+  xAxisFieldName: string = ''
 ): Ast | null => {
   const validLayers = state.layers.filter((layer): layer is ValidLayer =>
     Boolean(layer.xAccessor && layer.accessors.length)
@@ -118,6 +137,7 @@ export const buildExpression = (
         arguments: {
           xTitle: [xTitle],
           yTitle: [yTitle],
+          xAxisFieldName: [xAxisFieldName],
           legend: [
             {
               type: 'expression',
@@ -142,7 +162,7 @@ export const buildExpression = (
                 .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
                 .forEach(accessor => {
                   const operation = datasource.getOperationForColumnId(accessor);
-                  if (operation && operation.label) {
+                  if (operation?.label) {
                     columnToLabel[accessor] = operation.label;
                   }
                 });
