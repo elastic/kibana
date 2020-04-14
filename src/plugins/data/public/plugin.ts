@@ -62,6 +62,7 @@ import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,
   createFiltersFromValueClickAction,
+  createFiltersFromRangeSelectAction,
 } from './actions';
 import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
 import {
@@ -167,6 +168,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const dataServices = {
       actions: {
         createFiltersFromValueClickAction,
+        createFiltersFromRangeSelectAction,
       },
       autocomplete: this.autocomplete.start(),
       fieldFormats,
