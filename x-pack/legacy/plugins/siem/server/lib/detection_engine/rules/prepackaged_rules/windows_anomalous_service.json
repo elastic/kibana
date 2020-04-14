@@ -4,7 +4,7 @@
   "false_positives": [
     "A newly installed program or one that runs rarely as part of a monthly or quarterly workflow could trigger this signal."
   ],
-  "from": "now-16m",
+  "from": "now-45m",
   "interval": "15m",
   "machine_learning_job_id": "windows_anomalous_service",
   "name": "Unusual Windows Service",

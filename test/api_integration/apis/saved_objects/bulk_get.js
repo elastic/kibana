@@ -80,8 +80,9 @@ export default function({ getService }) {
                   id: 'does not exist',
                   type: 'dashboard',
                   error: {
+                    error: 'Not Found',
+                    message: 'Saved object [dashboard/does not exist] not found',
                     statusCode: 404,
-                    message: 'Not found',
                   },
                 },
                 {
@@ -123,24 +124,28 @@ export default function({ getService }) {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                   type: 'visualization',
                   error: {
+                    error: 'Not Found',
+                    message:
+                      'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] not found',
                     statusCode: 404,
-                    message: 'Not found',
                   },
                 },
                 {
                   id: 'does not exist',
                   type: 'dashboard',
                   error: {
+                    error: 'Not Found',
+                    message: 'Saved object [dashboard/does not exist] not found',
                     statusCode: 404,
-                    message: 'Not found',
                   },
                 },
                 {
                   id: '7.0.0-alpha1',
                   type: 'config',
                   error: {
+                    error: 'Not Found',
+                    message: 'Saved object [config/7.0.0-alpha1] not found',
                     statusCode: 404,
-                    message: 'Not found',
                   },
                 },
               ],
