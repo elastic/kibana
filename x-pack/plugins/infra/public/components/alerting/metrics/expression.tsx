@@ -264,10 +264,10 @@ export const Expressions: React.FC<Props> = props => {
 
       <EuiFormRow
         label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
-          defaultMessage: 'Filter',
+          defaultMessage: 'Filter (optional)',
         })}
         helpText={i18n.translate('xpack.infra.metrics.alertFlyout.filterHelpText', {
-          defaultMessage: 'Filter help text',
+          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
         })}
         fullWidth
         compressed
@@ -284,10 +284,11 @@ export const Expressions: React.FC<Props> = props => {
       {alertsContext.metadata && (
         <EuiFormRow
           label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
-            defaultMessage: 'Create alert per',
+            defaultMessage: 'Create alert per (optional)',
           })}
           helpText={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerHelpText', {
-            defaultMessage: 'Create alert help text',
+            defaultMessage:
+              'Create an alert for every unique value. For example: "host.id" or "cloud.region".',
           })}
           fullWidth
           compressed
