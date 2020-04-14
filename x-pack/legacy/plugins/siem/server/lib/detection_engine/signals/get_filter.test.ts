@@ -454,6 +454,7 @@ describe('get_filter', () => {
         savedId: undefined,
         services: servicesMock,
         index: ['auditbeat-*'],
+        lists: undefined,
       });
       expect(filter).toEqual({
         bool: {
@@ -488,6 +489,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
+          lists: undefined,
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
@@ -502,6 +504,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
+          lists: undefined,
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
@@ -516,6 +519,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: undefined,
+          lists: undefined,
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
@@ -529,6 +533,7 @@ describe('get_filter', () => {
         savedId: 'some-id',
         services: servicesMock,
         index: ['auditbeat-*'],
+        lists: undefined,
       });
       expect(filter).toEqual({
         bool: {
@@ -552,6 +557,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
+          lists: undefined,
         })
       ).rejects.toThrow('savedId parameter should be defined');
     });
@@ -566,6 +572,7 @@ describe('get_filter', () => {
           savedId: 'some-id',
           services: servicesMock,
           index: undefined,
+          lists: undefined,
         })
       ).rejects.toThrow('savedId parameter should be defined');
     });
@@ -580,6 +587,7 @@ describe('get_filter', () => {
           savedId: 'some-id',
           services: servicesMock,
           index: undefined,
+          lists: undefined,
         })
       ).rejects.toThrow('Unsupported Rule of type "machine_learning" supplied to getFilter');
     });

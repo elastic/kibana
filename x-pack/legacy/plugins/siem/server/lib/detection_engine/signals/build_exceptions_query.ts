@@ -103,28 +103,31 @@ export const buildExceptions = ({
   query,
   lists,
   language,
-  accumulator = [],
+  includeQuery = true,
 }: {
   query: string;
   lists: List[];
   language: string;
-  accumulator?: string[];
+  includeQuery: boolean;
 }): string[] => {
-  return lists.reduce((acc, item) => {
-    const exception: string[] = [query];
+  return lists.reduce<string[]>((acc, item) => {
+    let exception: string[] = [];
     const { and, ...exceptionDetails } = { ...item };
 
-    exception.push(evaluateValues({ list: exceptionDetails, language }));
+    exception = [...exception, evaluateValues({ list: exceptionDetails, language })];
 
-    if (and && !isEmpty(and)) {
-      and.forEach(i => {
-        exception.push(evaluateValues({ list: i, language }));
-      });
+    if (and) {
+      const andExceptions = buildExceptions({ query, lists: and, language, includeQuery: false });
+
+      exception = [...exception, ...andExceptions];
     }
 
-    acc.push(`(${exception.join('')})`);
-    return acc;
-  }, accumulator);
+    if (includeQuery) {
+      return [...acc, `(${query}${exception.join('')})`];
+    } else {
+      return [...acc, exception.join('')];
+    }
+  }, []);
 };
 
 export const buildQueryExceptions = ({
@@ -136,12 +139,16 @@ export const buildQueryExceptions = ({
   language: string;
   lists?: RuleAlertParams['lists'];
 }): Query[] => {
-  if (lists && lists !== null && !isEmpty(lists)) {
-    const exceptions = buildExceptions({ lists, language, query });
+  if (lists && lists !== null) {
+    const exceptions = buildExceptions({ lists, language, query, includeQuery: true });
+    const builtQuery =
+      exceptions.length > 0
+        ? exceptions.join(` ${getLanguageBooleanOperator(language, 'or')} `)
+        : query;
 
     return [
       {
-        query: exceptions.join(` ${getLanguageBooleanOperator(language, 'or')} `),
+        query: builtQuery,
         language,
       },
     ];

@@ -42,8 +42,7 @@ export const getQueryFilter = (
     f => f && !esFilters.isFilterDisabled(f)
   );
 
-  const a = esQuery.buildEsQuery(indexPattern, queries, enabledFilters, config);
-  return a;
+  return esQuery.buildEsQuery(indexPattern, queries, enabledFilters, config);
 };
 
 interface GetFilterArgs {
@@ -54,7 +53,7 @@ interface GetFilterArgs {
   savedId: string | undefined | null;
   services: AlertServices;
   index: string[] | undefined | null;
-  lists?: RuleAlertParams['lists'];
+  lists: RuleAlertParams['lists'];
 }
 
 interface QueryAttributes {

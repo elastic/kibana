@@ -434,6 +434,17 @@ describe('build_exceptions_query', () => {
   });
 
   describe('buildExceptions', () => {
+    test('it returns empty array if empty lists array passed in', () => {
+      const query = buildExceptions({
+        includeQuery: true,
+        query: 'a:*',
+        language: 'kuery',
+        lists: [],
+      });
+
+      expect(query).toEqual([]);
+    });
+
     test('it returns expected query when more than one item in list', () => {
       // Equal to query && !(b && !c) -> (query AND NOT b) OR (query AND c)
       // https://www.dcode.fr/boolean-expressions-calculator
@@ -462,7 +473,12 @@ describe('build_exceptions_query', () => {
           ],
         },
       ];
-      const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+      const query = buildExceptions({
+        includeQuery: true,
+        query: 'a:*',
+        language: 'kuery',
+        lists,
+      });
       const expectedQuery = ['(a:* and not b:(value-1 or value-2))', '(a:* and c:value-3)'];
 
       expect(query).toEqual(expectedQuery);
@@ -498,8 +514,73 @@ describe('build_exceptions_query', () => {
           ],
         },
       ];
-      const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+      const query = buildExceptions({
+        includeQuery: true,
+        query: 'a:*',
+        language: 'kuery',
+        lists,
+      });
       const expectedQuery = ['(a:* and not b:(value-1 or value-2) and c:value-3)'];
+
+      expect(query).toEqual(expectedQuery);
+    });
+
+    test('it returns expected query when list item includes nested "and" value of empty array', () => {
+      // Equal to query && !(b || !c) -> (query AND NOT b AND c)
+      // https://www.dcode.fr/boolean-expressions-calculator
+      const lists: List[] = [
+        {
+          field: 'b',
+          values_operator: 'included',
+          values_type: 'match_all',
+          values: [
+            {
+              name: 'value-1',
+            },
+            {
+              name: 'value-2',
+            },
+          ],
+          and: [],
+        },
+      ];
+      const query = buildExceptions({
+        includeQuery: true,
+        query: 'a:*',
+        language: 'kuery',
+        lists,
+      });
+      const expectedQuery = ['(a:* and not b:(value-1 or value-2))'];
+
+      expect(query).toEqual(expectedQuery);
+    });
+
+    test('it returns expected query when list item includes nested "and" value of null', () => {
+      // Equal to query && !(b || !c) -> (query AND NOT b AND c)
+      // https://www.dcode.fr/boolean-expressions-calculator
+      const lists: List[] = [
+        {
+          field: 'b',
+          values_operator: 'included',
+          values_type: 'match_all',
+          values: [
+            {
+              name: 'value-1',
+            },
+            {
+              name: 'value-2',
+            },
+          ],
+          and: undefined,
+        },
+      ];
+      const query = buildExceptions({
+        includeQuery: true,
+        query: 'a:*',
+        language: 'kuery',
+        lists,
+      });
+      const expectedQuery = ['(a:* and not b:(value-1 or value-2))'];
 
       expect(query).toEqual(expectedQuery);
     });
@@ -539,7 +620,12 @@ describe('build_exceptions_query', () => {
           values_type: 'exists',
         },
       ];
-      const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+      const query = buildExceptions({
+        includeQuery: true,
+        query: 'a:*',
+        language: 'kuery',
+        lists,
+      });
       const expectedQuery = [
         '(a:* and not b:(value-1 or value-2) and c:value-3)',
         '(a:* and not d:*)',
@@ -583,7 +669,12 @@ describe('build_exceptions_query', () => {
           values_type: 'exists',
         },
       ];
-      const query = buildExceptions({ query: 'a:*', language: 'lucene', lists });
+      const query = buildExceptions({
+        includeQuery: true,
+        query: 'a:*',
+        language: 'lucene',
+        lists,
+      });
       const expectedQuery = [
         '(a:* AND NOT b:(value-1 OR value-2) AND c:value-3)',
         '(a:* AND _exists_e)',
@@ -603,7 +694,12 @@ describe('build_exceptions_query', () => {
             values_type: 'exists',
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = ['(a:* and not b:*)'];
 
         expect(query).toEqual(expectedQuery);
@@ -619,7 +715,12 @@ describe('build_exceptions_query', () => {
             values_type: 'exists',
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = ['(a:* and b:*)'];
 
         expect(query).toEqual(expectedQuery);
@@ -642,7 +743,12 @@ describe('build_exceptions_query', () => {
             ],
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = ['(a:* and b:* and c:*)'];
 
         expect(query).toEqual(expectedQuery);
@@ -675,7 +781,12 @@ describe('build_exceptions_query', () => {
             values_type: 'exists',
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = ['(a:* and not b:* and c:* and not d:*)', '(a:* and not e:*)'];
 
         expect(query).toEqual(expectedQuery);
@@ -698,7 +809,12 @@ describe('build_exceptions_query', () => {
             ],
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = ['(a:* and not b:value)'];
 
         expect(query).toEqual(expectedQuery);
@@ -719,7 +835,12 @@ describe('build_exceptions_query', () => {
             ],
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = ['(a:* and b:value)'];
 
         expect(query).toEqual(expectedQuery);
@@ -752,7 +873,12 @@ describe('build_exceptions_query', () => {
             ],
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = ['(a:* and b:value and c:valueC)'];
 
         expect(query).toEqual(expectedQuery);
@@ -805,7 +931,12 @@ describe('build_exceptions_query', () => {
             ],
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = [
           '(a:* and not b:value and c:valueC and not d:valueC)',
           '(a:* and not e:valueC)',
@@ -834,7 +965,12 @@ describe('build_exceptions_query', () => {
             ],
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = ['(a:* and not b:(value or value-1))'];
 
         expect(query).toEqual(expectedQuery);
@@ -858,7 +994,12 @@ describe('build_exceptions_query', () => {
             ],
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = ['(a:* and b:(value or value-1))'];
 
         expect(query).toEqual(expectedQuery);
@@ -897,7 +1038,12 @@ describe('build_exceptions_query', () => {
             ],
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = ['(a:* and b:(value or value-1) and not c:(valueC or value-2))'];
 
         expect(query).toEqual(expectedQuery);
@@ -962,7 +1108,12 @@ describe('build_exceptions_query', () => {
             ],
           },
         ];
-        const query = buildExceptions({ query: 'a:*', language: 'kuery', lists });
+        const query = buildExceptions({
+          includeQuery: true,
+          query: 'a:*',
+          language: 'kuery',
+          lists,
+        });
         const expectedQuery = [
           '(a:* and not b:(value or value-1) and c:(valueC or value-2) and not d:(valueD or value-3))',
           '(a:* and not e:(valueE or value-4))',
@@ -976,6 +1127,31 @@ describe('build_exceptions_query', () => {
   describe('buildQueryExceptions', () => {
     test('it returns original query if no lists exist', () => {
       const query = buildQueryExceptions({ query: 'host.name: *', language: 'kuery' });
+      const expectedQuery = 'host.name: *';
+
+      expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
+    });
+
+    test('it returns original query if lists is empty array', () => {
+      const query = buildQueryExceptions({ query: 'host.name: *', language: 'kuery', lists: [] });
+      const expectedQuery = 'host.name: *';
+
+      expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
+    });
+
+    test('it returns original query if lists is null', () => {
+      const query = buildQueryExceptions({ query: 'host.name: *', language: 'kuery', lists: null });
+      const expectedQuery = 'host.name: *';
+
+      expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
+    });
+
+    test('it returns original query if lists is undefined', () => {
+      const query = buildQueryExceptions({
+        query: 'host.name: *',
+        language: 'kuery',
+        lists: undefined,
+      });
       const expectedQuery = 'host.name: *';
 
       expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
