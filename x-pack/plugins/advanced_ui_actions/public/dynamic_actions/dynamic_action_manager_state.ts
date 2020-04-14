@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SerializedEvent } from './dynamic_action_storage';
+import { SerializedEvent } from './types';
 
 /**
  * This interface represents the state of @type {DynamicActionManager} at any

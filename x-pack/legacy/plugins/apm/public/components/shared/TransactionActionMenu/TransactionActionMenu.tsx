@@ -124,7 +124,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
           <ActionMenuButton onClick={() => setIsActionPopoverOpen(true)} />
         }
       >
-        <div style={{ maxHeight: px(600) }}>
+        <div style={{ maxHeight: px(600), width: px(335) }}>
           {isCustomLinksPopoverOpen ? (
             <CustomLinkPopover
               customLinks={customLinks.slice(3, customLinks.length)}

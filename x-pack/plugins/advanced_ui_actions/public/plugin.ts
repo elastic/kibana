@@ -30,6 +30,7 @@ import {
   TimeBadgeActionContext,
 } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
+import { UiActionsServiceEnhancements } from './services';
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -41,10 +42,13 @@ interface StartDependencies {
   uiActions: UiActionsStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SetupContract extends UiActionsSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartContract extends UiActionsStart {}
+export interface SetupContract
+  extends UiActionsSetup,
+    Pick<UiActionsServiceEnhancements, 'registerActionFactory'> {}
+
+export interface StartContract
+  extends UiActionsStart,
+    Pick<UiActionsServiceEnhancements, 'getActionFactory' | 'getActionFactories'> {}
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -55,11 +59,14 @@ declare module '../../../../src/plugins/ui_actions/public' {
 
 export class AdvancedUiActionsPublicPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
+  private readonly enhancements = new UiActionsServiceEnhancements();
+
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: SetupDependencies): SetupContract {
     return {
       ...uiActions,
+      ...this.enhancements,
     };
   }
 
@@ -83,6 +90,7 @@ export class AdvancedUiActionsPublicPlugin
 
     return {
       ...uiActions,
+      ...this.enhancements,
     };
   }
 

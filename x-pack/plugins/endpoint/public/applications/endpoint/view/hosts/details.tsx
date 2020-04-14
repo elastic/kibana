@@ -28,6 +28,7 @@ import { useHostListSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
 import { FormattedDateAndTime } from '../formatted_date_time';
 import { uiQueryParams, detailsData, detailsError } from './../../store/hosts/selectors';
+import { LinkToApp } from '../components/link_to_app';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -37,6 +38,7 @@ const HostIds = styled(EuiListGroupItem)`
 `;
 
 const HostDetails = memo(({ details }: { details: HostMetadata }) => {
+  const { appId, appPath, url } = useHostLogsUrl(details.host.id);
   const detailsResultsUpper = useMemo(() => {
     return [
       {
@@ -113,6 +115,20 @@ const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         listItems={detailsResultsLower}
         data-test-subj="hostDetailsLowerList"
       />
+      <EuiHorizontalRule margin="s" />
+      <p>
+        <LinkToApp
+          appId={appId}
+          appPath={appPath}
+          href={url}
+          data-test-subj="hostDetailsLinkToLogs"
+        >
+          <FormattedMessage
+            id="xpack.endpoint.host.details.linkToLogsTitle"
+            defaultMessage="Endpoint Logs"
+          />
+        </LinkToApp>
+      </p>
     </>
   );
 });
@@ -169,4 +185,16 @@ export const HostDetailsFlyout = () => {
       </EuiFlyoutBody>
     </EuiFlyout>
   );
+};
+
+const useHostLogsUrl = (hostId: string): { url: string; appId: string; appPath: string } => {
+  const { services } = useKibana();
+  return useMemo(() => {
+    const appPath = `/stream?logFilter=(expression:'host.id:${hostId}',kind:kuery)`;
+    return {
+      url: `${services.application.getUrlForApp('logs')}${appPath}`,
+      appId: 'logs',
+      appPath,
+    };
+  }, [hostId, services.application]);
 };

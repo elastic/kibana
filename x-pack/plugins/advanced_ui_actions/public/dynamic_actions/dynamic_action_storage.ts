@@ -7,16 +7,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { Observable, Subject } from 'rxjs';
-import { UiActionsSerializedAction as SerializedAction } from '../../../../../src/plugins/ui_actions/public';
-
-/**
- * Serialized representation of event-action pair, used to persist in storage.
- */
-export interface SerializedEvent {
-  eventId: string;
-  triggers: string[];
-  action: SerializedAction<unknown>;
-}
+import { SerializedEvent } from './types';
 
 /**
  * This CRUD interface needs to be implemented by dynamic action users if they

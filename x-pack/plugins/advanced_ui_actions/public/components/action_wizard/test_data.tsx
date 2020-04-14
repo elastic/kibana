@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { ActionWizard } from './action_wizard';
-import { ActionFactoryDefinition, ActionFactory } from '../../services';
+import { ActionFactoryDefinition, ActionFactory } from '../../dynamic_actions';
 import { CollectConfigProps } from '../../util';
 
 type ActionBaseConfig = object;
