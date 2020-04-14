@@ -215,6 +215,10 @@ export class AbstractLayer {
     return this._descriptor.maxZoom;
   }
 
+  getMinSourceZoom() {
+    return this._source.getMinZoom();
+  }
+
   getAlpha() {
     return this._descriptor.alpha;
   }

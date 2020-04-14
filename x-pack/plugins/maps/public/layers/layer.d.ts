@@ -21,6 +21,7 @@ export interface ILayer {
   showAtZoomLevel(zoomLevel: number): boolean;
   getMinZoom(): number;
   getMaxZoom(): number;
+  getMinSourceZoom(): number;
 }
 
 export interface ILayerArguments {
@@ -43,5 +44,6 @@ export class AbstractLayer implements ILayer {
   showAtZoomLevel(zoomLevel: number): boolean;
   getMinZoom(): number;
   getMaxZoom(): number;
+  getMinSourceZoom(): number;
   getQuery(): MapQuery;
 }

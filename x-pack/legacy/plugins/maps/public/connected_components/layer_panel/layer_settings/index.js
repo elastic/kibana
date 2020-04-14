@@ -17,8 +17,8 @@ import {
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
-    minDataZoom: selectedLayer.getMinZoomForData(),
-    maxDataZoom: selectedLayer.getMaxZoomForData(),
+    minSourceZoom: selectedLayer.getMinSourceZoom(),
+    maxSourceZoom: selectedLayer.getMaxZoom(),
     alpha: selectedLayer.getAlpha(),
     label: selectedLayer.getLabel(),
     layerId: selectedLayer.getId(),

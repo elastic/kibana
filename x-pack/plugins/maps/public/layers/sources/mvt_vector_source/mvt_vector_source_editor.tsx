@@ -95,9 +95,7 @@ export class MVTVectorSourceEditor extends Component<Props, State> {
           <EuiFieldText value={this.state.layerName} onChange={this._handleLayerNameInputChange} />
         </EuiFormRow>
         <ValidatedDualRange
-          label={i18n.translate('xpack.maps.source.mvtVectorSource.sourceZoomRangeLabel', {
-            defaultMessage: 'Zoom range for layer data',
-          })}
+          label=""
           formRowDisplay="columnCompressed"
           min={MIN_ZOOM}
           max={MAX_ZOOM}
