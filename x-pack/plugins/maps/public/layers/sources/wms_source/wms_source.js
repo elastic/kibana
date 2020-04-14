@@ -12,7 +12,7 @@ import { WMSCreateSourceEditor } from './wms_create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { WmsClient } from './wms_client';
-import { WMS } from '../../../../common/constants';
+import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
 
 const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
@@ -20,7 +20,7 @@ const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
 });
 
 export class WMSSource extends AbstractTMSSource {
-  static type = WMS;
+  static type = SOURCE_TYPES.WMS;
 
   static createDescriptor({ serviceUrl, layers, styles, attributionText, attributionUrl }) {
     return {
@@ -92,7 +92,7 @@ export class WMSSource extends AbstractTMSSource {
 
 registerSource({
   ConstructorFunction: WMSSource,
-  type: WMS,
+  type: SOURCE_TYPES.WMS,
 });
 
 export const wmsLayerWizardConfig = {

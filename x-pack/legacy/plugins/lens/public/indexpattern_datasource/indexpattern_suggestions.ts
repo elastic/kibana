@@ -15,8 +15,8 @@ import {
   operationDefinitionMap,
   IndexPatternColumn,
 } from './operations';
-import { hasField } from './utils';
 import { operationDefinitions } from './operations/definitions';
+import { hasField } from './utils';
 import {
   IndexPattern,
   IndexPatternPrivateState,
@@ -196,7 +196,7 @@ function addFieldAsMetricOperation(
     suggestedPriority: undefined,
     field,
   });
-  const newColumnId = generateId();
+  const addedColumnId = generateId();
 
   const [, metrics] = separateBucketColumns(layer);
 
@@ -206,20 +206,19 @@ function addFieldAsMetricOperation(
       indexPatternId: indexPattern.id,
       columns: {
         ...layer.columns,
-        [newColumnId]: newColumn,
+        [addedColumnId]: newColumn,
       },
-      columnOrder: [...layer.columnOrder, newColumnId],
+      columnOrder: [...layer.columnOrder, addedColumnId],
     };
   }
 
-  // If only one metric, replace instead of add
-  const newColumns = { ...layer.columns, [newColumnId]: newColumn };
-  delete newColumns[metrics[0]];
+  // Replacing old column with new column, keeping the old ID
+  const newColumns = { ...layer.columns, [metrics[0]]: newColumn };
 
   return {
     indexPatternId: indexPattern.id,
     columns: newColumns,
-    columnOrder: [...layer.columnOrder.filter(c => c !== metrics[0]), newColumnId],
+    columnOrder: layer.columnOrder, // Order is kept by replacing
   };
 }
 

@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { ROUTES, MONITORING } from '../../../common/constants';
+import { ROUTES, MONITORING } from '../../../../../../plugins/logstash/common/constants';
 import { PipelineListItem } from 'plugins/logstash/models/pipeline_list_item';
 
 const RECENTLY_DELETED_PIPELINE_IDS_STORAGE_KEY = 'xpack.logstash.recentlyDeletedPipelines';

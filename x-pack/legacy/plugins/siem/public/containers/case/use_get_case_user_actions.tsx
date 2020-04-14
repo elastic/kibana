@@ -22,7 +22,7 @@ interface CaseUserActionsState {
   lastIndexPushToService: number;
 }
 
-const initialData: CaseUserActionsState = {
+export const initialData: CaseUserActionsState = {
   caseUserActions: [],
   firstIndexPushToService: -1,
   lastIndexPushToService: -1,
@@ -32,7 +32,7 @@ const initialData: CaseUserActionsState = {
   participants: [],
 };
 
-interface UseGetCaseUserActions extends CaseUserActionsState {
+export interface UseGetCaseUserActions extends CaseUserActionsState {
   fetchCaseUserActions: (caseId: string) => void;
 }
 
@@ -80,6 +80,7 @@ export const useGetCaseUserActions = (caseId: string): UseGetCaseUserActions => 
             const participants = !isEmpty(response)
               ? uniqBy('actionBy.username', response).map(cau => cau.actionBy)
               : [];
+
             const caseUserActions = !isEmpty(response) ? response.slice(1) : [];
             setCaseUserActionsState({
               caseUserActions,

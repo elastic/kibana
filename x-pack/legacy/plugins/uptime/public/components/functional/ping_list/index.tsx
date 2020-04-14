@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './ping_list';
+export { PingListComponent } from './ping_list';

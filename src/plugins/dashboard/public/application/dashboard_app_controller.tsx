@@ -143,6 +143,7 @@ export class DashboardAppController {
     });
 
     // sync initial app filters from state to filterManager
+    // if there is an existing similar global filter, then leave it as global
     filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
     // setup syncing of app filters between appState and filterManager
     const stopSyncingAppFilters = connectToQueryState(
@@ -150,7 +151,11 @@ export class DashboardAppController {
       {
         set: ({ filters }) => dashboardStateManager.setFilters(filters || []),
         get: () => ({ filters: dashboardStateManager.appState.filters }),
-        state$: dashboardStateManager.appState$.pipe(map(state => ({ filters: state.filters }))),
+        state$: dashboardStateManager.appState$.pipe(
+          map(state => ({
+            filters: state.filters,
+          }))
+        ),
       },
       {
         filters: esFilters.FilterStateStore.APP_STATE,
@@ -170,13 +175,16 @@ export class DashboardAppController {
     }
 
     // starts syncing `_g` portion of url with query services
-    // note: dashboard_state_manager.ts syncs `_a` portion of url
     // it is important to start this syncing after `dashboardStateManager.syncTimefilterWithDashboard(timefilter);` above is run,
-    // otherwise it will case redundant browser history record
+    // otherwise it will case redundant browser history records
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       queryService,
       kbnUrlStateStorage
     );
+
+    // starts syncing `_a` portion of url
+    dashboardStateManager.startStateSyncing();
+
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
     const getShouldShowEditHelp = () =>

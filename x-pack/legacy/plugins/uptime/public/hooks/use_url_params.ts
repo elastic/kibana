@@ -15,27 +15,26 @@ export type UpdateUrlParams = (updatedParams: {
 
 export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 
+const getParsedParams = (search: string) => {
+  return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};
+};
+
+export const useGetUrlParams: GetUrlParams = () => {
+  const location = useLocation();
+
+  const params = getParsedParams(location?.search);
+
+  return getSupportedUrlParams(params);
+};
+
 export const useUrlParams: UptimeUrlParamsHook = () => {
   const location = useLocation();
   const history = useHistory();
 
-  const getUrlParams: GetUrlParams = () => {
-    let search: string | undefined;
-    if (location) {
-      search = location.search;
-    }
-
-    const params = search
-      ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false })
-      : {};
-
-    return getSupportedUrlParams(params);
-  };
-
   const updateUrlParams: UpdateUrlParams = updatedParams => {
     if (!history || !location) return;
     const { pathname, search } = location;
-    const currentParams = parse(search[0] === '?' ? search.slice(1) : search, { sort: false });
+    const currentParams = getParsedParams(search);
     const mergedParams = {
       ...currentParams,
       ...updatedParams,
@@ -60,5 +59,5 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
     });
   };
 
-  return [getUrlParams, updateUrlParams];
+  return [useGetUrlParams, updateUrlParams];
 };

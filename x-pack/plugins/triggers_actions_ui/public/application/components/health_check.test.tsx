@@ -10,6 +10,7 @@ import { HealthCheck } from './health_check';
 
 import { act } from 'react-dom/test-utils';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import '@testing-library/jest-dom/extend-expect';
 
 const docLinks = { ELASTIC_WEBSITE_URL: 'elastic.co/', DOC_LINK_VERSION: 'current' };
 
@@ -91,7 +92,7 @@ describe('health check', () => {
 
     const description = queryByRole(/banner/i);
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"To create an alert, set a value for xpack.encrypted_saved_objects.encryptionKey in your kibana.yml file. Learn how."`
+      `"To create an alert, set a value for xpack.encryptedSavedObjects.encryptionKey in your kibana.yml file. Learn how."`
     );
 
     const action = queryByText(/Learn/i);
