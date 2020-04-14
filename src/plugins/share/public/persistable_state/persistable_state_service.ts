@@ -18,17 +18,25 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { i18n } from '@kbn/i18n';
-import { createPersistableStateContract } from './persistable_state_contract';
-import { PersistableStateDefinition, PersistableStateContract } from './types';
+import { identity } from 'lodash';
+import {
+  PersistableStateDefinition,
+  PersistableStateContract,
+  ExtractReferences,
+  MigrateState,
+} from './types';
 
 export interface PersistableStateSetup {
   register: (definition: PersistableStateDefinition) => Promise<void>;
 }
 
 export interface PersistableStateStart {
-  get: (definitionId: string) => Promise<PersistableStateContract<string>>;
+  get: (definitionId: string) => Promise<PersistableStateContract<string> | undefined>;
 }
+
+const defaultExtractReferences = ((state: any) => {
+  return [state, []];
+}) as ExtractReferences<string>;
 
 export class PersistableStateService
   implements Plugin<PersistableStateSetup, PersistableStateStart> {
@@ -37,27 +45,21 @@ export class PersistableStateService
   public setup(core: CoreSetup): PersistableStateSetup {
     return {
       register: async definition => {
-        this.definitions.set(definition.id, createPersistableStateContract(definition));
+        const { id, extractReferences, injectReferences, migrate } = definition;
+
+        this.definitions.set(definition.id, {
+          id,
+          extractReferences: extractReferences || defaultExtractReferences,
+          injectReferences: injectReferences || identity,
+          migrate: migrate || (identity as MigrateState<string>),
+        });
       },
     };
   }
 
   public start(core: CoreStart): PersistableStateStart {
     return {
-      get: async id => {
-        const definition = this.definitions.get(id);
-
-        if (!definition) {
-          throw new Error(
-            i18n.translate('share.persistableState.errors.noDefinitionWithId', {
-              defaultMessage: 'No persistable state definition found with id "{id}"',
-              values: { id },
-            })
-          );
-        }
-
-        return definition;
-      },
+      get: async id => this.definitions.get(id),
     };
   }
 

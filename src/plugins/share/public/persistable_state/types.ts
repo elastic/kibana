@@ -17,16 +17,10 @@
  * under the License.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
+import { SavedObjectReference } from 'src/core/public';
 
-export interface PersistableState<
-  S extends SavedObjectAttributes,
-  I extends string | undefined = undefined,
-  MS extends SavedObjectAttributes | undefined = undefined
-> {
+export interface PersistableState<S extends unknown> {
   state: S;
-  migratedId?: I;
-  migratedState?: MS;
 }
 
 /**
@@ -43,38 +37,30 @@ export interface PersistableState<
  * @public
  */
 export interface PersistableStates {
-  [key: string]: PersistableState<SavedObjectAttributes>;
+  [key: string]: PersistableState<any>;
 }
 
-interface SavedObjectWithReferences {
-  attributes: SavedObjectAttributes;
-  references: SavedObjectReference[];
-}
-type ExtractReferences = (opts: SavedObjectWithReferences) => SavedObjectWithReferences;
-type InjectReferences = (opts: SavedObjectWithReferences) => void;
+export type ExtractReferences<Id extends string = string> = (
+  state: PersistableStates[Id]['state']
+) => [PersistableStates[Id]['state'], SavedObjectReference[]];
+export type InjectReferences<Id extends string = string> = (
+  state: PersistableStates[Id]['state'],
+  references: SavedObjectReference[]
+) => PersistableStates[Id]['state'];
+export type MigrateState<Id extends string = string> = (
+  oldState: unknown
+) => PersistableStates[Id]['state'];
 
 export interface PersistableStateDefinition<Id extends string = string> {
   id: Id;
-  isDeprecated?: boolean;
-  extractReferences?: ExtractReferences;
-  injectReferences?: InjectReferences;
-  migrate?: (
-    state: PersistableStates[Id]['state']
-  ) => Promise<{
-    state: PersistableStates[Id]['migratedState'];
-    id: PersistableStates[Id]['migratedId'];
-  }>;
+  extractReferences?: ExtractReferences<Id>;
+  injectReferences?: InjectReferences<Id>;
+  migrate?: MigrateState<Id>;
 }
 
 export interface PersistableStateContract<Id extends string> {
   id: Id;
-  isDeprecated: boolean;
-  extractReferences: ExtractReferences;
-  injectReferences: InjectReferences;
-  migrate?: (
-    state: PersistableStates[Id]['state']
-  ) => Promise<{
-    state: PersistableStates[Id]['migratedState'];
-    id: PersistableStates[Id]['migratedId'];
-  }>;
+  extractReferences: ExtractReferences<Id>;
+  injectReferences: InjectReferences<Id>;
+  migrate: MigrateState<Id>;
 }
