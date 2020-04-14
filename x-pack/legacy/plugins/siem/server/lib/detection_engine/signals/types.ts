@@ -59,35 +59,35 @@ export interface SignalSource {
   };
 }
 
+export interface BulkItem {
+  create: {
+    _index: string;
+    _type?: string;
+    _id: string;
+    _version: number;
+    result?: string;
+    _shards?: {
+      total: number;
+      successful: number;
+      failed: number;
+    };
+    _seq_no?: number;
+    _primary_term?: number;
+    status: number;
+    error?: {
+      type: string;
+      reason: string;
+      index_uuid?: string;
+      shard: string;
+      index: string;
+    };
+  };
+}
+
 export interface BulkResponse {
   took: number;
   errors: boolean;
-  items: [
-    {
-      create: {
-        _index: string;
-        _type?: string;
-        _id: string;
-        _version: number;
-        result?: string;
-        _shards?: {
-          total: number;
-          successful: number;
-          failed: number;
-        };
-        _seq_no?: number;
-        _primary_term?: number;
-        status: number;
-        error?: {
-          type: string;
-          reason: string;
-          index_uuid?: string;
-          shard: string;
-          index: string;
-        };
-      };
-    }
-  ];
+  items: BulkItem[];
 }
 
 export interface MGetResponse {
@@ -169,3 +169,5 @@ export interface RuleAlertAttributes extends AlertAttributes {
     ruleId: string;
   };
 }
+
+export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;

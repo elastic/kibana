@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SignalSourceHit, SignalSearchResponse } from '../types';
+import { SignalSourceHit, SignalSearchResponse, BulkResponse, BulkItem } from '../types';
 import {
   Logger,
   SavedObject,
@@ -416,3 +416,68 @@ export const exampleFindRuleStatusResponse: (
 });
 
 export const mockLogger: Logger = loggingServiceMock.createLogger();
+
+export const sampleBulkErrorItem = (
+  {
+    status,
+    reason,
+  }: {
+    status: number;
+    reason: string;
+  } = { status: 400, reason: 'Invalid call' }
+): BulkItem => {
+  return {
+    create: {
+      _index: 'mock_index',
+      _id: '123',
+      _version: 1,
+      status,
+      _shards: {
+        total: 1,
+        successful: 0,
+        failed: 1,
+      },
+      error: {
+        type: 'Invalid',
+        reason,
+        shard: 'shard 123',
+        index: 'mock_index',
+      },
+    },
+  };
+};
+
+export const sampleBulkItem = (): BulkItem => {
+  return {
+    create: {
+      _index: 'mock_index',
+      _id: '123',
+      _version: 1,
+      status: 200,
+      result: 'some result here',
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+      },
+    },
+  };
+};
+
+export const sampleEmptyBulkResponse = (): BulkResponse => ({
+  took: 0,
+  errors: false,
+  items: [],
+});
+
+export const sampleBulkError = (): BulkResponse => ({
+  took: 0,
+  errors: true,
+  items: [sampleBulkErrorItem()],
+});
+
+export const sampleBulkResponse = (): BulkResponse => ({
+  took: 0,
+  errors: true,
+  items: [sampleBulkItem()],
+});
