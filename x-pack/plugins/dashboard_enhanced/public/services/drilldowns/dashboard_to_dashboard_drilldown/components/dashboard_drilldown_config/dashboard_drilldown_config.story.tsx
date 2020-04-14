@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import { DashboardDrilldownConfig } from '.';
+import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 
 export const dashboards = [
   { value: 'dashboard1', label: 'Dashboard 1' },

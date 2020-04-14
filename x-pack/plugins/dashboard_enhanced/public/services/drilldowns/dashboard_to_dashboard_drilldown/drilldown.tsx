@@ -9,9 +9,8 @@ import { CoreStart } from 'src/core/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
 import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
 import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../src/plugins/dashboard/public';
-import { PlaceContext, ActionContext, Config, CollectConfigProps } from './types';
-
-import { CollectConfigContainer } from './collect_config';
+import { PlaceContext, ActionContext, Config } from './types';
+import { CollectConfigContainer } from './components';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { DrilldownDefinition as Drilldown } from '../../../../../drilldowns/public';
 import { txtGoToDashboard } from './i18n';
@@ -37,7 +36,7 @@ export class DashboardToDashboardDrilldown
 
   public readonly euiIcon = 'dashboardApp';
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = props => (
+  private readonly ReactCollectConfig: React.FC<CollectConfigContainer['props']> = props => (
     <CollectConfigContainer {...props} deps={this.params} />
   );
 
@@ -82,9 +81,19 @@ export class DashboardToDashboardDrilldown
     // if undefined is passed, then destination dashboard will figure out time range itself
     // for brush event this time range would be overwritten
     let timeRange = config.useCurrentDateRange ? currentTimeRange : undefined;
-    let filtersFromEvent = context.data.range
-      ? await createFiltersFromBrushEvent(context.data as any)
-      : await createFiltersFromValueClickEvent(context.data as any);
+    let filtersFromEvent = await (async () => {
+      // TODO: not sure what would be the best way to handle types here
+      // context.data is `unknown` and comes from `EmbeddableVisTriggerContext`
+      try {
+        return context.data.range
+          ? await createFiltersFromBrushEvent(context.data as any)
+          : await createFiltersFromValueClickEvent(context.data as any);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('DashboardToDashboard drilldown: unable to extract filters from event', e);
+        return [];
+      }
+    })();
 
     if (context.timeFieldName) {
       const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(

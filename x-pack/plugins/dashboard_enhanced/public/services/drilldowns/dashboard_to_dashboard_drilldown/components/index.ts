@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './dashboard_drilldown_config';
+export { CollectConfigContainer } from './collect_config_container';
