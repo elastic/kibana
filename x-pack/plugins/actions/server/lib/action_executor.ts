@@ -87,7 +87,7 @@ export class ActionExecutor {
       encryptedSavedObjectsPlugin,
       preconfiguredActions,
       actionId,
-      namespace
+      namespace.namespace
     );
 
     actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
