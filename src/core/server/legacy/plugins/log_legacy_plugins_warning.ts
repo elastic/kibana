@@ -39,7 +39,7 @@ export const logLegacyThirdPartyPluginDeprecationWarning = ({
     log.warn(
       `Some installed third party plugin(s) [${pluginIds.join(
         ', '
-      )}] are using the legacy plugin format and will no longer work after version 8.0. ` +
+      )}] are using the legacy plugin format and will no longer work in a future Kibana release. ` +
         `Please refer to ${breakingChangesUrl} for a list of breaking changes ` +
         `and ${migrationGuideUrl} for documentation on how to migrate legacy plugins.`
     );
