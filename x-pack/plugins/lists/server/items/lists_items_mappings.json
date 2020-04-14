@@ -1,0 +1,26 @@
+{
+  "dynamic": "strict",
+  "properties": {
+    "tie_breaker_id": {
+      "type": "keyword"
+    },
+    "list_id": {
+      "type": "keyword"
+    },
+    "ip": {
+      "type": "ip"
+    },
+    "keyword": {
+      "type": "keyword"
+    },
+    "meta": {
+      "type": "keyword"
+    },
+    "created_at": {
+      "type": "date"
+    },
+    "updated_at": {
+      "type": "date"
+    }
+  }
+}

@@ -31,21 +31,7 @@ import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/fin
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_route';
 import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
-import { hasListsFeature } from '../lib/detection_engine/feature_flags';
-import { createListsRoute } from '../lib/lists/routes/create_lists_route';
-import { readListsRoute } from '../lib/lists/routes/read_lists_route';
-import { readListsItemsRoute } from '../lib/lists/routes/read_lists_items_route';
-import { createListsItemsRoute } from '../lib/lists/routes/create_lists_items_route';
-import { importListsItemsRoute } from '../lib/lists/routes/import_lists_items_route';
-import { exportListsItemsRoute } from '../lib/lists/routes/export_lists_items_route';
-import { patchListsRoute } from '../lib/lists/routes/patch_lists_route';
-import { patchListsItemsRoute } from '../lib/lists/routes/patch_lists_items_route';
-import { deleteListsRoute } from '../lib/lists/routes/delete_lists_route';
-import { createListsIndexRoute } from '../lib/lists/routes/create_lists_index_route';
-import { deleteListsIndexRoute } from '../lib/lists/routes/delete_lists_index_route';
-import { readListsIndexRoute } from '../lib/lists/routes/read_lists_index_route';
 import { SetupPlugins } from '../plugin';
-import { deleteListsItemsRoute } from '../lib/lists/routes/delete_lists_items_route';
 
 export const initRoutes = (
   router: IRouter,
@@ -94,29 +80,4 @@ export const initRoutes = (
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, security, usingEphemeralEncryptionKey);
-
-  if (hasListsFeature()) {
-    // List routes that have the REST endpoints of /api/lists
-
-    // index creation, policy management of lists
-    createListsIndexRoute(router);
-    readListsIndexRoute(router);
-    deleteListsIndexRoute(router);
-
-    // list routes
-    createListsRoute(router);
-    readListsRoute(router);
-    patchListsRoute(router);
-    deleteListsRoute(router);
-
-    // list items routes
-    createListsItemsRoute(router);
-    readListsItemsRoute(router);
-
-    // TODO: Add a updateListsItemsRoute
-    deleteListsItemsRoute(router);
-    patchListsItemsRoute(router);
-    importListsItemsRoute(router);
-    exportListsItemsRoute(router);
-  }
 };
