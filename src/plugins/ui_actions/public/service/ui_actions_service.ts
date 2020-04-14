@@ -23,6 +23,7 @@ import {
   TriggerToActionsRegistry,
   TriggerId,
   TriggerContextMapping,
+  ActionContextMapping,
   ActionType,
 } from '../types';
 import { ActionInternal, Action, ActionByType, ActionDefinition, ActionContext } from '../actions';
@@ -138,7 +139,9 @@ export class UiActionsService {
     triggerId: TType,
     // The action can accept partial or no context, but if it needs context not provided
     // by this type of trigger, typescript will complain. yay!
-    action: ActionByType<AType> & Action<TriggerContextMapping[TType]>
+    action:
+      | (ActionByType<AType> & Action<TriggerContextMapping[TType]>)
+      | ActionDefinition<ActionContextMapping[AType]>
   ): void => {
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);
