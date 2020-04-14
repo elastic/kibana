@@ -26,13 +26,13 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       }
     },
     async setAlertName(name: string) {
-      return testSubjects.setValue('alertNameInput', name);
+      return testSubjects.setValue('alertNameInput', name, { clearWithKeyboard: true });
     },
     async setAlertInterval(value: string) {
-      return testSubjects.setValue('intervalInput', value);
+      return testSubjects.setValue('intervalInput', value, { clearWithKeyboard: true });
     },
     async setAlertThrottleInterval(value: string) {
-      return testSubjects.setValue('throttleInput', value);
+      return testSubjects.setValue('throttleInput', value, { clearWithKeyboard: true });
     },
     async setAlertExpressionValue(
       expressionAttribute: string,
@@ -40,7 +40,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       value: string
     ) {
       await testSubjects.click(expressionAttribute);
-      await testSubjects.setValue(fieldAttribute, value);
+      await testSubjects.setValue(fieldAttribute, value, { clearWithKeyboard: true });
       return browser.pressKeys(browser.keys.ESCAPE);
     },
     async setAlertStatusNumTimes(value: string) {
