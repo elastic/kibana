@@ -25,3 +25,8 @@ export const calendarSchema = schema.object({
 });
 
 export const calendarIdSchema = schema.object({ calendarId: schema.string() });
+
+export const calendarIdsSchema = schema.object({
+  /** Comma-separated list of calendar IDs */
+  calendarIds: schema.string(),
+});
