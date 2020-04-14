@@ -235,6 +235,7 @@ export function SuggestionPanel({
 
   const expressionContext = {
     query: frame.query,
+    filters: frame.filters,
     timeRange: {
       from: frame.dateRange.fromDate,
       to: frame.dateRange.toDate,

@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { ROUTES } from '../../../common/constants';
+import { ROUTES } from '../../../../../../plugins/logstash/common/constants';
 import { Cluster } from 'plugins/logstash/models/cluster';
 
 export class ClusterService {
