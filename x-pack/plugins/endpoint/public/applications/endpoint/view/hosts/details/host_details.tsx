@@ -4,31 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, memo, useEffect } from 'react';
+import styled from 'styled-components';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
   EuiDescriptionList,
-  EuiLoadingContent,
-  EuiHorizontalRule,
   EuiHealth,
-  EuiSpacer,
+  EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
 } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
+import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { HostMetadata } from '../../../../../common/types';
-import { useHostListSelector } from './hooks';
-import { urlFromQueryParams } from './url_from_query_params';
-import { FormattedDateAndTime } from '../formatted_date_time';
-import { uiQueryParams, detailsData, detailsError } from './../../store/hosts/selectors';
-import { LinkToApp } from '../components/link_to_app';
+import { i18n } from '@kbn/i18n';
+import { HostMetadata } from '../../../../../../common/types';
+import { FormattedDateAndTime } from '../../formatted_date_time';
+import { LinkToApp } from '../../components/link_to_app';
+import { useHostLogsUrl } from '../hooks';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -37,7 +27,7 @@ const HostIds = styled(EuiListGroupItem)`
   }
 `;
 
-const HostDetails = memo(({ details }: { details: HostMetadata }) => {
+export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const { appId, appPath, url } = useHostLogsUrl(details.host.id);
   const detailsResultsUpper = useMemo(() => {
     return [
@@ -102,6 +92,7 @@ const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       },
     ];
   }, [details.agent.version, details.endpoint.policy.id, details.host.hostname, details.host.ip]);
+
   return (
     <>
       <EuiDescriptionList
@@ -132,69 +123,3 @@ const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     </>
   );
 });
-
-export const HostDetailsFlyout = () => {
-  const history = useHistory();
-  const { notifications } = useKibana();
-  const queryParams = useHostListSelector(uiQueryParams);
-  const { selected_host: selectedHost, ...queryParamsWithoutSelectedHost } = queryParams;
-  const details = useHostListSelector(detailsData);
-  const error = useHostListSelector(detailsError);
-
-  const handleFlyoutClose = useCallback(() => {
-    history.push(urlFromQueryParams(queryParamsWithoutSelectedHost));
-  }, [history, queryParamsWithoutSelectedHost]);
-
-  useEffect(() => {
-    if (error !== undefined) {
-      notifications.toasts.danger({
-        title: (
-          <FormattedMessage
-            id="xpack.endpoint.host.details.errorTitle"
-            defaultMessage="Could not find host"
-          />
-        ),
-        body: (
-          <FormattedMessage
-            id="xpack.endpoint.host.details.errorBody"
-            defaultMessage="Please exit the flyout and select an available host."
-          />
-        ),
-        toastLifeTimeMs: 10000,
-      });
-    }
-  }, [error, notifications.toasts]);
-
-  return (
-    <EuiFlyout onClose={handleFlyoutClose} data-test-subj="hostDetailsFlyout">
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2 data-test-subj="hostDetailsFlyoutTitle">
-            {details === undefined ? <EuiLoadingContent lines={1} /> : details.host.hostname}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {details === undefined ? (
-          <>
-            <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
-          </>
-        ) : (
-          <HostDetails details={details} />
-        )}
-      </EuiFlyoutBody>
-    </EuiFlyout>
-  );
-};
-
-const useHostLogsUrl = (hostId: string): { url: string; appId: string; appPath: string } => {
-  const { services } = useKibana();
-  return useMemo(() => {
-    const appPath = `/stream?logFilter=(expression:'host.id:${hostId}',kind:kuery)`;
-    return {
-      url: `${services.application.getUrlForApp('logs')}${appPath}`,
-      appId: 'logs',
-      appPath,
-    };
-  }, [hostId, services.application]);
-};
