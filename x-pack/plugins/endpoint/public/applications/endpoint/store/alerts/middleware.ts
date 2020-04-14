@@ -16,7 +16,7 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
     const eventsPattern: { indexPattern: string } = await coreStart.http.get(
-      `/api/endpoint/index_pattern/${EndpointAppConstants.EVENT_DATASET}`
+      `${EndpointAppConstants.INDEX_PATTERN_ROUTE}/${EndpointAppConstants.EVENT_DATASET}`
     );
     const fields = await indexPatterns.getFieldsForWildcard({
       pattern: eventsPattern.indexPattern,

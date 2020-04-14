@@ -3,27 +3,43 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract, Logger, LoggerFactory } from 'kibana/server';
+import { Logger, LoggerFactory, RequestHandlerContext } from 'kibana/server';
 import { IndexPatternService } from '../../ingest_manager/server';
-
-const endpointPackageName = 'endpoint';
+import { EndpointAppConstants } from '../common/types';
 
 export interface IndexPatternRetriever {
-  get(client: SavedObjectsClientContract, datasetPath: string): Promise<string>;
+  getIndexPattern(ctx: RequestHandlerContext, datasetPath: string): Promise<string>;
+  getEventIndexPattern(ctx: RequestHandlerContext): Promise<string>;
+  getMetadataIndexPattern(ctx: RequestHandlerContext): Promise<string>;
 }
 
 export class IngestIndexPatternRetriever implements IndexPatternRetriever {
+  private static endpointPackageName = 'endpoint';
+  private static metadataDataset = 'metadata';
   private readonly log: Logger;
   constructor(private readonly service: IndexPatternService, loggerFactory: LoggerFactory) {
     this.log = loggerFactory.get('index-pattern-retriever');
   }
 
-  async get(client: SavedObjectsClientContract, datasetPath: string, version?: string) {
-    const pattern = await this.service.get(client, endpointPackageName, datasetPath);
+  async getEventIndexPattern(ctx: RequestHandlerContext) {
+    return await this.getIndexPattern(ctx, EndpointAppConstants.EVENT_DATASET);
+  }
+
+  async getMetadataIndexPattern(ctx: RequestHandlerContext) {
+    return await this.getIndexPattern(ctx, IngestIndexPatternRetriever.metadataDataset);
+  }
+
+  async getIndexPattern(ctx: RequestHandlerContext, datasetPath: string) {
+    const pattern = await this.service.get(
+      ctx.core.savedObjects.client,
+      IngestIndexPatternRetriever.endpointPackageName,
+      datasetPath
+    );
 
     if (!pattern) {
-      this.log.warn(`Failed to retrieve index pattern from ingest manager dataset: ${datasetPath}`);
-      throw new Error(`Unable to retrieve the index pattern for dataset: ${datasetPath}`);
+      const msg = `Unable to retrieve the index pattern for dataset: ${datasetPath}`;
+      this.log.warn(msg);
+      throw new Error(msg);
     }
 
     return pattern;

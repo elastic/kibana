@@ -12,7 +12,7 @@ import {
 import { registerAlertRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
 import { alertingIndexGetQuerySchema } from '../../../common/schema/alert_index';
-import { FakeIndexPatternRetriever } from '../../plugin.test';
+import { createMockIndexPatternRetriever } from '../../mocks';
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -25,8 +25,7 @@ describe('test alerts route', () => {
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     registerAlertRoutes(routerMock, {
-      indexPatternRetriever: new FakeIndexPatternRetriever('events-endpoint-*'),
-
+      indexPatternRetriever: createMockIndexPatternRetriever('events-endpoint-*'),
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });

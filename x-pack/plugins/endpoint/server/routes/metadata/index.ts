@@ -56,9 +56,8 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const index = await endpointAppContext.indexPatternRetriever.get(
-          context.core.savedObjects.client,
-          EndpointAppConstants.METADATA_DATASET
+        const index = await endpointAppContext.indexPatternRetriever.getMetadataIndexPattern(
+          context
         );
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
@@ -86,9 +85,8 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const index = await endpointAppContext.indexPatternRetriever.get(
-          context.core.savedObjects.client,
-          EndpointAppConstants.METADATA_DATASET
+        const index = await endpointAppContext.indexPatternRetriever.getMetadataIndexPattern(
+          context
         );
 
         const doc = await getHostData(context, req.params.id, index);

@@ -31,9 +31,9 @@ export type Direction = 'asc' | 'desc';
 
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
+  static INDEX_PATTERN_ROUTE = `${EndpointAppConstants.BASE_API_URL}/index_pattern`;
   static ALERT_INDEX_NAME = 'events-endpoint-1';
   static EVENT_DATASET = 'events';
-  static METADATA_DATASET = 'metadata';
   static DEFAULT_TOTAL_HITS = 10000;
   /**
    * Legacy events are stored in indices with endgame-* prefix

@@ -24,8 +24,8 @@ import { HostInfo, HostMetadata, HostResultList, HostStatus } from '../../../com
 import { SearchResponse } from 'elasticsearch';
 import { registerEndpointRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
-import { FakeIndexPatternRetriever } from '../../plugin.test';
 import * as data from '../../test_data/all_metadata_data.json';
+import { createMockMetadataIPRetriever } from '../../mocks';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -46,7 +46,7 @@ describe('test endpoint route', () => {
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
     registerEndpointRoutes(routerMock, {
-      indexPatternRetriever: FakeIndexPatternRetriever.buildMetadata(),
+      indexPatternRetriever: createMockMetadataIPRetriever(),
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });

@@ -6,7 +6,7 @@
 
 import { IRouter, Logger, RequestHandler } from 'kibana/server';
 import { EndpointAppContext } from '../types';
-import { IndexPatternGetParamsResult } from '../../common/types';
+import { IndexPatternGetParamsResult, EndpointAppConstants } from '../../common/types';
 import { indexPatternGetParamsSchema } from '../../common/schema/index_pattern';
 import { IndexPatternRetriever } from '../index_pattern';
 
@@ -18,10 +18,7 @@ function handleIndexPattern(
     try {
       return res.ok({
         body: {
-          indexPattern: await indexRetriever.get(
-            context.core.savedObjects.client,
-            req.params.datasetPath
-          ),
+          indexPattern: await indexRetriever.getIndexPattern(context, req.params.datasetPath),
         },
       });
     } catch (error) {
@@ -36,7 +33,7 @@ export function registerIndexPatternRoute(router: IRouter, endpointAppContext: E
 
   router.get(
     {
-      path: '/api/endpoint/index_pattern/{datasetPath}',
+      path: `${EndpointAppConstants.INDEX_PATTERN_ROUTE}/{datasetPath}`,
       validate: { params: indexPatternGetParamsSchema },
       options: { authRequired: true },
     },
