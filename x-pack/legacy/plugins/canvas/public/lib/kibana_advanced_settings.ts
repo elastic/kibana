@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getCoreStart } from '../legacy';
+import { platformService } from '../services';
 
-export const getAdvancedSettings = () => getCoreStart().uiSettings;
+export const getAdvancedSettings = () => platformService.getService().coreStart.uiSettings;
