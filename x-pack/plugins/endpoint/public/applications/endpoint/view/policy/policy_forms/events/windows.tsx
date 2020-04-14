@@ -29,11 +29,25 @@ export const WindowsEvents = React.memo(() => {
   }> = useMemo(
     () => [
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.process', {
-          defaultMessage: 'Process',
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.dllDriverLoad', {
+          defaultMessage: 'DLL and Driver Load',
         }),
         os: OS.windows,
-        protectionField: 'process',
+        protectionField: 'dll_and_driver_load',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.dns', {
+          defaultMessage: 'DNS',
+        }),
+        os: OS.windows,
+        protectionField: 'dns',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.file', {
+          defaultMessage: 'File',
+        }),
+        os: OS.windows,
+        protectionField: 'file',
       },
       {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.network', {
@@ -41,6 +55,27 @@ export const WindowsEvents = React.memo(() => {
         }),
         os: OS.windows,
         protectionField: 'network',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.process', {
+          defaultMessage: 'Process',
+        }),
+        os: OS.windows,
+        protectionField: 'process',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.registry', {
+          defaultMessage: 'Registry',
+        }),
+        os: OS.windows,
+        protectionField: 'registry',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.security', {
+          defaultMessage: 'Security',
+        }),
+        os: OS.windows,
+        protectionField: 'security',
       },
     ],
     []
