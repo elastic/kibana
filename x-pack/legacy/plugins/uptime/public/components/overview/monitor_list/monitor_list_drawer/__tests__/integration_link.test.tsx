@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { IntegrationLink } from '../integration_link';
+import { IntegrationLink } from '../actions_popover/integration_link';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('IntegrationLink component', () => {

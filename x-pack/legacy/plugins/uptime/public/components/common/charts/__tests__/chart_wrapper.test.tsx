@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChartWrapper } from '../chart_wrapper';
-import { SnapshotHeading } from '../../../overview/snapshot_heading';
+import { SnapshotHeading } from '../../../overview/snapshot/snapshot_heading';
 import { DonutChart } from '../donut_chart';
 const SNAPSHOT_CHART_WIDTH = 144;
 const SNAPSHOT_CHART_HEIGHT = 144;

@@ -7,3 +7,4 @@
 export { MonitorList } from './monitor_list';
 export { Criteria, Pagination } from './types';
 export { LocationLink } from './monitor_list_drawer';
+export { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';

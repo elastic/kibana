@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { LocationMap } from '../location_map';
 import { UptimeRefreshContext } from '../../../contexts';
 import { MonitorLocations } from '../../../../common/runtime_types';
-import { MonitorStatusBar } from '../../connected';
+import { MonitorStatusBar } from './monitor_status_bar/status_bar_container';
 
 interface MonitorStatusDetailsProps {
   monitorId: string;

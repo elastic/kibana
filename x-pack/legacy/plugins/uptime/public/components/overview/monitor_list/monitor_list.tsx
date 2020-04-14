@@ -32,8 +32,8 @@ import { MonitorBarSeries } from '../../common/charts';
 import { MonitorPageLink } from './monitor_page_link';
 import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
-import { MonitorListDrawer } from '../../connected';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
+import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;

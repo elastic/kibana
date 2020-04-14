@@ -14,7 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { MonitorSSLCertificate } from './monitor_ssl_certificate';
+import { MonitorSSLCertificate } from './ssl_certificate';
 import * as labels from './translations';
 import { StatusByLocations } from './status_by_location';
 import { Ping } from '../../../../../common/graphql/types';

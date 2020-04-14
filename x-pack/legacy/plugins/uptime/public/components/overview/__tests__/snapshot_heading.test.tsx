@@ -6,7 +6,7 @@
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import { SnapshotHeading } from '../snapshot_heading';
+import { SnapshotHeading } from '../snapshot/snapshot_heading';
 
 describe('SnapshotHeading', () => {
   it('renders custom heading for no down monitors', () => {

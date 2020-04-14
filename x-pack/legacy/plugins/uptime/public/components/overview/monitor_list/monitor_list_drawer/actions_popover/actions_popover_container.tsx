@@ -5,10 +5,10 @@
  */
 
 import { connect } from 'react-redux';
-import { AppState } from '../../../state';
-import { isIntegrationsPopupOpen } from '../../../state/selectors';
-import { PopoverState, toggleIntegrationsPopover } from '../../../state/actions';
-import { MonitorListActionsPopoverComponent } from '../../overview/monitor_list/monitor_list_drawer';
+import { AppState } from '../../../../../state';
+import { isIntegrationsPopupOpen } from '../../../../../state/selectors';
+import { PopoverState, toggleIntegrationsPopover } from '../../../../../state/actions';
+import { ActionsPopoverComponent } from '../index';
 
 const mapStateToProps = (state: AppState) => ({
   popoverState: isIntegrationsPopupOpen(state),
@@ -20,7 +20,4 @@ const mapDispatchToProps = (dispatch: any) => ({
   },
 });
 
-export const MonitorListActionsPopover = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(MonitorListActionsPopoverComponent);
+export const ActionsPopover = connect(mapStateToProps, mapDispatchToProps)(ActionsPopoverComponent);

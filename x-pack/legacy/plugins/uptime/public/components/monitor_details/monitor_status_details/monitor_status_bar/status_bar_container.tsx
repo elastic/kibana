@@ -6,29 +6,35 @@
 
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useGetUrlParams } from '../../../hooks';
-import { monitorLocationsSelector } from '../../../state/selectors';
-import { getMonitorLocationsAction } from '../../../state/actions/monitor';
-import { MonitorStatusDetailsComponent } from '../../monitor_details/monitor_status_details';
-import { UptimeRefreshContext } from '../../../contexts';
+import { monitorLocationsSelector, monitorStatusSelector } from '../../../../state/selectors';
+import { MonitorStatusBarComponent } from './index';
+import { getMonitorStatusAction } from '../../../../state/actions';
+import { useGetUrlParams } from '../../../../hooks';
+import { UptimeRefreshContext } from '../../../../contexts';
 
 interface Props {
   monitorId: string;
 }
 
-export const MonitorStatusDetails: React.FC<Props> = ({ monitorId }: Props) => {
+export const MonitorStatusBar: React.FC<Props> = ({ monitorId }: Props) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
 
   const dispatch = useDispatch();
+
+  const monitorStatus = useSelector(monitorStatusSelector);
   const monitorLocations = useSelector(state => monitorLocationsSelector(state, monitorId));
 
   useEffect(() => {
-    dispatch(getMonitorLocationsAction({ dateStart, dateEnd, monitorId }));
+    dispatch(getMonitorStatusAction({ dateStart, dateEnd, monitorId }));
   }, [monitorId, dateStart, dateEnd, lastRefresh, dispatch]);
 
   return (
-    <MonitorStatusDetailsComponent monitorId={monitorId} monitorLocations={monitorLocations} />
+    <MonitorStatusBarComponent
+      monitorId={monitorId}
+      monitorStatus={monitorStatus}
+      monitorLocations={monitorLocations}
+    />
   );
 };

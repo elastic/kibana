@@ -18,9 +18,9 @@ import {
   getLoggingContainerHref,
   getLoggingIpHref,
   getLoggingKubernetesHref,
-} from '../../../../lib/helper';
-import { MonitorSummary } from '../../../../../common/graphql/types';
-import { UptimeSettingsContext } from '../../../../contexts';
+} from '../../../../../lib/helper';
+import { MonitorSummary } from '../../../../../../common/graphql/types';
+import { UptimeSettingsContext } from '../../../../../contexts';
 
 interface IntegrationGroupProps {
   summary: MonitorSummary;

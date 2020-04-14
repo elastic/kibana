@@ -9,20 +9,20 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiPopover, EuiButton } from '@elastic/eui';
 import { IntegrationGroup } from './integration_group';
-import { MonitorSummary } from '../../../../../common/graphql/types';
-import { toggleIntegrationsPopover, PopoverState } from '../../../../state/actions';
+import { MonitorSummary } from '../../../../../../common/graphql/types';
+import { toggleIntegrationsPopover, PopoverState } from '../../../../../state/actions';
 
-interface MonitorListActionsPopoverProps {
+interface ActionsPopoverProps {
   summary: MonitorSummary;
   popoverState: PopoverState | null;
   togglePopoverIsVisible: typeof toggleIntegrationsPopover;
 }
 
-export const MonitorListActionsPopoverComponent = ({
+export const ActionsPopoverComponent = ({
   summary,
   popoverState,
   togglePopoverIsVisible,
-}: MonitorListActionsPopoverProps) => {
+}: ActionsPopoverProps) => {
   const popoverId = `${summary.monitor_id}_popover`;
 
   const monitorUrl: string | undefined = get(summary, 'state.url.full', undefined);

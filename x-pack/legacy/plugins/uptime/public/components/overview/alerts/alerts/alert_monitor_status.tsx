@@ -7,8 +7,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
-import { selectMonitorStatusAlert } from '../../../state/selectors';
-import { AlertMonitorStatusComponent } from '../../overview/alerts';
+import { selectMonitorStatusAlert } from '../../../../state/selectors';
+import { AlertMonitorStatusComponent } from '../index';
 
 interface Props {
   autocomplete: DataPublicPluginSetup['autocomplete'];

@@ -5,5 +5,5 @@
  */
 
 export { MonitorStatusBarComponent } from './monitor_status_bar';
-export { MonitorStatusDetailsComponent } from './monitor_status_details';
+export { MonitorStatusDetailsComponent } from './status_details';
 export { StatusByLocations } from './monitor_status_bar/status_by_location';

@@ -12,7 +12,6 @@ import {
   getMLCapabilitiesAction,
   getMonitorDurationAction,
 } from '../../../state/actions';
-import { DurationChartComponent } from '../../common/charts';
 import {
   anomaliesSelector,
   hasMLFeatureAvailable,
@@ -22,12 +21,10 @@ import {
 import { UptimeRefreshContext } from '../../../contexts';
 import { getMLJobId } from '../../../state/api/ml_anomaly';
 import { JobStat } from '../../../../../../../plugins/ml/common/types/data_recognizer';
+import { MonitorDurationComponent } from './monitor_duration';
+import { MonitorIdParam } from '../../../../common/types';
 
-interface Props {
-  monitorId: string;
-}
-
-export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
+export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const {
     dateRangeStart,
     dateRangeEnd,
@@ -75,7 +72,7 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
   }, [dispatch]);
 
   return (
-    <DurationChartComponent
+    <MonitorDurationComponent
       anomalies={anomalies}
       hasMLJob={hasMLJob}
       loading={loading || jobsLoading}

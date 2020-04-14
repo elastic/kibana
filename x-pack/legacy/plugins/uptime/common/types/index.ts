@@ -42,4 +42,8 @@ export interface MonitorDurationResult {
   durationMaxValue: number;
 }
 
+export interface MonitorIdParam {
+  monitorId: string;
+}
+
 export * from './ping/histogram';

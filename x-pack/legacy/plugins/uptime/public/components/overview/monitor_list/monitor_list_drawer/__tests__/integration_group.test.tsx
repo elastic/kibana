@@ -7,7 +7,7 @@
 import React from 'react';
 import { MonitorSummary } from '../../../../../../common/graphql/types';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { IntegrationGroup } from '../integration_group';
+import { IntegrationGroup } from '../actions_popover/integration_group';
 
 describe('IntegrationGroup', () => {
   let summary: MonitorSummary;

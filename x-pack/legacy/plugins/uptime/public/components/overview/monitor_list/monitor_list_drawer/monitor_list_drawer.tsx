@@ -11,7 +11,7 @@ import { MonitorSummary } from '../../../../../common/graphql/types';
 import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails } from '../../../../../common/runtime_types';
-import { MonitorListActionsPopover } from '../../../connected';
+import { ActionsPopover } from './actions_popover/actions_popover_container';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -49,7 +49,7 @@ export function MonitorListDrawerComponent({ summary, monitorDetails }: MonitorL
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <MonitorListActionsPopover summary={summary} />
+          <ActionsPopover summary={summary} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
