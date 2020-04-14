@@ -6,6 +6,7 @@
 
 import { MiddlewareFactory, PolicyListState, GetDatasourcesResponse } from '../../types';
 import { sendGetEndpointSpecificDatasources } from './services/ingest';
+import { isOnPolicyListPage, urlSearchParams } from './selectors';
 
 export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = coreStart => {
   const http = coreStart.http;
@@ -13,22 +14,10 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
   return ({ getState, dispatch }) => next => async action => {
     next(action);
 
-    if (
-      (action.type === 'userNavigatedToPage' && action.payload === 'policyListPage') ||
-      action.type === 'userPaginatedPolicyListTable'
-    ) {
-      const state = getState();
-      let pageSize: number;
-      let pageIndex: number;
+    const state = getState();
 
-      if (action.type === 'userPaginatedPolicyListTable') {
-        pageSize = action.payload.pageSize;
-        pageIndex = action.payload.pageIndex;
-      } else {
-        pageSize = state.pageSize;
-        pageIndex = state.pageIndex;
-      }
-
+    if (action.type === 'userChangedUrl' && isOnPolicyListPage(state)) {
+      const { page_index: pageIndex, page_size: pageSize } = urlSearchParams(state);
       let response: GetDatasourcesResponse;
 
       try {
