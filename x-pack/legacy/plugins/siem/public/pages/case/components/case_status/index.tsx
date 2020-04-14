@@ -84,7 +84,7 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="l" alignItems="center">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="refresh" onClick={onRefresh}>
+          <EuiButtonEmpty data-test-subj="case-refresh" iconType="refresh" onClick={onRefresh}>
             {i18n.CASE_REFRESH}
           </EuiButtonEmpty>
         </EuiFlexItem>
