@@ -16,4 +16,4 @@ It compiles all the required scripts and generates the documentation both in HTM
 
 
 It will create a new directory `routes_doc` (next to the `routes` folder) which contains the documentation in HTML format 
-as well as markdown files under `/md` folder.
+as well as `ML_API.md` file.

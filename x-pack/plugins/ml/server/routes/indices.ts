@@ -15,7 +15,7 @@ export function indicesRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup Indices
    *
-   * @api {post} /api/ml/indices/field_caps
+   * @api {post} /api/ml/indices/field_caps Field caps
    * @apiName FieldCaps
    * @apiDescription Retrieves the capabilities of fields among multiple indices.
    *
