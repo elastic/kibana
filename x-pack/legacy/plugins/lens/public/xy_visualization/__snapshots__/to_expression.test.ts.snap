@@ -68,6 +68,9 @@ Object {
             "type": "expression",
           },
         ],
+        "primaryTimeFieldName": Array [
+          "timefield",
+        ],
         "xTitle": Array [
           "col_a",
         ],

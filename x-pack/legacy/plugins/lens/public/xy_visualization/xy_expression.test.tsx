@@ -204,6 +204,7 @@ const sampleLayer: LayerArgs = {
 const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
   xTitle: '',
   yTitle: '',
+  primaryTimeFieldName: null,
   legend: {
     type: 'lens_xy_legendConfig',
     isVisible: false,
@@ -588,7 +589,7 @@ describe('xy_expression', () => {
           data={dateHistogramData}
           args={{
             ...args,
-            xAxisFieldName: 'order_date',
+            primaryTimeFieldName: 'order_date',
             layers: [dateHistogramLayer],
           }}
           formatFactory={getFormatSpy}
@@ -646,6 +647,7 @@ describe('xy_expression', () => {
           data={data}
           args={{
             ...args,
+            primaryTimeFieldName: 'my_time',
             layers: [
               {
                 layerId: 'first',
@@ -689,6 +691,7 @@ describe('xy_expression', () => {
             },
           ],
         },
+        timeFieldName: 'my_time',
       });
     });
 

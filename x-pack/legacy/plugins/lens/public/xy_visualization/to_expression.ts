@@ -35,18 +35,6 @@ function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
   };
 }
 
-function getXAxisFieldName(layer: LayerConfig, frame: FramePublicAPI) {
-  if (!layer?.xAccessor) {
-    return;
-  }
-  const datasource = frame.datasourceLayers[layer.layerId];
-  if (!datasource) {
-    return;
-  }
-  const fieldName = datasource.getOperationForColumnId(layer.xAccessor)?.sourceField;
-  return fieldName;
-}
-
 export const toExpression = (state: State, frame: FramePublicAPI): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
@@ -64,13 +52,7 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
     });
   });
 
-  return buildExpression(
-    state,
-    metadata,
-    frame,
-    xyTitles(state.layers[0], frame),
-    getXAxisFieldName(state.layers[0], frame)
-  );
+  return buildExpression(state, metadata, frame, xyTitles(state.layers[0], frame));
 };
 
 export function toPreviewExpression(state: State, frame: FramePublicAPI) {
@@ -118,8 +100,7 @@ export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   frame?: FramePublicAPI,
-  { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' },
-  xAxisFieldName: string = ''
+  { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' }
 ): Ast | null => {
   const validLayers = state.layers.filter((layer): layer is ValidLayer =>
     Boolean(layer.xAccessor && layer.accessors.length)
@@ -127,6 +108,8 @@ export const buildExpression = (
   if (!validLayers.length) {
     return null;
   }
+
+  const timeFieldName = frame?.datasourceLayers[validLayers[0].layerId].primaryTimeFieldName;
 
   return {
     type: 'expression',
@@ -137,7 +120,7 @@ export const buildExpression = (
         arguments: {
           xTitle: [xTitle],
           yTitle: [yTitle],
-          xAxisFieldName: [xAxisFieldName],
+          primaryTimeFieldName: timeFieldName ? [timeFieldName] : [],
           legend: [
             {
               type: 'expression',

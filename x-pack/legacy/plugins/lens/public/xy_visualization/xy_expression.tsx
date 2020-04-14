@@ -84,9 +84,10 @@ export const xyChart: ExpressionFunctionDefinition<
       types: ['string'],
       help: 'Y axis title',
     },
-    xAxisFieldName: {
-      types: ['string'],
-      help: 'X xxis fieldname',
+    primaryTimeFieldName: {
+      types: ['string', 'null'],
+      required: false,
+      help: 'Used for filtering on the index pattern',
     },
     legend: {
       types: ['lens_xy_legendConfig'],
@@ -251,8 +252,6 @@ export function XYChart({
             layers[layers.findIndex(layer => data.tables[layer.layerId].rows.length)];
           const table = data.tables[firstLayerWithData.layerId];
 
-          const timeFieldName = xDomain && args.xAxisFieldName;
-
           // TODO: simplify the context structure: https://github.com/elastic/kibana/issues/62936
           const context: EmbeddableVisTriggerContext = {
             data: {
@@ -276,7 +275,7 @@ export function XYChart({
                 ],
               },
             },
-            timeFieldName,
+            timeFieldName: args.primaryTimeFieldName,
           };
           executeTriggerActions(VIS_EVENT_TO_TRIGGER.brush, context);
         }}
@@ -316,8 +315,6 @@ export function XYChart({
             });
           }
 
-          const timeFieldName = xDomain && args.xAxisFieldName;
-
           const context: EmbeddableVisTriggerContext = {
             data: {
               data: points.map(point => ({
@@ -327,7 +324,7 @@ export function XYChart({
                 table,
               })),
             },
-            timeFieldName,
+            timeFieldName: args.primaryTimeFieldName,
           };
           executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
         }}

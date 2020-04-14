@@ -61,7 +61,6 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
     isBucketed,
     scale,
     label: uniqueLabel || label,
-    sourceField,
   };
 }
 
@@ -319,6 +318,8 @@ export function getIndexPatternDatasource({
           }
           return null;
         },
+        primaryTimeFieldName:
+          state.indexPatterns[state.layers[layerId].indexPatternId]?.timeFieldName,
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
