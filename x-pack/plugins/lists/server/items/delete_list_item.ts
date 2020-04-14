@@ -6,9 +6,9 @@
 
 import { ScopedClusterClient } from 'kibana/server';
 
-import { ListsItemsSchema } from '../../common/schemas/response/lists_items_schema';
+import { ListsItemsSchema } from '../../common/schemas';
 
-import { getListItem } from './get_list_item';
+import { getListItem } from '.';
 
 export const deleteListItem = async ({
   id,

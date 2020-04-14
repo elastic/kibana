@@ -6,10 +6,9 @@
 
 import { ScopedClusterClient } from 'kibana/server';
 
-import { ListsItemsSchema } from '../../common/schemas/response/lists_items_schema';
-import { Type } from '../../common/schemas/common/schemas';
+import { ListsItemsSchema, Type } from '../../common/schemas';
 
-import { getListItemsByValues } from './get_list_items_by_values';
+import { getListItemsByValues } from '.';
 
 export const getListItemByValue = async ({
   listId,

@@ -5,7 +5,7 @@
  */
 
 import { ElasticListItemsType } from '../types';
-import { Type } from '../../common/schemas/common/schemas';
+import { Type } from '../../common/schemas';
 
 export const transformListItemsToElasticQuery = ({
   type,

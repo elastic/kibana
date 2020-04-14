@@ -13,11 +13,8 @@ import {
   buildSiemResponse,
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
-import {
-  patchListsSchema,
-  PatchListsSchema,
-} from '../../common/schemas/request/patch_lists_schema';
-import { updateList } from '../lists/update_list';
+import { patchListsSchema, PatchListsSchema } from '../../common/schemas';
+import { updateList } from '../lists';
 import { ConfigType } from '../config';
 
 // TODO: Make sure you write updateListRoute and update_list.sh routes

@@ -15,12 +15,9 @@ import {
   buildSiemResponse,
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
-import {
-  exportListsItemsQuerySchema,
-  ExportListsItemsQuerySchema,
-} from '../../common/schemas/request/export_lists_items_query_schema';
-import { writeListItemsToStream } from '../items/write_list_items_to_stream';
-import { getList } from '../lists/get_list';
+import { exportListsItemsQuerySchema, ExportListsItemsQuerySchema } from '../../common/schemas';
+import { writeListItemsToStream } from '../items';
+import { getList } from '../lists';
 import { ConfigType } from '../config';
 
 export const exportListsItemsRoute = (

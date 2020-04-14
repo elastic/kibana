@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Type } from '../common/schemas/common/schemas';
+import { Type } from '../common/schemas';
 
 // TODO: Use Definitely typed instead of all of this stuff:
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/elasticsearch/index.d.ts

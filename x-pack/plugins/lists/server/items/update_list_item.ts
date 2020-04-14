@@ -7,11 +7,10 @@
 import { ScopedClusterClient } from 'kibana/server';
 
 import { UpdateResponse } from '../types';
-import { ListsItemsSchema } from '../../common/schemas/response/lists_items_schema';
-import { transformListItemsToElasticQuery } from '../utils/transform_list_items_to_elastic_query';
-import { Type } from '../../common/schemas/common/schemas';
+import { ListsItemsSchema, Type } from '../../common/schemas';
+import { transformListItemsToElasticQuery } from '../utils';
 
-import { getListItemByValue } from './get_list_item_by_value';
+import { getListItemByValue } from '.';
 
 export const updateListItem = async ({
   listId,

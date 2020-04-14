@@ -13,8 +13,8 @@ import {
   buildSiemResponse,
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
-import { ReadListsSchema, readListsSchema } from '../../common/schemas/request/read_lists_schema';
-import { getList } from '../lists/get_list';
+import { ReadListsSchema, readListsSchema } from '../../common/schemas';
+import { getList } from '../lists';
 import { ConfigType } from '../config';
 
 export const readListsRoute = (router: IRouter, { listsIndex }: ConfigType): void => {

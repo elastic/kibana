@@ -7,9 +7,9 @@
 import uuid from 'uuid';
 import { ScopedClusterClient } from 'kibana/server';
 
-import { transformListItemsToElasticQuery } from '../utils/transform_list_items_to_elastic_query';
+import { transformListItemsToElasticQuery } from '../utils';
 import { ElasticListItemsInputType } from '../types';
-import { Type } from '../../common/schemas/common/schemas';
+import { Type } from '../../common/schemas';
 
 export interface CreateBulkType {
   create: { _index: string };

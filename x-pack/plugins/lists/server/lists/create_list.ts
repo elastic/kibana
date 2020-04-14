@@ -8,8 +8,7 @@ import uuid from 'uuid';
 import { ScopedClusterClient } from 'kibana/server';
 
 import { CreateResponse, ElasticListInputType } from '../types';
-import { ListsSchema } from '../../common/schemas/response/lists_schema';
-import { Type } from '../../common/schemas/common/schemas';
+import { ListsSchema, Type } from '../../common/schemas';
 
 export const createList = async ({
   id,

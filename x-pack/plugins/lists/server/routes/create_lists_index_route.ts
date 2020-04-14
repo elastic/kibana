@@ -20,8 +20,8 @@ import { setTemplate } from '../../../../legacy/plugins/siem/server/lib/detectio
 import { LIST_INDEX } from '../../common/constants';
 import listsPolicy from '../lists/lists_policy.json';
 import listsItemsPolicy from '../items/lists_items_policy.json';
-import { getListsTemplate } from '../lists/get_lists_template';
-import { getListsItemsTemplate } from '../items/get_lists_items_template';
+import { getListsTemplate } from '../lists';
+import { getListsItemsTemplate } from '../items';
 import { ConfigType } from '../config';
 
 export const createListsIndexRoute = (

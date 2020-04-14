@@ -13,13 +13,9 @@ import {
   buildSiemResponse,
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
-import {
-  createListsItemsSchema,
-  CreateListsItemsSchema,
-} from '../../common/schemas/request/create_lists_items_schema';
-import { createListItem } from '../items/create_list_item';
-import { getList } from '../lists/get_list';
-import { getListItemByValue } from '../items/get_list_item_by_value';
+import { createListsItemsSchema, CreateListsItemsSchema } from '../../common/schemas';
+import { createListItem, getListItemByValue } from '../items';
+import { getList } from '../lists';
 import { ConfigType } from '../config';
 
 export const createListsItemsRoute = (

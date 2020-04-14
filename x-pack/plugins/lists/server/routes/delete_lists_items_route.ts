@@ -13,13 +13,9 @@ import {
   buildSiemResponse,
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
-import {
-  DeleteListsItemsSchema,
-  deleteListsItemsSchema,
-} from '../../common/schemas/request/delete_lists_items_schema';
-import { deleteListItemByValue } from '../items/delete_list_item_by_value';
-import { getList } from '../lists/get_list';
-import { deleteListItem } from '../items/delete_list_item';
+import { DeleteListsItemsSchema, deleteListsItemsSchema } from '../../common/schemas';
+import { deleteListItemByValue, deleteListItem } from '../items';
+import { getList } from '../lists';
 import { ConfigType } from '../config';
 
 export const deleteListsItemsRoute = (

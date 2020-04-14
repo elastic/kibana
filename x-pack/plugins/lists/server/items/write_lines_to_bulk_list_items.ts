@@ -8,11 +8,9 @@ import { Readable } from 'stream';
 
 import { ScopedClusterClient } from 'kibana/server';
 
-import { Type } from '../../common/schemas/common/schemas';
+import { Type } from '../../common/schemas';
 
-import { createListItemsBulk } from './create_list_items_bulk';
-import { getListItemsByValues } from './get_list_items_by_values';
-import { BufferLines } from './buffer_lines';
+import { createListItemsBulk, getListItemsByValues, BufferLines } from '.';
 
 interface LinesResult {
   linesProcessed: number;

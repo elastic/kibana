@@ -6,11 +6,9 @@
 
 import { ScopedClusterClient } from 'kibana/server';
 
-import { ListsItemsSchema } from '../../common/schemas/response/lists_items_schema';
+import { ListsItemsSchema, Type } from '../../common/schemas';
 import { SearchResponse, ElasticListItemReturnType } from '../types';
-import { transformElasticToListsItems } from '../utils/transform_elastic_to_list_items';
-import { getQueryFilterFromTypeValue } from '../utils/get_query_filter_from_type_value';
-import { Type } from '../../common/schemas/common/schemas';
+import { transformElasticToListsItems, getQueryFilterFromTypeValue } from '../utils';
 
 export const getListItemsByValues = async ({
   listId,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Type } from '../../common/schemas/common/schemas';
+import { Type } from '../../common/schemas';
 
 export type QueryFilterType = Array<
   { term: { list_id: string } } | { terms: { ip: string[] } } | { terms: { keyword: string[] } }

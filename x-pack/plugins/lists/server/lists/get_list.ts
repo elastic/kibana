@@ -6,7 +6,7 @@
 
 import { ScopedClusterClient } from 'kibana/server';
 
-import { ListsSchema } from '../../common/schemas/response/lists_schema';
+import { ListsSchema } from '../../common/schemas';
 import { SearchResponse } from '../types';
 
 export const getList = async ({

@@ -6,8 +6,7 @@
 
 // TODO: Change this out for the definite types?
 import { SearchResponse, ElasticListItemReturnType } from '../types';
-import { ListsItemsSchema } from '../../common/schemas/response/lists_items_schema';
-import { Type } from '../../common/schemas/common/schemas';
+import { Type, ListsItemsSchema } from '../../common/schemas';
 
 export const transformElasticToListsItems = ({
   response,

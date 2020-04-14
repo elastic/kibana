@@ -14,18 +14,15 @@ import {
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
 import {
-  importListsItemsQuerySchema,
-  ImportListsItemsQuerySchema,
-} from '../../common/schemas/request/import_lists_items_query_schema';
-import {
   importListsItemsSchema,
   ImportListsItemsSchema,
-} from '../../common/schemas/request/import_lists_items_schema';
-import { writeLinesToBulkListItems } from '../items/write_lines_to_bulk_list_items';
-import { getList } from '../lists/get_list';
-import { createList } from '../lists/create_list';
-import { ListsSchema } from '../../common/schemas/response/lists_schema';
-import { Type } from '../../common/schemas/common/schemas';
+  importListsItemsQuerySchema,
+  ImportListsItemsQuerySchema,
+  ListsSchema,
+  Type,
+} from '../../common/schemas';
+import { writeLinesToBulkListItems } from '../items';
+import { getList, createList } from '../lists';
 import { ConfigType } from '../config';
 
 export const importListsItemsRoute = (
