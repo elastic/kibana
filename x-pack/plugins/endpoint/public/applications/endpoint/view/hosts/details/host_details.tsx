@@ -9,16 +9,20 @@ import {
   EuiDescriptionList,
   EuiHealth,
   EuiHorizontalRule,
+  EuiLink,
   EuiListGroup,
   EuiListGroupItem,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { useHistory } from 'react-router-dom';
 import { HostMetadata } from '../../../../../../common/types';
 import { FormattedDateAndTime } from '../../formatted_date_time';
 import { LinkToApp } from '../../components/link_to_app';
-import { useHostLogsUrl } from '../hooks';
+import { useHostListSelector, useHostLogsUrl } from '../hooks';
+import { urlFromQueryParams } from '../url_from_query_params';
+import { uiQueryParams } from '../../../store/hosts/selectors';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -29,6 +33,8 @@ const HostIds = styled(EuiListGroupItem)`
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const { appId, appPath, url } = useHostLogsUrl(details.host.id);
+  const queryParams = useHostListSelector(uiQueryParams);
+  const history = useHistory();
   const detailsResultsUpper = useMemo(() => {
     return [
       {
@@ -52,6 +58,14 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     ];
   }, [details]);
 
+  const policyResponseUri = useMemo(() => {
+    return urlFromQueryParams({
+      ...queryParams,
+      selected_host: details.host.id,
+      show: 'policy_response',
+    });
+  }, [details.host.id, queryParams]);
+
   const detailsResultsLower = useMemo(() => {
     return [
       {
@@ -64,7 +78,21 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         title: i18n.translate('xpack.endpoint.host.details.policyStatus', {
           defaultMessage: 'Policy Status',
         }),
-        description: <EuiHealth color="success">active</EuiHealth>,
+        description: (
+          <EuiHealth color="success">
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiLink
+              data-test-subj="hostnameCellLink"
+              href={'?' + policyResponseUri.search}
+              onClick={(ev: React.MouseEvent) => {
+                ev.preventDefault();
+                history.push(policyResponseUri);
+              }}
+            >
+              active
+            </EuiLink>
+          </EuiHealth>
+        ),
       },
       {
         title: i18n.translate('xpack.endpoint.host.details.ipAddress', {
@@ -91,7 +119,14 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         description: details.agent.version,
       },
     ];
-  }, [details.agent.version, details.endpoint.policy.id, details.host.hostname, details.host.ip]);
+  }, [
+    details.agent.version,
+    details.endpoint.policy.id,
+    details.host.hostname,
+    details.host.ip,
+    history,
+    policyResponseUri,
+  ]);
 
   return (
     <>

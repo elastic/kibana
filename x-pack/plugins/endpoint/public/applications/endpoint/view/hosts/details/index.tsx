@@ -18,8 +18,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { useHostListSelector } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
-import { uiQueryParams, detailsData, detailsError } from '../../../store/hosts/selectors';
+import { uiQueryParams, detailsData, detailsError, showView } from '../../../store/hosts/selectors';
 import { HostDetails } from './host_details';
+import { PolicyResponse } from './policy_response';
 
 export const HostDetailsFlyout = () => {
   const history = useHistory();
@@ -28,6 +29,7 @@ export const HostDetailsFlyout = () => {
   const { selected_host: selectedHost, ...queryParamsWithoutSelectedHost } = queryParams;
   const details = useHostListSelector(detailsData);
   const error = useHostListSelector(detailsError);
+  const show = useHostListSelector(showView);
 
   const handleFlyoutClose = useCallback(() => {
     history.push(urlFromQueryParams(queryParamsWithoutSelectedHost));
@@ -68,7 +70,10 @@ export const HostDetailsFlyout = () => {
             <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
           </>
         ) : (
-          <HostDetails details={details} />
+          <>
+            {show === 'details' && <HostDetails details={details} />}
+            {show === 'policy_response' && <PolicyResponse />}
+          </>
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
