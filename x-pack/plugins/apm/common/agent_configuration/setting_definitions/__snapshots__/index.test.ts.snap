@@ -29,15 +29,19 @@ Array [
     "options": Array [
       Object {
         "text": "off",
+        "value": "off",
       },
       Object {
         "text": "errors",
+        "value": "errors",
       },
       Object {
         "text": "transactions",
+        "value": "transactions",
       },
       Object {
         "text": "all",
+        "value": "all",
       },
     ],
     "type": "select",

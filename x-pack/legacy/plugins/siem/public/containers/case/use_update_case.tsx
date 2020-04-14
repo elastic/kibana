@@ -12,7 +12,7 @@ import { patchCase } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
 
-type UpdateKey = keyof Pick<CasePatchRequest, 'description' | 'status' | 'tags' | 'title'>;
+export type UpdateKey = keyof Pick<CasePatchRequest, 'description' | 'status' | 'tags' | 'title'>;
 
 interface NewCaseState {
   isLoading: boolean;
@@ -62,7 +62,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
   }
 };
 
-interface UseUpdateCase extends NewCaseState {
+export interface UseUpdateCase extends NewCaseState {
   updateCaseProperty: (updates: UpdateByKey) => void;
 }
 export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => {

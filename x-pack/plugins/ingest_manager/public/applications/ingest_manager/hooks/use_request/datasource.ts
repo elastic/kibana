@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { sendRequest } from './use_request';
+import { sendRequest, useRequest } from './use_request';
 import { datasourceRouteService } from '../../services';
 import { CreateDatasourceRequest, CreateDatasourceResponse } from '../../types';
 import {
   DeleteDatasourcesRequest,
   DeleteDatasourcesResponse,
+  GetDatasourcesRequest,
+  GetDatasourcesResponse,
 } from '../../../../../common/types/rest_spec';
 
 export const sendCreateDatasource = (body: CreateDatasourceRequest['body']) => {
@@ -26,3 +28,11 @@ export const sendDeleteDatasource = (body: DeleteDatasourcesRequest['body']) => 
     body: JSON.stringify(body),
   });
 };
+
+export function useGetDatasources(query: GetDatasourcesRequest['query']) {
+  return useRequest<GetDatasourcesResponse>({
+    method: 'get',
+    path: datasourceRouteService.getListPath(),
+    query,
+  });
+}

@@ -5,16 +5,16 @@
  */
 
 import { extractReferences, injectReferences } from './references';
-import { ES_GEO_GRID, ES_SEARCH, ES_PEW_PEW } from '../constants';
+import { SOURCE_TYPES } from '../constants';
 
 const layerListJSON = {
   esSearchSource: {
-    withIndexPatternId: `[{\"sourceDescriptor\":{\"type\":\"${ES_SEARCH}\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\"}}]`,
-    withIndexPatternRef: `[{\"sourceDescriptor\":{\"type\":\"${ES_SEARCH}\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"}}]`,
+    withIndexPatternId: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_SEARCH}\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\"}}]`,
+    withIndexPatternRef: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_SEARCH}\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"}}]`,
   },
   esGeoGridSource: {
-    withIndexPatternId: `[{\"sourceDescriptor\":{\"type\":\"${ES_GEO_GRID}\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\"}}]`,
-    withIndexPatternRef: `[{\"sourceDescriptor\":{\"type\":\"${ES_GEO_GRID}\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"}}]`,
+    withIndexPatternId: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_GEO_GRID}\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\"}}]`,
+    withIndexPatternRef: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_GEO_GRID}\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"}}]`,
   },
   join: {
     withIndexPatternId:
@@ -23,8 +23,8 @@ const layerListJSON = {
       '[{"joins":[{"right":{"indexPatternRefName":"layer_0_join_0_index_pattern"}}]}]',
   },
   pewPewSource: {
-    withIndexPatternId: `[{\"sourceDescriptor\":{\"type\":\"${ES_PEW_PEW}\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\"}}]`,
-    withIndexPatternRef: `[{\"sourceDescriptor\":{\"type\":\"${ES_PEW_PEW}\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"}}]`,
+    withIndexPatternId: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_PEW_PEW}\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\"}}]`,
+    withIndexPatternRef: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_PEW_PEW}\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"}}]`,
   },
 };
 

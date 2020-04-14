@@ -5,164 +5,191 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
-import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
+import { SPACES } from '../lib/spaces';
+import { expectResponses, getUrlPrefix } from '../lib/saved_object_test_utils';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
-interface ExportTest {
-  statusCode: number;
-  description: string;
-  response: (resp: { [key: string]: any }) => void;
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
+
+export interface ExportTestDefinition extends TestDefinition {
+  request: ReturnType<typeof createRequest>;
+}
+export type ExportTestSuite = TestSuite<ExportTestDefinition>;
+export interface ExportTestCase {
+  title: string;
+  type: string;
+  id?: string;
+  successResult?: TestCase | TestCase[];
+  failure?: 400 | 403;
 }
 
-interface ExportTests {
-  spaceAwareType: ExportTest;
-  hiddenType: ExportTest;
-  noTypeOrObjects: ExportTest;
-}
-
-interface ExportTestDefinition {
-  user?: TestDefinitionAuthentication;
-  spaceId?: string;
-  tests: ExportTests;
-}
+export const getTestCases = (spaceId?: string) => ({
+  singleNamespaceObject: {
+    title: 'single-namespace object',
+    ...(spaceId === SPACE_1_ID
+      ? CASES.SINGLE_NAMESPACE_SPACE_1
+      : spaceId === SPACE_2_ID
+      ? CASES.SINGLE_NAMESPACE_SPACE_2
+      : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE),
+  } as ExportTestCase,
+  singleNamespaceType: {
+    // this test explicitly ensures that single-namespace objects from other spaces are not returned
+    title: 'single-namespace type',
+    type: 'isolatedtype',
+    successResult:
+      spaceId === SPACE_1_ID
+        ? CASES.SINGLE_NAMESPACE_SPACE_1
+        : spaceId === SPACE_2_ID
+        ? CASES.SINGLE_NAMESPACE_SPACE_2
+        : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
+  } as ExportTestCase,
+  multiNamespaceObject: {
+    title: 'multi-namespace object',
+    ...(spaceId === SPACE_1_ID
+      ? CASES.MULTI_NAMESPACE_ONLY_SPACE_1
+      : spaceId === SPACE_2_ID
+      ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
+      : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1),
+    failure: 400, // multi-namespace types cannot be exported yet
+  } as ExportTestCase,
+  multiNamespaceType: {
+    title: 'multi-namespace type',
+    type: 'sharedtype',
+    // successResult:
+    //   spaceId === SPACE_1_ID
+    //     ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
+    //     : spaceId === SPACE_2_ID
+    //     ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
+    //     : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+    failure: 400, // multi-namespace types cannot be exported yet
+  } as ExportTestCase,
+  namespaceAgnosticObject: {
+    title: 'namespace-agnostic object',
+    ...CASES.NAMESPACE_AGNOSTIC,
+  } as ExportTestCase,
+  namespaceAgnosticType: {
+    title: 'namespace-agnostic type',
+    type: 'globaltype',
+    successResult: CASES.NAMESPACE_AGNOSTIC,
+  } as ExportTestCase,
+  hiddenObject: { title: 'hidden object', ...CASES.HIDDEN, failure: 400 } as ExportTestCase,
+  hiddenType: { title: 'hidden type', type: 'hiddentype', failure: 400 } as ExportTestCase,
+});
+export const createRequest = ({ type, id }: ExportTestCase) =>
+  id ? { objects: [{ type, id }] } : { type };
+const getTestTitle = ({ failure, title }: ExportTestCase) => {
+  let description = 'success';
+  if (failure === 400) {
+    description = 'bad request';
+  } else if (failure === 403) {
+    description = 'forbidden';
+  }
+  return `${description} ["${title}"]`;
+};
 
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
-    // In export only, the API uses "bulk_get" or "find" depending on the parameters it receives.
-    // The best that could be done here is to have an if statement to ensure at least one of the
-    // two errors has been thrown.
-    if (resp.body.message.indexOf(`bulk_get`) !== -1) {
-      expect(resp.body).to.eql({
-        statusCode: 403,
-        error: 'Forbidden',
-        message: `Unable to bulk_get ${type}`,
-      });
-      return;
-    }
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to find ${type}`,
-    });
-  };
-
-  const expectTypeOrObjectsRequired = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: '[request body]: expected a plain object value, but found [null] instead.',
-    });
-  };
-
-  const expectInvalidTypeSpecified = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: `Trying to export object(s) with non-exportable types: hiddentype:hiddentype_1`,
-    });
-  };
-
-  const createExpectVisualizationResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
-    [key: string]: any;
-  }) => {
-    const response = JSON.parse(resp.text);
-    expect(response).to.eql({
-      type: 'visualization',
-      id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-      version: response.version,
-      attributes: response.attributes,
-      references: [
-        {
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-          type: 'index-pattern',
-          id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
-        },
-      ],
-      migrationVersion: response.migrationVersion,
-      updated_at: '2017-09-21T18:51:23.794Z',
-    });
-  };
-
-  const makeExportTest = (describeFn: DescribeFn) => (
-    description: string,
-    definition: ExportTestDefinition
+  const expectForbiddenBulkGet = expectResponses.forbidden('bulk_get');
+  const expectForbiddenFind = expectResponses.forbidden('find');
+  const expectResponseBody = (testCase: ExportTestCase): ExpectResponseBody => async (
+    response: Record<string, any>
   ) => {
-    const { user = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+    const { type, id, successResult = { type, id }, failure } = testCase;
+    if (failure === 403) {
+      // In export only, the API uses "bulk_get" or "find" depending on the parameters it receives.
+      // The best that could be done here is to have an if statement to ensure at least one of the
+      // two errors has been thrown.
+      if (id) {
+        await expectForbiddenBulkGet(type)(response);
+      } else {
+        await expectForbiddenFind(type)(response);
+      }
+    } else if (failure === 400) {
+      // 400
+      expect(response.body.error).to.eql('Bad Request');
+      expect(response.body.statusCode).to.eql(failure);
+      if (id) {
+        expect(response.body.message).to.eql(
+          `Trying to export object(s) with non-exportable types: ${type}:${id}`
+        );
+      } else {
+        expect(response.body.message).to.eql(`Trying to export non-exportable type(s): ${type}`);
+      }
+    } else {
+      // 2xx
+      expect(response.body).not.to.have.property('error');
+      const ndjson = response.text.split('\n');
+      const savedObjectsArray = Array.isArray(successResult) ? successResult : [successResult];
+      expect(ndjson.length).to.eql(savedObjectsArray.length + 1);
+      for (let i = 0; i < savedObjectsArray.length; i++) {
+        const object = JSON.parse(ndjson[i]);
+        const { type: expectedType, id: expectedId } = savedObjectsArray[i];
+        expect(object.type).to.eql(expectedType);
+        expect(object.id).to.eql(expectedId);
+        expect(object.updated_at).to.match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+        // don't test attributes, version, or references
+      }
+      const exportDetails = JSON.parse(ndjson[ndjson.length - 1]);
+      expect(exportDetails).to.eql({
+        exportedCount: ndjson.length - 1,
+        missingRefCount: 0,
+        missingReferences: [],
+      });
+    }
+  };
+  const createTestDefinitions = (
+    testCases: ExportTestCase | ExportTestCase[],
+    forbidden: boolean,
+    options?: {
+      responseBodyOverride?: ExpectResponseBody;
+    }
+  ): ExportTestDefinition[] => {
+    let cases = Array.isArray(testCases) ? testCases : [testCases];
+    if (forbidden) {
+      // override the expected result in each test case
+      cases = cases.map(x => ({ ...x, failure: 403 }));
+    }
+    return cases.map(x => ({
+      title: getTestTitle(x),
+      responseStatusCode: x.failure ?? 200,
+      request: createRequest(x),
+      responseBody: options?.responseBodyOverride || expectResponseBody(x),
+    }));
+  };
+
+  const makeExportTest = (describeFn: Mocha.SuiteFunction) => (
+    description: string,
+    definition: ExportTestSuite
+  ) => {
+    const { user, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${tests.spaceAwareType.description} when querying by type`, async () => {
-        await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
-          .send({
-            type: 'visualization',
-            excludeExportDetails: true,
-          })
-          .auth(user.username, user.password)
-          .expect(tests.spaceAwareType.statusCode)
-          .then(tests.spaceAwareType.response);
-      });
-
-      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${tests.spaceAwareType.description} when querying by objects`, async () => {
-        await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
-          .send({
-            objects: [
-              {
-                type: 'visualization',
-                id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-              },
-            ],
-            excludeExportDetails: true,
-          })
-          .auth(user.username, user.password)
-          .expect(tests.spaceAwareType.statusCode)
-          .then(tests.spaceAwareType.response);
-      });
-
-      describe('hidden type', () => {
-        it(`should return ${tests.hiddenType.statusCode} with ${tests.hiddenType.description}`, async () => {
+      for (const test of tests) {
+        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
           await supertest
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
-            .send({
-              objects: [
-                {
-                  type: 'hiddentype',
-                  id: `hiddentype_1`,
-                },
-              ],
-              excludeExportDetails: true,
-            })
-            .auth(user.username, user.password)
-            .expect(tests.hiddenType.statusCode)
-            .then(tests.hiddenType.response);
+            .auth(user?.username, user?.password)
+            .send(test.request)
+            .expect(test.responseStatusCode)
+            .then(test.responseBody);
         });
-      });
-
-      describe('no type or objects', () => {
-        it(`should return ${tests.noTypeOrObjects.statusCode} with ${tests.noTypeOrObjects.description}`, async () => {
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
-            .auth(user.username, user.password)
-            .expect(tests.noTypeOrObjects.statusCode)
-            .then(tests.noTypeOrObjects.response);
-        });
-      });
+      }
     });
   };
 
-  const exportTest = makeExportTest(describe);
+  const addTests = makeExportTest(describe);
   // @ts-ignore
-  exportTest.only = makeExportTest(describe.only);
+  addTests.only = makeExportTest(describe.only);
 
   return {
-    createExpectRbacForbidden,
-    expectTypeOrObjectsRequired,
-    expectInvalidTypeSpecified,
-    createExpectVisualizationResults,
-    exportTest,
+    addTests,
+    createTestDefinitions,
   };
 }
