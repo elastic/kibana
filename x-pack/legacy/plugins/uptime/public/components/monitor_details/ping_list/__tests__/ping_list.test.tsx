@@ -7,10 +7,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PingListComponent, toggleDetails } from '../ping_list';
-import { ExpandedRowMap } from '../../monitor_list/types';
 import { Ping, PingsResponse } from '../../../../../common/runtime_types';
-import { PingResults, Ping } from '../../../../../common/graphql/types';
-import { PingListComponent, AllLocationOption, toggleDetails } from '../ping_list';
 import { ExpandedRowMap } from '../../../overview/monitor_list/types';
 
 describe('PingList component', () => {

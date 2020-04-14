@@ -10,7 +10,7 @@ import { PingHistogramComponent } from '../../common/charts';
 import { getPingHistogram } from '../../../state/actions';
 import { selectPingHistogram } from '../../../state/selectors';
 import { useGetUrlParams } from '../../../hooks';
-import { useMonitorId } from '../../../hooks/use_monitor';
+import { useMonitorId } from '../../../hooks';
 import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../common/higher_order';
 
 interface Props {

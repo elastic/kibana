@@ -25,12 +25,10 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Ping, GetPingsParams, DateRange } from '../../../../common/runtime_types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../common/higher_order';
-import { pingsQuery } from '../../../queries';
 import { LocationName } from './location_name';
 import { Pagination } from '../../overview/monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
-import { PingListProps } from '../../connected/pings';
+import { PingListProps } from '../../overview/pings';
 
 export const AllLocationOption = {
   'data-test-subj': 'xpack.uptime.pingList.locationOptions.all',
@@ -141,7 +139,7 @@ export const PingListComponent = (props: Props) => {
         }))
       );
 
-  const hasStatus: boolean = pings.reduce(
+  const hasStatus = pings.reduce(
     (hasHttpStatus: boolean, currentPing) =>
       hasHttpStatus || !!currentPing.http?.response?.status_code,
     false

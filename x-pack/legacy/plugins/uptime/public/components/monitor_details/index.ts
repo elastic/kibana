@@ -9,6 +9,3 @@ export * from './location_map';
 export * from './monitor_status_details';
 
 export { PingHistogram } from './ping_histogram/ping_histogram_container';
-export { MonitorStatusDetails } from './monitor_status_details/status_details_container';
-export { MonitorStatusBar } from './monitor_status_details/monitor_status_bar/status_bar_container';
-export { MonitorDuration } from './monitor_duration/monitor_duration_container';

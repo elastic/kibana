@@ -7,3 +7,6 @@
 export { MonitorStatusBarComponent } from './monitor_status_bar';
 export { MonitorStatusDetailsComponent } from './status_details';
 export { StatusByLocations } from './monitor_status_bar/status_by_location';
+
+export { MonitorStatusDetails } from './status_details_container';
+export { MonitorStatusBar } from './monitor_status_bar/status_bar_container';
