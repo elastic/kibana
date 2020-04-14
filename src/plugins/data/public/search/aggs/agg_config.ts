@@ -97,7 +97,7 @@ export class AggConfig {
   private __type: IAggType;
   private __typeDecorations: any;
   private subAggs: AggConfig[] = [];
-  private fieldFormats: FieldFormatsStart;
+  private readonly fieldFormats: FieldFormatsStart;
 
   constructor(
     aggConfigs: IAggConfigs,

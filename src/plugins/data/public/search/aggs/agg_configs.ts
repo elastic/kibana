@@ -70,7 +70,7 @@ export type IAggConfigs = AggConfigs;
 export class AggConfigs {
   public indexPattern: IndexPattern;
   public timeRange?: TimeRange;
-  private fieldFormats: FieldFormatsStart;
+  private readonly fieldFormats: FieldFormatsStart;
   private readonly typesRegistry: AggTypesRegistryStart;
 
   aggs: IAggConfig[];
