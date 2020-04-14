@@ -21,12 +21,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { auto } from 'angular';
 import { CoreSetup, Plugin } from 'kibana/public';
+import { SavedObjectLoader, SavedObjectKibanaServices } from '../../saved_objects/public';
 import { DocViewInput, DocViewInputFn, DocViewRenderProps } from './doc_views/doc_views_types';
 import { DocViewsRegistry } from './doc_views/doc_views_registry';
 import { DocViewTable } from './components/table/table';
 import { JsonCodeBlock } from './components/json_code_block/json_code_block';
 import { DocViewer } from './components/doc_viewer/doc_viewer';
 import { setDocViewsRegistry } from './services';
+import { createSavedSearchesLoader } from './saved_searches';
 
 import './index.scss';
 
@@ -61,6 +63,13 @@ export interface DiscoverStart {
      * @deprecated
      */
     DocViewer: React.ComponentType<DocViewRenderProps>;
+  };
+  savedSearches: {
+    /**
+     * Create a {@link SavedObjectLoader | loader} to handle the saved searches type.
+     * @param services
+     */
+    createLoader(services: SavedObjectKibanaServices): SavedObjectLoader;
   };
 }
 
@@ -104,6 +113,9 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     return {
       docViews: {
         DocViewer,
+      },
+      savedSearches: {
+        createLoader: createSavedSearchesLoader,
       },
     };
   }

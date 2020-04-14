@@ -32,8 +32,8 @@ export interface IVectorLayer extends ILayer {
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static createDescriptor(
-    options: VectorLayerArguments,
-    mapColors: string[]
+    options: Partial<VectorLayerDescriptor>,
+    mapColors?: string[]
   ): VectorLayerDescriptor;
 
   protected readonly _source: IVectorSource;
