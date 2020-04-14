@@ -11,6 +11,7 @@ import {
   syncLayerOrderForSingleLayer,
   removeOrphanedSourcesAndLayers,
   addSpritesheetToMap,
+  moveLayerToTop,
 } from './utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getGlyphUrl, isRetina } from '../../../../../../../plugins/maps/public/meta';
@@ -90,6 +91,7 @@ export class MBMapContainer extends React.Component {
           }
         );
       }
+      this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
     }
   }, 256);
 
@@ -261,11 +263,14 @@ export class MBMapContainer extends React.Component {
   };
 
   _syncMbMapWithLayerList = () => {
-    removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
+    removeOrphanedSourcesAndLayers(
+      this.state.mbMap,
+      this.props.layerList,
+      this.props.spatialFiltersLayer
+    );
     this.props.layerList.forEach(layer => layer.syncLayerWithMB(this.state.mbMap));
     syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
-
-    this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
+    moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
   };
 
   _syncMbMapWithInspector = () => {

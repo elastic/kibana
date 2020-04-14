@@ -37,6 +37,7 @@ import {
   SOURCE_DATA_ID_ORIGIN,
   STYLE_TYPE,
   VECTOR_STYLES,
+  SPATIAL_FILTERS_LAYER_ID,
 } from '../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { extractFeaturesFromFilters } from '../../../../../plugins/maps/public/elasticsearch_geo_utils';
@@ -208,7 +209,7 @@ export const getSpatialFiltersLayer = createSelector(getFilters, filters => {
   const isDarkMode = getUiSettings().get('theme:darkMode', false);
   return new VectorLayer({
     layerDescriptor: {
-      id: 'spatialFilters',
+      id: SPATIAL_FILTERS_LAYER_ID,
       visible: true,
       alpha: 0.3,
       type: LAYER_TYPE.VECTOR,

@@ -13,11 +13,16 @@ import {
 
 export { loadSpriteSheetImageData, addSpriteSheetToMapFromImageData };
 
-export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
+export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLayer) {
   const mbStyle = mbMap.getStyle();
 
   const mbLayerIdsToRemove = [];
   mbStyle.layers.forEach(mbLayer => {
+    // ignore mapbox layers from spatial filter layer
+    if (spatialFilterLayer.ownsMbLayerId(mbLayer.id)) {
+      return;
+    }
+
     const layer = layerList.find(layer => {
       return layer.ownsMbLayerId(mbLayer.id);
     });
@@ -30,6 +35,11 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
   const mbSourcesToRemove = [];
   for (const mbSourceId in mbStyle.sources) {
     if (mbStyle.sources.hasOwnProperty(mbSourceId)) {
+      // ignore mapbox sources from spatial filter layer
+      if (spatialFilterLayer.ownsMbSourceId(mbSourceId)) {
+        return;
+      }
+
       const layer = layerList.find(layer => {
         return layer.ownsMbSourceId(mbSourceId);
       });
@@ -39,6 +49,21 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
     }
   }
   mbSourcesToRemove.forEach(mbSourceId => mbMap.removeSource(mbSourceId));
+}
+
+export function moveLayerToTop(mbMap, layer) {
+  const mbStyle = mbMap.getStyle();
+
+  if (!mbStyle.layers || mbStyle.layers.length === 0) {
+    return;
+  }
+
+  layer.getMbLayerIds().forEach(mbLayerId => {
+    const mbLayer = mbMap.getLayer(mbLayerId);
+    if (mbLayer) {
+      mbMap.moveLayer(mbLayerId);
+    }
+  });
 }
 
 /**
@@ -53,9 +78,12 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
   }
 
   const mbLayers = mbMap.getStyle().layers.slice();
-  const layerIds = mbLayers.map(mbLayer => {
+  const layerIds = [];
+  mbLayers.map(mbLayer => {
     const layer = layerList.find(layer => layer.ownsMbLayerId(mbLayer.id));
-    return layer.getId();
+    if (layer) {
+      layerIds.push(layer.getId());
+    }
   });
 
   const currentLayerOrderLayerIds = _.uniq(layerIds);
