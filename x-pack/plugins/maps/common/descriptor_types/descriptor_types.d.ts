@@ -72,8 +72,7 @@ export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   term: string; // term field name
 };
 
-export type KibanaRegionmapSourceDescriptor = {
-  type: string;
+export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {
   name: string;
 };
 

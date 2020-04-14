@@ -72,7 +72,7 @@ export interface ILayer {
   isDataLoaded(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getType(): LAYER_TYPE | undefined;
+  getType(): string | undefined;
   isVisible(): boolean;
   cloneDescriptor(): LayerDescriptor;
   renderStyleEditor({
@@ -150,9 +150,14 @@ export class AbstractLayer implements ILayer {
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
+
+    // todo: fix this. This is hacky, and relies on knowledge of vector_layer
+    // @ts-ignore
     if (clonedDescriptor.joins) {
+      // @ts-ignore
       clonedDescriptor.joins.forEach(joinDescriptor => {
         // right.id is uuid used to track requests in inspector
+        // @ts-ignore
         joinDescriptor.right.id = uuid();
       });
     }
@@ -440,7 +445,7 @@ export class AbstractLayer implements ILayer {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
-  getType(): LAYER_TYPE | undefined {
+  getType(): string | undefined {
     return this._descriptor.type;
   }
 }

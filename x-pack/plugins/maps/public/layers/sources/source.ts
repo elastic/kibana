@@ -9,6 +9,7 @@
 import { ReactElement } from 'react';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// @ts-ignore
 import { copyPersistentState } from '../../reducers/util';
 
 import { LayerDescriptor, SourceDescriptor } from '../../../common/descriptor_types';
@@ -60,7 +61,7 @@ export interface ISource {
   getPreIndexedShape(): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   loadStylePropsMeta(args: unknown): Promise<unknown>; // todo
-  getValueSuggestions(field: IField, query: string): string[];
+  getValueSuggestions(field: IField, query: string): Promise<string[]>;
 }
 
 export class AbstractSource implements ISource {
@@ -184,7 +185,7 @@ export class AbstractSource implements ISource {
     throw new Error(`Source#loadStylePropsMeta not implemented`);
   }
 
-  async getValueSuggestions(field: IField, query: string): string[] {
+  async getValueSuggestions(field: IField, query: string): Promise<string[]> {
     return [];
   }
 
