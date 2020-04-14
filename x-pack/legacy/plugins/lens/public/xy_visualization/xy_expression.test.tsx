@@ -633,70 +633,242 @@ describe('xy_expression', () => {
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(false);
     });
 
-    test('it names the series for multiple accessors', () => {
-      const { data, args } = sampleArgs();
-
-      const component = shallow(
-        <XYChart
-          data={data}
-          args={args}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartTheme={{}}
-          executeTriggerActions={executeTriggerActions}
-        />
-      );
-      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
-
-      expect(
-        nameFn(
-          {
-            seriesKeys: ['a', 'b', 'c', 'd'],
-            key: '',
-            specId: 'a',
-            yAccessor: '',
-            splitAccessors: new Map(),
-          },
-          false
-        )
-      ).toEqual('Label A - Label B - c - Label D');
-    });
-
-    test('it names the series for a single accessor', () => {
-      const { data, args } = sampleArgs();
-
-      const component = shallow(
-        <XYChart
-          data={data}
-          args={{
-            ...args,
-            layers: [
-              {
-                ...args.layers[0],
-                accessors: ['a'],
-              },
+    describe('provides correct series naming', () => {
+      const dataWithoutFormats: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: {
+            type: 'kibana_datatable',
+            columns: [
+              { id: 'a', name: 'a' },
+              { id: 'b', name: 'b' },
+              { id: 'c', name: 'c' },
+              { id: 'd', name: 'd' },
             ],
-          }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartTheme={{}}
-          executeTriggerActions={executeTriggerActions}
-        />
-      );
-      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
-
-      expect(
-        nameFn(
-          {
-            seriesKeys: ['a', 'b', 'c', 'd'],
-            key: '',
-            specId: 'a',
-            yAccessor: '',
-            splitAccessors: new Map(),
+            rows: [
+              { a: 1, b: 2, c: 'I', d: 'Row 1' },
+              { a: 1, b: 5, c: 'J', d: 'Row 2' },
+            ],
           },
-          false
-        )
-      ).toEqual('Label A');
+        },
+      };
+      const dataWithFormats: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: {
+            type: 'kibana_datatable',
+            columns: [
+              { id: 'a', name: 'a' },
+              { id: 'b', name: 'b' },
+              { id: 'c', name: 'c' },
+              { id: 'd', name: 'd', formatHint: { id: 'custom' } },
+            ],
+            rows: [
+              { a: 1, b: 2, c: 'I', d: 'Row 1' },
+              { a: 1, b: 5, c: 'J', d: 'Row 2' },
+            ],
+          },
+        },
+      };
+
+      const nameFnArgs = {
+        seriesKeys: [],
+        key: '',
+        specId: 'a',
+        yAccessor: '',
+        splitAccessors: new Map(),
+      };
+
+      const getRenderedComponent = (data: LensMultiTable, args: XYArgs) => {
+        return shallow(
+          <XYChart
+            data={data}
+            args={args}
+            formatFactory={getFormatSpy}
+            timeZone="UTC"
+            chartTheme={{}}
+            executeTriggerActions={executeTriggerActions}
+          />
+        );
+      };
+
+      test('simplest xy chart without human-readable name', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a'],
+              splitAccessor: undefined,
+              columnToLabel: '',
+            },
+          ],
+        };
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+        // In this case, the ID is used as the name. This shouldn't happen in practice
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('');
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
+      });
+
+      test('simplest xy chart with empty name', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a'],
+              splitAccessor: undefined,
+              columnToLabel: '{"a":""}',
+            },
+          ],
+        };
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+        // In this case, the ID is used as the name. This shouldn't happen in practice
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('');
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
+      });
+
+      test('simplest xy chart with human-readable name', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a'],
+              splitAccessor: undefined,
+              columnToLabel: '{"a":"Column A"}',
+            },
+          ],
+        };
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Column A');
+      });
+
+      test('multiple y accessors', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a', 'b'],
+              splitAccessor: undefined,
+              columnToLabel: '{"a": "Label A"}',
+            },
+          ],
+        };
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+        // This accessor has a human-readable name
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
+        // This accessor does not
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('');
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
+      });
+
+      test('split series without formatting and single y accessor', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a'],
+              splitAccessor: 'd',
+              columnToLabel: '{"a": "Label A"}',
+            },
+          ],
+        };
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual('split1');
+      });
+
+      test('split series with formatting and single y accessor', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a'],
+              splitAccessor: 'd',
+              columnToLabel: '{"a": "Label A"}',
+            },
+          ],
+        };
+
+        const component = getRenderedComponent(dataWithFormats, newArgs);
+        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+        convertSpy.mockReturnValueOnce('formatted');
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual('formatted');
+        expect(getFormatSpy).toHaveBeenCalledWith({ id: 'custom' });
+      });
+
+      test('split series without formatting with multiple y accessors', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a', 'b'],
+              splitAccessor: 'd',
+              columnToLabel: '{"a": "Label A","b": "Label B"}',
+            },
+          ],
+        };
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
+          'split1 - Label B'
+        );
+      });
+
+      test('split series with formatting with multiple y accessors', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a', 'b'],
+              splitAccessor: 'd',
+              columnToLabel: '{"a": "Label A","b": "Label B"}',
+            },
+          ],
+        };
+
+        const component = getRenderedComponent(dataWithFormats, newArgs);
+        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+        convertSpy.mockReturnValueOnce('formatted1').mockReturnValueOnce('formatted2');
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual(
+          'formatted1 - Label A'
+        );
+        expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
+          'formatted2 - Label B'
+        );
+      });
     });
 
     test('it set the scale of the x axis according to the args prop', () => {

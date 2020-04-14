@@ -472,4 +472,16 @@ curl -XPUT "http://localhost:9200/index_1/type1/1" -H 'Content-Type: application
   "f": 1
 }'`.trim()
   );
+
+  multiReqCopyAsCurlTest(
+    'with single quotes',
+    editorInput1,
+    { start: { lineNumber: 29 }, end: { lineNumber: 33 } },
+    `
+curl -XPOST "http://localhost:9200/_sql?format=txt" -H 'Content-Type: application/json' -d'
+{
+  "query": "SELECT prenom FROM claude_index WHERE prenom = '\\''claude'\\'' ",
+  "fetch_size": 1
+}'`.trim()
+  );
 });
