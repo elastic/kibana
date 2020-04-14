@@ -22,65 +22,6 @@ import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 
-export async function installLatestPackage(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  callCluster: CallESAsCurrentUser;
-}): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, callCluster } = options;
-  try {
-    const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-    const pkgkey = Registry.pkgToPkgKey({
-      name: latestPackage.name,
-      version: latestPackage.version,
-    });
-    return installPackage({ savedObjectsClient, pkgkey, callCluster });
-  } catch (err) {
-    throw err;
-  }
-}
-
-export async function ensureInstalledDefaultPackages(
-  savedObjectsClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser
-): Promise<Installation[]> {
-  const installations = [];
-  for (const pkgName in DefaultPackages) {
-    if (!DefaultPackages.hasOwnProperty(pkgName)) continue;
-    const installation = await ensureInstalledPackage({
-      savedObjectsClient,
-      pkgName,
-      callCluster,
-    });
-    if (installation) installations.push(installation);
-  }
-
-  return installations;
-}
-
-export async function ensureInstalledPackage(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  callCluster: CallESAsCurrentUser;
-}): Promise<Installation | undefined> {
-  const { savedObjectsClient, pkgName, callCluster } = options;
-  const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
-  if (installedPackage) {
-    return installedPackage;
-  }
-  // if the requested packaged was not found to be installed, try installing
-  try {
-    await installLatestPackage({
-      savedObjectsClient,
-      pkgName,
-      callCluster,
-    });
-    return await getInstallation({ savedObjectsClient, pkgName });
-  } catch (err) {
-    throw new Error(err.message);
-  }
-}
-
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
@@ -92,36 +33,36 @@ export async function installPackage(options: {
   const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
   const { internal = false } = registryPackageInfo;
 
-  const installKibanaAssetsPromise = installKibanaAssets({
-    savedObjectsClient,
-    pkgName,
-    pkgVersion,
-  });
-  const installPipelinePromises = installPipelines(registryPackageInfo, callCluster);
-  const installTemplatePromises = installTemplates(
+  const [installedKibanaAssets, installedPipelines] = await Promise.all([
+    installKibanaAssets({
+      savedObjectsClient,
+      pkgName,
+      pkgVersion,
+    }),
+    installPipelines(registryPackageInfo, callCluster),
+    // index patterns and ilm policies are not currently associated with a particular package
+    // so we do not save them in the package saved object state.
+    installIndexPatterns(savedObjectsClient, pkgName, pkgVersion),
+    // currenly only the base package has an ILM policy
+    // at some point ILM policies can be installed/modified
+    // per dataset and we should then save them
+    installILMPolicy(pkgName, pkgVersion, callCluster),
+  ]);
+  const installedTemplates = await installTemplates(
     registryPackageInfo,
     callCluster,
     pkgName,
     pkgVersion
   );
-
-  // index patterns and ilm policies are not currently associated with a particular package
-  // so we do not save them in the package saved object state.  at some point ILM policies can be installed/modified
-  // per dataset and we should then save them
-  await installIndexPatterns(savedObjectsClient, pkgName, pkgVersion);
-  // currenly only the base package has an ILM policy
-  await installILMPolicy(pkgName, pkgVersion, callCluster);
-
-  const res = await Promise.all([
-    installKibanaAssetsPromise,
-    installPipelinePromises,
-    installTemplatePromises,
-  ]);
-
-  const toSaveAssetRefs: AssetReference[] = res.flat();
+  const toSaveAssetRefs: AssetReference[] = [
+    ...installedKibanaAssets,
+    ...installedPipelines,
+    ...installedTemplates,
+  ];
   const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
-  // Save those references in the package manager's state saved object
-  return await saveInstallationReferences({
+
+  // Save references to installed assets in the package's saved object state
+  return saveInstallationReferences({
     savedObjectsClient,
     pkgkey,
     pkgName,
@@ -230,4 +171,63 @@ function toAssetReference({ id, type }: SavedObject) {
   const reference: AssetReference = { id, type: type as KibanaAssetType };
 
   return reference;
+}
+
+export async function installLatestPackage(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  callCluster: CallESAsCurrentUser;
+}): Promise<AssetReference[]> {
+  const { savedObjectsClient, pkgName, callCluster } = options;
+  try {
+    const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+    const pkgkey = Registry.pkgToPkgKey({
+      name: latestPackage.name,
+      version: latestPackage.version,
+    });
+    return installPackage({ savedObjectsClient, pkgkey, callCluster });
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function ensureInstalledDefaultPackages(
+  savedObjectsClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+): Promise<Installation[]> {
+  const installations = [];
+  for (const pkgName in DefaultPackages) {
+    if (!DefaultPackages.hasOwnProperty(pkgName)) continue;
+    const installation = await ensureInstalledPackage({
+      savedObjectsClient,
+      pkgName,
+      callCluster,
+    });
+    if (installation) installations.push(installation);
+  }
+
+  return installations;
+}
+
+export async function ensureInstalledPackage(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  callCluster: CallESAsCurrentUser;
+}): Promise<Installation | undefined> {
+  const { savedObjectsClient, pkgName, callCluster } = options;
+  const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
+  if (installedPackage) {
+    return installedPackage;
+  }
+  // if the requested packaged was not found to be installed, try installing
+  try {
+    await installLatestPackage({
+      savedObjectsClient,
+      pkgName,
+      callCluster,
+    });
+    return await getInstallation({ savedObjectsClient, pkgName });
+  } catch (err) {
+    throw new Error(err.message);
+  }
 }
