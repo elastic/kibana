@@ -598,9 +598,7 @@ export class DashboardAppController {
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
-      const savedQueryFilters = savedQuery.attributes.filters || [];
-      const globalFilters = queryFilter.getGlobalFilters();
-      const allFilters = [...globalFilters, ...savedQueryFilters, ...queryFilter.getAppFilters()];
+      const allFilters = filterManager.getFilters();
       dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
       if (savedQuery.attributes.timefilter) {
         timefilter.setTime({
