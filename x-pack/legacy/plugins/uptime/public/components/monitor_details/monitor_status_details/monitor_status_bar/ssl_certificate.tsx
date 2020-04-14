@@ -9,14 +9,13 @@ import moment from 'moment';
 import { EuiSpacer, EuiText, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
-import { PingTls } from '../../../../../common/graphql/types';
+import { Tls } from '../../../../../common/runtime_types';
 
 interface Props {
   /**
    * TLS information coming from monitor in ES heartbeat index
    */
-  tls: PingTls | null | undefined;
+  tls: Tls | null | undefined;
 }
 
 export const MonitorSSLCertificate = ({ tls }: Props) => {
