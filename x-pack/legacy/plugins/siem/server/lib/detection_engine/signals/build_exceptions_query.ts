@@ -10,27 +10,6 @@ import { Query } from '../../../../../../../../src/plugins/data/server';
 import { List, ListOperator, ListValues } from '../routes/schemas/types/lists_default_array';
 import { RuleAlertParams } from '../types';
 
-export const flatten = (
-  accumulator: Array<string[] | List[]>,
-  exceptions: List[]
-): Array<string[] | List[]> => {
-  return exceptions.reduce((acc, exception) => {
-    const exceptionGroup: List[] = [];
-    const { and, ...exceptionDetials } = { ...exception };
-
-    exceptionGroup.push(exceptionDetials);
-
-    if (and && !isEmpty(and)) {
-      and.forEach(element => {
-        exceptionGroup.push(element);
-      });
-    }
-
-    acc.push(exceptionGroup);
-    return acc;
-  }, accumulator);
-};
-
 export const getLanguageBooleanOperator = (language: string, value: string) => {
   if (language === 'lucene') {
     return value.toUpperCase();
