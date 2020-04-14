@@ -47,6 +47,7 @@ import {
   VisualizationsSetup,
 } from '../../../../../plugins/visualizations/public';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
+import { createHashHistory } from 'history';
 
 export interface DiscoverSetupPlugins {
   uiActions: UiActionsSetup;
@@ -77,6 +78,7 @@ const embeddableAngularName = 'app/discoverEmbeddable';
  * Discover provides embeddables, those contain a slimmer Angular
  */
 export class DiscoverPlugin implements Plugin<void, void> {
+  private history = createHashHistory();
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
   private embeddableInjector: auto.IInjectorService | null = null;
@@ -98,6 +100,7 @@ export class DiscoverPlugin implements Plugin<void, void> {
       stop: stopUrlTracker,
       setActiveUrl: setTrackedUrl,
     } = createKbnUrlTracker({
+      history: this.history,
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/discover',
       storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
@@ -174,7 +177,7 @@ export class DiscoverPlugin implements Plugin<void, void> {
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(core, plugins);
+      const services = await buildServices(core, plugins, this.history);
       setServices(services);
       this.servicesInitialized = true;
 

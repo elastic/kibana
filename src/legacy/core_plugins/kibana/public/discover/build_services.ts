@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { createHashHistory, History } from 'history';
+import { History } from 'history';
 
 import {
   Capabilities,
@@ -67,7 +67,8 @@ export interface DiscoverServices {
 }
 export async function buildServices(
   core: CoreStart,
-  plugins: DiscoverStartPlugins
+  plugins: DiscoverStartPlugins,
+  history: History
 ): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,
@@ -77,6 +78,7 @@ export async function buildServices(
     overlays: core.overlays,
   };
   const savedObjectService = createSavedSearchesLoader(services);
+
   return {
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
@@ -85,7 +87,7 @@ export async function buildServices(
     data: plugins.data,
     docLinks: core.docLinks,
     DocViewer: plugins.discover.docViews.DocViewer,
-    history: createHashHistory(),
+    history,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),

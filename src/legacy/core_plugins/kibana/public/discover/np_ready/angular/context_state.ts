@@ -17,7 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
-import { createBrowserHistory, History } from 'history';
+import { createBrowserHistory, createHashHistory, History } from 'history';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
