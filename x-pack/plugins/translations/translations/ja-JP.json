@@ -798,8 +798,6 @@
     "data.search.searchBar.savedQueryDescriptionLabelText": "説明",
     "data.search.searchBar.savedQueryDescriptionText": "再度使用するクエリテキストとフィルターを保存します。",
     "data.search.searchBar.savedQueryForm.titleConflictText": "タイトルが既に保存されているクエリに使用されています",
-    "data.search.searchBar.savedQueryForm.titleMissingText": "名前が必要です",
-    "data.search.searchBar.savedQueryForm.whitespaceErrorText": "タイトルの始めと終わりにはスペースを使用できません",
     "data.search.searchBar.savedQueryFormCancelButtonText": "キャンセル",
     "data.search.searchBar.savedQueryFormSaveButtonText": "保存",
     "data.search.searchBar.savedQueryFormTitle": "クエリを保存",
