@@ -89,7 +89,10 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
                 history.push(policyResponseUri);
               }}
             >
-              active
+              <FormattedMessage
+                id="xpack.endpoint.host.details.policyStatus.success"
+                defaultMessage="Successful"
+              />
             </EuiLink>
           </EuiHealth>
         ),
