@@ -7,6 +7,7 @@
 import path from 'path';
 import moment from 'moment';
 import 'moment-timezone';
+import ReactDOM from "react-dom";
 
 import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
@@ -59,6 +60,11 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
     __esModule: true,
     default: 'ReactDatePicker',
   };
+});
+
+
+ReactDOM.createPortal = jest.fn((element) => {
+  return element;
 });
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {

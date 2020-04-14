@@ -6,6 +6,7 @@
 
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
+import { compose, withState } from 'recompose';
 import { camelCase } from 'lodash';
 // @ts-ignore Untyped local
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
@@ -25,6 +26,13 @@ const customElementAdded = 'elements-custom-added';
 
 interface OwnProps {
   onClose: () => void;
+}
+
+interface OwnPropsWithState extends OwnProps {
+  customElements: CustomElement[];
+  setCustomElements: (customElements: CustomElement[]) => void;
+  search: string;
+  setSearch: (search: string) => void;
 }
 
 interface DispatchProps {
@@ -56,13 +64,18 @@ const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
 const mergeProps = (
   stateProps: StateProps,
   dispatchProps: DispatchProps,
-  ownProps: OwnProps
+  ownProps: OwnPropsWithState
 ): ComponentProps => {
   const { pageId } = stateProps;
-  const { onClose } = ownProps;
+  const { onClose, search, setCustomElements } = ownProps;
+
+  const findCustomElements = async () => {
+    const { customElements } = await customElementService.find(search);
+    setCustomElements(customElements);
+  };
 
   return {
-    onClose,
+    ...ownProps,
     // add custom element to the page
     addCustomElement: (customElement: CustomElement) => {
       const { selectedNodes = [] } = JSON.parse(customElement.content) || {};
@@ -75,19 +88,18 @@ const mergeProps = (
       trackCanvasUiMetric(METRIC_TYPE.LOADED, customElementAdded);
     },
     // custom element search
-    findCustomElements: async (text: string): Promise<CustomElement[]> => {
+    findCustomElements: async (text?: string) => {
       try {
-        const { customElements } = await customElementService.find(text);
-        return customElements;
+        await findCustomElements();
       } catch (err) {
         notify.error(err, { title: `Couldn't find custom elements` });
-        return [];
       }
     },
     // remove custom element
     removeCustomElement: async (id: string) => {
       try {
         await customElementService.remove(id);
+        await findCustomElements();
       } catch (err) {
         notify.error(err, { title: `Couldn't delete custom elements` });
       }
@@ -101,6 +113,7 @@ const mergeProps = (
           image,
           help: description,
         });
+        await findCustomElements();
       } catch (err) {
         notify.error(err, { title: `Couldn't update custom elements` });
       }
@@ -108,8 +121,8 @@ const mergeProps = (
   };
 };
 
-export const SavedElementsModal = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
+export const SavedElementsModal = compose<ComponentProps, OwnProps>(
+  withState('search', 'setSearch', ''),
+  withState('customElements', 'setCustomElements', []),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps)
 )(Component);

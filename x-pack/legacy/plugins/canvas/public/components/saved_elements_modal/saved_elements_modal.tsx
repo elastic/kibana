@@ -35,7 +35,7 @@ export interface Props {
   /**
    * Queries ES for custom element saved objects
    */
-  findCustomElements: (text: string) => Promise<CustomElement[]>;
+  findCustomElements: () => void;
   /**
    * Handler invoked when the modal closes
    */
@@ -48,28 +48,35 @@ export interface Props {
    * Saved edits to the custom element
    */
   updateCustomElement: (id: string, name: string, description: string, image: string) => void;
+  /**
+   * Array of custom elements to display
+   */
+  customElements: CustomElement[];
+  /**
+   * Text used to filter custom elements list
+   */
+  search: string;
+  /**
+   * Setter for search text
+   */
+  setSearch: (search: string) => void;
 }
 
 export const SavedElementsModal: FunctionComponent<Props> = ({
+  search,
+  setSearch,
+  customElements,
   addCustomElement,
   findCustomElements,
   onClose,
   removeCustomElement,
   updateCustomElement,
 }) => {
-  const [filterText, setFilterText] = useState('');
-  const [customElements, setCustomElements] = useState<CustomElement[]>([]);
   const [elementToDelete, setElementToDelete] = useState<CustomElement | null>(null);
   const [elementToEdit, setElementToEdit] = useState<CustomElement | null>(null);
 
-  // Retrieves and sets custom element saved objects from ES
-  const fetchCustomElements = () =>
-    findCustomElements(filterText).then((elements: CustomElement[]) => {
-      setCustomElements(elements);
-    });
-
   useEffect(() => {
-    fetchCustomElements();
+    findCustomElements();
   });
 
   const showEditModal = (element: CustomElement) => setElementToEdit(element);
@@ -78,7 +85,6 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
   const handleEdit = async (name: string, description: string, image: string) => {
     if (elementToEdit) {
       await updateCustomElement(elementToEdit.id, name, description, image);
-      await fetchCustomElements();
     }
     hideEditModal();
   };
@@ -89,7 +95,6 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
   const handleDelete = async () => {
     if (elementToDelete) {
       await removeCustomElement(elementToDelete.id);
-      await fetchCustomElements();
     }
     hideDeleteModal();
   };
@@ -137,7 +142,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
       'displayName'
     );
 
-  const onSearch = (e: ChangeEvent<HTMLInputElement>) => setFilterText(e.target.value);
+  const onSearch = (e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value);
 
   let customElementContent = (
     <EuiEmptyPrompt
@@ -152,7 +157,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
     customElementContent = (
       <ElementGrid
         elements={sortElements(customElements)}
-        filterText={filterText}
+        filterText={search}
         onClick={addCustomElement}
         onEdit={showEditModal}
         onDelete={showDeleteModal}
@@ -178,7 +183,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
           <EuiModalBody style={{ paddingRight: '1px' }}>
             <EuiFieldSearch
               fullWidth
-              value={filterText}
+              value={search}
               placeholder={strings.getFindElementPlaceholder()}
               onChange={onSearch}
             />
