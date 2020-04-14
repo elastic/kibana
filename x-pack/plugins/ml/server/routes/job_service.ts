@@ -116,7 +116,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName DeleteJobs
    * @apiDescription Deletes an existing anomaly detection job
    *
-   * @apiSchema (body) datafeedIdsSchema
+   * @apiSchema (body) jobIdsSchema
    */
   router.post(
     {
