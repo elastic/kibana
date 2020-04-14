@@ -5,23 +5,24 @@
  */
 
 import { memo, useState, useMemo, useCallback } from 'react';
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
+  EuiBadge,
   EuiDataGrid,
   EuiDataGridColumn,
+  EuiEmptyPrompt,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiLink,
+  EuiLoadingSpinner,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
-  EuiBadge,
-  EuiLoadingSpinner,
+  EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiPageContentBody,
-  EuiLink,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -92,6 +93,7 @@ export const AlertIndex = memo(() => {
 
   const { pageIndex, pageSize, total } = useAlertListSelector(selectors.alertListPagination);
   const alertListData = useAlertListSelector(selectors.alertListData);
+  const alertListError = useAlertListSelector(selectors.alertListError);
   const hasSelectedAlert = useAlertListSelector(selectors.hasSelectedAlert);
   const queryParams = useAlertListSelector(selectors.uiQueryParams);
 
@@ -244,15 +246,30 @@ export const AlertIndex = memo(() => {
             </EuiPageContentHeader>
             <EuiPageContentBody>
               <AlertIndexSearchBar />
-              <EuiDataGrid
-                aria-label="Alert List"
-                rowCount={total}
-                columns={columns}
-                columnVisibility={columnVisibility}
-                renderCellValue={renderCellValue}
-                pagination={pagination}
-                data-test-subj="alertListGrid"
-              />
+              {alertListError && (
+                <EuiEmptyPrompt
+                  iconType="dataVisualizer"
+                  iconColor={null}
+                  title={<h2>You have selected too many alerts</h2>}
+                  titleSize="xs"
+                  body={
+                    <Fragment>
+                      <p>Please narrow your search.</p>
+                    </Fragment>
+                  }
+                />
+              )}
+              {!alertListError && (
+                <EuiDataGrid
+                  aria-label="Alert List"
+                  rowCount={total}
+                  columns={columns}
+                  columnVisibility={columnVisibility}
+                  renderCellValue={renderCellValue}
+                  pagination={pagination}
+                  data-test-subj="alertListGrid"
+                />
+              )}
             </EuiPageContentBody>
           </EuiPageContent>
         </EuiPageBody>

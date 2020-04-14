@@ -21,6 +21,8 @@ const createStructuredSelector: CreateStructuredSelector = createStructuredSelec
  */
 export const alertListData = (state: AlertListState) => state.alerts;
 
+export const alertListError = (state: AlertListState) => state.error;
+
 export const selectedAlertDetailsData = (state: AlertListState) => state.alertDetails;
 
 /**

@@ -287,6 +287,21 @@ interface AlertsSearchBarState {
 
 export type AlertListData = AlertResultList;
 
+export enum AlertListErrorCode {
+  TooManyAlerts,
+}
+
+export interface AlertListErrorTooManyData {
+  total: number;
+}
+
+export type AlertListErrorData = AlertListErrorTooManyData;
+
+export interface AlertListError {
+  code: AlertListErrorCode;
+  data: AlertListErrorData;
+}
+
 export interface AlertListState {
   /** Array of alert items. */
   readonly alerts: ImmutableArray<AlertData>;
@@ -308,6 +323,9 @@ export interface AlertListState {
 
   /** Search bar state including indexPatterns */
   readonly searchBar: AlertsSearchBarState;
+
+  /** Error state */
+  readonly error?: AlertListError;
 }
 
 /**

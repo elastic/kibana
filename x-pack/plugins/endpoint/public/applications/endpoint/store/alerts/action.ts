@@ -25,5 +25,6 @@ interface ServerReturnedSearchBarIndexPatterns {
 
 export type AlertAction =
   | ServerReturnedAlertsData
+  | ServerReturnedTooManyAlerts
   | ServerReturnedAlertDetailsData
   | ServerReturnedSearchBarIndexPatterns;

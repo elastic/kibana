@@ -70,6 +70,7 @@ export class AlertDetailsPagination extends Pagination<
    * Gets the next alert after this one.
    */
   async getNextUrl(): Promise<string | null> {
+    // TODO: update for simple pagination
     const response = await this.doSearch('asc', [
       this.data._source['@timestamp'].toString(),
       this.data._source.event.id,
@@ -81,6 +82,7 @@ export class AlertDetailsPagination extends Pagination<
    * Gets the alert before this one.
    */
   async getPrevUrl(): Promise<string | null> {
+    // TODO: update for simple pagination
     const response = await this.doSearch('desc', [
       this.data._source['@timestamp'].toString(),
       this.data._source.event.id,

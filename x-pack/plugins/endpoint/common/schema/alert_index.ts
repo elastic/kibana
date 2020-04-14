@@ -87,6 +87,15 @@ export const alertingIndexGetQuerySchema = schema.object(
   },
   {
     validate(value) {
+      const pageSize =
+        value.page_size !== undefined
+          ? value.page_size
+          : EndpointAppConstants.ALERT_LIST_DEFAULT_PAGE_SIZE;
+      if ((value.page_index + 1) * pageSize > EndpointAppConstants.MAX_ALERTS_PER_SEARCH) {
+        return i18n.translate('xpack.endpoint.alerts.errors.paged_too_far', {
+          defaultMessage: `Cannot page past ${EndpointAppConstants.MAX_ALERTS_PER_SEARCH} results. Please narrow your search.`,
+        });
+      }
       if (value.after !== undefined && value.page_index !== undefined) {
         return i18n.translate('xpack.endpoint.alerts.errors.page_index_cannot_be_used_with_after', {
           defaultMessage: '[page_index] cannot be used with [after]',

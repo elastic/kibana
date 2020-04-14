@@ -5,7 +5,8 @@
  */
 
 import { Reducer } from 'redux';
-import { AlertListState } from '../../types';
+import { EndpointAppConstants } from '../../../../../common/types';
+import { AlertListErrorCode, AlertListState } from '../../types';
 import { AppAction } from '../action';
 
 const initialState = (): AlertListState => {
@@ -19,6 +20,7 @@ const initialState = (): AlertListState => {
     searchBar: {
       patterns: [],
     },
+    error: undefined,
   };
 };
 
@@ -33,6 +35,18 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
       request_page_index: pageIndex,
       total,
     } = action.payload;
+
+    if (total > EndpointAppConstants.MAX_ALERTS_PER_SEARCH) {
+      state.error = {
+        code: AlertListErrorCode.TooManyAlerts,
+        data: {
+          total: action.payload,
+        },
+      };
+    } else {
+      state.error = undefined;
+    }
+
     return {
       ...state,
       alerts,

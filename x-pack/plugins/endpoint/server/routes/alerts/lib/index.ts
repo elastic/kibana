@@ -99,18 +99,8 @@ function buildSort(query: AlertSearchQuery): AlertSort {
 const buildAlertSearchQuery = async (
   query: AlertSearchQuery
 ): Promise<AlertSearchRequestWrapper> => {
-  let totalHitsMin: number = EndpointAppConstants.DEFAULT_TOTAL_HITS;
-
-  // Calculate minimum total hits set to indicate there's a next page
-  if (query.fromIndex) {
-    totalHitsMin = Math.max(
-      query.fromIndex + query.pageSize * 2,
-      EndpointAppConstants.DEFAULT_TOTAL_HITS
-    );
-  }
-
   const reqBody: AlertSearchRequest = {
-    track_total_hits: totalHitsMin,
+    track_total_hits: EndpointAppConstants.MAX_ALERTS_PER_SEARCH + 1, // Add 1 so we can detect when we have an 'overflow'
     query: buildQuery(query),
     sort: buildSort(query),
   };

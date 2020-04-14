@@ -35,6 +35,7 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
       const response: AlertResultList = await coreStart.http.get(`/api/endpoint/alerts`, {
         query: cloneHttpFetchQuery(apiQueryParams(state)),
       });
+
       api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
     }
 

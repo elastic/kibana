@@ -59,6 +59,7 @@ export class AlertListPagination extends Pagination<AlertSearchQuery, AlertHits>
    * Gets the next set of alerts after this one.
    */
   async getNextUrl(): Promise<string | null> {
+    // TODO: update for simple pagination
     let url = null;
     if (this.hitLen > 0 && this.hitLen <= this.state.pageSize) {
       const lastCustomSortValue: string = get(
@@ -75,6 +76,7 @@ export class AlertListPagination extends Pagination<AlertSearchQuery, AlertHits>
    * Gets the previous set of alerts before this one.
    */
   async getPrevUrl(): Promise<string | null> {
+    // TODO: update for simple pagination
     let url = null;
     if (this.hitLen > 0) {
       const firstCustomSortValue: string = get(this.data[0]._source, this.state.sort) as string;
