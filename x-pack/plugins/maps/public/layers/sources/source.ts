@@ -55,7 +55,7 @@ export interface ISource {
   getApplyGlobalQuery(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getGeoGridPrecision(): number;
+  getGeoGridPrecision(zoom: number): number;
   shouldBeIndexed(): boolean;
   getPreIndexedShape(): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
@@ -154,7 +154,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  getGeoGridPrecision(): number {
+  getGeoGridPrecision(zoom: number): number {
     return 0;
   }
 

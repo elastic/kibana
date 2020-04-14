@@ -47,7 +47,7 @@ export interface ILayer {
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
   getCustomIconAndTooltipContent(): IconAndTooltipContent;
-  getIconAndTooltipContent(): IconAndTooltipContent;
+  getIconAndTooltipContent(zoomLevel: number, isUsingSearch: boolean): IconAndTooltipContent;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
   getMinZoom(): number;
@@ -72,8 +72,13 @@ export interface ILayer {
   isDataLoaded(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getType(): LAYER_TYPE;
+  getType(): LAYER_TYPE | undefined;
   cloneDescriptor(): LayerDescriptor;
+  renderStyleEditor({
+    onStyleDescriptorChange,
+  }: {
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
+  }): ReactElement<any> | null;
 }
 export type Footnote = {
   icon: ReactElement<any>;
@@ -403,7 +408,7 @@ export class AbstractLayer implements ILayer {
 
   isDataLoaded(): boolean {
     const sourceDataRequest = this.getSourceDataRequest();
-    return sourceDataRequest && sourceDataRequest.hasData();
+    return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
   async getBounds(mapFilters: MapFilters): Promise<MapExtent> {
@@ -419,7 +424,7 @@ export class AbstractLayer implements ILayer {
     onStyleDescriptorChange,
   }: {
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
-  }): ReactElement<any> {
+  }): ReactElement<any> | null {
     const style = this.getStyleForEditing();
     if (!style) {
       return null;
@@ -440,7 +445,7 @@ export class AbstractLayer implements ILayer {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
-  getType(): LAYER_TYPE {
+  getType(): LAYER_TYPE | undefined {
     return this._descriptor.type;
   }
 }
