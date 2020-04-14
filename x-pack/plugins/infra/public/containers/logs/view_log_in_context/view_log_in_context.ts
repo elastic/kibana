@@ -3,16 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import createContainer from 'constate';
 import { LogEntry } from '../../../../common/http_api';
+import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
+import { esKuery } from '../../../../../../../src/plugins/data/public';
 
+function getQueryFromLogEntry(entry: LogEntry) {
+  const expression = Object.entries(entry.context).reduce((kuery, [key, value]) => {
+    const currentExpression = `${key} : "${value}"`;
+    if (kuery.length > 0) {
+      return `${kuery} AND ${currentExpression}`;
+    } else {
+      return currentExpression;
+    }
+  }, '');
+
+  return JSON.stringify(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(expression)));
+}
 interface ViewLogInContextProps {
+  sourceId: string;
   startTimestamp: number;
   endTimestamp: number;
 }
 
-interface ViewLogInContextState {
+export interface ViewLogInContextState {
   entries: LogEntry[];
   contextEntry?: LogEntry;
 }
@@ -26,6 +41,25 @@ export const useViewLogInContext = (
 ): [ViewLogInContextState, ViewLogInContextCallbacks] => {
   const [contextEntry, setContextEntry] = useState<LogEntry | undefined>();
   const [entries, setEntries] = useState<LogEntry[]>([]);
+  const { startTimestamp, endTimestamp, sourceId } = _props;
+
+  const maybeFetchLogs = useCallback(async () => {
+    if (contextEntry) {
+      const { data } = await fetchLogEntries({
+        sourceId,
+        startTimestamp,
+        endTimestamp,
+        query: getQueryFromLogEntry(contextEntry),
+      });
+      setEntries(data.entries);
+    } else {
+      setEntries([]);
+    }
+  }, [contextEntry, startTimestamp, endTimestamp, sourceId]);
+
+  useEffect(() => {
+    maybeFetchLogs();
+  }, [maybeFetchLogs]);
 
   return [
     {

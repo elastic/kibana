@@ -29,13 +29,18 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
 
 const ViewLogInContextProvider: React.FC = ({ children }) => {
   const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
+  const { sourceId } = useContext(Source.Context);
 
   if (!startTimestamp || !endTimestamp) {
     return null;
   }
 
   return (
-    <ViewLogInContext.Provider startTimestamp={startTimestamp} endTimestamp={endTimestamp}>
+    <ViewLogInContext.Provider
+      startTimestamp={startTimestamp}
+      endTimestamp={endTimestamp}
+      sourceId={sourceId}
+    >
       {children}
     </ViewLogInContext.Provider>
   );

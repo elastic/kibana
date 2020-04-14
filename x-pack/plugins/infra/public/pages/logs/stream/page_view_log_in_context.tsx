@@ -13,12 +13,12 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-
+import { EuiSpacer } from '@elastic/eui';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { LogEntry } from '../../../../common/http_api';
 
 export const PageViewLogInContext: React.FC = () => {
-  const [{ contextEntry }, { setContextEntry }] = useContext(ViewLogInContext.Context);
+  const [{ contextEntry, entries }, { setContextEntry }] = useContext(ViewLogInContext.Context);
 
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
 
@@ -34,11 +34,17 @@ export const PageViewLogInContext: React.FC = () => {
             <h2>Selected log message</h2>
           </EuiTitle>
 
-          <p>...selected entry...</p>
+          <p>
+            Selected Entry: <code>{JSON.stringify(contextEntry.columns)}</code>
+          </p>
+
+          <EuiSpacer />
 
           <LogEntryContext context={contextEntry.context} />
 
-          <p>...entries...</p>
+          <EuiSpacer />
+
+          <p>Surrounding Entry Count: {entries.length}</p>
         </EuiModalBody>
       </EuiModal>
     </EuiOverlayMask>
