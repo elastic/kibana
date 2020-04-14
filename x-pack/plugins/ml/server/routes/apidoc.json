@@ -80,6 +80,13 @@
     "ValidateCategoryExamples",
     "TopCategories",
 
+    "Calendars",
+    "GetCalendars",
+    "GetCalendarById",
+    "PutCalendars",
+    "UpdateCalendarById",
+    "DeleteCalendarById",
+
     "Filters",
     "GetFilters",
     "GetFilterById",
