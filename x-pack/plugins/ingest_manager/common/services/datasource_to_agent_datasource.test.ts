@@ -41,7 +41,7 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
       },
       {
         id: 'test-logs-bar',
-        enabled: false,
+        enabled: true,
         dataset: 'bar',
         config: {
           barVar: { value: 'bar-value' },
@@ -119,7 +119,7 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
             },
             {
               id: 'test-logs-bar',
-              enabled: false,
+              enabled: true,
               dataset: 'bar',
               barVar: 'bar-value',
               barVar2: [1, 2],
@@ -133,6 +133,44 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
                   anotherProp: 'test2',
                 },
               ],
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('returns agent datasource config without disabled streams', () => {
+    expect(
+      storedDatasourceToAgentDatasource({
+        ...mockDatasource,
+        inputs: [
+          {
+            ...mockInput,
+            streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
+          },
+        ],
+      })
+    ).toEqual({
+      id: 'mock-datasource',
+      namespace: 'default',
+      enabled: true,
+      use_output: 'default',
+      inputs: [
+        {
+          type: 'test-logs',
+          enabled: true,
+          inputVar: 'input-value',
+          inputVar3: {
+            testField: 'test',
+          },
+          streams: [
+            {
+              id: 'test-logs-foo',
+              enabled: true,
+              dataset: 'foo',
+              fooVar: 'foo-value',
+              fooVar2: [1, 2],
             },
           ],
         },
