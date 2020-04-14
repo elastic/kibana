@@ -22,12 +22,16 @@ import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elast
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../../vis_type_vislib/public';
 import {
   FileLayerField,
   VectorLayer,
   IServiceSettings,
 } from '../../../../../plugins/maps_legacy/public';
+import {
+  NumberInputOption,
+  SelectOption,
+  SwitchOption,
+} from '../../../../../plugins/charts/public';
 import { WmsOptions } from '../../../tile_map/public/components/wms_options';
 import { RegionMapVisParams } from '../types';
 

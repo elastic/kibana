@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { LineOptions, LineOptionsParams } from './line_options';
-import { NumberInputOption } from '../../common';
+import { NumberInputOption } from '../../../../../../../plugins/charts/public';
 import { seriesParam, vis } from './mocks';
 
 jest.mock('ui/new_platform');
