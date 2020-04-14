@@ -160,7 +160,7 @@ export default function({ getService }: FtrProviderContext) {
 
           // There are some pipelines created OOTB with ES
           // To not be dependent on these, we only confirm the pipeline we created as part of the test exists
-          const testPipeline = body.find(({ name }) => name === PIPELINE_ID);
+          const testPipeline = body.find(({ name }: { name: string }) => name === PIPELINE_ID);
 
           expect(testPipeline).to.eql({
             ...PIPELINE,
