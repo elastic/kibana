@@ -7,12 +7,7 @@
       aria-label="{{::'kbn.management.editIndexPattern.detailsAria' | i18n: { defaultMessage: 'Index pattern details' } }}"
     >
       <!-- Header -->
-      <kbn-management-index-patterns-header
-        index-pattern="indexPattern"
-        set-default="setDefaultPattern()"
-        refresh-fields="refreshFields()"
-        delete="removePattern()"
-      ></kbn-management-index-patterns-header>
+      <div id="reactIndexHeader"></div>
 
       <div class="euiSpacer euiSpacer--s"></div>
       <p ng-if="::(indexPattern.timeFieldName || (indexPattern.tags && indexPattern.tags.length))">
