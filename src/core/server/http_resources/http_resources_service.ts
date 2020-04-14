@@ -102,10 +102,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     const cspHeader = deps.http.csp.header;
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
-        // restOptions might contain `app` & `vars` options passed from the legacy platform.
-        const { headers, ...restOptions } = options;
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-          ...restOptions,
           includeUserSettings: true,
         });
 
@@ -115,10 +112,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
-        // restOptions might contain `app` & `vars` options passed from the legacy platform.
-        const { headers, ...restOptions } = options;
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-          ...restOptions,
           includeUserSettings: false,
         });
 

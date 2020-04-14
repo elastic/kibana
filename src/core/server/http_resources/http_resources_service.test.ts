@@ -196,33 +196,6 @@ describe('HttpResources service', () => {
           );
         });
 
-        it('passes the legacy platform options to the rendering service', async () => {
-          const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
-          const { createRegistrar } = await service.setup(setupDeps);
-          const { register } = createRegistrar(router);
-          const legacyOptions = {
-            app: 'my-app',
-            vars: {
-              'my-app': { foo: 'bar' },
-            },
-          };
-          register(routeConfig, async (ctx, req, res) => {
-            return res.renderCoreApp(legacyOptions as any);
-          });
-          const [[, routeHandler]] = router.get.mock.calls;
-
-          const responseFactory = httpResourcesMock.createResponseFactory();
-          await routeHandler(context, kibanaRequest, responseFactory);
-          expect(setupDeps.rendering.render).toHaveBeenCalledWith(
-            kibanaRequest,
-            context.core.uiSettings.client,
-            {
-              ...legacyOptions,
-              includeUserSettings: true,
-            }
-          );
-        });
-
         it('can attach headers, except the CSP header', async () => {
           const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
           const { createRegistrar } = await service.setup(setupDeps);
@@ -267,33 +240,6 @@ describe('HttpResources service', () => {
             kibanaRequest,
             context.core.uiSettings.client,
             {
-              includeUserSettings: false,
-            }
-          );
-        });
-
-        it('passes the legacy platform options to the rendering service', async () => {
-          const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
-          const { createRegistrar } = await service.setup(setupDeps);
-          const { register } = createRegistrar(router);
-          const legacyOptions = {
-            app: 'my-app',
-            vars: {
-              'my-app': { foo: 'bar' },
-            },
-          };
-          register(routeConfig, async (ctx, req, res) => {
-            return res.renderAnonymousCoreApp(legacyOptions as any);
-          });
-          const [[, routeHandler]] = router.get.mock.calls;
-
-          const responseFactory = httpResourcesMock.createResponseFactory();
-          await routeHandler(context, kibanaRequest, responseFactory);
-          expect(setupDeps.rendering.render).toHaveBeenCalledWith(
-            kibanaRequest,
-            context.core.uiSettings.client,
-            {
-              ...legacyOptions,
               includeUserSettings: false,
             }
           );
