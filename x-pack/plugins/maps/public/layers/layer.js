@@ -141,7 +141,8 @@ export class AbstractLayer {
         defaultMessage: `Layer is hidden.`,
       });
     } else if (!this.showAtZoomLevel(zoomLevel)) {
-      const { minZoom, maxZoom } = this.getZoomConfig();
+      const minZoom = this.getMinZoom();
+      const maxZoom = this.getMaxZoom();
       icon = <EuiIcon size="m" type="expand" />;
       tooltipContent = i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
         defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
@@ -220,13 +221,6 @@ export class AbstractLayer {
 
   getQuery() {
     return this._descriptor.query;
-  }
-
-  getZoomConfig() {
-    return {
-      minZoom: this._descriptor.minZoom,
-      maxZoom: this._descriptor.maxZoom,
-    };
   }
 
   getCurrentStyle() {
