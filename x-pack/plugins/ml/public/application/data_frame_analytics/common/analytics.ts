@@ -13,7 +13,6 @@ import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import { getErrorMessage } from '../../../../common/util/errors';
 import { SavedSearchQuery } from '../../contexts/ml';
-import { SortDirection } from '../../components/ml_in_memory_table';
 
 export type IndexName = string;
 export type IndexPattern = string;
@@ -54,6 +53,7 @@ export interface ClassificationAnalysis {
 }
 
 export interface LoadExploreDataArg {
+  filterByIsTraining?: boolean;
   searchQuery: SavedSearchQuery;
   requiresKeyword?: boolean;
   pageIndex?: number;
@@ -400,23 +400,35 @@ export function getEvalQueryBody({
   resultsField,
   isTraining,
   searchQuery,
-  ignoreDefaultQuery,
+  ignoreDefaultQuery, // TODO: I'm not sure we need this anymore
 }: {
   resultsField: string;
   isTraining: boolean;
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
 }) {
-  let query: ResultsSearchQuery = {
+  let query;
+
+  const trainingQuery: ResultsSearchQuery = {
     term: { [`${resultsField}.is_training`]: { value: isTraining } },
   };
 
-  if (searchQuery !== undefined && ignoreDefaultQuery === true) {
-    query = searchQuery;
-  } else if (searchQuery !== undefined && isResultsSearchBoolQuery(searchQuery)) {
-    const searchQueryClone = cloneDeep(searchQuery);
-    searchQueryClone.bool.must.push(query);
+  const searchQueryClone = cloneDeep(searchQuery);
+
+  if (isResultsSearchBoolQuery(searchQueryClone)) {
+    if (searchQueryClone.bool.must === undefined) {
+      searchQueryClone.bool.must = [];
+    }
+
+    searchQueryClone.bool.must.push(trainingQuery);
     query = searchQueryClone;
+  } else {
+    // Not a bool query so we need to create it so can add the trainingQuery
+    query = {
+      bool: {
+        must: [trainingQuery],
+      },
+    };
   }
   return query;
 }

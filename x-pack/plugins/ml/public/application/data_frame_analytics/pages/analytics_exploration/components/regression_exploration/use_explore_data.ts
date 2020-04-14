@@ -25,7 +25,6 @@ import {
   EsFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
-  // SearchQuery,
 } from '../../../../common';
 import { Dictionary } from '../../../../../../../common/types/common';
 import { isKeywordAndTextType } from '../../../../common/fields';
@@ -47,6 +46,7 @@ export interface UseExploreDataReturnType {
   rowCount: number;
   searchQuery: SavedSearchQuery;
   selectedFields: EsFieldName[];
+  setFilterByIsTraining: Dispatch<SetStateAction<undefined | boolean>>;
   setPagination: Dispatch<SetStateAction<Pagination>>;
   setSearchQuery: Dispatch<SetStateAction<SavedSearchQuery>>;
   setSelectedFields: Dispatch<SetStateAction<EsFieldName[]>>;
@@ -87,6 +87,7 @@ export const useExploreData = (
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
+  const [filterByIsTraining, setFilterByIsTraining] = useState<undefined | boolean>(undefined);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
   const predictedFieldName = getPredictedFieldName(
@@ -120,6 +121,7 @@ export const useExploreData = (
   };
 
   const loadExploreData = async ({
+    filterByIsTraining: isTraining,
     searchQuery: incomingQuery,
     requiresKeyword,
   }: LoadExploreDataArg) => {
@@ -132,13 +134,31 @@ export const useExploreData = (
         const searchQueryClone: ResultsSearchQuery = cloneDeep(incomingQuery);
         let query: ResultsSearchQuery;
         const { pageIndex, pageSize } = pagination;
+        // If filterByIsTraining is defined - add that in to the final query
+        const trainingQuery =
+          isTraining !== undefined
+            ? {
+                term: { [`${resultsField}.is_training`]: { value: isTraining } },
+              }
+            : undefined;
 
         if (JSON.stringify(incomingQuery) === JSON.stringify(defaultSearchQuery)) {
-          query = {
+          const existsQuery = {
             exists: {
               field: resultsField,
             },
           };
+
+          query = {
+            bool: {
+              must: [existsQuery],
+            },
+          };
+
+          if (trainingQuery !== undefined) {
+            // @ts-ignore // TODO: fix type here
+            query.bool.must.push(trainingQuery);
+          }
         } else if (isResultsSearchBoolQuery(searchQueryClone)) {
           if (searchQueryClone.bool.must === undefined) {
             searchQueryClone.bool.must = [];
@@ -149,6 +169,10 @@ export const useExploreData = (
               field: resultsField,
             },
           });
+
+          if (trainingQuery !== undefined) {
+            searchQueryClone.bool.must.push(trainingQuery);
+          }
 
           query = searchQueryClone;
         } else {
@@ -253,9 +277,16 @@ export const useExploreData = (
       const sortByField = predictedFieldSelected ? dependentVariable : selectedFields[0];
       const requiresKeyword = isKeywordAndTextType(sortByField);
 
-      loadExploreData({ searchQuery, requiresKeyword });
+      loadExploreData({ filterByIsTraining, searchQuery, requiresKeyword });
     }
-  }, [jobConfig && jobConfig.id, pagination, searchQuery, selectedFields, sortingColumns.length]);
+  }, [
+    filterByIsTraining,
+    jobConfig && jobConfig.id,
+    pagination,
+    searchQuery,
+    selectedFields,
+    sortingColumns.length,
+  ]);
 
   return {
     errorMessage,
@@ -264,6 +295,7 @@ export const useExploreData = (
     searchQuery,
     selectedFields,
     rowCount,
+    setFilterByIsTraining,
     setPagination,
     setSelectedFields,
     setSortingColumns,

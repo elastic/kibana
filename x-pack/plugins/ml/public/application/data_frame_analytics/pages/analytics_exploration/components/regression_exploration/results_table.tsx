@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect } from 'react';
+import React, { Fragment, FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -56,14 +57,26 @@ const showingFirstDocs = i18n.translate(
 );
 
 interface Props {
+  filterByIsTraining: undefined | boolean;
   indexPattern: IndexPattern;
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DATA_FRAME_TASK_STATE;
   setEvaluateSearchQuery: React.Dispatch<React.SetStateAction<object>>;
+  setFilterByIsTraining: React.Dispatch<React.SetStateAction<undefined | boolean>>;
 }
 
 export const ResultsTable: FC<Props> = React.memo(
-  ({ indexPattern, jobConfig, jobStatus, setEvaluateSearchQuery }) => {
+  ({
+    filterByIsTraining,
+    indexPattern,
+    jobConfig,
+    jobStatus,
+    setEvaluateSearchQuery,
+    setFilterByIsTraining,
+  }) => {
+    const [trainingButtonActive, setTrainingButtonActive] = useState<boolean>(false);
+    const [testingButtonActive, setTestingButtonActive] = useState<boolean>(false);
+
     const needsDestIndexFields = indexPattern && indexPattern.title === jobConfig.source.index[0];
 
     const {
@@ -73,6 +86,7 @@ export const ResultsTable: FC<Props> = React.memo(
       searchQuery,
       selectedFields,
       rowCount,
+      setFilterByIsTraining: setTableFilterByIsTraining,
       setPagination,
       setSearchQuery,
       setSelectedFields,
@@ -116,31 +130,6 @@ export const ResultsTable: FC<Props> = React.memo(
 
     const docFieldsCount = tableFields.length;
 
-    // useEffect(() => {
-    //   if (
-    //     jobConfig !== undefined &&
-    //     columns.length > 0 &&
-    //     selectedFields.length > 0 &&
-    //     sortField !== undefined &&
-    //     sortDirection !== undefined &&
-    //     selectedFields.some(field => field === sortField)
-    //   ) {
-    //     let field = sortField;
-    //     // If sorting by predictedField use dependentVar type
-    //     if (predictedFieldName === sortField) {
-    //       field = dependentVariable;
-    //     }
-    //     const requiresKeyword = isKeywordAndTextType(field);
-
-    //     loadExploreData({
-    //       field: sortField,
-    //       direction: sortDirection,
-    //       searchQuery,
-    //       requiresKeyword,
-    //     });
-    //   }
-    // }, [JSON.stringify(searchQuery)]);
-
     if (jobConfig === undefined) {
       return null;
     }
@@ -171,10 +160,29 @@ export const ResultsTable: FC<Props> = React.memo(
       );
     }
 
-    // const tableError =
-    //   status === INDEX_STATUS.ERROR && errorMessage.includes('parsing_exception')
-    //     ? errorMessage
-    //     : searchError;
+    const toggleTestingButton = () => {
+      if (filterByIsTraining === false) {
+        setTestingButtonActive(false);
+        setFilterByIsTraining(undefined);
+        setTableFilterByIsTraining(undefined);
+      } else {
+        setTestingButtonActive(true);
+        setFilterByIsTraining(false);
+        setTableFilterByIsTraining(false);
+      }
+    };
+
+    const toggleTrainingButton = () => {
+      if (filterByIsTraining === true) {
+        setTrainingButtonActive(false);
+        setFilterByIsTraining(undefined);
+        setTableFilterByIsTraining(undefined);
+      } else {
+        setTrainingButtonActive(true);
+        setFilterByIsTraining(true);
+        setTableFilterByIsTraining(true);
+      }
+    };
 
     return (
       <EuiPanel grow={false} data-test-subj="mlDFAnalyticsRegressionExplorationTablePanel">
@@ -218,7 +226,48 @@ export const ResultsTable: FC<Props> = React.memo(
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
               <EuiSpacer size="s" />
-              <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <ExplorationQueryBar
+                    indexPattern={indexPattern}
+                    setSearchQuery={setSearchQuery}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="none" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        onClick={toggleTestingButton}
+                        color={testingButtonActive ? 'text' : undefined}
+                        isDisabled={trainingButtonActive ? true : false}
+                        size="xs"
+                      >
+                        {i18n.translate(
+                          'xpack.ml.dataframe.analytics.regressionExploration.TestingFilterText',
+                          {
+                            defaultMessage: 'Testing',
+                          }
+                        )}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        onClick={toggleTrainingButton}
+                        color={trainingButtonActive ? 'text' : undefined}
+                        isDisabled={testingButtonActive ? true : false}
+                        size="xs"
+                      >
+                        {i18n.translate(
+                          'xpack.ml.dataframe.analytics.regressionExploration.TrainingFilterText',
+                          {
+                            defaultMessage: 'Training',
+                          }
+                        )}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiFormRow
                 helpText={tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
               >

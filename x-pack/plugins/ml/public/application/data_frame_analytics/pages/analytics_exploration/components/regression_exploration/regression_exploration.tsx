@@ -61,6 +61,7 @@ export const RegressionExploration: FC<Props> = ({ jobId }) => {
     undefined
   );
   const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
+  const [filterByIsTraining, setFilterByIsTraining] = useState<undefined | boolean>(undefined);
   const mlContext = useMlContext();
 
   const loadJobConfig = async () => {
@@ -157,7 +158,12 @@ export const RegressionExploration: FC<Props> = ({ jobId }) => {
     <Fragment>
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
-        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
+        <EvaluatePanel
+          jobConfig={jobConfig}
+          jobStatus={jobStatus}
+          searchQuery={searchQuery}
+          filterByIsTraining={filterByIsTraining}
+        />
       )}
       <EuiSpacer />
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
@@ -166,10 +172,12 @@ export const RegressionExploration: FC<Props> = ({ jobId }) => {
         indexPattern !== undefined &&
         isInitialized === true && (
           <ResultsTable
+            filterByIsTraining={filterByIsTraining}
             jobConfig={jobConfig}
             indexPattern={indexPattern}
             jobStatus={jobStatus}
             setEvaluateSearchQuery={setSearchQuery}
+            setFilterByIsTraining={setFilterByIsTraining}
           />
         )}
     </Fragment>

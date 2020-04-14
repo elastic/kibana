@@ -17,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { ErrorCallout } from '../error_callout';
 import {
   getValuesFromResponse,
@@ -33,19 +34,24 @@ import { EvaluateStat } from './evaluate_stat';
 import {
   isResultsSearchBoolQuery,
   isRegressionEvaluateResponse,
-  ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 
 interface Props {
+  filterByIsTraining: undefined | boolean;
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DATA_FRAME_TASK_STATE;
-  searchQuery: ResultsSearchQuery;
+  searchQuery: SavedSearchQuery;
 }
 
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
 
-export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
+export const EvaluatePanel: FC<Props> = ({
+  filterByIsTraining,
+  jobConfig,
+  jobStatus,
+  searchQuery,
+}) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -135,13 +141,9 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     }
   };
 
-  const loadData = async ({
-    isTrainingClause,
-  }: {
-    isTrainingClause?: { query: string; operator: string };
-  }) => {
+  const loadData = async ({ isTraining }: { isTraining?: boolean }) => {
     // searchBar query is filtering for testing data
-    if (isTrainingClause !== undefined && isTrainingClause.query === 'false') {
+    if (isTraining !== undefined && isTraining === false) {
       loadGeneralizationData();
 
       const docsCountResp = await loadDocsCount({
@@ -163,7 +165,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
         rSquared: '--',
         error: null,
       });
-    } else if (isTrainingClause !== undefined && isTrainingClause.query === 'true') {
+    } else if (isTraining !== undefined && isTraining === true) {
       // searchBar query is filtering for training data
       loadTrainingData();
 
@@ -219,18 +221,42 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   };
 
   useEffect(() => {
-    const hasIsTrainingClause =
-      isResultsSearchBoolQuery(searchQuery) &&
-      searchQuery.bool.must.filter(
-        (clause: any) => clause.match && clause.match[`${resultsField}.is_training`] !== undefined
-      );
-    const isTrainingClause =
-      hasIsTrainingClause &&
-      hasIsTrainingClause[0] &&
-      hasIsTrainingClause[0].match[`${resultsField}.is_training`];
+    let isTraining: boolean | undefined;
+    const query =
+      isResultsSearchBoolQuery(searchQuery) && (searchQuery.bool.should || searchQuery.bool.filter);
 
-    loadData({ isTrainingClause });
-  }, [JSON.stringify(searchQuery)]);
+    if (query !== undefined && query !== false) {
+      for (let i = 0; i < query.length; i++) {
+        const clause = query[i];
+
+        if (clause.match && clause.match[`${resultsField}.is_training`] !== undefined) {
+          isTraining = clause.match[`${resultsField}.is_training`];
+          break;
+        } else if (
+          clause.bool &&
+          (clause.bool.should !== undefined || clause.bool.filter !== undefined)
+        ) {
+          const innerQuery = clause.bool.should || clause.bool.filter;
+          if (innerQuery !== undefined) {
+            for (let j = 0; j < innerQuery.length; j++) {
+              const innerClause = innerQuery[j];
+              if (
+                innerClause.match &&
+                innerClause.match[`${resultsField}.is_training`] !== undefined
+              ) {
+                isTraining = innerClause.match[`${resultsField}.is_training`];
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    isTraining = isTraining || filterByIsTraining;
+
+    loadData({ isTraining });
+  }, [JSON.stringify(searchQuery), filterByIsTraining]);
 
   return (
     <EuiPanel data-test-subj="mlDFAnalyticsRegressionExplorationEvaluatePanel">
