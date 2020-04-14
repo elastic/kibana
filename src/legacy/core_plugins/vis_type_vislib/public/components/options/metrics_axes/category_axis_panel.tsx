@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { Axis } from '../../../types';
-import { SelectOption, SwitchOption } from '../../common';
+import { SelectOption, SwitchOption } from '../../../../../../../plugins/charts/public';
 import { LabelOptions, SetAxisLabel } from './label_options';
 import { Positions } from '../../../utils/collections';
 
