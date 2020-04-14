@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
+import {
+  IRouter,
+  kibanaResponseFactory,
+  RequestHandler,
+  RequestHandlerContext,
+} from 'src/core/server';
+
+import { isEsError } from '../../../lib/is_es_error';
+import { License } from '../../../services';
+import { registerCreateRoute } from './register_create_route';
+
+const httpService = httpServiceMock.createSetupContract();
+
+describe('[CCR API] Create follower index', () => {
+  let routeHandler: RequestHandler<any, any, any>;
+
+  beforeEach(() => {
+    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+
+    registerCreateRoute({
+      router,
+      license: {
+        guardApiRoute: (route: any) => route,
+      } as License,
+      lib: {
+        isEsError,
+      },
+    });
+
+    routeHandler = router.post.mock.calls[0][1];
+  });
+
+  it('should return 200 status when follower index is created', async () => {
+    const mockRouteContext = ({
+      crossClusterReplication: {
+        client: {
+          callAsCurrentUser: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+        },
+      },
+    } as unknown) as RequestHandlerContext;
+
+    const request = httpServerMock.createKibanaRequest({
+      body: {
+        name: 'follower_index',
+        remoteCluster: 'remote_cluster',
+        leaderIndex: 'leader_index',
+      },
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+  });
+});

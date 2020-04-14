@@ -116,27 +116,27 @@ export interface FollowerIndexToEs extends FollowerIndexAdvancedSettingsToEs {
 export interface FollowerIndexAdvancedSettings {
   maxReadRequestOperationCount?: number;
   maxOutstandingReadRequests?: number;
-  maxReadRequestSize?: number;
+  maxReadRequestSize?: string; // byte value
   maxWriteRequestOperationCount?: number;
-  maxWriteRequestSize?: number;
+  maxWriteRequestSize?: string; // byte value
   maxOutstandingWriteRequests?: number;
   maxWriteBufferCount?: number;
-  maxWriteBufferSize?: number;
-  maxRetryDelay?: number;
-  readPollTimeout?: number;
+  maxWriteBufferSize?: string; // byte value
+  maxRetryDelay?: string; // time value
+  readPollTimeout?: string; // time value
 }
 
 export interface FollowerIndexAdvancedSettingsToEs {
   max_read_request_operation_count?: number;
   max_outstanding_read_requests?: number;
-  max_read_request_size?: number;
+  max_read_request_size?: string; // byte value
   max_write_request_operation_count?: number;
-  max_write_request_size?: number;
+  max_write_request_size?: string; // byte value
   max_outstanding_write_requests?: number;
   max_write_buffer_count?: number;
-  max_write_buffer_size?: number;
-  max_retry_delay?: number;
-  read_poll_timeout?: number;
+  max_write_buffer_size?: string; // byte value
+  max_retry_delay?: string; // time value
+  read_poll_timeout?: string; // time value
 }
 
 export interface RecentAutoFollowError {

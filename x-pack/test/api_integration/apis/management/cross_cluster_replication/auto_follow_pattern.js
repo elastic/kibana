@@ -52,7 +52,6 @@ export default function({ getService }) {
         it('should create an auto-follow pattern when cluster is known', async () => {
           const name = getRandomString();
           const { body } = await createAutoFollowPattern(name).expect(200);
-          console.log(body);
 
           expect(body.acknowledged).to.eql(true);
         });

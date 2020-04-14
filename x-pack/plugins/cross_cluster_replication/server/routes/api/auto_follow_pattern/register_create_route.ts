@@ -33,7 +33,7 @@ export const registerCreateRoute = ({ router, license, lib }: RouteDependencies)
       const body = serializeAutoFollowPattern(rest as AutoFollowPattern);
 
       /**
-       * First let's make sur that an auto-follow pattern with
+       * First let's make sure that an auto-follow pattern with
        * the same id does not exist.
        */
       try {

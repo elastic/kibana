@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAutoFollowPatternClientMock } from '../../../fixtures/auto_follow_pattern';
+import { getAutoFollowPatternMock } from './fixtures/auto_follow_pattern';
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
@@ -76,11 +76,11 @@ describe('<AutoFollowPatternList />', () => {
     const testPrefix = 'prefix_';
     const testSuffix = '_suffix';
 
-    const autoFollowPattern1 = getAutoFollowPatternClientMock({
+    const autoFollowPattern1 = getAutoFollowPatternMock({
       name: `a${getRandomString()}`,
       followIndexPattern: `${testPrefix}{{leader_index}}${testSuffix}`,
     });
-    const autoFollowPattern2 = getAutoFollowPatternClientMock({
+    const autoFollowPattern2 = getAutoFollowPatternMock({
       name: `b${getRandomString()}`,
       followIndexPattern: '{{leader_index}}', // no prefix nor suffix
     });

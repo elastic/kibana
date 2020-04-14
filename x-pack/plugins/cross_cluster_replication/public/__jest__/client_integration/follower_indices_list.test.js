@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getFollowerIndexMock } from '../../../fixtures/follower_index';
+import { getFollowerIndexMock } from './fixtures/follower_index';
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
