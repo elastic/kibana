@@ -24,14 +24,15 @@ import {
   PersistableStateContract,
   ExtractReferences,
   MigrateState,
+  PersistableStates,
 } from './types';
 
 export interface PersistableStateSetup {
-  register: (definition: PersistableStateDefinition) => Promise<void>;
+  register: <K extends string>(id: K, definition: PersistableStateDefinition<K>) => Promise<void>;
 }
 
 export interface PersistableStateStart {
-  get: (definitionId: string) => Promise<PersistableStateContract<string> | undefined>;
+  get: <K extends string>(definitionId: K) => Promise<PersistableStateContract<K>>;
 }
 
 const defaultExtractReferences = ((state: any) => {
@@ -40,17 +41,17 @@ const defaultExtractReferences = ((state: any) => {
 
 export class PersistableStateService
   implements Plugin<PersistableStateSetup, PersistableStateStart> {
-  private definitions: Map<string, PersistableStateContract<string>> = new Map();
+  private definitions: Map<keyof PersistableStates, PersistableStateContract<string>> = new Map();
 
   public setup(core: CoreSetup): PersistableStateSetup {
     return {
-      register: async definition => {
-        const { id, extractReferences, injectReferences, migrate } = definition;
+      register: async (id, definition) => {
+        const { extractReferences, injectReferences, migrate } = definition;
 
-        this.definitions.set(definition.id, {
+        this.definitions.set(id, {
           id,
-          extractReferences: extractReferences || defaultExtractReferences,
-          injectReferences: injectReferences || identity,
+          extractReferences: (extractReferences as any) || defaultExtractReferences,
+          injectReferences: (injectReferences as any) || identity,
           migrate: migrate || (identity as MigrateState<string>),
         });
       },
@@ -59,7 +60,18 @@ export class PersistableStateService
 
   public start(core: CoreStart): PersistableStateStart {
     return {
-      get: async id => this.definitions.get(id),
+      get: async (id: string) => {
+        const d = this.definitions.get(id);
+        if (!d) {
+          return {
+            id,
+            migrate: identity,
+            injectReferences: identity,
+            extractReferences: defaultExtractReferences,
+          };
+        }
+        return d as any;
+      },
     };
   }
 

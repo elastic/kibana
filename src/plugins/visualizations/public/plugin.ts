@@ -139,8 +139,7 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
 
-    share.persistableState.register({
-      id: 'visualization',
+    share.persistableState.register('visualization', {
       injectReferences,
       extractReferences,
       migrate: updateOldState,

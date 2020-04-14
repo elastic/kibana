@@ -40,19 +40,18 @@ export interface PersistableStates {
   [key: string]: PersistableState<any>;
 }
 
-export type ExtractReferences<Id extends string = string> = (
+export type ExtractReferences<Id extends string> = (
   state: PersistableStates[Id]['state']
 ) => [PersistableStates[Id]['state'], SavedObjectReference[]];
-export type InjectReferences<Id extends string = string> = (
+
+export type InjectReferences<Id extends string> = (
   state: PersistableStates[Id]['state'],
   references: SavedObjectReference[]
 ) => PersistableStates[Id]['state'];
-export type MigrateState<Id extends string = string> = (
-  oldState: unknown
-) => PersistableStates[Id]['state'];
 
-export interface PersistableStateDefinition<Id extends string = string> {
-  id: Id;
+export type MigrateState<Id extends string> = (oldState: unknown) => PersistableStates[Id]['state'];
+
+export interface PersistableStateDefinition<Id extends string> {
   extractReferences?: ExtractReferences<Id>;
   injectReferences?: InjectReferences<Id>;
   migrate?: MigrateState<Id>;
