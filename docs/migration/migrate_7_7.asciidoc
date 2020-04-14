@@ -29,7 +29,7 @@ There are no user-facing breaking changes in 7.7.
 [discrete]
 ==== Add addInfo toast to core notifications service
 
-Added an Info toast to the core notifications service.
+This Info toast will be used for the async search notifications.
 
 *via {pull}60574[#60574]*
 
@@ -77,11 +77,7 @@ in `src/core/MIGRATION.md`.
 [discrete]
 ==== Delete FilterStateManager and QueryFilter
 
-Deleted unused legacy exports:
-
-* Delete `FilterStateManager`
-* Delete `QueryFilter`
-* Delete `SavedQuery` re-export from legacy
+Delete unused legacy exports `FilterStateManager`, `QueryFilter`, and `SavedQuery`.
 
 *via {pull}59872[#59872]*
 
@@ -771,9 +767,18 @@ the `CoreSetup.elasticsearch` API and expose `CoreStart.elasticsearch` instead.
 [discrete]
 ==== Embeddable triggers
 
-* Adds ability to embeddable to report what triggers it executes through
-`.supportedTriggers()` method.
-* Adds to `VisualizationEmbeddable` an implementation of `.supportedTriggers()` method.
+Embeddables can now report `ui_actions` triggers that they execute through the
+`.supportedTriggers()` method. For example:
+
+```js
+class MyEmbeddable extends Embeddable {
+  supportedTriggers() {
+    return ['VALUE_CLICK_TRIGGER'];
+  }
+}
+```
+The returned list of triggers will be used in the drilldowns feature on Dashboard,
+where users will be able to add drilldowns to embeddable triggers.
 
 *via {pull}58440[#58440]*
 
@@ -789,10 +794,7 @@ but it shouldn't be used as their domain-specific type.
 [discrete]
 ==== Trigger context
 
-This PR makes trigger context type typed in TypeScript and linked to `Trigger` type.
-Now when you execute a trigger or when an action receives trigger context it
-can be well typed. This functionality was added to visualization embeddable
-in the place where it executes a trigger.
+Improved types for trigger contexts, which are consumed by actions.
 
 *via {pull}57870[#57870]*
 
@@ -836,8 +838,8 @@ our Management UIs
 [discrete]
 ==== Move search service code to NP
 
-Move all of the search service code to Kibana new platform. Also to telete `courier` folder
-and move `getFlattenedObject` to `src/core/utils`.
+Move all of the search service code to Kibana new platform. Also deletes `courier` folder
+and moves `getFlattenedObject` to `src/core/utils`.
 
 *via {pull}55430[#55430]*
 
