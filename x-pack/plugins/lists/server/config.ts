@@ -7,10 +7,9 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
-  // TODO: Change this enable to default to false
   enabled: schema.boolean({ defaultValue: true }),
-  listsIndex: schema.string({ defaultValue: '.siem-lists' }),
-  listsItemsIndex: schema.string({ defaultValue: '.siem-items' }),
+  listsIndex: schema.string({ defaultValue: '.lists' }),
+  listsItemsIndex: schema.string({ defaultValue: '.items' }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;
