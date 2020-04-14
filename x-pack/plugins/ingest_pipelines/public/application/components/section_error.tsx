@@ -7,12 +7,6 @@
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
 
-export interface Error {
-  error: string;
-  message: string;
-  statusCode: number;
-}
-
 interface Props {
   title: React.ReactNode;
   error: Error;

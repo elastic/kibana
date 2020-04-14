@@ -24,7 +24,7 @@ import { PipelineDetailsJsonBlock } from './details_json_block';
 
 export interface Props {
   pipeline: Pipeline;
-  onEditClick: () => void;
+  onEditClick: (pipelineName: string) => void;
   onDeleteClick: () => void;
   onClose: () => void;
 }

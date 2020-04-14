@@ -13,7 +13,7 @@ import { Pipeline } from '../../../../common/types';
 export interface Props {
   pipelines: Pipeline[];
   onReloadClick: () => void;
-  onEditPipelineClick: (pipeline: Pipeline) => void;
+  onEditPipelineClick: (pipeineName: string) => void;
   onDeletePipelineClick: (pipeline: Pipeline) => void;
   onViewPipelineClick: (pipeline: Pipeline) => void;
 }

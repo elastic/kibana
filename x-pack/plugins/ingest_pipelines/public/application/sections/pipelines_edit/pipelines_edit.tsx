@@ -36,7 +36,9 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const { error, data: pipeline, isLoading } = services.api.useLoadPipeline(name);
+  const decodedPipelineName = decodeURI(decodeURIComponent(name));
+
+  const { error, data: pipeline, isLoading } = services.api.useLoadPipeline(decodedPipelineName);
 
   const onSave = async (updatedPipeline: Pipeline) => {
     setIsSaving(true);
@@ -105,7 +107,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
                   <FormattedMessage
                     id="xpack.ingestPipelines.edit.pageTitle"
                     defaultMessage="Edit pipeline '{name}'"
-                    values={{ name }}
+                    values={{ name: decodedPipelineName }}
                   />
                 </h1>
               </EuiTitle>
