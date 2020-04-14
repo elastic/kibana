@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { isValidRule, buildRuleDescription, getAppliesToValueFromAnomaly } from '../utils';
+import { isValidRule, buildRuleDescription, getAppliesToValueFromAnomaly } from './utils';
 import {
   ACTION,
   APPLIES_TO,
   OPERATOR,
   FILTER_TYPE,
-} from '../../../../../common/constants/detector_rule';
+} from '../../../../common/constants/detector_rule';
 
 describe('ML - rule editor utils', () => {
   const ruleWithCondition = {
@@ -55,19 +54,19 @@ describe('ML - rule editor utils', () => {
   };
 
   describe('isValidRule', () => {
-    it('returns true for a rule with an action and a condition', () => {
-      expect(isValidRule(ruleWithCondition)).to.be(true);
+    test('returns true for a rule with an action and a condition', () => {
+      expect(isValidRule(ruleWithCondition)).toBe(true);
     });
 
-    it('returns true for a rule with an action and scope', () => {
-      expect(isValidRule(ruleWithScope)).to.be(true);
+    test('returns true for a rule with an action and scope', () => {
+      expect(isValidRule(ruleWithScope)).toBe(true);
     });
 
-    it('returns true for a rule with an action, scope and condition', () => {
-      expect(isValidRule(ruleWithConditionAndScope)).to.be(true);
+    test('returns true for a rule with an action, scope and condition', () => {
+      expect(isValidRule(ruleWithConditionAndScope)).toBe(true);
     });
 
-    it('returns false for a rule with no action', () => {
+    test('returns false for a rule with no action', () => {
       const ruleWithNoAction = {
         actions: [],
         conditions: [
@@ -79,27 +78,27 @@ describe('ML - rule editor utils', () => {
         ],
       };
 
-      expect(isValidRule(ruleWithNoAction)).to.be(false);
+      expect(isValidRule(ruleWithNoAction)).toBe(false);
     });
 
-    it('returns false for a rule with no scope or conditions', () => {
+    test('returns false for a rule with no scope or conditions', () => {
       const ruleWithNoScopeOrCondition = {
         actions: [ACTION.SKIP_RESULT],
       };
 
-      expect(isValidRule(ruleWithNoScopeOrCondition)).to.be(false);
+      expect(isValidRule(ruleWithNoScopeOrCondition)).toBe(false);
     });
   });
 
   describe('buildRuleDescription', () => {
-    it('returns expected rule descriptions', () => {
-      expect(buildRuleDescription(ruleWithCondition)).to.be(
+    test('returns expected rule descriptions', () => {
+      expect(buildRuleDescription(ruleWithCondition)).toBe(
         'skip result when actual is greater than 10'
       );
-      expect(buildRuleDescription(ruleWithScope)).to.be(
+      expect(buildRuleDescription(ruleWithScope)).toBe(
         'skip result when instance is in test_aws_instances'
       );
-      expect(buildRuleDescription(ruleWithConditionAndScope)).to.be(
+      expect(buildRuleDescription(ruleWithConditionAndScope)).toBe(
         'skip result when typical is less than 100 AND instance is not in test_aws_instances'
       );
     });
@@ -111,16 +110,16 @@ describe('ML - rule editor utils', () => {
       typical: [1.23],
     };
 
-    it('returns expected actual value from an anomaly', () => {
-      expect(getAppliesToValueFromAnomaly(anomaly, APPLIES_TO.ACTUAL)).to.be(210);
+    test('returns expected actual value from an anomaly', () => {
+      expect(getAppliesToValueFromAnomaly(anomaly, APPLIES_TO.ACTUAL)).toBe(210);
     });
 
-    it('returns expected typical value from an anomaly', () => {
-      expect(getAppliesToValueFromAnomaly(anomaly, APPLIES_TO.TYPICAL)).to.be(1.23);
+    test('returns expected typical value from an anomaly', () => {
+      expect(getAppliesToValueFromAnomaly(anomaly, APPLIES_TO.TYPICAL)).toBe(1.23);
     });
 
-    it('returns expected diff from typical value from an anomaly', () => {
-      expect(getAppliesToValueFromAnomaly(anomaly, APPLIES_TO.DIFF_FROM_TYPICAL)).to.be(208.77);
+    test('returns expected diff from typical value from an anomaly', () => {
+      expect(getAppliesToValueFromAnomaly(anomaly, APPLIES_TO.DIFF_FROM_TYPICAL)).toBe(208.77);
     });
   });
 });
