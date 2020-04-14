@@ -67,7 +67,7 @@ import { ScriptingHelpFlyout } from './components/scripting_help';
 import { FieldFormatEditor } from './components/field_format_editor';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
-import { copyField, executeScript, isScriptValid } from './lib';
+import { executeScript, isScriptValid } from './lib';
 
 // This loads Ace editor's "groovy" mode, used below to highlight the script.
 import 'brace/mode/groovy';
@@ -118,7 +118,6 @@ export interface FieldEdiorProps {
   indexPattern: IndexPattern;
   field: Field;
   helpers: {
-    Field: any;
     getConfig: () => any;
     $http: () => any;
     fieldFormatEditors: any;
@@ -132,11 +131,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   constructor(props: FieldEdiorProps) {
     super(props);
 
-    const {
-      field,
-      indexPattern,
-      helpers: { Field: FieldClass },
-    } = props;
+    const { field, indexPattern } = props;
 
     this.state = {
       isReady: false,
@@ -146,7 +141,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       fieldTypes: [],
       fieldTypeFormats: [],
       existingFieldNames: indexPattern.fields.map((f: IFieldType) => f.name),
-      field: copyField(field, indexPattern, FieldClass),
+      field: { ...field, format: field.format },
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -754,7 +749,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   saveField = async () => {
-    const field = this.state.field.toActualField();
+    const field = this.state.field;
     const { indexPattern } = this.props;
     const { fieldFormatId } = this.state;
 
