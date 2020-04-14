@@ -97,7 +97,7 @@ describe('API Keys', () => {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
     });
 
-    it('throws the original error when exception contains no metadatat', async () => {
+    it('throws the original error when exception contains no metadata', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       const error = new Error();
 
