@@ -12,7 +12,7 @@ import {
 } from 'src/core/server';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
 import {
-  EMS_FILE,
+  SOURCE_TYPES,
   ES_GEO_FIELD_TYPE,
   MAP_SAVED_OBJECT_TYPE,
   TELEMETRY_TYPE,
@@ -100,7 +100,7 @@ export function buildMapsTelemetry({
   const emsLayersCount = layerLists.map(lList =>
     _(lList)
       .countBy((layer: LayerDescriptor) => {
-        const isEmsFile = _.get(layer, 'sourceDescriptor.type') === EMS_FILE;
+        const isEmsFile = _.get(layer, 'sourceDescriptor.type') === SOURCE_TYPES.EMS_FILE;
         return isEmsFile && _.get(layer, 'sourceDescriptor.id');
       })
       .pick((val, key) => key !== 'false')
