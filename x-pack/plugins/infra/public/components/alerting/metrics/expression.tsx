@@ -399,7 +399,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
 
   const updateThreshold = useCallback(
     t => {
-      if (t.join() !== expression.threshold.join('')) {
+      if (t.join() !== expression.threshold.join()) {
         setAlertParams(expressionId, { ...expression, threshold: t });
       }
     },
