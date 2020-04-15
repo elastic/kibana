@@ -3,16 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { IRouter, StartServicesAccessor } from 'src/core/server';
 import { LicensingPluginStart } from '../types';
-import { registerInfoRoute } from './info';
-import { registerFeatureUsageRoute } from './feature_usage';
 
-export function registerRoutes(
+export function registerFeatureUsageRoute(
   router: IRouter,
   getStartServices: StartServicesAccessor<{}, LicensingPluginStart>
 ) {
-  registerInfoRoute(router);
-  registerFeatureUsageRoute(router, getStartServices);
+  router.get(
+    { path: '/api/licensing/feature_usage', validate: false },
+    async (context, request, response) => {
+      const [, , { featureUsage }] = await getStartServices();
+      return response.ok({
+        body: featureUsage.getLastUsages(),
+      });
+    }
+  );
 }

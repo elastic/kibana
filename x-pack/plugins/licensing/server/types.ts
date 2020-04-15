@@ -6,6 +6,7 @@
 import { Observable } from 'rxjs';
 import { IClusterClient } from 'src/core/server';
 import { ILicense, LicenseStatus, LicenseType } from '../common/types';
+import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
 export interface ElasticsearchError extends Error {
   status?: number;
@@ -67,4 +68,17 @@ export interface LicensingPluginSetup {
     clusterClient: IClusterClient,
     pollingFrequency: number
   ) => { license$: Observable<ILicense>; refresh(): Promise<ILicense> };
+
+  /**
+   * TODO
+   */
+  featureUsage: FeatureUsageServiceSetup;
+}
+
+/** @public */
+export interface LicensingPluginStart {
+  /**
+   * TODO
+   */
+  featureUsage: FeatureUsageServiceStart;
 }
