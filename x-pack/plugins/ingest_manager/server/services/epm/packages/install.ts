@@ -22,7 +22,7 @@ import { installTemplates } from '../elasticsearch/template/install';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
-import { deleteAssetsByType } from './remove';
+import { deleteAssetsByType, deleteKibanaSavedObjectsAssets } from './remove';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -41,6 +41,12 @@ export async function installPackage(options: {
 
   const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
   const { internal = false } = registryPackageInfo;
+
+  // delete the previous version's installation's SO kibana assets before installing new ones
+  // in case some assets were removed in the new version
+  if (installedPkg) {
+    await deleteKibanaSavedObjectsAssets(savedObjectsClient, installedPkg.attributes.installed);
+  }
 
   const [installedKibanaAssets, installedPipelines] = await Promise.all([
     installKibanaAssets({

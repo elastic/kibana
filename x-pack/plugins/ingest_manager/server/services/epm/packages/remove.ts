@@ -96,3 +96,16 @@ export async function deleteAssetsByType({
     throw new Error(err.message);
   }
 }
+
+export async function deleteKibanaSavedObjectsAssets(
+  savedObjectsClient: SavedObjectsClientContract,
+  installedObjects: AssetReference[]
+) {
+  const deletePromises = installedObjects.map(({ id, type }) => {
+    const assetType = type as AssetType;
+    if (savedObjectTypes.includes(assetType)) {
+      savedObjectsClient.delete(assetType, id);
+    }
+  });
+  await Promise.all(deletePromises);
+}
