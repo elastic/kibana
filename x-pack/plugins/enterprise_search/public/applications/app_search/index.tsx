@@ -6,8 +6,8 @@
 
 import React, { useState } from 'react';
 
-import { SetupGuide } from '../setup_guide';
-import { EngineOverview } from '../engine_overview';
+import { SetupGuide } from './components/setup_guide';
+import { EngineOverview } from './components/engine_overview';
 
 interface IMainProps {
   appSearchUrl?: string;
