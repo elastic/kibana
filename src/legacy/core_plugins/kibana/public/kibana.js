@@ -45,7 +45,6 @@ import 'ui/autoload/all';
 import './discover/legacy';
 import './management';
 import './dev_tools';
-import 'ui/agg_response';
 import { showAppRedirectNotification } from '../../../../plugins/kibana_legacy/public';
 import 'leaflet';
 import { localApplicationService } from './local_application_service';

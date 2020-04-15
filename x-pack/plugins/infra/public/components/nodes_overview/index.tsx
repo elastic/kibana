@@ -12,7 +12,6 @@ import React from 'react';
 
 import { euiStyled } from '../../../../observability/public';
 import { InfraFormatterType, InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../lib/lib';
-import { KueryFilterQuery } from '../../store/local/waffle_filter';
 import { createFormatter } from '../../utils/formatters';
 import { NoData } from '../empty_states';
 import { InfraLoadingPanel } from '../loading';
@@ -23,6 +22,11 @@ import { SnapshotNode, SnapshotCustomMetricInputRT } from '../../../common/http_
 import { convertIntervalToString } from '../../utils/convert_interval_to_string';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { createFormatterForMetric } from '../metrics_explorer/helpers/create_formatter_for_metric';
+
+export interface KueryFilterQuery {
+  kind: 'kuery';
+  expression: string;
+}
 
 interface Props {
   options: InfraWaffleMapOptions;

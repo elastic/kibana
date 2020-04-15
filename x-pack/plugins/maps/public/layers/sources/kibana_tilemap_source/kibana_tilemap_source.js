@@ -11,7 +11,7 @@ import { getKibanaTileMap } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import _ from 'lodash';
-import { KIBANA_TILEMAP } from '../../../../common/constants';
+import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
 
 const sourceTitle = i18n.translate('xpack.maps.source.kbnTMSTitle', {
@@ -19,7 +19,7 @@ const sourceTitle = i18n.translate('xpack.maps.source.kbnTMSTitle', {
 });
 
 export class KibanaTilemapSource extends AbstractTMSSource {
-  static type = KIBANA_TILEMAP;
+  static type = SOURCE_TYPES.KIBANA_TILEMAP;
 
   static createDescriptor() {
     return {
@@ -86,7 +86,7 @@ export class KibanaTilemapSource extends AbstractTMSSource {
 
 registerSource({
   ConstructorFunction: KibanaTilemapSource,
-  type: KIBANA_TILEMAP,
+  type: SOURCE_TYPES.KIBANA_TILEMAP,
 });
 
 export const kibanaBasemapLayerWizardConfig = {
