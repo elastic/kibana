@@ -58,10 +58,9 @@ export class EmbeddableEnhancedPlugin
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.setCustomEmbeddableFactoryProvider(plugins);
 
-    plugins.advancedUiActions.addTriggerAction(
-      PANEL_NOTIFICATION_TRIGGER,
-      new PanelNotificationsAction()
-    );
+    const panelNotificationAction = new PanelNotificationsAction();
+    plugins.advancedUiActions.registerAction(panelNotificationAction);
+    plugins.advancedUiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
 
     return {};
   }
