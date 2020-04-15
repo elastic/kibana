@@ -63,6 +63,14 @@ created in the remote cluster, a follower index is automatically configured in t
 image::images/auto_follow_pattern.png[UI for adding an auto-follow pattern]
 
 [float]
+[[manage-replication]]
+=== Manage replication
+
+Use the list views in *Cross-cluster replication* to monitor whether the replication is active and
+pause and resume replication.  You can also edit and remove the follower indices and auto-follow patterns.
+
+
+[float]
 ==== Example
 
 * https://www.elastic.co/blog/bi-directional-replication-with-elasticsearch-cross-cluster-replication-ccr[Bi-directional replication with Elasticsearch cross-cluster replication]

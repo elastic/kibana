@@ -30,3 +30,10 @@ to reproduce indices in the remote cluster on a local cluster.
 
 [role="screenshot"]
 image::images/add_remote_cluster.png[][UI for adding a remote cluster]
+
+[float]
+[[manage-remote-clusters]]
+=== Manage remote clusters
+
+From the *Remote Clusters* list view, you can drill down into each cluster and
+view its status. You can also edit and delete a cluster.
