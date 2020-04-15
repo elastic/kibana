@@ -17,24 +17,13 @@
  * under the License.
  */
 
-import { npSetup, npStart } from 'ui/new_platform';
-import { PluginInitializerContext } from 'kibana/public';
+import { schema } from '@kbn/config-schema';
 
-import { plugin } from '.';
-import { VisTypeXyPluginSetupDependencies, VisTypeXyPluginStartDependencies } from './plugin';
-
-const setupPlugins: Readonly<VisTypeXyPluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: npSetup.plugins.visualizations,
-  charts: npSetup.plugins.charts,
+export const config = {
+  schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
 };
 
-const startPlugins: Readonly<VisTypeXyPluginStartDependencies> = {
-  expressions: npStart.plugins.expressions,
-  visualizations: npStart.plugins.visualizations,
-};
-
-const pluginInstance = plugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
-export const start = pluginInstance.start(npStart.core, startPlugins);
+export const plugin = () => ({
+  setup() {},
+  start() {},
+});
