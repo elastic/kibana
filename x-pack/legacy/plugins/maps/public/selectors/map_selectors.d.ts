@@ -18,3 +18,5 @@ export function getMapCenter(state: MapStoreState): MapCenter;
 export function getQueryableUniqueIndexPatternIds(state: MapStoreState): string[];
 
 export function getMapSettings(state: MapStoreState): MapSettings;
+
+export function hasMapSettingsChanges(state: MapStoreState): boolean;

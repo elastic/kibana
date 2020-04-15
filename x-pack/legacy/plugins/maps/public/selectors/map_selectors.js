@@ -65,6 +65,16 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
 
 export const getMapSettings = ({ map }) => map.settings;
 
+const getRollbackMapSettings = ({ map }) => map.__rollBackSettings;
+
+export const hasMapSettingsChanges = createSelector(
+  getMapSettings,
+  getRollbackMapSettings,
+  (settings, rollbackSettings) => {
+    return rollbackSettings ? !_.isEqual(settings, rollbackSettings) : false;
+  }
+);
+
 export const getOpenTooltips = ({ map }) => {
   return map && map.openTooltips ? map.openTooltips : [];
 };

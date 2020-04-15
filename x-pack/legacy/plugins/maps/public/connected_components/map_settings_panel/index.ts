@@ -5,15 +5,17 @@
  */
 
 import { connect } from 'react-redux';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FLYOUT_STATE } from '../../../../../../plugins/maps/public/reducers/ui';
 import { MapSettingsPanel } from './map_settings_panel';
 import { rollbackMapSettings, updateMapSetting } from '../../actions/map_actions';
-import { getMapSettings } from '../../selectors/map_selectors';
+import { getMapSettings, hasMapSettingsChanges } from '../../selectors/map_selectors';
 import { updateFlyout } from '../../actions/ui_actions';
 
 function mapStateToProps(state = {}) {
   return {
     mapSettings: getMapSettings(state),
+    hasMapSettingsChanges: hasMapSettingsChanges(state),
   };
 }
 
