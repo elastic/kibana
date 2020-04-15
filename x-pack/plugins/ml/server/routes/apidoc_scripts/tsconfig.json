@@ -6,8 +6,6 @@
     "moduleResolution": "node"
   },
   "include": [
-    "schema_worker.ts",
-    "schema_parser.ts",
-    "docs_extractor.ts"
+    "./*.ts"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "ml_kibana_api",
-  "version": "0.1.0",
+  "version": "7.8.0",
   "description": "ML Kibana API",
   "title": "ML Kibana API",
   "order": [

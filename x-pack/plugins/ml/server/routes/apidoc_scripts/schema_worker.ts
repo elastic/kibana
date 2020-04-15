@@ -7,43 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { DocEntry, extractDocumentation } from './schema_extractor';
-
-interface ApiParameter {
-  group: string;
-  type: any;
-  size: undefined;
-  allowedValues: undefined;
-  optional: boolean;
-  field: string;
-  defaultValue: undefined;
-  description?: string;
-}
-
-interface Local {
-  group: string;
-  type: string;
-  url: string;
-  title: string;
-  name: string;
-  description: string;
-  parameter: {
-    fields?: {
-      [key: string]: ApiParameter[] | undefined;
-    };
-  };
-  success: { fields: ObjectConstructor[] };
-  version: string;
-  filename: string;
-  schemas?: Array<{
-    name: string;
-    group: string;
-  }>;
-}
-
-interface Block {
-  global: any;
-  local: Local;
-}
+import { ApiParameter, Block } from './types';
 
 export function postProcess(parsedFiles: any[]): void {
   const schemasDirPath = `${__dirname}${path.sep}..${path.sep}..${path.sep}schemas${path.sep}`;
