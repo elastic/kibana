@@ -14,11 +14,12 @@ import { FrameworkRequest } from '../../framework';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
 import { SetupPlugins } from '../../../plugin';
-import { CreateTimeline } from '../types';
+import { CreateTimeline, TimelineTypeLiterals } from '../types';
 import { createTimelines, getTimeline } from './utils/create_timelines';
 
 import { timelineSavedObjectOmittedFields } from './utils/import_timelines';
 import { createTimelineSchema } from './schemas/create_timelines_schema';
+import { createTemplateTimelines } from './utils/create_template_timelines';
 export const createTimelinesRoute = (
   router: IRouter,
   config: LegacyServices['config'],
@@ -40,8 +41,10 @@ export const createTimelinesRoute = (
       try {
         const savedObjectsClient = context.core.savedObjects.client;
         const user = await security?.authc.getCurrentUser(request);
-        const { timelineId, timeline, version } = request.body;
+        const { timelineId, templateTimelineId, timeline, type, version } = request.body;
+        const isHandlingTemplateTimeline = type === TimelineTypeLiterals.template;
         let existTimeline = null;
+        let existTemplateTimeline = null;
         let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);
         frameworkRequest = set('user', user, frameworkRequest);
 
@@ -52,28 +55,69 @@ export const createTimelinesRoute = (
           );
         }
 
-        if (existTimeline == null || isNil(timelineId)) {
-          const newTimeline = await createTimelines(
-            (frameworkRequest as unknown) as FrameworkRequest,
-            omit(timelineSavedObjectOmittedFields, timeline),
-            timelineId,
-            version
-          );
-          return response.ok({
-            body: {
-              data: {
-                persistTimeline: {
-                  message: 'success',
-                  timeline: newTimeline,
+        // Manipulate timeline
+        if (!isHandlingTemplateTimeline) {
+          if (existTimeline == null || isNil(timelineId)) {
+            // Create timeline
+            const newTimeline = await createTimelines(
+              (frameworkRequest as unknown) as FrameworkRequest,
+              omit(timelineSavedObjectOmittedFields, timeline),
+              timelineId,
+              version
+            );
+            return response.ok({
+              body: {
+                data: {
+                  persistTimeline: {
+                    message: 'success',
+                    timeline: newTimeline,
+                  },
                 },
               },
-            },
-          });
-        } else {
-          return siemResponse.error({
-            body: 'UPDATE timeline with POST is not allowed, please use PATCH instead',
-            statusCode: 405,
-          });
+            });
+          } else if (!isNil(existTimeline) || !isNil(timelineId)) {
+            // Try to Update timeline with POST
+            return siemResponse.error({
+              body: 'UPDATE timeline with POST is not allowed, please use PATCH instead',
+              statusCode: 405,
+            });
+          }
+        }
+
+        // Manipulate template timeline
+        if (isHandlingTemplateTimeline) {
+          if (
+            !isNil(templateTimelineId) &&
+            existTimeline?.templateTimelineId === templateTimelineId
+          ) {
+            existTemplateTimeline = existTimeline;
+          }
+
+          if (existTemplateTimeline == null || isNil(timelineId) || isNil(templateTimelineId)) {
+            // Create Template timeline
+            const newTemplateTimeline = await createTemplateTimelines(
+              (frameworkRequest as unknown) as FrameworkRequest,
+              omit(timelineSavedObjectOmittedFields, timeline),
+              timelineId,
+              version
+            );
+            return response.ok({
+              body: {
+                data: {
+                  persistTimeline: {
+                    message: 'success',
+                    timeline: newTemplateTimeline,
+                  },
+                },
+              },
+            });
+          } else {
+            // Try to Update Template timeline with POST
+            return siemResponse.error({
+              body: 'UPDATE template timeline with POST is not allowed, please use PATCH instead',
+              statusCode: 405,
+            });
+          }
         }
       } catch (err) {
         const error = transformError(err);

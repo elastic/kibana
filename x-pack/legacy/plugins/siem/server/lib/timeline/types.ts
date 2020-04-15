@@ -136,6 +136,8 @@ const SavedSortRuntimeType = runtimeTypes.partial({
 /*
  *  Timeline Types
  */
+const TimelineTypeLiteral = runtimeTypes.literal('template', 'default');
+
 export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
@@ -150,6 +152,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   savedQueryId: unionWithNullType(runtimeTypes.string),
   sort: unionWithNullType(SavedSortRuntimeType),
   templateTimelineId: unionWithNullType(runtimeTypes.string),
+  type: TimelineTypeLiteral,
   created: unionWithNullType(runtimeTypes.number),
   createdBy: unionWithNullType(runtimeTypes.string),
   updated: unionWithNullType(runtimeTypes.number),
@@ -173,6 +176,7 @@ export const TimelineSavedObjectRuntimeType = runtimeTypes.intersection([
   runtimeTypes.partial({
     savedObjectId: runtimeTypes.string,
     templateTimelineId: runtimeTypes.string,
+    type: TimelineTypeLiteral,
   }),
 ]);
 
@@ -189,6 +193,7 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
     pinnedEventIds: runtimeTypes.array(runtimeTypes.string),
     pinnedEventsSaveObject: runtimeTypes.array(PinnedEventToReturnSavedObjectRuntimeType),
     templateTimelineId: unionWithNullType(runtimeTypes.string),
+    type: TimelineTypeLiteral,
   }),
 ]);
 
@@ -248,9 +253,17 @@ export type ExportedTimelines = TimelineSavedObject &
     pinnedEventIds: string[];
   };
 
+export enum TimelineTypeLiterals {
+  default = 'default',
+  template = 'template',
+}
+
+type TimelineTypeLiteral = TimelineTypeLiterals.default | TimelineTypeLiterals.template;
 export interface CreateTimeline {
   timeline: TimelineSavedObject;
   timelineId?: string | null;
+  templateTimelineId?: string | null;
+  type: TimelineTypeLiteral;
   version?: string | null;
 }
 
