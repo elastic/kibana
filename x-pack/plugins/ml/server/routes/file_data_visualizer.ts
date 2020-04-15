@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from 'kibana/server';
-import { MAX_BYTES } from '../../common/constants/file_datavisualizer';
+import { MAX_FILE_SIZE_BYTES } from '../../common/constants/file_datavisualizer';
 import {
   InputOverrides,
   Settings,
@@ -79,7 +79,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
       options: {
         body: {
           accepts: ['text/*', 'application/json'],
-          maxBytes: MAX_BYTES,
+          maxBytes: MAX_FILE_SIZE_BYTES,
         },
       },
     },
@@ -121,7 +121,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: MAX_BYTES,
+          maxBytes: MAX_FILE_SIZE_BYTES,
         },
       },
     },
