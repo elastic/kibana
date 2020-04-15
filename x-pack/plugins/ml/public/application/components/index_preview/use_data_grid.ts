@@ -8,9 +8,16 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
-import { EsDocSource, EsFieldName, INIT_MAX_COLUMNS } from '../../common';
-
-import { IndexPagination, OnChangeItemsPerPage, OnChangePage, OnSort, INDEX_STATUS } from './types';
+import { INIT_MAX_COLUMNS } from './common';
+import {
+  EsDocSource,
+  EsFieldName,
+  IndexPagination,
+  OnChangeItemsPerPage,
+  OnChangePage,
+  OnSort,
+  INDEX_STATUS,
+} from './types';
 
 const defaultPagination: IndexPagination = { pageIndex: 0, pageSize: 5 };
 

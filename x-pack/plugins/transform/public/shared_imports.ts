@@ -17,3 +17,12 @@ export {
 } from '../../../../src/plugins/es_ui_shared/public/request/np_ready_request';
 
 export { getErrorMessage } from '../../ml/common/util/errors';
+
+export {
+  multiColumnSortFactory,
+  useDataGrid,
+  IndexPreview,
+  RenderCellValue,
+  UseIndexDataReturnType,
+  INDEX_STATUS,
+} from '../../ml/public/application/components/index_preview';

@@ -6,8 +6,11 @@
 
 import React, { FC } from 'react';
 
+import { IndexPreview } from '../../../../../shared_imports';
+
+import { useToastNotifications } from '../../../../app_dependencies';
 import { getPivotQuery, TransformPivotConfig } from '../../../../common';
-import { usePivotData, IndexPreview } from '../../../../components/index_preview';
+import { usePivotData } from '../../../../hooks/use_pivot_data';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import {
@@ -20,6 +23,7 @@ interface Props {
 }
 
 export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
+  const toastNotifications = useToastNotifications();
   const previewConfig = applyTransformConfigToDefineState(
     getDefaultStepDefineState({} as SearchItems),
     transformConfig
@@ -35,5 +39,11 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
 
   const pivotPreviewProps = usePivotData(indexPatternTitle, pivotQuery, aggList, groupByList);
 
-  return <IndexPreview {...pivotPreviewProps} dataTestSubj="transformPivotPreview" />;
+  return (
+    <IndexPreview
+      {...pivotPreviewProps}
+      dataTestSubj="transformPivotPreview"
+      toastNotifications={toastNotifications}
+    />
+  );
 };

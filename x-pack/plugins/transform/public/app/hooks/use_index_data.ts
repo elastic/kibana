@@ -9,20 +9,24 @@ import { useEffect, useMemo } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
-import { Dictionary } from '../../../../common/types/common';
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/utils/date_utils';
-import { getNestedProperty } from '../../../../common/utils/object_utils';
+import { Dictionary } from '../../../common/types/common';
+import { formatHumanReadableDateTimeSeconds } from '../../../common/utils/date_utils';
+import { getNestedProperty } from '../../../common/utils/object_utils';
 
-import { getErrorMessage } from '../../../shared_imports';
+import {
+  getErrorMessage,
+  useDataGrid,
+  RenderCellValue,
+  UseIndexDataReturnType,
+  INDEX_STATUS,
+} from '../../shared_imports';
 
-import { isDefaultQuery, matchAllQuery, PivotQuery } from '../../common';
-import { SearchItems } from '../../hooks/use_search_items';
-import { useApi } from '../../hooks/use_api';
+import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
 
-import { RenderCellValue, UseIndexDataReturnType, INDEX_STATUS } from './types';
-import { useDataGrid } from './use_data_grid';
+import { SearchItems } from './use_search_items';
+import { useApi } from './use_api';
 
 type EsSorting = Dictionary<{
   order: 'asc' | 'desc';

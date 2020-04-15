@@ -35,24 +35,19 @@ import {
 
 import { useXJsonMode } from '../../../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 
-import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
-import { SavedSearchQuery, SearchItems } from '../../../../hooks/use_search_items';
-import { useToastNotifications } from '../../../../app_dependencies';
-import { TransformPivotConfig } from '../../../../common';
-import { dictionaryToArray, Dictionary } from '../../../../../../common/types/common';
-import { DropDown } from '../aggregation_dropdown';
-import { AggListForm } from '../aggregation_list';
-import { GroupByListForm } from '../group_by_list';
+import { IndexPreview } from '../../../../../shared_imports';
+
 import {
   getIndexDevConsoleStatement,
-  useIndexData,
-  usePivotData,
-  IndexPreview,
-} from '../../../../components/index_preview';
-import { getPivotPreviewDevConsoleStatement } from '../../../../components/index_preview';
+  getPivotPreviewDevConsoleStatement,
+} from '../../../../common/data_grid';
 
-import { SwitchModal } from './switch_modal';
-
+import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
+import { SavedSearchQuery, SearchItems } from '../../../../hooks/use_search_items';
+import { useIndexData } from '../../../../hooks/use_index_data';
+import { usePivotData } from '../../../../hooks/use_pivot_data';
+import { useToastNotifications } from '../../../../app_dependencies';
+import { dictionaryToArray, Dictionary } from '../../../../../../common/types/common';
 import {
   getPivotQuery,
   getPreviewRequestBody,
@@ -66,11 +61,17 @@ import {
   PivotGroupByConfig,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
+  TransformPivotConfig,
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 
+import { DropDown } from '../aggregation_dropdown';
+import { AggListForm } from '../aggregation_list';
+import { GroupByListForm } from '../group_by_list';
+
 import { getPivotDropdownOptions } from './common';
+import { SwitchModal } from './switch_modal';
 
 export interface StepDefineExposedState {
   aggList: PivotAggsConfigDict;
@@ -994,6 +995,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
             defaultMessage: 'Index {indexPatternTitle}',
             values: { indexPatternTitle: indexPattern.title },
           })}
+          toastNotifications={toastNotifications}
         />
         <EuiHorizontalRule />
         <IndexPreview
@@ -1009,6 +1011,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
           title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
             defaultMessage: 'Transform pivot preview',
           })}
+          toastNotifications={toastNotifications}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getIndexDevConsoleStatement, getPivotPreviewDevConsoleStatement } from './common';
-export { useIndexData } from './use_index_data';
-export { usePivotData } from './use_pivot_data';
+export { multiColumnSortFactory } from './common';
+export { useDataGrid } from './use_data_grid';
 export { IndexPreview } from './index_preview';
-export { INDEX_STATUS } from './types';
+export { RenderCellValue, UseIndexDataReturnType, INDEX_STATUS } from './types';

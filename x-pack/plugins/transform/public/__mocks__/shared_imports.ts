@@ -14,3 +14,11 @@ export const useRequest = jest.fn(() => ({
 export { mlInMemoryTableBasicFactory } from '../../../ml/public/application/components/ml_in_memory_table';
 export const SORT_DIRECTION = { ASC: 'asc' };
 export { getErrorMessage } from '../../../ml/common/util/errors';
+export {
+  multiColumnSortFactory,
+  useDataGrid,
+  IndexPreview,
+  RenderCellValue,
+  UseIndexDataReturnType,
+  INDEX_STATUS,
+} from '../../../ml/public/application/components/index_preview';

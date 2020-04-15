@@ -21,21 +21,21 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useToastNotifications } from '../../app_dependencies';
-import { euiDataGridStyle, euiDataGridToolbarSettings } from '../../common';
+import { CoreSetup } from 'src/core/public';
 
+import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
 import { IndexPreviewTitle } from './index_preview_title';
 import { INDEX_STATUS, UseIndexDataReturnType } from './types';
 
-interface PropsWithHeader extends UseIndexDataReturnType {
-  copyToClipboard: string;
-  copyToClipboardDescription: string;
-  dataTestSubj: string;
-  title: string;
-}
-
 interface PropsWithoutHeader extends UseIndexDataReturnType {
   dataTestSubj: string;
+  toastNotifications: CoreSetup['notifications']['toasts'];
+}
+
+interface PropsWithHeader extends PropsWithoutHeader {
+  copyToClipboard: string;
+  copyToClipboardDescription: string;
+  title: string;
 }
 
 function isWithHeader(arg: any): arg is PropsWithHeader {
@@ -61,16 +61,15 @@ export const IndexPreview: FC<Props> = props => {
     sortingColumns,
     status,
     tableItems: data,
+    toastNotifications,
     visibleColumns,
   } = props;
-
-  const toastNotifications = useToastNotifications();
 
   useEffect(() => {
     if (invalidSortingColumnns.length > 0) {
       invalidSortingColumnns.forEach(columnId => {
         toastNotifications.addDanger(
-          i18n.translate('xpack.transform.indexPreview.invalidSortingColumnError', {
+          i18n.translate('xpack.ml.indexPreview.invalidSortingColumnError', {
             defaultMessage: `The column '{columnId}' cannot be used for sorting.`,
             values: { columnId },
           })
@@ -84,13 +83,13 @@ export const IndexPreview: FC<Props> = props => {
       <div data-test-subj={`${dataTestSubj} empty`}>
         {isWithHeader(props) && <IndexPreviewTitle indexPreviewTitle={props.title} />}
         <EuiCallOut
-          title={i18n.translate('xpack.transform.indexPreview.IndexNoDataCalloutTitle', {
+          title={i18n.translate('xpack.ml.indexPreview.IndexNoDataCalloutTitle', {
             defaultMessage: 'Empty index query result.',
           })}
           color="primary"
         >
           <p>
-            {i18n.translate('xpack.transform.indexPreview.IndexNoDataCalloutBody', {
+            {i18n.translate('xpack.ml.indexPreview.IndexNoDataCalloutBody', {
               defaultMessage:
                 'The query for the index returned no results. Please make sure you have sufficient permissions, the index contains documents and your query is not too restrictive.',
             })}
@@ -105,8 +104,8 @@ export const IndexPreview: FC<Props> = props => {
       <div data-test-subj={`${dataTestSubj} empty`}>
         {isWithHeader(props) && <IndexPreviewTitle indexPreviewTitle={props.title} />}
         <EuiCallOut
-          title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutTitle', {
-            defaultMessage: 'Pivot preview not available',
+          title={i18n.translate('xpack.ml.indexPreview.IndexPreviewNoDataCalloutTitle', {
+            defaultMessage: 'Index preview not available',
           })}
           color="primary"
         >
@@ -142,7 +141,7 @@ export const IndexPreview: FC<Props> = props => {
       {status === INDEX_STATUS.ERROR && (
         <div data-test-subj={`${dataTestSubj} error`}>
           <EuiCallOut
-            title={i18n.translate('xpack.transform.indexPreview.indexDataError', {
+            title={i18n.translate('xpack.ml.indexPreview.indexDataError', {
               defaultMessage: 'An error occurred loading the index data.',
             })}
             color="danger"

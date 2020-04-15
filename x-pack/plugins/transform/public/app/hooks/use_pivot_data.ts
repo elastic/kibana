@@ -9,13 +9,20 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
-import { dictionaryToArray } from '../../../../common/types/common';
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/utils/date_utils';
-import { getNestedProperty } from '../../../../common/utils/object_utils';
+import { dictionaryToArray } from '../../../common/types/common';
+import { formatHumanReadableDateTimeSeconds } from '../../../common/utils/date_utils';
+import { getNestedProperty } from '../../../common/utils/object_utils';
 
-import { getErrorMessage } from '../../../shared_imports';
+import {
+  getErrorMessage,
+  multiColumnSortFactory,
+  useDataGrid,
+  RenderCellValue,
+  UseIndexDataReturnType,
+  INDEX_STATUS,
+} from '../../shared_imports';
 
 import {
   getPreviewRequestBody,
@@ -24,13 +31,10 @@ import {
   PivotGroupByConfig,
   PivotQuery,
   PreviewMappings,
-} from '../../common';
-import { SearchItems } from '../../hooks/use_search_items';
-import { useApi } from '../../hooks/use_api';
+} from '../common';
 
-import { multiColumnSortFactory } from './common';
-import { RenderCellValue, UseIndexDataReturnType, INDEX_STATUS } from './types';
-import { useDataGrid } from './use_data_grid';
+import { SearchItems } from './use_search_items';
+import { useApi } from './use_api';
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {

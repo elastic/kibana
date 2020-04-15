@@ -19,17 +19,17 @@ import {
 
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
+import { IndexPreview } from '../../../../../shared_imports';
+
+import { useToastNotifications } from '../../../../app_dependencies';
 import {
   getPivotQuery,
+  getPivotPreviewDevConsoleStatement,
   getPreviewRequestBody,
   isDefaultQuery,
   isMatchAllQuery,
 } from '../../../../common';
-import {
-  getPivotPreviewDevConsoleStatement,
-  usePivotData,
-  IndexPreview,
-} from '../../../../components/index_preview';
+import { usePivotData } from '../../../../hooks/use_pivot_data';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { AggListSummary } from '../aggregation_list';
@@ -46,6 +46,7 @@ export const StepDefineSummary: FC<Props> = ({
   formState: { searchString, searchQuery, groupByList, aggList },
   searchItems,
 }) => {
+  const toastNotifications = useToastNotifications();
   const pivotAggsArr = dictionaryToArray(aggList);
   const pivotGroupByArr = dictionaryToArray(groupByList);
   const pivotQuery = getPivotQuery(searchQuery);
@@ -157,6 +158,7 @@ export const StepDefineSummary: FC<Props> = ({
             title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
               defaultMessage: 'Transform pivot preview',
             })}
+            toastNotifications={toastNotifications}
           />
         </EuiText>
       </EuiFlexItem>

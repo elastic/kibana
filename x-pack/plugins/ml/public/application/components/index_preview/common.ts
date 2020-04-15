@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGridSorting, EuiDataGridStyle } from '@elastic/eui';
 
-import { getNestedProperty } from '../../../../common/utils/object_utils';
+import { getNestedProperty } from '../../util/object_utils';
 
-import { PivotQuery, PreviewRequestBody } from '../../common';
+export const INIT_MAX_COLUMNS = 20;
 
 /**
  * Helper to sort an array of objects based on an EuiDataGrid sorting configuration.
@@ -55,16 +55,18 @@ export const multiColumnSortFactory = (sortingColumns: EuiDataGridSorting['colum
   return sortFn;
 };
 
-export const getPivotPreviewDevConsoleStatement = (request: PreviewRequestBody) => {
-  return `POST _transform/_preview\n${JSON.stringify(request, null, 2)}\n`;
+export const euiDataGridStyle: EuiDataGridStyle = {
+  border: 'all',
+  fontSize: 's',
+  cellPadding: 's',
+  stripes: false,
+  rowHover: 'none',
+  header: 'shade',
 };
 
-export const getIndexDevConsoleStatement = (query: PivotQuery, indexPatternTitle: string) => {
-  return `GET ${indexPatternTitle}/_search\n${JSON.stringify(
-    {
-      query,
-    },
-    null,
-    2
-  )}\n`;
+export const euiDataGridToolbarSettings = {
+  showColumnSelector: true,
+  showStyleSelector: false,
+  showSortSelector: true,
+  showFullScreenSelector: false,
 };

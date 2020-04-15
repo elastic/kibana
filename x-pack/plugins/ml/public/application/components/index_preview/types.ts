@@ -8,7 +8,9 @@ import { Dispatch, SetStateAction } from 'react';
 
 import { EuiDataGridPaginationProps, EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
-import { EsDocSource, EsFieldName } from '../../common';
+// TODO move to common location and share with application/data_frame_analytics/common/fields.ts
+export type EsDocSource = Record<string, any>;
+export type EsFieldName = string;
 
 export enum INDEX_STATUS {
   UNUSED,
