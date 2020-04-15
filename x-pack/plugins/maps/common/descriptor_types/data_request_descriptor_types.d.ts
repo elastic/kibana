@@ -65,7 +65,7 @@ export type DataMeta = Partial<VectorSourceRequestMeta> &
 
 export type DataRequestDescriptor = {
   dataId: string;
-  dataMetaAtStart?: DataMeta;
+  dataMetaAtStart?: DataMeta | null;
   dataRequestToken?: symbol;
   data?: object;
   dataMeta?: DataMeta;

@@ -68,7 +68,7 @@ interface PushToServiceRequest {
   updateCase: (newCase: Case) => void;
 }
 
-interface UsePostPushToService extends PushToServiceState {
+export interface UsePostPushToService extends PushToServiceState {
   postPushToService: ({ caseId, connectorId, updateCase }: PushToServiceRequest) => void;
 }
 
@@ -131,7 +131,7 @@ export const usePostPushToService = (): UsePostPushToService => {
   return { ...state, postPushToService };
 };
 
-const formatServiceRequestData = (myCase: Case): ServiceConnectorCaseParams => {
+export const formatServiceRequestData = (myCase: Case): ServiceConnectorCaseParams => {
   const {
     id: caseId,
     createdAt,
