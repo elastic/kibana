@@ -21,8 +21,7 @@ import React, { useMemo } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { TmsLayer } from 'ui/vis/map/service_settings';
+import { TmsLayer } from '../../../../../plugins/maps_legacy/public';
 import { Vis } from '../../../../../plugins/visualizations/public';
 import { RegionMapVisParams } from '../../../region_map/public/types';
 import { SelectOption, SwitchOption } from '../../../../../plugins/charts/public';
