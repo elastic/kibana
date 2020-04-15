@@ -5,7 +5,7 @@
  */
 
 import '../../public/np_ready/app/services/breadcrumbs.mock';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
 
@@ -17,6 +17,7 @@ describe('<CrossClusterReplicationHome />', () => {
   let find;
   let exists;
   let component;
+  let waitFor;
 
   beforeAll(() => {
     ({ server, httpRequestsMockHelpers } = setupEnvironment());
@@ -29,46 +30,49 @@ describe('<CrossClusterReplicationHome />', () => {
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setLoadFollowerIndicesResponse();
+    httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse();
   });
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      ({ exists, find, component } = setup());
+      ({ exists, find, component, waitFor } = setup());
+      await waitFor('emptyPrompt');
     });
 
-    test('should set the correct an app title', () => {
+    test('initial app view', async () => {
+      // it should set the correct an app title
       expect(exists('appTitle')).toBe(true);
       expect(find('appTitle').text()).toEqual('Cross-Cluster Replication');
-    });
 
-    test('should have 2 tabs to switch between "Follower indices" & "Auto-follow patterns"', () => {
+      // should have 2 tabs to switch between "Follower indices" & "Auto-follow patterns"
       expect(exists('followerIndicesTab')).toBe(true);
       expect(find('followerIndicesTab').text()).toEqual('Follower indices');
-
       expect(exists('autoFollowPatternsTab')).toBe(true);
       expect(find('autoFollowPatternsTab').text()).toEqual('Auto-follow patterns');
-    });
 
-    test('should set the default selected tab to "Follower indices"', () => {
+      // should set the default selected tab to "Follower indices"
       expect(component.find('.euiTab-isSelected').text()).toBe('Follower indices');
 
       // Verify that the <FollowerIndicesList /> component is rendered
       expect(component.find('FollowerIndicesList').length).toBe(1);
-    });
-  });
 
-  describe('section change', () => {
-    test('should change to auto-follow pattern', async () => {
+      // There should be an empty prompt to "create your first follower index"
+      expect(find('emptyPrompt').text()).toContain('Create your first follower index');
+
+      // it should change to auto-follow pattern tab
       const autoFollowPatternsTab = find('autoFollowPatternsTab');
 
       autoFollowPatternsTab.simulate('click');
-      await nextTick();
-      component.update();
+      await waitFor('autoFollowPatternList');
+      await waitFor('emptyPrompt');
 
       expect(component.find('.euiTab-isSelected').text()).toBe('Auto-follow patterns');
 
       // Verify that the <AutoFollowPatternList /> component is rendered
       expect(component.find('AutoFollowPatternList').length).toBe(1);
+
+      // There should be an empty prompt to "create your first auto-follow pattern"
+      expect(find('emptyPrompt').text()).toContain('Create your first auto-follow pattern');
     });
   });
 });

@@ -257,10 +257,10 @@ export class AutoFollowPatternList extends PureComponent {
     const isEmpty = apiStatus === API_STATUS.IDLE && !autoFollowPatterns.length;
 
     return (
-      <Fragment>
+      <div data-test-subj="autoFollowPatternList">
         {!isEmpty && this.renderHeader()}
         {this.renderContent(isEmpty)}
-      </Fragment>
+      </div>
     );
   }
 }
