@@ -22,7 +22,6 @@ import { DashboardPanelState } from '../types';
 import { createPanelState } from './create_panel_state';
 import { EmbeddableInput } from '../../../embeddable_plugin';
 import { CONTACT_CARD_EMBEDDABLE } from '../../../embeddable_plugin_test_samples';
-import { IPanelPlacementArgs } from './dashboard_panel_placement';
 
 interface TestInput extends EmbeddableInput {
   test: string;
@@ -30,7 +29,7 @@ interface TestInput extends EmbeddableInput {
 const panels: { [key: string]: DashboardPanelState } = {};
 
 test('createPanelState adds a new panel state in 0,0 position', () => {
-  const panelState = createPanelState<TestInput, IPanelPlacementArgs>(
+  const panelState = createPanelState<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'hi', id: '123' },
@@ -49,7 +48,7 @@ test('createPanelState adds a new panel state in 0,0 position', () => {
 });
 
 test('createPanelState adds a second new panel state', () => {
-  const panelState = createPanelState<TestInput, IPanelPlacementArgs>(
+  const panelState = createPanelState<TestInput>(
     { type: CONTACT_CARD_EMBEDDABLE, explicitInput: { test: 'bye', id: '456' } },
     panels
   );
@@ -63,7 +62,7 @@ test('createPanelState adds a second new panel state', () => {
 });
 
 test('createPanelState adds a third new panel state', () => {
-  const panelState = createPanelState<TestInput, IPanelPlacementArgs>(
+  const panelState = createPanelState<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'bye', id: '789' },
@@ -80,7 +79,7 @@ test('createPanelState adds a third new panel state', () => {
 
 test('createPanelState adds a new panel state in the top most position', () => {
   delete panels['456'];
-  const panelState = createPanelState<TestInput, IPanelPlacementArgs>(
+  const panelState = createPanelState<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'bye', id: '987' },

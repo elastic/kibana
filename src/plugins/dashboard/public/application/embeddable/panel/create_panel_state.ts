@@ -32,7 +32,7 @@ import {
  */
 export function createPanelState<
   TEmbeddableInput extends EmbeddableInput,
-  TPlacementMethodArgs extends IPanelPlacementArgs
+  TPlacementMethodArgs extends IPanelPlacementArgs = IPanelPlacementArgs
 >(
   panelState: PanelState<TEmbeddableInput>,
   currentPanels: { [key: string]: DashboardPanelState },

@@ -102,55 +102,89 @@ export function findTopLeftMostOpenSpace({
   return { x: 0, y: maxY, w: width, h: height };
 }
 
+interface IplacementDirection {
+  grid: Omit<GridData, 'i'>;
+  fits: boolean;
+}
+
 export function placePanelBeside({
   width,
   height,
   currentPanels,
   placeBesideId,
 }: IPanelPlacementBesideArgs): Omit<GridData, 'i'> {
-  const finalPanels = _.cloneDeep(currentPanels);
+  // const clonedPanels = _.cloneDeep(currentPanels);
   if (!placeBesideId) {
     throw new Error('Place beside method called without placeBesideId');
   }
-  const panelToPlaceBeside = finalPanels[placeBesideId];
+  const panelToPlaceBeside = currentPanels[placeBesideId];
   if (!panelToPlaceBeside) {
     throw new PanelNotFoundError();
   }
-
-  const duplicatedPanelGrid = {} as GridData;
-  duplicatedPanelGrid.x = panelToPlaceBeside.gridData.x + panelToPlaceBeside.gridData.w;
-  duplicatedPanelGrid.y = panelToPlaceBeside.gridData.y;
-  duplicatedPanelGrid.w = width;
-  duplicatedPanelGrid.h = height;
-
-  // Adjust flow of dashboard if necessary
+  const beside = panelToPlaceBeside.gridData;
   const otherPanels: GridData[] = [];
-  _.forOwn(finalPanels, (panel: DashboardPanelState) => {
-    if (panel.savedObjectId !== panelToPlaceBeside.savedObjectId) {
-      otherPanels.push(panel.gridData);
+  _.forOwn(currentPanels, (panel: DashboardPanelState, key: string | undefined) => {
+    otherPanels.push(panel.gridData);
+  });
+
+  const possiblePlacementDirections: IplacementDirection[] = [
+    { grid: { x: beside.x + beside.w, y: beside.y, w: width, h: height }, fits: true }, // right
+    { grid: { x: beside.x - width, y: beside.y, w: width, h: height }, fits: true }, // left
+    { grid: { x: beside.x, y: beside.y + beside.h, w: width, h: height }, fits: true }, // bottom
+  ];
+
+  for (const direction of possiblePlacementDirections) {
+    if (
+      direction.grid.x >= 0 &&
+      direction.grid.x + direction.grid.w <= DASHBOARD_GRID_COLUMN_COUNT &&
+      direction.grid.y >= 0
+    ) {
+      const intersection = otherPanels.some((currentPanelGrid: GridData) => {
+        return (
+          direction.grid.x + direction.grid.w > currentPanelGrid.x &&
+          direction.grid.x < currentPanelGrid.x + currentPanelGrid.w &&
+          direction.grid.y < currentPanelGrid.y + currentPanelGrid.h &&
+          direction.grid.y + direction.grid.h > currentPanelGrid.y
+        );
+      });
+      if (!intersection) {
+        return direction.grid;
+      }
+    } else {
+      direction.fits = false;
     }
-  });
-
-  const intersection = otherPanels.some((currentPanelGrid: GridData) => {
-    return (
-      duplicatedPanelGrid.x + duplicatedPanelGrid.w > currentPanelGrid.x &&
-      duplicatedPanelGrid.x < currentPanelGrid.x + currentPanelGrid.w &&
-      duplicatedPanelGrid.y < currentPanelGrid.y + currentPanelGrid.h &&
-      duplicatedPanelGrid.y + duplicatedPanelGrid.h > currentPanelGrid.y
-    );
-  });
-
-  // if any other panel intersects with the newly duplicated panel, move all panels in the same 'row' to the right by the amount of the duplciated panel's width
-  if (intersection) {
+  }
+  // if we get here that means there is no blank space around the panel we are placing beside. This means it's time to mess up the dashboard's groove. Fun!
+  const [rightPlacement, , bottomPlacement] = possiblePlacementDirections;
+  if (rightPlacement.fits) {
     otherPanels.forEach((currentPanelGrid: GridData) => {
       if (
-        currentPanelGrid.x >= duplicatedPanelGrid.x &&
-        duplicatedPanelGrid.y <= currentPanelGrid.y + currentPanelGrid.h &&
-        duplicatedPanelGrid.y + duplicatedPanelGrid.h >= currentPanelGrid.y
+        currentPanelGrid.x >= rightPlacement.grid.x &&
+        rightPlacement.grid.y < currentPanelGrid.y + currentPanelGrid.h &&
+        rightPlacement.grid.y + rightPlacement.grid.h > currentPanelGrid.y
       ) {
-        currentPanelGrid.x += duplicatedPanelGrid.w;
+        const movedPanel = _.cloneDeep(currentPanels[currentPanelGrid.i]);
+        if (movedPanel.gridData.x + rightPlacement.grid.w > DASHBOARD_GRID_COLUMN_COUNT) {
+          movedPanel.gridData.y = movedPanel.gridData.y + rightPlacement.grid.h;
+        } else {
+          movedPanel.gridData.x = movedPanel.gridData.x + rightPlacement.grid.w;
+        }
+        currentPanels[currentPanelGrid.i] = movedPanel;
       }
     });
+    return rightPlacement.grid;
   }
-  return duplicatedPanelGrid;
+  for (const currentPanelGrid of otherPanels) {
+    if (
+      bottomPlacement.grid.x + bottomPlacement.grid.w > currentPanelGrid.x &&
+      bottomPlacement.grid.x < currentPanelGrid.x + currentPanelGrid.w &&
+      bottomPlacement.grid.y < currentPanelGrid.y + currentPanelGrid.h &&
+      bottomPlacement.grid.y + bottomPlacement.grid.h > currentPanelGrid.y
+    ) {
+      const movedPanel = _.cloneDeep(currentPanels[currentPanelGrid.i]);
+      movedPanel.gridData.y = movedPanel.gridData.y + bottomPlacement.grid.h;
+      currentPanels[currentPanelGrid.i] = movedPanel;
+    }
+  }
+  return bottomPlacement.grid;
 }
