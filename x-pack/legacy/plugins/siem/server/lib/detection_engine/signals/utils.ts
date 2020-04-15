@@ -115,7 +115,7 @@ export const makeFloatString = (num: number): string => Number(num).toFixed(2);
  */
 export const errorAggregator = (
   response: BulkResponse,
-  ignoreStatusCodes: number[] = []
+  ignoreStatusCodes: number[]
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
     if (item.create.error != null && !ignoreStatusCodes.includes(item.create.status)) {
@@ -132,5 +132,5 @@ export const errorAggregator = (
       }
     }
     return accum;
-  }, {});
+  }, Object.create(null));
 };

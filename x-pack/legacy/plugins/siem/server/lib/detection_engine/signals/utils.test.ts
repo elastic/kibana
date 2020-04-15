@@ -365,21 +365,21 @@ describe('utils', () => {
   describe('errorAggregator', () => {
     test('it should aggregate with an empty object when given an empty bulk response', () => {
       const empty = sampleEmptyBulkResponse();
-      const aggregated = errorAggregator(empty);
+      const aggregated = errorAggregator(empty, []);
       const expected: BulkResponseErrorAggregation = {};
       expect(aggregated).toEqual(expected);
     });
 
     test('it should aggregate with an empty object when given a valid bulk response with no errors', () => {
       const validResponse = sampleBulkResponse();
-      const aggregated = errorAggregator(validResponse);
+      const aggregated = errorAggregator(validResponse, []);
       const expected: BulkResponseErrorAggregation = {};
       expect(aggregated).toEqual(expected);
     });
 
     test('it should aggregate with a single error when given a single error item', () => {
       const singleError = sampleBulkError();
-      const aggregated = errorAggregator(singleError);
+      const aggregated = errorAggregator(singleError, []);
       const expected: BulkResponseErrorAggregation = {
         'Invalid call': {
           count: 1,
@@ -394,7 +394,7 @@ describe('utils', () => {
       const item1 = sampleBulkErrorItem();
       const item2 = sampleBulkErrorItem();
       twoAggregatedErrors.items = [item1, item2];
-      const aggregated = errorAggregator(twoAggregatedErrors);
+      const aggregated = errorAggregator(twoAggregatedErrors, []);
       const expected: BulkResponseErrorAggregation = {
         'Invalid call': {
           count: 2,
@@ -410,7 +410,7 @@ describe('utils', () => {
       const item2 = sampleBulkErrorItem();
       const item3 = sampleBulkErrorItem();
       twoAggregatedErrors.items = [item1, item2, item3];
-      const aggregated = errorAggregator(twoAggregatedErrors);
+      const aggregated = errorAggregator(twoAggregatedErrors, []);
       const expected: BulkResponseErrorAggregation = {
         'Invalid call': {
           count: 3,
@@ -425,7 +425,7 @@ describe('utils', () => {
       const item1 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
       const item2 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
       twoAggregatedErrors.items = [item1, item2];
-      const aggregated = errorAggregator(twoAggregatedErrors);
+      const aggregated = errorAggregator(twoAggregatedErrors, []);
       const expected: BulkResponseErrorAggregation = {
         'Parse Error': {
           count: 1,
@@ -446,7 +446,7 @@ describe('utils', () => {
       const item3 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
       const item4 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
       twoAggregatedErrors.items = [item1, item2, item3, item4];
-      const aggregated = errorAggregator(twoAggregatedErrors);
+      const aggregated = errorAggregator(twoAggregatedErrors, []);
       const expected: BulkResponseErrorAggregation = {
         'Parse Error': {
           count: 2,
@@ -469,7 +469,7 @@ describe('utils', () => {
       const item5 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
       const item6 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
       twoAggregatedErrors.items = [item1, item2, item3, item4, item5, item6];
-      const aggregated = errorAggregator(twoAggregatedErrors);
+      const aggregated = errorAggregator(twoAggregatedErrors, []);
       const expected: BulkResponseErrorAggregation = {
         'Parse Error': {
           count: 2,
@@ -496,7 +496,7 @@ describe('utils', () => {
       const item5 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
       const item6 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
       twoAggregatedErrors.items = [item1, item2, item3, item4, item5, item6];
-      const aggregated = errorAggregator(twoAggregatedErrors);
+      const aggregated = errorAggregator(twoAggregatedErrors, []);
       const expected: BulkResponseErrorAggregation = {
         'Parse Error': {
           count: 1,
