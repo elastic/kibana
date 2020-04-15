@@ -13,7 +13,7 @@ export { getMonitorLocations, GetMonitorLocationsParams } from './get_monitor_lo
 export { getMonitorStates, GetMonitorStatesParams } from './get_monitor_states';
 export { getMonitorStatus, GetMonitorStatusParams } from './get_monitor_status';
 export * from './get_monitor_status';
-export { getPings, GetPingsParams } from './get_pings';
+export { getPings } from './get_pings';
 export { getPingHistogram, GetPingHistogramParams } from './get_ping_histogram';
 export { UptimeRequests } from './uptime_requests';
 export { getSnapshotCount, GetSnapshotCountParams } from './get_snapshot_counts';

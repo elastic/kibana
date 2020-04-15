@@ -129,31 +129,21 @@ yarn cypress:run-as-ci
 ```
 
 Note that with this type of execution you don't need to have running a kibana and elasticsearch instance. This is because
- the command, as it would happen in the CI, will launch the instances. The elasticsearch instance will be fed with the data 
- placed in: `x-pack/test/siem_cypress/es_archives`
+ the command, as it would happen in the CI, will launch the instances. The elasticsearch instance will be fed data 
+ found in: `x-pack/test/siem_cypress/es_archives`
  
 As in this case we want to mimic a CI execution we want to execute the tests with the same set of data, this is why 
 in this case does not make sense to override Cypress environment variables. 
 
 ### Test data
 
-As said before when running the tests as Jenkins the tests are fed with the data placed in: `x-pack/test/siem_cypress/es_archives`.
+As mentioned above, when running the tests as Jenkins the tests are populated with data ("archives") found in: `x-pack/test/siem_cypress/es_archives`.
 
-Currently there are two different ways of feeding data:
-1. By default
-2. Specifying a specific set of data for a specific test
+By default, each test is populated with some base data: an empty kibana index and a set of auditbeat data (the `empty_kibana` and `auditbeat` archives, respectively). This is usually enough to cover most of the scenarios that we are testing.
 
-#### By default
+#### Running tests with additional archives
 
-When a execution of the test is going to be done an empty kibana and a set of audibteat data are loaded (empty_kibana and auditbeat). With this data usually is enough to cover most of the scenarios that we are testing.
-
-#### Running tests with custom data
-
-Sometimes the default data is not enough and we need a specific set of data in order to being able to test the desired behaviour.
-
-In that case in the hooks of the test use the function `esArchiverLoad` to load the set of data neeed and `esArchiverUnload` to remove the changes done in the data.
-
-Example:
+When the base data is insufficient, one can specify additional archives. Use `esArchiverLoad` to load the necessary archive, and `esArchiverUnload` to remove the archive from elasticsearch:
 
 ```typescript
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
@@ -174,11 +164,11 @@ describe('This are going to be a set of tests', () => {
 
 ```
 
-Note that loading and unloading data takes a signifcant amount of time so try to minimize the use of it when possible.
+Note that loading and unloading data take a significant amount of time, so try to minimize their use.
 
-### Current sets of data
+### Current archives
 
-The current sets of data can be found in: `x-pack/test/siem_cypress/es_archives` folder.
+The current archives can be found in `x-pack/test/siem_cypress/es_archives/`.
 
 - auditbeat
   - Auditbeat data generated in Sep, 2019 with the following hosts present: 
@@ -197,9 +187,9 @@ The current sets of data can be found in: `x-pack/test/siem_cypress/es_archives`
 - signals
   - Set of data with 108 opened signals linked to "Signals test" custom rule.
 
-### How to generate new test data
+### How to generate a new archive
 
-We are using es_archiver in order to generate the data that our Cypress tests needs.
+We are using es_archiver in order to manage the data that our Cypress tests needs.
 
 1. Setup if possible a clean instance of kibana and elasticsearch (if not, possible please try to clean the data that you are going to generate).
 2. With the kibana and elasticsearch instance up and running, create the data that you need for your test.
