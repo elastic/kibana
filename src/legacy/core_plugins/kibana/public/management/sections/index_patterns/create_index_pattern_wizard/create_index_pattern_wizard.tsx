@@ -61,7 +61,6 @@ interface CreateIndexPatternWizardState {
   isInitiallyLoadingIndices: boolean;
   isIncludingSystemIndices: boolean;
   toasts: EuiGlobalToastListToast[];
-  indexPatternCreationType: IndexPatternCreationConfig;
 }
 
 export class CreateIndexPatternWizard extends Component<
@@ -76,13 +75,7 @@ export class CreateIndexPatternWizard extends Component<
     isInitiallyLoadingIndices: true,
     isIncludingSystemIndices: false,
     toasts: [],
-    indexPatternCreationType: {} as IndexPatternCreationConfig,
   };
-
-  constructor(props: CreateIndexPatternWizardProps) {
-    super(props);
-    this.state.indexPatternCreationType = this.props.services.indexPatternCreationType;
-  }
 
   async UNSAFE_componentWillMount() {
     this.fetchData();
@@ -136,7 +129,7 @@ export class CreateIndexPatternWizard extends Component<
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices(services.es, this.state.indexPatternCreationType, `*`, MAX_SEARCH_SIZE),
+        getIndices(services.es, this.props.services.indexPatternCreationType, `*`, MAX_SEARCH_SIZE),
         [],
         indicesFailMsg
       )
@@ -147,7 +140,7 @@ export class CreateIndexPatternWizard extends Component<
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(services.es, this.state.indexPatternCreationType, `*:*`, 1),
+      getIndices(services.es, this.props.services.indexPatternCreationType, `*:*`, 1),
       ['a'],
       clustersFailMsg
     ).then((remoteIndices: string[] | MatchedIndex[]) =>
@@ -157,7 +150,7 @@ export class CreateIndexPatternWizard extends Component<
 
   createIndexPattern = async (timeFieldName: string | undefined, indexPatternId: string) => {
     const { services } = this.props;
-    const { indexPattern, indexPatternCreationType } = this.state;
+    const { indexPattern } = this.state;
 
     const emptyPattern = await services.indexPatterns.make();
 
@@ -165,7 +158,7 @@ export class CreateIndexPatternWizard extends Component<
       id: indexPatternId,
       title: indexPattern,
       timeFieldName,
-      ...indexPatternCreationType.getIndexPatternMappings(),
+      ...services.indexPatternCreationType.getIndexPatternMappings(),
     });
 
     const createdId = await emptyPattern.create();
@@ -211,7 +204,10 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   renderHeader() {
-    const { isIncludingSystemIndices, indexPatternCreationType } = this.state;
+    const {
+      services: { indexPatternCreationType },
+    } = this.props;
+    const { isIncludingSystemIndices } = this.state;
 
     return (
       <Header
@@ -227,13 +223,15 @@ export class CreateIndexPatternWizard extends Component<
 
   renderContent() {
     const {
+      services: { indexPatternCreationType },
+    } = this.props;
+    const {
       allIndices,
       isInitiallyLoadingIndices,
       isIncludingSystemIndices,
       step,
       indexPattern,
       remoteClustersExist,
-      indexPatternCreationType,
     } = this.state;
 
     if (isInitiallyLoadingIndices) {
