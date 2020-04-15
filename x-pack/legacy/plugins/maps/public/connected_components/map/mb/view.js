@@ -130,7 +130,7 @@ export class MBMapContainer extends React.Component {
         container: this.refs.mapContainer,
         style: mbStyle,
         scrollZoom: this.props.scrollZoom,
-        preserveDrawingBuffer: getInjectedVarFunc('preserveDrawingBuffer', false),
+        preserveDrawingBuffer: getInjectedVarFunc()('preserveDrawingBuffer', false),
         interactive: !this.props.disableInteractive,
       };
       const initialView = _.get(this.props.goto, 'center');

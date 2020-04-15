@@ -11,6 +11,11 @@ import {
   getVisualizations,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/maps/public/kibana_services';
+import { npSetup } from 'ui/new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { bindSetupCoreAndPlugins } from '../../../../plugins/maps/public/plugin';
+
+bindSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
 
 const showMapVisualizationTypes = getInjectedVarFunc()('showMapVisualizationTypes', false);
 
