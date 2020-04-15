@@ -26,6 +26,7 @@ const createStartMock = () => {
   return mock;
 };
 
+export type AlertInstanceMock = jest.Mocked<AlertInstance>;
 const createAlertInstanceFactoryMock = () => {
   const mock = {
     hasScheduledActions: jest.fn(),
@@ -45,20 +46,19 @@ const createAlertInstanceFactoryMock = () => {
   mock.unscheduleActions.mockReturnValue(mock);
   mock.scheduleActions.mockReturnValue(mock);
 
-  return (mock as unknown) as jest.Mocked<AlertInstance>;
+  return (mock as unknown) as AlertInstanceMock;
 };
 
 const createAlertServicesMock = () => {
   const alertInstanceFactoryMock = createAlertInstanceFactoryMock();
   return {
     alertInstanceFactory: jest
-      .fn<jest.Mocked<AlertInstance>, []>()
+      .fn<jest.Mocked<AlertInstance>, [string]>()
       .mockReturnValue(alertInstanceFactoryMock),
     callCluster: jest.fn(),
     savedObjectsClient: savedObjectsClientMock.create(),
   };
 };
-
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;
 
 export const alertsMock = {
