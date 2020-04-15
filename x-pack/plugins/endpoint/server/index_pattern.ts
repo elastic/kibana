@@ -30,18 +30,23 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
   }
 
   async getIndexPattern(ctx: RequestHandlerContext, datasetPath: string) {
-    const pattern = await this.service.getESIndexPattern(
-      ctx.core.savedObjects.client,
-      IngestIndexPatternRetriever.endpointPackageName,
-      datasetPath
-    );
+    try {
+      const pattern = await this.service.getESIndexPattern(
+        ctx.core.savedObjects.client,
+        IngestIndexPatternRetriever.endpointPackageName,
+        datasetPath
+      );
 
-    if (!pattern) {
-      const msg = `Unable to retrieve the index pattern for dataset: ${datasetPath}`;
-      this.log.warn(msg);
-      throw new Error(msg);
+      if (!pattern) {
+        const msg = `Unable to retrieve the index pattern for dataset: ${datasetPath}`;
+        this.log.warn(msg);
+        throw new Error(msg);
+      }
+      return pattern;
+    } catch (error) {
+      const errMsg = `Error occurred while retrieving pattern for: ${datasetPath} error: ${error}`;
+      this.log.warn(errMsg);
+      throw new Error(errMsg);
     }
-
-    return pattern;
   }
 }
