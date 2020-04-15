@@ -182,6 +182,76 @@ export default function({ getService }) {
               });
             }));
       });
+
+      describe('with a aggs', () => {
+        it('should return 200 with a valid response', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: { max: { field: 'visualization.attributes.version' } },
+                })
+              )}`
+            )
+            .expect(200)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                aggregations: {
+                  type_count: {
+                    value: 1,
+                  },
+                },
+                page: 1,
+                per_page: 0,
+                saved_objects: [],
+                total: 1,
+              });
+            }));
+
+        it('wrong type should return 400 with Bad Request', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: { max: { field: 'dashboard.attributes.version' } },
+                })
+              )}`
+            )
+            .expect(400)
+            .then(resp => {
+              console.log('body', JSON.stringify(resp.body));
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message: 'This type dashboard is not allowed: Bad Request',
+                statusCode: 400,
+              });
+            }));
+
+        it('adding a wrong attributes should return 400 with Bad Request', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: {
+                    max: {
+                      field: 'dashboard.attributes.version',
+                      script: 'Oh yes I am going to a script',
+                    },
+                  },
+                })
+              )}`
+            )
+            .expect(400)
+            .then(resp => {
+              console.log('body', JSON.stringify(resp.body));
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message:
+                  'Invalid value {"type_count":{"max":{"field":"dashboard.attributes.version","script":"Oh yes I am going to a script"}}} supplied to : { [K in string]: ((Partial<{ filter: { term: { [K in string]: string } }, histogram: ({ field: string } & { interval: number } & Partial<{ min_doc_count: number, extended_bounds: { min: number, max: number }, keyed: boolean, missing: number, order: { [K in string]: desc } }>), terms: ({ field: string } & Partial<{ field: string, size: number, show_term_doc_count_error: boolean, order: { [K in string]: desc } }>) }> & Partial<{ avg: { field: string }, weighted_avg: ({ value: ({ field: string } & Partial<{ missing: number }>), weight: ({ field: string } & Partial<{ missing: number }>) } & Partial<{ format: string, value_type: string }>), cardinality: { field: string }, max: ({ field: string } & Partial<{ missing: number }>), min: ({ field: string } & Partial<{ missing: number }>), top_hits: Partial<{ explain: boolean, from: string, highlight: any, seq_no_primary_term: boolean, size: number, sort: any, stored_fields: Array<string>, version: boolean, _name: string, _source: Partial<{ includes: Array<string>, excludes: Array<string> }> }> }>) & Partial<{ aggs: (Partial<{ filter: { term: { [K in string]: string } }, histogram: ({ field: string } & { interval: number } & Partial<{ min_doc_count: number, extended_bounds: { min: number, max: number }, keyed: boolean, missing: number, order: { [K in string]: desc } }>), terms: ({ field: string } & Partial<{ field: string, size: number, show_term_doc_count_error: boolean, order: { [K in string]: desc } }>) }> & Partial<{ avg: { field: string }, weighted_avg: ({ value: ({ field: string } & Partial<{ missing: number }>), weight: ({ field: string } & Partial<{ missing: number }>) } & Partial<{ format: string, value_type: string }>), cardinality: { field: string }, max: ({ field: string } & Partial<{ missing: number }>), min: ({ field: string } & Partial<{ missing: number }>), top_hits: Partial<{ explain: boolean, from: string, highlight: any, seq_no_primary_term: boolean, size: number, sort: any, stored_fields: Array<string>, version: boolean, _name: string, _source: Partial<{ includes: Array<string>, excludes: Array<string> }> }> }>) }>) }, excess properties: ["script"]: Bad Request',
+                statusCode: 400,
+              });
+            }));
+      });
     });
 
     describe('without kibana index', () => {

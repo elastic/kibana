@@ -47,6 +47,7 @@ import {
   SavedObjectsDeleteOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectAggs,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -57,7 +58,7 @@ import {
 } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { validateSavedObjectAggs } from './aggs_utils';
+import { validateGetSavedObjectAggs } from './aggs_utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -596,7 +597,7 @@ export class SavedObjectsRepository {
    * @property {object} [options.aggs] - see ./saved_object_aggs for more insight
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find<T = unknown>({
+  async find<T = unknown, A = unknown>({
     search,
     defaultSearchOperator = 'OR',
     searchFields,
@@ -610,7 +611,7 @@ export class SavedObjectsRepository {
     type,
     filter,
     aggs,
-  }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
+  }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>> {
     if (!type) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'options.type must be a string or an array of strings'
@@ -650,9 +651,10 @@ export class SavedObjectsRepository {
       }
     }
 
+    let aggsObject = null;
     try {
       if (aggs) {
-        validateSavedObjectAggs(allowedTypes, aggs, this._mappings);
+        aggsObject = validateGetSavedObjectAggs(allowedTypes, JSON.parse(aggs), this._mappings);
       }
     } catch (e) {
       throw e;
@@ -667,7 +669,7 @@ export class SavedObjectsRepository {
       rest_total_hits_as_int: true,
       body: {
         seq_no_primary_term: true,
-        ...(aggs != null ? { aggs } : {}),
+        ...(aggsObject != null ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,
           defaultSearchOperator,
@@ -696,6 +698,7 @@ export class SavedObjectsRepository {
     }
 
     return {
+      ...(response.aggregations != null ? { aggregations: response.aggregations } : {}),
       page,
       per_page: perPage,
       total: response.hits.total,

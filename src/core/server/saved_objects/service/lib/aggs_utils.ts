@@ -23,24 +23,36 @@ import { SavedObjectsErrorHelpers } from './errors';
 import { hasFilterKeyError } from './filter_utils';
 import { SavedObjectAggs, validateSavedObjectTypeAggs } from './saved_object_aggs_types';
 
-export const validateSavedObjectAggs = (
+export const validateGetSavedObjectAggs = (
   allowedTypes: string[],
   aggs: SavedObjectAggs,
   indexMapping: IndexMapping
-) => {
+): SavedObjectAggs => {
   validateSavedObjectTypeAggs(aggs);
-  validateAggFieldValue(allowedTypes, aggs, indexMapping);
+  return validateGetAggFieldValue(allowedTypes, aggs, indexMapping);
 };
 
-const validateAggFieldValue = (allowedTypes: string[], aggs: any, indexMapping: IndexMapping) => {
-  Object.keys(aggs).forEach(key => {
+const validateGetAggFieldValue = (
+  allowedTypes: string[],
+  aggs: any,
+  indexMapping: IndexMapping
+) => {
+  return Object.keys(aggs).reduce((acc, key) => {
     if (key === 'field') {
-      const error = hasFilterKeyError(key, allowedTypes, indexMapping);
+      const error = hasFilterKeyError(aggs[key], allowedTypes, indexMapping);
       if (error != null) {
         throw SavedObjectsErrorHelpers.createBadRequestError(error);
       }
+      return {
+        ...acc,
+        [key]: aggs[key].replace('.attributes', ''),
+      };
     } else if (typeof aggs[key] === 'object') {
-      validateAggFieldValue(allowedTypes, aggs[key], indexMapping);
+      return { ...acc, [key]: validateGetAggFieldValue(allowedTypes, aggs[key], indexMapping) };
     }
-  });
+    return {
+      ...acc,
+      [key]: aggs[key],
+    };
+  }, {});
 };

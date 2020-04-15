@@ -106,7 +106,9 @@ export interface SavedObjectsBatchResponse<T = unknown> {
  *
  * @public
  */
-export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown>
+  extends SavedObjectsBatchResponse<T> {
+  aggregations?: A;
   total: number;
   perPage: number;
   page: number;
@@ -291,7 +293,7 @@ export class SavedObjectsClient {
    * @property {object} [options.hasReference] - { type, id }
    * @returns A find result with objects matching the specified search.
    */
-  public find = <T = unknown>(
+  public find = <T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
@@ -323,13 +325,14 @@ export class SavedObjectsClient {
         SavedObjectsFindResponsePublic
       >(
         {
+          aggregations: 'aggregations',
           saved_objects: 'savedObjects',
           total: 'total',
           per_page: 'perPage',
           page: 'page',
         },
         resp
-      ) as SavedObjectsFindResponsePublic<T>;
+      ) as SavedObjectsFindResponsePublic<T, A>;
     });
   };
 

@@ -82,7 +82,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string;
-  aggs?: SavedObjectAggs;
+  aggs?: string;
 }
 
 /**

@@ -87,7 +87,8 @@ export interface SavedObjectsBulkResponse<T = unknown> {
  *
  * @public
  */
-export interface SavedObjectsFindResponse<T = unknown> {
+export interface SavedObjectsFindResponse<T = unknown, A = unknown> {
+  aggregations?: A;
   saved_objects: Array<SavedObject<T>>;
   total: number;
   per_page: number;
@@ -243,7 +244,9 @@ export class SavedObjectsClient {
    *
    * @param options
    */
-  async find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
+  async find<T = unknown, A = unknown>(
+    options: SavedObjectsFindOptions
+  ): Promise<SavedObjectsFindResponse<T, A>> {
     return await this._repository.find(options);
   }
 

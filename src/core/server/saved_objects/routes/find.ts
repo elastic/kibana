@@ -45,6 +45,7 @@ export const registerFindRoute = (router: IRouter) => {
           ),
           fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filter: schema.maybe(schema.string()),
+          aggs: schema.maybe(schema.string()),
         }),
       },
     },
@@ -62,6 +63,7 @@ export const registerFindRoute = (router: IRouter) => {
         hasReference: query.has_reference,
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
+        aggs: query.aggs,
       });
 
       return res.ok({ body: result });
