@@ -90,6 +90,7 @@ export const useDataGrid = (columns: EuiDataGridColumn[]) => {
     setNoDataMessage,
     setPagination,
     setRowCount,
+    setSortingColumns,
     setStatus,
     setTableItems,
     setVisibleColumns,

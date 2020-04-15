@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { useEffect, useState, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,23 +18,45 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+
 import {
   useColorRange,
-  ColorRangeLegend,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
+import { ml } from '../../../../../services/ml_api_service';
+import { ColorRangeLegend } from '../../../../../components/color_range_legend';
+import { DataGrid } from '../../../../../components/data_grid';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
+import { useMlContext } from '../../../../../contexts/ml';
 
-import { sortColumns, INDEX_STATUS, defaultSearchQuery } from '../../../../common';
+import { defaultSearchQuery, DataFrameAnalyticsConfig, INDEX_STATUS } from '../../../../common';
 
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
+import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
-import { useExploreData, TableItem } from '../../hooks/use_explore_data';
-
-import { ExplorationDataGrid } from '../exploration_data_grid';
 import { ExplorationQueryBar } from '../exploration_query_bar';
 
+import { useOutlierData } from './use_outlier_data';
+
+export type TableItem = Record<string, any>;
+
 const FEATURE_INFLUENCE = 'feature_influence';
+
+const getFeatureCount = (resultsField: string, tableItems: TableItem[] = []) => {
+  if (tableItems.length === 0) {
+    return 0;
+  }
+
+  return Object.keys(tableItems[0]).filter(key =>
+    key.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
+  ).length;
+};
 
 const ExplorationTitle: FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
@@ -51,91 +73,79 @@ interface ExplorationProps {
   jobId: string;
 }
 
-const getFeatureCount = (resultsField: string, tableItems: TableItem[] = []) => {
-  if (tableItems.length === 0) {
-    return 0;
-  }
-
-  return Object.keys(tableItems[0]).filter(key =>
-    key.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
-  ).length;
-};
-
 export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
-  const {
-    errorMessage,
-    indexPattern,
-    jobConfig,
-    jobStatus,
-    pagination,
-    searchQuery,
-    selectedFields,
-    setPagination,
-    setSearchQuery,
-    setSelectedFields,
-    setSortingColumns,
-    sortingColumns,
-    rowCount,
-    status,
-    tableFields,
-    tableItems,
-  } = useExploreData(jobId);
+  const mlContext = useMlContext();
+  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
+  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
+  const [jobStatus, setJobStatus] = useState<DATA_FRAME_TASK_STATE | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
 
-  const columns = [];
+  // get analytics configuration
+  useEffect(() => {
+    (async function() {
+      const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+      const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
+      const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
+        ? analyticsStats.data_frame_analytics[0]
+        : undefined;
 
-  if (
-    jobConfig !== undefined &&
-    indexPattern !== undefined &&
-    selectedFields.length > 0 &&
-    tableItems.length > 0
-  ) {
-    const resultsField = jobConfig.dest.results_field;
-    const removePrefix = new RegExp(`^${resultsField}\.${FEATURE_INFLUENCE}\.`, 'g');
-    columns.push(
-      ...tableFields.sort(sortColumns(tableItems[0], resultsField)).map(id => {
-        const idWithoutPrefix = id.replace(removePrefix, '');
-        const field = indexPattern.fields.getByName(idWithoutPrefix);
+      if (stats !== undefined && stats.state) {
+        setJobStatus(stats.state);
+      }
 
-        // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
-        // To fall back to the default string schema it needs to be undefined.
-        let schema;
+      if (
+        Array.isArray(analyticsConfigs.data_frame_analytics) &&
+        analyticsConfigs.data_frame_analytics.length > 0
+      ) {
+        setJobConfig(analyticsConfigs.data_frame_analytics[0]);
+      }
+    })();
+  }, []);
 
-        switch (field?.type) {
-          case 'date':
-            schema = 'datetime';
-            break;
-          case 'geo_point':
-            schema = 'json';
-            break;
-          case 'number':
-            schema = 'numeric';
-            break;
+  // get index pattern and field caps
+  useEffect(() => {
+    (async () => {
+      if (jobConfig !== undefined) {
+        try {
+          const destIndex = Array.isArray(jobConfig.dest.index)
+            ? jobConfig.dest.index[0]
+            : jobConfig.dest.index;
+          const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
+          let indexP: IndexPattern | undefined;
+
+          try {
+            indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+          } catch (e) {
+            indexP = undefined;
+          }
+
+          if (indexP === undefined) {
+            const sourceIndex = jobConfig.source.index[0];
+            const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+            indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+          }
+
+          if (indexP !== undefined) {
+            setIndexPattern(indexP);
+            await newJobCapsService.initializeFromIndexPattern(indexP, false, false);
+          }
+        } catch (e) {
+          // eslint-disable-next-line
+              console.log('Error loading index field data', e);
         }
+      }
+    })();
+  }, [jobConfig && jobConfig.id]);
 
-        if (id === `${resultsField}.outlier_score`) {
-          schema = 'numeric';
-        }
+  const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
 
-        return { id, schema };
-      })
-    );
-  }
-
-  const colorRange = useColorRange(
-    COLOR_RANGE.BLUE,
-    COLOR_RANGE_SCALE.INFLUENCER,
-    jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, tableItems) : 1
-  );
-
-  if (jobConfig === undefined || indexPattern === undefined) {
-    return null;
-  }
+  const { columns, errorMessage, status, tableItems } = outlierData;
 
   // if it's a searchBar syntax error leave the table visible so they can try again
   if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
     return (
       <EuiPanel grow={false}>
-        <ExplorationTitle jobId={jobConfig.id} />
+        <ExplorationTitle jobId={jobId} />
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
             defaultMessage: 'An error occurred loading the index data.',
@@ -161,6 +171,12 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     });
   }
 
+  const colorRange = useColorRange(
+    COLOR_RANGE.BLUE,
+    COLOR_RANGE_SCALE.INFLUENCER,
+    jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, tableItems) : 1
+  );
+
   return (
     <EuiPanel data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
       <EuiFlexGroup
@@ -170,7 +186,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
         gutterSize="s"
       >
         <EuiFlexItem grow={false}>
-          <ExplorationTitle jobId={jobConfig.id} />
+          <ExplorationTitle jobId={jobId} />
         </EuiFlexItem>
         {jobStatus !== undefined && (
           <EuiFlexItem grow={false}>
@@ -179,7 +195,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
         )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
-      {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
+      {(columns.length > 0 || searchQuery !== defaultSearchQuery) && indexPattern !== undefined && (
         <>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
@@ -200,19 +216,10 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           </EuiFlexGroup>
           <EuiSpacer size="s" />
           {columns.length > 0 && tableItems.length > 0 && (
-            <ExplorationDataGrid
-              colorRange={colorRange}
-              columns={columns}
-              indexPattern={indexPattern}
-              pagination={pagination}
-              resultsField={jobConfig.dest.results_field}
-              rowCount={rowCount}
-              selectedFields={selectedFields}
-              setPagination={setPagination}
-              setSelectedFields={setSelectedFields}
-              setSortingColumns={setSortingColumns}
-              sortingColumns={sortingColumns}
-              tableItems={tableItems}
+            <DataGrid
+              {...outlierData}
+              dataTestSubj="mlExplorationDataGrid"
+              toastNotifications={getToastNotifications()}
             />
           )}
         </>

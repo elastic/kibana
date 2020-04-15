@@ -6,7 +6,7 @@
 
 import { DataFrameAnalyticsConfig } from '../../../../common';
 
-const OUTLIER_SCORE = 'outlier_score';
+export const OUTLIER_SCORE = 'outlier_score';
 
 export const getOutlierScoreFieldName = (jobConfig: DataFrameAnalyticsConfig) =>
   `${jobConfig.dest.results_field}.${OUTLIER_SCORE}`;
