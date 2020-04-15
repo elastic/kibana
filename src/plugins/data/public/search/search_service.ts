@@ -26,7 +26,7 @@ import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
-import { createSearchSource, getSearchSource } from './search_source';
+import { createSearchSource, getSearchSourceType } from './search_source';
 import { QuerySetup } from '../query/query_service';
 import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
@@ -132,7 +132,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
 
     const aggTypesStart = this.aggTypesRegistry.start();
-    const SearchSource = getSearchSource({ getInternalStartServices });
 
     return {
       aggs: {
@@ -156,8 +155,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         // TODO: should an intercepror have a destroy method?
         this.searchInterceptor = searchInterceptor;
       },
-      SearchSource,
-      createSearchSource: createSearchSource(SearchSource, indexPatterns),
+      SearchSource: getSearchSourceType(getInternalStartServices),
+      createSearchSource: createSearchSource(getInternalStartServices, indexPatterns),
       __LEGACY: {
         esClient: this.esClient!,
         AggConfig,

@@ -22,7 +22,7 @@ import { cloneDeep } from 'lodash';
 import { OverlayStart, SavedObjectReference } from 'src/core/public';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
 import { getSearchService } from '../kibana_services';
-import { IndexPatternsContract, IIndexPattern, createSearchSource } from '../../../data/public';
+import { IndexPatternsContract, IIndexPattern } from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
 
@@ -209,11 +209,12 @@ export async function resolveIndexPatternConflicts(
       // The user decided to skip this conflict so do nothing
       return;
     }
-    const { SearchSource } = getSearchService();
+    const { createSearchSource } = getSearchService();
 
-    obj.searchSource = await createSearchSource(SearchSource, indexPatterns)(
+    obj.searchSource = await createSearchSource(
       JSON.stringify(serializedSearchSource),
-      replacedReferences
+      replacedReferences,
+      indexPatterns
     );
     if (await saveObject(obj, overwriteAll)) {
       importCount++;

@@ -20,9 +20,10 @@ import { transform, defaults, isFunction } from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
 import { migrateLegacyQuery } from '../../../../kibana_legacy/public';
 import { InvalidJSONProperty } from '../../../../kibana_utils/public';
-import { SearchSourceType } from './search_source';
+import { getSearchSourceType } from './search_source';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { SearchSourceFields } from './types';
+import { GetInternalStartServicesFn } from '../../types';
 
 /**
  * Deserializes a json string and a set of referenced objects to a `SearchSource` instance.
@@ -32,18 +33,23 @@ import { SearchSourceFields } from './types';
  * required service dependency (index patterns contract). A pre-wired version is also exposed in
  * the start contract of the data plugin as part of the search service
  *
- * @param SearchSource
  * @param indexPatterns The index patterns contract of the data plugin
  *
  * @return Wired utility function taking two parameters `searchSourceJson`, the json string
  * returned by `serializeSearchSource` and `references`, a list of references including the ones
  * returned by `serializeSearchSource`.
  *
- * @public */
+ *
+ * @internal */
 export const createSearchSource = (
-  SearchSource: SearchSourceType,
-  indexPatterns: IndexPatternsContract
-) => async (searchSourceJson: string, references: SavedObjectReference[]) => {
+  searchSourceDependencies: GetInternalStartServicesFn,
+  bindedIndexPatterns: IndexPatternsContract
+) => async (
+  searchSourceJson: string,
+  references: SavedObjectReference[],
+  indexPatterns: IndexPatternsContract = bindedIndexPatterns
+) => {
+  const SearchSource = getSearchSourceType(searchSourceDependencies);
   const searchSource = new SearchSource();
 
   // if we have a searchSource, set its values based on the searchSourceJson field

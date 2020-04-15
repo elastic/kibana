@@ -30,7 +30,6 @@ import {
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
-  GetInternalStartServicesFn,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
@@ -90,13 +89,15 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   private readonly storage: IStorageWrapper;
   private readonly packageInfo: PackageInfo;
 
-  private readonly getInternalStartServices: GetInternalStartServicesFn = () => ({
-    fieldFormats: getFieldFormats(),
-    notifications: getNotifications(),
-    uiSettings: getUiSettings(),
-    injectedMetadata: getInjectedMetadata(),
-    searchService: getSearchService(),
-  });
+  private getInternalStartServices() {
+    return {
+      fieldFormats: getFieldFormats(),
+      notifications: getNotifications(),
+      uiSettings: getUiSettings(),
+      injectedMetadata: getInjectedMetadata(),
+      searchService: getSearchService(),
+    };
+  }
 
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService();
