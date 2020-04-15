@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { set, omit } from 'lodash/fp';
+import { set, omit, isNil } from 'lodash/fp';
 import { TEMPLATE_TIMELINE_URL } from '../../../../common/constants';
 import {
   transformError,
@@ -15,20 +15,21 @@ import { FrameworkRequest } from '../../framework';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
 import { SetupPlugins } from '../../../plugin';
-import { Templatetimeline } from '../types';
+import { Createimeline } from '../types';
+import { createTimelines } from './utils/create_timelines';
 
 import { getTimeline, timelineSavedObjectOmittedFields } from './utils/import_timelines';
-import { templateTimelineSchema } from './schemas/import_timelines_schema';
-export const createTemplateTimelinesRoute = (
+import { updateTimelineSchema } from './schemas/update_timelines_schema';
+export const updateTimelinesRoute = (
   router: IRouter,
   config: LegacyServices['config'],
   security: SetupPlugins['security']
 ) => {
-  router.post(
+  router.patch(
     {
       path: TEMPLATE_TIMELINE_URL,
       validate: {
-        body: buildRouteValidation<Templatetimeline>(templateTimelineSchema),
+        body: buildRouteValidation<UpdateTimeline>(updateTimelineSchema),
       },
       options: {
         tags: ['access:siem'],
@@ -40,21 +41,39 @@ export const createTemplateTimelinesRoute = (
       try {
         const savedObjectsClient = context.core.savedObjects.client;
         const user = await security?.authc.getCurrentUser(request);
-
+        const { timelineId, timeline, version } = request.body;
+        let existTimeline = null;
         let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);
         frameworkRequest = set('user', user, frameworkRequest);
 
-        const templateTeimeline = await getTimeline(
-          (frameworkRequest as unknown) as FrameworkRequest,
-          request.body.savedObjectId
-        );
-        if (templateTeimeline == null) {
-          const newTemplateTimeline = await createTemplateTimelines(
+        if (!isNil(timelineId)) {
+          existTimeline = await getTimeline(
             (frameworkRequest as unknown) as FrameworkRequest,
-            omit(timelineSavedObjectOmittedFields, request.body)
+            timelineId
+          );
+        }
+
+        if (existTimeline == null || isNil(timelineId)) {
+          return siemResponse.error({
+            body: 'CREATE timeline with PATCH is not allowed, please use POST instead',
+            statusCode: 405,
+          });
+        } else {
+          await createTimelines(
+            (frameworkRequest as unknown) as FrameworkRequest,
+            omit(timelineSavedObjectOmittedFields, request.body),
+            timelineId,
+            version
           );
           return response.ok({
-            body: newTemplateTimeline,
+            body: {
+              data: {
+                persistTimeline: {
+                  message: 'success',
+                  timeline,
+                },
+              },
+            },
           });
         }
       } catch (err) {

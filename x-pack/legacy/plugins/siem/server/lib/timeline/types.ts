@@ -248,7 +248,11 @@ export type ExportedTimelines = TimelineSavedObject &
     pinnedEventIds: string[];
   };
 
-export type Templatetimeline = ExportedTimelines;
+export interface Createtimeline {
+  timeline: TimelineSavedObject;
+  timelineId?: string | null;
+  timelineVersion?: string | null;
+}
 
 export interface BulkGetInput {
   type: string;

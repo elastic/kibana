@@ -18,8 +18,6 @@ import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils';
 
 import {
-  createTimelines,
-  getTimeline,
   getTupleDuplicateErrorsAndUniqueTimeline,
   isBulkError,
   isImportRegular,
@@ -29,6 +27,7 @@ import {
   PromiseFromStreams,
   timelineSavedObjectOmittedFields,
 } from './utils/import_timelines';
+import { createTimelines, getTimeline } from './utils/create_timelines';
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { TIMELINE_IMPORT_URL } from '../../../../common/constants';

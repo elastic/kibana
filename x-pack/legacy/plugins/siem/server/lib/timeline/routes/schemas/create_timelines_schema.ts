@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-import { timelinesSchema } from './createtimelinesSchema';
+import { timelinesSchema, timelineId, version, pinnedEventIds } from './schemas';
 
-export const importTimelinesPayloadSchema = Joi.object({
-  file: Joi.object().required(),
+export const createTimelineSchema = Joi.object({
+  request: Joi.object(),
+  timeline: timelinesSchema,
+  timelineSavedObjectId: timelineId,
+  timelineVersion: version,
+  pinnedEventIds,
 });
-
-export const importTimelinesSchema = timelinesSchema;

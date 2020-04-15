@@ -156,3 +156,27 @@ export const ids = Joi.array().items(allowEmptyString);
 
 export const exclude_export_details = Joi.boolean();
 export const file_name = allowEmptyString;
+
+export const timelinesSchema = Joi.object({
+  columns,
+  created,
+  createdBy,
+  dataProviders,
+  dateRange,
+  description,
+  eventNotes,
+  eventType,
+  filters,
+  favorite,
+  globalNotes,
+  kqlMode,
+  kqlQuery,
+  savedObjectId,
+  savedQueryId,
+  sort,
+  title,
+  updated,
+  updatedBy,
+  version,
+  pinnedEventIds,
+});
