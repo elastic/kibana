@@ -34,7 +34,7 @@ import { AppAction } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
-import { WindowsEvents, MacEvents } from './policy_forms/events';
+import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
 
 export const PolicyDetails = React.memo(() => {
@@ -208,6 +208,8 @@ export const PolicyDetails = React.memo(() => {
         <WindowsEvents />
         <EuiSpacer size="l" />
         <MacEvents />
+        <EuiSpacer size="l" />
+        <LinuxEvents />
       </PageView>
     </>
   );

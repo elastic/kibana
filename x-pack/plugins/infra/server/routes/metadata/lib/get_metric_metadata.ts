@@ -26,7 +26,8 @@ export const getMetricMetadata = async (
   requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: InventoryItemType
+  nodeType: InventoryItemType,
+  timeRange: { from: number; to: number }
 ): Promise<InfraMetricsAdapterResponse> => {
   const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   const metricQuery = {
@@ -40,6 +41,15 @@ export const getMetricMetadata = async (
           filter: [
             {
               match: { [fields.id]: nodeId },
+            },
+            {
+              range: {
+                [sourceConfiguration.fields.timestamp]: {
+                  gte: timeRange.from,
+                  lte: timeRange.to,
+                  format: 'epoch_millis',
+                },
+              },
             },
           ],
         },
