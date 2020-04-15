@@ -80,7 +80,7 @@ export function getEMSClient() {
   const licenseId = getLicenseId();
   if (latestLicenseId !== licenseId) {
     latestLicenseId = licenseId;
-    emsClient.addQueryParams({ license: licenseId });
+    emsClient.setQueryParams({ license: licenseId });
   }
   return emsClient;
 }

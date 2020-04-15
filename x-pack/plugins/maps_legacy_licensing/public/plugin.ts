@@ -31,10 +31,10 @@ export class MapsLegacyLicensing
     if (licensing) {
       licensing.license$.subscribe(({ uid, isActive }: { uid: string; isActive: boolean }) => {
         if (isActive) {
-          serviceSettings.addQueryParams({ license: uid });
+          serviceSettings.setQueryParams({ license: uid });
           serviceSettings.disableZoomMessage();
         } else {
-          serviceSettings.addQueryParams({ license: undefined });
+          serviceSettings.setQueryParams({ license: undefined });
           serviceSettings.enableZoomMessage();
         }
       });
