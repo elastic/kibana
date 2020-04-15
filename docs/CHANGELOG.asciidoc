@@ -314,8 +314,7 @@ Visualizations::
 [[deprecation-7.7.0]]
 === Deprecations
 Monitoring::
-* Changes all configs to `monitoring.*` {pull}54919[#54919]
-* Changes all configs to `monitoring.*` {pull}56215[#56215]
+* Changes all configs to `monitoring.*` {pull}54919[#54919], {pull}56215[#56215]
 Platform::
 * Migrates Vega and Graph configs to new platform {pull}57011[#57011]
 
