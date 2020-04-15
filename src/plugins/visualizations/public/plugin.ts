@@ -26,6 +26,7 @@ import {
   setCapabilities,
   setHttp,
   setIndexPatterns,
+  setSearch,
   setSavedObjects,
   setUsageCollector,
   setFilterManager,
@@ -140,6 +141,7 @@ export class VisualizationsPlugin
     setHttp(core.http);
     setSavedObjects(core.savedObjects);
     setIndexPatterns(data.indexPatterns);
+    setSearch(data.search);
     setFilterManager(data.query.filterManager);
     setExpressions(expressions);
     setUiActions(uiActions);
@@ -150,6 +152,7 @@ export class VisualizationsPlugin
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
+      search: data.search,
       chrome: core.chrome,
       overlays: core.overlays,
       visualizationTypes: types,

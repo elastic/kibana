@@ -18,7 +18,7 @@ type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResul
 /**
  * Mocked app root context renderer
  */
-interface AppContextTestRender {
+export interface AppContextTestRender {
   store: ReturnType<typeof appStoreFactory>;
   history: ReturnType<typeof createMemoryHistory>;
   coreStart: ReturnType<typeof coreMock.createStart>;

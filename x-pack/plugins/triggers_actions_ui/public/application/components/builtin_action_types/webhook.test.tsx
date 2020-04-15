@@ -162,7 +162,7 @@ describe('WebhookParamsFields renders', () => {
         .first()
         .prop('value')
     ).toStrictEqual('test message');
-    expect(wrapper.find('[data-test-subj="webhookAddVariableButton"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').length > 0).toBeTruthy();
   });
 
   test('params validation fails when body is not valid', () => {

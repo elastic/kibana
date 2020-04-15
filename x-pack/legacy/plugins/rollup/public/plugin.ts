@@ -24,7 +24,7 @@ import {
 // @ts-ignore
 import { CRUD_APP_BASE_PATH } from './crud_app/constants';
 import { ManagementSetup } from '../../../../../src/plugins/management/public';
-import { IndexMgmtSetup } from '../../../../plugins/index_management/public';
+import { IndexManagementPluginSetup } from '../../../../plugins/index_management/public';
 import { IndexPatternManagementSetup } from '../../../../../src/plugins/index_pattern_management/public';
 import { search } from '../../../../../src/plugins/data/public';
 // @ts-ignore
@@ -35,7 +35,7 @@ import { renderApp } from './application';
 export interface RollupPluginSetupDependencies {
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
-  indexManagement?: IndexMgmtSetup;
+  indexManagement?: IndexManagementPluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
 }
 

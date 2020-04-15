@@ -9,6 +9,7 @@ exports[`ML Integrations renders without errors 1`] = `
   >
     <button
       class="euiButtonEmpty euiButtonEmpty--primary"
+      data-test-subj="uptimeEnableAnomalyBtn"
       type="button"
     >
       <span
