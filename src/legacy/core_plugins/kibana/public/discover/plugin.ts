@@ -144,6 +144,7 @@ export class DiscoverPlugin implements Plugin<void, void> {
         await this.initializeInnerAngular();
 
         // make sure the index pattern list is up to date
+        const [, { data: dataStart }] = await core.getStartServices();
         await dataStart.indexPatterns.clearCache();
         const { renderApp } = await import('./np_ready/application');
         const unmount = await renderApp(innerAngularName, params.element);
