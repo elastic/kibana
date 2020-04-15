@@ -63,6 +63,8 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
   return new source.ConstructorFunction(sourceDescriptor, inspectorAdapters);
 }
 
+export const getMapSettings = ({ map }) => map.settings;
+
 export const getOpenTooltips = ({ map }) => {
   return map && map.openTooltips ? map.openTooltips : [];
 };

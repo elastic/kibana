@@ -58,6 +58,7 @@ export function LayerControl({
   openLayerTOC,
   layerList,
   isAddButtonActive,
+  openMapSettings,
 }) {
   if (!isLayerTOCOpen) {
     const hasErrors = layerList.some(layer => {
@@ -102,6 +103,10 @@ export function LayerControl({
     );
   }
 
+  const openMapSettingsLabel = i18n.translate('xpack.maps.layerControl.openMapSettingsLabel', {
+    defaultMessage: 'Edit map settings',
+  });
+
   return (
     <Fragment>
       <EuiPanel
@@ -125,6 +130,21 @@ export function LayerControl({
                   />
                 </h2>
               </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                delay="long"
+                content={openMapSettingsLabel}
+              >
+                <EuiButtonIcon
+                  className="mapLayerControl__openMapSettingsButton"
+                  onClick={openMapSettings}
+                  iconType="gear"
+                  color="text"
+                  aria-label={openMapSettingsLabel}
+                  data-test-subj="mapOpenMapSettingsButton"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip

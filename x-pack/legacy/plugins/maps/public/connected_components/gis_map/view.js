@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
+import classNames from 'classnames';
 import { MBMapContainer } from '../map/mb';
 import { WidgetOverlay } from '../widget_overlay/index';
 import { ToolbarOverlay } from '../toolbar_overlay/index';
@@ -19,6 +20,9 @@ import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../../src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FLYOUT_STATE } from '../../../../../../plugins/maps/public/reducers/ui';
+import { MapSettingsPanel } from '../map_settings_panel';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -147,9 +151,7 @@ export class GisMap extends Component {
   render() {
     const {
       addFilters,
-      layerDetailsVisible,
-      addLayerVisible,
-      noFlyoutVisible,
+      flyoutDisplay,
       isFullScreen,
       exitFullScreen,
       mapInitError,
@@ -174,16 +176,13 @@ export class GisMap extends Component {
       );
     }
 
-    let currentPanel;
-    let currentPanelClassName;
-    if (noFlyoutVisible) {
-      currentPanel = null;
-    } else if (addLayerVisible) {
-      currentPanelClassName = 'mapMapLayerPanel-isVisible';
-      currentPanel = <AddLayerPanel />;
-    } else if (layerDetailsVisible) {
-      currentPanelClassName = 'mapMapLayerPanel-isVisible';
-      currentPanel = <LayerPanel />;
+    let flyoutPanel = null;
+    if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
+      flyoutPanel = <AddLayerPanel />;
+    } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
+      flyoutPanel = <LayerPanel />;
+    } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
+      flyoutPanel = <MapSettingsPanel />;
     }
 
     let exitFullScreenButton;
@@ -210,8 +209,13 @@ export class GisMap extends Component {
           <WidgetOverlay />
         </EuiFlexItem>
 
-        <EuiFlexItem className={`mapMapLayerPanel ${currentPanelClassName}`} grow={false}>
-          {currentPanel}
+        <EuiFlexItem
+          className={classNames('mapMapLayerPanel', {
+            'mapMapLayerPanel-isVisible': !!flyoutPanel,
+          })}
+          grow={false}
+        >
+          {flyoutPanel}
         </EuiFlexItem>
 
         {exitFullScreenButton}

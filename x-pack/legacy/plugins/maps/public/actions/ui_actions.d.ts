@@ -5,6 +5,9 @@
  */
 
 import { AnyAction } from 'redux';
+import { FLYOUT_STATE } from '../../../../../plugins/maps/public/reducers/ui';
+
+export function updateFlyout(display: FLYOUT_STATE): AnyAction;
 
 export function setOpenTOCDetails(layerIds?: string[]): AnyAction;
 

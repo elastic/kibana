@@ -78,6 +78,10 @@ import {
   HIDE_LAYER_CONTROL,
   HIDE_VIEW_CONTROL,
   SET_WAITING_FOR_READY_HIDDEN_LAYERS,
+  SET_MAP_SETTINGS,
+  ROLLBACK_MAP_SETTINGS,
+  TRACK_MAP_SETTINGS,
+  UPDATE_MAP_SETTING,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/actions/map_actions';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -149,6 +153,29 @@ export function setMapInitError(errorMessage) {
     type: SET_MAP_INIT_ERROR,
     errorMessage,
   };
+}
+
+export function setMapSettings(settings) {
+  return {
+    type: SET_MAP_SETTINGS,
+    settings
+  }
+}
+
+export function rollbackMapSettings() {
+  return { type: ROLLBACK_MAP_SETTINGS }
+}
+
+export function trackMapSettings() {
+  return { type: TRACK_MAP_SETTINGS }
+}
+
+export function updateMapSetting(settingKey, settingValue) {
+  return {
+    type: UPDATE_MAP_SETTING,
+    settingKey,
+    settingValue,
+  }
 }
 
 export function trackCurrentLayerState(layerId) {
