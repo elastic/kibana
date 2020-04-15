@@ -7,7 +7,7 @@
 import { EuiSuperDatePicker, OnRefreshChangeProps, OnTimeChangeProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { euiStyled } from '../../../../../observability/public';
-import { MetricsTimeInput } from '../containers/with_metrics_time';
+import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
 
@@ -61,8 +61,8 @@ export const MetricsTimeControls = (props: MetricsTimeControlsProps) => {
   return (
     <MetricsTimeControlsContainer>
       <EuiSuperDatePicker
-        start={currentTimeRange.from}
-        end={currentTimeRange.to}
+        start={currentTimeRange.from.toString()}
+        end={currentTimeRange.to.toString()}
         isPaused={!isLiveStreaming}
         refreshInterval={refreshInterval ? refreshInterval : 0}
         onTimeChange={handleTimeChange}

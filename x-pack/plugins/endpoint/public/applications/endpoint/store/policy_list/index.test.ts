@@ -5,7 +5,7 @@
  */
 
 import { EndpointAppLocation, PolicyListState } from '../../types';
-import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
+import { applyMiddleware, createStore, Store } from 'redux';
 import { AppAction } from '../action';
 import { policyListReducer } from './reducer';
 import { policyListMiddlewareFactory } from './middleware';
@@ -14,14 +14,16 @@ import { isOnPolicyListPage, selectIsLoading, urlSearchParams } from './selector
 import { DepsStartMock, depsStartMock } from '../../mocks';
 import { setPolicyListApiMockImplementation } from './test_mock_utils';
 import { INGEST_API_DATASOURCES } from './services/ingest';
+import { Immutable } from '../../../../../common/types';
 import { createSpyMiddleware, MiddlewareActionSpyHelper } from '../test_utils';
 
 describe('policy list store concerns', () => {
   let fakeCoreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
-  let store: Store<PolicyListState>;
-  let getState: typeof store['getState'];
-  let dispatch: Dispatch<AppAction>;
+  type PolicyListStore = Store<Immutable<PolicyListState>, Immutable<AppAction>>;
+  let store: PolicyListStore;
+  let getState: PolicyListStore['getState'];
+  let dispatch: PolicyListStore['dispatch'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
 
   beforeEach(() => {

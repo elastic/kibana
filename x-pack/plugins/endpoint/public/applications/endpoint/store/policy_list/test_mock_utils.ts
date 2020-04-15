@@ -18,13 +18,13 @@ const generator = new EndpointDocGenerator('policy-list');
  */
 export const setPolicyListApiMockImplementation = (
   mockedHttpService: jest.Mocked<HttpStart>,
-  responseItems: GetDatasourcesResponse['items'] = [generator.generatePolicyDatasource()]
+  responseItems: GetPolicyListResponse['items'] = [generator.generatePolicyDatasource()]
 ): void => {
   mockedHttpService.get.mockImplementation((...args) => {
     const [path] = args;
     if (typeof path === 'string') {
       if (path === INGEST_API_DATASOURCES) {
-        return Promise.resolve<GetDatasourcesResponse>({
+        return Promise.resolve<GetPolicyListResponse>({
           items: responseItems,
           total: 10,
           page: 1,

@@ -8,30 +8,30 @@ import { createSelector } from 'reselect';
 import { Immutable } from '../../../../../common/types';
 import { HostListState, HostIndexUIQueryParams } from '../../types';
 
-export const listData = (state: HostListState) => state.hosts;
+export const listData = (state: Immutable<HostListState>) => state.hosts;
 
-export const pageIndex = (state: HostListState) => state.pageIndex;
+export const pageIndex = (state: Immutable<HostListState>) => state.pageIndex;
 
-export const pageSize = (state: HostListState) => state.pageSize;
+export const pageSize = (state: Immutable<HostListState>) => state.pageSize;
 
-export const totalHits = (state: HostListState) => state.total;
+export const totalHits = (state: Immutable<HostListState>) => state.total;
 
-export const isLoading = (state: HostListState) => state.loading;
+export const isLoading = (state: Immutable<HostListState>) => state.loading;
 
-export const detailsError = (state: HostListState) => state.detailsError;
+export const detailsError = (state: Immutable<HostListState>) => state.detailsError;
 
-export const detailsData = (state: HostListState) => {
+export const detailsData = (state: Immutable<HostListState>) => {
   return state.details;
 };
 
-export const isOnHostPage = (state: HostListState) =>
+export const isOnHostPage = (state: Immutable<HostListState>) =>
   state.location ? state.location.pathname === '/hosts' : false;
 
 export const uiQueryParams: (
-  state: HostListState
+  state: Immutable<HostListState>
 ) => Immutable<HostIndexUIQueryParams> = createSelector(
-  (state: HostListState) => state.location,
-  (location: HostListState['location']) => {
+  (state: Immutable<HostListState>) => state.location,
+  (location: Immutable<HostListState>['location']) => {
     const data: HostIndexUIQueryParams = {};
     if (location) {
       // Removes the `?` from the beginning of query string if it exists
@@ -52,7 +52,7 @@ export const uiQueryParams: (
   }
 );
 
-export const hasSelectedHost: (state: HostListState) => boolean = createSelector(
+export const hasSelectedHost: (state: Immutable<HostListState>) => boolean = createSelector(
   uiQueryParams,
   ({ selected_host: selectedHost }) => {
     return selectedHost !== undefined;

@@ -10,7 +10,7 @@ import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getTags } from './api';
 import * as i18n from './translations';
 
-interface TagsState {
+export interface TagsState {
   tags: string[];
   isLoading: boolean;
   isError: boolean;
@@ -49,7 +49,7 @@ const initialData: string[] = [];
 
 export const useGetTags = (): TagsState => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
+    isLoading: true,
     isError: false,
     tags: initialData,
   });
