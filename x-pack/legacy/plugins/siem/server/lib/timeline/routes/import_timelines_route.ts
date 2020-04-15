@@ -6,10 +6,6 @@
 
 import { extname } from 'path';
 import { chunk, omit, set } from 'lodash/fp';
-import Boom from 'boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import {
   buildSiemResponse,
@@ -41,7 +37,6 @@ import { LegacyServices } from '../../../types';
 import { Timeline } from '../saved_object';
 import { validate } from '../../detection_engine/routes/rules/validate';
 import { FrameworkRequest } from '../../framework';
-import { throwErrors } from '../../../../../../../plugins/case/common/api';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
@@ -74,11 +69,7 @@ export const importTimelinesRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const { file } = pipe(
-          ImportTimelinesPayloadSchemaRt.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
-
+        const { file } = request.body;
         const { filename } = file.hapi;
 
         const fileExtension = extname(filename).toLowerCase();

@@ -14,11 +14,7 @@ import {
   PinnedEventToReturnSavedObjectRuntimeType,
   PinnedEventSavedObject,
 } from '../pinned_event/types';
-import {
-  SavedObjectsClient,
-  KibanaRequest,
-  RouteValidationError,
-} from '../../../../../../../src/core/server';
+import { SavedObjectsClient } from '../../../../../../../src/core/server';
 
 /*
  *  ColumnHeader Types
@@ -211,32 +207,6 @@ export interface AllTimelineSavedObject
 /**
  * Import/export timelines
  */
-
-export interface ExportTimelinesQuery {
-  file_name: string;
-  exclude_export_details: 'true' | 'false';
-}
-
-export interface ExportTimelinesRequestBody {
-  ids: string[];
-}
-
-export type ExportTimelineRequest = KibanaRequest<
-  unknown,
-  ExportTimelinesQuery,
-  ExportTimelinesRequestBody,
-  'post'
->;
-
-export type RequestValidationResult<T> =
-  | {
-      value: T;
-      error?: undefined;
-    }
-  | {
-      value?: undefined;
-      error: RouteValidationError;
-    };
 
 export type ExportTimelineSavedObjectsClient = Pick<
   SavedObjectsClient,

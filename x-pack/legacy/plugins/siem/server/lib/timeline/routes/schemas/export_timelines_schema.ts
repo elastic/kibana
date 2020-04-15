@@ -6,14 +6,11 @@
 
 import * as rt from 'io-ts';
 
-const ids = rt.array(rt.string);
-export const exportTimelinesSchema = rt.type({ ids });
-
 export const exportTimelinesQuerySchema = rt.type({
   file_name: rt.string,
   exclude_export_details: rt.union([rt.literal('true'), rt.literal('false')]),
 });
 
 export const exportTimelinesRequestBodySchema = rt.type({
-  ids,
+  ids: rt.array(rt.string),
 });

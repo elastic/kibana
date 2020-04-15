@@ -11,8 +11,18 @@ import { failure } from 'io-ts/lib/PathReporter';
 import {
   RouteValidationFunction,
   RouteValidationResultFactory,
+  RouteValidationError,
 } from '../../../../../../../src/core/server';
-import { RequestValidationResult } from '../../lib/timeline/types';
+
+type RequestValidationResult<T> =
+  | {
+      value: T;
+      error?: undefined;
+    }
+  | {
+      value?: undefined;
+      error: RouteValidationError;
+    };
 
 export const buildRouteValidation = <T extends rt.Mixed, A = rt.TypeOf<T>>(
   schema: T

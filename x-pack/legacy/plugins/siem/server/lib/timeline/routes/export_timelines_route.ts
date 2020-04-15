@@ -45,7 +45,7 @@ export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['co
 
         const responseBody = await getExportTimelineByObjectIds({
           client: savedObjectsClient,
-          request,
+          ids: request.body.ids,
         });
 
         return response.ok({
