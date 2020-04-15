@@ -9,14 +9,12 @@ import { Either } from 'fp-ts/lib/Either';
 
 import {
   list_and as listAnd,
-  list_values_type as listValuesType,
   list_values as listValues,
   list_values_operator as listOperator,
 } from '../response/schemas';
 
 export type ListsDefaultArrayC = t.Type<List[], List[], unknown>;
 export type List = t.TypeOf<typeof listAnd>;
-export type ListType = t.TypeOf<typeof listValuesType>;
 export type ListValues = t.TypeOf<typeof listValues>;
 export type ListOperator = t.TypeOf<typeof listOperator>;
 

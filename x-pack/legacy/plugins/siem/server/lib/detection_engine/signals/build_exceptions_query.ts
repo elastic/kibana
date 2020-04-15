@@ -133,12 +133,9 @@ export const buildExceptions = ({
 }): string[] => {
   return lists.reduce<string[]>((acc, item) => {
     const { and, ...exceptionDetails } = { ...item };
-    let andExceptions: string[] = [];
-
-    if (and) {
-      andExceptions = buildExceptions({ query, lists: and, language, includeQuery: false });
-    }
-
+    const andExceptions = and
+      ? buildExceptions({ query, lists: and, language, includeQuery: false })
+      : [];
     const exception = [evaluateValues({ list: exceptionDetails, language }), ...andExceptions];
 
     if (includeQuery) {
