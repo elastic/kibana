@@ -38,7 +38,6 @@ import {
 } from '../../../../common/analytics';
 
 interface Props {
-  filterByIsTraining: undefined | boolean;
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DATA_FRAME_TASK_STATE;
   searchQuery: SavedSearchQuery;
@@ -46,12 +45,7 @@ interface Props {
 
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
 
-export const EvaluatePanel: FC<Props> = ({
-  filterByIsTraining,
-  jobConfig,
-  jobStatus,
-  searchQuery,
-}) => {
+export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -253,10 +247,10 @@ export const EvaluatePanel: FC<Props> = ({
       }
     }
 
-    isTraining = isTraining || filterByIsTraining;
+    isTraining = isTraining;
 
     loadData({ isTraining });
-  }, [JSON.stringify(searchQuery), filterByIsTraining]);
+  }, [JSON.stringify(searchQuery)]);
 
   return (
     <EuiPanel data-test-subj="mlDFAnalyticsRegressionExplorationEvaluatePanel">

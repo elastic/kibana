@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect, useState } from 'react';
+import React, { Fragment, FC, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -57,26 +56,14 @@ const showingFirstDocs = i18n.translate(
 );
 
 interface Props {
-  filterByIsTraining: undefined | boolean;
   indexPattern: IndexPattern;
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DATA_FRAME_TASK_STATE;
   setEvaluateSearchQuery: React.Dispatch<React.SetStateAction<object>>;
-  setFilterByIsTraining: React.Dispatch<React.SetStateAction<undefined | boolean>>;
 }
 
 export const ResultsTable: FC<Props> = React.memo(
-  ({
-    filterByIsTraining,
-    indexPattern,
-    jobConfig,
-    jobStatus,
-    setEvaluateSearchQuery,
-    setFilterByIsTraining,
-  }) => {
-    const [trainingButtonActive, setTrainingButtonActive] = useState<boolean>(false);
-    const [testingButtonActive, setTestingButtonActive] = useState<boolean>(false);
-
+  ({ indexPattern, jobConfig, jobStatus, setEvaluateSearchQuery }) => {
     const needsDestIndexFields = indexPattern && indexPattern.title === jobConfig.source.index[0];
 
     const {
@@ -86,7 +73,6 @@ export const ResultsTable: FC<Props> = React.memo(
       searchQuery,
       selectedFields,
       rowCount,
-      setFilterByIsTraining: setTableFilterByIsTraining,
       setPagination,
       setSearchQuery,
       setSelectedFields,
@@ -160,30 +146,6 @@ export const ResultsTable: FC<Props> = React.memo(
       );
     }
 
-    const toggleTestingButton = () => {
-      if (filterByIsTraining === false) {
-        setTestingButtonActive(false);
-        setFilterByIsTraining(undefined);
-        setTableFilterByIsTraining(undefined);
-      } else {
-        setTestingButtonActive(true);
-        setFilterByIsTraining(false);
-        setTableFilterByIsTraining(false);
-      }
-    };
-
-    const toggleTrainingButton = () => {
-      if (filterByIsTraining === true) {
-        setTrainingButtonActive(false);
-        setFilterByIsTraining(undefined);
-        setTableFilterByIsTraining(undefined);
-      } else {
-        setTrainingButtonActive(true);
-        setFilterByIsTraining(true);
-        setTableFilterByIsTraining(true);
-      }
-    };
-
     return (
       <EuiPanel grow={false} data-test-subj="mlDFAnalyticsRegressionExplorationTablePanel">
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -232,40 +194,6 @@ export const ResultsTable: FC<Props> = React.memo(
                     indexPattern={indexPattern}
                     setSearchQuery={setSearchQuery}
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="none" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        onClick={toggleTestingButton}
-                        color={testingButtonActive ? 'text' : undefined}
-                        isDisabled={trainingButtonActive ? true : false}
-                        size="xs"
-                      >
-                        {i18n.translate(
-                          'xpack.ml.dataframe.analytics.regressionExploration.TestingFilterText',
-                          {
-                            defaultMessage: 'Testing',
-                          }
-                        )}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        onClick={toggleTrainingButton}
-                        color={trainingButtonActive ? 'text' : undefined}
-                        isDisabled={testingButtonActive ? true : false}
-                        size="xs"
-                      >
-                        {i18n.translate(
-                          'xpack.ml.dataframe.analytics.regressionExploration.TrainingFilterText',
-                          {
-                            defaultMessage: 'Training',
-                          }
-                        )}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiFormRow
