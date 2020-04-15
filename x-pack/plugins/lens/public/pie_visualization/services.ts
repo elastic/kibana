@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createGetterSetter } from '../../../../../../src/plugins/kibana_utils/public';
-import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { createGetterSetter } from '../../../../../src/plugins/kibana_utils/public';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export const [getExecuteTriggerActions, setExecuteTriggerActions] = createGetterSetter<
   UiActionsStart['executeTriggerActions']

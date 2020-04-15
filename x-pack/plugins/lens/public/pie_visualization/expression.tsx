@@ -29,12 +29,12 @@ import {
   ExpressionRenderDefinition,
   ExpressionFunctionDefinition,
 } from 'src/plugins/expressions/public';
-import { EmbeddableVisTriggerContext } from '../../../../../../src/plugins/embeddable/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
+import { EmbeddableVisTriggerContext } from '../../../../../src/plugins/embeddable/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { LensMultiTable, FormatFactory } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES } from './constants';
-import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { getExecuteTriggerActions } from './services';
 
 const EMPTY_SLICE = Symbol('empty_slice');
