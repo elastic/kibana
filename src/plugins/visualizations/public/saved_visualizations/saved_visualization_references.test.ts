@@ -19,52 +19,39 @@
 
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { VisSavedObject, SavedVisState } from '../types';
+import { SavedObjectReference } from '../../../../core/types';
 
 describe('extractReferences', () => {
   test('extracts nothing if savedSearchId is empty', () => {
     const doc = {
       id: '1',
       attributes: {
+        title: 'test',
+        visState: {} as any,
         foo: true,
       },
       references: [],
     };
-    const updatedDoc = extractReferences(doc);
-    expect(updatedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "foo": true,
-  },
-  "references": Array [],
-}
-`);
+    const [newAttributes] = extractReferences(doc.attributes);
+    doc.attributes = newAttributes as any;
+    expect(doc).toMatchSnapshot();
   });
 
   test('extracts references from savedSearchId', () => {
     const doc = {
       id: '1',
       attributes: {
+        title: 'test',
+        visState: {} as any,
         foo: true,
         savedSearchId: '123',
       },
-      references: [],
+      references: [] as SavedObjectReference[],
     };
-    const updatedDoc = extractReferences(doc);
-    expect(updatedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "foo": true,
-    "savedSearchRefName": "search_0",
-  },
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-}
-`);
+    const [newAttributes, references] = extractReferences(doc.attributes);
+    doc.attributes = newAttributes as any;
+    doc.references = references;
+    expect(doc).toMatchSnapshot();
   });
 
   test('extracts references from controls', () => {
@@ -72,7 +59,8 @@ Object {
       id: '1',
       attributes: {
         foo: true,
-        visState: JSON.stringify({
+        title: 'test',
+        visState: {
           params: {
             controls: [
               {
@@ -84,27 +72,15 @@ Object {
               },
             ],
           },
-        }),
+        } as any,
       },
-      references: [],
+      references: [] as SavedObjectReference[],
     };
-    const updatedDoc = extractReferences(doc);
+    const [newAttributes, references] = extractReferences(doc.attributes);
+    doc.attributes = newAttributes as any;
+    doc.references = references;
 
-    expect(updatedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "foo": true,
-    "visState": "{\\"params\\":{\\"controls\\":[{\\"bar\\":true,\\"indexPatternRefName\\":\\"control_0_index_pattern\\"},{\\"bar\\":false}]}}",
-  },
-  "references": Array [
-    Object {
-      "id": "pattern*",
-      "name": "control_0_index_pattern",
-      "type": "index-pattern",
-    },
-  ],
-}
-`);
+    expect(doc).toMatchSnapshot();
   });
 });
 
@@ -115,12 +91,7 @@ describe('injectReferences', () => {
       title: 'test',
     } as VisSavedObject;
     injectReferences(context, []);
-    expect(context).toMatchInlineSnapshot(`
-Object {
-  "id": "1",
-  "title": "test",
-}
-`);
+    expect(context).toMatchSnapshot();
   });
 
   test('injects references into context', () => {
@@ -155,26 +126,7 @@ Object {
       },
     ];
     injectReferences(context, references);
-    expect(context).toMatchInlineSnapshot(`
-Object {
-  "id": "1",
-  "savedSearchId": "123",
-  "title": "test",
-  "visState": Object {
-    "params": Object {
-      "controls": Array [
-        Object {
-          "foo": true,
-          "indexPattern": "pattern*",
-        },
-        Object {
-          "foo": false,
-        },
-      ],
-    },
-  },
-}
-`);
+    expect(context).toMatchSnapshot();
   });
 
   test(`fails when it can't find the saved search reference in the array`, () => {

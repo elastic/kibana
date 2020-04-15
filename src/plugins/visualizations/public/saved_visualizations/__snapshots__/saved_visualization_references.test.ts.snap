@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`extractReferences extracts nothing if savedSearchId is empty 1`] = `
+Object {
+  "attributes": Object {
+    "foo": true,
+    "title": "test",
+    "visState": Object {},
+  },
+  "id": "1",
+  "references": Array [],
+}
+`;
+
+exports[`extractReferences extracts references from controls 1`] = `
+Object {
+  "attributes": Object {
+    "foo": true,
+    "title": "test",
+    "visState": Object {
+      "params": Object {
+        "controls": Array [
+          Object {
+            "bar": true,
+            "indexPatternRefName": "control_0_index_pattern",
+          },
+          Object {
+            "bar": false,
+          },
+        ],
+      },
+    },
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "pattern*",
+      "name": "control_0_index_pattern",
+      "type": "index-pattern",
+    },
+  ],
+}
+`;
+
+exports[`extractReferences extracts references from savedSearchId 1`] = `
+Object {
+  "attributes": Object {
+    "foo": true,
+    "savedSearchRefName": "search_0",
+    "title": "test",
+    "visState": Object {},
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+}
+`;
+
+exports[`injectReferences injects nothing when savedSearchRefName is null 1`] = `
+Object {
+  "id": "1",
+  "title": "test",
+}
+`;
+
+exports[`injectReferences injects references into context 1`] = `
+Object {
+  "id": "1",
+  "savedSearchId": "123",
+  "title": "test",
+  "visState": Object {
+    "params": Object {
+      "controls": Array [
+        Object {
+          "foo": true,
+          "indexPattern": "pattern*",
+        },
+        Object {
+          "foo": false,
+        },
+      ],
+    },
+  },
+}
+`;

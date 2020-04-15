@@ -17,11 +17,9 @@
  * under the License.
  */
 import { SavedObjectReference } from '../../../../core/public';
-import { VisSavedObject } from '../types';
+import { ISavedVis } from '../types';
 
-export function extractReferences(
-  attributes: VisSavedObject
-): [VisSavedObject, SavedObjectReference[]] {
+export function extractReferences(attributes: ISavedVis): [ISavedVis, SavedObjectReference[]] {
   const updatedAttributes = { ...attributes };
   const updatedReferences = [];
 
@@ -38,7 +36,7 @@ export function extractReferences(
 
   // Extract index patterns from controls
   if (updatedAttributes.visState) {
-    const visState = JSON.parse(String(updatedAttributes.visState));
+    const visState = updatedAttributes.visState;
     const controls = (visState.params && visState.params.controls) || [];
     controls.forEach((control: Record<string, string>, i: number) => {
       if (!control.indexPattern) {
@@ -58,7 +56,7 @@ export function extractReferences(
   return [updatedAttributes, updatedReferences];
 }
 
-export function injectReferences(savedObject: VisSavedObject, references: SavedObjectReference[]) {
+export function injectReferences(savedObject: ISavedVis, references: SavedObjectReference[]) {
   if (savedObject.savedSearchRefName) {
     const savedSearchReference = references.find(
       reference => reference.name === savedObject.savedSearchRefName

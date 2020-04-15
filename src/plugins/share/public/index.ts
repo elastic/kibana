@@ -32,6 +32,7 @@ export {
   PersistableState,
   PersistableStates,
   PersistableStateDefinition,
+  SerializableState,
 } from './persistable_state';
 
 export {

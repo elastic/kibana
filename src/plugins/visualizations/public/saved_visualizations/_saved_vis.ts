@@ -127,7 +127,10 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
         mapping: SavedVis.mapping,
         searchSource: SavedVis.searchSource,
         extractReferences: ({ attributes, references }) => {
-          const [newState, newReferences] = extractReferences(attributes as any);
+          const [newState, newReferences] = extractReferences({
+            ...attributes,
+            visState: JSON.parse(attributes.visState as string),
+          } as any);
           const allReferences = [...references, ...newReferences];
           return {
             references: allReferences,

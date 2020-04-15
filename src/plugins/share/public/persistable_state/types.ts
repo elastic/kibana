@@ -21,7 +21,7 @@ import { SavedObjectReference } from 'src/core/public';
 
 type State = string | number | boolean | null | undefined | SerializableState;
 
-interface SerializableState {
+export interface SerializableState {
   [key: string]: State | State[];
 }
 
@@ -56,7 +56,7 @@ export interface PersistableStateContract<Id extends string> {
  * @public
  * TODO: should be <S extends SerializableState>
  */
-export interface PersistableState<S extends unknown> {
+export interface PersistableState<S extends SerializableState> {
   state: S;
 }
 
@@ -77,7 +77,7 @@ export interface PersistableStates {
   // Fallback state for if someone forgets to use `declare module` to
   // add their state to this interface.
   // TODO: should be PersistableState<SerializableState>
-  [key: string]: PersistableState<unknown>;
+  [key: string]: PersistableState<SerializableState>;
 }
 
 /**
