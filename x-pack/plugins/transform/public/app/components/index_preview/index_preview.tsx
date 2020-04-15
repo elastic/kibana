@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './_index_preview.scss';
+
 import React, { useEffect, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -16,7 +18,6 @@ import {
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiProgress,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -138,12 +139,6 @@ export const IndexPreview: FC<Props> = props => {
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <div className="transform__progress">
-        {status === INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-        {status !== INDEX_STATUS.LOADING && (
-          <EuiProgress size="xs" color="accent" max={1} value={0} />
-        )}
-      </div>
       {status === INDEX_STATUS.ERROR && (
         <div data-test-subj={`${dataTestSubj} error`}>
           <EuiCallOut
@@ -162,6 +157,7 @@ export const IndexPreview: FC<Props> = props => {
       )}
       <EuiDataGrid
         aria-label={isWithHeader(props) ? props.title : ''}
+        className={`mlDataGrid${!isWithHeader(props) ? '-noHeader' : ''}`}
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         gridStyle={euiDataGridStyle}

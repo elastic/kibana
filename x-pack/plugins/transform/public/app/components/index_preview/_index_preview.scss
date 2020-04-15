@@ -1,0 +1,7 @@
+/* override to hide the top border of EuiDataGrid on the transform list preview
+   to avoid a 2px line where EuiDataGrid and EuiTabs clash. */
+.mlDataGrid-noHeader {
+  .euiDataGrid__controls {
+    border-top: 0;
+  }
+}
