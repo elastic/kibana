@@ -8,12 +8,16 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHealth,
+  EuiHorizontalRule,
+  EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { useAlertListSelector } from '../../hooks/use_alerts_selector';
 import * as selectors from '../../../../store/alerts/selectors';
@@ -113,7 +117,24 @@ export const AlertDetailsOverview = styled(
           <TakeActionDropdown />
           <EuiSpacer />
         </section>
-        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+        <section className="alert-details-tabs">
+          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+        </section>
+        <section className="alert-details-pagination">
+          <EuiHorizontalRule />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty flush="left" iconType="arrowLeft" iconSide="left">
+                Previous Alert
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty flush="right" iconType="arrowRight" iconSide="right">
+                Next Alert
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </section>
       </>
     );
   })
