@@ -131,6 +131,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
 
+    const { fieldFormats } = getInternalStartServices();
+
     const aggTypesStart = this.aggTypesRegistry.start();
 
     return {
@@ -138,6 +140,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
+            fieldFormats,
             typesRegistry: aggTypesStart,
           });
         },

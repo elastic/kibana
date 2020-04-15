@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import moment from 'moment-timezone';
 import { AllCases } from './';
 import { TestProviders } from '../../../../mock';
-import { useGetCasesMockState } from '../__mock__/case_data';
+import { useGetCasesMockState } from '../../../../containers/case/mock';
 import * as i18n from './translations';
 
 import { getEmptyTagValue } from '../../../../components/empty_value';

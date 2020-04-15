@@ -30,6 +30,7 @@ import {
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
+  InternalStartServices,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
@@ -89,13 +90,23 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   private readonly storage: IStorageWrapper;
   private readonly packageInfo: PackageInfo;
 
-  private getInternalStartServices() {
+  private getInternalStartServices(): InternalStartServices {
     return {
-      fieldFormats: getFieldFormats(),
-      notifications: getNotifications(),
-      uiSettings: getUiSettings(),
-      injectedMetadata: getInjectedMetadata(),
-      searchService: getSearchService(),
+      get fieldFormats() {
+        return getFieldFormats();
+      },
+      get notifications() {
+        return getNotifications();
+      },
+      get uiSettings() {
+        return getUiSettings();
+      },
+      get injectedMetadata() {
+        return getInjectedMetadata();
+      },
+      get searchService() {
+        return getSearchService();
+      },
     };
   }
 
@@ -165,6 +176,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       indexPatterns,
       getInternalStartServices: this.getInternalStartServices,
     });
+
     setSearchService(search);
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));

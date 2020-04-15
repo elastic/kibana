@@ -71,22 +71,16 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { uniqueId, uniq, extend, pick, difference, set, omit, keys, isFunction } from 'lodash';
-import { CoreStart, SavedObjectReference } from 'kibana/public';
+import { SavedObjectReference } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { DataPublicPluginStart, IIndexPattern, SearchRequest } from '../..';
+import { IIndexPattern, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { GetInternalStartServicesFn } from '../../types';
-
-interface SearchSourceDependencies {
-  uiSettings: CoreStart['uiSettings'];
-  searchService: DataPublicPluginStart['search'];
-  injectedMetadata: CoreStart['injectedMetadata'];
-}
 
 /** @internal **/
 export class SearchSource {
@@ -99,19 +93,18 @@ export class SearchSource {
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
   private fields: SearchSourceFields;
-  private dependencies: {
-    uiSettings: CoreStart['uiSettings'];
-    searchService: DataPublicPluginStart['search'];
-    injectedMetadata: CoreStart['injectedMetadata'];
-  };
+  private readonly getInternalStartServices: GetInternalStartServicesFn;
 
-  constructor(fields: SearchSourceFields = {}, dependencies: SearchSourceDependencies) {
+  constructor(
+    fields: SearchSourceFields = {},
+    getInternalStartServices: GetInternalStartServicesFn
+  ) {
     this.fields = fields;
-    this.dependencies = dependencies;
+    this.getInternalStartServices = getInternalStartServices;
   }
 
   /** ***
-   * PUBLIC API
+   * PUBLIC APIgetInternalStartServices
    *****/
 
   setPreferredSearchStrategyId(searchStrategyId: string) {
@@ -159,11 +152,11 @@ export class SearchSource {
   }
 
   create() {
-    return new SearchSource({}, this.dependencies);
+    return new SearchSource({}, this.getInternalStartServices);
   }
 
   createCopy() {
-    const newSearchSource = new SearchSource({}, this.dependencies);
+    const newSearchSource = new SearchSource({}, this.getInternalStartServices);
     newSearchSource.setFields({ ...this.fields });
     // when serializing the internal fields we lose the internal classes used in the index
     // pattern, so we have to set it again to workaround this behavior
@@ -173,7 +166,7 @@ export class SearchSource {
   }
 
   createChild(options = {}) {
-    const childSearchSource = new SearchSource({}, this.dependencies);
+    const childSearchSource = new SearchSource({}, this.getInternalStartServices);
     childSearchSource.setParent(this, options);
     return childSearchSource;
   }
@@ -208,9 +201,9 @@ export class SearchSource {
 
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
-    const esShardTimeout = this.dependencies.injectedMetadata.getInjectedVar(
-      'esShardTimeout'
-    ) as number;
+
+    const { injectedMetadata, searchService, uiSettings } = this.getInternalStartServices();
+    const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
     const response = await fetchSoon(
       searchRequest,
       {
@@ -218,8 +211,8 @@ export class SearchSource {
         ...options,
       },
       {
-        searchService: this.dependencies.searchService,
-        config: this.dependencies.uiSettings,
+        searchService,
+        config: uiSettings,
         esShardTimeout,
       }
     );
@@ -311,6 +304,8 @@ export class SearchSource {
       }
     };
 
+    const { uiSettings } = this.getInternalStartServices();
+
     switch (key) {
       case 'filter':
         return addToRoot('filters', (data.filters || []).concat(val));
@@ -331,7 +326,7 @@ export class SearchSource {
         const sort = normalizeSortRequest(
           val,
           this.getField('index'),
-          this.dependencies.uiSettings.get('sort:options')
+          uiSettings.get('sort:options')
         );
         return addToBody(key, sort);
       default:
@@ -385,12 +380,11 @@ export class SearchSource {
       body._source = index.getSourceFiltering();
     }
 
+    const { uiSettings } = this.getInternalStartServices();
+
     if (body._source) {
       // exclude source fields for this index pattern specified by the user
-      const filter = fieldWildcardFilter(
-        body._source.excludes,
-        this.dependencies.uiSettings.get('metaFields')
-      );
+      const filter = fieldWildcardFilter(body._source.excludes, uiSettings.get('metaFields'));
       body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
         filter(docvalueField.field)
       );
@@ -408,14 +402,11 @@ export class SearchSource {
       set(body, '_source.includes', remainingFields);
     }
 
-    const esQueryConfigs = getEsQueryConfig(this.dependencies.uiSettings);
+    const esQueryConfigs = getEsQueryConfig(uiSettings);
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(
-        body.query,
-        this.dependencies.uiSettings.get('doc_table:highlight')
-      );
+      body.highlight = getHighlightRequest(body.query, uiSettings.get('doc_table:highlight'));
       delete searchRequest.highlightAll;
     }
 
@@ -528,11 +519,9 @@ export class SearchSource {
 export const getSearchSourceType = (
   getInternalStartServices: GetInternalStartServicesFn
 ): SearchSourceType => {
-  const { uiSettings, searchService, injectedMetadata } = getInternalStartServices();
-
   return class DecoratedSearchSource extends SearchSource {
     constructor(fields?: SearchSourceFields) {
-      super(fields, { uiSettings, searchService, injectedMetadata });
+      super(fields, getInternalStartServices);
     }
   };
 };
