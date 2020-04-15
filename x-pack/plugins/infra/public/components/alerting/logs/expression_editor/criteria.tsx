@@ -9,7 +9,13 @@ import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Criterion } from './criterion';
 
-export const Criteria: React.FC = ({ fields, criteria, updateCriterion, removeCriterion }) => {
+export const Criteria: React.FC = ({
+  fields,
+  criteria,
+  updateCriterion,
+  removeCriterion,
+  errors,
+}) => {
   if (!criteria) return null;
   return (
     <EuiFlexGroup gutterSize="s">
@@ -24,6 +30,7 @@ export const Criteria: React.FC = ({ fields, criteria, updateCriterion, removeCr
               updateCriterion={updateCriterion}
               removeCriterion={removeCriterion}
               canDelete={criteria.length > 1}
+              errors={errors[idx]}
             />
           );
         })}

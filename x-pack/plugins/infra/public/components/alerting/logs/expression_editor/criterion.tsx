@@ -15,6 +15,7 @@ import {
   EuiExpression,
   EuiFieldText,
   EuiButtonIcon,
+  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -27,6 +28,7 @@ export const Criterion: React.FC = ({
   updateCriterion,
   removeCriterion,
   canDelete,
+  errors,
 }) => {
   const [isFieldPopoverOpen, setIsFieldPopoverOpen] = useState(false);
   const [isComparatorPopoverOpen, setIsComparatorPopoverOpen] = useState(false);
@@ -79,6 +81,7 @@ export const Criterion: React.FC = ({
               uppercase={true}
               value={criterion.field}
               isActive={isFieldPopoverOpen}
+              color={errors.field.length === 0 ? 'secondary' : 'danger'}
               onClick={() => setIsFieldPopoverOpen(true)}
             />
           }
@@ -90,12 +93,14 @@ export const Criterion: React.FC = ({
         >
           <div>
             <EuiPopoverTitle>Field</EuiPopoverTitle>
-            <EuiSelect
-              compressed
-              value={criterion.field}
-              onChange={e => updateCriterion(idx, { field: e.target.value })}
-              options={fieldOptions}
-            />
+            <EuiFormRow isInvalid={errors.field.length > 0} error={errors.field}>
+              <EuiSelect
+                compressed
+                value={criterion.field}
+                onChange={e => updateCriterion(idx, { field: e.target.value })}
+                options={fieldOptions}
+              />
+            </EuiFormRow>
           </div>
         </EuiPopover>
       </EuiFlexItem>
@@ -108,6 +113,9 @@ export const Criterion: React.FC = ({
               uppercase={true}
               value={criterion.value}
               isActive={isComparatorPopoverOpen}
+              color={
+                errors.comparator.length === 0 && errors.value.length === 0 ? 'secondary' : 'danger'
+              }
               onClick={() => setIsComparatorPopoverOpen(true)}
             />
           }
@@ -119,28 +127,32 @@ export const Criterion: React.FC = ({
         >
           <div>
             <EuiPopoverTitle>Comparison : Value</EuiPopoverTitle>
-            <EuiSelect
-              compressed
-              value={criterion.comparator}
-              onChange={e => updateCriterion(idx, { comparator: e.target.value })}
-              options={compatibleComparatorOptions}
-            />
-            {fieldInfo.type === 'number' ? (
-              <EuiFieldNumber
+            <EuiFormRow isInvalid={errors.comparator.length > 0} error={errors.comparator}>
+              <EuiSelect
                 compressed
-                value={criterion.value}
-                onChange={e => {
-                  const number = parseInt(e.target.value, 10);
-                  updateCriterion(idx, { value: number ? number : undefined });
-                }}
+                value={criterion.comparator}
+                onChange={e => updateCriterion(idx, { comparator: e.target.value })}
+                options={compatibleComparatorOptions}
               />
-            ) : (
-              <EuiFieldText
-                compressed
-                value={criterion.value}
-                onChange={e => updateCriterion(idx, { value: e.target.value })}
-              />
-            )}
+            </EuiFormRow>
+            <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
+              {fieldInfo.type === 'number' ? (
+                <EuiFieldNumber
+                  compressed
+                  value={criterion.value}
+                  onChange={e => {
+                    const number = parseInt(e.target.value, 10);
+                    updateCriterion(idx, { value: number ? number : undefined });
+                  }}
+                />
+              ) : (
+                <EuiFieldText
+                  compressed
+                  value={criterion.value}
+                  onChange={e => updateCriterion(idx, { value: e.target.value })}
+                />
+              )}
+            </EuiFormRow>
           </div>
         </EuiPopover>
       </EuiFlexItem>

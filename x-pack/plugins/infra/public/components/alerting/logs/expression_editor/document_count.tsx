@@ -13,6 +13,7 @@ import {
   EuiSelect,
   EuiFieldNumber,
   EuiExpression,
+  EuiFormRow,
 } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Comparator } from '../../../../../server/lib/alerting/log_threshold/types';
@@ -26,7 +27,7 @@ const getComparatorOptions = () => {
   ];
 };
 
-export const DocumentCount: React.FC = ({ comparator, value, updateCount }) => {
+export const DocumentCount: React.FC = ({ comparator, value, updateCount, errors }) => {
   const [isComparatorPopoverOpen, setComparatorPopoverOpenState] = useState(false);
   const [isValuePopoverOpen, setIsValuePopoverOpen] = useState(false);
 
@@ -72,6 +73,7 @@ export const DocumentCount: React.FC = ({ comparator, value, updateCount }) => {
               value={'log entries'}
               isActive={isValuePopoverOpen}
               onClick={() => setIsValuePopoverOpen(true)}
+              color={errors.value.length === 0 ? 'secondary' : 'danger'}
             />
           }
           isOpen={isValuePopoverOpen}
@@ -82,14 +84,16 @@ export const DocumentCount: React.FC = ({ comparator, value, updateCount }) => {
         >
           <div>
             <EuiPopoverTitle>LOG ENTRIES</EuiPopoverTitle>
-            <EuiFieldNumber
-              compressed
-              value={value}
-              onChange={e => {
-                const number = parseInt(e.target.value, 10);
-                updateCount({ value: number ? number : undefined });
-              }}
-            />
+            <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
+              <EuiFieldNumber
+                compressed
+                value={value}
+                onChange={e => {
+                  const number = parseInt(e.target.value, 10);
+                  updateCount({ value: number ? number : undefined });
+                }}
+              />
+            </EuiFormRow>
           </div>
         </EuiPopover>
       </EuiFlexItem>

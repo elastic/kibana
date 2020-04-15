@@ -49,7 +49,7 @@ export interface ExpressionCriteria {
 }
 
 interface Props {
-  errors: IErrorObject[];
+  errors: IErrorObject;
   alertParams: LogsDocumentCountExpression;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
@@ -69,7 +69,7 @@ const DEFAULT_EXPRESSION = {
 
 export const ExpressionEditor: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors } = props;
-  const { source, createDerivedIndexPattern } = useSource({ sourceId: 'default' });
+  const { createDerivedIndexPattern } = useSource({ sourceId: 'default' });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('logs'), [
@@ -160,6 +160,7 @@ export const ExpressionEditor: React.FC<Props> = props => {
         comparator={alertParams.count?.comparator}
         value={alertParams.count?.value}
         updateCount={updateCount}
+        errors={errors.count}
       />
 
       <Criteria
@@ -167,14 +168,15 @@ export const ExpressionEditor: React.FC<Props> = props => {
         criteria={alertParams.criteria}
         updateCriterion={updateCriterion}
         removeCriterion={removeCriterion}
+        errors={errors.criteria}
       />
 
       <ForLastExpression
         timeWindowSize={timeSize}
         timeWindowUnit={timeUnit}
-        errors={emptyError}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
+        errors={errors}
       />
 
       <div>
