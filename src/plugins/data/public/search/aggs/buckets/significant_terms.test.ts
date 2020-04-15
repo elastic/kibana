@@ -70,6 +70,7 @@ describe('Significant Terms Agg', () => {
             typesRegistry: mockAggTypesRegistry([
               getSignificantTermsBucketAgg(aggTypesDependencies),
             ]),
+            fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
           }
         );
       };

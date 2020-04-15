@@ -59,7 +59,7 @@ const detectionsTabs: Record<string, NavTab> = {
   },
 };
 
-const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
+export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
   query,
   setAbsoluteRangeDatePicker,

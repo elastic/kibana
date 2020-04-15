@@ -20,6 +20,8 @@ const MyPanel = styled(EuiPanel)`
   position: relative;
 `;
 
+MyPanel.displayName = 'MyPanel';
+
 const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title }) => (
   <MyPanel>
     {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
