@@ -329,7 +329,6 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
         </EuiFlexGroup>
         {isRequestVisible ? (
           <PipelineRequestFlyout
-            pipeline={form.getFormData() as Pipeline}
             closeFlyout={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
           />
         ) : null}
