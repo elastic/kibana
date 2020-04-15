@@ -16,7 +16,6 @@ import { mlFieldFormatService } from '../../../../../services/field_format_servi
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
-// const FEATURE_IMPORTANCE = 'feature_importance';
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 type Pagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
