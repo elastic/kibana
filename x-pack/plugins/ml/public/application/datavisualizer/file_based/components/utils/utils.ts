@@ -15,6 +15,7 @@ import {
 import { getMlConfig } from '../../../../util/dependency_cache';
 
 const DEFAULT_LINES_TO_SAMPLE = 1000;
+const UPLOAD_SIZE_MB = 5;
 
 const overrideDefaults = {
   timestampFormat: undefined,
@@ -34,15 +35,22 @@ export function readFile(file: File) {
   return new Promise((resolve, reject) => {
     if (file && file.size) {
       const reader = new FileReader();
-      reader.readAsText(file);
+      reader.readAsArrayBuffer(file);
 
       reader.onload = (() => {
         return () => {
+          const decoder = new TextDecoder();
           const data = reader.result;
-          if (data === '') {
+          if (data === null || typeof data === 'string') {
+            return reject();
+          }
+          const size = UPLOAD_SIZE_MB * Math.pow(2, 20);
+          const fileContents = decoder.decode(data.slice(0, size));
+
+          if (fileContents === '') {
             reject();
           } else {
-            resolve({ data });
+            resolve({ fileContents, data });
           }
         };
       })();
@@ -50,14 +58,6 @@ export function readFile(file: File) {
       reject();
     }
   });
-}
-
-export function reduceData(data: string, mb: number) {
-  // assuming ascii characters in the file where 1 char is 1 byte
-  // TODO -  change this when other non UTF-8 formats are
-  // supported for the read data
-  const size = mb * Math.pow(2, 20);
-  return data.length >= size ? data.slice(0, size) : data;
 }
 
 export function getMaxBytes() {
