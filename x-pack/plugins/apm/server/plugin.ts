@@ -126,7 +126,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       getApmIndices: async () =>
         getApmIndices({
           savedObjectsClient: await getInternalSavedObjectsClient(core),
-          config: this.currentConfig!
+          config: await mergedConfig$.pipe(take(1)).toPromise()
         })
     };
   }
@@ -136,13 +136,13 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       throw new Error('APMPlugin needs to be setup before calling start()');
     }
 
-    // create agent configuration index without blocking setup lifecycle
+    // create agent configuration index without blocking start lifecycle
     createApmAgentConfigurationIndex({
       esClient: core.elasticsearch.legacy.client,
       config: this.currentConfig,
       logger: this.logger
     });
-    // create custom action index without blocking setup lifecycle
+    // create custom action index without blocking start lifecycle
     createApmCustomLinkIndex({
       esClient: core.elasticsearch.legacy.client,
       config: this.currentConfig,
