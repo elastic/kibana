@@ -30,7 +30,7 @@ interface ValidationResults {
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .ingest-active-button {
-    color: ${props => props.theme.eui.euiColorPrimary}};
+    color: ${props => props.theme.eui.euiColorPrimary};
   }
 `;
 
@@ -242,6 +242,71 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
                 </EuiFormRow>
               </>
             )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiText>
+              <h4>
+                <FormattedMessage
+                  id="xpack.ingestManager.agentConfigForm.monitoringLabel"
+                  defaultMessage="Monitor Elastic agent"
+                />
+              </h4>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSwitch
+              showLabel={true}
+              label={
+                <FormattedMessage
+                  id="xpack.ingestManager.agentConfigForm.monitoringLogsFieldLabel"
+                  defaultMessage="Collect agent logs"
+                />
+              }
+              checked={
+                agentConfig.monitoring_enabled !== undefined &&
+                agentConfig.monitoring_enabled.indexOf('logs') >= 0
+              }
+              onChange={() => {
+                const hasLogs =
+                  agentConfig.monitoring_enabled &&
+                  agentConfig.monitoring_enabled.indexOf('logs') >= 0;
+
+                const previousValues = agentConfig.monitoring_enabled || [];
+                updateAgentConfig({
+                  monitoring_enabled: hasLogs
+                    ? previousValues.filter(type => type !== 'logs')
+                    : [...previousValues, 'logs'],
+                });
+              }}
+            />
+            <EuiSpacer size="m" />
+            <EuiSwitch
+              showLabel={true}
+              label={
+                <FormattedMessage
+                  id="xpack.ingestManager.agentConfigForm.monitoringMetricsFieldLabel"
+                  defaultMessage="Collect agent metrics"
+                />
+              }
+              checked={
+                agentConfig.monitoring_enabled !== undefined &&
+                agentConfig.monitoring_enabled.indexOf('metrics') >= 0
+              }
+              onChange={() => {
+                const hasMetrics =
+                  agentConfig.monitoring_enabled &&
+                  agentConfig.monitoring_enabled.indexOf('metrics') >= 0;
+
+                const previousValues = agentConfig.monitoring_enabled || [];
+                updateAgentConfig({
+                  monitoring_enabled: hasMetrics
+                    ? previousValues.filter(type => type !== 'metrics')
+                    : [...previousValues, 'metrics'],
+                });
+              }}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </StyledEuiAccordion>

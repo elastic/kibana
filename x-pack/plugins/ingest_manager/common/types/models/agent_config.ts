@@ -23,6 +23,7 @@ export interface NewAgentConfig {
   namespace?: string;
   description?: string;
   is_default?: boolean;
+  monitoring_enabled?: Array<'logs' | 'metrics'>;
 }
 
 export interface AgentConfig extends NewAgentConfig, SavedObjectAttributes {
@@ -58,4 +59,10 @@ export interface FullAgentConfig {
   };
   datasources: FullAgentConfigDatasource[];
   revision?: number;
+  'settings.monitoring'?: {
+    use_output: string;
+    enabled: boolean;
+    metrics: boolean;
+    logs: boolean;
+  };
 }
