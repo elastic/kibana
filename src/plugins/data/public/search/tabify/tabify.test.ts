@@ -22,9 +22,11 @@ import { IndexPattern } from '../../index_patterns';
 import { AggConfigs, IAggConfig, IAggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
+import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('tabifyAggResponse Integration', () => {
   const typesRegistry = mockAggTypesRegistry();
+  const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
   const createAggConfigs = (aggs: IAggConfig[] = []) => {
     const field = {
@@ -42,6 +44,7 @@ describe('tabifyAggResponse Integration', () => {
 
     return new AggConfigs(indexPattern, aggs, {
       typesRegistry,
+      fieldFormats,
     });
   };
 
