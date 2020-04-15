@@ -15,13 +15,6 @@ Array [
                     "field": "monitor.duration.us",
                   },
                 },
-                "status": Object {
-                  "terms": Object {
-                    "field": "monitor.status",
-                    "shard_size": 2,
-                    "size": 2,
-                  },
-                },
               },
               "terms": Object {
                 "field": "observer.geo.name",
