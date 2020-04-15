@@ -57,7 +57,6 @@ const {
   core,
   chrome,
   data,
-  docTitle,
   history,
   indexPatterns,
   filterManager,
@@ -761,7 +760,7 @@ function discoverController(
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
-            docTitle.change(savedSearch.lastSavedTitle);
+            chrome.docTitle.change(savedSearch.lastSavedTitle);
           }
         }
       });
