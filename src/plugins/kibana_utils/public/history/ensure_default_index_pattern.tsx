@@ -42,7 +42,7 @@ export async function ensureDefaultIndexPattern(
   data: DataPublicPluginStart,
   history: History
 ) {
-  const patterns = await data.indexPatterns.getIds(true);
+  const patterns = await data.indexPatterns.getIds();
   let defaultId = core.uiSettings.get('defaultIndex');
   let defined = !!defaultId;
   const exists = contains(patterns, defaultId);

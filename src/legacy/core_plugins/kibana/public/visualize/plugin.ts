@@ -160,6 +160,8 @@ export class VisualizePlugin implements Plugin {
         };
         setServices(deps);
 
+        // make sure the index pattern list is up to date
+        await dataStart.indexPatterns.clearCache();
         const { renderApp } = await import('./np_ready/application');
         const unmount = renderApp(params.element, params.appBasePath, deps);
         return () => {
