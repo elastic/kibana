@@ -214,6 +214,7 @@ function discoverController(
     isAppStateDirty,
     kbnUrlStateStorage,
     getPreviousAppState,
+    resetInitialAppState,
   } = getState({
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
@@ -373,6 +374,8 @@ function discoverController(
             // If the save wasn't successful, put the original values back.
             if (!response.id || response.error) {
               savedSearch.title = currentTitle;
+            } else {
+              resetInitialAppState();
             }
             return response;
           });
