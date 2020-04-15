@@ -9,19 +9,16 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  ActionTypeModel,
   AlertAction,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TypeRegistry } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/type_registry';
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../../../../../../../plugins/triggers_actions_ui/public';
 import { FormSchema, FormData, ValidationFunc, ERROR_CODE } from '../../../../../shared_imports';
 import * as I18n from './translations';
 import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 export const validateSingleAction = (
   actionItem: AlertAction,
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>
+  actionTypeRegistry: TriggersAndActionsUIPublicPluginStart['actionTypeRegistry']
 ): string[] => {
   if (!isUuidv4(actionItem.id)) {
     return [I18n.NO_CONNECTOR_SELECTED];
@@ -33,7 +30,9 @@ export const validateSingleAction = (
   return [...actionParamsErrors, ...mustacheErrors];
 };
 
-export const validateRuleActionsField = (actionTypeRegistry: TypeRegistry<ActionTypeModel>) => (
+export const validateRuleActionsField = (
+  actionTypeRegistry: TriggersAndActionsUIPublicPluginStart['actionTypeRegistry']
+) => (
   ...data: Parameters<ValidationFunc>
 ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
   const [{ value, path }] = data as [{ value: AlertAction[]; path: string }];
@@ -63,7 +62,7 @@ export const validateRuleActionsField = (actionTypeRegistry: TypeRegistry<Action
 export const getSchema = ({
   actionTypeRegistry,
 }: {
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  actionTypeRegistry: TriggersAndActionsUIPublicPluginStart['actionTypeRegistry'];
 }): FormSchema<FormData> => ({
   actions: {
     validations: [

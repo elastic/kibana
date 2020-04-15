@@ -22,7 +22,7 @@ export const COMPLETE_WITH_ACTIVATING = i18n.translate(
 );
 
 export const NO_CONNECTOR_SELECTED = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepRuleActions.noConnectorSelectedErrorText',
+  'xpack.siem.detectionEngine.createRule.stepRuleActions.noConnectorSelectedErrorMessage',
   {
     defaultMessage: 'No connector selected',
   }
@@ -30,7 +30,7 @@ export const NO_CONNECTOR_SELECTED = i18n.translate(
 
 export const INVALID_MUSTACHE_TEMPLATE = (paramKey: string) =>
   i18n.translate(
-    'xpack.siem.detectionEngine.createRule.stepRuleActions.invalidMustacheTemplateErrorText',
+    'xpack.siem.detectionEngine.createRule.stepRuleActions.invalidMustacheTemplateErrorMessage',
     {
       defaultMessage: '{key} is not valid mustache template',
       values: {

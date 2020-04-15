@@ -8,13 +8,9 @@ import mustache from 'mustache';
 import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
 
 import {
-  ActionTypeModel,
   AlertAction,
-  IErrorObject,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TypeRegistry } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/type_registry';
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../../../../../../../plugins/triggers_actions_ui/public';
 import * as I18n from './translations';
 
 const UUID_V4_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
@@ -46,22 +42,24 @@ export const validateMustache = (params: AlertAction['params']) => {
 
 export const validateActionParams = (
   actionItem: AlertAction,
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>
+  actionTypeRegistry: TriggersAndActionsUIPublicPluginStart['actionTypeRegistry']
 ): string[] => {
-  const actionErrors: { errors: IErrorObject } = actionTypeRegistry
+  const actionErrors = actionTypeRegistry
     .get(actionItem.actionTypeId)
     ?.validateParams(actionItem.params);
-  const actionErrorsValues = Object.values(actionErrors.errors);
 
-  if (actionErrorsValues.length) {
-    // @ts-ignore
-    const filteredObjects: Array<string | string[]> = actionErrorsValues.filter(
-      item => isString(item) || isArray(item)
-    );
-    const uniqActionErrors = uniq(flattenDeep(filteredObjects));
+  if (actionErrors) {
+    const actionErrorsValues = Object.values(actionErrors.errors);
 
-    if (uniqActionErrors.length) {
-      return uniqActionErrors;
+    if (actionErrorsValues.length) {
+      const filteredObjects: Array<string | string[]> = actionErrorsValues.filter(
+        item => isString(item) || isArray(item)
+      ) as Array<string | string[]>;
+      const uniqActionErrors = uniq(flattenDeep(filteredObjects));
+
+      if (uniqActionErrors.length) {
+        return uniqActionErrors;
+      }
     }
   }
 
