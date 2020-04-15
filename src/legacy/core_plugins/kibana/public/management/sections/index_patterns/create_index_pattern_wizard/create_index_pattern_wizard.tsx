@@ -188,8 +188,8 @@ export class CreateIndexPatternWizard extends Component<
       }
     }
 
-    if (!services.config.get('defaultIndex')) {
-      await services.config.set('defaultIndex', createdId);
+    if (!services.uiSettings.get('defaultIndex')) {
+      await services.uiSettings.set('defaultIndex', createdId);
     }
 
     services.indexPatterns.clearCache(createdId);
