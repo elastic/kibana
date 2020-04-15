@@ -148,7 +148,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   return (
-    <EuiContextMenuPanel>
+    <EuiContextMenuPanel hasFocus={false}>
       {!allAlertsMuted && (
         <EuiContextMenuItem
           onClick={onmMuteAllClick}
@@ -158,7 +158,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
-            defaultMessage="Mute all"
+            defaultMessage="Mute"
           />
         </EuiContextMenuItem>
       )}
@@ -171,7 +171,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
-            defaultMessage="Unmute all"
+            defaultMessage="Unmute"
           />
         </EuiContextMenuItem>
       )}
@@ -184,7 +184,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
-            defaultMessage="Enable all"
+            defaultMessage="Enable"
           />
         </EuiContextMenuItem>
       )}
@@ -197,7 +197,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
-            defaultMessage="Disable all"
+            defaultMessage="Disable"
           />
         </EuiContextMenuItem>
       )}
@@ -212,7 +212,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
       >
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
-          defaultMessage="Delete all"
+          defaultMessage="Delete"
         />
       </EuiContextMenuItem>
     </EuiContextMenuPanel>

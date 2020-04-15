@@ -6,3 +6,9 @@
     align-items: baseline;
   }
 }
+
+.actCollapsedItemActions__item {
+  .euiText {
+    text-decoration: none;
+  }
+}

@@ -14,6 +14,8 @@ import {
   EuiContextMenuItem,
   EuiSwitch,
   EuiHorizontalRule,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { AlertTableItem } from '../../../../types';
@@ -65,16 +67,16 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       ownFocus
-      panelPaddingSize="s"
+      panelPaddingSize="none"
       data-test-subj="collapsedItemActions"
     >
-      <EuiContextMenuPanel>
-        <EuiContextMenuItem>
+      <EuiContextMenuPanel hasFocus={false}>
+        <EuiContextMenuItem className="actCollapsedItemActions__item">
           <EuiSwitch
-            name="enable"
+            name="disable"
             disabled={!canSave}
             compressed
-            checked={item.enabled}
+            checked={!item.enabled}
             data-test-subj="enableSwitch"
             onChange={async () => {
               if (item.enabled) {
@@ -86,13 +88,20 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             }}
             label={
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.enableTitle"
-                defaultMessage="Enable"
+                id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.disableTitle"
+                defaultMessage="Disable"
               />
             }
           />
+          <EuiSpacer size="xs" />
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.disableHelpText"
+              defaultMessage="When disabled, the alert is not checked"
+            />
+          </EuiText>
         </EuiContextMenuItem>
-        <EuiContextMenuItem>
+        <EuiContextMenuItem className="actCollapsedItemActions__item">
           <EuiSwitch
             name="mute"
             checked={item.muteAll}
@@ -114,6 +123,13 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
               />
             }
           />
+          <EuiSpacer size="xs" />
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteHelpText"
+              defaultMessage="When muted, the alert is checked, but no action is performed"
+            />
+          </EuiText>
         </EuiContextMenuItem>
         <EuiHorizontalRule margin="none" />
         <EuiContextMenuItem

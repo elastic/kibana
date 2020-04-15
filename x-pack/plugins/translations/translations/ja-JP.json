@@ -15965,7 +15965,7 @@
     "xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel": "保存",
     "xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText": "アラートを作成できません。",
     "xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText": "「{alertName}」 を保存しました",
-    "xpack.triggersActionsUI.sections.alertAdd.selectIndex": "インデックスを選択してください。",
+    "xpack.triggersActionsUI.sections.alertAdd.selectIndex": "インデックスを選択してください",
     "xpack.triggersActionsUI.sections.alertAdd.threshold.closeIndexPopoverLabel": "閉じる",
     "xpack.triggersActionsUI.sections.alertAdd.threshold.fixErrorInExpressionBelowValidationMessage": "下の表現のエラーを修正してください。",
     "xpack.triggersActionsUI.sections.alertAdd.threshold.howToBroadenSearchQueryDescription": "* で検索クエリの範囲を広げます。",
