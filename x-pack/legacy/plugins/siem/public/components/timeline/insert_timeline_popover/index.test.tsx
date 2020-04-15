@@ -50,7 +50,7 @@ describe('Insert timeline popover ', () => {
       payload: { id: 'timeline-id', show: false },
       type: 'x-pack/siem/local/timeline/SHOW_TIMELINE',
     });
-    expect(onTimelineChange).toBeCalledWith('Timeline title', 'timeline-id');
+    expect(onTimelineChange).toBeCalledWith('Timeline title', '34578-3497-5893-47589-34759');
   });
   it('should do nothing when router state', () => {
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
