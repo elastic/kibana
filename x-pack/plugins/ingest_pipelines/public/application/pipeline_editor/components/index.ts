@@ -5,3 +5,4 @@
  */
 
 export { FormFlyout } from './form_flyout';
+export { ProcessorForm } from './processor_form';

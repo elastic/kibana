@@ -3,13 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
 import React, { FunctionComponent } from 'react';
 
 import { PipelineEditorProcessor } from '../types';
-import { getProcessorFormFromType } from '../processor_forms';
+
+import { ProcessorForm } from './processor_form';
 
 export interface Props {
   processor: PipelineEditorProcessor;
@@ -18,7 +20,6 @@ export interface Props {
 
 export const FormFlyout: FunctionComponent<Props> = ({ onClose, processor }) => {
   const type = processor.type;
-  const FormComponent = getProcessorFormFromType(type as any);
   return (
     <EuiFlyout onClose={onClose} aria-labelledby="flyoutComplicatedTitle">
       <EuiFlyoutHeader hasBorder>
@@ -32,7 +33,7 @@ export const FormFlyout: FunctionComponent<Props> = ({ onClose, processor }) => 
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <FormComponent processor={processor as any} onSubmit={() => {}} />
+        <ProcessorForm processor={processor as any} onSubmit={() => {}} />
       </EuiFlyoutBody>
     </EuiFlyout>
   );

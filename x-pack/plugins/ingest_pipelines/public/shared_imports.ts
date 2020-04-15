@@ -25,6 +25,7 @@ export {
   getUseField,
   ValidationFuncArg,
   FormData,
+  UseField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
@@ -37,6 +38,8 @@ export {
   getFormRow,
   Field,
   JsonEditorField,
+  FormRow,
+  ToggleField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {
