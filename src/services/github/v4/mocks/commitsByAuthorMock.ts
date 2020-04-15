@@ -23,6 +23,9 @@ export const commitsWithPullRequestsMock: DataResponse = {
                   edges: [
                     {
                       node: {
+                        labels: {
+                          nodes: [{ name: 'my-label-b' }],
+                        },
                         mergeCommit: {
                           oid: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
                         },
@@ -51,6 +54,9 @@ export const commitsWithPullRequestsMock: DataResponse = {
                   edges: [
                     {
                       node: {
+                        labels: {
+                          nodes: [{ name: 'my-label-a' }],
+                        },
                         mergeCommit: {
                           oid: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
                         },

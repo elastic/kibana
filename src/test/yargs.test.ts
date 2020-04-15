@@ -51,11 +51,11 @@ describe('yargs', () => {
       `--upstream foo  --username ${username} --accessToken ${accessToken}`
     );
     expect(res).toMatchInlineSnapshot(`
-      "Invalid option \\"branches\\"
+      "You must specify a target branch
 
-      You can add it with either:
-       - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/434a28b431bb58c9a014d4489a95f561e6bb2769/docs/configuration.md#project-config-backportrcjson
-       - CLI: \\"--branches 6.1\\"
+      You can specify it via either:
+       - Config file (recommended): \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/434a28b431bb58c9a014d4489a95f561e6bb2769/docs/configuration.md#project-config-backportrcjson
+       - CLI: \\"--branch 6.1\\"
       "
     `);
   });
@@ -65,10 +65,10 @@ describe('yargs', () => {
       `--branch foo  --username ${username} --accessToken ${accessToken}`
     );
     expect(res).toMatchInlineSnapshot(`
-      "Invalid option \\"upstream\\"
+      "You must specify a valid Github repository
 
-      You can add it with either:
-       - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/434a28b431bb58c9a014d4489a95f561e6bb2769/docs/configuration.md#project-config-backportrcjson
+      You can specify it via either:
+       - Config file (recommended): \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/434a28b431bb58c9a014d4489a95f561e6bb2769/docs/configuration.md#project-config-backportrcjson
        - CLI: \\"--upstream elastic/kibana\\"
       "
     `);
@@ -114,7 +114,8 @@ describe('yargs', () => {
         3. Add 👻 (2e63475c)
         4. Add witch (#85)
         5. Add SF mention (#80) 6.3
-        6. Add backport config (3827bbba)"
+        6. Add backport config (3827bbba)
+        ──────────────"
     `);
   });
 
@@ -141,7 +142,8 @@ describe('yargs', () => {
         3. Update romeo-and-juliet.txt (91eee967)
         4. Add 👻 (2e63475c)
         5. Add witch (#85)
-        6. Add SF mention (#80) 6.3"
+        6. Add SF mention (#80) 6.3
+        ──────────────"
     `);
   });
 });

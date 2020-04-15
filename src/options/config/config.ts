@@ -27,18 +27,18 @@ export async function getOptionsFromConfigFiles() {
     multipleBranches: true,
     all: false,
     labels: [] as string[],
-    prTitle: '[{baseBranch}] {commitMessages}',
+    prTitle: '[{targetBranch}] {commitMessages}',
     gitHostname: 'github.com',
     githubApiBaseUrlV3: 'https://api.github.com',
     githubApiBaseUrlV4: 'https://api.github.com/graphql',
-    branchChoices: getBranchesAsObjects(branches),
+    targetBranchChoices: getTargetBranchChoices(branches),
     ...combinedConfig,
   };
 }
 
-// in the config `branches` can either a string or an object.
+// in the config `branches` can either be a string or an object.
 // We need to transform it so that it is always treated as an object troughout the application
-function getBranchesAsObjects(branches?: Config['branches']) {
+function getTargetBranchChoices(branches?: Config['branches']) {
   if (!branches) {
     return;
   }

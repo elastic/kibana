@@ -52,6 +52,11 @@ Object {
                           mergeCommit {
                             oid
                           }
+                          labels(first: 50) {
+                            nodes {
+                              name
+                            }
+                          }
                           timelineItems(
                             last: 20
                             itemTypes: CROSS_REFERENCED_EVENT
@@ -243,6 +248,11 @@ Array [
                           mergeCommit {
                             oid
                           }
+                          labels(first: 50) {
+                            nodes {
+                              name
+                            }
+                          }
                           timelineItems(
                             last: 20
                             itemTypes: CROSS_REFERENCED_EVENT
@@ -325,6 +335,13 @@ Array [
                         "edges": Array [
                           Object {
                             "node": Object {
+                              "labels": Object {
+                                "nodes": Array [
+                                  Object {
+                                    "name": "my-label-b",
+                                  },
+                                ],
+                              },
                               "mergeCommit": Object {
                                 "oid": "f3b618b9421fdecdb36862f907afbdd6344b361d",
                               },
@@ -352,6 +369,13 @@ Array [
                         "edges": Array [
                           Object {
                             "node": Object {
+                              "labels": Object {
+                                "nodes": Array [
+                                  Object {
+                                    "name": "my-label-a",
+                                  },
+                                ],
+                              },
                               "mergeCommit": Object {
                                 "oid": "79cf18453ec32a4677009dcbab1c9c8c73fc14fe",
                               },
@@ -454,7 +478,7 @@ fatal: No such remote: 'elastic'
     "",
   ],
   Array [
-    "[INFO] Backporting [{\\"branch\\":\\"master\\",\\"sha\\":\\"f3b618b9421fdecdb36862f907afbdd6344b361d\\",\\"formattedMessage\\":\\"Add witch (#85)\\",\\"pullNumber\\":85,\\"existingBackports\\":[]}] to 6.0",
+    "[INFO] Backporting [{\\"sourceBranch\\":\\"master\\",\\"targetBranches\\":[],\\"sha\\":\\"f3b618b9421fdecdb36862f907afbdd6344b361d\\",\\"formattedMessage\\":\\"Add witch (#85)\\",\\"pullNumber\\":85,\\"existingBackports\\":[]}] to 6.0",
     undefined,
   ],
   Array [
@@ -593,6 +617,11 @@ Object {
                           number
                           mergeCommit {
                             oid
+                          }
+                          labels(first: 50) {
+                            nodes {
+                              name
+                            }
                           }
                           timelineItems(
                             last: 20

@@ -15,7 +15,7 @@ describe('getOptionsFromConfigFiles', () => {
       githubApiBaseUrlV3: 'https://api.github.com',
       githubApiBaseUrlV4: 'https://api.github.com/graphql',
       backportCreatedLabels: [],
-      branchChoices: [
+      targetBranchChoices: [
         { checked: false, name: '6.0' },
         { checked: false, name: '5.9' },
       ],
@@ -25,7 +25,7 @@ describe('getOptionsFromConfigFiles', () => {
       multiple: false,
       multipleBranches: true,
       multipleCommits: false,
-      prTitle: '[{baseBranch}] {commitMessages}',
+      prTitle: '[{targetBranch}] {commitMessages}',
       upstream: 'elastic/backport-demo',
       username: 'sqren',
     });

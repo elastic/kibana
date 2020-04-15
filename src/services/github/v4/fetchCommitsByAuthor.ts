@@ -1,5 +1,6 @@
 import { BackportOptions } from '../../../options/options';
 import { CommitChoice } from '../../../types/Commit';
+import { filterEmpty } from '../../../utils/filterEmpty';
 import { HandledError } from '../../HandledError';
 import {
   getFirstCommitMessageLine,
@@ -7,12 +8,14 @@ import {
 } from '../commitFormatters';
 import { apiRequestV4 } from './apiRequestV4';
 import { fetchAuthorId } from './fetchAuthorId';
+import { getTargetBranchesFromLabels } from './getTargetBranchesFromLabels';
 
 export async function fetchCommitsByAuthor(
   options: BackportOptions
 ): Promise<CommitChoice[]> {
   const {
     accessToken,
+    branchLabelMapping,
     githubApiBaseUrlV4,
     commitsCount,
     path,
@@ -55,6 +58,11 @@ export async function fetchCommitsByAuthor(
                           number
                           mergeCommit {
                             oid
+                          }
+                          labels(first: 50) {
+                            nodes {
+                              name
+                            }
                           }
                           timelineItems(
                             last: 20
@@ -125,6 +133,7 @@ export async function fetchCommitsByAuthor(
     const commitMessage = edge.node.message;
     const sha = edge.node.oid;
 
+    // check whether the commit was merged via a pull request
     const associatedPullRequest = isAssociatedPullRequest({
       pullRequestEdge,
       options,
@@ -133,6 +142,7 @@ export async function fetchCommitsByAuthor(
       ? pullRequestEdge
       : undefined;
 
+    // find any existing pull requests
     const existingBackports = getExistingBackportPRs(
       commitMessage,
       associatedPullRequest
@@ -148,8 +158,17 @@ export async function fetchCommitsByAuthor(
       sha,
     });
 
+    const labels = associatedPullRequest?.node.labels.nodes.map(
+      (node) => node.name
+    );
+    const targetBranches = getTargetBranchesFromLabels({
+      labels,
+      branchLabelMapping,
+    });
+
     return {
-      branch: sourceBranch,
+      sourceBranch,
+      targetBranches,
       sha,
       formattedMessage,
       pullNumber,
@@ -191,7 +210,7 @@ export function getExistingBackportPRs(
 
   const firstMessageLine = getFirstCommitMessageLine(commitMessage);
   return associatedPullRequest.node.timelineItems.edges
-    .filter(notEmpty)
+    .filter(filterEmpty)
     .filter((item) => {
       const { source } = item.node;
 
@@ -230,10 +249,6 @@ export function getExistingBackportPRs(
     });
 }
 
-function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
-  return value !== null && value !== undefined;
-}
-
 export interface DataResponse {
   repository: {
     ref: {
@@ -261,6 +276,11 @@ export interface PullRequestEdge {
     number: number;
     mergeCommit: {
       oid: string;
+    };
+    labels: {
+      nodes: {
+        name: string;
+      }[];
     };
     repository: {
       owner: {

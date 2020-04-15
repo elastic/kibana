@@ -75,7 +75,7 @@ Array [
     },
   ],
   Array [
-    "git checkout myDefaultRepoBaseBranch && git branch -D backport/6.x/commit-mySha",
+    "git checkout myDefaultSourceBranch && git branch -D backport/6.x/commit-mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -122,7 +122,7 @@ Array [
     },
   ],
   Array [
-    "git checkout myDefaultRepoBaseBranch && git branch -D backport/6.x/pr-1000_pr-2000",
+    "git checkout myDefaultSourceBranch && git branch -D backport/6.x/pr-1000_pr-2000",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },

@@ -10,6 +10,7 @@ export interface Config {
   editor?: string;
 
   // project config
+  branchLabelMapping?: Record<string, string>;
   branches?: (string | BranchChoice)[];
   upstream?: string;
   fork?: boolean;

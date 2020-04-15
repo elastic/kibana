@@ -71,7 +71,10 @@ async function getCommitsByPrompt(options: BackportOptions) {
       process.exit(1);
     }
     spinner.stop();
-    return promptForCommits(commits, options.multipleCommits);
+    return promptForCommits({
+      commits,
+      isMultipleChoice: options.multipleCommits,
+    });
   } catch (e) {
     spinner.fail();
     throw e;

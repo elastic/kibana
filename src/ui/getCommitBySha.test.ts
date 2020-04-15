@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { BackportOptions } from '../options/options';
 import { commitByShaMock } from '../services/github/v3/mocks/commitByShaMock';
+import { CommitSelected } from '../types/Commit';
 import { getCommitBySha } from './getCommits';
 
 describe('getCommitBySha', () => {
@@ -18,14 +19,16 @@ describe('getCommitBySha', () => {
       githubApiBaseUrlV3: 'https://api.github.com',
     } as BackportOptions & { sha: string });
 
-    expect(commit).toEqual({
-      branch: 'master',
+    const expectedCommit: CommitSelected = {
+      sourceBranch: 'master',
       formattedMessage:
         '[Chrome] Bootstrap Angular into document.body (myCommit)',
       sha: 'myCommitSha',
       pullNumber: undefined,
-    });
+      targetBranches: [],
+    };
 
+    expect(commit).toEqual(expectedCommit);
     expect(axiosSpy).toHaveBeenCalledWith({
       method: 'get',
       url:

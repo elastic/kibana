@@ -103,7 +103,7 @@ export async function cherrypick(
   commit: CommitSelected
 ) {
   await exec(
-    `git fetch ${options.repoOwner} ${commit.branch}:${commit.branch} --force`,
+    `git fetch ${options.repoOwner} ${commit.sourceBranch}:${commit.sourceBranch} --force`,
     { cwd: getRepoPath(options) }
   );
   const mainline =
@@ -203,12 +203,12 @@ export async function addUnstagedFiles(options: BackportOptions) {
 
 export async function createFeatureBranch(
   options: BackportOptions,
-  baseBranch: string,
+  targetBranch: string,
   featureBranch: string
 ) {
   try {
     return await exec(
-      `git reset --hard && git clean -d --force && git fetch ${options.repoOwner} ${baseBranch} && git checkout -B ${featureBranch} ${options.repoOwner}/${baseBranch} --no-track`,
+      `git reset --hard && git clean -d --force && git fetch ${options.repoOwner} ${targetBranch} && git checkout -B ${featureBranch} ${options.repoOwner}/${targetBranch} --no-track`,
       { cwd: getRepoPath(options) }
     );
   } catch (e) {
@@ -218,7 +218,7 @@ export async function createFeatureBranch(
 
     if (isBranchInvalid) {
       throw new HandledError(
-        `The branch "${baseBranch}" is invalid or doesn't exist`
+        `The branch "${targetBranch}" is invalid or doesn't exist`
       );
     }
     throw e;

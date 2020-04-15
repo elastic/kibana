@@ -41,35 +41,32 @@ export function validateRequiredOptions({
     );
   }
 
-  if (isEmpty(options.branches) && isEmpty(options.branchChoices)) {
+  if (isEmpty(options.targetBranches) && isEmpty(options.targetBranchChoices)) {
     throw new HandledError(
-      getErrorMessage({ field: 'branches', exampleValue: '6.1' })
+      `You must specify a target branch\n\nYou can specify it via either:\n - Config file (recommended): ".backportrc.json". Read more: ${PROJECT_CONFIG_DOCS_LINK}\n - CLI: "--branch 6.1"`
     );
   }
 
   const [repoOwner, repoName] = upstream.split('/');
   if (!repoOwner || !repoName) {
     throw new HandledError(
-      getErrorMessage({ field: 'upstream', exampleValue: 'elastic/kibana' })
+      `You must specify a valid Github repository\n\nYou can specify it via either:\n - Config file (recommended): ".backportrc.json". Read more: ${PROJECT_CONFIG_DOCS_LINK}\n - CLI: "--upstream elastic/kibana"`
     );
   }
 
   return {
     ...options,
+
+    // no longer optional
     accessToken: options.accessToken,
+    username: options.username,
+
+    // split upstream
     repoName,
     repoOwner,
-    username: options.username,
-    author: options.author || options.username,
-  };
-}
 
-function getErrorMessage({
-  field,
-  exampleValue,
-}: {
-  field: keyof OptionsFromCliArgs;
-  exampleValue: string;
-}) {
-  return `Invalid option "${field}"\n\nYou can add it with either:\n - Config file: ".backportrc.json". Read more: ${PROJECT_CONFIG_DOCS_LINK}\n - CLI: "--${field} ${exampleValue}"`;
+    // define author
+    author: options.author || options.username,
+    all: options.author ? false : options.all,
+  };
 }

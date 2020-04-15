@@ -2,8 +2,8 @@
   "include": ["src/**/*"],
   "exclude": ["src/**/*.test.*", "src/test/**", "src/**/mocks/**"],
   "compilerOptions": {
-    "target": "es2017",
-    "lib": ["es2017"],
+    "target": "es2018",
+    "lib": ["es2019"],
     "module": "commonjs",
     "outDir": "./dist",
     "forceConsistentCasingInFileNames": true,

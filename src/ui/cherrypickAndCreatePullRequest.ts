@@ -30,24 +30,24 @@ import isEmpty = require('lodash.isempty');
 export async function cherrypickAndCreatePullRequest({
   options,
   commits,
-  baseBranch,
+  targetBranch,
 }: {
   options: BackportOptions;
   commits: CommitSelected[];
-  baseBranch: string;
+  targetBranch: string;
 }) {
-  const featureBranch = getFeatureBranchName(baseBranch, commits);
+  const featureBranch = getFeatureBranchName(targetBranch, commits);
   const commitMessages = commits
     .map((commit) => ` - ${commit.formattedMessage}`)
     .join('\n');
   consoleLog(
     `\n${chalk.bold(
-      `Backporting the following commits to ${baseBranch}:`
+      `Backporting the following commits to ${targetBranch}:`
     )}\n${commitMessages}\n`
   );
 
   await withSpinner({ text: 'Pulling latest changes' }, () =>
-    createFeatureBranch(options, baseBranch, featureBranch)
+    createFeatureBranch(options, targetBranch, featureBranch)
   );
 
   await sequentially(commits, (commit) => waitForCherrypick(options, commit));
@@ -68,7 +68,7 @@ export async function cherrypickAndCreatePullRequest({
   await deleteFeatureBranch(options, featureBranch);
 
   return withSpinner({ text: 'Creating pull request' }, async (spinner) => {
-    const payload = getPullRequestPayload(options, baseBranch, commits);
+    const payload = getPullRequestPayload(options, targetBranch, commits);
     const pullRequest = await createPullRequest(options, payload);
 
     if (options.labels.length > 0) {
@@ -80,7 +80,7 @@ export async function cherrypickAndCreatePullRequest({
   });
 }
 
-function getFeatureBranchName(baseBranch: string, commits: CommitSelected[]) {
+function getFeatureBranchName(targetBranch: string, commits: CommitSelected[]) {
   const refValues = commits
     .map((commit) =>
       commit.pullNumber
@@ -89,7 +89,7 @@ function getFeatureBranchName(baseBranch: string, commits: CommitSelected[]) {
     )
     .join('_')
     .slice(0, 200);
-  return `backport/${baseBranch}/${refValues}`;
+  return `backport/${targetBranch}/${refValues}`;
 }
 
 async function waitForCherrypick(
@@ -197,7 +197,7 @@ async function listUnstagedFiles(options: BackportOptions) {
 }
 
 function getPullRequestTitle(
-  baseBranch: string,
+  targetBranch: string,
   commits: CommitSelected[],
   prTitle: string
 ) {
@@ -205,7 +205,7 @@ function getPullRequestTitle(
     .map((commit) => commit.formattedMessage)
     .join(' | ');
   return prTitle
-    .replace('{baseBranch}', baseBranch)
+    .replace('{targetBranch}', targetBranch)
     .replace('{commitMessages}', commitMessages)
     .slice(0, 240);
 }
@@ -217,20 +217,20 @@ function getHeadBranchName(options: BackportOptions, featureBranch: string) {
 
 function getPullRequestPayload(
   options: BackportOptions,
-  baseBranch: string,
+  targetBranch: string,
   commits: CommitSelected[]
 ) {
   const { prDescription, prTitle } = options;
-  const featureBranch = getFeatureBranchName(baseBranch, commits);
+  const featureBranch = getFeatureBranchName(targetBranch, commits);
   const commitMessages = commits
     .map((commit) => ` - ${commit.formattedMessage}`)
     .join('\n');
   const bodySuffix = prDescription ? `\n\n${prDescription}` : '';
 
   return {
-    title: getPullRequestTitle(baseBranch, commits, prTitle),
-    body: `Backports the following commits to ${baseBranch}:\n${commitMessages}${bodySuffix}`,
+    title: getPullRequestTitle(targetBranch, commits, prTitle),
+    body: `Backports the following commits to ${targetBranch}:\n${commitMessages}${bodySuffix}`,
     head: getHeadBranchName(options, featureBranch),
-    base: baseBranch,
+    base: targetBranch,
   };
 }

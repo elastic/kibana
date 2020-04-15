@@ -15,6 +15,9 @@ export const getCommitsByAuthorMock = (repoName: string): DataResponse => ({
                   edges: [
                     {
                       node: {
+                        labels: {
+                          nodes: [{ name: 'my-label-a' }],
+                        },
                         mergeCommit: {
                           oid: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
                         },

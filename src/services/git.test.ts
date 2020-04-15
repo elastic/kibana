@@ -78,7 +78,7 @@ describe('createFeatureBranch', () => {
     repoName: 'kibana',
   } as BackportOptions;
 
-  const baseBranch = '4.x';
+  const targetBranch = '4.x';
   const featureBranch = 'backport/4.x/commit-72f94e76';
 
   it('should throw HandledError', async () => {
@@ -95,7 +95,7 @@ describe('createFeatureBranch', () => {
 
     jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
     await expect(
-      createFeatureBranch(options, baseBranch, featureBranch)
+      createFeatureBranch(options, targetBranch, featureBranch)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"The branch \\"4.x\\" is invalid or doesn't exist"`
     );
@@ -108,7 +108,7 @@ describe('createFeatureBranch', () => {
     expect.assertions(1);
 
     await expect(
-      createFeatureBranch(options, baseBranch, featureBranch)
+      createFeatureBranch(options, targetBranch, featureBranch)
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"just a normal error"`);
   });
 });
@@ -152,9 +152,10 @@ describe('cherrypick', () => {
   } as BackportOptions;
 
   const commit = {
-    branch: '7.x',
+    sourceBranch: '7.x',
     formattedMessage: '',
     sha: 'abcd',
+    targetBranches: [],
   };
 
   it('should return `needsResolving: false` when no errors are encountered', async () => {

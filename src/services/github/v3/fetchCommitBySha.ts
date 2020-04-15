@@ -54,7 +54,8 @@ export async function fetchCommitBySha(
   });
 
   return {
-    branch: 'master',
+    sourceBranch: 'master',
+    targetBranches: [],
     formattedMessage,
     sha: fullSha,
   };

@@ -34,7 +34,7 @@ describe('getProjectConfig', () => {
     it('should return empty config', async () => {
       jest.spyOn(fs, 'readFile').mockResolvedValueOnce('{}');
       const projectConfig = await getProjectConfig();
-      expect(projectConfig).toEqual({ branchChoices: undefined });
+      expect(projectConfig).toEqual({ targetBranchChoices: undefined });
     });
   });
 

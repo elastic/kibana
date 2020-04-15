@@ -12,6 +12,9 @@ export function getPullRequestEdgeMock({
 }): PullRequestEdge {
   return {
     node: {
+      labels: {
+        nodes: [{ name: 'my-label-a' }],
+      },
       mergeCommit: {
         oid: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
       },

@@ -63,6 +63,11 @@ Array [
                           mergeCommit {
                             oid
                           }
+                          labels(first: 50) {
+                            nodes {
+                              name
+                            }
+                          }
                           timelineItems(
                             last: 20
                             itemTypes: CROSS_REFERENCED_EVENT
@@ -109,7 +114,7 @@ Array [
       "historyPath": null,
       "repoName": "kibana",
       "repoOwner": "elastic",
-      "sourceBranch": undefined,
+      "sourceBranch": "master",
     },
   },
   Object {

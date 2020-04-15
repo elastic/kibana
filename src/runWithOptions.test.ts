@@ -21,13 +21,14 @@ describe('runWithOptions', () => {
   beforeEach(async () => {
     const options: BackportOptions = {
       accessToken: 'myAccessToken',
+      branchLabelMapping: undefined,
       all: false,
       githubApiBaseUrlV3: 'https://api.github.com',
       githubApiBaseUrlV4: 'https://api.github.com/graphql',
       author: 'sqren',
       backportCreatedLabels: [],
-      branches: [],
-      branchChoices: [
+      targetBranches: [],
+      targetBranchChoices: [
         { name: '6.x' },
         { name: '6.0' },
         { name: '5.6' },
@@ -45,7 +46,7 @@ describe('runWithOptions', () => {
       multipleCommits: false,
       path: undefined,
       prDescription: 'myPrDescription',
-      prTitle: 'myPrTitle {baseBranch} {commitMessages}',
+      prTitle: 'myPrTitle {targetBranch} {commitMessages}',
       pullNumber: undefined,
       repoName: 'kibana',
       repoOwner: 'elastic',

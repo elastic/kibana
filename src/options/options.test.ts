@@ -78,18 +78,18 @@ describe('getOptions', () => {
       githubApiBaseUrlV4: 'https://api.github.com/graphql',
       author: 'sqren',
       backportCreatedLabels: [],
-      branchChoices: [
+      targetBranchChoices: [
         { checked: false, name: '6.0' },
         { checked: false, name: '5.9' },
       ],
-      branches: ['6.0', '6.1'],
+      targetBranches: ['6.0', '6.1'],
       fork: true,
       gitHostname: 'github.com',
       labels: [],
       multiple: false,
       multipleBranches: true,
       multipleCommits: false,
-      prTitle: '[{baseBranch}] {commitMessages}',
+      prTitle: '[{targetBranch}] {commitMessages}',
       repoName: 'kibana',
       repoOwner: 'elastic',
       resetAuthor: false,
@@ -104,12 +104,13 @@ describe('validateRequiredOptions', () => {
   const validOptions: OptionsFromCliArgs = {
     accessToken: 'myAccessToken',
     all: false,
+    branchLabelMapping: undefined,
     githubApiBaseUrlV3: 'https://api.github.com',
     githubApiBaseUrlV4: 'https://api.github.com/graphql',
     author: undefined,
     backportCreatedLabels: [],
-    branchChoices: [],
-    branches: ['branchA'],
+    targetBranchChoices: [],
+    targetBranches: ['branchA'],
     commitsCount: 10,
     editor: 'code',
     fork: true,
@@ -136,12 +137,12 @@ describe('validateRequiredOptions', () => {
       expect(() => validateRequiredOptions(validOptions)).not.toThrow();
     });
 
-    it('when all options are valid and `branchChoices` is given', () => {
+    it('when all options are valid and `targetBranchChoices` is given', () => {
       expect(() =>
         validateRequiredOptions({
           ...validOptions,
-          branchChoices: [{ name: 'branchA' }],
-          branches: [],
+          targetBranchChoices: [{ name: 'branchA' }],
+          targetBranches: [],
         })
       ).not.toThrow();
     });
@@ -166,12 +167,12 @@ describe('validateRequiredOptions', () => {
       ).toThrowErrorMatchingSnapshot();
     });
 
-    it('when both branches and branchChoices are missing', () => {
+    it('when both branches and targetBranchChoices are missing', () => {
       expect(() =>
         validateRequiredOptions({
           ...validOptions,
-          branchChoices: [],
-          branches: [],
+          targetBranchChoices: [],
+          targetBranches: [],
         })
       ).toThrowErrorMatchingSnapshot();
     });
