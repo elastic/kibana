@@ -23,7 +23,6 @@ import {
   TriggerToActionsRegistry,
   TriggerId,
   TriggerContextMapping,
-  ActionContextMapping,
   ActionType,
 } from '../types';
 import { ActionInternal, Action, ActionByType, ActionDefinition, ActionContext } from '../actions';
