@@ -26,6 +26,7 @@ import { createMetricVisTypeDefinition } from './metric_vis_type';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService } from './services';
+import { ConfigSchema } from '../config';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
@@ -41,9 +42,9 @@ export interface MetricVisPluginStartDependencies {
 
 /** @internal */
 export class MetricVisPlugin implements Plugin<void, void> {
-  initializerContext: PluginInitializerContext;
+  initializerContext: PluginInitializerContext<ConfigSchema>;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
