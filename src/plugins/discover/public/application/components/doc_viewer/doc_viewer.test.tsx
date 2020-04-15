@@ -24,7 +24,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDocViewsRegistry } from '../../../kibana_services';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
-jest.mock('../../services', () => {
+jest.mock('../../../kibana_services', () => {
   let registry: any[] = [];
   return {
     getDocViewsRegistry: () => ({

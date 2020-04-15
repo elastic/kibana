@@ -19,13 +19,35 @@
 
 import angular from 'angular';
 import _ from 'lodash';
+import $ from 'jquery';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
+import 'angular-mocks';
+import 'angular-sanitize';
+import 'angular-route';
 import { getFakeRow, getFakeRowVals } from 'fixtures/fake_row';
-import $ from 'jquery';
-import { pluginInstance } from 'plugins/kibana/discover/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+
+import { coreMock } from '../../../../../../../core/public/mocks';
+import { initializeInnerAngularModule } from '../../../../get_inner_angular';
+import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
+import { dataPluginMock } from '../../../../../../data/public/mocks';
+import { initAngularBootstrap } from '../../../../../../kibana_legacy/public';
+
+jest.mock('../../../../kibana_services', () => ({
+  getServices: () => ({
+    uiSettings: {
+      get: jest.fn(),
+    },
+    filterManager: {
+      getGlobalFilters: () => [],
+      getAppFilters: () => [],
+    },
+  }),
+  getDocViewsRegistry: () => ({
+    getDocViewsSorted: () => [],
+  }),
+}));
 
 describe('Doc Table', function() {
   let $parentScope;
@@ -36,11 +58,19 @@ describe('Doc Table', function() {
 
   let fakeRowVals;
   let stubFieldFormatConverter;
-  beforeEach(() => pluginInstance.initializeServices());
-  beforeEach(() => pluginInstance.initializeInnerAngular());
-  beforeEach(ngMock.module('app/discover'));
-  beforeEach(
-    ngMock.inject(function($rootScope, Private) {
+
+  beforeEach(() => {
+    initAngularBootstrap();
+    initializeInnerAngularModule(
+      'app/discover',
+      coreMock.createStart(),
+      navigationPluginMock.createStartContract(),
+      dataPluginMock.createStartContract()
+    );
+
+    angular.mock.module('app/discover');
+
+    angular.mock.inject(function($rootScope, Private) {
       $parentScope = $rootScope;
       $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       mapping = $parentScope.indexPattern.fields;
@@ -53,7 +83,7 @@ describe('Doc Table', function() {
           if (val) {
             return val;
           }
-          const fieldName = _.get(options, 'field.name', null);
+          const fieldName = _.get(options, 'field.name', '');
 
           return fakeRowVals[fieldName] || '';
         };
@@ -61,12 +91,12 @@ describe('Doc Table', function() {
         $root.indexPattern.fields.getByName(field).format.convert = convertFn;
         $root.indexPattern.fields.getByName(field).format.getConverterFor = () => convertFn;
       };
-    })
-  );
+    });
+  });
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
   const init = function($elem, props) {
-    ngMock.inject(function($compile) {
+    angular.mock.inject(function($compile) {
       _.assign($parentScope, props);
       $compile($elem)($parentScope);
       $elem.scope().$digest();
@@ -200,7 +230,7 @@ describe('Doc Table', function() {
       row = getFakeRow(0, mapping);
 
       init($elem, {
-        row: row,
+        row,
         columns: [],
         sorting: [],
         filtering: sinon.spy(),
@@ -233,7 +263,7 @@ describe('Doc Table', function() {
     let $before;
 
     beforeEach(
-      ngMock.inject(function($rootScope, $compile, Private) {
+      angular.mock.inject(function($rootScope, $compile, Private) {
         $root = $rootScope;
         $root.row = getFakeRow(0, mapping);
         $root.columns = ['_source'];
