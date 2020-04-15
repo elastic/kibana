@@ -23,7 +23,7 @@ import uuid from 'uuid';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
 import { SavedObject } from '../../../../saved_objects/public';
-import { EmbeddableInput, PanelNotFoundError } from '../../../../embeddable/public';
+import { PanelNotFoundError } from '../../../../embeddable/public';
 import {
   placePanelBeside,
   IPanelPlacementBesideArgs,
@@ -125,6 +125,13 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
     panelToClone: DashboardPanelState,
     embeddableType: string
   ): Promise<Partial<PanelState>> {
+    const panelState: Partial<PanelState> = {
+      type: embeddableType,
+      explicitInput: {
+        ...panelToClone.explicitInput,
+        id: uuid.v4(),
+      },
+    };
     let newTitle: string = '';
     if (panelToClone.savedObjectId) {
       // Fetch existing saved object
@@ -143,24 +150,17 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
         },
         { references: _.cloneDeep(savedObjectToClone.references) }
       );
-      return {
-        type: embeddableType,
-        savedObjectId: clonedSavedObject.id,
-        explicitInput: {
-          ...panelToClone.explicitInput,
-          id: uuid.v4(),
-        },
-      };
-    } else {
-      const newInput: EmbeddableInput = _.cloneDeep(panelToClone.explicitInput);
-      delete newInput.id;
-      return {
-        type: embeddableType,
-        explicitInput: {
-          ...panelToClone.explicitInput,
-          id: uuid.v4(),
-        },
-      };
+      panelState.savedObjectId = clonedSavedObject.id;
     }
+    this.core.notifications.toasts.addSuccess({
+      title: i18n.translate('dashboard.panel.clonedToast', {
+        defaultMessage: 'Cloned panel',
+        values: {
+          savedObjectName: name,
+        },
+      }),
+      'data-test-subj': 'addObjectToContainerSuccess',
+    });
+    return panelState;
   }
 }

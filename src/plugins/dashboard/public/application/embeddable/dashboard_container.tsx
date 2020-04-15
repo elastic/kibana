@@ -136,6 +136,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       type: PLACEHOLDER_EMBEDDABLE,
       explicitInput: {
         id: uuid.v4(),
+        disabledActions: [
+          'ACTION_CUSTOMIZE_PANEL',
+          'CUSTOM_TIME_RANGE',
+          'clonePanel',
+          'replacePanel',
+          'togglePanel',
+        ],
       },
     } as PanelState<EmbeddableInput>;
     const placeholderPanelState = createPanelState(

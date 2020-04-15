@@ -17,7 +17,7 @@
  * under the License.
  */
 import { isErrorEmbeddable, IContainer } from '../../embeddable_plugin';
-import { DashboardContainer } from '../embeddable';
+import { DashboardContainer, DashboardPanelState } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
@@ -32,6 +32,7 @@ import { ClonePanelAction } from '.';
 
 // eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { PLACEHOLDER_EMBEDDABLE } from '../embeddable/placeholder';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -88,32 +89,41 @@ beforeEach(async () => {
   }
 });
 
-test('Clones an embeddable without a saved object ID', async () => {
-  const dashboard = embeddable.getRoot() as IContainer;
-  const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
-  const action = new ClonePanelAction(coreStart);
-  await action.execute({ embeddable });
-  expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount + 1);
-});
-
-test('Clones an embeddable with a saved object ID', async () => {
+test('Clone adds a new embeddable', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-  const panel = dashboard.getInput().panels[embeddable.id];
-  panel.savedObjectId = 'holySavedObjectBatman';
   const action = new ClonePanelAction(coreStart);
   await action.execute({ embeddable });
-  expect(coreStart.savedObjects.client.get).toHaveBeenCalledTimes(1);
-  expect(coreStart.savedObjects.client.find).toHaveBeenCalledTimes(1);
-  expect(coreStart.savedObjects.client.create).toHaveBeenCalledTimes(1);
+  expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount + 1);
   const newPanelId = Object.keys(container.getInput().panels).find(
     key => !originalPanelKeySet.has(key)
   );
   expect(newPanelId).toBeDefined();
   const newPanel = container.getInput().panels[newPanelId!];
   expect(newPanel.type).toEqual(embeddable.type);
-  expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount + 1);
+});
+
+test('Clones an embeddable without a saved object ID', async () => {
+  const dashboard = embeddable.getRoot() as IContainer;
+  const panel = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
+  const action = new ClonePanelAction(coreStart);
+  // @ts-ignore
+  const newPanel = await action.cloneEmbeddable(panel, embeddable.type);
+  expect(newPanel.type).toEqual(embeddable.type);
+});
+
+test('Clones an embeddable with a saved object ID', async () => {
+  const dashboard = embeddable.getRoot() as IContainer;
+  const panel = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
+  panel.savedObjectId = 'holySavedObjectBatman';
+  const action = new ClonePanelAction(coreStart);
+  // @ts-ignore
+  const newPanel = await action.cloneEmbeddable(panel, embeddable.type);
+  expect(coreStart.savedObjects.client.get).toHaveBeenCalledTimes(1);
+  expect(coreStart.savedObjects.client.find).toHaveBeenCalledTimes(1);
+  expect(coreStart.savedObjects.client.create).toHaveBeenCalledTimes(1);
+  expect(newPanel.type).toEqual(embeddable.type);
 });
 
 test('Gets a unique title ', async () => {

@@ -26,28 +26,13 @@ import { Embeddable, EmbeddableInput, IContainer } from '../../../embeddable_plu
 export const PLACEHOLDER_EMBEDDABLE = 'placeholder';
 
 export class PlaceholderEmbeddable extends Embeddable {
-  // The type of this embeddable. This will be used to find the appropriate factory
-  // to instantiate this kind of embeddable.
   public readonly type = PLACEHOLDER_EMBEDDABLE;
   private node?: HTMLElement;
 
   constructor(initialInput: EmbeddableInput, parent?: IContainer) {
-    super(
-      // Input state is irrelevant to this embeddable, just pass it along.
-      initialInput,
-      // Initial output state - this embeddable does not do anything with output, so just
-      // pass along an empty object.
-      {},
-      // Optional parent component, this embeddable can optionally be rendered inside a container.
-      parent
-    );
+    super(initialInput, {}, parent);
+    this.input = initialInput;
   }
-
-  /**
-   * Render yourself at the dom node using whatever framework you like, angular, react, or just plain
-   * vanilla js.
-   * @param node
-   */
   public render(node: HTMLElement) {
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
@@ -63,9 +48,5 @@ export class PlaceholderEmbeddable extends Embeddable {
     );
   }
 
-  /**
-   * This is mostly relevant for time based embeddables which need to update data
-   * even if EmbeddableInput has not changed at all.
-   */
   public reload() {}
 }

@@ -155,32 +155,9 @@ export function placePanelBeside({
     }
   }
   // if we get here that means there is no blank space around the panel we are placing beside. This means it's time to mess up the dashboard's groove. Fun!
-  const [rightPlacement, , bottomPlacement] = possiblePlacementDirections;
-  if (rightPlacement.fits) {
-    otherPanels.forEach((currentPanelGrid: GridData) => {
-      if (
-        currentPanelGrid.x >= rightPlacement.grid.x &&
-        rightPlacement.grid.y < currentPanelGrid.y + currentPanelGrid.h &&
-        rightPlacement.grid.y + rightPlacement.grid.h > currentPanelGrid.y
-      ) {
-        const movedPanel = _.cloneDeep(currentPanels[currentPanelGrid.i]);
-        if (movedPanel.gridData.x + rightPlacement.grid.w > DASHBOARD_GRID_COLUMN_COUNT) {
-          movedPanel.gridData.y = movedPanel.gridData.y + rightPlacement.grid.h;
-        } else {
-          movedPanel.gridData.x = movedPanel.gridData.x + rightPlacement.grid.w;
-        }
-        currentPanels[currentPanelGrid.i] = movedPanel;
-      }
-    });
-    return rightPlacement.grid;
-  }
+  const [, , bottomPlacement] = possiblePlacementDirections;
   for (const currentPanelGrid of otherPanels) {
-    if (
-      bottomPlacement.grid.x + bottomPlacement.grid.w > currentPanelGrid.x &&
-      bottomPlacement.grid.x < currentPanelGrid.x + currentPanelGrid.w &&
-      bottomPlacement.grid.y < currentPanelGrid.y + currentPanelGrid.h &&
-      bottomPlacement.grid.y + bottomPlacement.grid.h > currentPanelGrid.y
-    ) {
+    if (bottomPlacement.grid.y <= currentPanelGrid.y) {
       const movedPanel = _.cloneDeep(currentPanels[currentPanelGrid.i]);
       movedPanel.gridData.y = movedPanel.gridData.y + bottomPlacement.grid.h;
       currentPanels[currentPanelGrid.i] = movedPanel;

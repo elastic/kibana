@@ -113,7 +113,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('panel duplication', function() {
+    describe('panel cloning', function() {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setHistoricalDataRange();
@@ -124,16 +124,16 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
-      it('duplicates a panel', async () => {
+      it('clones a panel', async () => {
         const initialPanelTitles = await PageObjects.dashboard.getPanelTitles();
-        await dashboardPanelActions.duplicatePanelByTitle(PIE_CHART_VIS_NAME);
+        await dashboardPanelActions.clonePanelByTitle(PIE_CHART_VIS_NAME);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         const postPanelTitles = await PageObjects.dashboard.getPanelTitles();
         expect(postPanelTitles.length).to.equal(initialPanelTitles.length + 1);
       });
 
-      it('appends a duplication title tag', async () => {
+      it('appends a clone title tag', async () => {
         const panelTitles = await PageObjects.dashboard.getPanelTitles();
         expect(panelTitles[1]).to.equal(PIE_CHART_VIS_NAME + ' (copy)');
       });
@@ -143,10 +143,10 @@ export default function({ getService, getPageObjects }) {
         expect(panelDimensions[0]).to.eql(panelDimensions[1]);
       });
 
-      it('gives a correct title to the duplicate of a duplicate', async () => {
+      it('gives a correct title to the clone of a clone', async () => {
         const initialPanelTitles = await PageObjects.dashboard.getPanelTitles();
-        const duplicatedPanelName = initialPanelTitles[initialPanelTitles.length - 1];
-        await dashboardPanelActions.duplicatePanelByTitle(duplicatedPanelName);
+        const clonedPanelName = initialPanelTitles[initialPanelTitles.length - 1];
+        await dashboardPanelActions.clonePanelByTitle(clonedPanelName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         const postPanelTitles = await PageObjects.dashboard.getPanelTitles();

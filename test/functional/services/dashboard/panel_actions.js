@@ -20,7 +20,7 @@
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
 const REPLACE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-replacePanel';
-const DUPLICATE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-duplicatePanel';
+const CLONE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-clonePanel';
 const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_PANEL';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
@@ -98,14 +98,14 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click(REPLACE_PANEL_DATA_TEST_SUBJ);
     }
 
-    async duplicatePanelByTitle(title) {
-      log.debug(`duplicatePanel(${title})`);
+    async clonePanelByTitle(title) {
+      log.debug(`clonePanel(${title})`);
       let panelOptions = null;
       if (title) {
         panelOptions = await this.getPanelHeading(title);
       }
       await this.openContextMenu(panelOptions);
-      await testSubjects.click(DUPLICATE_PANEL_DATA_TEST_SUBJ);
+      await testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
     }
 
     async openInspectorByTitle(title) {
