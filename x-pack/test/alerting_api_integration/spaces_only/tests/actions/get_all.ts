@@ -46,6 +46,18 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           referencedByCount: 0,
         },
         {
+          id: 'preconfigured-es-index-action',
+          isPreconfigured: true,
+          actionTypeId: '.index',
+          name: 'preconfigured_es_index_action',
+          config: {
+            index: 'functional-test-actions-index-preconfigured',
+            refresh: true,
+            executionTimeField: 'timestamp',
+          },
+          referencedByCount: 0,
+        },
+        {
           id: 'my-slack1',
           isPreconfigured: true,
           actionTypeId: '.slack',
@@ -64,6 +76,16 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             xyzConfig1: 'value1',
             xyzConfig2: 'value2',
             listOfThings: ['a', 'b', 'c', 'd'],
+          },
+          referencedByCount: 0,
+        },
+        {
+          id: 'preconfigured.test.index-record',
+          isPreconfigured: true,
+          actionTypeId: 'test.index-record',
+          name: 'Test:_Preconfigured_Index_Record',
+          config: {
+            unencrypted: 'ignored-but-required',
           },
           referencedByCount: 0,
         },
@@ -89,6 +111,18 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
 
       await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/action/_getAll`).expect(200, [
         {
+          id: 'preconfigured-es-index-action',
+          isPreconfigured: true,
+          actionTypeId: '.index',
+          name: 'preconfigured_es_index_action',
+          config: {
+            index: 'functional-test-actions-index-preconfigured',
+            refresh: true,
+            executionTimeField: 'timestamp',
+          },
+          referencedByCount: 0,
+        },
+        {
           id: 'my-slack1',
           isPreconfigured: true,
           actionTypeId: '.slack',
@@ -107,6 +141,16 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             xyzConfig1: 'value1',
             xyzConfig2: 'value2',
             listOfThings: ['a', 'b', 'c', 'd'],
+          },
+          referencedByCount: 0,
+        },
+        {
+          id: 'preconfigured.test.index-record',
+          isPreconfigured: true,
+          actionTypeId: 'test.index-record',
+          name: 'Test:_Preconfigured_Index_Record',
+          config: {
+            unencrypted: 'ignored-but-required',
           },
           referencedByCount: 0,
         },

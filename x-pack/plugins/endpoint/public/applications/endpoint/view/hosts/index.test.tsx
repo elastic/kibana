@@ -151,7 +151,6 @@ describe('when on the hosts page', () => {
       });
 
       it('should navigate to logs without full page refresh', async () => {
-        // FIXME: this is not working :(
         expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
       });
     });
