@@ -11,6 +11,8 @@ import { initLoadingIndicator } from './lib/loading_indicator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 // @ts-ignore untyped local
 import { argTypeSpecs } from './expression_types/arg_types';
 import { transitions } from './transitions';
@@ -31,7 +33,9 @@ export interface CanvasSetupDeps {
 }
 
 export interface CanvasStartDeps {
+  embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
+  inspector: InspectorStart;
   uiActions: UiActionsStart;
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
@@ -48,13 +52,18 @@ export interface CanvasStartDeps {
 // These interfaces are empty for now but will be populate as we need to export
 // things for other plugins to use at startup or runtime
 export type CanvasSetup = CanvasApi;
-export interface CanvasStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export type CanvasStart = void;
 
 /** @internal */
 export class CanvasPlugin
   implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
+  // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
+  private srcPlugin = new CanvasSrcPlugin();
+
   public setup(core: CoreSetup<CanvasStartDeps>, plugins: CanvasSetupDeps) {
     const { api: canvasApi, registries } = getPluginApi(plugins.expressions);
+
+    this.srcPlugin.setup(core, { canvas: canvasApi });
 
     core.application.register({
       id: 'canvas',
@@ -84,10 +93,6 @@ export class CanvasPlugin
     canvasApi.addElements(legacyRegistries.elements.getOriginalFns());
     canvasApi.addTypes(legacyRegistries.types.getOriginalFns());
 
-    // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
-    const srcPlugin = new CanvasSrcPlugin();
-    srcPlugin.setup(core, { canvas: canvasApi });
-
     // Register core canvas stuff
     canvasApi.addFunctions(initFunctions({ typesRegistry: plugins.expressions.__LEGACY.types }));
     canvasApi.addArgumentUIs(argTypeSpecs);
@@ -99,8 +104,7 @@ export class CanvasPlugin
   }
 
   public start(core: CoreStart, plugins: CanvasStartDeps) {
+    this.srcPlugin.start(core, plugins);
     initLoadingIndicator(core.http.addLoadingCountSource);
-
-    return {};
   }
 }

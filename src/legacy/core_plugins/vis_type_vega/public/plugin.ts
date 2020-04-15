@@ -17,7 +17,6 @@
  * under the License.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
 import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
@@ -32,13 +31,15 @@ import {
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
+import { IServiceSettings } from '../../../../plugins/maps_legacy/public';
 
 /** @internal */
-export interface VegaVisualizationDependencies extends LegacyDependenciesPluginSetup {
+export interface VegaVisualizationDependencies {
   core: CoreSetup;
   plugins: {
     data: ReturnType<DataPublicPlugin['setup']>;
   };
+  serviceSettings: IServiceSettings;
 }
 
 /** @internal */
@@ -47,7 +48,7 @@ export interface VegaPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   data: ReturnType<DataPublicPlugin['setup']>;
   visTypeVega: VisTypeVegaSetup;
-  __LEGACY: LegacyDependenciesPlugin;
+  mapsLegacy: any;
 }
 
 /** @internal */
@@ -65,7 +66,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { data, expressions, visualizations, visTypeVega, __LEGACY }: VegaPluginSetupDependencies
+    { data, expressions, visualizations, visTypeVega, mapsLegacy }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: visTypeVega.config.enableExternalUrls,
@@ -79,7 +80,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       plugins: {
         data,
       },
-      ...(await __LEGACY.setup()),
+      serviceSettings: mapsLegacy.serviceSettings,
     };
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));

@@ -21,10 +21,15 @@ import * as vega from 'vega-lib';
 import { i18n } from '@kbn/i18n';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
-import { KibanaMap } from '../legacy_imports';
+import { KibanaMap } from '../../../../../plugins/maps_legacy/public';
 import { getEmsTileLayerId, getUISettings } from '../services';
 
 export class VegaMapView extends VegaBaseView {
+  constructor(opts, services) {
+    super(opts);
+    this.services = services;
+  }
+
   async _initViewCustomizations() {
     const mapConfig = this._parser.mapConfig;
     let baseMapOpts;
@@ -102,14 +107,18 @@ export class VegaMapView extends VegaBaseView {
     //   maxBounds = L.latLngBounds(L.latLng(b[1], b[0]), L.latLng(b[3], b[2]));
     // }
 
-    this._kibanaMap = new KibanaMap(this._$container.get(0), {
-      zoom,
-      minZoom,
-      maxZoom,
-      center: [mapConfig.latitude, mapConfig.longitude],
-      zoomControl: mapConfig.zoomControl,
-      scrollWheelZoom: mapConfig.scrollWheelZoom,
-    });
+    this._kibanaMap = new KibanaMap(
+      this._$container.get(0),
+      {
+        zoom,
+        minZoom,
+        maxZoom,
+        center: [mapConfig.latitude, mapConfig.longitude],
+        zoomControl: mapConfig.zoomControl,
+        scrollWheelZoom: mapConfig.scrollWheelZoom,
+      },
+      this.services
+    );
 
     if (baseMapOpts) {
       this._kibanaMap.setBaseLayer({
