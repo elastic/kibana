@@ -11,12 +11,11 @@ import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { loadActionTypes } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/lib/action_connector_api';
 import { SelectField } from '../../../../../shared_imports';
 import {
   ActionForm,
   ActionType,
+  loadActionTypes,
 } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertAction } from '../../../../../../../../../plugins/alerting/common';
 import { useKibana } from '../../../../../lib/kibana';
