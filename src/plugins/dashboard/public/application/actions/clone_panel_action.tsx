@@ -23,7 +23,7 @@ import uuid from 'uuid';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
 import { SavedObject } from '../../../../saved_objects/public';
-import { PanelNotFoundError } from '../../../../embeddable/public';
+import { PanelNotFoundError, EmbeddableInput } from '../../../../embeddable/public';
 import {
   placePanelBeside,
   IPanelPlacementBesideArgs,
@@ -125,7 +125,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
     panelToClone: DashboardPanelState,
     embeddableType: string
   ): Promise<Partial<PanelState>> {
-    const panelState: Partial<PanelState> = {
+    const panelState: PanelState<EmbeddableInput> = {
       type: embeddableType,
       explicitInput: {
         ...panelToClone.explicitInput,
@@ -133,11 +133,11 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
       },
     };
     let newTitle: string = '';
-    if (panelToClone.savedObjectId) {
+    if (panelToClone.explicitInput.savedObjectId) {
       // Fetch existing saved object
       const savedObjectToClone = await this.core.savedObjects.client.get<SavedObject>(
         embeddableType,
-        panelToClone.savedObjectId
+        panelToClone.explicitInput.savedObjectId
       );
 
       // Clone the saved object
@@ -150,7 +150,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
         },
         { references: _.cloneDeep(savedObjectToClone.references) }
       );
-      panelState.savedObjectId = clonedSavedObject.id;
+      panelState.explicitInput.savedObjectId = clonedSavedObject.id;
     }
     this.core.notifications.toasts.addSuccess({
       title: i18n.translate('dashboard.panel.clonedToast', {

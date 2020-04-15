@@ -32,7 +32,6 @@ import { ClonePanelAction } from '.';
 
 // eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { PLACEHOLDER_EMBEDDABLE } from '../embeddable/placeholder';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -116,7 +115,7 @@ test('Clones an embeddable without a saved object ID', async () => {
 test('Clones an embeddable with a saved object ID', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const panel = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
-  panel.savedObjectId = 'holySavedObjectBatman';
+  panel.explicitInput.savedObjectId = 'holySavedObjectBatman';
   const action = new ClonePanelAction(coreStart);
   // @ts-ignore
   const newPanel = await action.cloneEmbeddable(panel, embeddable.type);
