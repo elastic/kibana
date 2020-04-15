@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Processor {
-  [key: string]: {
-    [key: string]: unknown;
-  };
+export interface ESCommonProcessorOptions {
+  on_failure?: Processor[];
+  ignore_failure?: boolean;
+  if?: string;
+  tag?: string;
+}
+
+export interface Processor<Extend = { [key: string]: any }> {
+  [type: string]: ESCommonProcessorOptions & Extend;
 }
 
 export interface Pipeline {
