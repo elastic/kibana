@@ -11,7 +11,7 @@
     query="state.query"
     saved-query-id="state.savedQuery"
     screen-title="screenTitle"
-    show-date-picker="enableTimeRangeSelector"
+    show-date-picker="indexPattern.isTimeBased()"
     show-save-query="showSaveQuery"
     show-search-bar="true"
     use-default-behaviors="true"
@@ -140,6 +140,7 @@
                         position="'top'"
                       ></icon-tip>
                       <span
+                        data-test-subj="discoverIntervalSelectScaledToDesc"
                         i18n-id="kbn.discover.scaledToDescription"
                         i18n-default-message="Scaled to {bucketIntervalDescription}"
                         i18n-values="{
