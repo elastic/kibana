@@ -6,31 +6,12 @@
 
 import * as rt from 'io-ts';
 
-import { badRequestErrorRT, forbiddenErrorRT, routeTimingMetadataRT } from '../shared';
-
 export const LOG_SOURCE_CONFIGURATION_PATH_PREFIX = '/api/infra/log_source_configurations';
 export const LOG_SOURCE_CONFIGURATION_PATH = `${LOG_SOURCE_CONFIGURATION_PATH_PREFIX}/{sourceId}`;
 export const getLogSourceConfigurationPath = (sourceId: string) =>
   `${LOG_SOURCE_CONFIGURATION_PATH_PREFIX}/${sourceId}`;
 
-/**
- * request
- */
-
-export const getLogSourceConfigurationRequestParamsRT = rt.type({
-  // the id of the source configuration
-  sourceId: rt.string,
-});
-
-export type GetLogSourceConfigurationRequestParams = rt.TypeOf<
-  typeof getLogSourceConfigurationRequestParamsRT
->;
-
-/**
- * response
- */
-
-const logSourceConfigurationOriginRT = rt.keyof({
+export const logSourceConfigurationOriginRT = rt.keyof({
   fallback: null,
   internal: null,
   stored: null,
@@ -70,45 +51,10 @@ const logSourceColumnConfigurationRT = rt.union([
   logSourceFieldColumnConfigurationRT,
 ]);
 
-const logSourceConfigurationRT = rt.strict({
+export const logSourceConfigurationRT = rt.strict({
   name: rt.string,
   description: rt.string,
   logAlias: rt.string,
   fields: logSourceFieldsConfigurationRT,
   logColumns: rt.array(logSourceColumnConfigurationRT),
 });
-
-export const getLogSourceConfigurationSuccessResponsePayloadRT = rt.intersection([
-  rt.type({
-    data: rt.exact(
-      rt.intersection([
-        rt.type({
-          id: rt.string,
-          origin: logSourceConfigurationOriginRT,
-          configuration: logSourceConfigurationRT,
-        }),
-        rt.partial({
-          updatedAt: rt.number,
-          version: rt.string,
-        }),
-      ])
-    ),
-  }),
-  rt.partial({
-    timing: routeTimingMetadataRT,
-  }),
-]);
-
-export type GetLogSourceConfigurationSuccessResponsePayload = rt.TypeOf<
-  typeof getLogSourceConfigurationSuccessResponsePayloadRT
->;
-
-export const getLogSourceConfigurationResponsePayloadRT = rt.union([
-  getLogSourceConfigurationSuccessResponsePayloadRT,
-  badRequestErrorRT,
-  forbiddenErrorRT,
-]);
-
-export type GetLogSourceConfigurationReponsePayload = rt.TypeOf<
-  typeof getLogSourceConfigurationResponsePayloadRT
->;
