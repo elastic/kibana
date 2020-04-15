@@ -21,7 +21,7 @@ beforeEach(() => {
   clusterClient = elasticsearchServiceMock.createClusterClient();
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
-    clusterClient,
+    clusterClientPromise: Promise.resolve(clusterClient),
   });
 });
 
