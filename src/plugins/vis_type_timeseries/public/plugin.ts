@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import './application/index.scss';
+
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
