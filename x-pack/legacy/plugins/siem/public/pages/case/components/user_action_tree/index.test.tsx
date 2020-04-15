@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { getFormMock } from '../__mock__/form';
 import { useUpdateComment } from '../../../../containers/case/use_update_comment';
-import { basicCase, getUserAction } from '../__mock__/case_data';
+import { basicCase, getUserAction } from '../../../../containers/case/mock';
 import { UserActionTree } from './';
 import { TestProviders } from '../../../../mock';
 import { useFormMock } from '../create/index.test';
