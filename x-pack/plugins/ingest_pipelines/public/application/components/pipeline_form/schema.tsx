@@ -93,7 +93,7 @@ export const pipelineFormSchema: FormSchema = {
       },
     ],
   },
-  onFailure: {
+  on_failure: {
     label: i18n.translate('xpack.ingestPipelines.form.onFailureFieldLabel', {
       defaultMessage: 'On-failure processors (optional)',
     }),

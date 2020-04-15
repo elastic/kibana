@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -21,6 +22,7 @@ import {
 import { EuiSpacer, EuiText } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
+import { BASE_PATH } from '../../../../common/constants';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
 
@@ -28,7 +30,7 @@ import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
 import { PipelineDetails } from './details';
 
-export const PipelinesList: React.FunctionComponent = () => {
+export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const { services } = useKibana();
 
   const [selectedPipeline, setSelectedPipeline] = useState<Pipeline | undefined>(undefined);
@@ -43,6 +45,10 @@ export const PipelinesList: React.FunctionComponent = () => {
 
   let content: React.ReactNode;
 
+  const editPipeline = (name: string) => {
+    history.push(encodeURI(`${BASE_PATH}/edit/${encodeURIComponent(name)}`));
+  };
+
   if (isLoading) {
     content = (
       <SectionLoading>
@@ -55,10 +61,8 @@ export const PipelinesList: React.FunctionComponent = () => {
   } else if (data?.length) {
     content = (
       <PipelineTable
-        onReloadClick={() => {
-          sendRequest();
-        }}
-        onEditPipelineClick={() => {}}
+        onReloadClick={sendRequest}
+        onEditPipelineClick={editPipeline}
         onDeletePipelineClick={() => {}}
         onViewPipelineClick={setSelectedPipeline}
         pipelines={data}
@@ -106,7 +110,7 @@ export const PipelinesList: React.FunctionComponent = () => {
             </EuiText>
           </EuiTitle>
           <EuiSpacer size="m" />
-          {/* Error call out or pipeline table */}
+          {/* Error call out for pipeline table */}
           {error ? (
             <EuiCallOut
               iconType="faceSad"
@@ -125,7 +129,7 @@ export const PipelinesList: React.FunctionComponent = () => {
           pipeline={selectedPipeline}
           onClose={() => setSelectedPipeline(undefined)}
           onDeleteClick={() => {}}
-          onEditClick={() => {}}
+          onEditClick={editPipeline}
         />
       )}
     </>

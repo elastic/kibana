@@ -6,7 +6,15 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSwitch,
+  EuiLink,
+} from '@elastic/eui';
 
 import {
   useForm,
@@ -20,14 +28,16 @@ import {
 } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
 
-import { SectionError } from '../section_error';
+import { SectionError, PipelineRequestFlyout } from '../';
 import { pipelineFormSchema } from './schema';
 
 interface Props {
   onSave: (pipeline: Pipeline) => void;
+  onCancel: () => void;
   isSaving: boolean;
   saveError: any;
   defaultValue?: Pipeline;
+  isEditing?: boolean;
 }
 
 const UseField = getUseField({ component: Field });
@@ -38,17 +48,22 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
     name: '',
     description: '',
     processors: '',
-    onFailure: '',
+    on_failure: '',
     version: '',
   },
   onSave,
   isSaving,
   saveError,
+  isEditing,
+  onCancel,
 }) => {
   const { services } = useKibana();
 
-  const [isVersionVisible, setIsVersionVisible] = useState<boolean>(false);
-  const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(false);
+  const [isVersionVisible, setIsVersionVisible] = useState<boolean>(Boolean(defaultValue.version));
+  const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(
+    Boolean(defaultValue.on_failure)
+  );
+  const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
   const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
     if (isValid) {
@@ -62,24 +77,25 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
     onSubmit: handleSave,
   });
 
+  const saveButtonLabel = isSaving ? (
+    <FormattedMessage
+      id="xpack.ingestPipelines.form.savingButtonLabel"
+      defaultMessage="Saving..."
+    />
+  ) : isEditing ? (
+    <FormattedMessage
+      id="xpack.ingestPipelines.form.saveButtonLabel"
+      defaultMessage="Save pipeline"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.ingestPipelines.form.createButtonLabel"
+      defaultMessage="Create pipeline"
+    />
+  );
+
   return (
     <>
-      {saveError ? (
-        <>
-          <SectionError
-            title={
-              <FormattedMessage
-                id="xpack.ingestPipelines.form.savePipelineError"
-                defaultMessage="Unable to create pipeline"
-              />
-            }
-            error={saveError}
-            data-test-subj="savePipelineError"
-          />
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
-
       <Form
         form={form}
         data-test-subj="pipelineForm"
@@ -116,6 +132,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
             path="name"
             componentProps={{
               ['data-test-subj']: 'nameField',
+              euiFieldProps: { disabled: Boolean(isEditing) },
             }}
           />
 
@@ -237,7 +254,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
         >
           {isOnFailureEditorVisible ? (
             <UseField
-              path="onFailure"
+              path="on_failure"
               component={JsonEditorField}
               componentProps={{
                 ['data-test-subj']: 'onFailureEditor',
@@ -261,11 +278,28 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
 
         <EuiSpacer size="l" />
 
+        {/* Request error */}
+        {saveError ? (
+          <>
+            <SectionError
+              title={
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.savePipelineError"
+                  defaultMessage="Unable to create pipeline"
+                />
+              }
+              error={saveError}
+              data-test-subj="savePipelineError"
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+
         {/* Form submission */}
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiButton
                   fill
                   color="secondary"
@@ -275,17 +309,42 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
                   disabled={form.isSubmitted && form.isValid === false}
                   isLoading={isSaving}
                 >
-                  {
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.form.createButtonLabel"
-                      defaultMessage="Create pipeline"
-                    />
-                  }
+                  {saveButtonLabel}
                 </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonEmpty color="primary" onClick={onCancel}>
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.form.cancelButtonLabel"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
+            >
+              {isRequestVisible ? (
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.hideRequestButtonLabel"
+                  defaultMessage="Hide request"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.showRequestButtonLabel"
+                  defaultMessage="Show request"
+                />
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
+        {isRequestVisible ? (
+          <PipelineRequestFlyout
+            closeFlyout={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
+          />
+        ) : null}
       </Form>
 
       <EuiSpacer size="m" />
