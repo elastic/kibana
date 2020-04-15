@@ -11,7 +11,7 @@ import { AppState } from '../../../state';
 import { monitorLocationsSelector, monitorStatusSelector } from '../../../state/selectors';
 import { MonitorStatusBarComponent } from '../../functional/monitor_status_details/monitor_status_bar';
 import { getMonitorStatusAction } from '../../../state/actions';
-import { useUrlParams } from '../../../hooks';
+import { useGetUrlParams } from '../../../hooks';
 import { Ping } from '../../../../common/graphql/types';
 import { MonitorLocations } from '../../../../common/runtime_types/monitor';
 import { UptimeRefreshContext } from '../../../contexts';
@@ -39,8 +39,7 @@ const Container: React.FC<Props> = ({
 }: Props) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
-  const [getUrlParams] = useUrlParams();
-  const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = getUrlParams();
+  const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
 
   useEffect(() => {
     loadMonitorStatus({ dateStart, dateEnd, monitorId });

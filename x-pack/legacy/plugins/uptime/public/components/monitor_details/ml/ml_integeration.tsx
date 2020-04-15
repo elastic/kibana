@@ -5,8 +5,6 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-
-import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { MachineLearningFlyout } from './ml_flyout_container';
 import {
@@ -23,6 +21,7 @@ import * as labels from './translations';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ManageMLJobComponent } from './manage_ml_job';
 import { JobStat } from '../../../../../../../plugins/ml/common/types/data_recognizer';
+import { useMonitorId } from '../../../hooks/use_monitor';
 
 export const MLIntegrationComponent = () => {
   const [isMlFlyoutOpen, setIsMlFlyoutOpen] = useState(false);
@@ -32,8 +31,7 @@ export const MLIntegrationComponent = () => {
 
   const { notifications } = useKibana();
 
-  let { monitorId } = useParams();
-  monitorId = atob(monitorId || '');
+  const monitorId = useMonitorId();
 
   const dispatch = useDispatch();
 
