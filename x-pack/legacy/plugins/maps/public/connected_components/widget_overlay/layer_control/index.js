@@ -38,7 +38,7 @@ function mapDispatchToProps(dispatch) {
     openLayerTOC: () => {
       dispatch(setIsLayerTOCOpen(true));
     },
-    openMapSettings: async (flyoutDisplay) => {
+    openMapSettings: async flyoutDisplay => {
       await dispatch(setSelectedLayer(null));
       dispatch(trackMapSettings());
       dispatch(updateFlyout(FLYOUT_STATE.MAP_SETTINGS_PANEL));

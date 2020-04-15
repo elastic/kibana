@@ -158,16 +158,16 @@ export function setMapInitError(errorMessage) {
 export function setMapSettings(settings) {
   return {
     type: SET_MAP_SETTINGS,
-    settings
-  }
+    settings,
+  };
 }
 
 export function rollbackMapSettings() {
-  return { type: ROLLBACK_MAP_SETTINGS }
+  return { type: ROLLBACK_MAP_SETTINGS };
 }
 
 export function trackMapSettings() {
-  return { type: TRACK_MAP_SETTINGS }
+  return { type: TRACK_MAP_SETTINGS };
 }
 
 export function updateMapSetting(settingKey, settingValue) {
@@ -175,7 +175,7 @@ export function updateMapSetting(settingKey, settingValue) {
     type: UPDATE_MAP_SETTING,
     settingKey,
     settingValue,
-  }
+  };
 }
 
 export function trackCurrentLayerState(layerId) {

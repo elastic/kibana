@@ -69,4 +69,7 @@ export function rollbackMapSettings(): AnyAction;
 
 export function trackMapSettings(): AnyAction;
 
-export function updateMapSetting(settingKey: string, settingValue: string | boolean | number): AnyAction;
+export function updateMapSetting(
+  settingKey: string,
+  settingValue: string | boolean | number
+): AnyAction;

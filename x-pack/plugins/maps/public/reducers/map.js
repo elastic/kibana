@@ -194,10 +194,10 @@ export function map(state = INITIAL_STATE, action) {
     case ROLLBACK_MAP_SETTINGS:
       return state.__rollbackSettings
         ? {
-          ...state,
-          settings: { ...state.__rollbackSettings },
-          __rollbackSettings: null,
-        }
+            ...state,
+            settings: { ...state.__rollbackSettings },
+            __rollbackSettings: null,
+          }
         : state;
     case TRACK_MAP_SETTINGS:
       return {
@@ -210,7 +210,7 @@ export function map(state = INITIAL_STATE, action) {
         settings: {
           ...(state.settings ? state.settings : {}),
           [action.settingKey]: action.settingValue,
-        }
+        },
       };
     case SET_LAYER_ERROR_STATUS:
       const { layerList } = state;

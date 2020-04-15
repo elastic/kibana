@@ -132,10 +132,7 @@ export function LayerControl({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip
-                delay="long"
-                content={openMapSettingsLabel}
-              >
+              <EuiToolTip delay="long" content={openMapSettingsLabel}>
                 <EuiButtonIcon
                   className="mapLayerControl__openMapSettingsButton"
                   onClick={openMapSettings}

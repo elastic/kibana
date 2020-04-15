@@ -42,7 +42,7 @@ export type MapContext = {
 export type MapSettings = {
   maxZoom: number;
   minZoom: number;
-}
+};
 
 export type MapState = {
   ready: boolean;

@@ -27,7 +27,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
     },
     updateMapSetting: (settingKey, settingValue) => {
-      dispatch(updateMapSetting(settingKey, settingValue))
+      dispatch(updateMapSetting(settingKey, settingValue));
     },
   };
 }

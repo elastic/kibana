@@ -16,8 +16,11 @@ interface Props {
   updateMapSetting: (settingKey: string, settingValue: string | number | boolean) => void;
 }
 
-export function MapSettingsPanel({ cancelChanges, keepChanges, mapSettings, updateMapSetting }: Props) {
-  return (
-    <div>Map settings</div>
-  );
+export function MapSettingsPanel({
+  cancelChanges,
+  keepChanges,
+  mapSettings,
+  updateMapSetting,
+}: Props) {
+  return <div>Map settings</div>;
 }
