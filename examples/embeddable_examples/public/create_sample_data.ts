@@ -17,16 +17,20 @@
  * under the License.
  */
 
-export {
-  HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddable,
-  HelloWorldEmbeddableFactory,
-} from './hello_world';
-export { ListContainer, LIST_CONTAINER } from './list_container';
-export { TODO_EMBEDDABLE } from './todo';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { TodoSavedObjectAttributes } from '../common';
 
-import { EmbeddableExamplesPlugin } from './plugin';
-
-export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
-export { MULTI_TASK_TODO_EMBEDDABLE } from './multi_task_todo';
-export const plugin = () => new EmbeddableExamplesPlugin();
+export async function createSampleData(client: SavedObjectsClientContract) {
+  await client.create<TodoSavedObjectAttributes>(
+    'todo',
+    {
+      task: 'Take the garbage out',
+      title: 'Garbage',
+      icon: 'trash',
+    },
+    {
+      id: 'sample-todo-saved-object',
+      overwrite: true,
+    }
+  );
+}
