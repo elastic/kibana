@@ -7,7 +7,7 @@
 import uuid from 'uuid';
 import { merge, flattenDeep } from 'lodash';
 
-const INDEX_NAME = 'heartbeat-8.0.0';
+const INDEX_NAME = 'heartbeat-8-generated-test';
 
 export const makePing = async (
   es: any,

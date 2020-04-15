@@ -38,7 +38,7 @@ export interface ChartData {
 
 export interface ChartSeriesConfigs {
   customHeight?: number;
-  customSeriesColors?: string[];
+  color?: string[];
   series?: {
     xScaleType?: ScaleType | undefined;
     yScaleType?: ScaleType | undefined;
@@ -110,7 +110,7 @@ export const chartDefaultSettings = {
   rendering: chartDefaultRendering,
   animatedData: false,
   showLegend: false,
-  showLegendDisplayValue: false,
+  showLegendExtra: false,
   debug: false,
   legendPosition: Position.Bottom,
 };

@@ -7,6 +7,10 @@
 import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
+export const anomaly_threshold = Joi.number()
+  .integer()
+  .greater(-1)
+  .less(101);
 export const description = Joi.string();
 export const enabled = Joi.boolean();
 export const exclude_export_details = Joi.boolean();
@@ -48,7 +52,8 @@ export const risk_score = Joi.number()
 export const severity = Joi.string().valid('low', 'medium', 'high', 'critical');
 export const status = Joi.string().valid('open', 'closed');
 export const to = Joi.string();
-export const type = Joi.string().valid('query', 'saved_query');
+export const type = Joi.string().valid('query', 'saved_query', 'machine_learning');
+export const machine_learning_job_id = Joi.string();
 export const queryFilter = Joi.string();
 export const references = Joi.array()
   .items(Joi.string())
@@ -105,3 +110,44 @@ export const updated_by = Joi.string();
 export const version = Joi.number()
   .integer()
   .min(1);
+export const action_group = Joi.string();
+export const action_id = Joi.string();
+export const action_action_type_id = Joi.string();
+export const action_params = Joi.object();
+export const action = Joi.object({
+  group: action_group.required(),
+  id: action_id.required(),
+  action_type_id: action_action_type_id.required(),
+  params: action_params.required(),
+});
+export const actions = Joi.array().items(action);
+export const throttle = Joi.string().allow(null);
+export const note = Joi.string();
+
+// NOTE: Experimental list support not being shipped currently and behind a feature flag
+// TODO: (LIST-FEATURE) Remove this comment once we lists have passed testing and is ready for the release
+export const list_field = Joi.string();
+export const list_values_operator = Joi.string().valid(['included', 'excluded']);
+export const list_values_types = Joi.string().valid(['match', 'match_all', 'list', 'exists']);
+export const list_values = Joi.object({
+  name: Joi.string().required(),
+  id: Joi.string(),
+  description: Joi.string(),
+  created_at,
+});
+export const list = Joi.object({
+  field: list_field.required(),
+  values_operator: list_values_operator.required(),
+  values_type: list_values_types.required(),
+  values: Joi.when('values_type', {
+    is: 'exists',
+    then: Joi.forbidden(),
+    otherwise: Joi.array()
+      .items(list_values)
+      .required(),
+  }),
+});
+export const list_and = Joi.object({
+  and: Joi.array().items(list),
+});
+export const lists = Joi.array().items(list.concat(list_and));

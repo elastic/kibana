@@ -43,7 +43,7 @@ export function wrapComponentWithDefaults(component, defaults) {
 
 const tracer = function() {
   if (window.engine_trace) {
-    console.log.call(console, arguments);
+    console.log.call(console, ...arguments);
   }
 };
 

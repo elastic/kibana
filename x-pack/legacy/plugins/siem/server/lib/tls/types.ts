@@ -18,11 +18,7 @@ export interface TlsBuckets {
     value_as_string: string;
   };
 
-  alternative_names: {
-    buckets: Readonly<Array<{ key: string; doc_count: number }>>;
-  };
-
-  common_names: {
+  subjects: {
     buckets: Readonly<Array<{ key: string; doc_count: number }>>;
   };
 
@@ -30,7 +26,7 @@ export interface TlsBuckets {
     buckets: Readonly<Array<{ key: string; doc_count: number }>>;
   };
 
-  issuer_names: {
+  issuers: {
     buckets: Readonly<Array<{ key: string; doc_count: number }>>;
   };
 

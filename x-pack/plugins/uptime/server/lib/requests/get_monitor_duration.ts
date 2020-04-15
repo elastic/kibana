@@ -5,8 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
-import { getHistogramIntervalFormatted } from '../helper';
+import { QUERY } from '../../../../../legacy/plugins/uptime/common/constants';
 import {
   LocationDurationLine,
   MonitorDurationResult,
@@ -47,9 +46,9 @@ const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
 export const getMonitorDurationChart: UMElasticsearchQueryFn<
   GetMonitorChartsParams,
   MonitorDurationResult
-> = async ({ callES, dateStart, dateEnd, monitorId }) => {
+> = async ({ callES, dynamicSettings, dateStart, dateEnd, monitorId }) => {
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       query: {
         bool: {
@@ -63,10 +62,9 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
       size: 0,
       aggs: {
         timeseries: {
-          date_histogram: {
+          auto_date_histogram: {
             field: '@timestamp',
-            fixed_interval: getHistogramIntervalFormatted(dateStart, dateEnd),
-            min_doc_count: 0,
+            buckets: QUERY.DEFAULT_BUCKET_COUNT,
           },
           aggs: {
             location: {

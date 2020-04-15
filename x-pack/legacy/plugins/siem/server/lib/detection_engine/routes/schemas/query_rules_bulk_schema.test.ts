@@ -6,11 +6,20 @@
 
 import { queryRulesBulkSchema } from './query_rules_bulk_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 // only the basics of testing are here.
 // see: query_rules_bulk_schema.test.ts for the bulk of the validation tests
 // this just wraps queryRulesSchema in an array
 describe('query_rules_bulk_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('can take an empty array and validate it', () => {
     expect(
       queryRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([]).error

@@ -7,11 +7,10 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { IUiSettingsClient, HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { interval } from 'rxjs';
 import {
   AnnotationDomainTypes,
   Axis,
-  getAxisId,
-  getSpecId,
   Chart,
   LineAnnotation,
   LineSeries,
@@ -21,9 +20,16 @@ import {
   niceTimeFormatter,
 } from '@elastic/charts';
 import moment from 'moment-timezone';
-import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiLoadingChart,
+  EuiSpacer,
+  EuiEmptyPrompt,
+  EuiText,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getThresholdAlertVisualizationData } from './lib/api';
+import { getThresholdAlertVisualizationData } from '../../../../common/lib/index_threshold_api';
 import { AggregationType, Comparator } from '../../../../common/types';
 import { AlertsContextValue } from '../../../context/alerts_context';
 import { IndexThresholdAlertParams } from './types';
@@ -59,7 +65,7 @@ const getTimezone = (uiSettings: IUiSettingsClient) => {
   return tzOffset;
 };
 
-const getDomain = (alertInterval: string) => {
+const getDomain = (alertInterval: string, startAt: Date) => {
   const VISUALIZE_INTERVALS = 30;
   let intervalMillis: number;
 
@@ -69,10 +75,9 @@ const getDomain = (alertInterval: string) => {
     intervalMillis = 1000 * 60; // default to one minute if not parseable
   }
 
-  const now = Date.now();
   return {
-    min: now - intervalMillis * VISUALIZE_INTERVALS,
-    max: now,
+    min: startAt.getTime() - intervalMillis * VISUALIZE_INTERVALS,
+    max: startAt.getTime(),
   };
 };
 
@@ -84,6 +89,15 @@ interface Props {
     [key: string]: Comparator;
   };
   alertsContext: AlertsContextValue;
+  refreshRateInMilliseconds?: number;
+}
+
+const DEFAULT_REFRESH_RATE = 5000;
+
+enum LoadingStateType {
+  FirstLoad,
+  Refresh,
+  Idle,
 }
 
 type MetricResult = [number, number]; // [epochMillis, value]
@@ -93,6 +107,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   aggregationTypes,
   comparators,
   alertsContext,
+  refreshRateInMilliseconds = DEFAULT_REFRESH_RATE,
 }) => {
   const {
     index,
@@ -109,14 +124,25 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   } = alertParams;
   const { http, toastNotifications, charts, uiSettings, dataFieldsFormats } = alertsContext;
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingState, setLoadingState] = useState<LoadingStateType | null>(null);
   const [error, setError] = useState<undefined | any>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, MetricResult[]>>();
+  const [startVisualizationAt, setStartVisualizationAt] = useState<Date>(new Date());
+
+  useEffect(() => {
+    const source = interval(refreshRateInMilliseconds);
+    const subscription = source.subscribe((val: number) => {
+      setStartVisualizationAt(new Date());
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [refreshRateInMilliseconds]);
 
   useEffect(() => {
     (async () => {
       try {
-        setIsLoading(true);
+        setLoadingState(loadingState ? LoadingStateType.Refresh : LoadingStateType.FirstLoad);
         setVisualizationData(
           await getVisualizationData(alertWithoutActions, visualizeOptions, http)
         );
@@ -131,7 +157,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         }
         setError(e);
       } finally {
-        setIsLoading(false);
+        setLoadingState(LoadingStateType.Idle);
       }
     })();
     /* eslint-disable react-hooks/exhaustive-deps */
@@ -147,6 +173,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     timeWindowUnit,
     groupBy,
     threshold,
+    startVisualizationAt,
   ]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
@@ -155,7 +182,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   }
   const chartsTheme = charts.theme.useChartsTheme();
 
-  const domain = getDomain(alertInterval);
+  const domain = getDomain(alertInterval, startVisualizationAt);
   const visualizeOptions = {
     rangeFrom: new Date(domain.min).toISOString(),
     rangeTo: new Date(domain.max).toISOString(),
@@ -165,7 +192,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   // Fetching visualization data is independent of alert actions
   const alertWithoutActions = { ...alertParams, actions: [], type: 'threshold' };
 
-  if (isLoading) {
+  if (loadingState === LoadingStateType.FirstLoad) {
     return (
       <EuiEmptyPrompt
         title={<EuiLoadingChart size="xl" />}
@@ -224,32 +251,33 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     const dateFormatter = niceTimeFormatter([domain.min, domain.max]);
     const aggLabel = aggregationTypes[aggType].text;
     return (
-      <div data-test-subj="alertVisualizationChart">
+      <div data-test-subj="alertVisualizationChart" style={{ position: 'relative' }}>
+        {loadingState === LoadingStateType.Refresh ? (
+          <EuiLoadingSpinner size="l" style={{ position: 'absolute', top: '8%', right: '5%' }} />
+        ) : (
+          <Fragment />
+        )}
         {alertVisualizationDataKeys.length ? (
           <Chart size={['100%', 200]} renderer="canvas">
             <Settings
               theme={[customTheme(), chartsTheme]}
               xDomain={domain}
               showLegend={!!termField}
+              showLegendExtra
               legendPosition={Position.Bottom}
             />
             <Axis
-              id={getAxisId('bottom')}
+              id="bottom"
               position={Position.Bottom}
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
-            <Axis
-              domain={{ max: maxY }}
-              id={getAxisId('left')}
-              title={aggLabel}
-              position={Position.Left}
-            />
+            <Axis domain={{ max: maxY }} id="left" title={aggLabel} position={Position.Left} />
             {alertVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries
                   key={key}
-                  id={getSpecId(key)}
+                  id={key}
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   data={visualizationData[key]}
@@ -277,14 +305,14 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
             title={
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.alertAdd.thresholdPreviewChart.noDataTitle"
-                defaultMessage="No data matches that query"
+                defaultMessage="No data matches this query"
               />
             }
             color="warning"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertAdd.thresholdPreviewChart.dataDoesNotExistTextMessage"
-              defaultMessage="Check your time range and filters to make sure they are correct"
+              defaultMessage="Check that your time range and filters are correct."
             />
           </EuiCallOut>
         )}

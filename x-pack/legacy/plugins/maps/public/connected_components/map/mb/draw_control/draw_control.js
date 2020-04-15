@@ -9,16 +9,19 @@ import React from 'react';
 import { DRAW_TYPE } from '../../../../../common/constants';
 import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
+import { DrawCircle } from './draw_circle';
 import {
-  createSpatialFilterWithBoundingBox,
+  createDistanceFilterWithMeta,
   createSpatialFilterWithGeometry,
   getBoundingBoxGeometry,
   roundCoordinates,
-} from '../../../../elasticsearch_geo_utils';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../plugins/maps/public/elasticsearch_geo_utils';
 import { DrawTooltip } from './draw_tooltip';
 
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
+mbDrawModes.draw_circle = DrawCircle;
 
 export class DrawControl extends React.Component {
   constructor() {
@@ -60,28 +63,37 @@ export class DrawControl extends React.Component {
       return;
     }
 
-    const isBoundingBox = this.props.drawState.drawType === DRAW_TYPE.BOUNDS;
+    if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
+      const circle = e.features[0];
+      roundCoordinates(circle.properties.center);
+      const filter = createDistanceFilterWithMeta({
+        alias: this.props.drawState.filterLabel,
+        distanceKm: _.round(circle.properties.radiusKm, circle.properties.radiusKm > 10 ? 0 : 2),
+        geoFieldName: this.props.drawState.geoFieldName,
+        indexPatternId: this.props.drawState.indexPatternId,
+        point: circle.properties.center,
+      });
+      this.props.addFilters([filter]);
+      this.props.disableDrawState();
+      return;
+    }
+
     const geometry = e.features[0].geometry;
     // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
     roundCoordinates(geometry.coordinates);
 
     try {
-      const options = {
+      const filter = createSpatialFilterWithGeometry({
+        geometry:
+          this.props.drawState.drawType === DRAW_TYPE.BOUNDS
+            ? getBoundingBoxGeometry(geometry)
+            : geometry,
         indexPatternId: this.props.drawState.indexPatternId,
         geoFieldName: this.props.drawState.geoFieldName,
         geoFieldType: this.props.drawState.geoFieldType,
         geometryLabel: this.props.drawState.geometryLabel,
         relation: this.props.drawState.relation,
-      };
-      const filter = isBoundingBox
-        ? createSpatialFilterWithBoundingBox({
-            ...options,
-            geometry: getBoundingBoxGeometry(geometry),
-          })
-        : createSpatialFilterWithGeometry({
-            ...options,
-            geometry,
-          });
+      });
       this.props.addFilters([filter]);
     } catch (error) {
       // TODO notify user why filter was not created
@@ -109,11 +121,14 @@ export class DrawControl extends React.Component {
       this.props.mbMap.getCanvas().style.cursor = 'crosshair';
       this.props.mbMap.on('draw.create', this._onDraw);
     }
-    const mbDrawMode =
-      this.props.drawState.drawType === DRAW_TYPE.POLYGON
-        ? this._mbDrawControl.modes.DRAW_POLYGON
-        : 'draw_rectangle';
-    this._mbDrawControl.changeMode(mbDrawMode);
+
+    if (this.props.drawState.drawType === DRAW_TYPE.BOUNDS) {
+      this._mbDrawControl.changeMode('draw_rectangle');
+    } else if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
+      this._mbDrawControl.changeMode('draw_circle');
+    } else if (this.props.drawState.drawType === DRAW_TYPE.POLYGON) {
+      this._mbDrawControl.changeMode(this._mbDrawControl.modes.DRAW_POLYGON);
+    }
   }
 
   render() {

@@ -380,27 +380,30 @@ export const WatchList = () => {
       box: {
         incremental: true,
       },
-      toolsLeft: selection.length && (
-        <EuiButton
-          data-test-subj="btnDeleteWatches"
-          onClick={() => {
-            setWatchesToDelete(selection.map((selected: any) => selected.id));
-          }}
-          color="danger"
-        >
-          {selection.length > 1 ? (
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
-              defaultMessage="Delete watches"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
-              defaultMessage="Delete watch"
-            />
-          )}
-        </EuiButton>
-      ),
+      toolsLeft:
+        selection.length > 0 ? (
+          <EuiButton
+            data-test-subj="btnDeleteWatches"
+            onClick={() => {
+              setWatchesToDelete(selection.map((selected: any) => selected.id));
+            }}
+            color="danger"
+          >
+            {selection.length > 1 ? (
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
+                defaultMessage="Delete watches"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
+                defaultMessage="Delete watch"
+              />
+            )}
+          </EuiButton>
+        ) : (
+          undefined
+        ),
       toolsRight: createWatchContextMenu,
     };
 

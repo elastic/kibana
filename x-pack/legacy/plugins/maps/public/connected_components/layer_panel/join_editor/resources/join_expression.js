@@ -16,14 +16,15 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SingleFieldSelect } from '../../../../components/single_field_select';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SingleFieldSelect } from '../../../../../../../../plugins/maps/public/components/single_field_select';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getTermsFields } from '../../../../index_pattern_util';
-
-import { indexPatternService } from '../../../../kibana_services';
-
-import { npStart } from 'ui/new_platform';
-const { IndexPatternSelect } = npStart.plugins.data.ui;
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getTermsFields } from '../../../../../../../../plugins/maps/public/index_pattern_util';
+import {
+  getIndexPatternService,
+  getIndexPatternSelectComponent,
+} from '../../../../kibana_services';
 
 export class JoinExpression extends Component {
   state = {
@@ -44,7 +45,7 @@ export class JoinExpression extends Component {
 
   _onRightSourceChange = async indexPatternId => {
     try {
-      const indexPattern = await indexPatternService.get(indexPatternId);
+      const indexPattern = await getIndexPatternService().get(indexPatternId);
       this.props.onRightSourceChange({
         indexPatternId,
         indexPatternTitle: indexPattern.title,
@@ -106,6 +107,7 @@ export class JoinExpression extends Component {
     if (!this.props.leftValue) {
       return null;
     }
+    const IndexPatternSelect = getIndexPatternSelectComponent();
 
     return (
       <EuiFormRow

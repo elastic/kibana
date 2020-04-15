@@ -5,27 +5,27 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
-  EmptyState,
   MonitorList,
   OverviewPageParsingErrorCallout,
   StatusPanel,
 } from '../components/functional';
-import { useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
+import { useUptimeTelemetry, UptimePage, useGetUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { UptimeThemeContext } from '../contexts';
-import { FilterGroup, KueryBar } from '../components/connected';
+import { EmptyState, FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
 import { PageHeader } from './page_header';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
-  indexPattern: IIndexPattern;
+  indexPattern: IIndexPattern | null;
   setEsKueryFilters: (esFilters: string) => void;
 }
 
@@ -40,10 +40,26 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
+// TODO: these values belong deeper down in the monitor
+// list pagination control, but are here temporarily until we
+// are done removing GraphQL
+const DEFAULT_PAGE_SIZE = 10;
+const LOCAL_STORAGE_KEY = 'xpack.uptime.monitorList.pageSize';
+const getMonitorListPageSizeValue = () => {
+  const value = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '', 10);
+  if (isNaN(value)) {
+    return DEFAULT_PAGE_SIZE;
+  }
+  return value;
+};
+
 export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFilters }: Props) => {
   const { colors } = useContext(UptimeThemeContext);
-  const [getUrlParams] = useUrlParams();
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
+  // TODO: this is temporary until we migrate the monitor list to our Redux implementation
+  const [monitorListPageSize, setMonitorListPageSize] = useState<number>(
+    getMonitorListPageSizeValue()
+  );
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
   const {
     dateRangeStart,
     dateRangeEnd,
@@ -78,13 +94,20 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
     description: `The text that will be displayed in the app's heading when the Overview page loads.`,
   });
 
+  useBreadcrumbs([]); // No extra breadcrumbs on overview
   return (
     <>
-      <PageHeader headingText={heading} breadcrumbs={[]} datePicker={true} />
-      <EmptyState implementsCustomErrorState={true} variables={{}}>
+      <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
+      <EmptyState>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
-            <KueryBar autocomplete={autocomplete} />
+            <KueryBar
+              aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
+                defaultMessage: 'Input filter criteria for the overview page',
+              })}
+              autocomplete={autocomplete}
+              data-test-subj="xpack.uptime.filterBar"
+            />
           </EuiFlexItem>
           <EuiFlexItemStyled grow={true}>
             <FilterGroup esFilters={esFilters} />
@@ -99,10 +122,13 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
           hasActiveFilters={!!esFilters}
           implementsCustomErrorState={true}
           linkParameters={linkParameters}
+          pageSize={monitorListPageSize}
+          setPageSize={setMonitorListPageSize}
           successColor={colors.success}
           variables={{
             ...sharedProps,
             pagination,
+            pageSize: monitorListPageSize,
           }}
         />
       </EmptyState>

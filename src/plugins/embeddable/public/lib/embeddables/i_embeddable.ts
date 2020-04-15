@@ -21,14 +21,19 @@ import { Observable } from 'rxjs';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
+import { TriggerContextMapping } from '../../../../ui_actions/public';
 
 export interface EmbeddableInput {
   viewMode?: ViewMode;
   title?: string;
+  /**
+   * Note this is not a saved object id. It is used to uniquely identify this
+   * Embeddable instance from others (e.g. inside a container).  It's possible to
+   * have two Embeddables where everything else is the same but the id.
+   */
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
-  isEmptyState?: boolean;
 
   /**
    * Reserved key for `ui_actions` events.
@@ -44,6 +49,8 @@ export interface EmbeddableInput {
    * Whether this embeddable should not execute triggers.
    */
   disableTriggers?: boolean;
+
+  [key: string]: unknown;
 }
 
 export interface EmbeddableOutput {
@@ -161,4 +168,9 @@ export interface IEmbeddable<
    * Cleans up subscriptions, destroy nodes mounted from calls to render.
    */
   destroy(): void;
+
+  /**
+   * List of triggers that this embeddable will execute.
+   */
+  supportedTriggers(): Array<keyof TriggerContextMapping>;
 }

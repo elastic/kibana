@@ -26,7 +26,7 @@ describe('includedFields', () => {
 
   it('accepts type string', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(7);
+    expect(fields).toHaveLength(8);
     expect(fields).toContain('type');
   });
 
@@ -37,6 +37,7 @@ Array [
   "config.foo",
   "secret.foo",
   "namespace",
+  "namespaces",
   "type",
   "references",
   "migrationVersion",
@@ -48,14 +49,14 @@ Array [
 
   it('accepts field as string', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(7);
+    expect(fields).toHaveLength(8);
     expect(fields).toContain('config.foo');
   });
 
   it('accepts fields as an array', () => {
     const fields = includedFields('config', ['foo', 'bar']);
 
-    expect(fields).toHaveLength(9);
+    expect(fields).toHaveLength(10);
     expect(fields).toContain('config.foo');
     expect(fields).toContain('config.bar');
   });
@@ -69,6 +70,7 @@ Array [
   "secret.foo",
   "secret.bar",
   "namespace",
+  "namespaces",
   "type",
   "references",
   "migrationVersion",
@@ -81,31 +83,37 @@ Array [
 
   it('includes namespace', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(7);
+    expect(fields).toHaveLength(8);
     expect(fields).toContain('namespace');
+  });
+
+  it('includes namespaces', () => {
+    const fields = includedFields('config', 'foo');
+    expect(fields).toHaveLength(8);
+    expect(fields).toContain('namespaces');
   });
 
   it('includes references', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(7);
+    expect(fields).toHaveLength(8);
     expect(fields).toContain('references');
   });
 
   it('includes migrationVersion', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(7);
+    expect(fields).toHaveLength(8);
     expect(fields).toContain('migrationVersion');
   });
 
   it('includes updated_at', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(7);
+    expect(fields).toHaveLength(8);
     expect(fields).toContain('updated_at');
   });
 
   it('uses wildcard when type is not provided', () => {
     const fields = includedFields(undefined, 'foo');
-    expect(fields).toHaveLength(7);
+    expect(fields).toHaveLength(8);
     expect(fields).toContain('*.foo');
   });
 
@@ -113,7 +121,7 @@ Array [
     it('includes legacy field path', () => {
       const fields = includedFields('config', ['foo', 'bar']);
 
-      expect(fields).toHaveLength(9);
+      expect(fields).toHaveLength(10);
       expect(fields).toContain('foo');
       expect(fields).toContain('bar');
     });

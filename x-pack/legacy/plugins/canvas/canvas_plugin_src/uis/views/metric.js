@@ -5,7 +5,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { AdvancedSettings } from '../../../public/lib/kibana_advanced_settings';
+import { getAdvancedSettings } from '../../../public/lib/kibana_advanced_settings';
 import { ViewStrings } from '../../../i18n';
 
 const { Metric: strings } = ViewStrings;
@@ -21,7 +21,7 @@ export const metric = () => ({
       displayName: strings.getMetricFormatDisplayName(),
       help: strings.getMetricFormatHelp(),
       argType: 'numberFormat',
-      default: `"${AdvancedSettings.get('format:number:defaultPattern')}"`,
+      default: `"${getAdvancedSettings().get('format:number:defaultPattern')}"`,
     },
     {
       name: '_',

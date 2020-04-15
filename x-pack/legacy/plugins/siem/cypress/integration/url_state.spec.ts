@@ -249,6 +249,7 @@ describe('url state', () => {
     const timelineName = 'SIEM';
     addNameToTimeline(timelineName);
     addDescriptionToTimeline('This is the best timeline of the world');
+    cy.wait(5000);
 
     cy.url({ timeout: 30000 }).should('match', /\w*-\w*-\w*-\w*-\w*/);
     cy.url().then(url => {

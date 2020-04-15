@@ -53,7 +53,7 @@ export interface PluginsServiceStart {
  */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   /** Plugin wrappers in topological order. */
-  private readonly plugins = new Map<PluginName, PluginWrapper<unknown, Record<string, unknown>>>();
+  private readonly plugins = new Map<PluginName, PluginWrapper<unknown, unknown>>();
   private readonly pluginDependencies = new Map<PluginName, PluginName[]>();
 
   private readonly satupPlugins: PluginName[] = [];

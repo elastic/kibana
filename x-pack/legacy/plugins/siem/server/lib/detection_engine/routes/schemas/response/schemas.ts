@@ -25,6 +25,25 @@ export const file_name = t.string;
  */
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
 
+/**
+ * Params is an "object", since it is a type of AlertActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/alert.ts
+ */
+export const action_group = t.string;
+export const action_id = t.string;
+export const action_action_type_id = t.string;
+export const action_params = t.object;
+export const action = t.exact(
+  t.type({
+    group: action_group,
+    id: action_id,
+    action_type_id: action_action_type_id,
+    params: action_params,
+  })
+);
+
+export const actions = t.array(action);
+
 // TODO: Create a regular expression type or custom date math part type here
 export const from = t.string;
 
@@ -45,6 +64,9 @@ export const output_index = t.string;
 export const saved_id = t.string;
 export const timeline_id = t.string;
 export const timeline_title = t.string;
+export const throttle = t.string;
+export const anomaly_threshold = PositiveInteger;
+export const machine_learning_job_id = t.string;
 
 /**
  * Note that this is a plain unknown object because we allow the UI
@@ -64,7 +86,7 @@ export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run
 // TODO: Create a regular expression type or custom date math part type here
 export const to = t.string;
 
-export const type = t.keyof({ query: null, saved_query: null });
+export const type = t.keyof({ machine_learning: null, query: null, saved_query: null });
 export const queryFilter = t.string;
 export const references = t.array(t.string);
 export const per_page = PositiveInteger;
@@ -128,3 +150,38 @@ export const success_count = PositiveInteger;
 export const rules_custom_installed = PositiveInteger;
 export const rules_not_installed = PositiveInteger;
 export const rules_not_updated = PositiveInteger;
+export const note = t.string;
+
+// NOTE: Experimental list support not being shipped currently and behind a feature flag
+// TODO: Remove this comment once we lists have passed testing and is ready for the release
+export const list_field = t.string;
+export const list_values_operator = t.keyof({ included: null, excluded: null });
+export const list_values_type = t.keyof({ match: null, match_all: null, list: null, exists: null });
+export const list_values = t.exact(
+  t.intersection([
+    t.type({
+      name: t.string,
+    }),
+    t.partial({
+      id: t.string,
+      description: t.string,
+      created_at,
+    }),
+  ])
+);
+export const list = t.exact(
+  t.intersection([
+    t.type({
+      field: t.string,
+      values_operator: list_values_operator,
+      values_type: list_values_type,
+    }),
+    t.partial({ values: t.array(list_values) }),
+  ])
+);
+export const list_and = t.intersection([
+  list,
+  t.partial({
+    and: t.array(list),
+  }),
+]);

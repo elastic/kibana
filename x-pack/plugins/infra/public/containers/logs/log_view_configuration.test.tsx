@@ -45,33 +45,8 @@ describe('useLogViewConfiguration hook', () => {
     });
   });
 
-  describe('intervalSize state', () => {
-    it('has a default value', () => {
-      const { getLastHookValue } = mountHook(() => useLogViewConfiguration().intervalSize);
-
-      expect(getLastHookValue()).toEqual(86400000);
-    });
-
-    it('can be updated', () => {
-      const { act, getLastHookValue } = mountHook(() => useLogViewConfiguration());
-
-      act(({ setIntervalSize }) => {
-        setIntervalSize(90000000);
-      });
-
-      expect(getLastHookValue().intervalSize).toEqual(90000000);
-    });
-  });
-
   it('provides the available text scales', () => {
     const { getLastHookValue } = mountHook(() => useLogViewConfiguration().availableTextScales);
-
-    expect(getLastHookValue()).toEqual(expect.any(Array));
-    expect(getLastHookValue().length).toBeGreaterThan(0);
-  });
-
-  it('provides the available interval sizes', () => {
-    const { getLastHookValue } = mountHook(() => useLogViewConfiguration().availableIntervalSizes);
 
     expect(getLastHookValue()).toEqual(expect.any(Array));
     expect(getLastHookValue().length).toBeGreaterThan(0);

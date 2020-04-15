@@ -8,12 +8,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { Providers } from '../../../../app_dependencies.mock';
-
 import { StepCreateForm } from './step_create_form';
 
-jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: <StepCreateForm />', () => {
   test('Minimal initialization', () => {
@@ -26,11 +24,7 @@ describe('Transform: <StepCreateForm />', () => {
       onChange() {},
     };
 
-    const { getByText } = render(
-      <Providers>
-        <StepCreateForm {...props} />
-      </Providers>
-    );
+    const { getByText } = render(<StepCreateForm {...props} />);
 
     // Act
     // Assert

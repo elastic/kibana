@@ -29,14 +29,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import {
-  GetEmbeddableFactory,
+  EmbeddableStart,
   EmbeddableFactoryRenderer,
   EmbeddableRoot,
 } from '../../../src/plugins/embeddable/public';
 import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE } from '../../embeddable_examples/public';
 
 interface Props {
-  getEmbeddableFactory: GetEmbeddableFactory;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
 }
 
 export function HelloWorldEmbeddableExample({ getEmbeddableFactory }: Props) {

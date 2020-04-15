@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Action } from 'redux-actions';
 import { Snapshot } from '../../../common/runtime_types';
 import {
-  FETCH_SNAPSHOT_COUNT,
-  FETCH_SNAPSHOT_COUNT_FAIL,
-  FETCH_SNAPSHOT_COUNT_SUCCESS,
-  SnapshotActionTypes,
+  getSnapshotCountAction,
+  getSnapshotCountActionSuccess,
+  getSnapshotCountActionFail,
 } from '../actions';
 
 export interface SnapshotState {
@@ -28,20 +28,20 @@ const initialState: SnapshotState = {
   loading: false,
 };
 
-export function snapshotReducer(state = initialState, action: SnapshotActionTypes): SnapshotState {
+export function snapshotReducer(state = initialState, action: Action<any>): SnapshotState {
   switch (action.type) {
-    case FETCH_SNAPSHOT_COUNT:
+    case String(getSnapshotCountAction):
       return {
         ...state,
         loading: true,
       };
-    case FETCH_SNAPSHOT_COUNT_SUCCESS:
+    case String(getSnapshotCountActionSuccess):
       return {
         ...state,
         count: action.payload,
         loading: false,
       };
-    case FETCH_SNAPSHOT_COUNT_FAIL:
+    case String(getSnapshotCountActionFail):
       return {
         ...state,
         errors: [...state.errors, action.payload],

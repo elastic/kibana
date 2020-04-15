@@ -35,7 +35,8 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.unload('invalid_scripted_field');
     });
 
-    describe('invalid scripted field error', () => {
+    // https://github.com/elastic/kibana/issues/61366
+    describe.skip('invalid scripted field error', () => {
       it('is rendered', async () => {
         const isFetchErrorVisible = await testSubjects.exists('discoverFetchError');
         expect(isFetchErrorVisible).to.be(true);

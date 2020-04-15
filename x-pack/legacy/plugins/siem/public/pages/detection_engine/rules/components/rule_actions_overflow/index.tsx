@@ -16,12 +16,12 @@ import styled from 'styled-components';
 
 import { noop } from 'lodash/fp';
 import { useHistory } from 'react-router-dom';
-import { Rule } from '../../../../../containers/detection_engine/rules';
+import { Rule, exportRules } from '../../../../../containers/detection_engine/rules';
 import * as i18n from './translations';
 import * as i18nActions from '../../../rules/translations';
 import { displaySuccessToast, useStateToaster } from '../../../../../components/toasters';
 import { deleteRulesAction, duplicateRulesAction } from '../../all/actions';
-import { RuleDownloader } from '../rule_downloader';
+import { GenericDownloader } from '../../../../../components/generic_downloader';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../../components/link_to/redirect_to_detection_engine';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
@@ -62,8 +62,9 @@ const RuleActionsOverflowComponent = ({
         ? [
             <EuiContextMenuItem
               key={i18nActions.DUPLICATE_RULE}
-              icon="exportAction"
+              icon="copy"
               disabled={userHasNoPermissions}
+              data-test-subj="rules-details-duplicate-rule"
               onClick={async () => {
                 setIsPopoverOpen(false);
                 await duplicateRulesAction([rule], [rule.id], noop, dispatchToaster);
@@ -73,11 +74,12 @@ const RuleActionsOverflowComponent = ({
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
-              icon="indexEdit"
+              icon="exportAction"
               disabled={userHasNoPermissions || rule.immutable}
+              data-test-subj="rules-details-export-rule"
               onClick={() => {
                 setIsPopoverOpen(false);
-                setRulesToExport([rule.id]);
+                setRulesToExport([rule.rule_id]);
               }}
             >
               {i18nActions.EXPORT_RULE}
@@ -86,6 +88,7 @@ const RuleActionsOverflowComponent = ({
               key={i18nActions.DELETE_RULE}
               icon="trash"
               disabled={userHasNoPermissions}
+              data-test-subj="rules-details-delete-rule"
               onClick={async () => {
                 setIsPopoverOpen(false);
                 await deleteRulesAction([rule.id], noop, dispatchToaster, onRuleDeletedCallback);
@@ -109,6 +112,7 @@ const RuleActionsOverflowComponent = ({
           iconType="boxesHorizontal"
           aria-label={i18n.ALL_ACTIONS}
           isDisabled={userHasNoPermissions}
+          data-test-subj="rules-details-popover-button-icon"
           onClick={handlePopoverOpen}
         />
       </EuiToolTip>
@@ -124,15 +128,18 @@ const RuleActionsOverflowComponent = ({
         closePopover={() => setIsPopoverOpen(false)}
         id="ruleActionsOverflow"
         isOpen={isPopoverOpen}
+        data-test-subj="rules-details-popover"
         ownFocus={true}
         panelPaddingSize="none"
       >
-        <EuiContextMenuPanel items={actions} />
+        <EuiContextMenuPanel data-test-subj="rules-details-menu-panel" items={actions} />
       </EuiPopover>
-      <RuleDownloader
+      <GenericDownloader
         filename={`${i18nActions.EXPORT_FILENAME}.ndjson`}
-        ruleIds={rulesToExport}
-        onExportComplete={exportCount => {
+        ids={rulesToExport}
+        exportSelectedData={exportRules}
+        data-test-subj="rules-details-generic-downloader"
+        onExportSuccess={exportCount => {
           displaySuccessToast(
             i18nActions.SUCCESSFULLY_EXPORTED_RULES(exportCount),
             dispatchToaster

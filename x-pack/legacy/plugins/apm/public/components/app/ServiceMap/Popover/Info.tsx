@@ -9,6 +9,10 @@ import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React from 'react';
 import styled from 'styled-components';
+import {
+  SPAN_SUBTYPE,
+  SPAN_TYPE
+} from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 
 const ItemRow = styled.div`
   line-height: 2;
@@ -25,7 +29,14 @@ interface InfoProps extends cytoscape.NodeDataDefinition {
   subtype?: string;
 }
 
-export function Info({ type, subtype }: InfoProps) {
+export function Info(data: InfoProps) {
+  // For nodes with span.type "db", convert it to "database".
+  // Otherwise leave it as-is.
+  const type = data[SPAN_TYPE] === 'db' ? 'database' : data[SPAN_TYPE];
+
+  // Externals should not have a subtype so make it undefined if the type is external.
+  const subtype = data[SPAN_TYPE] !== 'external' && data[SPAN_SUBTYPE];
+
   const listItems = [
     {
       title: i18n.translate('xpack.apm.serviceMap.typePopoverMetric', {

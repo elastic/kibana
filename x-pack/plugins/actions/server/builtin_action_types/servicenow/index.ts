@@ -18,12 +18,12 @@ import { ServiceNow } from './lib';
 import * as i18n from './translations';
 
 import { ACTION_TYPE_ID } from './constants';
-import { ConfigType, SecretsType, ParamsType, CommentType } from './types';
+import { ConfigType, SecretsType, Comment, ExecutorParams } from './types';
 
 import { ConfigSchemaProps, SecretsSchemaProps, ParamsSchema } from './schema';
 
 import { buildMap, mapParams } from './helpers';
-import { handleCreateIncident, handleUpdateIncident } from './action_handlers';
+import { handleIncident } from './action_handlers';
 
 function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
@@ -56,6 +56,7 @@ export function getActionType({
   return {
     id: ACTION_TYPE_ID,
     name: i18n.NAME,
+    minimumLicenseRequired: 'platinum',
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),
@@ -77,21 +78,22 @@ async function serviceNowExecutor(
   const actionId = execOptions.actionId;
   const {
     apiUrl,
-    casesConfiguration: { mapping },
+    casesConfiguration: { mapping: configurationMapping },
   } = execOptions.config as ConfigType;
   const { username, password } = execOptions.secrets as SecretsType;
-  const params = execOptions.params as ParamsType;
+  const params = execOptions.params as ExecutorParams;
   const { comments, incidentId, ...restParams } = params;
 
-  const finalMap = buildMap(mapping);
-  const restParamsMapped = mapParams(restParams, finalMap);
+  const mapping = buildMap(configurationMapping);
+  const incident = mapParams(restParams, mapping);
   const serviceNow = new ServiceNow({ url: apiUrl, username, password });
 
   const handlerInput = {
+    incidentId,
     serviceNow,
-    params: restParamsMapped,
-    comments: comments as CommentType[],
-    mapping: finalMap,
+    params: { ...params, incident },
+    comments: comments as Comment[],
+    mapping,
   };
 
   const res: Pick<ActionTypeExecutorResult, 'status'> &
@@ -100,13 +102,7 @@ async function serviceNowExecutor(
     actionId,
   };
 
-  let data = {};
-
-  if (!incidentId) {
-    data = await handleCreateIncident(handlerInput);
-  } else {
-    data = await handleUpdateIncident({ incidentId, ...handlerInput });
-  }
+  const data = await handleIncident(handlerInput);
 
   return {
     ...res,

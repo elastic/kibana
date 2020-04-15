@@ -14,7 +14,7 @@ export function useDynamicIndexPattern(
     callApmApi => {
       return callApmApi({
         pathname: '/api/apm/index_pattern/dynamic',
-        forceCache: true,
+        isCachable: true,
         params: {
           query: {
             processorEvent

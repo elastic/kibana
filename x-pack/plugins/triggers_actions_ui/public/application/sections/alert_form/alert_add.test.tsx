@@ -17,6 +17,7 @@ import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ReactWrapper } from 'enzyme';
+import { AppContextProvider } from '../../app_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
@@ -43,14 +44,20 @@ describe('alert_add', () => {
     const mockes = coreMock.createSetup();
     deps = {
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
+
+    mockes.http.get.mockResolvedValue({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
+    });
+
     const alertType = {
       id: 'my-alert-type',
       iconClass: 'test',
@@ -84,22 +91,30 @@ describe('alert_add', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <AlertsContextProvider
-        value={{
-          reloadAlerts: () => {
-            return new Promise<void>(() => {});
-          },
-          http: deps.http,
-          actionTypeRegistry: deps.actionTypeRegistry,
-          alertTypeRegistry: deps.alertTypeRegistry,
-          toastNotifications: deps.toastNotifications,
-          uiSettings: deps.uiSettings,
-          metadata: { test: 'some value', fields: ['test'] },
-        }}
-      >
-        <AlertAdd consumer={'alerting'} addFlyoutVisible={true} setAddFlyoutVisibility={() => {}} />
-      </AlertsContextProvider>
+      <AppContextProvider appDeps={deps}>
+        <AlertsContextProvider
+          value={{
+            reloadAlerts: () => {
+              return new Promise<void>(() => {});
+            },
+            http: deps.http,
+            actionTypeRegistry: deps.actionTypeRegistry,
+            alertTypeRegistry: deps.alertTypeRegistry,
+            toastNotifications: deps.toastNotifications,
+            uiSettings: deps.uiSettings,
+            docLinks: deps.docLinks,
+            metadata: { test: 'some value', fields: ['test'] },
+          }}
+        >
+          <AlertAdd
+            consumer={'alerting'}
+            addFlyoutVisible={true}
+            setAddFlyoutVisibility={() => {}}
+          />
+        </AlertsContextProvider>
+      </AppContextProvider>
     );
+
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {
       await nextTick();
@@ -109,12 +124,15 @@ describe('alert_add', () => {
 
   it('renders alert add flyout', async () => {
     await setup();
+
     expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
+
     wrapper
       .find('[data-test-subj="my-alert-type-SelectOption"]')
       .first()
       .simulate('click');
+
     expect(wrapper.contains('Metadata: some value. Fields: test.')).toBeTruthy();
   });
 });

@@ -8,6 +8,7 @@ import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
@@ -38,9 +39,9 @@ import { plainRowRenderer } from './renderers/plain_row_renderer';
 interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
+  height?: number;
   id: string;
   isEventViewer?: boolean;
-  height: number;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
@@ -101,7 +102,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
             isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
         });
       },
-      [id, data, selectedEventIds, timelineTypeContext.queryFields]
+      [setSelected, id, data, selectedEventIds, timelineTypeContext.queryFields]
     );
 
     const onSelectAll: OnSelectAll = useCallback(
@@ -118,7 +119,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
               isSelectAllChecked: isSelected,
             })
           : clearSelected!({ id }),
-      [id, data, timelineTypeContext.queryFields]
+      [setSelected, clearSelected, id, data, timelineTypeContext.queryFields]
     );
 
     const onColumnSorted: OnColumnSorted = useCallback(
@@ -189,25 +190,22 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       />
     );
   },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.browserFields === nextProps.browserFields &&
-      prevProps.columnHeaders === nextProps.columnHeaders &&
-      prevProps.data === nextProps.data &&
-      prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
-      prevProps.notesById === nextProps.notesById &&
-      prevProps.height === nextProps.height &&
-      prevProps.id === nextProps.id &&
-      prevProps.isEventViewer === nextProps.isEventViewer &&
-      prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-      prevProps.loadingEventIds === nextProps.loadingEventIds &&
-      prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
-      prevProps.selectedEventIds === nextProps.selectedEventIds &&
-      prevProps.showCheckboxes === nextProps.showCheckboxes &&
-      prevProps.showRowRenderers === nextProps.showRowRenderers &&
-      prevProps.sort === nextProps.sort
-    );
-  }
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
+    deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
+    deepEqual(prevProps.data, nextProps.data) &&
+    prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
+    deepEqual(prevProps.notesById, nextProps.notesById) &&
+    prevProps.height === nextProps.height &&
+    prevProps.id === nextProps.id &&
+    prevProps.isEventViewer === nextProps.isEventViewer &&
+    prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
+    prevProps.loadingEventIds === nextProps.loadingEventIds &&
+    prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
+    prevProps.selectedEventIds === nextProps.selectedEventIds &&
+    prevProps.showCheckboxes === nextProps.showCheckboxes &&
+    prevProps.showRowRenderers === nextProps.showRowRenderers &&
+    prevProps.sort === nextProps.sort
 );
 
 StatefulBodyComponent.displayName = 'StatefulBodyComponent';

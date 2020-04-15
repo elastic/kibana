@@ -175,6 +175,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerType: deps.savedObjects.registerType,
       getImportExportObjectLimit: deps.savedObjects.getImportExportObjectLimit,
     },
+    status: {
+      core$: deps.status.core$,
+    },
     uiSettings: {
       register: deps.uiSettings.register,
     },
@@ -206,6 +209,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
+    elasticsearch: deps.elasticsearch,
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,

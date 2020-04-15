@@ -8,12 +8,14 @@ import { SignalSourceHit, SignalHit } from './types';
 import { buildRule } from './build_rule';
 import { buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
 
 interface BuildBulkBodyParams {
   doc: SignalSourceHit;
   ruleParams: RuleTypeParams;
   id: string;
+  actions: RuleAlertAction[];
   name: string;
   createdAt: string;
   createdBy: string;
@@ -22,6 +24,7 @@ interface BuildBulkBodyParams {
   interval: string;
   enabled: boolean;
   tags: string[];
+  throttle: string;
 }
 
 // format search_after result for signals index.
@@ -30,6 +33,7 @@ export const buildBulkBody = ({
   ruleParams,
   id,
   name,
+  actions,
   createdAt,
   createdBy,
   updatedAt,
@@ -37,8 +41,10 @@ export const buildBulkBody = ({
   interval,
   enabled,
   tags,
+  throttle,
 }: BuildBulkBodyParams): SignalHit => {
   const rule = buildRule({
+    actions,
     ruleParams,
     id,
     name,
@@ -49,6 +55,7 @@ export const buildBulkBody = ({
     updatedBy,
     interval,
     tags,
+    throttle,
   });
   const signal = buildSignal(doc, rule);
   const event = buildEventTypeSignal(doc);

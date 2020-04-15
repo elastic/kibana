@@ -27,6 +27,11 @@ export const renderErrorHandler: RenderErrorHandlerFnType = (
   error: RenderError,
   handlers: IInterpreterRenderHandlers
 ) => {
+  if (error.name === 'AbortError') {
+    handlers.done();
+    return;
+  }
+
   getNotifications().toasts.addError(error, {
     title: i18n.translate('expressions.defaultErrorRenderer.errorTitle', {
       defaultMessage: 'Error in visualisation',

@@ -4,25 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../layers/vector_layer', () => {});
-jest.mock('../layers/heatmap_layer', () => {});
-jest.mock('../layers/vector_tile_layer', () => {});
-jest.mock('../layers/sources/all_sources', () => {});
-jest.mock('../layers/joins/inner_join', () => {});
-jest.mock('../reducers/non_serializable_instances', () => ({
+jest.mock('../../../../../plugins/maps/public/layers/vector_layer', () => {});
+jest.mock('../../../../../plugins/maps/public/layers/blended_vector_layer', () => {});
+jest.mock('../../../../../plugins/maps/public/layers/heatmap_layer', () => {});
+jest.mock('../../../../../plugins/maps/public/layers/vector_tile_layer', () => {});
+jest.mock('../../../../../plugins/maps/public/layers/joins/inner_join', () => {});
+jest.mock('../../../../../plugins/maps/public/reducers/non_serializable_instances', () => ({
   getInspectorAdapters: () => {
     return {};
   },
 }));
-jest.mock('ui/timefilter', () => ({
-  timefilter: {
+jest.mock('../kibana_services', () => ({
+  getTimeFilter: () => ({
     getTime: () => {
       return {
         to: 'now',
         from: 'now-15m',
       };
     },
-  },
+  }),
 }));
 
 import { getTimeFilters } from './map_selectors';

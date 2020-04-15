@@ -5,6 +5,7 @@
  */
 
 export default async function({ readConfigFile }) {
+  // TODO move reporting tests to x-pack/test/functional/apps/<integration_app>/reporting
   const functionalConfig = await readConfigFile(require.resolve('../../functional/config.js'));
 
   return {
@@ -33,5 +34,6 @@ export default async function({ readConfigFile }) {
     },
     esArchiver: functionalConfig.get('esArchiver'),
     esTestCluster: functionalConfig.get('esTestCluster'),
+    security: { disableTestUser: true },
   };
 }

@@ -19,7 +19,6 @@
 
 import { ViewMode, EmbeddableOutput, isErrorEmbeddable } from '../../../../';
 import { AddPanelAction } from './add_panel_action';
-import { EmbeddableFactory } from '../../../../embeddables';
 import {
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddable,
@@ -27,15 +26,16 @@ import {
 } from '../../../../test_samples/embeddables/filterable_embeddable';
 import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddables/filterable_embeddable_factory';
 import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
-import { GetEmbeddableFactory } from '../../../../types';
 // eslint-disable-next-line
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
 import { esFilters, Filter } from '../../../../../../../../plugins/data/public';
+import { EmbeddableStart } from '../../../../../plugin';
+import { embeddablePluginMock } from '../../../../../mocks';
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+const { setup, doStart } = embeddablePluginMock.createInstance();
+setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+const getFactory = doStart().getEmbeddableFactory;
 
 let container: FilterableContainer;
 let embeddable: FilterableEmbeddable;
@@ -58,7 +58,7 @@ beforeEach(async () => {
   };
   container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [derivedFilter] },
-    getFactory
+    getFactory as EmbeddableStart['getEmbeddableFactory']
   );
 
   const filterableEmbeddable = await container.addNewEmbeddable<

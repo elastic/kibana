@@ -6,14 +6,16 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { TypeOf } from '@kbn/config-schema';
-import * as kbnConfigSchemaTypes from '@kbn/config-schema/target/types/types';
 import { alertingIndexGetQuerySchema } from './schema/alert_index';
+import { Datasource, NewDatasource } from '../../ingest_manager/common';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
  */
 export type Immutable<T> = T extends undefined | null | boolean | string | number
   ? T
+  : unknown extends T
+  ? unknown
   : T extends Array<infer U>
   ? ImmutableArray<U>
   : T extends Map<infer K, infer V>
@@ -45,6 +47,7 @@ export class EndpointAppConstants {
    **/
   static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
   static ALERT_LIST_DEFAULT_SORT = '@timestamp';
+  static MAX_LONG_INT = '9223372036854775807'; // 2^63-1
 }
 
 export interface AlertResultList {
@@ -84,10 +87,10 @@ export interface AlertResultList {
   prev: string | null;
 }
 
-export interface EndpointResultList {
-  /* the endpoints restricted by the page size */
-  endpoints: EndpointMetadata[];
-  /* the total number of unique endpoints in the index */
+export interface HostResultList {
+  /* the hosts restricted by the page size */
+  hosts: HostInfo[];
+  /* the total number of unique hosts in the index */
   total: number;
   /* the page size requested */
   request_page_size: number;
@@ -113,7 +116,7 @@ export interface HashFields {
   sha1: string;
   sha256: string;
 }
-export interface MalwareClassifierFields {
+export interface MalwareClassificationFields {
   identifier: string;
   score: number;
   threshold: number;
@@ -142,7 +145,7 @@ export interface DllFields {
   };
   compile_time: number;
   hash: HashFields;
-  malware_classifier: MalwareClassifierFields;
+  malware_classification: MalwareClassificationFields;
   mapped_address: number;
   mapped_size: number;
   path: string;
@@ -194,7 +197,7 @@ export type AlertEvent = Immutable<{
     executable: string;
     sid?: string;
     start: number;
-    malware_classifier?: MalwareClassifierFields;
+    malware_classification?: MalwareClassificationFields;
     token: {
       domain: string;
       type: string;
@@ -224,7 +227,7 @@ export type AlertEvent = Immutable<{
       trusted: boolean;
       subject_name: string;
     };
-    malware_classifier: MalwareClassifierFields;
+    malware_classification: MalwareClassificationFields;
     temp_file_path: string;
   };
   host: HostFields;
@@ -239,15 +242,54 @@ interface AlertMetadata {
   prev: string | null;
 }
 
+interface AlertState {
+  state: {
+    host_metadata: HostMetadata;
+  };
+}
+
 /**
  * Union of alert data and metadata.
  */
 export type AlertData = AlertEvent & AlertMetadata;
 
-export interface EndpointMetadata {
+export type AlertDetails = AlertData & AlertState;
+
+/**
+ * The status of the host
+ */
+export enum HostStatus {
+  /**
+   * Default state of the host when no host information is present or host information cannot
+   * be retrieved. e.g. API error
+   */
+  ERROR = 'error',
+
+  /**
+   * Host is online as indicated by its checkin status during the last checkin window
+   */
+  ONLINE = 'online',
+
+  /**
+   * Host is offline as indicated by its checkin status during the last checkin window
+   */
+  OFFLINE = 'offline',
+}
+
+export type HostInfo = Immutable<{
+  metadata: HostMetadata;
+  host_status: HostStatus;
+}>;
+
+export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
+  };
+  elastic: {
+    agent: {
+      id: string;
+    };
   };
   endpoint: {
     policy: {
@@ -259,7 +301,7 @@ export interface EndpointMetadata {
     version: string;
   };
   host: HostFields;
-}
+}>;
 
 /**
  * Represents `total` response from Elasticsearch after ES 7.0.
@@ -312,8 +354,8 @@ export interface EndpointEvent {
     version: string;
   };
   event: {
-    category: string;
-    type: string;
+    category: string | string[];
+    type: string | string[];
     id: string;
     kind: string;
   };
@@ -326,18 +368,15 @@ export interface EndpointEvent {
   };
   process: {
     entity_id: string;
+    name: string;
     parent?: {
       entity_id: string;
+      name?: string;
     };
   };
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
-
-/**
- * The PageId type is used for the payload when firing userNavigatedToPage actions
- */
-export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
 
 /**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
@@ -351,16 +390,16 @@ export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
  * const input: KbnConfigSchemaInputTypeOf<typeof schema> = value
  * schema.validate(input) // should be valid
  * ```
+ * Note that because the types coming from `@kbn/config-schema`'s schemas sometimes have deeply nested
+ * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
  */
-type KbnConfigSchemaInputTypeOf<
-  T extends kbnConfigSchemaTypes.Type<unknown>
-> = T extends kbnConfigSchemaTypes.ObjectType
+type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
   ? KbnConfigSchemaInputObjectTypeOf<
       T
     > /** `schema.number()` accepts strings, so this type should accept them as well. */
-  : kbnConfigSchemaTypes.Type<number> extends T
-  ? TypeOf<T> | string
-  : TypeOf<T>;
+  : number extends T
+  ? T | string
+  : T;
 
 /**
  * Works like ObjectResultType, except that 'maybe' schema will create an optional key.
@@ -368,20 +407,15 @@ type KbnConfigSchemaInputTypeOf<
  *
  * Instead of using this directly, use `InputTypeOf`.
  */
-type KbnConfigSchemaInputObjectTypeOf<
-  T extends kbnConfigSchemaTypes.ObjectType
-> = T extends kbnConfigSchemaTypes.ObjectType<infer P>
-  ? {
-      /** Use ? to make the field optional if the prop accepts undefined.
-       * This allows us to avoid writing `field: undefined` for optional fields.
-       */
-      [K in Exclude<
-        keyof P,
-        keyof KbnConfigSchemaNonOptionalProps<P>
-      >]?: KbnConfigSchemaInputTypeOf<P[K]>;
-    } &
-      { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> }
-  : never;
+type KbnConfigSchemaInputObjectTypeOf<P extends Record<string, unknown>> = {
+  /** Use ? to make the field optional if the prop accepts undefined.
+   * This allows us to avoid writing `field: undefined` for optional fields.
+   */
+  [K in Exclude<keyof P, keyof KbnConfigSchemaNonOptionalProps<P>>]?: KbnConfigSchemaInputTypeOf<
+    P[K]
+  >;
+} &
+  { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
 
 /**
  * Takes the props of a schema.object type, and returns a version that excludes
@@ -389,10 +423,14 @@ type KbnConfigSchemaInputObjectTypeOf<
  *
  * Instead of using this directly, use `InputTypeOf`.
  */
-type KbnConfigSchemaNonOptionalProps<Props extends kbnConfigSchemaTypes.Props> = Pick<
+type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pick<
   Props,
   {
-    [Key in keyof Props]: undefined extends TypeOf<Props[Key]> ? never : Key;
+    [Key in keyof Props]: undefined extends Props[Key]
+      ? never
+      : null extends Props[Key]
+      ? never
+      : Key;
   }[keyof Props]
 >;
 
@@ -400,10 +438,132 @@ type KbnConfigSchemaNonOptionalProps<Props extends kbnConfigSchemaTypes.Props> =
  * Query params to pass to the alert API when fetching new data.
  */
 export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
-  typeof alertingIndexGetQuerySchema
+  TypeOf<typeof alertingIndexGetQuerySchema>
 >;
 
 /**
  * Result of the validated query params when handling alert index requests.
  */
 export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;
+
+/**
+ * Endpoint Policy configuration
+ */
+export interface PolicyConfig {
+  windows: {
+    events: {
+      dll_and_driver_load: boolean;
+      dns: boolean;
+      file: boolean;
+      network: boolean;
+      process: boolean;
+      registry: boolean;
+      security: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  mac: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  linux: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+}
+
+/**
+ * Windows-specific policy configuration that is supported via the UI
+ */
+type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+
+/**
+ * Mac-specific policy configuration that is supported via the UI
+ */
+type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+
+/**
+ * Linux-specific policy configuration that is supported via the UI
+ */
+type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
+
+/**
+ * The set of Policy configuration settings that are show/edited via the UI
+ */
+export interface UIPolicyConfig {
+  windows: WindowsPolicyConfig;
+  mac: MacPolicyConfig;
+  linux: LinuxPolicyConfig;
+}
+
+interface PolicyConfigAdvancedOptions {
+  elasticsearch: {
+    indices: {
+      control: string;
+      event: string;
+      logging: string;
+    };
+    kernel: {
+      connect: boolean;
+      process: boolean;
+    };
+  };
+}
+
+/** Policy: Malware protection fields */
+export interface MalwareFields {
+  mode: ProtectionModes;
+}
+
+/** Policy protection mode options */
+export enum ProtectionModes {
+  detect = 'detect',
+  prevent = 'prevent',
+  preventNotify = 'preventNotify',
+  off = 'off',
+}
+
+/**
+ * Endpoint Policy data, which extends Ingest's `Datasource` type
+ */
+export type PolicyData = Datasource & NewPolicyData;
+
+/**
+ * New policy data. Used when updating the policy record via ingest APIs
+ */
+export type NewPolicyData = NewDatasource & {
+  inputs: [
+    {
+      type: 'endpoint';
+      enabled: boolean;
+      streams: [];
+      config: {
+        policy: {
+          value: PolicyConfig;
+        };
+      };
+    }
+  ];
+};

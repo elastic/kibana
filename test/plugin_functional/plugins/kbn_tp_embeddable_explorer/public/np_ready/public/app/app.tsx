@@ -18,24 +18,11 @@
  */
 import { EuiTab } from '@elastic/eui';
 import React, { Component } from 'react';
-import { CoreStart } from 'src/core/public';
-import {
-  GetEmbeddableFactory,
-  GetEmbeddableFactories,
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { UiActionsService } from '../../../../../../../../src/plugins/ui_actions/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { DashboardContainerExample } from './dashboard_container_example';
-import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
 
 export interface AppProps {
-  getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
-  overlays: CoreStart['overlays'];
-  notifications: CoreStart['notifications'];
-  inspector: InspectorStartContract;
-  SavedObjectFinder: React.ComponentType<any>;
-  I18nContext: CoreStart['i18n']['Context'];
+  embeddableServices: EmbeddableStart;
 }
 
 export class App extends Component<AppProps, { selectedTabId: string }> {
@@ -75,29 +62,17 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
 
   public render() {
     return (
-      <this.props.I18nContext>
-        <div id="dashboardViewport" style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
-          <div>{this.renderTabs()}</div>
-          {this.getContentsForTab()}
-        </div>
-      </this.props.I18nContext>
+      <div id="dashboardViewport" style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
+        <div>{this.renderTabs()}</div>
+        {this.getContentsForTab()}
+      </div>
     );
   }
 
   private getContentsForTab() {
     switch (this.state.selectedTabId) {
       case 'dashboardContainer': {
-        return (
-          <DashboardContainerExample
-            getActions={this.props.getActions}
-            getEmbeddableFactory={this.props.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
-            overlays={this.props.overlays}
-            notifications={this.props.notifications}
-            inspector={this.props.inspector}
-            SavedObjectFinder={this.props.SavedObjectFinder}
-          />
-        );
+        return <DashboardContainerExample embeddableServices={this.props.embeddableServices} />;
       }
     }
   }

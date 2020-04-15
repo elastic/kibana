@@ -25,6 +25,15 @@ export function parseDuration(duration: string): number {
   );
 }
 
+export function getDurationNumberInItsUnit(duration: string): number {
+  return parseInt(duration.replace(/[^0-9.]/g, ''), 0);
+}
+
+export function getDurationUnitValue(duration: string): string {
+  const durationNumber = getDurationNumberInItsUnit(duration);
+  return duration.replace(durationNumber.toString(), '');
+}
+
 export function validateDurationSchema(duration: string) {
   if (duration.match(SECONDS_REGEX)) {
     return;

@@ -22,13 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { ObjDefine } from './obj_define';
 import { IndexPattern } from '../index_patterns';
 import { getNotifications, getFieldFormats } from '../../services';
-import {
-  IFieldType,
-  getKbnFieldType,
-  IFieldSubType,
-  shortenDottedString,
-  FieldFormat,
-} from '../../../common';
+import { IFieldType, getKbnFieldType, IFieldSubType, FieldFormat } from '../../../common';
+import { shortenDottedString } from '../../../common/utils';
 
 export type FieldSpec = Record<string, any>;
 
@@ -50,9 +45,6 @@ export class Field implements IFieldType {
   subType?: IFieldSubType;
   displayName?: string;
   format: any;
-  routes: Record<string, string> = {
-    edit: '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
-  };
   $$spec: FieldSpec;
 
   constructor(
@@ -151,7 +143,3 @@ export class Field implements IFieldType {
     return obj.create();
   }
 }
-
-Field.prototype.routes = {
-  edit: '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
-};

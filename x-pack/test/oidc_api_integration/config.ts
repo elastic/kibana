@@ -17,6 +17,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [require.resolve('./apis/authorization_code_flow')],
     servers: xPackAPITestsConfig.get('servers'),
+    security: { disableTestUser: true },
     services,
     junit: {
       reportName: 'X-Pack OpenID Connect API Integration Tests',
@@ -50,12 +51,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${plugin}`,
         '--xpack.security.authc.providers=["oidc"]',
         '--xpack.security.authc.oidc.realm="oidc1"',
-        '--server.xsrf.whitelist',
-        JSON.stringify([
-          '/api/security/oidc/initiate_login',
-          '/api/oidc_provider/token_endpoint',
-          '/api/oidc_provider/userinfo_endpoint',
-        ]),
       ],
     },
   };

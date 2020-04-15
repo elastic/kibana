@@ -5,14 +5,16 @@
  */
 
 import ApolloClient from 'apollo-client';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 
+import { EuiButton } from '@elastic/eui';
 import { HeaderPage } from '../../components/header_page';
 import { StatefulOpenTimeline } from '../../components/open_timeline';
 import { WrapperPage } from '../../components/wrapper_page';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import * as i18n from './translations';
+import { useKibana } from '../../lib/kibana';
 
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -26,23 +28,47 @@ type OwnProps = TimelinesProps;
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => (
-  <>
-    <WrapperPage>
-      <HeaderPage border title={i18n.PAGE_TITLE} />
+export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
+  const [importDataModalToggle, setImportDataModalToggle] = useState<boolean>(false);
+  const onImportTimelineBtnClick = useCallback(() => {
+    setImportDataModalToggle(true);
+  }, [setImportDataModalToggle]);
 
-      <TimelinesContainer>
-        <StatefulOpenTimeline
-          apolloClient={apolloClient}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isModal={false}
-          title={i18n.ALL_TIMELINES_PANEL_TITLE}
-        />
-      </TimelinesContainer>
-    </WrapperPage>
+  const uiCapabilities = useKibana().services.application.capabilities;
+  const capabilitiesCanUserCRUD: boolean =
+    typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
 
-    <SpyRoute />
-  </>
-);
+  return (
+    <>
+      <WrapperPage>
+        <HeaderPage border title={i18n.PAGE_TITLE}>
+          {capabilitiesCanUserCRUD && (
+            <EuiButton
+              iconType="indexOpen"
+              onClick={onImportTimelineBtnClick}
+              data-test-subj="open-import-data-modal-btn"
+            >
+              {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
+            </EuiButton>
+          )}
+        </HeaderPage>
+
+        <TimelinesContainer>
+          <StatefulOpenTimeline
+            apolloClient={apolloClient}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            isModal={false}
+            importDataModalToggle={importDataModalToggle && capabilitiesCanUserCRUD}
+            setImportDataModalToggle={setImportDataModalToggle}
+            title={i18n.ALL_TIMELINES_PANEL_TITLE}
+            data-test-subj="stateful-open-timeline"
+          />
+        </TimelinesContainer>
+      </WrapperPage>
+
+      <SpyRoute />
+    </>
+  );
+};
 
 export const TimelinesPage = React.memo(TimelinesPageComponent);

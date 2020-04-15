@@ -4,23 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../../../../src/legacy/core_plugins/data/public';
-import { esFilters } from '../../../../../src/plugins/data/public';
-import { npStart } from 'ui/new_platform';
-
-export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
-export { SearchSource } from '../../../../../src/plugins/data/public';
-export const indexPatternService = npStart.plugins.data.indexPatterns;
-export const autocompleteService = npStart.plugins.data.autocomplete;
-
-let licenseId;
-export const setLicenseId = latestLicenseId => (licenseId = latestLicenseId);
-export const getLicenseId = () => {
-  return licenseId;
-};
+let indexPatternService;
+export const setIndexPatternService = dataIndexPatterns =>
+  (indexPatternService = dataIndexPatterns);
+export const getIndexPatternService = () => indexPatternService;
 
 let inspector;
 export const setInspector = newInspector => (inspector = newInspector);
@@ -28,36 +15,15 @@ export const getInspector = () => {
   return inspector;
 };
 
-let fileUploadPlugin;
-export const setFileUpload = fileUpload => (fileUploadPlugin = fileUpload);
-export const getFileUploadComponent = () => {
-  return fileUploadPlugin.JsonUploadAndParse;
-};
+let getInjectedVar;
+export const setInjectedVarFunc = getInjectedVarFunc => (getInjectedVar = getInjectedVarFunc);
+export const getInjectedVarFunc = () => getInjectedVar;
 
-export async function fetchSearchSourceAndRecordWithInspector({
-  searchSource,
-  requestId,
-  requestName,
-  requestDesc,
-  inspectorAdapters,
-  abortSignal,
-}) {
-  const inspectorRequest = inspectorAdapters.requests.start(requestName, {
-    id: requestId,
-    description: requestDesc,
-  });
-  let resp;
-  try {
-    inspectorRequest.stats(getRequestInspectorStats(searchSource));
-    searchSource.getSearchRequestBody().then(body => {
-      inspectorRequest.json(body);
-    });
-    resp = await searchSource.fetch({ abortSignal });
-    inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
-  } catch (error) {
-    inspectorRequest.error({ error });
-    throw error;
-  }
+let indexPatternSelectComponent;
+export const setIndexPatternSelect = indexPatternSelect =>
+  (indexPatternSelectComponent = indexPatternSelect);
+export const getIndexPatternSelectComponent = () => indexPatternSelectComponent;
 
-  return resp;
-}
+let dataTimeFilter;
+export const setTimeFilter = timeFilter => (dataTimeFilter = timeFilter);
+export const getTimeFilter = () => dataTimeFilter;

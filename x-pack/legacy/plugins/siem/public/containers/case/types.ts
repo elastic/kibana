@@ -4,25 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { User, UserActionField, UserAction } from '../../../../../../plugins/case/common/api';
+
 export interface Comment {
   id: string;
   createdAt: string;
   createdBy: ElasticUser;
   comment: string;
-  updatedAt: string;
+  pushedAt: string | null;
+  pushedBy: string | null;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
   version: string;
 }
+export interface CaseUserActions {
+  actionId: string;
+  actionField: UserActionField;
+  action: UserAction;
+  actionAt: string;
+  actionBy: ElasticUser;
+  caseId: string;
+  commentId: string | null;
+  newValue: string | null;
+  oldValue: string | null;
+}
 
+export interface CaseExternalService {
+  pushedAt: string;
+  pushedBy: ElasticUser;
+  connectorId: string;
+  connectorName: string;
+  externalId: string;
+  externalTitle: string;
+  externalUrl: string;
+}
 export interface Case {
   id: string;
+  closedAt: string | null;
+  closedBy: ElasticUser | null;
   comments: Comment[];
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
-  state: string;
+  externalService: CaseExternalService | null;
+  status: string;
   tags: string[];
   title: string;
-  updatedAt: string;
+  totalComment: number;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
   version: string;
 }
 
@@ -35,11 +65,17 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  state: string;
+  status: string;
   tags: string[];
+  reporters: User[];
 }
 
-export interface AllCases {
+export interface CasesStatus {
+  countClosedCases: number | null;
+  countOpenCases: number | null;
+}
+
+export interface AllCases extends CasesStatus {
   cases: Case[];
   page: number;
   perPage: number;
@@ -48,15 +84,38 @@ export interface AllCases {
 
 export enum SortFieldCase {
   createdAt = 'createdAt',
-  updatedAt = 'updatedAt',
+  closedAt = 'closedAt',
 }
 
 export interface ElasticUser {
-  readonly username: string;
+  readonly email?: string | null;
   readonly fullName?: string | null;
+  readonly username?: string | null;
 }
 
-export interface FetchCasesProps {
+export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
+}
+
+export interface ApiProps {
+  signal: AbortSignal;
+}
+
+export interface BulkUpdateStatus {
+  status: string;
+  id: string;
+  version: string;
+}
+export interface ActionLicense {
+  id: string;
+  name: string;
+  enabled: boolean;
+  enabledInConfig: boolean;
+  enabledInLicense: boolean;
+}
+
+export interface DeleteCase {
+  id: string;
+  title?: string;
 }

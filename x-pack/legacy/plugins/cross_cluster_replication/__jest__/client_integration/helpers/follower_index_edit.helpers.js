@@ -5,9 +5,9 @@
  */
 
 import { registerTestBed } from '../../../../../../test_utils';
-import { FollowerIndexEdit } from '../../../public/app/sections/follower_index_edit';
-import { ccrStore } from '../../../public/app/store';
-import routing from '../../../public/app/services/routing';
+import { FollowerIndexEdit } from '../../../public/np_ready/app/sections/follower_index_edit';
+import { ccrStore } from '../../../public/np_ready/app/store';
+import routing from '../../../public/np_ready/app/services/routing';
 
 import { FOLLOWER_INDEX_EDIT_NAME } from './constants';
 

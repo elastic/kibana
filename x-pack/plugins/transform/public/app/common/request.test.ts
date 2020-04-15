@@ -143,6 +143,7 @@ describe('Transform: Common', () => {
       isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
       sourceConfigUpdated: false,
+      searchLanguage: 'kuery',
       searchString: 'the-query',
       searchQuery: 'the-search-query',
       valid: true,

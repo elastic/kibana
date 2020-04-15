@@ -38,7 +38,6 @@ describe('get_column_renderer', () => {
     const row = rowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
-      children: <span>{'some child'}</span>,
       timelineId: 'test',
     });
 
@@ -51,7 +50,6 @@ describe('get_column_renderer', () => {
     const row = rowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
-      children: <span>{'some child'}</span>,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -59,7 +57,7 @@ describe('get_column_renderer', () => {
         <span>{row}</span>
       </TestProviders>
     );
-    expect(wrapper.text()).toContain('some child');
+    expect(wrapper.text()).toEqual('');
   });
 
   test('should render a suricata row data when it is a suricata row', () => {
@@ -67,7 +65,6 @@ describe('get_column_renderer', () => {
     const row = rowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
-      children: <span>{'some child '}</span>,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -76,7 +73,7 @@ describe('get_column_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some child 4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
+      '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
     );
   });
 
@@ -86,7 +83,6 @@ describe('get_column_renderer', () => {
     const row = rowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
-      children: <span>{'some child '}</span>,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -95,7 +91,7 @@ describe('get_column_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some child 4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
+      '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
     );
   });
 
@@ -105,7 +101,6 @@ describe('get_column_renderer', () => {
     const row = rowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: zeek,
-      children: <span>{'some child '}</span>,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -114,7 +109,7 @@ describe('get_column_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some child C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
+      'C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
     );
   });
 
@@ -124,7 +119,6 @@ describe('get_column_renderer', () => {
     const row = rowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: system,
-      children: <span>{'some child '}</span>,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -133,7 +127,7 @@ describe('get_column_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some child Braden@zeek-londonattempted a login via(6278)with resultfailureSource128.199.212.120'
+      'Braden@zeek-londonattempted a login via(6278)with resultfailureSource128.199.212.120'
     );
   });
 
@@ -143,7 +137,6 @@ describe('get_column_renderer', () => {
     const row = rowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: auditd,
-      children: <span>{'some child '}</span>,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -152,7 +145,7 @@ describe('get_column_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some child Sessionalice@zeek-sanfranin/executedgpgconf(5402)gpgconf--list-dirsagent-socketgpgconf --list-dirs agent-socket'
+      'Sessionalice@zeek-sanfranin/executedgpgconf(5402)gpgconf--list-dirsagent-socketgpgconf --list-dirs agent-socket'
     );
   });
 });

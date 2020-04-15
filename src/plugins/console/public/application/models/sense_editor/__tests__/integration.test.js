@@ -84,93 +84,90 @@ describe('Integration', () => {
         changeListener: function() {},
       }; // mimic auto complete
 
-      senseEditor.autocomplete._test.getCompletions(
-        senseEditor,
-        null,
-        { row: cursor.lineNumber - 1, column: cursor.column - 1 },
-        '',
-        function(err, terms) {
-          if (testToRun.assertThrows) {
-            done();
-            return;
-          }
-
-          if (err) {
-            throw err;
-          }
-
-          if (testToRun.no_context) {
-            expect(!terms || terms.length === 0).toBeTruthy();
-          } else {
-            expect(terms).not.toBeNull();
-            expect(terms.length).toBeGreaterThan(0);
-          }
-
-          if (!terms || terms.length === 0) {
-            done();
-            return;
-          }
-
-          if (testToRun.autoCompleteSet) {
-            const expectedTerms = _.map(testToRun.autoCompleteSet, function(t) {
-              if (typeof t !== 'object') {
-                t = { name: t };
-              }
-              return t;
-            });
-            if (terms.length !== expectedTerms.length) {
-              expect(_.pluck(terms, 'name')).toEqual(_.pluck(expectedTerms, 'name'));
-            } else {
-              const filteredActualTerms = _.map(terms, function(actualTerm, i) {
-                const expectedTerm = expectedTerms[i];
-                const filteredTerm = {};
-                _.each(expectedTerm, function(v, p) {
-                  filteredTerm[p] = actualTerm[p];
-                });
-                return filteredTerm;
-              });
-              expect(filteredActualTerms).toEqual(expectedTerms);
-            }
-          }
-
-          const context = terms[0].context;
-          const {
-            cursor: { lineNumber, column },
-          } = testToRun;
-          senseEditor.autocomplete._test.addReplacementInfoToContext(
-            context,
-            { lineNumber, column },
-            terms[0].value
-          );
-
-          function ac(prop, propTest) {
-            if (typeof testToRun[prop] !== 'undefined') {
-              if (propTest) {
-                propTest(context[prop], testToRun[prop], prop);
-              } else {
-                expect(context[prop]).toEqual(testToRun[prop]);
-              }
-            }
-          }
-
-          function posCompare(actual, expected) {
-            expect(actual.lineNumber).toEqual(expected.lineNumber + lineOffset);
-            expect(actual.column).toEqual(expected.column);
-          }
-
-          function rangeCompare(actual, expected, name) {
-            posCompare(actual.start, expected.start, name + '.start');
-            posCompare(actual.end, expected.end, name + '.end');
-          }
-
-          ac('prefixToAdd');
-          ac('suffixToAdd');
-          ac('addTemplate');
-          ac('textBoxPosition', posCompare);
-          ac('rangeToReplace', rangeCompare);
+      senseEditor.autocomplete._test.getCompletions(senseEditor, null, cursor, '', function(
+        err,
+        terms
+      ) {
+        if (testToRun.assertThrows) {
           done();
+          return;
         }
-      );
+
+        if (err) {
+          throw err;
+        }
+
+        if (testToRun.no_context) {
+          expect(!terms || terms.length === 0).toBeTruthy();
+        } else {
+          expect(terms).not.toBeNull();
+          expect(terms.length).toBeGreaterThan(0);
+        }
+
+        if (!terms || terms.length === 0) {
+          done();
+          return;
+        }
+
+        if (testToRun.autoCompleteSet) {
+          const expectedTerms = _.map(testToRun.autoCompleteSet, function(t) {
+            if (typeof t !== 'object') {
+              t = { name: t };
+            }
+            return t;
+          });
+          if (terms.length !== expectedTerms.length) {
+            expect(_.pluck(terms, 'name')).toEqual(_.pluck(expectedTerms, 'name'));
+          } else {
+            const filteredActualTerms = _.map(terms, function(actualTerm, i) {
+              const expectedTerm = expectedTerms[i];
+              const filteredTerm = {};
+              _.each(expectedTerm, function(v, p) {
+                filteredTerm[p] = actualTerm[p];
+              });
+              return filteredTerm;
+            });
+            expect(filteredActualTerms).toEqual(expectedTerms);
+          }
+        }
+
+        const context = terms[0].context;
+        const {
+          cursor: { lineNumber, column },
+        } = testToRun;
+        senseEditor.autocomplete._test.addReplacementInfoToContext(
+          context,
+          { lineNumber, column },
+          terms[0].value
+        );
+
+        function ac(prop, propTest) {
+          if (typeof testToRun[prop] !== 'undefined') {
+            if (propTest) {
+              propTest(context[prop], testToRun[prop], prop);
+            } else {
+              expect(context[prop]).toEqual(testToRun[prop]);
+            }
+          }
+        }
+
+        function posCompare(actual, expected) {
+          expect(actual.lineNumber).toEqual(expected.lineNumber + lineOffset);
+          expect(actual.column).toEqual(expected.column);
+        }
+
+        function rangeCompare(actual, expected, name) {
+          posCompare(actual.start, expected.start, name + '.start');
+          posCompare(actual.end, expected.end, name + '.end');
+        }
+
+        ac('prefixToAdd');
+        ac('suffixToAdd');
+        ac('addTemplate');
+        ac('textBoxPosition', posCompare);
+        ac('rangeToReplace', rangeCompare);
+        done();
+      });
     });
   }
 

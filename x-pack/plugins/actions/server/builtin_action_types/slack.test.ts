@@ -8,7 +8,7 @@ import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { validateParams, validateSecrets } from '../lib';
 import { getActionType } from './slack';
-import { configUtilsMock } from '../actions_config.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 
 const ACTION_TYPE_ID = '.slack';
 
@@ -22,7 +22,7 @@ let actionType: ActionType;
 beforeAll(() => {
   actionType = getActionType({
     async executor(options: ActionTypeExecutorOptions): Promise<any> {},
-    configurationUtilities: configUtilsMock,
+    configurationUtilities: actionsConfigMock.create(),
   });
 });
 
@@ -85,7 +85,7 @@ describe('validateActionTypeSecrets()', () => {
   test('should validate and pass when the slack webhookUrl is whitelisted', () => {
     actionType = getActionType({
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedUri: url => {
           expect(url).toEqual('https://api.slack.com/');
         },
@@ -100,7 +100,7 @@ describe('validateActionTypeSecrets()', () => {
   test('config validation returns an error if the specified URL isnt whitelisted', () => {
     actionType = getActionType({
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedHostname: url => {
           throw new Error(`target hostname is not whitelisted`);
         },
@@ -135,7 +135,7 @@ describe('execute()', () => {
 
     actionType = getActionType({
       executor: mockSlackExecutor,
-      configurationUtilities: configUtilsMock,
+      configurationUtilities: actionsConfigMock.create(),
     });
   });
 

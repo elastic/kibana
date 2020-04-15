@@ -12,10 +12,3 @@ export const TIMELINE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Timeline Properties',
   }
 );
-
-export const CLOSE_TIMELINE = i18n.translate(
-  'xpack.siem.timeline.flyout.pane.closeTimelineButtonLabel',
-  {
-    defaultMessage: 'Close timeline',
-  }
-);

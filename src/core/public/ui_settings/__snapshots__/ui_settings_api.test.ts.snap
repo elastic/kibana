@@ -84,21 +84,21 @@ Array [
 exports[`#batchSet rejects all promises for batched requests that fail: promise rejections 1`] = `
 Array [
   Object {
-    "error": [Error: Request failed with status code: 400],
+    "error": [Error: invalid],
     "isRejected": true,
   },
   Object {
-    "error": [Error: Request failed with status code: 400],
+    "error": [Error: invalid],
     "isRejected": true,
   },
   Object {
-    "error": [Error: Request failed with status code: 400],
+    "error": [Error: invalid],
     "isRejected": true,
   },
 ]
 `;
 
-exports[`#batchSet rejects on 301 1`] = `"Request failed with status code: 301"`;
+exports[`#batchSet rejects on 301 1`] = `"Moved Permanently"`;
 
 exports[`#batchSet rejects on 404 response 1`] = `"Request failed with status code: 404"`;
 

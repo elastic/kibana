@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { setup as visualizationsSetup } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
+import { npSetup } from '../../../../../src/legacy/ui/public/new_platform';
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_BASE_URL } from '../common/constants';
 
@@ -23,7 +23,7 @@ The Maps app offers more functionality and is easier to use.`,
   }
 );
 
-visualizationsSetup.registerAlias({
+npSetup.plugins.visualizations.registerAlias({
   aliasUrl: MAP_BASE_URL,
   name: APP_ID,
   title: i18n.translate('xpack.maps.visTypeAlias.title', {
@@ -37,5 +37,5 @@ visualizationsSetup.registerAlias({
 });
 
 if (!showMapVisualizationTypes) {
-  visualizationsSetup.hideTypes(['region_map', 'tile_map']);
+  npSetup.plugins.visualizations.hideTypes(['region_map', 'tile_map']);
 }

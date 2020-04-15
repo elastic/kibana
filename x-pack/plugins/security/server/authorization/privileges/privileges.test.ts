@@ -11,9 +11,9 @@ import { privilegesFactory } from './privileges';
 const actions = new Actions('1.0.0-zeta1');
 
 describe('features', () => {
-  test('actions defined at the feature cascade to the privileges', () => {
+  test('actions defined at the feature do not cascade to the privileges', () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo-feature',
         name: 'Foo Feature',
         icon: 'arrowDown',
@@ -39,115 +39,25 @@ describe('features', () => {
             ui: [],
           },
         },
-      },
+      }),
     ];
 
     const mockFeaturesService = { getFeatures: jest.fn().mockReturnValue(features) };
-    const privileges = privilegesFactory(actions, mockFeaturesService);
+    const mockLicenseService = {
+      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+    };
+    const privileges = privilegesFactory(actions, mockFeaturesService, mockLicenseService);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {
-      all: [
-        actions.login,
-        actions.version,
-        actions.app.get('app-1'),
-        actions.app.get('app-2'),
-        actions.ui.get('catalogue', 'catalogue-1'),
-        actions.ui.get('catalogue', 'catalogue-2'),
-        actions.ui.get('management', 'foo', 'management-1'),
-        actions.ui.get('management', 'foo', 'management-2'),
-        actions.ui.get('navLinks', 'kibana:foo'),
-        actions.allHack,
-      ],
-      read: [
-        actions.login,
-        actions.version,
-        actions.app.get('app-1'),
-        actions.app.get('app-2'),
-        actions.ui.get('catalogue', 'catalogue-1'),
-        actions.ui.get('catalogue', 'catalogue-2'),
-        actions.ui.get('management', 'foo', 'management-1'),
-        actions.ui.get('management', 'foo', 'management-2'),
-        actions.ui.get('navLinks', 'kibana:foo'),
-      ],
-    });
-  });
-
-  test('actions defined at the privilege take precedence', () => {
-    const features: Feature[] = [
-      {
-        id: 'foo',
-        name: 'Foo Feature',
-        icon: 'arrowDown',
-        app: ['ignore-me-1', 'ignore-me-2'],
-        catalogue: ['ignore-me-1', 'ignore-me-2'],
-        management: {
-          foo: ['ignore-me-1', 'ignore-me-2'],
-        },
-        privileges: {
-          all: {
-            app: ['all-app-1', 'all-app-2'],
-            catalogue: ['catalogue-all-1', 'catalogue-all-2'],
-            management: {
-              all: ['all-management-1', 'all-management-2'],
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-          },
-          read: {
-            app: ['read-app-1', 'read-app-2'],
-            catalogue: ['catalogue-read-1', 'catalogue-read-2'],
-            management: {
-              read: ['read-management-1', 'read-management-2'],
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-          },
-        },
-      },
-    ];
-
-    const mockXPackMainPlugin = {
-      getFeatures: jest.fn().mockReturnValue(features),
-    };
-
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
-
-    const actual = privileges.get();
-    expect(actual).toHaveProperty('features.foo', {
-      all: [
-        actions.login,
-        actions.version,
-        actions.app.get('all-app-1'),
-        actions.app.get('all-app-2'),
-        actions.ui.get('catalogue', 'catalogue-all-1'),
-        actions.ui.get('catalogue', 'catalogue-all-2'),
-        actions.ui.get('management', 'all', 'all-management-1'),
-        actions.ui.get('management', 'all', 'all-management-2'),
-        actions.allHack,
-      ],
-      read: [
-        actions.login,
-        actions.version,
-        actions.app.get('read-app-1'),
-        actions.app.get('read-app-2'),
-        actions.ui.get('catalogue', 'catalogue-read-1'),
-        actions.ui.get('catalogue', 'catalogue-read-2'),
-        actions.ui.get('management', 'read', 'read-management-1'),
-        actions.ui.get('management', 'read', 'read-management-2'),
-      ],
+      all: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
+      read: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
     });
   });
 
   test(`actions only specified at the privilege are alright too`, () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
@@ -168,93 +78,100 @@ describe('features', () => {
             ui: ['read-ui-1', 'read-ui-2'],
           },
         },
-      },
+      }),
     ];
 
     const mockXPackMainPlugin = {
       getFeatures: jest.fn().mockReturnValue(features),
     };
+    const mockLicenseService = {
+      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+    };
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+    const expectedAllPrivileges = [
+      actions.login,
+      actions.version,
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-all-1', 'get'),
+      actions.savedObject.get('all-savedObject-all-1', 'find'),
+      actions.savedObject.get('all-savedObject-all-1', 'create'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_create'),
+      actions.savedObject.get('all-savedObject-all-1', 'update'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_update'),
+      actions.savedObject.get('all-savedObject-all-1', 'delete'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-all-2', 'get'),
+      actions.savedObject.get('all-savedObject-all-2', 'find'),
+      actions.savedObject.get('all-savedObject-all-2', 'create'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_create'),
+      actions.savedObject.get('all-savedObject-all-2', 'update'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_update'),
+      actions.savedObject.get('all-savedObject-all-2', 'delete'),
+      actions.savedObject.get('all-savedObject-read-1', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-read-1', 'get'),
+      actions.savedObject.get('all-savedObject-read-1', 'find'),
+      actions.savedObject.get('all-savedObject-read-2', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-read-2', 'get'),
+      actions.savedObject.get('all-savedObject-read-2', 'find'),
+      actions.ui.get('foo', 'all-ui-1'),
+      actions.ui.get('foo', 'all-ui-2'),
+    ];
+
+    const expectedReadPrivileges = [
+      actions.login,
+      actions.version,
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-all-1', 'get'),
+      actions.savedObject.get('read-savedObject-all-1', 'find'),
+      actions.savedObject.get('read-savedObject-all-1', 'create'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_create'),
+      actions.savedObject.get('read-savedObject-all-1', 'update'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_update'),
+      actions.savedObject.get('read-savedObject-all-1', 'delete'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-all-2', 'get'),
+      actions.savedObject.get('read-savedObject-all-2', 'find'),
+      actions.savedObject.get('read-savedObject-all-2', 'create'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_create'),
+      actions.savedObject.get('read-savedObject-all-2', 'update'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_update'),
+      actions.savedObject.get('read-savedObject-all-2', 'delete'),
+      actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-read-1', 'get'),
+      actions.savedObject.get('read-savedObject-read-1', 'find'),
+      actions.savedObject.get('read-savedObject-read-2', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-read-2', 'get'),
+      actions.savedObject.get('read-savedObject-read-2', 'find'),
+      actions.ui.get('foo', 'read-ui-1'),
+      actions.ui.get('foo', 'read-ui-2'),
+    ];
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo', {
-      all: [
-        actions.login,
-        actions.version,
-        actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
-        actions.savedObject.get('all-savedObject-all-1', 'get'),
-        actions.savedObject.get('all-savedObject-all-1', 'find'),
-        actions.savedObject.get('all-savedObject-all-1', 'create'),
-        actions.savedObject.get('all-savedObject-all-1', 'bulk_create'),
-        actions.savedObject.get('all-savedObject-all-1', 'update'),
-        actions.savedObject.get('all-savedObject-all-1', 'bulk_update'),
-        actions.savedObject.get('all-savedObject-all-1', 'delete'),
-        actions.savedObject.get('all-savedObject-all-2', 'bulk_get'),
-        actions.savedObject.get('all-savedObject-all-2', 'get'),
-        actions.savedObject.get('all-savedObject-all-2', 'find'),
-        actions.savedObject.get('all-savedObject-all-2', 'create'),
-        actions.savedObject.get('all-savedObject-all-2', 'bulk_create'),
-        actions.savedObject.get('all-savedObject-all-2', 'update'),
-        actions.savedObject.get('all-savedObject-all-2', 'bulk_update'),
-        actions.savedObject.get('all-savedObject-all-2', 'delete'),
-        actions.savedObject.get('all-savedObject-read-1', 'bulk_get'),
-        actions.savedObject.get('all-savedObject-read-1', 'get'),
-        actions.savedObject.get('all-savedObject-read-1', 'find'),
-        actions.savedObject.get('all-savedObject-read-2', 'bulk_get'),
-        actions.savedObject.get('all-savedObject-read-2', 'get'),
-        actions.savedObject.get('all-savedObject-read-2', 'find'),
-        actions.ui.get('foo', 'all-ui-1'),
-        actions.ui.get('foo', 'all-ui-2'),
-        actions.allHack,
-      ],
-      read: [
-        actions.login,
-        actions.version,
-        actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
-        actions.savedObject.get('read-savedObject-all-1', 'get'),
-        actions.savedObject.get('read-savedObject-all-1', 'find'),
-        actions.savedObject.get('read-savedObject-all-1', 'create'),
-        actions.savedObject.get('read-savedObject-all-1', 'bulk_create'),
-        actions.savedObject.get('read-savedObject-all-1', 'update'),
-        actions.savedObject.get('read-savedObject-all-1', 'bulk_update'),
-        actions.savedObject.get('read-savedObject-all-1', 'delete'),
-        actions.savedObject.get('read-savedObject-all-2', 'bulk_get'),
-        actions.savedObject.get('read-savedObject-all-2', 'get'),
-        actions.savedObject.get('read-savedObject-all-2', 'find'),
-        actions.savedObject.get('read-savedObject-all-2', 'create'),
-        actions.savedObject.get('read-savedObject-all-2', 'bulk_create'),
-        actions.savedObject.get('read-savedObject-all-2', 'update'),
-        actions.savedObject.get('read-savedObject-all-2', 'bulk_update'),
-        actions.savedObject.get('read-savedObject-all-2', 'delete'),
-        actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
-        actions.savedObject.get('read-savedObject-read-1', 'get'),
-        actions.savedObject.get('read-savedObject-read-1', 'find'),
-        actions.savedObject.get('read-savedObject-read-2', 'bulk_get'),
-        actions.savedObject.get('read-savedObject-read-2', 'get'),
-        actions.savedObject.get('read-savedObject-read-2', 'find'),
-        actions.ui.get('foo', 'read-ui-1'),
-        actions.ui.get('foo', 'read-ui-2'),
-      ],
+      all: [...expectedAllPrivileges],
+      read: [...expectedReadPrivileges],
     });
   });
 
   test(`features with no privileges aren't listed`, () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
         app: [],
-        privileges: {},
-      },
+        privileges: null,
+      }),
     ];
 
     const mockXPackMainPlugin = {
       getFeatures: jest.fn().mockReturnValue(features),
     };
-
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+    const mockLicenseService = {
+      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+    };
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
     const actual = privileges.get();
     expect(actual).not.toHaveProperty('features.foo');
@@ -276,82 +193,9 @@ describe('features', () => {
   },
 ].forEach(({ group, expectManageSpaces, expectGetFeatures }) => {
   describe(`${group}`, () => {
-    test('actions defined only at the feature are included in `all` and `read`', () => {
-      const features: Feature[] = [
-        {
-          id: 'foo',
-          name: 'Foo Feature',
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
-          app: ['app-1', 'app-2'],
-          catalogue: ['catalogue-1', 'catalogue-2'],
-          management: {
-            foo: ['management-1', 'management-2'],
-          },
-          privileges: {
-            all: {
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: [],
-            },
-            read: {
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: [],
-            },
-          },
-        },
-      ];
-
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
-      };
-
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
-
-      const actual = privileges.get();
-      expect(actual).toHaveProperty(group, {
-        all: [
-          actions.login,
-          actions.version,
-          ...(expectGetFeatures ? [actions.api.get('features')] : []),
-          ...(expectManageSpaces
-            ? [
-                actions.space.manage,
-                actions.ui.get('spaces', 'manage'),
-                actions.ui.get('management', 'kibana', 'spaces'),
-              ]
-            : []),
-          actions.app.get('app-1'),
-          actions.app.get('app-2'),
-          actions.ui.get('catalogue', 'catalogue-1'),
-          actions.ui.get('catalogue', 'catalogue-2'),
-          actions.ui.get('management', 'foo', 'management-1'),
-          actions.ui.get('management', 'foo', 'management-2'),
-          actions.ui.get('navLinks', 'kibana:foo'),
-          actions.allHack,
-        ],
-        read: [
-          actions.login,
-          actions.version,
-          actions.app.get('app-1'),
-          actions.app.get('app-2'),
-          actions.ui.get('catalogue', 'catalogue-1'),
-          actions.ui.get('catalogue', 'catalogue-2'),
-          actions.ui.get('management', 'foo', 'management-1'),
-          actions.ui.get('management', 'foo', 'management-2'),
-          actions.ui.get('navLinks', 'kibana:foo'),
-        ],
-      });
-    });
-
     test('actions defined in any feature privilege are included in `all`', () => {
       const features: Feature[] = [
-        {
+        new Feature({
           id: 'foo',
           name: 'Foo Feature',
           icon: 'arrowDown',
@@ -362,17 +206,6 @@ describe('features', () => {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
           privileges: {
-            bar: {
-              management: {
-                'bar-management': ['bar-management-1', 'bar-management-2'],
-              },
-              catalogue: ['bar-catalogue-1', 'bar-catalogue-2'],
-              savedObject: {
-                all: ['bar-savedObject-all-1', 'bar-savedObject-all-2'],
-                read: ['bar-savedObject-read-1', 'bar-savedObject-read-2'],
-              },
-              ui: ['bar-ui-1', 'bar-ui-2'],
-            },
             all: {
               management: {
                 'all-management': ['all-management-1', 'all-management-2'],
@@ -396,14 +229,16 @@ describe('features', () => {
               ui: ['read-ui-1', 'read-ui-2'],
             },
           },
-        },
+        }),
       ];
 
       const mockXPackMainPlugin = {
         getFeatures: jest.fn().mockReturnValue(features),
       };
-
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      };
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.all`, [
@@ -417,39 +252,11 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.ui.get('catalogue', 'bar-catalogue-1'),
-        actions.ui.get('catalogue', 'bar-catalogue-2'),
-        actions.ui.get('management', 'bar-management', 'bar-management-1'),
-        actions.ui.get('management', 'bar-management', 'bar-management-2'),
-        actions.ui.get('navLinks', 'kibana:foo'),
-        actions.savedObject.get('bar-savedObject-all-1', 'bulk_get'),
-        actions.savedObject.get('bar-savedObject-all-1', 'get'),
-        actions.savedObject.get('bar-savedObject-all-1', 'find'),
-        actions.savedObject.get('bar-savedObject-all-1', 'create'),
-        actions.savedObject.get('bar-savedObject-all-1', 'bulk_create'),
-        actions.savedObject.get('bar-savedObject-all-1', 'update'),
-        actions.savedObject.get('bar-savedObject-all-1', 'bulk_update'),
-        actions.savedObject.get('bar-savedObject-all-1', 'delete'),
-        actions.savedObject.get('bar-savedObject-all-2', 'bulk_get'),
-        actions.savedObject.get('bar-savedObject-all-2', 'get'),
-        actions.savedObject.get('bar-savedObject-all-2', 'find'),
-        actions.savedObject.get('bar-savedObject-all-2', 'create'),
-        actions.savedObject.get('bar-savedObject-all-2', 'bulk_create'),
-        actions.savedObject.get('bar-savedObject-all-2', 'update'),
-        actions.savedObject.get('bar-savedObject-all-2', 'bulk_update'),
-        actions.savedObject.get('bar-savedObject-all-2', 'delete'),
-        actions.savedObject.get('bar-savedObject-read-1', 'bulk_get'),
-        actions.savedObject.get('bar-savedObject-read-1', 'get'),
-        actions.savedObject.get('bar-savedObject-read-1', 'find'),
-        actions.savedObject.get('bar-savedObject-read-2', 'bulk_get'),
-        actions.savedObject.get('bar-savedObject-read-2', 'get'),
-        actions.savedObject.get('bar-savedObject-read-2', 'find'),
-        actions.ui.get('foo', 'bar-ui-1'),
-        actions.ui.get('foo', 'bar-ui-2'),
         actions.ui.get('catalogue', 'all-catalogue-1'),
         actions.ui.get('catalogue', 'all-catalogue-2'),
         actions.ui.get('management', 'all-management', 'all-management-1'),
         actions.ui.get('management', 'all-management', 'all-management-2'),
+        actions.ui.get('navLinks', 'kibana:foo'),
         actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
         actions.savedObject.get('all-savedObject-all-1', 'get'),
         actions.savedObject.get('all-savedObject-all-1', 'find'),
@@ -502,13 +309,12 @@ describe('features', () => {
         actions.savedObject.get('read-savedObject-read-2', 'find'),
         actions.ui.get('foo', 'read-ui-1'),
         actions.ui.get('foo', 'read-ui-2'),
-        actions.allHack,
       ]);
     });
 
     test('actions defined in a feature privilege with name `read` are included in `read`', () => {
       const features: Feature[] = [
-        {
+        new Feature({
           id: 'foo',
           name: 'Foo Feature',
           icon: 'arrowDown',
@@ -519,17 +325,6 @@ describe('features', () => {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
           privileges: {
-            bar: {
-              management: {
-                'ignore-me': ['ignore-me-1', 'ignore-me-2'],
-              },
-              catalogue: ['ignore-me-1', 'ignore-me-2'],
-              savedObject: {
-                all: ['ignore-me-1', 'ignore-me-2'],
-                read: ['ignore-me-1', 'ignore-me-2'],
-              },
-              ui: ['ignore-me-1', 'ignore-me-2'],
-            },
             all: {
               management: {
                 'ignore-me': ['ignore-me-1', 'ignore-me-2'],
@@ -553,14 +348,16 @@ describe('features', () => {
               ui: ['read-ui-1', 'read-ui-2'],
             },
           },
-        },
+        }),
       ];
 
       const mockXPackMainPlugin = {
         getFeatures: jest.fn().mockReturnValue(features),
       };
-
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      };
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.read`, [
@@ -600,7 +397,7 @@ describe('features', () => {
 
     test('actions defined in a reserved privilege are not included in `all` or `read`', () => {
       const features: Feature[] = [
-        {
+        new Feature({
           id: 'foo',
           name: 'Foo Feature',
           icon: 'arrowDown',
@@ -610,25 +407,32 @@ describe('features', () => {
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
-          privileges: {},
+          privileges: null,
           reserved: {
-            privilege: {
-              savedObject: {
-                all: ['ignore-me-1', 'ignore-me-2'],
-                read: ['ignore-me-1', 'ignore-me-2'],
+            privileges: [
+              {
+                id: 'reserved',
+                privilege: {
+                  savedObject: {
+                    all: ['ignore-me-1', 'ignore-me-2'],
+                    read: ['ignore-me-1', 'ignore-me-2'],
+                  },
+                  ui: ['ignore-me-1'],
+                },
               },
-              ui: ['ignore-me-1'],
-            },
+            ],
             description: '',
           },
-        },
+        }),
       ];
 
       const mockXPackMainPlugin = {
         getFeatures: jest.fn().mockReturnValue(features),
       };
-
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      };
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.all`, [
@@ -642,14 +446,13 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
 
     test('actions defined in a feature with excludeFromBasePrivileges are not included in `all` or `read', () => {
       const features: Feature[] = [
-        {
+        new Feature({
           id: 'foo',
           name: 'Foo Feature',
           excludeFromBasePrivileges: true,
@@ -661,17 +464,6 @@ describe('features', () => {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
           privileges: {
-            bar: {
-              management: {
-                'bar-management': ['bar-management-1'],
-              },
-              catalogue: ['bar-catalogue-1'],
-              savedObject: {
-                all: ['bar-savedObject-all-1'],
-                read: ['bar-savedObject-read-1'],
-              },
-              ui: ['bar-ui-1'],
-            },
             all: {
               management: {
                 'all-management': ['all-management-1'],
@@ -695,14 +487,16 @@ describe('features', () => {
               ui: ['read-ui-1'],
             },
           },
-        },
+        }),
       ];
 
       const mockXPackMainPlugin = {
         getFeatures: jest.fn().mockReturnValue(features),
       };
-
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      };
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.all`, [
@@ -716,14 +510,13 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
 
     test('actions defined in an individual feature privilege with excludeFromBasePrivileges are not included in `all` or `read`', () => {
       const features: Feature[] = [
-        {
+        new Feature({
           id: 'foo',
           name: 'Foo Feature',
           icon: 'arrowDown',
@@ -734,18 +527,6 @@ describe('features', () => {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
           privileges: {
-            bar: {
-              excludeFromBasePrivileges: true,
-              management: {
-                'bar-management': ['bar-management-1'],
-              },
-              catalogue: ['bar-catalogue-1'],
-              savedObject: {
-                all: ['bar-savedObject-all-1'],
-                read: ['bar-savedObject-read-1'],
-              },
-              ui: ['bar-ui-1'],
-            },
             all: {
               excludeFromBasePrivileges: true,
               management: {
@@ -771,14 +552,16 @@ describe('features', () => {
               ui: ['read-ui-1'],
             },
           },
-        },
+        }),
       ];
 
       const mockXPackMainPlugin = {
         getFeatures: jest.fn().mockReturnValue(features),
       };
-
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      };
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.all`, [
@@ -792,7 +575,6 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -800,9 +582,9 @@ describe('features', () => {
 });
 
 describe('reserved', () => {
-  test('actions defined at the feature cascade to the privileges', () => {
+  test('actions defined at the feature do not cascade to the privileges', () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
@@ -812,113 +594,73 @@ describe('reserved', () => {
         management: {
           foo: ['management-1', 'management-2'],
         },
-        privileges: {},
+        privileges: null,
         reserved: {
-          privilege: {
-            savedObject: {
-              all: [],
-              read: [],
+          privileges: [
+            {
+              id: 'foo',
+              privilege: {
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: [],
+              },
             },
-            ui: [],
-          },
+          ],
           description: '',
         },
-      },
+      }),
     ];
 
     const mockXPackMainPlugin = {
       getFeatures: jest.fn().mockReturnValue(features),
     };
-
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+    const mockLicenseService = {
+      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+    };
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('reserved.foo', [
       actions.version,
-      actions.app.get('app-1'),
-      actions.app.get('app-2'),
-      actions.ui.get('catalogue', 'catalogue-1'),
-      actions.ui.get('catalogue', 'catalogue-2'),
-      actions.ui.get('management', 'foo', 'management-1'),
-      actions.ui.get('management', 'foo', 'management-2'),
       actions.ui.get('navLinks', 'kibana:foo'),
-    ]);
-  });
-
-  test('actions defined at the reservedPrivilege take precedence', () => {
-    const features: Feature[] = [
-      {
-        id: 'foo',
-        name: 'Foo Feature',
-        icon: 'arrowDown',
-        app: ['ignore-me-1', 'ignore-me-2'],
-        catalogue: ['ignore-me-1', 'ignore-me-2'],
-        management: {
-          foo: ['ignore-me-1', 'ignore-me-2'],
-        },
-        privileges: {},
-        reserved: {
-          privilege: {
-            app: ['app-1', 'app-2'],
-            catalogue: ['catalogue-1', 'catalogue-2'],
-            management: {
-              bar: ['management-1', 'management-2'],
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-          },
-          description: '',
-        },
-      },
-    ];
-
-    const mockXPackMainPlugin = {
-      getFeatures: jest.fn().mockReturnValue(features),
-    };
-
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
-
-    const actual = privileges.get();
-    expect(actual).toHaveProperty('reserved.foo', [
-      actions.version,
-      actions.app.get('app-1'),
-      actions.app.get('app-2'),
-      actions.ui.get('catalogue', 'catalogue-1'),
-      actions.ui.get('catalogue', 'catalogue-2'),
-      actions.ui.get('management', 'bar', 'management-1'),
-      actions.ui.get('management', 'bar', 'management-2'),
     ]);
   });
 
   test(`actions only specified at the privilege are alright too`, () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
         app: [],
-        privileges: {},
+        privileges: null,
         reserved: {
-          privilege: {
-            savedObject: {
-              all: ['savedObject-all-1', 'savedObject-all-2'],
-              read: ['savedObject-read-1', 'savedObject-read-2'],
+          privileges: [
+            {
+              id: 'foo',
+              privilege: {
+                savedObject: {
+                  all: ['savedObject-all-1', 'savedObject-all-2'],
+                  read: ['savedObject-read-1', 'savedObject-read-2'],
+                },
+                ui: ['ui-1', 'ui-2'],
+              },
             },
-            ui: ['ui-1', 'ui-2'],
-          },
+          ],
           description: '',
         },
-      },
+      }),
     ];
 
     const mockXPackMainPlugin = {
       getFeatures: jest.fn().mockReturnValue(features),
     };
-
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+    const mockLicenseService = {
+      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+    };
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('reserved.foo', [
@@ -952,7 +694,7 @@ describe('reserved', () => {
 
   test(`features with no reservedPrivileges aren't listed`, () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
@@ -965,17 +707,953 @@ describe('reserved', () => {
             },
             ui: ['foo'],
           },
+          read: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['foo'],
+          },
         },
-      },
+      }),
     ];
 
     const mockXPackMainPlugin = {
       getFeatures: jest.fn().mockReturnValue(features),
     };
-
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+    const mockLicenseService = {
+      getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+    };
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
     const actual = privileges.get();
     expect(actual).not.toHaveProperty('reserved.foo');
+  });
+});
+
+describe('subFeatures', () => {
+  describe(`with includeIn: 'none'`, () => {
+    test(`should not augment the primary feature privileges, base privileges, or minimal feature privileges`, () => {
+      const features: Feature[] = [
+        new Feature({
+          id: 'foo',
+          name: 'Foo Feature',
+          icon: 'arrowDown',
+          app: [],
+          privileges: {
+            all: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+            read: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'subFeature1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'subFeaturePriv1',
+                      name: 'sub feature priv 1',
+                      includeIn: 'none',
+                      savedObject: {
+                        all: ['all-sub-feature-type'],
+                        read: ['read-sub-feature-type'],
+                      },
+                      ui: ['sub-feature-ui'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const mockXPackMainPlugin = {
+        getFeatures: jest.fn().mockReturnValue(features),
+      };
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      };
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+
+      const actual = privileges.get();
+      expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty('foo.all', [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+      expect(actual.features).toHaveProperty('foo.minimal_all', [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual.features).toHaveProperty('foo.read', [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+      expect(actual.features).toHaveProperty('foo.minimal_read', [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual).toHaveProperty('global.all', [
+        actions.login,
+        actions.version,
+        actions.api.get('features'),
+        actions.space.manage,
+        actions.ui.get('spaces', 'manage'),
+        actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('foo', 'foo'),
+      ]);
+      expect(actual).toHaveProperty('global.read', [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual).toHaveProperty('space.all', [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+      expect(actual).toHaveProperty('space.read', [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+    });
+  });
+
+  describe(`with includeIn: 'read'`, () => {
+    test(`should augment the primary feature privileges and base privileges, but never the minimal versions`, () => {
+      const features: Feature[] = [
+        new Feature({
+          id: 'foo',
+          name: 'Foo Feature',
+          icon: 'arrowDown',
+          app: [],
+          privileges: {
+            all: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+            read: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'subFeature1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'subFeaturePriv1',
+                      name: 'sub feature priv 1',
+                      includeIn: 'read',
+                      savedObject: {
+                        all: ['all-sub-feature-type'],
+                        read: ['read-sub-feature-type'],
+                      },
+                      ui: ['sub-feature-ui'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const mockXPackMainPlugin = {
+        getFeatures: jest.fn().mockReturnValue(features),
+      };
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      };
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+
+      const actual = privileges.get();
+      expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.all`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_all`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.read`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_read`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual).toHaveProperty('global.all', [
+        actions.login,
+        actions.version,
+        actions.api.get('features'),
+        actions.space.manage,
+        actions.ui.get('spaces', 'manage'),
+        actions.ui.get('management', 'kibana', 'spaces'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('global.read', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual).toHaveProperty('space.all', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('space.read', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+    });
+
+    test(`should augment the primary feature privileges, but not base privileges if feature is excluded from them.`, () => {
+      const features: Feature[] = [
+        new Feature({
+          id: 'foo',
+          name: 'Foo Feature',
+          icon: 'arrowDown',
+          app: [],
+          excludeFromBasePrivileges: true,
+          privileges: {
+            all: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+            read: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'subFeature1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'subFeaturePriv1',
+                      name: 'sub feature priv 1',
+                      includeIn: 'read',
+                      savedObject: {
+                        all: ['all-sub-feature-type'],
+                        read: ['read-sub-feature-type'],
+                      },
+                      ui: ['sub-feature-ui'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const mockXPackMainPlugin = {
+        getFeatures: jest.fn().mockReturnValue(features),
+      };
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      };
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+
+      const actual = privileges.get();
+      expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.all`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_all`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.read`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_read`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual).toHaveProperty('global.all', [
+        actions.login,
+        actions.version,
+        actions.api.get('features'),
+        actions.space.manage,
+        actions.ui.get('spaces', 'manage'),
+        actions.ui.get('management', 'kibana', 'spaces'),
+      ]);
+      expect(actual).toHaveProperty('global.read', [actions.login, actions.version]);
+
+      expect(actual).toHaveProperty('space.all', [actions.login, actions.version]);
+      expect(actual).toHaveProperty('space.read', [actions.login, actions.version]);
+    });
+  });
+
+  describe(`with includeIn: 'all'`, () => {
+    test(`should augment the primary 'all' feature privileges and base 'all' privileges, but never the minimal versions`, () => {
+      const features: Feature[] = [
+        new Feature({
+          id: 'foo',
+          name: 'Foo Feature',
+          icon: 'arrowDown',
+          app: [],
+          privileges: {
+            all: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+            read: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'subFeature1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'subFeaturePriv1',
+                      name: 'sub feature priv 1',
+                      includeIn: 'all',
+                      savedObject: {
+                        all: ['all-sub-feature-type'],
+                        read: ['read-sub-feature-type'],
+                      },
+                      ui: ['sub-feature-ui'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const mockXPackMainPlugin = {
+        getFeatures: jest.fn().mockReturnValue(features),
+      };
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      };
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+
+      const actual = privileges.get();
+      expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.all`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_all`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.read`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_read`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual).toHaveProperty('global.all', [
+        actions.login,
+        actions.version,
+        actions.api.get('features'),
+        actions.space.manage,
+        actions.ui.get('spaces', 'manage'),
+        actions.ui.get('management', 'kibana', 'spaces'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('global.read', [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual).toHaveProperty('space.all', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('space.read', [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+    });
+
+    test(`should augment the primary 'all' feature privileges, but not the base privileges if the feature is excluded from them`, () => {
+      const features: Feature[] = [
+        new Feature({
+          id: 'foo',
+          name: 'Foo Feature',
+          icon: 'arrowDown',
+          app: [],
+          excludeFromBasePrivileges: true,
+          privileges: {
+            all: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+            read: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'subFeature1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'subFeaturePriv1',
+                      name: 'sub feature priv 1',
+                      includeIn: 'all',
+                      savedObject: {
+                        all: ['all-sub-feature-type'],
+                        read: ['read-sub-feature-type'],
+                      },
+                      ui: ['sub-feature-ui'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const mockXPackMainPlugin = {
+        getFeatures: jest.fn().mockReturnValue(features),
+      };
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      };
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+
+      const actual = privileges.get();
+      expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.all`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_all`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.read`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_read`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual).toHaveProperty('global.all', [
+        actions.login,
+        actions.version,
+        actions.api.get('features'),
+        actions.space.manage,
+        actions.ui.get('spaces', 'manage'),
+        actions.ui.get('management', 'kibana', 'spaces'),
+      ]);
+      expect(actual).toHaveProperty('global.read', [actions.login, actions.version]);
+
+      expect(actual).toHaveProperty('space.all', [actions.login, actions.version]);
+      expect(actual).toHaveProperty('space.read', [actions.login, actions.version]);
+    });
+  });
+
+  describe(`when license does not allow sub features`, () => {
+    test(`should augment the primary feature privileges, and should not create minimal or sub-feature privileges`, () => {
+      const features: Feature[] = [
+        new Feature({
+          id: 'foo',
+          name: 'Foo Feature',
+          icon: 'arrowDown',
+          app: [],
+          privileges: {
+            all: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+            read: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'subFeature1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'subFeaturePriv1',
+                      name: 'sub feature priv 1',
+                      includeIn: 'read',
+                      savedObject: {
+                        all: ['all-sub-feature-type'],
+                        read: ['read-sub-feature-type'],
+                      },
+                      ui: ['sub-feature-ui'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const mockXPackMainPlugin = {
+        getFeatures: jest.fn().mockReturnValue(features),
+      };
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: false }),
+      };
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+
+      const actual = privileges.get();
+      expect(actual.features).not.toHaveProperty(`foo.subFeaturePriv1`);
+
+      expect(actual.features).toHaveProperty(`foo.all`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).not.toHaveProperty(`foo.minimal_all`);
+
+      expect(actual.features).toHaveProperty(`foo.read`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).not.toHaveProperty(`foo.minimal_read`);
+
+      expect(actual).toHaveProperty('global.all', [
+        actions.login,
+        actions.version,
+        actions.api.get('features'),
+        actions.space.manage,
+        actions.ui.get('spaces', 'manage'),
+        actions.ui.get('management', 'kibana', 'spaces'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('global.read', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual).toHaveProperty('space.all', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('space.read', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+    });
   });
 });

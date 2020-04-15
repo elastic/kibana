@@ -15,8 +15,17 @@ import {
 } from './__mocks__/utils';
 import { left } from 'fp-ts/lib/Either';
 import { RulesSchema } from './rules_schema';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 
 describe('find_rules_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('it should validate a typical single find rules response', () => {
     const payload = getFindResponseSingle();
     const decoded = findRulesSchema.decode(payload);

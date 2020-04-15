@@ -10,7 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiText } from '@elastic/eui';
 
-export function ConnectionStatus({ isConnected }) {
+import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
+
+export function ConnectionStatus({ isConnected, mode }) {
   let icon;
   let message;
 
@@ -42,18 +44,21 @@ export function ConnectionStatus({ isConnected }) {
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
 
           <EuiFlexItem className="remoteClustersConnectionStatus__message">
-            <EuiText>{message}</EuiText>
+            <EuiText size="s">{message}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiIconTip color="subdued" content={seedNodeTooltip} />
-      </EuiFlexItem>
+      {!isConnected && mode === SNIFF_MODE && (
+        <EuiFlexItem grow={false}>
+          <EuiIconTip color="subdued" content={seedNodeTooltip} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }
 
 ConnectionStatus.propTypes = {
   isConnected: PropTypes.bool,
+  mode: PropTypes.oneOf([SNIFF_MODE, PROXY_MODE]),
 };

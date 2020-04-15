@@ -18,7 +18,7 @@ import {
 } from '../../../common/http_api/node_details_api';
 import { throwErrors } from '../../../common/runtime_types';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initNodeDetailsRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;

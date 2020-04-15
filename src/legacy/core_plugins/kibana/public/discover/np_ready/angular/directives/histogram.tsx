@@ -38,15 +38,18 @@ import {
   TooltipValue,
   TooltipType,
   ElementClickListener,
+  XYChartElementEvent,
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient } from 'kibana/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription } from 'rxjs';
-import { getServices, timezoneProvider } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
+import { Chart as IChart } from '../helpers/point_series';
 
 export interface DiscoverHistogramProps {
-  chartData: any;
+  chartData: IChart;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
 }
 
@@ -82,6 +85,16 @@ function getIntervalInMs(
       return 1 * esValue;
     default:
       return findIntervalFromDuration(value, esValue, esUnit, timeZone);
+  }
+}
+
+function getTimezone(uiSettings: IUiSettingsClient) {
+  if (uiSettings.isDefault('dateFormat:tz')) {
+    const detectedTimezone = moment.tz.guess();
+    if (detectedTimezone) return detectedTimezone;
+    else return moment().format('Z');
+  } else {
+    return uiSettings.get('dateFormat:tz', 'Browser');
   }
 }
 
@@ -140,7 +153,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
   };
 
   public onElementClick = (xInterval: number): ElementClickListener => ([elementData]) => {
-    const startRange = elementData[0].x;
+    const startRange = (elementData as XYChartElementEvent)[0].x;
 
     const range = {
       from: startRange,
@@ -151,7 +164,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
   };
 
   public formatXValue = (val: string) => {
-    const xAxisFormat = this.props.chartData.xAxisFormat.params.pattern;
+    const xAxisFormat = this.props.chartData.xAxisFormat.params!.pattern;
 
     return moment(val).format(xAxisFormat);
   };
@@ -192,22 +205,23 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
 
   public render() {
     const uiSettings = getServices().uiSettings;
-    const timeZone = timezoneProvider(uiSettings)();
+    const timeZone = getTimezone(uiSettings);
     const { chartData } = this.props;
     const { chartsTheme } = this.state;
 
-    if (!chartData || !chartData.series[0]) {
+    if (!chartData) {
       return null;
     }
 
-    const data = chartData.series[0].values;
+    const data = chartData.values;
 
     /**
      * Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval].
      * see https://github.com/elastic/kibana/issues/27410
      * TODO: Once the Discover query has been update, we should change the below to use the new field
      */
-    const { intervalESValue, intervalESUnit, interval: xInterval } = chartData.ordered;
+    const { intervalESValue, intervalESUnit, interval } = chartData.ordered;
+    const xInterval = interval.asMilliseconds();
 
     const xValues = chartData.xAxisOrderedValues;
     const lastXValue = xValues[xValues.length - 1];
@@ -216,7 +230,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const domainStart = domain.min.valueOf();
     const domainEnd = domain.max.valueOf();
 
-    const domainMin = data[0].x > domainStart ? domainStart : data[0].x;
+    const domainMin = data[0]?.x > domainStart ? domainStart : data[0]?.x;
     const domainMax = domainEnd - xInterval > lastXValue ? domainEnd - xInterval : lastXValue;
 
     const xDomain = {

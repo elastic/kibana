@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const MapsSchema = schema.object({
+export const MapEntrySchema = schema.object({
   source: schema.string(),
   target: schema.string(),
   actionType: schema.oneOf([
@@ -17,7 +17,7 @@ export const MapsSchema = schema.object({
 });
 
 export const CasesConfigurationSchema = schema.object({
-  mapping: schema.arrayOf(MapsSchema),
+  mapping: schema.arrayOf(MapEntrySchema),
 });
 
 export const ConfigSchemaProps = {
@@ -34,11 +34,25 @@ export const SecretsSchemaProps = {
 
 export const SecretsSchema = schema.object(SecretsSchemaProps);
 
+export const UserSchema = schema.object({
+  fullName: schema.nullable(schema.string()),
+  username: schema.string(),
+});
+
+const EntityInformationSchemaProps = {
+  createdAt: schema.string(),
+  createdBy: UserSchema,
+  updatedAt: schema.nullable(schema.string()),
+  updatedBy: schema.nullable(UserSchema),
+};
+
+export const EntityInformationSchema = schema.object(EntityInformationSchemaProps);
+
 export const CommentSchema = schema.object({
   commentId: schema.string(),
   comment: schema.string(),
   version: schema.maybe(schema.string()),
-  incidentCommentId: schema.maybe(schema.string()),
+  ...EntityInformationSchemaProps,
 });
 
 export const ExecutorAction = schema.oneOf([
@@ -48,8 +62,9 @@ export const ExecutorAction = schema.oneOf([
 
 export const ParamsSchema = schema.object({
   caseId: schema.string(),
+  title: schema.string(),
   comments: schema.maybe(schema.arrayOf(CommentSchema)),
   description: schema.maybe(schema.string()),
-  title: schema.maybe(schema.string()),
-  incidentId: schema.maybe(schema.string()),
+  incidentId: schema.nullable(schema.string()),
+  ...EntityInformationSchemaProps,
 });

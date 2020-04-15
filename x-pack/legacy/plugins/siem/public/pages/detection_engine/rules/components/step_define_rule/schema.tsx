@@ -10,6 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import { esKuery } from '../../../../../../../../../../src/plugins/data/public';
+import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
 import { FieldValueQueryBar } from '../query_bar';
 import {
   ERROR_CODE,
@@ -19,8 +20,6 @@ import {
   ValidationFunc,
 } from '../../../../../shared_imports';
 import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY, INDEX_HELPER_TEXT } from './translations';
-
-const { emptyField } = fieldValidators;
 
 export const schema: FormSchema = {
   index: {
@@ -34,14 +33,25 @@ export const schema: FormSchema = {
     helpText: <EuiText size="xs">{INDEX_HELPER_TEXT}</EuiText>,
     validations: [
       {
-        validator: emptyField(
-          i18n.translate(
-            'xpack.siem.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
-            {
-              defaultMessage: 'A minimum of one index pattern is required.',
-            }
-          )
-        ),
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = !isMlRule(formData.ruleType);
+
+          if (!needsValidation) {
+            return;
+          }
+
+          return fieldValidators.emptyField(
+            i18n.translate(
+              'xpack.siem.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
+              {
+                defaultMessage: 'A minimum of one index pattern is required.',
+              }
+            )
+          )(...args);
+        },
       },
     ],
   },
@@ -57,8 +67,13 @@ export const schema: FormSchema = {
         validator: (
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path }] = args;
+          const [{ value, path, formData }] = args;
           const { query, filters } = value as FieldValueQueryBar;
+          const needsValidation = !isMlRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+
           return isEmpty(query.query as string) && isEmpty(filters)
             ? {
                 code: 'ERR_FIELD_MISSING',
@@ -72,8 +87,13 @@ export const schema: FormSchema = {
         validator: (
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path }] = args;
+          const [{ value, path, formData }] = args;
           const { query } = value as FieldValueQueryBar;
+          const needsValidation = !isMlRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+
           if (!isEmpty(query.query as string) && query.language === 'kuery') {
             try {
               esKuery.fromKueryExpression(query.query);
@@ -85,9 +105,72 @@ export const schema: FormSchema = {
               };
             }
           }
-          return undefined;
         },
       },
     ],
+  },
+  ruleType: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldRuleTypeLabel',
+      {
+        defaultMessage: 'Rule type',
+      }
+    ),
+    validations: [],
+  },
+  anomalyThreshold: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldAnomalyThresholdLabel',
+      {
+        defaultMessage: 'Anomaly score threshold',
+      }
+    ),
+    validations: [],
+  },
+  machineLearningJobId: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldMachineLearningJobIdLabel',
+      {
+        defaultMessage: 'Machine Learning job',
+      }
+    ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isMlRule(formData.ruleType);
+
+          if (!needsValidation) {
+            return;
+          }
+
+          return fieldValidators.emptyField(
+            i18n.translate(
+              'xpack.siem.detectionEngine.createRule.stepDefineRule.machineLearningJobIdRequired',
+              {
+                defaultMessage: 'A Machine Learning job is required.',
+              }
+            )
+          )(...args);
+        },
+      },
+    ],
+  },
+  timeline: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateLabel',
+      {
+        defaultMessage: 'Timeline template',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText',
+      {
+        defaultMessage:
+          'Select an existing timeline to use as a template when investigating generated signals.',
+      }
+    ),
   },
 };

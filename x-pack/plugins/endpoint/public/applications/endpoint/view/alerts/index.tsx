@@ -32,6 +32,7 @@ import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import { AlertDetailsOverview } from './details';
 import { FormattedDate } from './formatted_date';
+import { AlertIndexSearchBar } from './index_search_bar';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
@@ -182,7 +183,7 @@ export const AlertIndex = memo(() => {
       } else if (columnId === 'archived') {
         return null;
       } else if (columnId === 'malware_score') {
-        return row.file.malware_classifier.score;
+        return row.file.malware_classification.score;
       }
       return null;
     };
@@ -232,7 +233,7 @@ export const AlertIndex = memo(() => {
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiTitle size="l">
-                  <h1>
+                  <h1 data-test-subj="alertsViewTitle">
                     <FormattedMessage
                       id="xpack.endpoint.alertList.viewTitle"
                       defaultMessage="Alerts"
@@ -242,6 +243,7 @@ export const AlertIndex = memo(() => {
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
             <EuiPageContentBody>
+              <AlertIndexSearchBar />
               <EuiDataGrid
                 aria-label="Alert List"
                 rowCount={total}

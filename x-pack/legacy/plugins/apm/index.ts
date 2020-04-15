@@ -14,7 +14,13 @@ import mappings from './mappings.json';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
+    require: [
+      'kibana',
+      'elasticsearch',
+      'xpack_main',
+      'apm_oss',
+      'task_manager'
+    ],
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),
@@ -71,7 +77,15 @@ export const apm: LegacyPluginInitializer = kibana => {
         autocreateApmIndexPattern: Joi.boolean().default(true),
 
         // service map
-        serviceMapEnabled: Joi.boolean().default(false)
+        serviceMapEnabled: Joi.boolean().default(true),
+        serviceMapFingerprintBucketSize: Joi.number().default(100),
+        serviceMapTraceIdBucketSize: Joi.number().default(65),
+        serviceMapFingerprintGlobalBucketSize: Joi.number().default(1000),
+        serviceMapTraceIdGlobalBucketSize: Joi.number().default(6),
+        serviceMapMaxTracesPerRequest: Joi.number().default(50),
+
+        // telemetry
+        telemetryCollectionEnabled: Joi.boolean().default(true)
       }).default();
     },
 
@@ -82,35 +96,71 @@ export const apm: LegacyPluginInitializer = kibana => {
         name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
           defaultMessage: 'APM'
         }),
+        order: 900,
         icon: 'apmApp',
         navLinkId: 'apm',
         app: ['apm', 'kibana'],
         catalogue: ['apm'],
+        // see x-pack/plugins/features/common/feature_kibana_privileges.ts
         privileges: {
           all: {
-            api: ['apm', 'apm_write'],
+            app: ['apm', 'kibana'],
+            api: [
+              'apm',
+              'apm_write',
+              'actions-read',
+              'actions-all',
+              'alerting-read',
+              'alerting-all'
+            ],
             catalogue: ['apm'],
             savedObject: {
-              all: [],
+              all: ['alert', 'action', 'action_task_params'],
               read: []
             },
-            ui: ['show', 'save']
+            ui: [
+              'show',
+              'save',
+              'alerting:show',
+              'actions:show',
+              'alerting:save',
+              'actions:save',
+              'alerting:delete',
+              'actions:delete'
+            ]
           },
           read: {
-            api: ['apm'],
+            app: ['apm', 'kibana'],
+            api: [
+              'apm',
+              'actions-read',
+              'actions-all',
+              'alerting-read',
+              'alerting-all'
+            ],
             catalogue: ['apm'],
             savedObject: {
-              all: [],
+              all: ['alert', 'action', 'action_task_params'],
               read: []
             },
-            ui: ['show']
+            ui: [
+              'show',
+              'alerting:show',
+              'actions:show',
+              'alerting:save',
+              'actions:save',
+              'alerting:delete',
+              'actions:delete'
+            ]
           }
         }
       });
-
       const apmPlugin = server.newPlatform.setup.plugins
         .apm as APMPluginContract;
-      apmPlugin.registerLegacyAPI({ server });
+
+      apmPlugin.registerLegacyAPI({
+        server
+      });
     }
   });
 };

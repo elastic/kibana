@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { NotificationsStart } from 'src/core/public';
-import { CoreSetup, CoreStart } from 'kibana/public';
+import { NotificationsStart, CoreSetup, CoreStart } from 'src/core/public';
 import { FieldFormatsStart } from './field_formats';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { IndexPatternsContract } from './index_patterns';

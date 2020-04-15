@@ -138,19 +138,19 @@ export class Timeline {
     timeline: SavedTimeline
   ): Promise<ResponseTimeline> {
     const savedObjectsClient = request.context.core.savedObjects.client;
-
     try {
       if (timelineId == null) {
         // Create new timeline
+        const newTimeline = convertSavedObjectToSavedTimeline(
+          await savedObjectsClient.create(
+            timelineSavedObjectType,
+            pickSavedTimeline(timelineId, timeline, request.user)
+          )
+        );
         return {
           code: 200,
           message: 'success',
-          timeline: convertSavedObjectToSavedTimeline(
-            await savedObjectsClient.create(
-              timelineSavedObjectType,
-              pickSavedTimeline(timelineId, timeline, request.user)
-            )
-          ),
+          timeline: newTimeline,
         };
       }
       // Update Timeline
@@ -162,6 +162,7 @@ export class Timeline {
           version: version || undefined,
         }
       );
+
       return {
         code: 200,
         message: 'success',
@@ -271,7 +272,7 @@ export const convertStringToBase64 = (text: string): string => Buffer.from(text)
 // then this interface does not allow types without index signature
 // this is limiting us with our type for now so the easy way was to use any
 
-const timelineWithReduxProperties = (
+export const timelineWithReduxProperties = (
   notes: NoteSavedObject[],
   pinnedEvents: PinnedEventSavedObject[],
   timeline: TimelineSavedObject,
@@ -279,7 +280,9 @@ const timelineWithReduxProperties = (
 ): TimelineSavedObject => ({
   ...timeline,
   favorite:
-    timeline.favorite != null ? timeline.favorite.filter(fav => fav.userName === userName) : [],
+    timeline.favorite != null && userName != null
+      ? timeline.favorite.filter(fav => fav.userName === userName)
+      : [],
   eventIdToNoteIds: notes.filter(note => note.eventId != null),
   noteIds: notes
     .filter(note => note.eventId == null && note.noteId != null)

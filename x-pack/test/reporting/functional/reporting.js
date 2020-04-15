@@ -15,8 +15,14 @@ const mkdirAsync = promisify(fs.mkdir);
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
+/*
+ * TODO Remove this file and spread the tests to various apps
+ */
+
 export default function({ getService, getPageObjects }) {
-  const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
+  const log = getService('log');
   const config = getService('config');
   const PageObjects = getPageObjects([
     'reporting',
@@ -27,65 +33,32 @@ export default function({ getService, getPageObjects }) {
     'visualize',
     'visEditor',
   ]);
-  const log = getService('log');
 
   describe('Reporting', () => {
-    before('initialize tests', async () => {
-      await PageObjects.reporting.initTests();
-    });
-
-    const expectDisabledGenerateReportButton = async () => {
-      const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
-      await retry.try(async () => {
-        const isDisabled = await generateReportButton.getAttribute('disabled');
-        expect(isDisabled).to.be('true');
-      });
-    };
-
-    const expectEnabledGenerateReportButton = async () => {
-      const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
-      await retry.try(async () => {
-        const isDisabled = await generateReportButton.getAttribute('disabled');
-        expect(isDisabled).to.be(null);
-      });
-    };
-
-    const expectReportCanBeCreated = async () => {
-      await PageObjects.reporting.clickGenerateReportButton();
-      const success = await PageObjects.reporting.checkForReportingToasts();
-      expect(success).to.be(true);
-    };
-
-    const writeSessionReport = async (name, rawPdf, reportExt = 'pdf') => {
-      const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
-      await mkdirAsync(sessionDirectory, { recursive: true });
-      const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
-      await writeFileAsync(sessionReportPath, rawPdf);
-      return sessionReportPath;
-    };
-
-    const getBaselineReportPath = (fileName, reportExt = 'pdf') => {
-      const baselineFolder = path.resolve(REPORTS_FOLDER, 'baseline');
-      const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
-      log.debug(`getBaselineReportPath (${fullPath})`);
-      return fullPath;
-    };
-
     describe('Dashboard', () => {
-      beforeEach(() => PageObjects.reporting.clearToastNotifications());
+      before('initialize tests', async () => {
+        log.debug('ReportingPage:initTests');
+        await esArchiver.loadIfNeeded('reporting/ecommerce');
+        await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
+        await browser.setWindowSize(1600, 850);
+      });
+      after('clean up archives', async () => {
+        await esArchiver.unload('reporting/ecommerce');
+        await esArchiver.unload('reporting/ecommerce_kibana');
+      });
 
       describe('Print PDF button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.clickNewDashboard();
           await PageObjects.reporting.openPdfReportingPanel();
-          await expectDisabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         });
 
         it('becomes available when saved', async () => {
           await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
-          await expectEnabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
       });
 
@@ -95,15 +68,7 @@ export default function({ getService, getPageObjects }) {
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(300000);
           await PageObjects.common.navigateToApp('dashboard');
-          await PageObjects.dashboard.gotoDashboardEditMode('My PDF Dashboard');
-          await PageObjects.reporting.setTimepickerInDataRange();
-          const visualizations = PageObjects.dashboard.getTestVisualizationNames();
-
-          const tileMapIndex = visualizations.indexOf('Visualization TileMap');
-          visualizations.splice(tileMapIndex, 1);
-
-          await PageObjects.dashboard.addVisualizations(visualizations);
-          await PageObjects.dashboard.saveDashboard('report test');
+          await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
@@ -121,30 +86,36 @@ export default function({ getService, getPageObjects }) {
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.clickNewDashboard();
           await PageObjects.reporting.openPngReportingPanel();
-          await expectDisabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         });
 
         it('becomes available when saved', async () => {
           await PageObjects.dashboard.saveDashboard('My PNG Dash');
           await PageObjects.reporting.openPngReportingPanel();
-          await expectEnabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
       });
 
       describe('Preserve Layout', () => {
         it('matches baseline report', async function() {
+          const writeSessionReport = async (name, rawPdf, reportExt) => {
+            const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
+            await mkdirAsync(sessionDirectory, { recursive: true });
+            const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
+            await writeFileAsync(sessionReportPath, rawPdf);
+            return sessionReportPath;
+          };
+          const getBaselineReportPath = (fileName, reportExt) => {
+            const baselineFolder = path.resolve(REPORTS_FOLDER, 'baseline');
+            const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
+            log.debug(`getBaselineReportPath (${fullPath})`);
+            return fullPath;
+          };
+
           this.timeout(300000);
 
           await PageObjects.common.navigateToApp('dashboard');
-          await PageObjects.dashboard.gotoDashboardEditMode('My PNG Dash');
-          await PageObjects.reporting.setTimepickerInDataRange();
-
-          const visualizations = PageObjects.dashboard.getTestVisualizationNames();
-          const tileMapIndex = visualizations.indexOf('Visualization TileMap');
-          visualizations.splice(tileMapIndex, 1);
-
-          await PageObjects.dashboard.addVisualizations(visualizations);
-          await PageObjects.dashboard.saveDashboard('PNG report test');
+          await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
           await PageObjects.reporting.openPngReportingPanel();
           await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
           await PageObjects.reporting.clickGenerateReportButton();
@@ -167,44 +138,64 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('Discover', () => {
+      before('initialize tests', async () => {
+        log.debug('ReportingPage:initTests');
+        await esArchiver.loadIfNeeded('reporting/ecommerce');
+        await browser.setWindowSize(1600, 850);
+      });
+      after('clean up archives', async () => {
+        await esArchiver.unload('reporting/ecommerce');
+      });
+
       describe('Generate CSV button', () => {
         beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
         it('is not available if new', async () => {
           await PageObjects.reporting.openCsvReportingPanel();
-          await expectDisabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         });
 
         it('becomes available when saved', async () => {
           await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
           await PageObjects.reporting.openCsvReportingPanel();
-          await expectEnabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
 
         it('generates a report with data', async () => {
           await PageObjects.reporting.setTimepickerInDataRange();
           await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
           await PageObjects.reporting.openCsvReportingPanel();
-          await expectReportCanBeCreated();
+          expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
         });
 
         it('generates a report with no data', async () => {
           await PageObjects.reporting.setTimepickerInNoDataRange();
           await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
           await PageObjects.reporting.openCsvReportingPanel();
-          await expectReportCanBeCreated();
+          expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
         });
       });
     });
 
     describe('Visualize', () => {
+      before('initialize tests', async () => {
+        log.debug('ReportingPage:initTests');
+        await esArchiver.loadIfNeeded('reporting/ecommerce');
+        await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
+        await browser.setWindowSize(1600, 850);
+      });
+      after('clean up archives', async () => {
+        await esArchiver.unload('reporting/ecommerce');
+        await esArchiver.unload('reporting/ecommerce_kibana');
+      });
+
       describe('Print PDF button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToUrl('visualize', 'new');
           await PageObjects.visualize.clickAreaChart();
-          await PageObjects.visualize.clickNewSearch();
+          await PageObjects.visualize.clickNewSearch('ecommerce');
           await PageObjects.reporting.openPdfReportingPanel();
-          await expectDisabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         });
 
         it('becomes available when saved', async () => {
@@ -214,14 +205,16 @@ export default function({ getService, getPageObjects }) {
           await PageObjects.visEditor.clickGo();
           await PageObjects.visualize.saveVisualization('my viz');
           await PageObjects.reporting.openPdfReportingPanel();
-          await expectEnabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
 
-        it('matches baseline report', async function() {
+        it('downloaded PDF has OK status', async function() {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);
 
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
 

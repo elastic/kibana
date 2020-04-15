@@ -42,14 +42,24 @@ export class DrawTooltip extends Component {
   }
 
   render() {
-    const instructions =
-      this.props.drawState.drawType === DRAW_TYPE.BOUNDS
-        ? i18n.translate('xpack.maps.drawTooltip.boundsInstructions', {
-            defaultMessage: 'Click to start rectangle. Click again to finish.',
-          })
-        : i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
-            defaultMessage: 'Click to add vertex. Double click to finish.',
-          });
+    let instructions;
+    if (this.props.drawState.drawType === DRAW_TYPE.BOUNDS) {
+      instructions = i18n.translate('xpack.maps.drawTooltip.boundsInstructions', {
+        defaultMessage:
+          'Click to start rectangle. Move mouse to adjust rectangle size. Click again to finish.',
+      });
+    } else if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
+      instructions = i18n.translate('xpack.maps.drawTooltip.distanceInstructions', {
+        defaultMessage: 'Click to set point. Move mouse to adjust distance. Click to finish.',
+      });
+    } else if (this.props.drawState.drawType === DRAW_TYPE.POLYGON) {
+      instructions = i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
+        defaultMessage: 'Click to start shape. Click to add vertex. Double click to finish.',
+      });
+    } else {
+      // unknown draw type, tooltip not needed
+      return null;
+    }
 
     const tooltipAnchor = (
       <div style={{ height: '26px', width: '26px', background: 'transparent' }} />

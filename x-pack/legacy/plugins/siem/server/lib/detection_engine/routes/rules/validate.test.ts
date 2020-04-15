@@ -16,8 +16,10 @@ import { getResult } from '../__mocks__/request_responses';
 import { FindResult } from '../../../../../../../../plugins/alerting/server';
 import { RulesSchema } from '../schemas/response/rules_schema';
 import { BulkError } from '../utils';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 export const ruleOutput: RulesSchema = {
+  actions: [],
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',
   created_by: 'elastic',
@@ -41,6 +43,7 @@ export const ruleOutput: RulesSchema = {
   tags: [],
   to: 'now',
   type: 'query',
+  throttle: 'no_actions',
   threat: [
     {
       framework: 'MITRE ATT&CK',
@@ -68,15 +71,56 @@ export const ruleOutput: RulesSchema = {
       },
     },
   ],
+  lists: [
+    {
+      field: 'source.ip',
+      values_operator: 'included',
+      values_type: 'exists',
+    },
+    {
+      field: 'host.name',
+      values_operator: 'excluded',
+      values_type: 'match',
+      values: [
+        {
+          name: 'rock01',
+        },
+      ],
+      and: [
+        {
+          field: 'host.id',
+          values_operator: 'included',
+          values_type: 'match_all',
+          values: [
+            {
+              name: '123',
+            },
+            {
+              name: '678',
+            },
+          ],
+        },
+      ],
+    },
+  ],
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   meta: {
     someMeta: 'someField',
   },
+  note: '# Investigative notes',
   timeline_title: 'some-timeline-title',
   timeline_id: 'some-timeline-id',
 };
 
 describe('validate', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   describe('validate', () => {
     test('it should do a validation correctly', () => {
       const schema = t.exact(t.type({ a: t.number }));
@@ -117,7 +161,7 @@ describe('validate', () => {
   describe('transformValidateFindAlerts', () => {
     test('it should do a validation correctly of a find alert', () => {
       const findResult: FindResult = { data: [getResult()], page: 1, perPage: 0, total: 0 };
-      const [validated, errors] = transformValidateFindAlerts(findResult);
+      const [validated, errors] = transformValidateFindAlerts(findResult, []);
       expect(validated).toEqual({ data: [ruleOutput], page: 1, perPage: 0, total: 0 });
       expect(errors).toEqual(null);
     });
@@ -125,7 +169,7 @@ describe('validate', () => {
     test('it should do an in-validation correctly of a partial alert', () => {
       const findResult: FindResult = { data: [getResult()], page: 1, perPage: 0, total: 0 };
       delete findResult.page;
-      const [validated, errors] = transformValidateFindAlerts(findResult);
+      const [validated, errors] = transformValidateFindAlerts(findResult, []);
       expect(validated).toEqual(null);
       expect(errors).toEqual('Invalid value "undefined" supplied to "page"');
     });

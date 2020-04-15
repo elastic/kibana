@@ -27,8 +27,6 @@ export {
   ACTION_ADD_PANEL,
   AddPanelAction,
   ACTION_APPLY_FILTER,
-  APPLY_FILTER_TRIGGER,
-  applyFilterTrigger,
   Container,
   ContainerInput,
   ContainerOutput,
@@ -40,6 +38,7 @@ export {
   EmbeddableChildPanel,
   EmbeddableChildPanelProps,
   EmbeddableContext,
+  EmbeddableFactoryDefinition,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactoryRenderer,
@@ -50,8 +49,6 @@ export {
   EmbeddableRoot,
   EmbeddableVisTriggerContext,
   ErrorEmbeddable,
-  GetEmbeddableFactories,
-  GetEmbeddableFactory,
   IContainer,
   IEmbeddable,
   isErrorEmbeddable,
@@ -62,16 +59,14 @@ export {
   PanelNotFoundError,
   PanelState,
   PropertySpec,
-  SELECT_RANGE_TRIGGER,
-  selectRangeTrigger,
-  VALUE_CLICK_TRIGGER,
-  valueClickTrigger,
   ViewMode,
   withEmbeddableSubscription,
+  SavedObjectEmbeddableInput,
+  isSavedObjectEmbeddableInput,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
 
-export { IEmbeddableSetup, IEmbeddableStart } from './plugin';
+export { EmbeddableSetup, EmbeddableStart } from './plugin';

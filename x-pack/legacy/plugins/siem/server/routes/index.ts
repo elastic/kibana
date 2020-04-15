@@ -29,11 +29,15 @@ import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_ru
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
+import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_route';
+import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
+import { SetupPlugins } from '../plugin';
 
 export const initRoutes = (
   router: IRouter,
   config: LegacyServices['config'],
-  usingEphemeralEncryptionKey: boolean
+  usingEphemeralEncryptionKey: boolean,
+  security: SetupPlugins['security']
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
@@ -54,6 +58,9 @@ export const initRoutes = (
   importRulesRoute(router, config);
   exportRulesRoute(router, config);
 
+  importTimelinesRoute(router, config, security);
+  exportTimelinesRoute(router, config);
+
   findRulesStatusesRoute(router);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
@@ -72,5 +79,5 @@ export const initRoutes = (
   readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
-  readPrivilegesRoute(router, usingEphemeralEncryptionKey);
+  readPrivilegesRoute(router, security, usingEphemeralEncryptionKey);
 };

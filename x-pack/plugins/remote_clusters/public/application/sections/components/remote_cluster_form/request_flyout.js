@@ -26,7 +26,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { serializeCluster } from '../../../../../common/constants';
+import { serializeCluster } from '../../../../../common/lib';
 
 export class RequestFlyout extends PureComponent {
   static propTypes = {

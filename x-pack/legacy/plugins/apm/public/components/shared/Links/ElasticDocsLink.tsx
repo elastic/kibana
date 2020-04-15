@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
+import React from 'react';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 // union type constisting of valid guide sections that we link to
-type DocsSection = '/apm/get-started' | '/x-pack' | '/apm/server';
+type DocsSection = '/apm/get-started' | '/x-pack' | '/apm/server' | '/kibana';
 
 interface Props extends EuiLinkAnchorProps {
   section: DocsSection;
@@ -17,8 +17,11 @@ interface Props extends EuiLinkAnchorProps {
 }
 
 export function ElasticDocsLink({ section, path, children, ...rest }: Props) {
-  const { version } = useApmPluginContext().packageInfo;
-  const href = `https://www.elastic.co/guide/en${section}/${version}${path}`;
+  const { docLinks } = useApmPluginContext().core;
+  const baseUrl = docLinks.ELASTIC_WEBSITE_URL;
+  const version = docLinks.DOC_LINK_VERSION;
+  const href = `${baseUrl}guide/en${section}/${version}${path}`;
+
   return typeof children === 'function' ? (
     children(href)
   ) : (

@@ -7,8 +7,6 @@
 import {
   Axis,
   Chart,
-  getAxisId,
-  getSpecId,
   HistogramBarSeries,
   Position,
   Settings,
@@ -46,9 +44,9 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
     const theme = useTheme();
 
     const chartSize: ChartSizeArray = useMemo(() => ['100%', chartHeight], [chartHeight]);
-    const xAxisId = useMemo(() => getAxisId('signalsHistogramAxisX'), []);
-    const yAxisId = useMemo(() => getAxisId('signalsHistogramAxisY'), []);
-    const id = useMemo(() => getSpecId('signalsHistogram'), []);
+    const xAxisId = 'signalsHistogramAxisX';
+    const yAxisId = 'signalsHistogramAxisY';
+    const id = 'signalsHistogram';
     const yAccessors = useMemo(() => ['y'], []);
     const splitSeriesAccessors = useMemo(() => ['g'], []);
     const tickFormat = useMemo(() => histogramDateTimeFormatter([from, to]), [from, to]);
@@ -69,6 +67,7 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
             legendPosition={legendPosition}
             onBrushEnd={updateDateRange}
             showLegend
+            showLegendExtra
             theme={theme}
           />
 

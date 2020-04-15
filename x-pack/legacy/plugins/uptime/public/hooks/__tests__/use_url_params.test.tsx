@@ -19,6 +19,7 @@ interface MockUrlParamsComponentProps {
 const UseUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponentProps) => {
   const [params, setParams] = useState({});
   const [getUrlParams, updateUrlParams] = hook();
+  const queryParams = getUrlParams();
   return (
     <Fragment>
       {Object.keys(params).length > 0 ? <div>{JSON.stringify(params)}</div> : null}
@@ -30,7 +31,7 @@ const UseUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponen
       >
         Set url params
       </button>
-      <button id="getUrlParams" onClick={() => setParams(getUrlParams())}>
+      <button id="getUrlParams" onClick={() => setParams(queryParams)}>
         Get url params
       </button>
     </Fragment>
@@ -114,7 +115,7 @@ describe('useUrlParams', () => {
 
     expect(history.push).toHaveBeenCalledWith({
       pathname: '/',
-      search: 'g=%22%22&dateRangeStart=now-12&dateRangeEnd=now',
+      search: 'dateRangeEnd=now&dateRangeStart=now-12&g=%22%22',
     });
   });
 });

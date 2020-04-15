@@ -32,7 +32,7 @@ export class AlertListPagination extends Pagination<AlertSearchQuery, AlertHits>
   protected getBasePaginationParams(): string {
     let pageParams: string = '';
     if (this.state.query) {
-      pageParams += `query=${this.state.query}&`;
+      pageParams += `query=${encode((this.state.query as unknown) as RisonValue)}&`;
     }
 
     if (this.state.filters !== undefined && this.state.filters.length > 0) {

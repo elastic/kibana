@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
-import { RuleTypeParams } from '../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
+import { makeFloatString } from './utils';
 
 interface SingleSearchAfterParams {
   searchAfterSortId: string | undefined;
-  ruleParams: RuleTypeParams;
+  index: string[];
+  from: string;
+  to: string;
   services: AlertServices;
   logger: Logger;
   pageSize: number;
@@ -22,29 +25,36 @@ interface SingleSearchAfterParams {
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async ({
   searchAfterSortId,
-  ruleParams,
+  index,
+  from,
+  to,
   services,
   filter,
   logger,
   pageSize,
-}: SingleSearchAfterParams): Promise<SignalSearchResponse> => {
+}: SingleSearchAfterParams): Promise<{
+  searchResult: SignalSearchResponse;
+  searchDuration: string;
+}> => {
   if (searchAfterSortId == null) {
     throw Error('Attempted to search after with empty sort id');
   }
   try {
     const searchAfterQuery = buildEventsSearchQuery({
-      index: ruleParams.index,
-      from: ruleParams.from,
-      to: ruleParams.to,
+      index,
+      from,
+      to,
       filter,
       size: pageSize,
       searchAfterSortId,
     });
+    const start = performance.now();
     const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
       'search',
       searchAfterQuery
     );
-    return nextSearchAfterResult;
+    const end = performance.now();
+    return { searchResult: nextSearchAfterResult, searchDuration: makeFloatString(end - start) };
   } catch (exc) {
     logger.error(`[-] nextSearchAfter threw an error ${exc}`);
     throw exc;

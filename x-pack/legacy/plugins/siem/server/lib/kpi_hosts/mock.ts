@@ -356,15 +356,15 @@ export const mockKpiHostDetailsUniqueIpsQuery = [
 ];
 
 const mockAuthAggs = {
-  authentication_success: { filter: { term: { 'event.type': 'authentication_success' } } },
+  authentication_success: { filter: { term: { 'event.outcome': 'success' } } },
   authentication_success_histogram: {
     auto_date_histogram: { field: '@timestamp', buckets: '6' },
-    aggs: { count: { filter: { term: { 'event.type': 'authentication_success' } } } },
+    aggs: { count: { filter: { term: { 'event.outcome': 'success' } } } },
   },
-  authentication_failure: { filter: { term: { 'event.type': 'authentication_failure' } } },
+  authentication_failure: { filter: { term: { 'event.outcome': 'failure' } } },
   authentication_failure_histogram: {
     auto_date_histogram: { field: '@timestamp', buckets: '6' },
-    aggs: { count: { filter: { term: { 'event.type': 'authentication_failure' } } } },
+    aggs: { count: { filter: { term: { 'event.outcome': 'failure' } } } },
   },
 };
 

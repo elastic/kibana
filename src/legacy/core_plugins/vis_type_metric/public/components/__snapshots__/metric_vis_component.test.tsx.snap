@@ -1,26 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MetricVisComponent should render correct structure for single metric 1`] = `
-<div
-  className="mtrVis"
->
-  <MetricVisValue
-    key="0"
-    metric={
-      Object {
-        "bgColor": undefined,
-        "color": undefined,
-        "label": "Count",
-        "lightText": false,
-        "rowIndex": 0,
-        "value": "<span ng-non-bindable>4301021</span>",
-      }
-    }
-    showLabel={true}
-  />
-</div>
-`;
-
 exports[`MetricVisComponent should render correct structure for multi-value metrics 1`] = `
 <div
   className="mtrVis"
@@ -34,7 +13,7 @@ exports[`MetricVisComponent should render correct structure for multi-value metr
         "label": "1st percentile of bytes",
         "lightText": false,
         "rowIndex": 0,
-        "value": "<span ng-non-bindable>182</span>",
+        "value": 182,
       }
     }
     showLabel={true}
@@ -48,7 +27,28 @@ exports[`MetricVisComponent should render correct structure for multi-value metr
         "label": "99th percentile of bytes",
         "lightText": false,
         "rowIndex": 0,
-        "value": "<span ng-non-bindable>445842.4634666484</span>",
+        "value": 445842.4634666484,
+      }
+    }
+    showLabel={true}
+  />
+</div>
+`;
+
+exports[`MetricVisComponent should render correct structure for single metric 1`] = `
+<div
+  className="mtrVis"
+>
+  <MetricVisValue
+    key="0"
+    metric={
+      Object {
+        "bgColor": undefined,
+        "color": undefined,
+        "label": "Count",
+        "lightText": false,
+        "rowIndex": 0,
+        "value": 4301021,
       }
     }
     showLabel={true}

@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { ToastInput } from '../../../../../src/core/public';
+import { ToastInput } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { JobSummary, ManagementLinkFn } from '../../index.d';
 

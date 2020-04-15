@@ -6,15 +6,28 @@
 
 import { createSelector } from 'reselect';
 import _ from 'lodash';
-import { TileLayer } from '../layers/tile_layer';
-import { VectorTileLayer } from '../layers/vector_tile_layer';
-import { VectorLayer } from '../layers/vector_layer';
-import { HeatmapLayer } from '../layers/heatmap_layer';
-import { ALL_SOURCES } from '../layers/sources/all_sources';
-import { timefilter } from 'ui/timefilter';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
-import { InnerJoin } from '../layers/joins/inner_join';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TileLayer } from '../../../../../plugins/maps/public/layers/tile_layer';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { VectorTileLayer } from '../../../../../plugins/maps/public/layers/vector_tile_layer';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { VectorLayer } from '../../../../../plugins/maps/public/layers/vector_layer';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { HeatmapLayer } from '../../../../../plugins/maps/public/layers/heatmap_layer';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BlendedVectorLayer } from '../../../../../plugins/maps/public/layers/blended_vector_layer';
+import { getTimeFilter } from '../kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
+import {
+  copyPersistentState,
+  TRACKED_LAYER_DESCRIPTOR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/reducers/util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { InnerJoin } from '../../../../../plugins/maps/public/layers/joins/inner_join';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getSourceByType } from '../../../../../plugins/maps/public/layers/sources/source_registry';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -35,19 +48,19 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
       return new VectorTileLayer({ layerDescriptor, source });
     case HeatmapLayer.type:
       return new HeatmapLayer({ layerDescriptor, source });
+    case BlendedVectorLayer.type:
+      return new BlendedVectorLayer({ layerDescriptor, source });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
 }
 
 function createSourceInstance(sourceDescriptor, inspectorAdapters) {
-  const Source = ALL_SOURCES.find(Source => {
-    return Source.type === sourceDescriptor.type;
-  });
-  if (!Source) {
+  const source = getSourceByType(sourceDescriptor.type);
+  if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
-  return new Source(sourceDescriptor, inspectorAdapters);
+  return new source.ConstructorFunction(sourceDescriptor, inspectorAdapters);
 }
 
 export const getOpenTooltips = ({ map }) => {
@@ -101,7 +114,7 @@ export const getMapCenter = ({ map }) =>
 export const getMouseCoordinates = ({ map }) => map.mapState.mouseCoordinates;
 
 export const getTimeFilters = ({ map }) =>
-  map.mapState.timeFilters ? map.mapState.timeFilters : timefilter.getTime();
+  map.mapState.timeFilters ? map.mapState.timeFilters : getTimeFilter().getTime();
 
 export const getQuery = ({ map }) => map.mapState.query;
 
@@ -124,7 +137,7 @@ export const getRefreshConfig = ({ map }) => {
     return map.mapState.refreshConfig;
   }
 
-  const refreshInterval = timefilter.getRefreshInterval();
+  const refreshInterval = getTimeFilter().getRefreshInterval();
   return {
     isPaused: refreshInterval.pause,
     interval: refreshInterval.value,

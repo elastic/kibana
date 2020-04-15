@@ -19,12 +19,7 @@ import { TimelineUrl } from '../../store/timeline/model';
 import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
-import {
-  LocationTypes,
-  UrlStateContainerPropTypes,
-  ReplaceStateInLocation,
-  UpdateUrlStateString,
-} from './types';
+import { ReplaceStateInLocation, UpdateUrlStateString } from './types';
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
@@ -113,42 +108,13 @@ export const getTitle = (
   return navTabs[pageName] != null ? navTabs[pageName].name : '';
 };
 
-export const getCurrentLocation = (
-  pageName: string,
-  detailName: string | undefined
-): LocationTypes => {
-  if (pageName === SiemPageName.overview) {
-    return CONSTANTS.overviewPage;
-  } else if (pageName === SiemPageName.hosts) {
-    if (detailName != null) {
-      return CONSTANTS.hostsDetails;
-    }
-    return CONSTANTS.hostsPage;
-  } else if (pageName === SiemPageName.network) {
-    if (detailName != null) {
-      return CONSTANTS.networkDetails;
-    }
-    return CONSTANTS.networkPage;
-  } else if (pageName === SiemPageName.detections) {
-    return CONSTANTS.detectionsPage;
-  } else if (pageName === SiemPageName.timelines) {
-    return CONSTANTS.timelinePage;
-  } else if (pageName === SiemPageName.case) {
-    if (detailName != null) {
-      return CONSTANTS.caseDetails;
-    }
-    return CONSTANTS.casePage;
-  }
-  return CONSTANTS.unknown;
-};
-
 export const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimelines = timelineSelectors.getTimelines();
-  const mapStateToProps = (state: State, { pageName, detailName }: UrlStateContainerPropTypes) => {
+  const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;

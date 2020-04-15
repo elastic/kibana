@@ -53,7 +53,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
       yAccessors={['value']}
       data={series.data}
       areaSeriesStyle={style}
-      customSeriesColors={color ? [color] : void 0}
+      color={color ? color : void 0}
       stackAccessors={stack ? ['timestamp'] : void 0}
     />
   );
@@ -80,7 +80,7 @@ export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
       yAccessors={['value']}
       data={series.data}
       barSeriesStyle={style}
-      customSeriesColors={color ? [color] : void 0}
+      color={color ? color : void 0}
       stackAccessors={stack ? ['timestamp'] : void 0}
     />
   );

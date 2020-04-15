@@ -9,6 +9,8 @@ import { ConcreteTaskInstance, TaskStatus } from '../../../../plugins/task_manag
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { actionsMock } from '../../../actions/server/mocks';
+import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 
 const alertType = {
   id: 'test',
@@ -56,11 +58,12 @@ describe('Task Runner Factory', () => {
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
     getServices: jest.fn().mockReturnValue(services),
-    executeAction: jest.fn(),
+    actionsPlugin: actionsMock.createStart(),
     encryptedSavedObjectsPlugin,
     logger: loggingServiceMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     getBasePath: jest.fn().mockReturnValue(undefined),
+    eventLogger: eventLoggerMock.create(),
   };
 
   beforeEach(() => {

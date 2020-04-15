@@ -19,6 +19,7 @@
 
 import testSubjSelector from '@kbn/test-subj-selector';
 import { map as mapAsync } from 'bluebird';
+import { ProvidedType } from '@kbn/test/types/ftr';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -32,6 +33,7 @@ interface SetValueOptions {
   typeCharByChar?: boolean;
 }
 
+export type TestSubjects = ProvidedType<typeof TestSubjectsProvider>;
 export function TestSubjectsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');

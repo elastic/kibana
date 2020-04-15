@@ -19,9 +19,5 @@ const setupPlugins = {
   np: npSetup.plugins,
 };
 
-const startPlugins = {
-  np: npStart.plugins,
-};
-
 export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
-export const start = pluginInstance.start(npStart.core, startPlugins);
+export const start = pluginInstance.start(npStart.core, npStart.plugins);

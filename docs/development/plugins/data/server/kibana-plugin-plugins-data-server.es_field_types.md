@@ -30,6 +30,7 @@ export declare enum ES_FIELD_TYPES
 |  GEO\_POINT | <code>&quot;geo_point&quot;</code> |  |
 |  GEO\_SHAPE | <code>&quot;geo_shape&quot;</code> |  |
 |  HALF\_FLOAT | <code>&quot;half_float&quot;</code> |  |
+|  HISTOGRAM | <code>&quot;histogram&quot;</code> |  |
 |  INTEGER | <code>&quot;integer&quot;</code> |  |
 |  IP | <code>&quot;ip&quot;</code> |  |
 |  KEYWORD | <code>&quot;keyword&quot;</code> |  |

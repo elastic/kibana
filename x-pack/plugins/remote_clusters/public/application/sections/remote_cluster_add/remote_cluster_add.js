@@ -57,12 +57,22 @@ export class RemoteClusterAdd extends PureComponent {
     const { isAddingCluster, addClusterError } = this.props;
 
     return (
-      <EuiPageContent horizontalPosition="center" className="remoteClusterAddPage">
+      <EuiPageContent
+        horizontalPosition="center"
+        className="remoteClusterAddPage"
+        data-test-subj="remoteClusterAddPage"
+      >
         <RemoteClusterPageTitle
           title={
             <FormattedMessage
               id="xpack.remoteClusters.addTitle"
               defaultMessage="Add remote cluster"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClustersDescription"
+              defaultMessage="Add a remote cluster that connects to seed nodes or a single proxy address."
             />
           }
         />

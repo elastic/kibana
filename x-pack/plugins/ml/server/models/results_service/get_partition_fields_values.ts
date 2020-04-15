@@ -5,8 +5,8 @@
  */
 
 import Boom from 'boom';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../../legacy/plugins/ml/common/constants/index_patterns';
-import { callWithRequestType } from '../../../../../legacy/plugins/ml/common/types/kibana';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { callWithRequestType } from '../../../common/types/kibana';
 import { CriteriaField } from './results_service';
 
 const PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;

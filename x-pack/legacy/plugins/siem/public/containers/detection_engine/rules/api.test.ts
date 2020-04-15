@@ -39,7 +39,7 @@ describe('Detections Rules API', () => {
       await addRule({ rule: ruleMock, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
         body:
-          '{"description":"some desc","enabled":true,"false_positives":[],"filters":[],"from":"now-360s","index":["apm-*-transaction*","auditbeat-*","endgame-*","filebeat-*","packetbeat-*","winlogbeat-*"],"interval":"5m","rule_id":"bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf","language":"kuery","risk_score":75,"name":"Test rule","query":"user.email: \'root@elastic.co\'","references":[],"severity":"high","tags":["APM"],"to":"now","type":"query","threat":[]}',
+          '{"description":"some desc","enabled":true,"false_positives":[],"filters":[],"from":"now-360s","index":["apm-*-transaction*","auditbeat-*","endgame-*","filebeat-*","packetbeat-*","winlogbeat-*"],"interval":"5m","rule_id":"bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf","language":"kuery","risk_score":75,"name":"Test rule","query":"user.email: \'root@elastic.co\'","references":[],"severity":"high","tags":["APM"],"to":"now","type":"query","threat":[],"throttle":null}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
@@ -291,7 +291,7 @@ describe('Detections Rules API', () => {
       await duplicateRules({ rules: rulesMock.data });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_create', {
         body:
-          '[{"description":"Elastic Endpoint detected Credential Dumping. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":73,"name":"Credential Dumping - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:cred_theft_event and endgame.metadata.type:detection","filters":[],"references":[],"severity":"high","tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"version":1},{"description":"Elastic Endpoint detected an Adversary Behavior. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":47,"name":"Adversary Behavior - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:rules_engine_event","filters":[],"references":[],"severity":"medium","tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"version":1}]',
+          '[{"actions":[],"description":"Elastic Endpoint detected Credential Dumping. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":73,"name":"Credential Dumping - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:cred_theft_event and endgame.metadata.type:detection","filters":[],"references":[],"severity":"high","tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"throttle":null,"version":1},{"actions":[],"description":"Elastic Endpoint detected an Adversary Behavior. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":47,"name":"Adversary Behavior - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:rules_engine_event","filters":[],"references":[],"severity":"medium","tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"throttle":null,"version":1}]',
         method: 'POST',
       });
     });
@@ -402,7 +402,7 @@ describe('Detections Rules API', () => {
 
     test('check parameter url, body and query when exporting rules', async () => {
       await exportRules({
-        ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
+        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
@@ -419,7 +419,7 @@ describe('Detections Rules API', () => {
     test('check parameter url, body and query when exporting rules with excludeExportDetails', async () => {
       await exportRules({
         excludeExportDetails: true,
-        ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
+        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
@@ -436,7 +436,7 @@ describe('Detections Rules API', () => {
     test('check parameter url, body and query when exporting rules with fileName', async () => {
       await exportRules({
         filename: 'myFileName.ndjson',
-        ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
+        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
@@ -454,7 +454,7 @@ describe('Detections Rules API', () => {
       await exportRules({
         excludeExportDetails: true,
         filename: 'myFileName.ndjson',
-        ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
+        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
@@ -470,7 +470,7 @@ describe('Detections Rules API', () => {
 
     test('happy path', async () => {
       const resp = await exportRules({
-        ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
+        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
       expect(resp).toEqual(blob);

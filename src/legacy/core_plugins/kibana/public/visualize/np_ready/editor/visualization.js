@@ -17,12 +17,12 @@
  * under the License.
  */
 
-export function initVisualizationDirective(app, deps) {
+export function initVisualizationDirective(app) {
   app.directive('visualizationEmbedded', function($timeout) {
     return {
       restrict: 'E',
       scope: {
-        savedObj: '=',
+        embeddableHandler: '=',
         uiState: '=?',
         timeRange: '=',
         filters: '=',
@@ -31,24 +31,16 @@ export function initVisualizationDirective(app, deps) {
       },
       link: function($scope, element) {
         $scope.renderFunction = async () => {
-          if (!$scope._handler) {
-            $scope._handler = await deps.embeddable
-              .getEmbeddableFactory('visualization')
-              .createFromObject($scope.savedObj, {
-                timeRange: $scope.timeRange,
-                filters: $scope.filters || [],
-                query: $scope.query,
-                appState: $scope.appState,
-                uiState: $scope.uiState,
-              });
-            $scope._handler.render(element[0]);
-          } else {
-            $scope._handler.updateInput({
-              timeRange: $scope.timeRange,
-              filters: $scope.filters || [],
-              query: $scope.query,
-            });
+          if (!$scope.rendered) {
+            $scope.embeddableHandler.render(element[0]);
+            $scope.rendered = true;
           }
+
+          $scope.embeddableHandler.updateInput({
+            timeRange: $scope.timeRange,
+            filters: $scope.filters || [],
+            query: $scope.query,
+          });
         };
 
         $scope.$on('render', event => {
@@ -59,7 +51,9 @@ export function initVisualizationDirective(app, deps) {
         });
 
         $scope.$on('$destroy', () => {
-          $scope._handler.destroy();
+          if ($scope.embeddableHandler) {
+            $scope.embeddableHandler.destroy();
+          }
         });
       },
     };

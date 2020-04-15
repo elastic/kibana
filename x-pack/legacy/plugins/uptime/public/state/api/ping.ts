@@ -4,32 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { stringify } from 'query-string';
-import { getApiPath } from '../../lib/helper';
 import { APIFn } from './types';
-import { GetPingHistogramParams, HistogramResult } from '../../../common/types';
+import {
+  PingsResponseType,
+  PingsResponse,
+  GetPingsParams,
+  GetPingHistogramParams,
+  HistogramResult,
+} from '../../../common/runtime_types';
+import { apiService } from './utils';
+import { API_URLS } from '../../../common/constants/rest_api';
+
+export const fetchPings: APIFn<GetPingsParams, PingsResponse> = async ({
+  dateRange: { from, to },
+  ...optional
+}) => await apiService.get(API_URLS.PINGS, { from, to, ...optional }, PingsResponseType);
 
 export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> = async ({
-  basePath,
   monitorId,
   dateStart,
   dateEnd,
   statusFilter,
   filters,
 }) => {
-  const url = getApiPath(`/api/uptime/ping/histogram`, basePath);
-  const params = {
+  const queryParams = {
     dateStart,
     dateEnd,
-    ...(monitorId && { monitorId }),
-    ...(statusFilter && { statusFilter }),
-    ...(filters && { filters }),
+    monitorId,
+    statusFilter,
+    filters,
   };
-  const urlParams = stringify(params, { sort: false });
-  const response = await fetch(`${url}?${urlParams}`);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  const responseData = await response.json();
-  return responseData;
+
+  return await apiService.get(API_URLS.PING_HISTOGRAM, queryParams);
 };

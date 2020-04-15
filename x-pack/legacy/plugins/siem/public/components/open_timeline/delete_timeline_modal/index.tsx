@@ -4,58 +4,54 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiModal, EuiToolTip, EuiOverlayMask } from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiModal, EuiOverlayMask } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { createGlobalStyle } from 'styled-components';
 
 import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
-import * as i18n from '../translations';
 import { DeleteTimelines } from '../types';
+const RemovePopover = createGlobalStyle`
+div.euiPopover__panel-isOpen {
+  display: none;
+}
+`;
 
 interface Props {
-  deleteTimelines?: DeleteTimelines;
-  savedObjectId?: string | null;
-  title?: string | null;
+  deleteTimelines: DeleteTimelines;
+  onComplete?: () => void;
+  isModalOpen: boolean;
+  savedObjectIds: string[];
+  title: string | null;
 }
 /**
  * Renders a button that when clicked, displays the `Delete Timeline` modal
  */
-export const DeleteTimelineModalButton = React.memo<Props>(
-  ({ deleteTimelines, savedObjectId, title }) => {
-    const [showModal, setShowModal] = useState(false);
-
-    const openModal = () => setShowModal(true);
-    const closeModal = () => setShowModal(false);
-
-    const onDelete = () => {
-      if (deleteTimelines != null && savedObjectId != null) {
-        deleteTimelines([savedObjectId]);
+export const DeleteTimelineModalOverlay = React.memo<Props>(
+  ({ deleteTimelines, isModalOpen, savedObjectIds, title, onComplete }) => {
+    const internalCloseModal = useCallback(() => {
+      if (onComplete != null) {
+        onComplete();
       }
-      closeModal();
-    };
-
+    }, [onComplete]);
+    const onDelete = useCallback(() => {
+      if (savedObjectIds != null) {
+        deleteTimelines(savedObjectIds);
+      }
+      if (onComplete != null) {
+        onComplete();
+      }
+    }, [deleteTimelines, savedObjectIds, onComplete]);
     return (
       <>
-        <EuiToolTip content={i18n.DELETE}>
-          <EuiButtonIcon
-            aria-label={i18n.DELETE}
-            color="danger"
-            data-test-subj="delete-timeline"
-            iconSize="s"
-            iconType="trash"
-            isDisabled={deleteTimelines == null || savedObjectId == null || savedObjectId === ''}
-            onClick={openModal}
-            size="s"
-          />
-        </EuiToolTip>
-
-        {showModal ? (
+        {isModalOpen && <RemovePopover data-test-subj="remove-popover" />}
+        {isModalOpen ? (
           <EuiOverlayMask>
-            <EuiModal maxWidth={DELETE_TIMELINE_MODAL_WIDTH} onClose={closeModal}>
+            <EuiModal maxWidth={DELETE_TIMELINE_MODAL_WIDTH} onClose={internalCloseModal}>
               <DeleteTimelineModal
                 data-test-subj="delete-timeline-modal"
                 onDelete={onDelete}
                 title={title}
-                closeModal={closeModal}
+                closeModal={internalCloseModal}
               />
             </EuiModal>
           </EuiOverlayMask>
@@ -64,5 +60,4 @@ export const DeleteTimelineModalButton = React.memo<Props>(
     );
   }
 );
-
-DeleteTimelineModalButton.displayName = 'DeleteTimelineModalButton';
+DeleteTimelineModalOverlay.displayName = 'DeleteTimelineModalOverlay';

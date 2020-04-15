@@ -21,9 +21,6 @@ export interface InfraServerPluginDeps {
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
   metrics: VisTypeTimeseriesSetup;
-  indexPatterns: {
-    indexPatternsServiceFactory: any;
-  };
   features: FeaturesPluginSetup;
   apm: APMPluginContract;
   alerting: AlertingPluginContract;
@@ -38,6 +35,8 @@ export interface CallWithRequestParams extends GenericParams {
   size?: number;
   terminate_after?: number;
   fields?: string | string[];
+  path?: string;
+  query?: string | object;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;

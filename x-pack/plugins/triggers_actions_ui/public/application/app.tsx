@@ -13,6 +13,7 @@ import {
   IUiSettingsClient,
   ApplicationStart,
   ChromeBreadcrumb,
+  CoreStart,
 } from 'kibana/public';
 import { BASE_PATH, Section, routeToAlertDetails } from './constants';
 import { TriggersActionsUIHome } from './home';
@@ -23,14 +24,16 @@ import { TypeRegistry } from './type_registry';
 import { AlertDetailsRouteWithApi as AlertDetailsRoute } from './sections/alert_details/components/alert_details_route';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { PluginStartContract as AlertingStart } from '../../../alerting/public';
 
 export interface AppDeps {
   dataPlugin: DataPublicPluginStart;
   charts: ChartsPluginStart;
   chrome: ChromeStart;
+  alerting?: AlertingStart;
+  navigateToApp: CoreStart['application']['navigateToApp'];
   docLinks: DocLinksStart;
   toastNotifications: ToastsSetup;
-  injectedMetadata: any;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;

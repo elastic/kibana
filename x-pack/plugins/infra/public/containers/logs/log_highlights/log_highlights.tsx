@@ -6,38 +6,37 @@
 
 import createContainer from 'constate';
 import { useState, useContext } from 'react';
+import { useThrottle } from 'react-use';
 import { useLogEntryHighlights } from './log_entry_highlights';
 import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';
-import { useLogSummaryBufferInterval } from '../log_summary';
-import { LogViewConfiguration } from '../log_view_configuration';
 import { LogPositionState } from '../log_position';
 import { TimeKey } from '../../../../common/time';
+
+const FETCH_THROTTLE_INTERVAL = 3000;
+
+interface UseLogHighlightsStateProps {
+  sourceId: string;
+  sourceVersion: string | undefined;
+  centerCursor: TimeKey | null;
+  size: number;
+  filterQuery: string | null;
+}
 
 export const useLogHighlightsState = ({
   sourceId,
   sourceVersion,
-  entriesStart,
-  entriesEnd,
+  centerCursor,
+  size,
   filterQuery,
-}: {
-  sourceId: string;
-  sourceVersion: string | undefined;
-  entriesStart: TimeKey | null;
-  entriesEnd: TimeKey | null;
-  filterQuery: string | null;
-}) => {
+}: UseLogHighlightsStateProps) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
-  const { visibleMidpoint, jumpToTargetPosition } = useContext(LogPositionState.Context);
-  const { intervalSize: summaryIntervalSize } = useContext(LogViewConfiguration.Context);
-  const {
-    start: summaryStart,
-    end: summaryEnd,
-    bucketSize: summaryBucketSize,
-  } = useLogSummaryBufferInterval(
-    visibleMidpoint ? visibleMidpoint.time : null,
-    summaryIntervalSize
+  const { visibleMidpoint, jumpToTargetPosition, startTimestamp, endTimestamp } = useContext(
+    LogPositionState.Context
   );
+
+  const throttledStartTimestamp = useThrottle(startTimestamp, FETCH_THROTTLE_INTERVAL);
+  const throttledEndTimestamp = useThrottle(endTimestamp, FETCH_THROTTLE_INTERVAL);
 
   const {
     logEntryHighlights,
@@ -46,8 +45,10 @@ export const useLogHighlightsState = ({
   } = useLogEntryHighlights(
     sourceId,
     sourceVersion,
-    entriesStart,
-    entriesEnd,
+    throttledStartTimestamp,
+    throttledEndTimestamp,
+    centerCursor,
+    size,
     filterQuery,
     highlightTerms
   );
@@ -55,9 +56,8 @@ export const useLogHighlightsState = ({
   const { logSummaryHighlights, loadLogSummaryHighlightsRequest } = useLogSummaryHighlights(
     sourceId,
     sourceVersion,
-    summaryStart,
-    summaryEnd,
-    summaryBucketSize,
+    throttledStartTimestamp,
+    throttledEndTimestamp,
     filterQuery,
     highlightTerms
   );

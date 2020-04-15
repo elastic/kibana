@@ -10,8 +10,17 @@ import { foldLeftRight, getPaths } from './__mocks__/utils';
 import { left } from 'fp-ts/lib/Either';
 import { ImportRulesSchema, importRulesSchema } from './import_rules_schema';
 import { ErrorSchema } from './error_schema';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 
 describe('import_rules_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('it should validate an empty import response with no errors', () => {
     const payload: ImportRulesSchema = { success: true, success_count: 0, errors: [] };
     const decoded = importRulesSchema.decode(payload);

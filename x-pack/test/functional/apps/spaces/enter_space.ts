@@ -10,7 +10,6 @@ export default function enterSpaceFunctonalTests({
   getPageObjects,
 }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
 
   describe('Enter Space', function() {
@@ -25,30 +24,7 @@ export default function enterSpaceFunctonalTests({
       await PageObjects.security.forceLogout();
     });
 
-    it('allows user to navigate to different spaces, respecting the configured default route', async () => {
-      const spaceId = 'another-space';
-
-      await PageObjects.security.login(null, null, {
-        expectSpaceSelector: true,
-      });
-
-      await PageObjects.spaceSelector.clickSpaceCard(spaceId);
-
-      await PageObjects.spaceSelector.expectRoute(spaceId, '/app/kibana/#/dashboard');
-
-      await PageObjects.spaceSelector.openSpacesNav();
-
-      // change spaces
-
-      await PageObjects.spaceSelector.clickSpaceAvatar('default');
-
-      await PageObjects.spaceSelector.expectRoute('default', '/app/canvas');
-    });
-
     it('falls back to the default home page when the configured default route is malformed', async () => {
-      await kibanaServer.uiSettings.replace({ defaultRoute: 'http://example.com/evil' });
-
-      // This test only works with the default space, as other spaces have an enforced relative url of `${serverBasePath}/s/space-id/${defaultRoute}`
       const spaceId = 'default';
 
       await PageObjects.security.login(null, null, {
@@ -58,6 +34,26 @@ export default function enterSpaceFunctonalTests({
       await PageObjects.spaceSelector.clickSpaceCard(spaceId);
 
       await PageObjects.spaceSelector.expectHomePage(spaceId);
+    });
+
+    it('allows user to navigate to different spaces, respecting the configured default route', async () => {
+      const spaceId = 'another-space';
+
+      await PageObjects.security.login(null, null, {
+        expectSpaceSelector: true,
+      });
+
+      await PageObjects.spaceSelector.clickSpaceCard(spaceId);
+
+      await PageObjects.spaceSelector.expectRoute(spaceId, '/app/canvas');
+
+      await PageObjects.spaceSelector.openSpacesNav();
+
+      // change spaces
+      const newSpaceId = 'default';
+      await PageObjects.spaceSelector.clickSpaceAvatar(newSpaceId);
+
+      await PageObjects.spaceSelector.expectHomePage(newSpaceId);
     });
   });
 }

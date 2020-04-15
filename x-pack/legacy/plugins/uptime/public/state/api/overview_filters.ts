@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
-import { isRight } from 'fp-ts/lib/Either';
 import { GetOverviewFiltersPayload } from '../actions/overview_filters';
-import { getApiPath, parameterizeValues } from '../../lib/helper';
 import { OverviewFiltersType } from '../../../common/runtime_types';
-
-type ApiRequest = GetOverviewFiltersPayload & {
-  basePath: string;
-};
+import { apiService } from './utils';
+import { API_URLS } from '../../../common/constants/rest_api';
 
 export const fetchOverviewFilters = async ({
-  basePath,
   dateRangeStart,
   dateRangeEnd,
   search,
@@ -23,30 +17,16 @@ export const fetchOverviewFilters = async ({
   locations,
   ports,
   tags,
-}: ApiRequest) => {
-  const url = getApiPath(`/api/uptime/filters`, basePath);
-
-  const params = new URLSearchParams({
+}: GetOverviewFiltersPayload) => {
+  const queryParams = {
     dateRangeStart,
     dateRangeEnd,
-  });
+    schemes,
+    locations,
+    ports,
+    tags,
+    search,
+  };
 
-  if (search) {
-    params.append('search', search);
-  }
-
-  parameterizeValues(params, { schemes, locations, ports, tags });
-
-  const response = await fetch(`${url}?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  const responseData = await response.json();
-  const decoded = OverviewFiltersType.decode(responseData);
-
-  ThrowReporter.report(decoded);
-  if (isRight(decoded)) {
-    return decoded.right;
-  }
-  throw new Error('`getOverviewFilters` response did not correspond to expected type');
+  return await apiService.get(API_URLS.FILTERS, queryParams, OverviewFiltersType);
 };

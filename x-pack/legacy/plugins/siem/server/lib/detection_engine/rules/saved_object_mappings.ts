@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchMappingOf } from '../../../utils/typed_elasticsearch_mappings';
-import { IRuleStatusAttributes } from './types';
-
 export const ruleStatusSavedObjectType = 'siem-detection-engine-rule-status';
 
-export const ruleStatusSavedObjectMappings: {
-  [ruleStatusSavedObjectType]: ElasticsearchMappingOf<IRuleStatusAttributes>;
-} = {
+export const ruleStatusSavedObjectMappings = {
   [ruleStatusSavedObjectType]: {
     properties: {
       alertId: {
@@ -34,6 +29,18 @@ export const ruleStatusSavedObjectMappings: {
       },
       lastSuccessMessage: {
         type: 'text',
+      },
+      lastLookBackDate: {
+        type: 'date',
+      },
+      gap: {
+        type: 'text',
+      },
+      bulkCreateTimeDurations: {
+        type: 'float',
+      },
+      searchAfterTimeDurations: {
+        type: 'float',
       },
     },
   },

@@ -9,7 +9,6 @@ import { Plugin, CoreStart, CoreSetup, PluginInitializerContext } from 'kibana/p
 import { first } from 'rxjs/operators';
 
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import { LICENSE_CHECK_STATE } from '../../licensing/public';
 
 import { PLUGIN } from '../common';
 import { AppPublicPluginDependencies } from './types';
@@ -50,7 +49,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         const license = await licensing.license$.pipe(first()).toPromise();
         const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
         const initialLicenseStatus =
-          state === LICENSE_CHECK_STATE.Valid ? { valid: true } : { valid: false, message };
+          state === 'valid' ? { valid: true } : { valid: false, message };
 
         return boot({
           http,

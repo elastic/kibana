@@ -15,7 +15,10 @@ describe('Transaction', () => {
   const transaction: AllowUnknownProperties<Transaction> = {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
-    observer: 'whatever',
+    observer: {
+      version: 'whatever',
+      version_major: 8
+    },
     agent: {
       name: 'java',
       version: 'agent version'
@@ -63,7 +66,10 @@ describe('Span', () => {
   const span: AllowUnknownProperties<Span> = {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
-    observer: 'whatever',
+    observer: {
+      version: 'whatever',
+      version_major: 8
+    },
     agent: {
       name: 'java',
       version: 'agent version'
@@ -107,7 +113,10 @@ describe('Span', () => {
 describe('Error', () => {
   const errorDoc: AllowUnknownProperties<APMError> = {
     '@metadata': 'whatever',
-    observer: 'whatever',
+    observer: {
+      version: 'whatever',
+      version_major: 8
+    },
     agent: {
       name: 'java',
       version: 'agent version'

@@ -259,40 +259,6 @@ describe('start', () => {
     });
   });
 
-  describe('is collapsed', () => {
-    it('updates/emits isCollapsed', async () => {
-      const { chrome, service } = await start();
-      const promise = chrome
-        .getIsCollapsed$()
-        .pipe(toArray())
-        .toPromise();
-
-      chrome.setIsCollapsed(true);
-      chrome.setIsCollapsed(false);
-      chrome.setIsCollapsed(true);
-      service.stop();
-
-      await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          false,
-          true,
-          false,
-          true,
-        ]
-      `);
-    });
-
-    it('only stores true in localStorage', async () => {
-      const { chrome } = await start();
-
-      chrome.setIsCollapsed(true);
-      expect(store.size).toBe(1);
-
-      chrome.setIsCollapsed(false);
-      expect(store.size).toBe(0);
-    });
-  });
-
   describe('application classes', () => {
     it('updates/emits the application classes', async () => {
       const { chrome, service } = await start();
@@ -442,12 +408,12 @@ describe('start', () => {
 });
 
 describe('stop', () => {
-  it('completes applicationClass$, isCollapsed$, breadcrumbs$, isVisible$, and brand$ observables', async () => {
+  it('completes applicationClass$, getIsNavDrawerLocked, breadcrumbs$, isVisible$, and brand$ observables', async () => {
     const { chrome, service } = await start();
     const promise = Rx.combineLatest(
       chrome.getBrand$(),
       chrome.getApplicationClasses$(),
-      chrome.getIsCollapsed$(),
+      chrome.getIsNavDrawerLocked$(),
       chrome.getBreadcrumbs$(),
       chrome.getIsVisible$(),
       chrome.getHelpExtension$()
@@ -465,7 +431,7 @@ describe('stop', () => {
       Rx.combineLatest(
         chrome.getBrand$(),
         chrome.getApplicationClasses$(),
-        chrome.getIsCollapsed$(),
+        chrome.getIsNavDrawerLocked$(),
         chrome.getBreadcrumbs$(),
         chrome.getIsVisible$(),
         chrome.getHelpExtension$()

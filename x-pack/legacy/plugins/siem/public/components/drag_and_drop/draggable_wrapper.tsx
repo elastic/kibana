@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Draggable,
   DraggableProvided,
@@ -15,7 +15,6 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import { EuiPortal } from '@elastic/eui';
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { TruncatableText } from '../truncatable_text';
@@ -26,9 +25,6 @@ import { ProviderContainer } from './provider_container';
 export const DragEffects = styled.div``;
 
 DragEffects.displayName = 'DragEffects';
-
-export const DraggablePortalContext = createContext<boolean>(false);
-export const useDraggablePortalContext = () => useContext(DraggablePortalContext);
 
 /**
  * Wraps the `react-beautiful-dnd` error boundary. See also:
@@ -89,7 +85,6 @@ export const DraggableWrapper = React.memo<Props>(
   ({ dataProvider, render, truncate }) => {
     const [providerRegistered, setProviderRegistered] = useState(false);
     const dispatch = useDispatch();
-    const usePortal = useDraggablePortalContext();
 
     const registerProvider = useCallback(() => {
       if (!providerRegistered) {
@@ -113,7 +108,26 @@ export const DraggableWrapper = React.memo<Props>(
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">
         <DragDropErrorBoundary>
-          <Droppable isDropDisabled={true} droppableId={getDroppableId(dataProvider.id)}>
+          <Droppable
+            isDropDisabled={true}
+            droppableId={getDroppableId(dataProvider.id)}
+            renderClone={(provided, snapshot) => (
+              <ConditionalPortal registerProvider={registerProvider}>
+                <div
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  ref={provided.innerRef}
+                  data-test-subj="providerContainer"
+                >
+                  <ProviderContentWrapper
+                    data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
+                  >
+                    {render(dataProvider, provided, snapshot)}
+                  </ProviderContentWrapper>
+                </div>
+              </ConditionalPortal>
+            )}
+          >
             {droppableProvided => (
               <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
                 <Draggable
@@ -122,35 +136,26 @@ export const DraggableWrapper = React.memo<Props>(
                   key={getDraggableId(dataProvider.id)}
                 >
                   {(provided, snapshot) => (
-                    <ConditionalPortal
+                    <ProviderContainer
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      ref={provided.innerRef}
+                      data-test-subj="providerContainer"
                       isDragging={snapshot.isDragging}
                       registerProvider={registerProvider}
-                      usePortal={snapshot.isDragging && usePortal}
                     >
-                      <ProviderContainer
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        ref={provided.innerRef}
-                        data-test-subj="providerContainer"
-                        isDragging={snapshot.isDragging}
-                        registerProvider={registerProvider}
-                        style={{
-                          ...provided.draggableProps.style,
-                        }}
-                      >
-                        {truncate && !snapshot.isDragging ? (
-                          <TruncatableText data-test-subj="draggable-truncatable-content">
-                            {render(dataProvider, provided, snapshot)}
-                          </TruncatableText>
-                        ) : (
-                          <ProviderContentWrapper
-                            data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
-                          >
-                            {render(dataProvider, provided, snapshot)}
-                          </ProviderContentWrapper>
-                        )}
-                      </ProviderContainer>
-                    </ConditionalPortal>
+                      {truncate && !snapshot.isDragging ? (
+                        <TruncatableText data-test-subj="draggable-truncatable-content">
+                          {render(dataProvider, provided, snapshot)}
+                        </TruncatableText>
+                      ) : (
+                        <ProviderContentWrapper
+                          data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
+                        >
+                          {render(dataProvider, provided, snapshot)}
+                        </ProviderContentWrapper>
+                      )}
+                    </ProviderContainer>
                   )}
                 </Draggable>
                 {droppableProvided.placeholder}
@@ -178,20 +183,16 @@ DraggableWrapper.displayName = 'DraggableWrapper';
 
 interface ConditionalPortalProps {
   children: React.ReactNode;
-  usePortal: boolean;
-  isDragging: boolean;
   registerProvider: () => void;
 }
 
 export const ConditionalPortal = React.memo<ConditionalPortalProps>(
-  ({ children, usePortal, registerProvider, isDragging }) => {
+  ({ children, registerProvider }) => {
     useEffect(() => {
-      if (isDragging) {
-        registerProvider();
-      }
-    }, [isDragging, registerProvider]);
+      registerProvider();
+    }, [registerProvider]);
 
-    return usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>;
+    return <>{children}</>;
   }
 );
 

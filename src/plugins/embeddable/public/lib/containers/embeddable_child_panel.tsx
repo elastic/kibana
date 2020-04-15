@@ -29,15 +29,15 @@ import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from '../panel';
 import { IContainer } from './i_container';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
+import { EmbeddableStart } from '../../plugin';
 
 export interface EmbeddableChildPanelProps {
   embeddableId: string;
   className?: string;
   container: IContainer;
   getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;

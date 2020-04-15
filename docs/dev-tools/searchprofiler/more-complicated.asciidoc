@@ -25,11 +25,11 @@ POST test/_bulk
 // CONSOLE
 --
 
-. From the {searchprofiler}, enter "test" in the *Index* field to restrict profiled 
+. From the {searchprofiler}, enter "test" in the *Index* field to restrict profiled
 queries to the `test` index.
 
 . Replace the default `match_all` query in the query editor with a query that has two sub-query
-components and includes a simple aggregation, like the example below.
+components and includes a simple aggregation:
 +
 --
 [source,js]

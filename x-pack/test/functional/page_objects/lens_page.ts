@@ -103,8 +103,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Changes the specified dimension to the specified operation and (optinally) field.
      *
-     * @param opts.from - the text of the dimension being changed
-     * @param opts.to - the desired operation for the dimension
+     * @param opts.dimension - the selector of the dimension being changed
+     * @param opts.operation - the desired operation ID for the dimension
      * @param opts.field - the desired field for the dimension
      */
     async configureDimension(opts: { dimension: string; operation?: string; field?: string }) {
@@ -121,6 +121,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click('indexPattern-dimension-field');
         await testSubjects.click(`lns-fieldOption-${opts.field}`);
       }
+    },
+
+    /**
+     * Removes the dimension matching a specific test subject
+     */
+    async removeDimension(dimensionTestSubj: string) {
+      await find.clickByCssSelector(
+        `[data-test-subj="${dimensionTestSubj}"] [data-test-subj="indexPattern-dimensionPopover-remove"]`
+      );
     },
 
     /**

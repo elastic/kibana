@@ -7,12 +7,6 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 - Create and register a new Action Type.
 - Embed the Create Alert flyout within any Kibana plugin.
 
-To enable Alerts and Actions UIs, the following configuration settings are needed:
-```
-xpack.triggers_actions_ui.enabled: true
-xpack.triggers_actions_ui.createAlertUiEnabled: true
-```
-
 -----
 
 
@@ -73,7 +67,7 @@ AlertTypeModel:
 export function getAlertType(): AlertTypeModel {
   return {
     id: '.index-threshold',
-    name: 'Index Threshold',
+    name: 'Index threshold',
     iconClass: 'alert',
     alertParamsExpression: IndexThresholdAlertTypeExpression,
     validate: validateAlertType,
@@ -666,6 +660,7 @@ const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
     alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
     toastNotifications: toasts,
     uiSettings,
+    docLinks,
     charts,
     dataFieldsFormats,
     metadata: { test: 'some value', fields: ['test'] },
@@ -703,6 +698,7 @@ export interface AlertsContextValue<MetaData = Record<string, any>> {
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   uiSettings?: IUiSettingsClient;
+  docLinks: DocLinksStart;
   toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
@@ -720,6 +716,7 @@ export interface AlertsContextValue<MetaData = Record<string, any>> {
 |alertTypeRegistry|Registry for alert types.|
 |actionTypeRegistry|Registry for action types.|
 |uiSettings|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
+|docLinks|Documentation Links, needed to link to the documentation from informational callouts.|
 |toastNotifications|Toast messages.|
 |charts|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
 |dataFieldsFormats|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
@@ -1328,6 +1325,7 @@ export interface AlertsContextValue {
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   uiSettings?: IUiSettingsClient;
+  docLinks: DocLinksStart;
   toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
@@ -1344,6 +1342,7 @@ export interface AlertsContextValue {
 |alertTypeRegistry|Registry for alert types.|
 |actionTypeRegistry|Registry for action types.|
 |uiSettings|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
+|docLinks|Documentation Links, needed to link to the documentation from informational callouts.|
 |toastNotifications|Toast messages.|
 |charts|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
 |dataFieldsFormats|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|

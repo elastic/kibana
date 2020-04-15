@@ -5,12 +5,9 @@
  */
 
 import { get } from 'lodash';
-import {
-  AggFieldNamePair,
-  EVENT_RATE_FIELD_ID,
-} from '../../../../../../legacy/plugins/ml/common/types/fields';
-import { callWithRequestType } from '../../../../../../legacy/plugins/ml/common/types/kibana';
-import { ML_MEDIAN_PERCENTS } from '../../../../../../legacy/plugins/ml/common/util/job_utils';
+import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import { callWithRequestType } from '../../../../common/types/kibana';
+import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 const OVER_FIELD_EXAMPLES_COUNT = 40;
 

@@ -14,12 +14,12 @@ export function initGetTagsApi({ caseService, router }: RouteDeps) {
       validate: {},
     },
     async (context, request, response) => {
-      let theCase;
       try {
-        theCase = await caseService.getTags({
-          client: context.core.savedObjects.client,
+        const client = context.core.savedObjects.client;
+        const tags = await caseService.getTags({
+          client,
         });
-        return response.ok({ body: theCase });
+        return response.ok({ body: tags });
       } catch (error) {
         return response.customError(wrapError(error));
       }

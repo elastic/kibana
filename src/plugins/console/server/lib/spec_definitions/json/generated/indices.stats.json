@@ -1,0 +1,57 @@
+{
+  "indices.stats": {
+    "url_params": {
+      "completion_fields": [],
+      "fielddata_fields": [],
+      "fields": [],
+      "groups": [],
+      "level": [
+        "cluster",
+        "indices",
+        "shards"
+      ],
+      "types": [],
+      "include_segment_file_sizes": "__flag__",
+      "include_unloaded_segments": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ],
+      "forbid_closed_indices": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_stats",
+      "_stats/{metrics}",
+      "{indices}/_stats",
+      "{indices}/_stats/{metrics}"
+    ],
+    "url_components": {
+      "metrics": [
+        "_all",
+        "completion",
+        "docs",
+        "fielddata",
+        "flush",
+        "get",
+        "indexing",
+        "merge",
+        "query_cache",
+        "refresh",
+        "request_cache",
+        "search",
+        "segments",
+        "store",
+        "suggest",
+        "warmer"
+      ],
+      "indices": null
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-stats.html"
+  }
+}

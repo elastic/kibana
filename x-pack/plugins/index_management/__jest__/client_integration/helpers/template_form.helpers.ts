@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
-import { Template } from '../../../common/types';
+import { TemplateDeserialized } from '../../../common';
 import { nextTick } from './index';
 
 interface MappingField {
@@ -45,7 +44,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     testBed.find('editFieldUpdateButton').simulate('click');
   };
 
-  const clickRemoveButtonAtField = (index: number) => {
+  const deleteMappingsFieldAt = (index: number) => {
     testBed
       .find('removeFieldButton')
       .at(index)
@@ -55,7 +54,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
   };
 
   const clickCancelCreateFieldButton = () => {
-    testBed.find('createFieldWrapper.cancelButton').simulate('click');
+    testBed.find('createFieldForm.cancelButton').simulate('click');
   };
 
   const completeStepOne = async ({
@@ -63,8 +62,8 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     indexPatterns,
     order,
     version,
-  }: Partial<Template> = {}) => {
-    const { form, find, component } = testBed;
+  }: Partial<TemplateDeserialized> = {}) => {
+    const { form, find, waitFor } = testBed;
 
     if (name) {
       form.setInputValue('nameField.input', name);
@@ -89,12 +88,11 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     }
 
     clickNextButton();
-    await nextTick();
-    component.update();
+    await waitFor('stepSettings');
   };
 
   const completeStepTwo = async (settings?: string) => {
-    const { find, component } = testBed;
+    const { find, component, waitFor } = testBed;
 
     if (settings) {
       find('mockCodeEditor').simulate('change', {
@@ -105,41 +103,41 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     }
 
     clickNextButton();
-    await nextTick();
-    component.update();
+    await waitFor('stepMappings');
   };
 
   const completeStepThree = async (mappingFields?: MappingField[]) => {
-    const { component } = testBed;
+    const { waitFor } = testBed;
 
     if (mappingFields) {
       for (const field of mappingFields) {
         const { name, type } = field;
         await addMappingField(name, type);
       }
-    } else {
-      await nextTick();
     }
 
     clickNextButton();
-    await nextTick(50); // hooks updates cycles are tricky, adding some latency is needed
-    component.update();
+    await waitFor('stepAliases');
   };
 
-  const completeStepFour = async (aliases?: string) => {
-    const { find, component } = testBed;
+  const completeStepFour = async (aliases?: string, waitForNextStep = true) => {
+    const { find, component, waitFor } = testBed;
 
     if (aliases) {
       find('mockCodeEditor').simulate('change', {
         jsonString: aliases,
       }); // Using mocked EuiCodeEditor
-      await nextTick(50);
+      await nextTick();
       component.update();
     }
 
     clickNextButton();
-    await nextTick(50);
-    component.update();
+
+    if (waitForNextStep) {
+      await waitFor('summaryTab');
+    } else {
+      component.update();
+    }
   };
 
   const selectSummaryTab = (tab: 'summary' | 'request') => {
@@ -156,7 +154,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     const { find, form, component } = testBed;
 
     form.setInputValue('nameParameterInput', name);
-    find('createFieldWrapper.mockComboBox').simulate('change', [
+    find('createFieldForm.mockComboBox').simulate('change', [
       {
         label: type,
         value: type,
@@ -166,7 +164,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     await nextTick(50);
     component.update();
 
-    find('createFieldWrapper.addButton').simulate('click');
+    find('createFieldForm.addButton').simulate('click');
 
     await nextTick();
     component.update();
@@ -180,7 +178,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       clickSubmitButton,
       clickEditButtonAtField,
       clickEditFieldUpdateButton,
-      clickRemoveButtonAtField,
+      deleteMappingsFieldAt,
       clickCancelCreateFieldButton,
       completeStepOne,
       completeStepTwo,
@@ -198,16 +196,16 @@ export type TestSubjects =
   | 'backButton'
   | 'codeEditorContainer'
   | 'confirmModalConfirmButton'
-  | 'createFieldWrapper.addPropertyButton'
-  | 'createFieldWrapper.addButton'
-  | 'createFieldWrapper.addFieldButton'
-  | 'createFieldWrapper.addMultiFieldButton'
-  | 'createFieldWrapper.cancelButton'
-  | 'createFieldWrapper.mockComboBox'
+  | 'createFieldForm.addPropertyButton'
+  | 'createFieldForm.addButton'
+  | 'createFieldForm.addFieldButton'
+  | 'createFieldForm.addMultiFieldButton'
+  | 'createFieldForm.cancelButton'
+  | 'createFieldForm.mockComboBox'
   | 'editFieldButton'
   | 'editFieldUpdateButton'
   | 'fieldsListItem'
-  | 'fieldTypeComboBox'
+  | 'fieldType'
   | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'

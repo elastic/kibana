@@ -35,10 +35,13 @@ const customUrlSchema = {
   time_range: schema.maybe(schema.any()),
 };
 
-const customSettingsSchema = schema.object({
-  created_by: schema.maybe(schema.string()),
-  custom_urls: schema.maybe(schema.arrayOf(schema.maybe(schema.object({ ...customUrlSchema })))),
-});
+const customSettingsSchema = schema.object(
+  {
+    created_by: schema.maybe(schema.string()),
+    custom_urls: schema.maybe(schema.arrayOf(schema.maybe(schema.object({ ...customUrlSchema })))),
+  },
+  { unknowns: 'allow' } // Create / Update job API allows other fields to be added to custom_settings.
+);
 
 export const anomalyDetectionUpdateJobSchema = {
   description: schema.maybe(schema.string()),
@@ -63,14 +66,16 @@ export const anomalyDetectionUpdateJobSchema = {
   groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
 };
 
+export const analysisConfigSchema = schema.object({
+  bucket_span: schema.maybe(schema.string()),
+  summary_count_field_name: schema.maybe(schema.string()),
+  detectors: schema.arrayOf(detectorSchema),
+  influencers: schema.arrayOf(schema.maybe(schema.string())),
+  categorization_field_name: schema.maybe(schema.string()),
+});
+
 export const anomalyDetectionJobSchema = {
-  analysis_config: schema.object({
-    bucket_span: schema.maybe(schema.string()),
-    summary_count_field_name: schema.maybe(schema.string()),
-    detectors: schema.arrayOf(detectorSchema),
-    influencers: schema.arrayOf(schema.maybe(schema.string())),
-    categorization_field_name: schema.maybe(schema.string()),
-  }),
+  analysis_config: analysisConfigSchema,
   analysis_limits: schema.maybe(
     schema.object({
       categorization_examples_limit: schema.maybe(schema.number()),

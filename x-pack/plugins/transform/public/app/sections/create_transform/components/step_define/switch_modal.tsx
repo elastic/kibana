@@ -34,7 +34,7 @@ const pivotModalMessage = i18n.translate(
 const sourceModalMessage = i18n.translate(
   'xpack.transform.stepDefineForm.advancedSourceEditorSwitchModalBodyText',
   {
-    defaultMessage: `By switching back to KQL query bar you will lose your edits.`,
+    defaultMessage: `By switching back to the query bar you will lose your edits.`,
   }
 );
 const pivotModalConfirmButtonText = i18n.translate(
@@ -46,7 +46,7 @@ const pivotModalConfirmButtonText = i18n.translate(
 const sourceModalConfirmButtonText = i18n.translate(
   'xpack.transform.stepDefineForm.advancedSourceEditorSwitchModalConfirmButtonText',
   {
-    defaultMessage: 'Switch to KQL',
+    defaultMessage: 'Switch to query bar',
   }
 );
 const cancelButtonText = i18n.translate(

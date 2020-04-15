@@ -30,7 +30,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`
       );
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body).to.eql({
         id: createdAlert.id,
         name: 'abc',

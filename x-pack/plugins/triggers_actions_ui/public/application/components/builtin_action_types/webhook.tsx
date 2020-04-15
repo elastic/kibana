@@ -31,6 +31,7 @@ import {
   ActionParamsProps,
 } from '../../../types';
 import { WebhookActionParams, WebhookActionConnector } from './types';
+import { AddMessageVariables } from '../add_message_variables';
 
 const HTTP_VERBS = ['post', 'put'];
 
@@ -42,6 +43,12 @@ export function getActionType(): ActionTypeModel {
       'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.selectMessageText',
       {
         defaultMessage: 'Send a request to a web service.',
+      }
+    ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.actionTypeTitle',
+      {
+        defaultMessage: 'Webhook data',
       }
     ),
     validateConnector: (action: WebhookActionConnector): ValidationResult => {
@@ -139,7 +146,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       i18n.translate(
         'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderKeyText',
         {
-          defaultMessage: 'Header key is required.',
+          defaultMessage: 'Key is required.',
         }
       )
     );
@@ -149,7 +156,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       i18n.translate(
         'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderValueText',
         {
-          defaultMessage: 'Header value is required.',
+          defaultMessage: 'Value is required.',
         }
       )
     );
@@ -192,7 +199,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
-              defaultMessage="Add a new header"
+              defaultMessage="Add header"
               id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeader"
             />
           </h5>
@@ -454,10 +461,13 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
   actionParams,
   editAction,
   index,
+  messageVariables,
   errors,
 }) => {
   const { body } = actionParams;
-
+  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
+    editAction(paramsProperty, (body ?? '').concat(` {{${variable}}}`), index);
+  };
   return (
     <Fragment>
       <EuiFormRow
@@ -471,6 +481,13 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
         isInvalid={errors.body.length > 0 && body !== undefined}
         fullWidth
         error={errors.body}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable('body', variable)}
+            paramsProperty="body"
+          />
+        }
       >
         <EuiCodeEditor
           mode="json"

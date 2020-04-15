@@ -8,7 +8,14 @@ import React from 'react';
 import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { Providers } from '../../../../app_dependencies.mock';
+import { I18nProvider } from '@kbn/i18n/react';
+
+import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
+
+import { coreMock } from '../../../../../../../../../src/core/public/mocks';
+import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
+const startMock = coreMock.createStart();
+
 import {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
@@ -19,8 +26,25 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { StepDefineForm, getAggNameConflictToastMessages } from './step_define_form';
 
-jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
+
+const createMockWebStorage = () => ({
+  clear: jest.fn(),
+  getItem: jest.fn(),
+  key: jest.fn(),
+  removeItem: jest.fn(),
+  setItem: jest.fn(),
+  length: 0,
+});
+
+const createMockStorage = () => ({
+  storage: createMockWebStorage(),
+  get: jest.fn(),
+  set: jest.fn(),
+  remove: jest.fn(),
+  clear: jest.fn(),
+});
 
 describe('Transform: <DefinePivotForm />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
@@ -32,10 +56,21 @@ describe('Transform: <DefinePivotForm />', () => {
         fields: [] as any[],
       } as SearchItems['indexPattern'],
     };
+
+    // mock services for QueryStringInput
+    const services = {
+      ...startMock,
+      data: dataPluginMock.createStartContract(),
+      appName: 'the-test-app',
+      storage: createMockStorage(),
+    };
+
     const { getByLabelText } = render(
-      <Providers>
-        <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
-      </Providers>
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
     // Act

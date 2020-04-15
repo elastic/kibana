@@ -42,6 +42,7 @@ export const HashAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
         }
       )}
       paddingSize="l"
+      data-test-subj="alertDetailsHashAccordion"
     >
       <EuiDescriptionList type="column" listItems={columns} />
     </EuiAccordion>

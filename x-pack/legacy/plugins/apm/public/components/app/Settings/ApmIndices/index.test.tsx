@@ -7,8 +7,8 @@
 import { render, wait } from '@testing-library/react';
 import React from 'react';
 import { ApmIndices } from '.';
-import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
 import * as hooks from '../../../../hooks/useFetcher';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 describe('ApmIndices', () => {
   it('should not get stuck in infinite loop', async () => {

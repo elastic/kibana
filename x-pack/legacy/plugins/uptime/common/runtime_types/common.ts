@@ -22,6 +22,18 @@ export const SummaryType = t.partial({
   geo: CheckGeoType,
 });
 
+export const StatesIndexStatusType = t.type({
+  indexExists: t.boolean,
+  docCount: t.number,
+});
+
+export const DateRangeType = t.type({
+  from: t.string,
+  to: t.string,
+});
+
 export type Summary = t.TypeOf<typeof SummaryType>;
 export type CheckGeo = t.TypeOf<typeof CheckGeoType>;
 export type Location = t.TypeOf<typeof LocationType>;
+export type StatesIndexStatus = t.TypeOf<typeof StatesIndexStatusType>;
+export type DateRange = t.TypeOf<typeof DateRangeType>;

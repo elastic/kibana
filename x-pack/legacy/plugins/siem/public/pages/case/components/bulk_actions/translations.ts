@@ -16,7 +16,7 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
 export const BULK_ACTION_OPEN_SELECTED = i18n.translate(
   'xpack.siem.case.caseTable.bulkActions.openSelectedTitle',
   {
-    defaultMessage: 'Open selected',
+    defaultMessage: 'Reopen selected',
   }
 );
 

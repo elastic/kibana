@@ -5,7 +5,7 @@
  */
 
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
-import { LICENSE_CHECK_STATE, LicenseCheck } from '../../../../licensing/server';
+import { LicenseCheck } from '../../../../licensing/server';
 import { defineGetApiKeysRoutes } from './get';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
@@ -22,12 +22,7 @@ interface TestOptions {
 describe('Get API keys', () => {
   const getApiKeysTest = (
     description: string,
-    {
-      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
-      apiResponse,
-      asserts,
-      isAdmin = true,
-    }: TestOptions
+    { licenseCheckResult = { state: 'valid' }, apiResponse, asserts, isAdmin = true }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
@@ -71,7 +66,7 @@ describe('Get API keys', () => {
 
   describe('failure', () => {
     getApiKeysTest('returns result of license checker', {
-      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
+      licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 

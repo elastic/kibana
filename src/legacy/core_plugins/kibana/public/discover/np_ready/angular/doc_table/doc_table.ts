@@ -17,21 +17,17 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
 import html from './doc_table.html';
 import { dispatchRenderComplete } from '../../../../../../../../plugins/kibana_utils/public';
 // @ts-ignore
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
+import { getServices } from '../../../kibana_services';
 
 interface LazyScope extends ng.IScope {
   [key: string]: any;
 }
 
-export function createDocTableDirective(
-  config: IUiSettingsClient,
-  pagerFactory: any,
-  $filter: any
-) {
+export function createDocTableDirective(pagerFactory: any, $filter: any) {
   return {
     restrict: 'E',
     template: html,
@@ -68,7 +64,7 @@ export function createDocTableDirective(
       };
 
       $scope.limitedResultsWarning = getLimitedSearchResultsMessage(
-        config.get('discover:sampleSize')
+        getServices().uiSettings.get('discover:sampleSize')
       );
 
       $scope.addRows = function() {

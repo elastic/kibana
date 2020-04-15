@@ -22,13 +22,48 @@ export function getAlertType(service: Service): AlertType {
   const { logger } = service;
 
   const alertTypeName = i18n.translate('xpack.alertingBuiltins.indexThreshold.alertTypeTitle', {
-    defaultMessage: 'Index Threshold',
+    defaultMessage: 'Index threshold',
   });
 
   const actionGroupName = i18n.translate(
     'xpack.alertingBuiltins.indexThreshold.actionGroupThresholdMetTitle',
     {
       defaultMessage: 'Threshold Met',
+    }
+  );
+
+  const actionVariableContextGroupLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextGroupLabel',
+    {
+      defaultMessage: 'The group that exceeded the threshold.',
+    }
+  );
+
+  const actionVariableContextDateLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextDateLabel',
+    {
+      defaultMessage: 'The date the alert exceeded the threshold.',
+    }
+  );
+
+  const actionVariableContextValueLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextValueLabel',
+    {
+      defaultMessage: 'The value that exceeded the threshold.',
+    }
+  );
+
+  const actionVariableContextMessageLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextMessageLabel',
+    {
+      defaultMessage: 'A pre-constructed message for the alert.',
+    }
+  );
+
+  const actionVariableContextTitleLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextTitleLabel',
+    {
+      defaultMessage: 'A pre-constructed title for the alert.',
     }
   );
 
@@ -39,6 +74,15 @@ export function getAlertType(service: Service): AlertType {
     defaultActionGroupId: ActionGroupId,
     validate: {
       params: ParamsSchema,
+    },
+    actionVariables: {
+      context: [
+        { name: 'message', description: actionVariableContextMessageLabel },
+        { name: 'title', description: actionVariableContextTitleLabel },
+        { name: 'group', description: actionVariableContextGroupLabel },
+        { name: 'date', description: actionVariableContextDateLabel },
+        { name: 'value', description: actionVariableContextValueLabel },
+      ],
     },
     executor,
   };
@@ -69,6 +113,7 @@ export function getAlertType(service: Service): AlertType {
       timeWindowUnit: params.timeWindowUnit,
       interval: undefined,
     };
+    // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
     const result = await service.indexThreshold.timeSeriesQuery({
       logger,
       callCluster,
@@ -77,6 +122,7 @@ export function getAlertType(service: Service): AlertType {
     logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
 
     const groupResults = result.results || [];
+    // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
     for (const groupResult of groupResults) {
       const instanceId = groupResult.group;
       const value = groupResult.metrics[0][1];

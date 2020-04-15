@@ -22,8 +22,14 @@ import { IClusterClient, ICustomClusterClient } from './cluster_client';
 import { IScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
-import { InternalElasticsearchServiceSetup, ElasticsearchServiceSetup } from './types';
+import {
+  InternalElasticsearchServiceSetup,
+  ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
+  ElasticsearchStatusMeta,
+} from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import { ServiceStatus, ServiceStatusLevels } from '../status';
 
 const createScopedClusterClientMock = (): jest.Mocked<IScopedClusterClient> => ({
   callAsInternalUser: jest.fn(),
@@ -63,6 +69,26 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
+type MockedElasticSearchServiceStart = {
+  legacy: jest.Mocked<ElasticsearchServiceStart['legacy']>;
+} & {
+  legacy: {
+    client: jest.Mocked<IClusterClient>;
+  };
+};
+
+const createStartContractMock = () => {
+  const startContract: MockedElasticSearchServiceStart = {
+    legacy: {
+      createClient: jest.fn(),
+      client: createClusterClientMock(),
+    },
+  };
+  startContract.legacy.createClient.mockReturnValue(createCustomClusterClientMock());
+  startContract.legacy.client.asScoped.mockReturnValue(createScopedClusterClientMock());
+  return startContract;
+};
+
 type MockedInternalElasticSearchServiceSetup = jest.Mocked<
   InternalElasticsearchServiceSetup & {
     adminClient: jest.Mocked<IClusterClient>;
@@ -77,6 +103,10 @@ const createInternalSetupContractMock = () => {
       incompatibleNodes: [],
       warningNodes: [],
       kibanaVersion: '8.0.0',
+    }),
+    status$: new BehaviorSubject<ServiceStatus<ElasticsearchStatusMeta>>({
+      level: ServiceStatusLevels.available,
+      summary: 'Elasticsearch is available',
     }),
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
@@ -95,6 +125,7 @@ const createMock = () => {
     stop: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());
+  mocked.start.mockResolvedValueOnce(createStartContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;
 };
@@ -103,6 +134,7 @@ export const elasticsearchServiceMock = {
   create: createMock,
   createInternalSetup: createInternalSetupContractMock,
   createSetup: createSetupContractMock,
+  createStart: createStartContractMock,
   createClusterClient: createClusterClientMock,
   createCustomClusterClient: createCustomClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,

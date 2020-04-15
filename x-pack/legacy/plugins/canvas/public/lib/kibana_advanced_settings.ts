@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import { getCoreStart } from '../legacy';
 
-export const AdvancedSettings = chrome.getUiSettingsClient();
+export const getAdvancedSettings = () => getCoreStart().uiSettings;

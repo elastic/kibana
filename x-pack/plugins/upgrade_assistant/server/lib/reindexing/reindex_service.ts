@@ -6,14 +6,17 @@
 import { APICaller, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 
+import { LicensingPluginSetup } from '../../../../licensing/server';
+
 import {
   IndexGroup,
-  ReindexOptions,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
+
+import { esIndicesStateCheck } from '../es_indices_state_check';
 
 import {
   generateNewIndexName,
@@ -21,8 +24,8 @@ import {
   sourceNameForIndex,
   transformFlatSettings,
 } from './index_settings';
+
 import { ReindexActions } from './reindex_actions';
-import { LicensingPluginSetup } from '../../../../licensing/server';
 
 import { error } from './error';
 
@@ -55,7 +58,10 @@ export interface ReindexService {
    * @param indexName
    * @param opts Additional options when creating a new reindex operation
    */
-  createReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
+  createReindexOperation(
+    indexName: string,
+    opts?: { enqueue?: boolean }
+  ): Promise<ReindexSavedObject>;
 
   /**
    * Retrieves all reindex operations that have the given status.
@@ -69,6 +75,12 @@ export interface ReindexService {
    * @param indexName
    */
   findReindexOperation(indexName: string): Promise<ReindexSavedObject | null>;
+
+  /**
+   * Delete reindex operations for completed indices with deprecations.
+   * @param indexNames
+   */
+  cleanupReindexOperations(indexNames: string[]): Promise<void> | null;
 
   /**
    * Process the reindex operation through one step of the state machine and resolves
@@ -88,7 +100,21 @@ export interface ReindexService {
    * @param indexName
    * @param opts As with {@link createReindexOperation} we support this setting.
    */
-  resumeReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
+  resumeReindexOperation(
+    indexName: string,
+    opts?: { enqueue?: boolean }
+  ): Promise<ReindexSavedObject>;
+
+  /**
+   * Update the update_at field on the reindex operation
+   *
+   * @remark
+   * Currently also sets a startedAt field on the SavedObject, not really used
+   * elsewhere, but is an indication that the object has started being processed.
+   *
+   * @param indexName
+   */
+  startQueuedReindexOperation(indexName: string): Promise<ReindexSavedObject>;
 
   /**
    * Cancel an in-progress reindex operation for a given index. Only allowed when the
@@ -317,7 +343,12 @@ export const reindexServiceFactory = (
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
     const { indexName, reindexOptions } = reindexOp.attributes;
 
-    if (reindexOptions?.openAndClose === true) {
+    // Where possible, derive reindex options at the last moment before reindexing
+    // to prevent them from becoming stale as they wait in the queue.
+    const indicesState = await esIndicesStateCheck(callAsUser, [indexName]);
+    const openAndClose = indicesState[indexName] === 'close';
+    if (indicesState[indexName] === 'close') {
+      log.debug(`Detected closed index ${indexName}, opening...`);
       await callAsUser('indices.open', { index: indexName });
     }
 
@@ -334,6 +365,12 @@ export const reindexServiceFactory = (
       lastCompletedStep: ReindexStep.reindexStarted,
       reindexTaskId: startReindex.task,
       reindexTaskPercComplete: 0,
+      reindexOptions: {
+        ...(reindexOptions ?? {}),
+        // Indicate to downstream states whether we opened a closed index that should be
+        // closed again.
+        openAndClose,
+      },
     });
   };
 
@@ -529,7 +566,7 @@ export const reindexServiceFactory = (
       }
     },
 
-    async createReindexOperation(indexName: string, opts?: ReindexOptions) {
+    async createReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
       const indexExists = await callAsUser('indices.exists', { index: indexName });
       if (!indexExists) {
         throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
@@ -551,7 +588,10 @@ export const reindexServiceFactory = (
         }
       }
 
-      return actions.createReindexOp(indexName, opts);
+      return actions.createReindexOp(
+        indexName,
+        opts?.enqueue ? { queueSettings: { queuedAt: Date.now() } } : undefined
+      );
     },
 
     async findReindexOperation(indexName: string) {
@@ -567,6 +607,23 @@ export const reindexServiceFactory = (
       }
 
       return findResponse.saved_objects[0];
+    },
+
+    async cleanupReindexOperations(indexNames: string[]) {
+      const performCleanup = async (indexName: string) => {
+        const existingReindexOps = await actions.findReindexOperations(indexName);
+
+        if (existingReindexOps && existingReindexOps.total !== 0) {
+          const existingOp = existingReindexOps.saved_objects[0];
+          if (existingOp.attributes.status === ReindexStatus.completed) {
+            // Delete the existing one if its status is completed, but still contains deprecation warnings
+            // example scenario: index was upgraded, but then deleted and restored with an old snapshot
+            await actions.deleteReindexOp(existingOp);
+          }
+        }
+      };
+
+      await Promise.all(indexNames.map(performCleanup));
     },
 
     findAllByStatus: actions.findAllByStatus,
@@ -639,7 +696,7 @@ export const reindexServiceFactory = (
       });
     },
 
-    async resumeReindexOperation(indexName: string, opts?: ReindexOptions) {
+    async resumeReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
       const reindexOp = await this.findReindexOperation(indexName);
 
       if (!reindexOp) {
@@ -653,10 +710,31 @@ export const reindexServiceFactory = (
         } else if (op.attributes.status !== ReindexStatus.paused) {
           throw new Error(`Reindex operation must be paused in order to be resumed.`);
         }
+        const queueSettings = opts?.enqueue ? { queuedAt: Date.now() } : undefined;
 
         return actions.updateReindexOp(op, {
           status: ReindexStatus.inProgress,
-          reindexOptions: opts ?? op.attributes.reindexOptions,
+          reindexOptions: queueSettings ? { queueSettings } : undefined,
+        });
+      });
+    },
+
+    async startQueuedReindexOperation(indexName: string) {
+      const reindexOp = await this.findReindexOperation(indexName);
+
+      if (!reindexOp) {
+        throw error.indexNotFound(`No reindex operation found for index ${indexName}`);
+      }
+
+      if (!reindexOp.attributes.reindexOptions?.queueSettings) {
+        throw error.reindexIsNotInQueue(`Reindex operation ${indexName} is not in the queue.`);
+      }
+
+      return actions.runWhileLocked(reindexOp, async lockedReindexOp => {
+        const { reindexOptions } = lockedReindexOp.attributes;
+        reindexOptions!.queueSettings!.startedAt = Date.now();
+        return actions.updateReindexOp(lockedReindexOp, {
+          reindexOptions,
         });
       });
     },

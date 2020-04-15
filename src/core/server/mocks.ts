@@ -33,6 +33,7 @@ import { InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { metricsServiceMock } from './metrics/metrics_service.mock';
 import { uuidServiceMock } from './uuid/uuid_service.mock';
+import { statusServiceMock } from './status/status_service.mock';
 
 export { httpServerMock } from './http/http_server.mocks';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
@@ -96,7 +97,13 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & jest.Mocked<Pick<CoreSetup, 'getStartServices'>>;
 
-function createCoreSetupMock() {
+function createCoreSetupMock({
+  pluginStartDeps = {},
+  pluginStartContract,
+}: {
+  pluginStartDeps?: object;
+  pluginStartContract?: any;
+} = {}) {
   const httpService = httpServiceMock.createSetupContract();
   const httpMock: jest.Mocked<CoreSetup['http']> = {
     createCookieSessionStorageFactory: httpService.createCookieSessionStorageFactory,
@@ -127,12 +134,13 @@ function createCoreSetupMock() {
     elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
+    status: statusServiceMock.createSetupContract(),
+    metrics: metricsServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
-    metrics: metricsServiceMock.createSetupContract(),
     getStartServices: jest
-      .fn<Promise<[ReturnType<typeof createCoreStartMock>, object]>, []>()
-      .mockResolvedValue([createCoreStartMock(), {}]),
+      .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
+      .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
   };
 
   return mock;
@@ -141,6 +149,7 @@ function createCoreSetupMock() {
 function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
     capabilities: capabilitiesServiceMock.createStartContract(),
+    elasticsearch: elasticsearchServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
@@ -154,10 +163,11 @@ function createInternalCoreSetupMock() {
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
     http: httpServiceMock.createSetupContract(),
-    uiSettings: uiSettingsServiceMock.createSetupContract(),
-    savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
-    uuid: uuidServiceMock.createSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
+    savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
+    status: statusServiceMock.createInternalSetupContract(),
+    uuid: uuidServiceMock.createSetupContract(),
+    uiSettings: uiSettingsServiceMock.createSetupContract(),
   };
   return setupDeps;
 }
@@ -165,6 +175,7 @@ function createInternalCoreSetupMock() {
 function createInternalCoreStartMock() {
   const startDeps: InternalCoreStart = {
     capabilities: capabilitiesServiceMock.createStartContract(),
+    elasticsearch: elasticsearchServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };

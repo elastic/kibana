@@ -12,7 +12,7 @@ import { fitToLayerExtent, updateSourceProp } from '../../actions/map_actions';
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
-    key: selectedLayer ? selectedLayer.getId() : '',
+    key: selectedLayer ? `${selectedLayer.getId()}${selectedLayer.isJoinable()}` : '',
     selectedLayer,
   };
 }
@@ -22,7 +22,8 @@ function mapDispatchToProps(dispatch) {
     fitToBounds: layerId => {
       dispatch(fitToLayerExtent(layerId));
     },
-    updateSourceProp: (id, propName, value) => dispatch(updateSourceProp(id, propName, value)),
+    updateSourceProp: (id, propName, value, newLayerType) =>
+      dispatch(updateSourceProp(id, propName, value, newLayerType)),
   };
 }
 

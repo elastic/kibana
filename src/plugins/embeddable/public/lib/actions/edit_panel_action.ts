@@ -19,9 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { Action } from 'src/plugins/ui_actions/public';
-import { GetEmbeddableFactory, ViewMode } from '../types';
+import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { IEmbeddable } from '../embeddables';
+import { EmbeddableStart } from '../../plugin';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -34,7 +35,7 @@ export class EditPanelAction implements Action<ActionContext> {
   public readonly id = ACTION_EDIT_PANEL;
   public order = 15;
 
-  constructor(private readonly getEmbeddableFactory: GetEmbeddableFactory) {}
+  constructor(private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']) {}
 
   public getDisplayName({ embeddable }: ActionContext) {
     const factory = this.getEmbeddableFactory(embeddable.type);
@@ -61,11 +62,16 @@ export class EditPanelAction implements Action<ActionContext> {
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
-  public async execute() {
-    return;
+  public async execute(context: ActionContext) {
+    const href = await this.getHref(context);
+    if (href) {
+      // TODO: when apps start using browser router instead of hash router this has to be fixed
+      // https://github.com/elastic/kibana/issues/58217
+      window.location.href = href;
+    }
   }
 
-  public getHref({ embeddable }: ActionContext): string {
+  public async getHref({ embeddable }: ActionContext): Promise<string> {
     const editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
     return editUrl ? editUrl : '';
   }

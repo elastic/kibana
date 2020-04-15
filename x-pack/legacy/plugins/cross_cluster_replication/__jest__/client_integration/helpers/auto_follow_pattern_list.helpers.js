@@ -5,9 +5,9 @@
  */
 
 import { registerTestBed, findTestSubject } from '../../../../../../test_utils';
-import { AutoFollowPatternList } from '../../../public/app/sections/home/auto_follow_pattern_list';
-import { ccrStore } from '../../../public/app/store';
-import routing from '../../../public/app/services/routing';
+import { AutoFollowPatternList } from '../../../public/np_ready/app/sections/home/auto_follow_pattern_list';
+import { ccrStore } from '../../../public/np_ready/app/store';
+import routing from '../../../public/np_ready/app/services/routing';
 
 const testBedConfig = {
   store: ccrStore,

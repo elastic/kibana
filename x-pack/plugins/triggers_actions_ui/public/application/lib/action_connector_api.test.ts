@@ -25,6 +25,9 @@ describe('loadActionTypes', () => {
         id: 'test',
         name: 'Test',
         enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);
@@ -40,25 +43,14 @@ describe('loadActionTypes', () => {
 });
 
 describe('loadAllActions', () => {
-  test('should call find actions API', async () => {
-    const resolvedValue = {
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    };
-    http.get.mockResolvedValueOnce(resolvedValue);
+  test('should call getAll actions API', async () => {
+    http.get.mockResolvedValueOnce([]);
 
     const result = await loadAllActions({ http });
-    expect(result).toEqual(resolvedValue);
+    expect(result).toEqual([]);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action/_find",
-        Object {
-          "query": Object {
-            "per_page": 10000,
-          },
-        },
+        "/api/action/_getAll",
       ]
     `);
   });
@@ -68,6 +60,7 @@ describe('createActionConnector', () => {
   test('should call create action API', async () => {
     const connector: ActionConnectorWithoutId = {
       actionTypeId: 'test',
+      isPreconfigured: false,
       name: 'My test',
       config: {},
       secrets: {},
@@ -81,7 +74,7 @@ describe('createActionConnector', () => {
       Array [
         "/api/action",
         Object {
-          "body": "{\\"actionTypeId\\":\\"test\\",\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
+          "body": "{\\"actionTypeId\\":\\"test\\",\\"isPreconfigured\\":false,\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
       ]
     `);
@@ -93,6 +86,7 @@ describe('updateActionConnector', () => {
     const id = '123';
     const connector: ActionConnectorWithoutId = {
       actionTypeId: 'test',
+      isPreconfigured: false,
       name: 'My test',
       config: {},
       secrets: {},

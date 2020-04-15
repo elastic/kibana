@@ -5,18 +5,15 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import {
-  Privileges,
-  getDefaultPrivileges,
-} from '../../../../../legacy/plugins/ml/common/types/privileges';
+import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
 import { upgradeCheckProvider } from './upgrade';
-import { MlLicense } from '../../../../../legacy/plugins/ml/common/license';
+import { MlLicense } from '../../../common/license';
 
 import { mlPrivileges } from './privileges';
 
 type ClusterPrivilege = Record<string, boolean>;
 
-interface Response {
+export interface MlCapabilities {
   capabilities: Privileges;
   upgradeInProgress: boolean;
   isPlatinumOrTrialLicense: boolean;
@@ -30,7 +27,7 @@ export function privilegesProvider(
   ignoreSpaces: boolean = false
 ) {
   const { isUpgradeInProgress } = upgradeCheckProvider(callAsCurrentUser);
-  async function getPrivileges(): Promise<Response> {
+  async function getPrivileges(): Promise<MlCapabilities> {
     // get the default privileges, forced to be false.
     const privileges = getDefaultPrivileges();
 

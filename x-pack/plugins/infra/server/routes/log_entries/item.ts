@@ -20,7 +20,7 @@ import {
   logEntriesItemResponseRT,
 } from '../../../common/http_api';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initLogEntriesItemRoute = ({ framework, sources, logEntries }: InfraBackendLibs) => {
   framework.registerRoute(

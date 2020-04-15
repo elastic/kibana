@@ -4,19 +4,19 @@
 
 A Canvas _workpad_ provides you with a workspace where you can build presentations of your live data.
 
-To create a workpad, you can:
+To create a workpad, choose one of the following options:
 
 * <<blank-canvas-workpad,Build fully customizable presentations of your own data>>
 
 * <<canvas-template-workpad,Choose from a set of preconfigured workpad templates>>
 
-* <<import-canvas-workpad,Import a workpad that someone else has already started>>
-
 * <<sample-data-workpad,Gather inspiration from the {kib} sample data workpads>>
+
+* <<import-canvas-workpad,Import a workpad that someone else has already started>>
 
 [float]
 [[blank-canvas-workpad]]
-=== Start with a blank page
+=== Start with a blank workpad
 
 To use the background colors, images, and data of your choice, start with a blank workpad.
 
@@ -69,21 +69,21 @@ Each of the sample data sets comes with a Canvas workpad that you can use for yo
 
 . Add a {kibana-ref}/add-sample-data.html[sample data set].
 
-. On the *Add Data to Kibana* page, click the *View data* dropdown list, then select *Canvas*.
-+
-Need some more workpad inspiration? Check out the link:https://www.elastic.co/blog/[Elastic Blog].
+. On the *Add Data* page, click *View data*, then select *Canvas*.
 
 [float]
 [[apply-workpad-styles]]
-== Apply a set of styles to the entire workpad
+=== Apply a set of styles to the entire workpad
 
-To make your workpad look exactly the way you want, use the editor on the right to apply CSS overrides.
+To make your workpad look exactly the way you want, use the editor to apply CSS overrides.
 
 . Expand *Global CSS overrides*.
 
-. Enter the CSS. For example, to change the background on every page, enter:
+. Enter the CSS.
 +
-[source,js]
+For example, to change the background on every page, enter:
++
+[source,text]
 --------------------------------------------------
 .canvasPage {
 background-color: #3990e6;
@@ -91,3 +91,46 @@ background-color: #3990e6;
 --------------------------------------------------
 
 . Click *Apply stylesheet*.
+
+[float]
+[[configure-auto-refresh-interval]]
+=== Change the auto-refresh interval
+
+Increase or decrease how often the data refreshes on your workpad.
+
+. In the top left corner, click the *Control settings* icon.
+
+. Under *Change auto-refresh interval*, select the interval you want to use.
++
+[role="screenshot"]
+image::images/canvas-refresh-interval.png[Element data refresh interval]
+
+TIP: To manually refresh the data, click the *Refresh data* icon.
+
+[float]
+[[zoom-in-out]]
+=== Use the zoom options
+
+In the upper left corner, click the *Zoom controls* icon, then select one of the options.
+
+[role="screenshot"]
+image::images/canvas-zoom-controls.png[Zoom controls]
+
+[float]
+[[add-more-pages]]
+=== Add pages
+
+Organize your ideas onto separate pages by adding more pages.
+
+. Click *Page 1*, then click *+*.
+
+. On the *Page* editor panel, select the page transition from the *Transition* dropdown.
++
+[role="screenshot"]
+image::images/canvas-add-pages.gif[Add pages]
+
+include::{kib-repo-dir}/canvas/canvas-elements.asciidoc[]
+
+include::{kib-repo-dir}/canvas/canvas-present-workpad.asciidoc[]
+
+include::{kib-repo-dir}/canvas/canvas-share-workpad.asciidoc[]

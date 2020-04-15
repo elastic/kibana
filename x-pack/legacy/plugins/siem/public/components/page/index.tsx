@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import {
-  EuiBadge,
-  EuiBadgeProps,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiPage,
-} from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
 import styled, { createGlobalStyle } from 'styled-components';
 
 /*
@@ -20,6 +12,12 @@ import styled, { createGlobalStyle } from 'styled-components';
   and `EuiPopover`, `EuiToolTip` global styles
 */
 export const AppGlobalStyle = createGlobalStyle`
+  /* dirty hack to fix draggables with tooltip on FF */
+  body#siem-app {
+    position: static;
+  }
+  /* end of dirty hack to fix draggables with tooltip on FF */
+  
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }
@@ -107,6 +105,7 @@ export const PageHeader = styled.div`
 PageHeader.displayName = 'PageHeader';
 
 export const FooterContainer = styled.div`
+  flex: 0;
   bottom: 0;
   color: #666;
   left: 0;
@@ -154,13 +153,9 @@ export const Pane1FlexContent = styled.div`
 
 Pane1FlexContent.displayName = 'Pane1FlexContent';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// const Badge = styled(EuiBadge)`
-//   margin-left: 5px;
-// `;
-export const CountBadge = (props: EuiBadgeProps) => (
-  <EuiBadge {...props} style={{ marginLeft: '5px' }} />
-);
+export const CountBadge = styled(EuiBadge)`
+  margin-left: 5px;
+`;
 
 CountBadge.displayName = 'CountBadge';
 
@@ -170,13 +165,9 @@ export const Spacer = styled.span`
 
 Spacer.displayName = 'Spacer';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// export const Badge = styled(EuiBadge)`
-//   vertical-align: top;
-// `;
-export const Badge = (props: EuiBadgeProps) => (
-  <EuiBadge {...props} style={{ verticalAlign: 'top' }} />
-);
+export const Badge = styled(EuiBadge)`
+  vertical-align: top;
+`;
 
 Badge.displayName = 'Badge';
 

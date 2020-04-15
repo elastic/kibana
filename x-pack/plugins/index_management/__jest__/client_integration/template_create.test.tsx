@@ -6,6 +6,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../common';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
 import {
@@ -69,7 +70,10 @@ describe('<TemplateCreate />', () => {
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      testBed = await setup();
+      await act(async () => {
+        testBed = await setup();
+        await testBed.waitFor('templateForm');
+      });
     });
 
     test('should set the correct page title', () => {
@@ -92,252 +96,258 @@ describe('<TemplateCreate />', () => {
 
       expect(find('nextButton').props().disabled).toEqual(true);
     });
+  });
 
-    describe('form validation', () => {
-      beforeEach(async () => {
+  describe('form validation', () => {
+    beforeEach(async () => {
+      await act(async () => {
         testBed = await setup();
-      });
-
-      describe('index settings (step 2)', () => {
-        beforeEach(async () => {
-          const { actions } = testBed;
-
-          await act(async () => {
-            // Complete step 1 (logistics)
-            await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
-          });
-        });
-
-        it('should set the correct page title', () => {
-          const { exists, find } = testBed;
-
-          expect(exists('stepSettings')).toBe(true);
-          expect(find('stepTitle').text()).toEqual('Index settings (optional)');
-        });
-
-        it('should not allow invalid json', async () => {
-          const { form, actions } = testBed;
-
-          await act(async () => {
-            actions.completeStepTwo('{ invalidJsonString ');
-          });
-
-          expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
-        });
-      });
-
-      describe('mappings (step 3)', () => {
-        beforeEach(async () => {
-          const { actions } = testBed;
-
-          await act(async () => {
-            // Complete step 1 (logistics)
-            await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
-
-            // Complete step 2 (index settings)
-            await actions.completeStepTwo('{}');
-          });
-        });
-
-        it('should set the correct page title', () => {
-          const { exists, find } = testBed;
-
-          expect(exists('stepMappings')).toBe(true);
-          expect(find('stepTitle').text()).toEqual('Mappings (optional)');
-        });
-
-        it('should allow the user to define document fields for a mapping', async () => {
-          const { actions, find } = testBed;
-
-          await act(async () => {
-            await actions.addMappingField('field_1', 'text');
-            await actions.addMappingField('field_2', 'text');
-            await actions.addMappingField('field_3', 'text');
-          });
-
-          expect(find('fieldsListItem').length).toBe(3);
-        });
-
-        it('should allow the user to remove a document field from a mapping', async () => {
-          const { actions, find } = testBed;
-
-          await act(async () => {
-            await actions.addMappingField('field_1', 'text');
-            await actions.addMappingField('field_2', 'text');
-          });
-
-          expect(find('fieldsListItem').length).toBe(2);
-
-          actions.clickCancelCreateFieldButton();
-          // Remove first field
-          actions.clickRemoveButtonAtField(0);
-
-          expect(find('fieldsListItem').length).toBe(1);
-        });
-      });
-
-      describe('aliases (step 4)', () => {
-        beforeEach(async () => {
-          const { actions } = testBed;
-
-          await act(async () => {
-            // Complete step 1 (logistics)
-            await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
-
-            // Complete step 2 (index settings)
-            await actions.completeStepTwo('{}');
-
-            // Complete step 3 (mappings)
-            await actions.completeStepThree();
-          });
-        });
-
-        it('should set the correct page title', () => {
-          const { exists, find } = testBed;
-
-          expect(exists('stepAliases')).toBe(true);
-          expect(find('stepTitle').text()).toEqual('Aliases (optional)');
-        });
-
-        it('should not allow invalid json', async () => {
-          const { actions, form } = testBed;
-
-          await act(async () => {
-            // Complete step 4 (aliases) with invalid json
-            await actions.completeStepFour('{ invalidJsonString ');
-          });
-
-          expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
-        });
+        await testBed.waitFor('templateForm');
       });
     });
 
-    describe('review (step 5)', () => {
+    describe('index settings (step 2)', () => {
       beforeEach(async () => {
-        testBed = await setup();
-
         const { actions } = testBed;
 
         await act(async () => {
           // Complete step 1 (logistics)
-          await actions.completeStepOne({
-            name: TEMPLATE_NAME,
-            indexPatterns: DEFAULT_INDEX_PATTERNS,
-          });
-
-          // Complete step 2 (index settings)
-          await actions.completeStepTwo(JSON.stringify(SETTINGS));
-
-          // Complete step 3 (mappings)
-          await actions.completeStepThree();
-
-          // Complete step 4 (aliases)
-          await actions.completeStepFour(JSON.stringify(ALIASES));
+          await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
         });
       });
 
-      it('should set the correct step title', () => {
-        const { find, exists } = testBed;
-        expect(exists('stepSummary')).toBe(true);
-        expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
+      it('should set the correct page title', () => {
+        const { exists, find } = testBed;
+
+        expect(exists('stepSettings')).toBe(true);
+        expect(find('stepTitle').text()).toEqual('Index settings (optional)');
       });
 
-      describe('tabs', () => {
-        test('should have 2 tabs', () => {
-          const { find } = testBed;
-
-          expect(find('summaryTabContent').find('.euiTab').length).toBe(2);
-          expect(
-            find('summaryTabContent')
-              .find('.euiTab')
-              .map(t => t.text())
-          ).toEqual(['Summary', 'Request']);
-        });
-
-        test('should navigate to the Request tab', async () => {
-          const { exists, actions } = testBed;
-
-          expect(exists('summaryTab')).toBe(true);
-          expect(exists('requestTab')).toBe(false);
-
-          actions.selectSummaryTab('request');
-
-          expect(exists('summaryTab')).toBe(false);
-          expect(exists('requestTab')).toBe(true);
-        });
-      });
-
-      it('should render a warning message if a wildcard is used as an index pattern', async () => {
-        testBed = await setup();
-
-        const { actions, exists, find } = testBed;
+      it('should not allow invalid json', async () => {
+        const { form, actions } = testBed;
 
         await act(async () => {
-          // Complete step 1 (logistics)
-          await actions.completeStepOne({
-            name: TEMPLATE_NAME,
-            indexPatterns: ['*'], // Set wildcard index pattern
-          });
-
-          // Complete step 2 (index settings)
-          await actions.completeStepTwo(JSON.stringify({}));
-
-          // Complete step 3 (mappings)
-          await actions.completeStepThree();
-
-          // Complete step 4 (aliases)
-          await actions.completeStepFour(JSON.stringify({}));
+          actions.completeStepTwo('{ invalidJsonString ');
         });
 
-        expect(exists('indexPatternsWarning')).toBe(true);
-        expect(find('indexPatternsWarningDescription').text()).toEqual(
-          'All new indices that you create will use this template. Edit index patterns.'
-        );
+        expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
       });
     });
 
-    describe('form payload & api errors', () => {
+    describe('mappings (step 3)', () => {
       beforeEach(async () => {
-        testBed = await setup();
-
         const { actions } = testBed;
-
-        const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
 
         await act(async () => {
           // Complete step 1 (logistics)
-          await actions.completeStepOne({
-            name: TEMPLATE_NAME,
-            indexPatterns: DEFAULT_INDEX_PATTERNS,
-          });
+          await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
 
           // Complete step 2 (index settings)
-          await actions.completeStepTwo(JSON.stringify(SETTINGS));
-
-          // Complete step 3 (mappings)
-          await actions.completeStepThree(MAPPING_FIELDS);
-
-          // Complete step 4 (aliases)
-          await nextTick(100);
-          await actions.completeStepFour(JSON.stringify(ALIASES));
+          await actions.completeStepTwo('{}');
         });
       });
 
-      // Flaky
-      it.skip('should send the correct payload', async () => {
+      it('should set the correct page title', () => {
+        const { exists, find } = testBed;
+
+        expect(exists('stepMappings')).toBe(true);
+        expect(find('stepTitle').text()).toEqual('Mappings (optional)');
+      });
+
+      it('should allow the user to define document fields for a mapping', async () => {
+        const { actions, find } = testBed;
+
+        await act(async () => {
+          await actions.addMappingField('field_1', 'text');
+          await actions.addMappingField('field_2', 'text');
+          await actions.addMappingField('field_3', 'text');
+        });
+
+        expect(find('fieldsListItem').length).toBe(3);
+      });
+
+      it('should allow the user to remove a document field from a mapping', async () => {
+        const { actions, find } = testBed;
+
+        await act(async () => {
+          await actions.addMappingField('field_1', 'text');
+          await actions.addMappingField('field_2', 'text');
+        });
+
+        expect(find('fieldsListItem').length).toBe(2);
+
+        actions.clickCancelCreateFieldButton();
+        // Remove first field
+        actions.deleteMappingsFieldAt(0);
+
+        expect(find('fieldsListItem').length).toBe(1);
+      });
+    });
+
+    describe('aliases (step 4)', () => {
+      beforeEach(async () => {
         const { actions } = testBed;
 
         await act(async () => {
-          actions.clickSubmitButton();
-          await nextTick();
+          // Complete step 1 (logistics)
+          await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+
+          // Complete step 2 (index settings)
+          await actions.completeStepTwo('{}');
+
+          // Complete step 3 (mappings)
+          await actions.completeStepThree();
+        });
+      });
+
+      it('should set the correct page title', () => {
+        const { exists, find } = testBed;
+
+        expect(exists('stepAliases')).toBe(true);
+        expect(find('stepTitle').text()).toEqual('Aliases (optional)');
+      });
+
+      it('should not allow invalid json', async () => {
+        const { actions, form } = testBed;
+
+        await act(async () => {
+          // Complete step 4 (aliases) with invalid json
+          await actions.completeStepFour('{ invalidJsonString ', false);
         });
 
-        const latestRequest = server.requests[server.requests.length - 1];
+        expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
+      });
+    });
+  });
 
-        const expected = JSON.stringify({
-          isManaged: false,
+  describe('review (step 5)', () => {
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup();
+        await testBed.waitFor('templateForm');
+
+        const { actions } = testBed;
+
+        // Complete step 1 (logistics)
+        await actions.completeStepOne({
           name: TEMPLATE_NAME,
           indexPatterns: DEFAULT_INDEX_PATTERNS,
+        });
+
+        // Complete step 2 (index settings)
+        await actions.completeStepTwo(JSON.stringify(SETTINGS));
+
+        // Complete step 3 (mappings)
+        await actions.completeStepThree();
+
+        // Complete step 4 (aliases)
+        await actions.completeStepFour(JSON.stringify(ALIASES));
+      });
+    });
+
+    it('should set the correct step title', () => {
+      const { find, exists } = testBed;
+      expect(exists('stepSummary')).toBe(true);
+      expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
+    });
+
+    describe('tabs', () => {
+      test('should have 2 tabs', () => {
+        const { find } = testBed;
+
+        expect(find('summaryTabContent').find('.euiTab').length).toBe(2);
+        expect(
+          find('summaryTabContent')
+            .find('.euiTab')
+            .map(t => t.text())
+        ).toEqual(['Summary', 'Request']);
+      });
+
+      test('should navigate to the Request tab', async () => {
+        const { exists, actions } = testBed;
+
+        expect(exists('summaryTab')).toBe(true);
+        expect(exists('requestTab')).toBe(false);
+
+        actions.selectSummaryTab('request');
+
+        expect(exists('summaryTab')).toBe(false);
+        expect(exists('requestTab')).toBe(true);
+      });
+    });
+
+    it('should render a warning message if a wildcard is used as an index pattern', async () => {
+      await act(async () => {
+        testBed = await setup();
+        await testBed.waitFor('templateForm');
+
+        const { actions } = testBed;
+        // Complete step 1 (logistics)
+        await actions.completeStepOne({
+          name: TEMPLATE_NAME,
+          indexPatterns: ['*'], // Set wildcard index pattern
+        });
+
+        // Complete step 2 (index settings)
+        await actions.completeStepTwo(JSON.stringify({}));
+
+        // Complete step 3 (mappings)
+        await actions.completeStepThree();
+
+        // Complete step 4 (aliases)
+        await actions.completeStepFour(JSON.stringify({}));
+      });
+
+      const { exists, find } = testBed;
+
+      expect(exists('indexPatternsWarning')).toBe(true);
+      expect(find('indexPatternsWarningDescription').text()).toEqual(
+        'All new indices that you create will use this template. Edit index patterns.'
+      );
+    });
+  });
+
+  describe('form payload & api errors', () => {
+    beforeEach(async () => {
+      const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
+
+      await act(async () => {
+        testBed = await setup();
+        await testBed.waitFor('templateForm');
+
+        const { actions } = testBed;
+        // Complete step 1 (logistics)
+        await actions.completeStepOne({
+          name: TEMPLATE_NAME,
+          indexPatterns: DEFAULT_INDEX_PATTERNS,
+        });
+
+        // Complete step 2 (index settings)
+        await actions.completeStepTwo(JSON.stringify(SETTINGS));
+
+        // Complete step 3 (mappings)
+        await actions.completeStepThree(MAPPING_FIELDS);
+
+        // Complete step 4 (aliases)
+        await actions.completeStepFour(JSON.stringify(ALIASES));
+      });
+    });
+
+    it('should send the correct payload', async () => {
+      const { actions } = testBed;
+
+      await act(async () => {
+        actions.clickSubmitButton();
+        await nextTick();
+      });
+
+      const latestRequest = server.requests[server.requests.length - 1];
+
+      const expected = {
+        isManaged: false,
+        name: TEMPLATE_NAME,
+        indexPatterns: DEFAULT_INDEX_PATTERNS,
+        template: {
           settings: SETTINGS,
           mappings: {
             ...MAPPINGS,
@@ -354,31 +364,34 @@ describe('<TemplateCreate />', () => {
             },
           },
           aliases: ALIASES,
-        });
+        },
+        _kbnMeta: {
+          formatVersion: DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
+        },
+      };
 
-        expect(JSON.parse(latestRequest.requestBody).body).toEqual(expected);
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+    });
+
+    it('should surface the API errors from the put HTTP request', async () => {
+      const { component, actions, find, exists } = testBed;
+
+      const error = {
+        status: 409,
+        error: 'Conflict',
+        message: `There is already a template with name '${TEMPLATE_NAME}'`,
+      };
+
+      httpRequestsMockHelpers.setCreateTemplateResponse(undefined, { body: error });
+
+      await act(async () => {
+        actions.clickSubmitButton();
+        await nextTick();
+        component.update();
       });
 
-      it('should surface the API errors from the put HTTP request', async () => {
-        const { component, actions, find, exists } = testBed;
-
-        const error = {
-          status: 409,
-          error: 'Conflict',
-          message: `There is already a template with name '${TEMPLATE_NAME}'`,
-        };
-
-        httpRequestsMockHelpers.setCreateTemplateResponse(undefined, { body: error });
-
-        await act(async () => {
-          actions.clickSubmitButton();
-          await nextTick();
-          component.update();
-        });
-
-        expect(exists('saveTemplateError')).toBe(true);
-        expect(find('saveTemplateError').text()).toContain(error.message);
-      });
+      expect(exists('saveTemplateError')).toBe(true);
+      expect(find('saveTemplateError').text()).toContain(error.message);
     });
   });
 });

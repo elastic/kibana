@@ -20,6 +20,7 @@
 import Path from 'path';
 
 import multimatch from 'multimatch';
+import isPathInside from 'is-path-inside';
 
 import { ProjectMap, getProjects, includeTransitiveProjects } from './projects';
 import { Project } from './project';
@@ -120,5 +121,16 @@ export class Kibana {
     }
 
     return filteredProjects;
+  }
+
+  isPartOfRepo(project: Project) {
+    return (
+      project.path === this.kibanaProject.path ||
+      isPathInside(project.path, this.kibanaProject.path)
+    );
+  }
+
+  isOutsideRepo(project: Project) {
+    return !this.isPartOfRepo(project);
   }
 }

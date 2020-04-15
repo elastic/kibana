@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  TimeSeriesResult,
-  TimeSeriesResultRow,
-  MetricResult,
-} from '../../../../../../alerting_builtins/common/alert_types/index_threshold';
-
 export interface Comparator {
   text: string;
   value: string;

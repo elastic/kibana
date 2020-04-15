@@ -7,12 +7,10 @@ import { OutputType } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'outputs';
 
-export const DEFAULT_OUTPUT_ID = 'default';
-
 export const DEFAULT_OUTPUT = {
-  name: DEFAULT_OUTPUT_ID,
+  name: 'default',
+  is_default: true,
   type: OutputType.Elasticsearch,
   hosts: [''],
-  ingest_pipeline: DEFAULT_OUTPUT_ID,
   api_key: '',
 };

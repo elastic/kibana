@@ -11,7 +11,7 @@ import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-const bodySchema = schema.object({ pattern: schema.string() }, { allowUnknowns: true });
+const bodySchema = schema.object({ pattern: schema.string() }, { unknowns: 'allow' });
 
 function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
   return reduce(

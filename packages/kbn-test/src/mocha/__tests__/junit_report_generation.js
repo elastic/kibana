@@ -129,7 +129,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE SUB_SUITE never runs',
         'metadata-json': '{}',
       },
-      'system-out': testFail['system-out'],
+      'system-out': ['-- logs are only reported for failed tests --'],
       skipped: [''],
     });
   });

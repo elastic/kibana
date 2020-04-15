@@ -10,7 +10,7 @@ import {
   METRIC_JAVA_HEAP_MEMORY_MAX,
   METRIC_JAVA_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_HEAP_MEMORY_USED,
-  SERVICE_AGENT_NAME
+  AGENT_NAME
 } from '../../../../../../common/elasticsearch_fieldnames';
 import {
   Setup,
@@ -71,6 +71,6 @@ export async function getHeapMemoryChart(
       },
       heapMemoryUsed: { avg: { field: METRIC_JAVA_HEAP_MEMORY_USED } }
     },
-    additionalFilters: [{ term: { [SERVICE_AGENT_NAME]: 'java' } }]
+    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }]
   });
 }

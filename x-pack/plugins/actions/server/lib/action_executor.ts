@@ -11,6 +11,8 @@ import {
   ActionTypeRegistryContract,
   GetServicesFunction,
   RawAction,
+  PreConfiguredAction,
+  Services,
 } from '../types';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
@@ -24,6 +26,7 @@ export interface ActionExecutorContext {
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export interface ExecuteOptions {
@@ -72,33 +75,22 @@ export class ActionExecutor {
       encryptedSavedObjectsPlugin,
       actionTypeRegistry,
       eventLogger,
+      preconfiguredActions,
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
-    const namespace = spaces && spaces.getSpaceId(request);
+    const spaceId = spaces && spaces.getSpaceId(request);
+    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
-    // Ensure user can read the action before processing
-    const {
-      attributes: { actionTypeId, config, name },
-    } = await services.savedObjectsClient.get<RawAction>('action', actionId);
-
-    try {
-      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-    } catch (err) {
-      return { status: 'error', actionId, message: err.message, retry: false };
-    }
-
-    // Only get encrypted attributes here, the remaining attributes can be fetched in
-    // the savedObjectsClient call
-    const {
-      attributes: { secrets },
-    } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAction>(
-      'action',
+    const { actionTypeId, name, config, secrets } = await getActionInfo(
+      services,
+      encryptedSavedObjectsPlugin,
+      preconfiguredActions,
       actionId,
-      {
-        namespace: namespace === 'default' ? undefined : namespace,
-      }
+      namespace.namespace
     );
+
+    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     const actionType = actionTypeRegistry.get(actionTypeId);
 
     let validatedParams: Record<string, any>;
@@ -116,7 +108,7 @@ export class ActionExecutor {
     const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
-      kibana: { namespace, saved_objects: [{ type: 'action', id: actionId }] },
+      kibana: { saved_objects: [{ type: 'action', id: actionId, ...namespace }] },
     };
 
     eventLogger.startTiming(event);
@@ -177,4 +169,51 @@ function actionErrorToMessage(result: ActionTypeExecutorResult): string {
   }
 
   return message;
+}
+
+interface ActionInfo {
+  actionTypeId: string;
+  name: string;
+  config: any;
+  secrets: any;
+}
+
+async function getActionInfo(
+  services: Services,
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart,
+  preconfiguredActions: PreConfiguredAction[],
+  actionId: string,
+  namespace: string | undefined
+): Promise<ActionInfo> {
+  // check to see if it's a pre-configured action first
+  const pcAction = preconfiguredActions.find(
+    preconfiguredAction => preconfiguredAction.id === actionId
+  );
+  if (pcAction) {
+    return {
+      actionTypeId: pcAction.actionTypeId,
+      name: pcAction.name,
+      config: pcAction.config,
+      secrets: pcAction.secrets,
+    };
+  }
+
+  // if not pre-configured action, should be a saved object
+  // ensure user can read the action before processing
+  const {
+    attributes: { actionTypeId, config, name },
+  } = await services.savedObjectsClient.get<RawAction>('action', actionId);
+
+  const {
+    attributes: { secrets },
+  } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAction>('action', actionId, {
+    namespace: namespace === 'default' ? undefined : namespace,
+  });
+
+  return {
+    actionTypeId,
+    name,
+    config,
+    secrets,
+  };
 }

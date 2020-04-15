@@ -27,7 +27,10 @@ export async function getUpgradeAssistantStatus(
   // If we have found deprecation information for index/indices check whether the index is
   // open or closed.
   if (indexNames.length) {
-    const indexStates = await esIndicesStateCheck(dataClient, indexNames);
+    const indexStates = await esIndicesStateCheck(
+      dataClient.callAsCurrentUser.bind(dataClient),
+      indexNames
+    );
 
     indices.forEach(indexData => {
       indexData.blockerForReindexing =

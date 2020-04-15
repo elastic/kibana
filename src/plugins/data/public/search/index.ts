@@ -17,6 +17,10 @@
  * under the License.
  */
 
+export * from './aggs';
+export * from './expressions';
+export * from './tabify';
+
 export {
   ISearchSetup,
   ISearchStart,
@@ -42,14 +46,7 @@ export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search
 
 export { LegacyApiCaller, SearchRequest, SearchResponse } from './es_client';
 
-export {
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-  defaultSearchStrategy,
-  SearchError,
-  SearchStrategyProvider,
-  getSearchErrorType,
-} from './search_strategy';
+export { SearchError, SearchStrategyProvider, getSearchErrorType } from './search_strategy';
 
 export {
   ISearchSource,
@@ -57,6 +54,10 @@ export {
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
+  createSearchSource,
 } from './search_source';
+
+export { SearchInterceptor } from './search_interceptor';
+export { RequestTimeoutError } from './request_timeout_error';
 
 export { FetchOptions } from './fetch';

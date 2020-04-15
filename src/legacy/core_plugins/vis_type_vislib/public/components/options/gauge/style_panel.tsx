@@ -22,9 +22,9 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SelectOption } from '../../common';
+import { SelectOption } from '../../../../../../../plugins/charts/public';
 import { GaugeOptionsInternalProps } from '.';
-import { AggGroupNames } from '../../../legacy_imports';
+import { AggGroupNames } from '../../../../../../../plugins/data/public';
 
 function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInternalProps) {
   const diasableAlignment =

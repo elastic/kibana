@@ -41,6 +41,7 @@ export const SourceConfigurationSettings = ({
     source,
     sourceExists,
     isLoading,
+    isUninitialized,
     updateSourceConfiguration,
   } = useContext(Source.Context);
 
@@ -83,10 +84,10 @@ export const SourceConfigurationSettings = ({
     source,
   ]);
 
-  if (!source) {
+  if ((isLoading || isUninitialized) && !source) {
     return <SourceLoadingPage />;
   }
-  if (!source.configuration) {
+  if (!source?.configuration) {
     return null;
   }
 

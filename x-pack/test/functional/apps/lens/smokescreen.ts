@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects, ...rest }: FtrProviderContext) {
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -21,6 +21,10 @@ export default function({ getService, getPageObjects, ...rest }: FtrProviderCont
   ]);
   const find = getService('find');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const elasticChart = getService('elasticChart');
+  const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
+  const filterBar = getService('filterBar');
 
   async function assertExpectedMetric() {
     await PageObjects.lens.assertExactText(
@@ -41,6 +45,29 @@ export default function({ getService, getPageObjects, ...rest }: FtrProviderCont
     );
   }
 
+  async function assertExpectedChart() {
+    await PageObjects.lens.assertExactText(
+      '[data-test-subj="embeddablePanelHeading-lnsXYvis"]',
+      'lnsXYvis'
+    );
+  }
+
+  async function assertExpectedTimerange() {
+    const time = await PageObjects.timePicker.getTimeConfig();
+    expect(time.start).to.equal('Sep 21, 2015 @ 09:00:00.000');
+    expect(time.end).to.equal('Sep 21, 2015 @ 12:00:00.000');
+  }
+
+  async function clickOnBarHistogram() {
+    const el = await elasticChart.getCanvas();
+
+    await browser
+      .getActions()
+      .move({ x: 5, y: 5, origin: el._webElement })
+      .click()
+      .perform();
+  }
+
   describe('lens smokescreen tests', () => {
     it('should allow editing saved visualizations', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
@@ -49,7 +76,7 @@ export default function({ getService, getPageObjects, ...rest }: FtrProviderCont
       await assertExpectedMetric();
     });
 
-    it('should be embeddable in dashboards', async () => {
+    it('metric should be embeddable in dashboards', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
@@ -57,6 +84,22 @@ export default function({ getService, getPageObjects, ...rest }: FtrProviderCont
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
       await assertExpectedMetric();
+    });
+
+    it('click on the bar in XYChart adds proper filters/timerange', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await find.clickByButtonText('lnsXYvis');
+      await dashboardAddPanel.closeAddPanel();
+      await PageObjects.lens.goToTimeRange();
+      await clickOnBarHistogram();
+      await testSubjects.click('applyFiltersPopoverButton');
+
+      await assertExpectedChart();
+      await assertExpectedTimerange();
+      const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
+      expect(hasIpFilter).to.be(true);
     });
 
     it('should allow seamless transition to and from table view', async () => {
@@ -77,21 +120,32 @@ export default function({ getService, getPageObjects, ...rest }: FtrProviderCont
 
       await PageObjects.lens.configureDimension({
         dimension:
-          '[data-test-subj="lnsXY_xDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
+          '[data-test-subj="lnsXY_xDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
       await PageObjects.lens.configureDimension({
         dimension:
-          '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
+          '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
         operation: 'avg',
         field: 'bytes',
       });
 
       await PageObjects.lens.configureDimension({
         dimension:
-          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
+          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        operation: 'terms',
+        field: '@message.raw',
+      });
+
+      await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_lnsDatatable');
+      await PageObjects.lens.removeDimension('lnsDatatable_column');
+      await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_bar_stacked');
+
+      await PageObjects.lens.configureDimension({
+        dimension:
+          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
         operation: 'terms',
         field: 'ip',
       });

@@ -5,10 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  JOB_STATE,
-  DATAFEED_STATE,
-} from '../../../../../legacy/plugins/ml/common/constants/states';
+import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
 type ACTION_STATE = DATAFEED_STATE | JOB_STATE;

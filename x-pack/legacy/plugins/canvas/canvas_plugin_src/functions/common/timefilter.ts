@@ -58,14 +58,14 @@ export function timefilter(): ExpressionFunctionDefinition<
       }
 
       const { from, to, column } = args;
-      const filter = {
+      const filter: Filter = {
         type: 'time',
         column,
         and: [],
       };
 
-      function parseAndValidate(str: string): string {
-        const moment = dateMath.parse(str);
+      function parseAndValidate(str: string, { roundUp }: { roundUp: boolean }): string {
+        const moment = dateMath.parse(str, { roundUp });
 
         if (!moment || !moment.isValid()) {
           throw errors.invalidString(str);
@@ -75,11 +75,11 @@ export function timefilter(): ExpressionFunctionDefinition<
       }
 
       if (!!to) {
-        (filter as any).to = parseAndValidate(to);
+        filter.to = parseAndValidate(to, { roundUp: true });
       }
 
       if (!!from) {
-        (filter as any).from = parseAndValidate(from);
+        filter.from = parseAndValidate(from, { roundUp: false });
       }
 
       return { ...input, and: [...input.and, filter] };

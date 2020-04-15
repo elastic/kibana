@@ -13,12 +13,20 @@ function generateUniqueKey() {
 }
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
+  const alerting = getService('alerting');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
 
   describe('Connectors', function() {
     before(async () => {
+      await alerting.actions.createAction({
+        name: `server-log-${Date.now()}`,
+        actionTypeId: '.server-log',
+        config: {},
+        secrets: {},
+      });
+
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('connectorsTab');
     });
@@ -123,9 +131,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResultsBeforeDelete.length).to.eql(1);
 
       await testSubjects.click('deleteConnector');
-      await testSubjects.existOrFail('deleteConnectorsConfirmation');
-      await testSubjects.click('deleteConnectorsConfirmation > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('deleteConnectorsConfirmation');
+      await testSubjects.existOrFail('deleteIdsConfirmation');
+      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('deleteIdsConfirmation');
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql('Deleted 1 connector');
@@ -164,9 +172,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('.euiTableRowCellCheckbox .euiCheckbox__input');
 
       await testSubjects.click('bulkDelete');
-      await testSubjects.existOrFail('deleteConnectorsConfirmation');
-      await testSubjects.click('deleteConnectorsConfirmation > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('deleteConnectorsConfirmation');
+      await testSubjects.existOrFail('deleteIdsConfirmation');
+      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('deleteIdsConfirmation');
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql('Deleted 1 connector');
@@ -175,6 +183,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
       expect(searchResultsAfterDelete.length).to.eql(0);
+    });
+
+    it('should not be able to delete a pre-configured connector', async () => {
+      const preconfiguredConnectorName = 'xyz';
+      await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
+
+      const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResults.length).to.eql(1);
+
+      expect(await testSubjects.exists('deleteConnector')).to.be(false);
+      expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
+    });
+
+    it('should not be able to edit a pre-configured connector', async () => {
+      const preconfiguredConnectorName = 'xyz';
+
+      await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
+
+      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsBeforeEdit.length).to.eql(1);
+
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+
+      expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);
+      expect(await testSubjects.exists('saveEditedActionButton')).to.be(false);
     });
   });
 };

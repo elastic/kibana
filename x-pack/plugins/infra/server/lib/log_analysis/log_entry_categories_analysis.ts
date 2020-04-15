@@ -5,16 +5,30 @@
  */
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { getJobId, logEntryCategoriesJobTypes } from '../../../common/log_analysis';
+import {
+  compareDatasetsByMaximumAnomalyScore,
+  getJobId,
+  jobCustomSettingsRT,
+  logEntryCategoriesJobTypes,
+} from '../../../common/log_analysis';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
-import { NoLogAnalysisResultsIndexError } from './errors';
+import {
+  InsufficientLogAnalysisMlJobConfigurationError,
+  NoLogAnalysisMlJobError,
+  NoLogAnalysisResultsIndexError,
+  UnknownCategoryError,
+} from './errors';
 import {
   createLogEntryCategoriesQuery,
   logEntryCategoriesResponseRT,
   LogEntryCategoryHit,
 } from './queries/log_entry_categories';
+import {
+  createLogEntryCategoryExamplesQuery,
+  logEntryCategoryExamplesResponseRT,
+} from './queries/log_entry_category_examples';
 import {
   createLogEntryCategoryHistogramsQuery,
   logEntryCategoryHistogramsResponseRT,
@@ -25,6 +39,7 @@ import {
   LogEntryDatasetBucket,
   logEntryDatasetsResponseRT,
 } from './queries/log_entry_data_sets';
+import { createMlJobsQuery, mlJobsResponseRT } from './queries/ml_jobs';
 import {
   createTopLogEntryCategoriesQuery,
   topLogEntryCategoriesResponseRT,
@@ -175,6 +190,80 @@ export class LogEntryCategoriesAnalysis {
     };
   }
 
+  public async getLogEntryCategoryExamples(
+    requestContext: RequestHandlerContext,
+    request: KibanaRequest,
+    sourceId: string,
+    startTime: number,
+    endTime: number,
+    categoryId: number,
+    exampleCount: number
+  ) {
+    const finalizeLogEntryCategoryExamplesSpan = startTracingSpan(
+      'get category example log entries'
+    );
+
+    const logEntryCategoriesCountJobId = getJobId(
+      this.libs.framework.getSpaceId(request),
+      sourceId,
+      logEntryCategoriesJobTypes[0]
+    );
+
+    const {
+      mlJob,
+      timing: { spans: fetchMlJobSpans },
+    } = await this.fetchMlJob(requestContext, logEntryCategoriesCountJobId);
+
+    const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
+    const indices = customSettings?.logs_source_config?.indexPattern;
+    const timestampField = customSettings?.logs_source_config?.timestampField;
+
+    if (indices == null || timestampField == null) {
+      throw new InsufficientLogAnalysisMlJobConfigurationError(
+        `Failed to find index configuration for ml job ${logEntryCategoriesCountJobId}`
+      );
+    }
+
+    const {
+      logEntryCategoriesById,
+      timing: { spans: fetchLogEntryCategoriesSpans },
+    } = await this.fetchLogEntryCategories(requestContext, logEntryCategoriesCountJobId, [
+      categoryId,
+    ]);
+    const category = logEntryCategoriesById[categoryId];
+
+    if (category == null) {
+      throw new UnknownCategoryError(categoryId);
+    }
+
+    const {
+      examples,
+      timing: { spans: fetchLogEntryCategoryExamplesSpans },
+    } = await this.fetchLogEntryCategoryExamples(
+      requestContext,
+      indices,
+      timestampField,
+      startTime,
+      endTime,
+      category._source.terms,
+      exampleCount
+    );
+
+    const logEntryCategoryExamplesSpan = finalizeLogEntryCategoryExamplesSpan();
+
+    return {
+      data: examples,
+      timing: {
+        spans: [
+          logEntryCategoryExamplesSpan,
+          ...fetchMlJobSpans,
+          ...fetchLogEntryCategoriesSpans,
+          ...fetchLogEntryCategoryExamplesSpans,
+        ],
+      },
+    };
+  }
+
   private async fetchTopLogEntryCategories(
     requestContext: RequestHandlerContext,
     logEntryCategoriesCountJobId: string,
@@ -208,14 +297,30 @@ export class LogEntryCategoriesAnalysis {
     }
 
     const topLogEntryCategories = topLogEntryCategoriesResponse.aggregations.terms_category_id.buckets.map(
-      topCategoryBucket => ({
-        categoryId: parseCategoryId(topCategoryBucket.key),
-        logEntryCount: topCategoryBucket.filter_model_plot.sum_actual.value ?? 0,
-        datasets: topCategoryBucket.filter_model_plot.terms_dataset.buckets.map(
-          datasetBucket => datasetBucket.key
-        ),
-        maximumAnomalyScore: topCategoryBucket.filter_record.maximum_record_score.value ?? 0,
-      })
+      topCategoryBucket => {
+        const maximumAnomalyScoresByDataset = topCategoryBucket.filter_record.terms_dataset.buckets.reduce<
+          Record<string, number>
+        >(
+          (accumulatedMaximumAnomalyScores, datasetFromRecord) => ({
+            ...accumulatedMaximumAnomalyScores,
+            [datasetFromRecord.key]: datasetFromRecord.maximum_record_score.value ?? 0,
+          }),
+          {}
+        );
+
+        return {
+          categoryId: parseCategoryId(topCategoryBucket.key),
+          logEntryCount: topCategoryBucket.filter_model_plot.sum_actual.value ?? 0,
+          datasets: topCategoryBucket.filter_model_plot.terms_dataset.buckets
+            .map(datasetBucket => ({
+              name: datasetBucket.key,
+              maximumAnomalyScore: maximumAnomalyScoresByDataset[datasetBucket.key] ?? 0,
+            }))
+            .sort(compareDatasetsByMaximumAnomalyScore)
+            .reverse(),
+          maximumAnomalyScore: topCategoryBucket.filter_record.maximum_record_score.value ?? 0,
+        };
+      }
     );
 
     return {
@@ -346,6 +451,78 @@ export class LogEntryCategoriesAnalysis {
 
     return {
       categoryHistogramsById,
+      timing: {
+        spans: [esSearchSpan],
+      },
+    };
+  }
+
+  private async fetchMlJob(
+    requestContext: RequestHandlerContext,
+    logEntryCategoriesCountJobId: string
+  ) {
+    const finalizeMlGetJobSpan = startTracingSpan('Fetch ml job from ES');
+
+    const {
+      jobs: [mlJob],
+    } = decodeOrThrow(mlJobsResponseRT)(
+      await this.libs.framework.callWithRequest(
+        requestContext,
+        'transport.request',
+        createMlJobsQuery([logEntryCategoriesCountJobId])
+      )
+    );
+
+    const mlGetJobSpan = finalizeMlGetJobSpan();
+
+    if (mlJob == null) {
+      throw new NoLogAnalysisMlJobError(`Failed to find ml job ${logEntryCategoriesCountJobId}.`);
+    }
+
+    return {
+      mlJob,
+      timing: {
+        spans: [mlGetJobSpan],
+      },
+    };
+  }
+
+  private async fetchLogEntryCategoryExamples(
+    requestContext: RequestHandlerContext,
+    indices: string,
+    timestampField: string,
+    startTime: number,
+    endTime: number,
+    categoryQuery: string,
+    exampleCount: number
+  ) {
+    const finalizeEsSearchSpan = startTracingSpan('Fetch examples from ES');
+
+    const {
+      hits: { hits },
+    } = decodeOrThrow(logEntryCategoryExamplesResponseRT)(
+      await this.libs.framework.callWithRequest(
+        requestContext,
+        'search',
+        createLogEntryCategoryExamplesQuery(
+          indices,
+          timestampField,
+          startTime,
+          endTime,
+          categoryQuery,
+          exampleCount
+        )
+      )
+    );
+
+    const esSearchSpan = finalizeEsSearchSpan();
+
+    return {
+      examples: hits.map(hit => ({
+        dataset: hit._source.event?.dataset ?? '',
+        message: hit._source.message ?? '',
+        timestamp: hit.sort[0],
+      })),
       timing: {
         spans: [esSearchSpan],
       },

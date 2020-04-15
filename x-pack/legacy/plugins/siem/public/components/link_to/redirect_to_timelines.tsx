@@ -6,8 +6,11 @@
 
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { RedirectWrapper } from './redirect_wrapper';
+
 import { SiemPageName } from '../../pages/home/types';
+
+import { appendSearch } from './helpers';
+import { RedirectWrapper } from './redirect_wrapper';
 
 export type TimelineComponentProps = RouteComponentProps<{
   search: string;
@@ -17,4 +20,5 @@ export const RedirectToTimelinesPage = ({ location: { search } }: TimelineCompon
   <RedirectWrapper to={`/${SiemPageName.timelines}${search}`} />
 );
 
-export const getTimelinesUrl = () => `#/link-to/${SiemPageName.timelines}`;
+export const getTimelinesUrl = (search?: string) =>
+  `#/link-to/${SiemPageName.timelines}${appendSearch(search)}`;

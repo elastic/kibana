@@ -7,7 +7,7 @@ import { decode } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
 import { KibanaRequest } from 'kibana/server';
 import { RequestHandlerContext } from 'src/core/server';
-import { Filter, TimeRange } from '../../../../../../../../src/plugins/data/server';
+import { Query, Filter, TimeRange } from '../../../../../../../../src/plugins/data/server';
 import {
   AlertEvent,
   AlertData,
@@ -36,7 +36,10 @@ export const getRequestData = async (
       : config.alertResultListDefaultDateRange) as unknown) as TimeRange,
 
     // Filtering
-    query: request.query.query,
+    query:
+      request.query.query !== undefined
+        ? ((decode(request.query.query) as unknown) as Query)
+        : { query: '', language: 'kuery' },
     filters:
       request.query.filters !== undefined
         ? ((decode(request.query.filters) as unknown) as Filter[])
@@ -46,6 +49,7 @@ export const getRequestData = async (
     pageIndex: request.query.page_index,
     searchAfter: request.query.after,
     searchBefore: request.query.before,
+    emptyStringIsUndefined: request.query.empty_string_is_undefined,
   };
 
   if (reqData.searchAfter === undefined && reqData.searchBefore === undefined) {
@@ -54,6 +58,24 @@ export const getRequestData = async (
       reqData.pageIndex = 0;
     }
     reqData.fromIndex = reqData.pageIndex * reqData.pageSize;
+  }
+
+  // See: https://github.com/elastic/elasticsearch-js/issues/662
+  // and https://github.com/elastic/endpoint-app-team/issues/221
+  if (
+    reqData.searchBefore !== undefined &&
+    reqData.searchBefore[0] === '' &&
+    reqData.emptyStringIsUndefined
+  ) {
+    reqData.searchBefore[0] = EndpointAppConstants.MAX_LONG_INT;
+  }
+
+  if (
+    reqData.searchAfter !== undefined &&
+    reqData.searchAfter[0] === '' &&
+    reqData.emptyStringIsUndefined
+  ) {
+    reqData.searchAfter[0] = EndpointAppConstants.MAX_LONG_INT;
   }
 
   return reqData;

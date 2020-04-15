@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders DashboardSaveModal 1`] = `
+<SavedObjectSaveModal
+  objectType="dashboard"
+  onClose={[Function]}
+  onSave={[Function]}
+  options={
+    <React.Fragment>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Description"
+            id="dashboard.topNav.saveModal.descriptionFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiTextArea
+          data-test-subj="dashboardDescription"
+          onChange={[Function]}
+          value="dash description"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <FormattedMessage
+            defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
+            id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiSwitch
+          checked={true}
+          data-test-subj="storeTimeWithDashboard"
+          label={
+            <FormattedMessage
+              defaultMessage="Store time with dashboard"
+              id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+              values={Object {}}
+            />
+          }
+          onChange={[Function]}
+        />
+      </EuiFormRow>
+    </React.Fragment>
+  }
+  showCopyOnSave={true}
+  showDescription={false}
+  title="dash title"
+/>
+`;

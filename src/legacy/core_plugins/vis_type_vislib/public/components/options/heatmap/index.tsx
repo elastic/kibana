@@ -23,7 +23,7 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../../../vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import {
   BasicOptions,
   ColorRanges,
@@ -31,12 +31,12 @@ import {
   NumberInputOption,
   SelectOption,
   SwitchOption,
-} from '../../common';
-import { SetColorSchemaOptionsValue } from '../../common/color_schema';
+  SetColorSchemaOptionsValue,
+  SetColorRangeValue,
+} from '../../../../../../../plugins/charts/public';
 import { HeatmapVisParams } from '../../../heatmap';
 import { ValueAxis } from '../../../types';
 import { LabelsPanel } from './labels_panel';
-import { SetColorRangeValue } from '../../common/color_ranges';
 
 function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
   const { stateParams, vis, uiState, setValue, setValidity, setTouched } = props;

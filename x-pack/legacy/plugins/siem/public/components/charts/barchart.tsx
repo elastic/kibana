@@ -8,8 +8,8 @@ import React from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
-import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import { useThrottledResizeObserver } from '../utils';
 import { useTimeZone } from '../../lib/kibana';
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
@@ -75,7 +75,7 @@ export const BarChartBaseComponent = ({
             splitSeriesAccessors={['g']}
             data={series.value!}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
-            customSeriesColors={series.color ? [series.color] : undefined}
+            color={series.color ? series.color : undefined}
           />
         ) : null;
       })}
@@ -105,7 +105,7 @@ interface BarChartComponentProps {
 }
 
 export const BarChartComponent: React.FC<BarChartComponentProps> = ({ barChart, configs }) => {
-  const { ref: measureRef, width, height } = useResizeObserver<HTMLDivElement>({});
+  const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);

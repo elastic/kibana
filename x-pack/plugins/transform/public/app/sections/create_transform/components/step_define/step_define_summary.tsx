@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { getPivotQuery } from '../../../../common';
+import { getPivotQuery, isDefaultQuery, isMatchAllQuery } from '../../../../common';
 import { PivotPreview } from '../../../../components/pivot_preview';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
@@ -25,9 +25,6 @@ import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 
 import { StepDefineExposedState } from './step_define_form';
-
-const defaultSearch = '*';
-const emptySearch = '';
 
 interface Props {
   formState: StepDefineExposedState;
@@ -39,44 +36,33 @@ export const StepDefineSummary: FC<Props> = ({
   searchItems,
 }) => {
   const pivotQuery = getPivotQuery(searchQuery);
-  let useCodeBlock = false;
-  let displaySearch;
-  // searchString set to empty once source config editor used - display query instead
-  if (searchString === emptySearch) {
-    displaySearch = JSON.stringify(searchQuery, null, 2);
-    useCodeBlock = true;
-  } else if (searchString === defaultSearch) {
-    displaySearch = emptySearch;
-  } else {
-    displaySearch = searchString;
-  }
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <div data-test-subj="transformStepDefineSummary">
           <EuiForm>
-            {searchItems.savedSearch !== undefined &&
-              searchItems.savedSearch.id === undefined &&
-              typeof searchString === 'string' && (
-                <Fragment>
+            {searchItems.savedSearch === undefined && (
+              <Fragment>
+                <EuiFormRow
+                  label={i18n.translate('xpack.transform.stepDefineSummary.indexPatternLabel', {
+                    defaultMessage: 'Index pattern',
+                  })}
+                >
+                  <span>{searchItems.indexPattern.title}</span>
+                </EuiFormRow>
+                {typeof searchString === 'string' && (
                   <EuiFormRow
-                    label={i18n.translate('xpack.transform.stepDefineSummary.indexPatternLabel', {
-                      defaultMessage: 'Index pattern',
+                    label={i18n.translate('xpack.transform.stepDefineSummary.queryLabel', {
+                      defaultMessage: 'Query',
                     })}
                   >
-                    <span>{searchItems.indexPattern.title}</span>
+                    <span>{searchString}</span>
                   </EuiFormRow>
-                  {useCodeBlock === false && displaySearch !== emptySearch && (
-                    <EuiFormRow
-                      label={i18n.translate('xpack.transform.stepDefineSummary.queryLabel', {
-                        defaultMessage: 'Query',
-                      })}
-                    >
-                      <span>{displaySearch}</span>
-                    </EuiFormRow>
-                  )}
-                  {useCodeBlock === true && displaySearch !== emptySearch && (
+                )}
+                {typeof searchString === 'undefined' &&
+                  !isDefaultQuery(pivotQuery) &&
+                  !isMatchAllQuery(pivotQuery) && (
                     <EuiFormRow
                       label={i18n.translate(
                         'xpack.transform.stepDefineSummary.queryCodeBlockLabel',
@@ -93,12 +79,12 @@ export const StepDefineSummary: FC<Props> = ({
                         overflowHeight={300}
                         isCopyable
                       >
-                        {displaySearch}
+                        {JSON.stringify(pivotQuery, null, 2)}
                       </EuiCodeBlock>
                     </EuiFormRow>
                   )}
-                </Fragment>
-              )}
+              </Fragment>
+            )}
 
             {searchItems.savedSearch !== undefined && searchItems.savedSearch.id !== undefined && (
               <EuiFormRow

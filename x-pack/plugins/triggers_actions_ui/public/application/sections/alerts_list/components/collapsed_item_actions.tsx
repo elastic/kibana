@@ -27,6 +27,7 @@ import {
 export type ComponentOpts = {
   item: AlertTableItem;
   onAlertChanged: () => void;
+  setAlertsToDelete: React.Dispatch<React.SetStateAction<string[]>>;
 } & BulkOperationsComponentOpts;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
@@ -36,7 +37,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   enableAlert,
   unmuteAlert,
   muteAlert,
-  deleteAlert,
+  setAlertsToDelete,
 }: ComponentOpts) => {
   const { capabilities } = useAppDependencies();
 
@@ -116,10 +117,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             iconType="trash"
             color="text"
             data-test-subj="deleteAlert"
-            onClick={async () => {
-              await deleteAlert(item);
-              onAlertChanged();
-            }}
+            onClick={() => setAlertsToDelete([item.id])}
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.deleteTitle"

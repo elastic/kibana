@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createLogMonitorPageRoute } from './log_monitor_page';
-export { createLogOverviewPageRoute } from './log_overview_page';
+export { createLogPageViewRoute } from './log_page_view';

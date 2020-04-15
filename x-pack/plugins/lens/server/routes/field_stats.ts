@@ -24,7 +24,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
         }),
         body: schema.object(
           {
-            dslQuery: schema.object({}, { allowUnknowns: true }),
+            dslQuery: schema.object({}, { unknowns: 'allow' }),
             fromDate: schema.string(),
             toDate: schema.string(),
             timeFieldName: schema.maybe(schema.string()),
@@ -34,10 +34,10 @@ export async function initFieldsRoute(setup: CoreSetup) {
                 type: schema.string(),
                 esTypes: schema.maybe(schema.arrayOf(schema.string())),
               },
-              { allowUnknowns: true }
+              { unknowns: 'allow' }
             ),
           },
-          { allowUnknowns: true }
+          { unknowns: 'allow' }
         ),
       },
     },

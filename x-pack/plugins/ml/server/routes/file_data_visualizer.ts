@@ -6,23 +6,25 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from 'kibana/server';
-import { MAX_BYTES } from '../../../../legacy/plugins/ml/common/constants/file_datavisualizer';
-import { wrapError } from '../client/error_wrapper';
+import { MAX_FILE_SIZE_BYTES } from '../../common/constants/file_datavisualizer';
 import {
   InputOverrides,
+  Settings,
+  IngestPipelineWrapper,
+  Mappings,
+} from '../../common/types/file_datavisualizer';
+import { wrapError } from '../client/error_wrapper';
+import {
   InputData,
   fileDataVisualizerProvider,
   importDataProvider,
-  Settings,
-  InjectPipeline,
-  Mappings,
 } from '../models/file_data_visualizer';
 
 import { RouteInitialization } from '../types';
-import { incrementFileDataVisualizerIndexCreationCount } from '../lib/ml_telemetry';
+import { updateTelemetry } from '../lib/telemetry';
 
 function analyzeFiles(context: RequestHandlerContext, data: InputData, overrides: InputOverrides) {
-  const { analyzeFile } = fileDataVisualizerProvider(context);
+  const { analyzeFile } = fileDataVisualizerProvider(context.ml!.mlClient.callAsCurrentUser);
   return analyzeFile(data, overrides);
 }
 
@@ -32,10 +34,10 @@ function importData(
   index: string,
   settings: Settings,
   mappings: Mappings,
-  ingestPipeline: InjectPipeline,
+  ingestPipeline: IngestPipelineWrapper,
   data: InputData
 ) {
-  const { importData: importDataFunc } = importDataProvider(context);
+  const { importData: importDataFunc } = importDataProvider(context.ml!.mlClient.callAsCurrentUser);
   return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
 }
 
@@ -77,7 +79,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
       options: {
         body: {
           accepts: ['text/*', 'application/json'],
-          maxBytes: MAX_BYTES,
+          maxBytes: MAX_FILE_SIZE_BYTES,
         },
       },
     },
@@ -119,7 +121,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: MAX_BYTES,
+          maxBytes: MAX_FILE_SIZE_BYTES,
         },
       },
     },
@@ -132,8 +134,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         // follow-up import calls to just add additional data will include the `id` of the created
         // index, we'll ignore those and don't increment the counter.
         if (id === undefined) {
-          // @ts-ignore
-          await incrementFileDataVisualizerIndexCreationCount(context.core.savedObjects.client);
+          await updateTelemetry();
         }
 
         const result = await importData(

@@ -115,7 +115,6 @@ class ScopeResolver extends SharedComponent {
       next: [],
     };
     const components = this.resolveLinkToComponents(context, editor);
-
     _.each(components, function(component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {

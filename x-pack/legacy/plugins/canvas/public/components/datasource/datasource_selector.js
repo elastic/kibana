@@ -15,6 +15,7 @@ export const DatasourceSelector = ({ onSelect, datasources, current }) => (
         key={d.name}
         title={d.displayName}
         titleElement="h5"
+        titleSize="xs"
         icon={<EuiIcon type={d.image} size="l" />}
         description={d.help}
         layout="horizontal"

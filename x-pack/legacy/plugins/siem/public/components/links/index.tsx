@@ -23,9 +23,12 @@ import {
 import { FlowTarget, FlowTargetSourceDest } from '../../graphql/types';
 import { useUiSetting$ } from '../../lib/kibana';
 import { IP_REPUTATION_LINKS_SETTING } from '../../../common/constants';
-import * as i18n from '../page/network/ip_overview/translations';
 import { isUrlInvalid } from '../../pages/detection_engine/rules/components/step_about_rule/helpers';
 import { ExternalLinkIcon } from '../external_link_icon';
+import { navTabs } from '../../pages/home/home_navigations';
+import { useGetUrlSearch } from '../navigation/use_get_url_search';
+
+import * as i18n from './translations';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
@@ -86,23 +89,30 @@ const IPDetailsLinkComponent: React.FC<{
 
 export const IPDetailsLink = React.memo(IPDetailsLinkComponent);
 
-const CaseDetailsLinkComponent: React.FC<{ children?: React.ReactNode; detailName: string }> = ({
-  children,
-  detailName,
-}) => (
-  <EuiLink
-    href={getCaseDetailsUrl(encodeURIComponent(detailName))}
-    data-test-subj="case-details-link"
-  >
-    {children ? children : detailName}
-  </EuiLink>
-);
+const CaseDetailsLinkComponent: React.FC<{
+  children?: React.ReactNode;
+  detailName: string;
+  title?: string;
+}> = ({ children, detailName, title }) => {
+  const search = useGetUrlSearch(navTabs.case);
+
+  return (
+    <EuiLink
+      href={getCaseDetailsUrl({ id: detailName, search })}
+      data-test-subj="case-details-link"
+      aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
+    >
+      {children ? children : detailName}
+    </EuiLink>
+  );
+};
 export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);
 CaseDetailsLink.displayName = 'CaseDetailsLink';
 
-export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ children }) => (
-  <EuiLink href={getCreateCaseUrl()}>{children}</EuiLink>
-));
+export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ children }) => {
+  const search = useGetUrlSearch(navTabs.case);
+  return <EuiLink href={getCreateCaseUrl(search)}>{children}</EuiLink>;
+});
 
 CreateCaseLink.displayName = 'CreateCaseLink';
 

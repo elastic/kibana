@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SortDirection } from '../../../../../kibana_services';
+import { SortDirection } from '../../../../../../../../../../plugins/data/public';
 
 export type IntervalValue = number | null;
 

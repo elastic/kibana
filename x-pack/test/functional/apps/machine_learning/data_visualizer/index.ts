@@ -10,5 +10,6 @@ export default function({ loadTestFile }: FtrProviderContext) {
     this.tags(['skipFirefox']);
 
     loadTestFile(require.resolve('./index_data_visualizer'));
+    loadTestFile(require.resolve('./file_data_visualizer'));
   });
 }

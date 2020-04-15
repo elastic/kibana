@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../../../plugins/alerting/server';
 import { readRules } from './read_rules';
 import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion } from './utils';
+import { hasListsFeature } from '../feature_flags';
 
 export const updateRules = async ({
   alertsClient,
@@ -27,7 +29,6 @@ export const updateRules = async ({
   meta,
   filters,
   from,
-  immutable,
   id,
   ruleId,
   index,
@@ -42,7 +43,11 @@ export const updateRules = async ({
   type,
   references,
   version,
-  throttle,
+  note,
+  lists,
+  anomalyThreshold,
+  machineLearningJobId,
+  actions,
 }: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -73,23 +78,28 @@ export const updateRules = async ({
     type,
     references,
     version,
-    throttle,
+    note,
+    anomalyThreshold,
+    machineLearningJobId,
   });
+
+  // TODO: Remove this and use regular lists once the feature is stable for a release
+  const listsParam = hasListsFeature() ? { lists } : {};
 
   const update = await alertsClient.update({
     id: rule.id,
     data: {
-      tags: addTags(tags, rule.params.ruleId, immutable),
+      tags: addTags(tags, rule.params.ruleId, rule.params.immutable),
       name,
       schedule: { interval },
-      actions: rule.actions,
-      throttle: throttle ?? rule.throttle ?? null,
+      actions: actions.map(transformRuleToAlertAction),
+      throttle: null,
       params: {
         description,
         ruleId: rule.params.ruleId,
         falsePositives,
         from,
-        immutable,
+        immutable: rule.params.immutable,
         query,
         language,
         outputIndex,
@@ -106,7 +116,11 @@ export const updateRules = async ({
         to,
         type,
         references,
+        note,
         version: calculatedVersion,
+        anomalyThreshold,
+        machineLearningJobId,
+        ...listsParam,
       },
     },
   });

@@ -12,12 +12,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
+import { CustomLink } from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
+import { Documentation } from './Documentation';
 
 interface InputField {
   name: keyof CustomLink;
   label: string;
-  helpText: string;
+  helpText: string | React.ReactNode;
   placeholder: string;
   onChange: (value: string) => void;
   value?: string;
@@ -69,13 +70,25 @@ export const LinkSection = ({
           defaultMessage: 'URL'
         }
       ),
-      helpText: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.flyout.link.url.helpText',
-        {
-          defaultMessage:
-            'Add fieldname variables to your URL to apply values e.g. {sample}. TODO: Learn more in the docs.',
-          values: { sample: '{{trace.id}}' }
-        }
+      helpText: (
+        <>
+          {i18n.translate(
+            'xpack.apm.settings.customizeUI.customLink.flyout.link.url.helpText',
+            {
+              defaultMessage:
+                'Add field name variables to your URL to apply values e.g. {sample}.',
+              values: { sample: '{{trace.id}}' }
+            }
+          )}{' '}
+          <Documentation
+            label={i18n.translate(
+              'xpack.apm.settings.customizeUI.customLink.flyout.link.url.doc',
+              {
+                defaultMessage: 'Learn more in the docs.'
+              }
+            )}
+          />
+        </>
       ),
       placeholder: i18n.translate(
         'xpack.apm.settings.customizeUI.customLink.flyout.link.url.placeholder',
@@ -125,7 +138,7 @@ export const LinkSection = ({
               fullWidth
               value={field.value}
               onChange={e => field.onChange(e.target.value)}
-              aria-label={field.name}
+              data-test-subj={field.name}
             />
           </EuiFormRow>
         );

@@ -18,7 +18,7 @@ import {
 } from '../../../common/http_api/inventory_meta_api';
 import { getCloudMetadata } from './lib/get_cloud_metadata';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;

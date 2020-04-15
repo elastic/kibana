@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Component, createRef } from 'react';
+import classnames from 'classnames';
 import * as Rx from 'rxjs';
 import {
   ChromeBadge,
@@ -68,8 +69,8 @@ export interface HeaderProps {
   navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
-  isLocked?: boolean;
-  onIsLockedUpdate?: OnIsLockedUpdate;
+  isLocked$: Rx.Observable<boolean>;
+  onIsLockedUpdate: OnIsLockedUpdate;
 }
 
 interface State {
@@ -81,6 +82,7 @@ interface State {
   navControlsLeft: readonly ChromeNavControl[];
   navControlsRight: readonly ChromeNavControl[];
   currentAppId: string | undefined;
+  isLocked: boolean;
 }
 
 export class Header extends Component<HeaderProps, State> {
@@ -89,6 +91,9 @@ export class Header extends Component<HeaderProps, State> {
 
   constructor(props: HeaderProps) {
     super(props);
+
+    let isLocked = false;
+    props.isLocked$.subscribe(initialIsLocked => (isLocked = initialIsLocked));
 
     this.state = {
       appTitle: 'Kibana',
@@ -99,6 +104,7 @@ export class Header extends Component<HeaderProps, State> {
       navControlsLeft: [],
       navControlsRight: [],
       currentAppId: '',
+      isLocked,
     };
   }
 
@@ -109,11 +115,12 @@ export class Header extends Component<HeaderProps, State> {
       this.props.forceAppSwitcherNavigation$,
       this.props.navLinks$,
       this.props.recentlyAccessed$,
-      // Types for combineLatest only handle up to 6 inferred types so we combine these two separately.
+      // Types for combineLatest only handle up to 6 inferred types so we combine these separately.
       Rx.combineLatest(
         this.props.navControlsLeft$,
         this.props.navControlsRight$,
-        this.props.application.currentAppId$
+        this.props.application.currentAppId$,
+        this.props.isLocked$
       )
     ).subscribe({
       next: ([
@@ -122,7 +129,7 @@ export class Header extends Component<HeaderProps, State> {
         forceNavigation,
         navLinks,
         recentlyAccessed,
-        [navControlsLeft, navControlsRight, currentAppId],
+        [navControlsLeft, navControlsRight, currentAppId, isLocked],
       ]) => {
         this.setState({
           appTitle,
@@ -133,6 +140,7 @@ export class Header extends Component<HeaderProps, State> {
           navControlsLeft,
           navControlsRight,
           currentAppId,
+          isLocked,
         });
       },
     });
@@ -181,8 +189,16 @@ export class Header extends Component<HeaderProps, State> {
       return null;
     }
 
+    const className = classnames(
+      'chrHeaderWrapper',
+      {
+        'chrHeaderWrapper--navIsLocked': this.state.isLocked,
+      },
+      'hide-for-sharing'
+    );
+
     return (
-      <header>
+      <header className={className} data-test-subj="headerGlobalNav">
         <EuiHeader>
           <EuiHeaderSection grow={false}>
             <EuiShowFor sizes={['xs', 's']}>
@@ -220,7 +236,7 @@ export class Header extends Component<HeaderProps, State> {
           </EuiHeaderSection>
         </EuiHeader>
         <NavDrawer
-          isLocked={this.props.isLocked}
+          isLocked={this.state.isLocked}
           onIsLockedUpdate={this.props.onIsLockedUpdate}
           navLinks={navLinks}
           chromeNavLinks={this.state.navLinks}

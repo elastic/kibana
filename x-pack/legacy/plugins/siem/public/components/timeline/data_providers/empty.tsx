@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiBadgeProps, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -21,24 +21,12 @@ const Text = styled(EuiText)`
 
 Text.displayName = 'Text';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// const BadgeHighlighted = styled(EuiBadge)`
-//   height: 20px;
-//   margin: 0 5px 0 5px;
-//   max-width: 70px;
-//   min-width: 70px;
-// `;
-const BadgeHighlighted = (props: EuiBadgeProps) => (
-  <EuiBadge
-    {...props}
-    style={{
-      height: '20px',
-      margin: '0 5px 0 5px',
-      maxWidth: '85px',
-      minWidth: '85px',
-    }}
-  />
-);
+const BadgeHighlighted = styled(EuiBadge)`
+  height: 20px;
+  margin: 0 5px 0 5px;
+  maxwidth: 85px;
+  minwidth: 85px;
+`;
 
 BadgeHighlighted.displayName = 'BadgeHighlighted';
 

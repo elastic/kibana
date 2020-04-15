@@ -21,7 +21,8 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { BasicOptions, SwitchOption, ValidationVisOptionsProps } from '../../common';
+import { ValidationVisOptionsProps } from '../../common';
+import { BasicOptions, SwitchOption } from '../../../../../../../plugins/charts/public';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
 import { BasicVislibParams } from '../../../types';
@@ -44,7 +45,9 @@ function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
         <BasicOptions {...props} />
 
-        {vis.hasSchemaAgg('segment', 'date_histogram') ? (
+        {vis.data.aggs!.aggs.some(
+          agg => agg.schema === 'segment' && agg.type.name === 'date_histogram'
+        ) ? (
           <SwitchOption
             label={i18n.translate('visTypeVislib.editors.pointSeries.currentTimeMarkerLabel', {
               defaultMessage: 'Current time marker',

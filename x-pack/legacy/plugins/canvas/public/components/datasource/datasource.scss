@@ -6,8 +6,13 @@
   padding: 0 $euiSizeS;
 }
 
-.canvasDataSource__section {
-  padding: $euiSizeM;
+.canvasDataSource__section,
+.canvasDataSource__list {
+  padding: $euiSizeM $euiSizeM 0;
+}
+
+.canvasDataSource__sectionFooter {
+  padding: 0 $euiSizeM;
 }
 
 .canvasDataSource__triggerButton {
@@ -17,10 +22,6 @@
 
 .canvasDataSource__triggerButtonIcon {
   margin-right: $euiSizeS;
-}
-
-.canvasDataSource__list {
-  padding: $euiSizeM;
 }
 
 .canvasDataSource__card .euiCard__content {

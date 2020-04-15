@@ -3,23 +3,48 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'src/core/server';
+import { safeLoad } from 'js-yaml';
+import { AuthenticatedUser } from '../../../security/server';
+import {
+  DeleteDatasourcesResponse,
+  packageToConfigDatasource,
+  DatasourceInput,
+  DatasourceInputStream,
+} from '../../common';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';
-import { NewDatasource, Datasource, DeleteDatasourcesResponse, ListWithKuery } from '../types';
+import { NewDatasource, Datasource, ListWithKuery } from '../types';
+import { agentConfigService } from './agent_config';
+import { getPackageInfo, getInstallation } from './epm/packages';
+import { outputService } from './output';
+import { getAssetsDataForPackageKey } from './epm/packages/assets';
+import { createStream } from './epm/agent/agent';
 
 const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
+
+function getDataset(st: string) {
+  return st.split('.')[1];
+}
 
 class DatasourceService {
   public async create(
     soClient: SavedObjectsClientContract,
     datasource: NewDatasource,
-    options?: { id?: string }
+    options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<Datasource> {
-    const newSo = await soClient.create<Datasource>(
+    const newSo = await soClient.create<Omit<Datasource, 'id'>>(
       SAVED_OBJECT_TYPE,
-      datasource as Datasource,
+      {
+        ...datasource,
+        revision: 1,
+      },
       options
     );
+
+    // Assign it to the given agent config
+    await agentConfigService.assignDatasources(soClient, datasource.config_id, [newSo.id], {
+      user: options?.user,
+    });
 
     return {
       id: newSo.id,
@@ -98,20 +123,47 @@ class DatasourceService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    datasource: NewDatasource
+    datasource: NewDatasource,
+    options?: { user?: AuthenticatedUser }
   ): Promise<Datasource> {
-    await soClient.update<Datasource>(SAVED_OBJECT_TYPE, id, datasource);
+    const oldDatasource = await this.get(soClient, id);
+
+    if (!oldDatasource) {
+      throw new Error('Datasource not found');
+    }
+
+    await soClient.update<Datasource>(SAVED_OBJECT_TYPE, id, {
+      ...datasource,
+      revision: oldDatasource.revision + 1,
+    });
+
+    // Bump revision of associated agent config
+    await agentConfigService.bumpRevision(soClient, datasource.config_id, { user: options?.user });
+
     return (await this.get(soClient, id)) as Datasource;
   }
 
   public async delete(
     soClient: SavedObjectsClientContract,
-    ids: string[]
+    ids: string[],
+    options?: { user?: AuthenticatedUser }
   ): Promise<DeleteDatasourcesResponse> {
     const result: DeleteDatasourcesResponse = [];
 
     for (const id of ids) {
       try {
+        const oldDatasource = await this.get(soClient, id);
+        if (!oldDatasource) {
+          throw new Error('Datasource not found');
+        }
+        await agentConfigService.unassignDatasources(
+          soClient,
+          oldDatasource.config_id,
+          [oldDatasource.id],
+          {
+            user: options?.user,
+          }
+        );
         await soClient.delete(SAVED_OBJECT_TYPE, id);
         result.push({
           id,
@@ -127,6 +179,81 @@ class DatasourceService {
 
     return result;
   }
+
+  public async buildDatasourceFromPackage(
+    soClient: SavedObjectsClientContract,
+    pkgName: string
+  ): Promise<NewDatasource | undefined> {
+    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
+    if (pkgInstall) {
+      const [pkgInfo, defaultOutputId] = await Promise.all([
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: pkgInstall.name,
+          pkgVersion: pkgInstall.version,
+        }),
+        outputService.getDefaultOutputId(soClient),
+      ]);
+      if (pkgInfo) {
+        return packageToConfigDatasource(pkgInfo, '', defaultOutputId);
+      }
+    }
+  }
+
+  public async assignPackageStream(
+    pkgInfo: { pkgName: string; pkgVersion: string },
+    inputs: DatasourceInput[]
+  ): Promise<DatasourceInput[]> {
+    const inputsPromises = inputs.map(input => _assignPackageStreamToInput(pkgInfo, input));
+    return Promise.all(inputsPromises);
+  }
+}
+
+const _isAgentStream = (p: string) => !!p.match(/agent\/stream\/stream\.yml/);
+
+async function _assignPackageStreamToInput(
+  pkgInfo: { pkgName: string; pkgVersion: string },
+  input: DatasourceInput
+) {
+  const streamsPromises = input.streams.map(stream =>
+    _assignPackageStreamToStream(pkgInfo, input, stream)
+  );
+
+  const streams = await Promise.all(streamsPromises);
+  return { ...input, streams };
+}
+
+async function _assignPackageStreamToStream(
+  pkgInfo: { pkgName: string; pkgVersion: string },
+  input: DatasourceInput,
+  stream: DatasourceInputStream
+) {
+  if (!stream.enabled) {
+    return { ...stream, pkg_stream: undefined };
+  }
+  const dataset = getDataset(stream.dataset);
+  const assetsData = await getAssetsDataForPackageKey(pkgInfo, _isAgentStream, dataset);
+
+  const [pkgStream] = assetsData;
+  if (!pkgStream || !pkgStream.buffer) {
+    throw new Error(`Stream template not found for dataset ${dataset}`);
+  }
+
+  // Populate template variables from input config and stream config
+  const data: { [k: string]: string | string[] } = {};
+  if (input.config) {
+    for (const key of Object.keys(input.config)) {
+      data[key] = input.config[key].value;
+    }
+  }
+  if (stream.config) {
+    for (const key of Object.keys(stream.config)) {
+      data[key] = stream.config[key].value;
+    }
+  }
+  const yaml = safeLoad(createStream(data, pkgStream.buffer.toString()));
+  stream.pkg_stream = yaml;
+  return { ...stream };
 }
 
 export const datasourceService = new DatasourceService();

@@ -17,7 +17,7 @@ import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
 import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
-import { getBarchartConfigs, getCustomChartData } from '../../components/matrix_histogram/utils';
+import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useQuery } from '../../containers/matrix_histogram';
 import {
   MatrixHistogramProps,
@@ -25,7 +25,6 @@ import {
   HistogramAggregation,
   MatrixHistogramQueryProps,
 } from './types';
-import { ChartSeriesData } from '../charts/common';
 import { InspectButtonContainer } from '../inspect';
 
 import { State, inputsSelectors, hostsModel, networkModel } from '../../store';
@@ -120,11 +119,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
     defaultStackByOption
   );
-
-  const [titleWithStackByField, setTitle] = useState<string>('');
-  const [subtitleWithCounts, setSubtitle] = useState<string>('');
-  const [hideHistogram, setHideHistogram] = useState<boolean>(hideHistogramIfEmpty);
-  const [barChartData, setBarChartData] = useState<ChartSeriesData[] | null>(null);
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
@@ -146,40 +140,36 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     }
   );
 
+  const titleWithStackByField = useMemo(
+    () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
+    [title, selectedStackByOption]
+  );
+  const subtitleWithCounts = useMemo(
+    () => (subtitle != null && typeof subtitle === 'function' ? subtitle(totalCount) : subtitle),
+    [subtitle, totalCount]
+  );
+  const hideHistogram = useMemo(() => (totalCount <= 0 && hideHistogramIfEmpty ? true : false), [
+    totalCount,
+    hideHistogramIfEmpty,
+  ]);
+  const barChartData = useMemo(() => getCustomChartData(data, mapping), [data, mapping]);
+
   useEffect(() => {
-    if (title != null) setTitle(typeof title === 'function' ? title(selectedStackByOption) : title);
-
-    if (subtitle != null)
-      setSubtitle(typeof subtitle === 'function' ? subtitle(totalCount) : subtitle);
-
-    if (totalCount <= 0 && hideHistogramIfEmpty) {
-      setHideHistogram(true);
-    } else {
-      setHideHistogram(false);
-    }
-    setBarChartData(getCustomChartData(data, mapping));
-
     setQuery({ id, inspect, loading, refetch });
 
     if (isInitialLoading && !!barChartData && data) {
       setIsInitialLoading(false);
     }
   }, [
-    subtitle,
-    setSubtitle,
-    setHideHistogram,
-    setBarChartData,
     setQuery,
-    hideHistogramIfEmpty,
-    totalCount,
     id,
     inspect,
-    isInspected,
     loading,
     refetch,
-    data,
-    refetch,
     isInitialLoading,
+    barChartData,
+    data,
+    setIsInitialLoading,
   ]);
 
   if (hideHistogram) {

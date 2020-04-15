@@ -22,6 +22,7 @@ import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer, now } from '../../../kibana_utils/common';
+import { AbortError } from '../../../data/common';
 import { RequestAdapter, DataAdapter } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
@@ -190,10 +191,7 @@ export class Execution<
     for (const link of chainArr) {
       // if execution was aborted return error
       if (this.context.abortSignal && this.context.abortSignal.aborted) {
-        return createError({
-          message: 'The expression was aborted.',
-          name: 'AbortError',
-        });
+        return createError(new AbortError('The expression was aborted.'));
       }
 
       const { function: fnName, arguments: fnArgs } = link;

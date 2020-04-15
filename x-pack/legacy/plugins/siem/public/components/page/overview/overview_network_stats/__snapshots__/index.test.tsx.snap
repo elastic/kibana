@@ -8,6 +8,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
     margin="xs"
   />
   <EuiAccordion
+    arrowDisplay="left"
     buttonContent={
       <ForwardRef
         data-test-subj="network-stat-group-auditbeat"
@@ -80,6 +81,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
     margin="xs"
   />
   <EuiAccordion
+    arrowDisplay="left"
     buttonContent={
       <ForwardRef
         data-test-subj="network-stat-group-filebeat"
@@ -280,6 +282,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
     margin="xs"
   />
   <EuiAccordion
+    arrowDisplay="left"
     buttonContent={
       <ForwardRef
         data-test-subj="network-stat-group-packetbeat"

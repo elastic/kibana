@@ -11,6 +11,10 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, Alert, AlertAction } from '../../../types';
 import { ActionForm } from './action_form';
+jest.mock('../../lib/action_connector_api', () => ({
+  loadAllActions: jest.fn(),
+  loadActionTypes: jest.fn(),
+}));
 const actionTypeRegistry = actionTypeRegistryMock.create();
 describe('action_form', () => {
   let deps: any;
@@ -39,17 +43,62 @@ describe('action_form', () => {
     actionParamsFields: null,
   };
 
+  const disabledByConfigActionType = {
+    id: 'disabled-by-config',
+    iconClass: 'test',
+    selectMessage: 'test',
+    validateConnector: (): ValidationResult => {
+      return { errors: {} };
+    },
+    validateParams: (): ValidationResult => {
+      const validationResult = { errors: {} };
+      return validationResult;
+    },
+    actionConnectorFields: null,
+    actionParamsFields: null,
+  };
+
+  const disabledByLicenseActionType = {
+    id: 'disabled-by-license',
+    iconClass: 'test',
+    selectMessage: 'test',
+    validateConnector: (): ValidationResult => {
+      return { errors: {} };
+    },
+    validateParams: (): ValidationResult => {
+      const validationResult = { errors: {} };
+      return validationResult;
+    },
+    actionConnectorFields: null,
+    actionParamsFields: null,
+  };
+
   describe('action_form in alert', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
+      const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
+      loadAllActions.mockResolvedValueOnce([
+        {
+          secrets: {},
+          id: 'test',
+          actionTypeId: actionType.id,
+          name: 'Test connector',
+          config: {},
+          isPreconfigured: false,
+        },
+      ]);
       const mockes = coreMock.createSetup();
       deps = {
         toastNotifications: mockes.notifications.toasts,
         http: mockes.http,
         actionTypeRegistry: actionTypeRegistry as any,
       };
-      actionTypeRegistry.list.mockReturnValue([actionType]);
+      actionTypeRegistry.list.mockReturnValue([
+        actionType,
+        disabledByConfigActionType,
+        disabledByLicenseActionType,
+      ]);
       actionTypeRegistry.has.mockReturnValue(true);
 
       const initialAlert = ({
@@ -92,8 +141,38 @@ describe('action_form', () => {
           actionTypeRegistry={deps!.actionTypeRegistry}
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={[
-            { id: actionType.id, name: 'Test', enabled: true },
-            { id: '.index', name: 'Index', enabled: true },
+            {
+              id: actionType.id,
+              name: 'Test',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
+            },
+            {
+              id: '.index',
+              name: 'Index',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
+            },
+            {
+              id: 'disabled-by-config',
+              name: 'Disabled by config',
+              enabled: false,
+              enabledInConfig: false,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'gold',
+            },
+            {
+              id: 'disabled-by-license',
+              name: 'Disabled by license',
+              enabled: false,
+              enabledInConfig: true,
+              enabledInLicense: false,
+              minimumLicenseRequired: 'gold',
+            },
           ]}
           toastNotifications={deps!.toastNotifications}
         />
@@ -112,6 +191,32 @@ describe('action_form', () => {
         `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
       );
       expect(actionOption.exists()).toBeTruthy();
+      expect(
+        wrapper
+          .find(`EuiToolTip [data-test-subj="${actionType.id}-ActionTypeSelectOption"]`)
+          .exists()
+      ).toBeFalsy();
+    });
+
+    it(`doesn't render action types disabled by config`, async () => {
+      await setup();
+      const actionOption = wrapper.find(
+        `[data-test-subj="disabled-by-config-ActionTypeSelectOption"]`
+      );
+      expect(actionOption.exists()).toBeFalsy();
+    });
+
+    it('renders action types disabled by license', async () => {
+      await setup();
+      const actionOption = wrapper.find(
+        `[data-test-subj="disabled-by-license-ActionTypeSelectOption"]`
+      );
+      expect(actionOption.exists()).toBeTruthy();
+      expect(
+        wrapper
+          .find('EuiToolTip [data-test-subj="disabled-by-license-ActionTypeSelectOption"]')
+          .exists()
+      ).toBeTruthy();
     });
   });
 });

@@ -5,21 +5,9 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { aggTypeFilters } from 'ui/agg_types';
-import { aggTypeFieldFilters } from 'ui/agg_types';
-import { addSearchStrategy } from '../../../../../src/plugins/data/public';
 import { RollupPlugin } from './plugin';
-import { setup as management } from '../../../../../src/legacy/core_plugins/management/public/legacy';
 
 const plugin = new RollupPlugin();
 
-export const setup = plugin.setup(npSetup.core, {
-  ...npSetup.plugins,
-  __LEGACY: {
-    aggTypeFilters,
-    aggTypeFieldFilters,
-    addSearchStrategy,
-    managementLegacy: management,
-  },
-});
-export const start = plugin.start(npStart.core);
+export const setup = plugin.setup(npSetup.core, npSetup.plugins);
+export const start = plugin.start(npStart.core, npStart.plugins);

@@ -52,6 +52,36 @@ export const getRuleStatusById = async ({
         last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
         last_failure_message: null,
         last_success_message: 'it is a success',
+        gap: null,
+        bulk_create_time_durations: ['2235.01'],
+        search_after_time_durations: ['616.97'],
+        last_look_back_date: '2020-03-19T00:32:07.996Z',
+      },
+      failures: [],
+    },
+  });
+
+export const getRulesStatusByIds = async ({
+  ids,
+  signal,
+}: {
+  ids: string[];
+  signal: AbortSignal;
+}): Promise<RuleStatusResponse> =>
+  Promise.resolve({
+    '12345678987654321': {
+      current_status: {
+        alert_id: 'alertId',
+        status_date: 'mm/dd/yyyyTHH:MM:sssz',
+        status: 'succeeded',
+        last_failure_at: null,
+        last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
+        last_failure_message: null,
+        last_success_message: 'it is a success',
+        gap: null,
+        bulk_create_time_durations: ['2235.01'],
+        search_after_time_durations: ['616.97'],
+        last_look_back_date: '2020-03-19T00:32:07.996Z',
       },
       failures: [],
     },

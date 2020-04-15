@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash/fp';
+import { isEmpty, get } from 'lodash/fp';
 
 import { IndexField } from '../../graphql/types';
 import {
@@ -51,6 +51,23 @@ export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
   }
 }
 
+const missingFields = [
+  {
+    name: '_id',
+    type: 'string',
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: true,
+  },
+  {
+    name: '_index',
+    type: 'string',
+    searchable: true,
+    aggregatable: true,
+    readFromDocValues: true,
+  },
+];
+
 export const formatIndexFields = (
   responsesIndexFields: IndexFieldDescriptor[][],
   indexesAlias: IndexAlias[]
@@ -59,20 +76,23 @@ export const formatIndexFields = (
     .reduce(
       (accumulator: IndexField[], indexFields: IndexFieldDescriptor[], indexesAliasIdx: number) => [
         ...accumulator,
-        ...indexFields.reduce((itemAccumulator: IndexField[], index: IndexFieldDescriptor) => {
-          const alias: IndexAlias = indexesAlias[indexesAliasIdx];
-          const splitName = index.name.split('.');
-          const category = baseCategoryFields.includes(splitName[0]) ? 'base' : splitName[0];
-          return [
-            ...itemAccumulator,
-            {
-              ...(hasDocumentation(alias, index.name) ? getDocumentation(alias, index.name) : {}),
-              ...index,
-              category,
-              indexes: [alias],
-            } as IndexField,
-          ];
-        }, []),
+        ...[...missingFields, ...indexFields].reduce(
+          (itemAccumulator: IndexField[], index: IndexFieldDescriptor) => {
+            const alias: IndexAlias = indexesAlias[indexesAliasIdx];
+            const splitName = index.name.split('.');
+            const category = baseCategoryFields.includes(splitName[0]) ? 'base' : splitName[0];
+            return [
+              ...itemAccumulator,
+              {
+                ...(hasDocumentation(alias, index.name) ? getDocumentation(alias, index.name) : {}),
+                ...index,
+                category,
+                indexes: [alias],
+              } as IndexField,
+            ];
+          },
+          []
+        ),
       ],
       []
     )
@@ -84,7 +104,10 @@ export const formatIndexFields = (
           ...accumulator.slice(0, alreadyExistingIndexField),
           {
             ...existingIndexField,
-            indexes: [...existingIndexField.indexes, ...indexfield.indexes],
+            description: isEmpty(existingIndexField.description)
+              ? indexfield.description
+              : existingIndexField.description,
+            indexes: Array.from(new Set([...existingIndexField.indexes, ...indexfield.indexes])),
           },
           ...accumulator.slice(alreadyExistingIndexField + 1),
         ];

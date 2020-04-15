@@ -131,5 +131,5 @@ export const loginAndWaitForPageWithoutDateRange = (url: string) => {
   login();
   cy.viewport('macbook-15');
   cy.visit(url);
-  cy.contains('a', 'SIEM');
+  cy.contains('a', 'SIEM', { timeout: 120000 });
 };

@@ -16,8 +16,8 @@ import { Watch } from '../../../models/watch/index';
 import { VisualizeOptions } from '../../../models/visualize_options/index';
 
 const bodySchema = schema.object({
-  watch: schema.object({}, { allowUnknowns: true }),
-  options: schema.object({}, { allowUnknowns: true }),
+  watch: schema.object({}, { unknowns: 'allow' }),
+  options: schema.object({}, { unknowns: 'allow' }),
 });
 
 function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: any) {

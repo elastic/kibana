@@ -6,7 +6,7 @@
 
 import { newJobLineChartProvider } from './line_chart';
 import { newJobPopulationChartProvider } from './population_chart';
-import { callWithRequestType } from '../../../../../../legacy/plugins/ml/common/types/kibana';
+import { callWithRequestType } from '../../../../common/types/kibana';
 
 export function newJobChartsProvider(callWithRequest: callWithRequestType) {
   const { newJobLineChart } = newJobLineChartProvider(callWithRequest);

@@ -28,7 +28,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
 import { fieldWildcardMatcher } from '../../../../../../../../plugins/kibana_utils/public';
-import { setup as managementSetup } from '../../../../../../management/public/legacy';
+import { subscribeWithScope } from '../../../../../../../../plugins/kibana_legacy/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
@@ -37,7 +37,6 @@ import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { npStart } from 'ui/new_platform';
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { createEditIndexPatternPageStateContainer } from './edit_index_pattern_state_container';
@@ -49,6 +48,8 @@ const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
 const TAB_INDEXED_FIELDS = 'indexedFields';
 const TAB_SCRIPTED_FIELDS = 'scriptedFields';
 const TAB_SOURCE_FILTERS = 'sourceFilters';
+
+const EDIT_FIELD_PATH = '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}';
 
 function updateSourceFiltersTable($scope) {
   $scope.$$postDigest(() => {
@@ -98,8 +99,8 @@ function updateScriptedFieldsTable($scope) {
           fieldFilter={$scope.fieldFilter}
           scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
           helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.changeToRoute(obj, route);
+            redirectToRoute: field => {
+              $scope.kbnUrl.changePath(EDIT_FIELD_PATH, field);
               $scope.$apply();
             },
             getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
@@ -141,8 +142,8 @@ function updateIndexedFieldsTable($scope) {
           fieldWildcardMatcher={$scope.fieldWildcardMatcher}
           indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
           helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.changeToRoute(obj, route);
+            redirectToRoute: field => {
+              $scope.kbnUrl.changePath(EDIT_FIELD_PATH, field);
               $scope.$apply();
             },
             getFieldInfo: $scope.getFieldInfo,
@@ -214,11 +215,16 @@ uiModules
     $scope.getCurrentTab = getCurrentTab;
     $scope.setCurrentTab = setCurrentTab;
 
-    const stateChangedSub = subscribeWithScope($scope, state$, {
-      next: ({ tab }) => {
-        handleTabChange($scope, tab);
+    const stateChangedSub = subscribeWithScope(
+      $scope,
+      state$,
+      {
+        next: ({ tab }) => {
+          handleTabChange($scope, tab);
+        },
       },
-    });
+      fatalError
+    );
 
     handleTabChange($scope, getCurrentTab()); // setup initial tab depending on initial tab state
 
@@ -234,14 +240,12 @@ uiModules
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
-    $scope.indexPatternListProvider = managementSetup.indexPattern.list;
-    $scope.indexPattern.tags = managementSetup.indexPattern.list.getIndexPatternTags(
+    $scope.indexPatternListProvider = npStart.plugins.indexPatternManagement.list;
+    $scope.indexPattern.tags = npStart.plugins.indexPatternManagement.list.getIndexPatternTags(
       $scope.indexPattern,
       $scope.indexPattern.id === config.get('defaultIndex')
     );
-    $scope.getFieldInfo = managementSetup.indexPattern.list.getFieldInfo.bind(
-      managementSetup.indexPattern.list
-    );
+    $scope.getFieldInfo = npStart.plugins.indexPatternManagement.list.getFieldInfo;
     docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
@@ -252,7 +256,7 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        managementSetup.indexPattern.list
+        npStart.plugins.indexPatternManagement.list
       );
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
@@ -358,7 +362,7 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        managementSetup.indexPattern.list
+        npStart.plugins.indexPatternManagement.list
       );
 
       if ($scope.fieldFilter === undefined) {

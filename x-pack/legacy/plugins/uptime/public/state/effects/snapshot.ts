@@ -6,16 +6,20 @@
 
 import { takeLatest } from 'redux-saga/effects';
 import {
-  FETCH_SNAPSHOT_COUNT,
-  fetchSnapshotCountFail,
-  fetchSnapshotCountSuccess,
+  getSnapshotCountAction,
+  getSnapshotCountActionFail,
+  getSnapshotCountActionSuccess,
 } from '../actions';
 import { fetchSnapshotCount } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchSnapshotCountEffect() {
   yield takeLatest(
-    FETCH_SNAPSHOT_COUNT,
-    fetchEffectFactory(fetchSnapshotCount, fetchSnapshotCountSuccess, fetchSnapshotCountFail)
+    getSnapshotCountAction,
+    fetchEffectFactory(
+      fetchSnapshotCount,
+      getSnapshotCountActionSuccess,
+      getSnapshotCountActionFail
+    )
   );
 }

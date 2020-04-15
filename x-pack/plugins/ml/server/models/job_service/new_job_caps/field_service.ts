@@ -12,9 +12,9 @@ import {
   FieldId,
   NewJobCaps,
   METRIC_AGG_TYPE,
-} from '../../../../../../legacy/plugins/ml/common/types/fields';
+} from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/server';
-import { ML_JOB_AGGREGATION } from '../../../../../../legacy/plugins/ml/common/constants/aggregation_types';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
 import { aggregations, mlOnlyAggregations } from './aggregations';
 

@@ -10,10 +10,10 @@ import * as React from 'react';
 
 import { LogEntryTime } from '../../../../common/log_entry';
 import { SearchMarker } from './search_marker';
-import { SummaryHighlightBucket } from './types';
+import { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api';
 
 interface SearchMarkersProps {
-  buckets: SummaryHighlightBucket[];
+  buckets: LogEntriesSummaryHighlightsBucket[];
   className?: string;
   end: number;
   start: number;

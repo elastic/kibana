@@ -13,7 +13,6 @@ import { DetailItem } from '../../../graphql/types';
 import { StatefulEventDetails } from '../../event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
 import { OnUpdateColumns } from '../events';
-import { useTimelineWidthContext } from '../timeline_context';
 
 const ExpandableDetails = styled.div<{ hideExpandButton: boolean }>`
   ${({ hideExpandButton }) =>
@@ -50,33 +49,26 @@ export const ExpandableEvent = React.memo<Props>(
     timelineId,
     toggleColumn,
     onUpdateColumns,
-  }) => {
-    const width = useTimelineWidthContext();
-    // Passing the styles directly to the component of LazyAccordion because the width is
-    // being calculated and is recommended by Styled Components for performance
-    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-    return (
-      <ExpandableDetails hideExpandButton={true}>
-        <LazyAccordion
-          style={{ width: `${width}px` }}
-          id={`timeline-${timelineId}-row-${id}`}
-          renderExpandedContent={() => (
-            <StatefulEventDetails
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              data={event}
-              id={id}
-              onUpdateColumns={onUpdateColumns}
-              timelineId={timelineId}
-              toggleColumn={toggleColumn}
-            />
-          )}
-          forceExpand={forceExpand}
-          paddingSize="none"
-        />
-      </ExpandableDetails>
-    );
-  }
+  }) => (
+    <ExpandableDetails hideExpandButton={true}>
+      <LazyAccordion
+        id={`timeline-${timelineId}-row-${id}`}
+        renderExpandedContent={() => (
+          <StatefulEventDetails
+            browserFields={browserFields}
+            columnHeaders={columnHeaders}
+            data={event}
+            id={id}
+            onUpdateColumns={onUpdateColumns}
+            timelineId={timelineId}
+            toggleColumn={toggleColumn}
+          />
+        )}
+        forceExpand={forceExpand}
+        paddingSize="none"
+      />
+    </ExpandableDetails>
+  )
 );
 
 ExpandableEvent.displayName = 'ExpandableEvent';

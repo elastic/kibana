@@ -11,19 +11,16 @@ import {
   JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
   JOB_STATUS_COMPLETED,
   JOB_STATUS_FAILED,
-  API_BASE_URL,
-  REPORTING_MANAGEMENT_HOME,
 } from '../../constants';
+
 import {
   JobId,
   JobSummary,
   JobStatusBuckets,
-  HttpService,
   NotificationsService,
   SourceJob,
-  DownloadReportFn,
-  ManagementLinkFn,
 } from '../../index.d';
+
 import {
   getSuccessToast,
   getFailureToast,
@@ -31,7 +28,7 @@ import {
   getWarningMaxSizeToast,
   getGeneralErrorToast,
 } from '../components';
-import { jobQueueClient as defaultJobQueueClient } from './job_queue';
+import { ReportingAPIClient } from './reporting_api_client';
 
 function updateStored(jobIds: JobId[]): void {
   sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobIds));
@@ -49,21 +46,7 @@ function summarizeJob(src: SourceJob): JobSummary {
 }
 
 export class ReportingNotifierStreamHandler {
-  private getManagementLink: ManagementLinkFn;
-  private getDownloadLink: DownloadReportFn;
-
-  constructor(
-    private http: HttpService,
-    private notifications: NotificationsService,
-    private jobQueueClient = defaultJobQueueClient
-  ) {
-    this.getManagementLink = () => {
-      return http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
-    };
-    this.getDownloadLink = (jobId: JobId) => {
-      return http.basePath.prepend(`${API_BASE_URL}/download/${jobId}`);
-    };
-  }
+  constructor(private notifications: NotificationsService, private apiClient: ReportingAPIClient) {}
 
   /*
    * Use Kibana Toast API to show our messages
@@ -77,23 +60,33 @@ export class ReportingNotifierStreamHandler {
       for (const job of completedJobs) {
         if (job.csvContainsFormulas) {
           this.notifications.toasts.addWarning(
-            getWarningFormulasToast(job, this.getManagementLink, this.getDownloadLink)
+            getWarningFormulasToast(
+              job,
+              this.apiClient.getManagementLink,
+              this.apiClient.getDownloadLink
+            )
           );
         } else if (job.maxSizeReached) {
           this.notifications.toasts.addWarning(
-            getWarningMaxSizeToast(job, this.getManagementLink, this.getDownloadLink)
+            getWarningMaxSizeToast(
+              job,
+              this.apiClient.getManagementLink,
+              this.apiClient.getDownloadLink
+            )
           );
         } else {
           this.notifications.toasts.addSuccess(
-            getSuccessToast(job, this.getManagementLink, this.getDownloadLink)
+            getSuccessToast(job, this.apiClient.getManagementLink, this.apiClient.getDownloadLink)
           );
         }
       }
 
       // no download link available
       for (const job of failedJobs) {
-        const content = await this.jobQueueClient.getContent(this.http, job.id);
-        this.notifications.toasts.addDanger(getFailureToast(content, job, this.getManagementLink));
+        const { content } = await this.apiClient.getContent(job.id);
+        this.notifications.toasts.addDanger(
+          getFailureToast(content, job, this.apiClient.getManagementLink)
+        );
       }
       return { completed: completedJobs, failed: failedJobs };
     };
@@ -106,7 +99,7 @@ export class ReportingNotifierStreamHandler {
    * session storage) but have non-processing job status on the server
    */
   public findChangedStatusJobs(storedJobs: JobId[]): Rx.Observable<JobStatusBuckets> {
-    return Rx.from(this.jobQueueClient.findForJobIds(this.http, storedJobs)).pipe(
+    return Rx.from(this.apiClient.findForJobIds(storedJobs)).pipe(
       map((jobs: SourceJob[]) => {
         const completedJobs: JobSummary[] = [];
         const failedJobs: JobSummary[] = [];

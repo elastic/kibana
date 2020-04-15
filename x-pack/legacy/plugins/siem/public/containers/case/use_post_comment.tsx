@@ -10,82 +10,77 @@ import { CommentRequest } from '../../../../../../plugins/case/common/api';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 
 import { postComment } from './api';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
-import { Comment } from './types';
+import { Case } from './types';
 
 interface NewCommentState {
-  commentData: Comment | null;
   isLoading: boolean;
   isError: boolean;
-  caseId: string;
 }
-interface Action {
-  type: string;
-  payload?: Comment;
-}
+type Action = { type: 'FETCH_INIT' } | { type: 'FETCH_SUCCESS' } | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'FETCH_INIT':
       return {
-        ...state,
         isLoading: true,
         isError: false,
       };
-    case FETCH_SUCCESS:
+    case 'FETCH_SUCCESS':
       return {
-        ...state,
         isLoading: false,
         isError: false,
-        commentData: action.payload ?? null,
       };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
-        ...state,
         isLoading: false,
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 
-interface UsePostComment extends NewCommentState {
-  postComment: (data: CommentRequest) => void;
+export interface UsePostComment extends NewCommentState {
+  postComment: (data: CommentRequest, updateCase: (newCase: Case) => void) => void;
 }
 
 export const usePostComment = (caseId: string): UsePostComment => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    commentData: null,
     isLoading: false,
     isError: false,
-    caseId,
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const postMyComment = useCallback(async (data: CommentRequest) => {
-    let cancel = false;
-    try {
-      dispatch({ type: FETCH_INIT });
-      const response = await postComment(data, state.caseId);
-      if (!cancel) {
-        dispatch({ type: FETCH_SUCCESS, payload: response });
+  const postMyComment = useCallback(
+    async (data: CommentRequest, updateCase: (newCase: Case) => void) => {
+      let cancel = false;
+      const abortCtrl = new AbortController();
+
+      try {
+        dispatch({ type: 'FETCH_INIT' });
+        const response = await postComment(data, caseId, abortCtrl.signal);
+        if (!cancel) {
+          dispatch({ type: 'FETCH_SUCCESS' });
+          updateCase(response);
+        }
+      } catch (error) {
+        if (!cancel) {
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
+          dispatch({ type: 'FETCH_FAILURE' });
+        }
       }
-    } catch (error) {
-      if (!cancel) {
-        errorToToaster({
-          title: i18n.ERROR_TITLE,
-          error: error.body && error.body.message ? new Error(error.body.message) : error,
-          dispatchToaster,
-        });
-        dispatch({ type: FETCH_FAILURE });
-      }
-    }
-    return () => {
-      cancel = true;
-    };
-  }, []);
+      return () => {
+        abortCtrl.abort();
+        cancel = true;
+      };
+    },
+    [caseId]
+  );
 
   return { ...state, postComment: postMyComment };
 };

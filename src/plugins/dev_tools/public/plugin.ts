@@ -132,4 +132,6 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
       getSortedDevTools: this.getSortedDevTools.bind(this),
     };
   }
+
+  public stop() {}
 }

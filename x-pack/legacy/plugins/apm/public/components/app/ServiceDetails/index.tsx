@@ -10,14 +10,28 @@ import { ApmHeader } from '../../shared/ApmHeader';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { AlertIntegrations } from './AlertIntegrations';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 interface Props {
   tab: React.ComponentProps<typeof ServiceDetailTabs>['tab'];
 }
 
 export function ServiceDetails({ tab }: Props) {
+  const plugin = useApmPluginContext();
   const { urlParams } = useUrlParams();
   const { serviceName } = urlParams;
+
+  const canReadAlerts = !!plugin.core.application.capabilities.apm[
+    'alerting:show'
+  ];
+  const canSaveAlerts = !!plugin.core.application.capabilities.apm[
+    'alerting:save'
+  ];
+  const isAlertingPluginEnabled = 'alerting' in plugin.plugins;
+
+  const isAlertingAvailable =
+    isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
 
   return (
     <div>
@@ -31,6 +45,14 @@ export function ServiceDetails({ tab }: Props) {
           <EuiFlexItem grow={false}>
             <ServiceIntegrations urlParams={urlParams} />
           </EuiFlexItem>
+          {isAlertingAvailable && (
+            <EuiFlexItem grow={false}>
+              <AlertIntegrations
+                canReadAlerts={canReadAlerts}
+                canSaveAlerts={canSaveAlerts}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </ApmHeader>
 

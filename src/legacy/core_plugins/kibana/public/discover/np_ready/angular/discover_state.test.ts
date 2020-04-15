@@ -30,7 +30,7 @@ describe('Test discover state', () => {
     history.push('/');
     state = getState({
       defaultAppState: { index: 'test' },
-      hashHistory: history,
+      history,
     });
     await state.replaceUrlAppState({});
     await state.startSync();
@@ -74,5 +74,32 @@ describe('Test discover state', () => {
     const stateA = state.appStateContainer.getState();
     state.setAppState({ index: 'second' });
     expect(state.getPreviousAppState()).toEqual(stateA);
+  });
+});
+
+describe('Test discover state with legacy migration', () => {
+  test('migration of legacy query ', async () => {
+    history = createBrowserHistory();
+    history.push(
+      "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))"
+    );
+    state = getState({
+      defaultAppState: { index: 'test' },
+      history,
+    });
+    expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
+      Object {
+        "index": "test",
+        "query": Object {
+          "language": "lucene",
+          "query": Object {
+            "query_string": Object {
+              "analyze_wildcard": true,
+              "query": "type:nice name:\\"yeah\\"",
+            },
+          },
+        },
+      }
+    `);
   });
 });

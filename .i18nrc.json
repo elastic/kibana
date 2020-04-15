@@ -3,11 +3,9 @@
     "common.ui": "src/legacy/ui",
     "console": "src/plugins/console",
     "core": "src/core",
-    "dashboardEmbeddableContainer": "src/plugins/dashboard_embeddable_container",
-    "data": [
-      "src/legacy/core_plugins/data",
-      "src/plugins/data"
-    ],
+    "discover": "src/plugins/discover",
+    "dashboard": "src/plugins/dashboard",
+    "data": "src/plugins/data",
     "embeddableApi": "src/plugins/embeddable",
     "embeddableExamples": "examples/embeddable_examples",
     "share": "src/plugins/share",
@@ -26,6 +24,8 @@
       "src/legacy/core_plugins/management",
       "src/plugins/management"
     ],
+    "maps_legacy": "src/plugins/maps_legacy",
+    "indexPatternManagement": "src/plugins/index_pattern_management",
     "advancedSettings": "src/plugins/advanced_settings",
     "kibana_legacy": "src/plugins/kibana_legacy",
     "kibana_react": "src/legacy/core_plugins/kibana_react",
@@ -35,16 +35,17 @@
     "newsfeed": "src/plugins/newsfeed",
     "regionMap": "src/legacy/core_plugins/region_map",
     "savedObjects": "src/plugins/saved_objects",
+    "savedObjectsManagement": "src/plugins/saved_objects_management",
     "server": "src/legacy/server",
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": [
-      "src/legacy/core_plugins/telemetry",
-      "src/plugins/telemetry"
+      "src/plugins/telemetry",
+      "src/plugins/telemetry_management_section"
     ],
     "tileMap": "src/legacy/core_plugins/tile_map",
     "timelion": ["src/legacy/core_plugins/timelion", "src/legacy/core_plugins/vis_type_timelion", "src/plugins/timelion"],
     "uiActions": "src/plugins/ui_actions",
-    "visDefaultEditor": "src/legacy/core_plugins/vis_default_editor",
+    "visDefaultEditor": "src/plugins/vis_default_editor",
     "visTypeMarkdown": "src/legacy/core_plugins/vis_type_markdown",
     "visTypeMetric": "src/legacy/core_plugins/vis_type_metric",
     "visTypeTable": "src/legacy/core_plugins/vis_type_table",
@@ -53,10 +54,7 @@
     "visTypeVega": "src/legacy/core_plugins/vis_type_vega",
     "visTypeVislib": "src/legacy/core_plugins/vis_type_vislib",
     "visTypeXy": "src/legacy/core_plugins/vis_type_xy",
-    "visualizations": [
-      "src/plugins/visualizations",
-      "src/legacy/core_plugins/visualizations"
-    ]
+    "visualizations": "src/plugins/visualizations"
   },
   "exclude": [
     "src/legacy/ui/ui_render/ui_render_mixin.js"

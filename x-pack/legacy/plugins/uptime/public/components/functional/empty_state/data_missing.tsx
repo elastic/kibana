@@ -24,7 +24,7 @@ interface DataMissingProps {
 export const DataMissing = ({ headingMessage }: DataMissingProps) => {
   const { basePath } = useContext(UptimeSettingsContext);
   return (
-    <EuiFlexGroup justifyContent="center">
+    <EuiFlexGroup justifyContent="center" data-test-subj="data-missing">
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <EuiPanel>

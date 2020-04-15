@@ -25,6 +25,7 @@ describe('buildBulkBody', () => {
       ruleParams: sampleParams,
       id: sampleRuleGuid,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -32,6 +33,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -60,6 +62,7 @@ describe('buildBulkBody', () => {
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
+          actions: [],
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           rule_id: 'rule-1',
           false_positives: [],
@@ -77,14 +80,48 @@ describe('buildBulkBody', () => {
           references: ['http://google.com'],
           severity: 'high',
           tags: ['some fake tag 1', 'some fake tag 2'],
+          throttle: 'no_actions',
           type: 'query',
           to: 'now',
+          note: '',
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          lists: [
+            {
+              field: 'source.ip',
+              values_operator: 'included',
+              values_type: 'exists',
+            },
+            {
+              field: 'host.name',
+              values_operator: 'excluded',
+              values_type: 'match',
+              values: [
+                {
+                  name: 'rock01',
+                },
+              ],
+              and: [
+                {
+                  field: 'host.id',
+                  values_operator: 'included',
+                  values_type: 'match_all',
+                  values: [
+                    {
+                      name: '123',
+                    },
+                    {
+                      name: '678',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       },
     };
@@ -105,6 +142,7 @@ describe('buildBulkBody', () => {
       ruleParams: sampleParams,
       id: sampleRuleGuid,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -112,6 +150,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -149,6 +188,7 @@ describe('buildBulkBody', () => {
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
+          actions: [],
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           rule_id: 'rule-1',
           false_positives: [],
@@ -168,12 +208,46 @@ describe('buildBulkBody', () => {
           tags: ['some fake tag 1', 'some fake tag 2'],
           type: 'query',
           to: 'now',
+          note: '',
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          throttle: 'no_actions',
+          lists: [
+            {
+              field: 'source.ip',
+              values_operator: 'included',
+              values_type: 'exists',
+            },
+            {
+              field: 'host.name',
+              values_operator: 'excluded',
+              values_type: 'match',
+              values: [
+                {
+                  name: 'rock01',
+                },
+              ],
+              and: [
+                {
+                  field: 'host.id',
+                  values_operator: 'included',
+                  values_type: 'match_all',
+                  values: [
+                    {
+                      name: '123',
+                    },
+                    {
+                      name: '678',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       },
     };
@@ -193,6 +267,7 @@ describe('buildBulkBody', () => {
       ruleParams: sampleParams,
       id: sampleRuleGuid,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -200,6 +275,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -236,6 +312,7 @@ describe('buildBulkBody', () => {
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
+          actions: [],
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           rule_id: 'rule-1',
           false_positives: [],
@@ -255,12 +332,46 @@ describe('buildBulkBody', () => {
           tags: ['some fake tag 1', 'some fake tag 2'],
           type: 'query',
           to: 'now',
+          note: '',
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          throttle: 'no_actions',
+          lists: [
+            {
+              field: 'source.ip',
+              values_operator: 'included',
+              values_type: 'exists',
+            },
+            {
+              field: 'host.name',
+              values_operator: 'excluded',
+              values_type: 'match',
+              values: [
+                {
+                  name: 'rock01',
+                },
+              ],
+              and: [
+                {
+                  field: 'host.id',
+                  values_operator: 'included',
+                  values_type: 'match_all',
+                  values: [
+                    {
+                      name: '123',
+                    },
+                    {
+                      name: '678',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       },
     };
@@ -278,6 +389,7 @@ describe('buildBulkBody', () => {
       ruleParams: sampleParams,
       id: sampleRuleGuid,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -285,6 +397,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -316,6 +429,7 @@ describe('buildBulkBody', () => {
         original_time: 'someTimeStamp',
         status: 'open',
         rule: {
+          actions: [],
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           rule_id: 'rule-1',
           false_positives: [],
@@ -335,12 +449,46 @@ describe('buildBulkBody', () => {
           tags: ['some fake tag 1', 'some fake tag 2'],
           type: 'query',
           to: 'now',
+          note: '',
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
           version: 1,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          throttle: 'no_actions',
+          lists: [
+            {
+              field: 'source.ip',
+              values_operator: 'included',
+              values_type: 'exists',
+            },
+            {
+              field: 'host.name',
+              values_operator: 'excluded',
+              values_type: 'match',
+              values: [
+                {
+                  name: 'rock01',
+                },
+              ],
+              and: [
+                {
+                  field: 'host.id',
+                  values_operator: 'included',
+                  values_type: 'match_all',
+                  values: [
+                    {
+                      name: '123',
+                    },
+                    {
+                      name: '678',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       },
     };

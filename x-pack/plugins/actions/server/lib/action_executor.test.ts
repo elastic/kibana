@@ -12,6 +12,7 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_service.mock';
+import { ActionType } from '../types';
 
 const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -42,6 +43,7 @@ actionExecutor.initialize({
   actionTypeRegistry,
   encryptedSavedObjectsPlugin,
   eventLogger: eventLoggerMock.create(),
+  preconfiguredActions: [],
 });
 
 beforeEach(() => {
@@ -50,9 +52,10 @@ beforeEach(() => {
 });
 
 test('successfully executes', async () => {
-  const actionType = {
+  const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    minimumLicenseRequired: 'basic',
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -96,9 +99,10 @@ test('successfully executes', async () => {
 });
 
 test('provides empty config when config and / or secrets is empty', async () => {
-  const actionType = {
+  const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    minimumLicenseRequired: 'basic',
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -120,9 +124,10 @@ test('provides empty config when config and / or secrets is empty', async () => 
 });
 
 test('throws an error when config is invalid', async () => {
-  const actionType = {
+  const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    minimumLicenseRequired: 'basic',
     validate: {
       config: schema.object({
         param1: schema.string(),
@@ -152,9 +157,10 @@ test('throws an error when config is invalid', async () => {
 });
 
 test('throws an error when params is invalid', async () => {
-  const actionType = {
+  const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    minimumLicenseRequired: 'basic',
     validate: {
       params: schema.object({
         param1: schema.string(),
@@ -190,10 +196,11 @@ test('throws an error when failing to load action through savedObjectsClient', a
   );
 });
 
-test('returns an error if actionType is not enabled', async () => {
-  const actionType = {
+test('throws an error if actionType is not enabled', async () => {
+  const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    minimumLicenseRequired: 'basic',
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -210,17 +217,11 @@ test('returns an error if actionType is not enabled', async () => {
   actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
     throw new Error('not enabled for test');
   });
-  const result = await actionExecutor.execute(executeParams);
+  await expect(actionExecutor.execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"not enabled for test"`
+  );
 
   expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith('test');
-  expect(result).toMatchInlineSnapshot(`
-    Object {
-      "actionId": "1",
-      "message": "not enabled for test",
-      "retry": false,
-      "status": "error",
-    }
-  `);
 });
 
 test('throws an error when passing isESOUsingEphemeralEncryptionKey with value of true', async () => {
@@ -232,6 +233,7 @@ test('throws an error when passing isESOUsingEphemeralEncryptionKey with value o
     actionTypeRegistry,
     encryptedSavedObjectsPlugin,
     eventLogger: eventLoggerMock.create(),
+    preconfiguredActions: [],
   });
   await expect(
     customActionExecutor.execute(executeParams)

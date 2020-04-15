@@ -17,7 +17,11 @@
  * under the License.
  */
 
-require('./harden'); // this require MUST be executed before any others
+// The following require statements MUST be executed before any others - BEGIN
+require('./exit_on_warning');
+require('./harden');
+// The following require statements MUST be executed before any others - END
+
 require('symbol-observable');
 require('./root');
 require('./node_version_validator');

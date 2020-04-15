@@ -10,9 +10,13 @@ import { overviewFiltersReducer } from './overview_filters';
 import { snapshotReducer } from './snapshot';
 import { uiReducer } from './ui';
 import { monitorStatusReducer } from './monitor_status';
+import { dynamicSettingsReducer } from './dynamic_settings';
 import { indexPatternReducer } from './index_pattern';
 import { pingReducer } from './ping';
+import { pingListReducer } from './ping_list';
 import { monitorDurationReducer } from './monitor_duration';
+import { indexStatusReducer } from './index_status';
+import { mlJobsReducer } from './ml_anomaly';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
@@ -20,7 +24,11 @@ export const rootReducer = combineReducers({
   snapshot: snapshotReducer,
   ui: uiReducer,
   monitorStatus: monitorStatusReducer,
+  dynamicSettings: dynamicSettingsReducer,
   indexPattern: indexPatternReducer,
   ping: pingReducer,
+  pingList: pingListReducer,
+  ml: mlJobsReducer,
   monitorDuration: monitorDurationReducer,
+  indexStatus: indexStatusReducer,
 });

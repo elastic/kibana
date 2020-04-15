@@ -35,6 +35,7 @@ const ParamsSchema = schema.object({
 export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.server-log',
+    minimumLicenseRequired: 'basic',
     name: i18n.translate('xpack.actions.builtin.serverLogTitle', {
       defaultMessage: 'Server log',
     }),

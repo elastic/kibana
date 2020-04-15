@@ -14,6 +14,7 @@ import {
 } from 'kibana/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { BASE_ALERT_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -22,7 +23,7 @@ const paramSchema = schema.object({
 export const muteAllAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: '/api/alert/{id}/_mute_all',
+      path: `${BASE_ALERT_API_PATH}/{id}/_mute_all`,
       validate: {
         params: paramSchema,
       },

@@ -77,6 +77,9 @@ describe('connector_add_flyout', () => {
               id: actionType.id,
               enabled: true,
               name: 'Test',
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
             },
           ]}
         />
@@ -84,5 +87,103 @@ describe('connector_add_flyout', () => {
     );
 
     expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
+  });
+
+  it(`doesn't renders action types that are disabled via config`, () => {
+    const onActionTypeChange = jest.fn();
+    const actionType = {
+      id: 'my-action-type',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateConnector: (): ValidationResult => {
+        return { errors: {} };
+      },
+      validateParams: (): ValidationResult => {
+        const validationResult = { errors: {} };
+        return validationResult;
+      },
+      actionConnectorFields: null,
+      actionParamsFields: null,
+    };
+    actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+    const wrapper = mountWithIntl(
+      <ActionsConnectorsContextProvider
+        value={{
+          http: deps!.http,
+          actionTypeRegistry: deps!.actionTypeRegistry,
+          capabilities: deps!.capabilities,
+          toastNotifications: deps!.toastNotifications,
+          reloadConnectors: () => {
+            return new Promise<void>(() => {});
+          },
+        }}
+      >
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypes={[
+            {
+              id: actionType.id,
+              enabled: false,
+              name: 'Test',
+              enabledInConfig: false,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'gold',
+            },
+          ]}
+        />
+      </ActionsConnectorsContextProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeFalsy();
+  });
+
+  it(`renders action types as disabled when disabled by license`, () => {
+    const onActionTypeChange = jest.fn();
+    const actionType = {
+      id: 'my-action-type',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateConnector: (): ValidationResult => {
+        return { errors: {} };
+      },
+      validateParams: (): ValidationResult => {
+        const validationResult = { errors: {} };
+        return validationResult;
+      },
+      actionConnectorFields: null,
+      actionParamsFields: null,
+    };
+    actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+    const wrapper = mountWithIntl(
+      <ActionsConnectorsContextProvider
+        value={{
+          http: deps!.http,
+          actionTypeRegistry: deps!.actionTypeRegistry,
+          capabilities: deps!.capabilities,
+          toastNotifications: deps!.toastNotifications,
+          reloadConnectors: () => {
+            return new Promise<void>(() => {});
+          },
+        }}
+      >
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypes={[
+            {
+              id: actionType.id,
+              enabled: false,
+              name: 'Test',
+              enabledInConfig: true,
+              enabledInLicense: false,
+              minimumLicenseRequired: 'gold',
+            },
+          ]}
+        />
+      </ActionsConnectorsContextProvider>
+    );
+
+    expect(wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
   });
 });

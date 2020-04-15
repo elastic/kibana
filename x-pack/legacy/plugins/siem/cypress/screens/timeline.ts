@@ -14,6 +14,8 @@ export const ID_FIELD = '[data-test-subj="timeline"] [data-test-subj="field-name
 
 export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 
+export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
+
 export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
 
@@ -30,6 +32,8 @@ export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContain
 
 export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
+
+export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="eui-flyout-header"]';
 
 export const TIMELINE_FLYOUT_BODY = '[data-test-subj="eui-flyout-body"]';
 

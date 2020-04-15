@@ -7,15 +7,21 @@
 import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { CustomLink } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
+import { i18n } from '@kbn/i18n';
+import { CustomLink } from '../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
+import { useLicense } from '../../../../../hooks/useLicense';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { CustomLinkFlyout } from './CustomLinkFlyout';
 import { CustomLinkTable } from './CustomLinkTable';
 import { EmptyPrompt } from './EmptyPrompt';
 import { Title } from './Title';
 import { CreateCustomLinkButton } from './CreateCustomLinkButton';
+import { LicensePrompt } from '../../../../shared/LicensePrompt';
 
 export const CustomLinkOverview = () => {
+  const license = useLicense();
+  const hasValidLicense = license?.isActive && license?.hasAtLeast('gold');
+
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [customLinkSelected, setCustomLinkSelected] = useState<
     CustomLink | undefined
@@ -49,7 +55,8 @@ export const CustomLinkOverview = () => {
       {isFlyoutOpen && (
         <CustomLinkFlyout
           onClose={onCloseFlyout}
-          customLinkSelected={customLinkSelected}
+          defaults={customLinkSelected}
+          customLinkId={customLinkSelected?.id}
           onSave={() => {
             onCloseFlyout();
             refetch();
@@ -65,7 +72,7 @@ export const CustomLinkOverview = () => {
           <EuiFlexItem grow={false}>
             <Title />
           </EuiFlexItem>
-          {!showEmptyPrompt && (
+          {hasValidLicense && !showEmptyPrompt && (
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
@@ -77,13 +84,24 @@ export const CustomLinkOverview = () => {
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
-
-        {showEmptyPrompt ? (
-          <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />
+        {hasValidLicense ? (
+          showEmptyPrompt ? (
+            <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />
+          ) : (
+            <CustomLinkTable
+              items={customLinks}
+              onCustomLinkSelected={setCustomLinkSelected}
+            />
+          )
         ) : (
-          <CustomLinkTable
-            items={customLinks}
-            onCustomLinkSelected={setCustomLinkSelected}
+          <LicensePrompt
+            text={i18n.translate(
+              'xpack.apm.settings.customizeUI.customLink.license.text',
+              {
+                defaultMessage:
+                  "To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services."
+              }
+            )}
           />
         )}
       </EuiPanel>

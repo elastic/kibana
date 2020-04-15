@@ -28,9 +28,9 @@ export function registerSearchRoute(router: IRouter): void {
       validate: {
         params: schema.object({ strategy: schema.string() }),
 
-        query: schema.object({}, { allowUnknowns: true }),
+        query: schema.object({}, { unknowns: 'allow' }),
 
-        body: schema.object({}, { allowUnknowns: true }),
+        body: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, res) => {
@@ -43,11 +43,11 @@ export function registerSearchRoute(router: IRouter): void {
         return res.ok({ body: response });
       } catch (err) {
         return res.customError({
-          statusCode: err.statusCode,
+          statusCode: err.statusCode || 500,
           body: {
             message: err.message,
             attributes: {
-              error: err.body.error,
+              error: err.body?.error || err.message,
             },
           },
         });
@@ -64,7 +64,7 @@ export function registerSearchRoute(router: IRouter): void {
           id: schema.string(),
         }),
 
-        query: schema.object({}, { allowUnknowns: true }),
+        query: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, res) => {

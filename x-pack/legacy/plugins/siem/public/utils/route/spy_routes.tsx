@@ -39,12 +39,13 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           dispatch({
             type: 'updateRouteWithOutSearch',
             route: {
-              pageName,
               detailName,
-              tabName,
-              pathName: pathname,
-              history,
               flowTarget,
+              history,
+              pageName,
+              pathName: pathname,
+              state,
+              tabName,
             },
           });
           setIsInitializing(false);
@@ -52,13 +53,14 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           dispatch({
             type: 'updateRoute',
             route: {
-              pageName,
               detailName,
-              tabName,
-              search,
-              pathName: pathname,
-              history,
               flowTarget,
+              history,
+              pageName,
+              pathName: pathname,
+              search,
+              state,
+              tabName,
             },
           });
         }
@@ -67,14 +69,14 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           dispatch({
             type: 'updateRoute',
             route: {
-              pageName,
               detailName,
-              tabName,
-              search,
-              pathName: pathname,
-              history,
               flowTarget,
+              history,
+              pageName,
+              pathName: pathname,
+              search,
               state,
+              tabName,
             },
           });
         }

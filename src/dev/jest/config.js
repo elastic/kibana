@@ -49,8 +49,6 @@ export default {
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
     'src/legacy/core_plugins/**/*.{js,jsx,ts,tsx}',
     '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
-    'src/legacy/ui/public/{agg_types,vis}/**/*.{ts,tsx}',
-    '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
   ],
   moduleNameMapper: {
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
@@ -64,6 +62,7 @@ export default {
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
+    '\\.ace\\.worker.js$': '<rootDir>/src/dev/jest/mocks/ace_worker_module_mock.js',
   },
   setupFiles: [
     '<rootDir>/src/dev/jest/setup/babel_polyfill.js',

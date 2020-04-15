@@ -18,38 +18,18 @@
  */
 
 import { format } from 'url';
-import { resolve } from 'path';
 import _ from 'lodash';
 import Boom from 'boom';
 
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
-import { setupDefaultRouteProvider } from './setup_default_route_provider';
 
 export default async function(kbnServer, server, config) {
   server = kbnServer.server;
 
   setupBasePathProvider(kbnServer);
 
-  setupDefaultRouteProvider(server);
-
   await registerHapiPlugins(server);
-
-  // provide a simple way to expose static directories
-  server.decorate('server', 'exposeStaticDir', function(routePath, dirPath) {
-    this.route({
-      path: routePath,
-      method: 'GET',
-      handler: {
-        directory: {
-          path: dirPath,
-          listing: false,
-          lookupCompressed: true,
-        },
-      },
-      config: { auth: false },
-    });
-  });
 
   // helper for creating view managers for servers
   server.decorate('server', 'setupViews', function(path, engines) {
@@ -58,14 +38,6 @@ export default async function(kbnServer, server, config) {
       isCached: config.get('optimize.viewCaching'),
       engines: _.assign({ pug: require('pug') }, engines || {}),
     });
-  });
-
-  server.route({
-    path: '/',
-    method: 'GET',
-    async handler(req, h) {
-      return h.redirect(await req.getDefaultRoute());
-    },
   });
 
   server.route({
@@ -88,7 +60,4 @@ export default async function(kbnServer, server, config) {
         .permanent(true);
     },
   });
-
-  // Expose static assets
-  server.exposeStaticDir('/ui/{path*}', resolve(__dirname, '../../ui/public/assets'));
 }

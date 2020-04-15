@@ -10,8 +10,17 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck } from './exact_check';
 import { foldLeftRight, getErrorPayload, getPaths } from './__mocks__/utils';
 import { errorSchema, ErrorSchema } from './error_schema';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 
 describe('error_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('it should validate an error with a UUID given for id', () => {
     const error = getErrorPayload();
     const decoded = errorSchema.decode(getErrorPayload());

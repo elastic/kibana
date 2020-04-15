@@ -29,44 +29,19 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { OverlayStart, CoreStart, SavedObjectsStart, IUiSettingsClient } from 'kibana/public';
-import {
-  GetEmbeddableFactory,
-  EmbeddablePanel,
-  IEmbeddableStart,
-  IEmbeddable,
-} from '../../../src/plugins/embeddable/public';
+import { EmbeddableStart, IEmbeddable } from '../../../src/plugins/embeddable/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
   TODO_EMBEDDABLE,
   MULTI_TASK_TODO_EMBEDDABLE,
   SEARCHABLE_LIST_CONTAINER,
 } from '../../embeddable_examples/public';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
-import { getSavedObjectFinder } from '../../../src/plugins/saved_objects/public';
 
 interface Props {
-  getAllEmbeddableFactories: IEmbeddableStart['getEmbeddableFactories'];
-  getEmbeddableFactory: GetEmbeddableFactory;
-  uiActionsApi: UiActionsStart;
-  overlays: OverlayStart;
-  notifications: CoreStart['notifications'];
-  inspector: InspectorStartContract;
-  savedObject: SavedObjectsStart;
-  uiSettingsClient: IUiSettingsClient;
+  embeddableServices: EmbeddableStart;
 }
 
-export function EmbeddablePanelExample({
-  inspector,
-  notifications,
-  overlays,
-  getAllEmbeddableFactories,
-  getEmbeddableFactory,
-  uiActionsApi,
-  savedObject,
-  uiSettingsClient,
-}: Props) {
+export function EmbeddablePanelExample({ embeddableServices }: Props) {
   const searchableInput = {
     id: '1',
     title: 'My searchable todo list',
@@ -106,7 +81,7 @@ export function EmbeddablePanelExample({
   useEffect(() => {
     ref.current = true;
     if (!embeddable) {
-      const factory = getEmbeddableFactory(SEARCHABLE_LIST_CONTAINER);
+      const factory = embeddableServices.getEmbeddableFactory(SEARCHABLE_LIST_CONTAINER);
       const promise = factory?.create(searchableInput);
       if (promise) {
         promise.then(e => {
@@ -135,22 +110,13 @@ export function EmbeddablePanelExample({
           <EuiText>
             You can render your embeddable inside the EmbeddablePanel component. This adds some
             extra rendering and offers a context menu with pluggable actions. Using EmbeddablePanel
-            to render your embeddable means you get access to the &quote;Add panel flyout&quote;.
-            Now you can see how to add embeddables to your container, and how
-            &quote;getExplicitInput&quote; is used to grab input not provided by the container.
+            to render your embeddable means you get access to the &quot;Add panel flyout&quot;. Now
+            you can see how to add embeddables to your container, and how
+            &quot;getExplicitInput&quot; is used to grab input not provided by the container.
           </EuiText>
           <EuiPanel data-test-subj="embeddedPanelExample" paddingSize="none" role="figure">
             {embeddable ? (
-              <EmbeddablePanel
-                embeddable={embeddable}
-                getActions={uiActionsApi.getTriggerCompatibleActions}
-                getEmbeddableFactory={getEmbeddableFactory}
-                getAllEmbeddableFactories={getAllEmbeddableFactories}
-                overlays={overlays}
-                notifications={notifications}
-                inspector={inspector}
-                SavedObjectFinder={getSavedObjectFinder(savedObject, uiSettingsClient)}
-              />
+              <embeddableServices.EmbeddablePanel embeddable={embeddable} />
             ) : (
               <EuiText>Loading...</EuiText>
             )}

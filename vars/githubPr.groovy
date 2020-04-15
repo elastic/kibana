@@ -169,7 +169,20 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
       ## :broken_heart: Build Failed
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      * [Pipeline Steps](${env.BUILD_URL}flowGraphTable) (look for red circles / failed steps)
+      * [Interpreting CI Failures](https://www.elastic.co/guide/en/kibana/current/interpreting-ci-failures.html)
     """
+
+    try {
+      def steps = getFailedSteps()
+      if (steps?.size() > 0) {
+        def list = steps.collect { "* [${it.displayName}](${it.logs})" }.join("\n")
+        messages << "### Failed CI Steps\n${list}"
+      }
+    } catch (ex) {
+      buildUtils.printStacktrace(ex)
+      print "Error retrieving failed pipeline steps for PR comment, will skip this section"
+    }
   }
 
   messages << getTestFailuresMessage()
@@ -192,14 +205,6 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
     .findAll { !!it } // No blank strings
     .collect { it.stripIndent().trim() } // This just allows us to indent various strings above, but leaves them un-indented in the comment
     .join("\n\n")
-}
-
-def withGithubCredentials(closure) {
-  withCredentials([
-    string(credentialsId: '2a9602aa-ab9f-4e52-baf3-b71ca88469c7', variable: 'GITHUB_TOKEN'),
-  ]) {
-    closure()
-  }
 }
 
 def postComment(message) {
@@ -227,4 +232,10 @@ def deleteComment(commentId) {
 
 def getCommitHash() {
   return env.ghprbActualCommit
+}
+
+def getFailedSteps() {
+  return jenkinsApi.getFailedSteps()?.findAll { step ->
+    step.displayName != 'Check out from version control'
+  }
 }

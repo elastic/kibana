@@ -10,5 +10,3 @@ import { ConfigSchema } from '../config';
 
 export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema>) =>
   new GraphPlugin(initializerContext);
-
-export { GraphSetup } from './plugin';

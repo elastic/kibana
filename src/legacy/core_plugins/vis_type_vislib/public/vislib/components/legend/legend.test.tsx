@@ -34,8 +34,9 @@ jest.mock('@elastic/eui', () => ({
 jest.mock('../../../legacy_imports', () => ({
   getTableAggs: jest.fn(),
 }));
-jest.mock('../../../../../data/public/actions/filters/create_filters_from_event', () => ({
-  createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']),
+
+jest.mock('../../../services', () => ({
+  getDataActions: () => ({ createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']) }),
 }));
 
 const vis = {

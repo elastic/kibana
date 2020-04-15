@@ -17,10 +17,5 @@
  * under the License.
  */
 
-export { AggType, AggGroupNames, IAggConfig, IAggType, Schemas } from 'ui/agg_types';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-export { tabifyAggResponse, tabifyGetColumns } from '../../data/public';
-// @ts-ignore
-export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
-// @ts-ignore
-export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';
+import { search } from '../../../../plugins/data/public';
+export const { tabifyAggResponse, tabifyGetColumns } = search;

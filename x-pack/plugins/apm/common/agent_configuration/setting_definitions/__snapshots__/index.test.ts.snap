@@ -1,0 +1,191 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`settingDefinitions should have correct default values 1`] = `
+Array [
+  Object {
+    "key": "api_request_size",
+    "type": "bytes",
+    "units": Array [
+      "b",
+      "kb",
+      "mb",
+    ],
+    "validationError": "Please specify an integer and a unit",
+    "validationName": "bytesRt",
+  },
+  Object {
+    "key": "api_request_time",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationError": "Please specify an integer and a unit",
+    "validationName": "durationRt",
+  },
+  Object {
+    "key": "capture_body",
+    "options": Array [
+      Object {
+        "text": "off",
+        "value": "off",
+      },
+      Object {
+        "text": "errors",
+        "value": "errors",
+      },
+      Object {
+        "text": "transactions",
+        "value": "transactions",
+      },
+      Object {
+        "text": "all",
+        "value": "all",
+      },
+    ],
+    "type": "select",
+    "validationName": "(\\"off\\" | \\"errors\\" | \\"transactions\\" | \\"all\\")",
+  },
+  Object {
+    "key": "capture_headers",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "circuit_breaker_enabled",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "enable_log_correlation",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "log_level",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
+    "key": "profiling_inferred_spans_enabled",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "profiling_inferred_spans_excluded_classes",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
+    "key": "profiling_inferred_spans_included_classes",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
+    "key": "profiling_inferred_spans_min_duration",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationError": "Please specify an integer and a unit",
+    "validationName": "durationRt",
+  },
+  Object {
+    "key": "profiling_inferred_spans_sampling_interval",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationError": "Please specify an integer and a unit",
+    "validationName": "durationRt",
+  },
+  Object {
+    "key": "recording",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "server_timeout",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationError": "Please specify an integer and a unit",
+    "validationName": "durationRt",
+  },
+  Object {
+    "key": "span_frames_min_duration",
+    "min": -1,
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationError": "Please specify an integer and a unit",
+    "validationName": "durationRt",
+  },
+  Object {
+    "key": "stack_trace_limit",
+    "type": "integer",
+    "validationError": "Must be an integer",
+    "validationName": "integerRt",
+  },
+  Object {
+    "key": "stress_monitor_cpu_duration_threshold",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationError": "Please specify an integer and a unit",
+    "validationName": "durationRt",
+  },
+  Object {
+    "key": "stress_monitor_gc_relief_threshold",
+    "type": "float",
+    "validationError": "Must be a number between 0.000 and 1",
+    "validationName": "numberFloatRt",
+  },
+  Object {
+    "key": "stress_monitor_gc_stress_threshold",
+    "type": "float",
+    "validationError": "Must be a number between 0.000 and 1",
+    "validationName": "numberFloatRt",
+  },
+  Object {
+    "key": "stress_monitor_system_cpu_relief_threshold",
+    "type": "float",
+    "validationError": "Must be a number between 0.000 and 1",
+    "validationName": "numberFloatRt",
+  },
+  Object {
+    "key": "stress_monitor_system_cpu_stress_threshold",
+    "type": "float",
+    "validationError": "Must be a number between 0.000 and 1",
+    "validationName": "numberFloatRt",
+  },
+  Object {
+    "key": "transaction_max_spans",
+    "max": 32000,
+    "min": 0,
+    "type": "integer",
+    "validationError": "Must be between 0 and 32000",
+    "validationName": "integerRt",
+  },
+  Object {
+    "key": "transaction_sample_rate",
+    "type": "float",
+    "validationError": "Must be a number between 0.000 and 1",
+    "validationName": "numberFloatRt",
+  },
+]
+`;

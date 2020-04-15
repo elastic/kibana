@@ -26,12 +26,19 @@ export const createApmCustomLinkIndex = async ({
 };
 
 const mappings: Mappings = {
+  dynamic: 'strict',
   properties: {
     '@timestamp': {
       type: 'date'
     },
     label: {
-      type: 'text'
+      type: 'text',
+      fields: {
+        // Adding keyword type to be able to sort by label alphabetically
+        keyword: {
+          type: 'keyword'
+        }
+      }
     },
     url: {
       type: 'keyword'

@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useCallback } from 'react';
 
 import { Case } from './types';
-import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS } from './constants';
-import { getTypedPayload } from './utils';
 import * as i18n from './translations';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getCase } from './api';
@@ -18,52 +16,69 @@ interface CaseState {
   isLoading: boolean;
   isError: boolean;
 }
-interface Action {
-  type: string;
-  payload?: Case;
-}
+
+type Action =
+  | { type: 'FETCH_INIT' }
+  | { type: 'FETCH_SUCCESS'; payload: Case }
+  | { type: 'FETCH_FAILURE' }
+  | { type: 'UPDATE_CASE'; payload: Case };
 
 const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'FETCH_INIT':
       return {
         ...state,
         isLoading: true,
         isError: false,
       };
-    case FETCH_SUCCESS:
+    case 'FETCH_SUCCESS':
       return {
         ...state,
         isLoading: false,
         isError: false,
-        data: getTypedPayload<Case>(action.payload),
+        data: action.payload,
       };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
         ...state,
         isLoading: false,
         isError: true,
       };
+    case 'UPDATE_CASE':
+      return {
+        ...state,
+        data: action.payload,
+      };
     default:
-      throw new Error();
+      return state;
   }
 };
-const initialData: Case = {
+export const initialData: Case = {
   id: '',
+  closedAt: null,
+  closedBy: null,
   createdAt: '',
   comments: [],
   createdBy: {
     username: '',
   },
   description: '',
-  state: '',
+  externalService: null,
+  status: '',
   tags: [],
   title: '',
-  updatedAt: '',
+  totalComment: 0,
+  updatedAt: null,
+  updatedBy: null,
   version: '',
 };
 
-export const useGetCase = (caseId: string): [CaseState] => {
+export interface UseGetCase extends CaseState {
+  fetchCase: () => void;
+  updateCase: (newCase: Case) => void;
+}
+
+export const useGetCase = (caseId: string): UseGetCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: true,
     isError: false,
@@ -71,14 +86,20 @@ export const useGetCase = (caseId: string): [CaseState] => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const callFetch = () => {
+  const updateCase = useCallback((newCase: Case) => {
+    dispatch({ type: 'UPDATE_CASE', payload: newCase });
+  }, []);
+
+  const callFetch = useCallback(async () => {
     let didCancel = false;
+    const abortCtrl = new AbortController();
+
     const fetchData = async () => {
-      dispatch({ type: FETCH_INIT });
+      dispatch({ type: 'FETCH_INIT' });
       try {
-        const response = await getCase(caseId);
+        const response = await getCase(caseId, true, abortCtrl.signal);
         if (!didCancel) {
-          dispatch({ type: FETCH_SUCCESS, payload: response });
+          dispatch({ type: 'FETCH_SUCCESS', payload: response });
         }
       } catch (error) {
         if (!didCancel) {
@@ -87,18 +108,19 @@ export const useGetCase = (caseId: string): [CaseState] => {
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: FETCH_FAILURE });
+          dispatch({ type: 'FETCH_FAILURE' });
         }
       }
     };
     fetchData();
     return () => {
       didCancel = true;
+      abortCtrl.abort();
     };
-  };
+  }, [caseId]);
 
   useEffect(() => {
     callFetch();
   }, [caseId]);
-  return [state];
+  return { ...state, fetchCase: callFetch, updateCase };
 };

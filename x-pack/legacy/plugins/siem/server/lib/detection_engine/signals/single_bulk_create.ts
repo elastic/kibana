@@ -8,8 +8,9 @@ import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { SignalSearchResponse, BulkResponse } from './types';
-import { RuleTypeParams } from '../types';
-import { generateId } from './utils';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { RuleTypeParams, RefreshTypes } from '../types';
+import { generateId, makeFloatString } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../../src/core/server';
 
@@ -20,6 +21,7 @@ interface SingleBulkCreateParams {
   logger: Logger;
   id: string;
   signalsIndex: string;
+  actions: RuleAlertAction[];
   name: string;
   createdAt: string;
   createdBy: string;
@@ -28,6 +30,8 @@ interface SingleBulkCreateParams {
   interval: string;
   enabled: boolean;
   tags: string[];
+  throttle: string;
+  refresh: RefreshTypes;
 }
 
 /**
@@ -52,6 +56,12 @@ export const filterDuplicateRules = (
   });
 };
 
+export interface SingleBulkCreateResponse {
+  success: boolean;
+  bulkCreateDuration?: string;
+  createdItemsCount: number;
+}
+
 // Bulk Index documents.
 export const singleBulkCreate = async ({
   someResult,
@@ -60,6 +70,7 @@ export const singleBulkCreate = async ({
   logger,
   id,
   signalsIndex,
+  actions,
   name,
   createdAt,
   createdBy,
@@ -67,12 +78,13 @@ export const singleBulkCreate = async ({
   updatedBy,
   interval,
   enabled,
+  refresh,
   tags,
-}: SingleBulkCreateParams): Promise<boolean> => {
+  throttle,
+}: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
   someResult.hits.hits = filterDuplicateRules(id, someResult);
-
   if (someResult.hits.hits.length === 0) {
-    return true;
+    return { success: true, createdItemsCount: 0 };
   }
   // index documents after creating an ID based on the
   // source documents' originating index, and the original
@@ -99,6 +111,7 @@ export const singleBulkCreate = async ({
       doc,
       ruleParams,
       id,
+      actions,
       name,
       createdAt,
       createdBy,
@@ -107,16 +120,17 @@ export const singleBulkCreate = async ({
       interval,
       enabled,
       tags,
+      throttle,
     }),
   ]);
   const start = performance.now();
   const response: BulkResponse = await services.callCluster('bulk', {
     index: signalsIndex,
-    refresh: false,
+    refresh,
     body: bulkBody,
   });
   const end = performance.now();
-  logger.debug(`individual bulk process time took: ${Number(end - start).toFixed(2)} milliseconds`);
+  logger.debug(`individual bulk process time took: ${makeFloatString(end - start)} milliseconds`);
   logger.debug(`took property says bulk took: ${response.took} milliseconds`);
 
   if (response.errors) {
@@ -134,5 +148,8 @@ export const singleBulkCreate = async ({
       );
     }
   }
-  return true;
+
+  const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
+
+  return { success: true, bulkCreateDuration: makeFloatString(end - start), createdItemsCount };
 };

@@ -40,7 +40,6 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields,
         data: auditd,
-        children: <span>{'some children'}</span>,
         timelineId: 'test',
       });
 
@@ -66,26 +65,10 @@ describe('GenericRowRenderer', () => {
       }
     });
 
-    test('should render children normally if it does not have a auditd object', () => {
-      const children = connectedToRenderer.renderRow({
-        browserFields: mockBrowserFields,
-        data: nonAuditd,
-        children: <span>{'some children'}</span>,
-        timelineId: 'test',
-      });
-      const wrapper = mount(
-        <TestProviders>
-          <span>{children}</span>
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual('some children');
-    });
-
     test('should render a auditd row', () => {
       const children = connectedToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: auditd,
-        children: <span>{'some children '}</span>,
         timelineId: 'test',
       });
       const wrapper = mount(
@@ -94,7 +77,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Session246alice@zeek-londonsome textwget(1490)wget www.example.comwith resultsuccessDestination93.184.216.34:80'
+        'Session246alice@zeek-londonsome textwget(1490)wget www.example.comwith resultsuccessDestination93.184.216.34:80'
       );
     });
   });
@@ -119,7 +102,6 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields,
         data: auditdFile,
-        children: <span>{'some children'}</span>,
         timelineId: 'test',
       });
 
@@ -145,26 +127,10 @@ describe('GenericRowRenderer', () => {
       }
     });
 
-    test('should render children normally if it does not have a auditd object', () => {
-      const children = fileToRenderer.renderRow({
-        browserFields: mockBrowserFields,
-        data: nonAuditd,
-        children: <span>{'some children'}</span>,
-        timelineId: 'test',
-      });
-      const wrapper = mount(
-        <TestProviders>
-          <span>{children}</span>
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual('some children');
-    });
-
     test('should render a auditd row', () => {
       const children = fileToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: auditdFile,
-        children: <span>{'some children '}</span>,
         timelineId: 'test',
       });
       const wrapper = mount(
@@ -173,7 +139,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusingsystemd-journal(27244)/lib/systemd/systemd-journaldwith resultsuccess'
+        'Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusingsystemd-journal(27244)/lib/systemd/systemd-journaldwith resultsuccess'
       );
     });
   });

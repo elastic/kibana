@@ -20,6 +20,7 @@ export type ComponentOpts = {
   selectedItems: Alert[];
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
+  setAlertsToDelete: React.Dispatch<React.SetStateAction<string[]>>;
 } & BulkOperationsComponentOpts;
 
 export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
@@ -30,7 +31,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   unmuteAlerts,
   enableAlerts,
   disableAlerts,
-  deleteAlerts,
+  setAlertsToDelete,
 }: ComponentOpts) => {
   const { toastNotifications } = useAppDependencies();
 
@@ -129,7 +130,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     setIsDeletingAlerts(true);
     try {
-      await deleteAlerts(selectedItems);
+      setAlertsToDelete(selectedItems.map((selected: any) => selected.id));
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(

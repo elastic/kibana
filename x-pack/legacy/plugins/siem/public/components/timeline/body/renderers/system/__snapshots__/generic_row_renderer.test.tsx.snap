@@ -2,9 +2,6 @@
 
 exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <span>
-    some children
-  </span>
   <RowRendererContainer>
     <SystemGenericFileDetails
       browserFields={Object {}}
@@ -102,9 +99,6 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
 
 exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <span>
-    some children
-  </span>
   <RowRendererContainer>
     <SystemGenericDetails
       browserFields={Object {}}

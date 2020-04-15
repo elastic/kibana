@@ -14,7 +14,7 @@ export default async function({ readConfigFile }) {
       'xpack.license.self_generated.type=basic',
       'xpack.security.enabled=true',
     ];
-    config.testFiles = [require.resolve('./apis/security')];
+    config.testFiles = [require.resolve('./apis/security/security_basic')];
     return config;
   });
 }

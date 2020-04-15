@@ -5,12 +5,13 @@
  */
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
+import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { JOB_STATE, DATAFEED_STATE } from '../../../../legacy/plugins/ml/common/constants/states';
-import { DATA_FRAME_TASK_STATE } from '../../../../legacy/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { Job, Datafeed } from '../../../..//legacy/plugins/ml/common/types/anomaly_detection_jobs';
+import { JOB_STATE, DATAFEED_STATE } from '../../../../plugins/ml/common/constants/states';
+import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { Job, Datafeed } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
@@ -276,6 +277,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(200);
     },
 
+    async waitForAnomalyDetectionJobToExist(jobId: string) {
+      await retry.waitForWithTimeout(`'${jobId}' to exist`, 5 * 1000, async () => {
+        if (await this.getAnomalyDetectionJob(jobId)) {
+          return true;
+        } else {
+          throw new Error(`expected anomaly detection job '${jobId}' to exist`);
+        }
+      });
+    },
+
     async createAnomalyDetectionJob(jobConfig: Job) {
       const jobId = jobConfig.job_id;
       log.debug(`Creating anomaly detection job with id '${jobId}'...`);
@@ -284,17 +295,21 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .send(jobConfig)
         .expect(200);
 
-      await retry.waitForWithTimeout(`'${jobId}' to be created`, 5 * 1000, async () => {
-        if (await this.getAnomalyDetectionJob(jobId)) {
-          return true;
-        } else {
-          throw new Error(`expected anomaly detection job '${jobId}' to be created`);
-        }
-      });
+      await this.waitForAnomalyDetectionJobToExist(jobId);
     },
 
     async getDatafeed(datafeedId: string) {
       return await esSupertest.get(`/_ml/datafeeds/${datafeedId}`).expect(200);
+    },
+
+    async waitForDatafeedToExist(datafeedId: string) {
+      await retry.waitForWithTimeout(`'${datafeedId}' to exist`, 5 * 1000, async () => {
+        if (await this.getDatafeed(datafeedId)) {
+          return true;
+        } else {
+          throw new Error(`expected datafeed '${datafeedId}' to exist`);
+        }
+      });
     },
 
     async createDatafeed(datafeedConfig: Datafeed) {
@@ -305,13 +320,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .send(datafeedConfig)
         .expect(200);
 
-      await retry.waitForWithTimeout(`'${datafeedId}' to be created`, 5 * 1000, async () => {
-        if (await this.getDatafeed(datafeedId)) {
-          return true;
-        } else {
-          throw new Error(`expected datafeed '${datafeedId}' to be created`);
-        }
-      });
+      await this.waitForDatafeedToExist(datafeedId);
     },
 
     async openAnomalyDetectionJob(jobId: string) {
@@ -354,6 +363,32 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end: `${Date.now()}` });
       await this.waitForDatafeedState(datafeedConfig.datafeed_id, DATAFEED_STATE.STOPPED);
       await this.waitForJobState(jobConfig.job_id, JOB_STATE.CLOSED);
+    },
+
+    async getDataFrameAnalyticsJob(analyticsId: string) {
+      log.debug(`Fetching data frame analytics job '${analyticsId}'...`);
+      return await esSupertest.get(`/_ml/data_frame/analytics/${analyticsId}`).expect(200);
+    },
+
+    async waitForDataFrameAnalyticsJobToExist(analyticsId: string) {
+      await retry.waitForWithTimeout(`'${analyticsId}' to exist`, 5 * 1000, async () => {
+        if (await this.getDataFrameAnalyticsJob(analyticsId)) {
+          return true;
+        } else {
+          throw new Error(`expected data frame analytics job '${analyticsId}' to exist`);
+        }
+      });
+    },
+
+    async createDataFrameAnalyticsJob(jobConfig: DataFrameAnalyticsConfig) {
+      const { id: analyticsId, ...analyticsConfig } = jobConfig;
+      log.debug(`Creating data frame analytic job with id '${analyticsId}'...`);
+      await esSupertest
+        .put(`/_ml/data_frame/analytics/${analyticsId}`)
+        .send(analyticsConfig)
+        .expect(200);
+
+      await this.waitForDataFrameAnalyticsJobToExist(analyticsId);
     },
   };
 }

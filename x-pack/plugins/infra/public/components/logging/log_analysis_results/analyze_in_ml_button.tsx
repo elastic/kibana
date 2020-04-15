@@ -18,7 +18,9 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
 }> = ({ jobId, partition, timeRange }) => {
   const linkProps = useLinkProps(
     typeof partition === 'string'
-      ? getPartitionSpecificSingleMetricViewerLinkDescriptor(jobId, partition, timeRange)
+      ? getEntitySpecificSingleMetricViewerLink(jobId, timeRange, {
+          'event.dataset': partition,
+        })
       : getOverallAnomalyExplorerLinkDescriptor(jobId, timeRange)
   );
   const buttonLabel = (
@@ -61,10 +63,10 @@ const getOverallAnomalyExplorerLinkDescriptor = (
   };
 };
 
-const getPartitionSpecificSingleMetricViewerLinkDescriptor = (
+export const getEntitySpecificSingleMetricViewerLink = (
   jobId: string,
-  partition: string,
-  timeRange: TimeRange
+  timeRange: TimeRange,
+  entities: Record<string, string>
 ): LinkDescriptor => {
   const { from, to } = convertTimeRangeToParams(timeRange);
 
@@ -81,7 +83,7 @@ const getPartitionSpecificSingleMetricViewerLinkDescriptor = (
 
   const _a = encode({
     mlTimeSeriesExplorer: {
-      entities: { 'event.dataset': partition },
+      entities,
     },
   });
 

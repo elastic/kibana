@@ -69,7 +69,7 @@ node scripts/functional_tests_server.js
 node ../scripts/functional_test_runner.js
 ----------
 
-** Selenium tests are run in headless mode on CI. Locally the same tests will be executed in a real browser. You can activate headless mode by setting the environment variable below:
+** Selenium tests are run in headless mode on CI. Locally the same tests will be executed in a real browser. You can activate headless mode by setting the environment variable:
 +
 ["source", "shell"]
 ----------
@@ -179,9 +179,28 @@ node scripts/functional_test_runner --config test/functional/config.firefox.js
 -----------
 
 [float]
+===== Using the test_user service
+
+Tests should run at the positive security boundry condition, meaning that they should be run with the mimimum privileges required (and documented) and not as the superuser.
+ This prevents the type of regression where additional privleges accidentally become required to perform the same action. 
+ 
+The functional UI tests now default to logging in with a user named `test_user` and the roles of this user can be changed dynamically without logging in and out.  
+
+In order to achieve this a new service was introduced called `createTestUserService` (see `test/common/services/security/test_user.ts`). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
+
+An example of how to set the role like how its defined below:
+
+`await security.testUser.setRoles(['kibana_user', 'kibana_date_nanos']);`
+
+Here we are setting the `test_user` to have the `kibana_user` role and also role access to a specific data index (`kibana_date_nanos`).
+
+Tests should normally setRoles() in the before() and restoreDefaults() in the after().
+
+
+[float]
 ===== Anatomy of a test file
 
-The annotated example file below shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/master/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
+This annotated example file shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/master/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
 
 ["source","js"]
 ----

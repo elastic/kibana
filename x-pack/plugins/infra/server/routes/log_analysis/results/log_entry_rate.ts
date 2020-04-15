@@ -20,7 +20,7 @@ import {
 import { throwErrors } from '../../../../common/runtime_types';
 import { NoLogAnalysisResultsIndexError } from '../../../lib/log_analysis';
 
-const anyObject = schema.object({}, { allowUnknowns: true });
+const anyObject = schema.object({}, { unknowns: 'allow' });
 
 export const initGetLogEntryRateRoute = ({ framework, logEntryRateAnalysis }: InfraBackendLibs) => {
   framework.registerRoute(

@@ -9,93 +9,92 @@ import { useReducer, useCallback } from 'react';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 
 import { patchComment } from './api';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
-import { Comment } from './types';
-import { getTypedPayload } from './utils';
+import { Case } from './types';
 
 interface CommentUpdateState {
-  comments: Comment[];
   isLoadingIds: string[];
   isError: boolean;
 }
-
 interface CommentUpdate {
-  update: Partial<Comment>;
   commentId: string;
 }
 
-interface Action {
-  type: string;
-  payload?: CommentUpdate | string;
-}
+type Action =
+  | { type: 'FETCH_INIT'; payload: string }
+  | { type: 'FETCH_SUCCESS'; payload: CommentUpdate }
+  | { type: 'FETCH_FAILURE'; payload: string };
 
 const dataFetchReducer = (state: CommentUpdateState, action: Action): CommentUpdateState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'FETCH_INIT':
       return {
         ...state,
-        isLoadingIds: [...state.isLoadingIds, getTypedPayload<string>(action.payload)],
+        isLoadingIds: [...state.isLoadingIds, action.payload],
         isError: false,
       };
 
-    case FETCH_SUCCESS:
-      const updatePayload = getTypedPayload<CommentUpdate>(action.payload);
-      const foundIndex = state.comments.findIndex(
-        comment => comment.id === updatePayload.commentId
-      );
-      const newComments = state.comments;
-      if (foundIndex !== -1) {
-        newComments[foundIndex] = { ...state.comments[foundIndex], ...updatePayload.update };
-      }
-
+    case 'FETCH_SUCCESS':
       return {
         ...state,
-        isLoadingIds: state.isLoadingIds.filter(id => updatePayload.commentId !== id),
+        isLoadingIds: state.isLoadingIds.filter(id => action.payload.commentId !== id),
         isError: false,
-        comments: newComments,
       };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
         ...state,
-        isLoadingIds: state.isLoadingIds.filter(
-          id => getTypedPayload<string>(action.payload) !== id
-        ),
+        isLoadingIds: state.isLoadingIds.filter(id => action.payload !== id),
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 
-interface UseUpdateComment extends CommentUpdateState {
-  updateComment: (caseId: string, commentId: string, commentUpdate: string) => void;
+interface UpdateComment {
+  caseId: string;
+  commentId: string;
+  commentUpdate: string;
+  fetchUserActions: () => void;
+  updateCase: (newCase: Case) => void;
+  version: string;
 }
 
-export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
+export interface UseUpdateComment extends CommentUpdateState {
+  patchComment: ({ caseId, commentId, commentUpdate, fetchUserActions }: UpdateComment) => void;
+}
+
+export const useUpdateComment = (): UseUpdateComment => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoadingIds: [],
     isError: false,
-    comments,
   });
   const [, dispatchToaster] = useStateToaster();
 
   const dispatchUpdateComment = useCallback(
-    async (caseId: string, commentId: string, commentUpdate: string) => {
+    async ({
+      caseId,
+      commentId,
+      commentUpdate,
+      fetchUserActions,
+      updateCase,
+      version,
+    }: UpdateComment) => {
       let cancel = false;
+      const abortCtrl = new AbortController();
       try {
-        dispatch({ type: FETCH_INIT, payload: commentId });
-        const currentComment = state.comments.find(comment => comment.id === commentId) ?? {
-          version: '',
-        };
+        dispatch({ type: 'FETCH_INIT', payload: commentId });
         const response = await patchComment(
           caseId,
           commentId,
           commentUpdate,
-          currentComment.version
+          version,
+          abortCtrl.signal
         );
         if (!cancel) {
-          dispatch({ type: FETCH_SUCCESS, payload: { update: response, commentId } });
+          updateCase(response);
+          fetchUserActions();
+          dispatch({ type: 'FETCH_SUCCESS', payload: { commentId } });
         }
       } catch (error) {
         if (!cancel) {
@@ -104,15 +103,16 @@ export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: FETCH_FAILURE, payload: commentId });
+          dispatch({ type: 'FETCH_FAILURE', payload: commentId });
         }
       }
       return () => {
         cancel = true;
+        abortCtrl.abort();
       };
     },
-    [state]
+    []
   );
 
-  return { ...state, updateComment: dispatchUpdateComment };
+  return { ...state, patchComment: dispatchUpdateComment };
 };

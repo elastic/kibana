@@ -4,66 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
+import { EuiContextMenuItem } from '@elastic/eui';
 import * as i18n from './translations';
-import { Case } from '../../../../containers/case/types';
 
 interface GetBulkItems {
-  // cases: Case[];
-  closePopover: () => void;
-  // dispatch: Dispatch<Action>;
-  // dispatchToaster: Dispatch<ActionToaster>;
-  // reFetchCases: (refreshPrePackagedCase?: boolean) => void;
-  selectedCases: Case[];
   caseStatus: string;
+  closePopover: () => void;
+  deleteCasesAction: (cases: string[]) => void;
+  selectedCaseIds: string[];
+  updateCaseStatus: (status: string) => void;
 }
 
 export const getBulkItems = ({
-  // cases,
-  closePopover,
   caseStatus,
-  // dispatch,
-  // dispatchToaster,
-  // reFetchCases,
-  selectedCases,
+  closePopover,
+  deleteCasesAction,
+  selectedCaseIds,
+  updateCaseStatus,
 }: GetBulkItems) => {
   return [
     caseStatus === 'open' ? (
       <EuiContextMenuItem
+        data-test-subj="cases-bulk-close-button"
+        disabled={selectedCaseIds.length === 0}
         key={i18n.BULK_ACTION_CLOSE_SELECTED}
-        icon="magnet"
-        disabled={true} // TO DO
-        onClick={async () => {
+        icon="folderCheck"
+        onClick={() => {
           closePopover();
-          // await deleteCasesAction(selectedCases, dispatch, dispatchToaster);
-          // reFetchCases(true);
+          updateCaseStatus('closed');
         }}
       >
         {i18n.BULK_ACTION_CLOSE_SELECTED}
       </EuiContextMenuItem>
     ) : (
       <EuiContextMenuItem
+        data-test-subj="cases-bulk-open-button"
+        disabled={selectedCaseIds.length === 0}
         key={i18n.BULK_ACTION_OPEN_SELECTED}
-        icon="magnet"
-        disabled={true} // TO DO
-        onClick={async () => {
+        icon="folderExclamation"
+        onClick={() => {
           closePopover();
-          // await deleteCasesAction(selectedCases, dispatch, dispatchToaster);
-          // reFetchCases(true);
+          updateCaseStatus('open');
         }}
       >
         {i18n.BULK_ACTION_OPEN_SELECTED}
       </EuiContextMenuItem>
     ),
     <EuiContextMenuItem
+      data-test-subj="cases-bulk-delete-button"
       key={i18n.BULK_ACTION_DELETE_SELECTED}
       icon="trash"
-      disabled={true} // TO DO
-      onClick={async () => {
+      disabled={selectedCaseIds.length === 0}
+      onClick={() => {
         closePopover();
-        // await deleteCasesAction(selectedCases, dispatch, dispatchToaster);
-        // reFetchCases(true);
+        deleteCasesAction(selectedCaseIds);
       }}
     >
       {i18n.BULK_ACTION_DELETE_SELECTED}

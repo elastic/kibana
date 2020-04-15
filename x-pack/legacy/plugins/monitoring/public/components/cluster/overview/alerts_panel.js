@@ -6,14 +6,12 @@
 
 import React, { Fragment } from 'react';
 import moment from 'moment-timezone';
-import chrome from '../../../np_imports/ui/chrome';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import {
   CALCULATE_DURATION_SINCE,
   KIBANA_ALERTING_ENABLED,
-  ALERT_TYPE_LICENSE_EXPIRATION,
   CALCULATE_DURATION_UNTIL,
 } from '../../../../common/constants';
 import { formatDateTimeLocal } from '../../../../common/formatting';
@@ -30,6 +28,37 @@ import {
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
+
+function replaceTokens(alert) {
+  if (!alert.message.tokens) {
+    return alert.message.text;
+  }
+
+  let text = alert.message.text;
+
+  for (const token of alert.message.tokens) {
+    if (token.type === 'time') {
+      text = text.replace(
+        token.startToken,
+        token.isRelative
+          ? formatTimestampToDuration(alert.expirationTime, CALCULATE_DURATION_UNTIL)
+          : moment.tz(alert.expirationTime, moment.tz.guess()).format('LLL z')
+      );
+    } else if (token.type === 'link') {
+      const linkPart = new RegExp(`${token.startToken}(.+?)${token.endToken}`).exec(text);
+      // TODO: we assume this is at the end, which works for now but will not always work
+      const nonLinkText = text.replace(linkPart[0], '');
+      text = (
+        <Fragment>
+          {nonLinkText}
+          <EuiLink href={`#${token.url}`}>{linkPart[1]}</EuiLink>
+        </Fragment>
+      );
+    }
+  }
+
+  return text;
+}
 
 export function AlertsPanel({ alerts, changeUrl }) {
   const goToAlerts = () => changeUrl('/alerts');
@@ -58,9 +87,6 @@ export function AlertsPanel({ alerts, changeUrl }) {
       severityIcon.iconType = 'check';
     }
 
-    const injector = chrome.dangerouslyGetActiveInjector();
-    const timezone = injector.get('config').get('dateFormat:tz');
-
     return (
       <EuiCallOut
         key={`alert-item-${index}`}
@@ -83,7 +109,7 @@ export function AlertsPanel({ alerts, changeUrl }) {
               id="xpack.monitoring.cluster.overview.alertsPanel.lastCheckedTimeText"
               defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
               values={{
-                updateDateTime: formatDateTimeLocal(item.update_timestamp, timezone),
+                updateDateTime: formatDateTimeLocal(item.update_timestamp),
                 duration: formatTimestampToDuration(item.timestamp, CALCULATE_DURATION_SINCE),
               }}
             />
@@ -96,14 +122,7 @@ export function AlertsPanel({ alerts, changeUrl }) {
   const alertsList = KIBANA_ALERTING_ENABLED
     ? alerts.map((alert, idx) => {
         const callOutProps = mapSeverity(alert.severity);
-        let message = alert.message
-          // scan message prefix and replace relative times
-          // \w: Matches any alphanumeric character from the basic Latin alphabet, including the underscore. Equivalent to [A-Za-z0-9_].
-          .replace(
-            '#relative',
-            formatTimestampToDuration(alert.expirationTime, CALCULATE_DURATION_UNTIL)
-          )
-          .replace('#absolute', moment.tz(alert.expirationTime, moment.tz.guess()).format('LLL z'));
+        const message = replaceTokens(alert);
 
         if (!alert.isFiring) {
           callOutProps.title = i18n.translate(
@@ -118,22 +137,30 @@ export function AlertsPanel({ alerts, changeUrl }) {
           );
           callOutProps.color = 'success';
           callOutProps.iconType = 'check';
-        } else {
-          if (alert.type === ALERT_TYPE_LICENSE_EXPIRATION) {
-            message = (
-              <Fragment>
-                {message}
-                &nbsp;
-                <EuiLink href="#license">Please update your license</EuiLink>
-              </Fragment>
-            );
-          }
         }
 
         return (
-          <EuiCallOut key={idx} {...callOutProps}>
-            <p>{message}</p>
-          </EuiCallOut>
+          <Fragment key={idx}>
+            <EuiCallOut {...callOutProps}>
+              <p>{message}</p>
+              <EuiText size="xs">
+                <p data-test-subj="alertMeta" className="monCallout--meta">
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.alertsPanel.lastCheckedTimeText"
+                    defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
+                    values={{
+                      updateDateTime: formatDateTimeLocal(alert.lastCheckedMS),
+                      duration: formatTimestampToDuration(
+                        alert.triggeredMS,
+                        CALCULATE_DURATION_SINCE
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </EuiCallOut>
+            <EuiSpacer />
+          </Fragment>
         );
       })
     : alerts.map((item, index) => (

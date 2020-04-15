@@ -6,7 +6,6 @@
 
 import {
   EuiBadge,
-  EuiBadgeProps,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -18,8 +17,10 @@ import {
   EuiOverlayMask,
   EuiToolTip,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import uuid from 'uuid';
+import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
@@ -27,18 +28,16 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { NOTES_PANEL_WIDTH } from './notes_size';
 import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
 import * as i18n from './translations';
+import { SiemPageName } from '../../../pages/home/types';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
 export const newTimelineToolTip = 'Create a new timeline';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// const NotesCountBadge = styled(EuiBadge)`
-//   margin-left: 5px;
-// `;
-const NotesCountBadge = (props: EuiBadgeProps) => (
-  <EuiBadge {...props} style={{ marginLeft: '5px' }} />
-);
+const NotesCountBadge = styled(EuiBadge)`
+  margin-left: 5px;
+`;
+
 NotesCountBadge.displayName = 'NotesCountBadge';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
@@ -114,6 +113,41 @@ export const Name = React.memo<NameProps>(({ timelineId, title, updateTitle }) =
 ));
 Name.displayName = 'Name';
 
+interface NewCaseProps {
+  onClosePopover: () => void;
+  timelineId: string;
+  timelineTitle: string;
+}
+
+export const NewCase = React.memo<NewCaseProps>(({ onClosePopover, timelineId, timelineTitle }) => {
+  const history = useHistory();
+  const handleClick = useCallback(() => {
+    onClosePopover();
+    history.push({
+      pathname: `/${SiemPageName.case}/create`,
+      state: {
+        insertTimeline: {
+          timelineId,
+          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+        },
+      },
+    });
+  }, [onClosePopover, history, timelineId, timelineTitle]);
+
+  return (
+    <EuiButtonEmpty
+      data-test-subj="attach-timeline-case"
+      color="text"
+      iconSide="left"
+      iconType="paperClip"
+      onClick={handleClick}
+    >
+      {i18n.ATTACH_TIMELINE_TO_NEW_CASE}
+    </EuiButtonEmpty>
+  );
+});
+NewCase.displayName = 'NewCase';
+
 interface NewTimelineProps {
   createTimeline: CreateTimeline;
   onClosePopover: () => void;
@@ -121,20 +155,24 @@ interface NewTimelineProps {
 }
 
 export const NewTimeline = React.memo<NewTimelineProps>(
-  ({ createTimeline, onClosePopover, timelineId }) => (
-    <EuiButtonEmpty
-      data-test-subj="timeline-new"
-      color="text"
-      iconSide="left"
-      iconType="plusInCircle"
-      onClick={() => {
-        createTimeline({ id: timelineId, show: true });
-        onClosePopover();
-      }}
-    >
-      {i18n.NEW_TIMELINE}
-    </EuiButtonEmpty>
-  )
+  ({ createTimeline, onClosePopover, timelineId }) => {
+    const handleClick = useCallback(() => {
+      createTimeline({ id: timelineId, show: true });
+      onClosePopover();
+    }, [createTimeline, timelineId, onClosePopover]);
+
+    return (
+      <EuiButtonEmpty
+        data-test-subj="timeline-new"
+        color="text"
+        iconSide="left"
+        iconType="plusInCircle"
+        onClick={handleClick}
+      >
+        {i18n.NEW_TIMELINE}
+      </EuiButtonEmpty>
+    );
+  }
 );
 NewTimeline.displayName = 'NewTimeline';
 

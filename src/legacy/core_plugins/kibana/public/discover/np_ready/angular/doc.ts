@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getAngularModule, wrapInI18nContext, getServices } from '../../kibana_services';
+import { getAngularModule, getServices } from '../../kibana_services';
 // @ts-ignore
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
 import html from './doc.html';
@@ -30,7 +30,7 @@ const { timefilter } = getServices();
 const app = getAngularModule();
 app.directive('discoverDoc', function(reactDirective: any) {
   return reactDirective(
-    wrapInI18nContext(Doc),
+    Doc,
     [
       ['id', { watchDepth: 'value' }],
       ['index', { watchDepth: 'value' }],

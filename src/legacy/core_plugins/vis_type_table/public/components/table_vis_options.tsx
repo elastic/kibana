@@ -23,11 +23,17 @@ import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/public';
-import { tabifyGetColumns } from '../legacy_imports';
-import { NumberInputOption, SwitchOption, SelectOption } from '../../../vis_type_vislib/public';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { search } from '../../../../../plugins/data/public';
+import {
+  SwitchOption,
+  SelectOption,
+  NumberInputOption,
+} from '../../../../../plugins/charts/public';
 import { TableVisParams } from '../types';
 import { totalAggregations } from './utils';
+
+const { tabifyGetColumns } = search;
 
 function TableOptions({
   aggs,

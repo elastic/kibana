@@ -17,9 +17,12 @@ import * as i18n from './translations';
 
 import { FilterOptions } from '../../../../containers/case/types';
 import { useGetTags } from '../../../../containers/case/use_get_tags';
+import { useGetReporters } from '../../../../containers/case/use_get_reporters';
 import { FilterPopover } from '../../../../components/filter_popover';
 
 interface CasesTableFiltersProps {
+  countClosedCases: number | null;
+  countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
 }
@@ -31,14 +34,35 @@ interface CasesTableFiltersProps {
  * @param onFilterChanged change listener to be notified on filter changes
  */
 
+const defaultInitial = { search: '', reporters: [], status: 'open', tags: [] };
+
 const CasesTableFiltersComponent = ({
+  countClosedCases,
+  countOpenCases,
   onFilterChanged,
-  initial = { search: '', tags: [], state: 'open' },
+  initial = defaultInitial,
 }: CasesTableFiltersProps) => {
+  const [selectedReporters, setSelectedReporters] = useState(
+    initial.reporters.map(r => r.full_name ?? r.username ?? '')
+  );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const [showOpenCases, setShowOpenCases] = useState(initial.state === 'open');
-  const [{ data }] = useGetTags();
+  const [showOpenCases, setShowOpenCases] = useState(initial.status === 'open');
+  const { tags } = useGetTags();
+  const { reporters, respReporters } = useGetReporters();
+
+  const handleSelectedReporters = useCallback(
+    newReporters => {
+      if (!isEqual(newReporters, selectedReporters)) {
+        setSelectedReporters(newReporters);
+        const reportersObj = respReporters.filter(
+          r => newReporters.includes(r.username) || newReporters.includes(r.full_name)
+        );
+        onFilterChanged({ reporters: reportersObj });
+      }
+    },
+    [selectedReporters, respReporters]
+  );
 
   const handleSelectedTags = useCallback(
     newTags => {
@@ -47,7 +71,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ tags: newTags });
       }
     },
-    [search, selectedTags]
+    [selectedTags]
   );
   const handleOnSearch = useCallback(
     newSearch => {
@@ -57,13 +81,13 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ search: trimSearch });
       }
     },
-    [search, selectedTags]
+    [search]
   );
   const handleToggleFilter = useCallback(
     showOpen => {
       if (showOpen !== showOpenCases) {
         setShowOpenCases(showOpen);
-        onFilterChanged({ state: showOpen ? 'open' : 'closed' });
+        onFilterChanged({ status: showOpen ? 'open' : 'closed' });
       }
     },
     [showOpenCases]
@@ -73,6 +97,7 @@ const CasesTableFiltersComponent = ({
       <EuiFlexItem grow={true}>
         <EuiFieldSearch
           aria-label={i18n.SEARCH_CASES}
+          data-test-subj="search-cases"
           fullWidth
           incremental={false}
           placeholder={i18n.SEARCH_PLACEHOLDER}
@@ -83,30 +108,34 @@ const CasesTableFiltersComponent = ({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiFilterButton
+            data-test-subj="open-case-count"
             withNext
             hasActiveFilters={showOpenCases}
             onClick={handleToggleFilter.bind(null, true)}
           >
             {i18n.OPEN_CASES}
+            {countOpenCases != null ? ` (${countOpenCases})` : ''}
           </EuiFilterButton>
           <EuiFilterButton
+            data-test-subj="closed-case-count"
             hasActiveFilters={!showOpenCases}
             onClick={handleToggleFilter.bind(null, false)}
           >
             {i18n.CLOSED_CASES}
+            {countClosedCases != null ? ` (${countClosedCases})` : ''}
           </EuiFilterButton>
           <FilterPopover
             buttonLabel={i18n.REPORTER}
-            onSelectedOptionsChanged={() => {}}
-            selectedOptions={[]}
-            options={[]}
+            onSelectedOptionsChanged={handleSelectedReporters}
+            selectedOptions={selectedReporters}
+            options={reporters}
             optionsEmptyLabel={i18n.NO_REPORTERS_AVAILABLE}
           />
           <FilterPopover
             buttonLabel={i18n.TAGS}
             onSelectedOptionsChanged={handleSelectedTags}
             selectedOptions={selectedTags}
-            options={data}
+            options={tags}
             optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
           />
         </EuiFilterGroup>

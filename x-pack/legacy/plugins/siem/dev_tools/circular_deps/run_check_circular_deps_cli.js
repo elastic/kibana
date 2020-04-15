@@ -17,6 +17,16 @@ run(
       [resolve(__dirname, '../../public'), resolve(__dirname, '../../common')],
       {
         fileExtensions: ['ts', 'js', 'tsx'],
+        excludeRegExp: [
+          'test.ts$',
+          'test.tsx$',
+          'containers/detection_engine/rules/types.ts$',
+          'core/public/chrome/chrome_service.tsx$',
+          'src/core/server/types.ts$',
+          'src/core/server/saved_objects/types.ts$',
+          'src/core/public/overlays/banners/banners_service.tsx$',
+          'src/core/public/saved_objects/saved_objects_client.ts$',
+        ],
       }
     );
 

@@ -22,9 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { createInputControlVisController } from './vis_controller';
 import { getControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
-import { Status } from '../../visualizations/public';
 import { InputControlVisDependencies } from './plugin';
-import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/common';
+import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/public';
 
 export function createInputControlVisTypeDefinition(deps: InputControlVisDependencies) {
   const InputControlVisController = createInputControlVisController(deps);
@@ -40,7 +39,6 @@ export function createInputControlVisTypeDefinition(deps: InputControlVisDepende
       defaultMessage: 'Create interactive controls for easy dashboard manipulation.',
     }),
     stage: 'experimental',
-    requiresUpdateStatus: [Status.PARAMS, Status.TIME],
     feedbackMessage: defaultFeedbackMessage,
     visualization: InputControlVisController,
     visConfig: {

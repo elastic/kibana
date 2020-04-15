@@ -68,7 +68,7 @@ export const MonitorBarSeries = ({ dangerColor, histogramSeries }: MonitorBarSer
         />
         <BarSeries
           id={id}
-          customSeriesColors={[dangerColor]}
+          color={dangerColor}
           data={(histogramSeries || []).map(({ timestamp, down }) => [timestamp, down])}
           name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
             defaultMessage: 'Down checks',

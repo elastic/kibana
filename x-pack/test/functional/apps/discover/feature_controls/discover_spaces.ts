@@ -24,7 +24,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  describe('spaces', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/60559
+  describe.skip('spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });

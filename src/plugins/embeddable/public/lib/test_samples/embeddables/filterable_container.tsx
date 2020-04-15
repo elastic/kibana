@@ -18,8 +18,8 @@
  */
 
 import { Container, ContainerInput } from '../../containers';
-import { GetEmbeddableFactory } from '../../types';
 import { Filter } from '../../../../../data/public';
+import { EmbeddableStart } from '../../../plugin';
 
 export const FILTERABLE_CONTAINER = 'FILTERABLE_CONTAINER';
 
@@ -46,7 +46,7 @@ export class FilterableContainer extends Container<
 
   constructor(
     initialInput: FilterableContainerInput,
-    getFactory: GetEmbeddableFactory,
+    getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: Container
   ) {
     super(initialInput, { embeddableLoaded: {} }, getFactory, parent);

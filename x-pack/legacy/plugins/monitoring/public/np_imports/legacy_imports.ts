@@ -18,5 +18,5 @@ export { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 export { EventsProvider } from 'ui/events';
 // @ts-ignore
-export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
+export { KbnUrlProvider } from 'ui/url';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';

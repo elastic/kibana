@@ -69,6 +69,7 @@ export interface OverlayModalConfirmOptions {
   closeButtonAriaLabel?: string;
   'data-test-subj'?: string;
   defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
+  buttonColor?: EuiConfirmModalProps['buttonColor'];
 }
 
 /**

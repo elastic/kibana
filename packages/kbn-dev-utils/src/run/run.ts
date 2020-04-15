@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { inspect } from 'util';
+
 // @ts-ignore @types are outdated and module is super simple
 import exitHook from 'exit-hook';
 
@@ -62,7 +64,11 @@ export async function run(fn: RunFn, options: Options = {}) {
 
   process.on('unhandledRejection', error => {
     log.error('UNHANDLED PROMISE REJECTION');
-    log.error(error);
+    log.error(
+      error instanceof Error
+        ? error
+        : new Error(`non-Error type rejection value: ${inspect(error)}`)
+    );
     process.exit(1);
   });
 

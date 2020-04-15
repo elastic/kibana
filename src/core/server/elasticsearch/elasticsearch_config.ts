@@ -21,7 +21,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
-import { readPkcs12Keystore, readPkcs12Truststore } from '../../utils';
+import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
 import { ServiceConfigDescriptor } from '../internal_types';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });

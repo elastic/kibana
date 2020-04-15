@@ -107,6 +107,11 @@ export const getFilter = async ({
         throw new BadRequestError('savedId parameter should be defined');
       }
     }
+    case 'machine_learning': {
+      throw new BadRequestError(
+        'Unsupported Rule of type "machine_learning" supplied to getFilter'
+      );
+    }
   }
   return assertUnreachable(type);
 };

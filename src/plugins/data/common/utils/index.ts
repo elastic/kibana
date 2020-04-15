@@ -17,5 +17,6 @@
  * under the License.
  */
 
+/** @internal */
 export { shortenDottedString } from './shorten_dotted_string';
-export { parseInterval } from './parse_interval';
+export { AbortError, toPromise, getCombinedSignal } from './abort_utils';

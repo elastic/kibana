@@ -39,3 +39,4 @@ export const API_ROUTE_SHAREABLE_BASE = '/public/canvas';
 export const API_ROUTE_SHAREABLE_ZIP = '/public/canvas/zip';
 export const API_ROUTE_SHAREABLE_RUNTIME = '/public/canvas/runtime';
 export const API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD = `/public/canvas/${SHAREABLE_RUNTIME_NAME}.js`;
+export const CANVAS_EMBEDDABLE_CLASSNAME = `canvasEmbeddable`;

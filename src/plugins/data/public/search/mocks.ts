@@ -17,16 +17,34 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { getCalculateAutoTimeExpression } from './aggs/buckets/lib/date_utils';
+import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
+import { AggTypeFieldFilters } from './aggs/param_types/filter';
+import { ISearchStart } from './types';
 
 export * from './search_source/mocks';
 
 export const searchSetupMock = {
-  aggs: {
-    calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings),
-  },
+  aggs: searchAggsSetupMock(),
   registerSearchStrategyContext: jest.fn(),
   registerSearchStrategyProvider: jest.fn(),
+};
+
+export const searchStartMock: jest.Mocked<ISearchStart> = {
+  aggs: searchAggsStartMock(),
+  setInterceptor: jest.fn(),
+  search: jest.fn(),
+  createSearchSource: jest.fn(),
+  __LEGACY: {
+    AggConfig: jest.fn() as any,
+    AggType: jest.fn(),
+    aggTypeFieldFilters: new AggTypeFieldFilters(),
+    FieldParamType: jest.fn(),
+    MetricAggType: jest.fn(),
+    parentPipelineAggHelper: jest.fn() as any,
+    siblingPipelineAggHelper: jest.fn() as any,
+    esClient: {
+      search: jest.fn(),
+      msearch: jest.fn(),
+    },
+  },
 };

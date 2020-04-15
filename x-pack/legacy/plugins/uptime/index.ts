@@ -14,7 +14,7 @@ export const uptime = (kibana: any) =>
     configPrefix: 'xpack.uptime',
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['alerting', 'kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.uptime.pluginDescription', {

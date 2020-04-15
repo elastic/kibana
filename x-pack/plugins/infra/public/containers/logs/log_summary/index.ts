@@ -5,5 +5,4 @@
  */
 
 export * from './log_summary';
-export * from './use_log_summary_buffer_interval';
 export * from './with_summary';

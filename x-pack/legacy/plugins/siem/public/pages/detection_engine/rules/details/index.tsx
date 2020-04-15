@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useMemo, useState } from 'react';
@@ -38,13 +39,13 @@ import {
 } from '../../../../containers/source';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 
+import { StepAboutRuleToggleDetails } from '../components/step_about_rule_details/';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { SignalsHistogramPanel } from '../../components/signals_histogram_panel';
 import { SignalsTable } from '../../components/signals';
 import { useUserInfo } from '../../components/user_info';
 import { DetectionEngineEmptyPage } from '../../detection_engine_empty_page';
 import { useSignalInfo } from '../../components/signals_info';
-import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
 import { buildSignalsRuleIdFilter } from '../../components/signals/default_config';
@@ -53,7 +54,7 @@ import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../components/read_only_callout';
 import { RuleSwitch } from '../components/rule_switch';
 import { StepPanel } from '../components/step_panel';
-import { getStepsData, redirectToDetections } from '../helpers';
+import { getStepsData, redirectToDetections, userHasNoPermissions } from '../helpers';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
@@ -66,6 +67,8 @@ import { RuleActionsOverflow } from '../components/rule_actions_overflow';
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../components/rule_status';
+import { useMlCapabilities } from '../../../../components/ml_popover/hooks/use_ml_capabilities';
+import { hasMlAdminPermissions } from '../../../../components/ml/permissions/has_ml_admin_permissions';
 
 enum RuleDetailTabs {
   signals = 'signals',
@@ -85,7 +88,7 @@ const ruleDetailTabs = [
   },
 ];
 
-const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
+export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   filters,
   query,
   setAbsoluteRangeDatePicker,
@@ -96,7 +99,6 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
-    hasManageApiKey,
     hasIndexWrite,
     signalIndexName,
   } = useUserInfo();
@@ -105,16 +107,21 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
-  const { aboutRuleData, defineRuleData, scheduleRuleData } =
+  const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
-      ? getStepsData({
-          rule,
-          detailsView: true,
-        })
-      : { aboutRuleData: null, defineRuleData: null, scheduleRuleData: null };
+      ? getStepsData({ rule, detailsView: true })
+      : {
+          aboutRuleData: null,
+          modifiedAboutRuleDetailsData: null,
+          defineRuleData: null,
+          scheduleRuleData: null,
+        };
   const [lastSignals] = useSignalInfo({ ruleId });
-  const userHasNoPermissions =
-    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
+  const mlCapabilities = useMlCapabilities();
+
+  // TODO: Refactor license check + hasMlAdminPermissions to common check
+  const hasMlPermissions =
+    mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
 
   const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
   const subTitle = useMemo(
@@ -225,7 +232,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   return (
     <>
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
-      {userHasNoPermissions && <ReadOnlyCallOut />}
+      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
       <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indicesExist, indexPattern }) => {
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -260,13 +267,25 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     >
                       <EuiFlexGroup alignItems="center">
                         <EuiFlexItem grow={false}>
-                          <RuleSwitch
-                            id={rule?.id ?? '-1'}
-                            isDisabled={userHasNoPermissions}
-                            enabled={rule?.enabled ?? false}
-                            optionLabel={i18n.ACTIVATE_RULE}
-                            onChange={handleOnChangeEnabledRule}
-                          />
+                          <EuiToolTip
+                            position="top"
+                            content={
+                              rule?.type === 'machine_learning' && !hasMlPermissions
+                                ? detectionI18n.ML_RULES_DISABLED_MESSAGE
+                                : undefined
+                            }
+                          >
+                            <RuleSwitch
+                              id={rule?.id ?? '-1'}
+                              isDisabled={
+                                userHasNoPermissions(canUserCRUD) ||
+                                (!hasMlPermissions && !rule?.enabled)
+                              }
+                              enabled={rule?.enabled ?? false}
+                              optionLabel={i18n.ACTIVATE_RULE}
+                              onChange={handleOnChangeEnabledRule}
+                            />
+                          </EuiToolTip>
                         </EuiFlexItem>
 
                         <EuiFlexItem grow={false}>
@@ -275,7 +294,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                               <EuiButton
                                 href={getEditRuleUrl(ruleId ?? '')}
                                 iconType="controlsHorizontal"
-                                isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
+                                isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
                               >
                                 {ruleI18n.EDIT_RULE_SETTINGS}
                               </EuiButton>
@@ -283,7 +302,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             <EuiFlexItem grow={false}>
                               <RuleActionsOverflow
                                 rule={rule}
-                                userHasNoPermissions={userHasNoPermissions}
+                                userHasNoPermissions={userHasNoPermissions(canUserCRUD)}
                               />
                             </EuiFlexItem>
                           </EuiFlexGroup>
@@ -291,16 +310,23 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                       </EuiFlexGroup>
                     </DetectionEngineHeaderPage>
                     {ruleError}
-                    {tabs}
                     <EuiSpacer />
-                    {ruleDetailTab === RuleDetailTabs.signals && (
-                      <>
-                        <EuiFlexGroup>
+                    <EuiFlexGroup>
+                      <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
+                        <StepAboutRuleToggleDetails
+                          loading={isLoading}
+                          stepData={aboutRuleData}
+                          stepDataDetails={modifiedAboutRuleDetailsData}
+                        />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={1}>
+                        <EuiFlexGroup direction="column">
                           <EuiFlexItem component="section" grow={1}>
                             <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
                               {defineRuleData != null && (
                                 <StepDefineRule
-                                  descriptionDirection="column"
+                                  descriptionColumns="singleSplit"
                                   isReadOnlyView={true}
                                   isLoading={false}
                                   defaultValues={defineRuleData}
@@ -308,25 +334,12 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                               )}
                             </StepPanel>
                           </EuiFlexItem>
-
-                          <EuiFlexItem data-test-subj="aboutRule" component="section" grow={2}>
-                            <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
-                              {aboutRuleData != null && (
-                                <StepAboutRule
-                                  descriptionDirection="row"
-                                  isReadOnlyView={true}
-                                  isLoading={false}
-                                  defaultValues={aboutRuleData}
-                                />
-                              )}
-                            </StepPanel>
-                          </EuiFlexItem>
-
+                          <EuiSpacer />
                           <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                             <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
                               {scheduleRuleData != null && (
                                 <StepScheduleRule
-                                  descriptionDirection="column"
+                                  descriptionColumns="singleSplit"
                                   isReadOnlyView={true}
                                   isLoading={false}
                                   defaultValues={scheduleRuleData}
@@ -335,7 +348,13 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             </StepPanel>
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                        <EuiSpacer />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer />
+                    {tabs}
+                    <EuiSpacer />
+                    {ruleDetailTab === RuleDetailTabs.signals && (
+                      <>
                         <SignalsHistogramPanel
                           deleteQuery={deleteQuery}
                           filters={signalMergedFilters}

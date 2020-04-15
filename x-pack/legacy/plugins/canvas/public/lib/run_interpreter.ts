@@ -11,7 +11,7 @@ import { notify } from './notify';
 
 import { CanvasStartDeps, CanvasSetupDeps } from '../plugin';
 
-let expressionsStarting: Promise<CanvasStartDeps['expressions']>;
+let expressionsStarting: Promise<CanvasStartDeps['expressions']> | undefined;
 
 export const initInterpreter = function(
   expressionsStart: CanvasStartDeps['expressions'],
@@ -29,6 +29,10 @@ async function startExpressions(
   await expressionsSetup.__LEGACY.loadLegacyServerFunctionWrappers();
   return expressionsStart;
 }
+
+export const resetInterpreter = function() {
+  expressionsStarting = undefined;
+};
 
 interface Options {
   castToRender?: boolean;

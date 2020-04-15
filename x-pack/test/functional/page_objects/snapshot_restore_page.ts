@@ -28,21 +28,15 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
     },
     async getRepoList() {
       const table = await testSubjects.find('repositoryTable');
-      const rows = await table.findAllByCssSelector('[data-test-subj="row"]');
+      const rows = await table.findAllByTestSubject('row');
       return await Promise.all(
         rows.map(async row => {
           return {
-            repoName: await (
-              await row.findByCssSelector('[data-test-subj="Name_cell"]')
-            ).getVisibleText(),
-            repoLink: await (
-              await row.findByCssSelector('[data-test-subj="Name_cell"]')
-            ).findByCssSelector('a'),
-            repoType: await (
-              await row.findByCssSelector('[data-test-subj="Type_cell"]')
-            ).getVisibleText(),
-            repoEdit: await row.findByCssSelector('[data-test-subj="editRepositoryButton"]'),
-            repoDelete: await row.findByCssSelector('[data-test-subj="deleteRepositoryButton"]'),
+            repoName: await (await row.findByTestSubject('Name_cell')).getVisibleText(),
+            repoLink: await (await row.findByTestSubject('Name_cell')).findByCssSelector('a'),
+            repoType: await (await row.findByTestSubject('Type_cell')).getVisibleText(),
+            repoEdit: await row.findByTestSubject('editRepositoryButton'),
+            repoDelete: await row.findByTestSubject('deleteRepositoryButton'),
           };
         })
       );
