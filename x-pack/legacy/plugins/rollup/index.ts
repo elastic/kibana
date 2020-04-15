@@ -6,7 +6,7 @@
 
 import { PluginInitializerContext } from 'src/core/server';
 import { RollupSetup } from '../../../plugins/rollup/server';
-import { PLUGIN, CONFIG_ROLLUPS } from './common';
+import { PLUGIN } from './common';
 import { plugin } from './server';
 
 export function rollup(kibana: any) {
