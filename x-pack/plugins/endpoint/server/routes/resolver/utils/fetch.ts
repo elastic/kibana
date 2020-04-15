@@ -43,25 +43,24 @@ export class Fetcher {
     return tree;
   }
 
-  private async doAncestors(tree: Tree, node: string, id: string, levels: number) {
+  private async doAncestors(tree: Tree, curNode: string, previousNode: string, levels: number) {
     if (levels === 0) {
-      tree.setNextAncestor(id);
+      tree.setNextAncestor(curNode);
       return;
     }
 
     const query = new LifecycleQuery(this.endpointID);
-    const { results } = await query.search(this.client, id);
+    const { results } = await query.search(this.client, curNode);
 
     if (results.length === 0) {
       tree.setNextAncestor(null);
       return;
     }
-
-    tree.addAncestor(node, ...results);
+    tree.addAncestor(previousNode, ...results);
 
     const next = parentEntityId(results[0]);
     if (next !== undefined) {
-      await this.doAncestors(tree, next, next, levels - 1);
+      await this.doAncestors(tree, next, curNode, levels - 1);
     }
   }
 

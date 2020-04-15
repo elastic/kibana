@@ -64,6 +64,7 @@ export interface Node {
   children: Node[];
   events: ResolverEvent[];
   lifecycle: ResolverEvent[];
+  ancestors?: Node[];
   parent?: Node | null;
   pagination: NodePagination;
   stats?: NodeStats;

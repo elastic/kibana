@@ -92,6 +92,7 @@ export class Tree {
     // fix up the references
     children.root.lifecycle = ancestors.root.lifecycle; // lifecycle is bound to the ancestors query
     children.root.parent = ancestors.root.parent;
+    children.root.ancestors = ancestors.root.ancestors;
     children.root.events = events.root.events;
 
     // merge the pagination
@@ -114,8 +115,19 @@ export class Tree {
       const ancestorID = entityId(event);
       console.log(ancestorID, 'ancestor');
       if (!this.cache[ancestorID]) {
-        this.cache[ancestorID] = createNode(ancestorID);
-        this.cache[id].parent = this.cache[ancestorID];
+        const newParent = createNode(ancestorID);
+        this.cache[ancestorID] = newParent;
+        // Uncomment this line to populate the node's parent field, it will build a tree like
+        // node.parent.parent.parent going up the ancestry chain
+        // this.cache[id].parent = newParent;
+
+        // This method just adds all the ancestors to the root node's ancestors array
+        // The ordering of the ancestors should be the closest parent is towards at the front of the array
+        // the further the ancestor the more towards the end of the array
+        if (!this.root.ancestors) {
+          this.root.ancestors = [];
+        }
+        this.root.ancestors.push(newParent);
       }
       this.cache[ancestorID].lifecycle.push(event);
     });
