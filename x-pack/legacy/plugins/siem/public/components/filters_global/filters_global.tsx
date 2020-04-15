@@ -14,7 +14,7 @@ import { gutterTimeline } from '../../lib/helpers';
 const offsetChrome = 49;
 
 const disableSticky = `screen and (max-width: ${euiLightVars.euiBreakpoints.s})`;
-const disableStickyMq = window.matchMedia ? window.matchMedia(disableSticky).matches : undefined;
+const disableStickyMq = window.matchMedia(disableSticky);
 
 const Wrapper = styled.aside<{ isSticky?: boolean }>`
   position: relative;
@@ -42,7 +42,7 @@ export interface FiltersGlobalProps {
 }
 
 export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => (
-  <Sticky disableCompensation={disableStickyMq} topOffset={-offsetChrome}>
+  <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
     {({ style, isSticky }) => (
       <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>
         {children}

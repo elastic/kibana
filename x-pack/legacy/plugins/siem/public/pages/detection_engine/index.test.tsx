@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import '../../mock/match_media';
 import { DetectionEngineContainer } from './index';
 
 describe('DetectionEngineContainer', () => {

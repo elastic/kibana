@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import '../../../../mock/match_media';
 import { TestProviders } from '../../../../mock';
 import { RuleDetailsPageComponent } from './index';
 import { setAbsoluteRangeDatePicker } from '../../../../store/inputs/actions';

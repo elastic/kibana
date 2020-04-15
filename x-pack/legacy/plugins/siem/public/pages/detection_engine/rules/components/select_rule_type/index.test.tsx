@@ -9,6 +9,7 @@ import { shallow } from 'enzyme';
 
 import { SelectRuleType } from './index';
 import { useFormFieldMock } from '../../../../../mock';
+jest.mock('../../../../../lib/kibana');
 
 describe('SelectRuleType', () => {
   it('renders correctly', () => {
