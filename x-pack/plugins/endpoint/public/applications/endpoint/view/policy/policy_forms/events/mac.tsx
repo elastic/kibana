@@ -8,18 +8,19 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { ImmutableArray } from '../../../../../../../common/types';
+import { getIn, setIn } from '../../../../models/policy_details_config';
 import { EventsCheckbox } from './checkbox';
 import { OS, UIPolicyConfig } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { selectedMacEvents, totalMacEvents } from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
-import { getIn, setIn } from '../../../../models/policy_details_config';
 
 export const MacEvents = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedMacEvents);
   const total = usePolicyDetailsSelector(totalMacEvents);
 
-  const checkboxes: Array<{
+  const checkboxes: ImmutableArray<{
     name: string;
     os: 'mac';
     protectionField: keyof UIPolicyConfig['mac']['events'];
@@ -50,7 +51,7 @@ export const MacEvents = React.memo(() => {
     []
   );
 
-  const renderCheckboxes = () => {
+  const renderCheckboxes = useMemo(() => {
     return (
       <>
         <EuiTitle size="xxs">
@@ -76,9 +77,9 @@ export const MacEvents = React.memo(() => {
         })}
       </>
     );
-  };
+  }, [checkboxes]);
 
-  const collectionsEnabled = () => {
+  const collectionsEnabled = useMemo(() => {
     return (
       <EuiText size="s" color="subdued">
         <FormattedMessage
@@ -88,19 +89,20 @@ export const MacEvents = React.memo(() => {
         />
       </EuiText>
     );
-  };
+  }, [selected, total]);
 
   return (
     <ConfigForm
       type={i18n.translate('xpack.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      supportedOss={[
-        i18n.translate('xpack.endpoint.policy.details.mac', { defaultMessage: 'Mac' }),
-      ]}
-      id="macEventingForm"
-      rightCorner={collectionsEnabled()}
-      children={renderCheckboxes()}
+      supportedOss={useMemo(
+        () => [i18n.translate('xpack.endpoint.policy.details.mac', { defaultMessage: 'Mac' })],
+        []
+      )}
+      id="macEventsForm"
+      rightCorner={collectionsEnabled}
+      children={renderCheckboxes}
     />
   );
 });

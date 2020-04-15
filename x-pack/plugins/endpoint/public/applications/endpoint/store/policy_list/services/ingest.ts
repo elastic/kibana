@@ -11,13 +11,13 @@ import {
 } from '../../../../../../../ingest_manager/common';
 import {
   NewPolicyData,
-  GetDatasourcesResponse,
-  GetDatasourceResponse,
-  UpdateDatasourceResponse,
+  GetPolicyListResponse,
+  GetPolicyResponse,
+  UpdatePolicyResponse,
 } from '../../../types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
-const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
+export const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
 
@@ -30,8 +30,8 @@ const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
 export const sendGetEndpointSpecificDatasources = (
   http: HttpStart,
   options: HttpFetchOptions & Partial<GetDatasourcesRequest> = {}
-): Promise<GetDatasourcesResponse> => {
-  return http.get<GetDatasourcesResponse>(INGEST_API_DATASOURCES, {
+): Promise<GetPolicyListResponse> => {
+  return http.get<GetPolicyListResponse>(INGEST_API_DATASOURCES, {
     ...options,
     query: {
       ...options.query,
@@ -53,7 +53,7 @@ export const sendGetDatasource = (
   datasourceId: string,
   options?: HttpFetchOptions
 ) => {
-  return http.get<GetDatasourceResponse>(`${INGEST_API_DATASOURCES}/${datasourceId}`, options);
+  return http.get<GetPolicyResponse>(`${INGEST_API_DATASOURCES}/${datasourceId}`, options);
 };
 
 /**
@@ -69,7 +69,7 @@ export const sendPutDatasource = (
   datasourceId: string,
   datasource: NewPolicyData,
   options: Exclude<HttpFetchOptions, 'body'> = {}
-): Promise<UpdateDatasourceResponse> => {
+): Promise<UpdatePolicyResponse> => {
   return http.put(`${INGEST_API_DATASOURCES}/${datasourceId}`, {
     ...options,
     body: JSON.stringify(datasource),

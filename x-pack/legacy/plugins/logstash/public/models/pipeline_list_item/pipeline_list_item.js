@@ -8,7 +8,7 @@ import { pick, capitalize } from 'lodash';
 
 import { getSearchValue } from 'plugins/logstash/lib/get_search_value';
 import { getMoment } from 'plugins/logstash/../common/lib/get_moment';
-import { PIPELINE } from '../../../common/constants';
+import { PIPELINE } from '../../../../../../plugins/logstash/common/constants';
 
 /**
  * Represents the model for listing pipelines in the UI

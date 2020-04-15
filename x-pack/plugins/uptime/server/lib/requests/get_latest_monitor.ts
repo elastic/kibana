@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Ping } from '../../../common/graphql/types';
+import { Ping } from '../../../common/runtime_types';
 
 export interface GetLatestMonitorParams {
   /** @member dateRangeStart timestamp bounds */
@@ -53,11 +53,9 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   };
 
   const result = await callES('search', params);
-  const ping: any = result.hits?.hits?.[0] ?? {};
-  const { '@timestamp': timestamp, ...monitorResult } = ping?._source ?? {};
+  const doc = result.hits?.hits?.[0];
+  const source = doc?._source ?? {};
+  const docId = doc?._id ?? '';
 
-  return {
-    timestamp,
-    ...monitorResult,
-  };
+  return { ...source, docId, timestamp: source['@timestamp'] };
 };
