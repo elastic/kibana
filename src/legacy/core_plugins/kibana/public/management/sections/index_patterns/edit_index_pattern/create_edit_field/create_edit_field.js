@@ -53,7 +53,6 @@ const renderFieldEditor = (
           indexPattern={indexPattern}
           field={field}
           helpers={{
-            Field: IndexPatternField,
             getConfig,
             $http,
             fieldFormatEditors,

@@ -60,7 +60,7 @@ interface UpdateComment {
   version: string;
 }
 
-interface UseUpdateComment extends CommentUpdateState {
+export interface UseUpdateComment extends CommentUpdateState {
   patchComment: ({ caseId, commentId, commentUpdate, fetchUserActions }: UpdateComment) => void;
 }
 

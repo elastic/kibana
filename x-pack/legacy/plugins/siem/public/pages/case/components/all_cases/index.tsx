@@ -131,11 +131,11 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
 
   const refreshCases = useCallback(() => {
-    refetchCases(filterOptions, queryParams);
+    refetchCases();
     fetchCasesStatus();
     setSelectedCases([]);
     setDeleteBulk([]);
-  }, [filterOptions, queryParams]);
+  }, []);
 
   useEffect(() => {
     if (isDeleted) {
