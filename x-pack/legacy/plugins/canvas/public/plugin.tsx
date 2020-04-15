@@ -13,6 +13,7 @@ import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/e
 import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 // @ts-ignore untyped local
 import { argTypeSpecs } from './expression_types/arg_types';
@@ -32,12 +33,14 @@ export interface CanvasSetupDeps {
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
   home: HomePublicPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface CanvasStartDeps {
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
   inspector: InspectorStart;
+
   uiActions: UiActionsStart;
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
