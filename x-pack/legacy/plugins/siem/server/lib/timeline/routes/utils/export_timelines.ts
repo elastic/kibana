@@ -29,7 +29,7 @@ import {
   ExportedNotes,
   TimelineSavedObject,
 } from '../../types';
-import { transformDataToNdjson } from '../../../../utils/read_stream/create_rules_stream_from_ndjson';
+import { transformDataToNdjson } from '../../../../utils/read_stream/create_stream_from_ndjson';
 
 export type TimelineSavedObjectsClient = Pick<
   SavedObjectsClient,

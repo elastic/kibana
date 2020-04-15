@@ -18,7 +18,7 @@ import {
   parseNdjsonStrings,
   filterExportedCounts,
   createLimitStream,
-} from '../../utils/read_stream/create_rules_stream_from_ndjson';
+} from '../../utils/read_stream/create_stream_from_ndjson';
 
 import { ImportTimelineResponse } from './routes/utils/import_timelines';
 import { ImportTimelinesSchemaRt } from './routes/schemas/import_timelines_schema';

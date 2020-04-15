@@ -68,21 +68,6 @@ export const createLimitStream = (limit: number): Transform => {
   });
 };
 
-/**
- * Inspiration and the pattern of code followed is from:
- * saved_objects/lib/create_saved_objects_stream_from_ndjson.ts
- */
-export const createRulesStreamFromNdJson = (ruleLimit: number) => {
-  return [
-    createSplitStream('\n'),
-    parseNdjsonStrings(),
-    filterExportedCounts(),
-    validateRules(),
-    createLimitStream(ruleLimit),
-    createConcatStream([]),
-  ];
-};
-
 export const transformDataToNdjson = (data: unknown[]): string => {
   if (data.length !== 0) {
     const dataString = data.map(rule => JSON.stringify(rule)).join('\n');

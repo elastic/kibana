@@ -24,7 +24,7 @@ import {
 import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { importRulesRoute } from './import_rules_route';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
-import * as createRulesStreamFromNdJson from '../../../../utils/read_stream/create_rules_stream_from_ndjson';
+import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('import_rules_route', () => {

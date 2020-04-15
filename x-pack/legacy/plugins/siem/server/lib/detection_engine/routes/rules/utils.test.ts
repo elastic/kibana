@@ -22,12 +22,12 @@ import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { ImportRuleAlertRest, RuleAlertParamsRest, RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { getSimpleRule, getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { createRulesStreamFromNdJson } from '../../../../utils/read_stream/create_rules_stream_from_ndjson';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { PartialAlert } from '../../../../../../../../plugins/alerting/server';
 import { SanitizedAlert } from '../../../../../../../../plugins/alerting/server/types';
 import { RuleAlertType } from '../../rules/types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 

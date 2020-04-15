@@ -16,7 +16,7 @@ import {
   parseNdjsonStrings,
   filterExportedCounts,
   createLimitStream,
-} from '../../../utils/read_stream/create_rules_stream_from_ndjson';
+} from '../../../utils/read_stream/create_stream_from_ndjson';
 
 export const validateRules = (): Transform => {
   return createMapStream((obj: ImportRuleAlertRest) => {
