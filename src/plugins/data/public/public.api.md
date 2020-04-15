@@ -59,21 +59,13 @@ import { Unit } from '@elastic/datemath';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues } from 'src/core/server/types';
 
+// Warning: (ae-forgotten-export) The symbol "AggConfigJson" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "AggConfigOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface AggConfigOptions {
-    // (undocumented)
-    enabled?: boolean;
-    // (undocumented)
-    id?: string;
-    // (undocumented)
-    params?: Record<string, any>;
-    // (undocumented)
-    schema?: string;
-    // (undocumented)
+export type AggConfigOptions = Assign<AggConfigJson, {
     type: IAggType;
-}
+}>;
 
 // Warning: (ae-missing-release-tag) "AggGroupNames" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
