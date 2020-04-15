@@ -20,7 +20,7 @@ export async function removeInstallation(options: {
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const [pkgName] = pkgkey.split('-');
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  const installedObjects = installation?.installed || { references: [], es_index_patterns: {} };
+  const installedObjects = installation?.installed || [];
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -30,7 +30,7 @@ export async function removeInstallation(options: {
   await installIndexPatterns(savedObjectsClient);
 
   // Delete the installed assets
-  const deletePromises = installedObjects.references.map(async ({ id, type }) => {
+  const deletePromises = installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
     if (savedObjectTypes.includes(assetType)) {
       savedObjectsClient.delete(assetType, id);
@@ -43,7 +43,7 @@ export async function removeInstallation(options: {
   await Promise.all([...deletePromises]);
 
   // successful delete's in SO client return {}. return something more useful
-  return installedObjects.references;
+  return installedObjects;
 }
 
 async function deletePipeline(callCluster: CallESAsCurrentUser, id: string): Promise<void> {

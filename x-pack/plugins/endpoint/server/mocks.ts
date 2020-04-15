@@ -15,7 +15,7 @@ export const createMockIndexPatternRetriever = (indexPattern: string) => {
 
 export const MetadataIndexPattern = 'metrics-endpoint-*';
 
-export const createMockMetadataIPRetriever = () => {
+export const createMockMetadataIndexPatternRetriever = () => {
   return createMockIndexPatternRetriever(MetadataIndexPattern);
 };
 

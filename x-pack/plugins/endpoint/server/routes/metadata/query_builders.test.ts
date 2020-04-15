@@ -6,7 +6,7 @@
 import { httpServerMock, loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { EndpointConfigSchema } from '../../config';
 import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
-import { createMockMetadataIPRetriever, MetadataIndexPattern } from '../../mocks';
+import { createMockMetadataIndexPatternRetriever, MetadataIndexPattern } from '../../mocks';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -17,7 +17,7 @@ describe('query builder', () => {
       const query = await kibanaRequestToMetadataListESQuery(
         mockRequest,
         {
-          indexPatternRetriever: createMockMetadataIPRetriever(),
+          indexPatternRetriever: createMockMetadataIndexPatternRetriever(),
           logFactory: loggingServiceMock.create(),
           config: () => Promise.resolve(EndpointConfigSchema.validate({})),
         },
@@ -68,7 +68,7 @@ describe('query builder', () => {
       const query = await kibanaRequestToMetadataListESQuery(
         mockRequest,
         {
-          indexPatternRetriever: createMockMetadataIPRetriever(),
+          indexPatternRetriever: createMockMetadataIndexPatternRetriever(),
           logFactory: loggingServiceMock.create(),
           config: () => Promise.resolve(EndpointConfigSchema.validate({})),
         },

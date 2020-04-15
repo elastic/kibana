@@ -9,7 +9,6 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
   Installation,
-  InstalledReferences,
   KibanaAssetType,
   CallESAsCurrentUser,
   DefaultPackages,
@@ -27,7 +26,7 @@ export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   callCluster: CallESAsCurrentUser;
-}): Promise<InstalledReferences> {
+}): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgName, callCluster } = options;
   try {
     const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
@@ -86,7 +85,7 @@ export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   callCluster: CallESAsCurrentUser;
-}): Promise<InstalledReferences> {
+}): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO: change epm API to /packageName/version so we don't need to do this
   const [pkgName, pkgVersion] = pkgkey.split('-');
@@ -119,7 +118,7 @@ export async function installPackage(options: {
     installTemplatePromises,
   ]);
 
-  const toSaveRefs: AssetReference[] = res.flat();
+  const toSaveAssetRefs: AssetReference[] = res.flat();
   const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
   // Save those references in the package manager's state saved object
   return await saveInstallationReferences({
@@ -128,7 +127,7 @@ export async function installPackage(options: {
     pkgName,
     pkgVersion,
     internal,
-    toSaveRefs,
+    toSaveAssetRefs,
     toSaveESIndexPatterns,
   });
 }
@@ -159,7 +158,7 @@ export async function saveInstallationReferences(options: {
   pkgName: string;
   pkgVersion: string;
   internal: boolean;
-  toSaveRefs: AssetReference[];
+  toSaveAssetRefs: AssetReference[];
   toSaveESIndexPatterns: Record<string, string>;
 }) {
   const {
@@ -167,13 +166,13 @@ export async function saveInstallationReferences(options: {
     pkgName,
     pkgVersion,
     internal,
-    toSaveRefs,
+    toSaveAssetRefs,
     toSaveESIndexPatterns,
   } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  const savedRefs = installation?.installed.references || [];
+  const savedAssetRefs = installation?.installed || [];
   const toInstallESIndexPatterns = Object.assign(
-    installation?.installed.es_index_patterns || {},
+    installation?.es_index_patterns || {},
     toSaveESIndexPatterns
   );
 
@@ -183,12 +182,12 @@ export async function saveInstallationReferences(options: {
     return current;
   };
 
-  const toInstallRefs = toSaveRefs.reduce(mergeRefsReducer, savedRefs);
-  const installed = { references: toInstallRefs, es_index_patterns: toInstallESIndexPatterns };
+  const toInstallAssetsRefs = toSaveAssetRefs.reduce(mergeRefsReducer, savedAssetRefs);
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
-      installed,
+      installed: toInstallAssetsRefs,
+      es_index_patterns: toInstallESIndexPatterns,
       name: pkgName,
       version: pkgVersion,
       internal,
@@ -196,7 +195,7 @@ export async function saveInstallationReferences(options: {
     { id: pkgName, overwrite: true }
   );
 
-  return installed;
+  return toInstallAssetsRefs;
 }
 
 async function installKibanaSavedObjects({
