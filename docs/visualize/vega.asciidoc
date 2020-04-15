@@ -1,81 +1,58 @@
 [[vega-graph]]
-== Vega Graphs
-experimental[]
+== Vega
 
-You can build https://vega.github.io/vega/examples/[Vega] and
-https://vega.github.io/vega-lite/examples/[Vega-Lite] data visualizations
-into Kibana, either standalone, or on top of a map.  To see Vega in action,
-watch this
-https://www.youtube.com/watch?v=lQGCipY3th8[short introduction video].
+experimental[] Build custom visualizations from multiple data sources using Vega and Vega-Lite.
 
-Currently Vega version 4.3 and Vega-Lite version 2.6 are supported.
+* *Vega* -- A declarative format to create visualizations using JSON. Generate interactive displays using D3.
 
-NOTE: In Vega it is possible to load data dynamically, e.g. by setting signals as data urls. This is not supported in Kibana as all data is fetched at once prior to passing it to the Vega renderer.
+* *Vega-Lite* -- An easier format that enables more rapid data analysis. Compiles into Vega.
 
+For more information about Vega and Vega-Lite, refer to link:https://vega.github.io/vega/[Vega].
 
-[[vega-quick-demo]]
-=== Getting Started with Vega
+To see Vega in action, watch
+link:https://www.youtube.com/watch?v=lQGCipY3th8[Creating Custom {kib} Data Visualizations Using Vega].
 
-* To experiment using sample data, first click the {kib} logo in the upper left hand corner
-and then click the link next to *Sample Data*.
-* Once you have data loaded, go to *Visualize*, click *+*, and select *Vega* to see an example graph.
-*Note*: The default graph is written in Vega-Lite, but you can build visualizations
-in either language. See <<vega-vs-vegalite, Vega vs. Vega-Lite>> for more information.
-* Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
-or `square`. Check out the
-https://vega.github.io/vega-lite/docs/mark.html#mark-def[Vega-Lite docs] for more information.
-* Explore other available https://vega.github.io/vega/examples/[Vega] or
-https://vega.github.io/vega-lite/examples/[Vega-Lite] visualizations.
-*Note*: You might need to make URLs absolute, for example, replace
-`"url": "data/world-110m.json"` with
-`"url": "https://vega.github.io/editor/data/world-110m.json"`.
-See <<vega-using-vega-and-vegalite-examples, Vega and Vega-Lite examples>>.
-* For more information on getting started, check out this https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[blog post].
+For information on getting started, refer to link:https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[Getting Started with Vega Visualizations in {kib}].
 
+NOTE: Dynamically load your data by setting signals as data URLs. {kib} is unable to support dynamically loaded data, so all data is fetched before it's passed to the Vega renderer.
 
-[[vega-vs-vegalite]]
-=== Vega vs Vega-Lite
+[float]
+[[create-vega-viz]]
+=== Create Vega visualizations
 
-The Vega visualization in {kib} supports both Vega and Vega-Lite. You can use the
-`schema` value to define which language you would like to use and its minimum
-required version.
+Short description.
 
-For example:
+[float]
+[[vega-schema]]
+==== Edit the `schema`
 
-* Vega-Lite v2: `$schema: https://vega.github.io/schema/vega-lite/v2.json`
-* Vega v4: `$schema: https://vega.github.io/schema/vega/v4.json`
+The default visualization uses Vega-Lite. To use Vega, edit the `schema`.
 
-The `schema` URL is only used for identification, and does not need to be accessible by {kib}.
+For example, to use Vega version 4.0, use `$schema: https://vega.github.io/schema/vega/v4.json`.
 
-Vega-Lite is a simplified version of Vega; it automates some constructions and has
-much shorter specifications than Vega. Vega-Lite is automatically converted into
-Vega before rendering, but it has some limitations, and there are some visualizations
-that can be expressed in Vega that cannot be expressed in Vega-Lite. You can learn more
-in the https://vega.github.io/vega-lite/[Vega-Lite documentation].
+[float]
+[[vega-type]]
+==== Change the visualization type
 
-You can use https://vega.github.io/editor/[this editor] to convert Vega-Lite into
-Vega.
+The default visualization is a line chart. To change the visualization type, change the `mark` value.
 
-When you create a Vega visualization in {kib}, you can edit the `schema`
-value in the dev tools to the left of the graph to define which of the two expression
-languages you would like to use.
-
+Scroll to `mark`, change the value to a different visualization type, then click *Update*.
 
 [[vega-querying-elasticsearch]]
-=== Querying Elasticsearch
+=== Query {es}
 
-By default, Vega's https://vega.github.io/vega/docs/data/[data] element
-can use embedded and external data with a `"url"` parameter. Kibana adds support for the direct Elasticsearch queries by overloading
+Vega https://vega.github.io/vega/docs/data/[data] elements
+use embedded and external data with a `"url"` parameter. {kib} adds support for the direct {es} queries by overloading
 the `"url"` value.
 
-Here is an example of an Elasticsearch query that counts the number of documents in all indexes. The query uses *@timestamp* field to filter the time range, and break it into histogram buckets.
+For example, count the number of documents in all indexes:
 
 [source,yaml]
 ----
-// An object instead of a string for the url value
+// An object instead of a string for the URL value
 // is treated as a context-aware Elasticsearch query.
 url: {
-  // Specify the time filter (upper right corner) with this field
+  // Specify the time filter.
   %timefield%: @timestamp
   // Apply dashboard context filters when set
   %context%: true
@@ -88,8 +65,8 @@ url: {
       time_buckets: {
         date_histogram: {
           // Use date histogram aggregation on @timestamp field
-          field: @timestamp
-          // interval value will depend on the daterange picker
+          field: @timestamp <1>
+          // interval value will depend on the time filter
           // Use an integer to set approximate bucket count
           interval: { %autointerval%: true }
           // Make sure we get an entire range, even if it has no data
@@ -109,6 +86,8 @@ url: {
 }
 ----
 
+<1> `@timestamp` -- Filters the time range and breaks it into histogram buckets.
+
 The full result has this kind of structure:
 
 [source,yaml]
@@ -118,22 +97,21 @@ The full result has this kind of structure:
     "time_buckets": {
       "buckets": [{
           "key_as_string": "2015-11-30T22:00:00.000Z",
-          "key": 1448920800000,
+          "key": 1448920800000,<1>
           "doc_count": 28
         }, {
           "key_as_string": "2015-11-30T23:00:00.000Z",
-          "key": 1448924400000,
+          "key": 1448924400000, <1>
           "doc_count": 330
         }, ...
 ----
 
-Note that `"key"` is a unix timestamp, and can be used without conversions by the
+<1> `"key"` -- The unix timestamp you can use without conversions by the
 Vega date expressions.
 
-For most graphs we only need the list of the bucket values, so we use `format: {property: "aggregations.time_buckets.buckets"}` expression to focus on just the data we need.
+For most visualizations, you only need the list of bucket values. To focus on only the data you need, use `format: {property: "aggregations.time_buckets.buckets"}`.
 
-Query may be specified with individual range and dashboard context as
-well. This query is equivalent to `"%context%": true, "%timefield%": "@timestamp"`,
+Specify a query with individual range and dashboard context. The query is equivalent to `"%context%": true, "%timefield%": "@timestamp"`,
 except that the timerange is shifted back by 10 minutes:
 
 [source,yaml]
