@@ -11,13 +11,13 @@ import { getActionLicense } from './api';
 import * as i18n from './translations';
 import { ActionLicense } from './types';
 
-interface ActionLicenseState {
+export interface ActionLicenseState {
   actionLicense: ActionLicense | null;
   isLoading: boolean;
   isError: boolean;
 }
 
-const initialData: ActionLicenseState = {
+export const initialData: ActionLicenseState = {
   actionLicense: null,
   isLoading: true,
   isError: false,
