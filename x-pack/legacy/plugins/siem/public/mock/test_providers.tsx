@@ -20,6 +20,7 @@ import { ThemeProvider } from 'styled-components';
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
 import { createKibanaContextProviderMock } from './kibana_react';
+import { FieldHook, useForm } from '../shared_imports';
 
 jest.mock('ui/new_platform');
 
@@ -91,3 +92,29 @@ const TestProviderWithoutDragAndDropComponent: React.FC<Props> = ({
 );
 
 export const TestProviderWithoutDragAndDrop = React.memo(TestProviderWithoutDragAndDropComponent);
+
+export const useFormFieldMock = (options?: Partial<FieldHook>): FieldHook => {
+  const { form } = useForm();
+
+  return {
+    path: 'path',
+    type: 'type',
+    value: [],
+    isPristine: false,
+    isValidating: false,
+    isValidated: false,
+    isChangingValue: false,
+    form,
+    errors: [],
+    isValid: true,
+    getErrorsMessages: jest.fn(),
+    onChange: jest.fn(),
+    setValue: jest.fn(),
+    setErrors: jest.fn(),
+    clearErrors: jest.fn(),
+    validate: jest.fn(),
+    reset: jest.fn(),
+    __serializeOutput: jest.fn(),
+    ...options,
+  };
+};
