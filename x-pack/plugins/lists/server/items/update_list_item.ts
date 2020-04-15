@@ -5,8 +5,8 @@
  */
 
 import { ScopedClusterClient } from 'kibana/server';
+import { CreateDocumentResponse } from 'elasticsearch';
 
-import { UpdateResponse } from '../types';
 import { ListsItemsSchema, Type } from '../../common/schemas';
 import { transformListItemsToElasticQuery } from '../utils';
 
@@ -36,7 +36,8 @@ export const updateListItem = async ({
   if (listItem == null) {
     return null;
   } else {
-    const response: UpdateResponse = await clusterClient.callAsCurrentUser('update', {
+    // There isn't a UpdateDocumentResponse so I'm using CreateDocumentResponse here as a type
+    const response: CreateDocumentResponse = await clusterClient.callAsCurrentUser('update', {
       index: listsItemsIndex,
       id: listItem.id,
       body: {

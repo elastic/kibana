@@ -7,7 +7,6 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_INDEX } from '../../common/constants';
-// TODO: Move these utilities out of detection engine and into a more generic area
 import {
   transformError,
   buildSiemResponse,

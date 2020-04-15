@@ -23,21 +23,16 @@ export const getListItemByValue = async ({
   type: Type;
   value: string;
 }): Promise<ListsItemsSchema | null> => {
-  // TODO: Move this listId.trim() check above here to within the API boundary
-  if (listId.trim() === '') {
-    return null;
+  const listItems = await getListItemsByValues({
+    listId,
+    clusterClient,
+    listsItemsIndex,
+    type,
+    value: [value],
+  });
+  if (listItems.length) {
+    return listItems[0];
   } else {
-    const listItems = await getListItemsByValues({
-      listId,
-      clusterClient,
-      listsItemsIndex,
-      type,
-      value: [value],
-    });
-    if (listItems.length) {
-      return listItems[0];
-    } else {
-      return null;
-    }
+    return null;
   }
 };

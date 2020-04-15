@@ -7,9 +7,9 @@
 import { PassThrough } from 'stream';
 
 import { ScopedClusterClient } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 
-// TODO: There is a definitely typed version of SearchResponse. Should we migrate to that and not use this type anymore?
-import { SearchResponse, ElasticListItemReturnType } from '../types';
+import { ElasticListItemReturnType } from '../types';
 
 /**
  * How many results to page through from the network at a time

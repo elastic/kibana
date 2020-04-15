@@ -6,7 +6,6 @@
 
 import { IRouter } from 'kibana/server';
 
-// TODO: Change these from the legacy to the non-legacy
 import {
   transformError,
   buildSiemResponse,

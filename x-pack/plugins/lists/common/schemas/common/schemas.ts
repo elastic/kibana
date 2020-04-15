@@ -8,15 +8,17 @@
 
 import * as t from 'io-ts';
 
+import { NonEmptyString } from '../types/non_empty_string';
+
 export const name = t.string;
 export const description = t.string;
-export const list_id = t.string;
+export const list_id = NonEmptyString;
 export const item = t.string;
 export const meta = t.object;
 export const created_at = t.string; // TODO: Make this into an ISO Date string check
 export const updated_at = t.string; // TODO: Make this into an ISO Date string check
 export const file = t.object;
-export const id = t.string;
+export const id = NonEmptyString;
 export const value = t.string;
 export const tie_breaker_id = t.string; // TODO: Use UUID for this instead of a string for validation
 

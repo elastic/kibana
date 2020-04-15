@@ -7,7 +7,6 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-// TODO: Pull this out of detection engine
 import {
   getPaths,
   foldLeftRight,

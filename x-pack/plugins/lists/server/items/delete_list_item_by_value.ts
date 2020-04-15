@@ -23,34 +23,30 @@ export const deleteListItemByValue = async ({
   value: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
-}): Promise<ListsItemsSchema[] | null> => {
+}): Promise<ListsItemsSchema[]> => {
   // TODO: Check before we call into these functions at the validation level that the string is not empty?
-  if (listId.trim() === '') {
-    return null;
-  } else {
-    const listItems = await getListItemsByValues({
-      type,
-      value: [value],
-      listId,
-      clusterClient,
-      listsItemsIndex,
-    });
-    const values = listItems.map(listItem => listItem.value);
-    const filter = getQueryFilterFromTypeValue({
-      type,
-      value: values,
-      listId,
-    });
-    await clusterClient.callAsCurrentUser('deleteByQuery', {
-      index: listsItemsIndex,
-      body: {
-        query: {
-          bool: {
-            filter,
-          },
+  const listItems = await getListItemsByValues({
+    type,
+    value: [value],
+    listId,
+    clusterClient,
+    listsItemsIndex,
+  });
+  const values = listItems.map(listItem => listItem.value);
+  const filter = getQueryFilterFromTypeValue({
+    type,
+    value: values,
+    listId,
+  });
+  await clusterClient.callAsCurrentUser('deleteByQuery', {
+    index: listsItemsIndex,
+    body: {
+      query: {
+        bool: {
+          filter,
         },
       },
-    });
-    return listItems;
-  }
+    },
+  });
+  return listItems;
 };

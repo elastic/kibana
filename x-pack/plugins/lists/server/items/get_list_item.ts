@@ -5,8 +5,8 @@
  */
 
 import { ScopedClusterClient } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 
-import { SearchResponse } from '../types';
 import { ListsItemsSchema } from '../../common/schemas';
 
 export const getListItem = async ({
@@ -18,31 +18,27 @@ export const getListItem = async ({
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
 }): Promise<ListsItemsSchema | null> => {
-  if (id.trim() === '') {
-    return null;
-  } else {
-    const result: SearchResponse<Omit<
-      ListsItemsSchema,
-      'id'
-    >> = await clusterClient.callAsCurrentUser('search', {
-      body: {
-        query: {
-          term: {
-            _id: id,
-          },
+  const result: SearchResponse<Omit<
+    ListsItemsSchema,
+    'id'
+  >> = await clusterClient.callAsCurrentUser('search', {
+    body: {
+      query: {
+        term: {
+          _id: id,
         },
       },
-      index: listsItemsIndex,
-      ignoreUnavailable: true,
-    });
+    },
+    index: listsItemsIndex,
+    ignoreUnavailable: true,
+  });
 
-    if (result.hits.hits.length) {
-      return {
-        id: result.hits.hits[0]._id,
-        ...result.hits.hits[0]._source,
-      };
-    } else {
-      return null;
-    }
+  if (result.hits.hits.length) {
+    return {
+      id: result.hits.hits[0]._id,
+      ...result.hits.hits[0]._source,
+    };
+  } else {
+    return null;
   }
 };

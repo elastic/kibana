@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: Change this out for the definite types?
-import { SearchResponse, ElasticListItemReturnType } from '../types';
+import { SearchResponse } from 'elasticsearch';
+
+import { ElasticListItemReturnType } from '../types';
 import { Type, ListsItemsSchema } from '../../common/schemas';
 
 export const transformElasticToListsItems = ({

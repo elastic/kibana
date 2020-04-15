@@ -5,9 +5,9 @@
  */
 
 import { ScopedClusterClient } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 
 import { ListsSchema } from '../../common/schemas';
-import { SearchResponse } from '../types';
 
 export const getList = async ({
   id,
@@ -18,31 +18,26 @@ export const getList = async ({
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsIndex: string;
 }): Promise<ListsSchema | null> => {
-  // TODO: Move this trim up higher and use the top level API to do the trim here.
-  if (id.trim() === '') {
-    return null;
-  } else {
-    const result: SearchResponse<Omit<ListsSchema, 'id'>> = await clusterClient.callAsCurrentUser(
-      'search',
-      {
-        body: {
-          query: {
-            term: {
-              _id: id,
-            },
+  const result: SearchResponse<Omit<ListsSchema, 'id'>> = await clusterClient.callAsCurrentUser(
+    'search',
+    {
+      body: {
+        query: {
+          term: {
+            _id: id,
           },
         },
-        index: listsIndex,
-        ignoreUnavailable: true,
-      }
-    );
-    if (result.hits.hits.length) {
-      return {
-        id: result.hits.hits[0]._id,
-        ...result.hits.hits[0]._source,
-      };
-    } else {
-      return null;
+      },
+      index: listsIndex,
+      ignoreUnavailable: true,
     }
+  );
+  if (result.hits.hits.length) {
+    return {
+      id: result.hits.hits[0]._id,
+      ...result.hits.hits[0]._source,
+    };
+  } else {
+    return null;
   }
 };

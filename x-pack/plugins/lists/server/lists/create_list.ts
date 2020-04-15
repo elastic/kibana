@@ -6,8 +6,9 @@
 
 import uuid from 'uuid';
 import { ScopedClusterClient } from 'kibana/server';
+import { CreateDocumentResponse } from 'elasticsearch';
 
-import { CreateResponse, ElasticListInputType } from '../types';
+import { ElasticListInputType } from '../types';
 import { ListsSchema, Type } from '../../common/schemas';
 
 export const createList = async ({
@@ -34,7 +35,7 @@ export const createList = async ({
     updated_at: createdAt,
     created_at: createdAt,
   };
-  const response: CreateResponse = await clusterClient.callAsCurrentUser('index', {
+  const response: CreateDocumentResponse = await clusterClient.callAsCurrentUser('index', {
     index: listsIndex,
     id,
     body,

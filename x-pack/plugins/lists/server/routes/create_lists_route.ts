@@ -7,7 +7,6 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_URL } from '../../common/constants';
-// TODO: Change these from the legacy to the non-legacy
 import {
   transformError,
   buildSiemResponse,

@@ -7,7 +7,6 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_INDEX } from '../../common/constants';
-// TODO: Move these utilities out of detection engine and into a more generic area
 import {
   transformError,
   buildSiemResponse,
@@ -52,7 +51,6 @@ export const deleteListsIndexRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        // TODO: Write Change all of this code below
         const clusterClient = context.core.elasticsearch.dataClient;
         const callCluster = clusterClient.callAsCurrentUser;
         const listsIndexExists = await getIndexExists(callCluster, listsIndex);

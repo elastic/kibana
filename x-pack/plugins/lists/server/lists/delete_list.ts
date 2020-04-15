@@ -21,30 +21,25 @@ export const deleteList = async ({
   listsIndex: string;
   listsItemsIndex: string;
 }): Promise<ListsSchema | null> => {
-  // TODO: Move this check up higher in the API boundary and remove the trim here.
-  if (id.trim() === '') {
+  const list = await getList({ id, clusterClient, listsIndex });
+  if (list == null) {
     return null;
   } else {
-    const list = await getList({ id, clusterClient, listsIndex });
-    if (list == null) {
-      return null;
-    } else {
-      await clusterClient.callAsCurrentUser('deleteByQuery', {
-        index: listsItemsIndex,
-        body: {
-          query: {
-            term: {
-              list_id: id,
-            },
+    await clusterClient.callAsCurrentUser('deleteByQuery', {
+      index: listsItemsIndex,
+      body: {
+        query: {
+          term: {
+            list_id: id,
           },
         },
-      });
+      },
+    });
 
-      await clusterClient.callAsCurrentUser('delete', {
-        index: listsIndex,
-        id,
-      });
-      return list;
-    }
+    await clusterClient.callAsCurrentUser('delete', {
+      index: listsIndex,
+      id,
+    });
+    return list;
   }
 };

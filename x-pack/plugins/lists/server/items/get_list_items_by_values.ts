@@ -5,9 +5,10 @@
  */
 
 import { ScopedClusterClient } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 
 import { ListsItemsSchema, Type } from '../../common/schemas';
-import { SearchResponse, ElasticListItemReturnType } from '../types';
+import { ElasticListItemReturnType } from '../types';
 import { transformElasticToListsItems, getQueryFilterFromTypeValue } from '../utils';
 
 export const getListItemsByValues = async ({
@@ -23,25 +24,20 @@ export const getListItemsByValues = async ({
   type: Type;
   value: string[];
 }): Promise<ListsItemsSchema[]> => {
-  // TODO: Move the check for trim above this and remove it below. It shouldn't be here but rather a validation check above.
-  if (listId.trim() === '') {
-    return [];
-  } else {
-    const response: SearchResponse<ElasticListItemReturnType> = await clusterClient.callAsCurrentUser(
-      'search',
-      {
-        index: listsItemsIndex,
-        ignoreUnavailable: true,
-        body: {
-          query: {
-            bool: {
-              filter: getQueryFilterFromTypeValue({ listId, type, value }),
-            },
+  const response: SearchResponse<ElasticListItemReturnType> = await clusterClient.callAsCurrentUser(
+    'search',
+    {
+      index: listsItemsIndex,
+      ignoreUnavailable: true,
+      body: {
+        query: {
+          bool: {
+            filter: getQueryFilterFromTypeValue({ listId, type, value }),
           },
         },
-        size: value.length,
-      }
-    );
-    return transformElasticToListsItems({ response, type });
-  }
+      },
+      size: value.length,
+    }
+  );
+  return transformElasticToListsItems({ response, type });
 };

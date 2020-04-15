@@ -5,8 +5,8 @@
  */
 
 import { ScopedClusterClient } from 'kibana/server';
+import { CreateDocumentResponse } from 'elasticsearch';
 
-import { UpdateResponse } from '../types';
 import { ListsSchema } from '../../common/schemas';
 
 import { getList } from '.';
@@ -29,7 +29,8 @@ export const updateList = async ({
   if (list == null) {
     return null;
   } else {
-    const response: UpdateResponse = await clusterClient.callAsCurrentUser('update', {
+    // There isn't a UpdateDocumentResponse so I am using a CreateDocumentResponse here for the type
+    const response: CreateDocumentResponse = await clusterClient.callAsCurrentUser('update', {
       index: listsIndex,
       id,
       body: { doc: { name, description, updated_at: updatedAt } }, // TODO: Add strong types for the body
