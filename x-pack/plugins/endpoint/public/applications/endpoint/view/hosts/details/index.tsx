@@ -77,7 +77,7 @@ export const HostDetailsFlyout = memo(() => {
         <>
           {show === 'details' && (
             <>
-              <EuiFlyoutBody>
+              <EuiFlyoutBody data-test-subj="hostDetailsFlyoutBody">
                 <HostDetails details={details} />
               </EuiFlyoutBody>
             </>
@@ -113,8 +113,11 @@ const PolicyResponseFlyoutPanel = memo<{
 
   return (
     <>
-      <FlyoutSubHeader backButton={backButtonProp}>
-        <EuiTitle size="xxs">
+      <FlyoutSubHeader
+        backButton={backButtonProp}
+        data-test-subj="hostDetailsPolicyResponseFlyoutHeader"
+      >
+        <EuiTitle size="xxs" data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
           <h3>
             <FormattedMessage
               id="xpack.endpoint.host.policyResponse.title"
@@ -123,7 +126,7 @@ const PolicyResponseFlyoutPanel = memo<{
           </h3>
         </EuiTitle>
       </FlyoutSubHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
         <PolicyResponse />
       </EuiFlyoutBody>
     </>

@@ -27,6 +27,7 @@ type ActionsMap<A extends AppAction = AppAction> = UnionToIntersection<
 export interface MiddlewareActionSpyHelper<S = GlobalState, A extends AppAction = AppAction> {
   /**
    * Returns a promise that is fulfilled when the given action is dispatched or a timeout occurs.
+   * The `action` will given to the promise `resolve` thus allowing for checks to be done.
    * The use of this method instead of a `sleep()` type of delay should avoid test case instability
    * especially when run in a CI environment.
    *

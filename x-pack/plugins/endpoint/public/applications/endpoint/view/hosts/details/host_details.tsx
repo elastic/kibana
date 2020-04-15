@@ -82,7 +82,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           <EuiHealth color="success">
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
-              data-test-subj="hostnameCellLink"
+              data-test-subj="policyStatusValue"
               href={'?' + policyResponseUri.search}
               onClick={(ev: React.MouseEvent) => {
                 ev.preventDefault();
