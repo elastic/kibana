@@ -32,7 +32,7 @@
     "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.painlessLab": "plugins/painless_lab",
     "xpack.reporting": ["plugins/reporting", "legacy/plugins/reporting"],
-    "xpack.rollupJobs": "legacy/plugins/rollup",
+    "xpack.rollupJobs": ["legacy/plugins/rollup", "plugins/rollup"],
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": ["legacy/plugins/security", "plugins/security"],
     "xpack.server": "legacy/server",
