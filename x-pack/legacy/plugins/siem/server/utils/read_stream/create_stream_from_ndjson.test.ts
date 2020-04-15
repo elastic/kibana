@@ -3,14 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Readable } from 'stream';
-import { createRulesStreamFromNdJson, transformDataToNdjson } from './create_stream_from_ndjson';
-import { createPromiseFromStreams } from '../../../../../../../src/legacy/utils/streams';
+import { transformDataToNdjson } from './create_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../lib/detection_engine/types';
-import { BadRequestError } from '../../lib/detection_engine/errors/bad_request_error';
 import { sampleRule } from '../../lib/detection_engine/signals/__mocks__/es_results';
-
-type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 export const getOutputSample = (): Partial<ImportRuleAlertRest> => ({
   rule_id: 'rule-1',
