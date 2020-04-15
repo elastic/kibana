@@ -118,3 +118,6 @@ export const EMAIL_BODY = (caseUrl: string) =>
     values: { caseUrl },
     defaultMessage: 'Case reference: {caseUrl}',
   });
+export const UNKNOWN = i18n.translate('xpack.siem.case.caseView.unknown', {
+  defaultMessage: 'Unknown',
+});
