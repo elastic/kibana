@@ -29,7 +29,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { EmbeddableFactoryRenderer, EmbeddableStart } from '../../../src/plugins/embeddable/public';
+import {
+  EmbeddableFactoryRenderer,
+  EmbeddableStart,
+  ViewMode,
+} from '../../../src/plugins/embeddable/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
   TODO_EMBEDDABLE,
@@ -46,6 +50,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
   const listInput = {
     id: 'hello',
     title: 'My todo list',
+    viewMode: ViewMode.VIEW,
     panels: {
       '1': {
         type: HELLO_WORLD_EMBEDDABLE,
@@ -76,6 +81,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
   const searchableInput = {
     id: '1',
     title: 'My searchable todo list',
+    viewMode: ViewMode.VIEW,
     panels: {
       '1': {
         type: HELLO_WORLD_EMBEDDABLE,
@@ -150,7 +156,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
             </p>
 
             <p>
-              Check out the &quote;Dynamically adding children&quote; section, to see how to add
+              Check out the &quot;Dynamically adding children&quot; section, to see how to add
               children to this container, and see it rendered inside an `EmbeddablePanel` component.
             </p>
           </EuiText>

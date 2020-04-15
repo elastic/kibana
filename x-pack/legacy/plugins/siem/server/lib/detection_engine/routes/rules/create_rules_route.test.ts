@@ -15,13 +15,12 @@ import {
   getEmptyIndex,
   getFindResultWithSingleHit,
   createMlRuleRequest,
-  createRuleWithActionsRequest,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesRoute } from './create_rules_route';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
-import { createNotifications } from '../../notifications/create_notifications';
-jest.mock('../../notifications/create_notifications');
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
+jest.mock('../../rules/update_rules_notifications');
 
 describe('create_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -49,6 +48,12 @@ describe('create_rules', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
+      (updateRulesNotifications as jest.Mock).mockResolvedValue({
+        id: 'id',
+        actions: [],
+        alertThrottle: null,
+        ruleThrottle: 'no_actions',
+      });
       const response = await server.inject(getCreateRequest(), context);
       expect(response.status).toEqual(200);
     });
@@ -59,6 +64,20 @@ describe('create_rules', () => {
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
+
+    it('returns 404 if siem client is unavailable', async () => {
+      const { siem, ...contextWithoutSiem } = context;
+      const response = await server.inject(getCreateRequest(), contextWithoutSiem);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
+
+    it('returns 200 if license is not platinum', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+
+      const response = await server.inject(getCreateRequest(), context);
+      expect(response.status).toEqual(200);
+    });
   });
 
   describe('creating an ML Rule', () => {
@@ -66,17 +85,16 @@ describe('create_rules', () => {
       const response = await server.inject(createMlRuleRequest(), context);
       expect(response.status).toEqual(200);
     });
-  });
 
-  describe('creating a Notification if throttle and actions were provided ', () => {
-    it('is successful', async () => {
-      const response = await server.inject(createRuleWithActionsRequest(), context);
-      expect(response.status).toEqual(200);
-      expect(createNotifications).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ruleAlertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        })
-      );
+    it('rejects the request if licensing is not platinum', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+
+      const response = await server.inject(createMlRuleRequest(), context);
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: 'Your license does not support machine learning. Please upgrade your license.',
+        status_code: 400,
+      });
     });
   });
 

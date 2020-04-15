@@ -24,25 +24,19 @@ import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { Action } from '../actions';
 
-export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
-  defaultMessage: 'Options',
-});
-
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
  */
-export async function buildContextMenuForActions<Context extends object>({
+export async function buildContextMenuForActions<A>({
   actions,
   actionContext,
-  title = defaultTitle,
   closeMenu,
 }: {
-  actions: Array<Action<Context>>;
-  actionContext: Context;
-  title?: string;
+  actions: Array<Action<A>>;
+  actionContext: A;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelDescriptor> {
-  const menuItems = await buildEuiContextMenuPanelItems<Context>({
+  const menuItems = await buildEuiContextMenuPanelItems<A>({
     actions,
     actionContext,
     closeMenu,
@@ -50,7 +44,9 @@ export async function buildContextMenuForActions<Context extends object>({
 
   return {
     id: 'mainMenu',
-    title,
+    title: i18n.translate('uiActions.actionPanel.title', {
+      defaultMessage: 'Options',
+    }),
     items: menuItems,
   };
 }
@@ -58,43 +54,51 @@ export async function buildContextMenuForActions<Context extends object>({
 /**
  * Transform an array of Actions into the shape needed to build an EUIContextMenu
  */
-async function buildEuiContextMenuPanelItems<Context extends object>({
+async function buildEuiContextMenuPanelItems<A>({
   actions,
   actionContext,
   closeMenu,
 }: {
-  actions: Array<Action<Context>>;
-  actionContext: Context;
+  actions: Array<Action<A>>;
+  actionContext: A;
   closeMenu: () => void;
 }) {
-  const items: EuiContextMenuPanelItemDescriptor[] = new Array(actions.length);
-  const promises = actions.map(async (action, index) => {
+  const items: EuiContextMenuPanelItemDescriptor[] = [];
+  const promises = actions.map(async action => {
     const isCompatible = await action.isCompatible(actionContext);
     if (!isCompatible) {
       return;
     }
 
-    items[index] = convertPanelActionToContextMenuItem({
-      action,
-      actionContext,
-      closeMenu,
-    });
+    items.push(
+      await convertPanelActionToContextMenuItem({
+        action,
+        actionContext,
+        closeMenu,
+      })
+    );
   });
 
   await Promise.all(promises);
 
-  return items.filter(Boolean);
+  return items;
 }
 
-function convertPanelActionToContextMenuItem<Context extends object>({
+/**
+ *
+ * @param {ContextMenuAction} action
+ * @param {Embeddable} embeddable
+ * @return {Promise<EuiContextMenuPanelItemDescriptor>}
+ */
+async function convertPanelActionToContextMenuItem<A>({
   action,
   actionContext,
   closeMenu,
 }: {
-  action: Action<Context>;
-  actionContext: Context;
+  action: Action<A>;
+  actionContext: A;
   closeMenu: () => void;
-}): EuiContextMenuPanelItemDescriptor {
+}): Promise<EuiContextMenuPanelItemDescriptor> {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
     name: action.MenuItem
       ? React.createElement(uiToReactComponent(action.MenuItem), {
@@ -106,15 +110,32 @@ function convertPanelActionToContextMenuItem<Context extends object>({
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };
 
-  menuPanelItem.onClick = () => {
-    action.execute(actionContext);
+  menuPanelItem.onClick = event => {
+    if (event.currentTarget instanceof HTMLAnchorElement) {
+      // from react-router's <Link/>
+      if (
+        !event.defaultPrevented && // onClick prevented default
+        event.button === 0 && // ignore everything but left clicks
+        (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
+        !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
+      ) {
+        event.preventDefault();
+        action.execute(actionContext);
+      } else {
+        // let browser handle navigation
+      }
+    } else {
+      // not a link
+      action.execute(actionContext);
+    }
+
     closeMenu();
   };
 
   if (action.getHref) {
-    const href = action.getHref(actionContext);
+    const href = await action.getHref(actionContext);
     if (href) {
-      menuPanelItem.href = action.getHref(actionContext);
+      menuPanelItem.href = href;
     }
   }
 

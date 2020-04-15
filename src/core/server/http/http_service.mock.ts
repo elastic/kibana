@@ -72,6 +72,7 @@ const createSetupContractMock = () => {
     registerRouteHandlerContext: jest.fn(),
     registerOnPreResponse: jest.fn(),
     createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
+    registerStaticDir: jest.fn(),
     basePath: createBasePathMock(),
     csp: CspConfig.DEFAULT,
     auth: createAuthMock(),

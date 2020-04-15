@@ -90,10 +90,10 @@ In *Edit* mode, you can move, resize, customize, and delete panels to suit your 
 * To move a panel, click and hold the panel header and drag to the new location.
 
 [[resizing-containers]]
-* To resize a panel, click the resize control on the lower right and drag
+* To resize a panel, click the resize control and drag
 to the new dimensions.
 
-* To toggle the use of margins and panel titles, use the *Options* menu in the upper left.
+* To toggle the use of margins and panel titles, use the *Options* menu.
 
 * To delete a panel, open the panel menu and select *Delete from dashboard.* Deleting a panel from a
 dashboard does *not* delete the saved visualization or search.

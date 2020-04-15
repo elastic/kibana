@@ -23,7 +23,7 @@ export const MaxShingleSizeParameter = ({ defaultToggleValue }: Props) => (
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.maxShingleSizeFieldDescription', {
       defaultMessage:
-        'The default is three shingle subfields. More subfields enables more specific queries, but increases index size.',
+        'The default is three shingle subfields. More subfields enable more specific queries, but increase index size.',
     })}
     defaultToggleValue={defaultToggleValue}
   >

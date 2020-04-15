@@ -45,7 +45,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   setValidatedIndices,
   validationErrors = [],
 }: InitialConfigurationStepProps) => {
-  const disabled = useMemo(() => !editableFormStatus.includes(setupStatus), [setupStatus]);
+  const disabled = useMemo(() => !editableFormStatus.includes(setupStatus.type), [setupStatus]);
 
   return (
     <>
@@ -72,12 +72,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   );
 };
 
-const editableFormStatus = [
-  'required',
-  'requiredForReconfiguration',
-  'requiredForUpdate',
-  'failed',
-];
+const editableFormStatus = ['required', 'failed'];
 
 const errorCalloutTitle = i18n.translate(
   'xpack.infra.analysisSetup.steps.initialConfigurationStep.errorCalloutTitle',

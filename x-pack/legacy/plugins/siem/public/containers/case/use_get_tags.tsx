@@ -10,7 +10,7 @@ import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getTags } from './api';
 import * as i18n from './translations';
 
-interface TagsState {
+export interface TagsState {
   tags: string[];
   isLoading: boolean;
   isError: boolean;
@@ -49,7 +49,7 @@ const initialData: string[] = [];
 
 export const useGetTags = (): TagsState => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
+    isLoading: true,
     isError: false,
     tags: initialData,
   });
@@ -57,10 +57,12 @@ export const useGetTags = (): TagsState => {
 
   useEffect(() => {
     let didCancel = false;
+    const abortCtrl = new AbortController();
+
     const fetchData = async () => {
       dispatch({ type: 'FETCH_INIT' });
       try {
-        const response = await getTags();
+        const response = await getTags(abortCtrl.signal);
         if (!didCancel) {
           dispatch({ type: 'FETCH_SUCCESS', payload: response });
         }
@@ -77,6 +79,7 @@ export const useGetTags = (): TagsState => {
     };
     fetchData();
     return () => {
+      abortCtrl.abort();
       didCancel = true;
     };
   }, []);

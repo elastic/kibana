@@ -21,13 +21,17 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MetricVisComponent, MetricVisComponentProps } from './metric_vis_component';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart } from 'ui/new_platform';
-import { fieldFormats } from '../../../../../plugins/data/public';
-import { identity } from 'lodash';
-import { ExprVis } from '../../../visualizations/public/np_ready/public/expressions/vis';
+import { ExprVis } from '../../../../../plugins/visualizations/public';
 
-jest.mock('ui/new_platform');
+jest.mock('../services', () => ({
+  getFormatService: () => ({
+    deserialize: () => {
+      return {
+        convert: (x: unknown) => x,
+      };
+    },
+  }),
+}));
 
 type Props = MetricVisComponentProps;
 
@@ -65,12 +69,6 @@ describe('MetricVisComponent', function() {
 
     return shallow(<MetricVisComponent {...props} />);
   };
-
-  beforeAll(() => {
-    (npStart.plugins.data.fieldFormats.deserialize as jest.Mock).mockImplementation(() => {
-      return new (fieldFormats.FieldFormat.from(identity))();
-    });
-  });
 
   it('should render component', () => {
     expect(getComponent().exists()).toBe(true);

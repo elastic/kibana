@@ -34,12 +34,18 @@ const MySpinner = styled(EuiLoadingSpinner)`
 `;
 
 interface Props {
+  disabled?: boolean;
   isLoading: boolean;
   title: string | React.ReactNode;
   onSubmit: (title: string) => void;
 }
 
-const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title }) => {
+const EditableTitleComponent: React.FC<Props> = ({
+  disabled = false,
+  onSubmit,
+  isLoading,
+  title,
+}) => {
   const [editMode, setEditMode] = useState(false);
   const [changedTitle, onTitleChange] = useState<string>(typeof title === 'string' ? title : '');
 
@@ -54,12 +60,9 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
   }, [changedTitle, title]);
 
   const handleOnChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      onTitleChange(e.target.value);
-    },
-    [onTitleChange]
+    (e: ChangeEvent<HTMLInputElement>) => onTitleChange(e.target.value),
+    []
   );
-
   return editMode ? (
     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
@@ -101,9 +104,10 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
         <Title title={title} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {isLoading && <MySpinner />}
+        {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
         {!isLoading && (
           <MyEuiButtonIcon
+            isDisabled={disabled}
             aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
             iconType="pencil"
             onClick={onClickEditIcon}

@@ -16,12 +16,19 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
+import { RuleType } from '../../../../../../common/detection_engine/types';
 import { FieldHook } from '../../../../../shared_imports';
-import { RuleType } from '../../../../../containers/detection_engine/rules/types';
+import { useKibana } from '../../../../../lib/kibana';
 import * as i18n from './translations';
-import { isMlRule } from '../../helpers';
 
-const MlCardDescription = ({ hasValidLicense = false }: { hasValidLicense?: boolean }) => (
+const MlCardDescription = ({
+  subscriptionUrl,
+  hasValidLicense = false,
+}: {
+  subscriptionUrl: string;
+  hasValidLicense?: boolean;
+}) => (
   <EuiText size="s">
     {hasValidLicense ? (
       i18n.ML_TYPE_DESCRIPTION
@@ -31,7 +38,7 @@ const MlCardDescription = ({ hasValidLicense = false }: { hasValidLicense?: bool
         defaultMessage="Access to ML requires a {subscriptionsLink}."
         values={{
           subscriptionsLink: (
-            <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+            <EuiLink href={subscriptionUrl} target="_blank">
               <FormattedMessage
                 id="xpack.siem.components.stepDefineRule.ruleTypeField.subscriptionsLink"
                 defaultMessage="Platinum subscription"
@@ -48,14 +55,16 @@ interface SelectRuleTypeProps {
   describedByIds?: string[];
   field: FieldHook;
   hasValidLicense?: boolean;
+  isMlAdmin?: boolean;
   isReadOnly?: boolean;
 }
 
 export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   describedByIds = [],
   field,
-  hasValidLicense = false,
   isReadOnly = false,
+  hasValidLicense = false,
+  isMlAdmin = false,
 }) => {
   const ruleType = field.value as RuleType;
   const setType = useCallback(
@@ -66,7 +75,10 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   );
   const setMl = useCallback(() => setType('machine_learning'), [setType]);
   const setQuery = useCallback(() => setType('query'), [setType]);
-  const mlCardDisabled = isReadOnly || !hasValidLicense;
+  const mlCardDisabled = isReadOnly || !hasValidLicense || !isMlAdmin;
+  const licensingUrl = useKibana().services.application.getUrlForApp('kibana', {
+    path: '#/management/elasticsearch/license_management',
+  });
 
   return (
     <EuiFormRow
@@ -78,6 +90,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiCard
+            data-test-subj="customRuleType"
             title={i18n.QUERY_TYPE_TITLE}
             description={i18n.QUERY_TYPE_DESCRIPTION}
             icon={<EuiIcon size="l" type="search" />}
@@ -90,8 +103,11 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
+            data-test-subj="machineLearningRuleType"
             title={i18n.ML_TYPE_TITLE}
-            description={<MlCardDescription hasValidLicense={hasValidLicense} />}
+            description={
+              <MlCardDescription subscriptionUrl={licensingUrl} hasValidLicense={hasValidLicense} />
+            }
             icon={<EuiIcon size="l" type="machineLearningApp" />}
             isDisabled={mlCardDisabled}
             selectable={{

@@ -124,6 +124,13 @@ export const CREATE_NEW_JOB = i18n.translate(
   }
 );
 
+export const CANCEL_LABEL = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.cancelLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
 export const CREAT_ML_JOB_DESC = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.createMLJobDescription',
   {

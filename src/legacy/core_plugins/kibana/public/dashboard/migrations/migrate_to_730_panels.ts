@@ -27,14 +27,11 @@ import {
   RawSavedDashboardPanel730ToLatest,
   RawSavedDashboardPanel610,
   RawSavedDashboardPanel620,
-} from '../../../../../../plugins/dashboard/public';
-
-import {
   SavedDashboardPanelTo60,
   SavedDashboardPanel620,
   SavedDashboardPanel630,
   SavedDashboardPanel610,
-} from '../np_ready/types';
+} from '../../../../../../plugins/dashboard/public';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;

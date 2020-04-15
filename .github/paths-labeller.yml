@@ -1,3 +1,10 @@
 ---
+  - "Feature:Embedding":
+    - "src/plugins/embeddable/**/*.*"
+    - "src/plugins/dashboard_embeddable_container/**/*.*"
   - "Feature:Drilldowns":
     - "x-pack/plugins/drilldowns/**/*.*"
+    - "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/**/*.*"
+  - "Feature:ExpressionLanguage":
+    - "src/plugins/expressions/**/*.*"
+    - "src/plugins/bfetch/**/*.*"

@@ -16,7 +16,8 @@ export function IconPanel({ iconType }: { iconType: IconType }) {
       text-align: center;
       vertical-align: middle;
       padding: ${props => props.theme.eui.spacerSizes.xl};
-      svg {
+      svg,
+      img {
         height: ${props => props.theme.eui.euiKeyPadMenuSize};
         width: ${props => props.theme.eui.euiKeyPadMenuSize};
       }

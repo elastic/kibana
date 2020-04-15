@@ -23,6 +23,10 @@ import { ISearchSetup, ISearchStart, TSearchStrategiesMap, ISearchStrategy } fro
 import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
+import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { createSearchSource } from './search_source';
+import { QuerySetup } from '../query/query_service';
+import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
 import { esSearchStrategyProvider } from './es_search';
 import {
@@ -38,6 +42,19 @@ import {
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
 } from './aggs';
+
+import { FieldFormatsStart } from '../field_formats';
+
+interface SearchServiceSetupDependencies {
+  packageInfo: PackageInfo;
+  query: QuerySetup;
+  getInternalStartServices: GetInternalStartServicesFn;
+}
+
+interface SearchStartDependencies {
+  fieldFormats: FieldFormatsStart;
+  indexPatterns: IndexPatternsContract;
+}
 
 /**
  * The search plugin exposes two registration methods for other plugins:
@@ -67,13 +84,17 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   };
 
   private getSearchStrategy = <T extends TStrategyTypes>(name: T): ISearchStrategy<T> => {
-    if (!this.searchStrategies.hasOwnProperty(name)) {
+    const strategy = this.searchStrategies[name];
+    if (!strategy) {
       throw new Error(`Search strategy ${name} not found`);
     }
-    return this.searchStrategies[name];
+    return strategy;
   };
 
-  public setup(core: CoreSetup, packageInfo: PackageInfo): ISearchSetup {
+  public setup(
+    core: CoreSetup,
+    { packageInfo, query, getInternalStartServices }: SearchServiceSetupDependencies
+  ): ISearchSetup {
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
 
     const syncSearchStrategy = syncSearchStrategyProvider(core);
@@ -82,7 +103,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.registerSearchStrategy(ES_SEARCH_STRATEGY, esSearchStrategy);
 
     const aggTypesSetup = this.aggTypesRegistry.setup();
-    const aggTypes = getAggTypes({ uiSettings: core.uiSettings });
+    const aggTypes = getAggTypes({
+      query,
+      uiSettings: core.uiSettings,
+      getInternalStartServices,
+    });
+
     aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));
     aggTypes.metrics.forEach(m => aggTypesSetup.registerMetric(m));
 
@@ -96,7 +122,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
 
-  public start(core: CoreStart): ISearchStart {
+  public start(
+    core: CoreStart,
+    { fieldFormats, indexPatterns }: SearchStartDependencies
+  ): ISearchStart {
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -117,22 +146,20 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
             typesRegistry: aggTypesStart,
+            fieldFormats,
           });
         },
         types: aggTypesStart,
       },
       search: (request, options, strategyName) => {
-        const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
-        const { search } = strategyProvider({
-          core,
-          getSearchStrategy: this.getSearchStrategy,
-        });
+        const { search } = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
         return this.searchInterceptor.search(search as any, request, options);
       },
       setInterceptor: (searchInterceptor: SearchInterceptor) => {
         // TODO: should an intercepror have a destroy method?
         this.searchInterceptor = searchInterceptor;
       },
+      createSearchSource: createSearchSource(indexPatterns),
       __LEGACY: {
         esClient: this.esClient!,
         AggConfig,

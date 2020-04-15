@@ -4,63 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
-import { getNotificationResultsLink } from './utils';
-import { NotificationExecutorOptions } from './types';
-import { parseScheduleDates } from '../signals/utils';
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { buildSignalsSearchQuery } from './build_signals_query';
 
-interface SignalsCountResults {
-  signalsCount: string;
-  resultsLink: string;
-}
-
 interface GetSignalsCount {
-  from: Date | string;
-  to: Date | string;
-  ruleAlertId: string;
+  from?: string;
+  to?: string;
   ruleId: string;
   index: string;
-  kibanaUrl: string | undefined;
-  callCluster: NotificationExecutorOptions['services']['callCluster'];
+  callCluster: AlertServices['callCluster'];
+}
+
+interface CountResult {
+  count: number;
 }
 
 export const getSignalsCount = async ({
   from,
   to,
-  ruleAlertId,
   ruleId,
   index,
   callCluster,
-  kibanaUrl = '',
-}: GetSignalsCount): Promise<SignalsCountResults> => {
-  const fromMoment = moment.isDate(from) ? moment(from) : parseScheduleDates(from);
-  const toMoment = moment.isDate(to) ? moment(to) : parseScheduleDates(to);
-
-  if (!fromMoment || !toMoment) {
-    throw new Error(`There was an issue with parsing ${from} or ${to} into Moment object`);
+}: GetSignalsCount): Promise<number> => {
+  if (from == null || to == null) {
+    throw Error('"from" or "to" was not provided to signals count query');
   }
-
-  const fromInMs = fromMoment.format('x');
-  const toInMs = toMoment.format('x');
 
   const query = buildSignalsSearchQuery({
     index,
     ruleId,
-    to: toInMs,
-    from: fromInMs,
+    to,
+    from,
   });
 
-  const result = await callCluster('count', query);
-  const resultsLink = getNotificationResultsLink({
-    baseUrl: kibanaUrl,
-    id: ruleAlertId,
-    from: fromInMs,
-    to: toInMs,
-  });
+  const result: CountResult = await callCluster('count', query);
 
-  return {
-    signalsCount: result.count,
-    resultsLink,
-  };
+  return result.count;
 };

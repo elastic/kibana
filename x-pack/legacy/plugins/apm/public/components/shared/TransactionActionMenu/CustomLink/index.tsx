@@ -15,8 +15,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
+import { CustomLink as CustomLinkType } from '../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
-import { CustomLink as CustomLinkType } from '../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import {
   ActionMenuDivider,
   SectionSubtitle
@@ -55,7 +55,7 @@ export const CustomLink = ({
       <EuiText size="xs" grow={false} style={{ width: px(300) }}>
         {i18n.translate('xpack.apm.customLink.empty', {
           defaultMessage:
-            'No custom links found. Set up your own custom links i.e. a link to a specific Dashboard or external link.'
+            'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.'
         })}
       </EuiText>
       <EuiSpacer size="s" />

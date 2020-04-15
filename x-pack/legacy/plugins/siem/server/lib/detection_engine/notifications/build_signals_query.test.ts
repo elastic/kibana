@@ -39,8 +39,9 @@ describe('buildSignalsSearchQuery', () => {
               {
                 range: {
                   '@timestamp': {
-                    gte: from,
+                    gt: from,
                     lte: to,
+                    format: 'epoch_millis',
                   },
                 },
               },

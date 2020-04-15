@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { useXJsonMode } from '../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -31,6 +32,7 @@ import {
   getIndexOptions,
   getIndexPatterns,
 } from '../../../common/index_controls';
+import { AddMessageVariables } from '../add_message_variables';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -40,6 +42,12 @@ export function getActionType(): ActionTypeModel {
       'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.selectMessageText',
       {
         defaultMessage: 'Index data into Elasticsearch.',
+      }
+    ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.actionTypeTitle',
+      {
+        defaultMessage: 'Index data',
       }
     ),
     validateConnector: (action: EsIndexActionConnector): ValidationResult => {
@@ -73,7 +81,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
 >> = ({ action, editActionConfig, errors, http }) => {
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
-    executionTimeField !== undefined
+    executionTimeField != null
   );
 
   const [indexPatterns, setIndexPatterns] = useState([]);
@@ -179,7 +187,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           <>
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshLabel"
-              defaultMessage="Refresh"
+              defaultMessage="Refresh index"
             />{' '}
             <EuiIconTip
               position="right"
@@ -187,7 +195,8 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               content={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshTooltip',
                 {
-                  defaultMessage: 'This checkbox set refresh index value.',
+                  defaultMessage:
+                    'Refresh the affected shards to make this operation visible to search.',
                 }
               )}
             />
@@ -200,12 +209,17 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         checked={hasTimeFieldCheckbox || false}
         onChange={() => {
           setTimeFieldCheckboxState(!hasTimeFieldCheckbox);
+          // if changing from checked to not checked (hasTimeField === true),
+          // set time field to null
+          if (hasTimeFieldCheckbox) {
+            editActionConfig('executionTimeField', null);
+          }
         }}
         label={
           <>
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
-              defaultMessage="Define time field"
+              defaultMessage="Define time field for each document"
             />
             <EuiIconTip
               position="right"
@@ -213,8 +227,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               content={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.definedateFieldTooltip',
                 {
-                  defaultMessage:
-                    'This is checkbox allows to define execution time field for index.',
+                  defaultMessage: `Automatically add a time field to each document when it's indexed.`,
                 }
               )}
             />
@@ -239,13 +252,13 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               fullWidth
               name="executionTimeField"
               data-test-subj="executionTimeFieldSelect"
-              value={executionTimeField}
+              value={executionTimeField ?? ''}
               onChange={e => {
-                editActionConfig('executionTimeField', e.target.value);
+                editActionConfig('executionTimeField', nullableString(e.target.value));
               }}
               onBlur={() => {
                 if (executionTimeField === undefined) {
-                  editActionConfig('executionTimeField', '');
+                  editActionConfig('executionTimeField', null);
                 }
               }}
             />
@@ -260,8 +273,18 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
   actionParams,
   index,
   editAction,
+  messageVariables,
 }) => {
   const { documents } = actionParams;
+  const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(
+    documents && documents.length > 0 ? documents[0] : null
+  );
+  const onSelectMessageVariable = (variable: string) => {
+    const value = (xJson ?? '').concat(` {{${variable}}}`);
+    setXJson(value);
+    // Keep the documents in sync with the editor content
+    onDocumentsChange(convertToJson(value));
+  };
 
   function onDocumentsChange(updatedDocuments: string) {
     try {
@@ -280,29 +303,40 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
             defaultMessage: 'Document to index',
           }
         )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable(variable)}
+            paramsProperty="documents"
+          />
+        }
       >
         <EuiCodeEditor
-          aria-label={''}
-          mode={'json'}
+          mode={xJsonMode}
+          width="100%"
+          height="200px"
           theme="github"
           data-test-subj="actionIndexDoc"
-          value={JSON.stringify(documents && documents.length > 0 ? documents[0] : {}, null, 2)}
-          onChange={onDocumentsChange}
-          width="100%"
-          height="auto"
-          minLines={6}
-          maxLines={30}
-          isReadOnly={false}
-          setOptions={{
-            showLineNumbers: true,
-            tabSize: 2,
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.jsonDocAriaLabel',
+            {
+              defaultMessage: 'Code editor',
+            }
+          )}
+          value={xJson}
+          onChange={(xjson: string) => {
+            setXJson(xjson);
+            // Keep the documents in sync with the editor content
+            onDocumentsChange(convertToJson(xjson));
           }}
-          editorProps={{
-            $blockScrolling: Infinity,
-          }}
-          showGutter={true}
         />
       </EuiFormRow>
     </Fragment>
   );
 };
+
+// if the string == null or is empty, return null, else return string
+function nullableString(str: string | null | undefined) {
+  if (str == null || str.trim() === '') return null;
+  return str;
+}

@@ -20,13 +20,27 @@
 import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { significantTermsBucketAgg } from './significant_terms';
-import { IBucketAggConfig } from './_bucket_agg_type';
+import {
+  getSignificantTermsBucketAgg,
+  SignificantTermsBucketAggDependencies,
+} from './significant_terms';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
 describe('Significant Terms Agg', () => {
   describe('order agg editor UI', () => {
     describe('convert include/exclude from old format', () => {
-      const typesRegistry = mockAggTypesRegistry([significantTermsBucketAgg]);
+      let aggTypesDependencies: SignificantTermsBucketAggDependencies;
+
+      beforeEach(() => {
+        aggTypesDependencies = {
+          getInternalStartServices: () => ({
+            fieldFormats: fieldFormatsServiceMock.createStartContract(),
+            notifications: notificationServiceMock.createStartContract(),
+          }),
+        };
+      });
+
       const getAggConfigs = (params: Record<string, any> = {}) => {
         const indexPattern = {
           id: '1234',
@@ -52,12 +66,17 @@ describe('Significant Terms Agg', () => {
               params,
             },
           ],
-          { typesRegistry }
+          {
+            typesRegistry: mockAggTypesRegistry([
+              getSignificantTermsBucketAgg(aggTypesDependencies),
+            ]),
+            fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+          }
         );
       };
 
       const testSerializeAndWrite = (aggs: IAggConfigs) => {
-        const agg = aggs.aggs[0];
+        const [agg] = aggs.aggs;
         const { [BUCKET_TYPES.SIGNIFICANT_TERMS]: params } = agg.toDsl();
 
         expect(params.field).toBe('field');
@@ -65,19 +84,19 @@ describe('Significant Terms Agg', () => {
         expect(params.exclude).toBe('400');
       };
 
-      it('should generate correct label', () => {
+      test('should generate correct label', () => {
         const aggConfigs = getAggConfigs({
           size: 'SIZE',
           field: {
             name: 'FIELD',
           },
         });
-        const label = significantTermsBucketAgg.makeLabel(aggConfigs.aggs[0] as IBucketAggConfig);
+        const label = aggConfigs.aggs[0].makeLabel();
 
         expect(label).toBe('Top SIZE unusual terms in FIELD');
       });
 
-      it('should doesnt do anything with string type', () => {
+      test('should doesnt do anything with string type', () => {
         const aggConfigs = getAggConfigs({
           include: '404',
           exclude: '400',
@@ -90,7 +109,7 @@ describe('Significant Terms Agg', () => {
         testSerializeAndWrite(aggConfigs);
       });
 
-      it('should converts object to string type', () => {
+      test('should converts object to string type', () => {
         const aggConfigs = getAggConfigs({
           include: {
             pattern: '404',

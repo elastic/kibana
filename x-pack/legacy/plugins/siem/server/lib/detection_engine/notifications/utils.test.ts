@@ -9,7 +9,7 @@ import { getNotificationResultsLink } from './utils';
 describe('utils', () => {
   it('getNotificationResultsLink', () => {
     const resultLink = getNotificationResultsLink({
-      baseUrl: 'http://localhost:5601',
+      kibanaSiemAppUrl: 'http://localhost:5601/app/siem',
       id: 'notification-id',
       from: '00000',
       to: '1111',

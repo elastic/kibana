@@ -35,7 +35,7 @@ export type Action =
     }
   | { type: 'FETCH_FAILURE'; payload: string }
   | { type: 'FETCH_UPDATE_CASE_SUCCESS' }
-  | { type: 'UPDATE_FILTER_OPTIONS'; payload: FilterOptions }
+  | { type: 'UPDATE_FILTER_OPTIONS'; payload: Partial<FilterOptions> }
   | { type: 'UPDATE_QUERY_PARAMS'; payload: Partial<QueryParams> }
   | { type: 'UPDATE_TABLE_SELECTIONS'; payload: Case[] };
 
@@ -68,7 +68,10 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
     case 'UPDATE_FILTER_OPTIONS':
       return {
         ...state,
-        filterOptions: action.payload,
+        filterOptions: {
+          ...state.filterOptions,
+          ...action.payload,
+        },
       };
     case 'UPDATE_QUERY_PARAMS':
       return {
@@ -102,7 +105,7 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
   sortOrder: 'desc',
 };
 
-const initialData: AllCases = {
+export const initialData: AllCases = {
   cases: [],
   countClosedCases: null,
   countOpenCases: null,
@@ -110,7 +113,7 @@ const initialData: AllCases = {
   perPage: 0,
   total: 0,
 };
-interface UseGetCases extends UseGetCasesState {
+export interface UseGetCases extends UseGetCasesState {
   dispatchUpdateCaseProperty: ({
     updateKey,
     updateValue,
@@ -118,9 +121,9 @@ interface UseGetCases extends UseGetCasesState {
     version,
     refetchCasesStatus,
   }: UpdateCase) => void;
-  refetchCases: (filters: FilterOptions, queryParams: QueryParams) => void;
-  setFilters: (filters: FilterOptions) => void;
-  setQueryParams: (queryParams: QueryParams) => void;
+  refetchCases: () => void;
+  setFilters: (filters: Partial<FilterOptions>) => void;
+  setQueryParams: (queryParams: Partial<QueryParams>) => void;
   setSelectedCases: (mySelectedCases: Case[]) => void;
 }
 
@@ -139,22 +142,25 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
     dispatch({ type: 'UPDATE_TABLE_SELECTIONS', payload: mySelectedCases });
   }, []);
 
-  const setQueryParams = useCallback((newQueryParams: QueryParams) => {
+  const setQueryParams = useCallback((newQueryParams: Partial<QueryParams>) => {
     dispatch({ type: 'UPDATE_QUERY_PARAMS', payload: newQueryParams });
   }, []);
 
-  const setFilters = useCallback((newFilters: FilterOptions) => {
+  const setFilters = useCallback((newFilters: Partial<FilterOptions>) => {
     dispatch({ type: 'UPDATE_FILTER_OPTIONS', payload: newFilters });
   }, []);
 
   const fetchCases = useCallback((filterOptions: FilterOptions, queryParams: QueryParams) => {
     let didCancel = false;
+    const abortCtrl = new AbortController();
+
     const fetchData = async () => {
       dispatch({ type: 'FETCH_INIT', payload: 'cases' });
       try {
         const response = await getCases({
           filterOptions,
           queryParams,
+          signal: abortCtrl.signal,
         });
         if (!didCancel) {
           dispatch({
@@ -175,6 +181,7 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
     };
     fetchData();
     return () => {
+      abortCtrl.abort();
       didCancel = true;
     };
   }, []);
@@ -187,13 +194,17 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
   const dispatchUpdateCaseProperty = useCallback(
     ({ updateKey, updateValue, caseId, refetchCasesStatus, version }: UpdateCase) => {
       let didCancel = false;
+      const abortCtrl = new AbortController();
+
       const fetchData = async () => {
         dispatch({ type: 'FETCH_INIT', payload: 'caseUpdate' });
         try {
           await patchCase(
             caseId,
             { [updateKey]: updateValue },
-            version ?? '' // saved object versions are typed as string | undefined, hope that's not true
+            // saved object versions are typed as string | undefined, hope that's not true
+            version ?? '',
+            abortCtrl.signal
           );
           if (!didCancel) {
             dispatch({ type: 'FETCH_UPDATE_CASE_SUCCESS' });
@@ -209,6 +220,7 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
       };
       fetchData();
       return () => {
+        abortCtrl.abort();
         didCancel = true;
       };
     },

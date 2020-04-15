@@ -48,7 +48,7 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-uwsgi.html',
       },
     }),
-    // euiIconType: 'logouWSGI',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/uwsgi.svg',
     isBeta: false,
     artifacts: {
       dashboards: [

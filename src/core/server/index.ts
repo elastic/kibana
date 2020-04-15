@@ -60,6 +60,7 @@ import {
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
 import { MetricsServiceSetup } from './metrics';
+import { StatusServiceSetup } from './status';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -95,6 +96,8 @@ export {
   ElasticsearchErrorHelpers,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
+  ElasticsearchStatusMeta,
+  NodesVersionCompatibility,
   APICaller,
   FakeRequest,
   ScopeableRequest,
@@ -224,8 +227,11 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsAddToNamespacesOptions,
+  SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
+  SavedObjectStatusMeta,
   SavedObjectsDeleteOptions,
   ISavedObjectsRepository,
   SavedObjectsRepository,
@@ -238,6 +244,7 @@ export {
   SavedObjectsMappingProperties,
   SavedObjectTypeRegistry,
   ISavedObjectTypeRegistry,
+  SavedObjectsNamespaceType,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
@@ -294,6 +301,14 @@ export {
   LegacyInternals,
 } from './legacy';
 
+export {
+  CoreStatus,
+  ServiceStatus,
+  ServiceStatusLevel,
+  ServiceStatusLevels,
+  StatusServiceSetup,
+} from './status';
+
 /**
  * Plugin specific context passed to a route handler.
  *
@@ -333,9 +348,13 @@ export interface RequestHandlerContext {
 /**
  * Context passed to the plugins `setup` method.
  *
+ * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
+ *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
+ * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
+ *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
  * @public
  */
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
@@ -344,16 +363,18 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup;
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
+  /** {@link StatusServiceSetup} */
+  status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
   /** {@link UuidServiceSetup} */
   uuid: UuidServiceSetup;
-  /** {@link MetricsServiceSetup} */
-  metrics: MetricsServiceSetup;
   /** {@link StartServicesAccessor} */
-  getStartServices: StartServicesAccessor<TPluginsStart>;
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
 
 /**
@@ -364,9 +385,10 @@ export interface CoreSetup<TPluginsStart extends object = object> {
  *
  * @public
  */
-export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<
-  [CoreStart, TPluginsStart]
->;
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
  * Context passed to the plugins `start` method.

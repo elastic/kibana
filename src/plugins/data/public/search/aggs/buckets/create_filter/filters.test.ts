@@ -17,25 +17,29 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { getFiltersBucketAgg } from '../filters';
+import { getFiltersBucketAgg, FiltersBucketAggDependencies } from '../filters';
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
-import { IBucketAggConfig } from '../_bucket_agg_type';
+import { mockAggTypesRegistry } from '../../test_helpers';
+import { IBucketAggConfig } from '../bucket_agg_type';
+import { coreMock, notificationServiceMock } from '../../../../../../../core/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 
 describe('AggConfig Filters', () => {
   describe('filters', () => {
-    beforeEach(() => {
-      mockDataServices();
-    });
+    let aggTypesDependencies: FiltersBucketAggDependencies;
 
-    const typesRegistry = mockAggTypesRegistry([
-      getFiltersBucketAgg({
-        uiSettings: coreMock.createSetup().uiSettings,
-      }),
-    ]);
+    beforeEach(() => {
+      const { uiSettings } = coreMock.createSetup();
+
+      aggTypesDependencies = {
+        uiSettings,
+        getInternalStartServices: () => ({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
+        }),
+      };
+    });
 
     const getAggConfigs = () => {
       const field = {
@@ -65,10 +69,14 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry }
+        {
+          typesRegistry: mockAggTypesRegistry([getFiltersBucketAgg(aggTypesDependencies)]),
+          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+        }
       );
     };
-    it('should return a filters filter', () => {
+
+    test('should return a filters filter', () => {
       const aggConfigs = getAggConfigs();
       const filter = createFilterFilters(aggConfigs.aggs[0] as IBucketAggConfig, 'type:nginx');
 

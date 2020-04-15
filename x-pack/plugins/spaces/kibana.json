@@ -4,7 +4,14 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "spaces"],
   "requiredPlugins": ["features", "licensing"],
-  "optionalPlugins": ["advancedSettings", "home", "management", "security", "usageCollection"],
+  "optionalPlugins": [
+    "advancedSettings",
+    "home",
+    "management",
+    "security",
+    "usageCollection",
+    "savedObjectsManagement"
+  ],
   "server": true,
   "ui": true
 }

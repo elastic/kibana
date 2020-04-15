@@ -883,3 +883,42 @@ export async function loadTopInfluencers(
     }
   });
 }
+
+// Recommended by MDN for escaping user input to be treated as a literal string within a regular expression
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+export function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+export function escapeParens(string) {
+  return string.replace(/[()]/g, '\\$&');
+}
+
+export function escapeDoubleQuotes(string) {
+  return string.replace(/\"/g, '\\$&');
+}
+
+export function getQueryPattern(fieldName, fieldValue) {
+  const sanitizedFieldName = escapeRegExp(fieldName);
+  const sanitizedFieldValue = escapeRegExp(fieldValue);
+
+  return new RegExp(`(${sanitizedFieldName})\\s?:\\s?(")?(${sanitizedFieldValue})(")?`, 'i');
+}
+
+export function removeFilterFromQueryString(currentQueryString, fieldName, fieldValue) {
+  let newQueryString = '';
+  // Remove the passed in fieldName and value from the existing filter
+  const queryPattern = getQueryPattern(fieldName, fieldValue);
+  newQueryString = currentQueryString.replace(queryPattern, '');
+  // match 'and' or 'or' at the start/end of the string
+  const endPattern = /\s(and|or)\s*$/gi;
+  const startPattern = /^\s*(and|or)\s/gi;
+  // If string has a double operator (e.g. tag:thing or or tag:other) remove and replace with the first occurring operator
+  const invalidOperatorPattern = /\s+(and|or)\s+(and|or)\s+/gi;
+  newQueryString = newQueryString.replace(invalidOperatorPattern, ' $1 ');
+  // If string starts/ends with 'and' or 'or' remove that as that is illegal kuery syntax
+  newQueryString = newQueryString.replace(endPattern, '');
+  newQueryString = newQueryString.replace(startPattern, '');
+
+  return newQueryString;
+}

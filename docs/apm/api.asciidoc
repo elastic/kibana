@@ -1,6 +1,10 @@
 [role="xpack"]
 [[apm-api]]
-== API
+== APM app API
+
+++++
+<titleabbrev>REST API</titleabbrev>
+++++
 
 Some APM app features are provided via a REST API:
 
@@ -38,17 +42,22 @@ The following Agent configuration APIs are available:
 
 `PUT /api/apm/settings/agent-configuration`
 
+[role="child_attributes"]
 [[apm-update-config-req-body]]
 ===== Request body
 
 `service`::
 (required, object) Service identifying the configuration to create or update.
-
++
+.Properties of `service`
+[%collapsible%open]
+======
 `name` :::
   (required, string) Name of service
 
 `environment` :::
   (optional, string) Environment of service
+======
 
 `settings`::
 (required) Key/value object with settings and their corresponding value.
@@ -90,16 +99,21 @@ PUT /api/apm/settings/agent-configuration
 
 `DELETE /api/apm/settings/agent-configuration`
 
+[role="child_attributes"]
 [[apm-delete-config-req-body]]
 ===== Request body
 `service`::
 (required, object) Service identifying the configuration to delete
-
++
+.Properties of `service`
+[%collapsible%open]
+======
 `name` :::
   (required, string) Name of service
 
 `environment` :::
   (optional, string) Environment of service
+======
 
 
 [[apm-delete-config-example]]
@@ -201,17 +215,22 @@ GET  /api/apm/settings/agent-configuration
 
 `POST /api/apm/settings/agent-configuration/search`
 
+[role="child_attributes"]
 [[apm-search-config-req-body]]
 ===== Request body
 
 `service`::
 (required, object) Service identifying the configuration.
-
++
+.Properties of `service`
+[%collapsible%open]
+======
 `name` :::
   (required, string) Name of service
 
 `environment` :::
   (optional, string) Environment of service
+======
 
 `etag`::
 (required) etag is sent by the agent to indicate the etag of the last successfully applied configuration. If the etag matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.

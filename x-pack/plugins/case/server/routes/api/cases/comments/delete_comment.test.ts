@@ -21,7 +21,7 @@ describe('DELETE comment', () => {
   beforeAll(async () => {
     routeHandler = await createRoute(initDeleteCommentApi, 'delete');
   });
-  it(`deletes the comment. responds with 200`, async () => {
+  it(`deletes the comment. responds with 204`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{case_id}/comments/{comment_id}',
       method: 'delete',
@@ -39,7 +39,7 @@ describe('DELETE comment', () => {
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(204);
   });
   it(`returns an error when thrown from deleteComment service`, async () => {
     const request = httpServerMock.createKibanaRequest({

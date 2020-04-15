@@ -12,8 +12,10 @@ import { OpenTimelineProps, OpenTimelineResult } from './types';
 import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import { TitleRow } from './title_row';
-
+import { ImportDataModal } from '../import_data_modal';
 import * as i18n from './translations';
+import { importTimelines } from '../../containers/timeline/all/api';
+
 import {
   UtilityBarGroup,
   UtilityBarText,
@@ -31,6 +33,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     defaultPageSize,
     isLoading,
     itemIdToExpandedNotesRowMap,
+    importDataModalToggle,
     onAddTimelinesToFavorites,
     onDeleteSelected,
     onlyFavorites,
@@ -47,6 +50,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     searchResults,
     selectedItems,
     sortDirection,
+    setImportDataModalToggle,
     sortField,
     title,
     totalSearchResultsCount,
@@ -93,8 +97,24 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     );
 
     const onRefreshBtnClick = useCallback(() => {
-      if (typeof refetch === 'function') refetch();
+      if (refetch != null) {
+        refetch();
+      }
     }, [refetch]);
+
+    const handleCloseModal = useCallback(() => {
+      if (setImportDataModalToggle != null) {
+        setImportDataModalToggle(false);
+      }
+    }, [setImportDataModalToggle]);
+    const handleComplete = useCallback(() => {
+      if (setImportDataModalToggle != null) {
+        setImportDataModalToggle(false);
+      }
+      if (refetch != null) {
+        refetch();
+      }
+    }, [setImportDataModalToggle, refetch]);
 
     return (
       <>
@@ -105,6 +125,21 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           isEnableDownloader={isEnableDownloader}
           onComplete={onCompleteEditTimelineAction}
           title={actionItem?.title ?? i18n.UNTITLED_TIMELINE}
+        />
+        <ImportDataModal
+          checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
+          closeModal={handleCloseModal}
+          description={i18n.SELECT_TIMELINE}
+          errorMessage={i18n.IMPORT_FAILED}
+          failedDetailed={i18n.IMPORT_FAILED_DETAILED}
+          importComplete={handleComplete}
+          importData={importTimelines}
+          successMessage={i18n.SUCCESSFULLY_IMPORTED_TIMELINES}
+          showCheckBox={false}
+          showModal={importDataModalToggle ?? false}
+          submitBtnText={i18n.IMPORT_TIMELINE_BTN_TITLE}
+          subtitle={i18n.INITIAL_PROMPT_TEXT}
+          title={i18n.IMPORT_TIMELINE}
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>

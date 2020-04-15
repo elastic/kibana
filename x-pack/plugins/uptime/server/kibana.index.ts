@@ -6,7 +6,6 @@
 
 import { Request, Server } from 'hapi';
 import { PLUGIN } from '../../../legacy/plugins/uptime/common/constants';
-import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
@@ -25,9 +24,8 @@ export interface KibanaServer extends Server {
 }
 
 export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCorePlugins) => {
-  const { features, usageCollection } = plugins;
+  const { features } = plugins;
   const libs = compose(server);
-  KibanaTelemetryAdapter.registerUsageCollector(usageCollection);
 
   features.registerFeature({
     id: PLUGIN.ID,
@@ -41,22 +39,47 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
       all: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: ['uptime-read', 'uptime-write'],
+        api: [
+          'uptime-read',
+          'uptime-write',
+          'actions-read',
+          'actions-all',
+          'alerting-read',
+          'alerting-all',
+        ],
         savedObject: {
-          all: [umDynamicSettings.name],
+          all: [umDynamicSettings.name, 'alert', 'action', 'action_task_params'],
           read: [],
         },
-        ui: ['save', 'configureSettings', 'show'],
+        ui: [
+          'save',
+          'configureSettings',
+          'show',
+          'alerting:show',
+          'actions:show',
+          'alerting:save',
+          'actions:save',
+          'alerting:delete',
+          'actions:delete',
+        ],
       },
       read: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: ['uptime-read'],
+        api: ['uptime-read', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
         savedObject: {
-          all: [],
+          all: ['alert', 'action', 'action_task_params'],
           read: [umDynamicSettings.name],
         },
-        ui: ['show'],
+        ui: [
+          'show',
+          'alerting:show',
+          'actions:show',
+          'alerting:save',
+          'actions:save',
+          'alerting:delete',
+          'actions:delete',
+        ],
       },
     },
   });

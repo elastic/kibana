@@ -25,7 +25,7 @@ export default function({ loadTestFile }) {
     loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./index_patterns'));
     loadTestFile(require.resolve('./kql_telemetry'));
-    loadTestFile(require.resolve('./management'));
+    loadTestFile(require.resolve('./saved_objects_management'));
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./scripts'));
     loadTestFile(require.resolve('./shorten'));

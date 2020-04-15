@@ -11,7 +11,7 @@ import {
   Plugin,
 } from '../../../../src/core/public';
 import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
-import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { UiActionsStart, UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
@@ -41,10 +41,8 @@ interface StartDependencies {
   uiActions: UiActionsStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SetupContract extends UiActionsSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartContract extends UiActionsStart {}
+export type Setup = void;
+export type Start = void;
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -54,16 +52,12 @@ declare module '../../../../src/plugins/ui_actions/public' {
 }
 
 export class AdvancedUiActionsPublicPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
+  implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { uiActions }: SetupDependencies): SetupContract {
-    return {
-      ...uiActions,
-    };
-  }
+  public setup(core: CoreSetup, { uiActions }: SetupDependencies): Setup {}
 
-  public start(core: CoreStart, { uiActions }: StartDependencies): StartContract {
+  public start(core: CoreStart, { uiActions }: StartDependencies): Start {
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
     const { openModal } = createReactOverlays(core);
@@ -72,18 +66,16 @@ export class AdvancedUiActionsPublicPlugin
       dateFormat,
       commonlyUsedRanges,
     });
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, timeRangeAction);
+    uiActions.registerAction(timeRangeAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, timeRangeAction);
 
     const timeRangeBadge = new CustomTimeRangeBadge({
       openModal,
       dateFormat,
       commonlyUsedRanges,
     });
-    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
-
-    return {
-      ...uiActions,
-    };
+    uiActions.registerAction(timeRangeBadge);
+    uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
   }
 
   public stop() {}

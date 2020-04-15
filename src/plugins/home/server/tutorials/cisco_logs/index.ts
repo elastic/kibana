@@ -50,7 +50,7 @@ supports the "asa" fileset for Cisco ASA firewall logs received over syslog or r
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-cisco.html',
       },
     }),
-    // euiIconType: 'logoCisco',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/cisco.svg',
     artifacts: {
       dashboards: [],
       application: {

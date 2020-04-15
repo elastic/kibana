@@ -217,6 +217,13 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       delete modelSizeStats.rare_category_count;
       delete modelSizeStats.total_category_count;
 
+      // MML during clone has changed in #61589
+      // TODO: adjust test code to reflect the new behavior
+      expect(modelSizeStats).to.have.property('model_bytes_memory_limit');
+      delete modelSizeStats.model_bytes_memory_limit;
+      // @ts-ignore
+      delete expectedModelSizeStats.model_bytes_memory_limit;
+
       expect(modelSizeStats).to.eql(expectedModelSizeStats);
     }
 

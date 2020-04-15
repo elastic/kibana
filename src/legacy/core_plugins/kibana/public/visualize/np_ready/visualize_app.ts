@@ -27,5 +27,5 @@ import { initListingDirective } from './listing/visualize_listing';
 
 export function initVisualizeAppDirective(app: IModule, deps: VisualizeKibanaServices) {
   initEditorDirective(app, deps);
-  initListingDirective(app);
+  initListingDirective(app, deps.core.i18n.Context);
 }

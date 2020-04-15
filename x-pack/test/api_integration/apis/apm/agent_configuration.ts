@@ -83,8 +83,8 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       });
 
       it('can find the created config', async () => {
-        const { statusCode, body } = await searchConfigurations(searchParams);
-        expect(statusCode).to.equal(200);
+        const { status, body } = await searchConfigurations(searchParams);
+        expect(status).to.equal(200);
         expect(body._source.service).to.eql({});
         expect(body._source.settings).to.eql({ transaction_sample_rate: '0.55' });
       });
@@ -92,16 +92,16 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       it('can update the created config', async () => {
         await updateConfiguration({ service: {}, settings: { transaction_sample_rate: '0.85' } });
 
-        const { statusCode, body } = await searchConfigurations(searchParams);
-        expect(statusCode).to.equal(200);
+        const { status, body } = await searchConfigurations(searchParams);
+        expect(status).to.equal(200);
         expect(body._source.service).to.eql({});
         expect(body._source.settings).to.eql({ transaction_sample_rate: '0.85' });
       });
 
       it('can delete the created config', async () => {
         await deleteConfiguration(newConfig);
-        const { statusCode } = await searchConfigurations(searchParams);
-        expect(statusCode).to.equal(404);
+        const { status } = await searchConfigurations(searchParams);
+        expect(status).to.equal(404);
       });
     });
 
@@ -166,12 +166,12 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
       for (const agentRequest of agentsRequests) {
         it(`${agentRequest.service.name} / ${agentRequest.service.environment}`, async () => {
-          const { statusCode, body } = await searchConfigurations({
+          const { status, body } = await searchConfigurations({
             service: agentRequest.service,
             etag: 'abc',
           });
 
-          expect(statusCode).to.equal(200);
+          expect(status).to.equal(200);
           expect(body._source.settings).to.eql(agentRequest.expectedSettings);
         });
       }

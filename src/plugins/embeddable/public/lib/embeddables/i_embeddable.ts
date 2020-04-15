@@ -18,7 +18,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { UiActionsDynamicActionManager } from '../../../../../plugins/ui_actions/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
@@ -27,6 +26,11 @@ import { TriggerContextMapping } from '../../../../ui_actions/public';
 export interface EmbeddableInput {
   viewMode?: ViewMode;
   title?: string;
+  /**
+   * Note this is not a saved object id. It is used to uniquely identify this
+   * Embeddable instance from others (e.g. inside a container).  It's possible to
+   * have two Embeddables where everything else is the same but the id.
+   */
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
@@ -34,7 +38,7 @@ export interface EmbeddableInput {
   /**
    * Reserved key for `ui_actions` events.
    */
-  events?: Array<{ eventId: string }>;
+  events?: unknown;
 
   /**
    * List of action IDs that this embeddable should not render.
@@ -45,6 +49,8 @@ export interface EmbeddableInput {
    * Whether this embeddable should not execute triggers.
    */
   disableTriggers?: boolean;
+
+  [key: string]: unknown;
 }
 
 export interface EmbeddableOutput {
@@ -82,19 +88,6 @@ export interface IEmbeddable<
    * Panel States to a child embeddable instance.
    **/
   readonly id: string;
-
-  /**
-   * Unique ID an embeddable is assigned each time it is initialized. This ID
-   * is different for different instances of the same embeddable. For example,
-   * if the same dashboard is rendered twice on the screen, all embeddable
-   * instances will have a unique `runtimeId`.
-   */
-  readonly runtimeId?: number;
-
-  /**
-   * Default implementation of dynamic action API for embeddables.
-   */
-  dynamicActions?: UiActionsDynamicActionManager;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to

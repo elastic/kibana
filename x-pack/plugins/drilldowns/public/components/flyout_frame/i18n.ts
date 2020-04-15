@@ -6,10 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const txtClose = i18n.translate('xpack.drilldowns.components.FlyoutFrame.CloseButtonLabel', {
+export const txtClose = i18n.translate('xpack.drilldowns.components.FlyoutFrame.Close', {
   defaultMessage: 'Close',
-});
-
-export const txtBack = i18n.translate('xpack.drilldowns.components.FlyoutFrame.BackButtonLabel', {
-  defaultMessage: 'Back',
 });

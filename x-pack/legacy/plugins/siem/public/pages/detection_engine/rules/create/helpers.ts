@@ -6,18 +6,24 @@
 
 import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
+import deepmerge from 'deepmerge';
 
-import { NewRule, RuleType } from '../../../../containers/detection_engine/rules';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../common/constants';
+import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
+import { RuleType } from '../../../../../common/detection_engine/types';
+import { isMlRule } from '../../../../../common/detection_engine/ml_helpers';
+import { NewRule } from '../../../../containers/detection_engine/rules';
 
 import {
   AboutStepRule,
   DefineStepRule,
   ScheduleStepRule,
+  ActionsStepRule,
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
+  ActionsStepRuleJson,
 } from '../types';
-import { isMlRule } from '../helpers';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
@@ -136,12 +142,33 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
   };
 };
 
+export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
+  const {
+    actions = [],
+    enabled,
+    kibanaSiemAppUrl,
+    throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
+  } = actionsStepData;
+
+  return {
+    actions: actions.map(transformAlertToRuleAction),
+    enabled,
+    throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
+    meta: {
+      kibana_siem_app_url: kibanaSiemAppUrl,
+    },
+  };
+};
+
 export const formatRule = (
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
-  scheduleData: ScheduleStepRule
-): NewRule => ({
-  ...formatDefineStepData(defineStepData),
-  ...formatAboutStepData(aboutStepData),
-  ...formatScheduleStepData(scheduleData),
-});
+  scheduleData: ScheduleStepRule,
+  actionsData: ActionsStepRule
+): NewRule =>
+  deepmerge.all([
+    formatDefineStepData(defineStepData),
+    formatAboutStepData(aboutStepData),
+    formatScheduleStepData(scheduleData),
+    formatActionsStepData(actionsData),
+  ]) as NewRule;

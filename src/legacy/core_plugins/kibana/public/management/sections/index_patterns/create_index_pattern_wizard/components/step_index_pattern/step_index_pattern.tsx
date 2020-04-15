@@ -39,7 +39,7 @@ import { LoadingIndices } from './components/loading_indices';
 import { StatusMessage } from './components/status_message';
 import { IndicesList } from './components/indices_list';
 import { Header } from './components/header';
-import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
+import { IndexPatternCreationConfig } from '../../../../../../../../../../plugins/index_pattern_management/public';
 import { MatchedIndex } from '../../types';
 
 interface StepIndexPatternProps {

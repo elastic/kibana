@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useReducer } from 'react';
-import { errorToToaster, useStateToaster } from '../../components/toasters';
+import { displaySuccessToast, errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { patchCasesStatus } from './api';
 import { BulkUpdateStatus, Case } from './types';
@@ -51,12 +51,12 @@ const dataFetchReducer = (state: UpdateState, action: Action): UpdateState => {
       return state;
   }
 };
-interface UseUpdateCase extends UpdateState {
+export interface UseUpdateCases extends UpdateState {
   updateBulkStatus: (cases: Case[], status: string) => void;
   dispatchResetIsUpdated: () => void;
 }
 
-export const useUpdateCases = (): UseUpdateCase => {
+export const useUpdateCases = (): UseUpdateCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -66,12 +66,27 @@ export const useUpdateCases = (): UseUpdateCase => {
 
   const dispatchUpdateCases = useCallback((cases: BulkUpdateStatus[]) => {
     let cancel = false;
+    const abortCtrl = new AbortController();
+
     const patchData = async () => {
       try {
         dispatch({ type: 'FETCH_INIT' });
-        await patchCasesStatus(cases);
+        const patchResponse = await patchCasesStatus(cases, abortCtrl.signal);
         if (!cancel) {
+          const resultCount = Object.keys(patchResponse).length;
+          const firstTitle = patchResponse[0].title;
+
           dispatch({ type: 'FETCH_SUCCESS', payload: true });
+          const messageArgs = {
+            totalCases: resultCount,
+            caseTitle: resultCount === 1 ? firstTitle : '',
+          };
+          const message =
+            resultCount && patchResponse[0].status === 'open'
+              ? i18n.REOPENED_CASES(messageArgs)
+              : i18n.CLOSED_CASES(messageArgs);
+
+          displaySuccessToast(message, dispatchToaster);
         }
       } catch (error) {
         if (!cancel) {
@@ -87,6 +102,7 @@ export const useUpdateCases = (): UseUpdateCase => {
     patchData();
     return () => {
       cancel = true;
+      abortCtrl.abort();
     };
   }, []);
 

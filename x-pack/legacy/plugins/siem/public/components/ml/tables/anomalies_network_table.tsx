@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
 
@@ -13,8 +13,8 @@ import { convertAnomaliesToNetwork } from './convert_anomalies_to_network';
 import { Loader } from '../../loader';
 import { AnomaliesNetworkTableProps } from '../types';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
+import { useMlCapabilities } from '../../ml_popover/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
-import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 import { BasicTable } from './basic_table';
 import { networkEquality } from './network_equality';
 import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';
@@ -35,7 +35,7 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
   type,
   flowTarget,
 }) => {
-  const capabilities = useContext(MlCapabilitiesContext);
+  const capabilities = useMlCapabilities();
   const [loading, tableData] = useAnomaliesTableData({
     startDate,
     endDate,

@@ -16,5 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 export { createHelloWorldAction } from './hello_world_action';

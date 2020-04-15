@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCard, EuiLink } from '@elastic/eui';
@@ -30,10 +31,9 @@ export function checkActionTypeEnabled(
       message: i18n.translate(
         'xpack.triggersActionsUI.checkActionTypeEnabled.actionTypeDisabledByLicenseMessage',
         {
-          defaultMessage:
-            'This connector is disabled because it requires a {minimumLicenseRequired} license.',
+          defaultMessage: 'This connector requires a {minimumLicenseRequired} license.',
           values: {
-            minimumLicenseRequired: actionType.minimumLicenseRequired,
+            minimumLicenseRequired: capitalize(actionType.minimumLicenseRequired),
           },
         }
       ),
@@ -45,7 +45,7 @@ export function checkActionTypeEnabled(
             {
               defaultMessage: 'This feature requires a {minimumLicenseRequired} license.',
               values: {
-                minimumLicenseRequired: actionType.minimumLicenseRequired,
+                minimumLicenseRequired: capitalize(actionType.minimumLicenseRequired),
               },
             }
           )}

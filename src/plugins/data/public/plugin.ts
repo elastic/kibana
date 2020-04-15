@@ -30,6 +30,7 @@ import {
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
+  GetInternalStartServicesFn,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
@@ -47,6 +48,8 @@ import {
   setQueryService,
   setSearchService,
   setUiSettings,
+  getFieldFormats,
+  getNotifications,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { esaggs } from './search/expressions';
@@ -100,6 +103,11 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     expressions.registerFunction(esaggs);
 
+    const getInternalStartServices: GetInternalStartServicesFn = () => ({
+      fieldFormats: getFieldFormats(),
+      notifications: getNotifications(),
+    });
+
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
       storage: this.storage,
@@ -109,19 +117,23 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.addTriggerAction(
+    uiActions.attachAction(
       SELECT_RANGE_TRIGGER,
       selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.addTriggerAction(
+    uiActions.attachAction(
       VALUE_CLICK_TRIGGER,
       valueClickAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
     return {
       autocomplete: this.autocomplete.setup(core),
-      search: this.searchService.setup(core, this.packageInfo),
+      search: this.searchService.setup(core, {
+        getInternalStartServices,
+        packageInfo: this.packageInfo,
+        query: queryService,
+      }),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
     };
@@ -143,13 +155,10 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const query = this.queryService.start(savedObjects);
     setQueryService(query);
 
-    const search = this.searchService.start(core);
+    const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
 
-    uiActions.addTriggerAction(
-      APPLY_FILTER_TRIGGER,
-      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
-    );
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));
 
     const dataServices = {
       actions: {

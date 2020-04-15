@@ -16,10 +16,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { FilterOptions } from '../../../../../../../../../../plugins/apm/common/custom_link_filter_options';
+import {
+  Filter,
+  FilterKey
+} from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import {
   DEFAULT_OPTION,
-  FilterKeyValue,
   FILTER_SELECT_OPTIONS,
   getSelectOptions
 } from './helper';
@@ -28,12 +30,16 @@ export const FiltersSection = ({
   filters,
   onChangeFilters
 }: {
-  filters: FilterKeyValue[];
-  onChangeFilters: (filters: FilterKeyValue[]) => void;
+  filters: Filter[];
+  onChangeFilters: (filters: Filter[]) => void;
 }) => {
-  const onChangeFilter = (filter: FilterKeyValue, idx: number) => {
+  const onChangeFilter = (
+    key: Filter['key'],
+    value: Filter['value'],
+    idx: number
+  ) => {
     const newFilters = [...filters];
-    newFilters[idx] = filter;
+    newFilters[idx] = { key, value };
     onChangeFilters(newFilters);
   };
 
@@ -45,14 +51,14 @@ export const FiltersSection = ({
     // if there is only one item left it should not be removed
     // but reset to empty
     if (isEmpty(newFilters)) {
-      onChangeFilters([['', '']]);
+      onChangeFilters([{ key: '', value: '' }]);
     } else {
       onChangeFilters(newFilters);
     }
   };
 
   const handleAddFilter = () => {
-    onChangeFilters([...filters, ['', '']]);
+    onChangeFilters([...filters, { key: '', value: '' }]);
   };
 
   return (
@@ -81,7 +87,7 @@ export const FiltersSection = ({
       <EuiSpacer size="s" />
 
       {filters.map((filter, idx) => {
-        const [key, value] = filter;
+        const { key, value } = filter;
         const filterId = `filter-${idx}`;
         const selectOptions = getSelectOptions(filters, key);
         return (
@@ -100,10 +106,7 @@ export const FiltersSection = ({
                   }
                 )}
                 onChange={e =>
-                  onChangeFilter(
-                    [e.target.value as keyof FilterOptions, value],
-                    idx
-                  )
+                  onChangeFilter(e.target.value as FilterKey, value, idx)
                 }
                 isInvalid={
                   !isEmpty(value) &&
@@ -113,13 +116,13 @@ export const FiltersSection = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFieldText
-                data-test-subj={`value-${idx}`}
+                data-test-subj={`${key}.value`}
                 fullWidth
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption.value',
                   { defaultMessage: 'Value' }
                 )}
-                onChange={e => onChangeFilter([key, e.target.value], idx)}
+                onChange={e => onChangeFilter(key, e.target.value, idx)}
                 value={value}
                 isInvalid={!isEmpty(key) && isEmpty(value)}
               />

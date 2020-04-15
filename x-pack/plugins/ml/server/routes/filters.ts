@@ -5,10 +5,9 @@
  */
 
 import { RequestHandlerContext } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
-import { createFilterSchema, updateFilterSchema } from './schemas/filters_schema';
+import { createFilterSchema, filterIdSchema, updateFilterSchema } from './schemas/filters_schema';
 import { FilterManager, FormFilter } from '../models/filter';
 
 // TODO - add function for returning a list of just the filter IDs.
@@ -47,7 +46,7 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup Filters
    *
-   * @api {get} /api/ml/filters Gets filters
+   * @api {get} /api/ml/filters Gets filters - size limit has been explicitly set to 1000
    * @apiName GetFilters
    * @apiDescription Retrieves the list of filters which are used for custom rules in anomaly detection.
    *
@@ -79,6 +78,8 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetFilterById
    * @apiDescription Retrieves the filter with the specified ID.
    *
+   * @apiSchema (params) filterIdSchema
+   *
    * @apiSuccess {Boolean} success
    * @apiSuccess {Object} filter the filter with the specified ID
    */
@@ -86,7 +87,7 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/filters/{filterId}',
       validate: {
-        params: schema.object({ filterId: schema.string() }),
+        params: filterIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -108,6 +109,8 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName CreateFilter
    * @apiDescription Instantiates a filter, for use by custom rules in anomaly detection.
    *
+   * @apiSchema (body) createFilterSchema
+   *
    * @apiSuccess {Boolean} success
    * @apiSuccess {Object} filter created filter
    */
@@ -115,7 +118,7 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/filters',
       validate: {
-        body: schema.object(createFilterSchema),
+        body: createFilterSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -139,6 +142,9 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName UpdateFilter
    * @apiDescription Updates the  description of a filter, adds items or removes items.
    *
+   * @apiSchema (params) filterIdSchema
+   * @apiSchema (body) updateFilterSchema
+   *
    * @apiSuccess {Boolean} success
    * @apiSuccess {Object} filter updated filter
    */
@@ -146,8 +152,8 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/filters/{filterId}',
       validate: {
-        params: schema.object({ filterId: schema.string() }),
-        body: schema.object(updateFilterSchema),
+        params: filterIdSchema,
+        body: updateFilterSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -172,13 +178,13 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName DeleteFilter
    * @apiDescription Deletes the filter with the specified ID.
    *
-   * @apiParam {String} filterId the ID of the filter to delete
+   * @apiSchema (params) filterIdSchema
    */
   router.delete(
     {
       path: '/api/ml/filters/{filterId}',
       validate: {
-        params: schema.object({ filterId: schema.string() }),
+        params: filterIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

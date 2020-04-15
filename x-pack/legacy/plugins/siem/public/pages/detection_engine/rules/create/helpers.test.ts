@@ -9,7 +9,9 @@ import {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
+  ActionsStepRuleJson,
   AboutStepRule,
+  ActionsStepRule,
   ScheduleStepRule,
   DefineStepRule,
 } from '../types';
@@ -18,6 +20,7 @@ import {
   formatDefineStepData,
   formatScheduleStepData,
   formatAboutStepData,
+  formatActionsStepData,
   formatRule,
   filterRuleFieldsForType,
 } from './helpers';
@@ -26,6 +29,7 @@ import {
   mockQueryBar,
   mockScheduleStepRule,
   mockAboutStepRule,
+  mockActionsStepRule,
 } from '../all/__mocks__/mock';
 
 describe('helpers', () => {
@@ -241,7 +245,6 @@ describe('helpers', () => {
     test('returns formatted object as ScheduleStepRuleJson', () => {
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockData);
       const expected = {
-        enabled: false,
         from: 'now-660s',
         to: 'now',
         interval: '5m',
@@ -260,7 +263,6 @@ describe('helpers', () => {
       delete mockStepData.to;
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-660s',
         to: 'now',
         interval: '5m',
@@ -279,7 +281,6 @@ describe('helpers', () => {
       };
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-660s',
         to: 'now',
         interval: '5m',
@@ -298,7 +299,6 @@ describe('helpers', () => {
       };
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-300s',
         to: 'now',
         interval: '5m',
@@ -317,7 +317,6 @@ describe('helpers', () => {
       };
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-360s',
         to: 'now',
         interval: 'random',
@@ -503,19 +502,159 @@ describe('helpers', () => {
     });
   });
 
+  describe('formatActionsStepData', () => {
+    let mockData: ActionsStepRule;
+
+    beforeEach(() => {
+      mockData = mockActionsStepRule();
+    });
+
+    test('returns formatted object as ActionsStepRuleJson', () => {
+      const result: ActionsStepRuleJson = formatActionsStepData(mockData);
+      const expected = {
+        actions: [],
+        enabled: false,
+        meta: {
+          kibana_siem_app_url: 'http://localhost:5601/app/siem',
+        },
+        throttle: 'no_actions',
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns proper throttle value for no_actions', () => {
+      const mockStepData = {
+        ...mockData,
+        throttle: 'no_actions',
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [],
+        enabled: false,
+        meta: {
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
+        },
+        throttle: 'no_actions',
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns proper throttle value for rule', () => {
+      const mockStepData = {
+        ...mockData,
+        throttle: 'rule',
+        actions: [
+          {
+            group: 'default',
+            id: 'id',
+            actionTypeId: 'actionTypeId',
+            params: {},
+          },
+        ],
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [
+          {
+            group: mockStepData.actions[0].group,
+            id: mockStepData.actions[0].id,
+            action_type_id: mockStepData.actions[0].actionTypeId,
+            params: mockStepData.actions[0].params,
+          },
+        ],
+        enabled: false,
+        meta: {
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
+        },
+        throttle: 'rule',
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns proper throttle value for interval', () => {
+      const mockStepData = {
+        ...mockData,
+        throttle: '1d',
+        actions: [
+          {
+            group: 'default',
+            id: 'id',
+            actionTypeId: 'actionTypeId',
+            params: {},
+          },
+        ],
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [
+          {
+            group: mockStepData.actions[0].group,
+            id: mockStepData.actions[0].id,
+            action_type_id: mockStepData.actions[0].actionTypeId,
+            params: mockStepData.actions[0].params,
+          },
+        ],
+        enabled: false,
+        meta: {
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
+        },
+        throttle: mockStepData.throttle,
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns actions with action_type_id', () => {
+      const mockAction = {
+        group: 'default',
+        id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        params: { message: 'ML Rule generated {{state.signals_count}} signals' },
+        actionTypeId: '.slack',
+      };
+
+      const mockStepData = {
+        ...mockData,
+        actions: [mockAction],
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [
+          {
+            group: mockAction.group,
+            id: mockAction.id,
+            params: mockAction.params,
+            action_type_id: mockAction.actionTypeId,
+          },
+        ],
+        enabled: false,
+        meta: {
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
+        },
+        throttle: 'no_actions',
+      };
+
+      expect(result).toEqual(expected);
+    });
+  });
+
   describe('formatRule', () => {
     let mockAbout: AboutStepRule;
     let mockDefine: DefineStepRule;
     let mockSchedule: ScheduleStepRule;
+    let mockActions: ActionsStepRule;
 
     beforeEach(() => {
       mockAbout = mockAboutStepRule();
       mockDefine = mockDefineStepRule();
       mockSchedule = mockScheduleStepRule();
+      mockActions = mockActionsStepRule();
     });
 
     test('returns NewRule with type of saved_query when saved_id exists', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule);
+      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
 
       expect(result.type).toEqual('saved_query');
     });
@@ -528,13 +667,18 @@ describe('helpers', () => {
           saved_id: '',
         },
       };
-      const result: NewRule = formatRule(mockDefineStepRuleWithoutSavedId, mockAbout, mockSchedule);
+      const result: NewRule = formatRule(
+        mockDefineStepRuleWithoutSavedId,
+        mockAbout,
+        mockSchedule,
+        mockActions
+      );
 
       expect(result.type).toEqual('query');
     });
 
     test('returns NewRule without id if ruleId does not exist', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule);
+      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
 
       expect(result.id).toBeUndefined();
     });

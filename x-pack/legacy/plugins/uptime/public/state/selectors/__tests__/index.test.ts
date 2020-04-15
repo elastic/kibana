@@ -46,7 +46,6 @@ describe('state selectors', () => {
     },
     monitorStatus: {
       status: null,
-      monitor: null,
       loading: false,
     },
     indexPattern: {
@@ -58,6 +57,14 @@ describe('state selectors', () => {
       pingHistogram: null,
       loading: false,
       errors: [],
+    },
+    pingList: {
+      loading: false,
+      pingList: {
+        total: 0,
+        locations: [],
+        pings: [],
+      },
     },
     monitorDuration: {
       durationLines: null,

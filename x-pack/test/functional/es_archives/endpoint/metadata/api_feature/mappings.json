@@ -9,6 +9,23 @@
         "@timestamp": {
           "type": "long"
         },
+        "elastic": {
+          "properties": {
+            "agent": {
+              "properties": {
+                "id": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            }
+          }
+        },
         "agent": {
           "properties": {
             "id": {

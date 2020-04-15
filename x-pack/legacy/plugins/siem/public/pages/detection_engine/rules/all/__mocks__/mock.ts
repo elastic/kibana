@@ -6,7 +6,7 @@
 
 import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
-import { AboutStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
+import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
 import { FieldValueQueryBar } from '../../components/query_bar';
 
 export const mockQueryBar: FieldValueQueryBar = {
@@ -40,6 +40,7 @@ export const mockQueryBar: FieldValueQueryBar = {
 };
 
 export const mockRule = (id: string): Rule => ({
+  actions: [],
   created_at: '2020-01-10T21:11:45.839Z',
   updated_at: '2020-01-10T21:11:45.839Z',
   created_by: 'elastic',
@@ -70,11 +71,13 @@ export const mockRule = (id: string): Rule => ({
   to: 'now',
   type: 'saved_query',
   threat: [],
+  throttle: 'no_actions',
   note: '# this is some markdown documentation',
   version: 1,
 });
 
 export const mockRuleWithEverything = (id: string): Rule => ({
+  actions: [],
   created_at: '2020-01-10T21:11:45.839Z',
   updated_at: '2020-01-10T21:11:45.839Z',
   created_by: 'elastic',
@@ -142,6 +145,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
       ],
     },
   ],
+  throttle: 'no_actions',
   note: '# this is some markdown documentation',
   version: 1,
 });
@@ -175,6 +179,14 @@ export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
   note: '# this is some markdown documentation',
 });
 
+export const mockActionsStepRule = (isNew = false, enabled = false): ActionsStepRule => ({
+  isNew,
+  actions: [],
+  kibanaSiemAppUrl: 'http://localhost:5601/app/siem',
+  enabled,
+  throttle: 'no_actions',
+});
+
 export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
   isNew,
   ruleType: 'query',
@@ -188,9 +200,8 @@ export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
   },
 });
 
-export const mockScheduleStepRule = (isNew = false, enabled = false): ScheduleStepRule => ({
+export const mockScheduleStepRule = (isNew = false): ScheduleStepRule => ({
   isNew,
-  enabled,
   interval: '5m',
   from: '6m',
   to: 'now',

@@ -24,22 +24,22 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSuperDatePicker,
-  OnRefreshProps,
+  EuiFieldText,
   prettyDuration,
 } from '@elastic/eui';
+// @ts-ignore
+import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
-import { LoadingButton, LoadingButtonAction } from './loading_button';
-import { IDataPluginServices, IIndexPattern, Query, TimeHistoryContract, TimeRange } from '../..';
-import { toMountPoint, useKibana } from '../../../../kibana_react/public';
+import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
+import { useKibana, toMountPoint } from '../../../../kibana_react/public';
 import { QueryStringInput } from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError } from '../../../common';
-import { getQueryLog, PersistedLog } from '../../query';
+import { PersistedLog, getQueryLog } from '../../query';
 
 interface Props {
   query?: Query;
@@ -50,6 +50,7 @@ interface Props {
   disableAutoFocus?: boolean;
   screenTitle?: string;
   indexPatterns?: Array<IIndexPattern | string>;
+  isLoading?: boolean;
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   showQueryInput?: boolean;
   showDatePicker?: boolean;
@@ -66,14 +67,9 @@ interface Props {
 
 export function QueryBarTopRow(props: Props) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { uiSettings, notifications, storage, appName, docLinks, data } = kibana.services;
-
-  data.search.getPendingSearchesCount$().subscribe((count: number) => {
-    setIsLoading(count > 0);
-  });
+  const { uiSettings, notifications, storage, appName, docLinks } = kibana.services;
 
   const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
 
@@ -86,20 +82,12 @@ export function QueryBarTopRow(props: Props) {
     [appName, queryLanguage, uiSettings, storage]
   );
 
-  function onLoadingButtonAction(action: LoadingButtonAction) {
-    switch (action) {
-      case LoadingButtonAction.ActionAbortAll:
-        data.search.cancelPendingSearches();
-        break;
-      case LoadingButtonAction.ActionRunBeyondTimeout:
-        // TODO: implement me
-        break;
-      default:
-        if (persistedLog && props.query) {
-          persistedLog.add(props.query.query);
-        }
-        onSubmit({ query: props.query, dateRange: getDateRange() });
+  function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
+    if (persistedLog && props.query) {
+      persistedLog.add(props.query.query);
     }
+    event.preventDefault();
+    onSubmit({ query: props.query, dateRange: getDateRange() });
   }
 
   function getDateRange() {
@@ -226,13 +214,13 @@ export function QueryBarTopRow(props: Props) {
 
   function renderUpdateButton() {
     const button = props.customSubmitButton ? (
-      React.cloneElement(props.customSubmitButton, { onClick: onLoadingButtonAction })
+      React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
     ) : (
-      <LoadingButton
-        isDirty={props.isDirty}
+      <EuiSuperUpdateButton
+        needsUpdate={props.isDirty}
         isDisabled={isDateRangeInvalid}
-        isLoading={isLoading}
-        onClick={onLoadingButtonAction}
+        isLoading={props.isLoading}
+        onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
       />
     );

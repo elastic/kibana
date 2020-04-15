@@ -29,7 +29,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import {
   ColorModes,
   ColorRanges,
@@ -37,9 +37,9 @@ import {
   SwitchOption,
   RangeOption,
   SetColorSchemaOptionsValue,
-} from '../../../vis_type_vislib/public';
+  SetColorRangeValue,
+} from '../../../../../plugins/charts/public';
 import { MetricVisParam, VisParams } from '../types';
-import { SetColorRangeValue } from '../../../vis_type_vislib/public/components/common/color_ranges';
 
 function MetricVisOptions({
   stateParams,

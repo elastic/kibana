@@ -57,7 +57,6 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
-      resolve(__dirname, './apps/endpoint'),
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -86,9 +85,7 @@ export default async function({ readConfigFile }) {
         '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
-        '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
-        '--xpack.endpoint.enabled=true',
       ],
     },
     uiSettings: {
@@ -199,9 +196,6 @@ export default async function({ readConfigFile }) {
         pathname: '/app/kibana/',
         hash: '/management/elasticsearch/transform',
       },
-      endpoint: {
-        pathname: '/app/endpoint',
-      },
     },
 
     // choose where esArchiver should load archives from
@@ -232,6 +226,21 @@ export default async function({ readConfigFile }) {
             run_as: [],
           },
           kibana: [],
+        },
+
+        //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
+        test_api_keys: {
+          elasticsearch: {
+            cluster: ['manage_security', 'manage_api_key'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
         },
       },
       defaultRoles: ['superuser'],

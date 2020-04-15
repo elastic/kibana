@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fireEvent, render, wait } from '@testing-library/react';
+import { fireEvent, render, wait, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import * as apmApi from '../../../../../services/rest/createCallApmApi';
@@ -71,20 +71,6 @@ describe('CustomLink', () => {
       );
       expectTextsInDocument(component, ['No links found.']);
     });
-    it('opens flyout when click to create new link', () => {
-      const { queryByText, getByText } = render(
-        <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
-      expect(queryByText('Create link')).not.toBeInTheDocument();
-      act(() => {
-        fireEvent.click(getByText('Create custom link'));
-      });
-      expect(queryByText('Create link')).toBeInTheDocument();
-    });
   });
 
   describe('overview', () => {
@@ -146,7 +132,7 @@ describe('CustomLink', () => {
       jest.resetAllMocks();
     });
 
-    const openFlyout = () => {
+    const openFlyout = async () => {
       const component = render(
         <LicenseContext.Provider value={goldLicense}>
           <MockApmPluginContextWrapper>
@@ -158,12 +144,13 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(component.getByText('Create custom link'));
       });
+      await wait(() => component.queryByText('Create link'));
       expect(component.queryByText('Create link')).toBeInTheDocument();
       return component;
     };
 
     it('creates a custom link', async () => {
-      const component = openFlyout();
+      const component = await openFlyout();
       const labelInput = component.getByTestId('label');
       act(() => {
         fireEvent.change(labelInput, {
@@ -205,16 +192,13 @@ describe('CustomLink', () => {
     });
 
     describe('Filters', () => {
-      const addFilterField = (
-        component: ReturnType<typeof openFlyout>,
-        amount: number
-      ) => {
+      const addFilterField = (component: RenderResult, amount: number) => {
         for (let i = 1; i <= amount; i++) {
           fireEvent.click(component.getByText('Add another filter'));
         }
       };
-      it('checks if add filter button is disabled after all elements have been added', () => {
-        const component = openFlyout();
+      it('checks if add filter button is disabled after all elements have been added', async () => {
+        const component = await openFlyout();
         expect(component.getAllByText('service.name').length).toEqual(1);
         addFilterField(component, 1);
         expect(component.getAllByText('service.name').length).toEqual(2);
@@ -224,8 +208,8 @@ describe('CustomLink', () => {
         addFilterField(component, 2);
         expect(component.getAllByText('service.name').length).toEqual(4);
       });
-      it('removes items already selected', () => {
-        const component = openFlyout();
+      it('removes items already selected', async () => {
+        const component = await openFlyout();
 
         const addFieldAndCheck = (
           fieldName: string,

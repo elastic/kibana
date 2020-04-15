@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DrilldownsSetup, DrilldownsStart } from '.';
+import { DrilldownsSetupContract, DrilldownsStartContract } from '.';
 
-export type Setup = jest.Mocked<DrilldownsSetup>;
-export type Start = jest.Mocked<DrilldownsStart>;
+export type Setup = jest.Mocked<DrilldownsSetupContract>;
+export type Start = jest.Mocked<DrilldownsStartContract>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
@@ -17,14 +17,12 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = {
-    FlyoutManageDrilldowns: jest.fn(),
-  };
+  const startContract: Start = {};
 
   return startContract;
 };
 
-export const drilldownsPluginMock = {
+export const bfetchPluginMock = {
   createSetupContract,
   createStartContract,
 };

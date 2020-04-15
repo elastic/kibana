@@ -56,8 +56,6 @@ async function creatHelloWorldContainerAndEmbeddable(
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const { setup, doStart, uiActions } = testPlugin(coreSetup, coreStart);
-  const start = doStart();
-
   const filterableFactory = new FilterableEmbeddableFactory();
   const slowContactCardFactory = new SlowContactCardEmbeddableFactory({
     execAction: uiActions.executeTriggerActions,
@@ -67,6 +65,8 @@ async function creatHelloWorldContainerAndEmbeddable(
   setup.registerEmbeddableFactory(filterableFactory.type, filterableFactory);
   setup.registerEmbeddableFactory(slowContactCardFactory.type, slowContactCardFactory);
   setup.registerEmbeddableFactory(helloWorldFactory.type, helloWorldFactory);
+
+  const start = doStart();
 
   const container = new HelloWorldContainer(containerInput, {
     getActions: uiActions.getTriggerCompatibleActions,
@@ -563,6 +563,13 @@ test('Container changes made directly after adding a new embeddable are propagat
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const { setup, doStart, uiActions } = testPlugin(coreSetup, coreStart);
+
+  const factory = new SlowContactCardEmbeddableFactory({
+    loadTickCount: 3,
+    execAction: uiActions.executeTriggerActions,
+  });
+  setup.registerEmbeddableFactory(factory.type, factory);
+
   const start = doStart();
 
   const container = new HelloWorldContainer(
@@ -581,12 +588,6 @@ test('Container changes made directly after adding a new embeddable are propagat
       SavedObjectFinder: () => null,
     }
   );
-
-  const factory = new SlowContactCardEmbeddableFactory({
-    loadTickCount: 3,
-    execAction: uiActions.executeTriggerActions,
-  });
-  setup.registerEmbeddableFactory(factory.type, factory);
 
   const subscription = Rx.merge(container.getOutput$(), container.getInput$())
     .pipe(skip(2))
@@ -640,8 +641,7 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123' },
-        savedObjectId: '456',
+        explicitInput: { id: '123', savedObjectId: '456' },
       },
     },
     viewMode: ViewMode.EDIT,
@@ -662,8 +662,7 @@ test('ErrorEmbeddables get updated when parent does', async done => {
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123' },
-        savedObjectId: '456',
+        explicitInput: { id: '123', savedObjectId: '456' },
       },
     },
     viewMode: ViewMode.EDIT,
@@ -759,12 +758,13 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
     coreMock.createSetup(),
     coreMock.createStart()
   );
-  const start = doStart();
   const factory = new SlowContactCardEmbeddableFactory({
     loadTickCount: 3,
     execAction: uiActions.executeTriggerActions,
   });
   setup.registerEmbeddableFactory(factory.type, factory);
+
+  const start = doStart();
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -799,12 +799,12 @@ test('adding a panel then subsequently removing it before its loaded removes the
     coreMock.createSetup(),
     coreMock.createStart()
   );
-  const start = doStart();
   const factory = new SlowContactCardEmbeddableFactory({
     loadTickCount: 1,
     execAction: uiActions.executeTriggerActions,
   });
   setup.registerEmbeddableFactory(factory.type, factory);
+  const start = doStart();
   const container = new HelloWorldContainer(
     {
       id: 'hello',

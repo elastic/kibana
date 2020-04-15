@@ -15,6 +15,7 @@ interface LinkProps {
   href?: string;
   iconSide?: 'left' | 'right';
   onClick?: Function;
+  ariaLabel?: string;
 }
 
 const Link = styled(({ iconSide, children, ...rest }) => <EuiLink {...rest}>{children}</EuiLink>)<
@@ -52,7 +53,17 @@ export interface LinkIconProps extends LinkProps {
 }
 
 export const LinkIcon = React.memo<LinkIconProps>(
-  ({ children, color, disabled, href, iconSide = 'left', iconSize = 's', iconType, onClick }) => (
+  ({
+    children,
+    color,
+    disabled,
+    href,
+    iconSide = 'left',
+    iconSize = 's',
+    iconType,
+    onClick,
+    ariaLabel,
+  }) => (
     <Link
       className="siemLinkIcon"
       color={color}
@@ -60,6 +71,7 @@ export const LinkIcon = React.memo<LinkIconProps>(
       href={href}
       iconSide={iconSide}
       onClick={onClick}
+      aria-label={ariaLabel ?? children}
     >
       <EuiIcon size={iconSize} type={iconType} />
       <span className="siemLinkIcon__label">{children}</span>

@@ -20,9 +20,8 @@
 import { Embeddable } from './embeddable';
 import { EmbeddableInput } from './i_embeddable';
 import { ViewMode } from '../types';
-import { EmbeddableActionStorage } from './embeddable_action_storage';
-import { UiActionsSerializedEvent } from '../../../../ui_actions/public';
-import { of } from '../../../../kibana_utils/common';
+import { EmbeddableActionStorage, SerializedEvent } from './embeddable_action_storage';
+import { of } from '../../../../kibana_utils/public';
 
 class TestEmbeddable extends Embeddable<EmbeddableInput> {
   public readonly type = 'test';
@@ -43,9 +42,9 @@ describe('EmbeddableActionStorage', () => {
     test('can add event to embeddable', async () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
-      const event: UiActionsSerializedEvent = {
+      const event: SerializedEvent = {
         eventId: 'EVENT_ID',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
 
@@ -58,40 +57,23 @@ describe('EmbeddableActionStorage', () => {
       expect(events2).toEqual([event]);
     });
 
-    test('does not merge .getInput() into .updateInput()', async () => {
-      const embeddable = new TestEmbeddable();
-      const storage = new EmbeddableActionStorage(embeddable);
-      const event: UiActionsSerializedEvent = {
-        eventId: 'EVENT_ID',
-        triggers: ['TRIGGER-ID'],
-        action: {} as any,
-      };
-
-      const spy = jest.spyOn(embeddable, 'updateInput');
-
-      await storage.create(event);
-
-      expect(spy.mock.calls[0][0].id).toBe(undefined);
-      expect(spy.mock.calls[0][0].viewMode).toBe(undefined);
-    });
-
     test('can create multiple events', async () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event1: UiActionsSerializedEvent = {
+      const event1: SerializedEvent = {
         eventId: 'EVENT_ID1',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
-      const event2: UiActionsSerializedEvent = {
+      const event2: SerializedEvent = {
         eventId: 'EVENT_ID2',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
-      const event3: UiActionsSerializedEvent = {
+      const event3: SerializedEvent = {
         eventId: 'EVENT_ID3',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
 
@@ -113,9 +95,9 @@ describe('EmbeddableActionStorage', () => {
     test('throws when creating an event with the same ID', async () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
-      const event: UiActionsSerializedEvent = {
+      const event: SerializedEvent = {
         eventId: 'EVENT_ID',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
 
@@ -140,16 +122,16 @@ describe('EmbeddableActionStorage', () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event1: UiActionsSerializedEvent = {
+      const event1: SerializedEvent = {
         eventId: 'EVENT_ID',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {
           name: 'foo',
         } as any,
       };
-      const event2: UiActionsSerializedEvent = {
+      const event2: SerializedEvent = {
         eventId: 'EVENT_ID',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {
           name: 'bar',
         } as any,
@@ -166,30 +148,30 @@ describe('EmbeddableActionStorage', () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event1: UiActionsSerializedEvent = {
+      const event1: SerializedEvent = {
         eventId: 'EVENT_ID1',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {
           name: 'foo',
         } as any,
       };
-      const event2: UiActionsSerializedEvent = {
+      const event2: SerializedEvent = {
         eventId: 'EVENT_ID2',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {
           name: 'bar',
         } as any,
       };
-      const event22: UiActionsSerializedEvent = {
+      const event22: SerializedEvent = {
         eventId: 'EVENT_ID2',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {
           name: 'baz',
         } as any,
       };
-      const event3: UiActionsSerializedEvent = {
+      const event3: SerializedEvent = {
         eventId: 'EVENT_ID3',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {
           name: 'qux',
         } as any,
@@ -217,9 +199,9 @@ describe('EmbeddableActionStorage', () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event: UiActionsSerializedEvent = {
+      const event: SerializedEvent = {
         eventId: 'EVENT_ID',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
 
@@ -235,14 +217,14 @@ describe('EmbeddableActionStorage', () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event1: UiActionsSerializedEvent = {
+      const event1: SerializedEvent = {
         eventId: 'EVENT_ID1',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
-      const event2: UiActionsSerializedEvent = {
+      const event2: SerializedEvent = {
         eventId: 'EVENT_ID2',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
 
@@ -267,9 +249,9 @@ describe('EmbeddableActionStorage', () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event: UiActionsSerializedEvent = {
+      const event: SerializedEvent = {
         eventId: 'EVENT_ID',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
 
@@ -284,23 +266,23 @@ describe('EmbeddableActionStorage', () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event1: UiActionsSerializedEvent = {
+      const event1: SerializedEvent = {
         eventId: 'EVENT_ID1',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {
           name: 'foo',
         } as any,
       };
-      const event2: UiActionsSerializedEvent = {
+      const event2: SerializedEvent = {
         eventId: 'EVENT_ID2',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {
           name: 'bar',
         } as any,
       };
-      const event3: UiActionsSerializedEvent = {
+      const event3: SerializedEvent = {
         eventId: 'EVENT_ID3',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {
           name: 'qux',
         } as any,
@@ -345,9 +327,9 @@ describe('EmbeddableActionStorage', () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event: UiActionsSerializedEvent = {
+      const event: SerializedEvent = {
         eventId: 'EVENT_ID',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
 
@@ -373,9 +355,9 @@ describe('EmbeddableActionStorage', () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event: UiActionsSerializedEvent = {
+      const event: SerializedEvent = {
         eventId: 'EVENT_ID',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
 
@@ -401,9 +383,9 @@ describe('EmbeddableActionStorage', () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event: UiActionsSerializedEvent = {
+      const event: SerializedEvent = {
         eventId: 'EVENT_ID',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID',
         action: {} as any,
       };
 
@@ -420,19 +402,19 @@ describe('EmbeddableActionStorage', () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event1: UiActionsSerializedEvent = {
+      const event1: SerializedEvent = {
         eventId: 'EVENT_ID1',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID1',
         action: {} as any,
       };
-      const event2: UiActionsSerializedEvent = {
+      const event2: SerializedEvent = {
         eventId: 'EVENT_ID2',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID2',
         action: {} as any,
       };
-      const event3: UiActionsSerializedEvent = {
+      const event3: SerializedEvent = {
         eventId: 'EVENT_ID3',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID3',
         action: {} as any,
       };
 
@@ -476,7 +458,7 @@ describe('EmbeddableActionStorage', () => {
 
       await storage.create({
         eventId: 'EVENT_ID1',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID1',
         action: {} as any,
       });
 
@@ -484,7 +466,7 @@ describe('EmbeddableActionStorage', () => {
 
       await storage.create({
         eventId: 'EVENT_ID2',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID1',
         action: {} as any,
       });
 
@@ -520,15 +502,15 @@ describe('EmbeddableActionStorage', () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const event1: UiActionsSerializedEvent = {
+      const event1: SerializedEvent = {
         eventId: 'EVENT_ID1',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID1',
         action: {} as any,
       };
 
-      const event2: UiActionsSerializedEvent = {
+      const event2: SerializedEvent = {
         eventId: 'EVENT_ID2',
-        triggers: ['TRIGGER-ID'],
+        triggerId: 'TRIGGER-ID1',
         action: {} as any,
       };
 

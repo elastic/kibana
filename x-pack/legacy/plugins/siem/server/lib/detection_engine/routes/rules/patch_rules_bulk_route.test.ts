@@ -11,6 +11,7 @@ import {
   getFindResultWithSingleHit,
   getPatchBulkRequest,
   getResult,
+  typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { patchRulesBulkRoute } from './patch_rules_bulk_route';
@@ -87,6 +88,27 @@ describe('patch_rules_bulk', () => {
       const response = await server.inject(getPatchBulkRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
+
+    it('rejects patching of an ML rule with an insufficient license', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const request = requestMock.create({
+        method: 'patch',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        body: [typicalMlRulePayload()],
+      });
+
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        {
+          error: {
+            message: 'Your license does not support machine learning. Please upgrade your license.',
+            status_code: 400,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
     });
   });
 

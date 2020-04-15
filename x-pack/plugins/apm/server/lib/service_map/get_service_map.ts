@@ -13,17 +13,13 @@ import {
 import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { dedupeConnections } from './dedupe_connections';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 
 export interface IEnvOptions {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName?: string;
   environment?: string;
 }
@@ -77,7 +73,9 @@ async function getConnectionData({
 async function getServicesData(options: IEnvOptions) {
   const { setup } = options;
 
-  const projection = getServicesProjection({ setup });
+  const projection = getServicesProjection({
+    setup: { ...setup, uiFiltersES: [] }
+  });
 
   const { filter } = projection.body.query.bool;
 

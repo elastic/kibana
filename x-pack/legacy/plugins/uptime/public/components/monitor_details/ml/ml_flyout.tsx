@@ -7,6 +7,7 @@
 import React, { useContext } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -38,7 +39,7 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
   const hasPlatinumLicense = license?.getFeature('ml')?.isAvailable;
 
   return (
-    <EuiFlyout onClose={onClose} size="s">
+    <EuiFlyout onClose={onClose} size="s" data-test-subj="uptimeMLFlyout">
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2>{labels.ENABLE_ANOMALY_DETECTION}</h2>
@@ -64,13 +65,18 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
             <em>{labels.TAKE_SOME_TIME_TEXT}</em>
           </p>
         </EuiText>
-
         <EuiSpacer />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => onClose()} disabled={isCreatingJob || isLoadingMLJob}>
+              {labels.CANCEL_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="uptimeMLCreateJobBtn"
               onClick={() => onClickCreate()}
               fill
               isLoading={isCreatingJob}

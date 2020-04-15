@@ -20,7 +20,6 @@
 import ServerStatus from './server_status';
 import { Metrics } from './lib/metrics';
 import { registerStatusPage, registerStatusApi, registerStatsApi } from './routes';
-import { registerOpsStatsCollector } from './collectors';
 import Oppsy from 'oppsy';
 import { cloneDeep } from 'lodash';
 import { getOSInfo } from './lib/get_os_info';
@@ -28,7 +27,6 @@ import { getOSInfo } from './lib/get_os_info';
 export function statusMixin(kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
   const { usageCollection } = server.newPlatform.setup.plugins;
-  registerOpsStatsCollector(usageCollection, server, kbnServer);
 
   const metrics = new Metrics(config, server);
 
@@ -57,7 +55,7 @@ export function statusMixin(kbnServer, server, config) {
   // init routes
   registerStatusPage(kbnServer, server, config);
   registerStatusApi(kbnServer, server, config);
-  registerStatsApi(usageCollection, server, config);
+  registerStatsApi(usageCollection, server, config, kbnServer);
 
   // expore shared functionality
   server.decorate('server', 'getOSInfo', getOSInfo);

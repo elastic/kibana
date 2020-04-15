@@ -1747,25 +1747,31 @@ describe('import rules schema', () => {
           lists: [
             {
               field: 'source.ip',
-              boolean_operator: 'and',
-              values: [
-                {
-                  name: '127.0.0.1',
-                  type: 'value',
-                },
-              ],
+              values_operator: 'included',
+              values_type: 'exists',
             },
             {
               field: 'host.name',
-              boolean_operator: 'and not',
+              values_operator: 'excluded',
+              values_type: 'match',
               values: [
                 {
                   name: 'rock01',
-                  type: 'value',
                 },
+              ],
+              and: [
                 {
-                  name: 'mothra',
-                  type: 'value',
+                  field: 'host.id',
+                  values_operator: 'included',
+                  values_type: 'match_all',
+                  values: [
+                    {
+                      name: '123',
+                    },
+                    {
+                      name: '678',
+                    },
+                  ],
                 },
               ],
             },

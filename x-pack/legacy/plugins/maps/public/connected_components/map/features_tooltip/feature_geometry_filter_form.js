@@ -8,7 +8,8 @@ import React, { Component, Fragment } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { createSpatialFilterWithGeometry } from '../../../elasticsearch_geo_utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createSpatialFilterWithGeometry } from '../../../../../../../plugins/maps/public/elasticsearch_geo_utils';
 import { GEO_JSON_TYPE } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 import { UrlOverflowService } from 'ui/error_url_overflow';

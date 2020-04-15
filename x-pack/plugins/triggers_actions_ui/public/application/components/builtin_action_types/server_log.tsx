@@ -3,19 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiSelect,
-  EuiTextArea,
-  EuiFormRow,
-  EuiContextMenuItem,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-} from '@elastic/eui';
+import { EuiSelect, EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { ActionTypeModel, ValidationResult, ActionParamsProps } from '../../../types';
 import { ServerLogActionParams } from './types';
+import { AddMessageVariables } from '../add_message_variables';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -71,7 +64,6 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
     { value: 'error', text: 'Error' },
     { value: 'fatal', text: 'Fatal' },
   ];
-  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
 
   useEffect(() => {
     editAction('level', 'info', index);
@@ -80,18 +72,11 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const messageVariablesItems = messageVariables?.map((variable: string) => (
-    <EuiContextMenuItem
-      key={variable}
-      icon="empty"
-      onClick={() => {
-        editAction('message', (message ?? '').concat(` {{${variable}}}`), index);
-        setIsVariablesPopoverOpen(false);
-      }}
-    >
-      {`{{${variable}}}`}
-    </EuiContextMenuItem>
-  ));
+
+  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
+    editAction(paramsProperty, (message ?? '').concat(` {{${variable}}}`), index);
+  };
+
   return (
     <Fragment>
       <EuiFormRow
@@ -128,27 +113,13 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
           }
         )}
         labelAppend={
-          <EuiPopover
-            id="singlePanel"
-            button={
-              <EuiButtonIcon
-                onClick={() => setIsVariablesPopoverOpen(true)}
-                iconType="indexOpen"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.addVariablePopoverButton',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-              />
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) =>
+              onSelectMessageVariable('message', variable)
             }
-            isOpen={isVariablesPopoverOpen}
-            closePopover={() => setIsVariablesPopoverOpen(false)}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={messageVariablesItems} />
-          </EuiPopover>
+            paramsProperty="message"
+          />
         }
       >
         <EuiTextArea

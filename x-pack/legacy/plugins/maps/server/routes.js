@@ -44,6 +44,7 @@ export function initRoutes(server, licenseUid) {
       fileApiUrl: mapConfig.emsFileApiUrl,
       tileApiUrl: mapConfig.emsTileApiUrl,
       landingPageUrl: mapConfig.emsLandingPageUrl,
+      fetchFunction: fetch,
     });
     emsClient.addQueryParams({ license: licenseUid });
   } else {

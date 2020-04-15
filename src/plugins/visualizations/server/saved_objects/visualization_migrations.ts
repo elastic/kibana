@@ -19,6 +19,7 @@
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { cloneDeep, get, omit, has, flow } from 'lodash';
+import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn = doc => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -84,6 +85,38 @@ const migratePercentileRankAggregation: SavedObjectMigrationFn = doc => {
             delete metric.value;
           }
         });
+      });
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
+// [TSVB] Remove stale opperator key
+const migrateOperatorKeyTypo: SavedObjectMigrationFn = doc => {
+  const visStateJSON = get<string>(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const gaugeColorRules: any[] = get(visState, 'params.gauge_color_rules') || [];
+
+      gaugeColorRules.forEach(colorRule => {
+        if (colorRule.opperator) {
+          delete colorRule.opperator;
+        }
       });
 
       return {
@@ -539,6 +572,40 @@ const migrateTableSplits: SavedObjectMigrationFn = doc => {
   }
 };
 
+const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
+  const searchSourceJSON = get<string>(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+
+  if (searchSourceJSON) {
+    let searchSource: any;
+
+    try {
+      searchSource = JSON.parse(searchSourceJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    if (searchSource.query?.match_all) {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              ...searchSource,
+              query: {
+                query: '',
+                language: DEFAULT_QUERY_LANGUAGE,
+              },
+            }),
+          },
+        },
+      };
+    }
+  }
+
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -550,7 +617,7 @@ export const visualizationSavedObjectTypeMigrations = {
    * in that version. So we apply this twice, once with 6.7.2 and once with 7.0.1 while the backport to 6.7
    * only contained the 6.7.2 migration and not the 7.0.1 migration.
    */
-  '6.7.2': flow<SavedObjectMigrationFn>(removeDateHistogramTimeZones),
+  '6.7.2': flow<SavedObjectMigrationFn>(migrateMatchAllQuery, removeDateHistogramTimeZones),
   '7.0.0': flow<SavedObjectMigrationFn>(
     addDocReferences,
     migrateIndexPattern,
@@ -571,4 +638,5 @@ export const visualizationSavedObjectTypeMigrations = {
   ),
   '7.3.1': flow<SavedObjectMigrationFn>(migrateFiltersAggQueryStringQueries),
   '7.4.2': flow<SavedObjectMigrationFn>(transformSplitFiltersStringToQueryObject),
+  '7.7.0': flow<SavedObjectMigrationFn>(migrateOperatorKeyTypo),
 };

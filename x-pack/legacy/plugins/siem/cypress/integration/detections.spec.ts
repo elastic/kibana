@@ -42,16 +42,15 @@ describe('Detections', () => {
       cy.get(NUMBER_OF_SIGNALS)
         .invoke('text')
         .then(numberOfSignals => {
-          cy.get(SHOWING_SIGNALS)
-            .invoke('text')
-            .should('eql', `Showing ${numberOfSignals} signals`);
+          cy.get(SHOWING_SIGNALS).should('have.text', `Showing ${numberOfSignals} signals`);
 
           const numberOfSignalsToBeClosed = 3;
           selectNumberOfSignals(numberOfSignalsToBeClosed);
 
-          cy.get(SELECTED_SIGNALS)
-            .invoke('text')
-            .should('eql', `Selected ${numberOfSignalsToBeClosed} signals`);
+          cy.get(SELECTED_SIGNALS).should(
+            'have.text',
+            `Selected ${numberOfSignalsToBeClosed} signals`
+          );
 
           closeSignals();
           waitForSignals();
@@ -59,30 +58,33 @@ describe('Detections', () => {
           waitForSignals();
 
           const expectedNumberOfSignalsAfterClosing = +numberOfSignals - numberOfSignalsToBeClosed;
-          cy.get(NUMBER_OF_SIGNALS)
-            .invoke('text')
-            .should('eq', expectedNumberOfSignalsAfterClosing.toString());
-          cy.get(SHOWING_SIGNALS)
-            .invoke('text')
-            .should('eql', `Showing ${expectedNumberOfSignalsAfterClosing.toString()} signals`);
+          cy.get(NUMBER_OF_SIGNALS).should(
+            'have.text',
+            expectedNumberOfSignalsAfterClosing.toString()
+          );
+
+          cy.get(SHOWING_SIGNALS).should(
+            'have.text',
+            `Showing ${expectedNumberOfSignalsAfterClosing.toString()} signals`
+          );
 
           goToClosedSignals();
           waitForSignals();
 
-          cy.get(NUMBER_OF_SIGNALS)
-            .invoke('text')
-            .should('eql', numberOfSignalsToBeClosed.toString());
-          cy.get(SHOWING_SIGNALS)
-            .invoke('text')
-            .should('eql', `Showing ${numberOfSignalsToBeClosed.toString()} signals`);
+          cy.get(NUMBER_OF_SIGNALS).should('have.text', numberOfSignalsToBeClosed.toString());
+          cy.get(SHOWING_SIGNALS).should(
+            'have.text',
+            `Showing ${numberOfSignalsToBeClosed.toString()} signals`
+          );
           cy.get(SIGNALS).should('have.length', numberOfSignalsToBeClosed);
 
           const numberOfSignalsToBeOpened = 1;
           selectNumberOfSignals(numberOfSignalsToBeOpened);
 
-          cy.get(SELECTED_SIGNALS)
-            .invoke('text')
-            .should('eql', `Selected ${numberOfSignalsToBeOpened} signal`);
+          cy.get(SELECTED_SIGNALS).should(
+            'have.text',
+            `Selected ${numberOfSignalsToBeOpened} signal`
+          );
 
           openSignals();
           waitForSignals();
@@ -93,15 +95,14 @@ describe('Detections', () => {
           waitForSignals();
 
           const expectedNumberOfClosedSignalsAfterOpened = 2;
-          cy.get(NUMBER_OF_SIGNALS)
-            .invoke('text')
-            .should('eql', expectedNumberOfClosedSignalsAfterOpened.toString());
-          cy.get(SHOWING_SIGNALS)
-            .invoke('text')
-            .should(
-              'eql',
-              `Showing ${expectedNumberOfClosedSignalsAfterOpened.toString()} signals`
-            );
+          cy.get(NUMBER_OF_SIGNALS).should(
+            'have.text',
+            expectedNumberOfClosedSignalsAfterOpened.toString()
+          );
+          cy.get(SHOWING_SIGNALS).should(
+            'have.text',
+            `Showing ${expectedNumberOfClosedSignalsAfterOpened.toString()} signals`
+          );
           cy.get(SIGNALS).should('have.length', expectedNumberOfClosedSignalsAfterOpened);
 
           goToOpenedSignals();
@@ -109,13 +110,15 @@ describe('Detections', () => {
 
           const expectedNumberOfOpenedSignals =
             +numberOfSignals - expectedNumberOfClosedSignalsAfterOpened;
-          cy.get(SHOWING_SIGNALS)
-            .invoke('text')
-            .should('eql', `Showing ${expectedNumberOfOpenedSignals.toString()} signals`);
+          cy.get(SHOWING_SIGNALS).should(
+            'have.text',
+            `Showing ${expectedNumberOfOpenedSignals.toString()} signals`
+          );
 
-          cy.get('[data-test-subj="server-side-event-count"]')
-            .invoke('text')
-            .should('eql', expectedNumberOfOpenedSignals.toString());
+          cy.get('[data-test-subj="server-side-event-count"]').should(
+            'have.text',
+            expectedNumberOfOpenedSignals.toString()
+          );
         });
     });
 

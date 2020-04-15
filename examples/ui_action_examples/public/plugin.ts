@@ -46,7 +46,7 @@ export class UiActionExamplesPlugin
     }));
 
     uiActions.registerAction(helloWorldAction);
-    uiActions.addTriggerAction(helloWorldTrigger.id, helloWorldAction);
+    uiActions.attachAction(helloWorldTrigger.id, helloWorldAction);
   }
 
   public start() {}

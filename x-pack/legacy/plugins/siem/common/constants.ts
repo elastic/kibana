@@ -80,6 +80,7 @@ export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE
 
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
+export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -94,4 +95,19 @@ export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_UR
  */
 export const UNAUTHENTICATED_USER = 'Unauthenticated';
 
+/*
+  Licensing requirements
+ */
+export const MINIMUM_ML_LICENSE = 'platinum';
+
+/*
+  Rule notifications options
+*/
+export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
+  '.email',
+  '.slack',
+  '.pagerduty',
+  '.webhook',
+];
+export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';

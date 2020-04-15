@@ -127,7 +127,7 @@ describe('rules_notification_alert_type', () => {
 
       expect(alertInstanceFactoryMock).toHaveBeenCalled();
       expect(alertInstanceMock.replaceState).toHaveBeenCalledWith(
-        expect.objectContaining({ signalsCount: 10 })
+        expect.objectContaining({ signals_count: 10 })
       );
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
         'default',

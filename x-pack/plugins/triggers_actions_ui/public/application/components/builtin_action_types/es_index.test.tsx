@@ -52,6 +52,26 @@ describe('index connector validation', () => {
   });
 });
 
+describe('index connector validation with minimal config', () => {
+  test('connector validation succeeds when connector config is valid', () => {
+    const actionConnector = {
+      secrets: {},
+      id: 'test',
+      actionTypeId: '.index',
+      name: 'es_index',
+      config: {
+        index: 'test_es_index',
+      },
+    } as EsIndexActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        index: [],
+      },
+    });
+  });
+});
+
 describe('action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
@@ -114,7 +134,7 @@ describe('IndexParamsFields renders', () => {
       ActionParamsProps<IndexActionParams>
     >;
     const actionParams = {
-      documents: ['test'],
+      documents: [{ test: 123 }],
     };
     const wrapper = mountWithIntl(
       <ParamsFields
@@ -129,6 +149,9 @@ describe('IndexParamsFields renders', () => {
         .find('[data-test-subj="actionIndexDoc"]')
         .first()
         .prop('value')
-    ).toBe('"test"');
+    ).toBe(`{
+  "test": 123
+}`);
+    expect(wrapper.find('[data-test-subj="documentsAddVariableButton"]').length > 0).toBeTruthy();
   });
 });

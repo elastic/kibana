@@ -33,7 +33,7 @@ interface ActionContext {
 export class EditPanelAction implements Action<ActionContext> {
   public readonly type = ACTION_EDIT_PANEL;
   public readonly id = ACTION_EDIT_PANEL;
-  public order = 50;
+  public order = 15;
 
   constructor(private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']) {}
 
@@ -62,11 +62,16 @@ export class EditPanelAction implements Action<ActionContext> {
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
-  public async execute() {
-    return;
+  public async execute(context: ActionContext) {
+    const href = await this.getHref(context);
+    if (href) {
+      // TODO: when apps start using browser router instead of hash router this has to be fixed
+      // https://github.com/elastic/kibana/issues/58217
+      window.location.href = href;
+    }
   }
 
-  public getHref({ embeddable }: ActionContext): string {
+  public async getHref({ embeddable }: ActionContext): Promise<string> {
     const editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
     return editUrl ? editUrl : '';
   }

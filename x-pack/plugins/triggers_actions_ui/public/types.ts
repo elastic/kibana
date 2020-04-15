@@ -12,8 +12,9 @@ import {
   AlertAction,
   AlertTaskState,
   RawAlertInstance,
+  AlertingFrameworkHealth,
 } from '../../../plugins/alerting/common';
-export { Alert, AlertAction, AlertTaskState, RawAlertInstance };
+export { Alert, AlertAction, AlertTaskState, RawAlertInstance, AlertingFrameworkHealth };
 export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
@@ -65,6 +66,7 @@ export interface ActionConnector {
   name: string;
   referencedByCount?: number;
   config: Record<string, any>;
+  isPreconfigured: boolean;
 }
 
 export type ActionConnectorWithoutId = Omit<ActionConnector, 'id'>;
@@ -110,5 +112,5 @@ export interface AlertTypeModel {
 }
 
 export interface IErrorObject {
-  [key: string]: string[];
+  [key: string]: string | string[] | IErrorObject;
 }

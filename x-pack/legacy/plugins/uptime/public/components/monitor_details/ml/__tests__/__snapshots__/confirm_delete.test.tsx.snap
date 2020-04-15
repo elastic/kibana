@@ -6,6 +6,7 @@ exports[`ML Confirm Job Delete shallow renders without errors 1`] = `
     buttonColor="danger"
     cancelButtonText="Cancel"
     confirmButtonText="Delete"
+    data-test-subj="uptimeMLJobDeleteConfirmModel"
     defaultFocusedButton="confirm"
     onCancel={[MockFunction]}
     onConfirm={[MockFunction]}
@@ -35,6 +36,7 @@ exports[`ML Confirm Job Delete shallow renders without errors while loading 1`] 
     buttonColor="danger"
     cancelButtonText="Cancel"
     confirmButtonText="Delete"
+    data-test-subj="uptimeMLJobDeleteConfirmModel"
     defaultFocusedButton="confirm"
     onCancel={[MockFunction]}
     onConfirm={[MockFunction]}

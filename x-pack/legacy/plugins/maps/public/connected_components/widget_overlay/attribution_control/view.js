@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 import _ from 'lodash';
 import { EuiText, EuiLink } from '@elastic/eui';
+import classNames from 'classnames';
 
 export class AttributionControl extends React.Component {
   state = {
@@ -86,7 +87,11 @@ export class AttributionControl extends React.Component {
       return null;
     }
     return (
-      <div className="mapAttributionControl">
+      <div
+        className={classNames('mapAttributionControl', {
+          mapAttributionControl__fullScreen: this.props.isFullScreen,
+        })}
+      >
         <EuiText size="xs">
           <small>
             <strong>{this._renderAttributions()}</strong>

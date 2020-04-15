@@ -27,6 +27,7 @@ export {
   InvalidateAPIKeyResult,
   CreateAPIKeyParams,
   InvalidateAPIKeyParams,
+  GrantAPIKeyResult,
 } from './api_keys';
 export {
   BasicHTTPAuthorizationHeaderCredentials,

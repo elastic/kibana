@@ -5,7 +5,7 @@
  */
 
 import { IIndexPattern } from 'src/plugins/data/public';
-import { Immutable, AlertData } from '../../../../../common/types';
+import { Immutable, AlertDetails } from '../../../../../common/types';
 import { AlertListData } from '../../types';
 
 interface ServerReturnedAlertsData {
@@ -15,7 +15,7 @@ interface ServerReturnedAlertsData {
 
 interface ServerReturnedAlertDetailsData {
   readonly type: 'serverReturnedAlertDetailsData';
-  readonly payload: Immutable<AlertData>;
+  readonly payload: Immutable<AlertDetails>;
 }
 
 interface ServerReturnedSearchBarIndexPatterns {

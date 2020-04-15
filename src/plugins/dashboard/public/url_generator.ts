@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { TimeRange, Filter, Query } from '../../data/public';
+import {
+  TimeRange,
+  Filter,
+  Query,
+  esFilters,
+  QueryState,
+  RefreshInterval,
+} from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition, UrlGeneratorState } from '../../share/public';
 
@@ -36,10 +43,15 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
    * Optionally set the time range in the time picker.
    */
   timeRange?: TimeRange;
+
+  /**
+   * Optionally set the refresh interval.
+   */
+  refreshInterval?: RefreshInterval;
+
   /**
    * Optionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the
-   * saved dashboard has filters saved with it, this will _replace_ those filters.  This will set
-   * app filters, not global filters.
+   * saved dashboard has filters saved with it, this will _replace_ those filters.
    */
   filters?: Filter[];
   /**
@@ -64,21 +76,32 @@ export const createDirectAccessDashboardLinkGenerator = (
     const appBasePath = startServices.appBasePath;
     const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
 
+    const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
+      Object.keys(stateObj).forEach(key => {
+        if (stateObj[key] === undefined) {
+          delete stateObj[key];
+        }
+      });
+      return stateObj;
+    };
+
     const appStateUrl = setStateToKbnUrl(
       STATE_STORAGE_KEY,
-      {
+      cleanEmptyKeys({
         query: state.query,
-        filters: state.filters,
-      },
+        filters: state.filters?.filter(f => !esFilters.isFilterPinned(f)),
+      }),
       { useHash },
       `${appBasePath}#/${hash}`
     );
 
-    return setStateToKbnUrl(
+    return setStateToKbnUrl<QueryState>(
       GLOBAL_STATE_STORAGE_KEY,
-      {
+      cleanEmptyKeys({
         time: state.timeRange,
-      },
+        filters: state.filters?.filter(f => esFilters.isFilterPinned(f)),
+        refreshInterval: state.refreshInterval,
+      }),
       { useHash },
       appStateUrl
     );

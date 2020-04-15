@@ -123,7 +123,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     </PopoverExpression>,
     <ForLastExpression
       onChangeWindowSize={timeWindowSize =>
-        setAlertParams('windowSize', timeWindowSize)
+        setAlertParams('windowSize', timeWindowSize || '')
       }
       onChangeWindowUnit={timeWindowUnit =>
         setAlertParams('windowUnit', timeWindowUnit)

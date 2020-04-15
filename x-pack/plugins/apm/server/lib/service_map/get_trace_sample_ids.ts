@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { uniq, take, sortBy } from 'lodash';
-import {
-  Setup,
-  SetupUIFilters,
-  SetupTimeRange
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { rangeFilter } from '../helpers/range_filter';
 import { ESFilter } from '../../../typings/elasticsearch';
 import {
@@ -28,7 +24,7 @@ export async function getTraceSampleIds({
 }: {
   serviceName?: string;
   environment?: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
   const { start, end, client, indices, config } = setup;
 

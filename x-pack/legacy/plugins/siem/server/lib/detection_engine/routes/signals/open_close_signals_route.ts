@@ -24,8 +24,12 @@ export const setSignalsStatusRoute = (router: IRouter) => {
     async (context, request, response) => {
       const { signal_ids: signalIds, query, status } = request.body;
       const clusterClient = context.core.elasticsearch.dataClient;
-      const siemClient = context.siem.getSiemClient();
+      const siemClient = context.siem?.getSiemClient();
       const siemResponse = buildSiemResponse(response);
+
+      if (!siemClient) {
+        return siemResponse.error({ statusCode: 404 });
+      }
 
       let queryObject;
       if (signalIds) {

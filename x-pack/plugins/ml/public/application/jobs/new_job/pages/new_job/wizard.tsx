@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useReducer, useState, useEffect } from 'react';
+import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
 
 import { WIZARD_STEPS } from '../components/step_types';
 
@@ -119,6 +120,8 @@ export const Wizard: FC<Props> = ({
       setHighestStep(currentStep);
     }
   }, [currentStep]);
+
+  useModelMemoryEstimator(jobCreator, jobValidator, jobCreatorUpdate, jobCreatorUpdated);
 
   return (
     <JobCreatorContext.Provider value={jobCreatorContext}>

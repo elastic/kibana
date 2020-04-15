@@ -47,11 +47,11 @@ import {
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerting/server';
 import { getLicenseExpiration } from './alerts/license_expiration';
+import { getClusterState } from './alerts/cluster_state';
 import { InfraPluginSetup } from '../../infra/server';
 
 export interface LegacyAPI {
   getServerStatus: () => string;
-  infra: any;
 }
 
 interface PluginsSetup {
@@ -155,6 +155,17 @@ export class Plugin {
           config.ui.ccs.enabled
         )
       );
+      plugins.alerting.registerType(
+        getClusterState(
+          async () => {
+            const coreStart = (await core.getStartServices())[0];
+            return coreStart.uiSettings;
+          },
+          cluster,
+          this.getLogger,
+          config.ui.ccs.enabled
+        )
+      );
     }
 
     // Initialize telemetry
@@ -166,12 +177,7 @@ export class Plugin {
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(
-        plugins.usageCollection,
-        config,
-        core.metrics.getOpsMetrics$(),
-        get(legacyConfig, 'kibana.index')
-      );
+      registerCollectors(plugins.usageCollection, config);
     }
 
     // If collection is enabled, create the bulk uploader
@@ -189,8 +195,9 @@ export class Plugin {
           name: serverInfo.name,
           index: get(legacyConfig, 'kibana.index'),
           host: serverInfo.host,
-          transport_address: `${serverInfo.host}:${serverInfo.port}`,
+          locale: i18n.getLocale(),
           port: serverInfo.port.toString(),
+          transport_address: `${serverInfo.host}:${serverInfo.port}`,
           version: this.initializerContext.env.packageInfo.version,
           snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
         },
@@ -224,7 +231,7 @@ export class Plugin {
       this.monitoringCore = this.getLegacyShim(
         config,
         legacyConfig,
-        core.getStartServices as () => Promise<[CoreStart, PluginsStart]>,
+        core.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
         this.licenseService,
         this.cluster
       );
@@ -269,18 +276,23 @@ export class Plugin {
       catalogue: ['monitoring'],
       privileges: null,
       reserved: {
-        privilege: {
-          app: ['monitoring', 'kibana'],
-          catalogue: ['monitoring'],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
         }),
+        privileges: [
+          {
+            id: 'monitoring',
+            privilege: {
+              app: ['monitoring', 'kibana'],
+              catalogue: ['monitoring'],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
+          },
+        ],
       },
     });
   }
@@ -293,7 +305,7 @@ export class Plugin {
   getLegacyShim(
     config: MonitoringConfig,
     legacyConfig: any,
-    getCoreServices: () => Promise<[CoreStart, PluginsStart]>,
+    getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
     cluster: ICustomClusterClient
   ): MonitoringCore {
