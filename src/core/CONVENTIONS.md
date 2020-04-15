@@ -16,6 +16,7 @@ Definition of done for a feature:
 - has a dedicated Github issue describing problem space
 - an umbrella task closed/updated with follow-ups
 - all code review comments are resolved
+- has been verified manually by at least one reviewer
 - can be used by first & third party plugins
 - there is no contradiction between client and server API
 - works for OSS version
