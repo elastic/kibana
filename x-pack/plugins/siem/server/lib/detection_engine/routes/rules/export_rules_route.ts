@@ -35,7 +35,7 @@ export const exportRulesRoute = (router: IRouter, config: ConfigType) => {
       }
 
       try {
-        const exportSizeLimit = config.maxImportExportSize;
+        const exportSizeLimit = config.maxRuleImportExportSize;
         if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
           return siemResponse.error({
             statusCode: 400,

@@ -34,7 +34,7 @@ export const exportTimelinesRoute = (router: IRouter, config: ConfigType) => {
       try {
         const siemResponse = buildSiemResponse(response);
         const savedObjectsClient = context.core.savedObjects.client;
-        const exportSizeLimit = config.maxImportExportSize;
+        const exportSizeLimit = config.maxTimelineImportExportSize;
 
         if (request.body?.ids != null && request.body.ids.length > exportSizeLimit) {
           return siemResponse.error({

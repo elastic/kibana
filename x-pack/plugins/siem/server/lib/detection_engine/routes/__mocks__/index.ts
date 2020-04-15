@@ -15,6 +15,8 @@ export { requestMock, requestContextMock, responseMock, serverMock };
 export const createMockConfig = () => ({
   enabled: true,
   [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
-  maxImportPayloadBytes: 10485760,
-  maxImportExportSize: 10000,
+  maxRuleImportExportSize: 10000,
+  maxRuleImportPayloadBytes: 10485760,
+  maxTimelineImportExportSize: 10000,
+  maxTimelineImportPayloadBytes: 10485760,
 });

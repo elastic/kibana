@@ -56,7 +56,7 @@ export const importTimelinesRoute = (
       options: {
         tags: ['access:siem'],
         body: {
-          maxBytes: config.maxImportPayloadBytes,
+          maxBytes: config.maxTimelineImportPayloadBytes,
           output: 'stream',
         },
       },
@@ -81,7 +81,7 @@ export const importTimelinesRoute = (
           });
         }
 
-        const objectLimit = config.maxImportExportSize;
+        const objectLimit = config.maxTimelineImportExportSize;
 
         const readStream = createTimelinesStreamFromNdJson(objectLimit);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([

@@ -49,7 +49,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
       options: {
         tags: ['access:siem'],
         body: {
-          maxBytes: config.maxImportPayloadBytes,
+          maxBytes: config.maxRuleImportPayloadBytes,
           output: 'stream',
         },
       },
@@ -77,7 +77,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
           });
         }
 
-        const objectLimit = config.maxImportExportSize;
+        const objectLimit = config.maxRuleImportExportSize;
         const readStream = createRulesStreamFromNdJson(objectLimit);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
           request.body.file,
