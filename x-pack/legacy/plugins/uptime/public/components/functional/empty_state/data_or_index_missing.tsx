@@ -13,13 +13,10 @@ import {
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
 import { UptimeSettingsContext } from '../../../contexts';
 import { DynamicSettings } from '../../../../common/runtime_types';
-import { SETTINGS_ROUTE } from '../../../../common/constants';
 
 interface DataMissingProps {
   headingMessage: JSX.Element;
