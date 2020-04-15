@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.7.0>>
 * <<release-notes-7.6.2>>
 * <<release-notes-7.6.1>>
 * <<release-notes-7.6.0>>
@@ -35,6 +36,289 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.7.0]]
+== {kib} 7.7.0
+
+See <<breaking-changes-7.7,breaking changes in 7.7>>.
+
+[float]
+[[enhancement-7.7.0]]
+=== Enhancements
+APM::
+* Updates monospace font family variable {pull}57555[#57555]
+* Shows missing permissions message to the user on the Services overview {pull}56374[#56374]
+* Settings list page for managing custom actions {pull}56853[#56853]
+* Divides &quot;Actions menu&quot; into sections to improve readability {pull}56623[#56623]
+* Creates settings page to manage Custom Links {pull}57788[#57788]
+* Creates custom link from Trace summary {pull}59648[#59648]
+* Writes tests for the Custom Link API {pull}60899[#60899]
+* Threshold alerts  {pull}59566[#59566]
+* Adds additional (java) options {pull}59860[#59860]
+* Sync badge {pull}55113[#55113]
+* Client.ip to metadata for RUM transactions {pull}56546[#56546]
+Canvas::
+* Adds Lens embeddables {pull}57499[#57499]
+* Switches to using EUI SuperDatePicker in time filter element {pull}59249[#59249]
+* Adds Visualize embeddable {pull}60859[#60859]
+* Adds argument to open all links in new tab within markdown element {pull}57017[#57017]
+* Updates esdocs datasource {pull}59512[#59512]
+* Improves expression autocomplete {pull}52035[#52035]
+Dashboard::
+* Dashboard/add panel flow {pull}59918[#59918]
+* Moves create new to the top of SavedObjectFinder {pull}56428[#56428]
+Lens::
+* Creates Lens filters on click with bar, line, area charts {pull}57261[#57261]
+* Allows number formatting within Lens {pull}56253[#56253]
+* Simplifies state management from visualization {pull}58279[#58279]
+* Improves suggestions when dragging field for the second time {pull}60687[#60687]
+* Disallows duplicate percentiles {pull}58299[#58299]
+* EUICodeEditor for Visualize JSON  {pull}58679[#58679]
+* Supports Histogram Data Type {pull}59387[#59387]
+* Median label shows &quot;Median&quot; instead of &quot;50th percentile of&quot; {pull}58521[#58521]
+Logs::
+* Uses the Super date picker in the log stream {pull}54280[#54280]
+* Adds expandable rows with category examples {pull}54586[#54586]
+* Shows navigation bar while loading source configuration {pull}59997[#59997]
+Machine Learning::
+* Processes delimited files like semi-structured text {pull}56038[#56038]
+* Supports multi-line JSON notation  {pull}58870[#58870]
+* Validates manual model memory input {pull}59056[#59056]
+* Clones analytics job  {pull}59791[#59791]
+* Uses a new ML endpoint to estimate a model memory {pull}60376[#60376]
+* Module setup with dynamic model memory estimation {pull}60656[#60656]
+* Adds text fields to datafeed start modal {pull}55560[#55560]
+* Categorization examples privilege check {pull}57375[#57375]
+* Adds filebeat config to file dataviz {pull}58152[#58152]
+* Global calendars {pull}57890[#57890]
+* Adds indices_options to datafeed {pull}59119[#59119]
+* Displays multi-class results in evaluate panel {pull}60760[#60760]
+* Adds support for date_nanos time field in anomaly job wizard {pull}59017[#59017]
+* Uses EuiDataGrid for outlier result page {pull}58235[#58235]
+* Supports multi-line JSON notation in advanced editor {pull}58015[#58015]
+* Adds support for percentiles aggregation to Transform wizard {pull}60763[#60763]
+* Adds clone feature to transforms list {pull}57837[#57837]
+* Uses EuiDataGrid for transform wizard {pull}52510[#52510]
+* Replaces KqlFilterBar with QueryStringInput {pull}59723[#59723]
+Management::
+* Adds support for proxy mode {pull}59221[#59221]
+* Adds filter for ILM phase to Index Management {pull}57402[#57402]
+* Creates Painless Lab app {pull}57538[#57538]
+* Moves out of legacy {pull}55331[#55331]
+* Moves out of legacy and migrates server side to New Platform {pull}55690[#55690]
+* Updates Console progress bar {pull}56628[#56628]
+* Auto follow pause &amp; resume {pull}56615[#56615]
+* Supports triple quoted JSON strings and Painless highlighting to Watcher and SearchProfiler {pull}57563[#57563]
+* Server-side batch reindexing {pull}58598[#58598]
+* Better handling of closed indices {pull}58890[#58890]
+* Advanced settings UI change to centralize save state {pull}53693[#53693]
+Maps::
+* Improves Layer Style UI {pull}58406[#58406]
+* Shows field type icons in data driven styling field select {pull}55166[#55166]
+* Style icons by category {pull}55747[#55747]
+* Adds type icons to SingleFieldSelect component {pull}56313[#56313]
+* Disables style forms when they are not applied due to other style settings {pull}55858[#55858]
+* Autocompletes for custom color palettes and custom icon palettes {pull}56446[#56446]
+* Allows simultaneous opening of multiple tooltips {pull}57226[#57226]
+* Adds Top term aggregation {pull}57875[#57875]
+* Direct Discover &quot;visualize&quot; to open Maps application {pull}58549[#58549]
+* Top term percentage field property {pull}59386[#59386]
+* Adds UI to disable style meta and get top categories from current features {pull}59707[#59707]
+* Adds draw control to create distance filter {pull}58163[#58163]
+* Blended layer that switches between documents and clusters {pull}57879[#57879]
+* Default ES document layer scaling type to clusters and show scaling UI in the create wizard {pull}60668[#60668]
+* Disables add layer button when flyout is open {pull}54932[#54932]
+* Supports categorical styling for numbers and dates {pull}57908[#57908]
+Metrics::
+* Setup commonly used time ranges in timepicker {pull}56701[#56701]
+* Custom Metrics for Inventory View {pull}58072[#58072]
+* Alerting for metrics explorer and inventory {pull}58779[#58779]
+* Creates a new menu for observability links {pull}54847[#54847]
+* Creates Metric Threshold Alert Type and Executor {pull}57606[#57606]
+Monitoring::
+* Supports shipping directly to the monitoring cluster {pull}57022[#57022]
+Platform::
+* Improves validation in truncate field formatter editor {pull}56521[#56521]
+* Variable support for interpreter {pull}54788[#54788]
+Reporting::
+* Handles page setup errors and capture the page, don't fail the job {pull}58683[#58683]
+* Allows reports to be deleted in Management &gt; Kibana &gt; Reporting {pull}60077[#60077]
+SIEM::
+* Overview: Recent cases widget {pull}60993[#60993]
+* Adds custom reputation link {pull}57814[#57814]
+* Exports timeline {pull}58368[#58368]
+* Rule activity monitoring {pull}60816[#60816]
+* Removes has manage api keys requirement {pull}62446[#62446]
+* Adds release notes link and updates one UI section {pull}60825[#60825]
+* Adds rule notifications {pull}59004[#59004]
+* Version 7.7 rule import {pull}61903[#61903]
+* Creates ML Rules {pull}58053[#58053]
+* Case workflow api schema {pull}51535[#51535]
+* Service Now {kib} Action {pull}53890[#53890]
+* API with io-ts validation {pull}59265[#59265]
+* Status / Batch update {pull}59856[#59856]
+* Imports timeline {pull}60880[#60880]
+* Bug/clean up phase I {pull}61354[#61354]
+* Cases clean up Phase II {pull}61750[#61750]
+* Modifies gap detection util to accept all dateMath formats {pull}56055[#56055]
+* Adds note markdown field to backend {pull}59796[#59796]
+* Adds rule markdown field to rule create, detail, and edit flows {pull}60108[#60108]
+* Adds rule markdown to timeline global notes {pull}61026[#61026]
+Security::
+* Uses links instead of click handlers when switching spaces {pull}57730[#57730]
+* Adds support for deprecated roles {pull}57209[#57209]
+* Supports for sub-feature privileges {pull}60563[#60563]
+Telemetry::
+* Application Usage implemented in @kbn/analytics {pull}58401[#58401]
+* Server-side Migration to NP {pull}60485[#60485]
+* Use EuiTokens for ES field types {pull}57911[#57911]
+* Adds 7 day metrics to Application Usage telemetry {pull}59846[#59846]
+Uptime::
+* Adds Settings Page {pull}53550[#53550]
+* Adds Alerting UI {pull}57919[#57919]
+* Adds configurable page size to monitor list {pull}60573[#60573]
+* Adds Green Icon for all up Monitors {pull}56770[#56770]
+* Implements drag and select on charts {pull}57089[#57089]
+* Fix/filter group autocomplete {pull}57686[#57686]
+* Ml detection of duration anomalies {pull}59785[#59785]
+Visualizations::
+* Adds Positive Rate to Aggregations {pull}59843[#59843]
+* Fixes linked search behavior {pull}59690[#59690]
+
+[float]
+[[bug-7.7.0]]
+=== Bug fixes
+Alerts::
+* Retains empty AlertsList when filter has removed all items {pull}60501[#60501]
+* Fixes alert threshold line disappears {pull}61499[#61499]
+APM::
+* Changes &quot;url&quot; to &quot;urls&quot; in APM agent instructions {pull}60790[#60790]
+* Uses ES Permission API to check if a user has permissions to read from APM indices {pull}57311[#57311]
+* Filters are not prefilled when the custom link flyout is opened from a transaction page {pull}61650[#61650]
+* .apm-agent-configuration is not created if {kib} is started while ES is not ready {pull}61610[#61610]
+* Don’t include UI filters when fetching a specific transaction {pull}57934[#57934]
+* Uses docLinks API for APM doc links {pull}61880[#61880]
+* Updates APM index pattern {pull}61265[#61265]
+Canvas::
+* Toggles footer editable controls when you turn off edit mode #52786 {pull}58044[#58044]
+* Fixes map embeddables not showing up on PDF reports {pull}61149[#61149]
+* Limits rows in debug element {pull}60804[#60804]
+Dashboard::
+* Puts embed param into short url instead of behind it {pull}58846[#58846]
+* Allows markdown in error embeddable {pull}62427[#62427]
+Discover::
+* Removes flickering when opening filter bar popover {pull}56222[#56222]
+* Retains pinned filters when loading and clearing saved queries {pull}54307[#54307]
+Graph::
+* Specifies valid licenses for the Graph feature {pull}55911[#55911]
+* Improves graph missing workspace error message {pull}58876[#58876]
+Lens::
+* Filters out pinned filters from saved object of Lens {pull}57197[#57197]
+* Adds using queries/filters for field existence endpoint {pull}59033[#59033]
+* Fixes display single bar in XYChart Bar Vis {pull}61452[#61452]
+* Resetting a layer generates new suggestions {pull}60674[#60674]
+* Fixes disabled switches in the editor {pull}62911[#62911]
+Logs::
+* Correctly update the expanded log rate table rows {pull}60306[#60306]
+Machine Learning::
+* Handles Empty Partition Field Values in Single Metric Viewer {pull}61649[#61649]
+* Fixes job wizard model memory limit warnings {pull}62331[#62331]
+* Files data viz fix index pattern warning after index change {pull}57807[#57807]
+* Uses real datafeed ID for datafeed preview {pull}60275[#60275]
+* Disables start trial option when license management ui is disabled {pull}60987[#60987]
+* Fixes jobs list filter in url {pull}61822[#61822]
+* Fixes job ID in edit job flyout {pull}61840[#61840]
+* Fixes reporting of http request errors {pull}61811[#61811]
+* Ensures confusion matrix label column is correct {pull}60308[#60308]
+* Ensures column in correct position after reselect  {pull}61342[#61342]
+* Ensures query bar syntax errors are shown  {pull}61333[#61333]
+* Ensures job state is up to date {pull}61678[#61678]
+* Increases number of items that can be paged in calendars and filters lists {pull}61842[#61842]
+* Uses index pattern field format if one exists {pull}61709[#61709]
+* Ensures filter works as expected {pull}62041[#62041]
+* Ensures destination index pattern created {pull}62450[#62450]
+* Fixes page heading structure {pull}56741[#56741]
+* Fixes handling of index pattern with special characters {pull}59884[#59884]
+* Fixes to error handling for analytics jobs and file data viz {pull}60249[#60249]
+* Fixes Anomaly Explorer swimlane label and chart tooltips {pull}61327[#61327]
+* Prevents training_percent of 0 for analytics job {pull}61789[#61789]
+* Removes duplicate page main landmarks {pull}56883[#56883]
+* Fixes license check {pull}58343[#58343]
+* Clears {kib} index pattern cache on creation or form reset {pull}62184[#62184]
+Management::
+* Adds support for additional watch action statuses {pull}55092[#55092]
+* Upgrade assistant migration meta data can become stale {pull}60789[#60789]
+* Fixes doc links {pull}61331[#61331]
+* Fixes for console error handling and loading of autocomplete {pull}58587[#58587]
+* Fixes grokdebugger simulate call in non-default space {pull}61423[#61423]
+* Handles the case where saving to history may throw an error {pull}62424[#62424]
+* Escapes single quotes surrounded by double quotes {pull}63229[#63229]
+* System index templates can't be edited {pull}55229[#55229]
+* Not possible to edit a watch that was created with the API if the ID contains a dot {pull}59383[#59383]
+* Fixes console a11y failures {pull}57520[#57520]
+Maps::
+* Do not show border color for icon in legend when border width is zero {pull}57501[#57501]
+* Uses blended layer when linking discover to maps {pull}61467[#61467]
+* Fixes tooltip overflow {pull}61564[#61564]
+* Cleans up unsaved state check {pull}61705[#61705]
+* Fixes regression in loading left join fields {pull}63325[#63325]
+* Fixes cross origin error for icon spritesheets when Kibana secured via OAuth proxy {pull}53896[#53896]
+* Correctly open layer settings from add layer wizard {pull}48971[#48971]
+Metrics::
+* Limits group by selector to only 2 fields {pull}56800[#56800]
+* Uses CPU Usage limits for Kubernetes pods when available {pull}58424[#58424]
+* Fixes toolbar popover for metrics table row {pull}56796[#56796]
+Monitoring::
+* Handles setup mode if security is disabled {pull}53306[#53306]
+* Protects against no monitoring data near end of time series {pull}61273[#61273]
+* Adds new config for logging index name {pull}56920[#56920]
+Platform::
+* Rollup index pattern error: must match one rollup index {pull}56732[#56732]
+* In scripted fields, unable to switch the `Type` {pull}59285[#59285]
+* Duplicates query filters in es request {pull}60106[#60106]
+* Bugfix dashboard unpins filters {pull}62301[#62301]
+* Fixes plugin enabled config options {pull}60998[#60998]
+* Fixes tabifyAggResponse {pull}61214[#61214]
+* Fixes parse interval {pull}62267[#62267]
+* Avoid 'app not found' flickering while awaiting for mount {pull}56483[#56483]
+* Creates empty string filters when value not specified {pull}57442[#57442]
+* Fixes formatter on range aggregation {pull}58651[#58651]
+Reporting::
+* Fixes error handling for job handler in route {pull}60161[#60161]
+Security::
+* Handling a 404 when the space's telemetry collector runs {pull}55921[#55921]
+SIEM::
+* Allows Import timeline for authorised users {pull}61438[#61438]
+* Imports timeline schema update {pull}61622[#61622]
+* Fixes bug with timeline templates not working {pull}60476[#60476]
+* Fixes export of single rule and the icons {pull}62394[#62394]
+* Updates process and TLS tables to use ECS 1.5 fields {pull}60854[#60854]
+Telemetry::
+* Fixes bug introduced in #55859 {pull}57441[#57441]
+* UI Metrics use findAll to retrieve all Saved Objects {pull}59891[#59891]
+Uptime::
+* Updates heartbeat index name for 7.7 {pull}62172[#62172]
+* Shows only total in snapshot heading {pull}58376[#58376]
+* Fixes PingList pagination {pull}61481[#61481]
+* Fixes es query function null reference errors {pull}61465[#61465]
+* Fixes issue with Kibana Icon in Uptime App {pull}56837[#56837]
+* Adds tests for pages {pull}56736[#56736]
+Visualizations::
+* Fixes broken Handlebar documentation links {pull}55866[#55866]
+* Shows timepicker in Timelion and TSVB {pull}58857[#58857]
+* Makes Vega remove filter work {pull}58871[#58871]
+* Makes d3 place nicely with object values {pull}62004[#62004]
+* Fixes position calculation of ticks in non-horizontal axes {pull}62309[#62309]
+
+[float]
+[[deprecation-7.7.0]]
+=== Deprecations
+Monitoring::
+* Changes all configs to `monitoring.*` {pull}54919[#54919]
+* Changes all configs to `monitoring.*` {pull}56215[#56215]
+Platform::
+* Migrates Vega and Graph configs to new platform {pull}57011[#57011]
+
 [[release-notes-7.6.2]]
 == {kib} 7.6.2
 
