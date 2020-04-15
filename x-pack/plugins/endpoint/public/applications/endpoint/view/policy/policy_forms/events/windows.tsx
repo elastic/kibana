@@ -8,6 +8,8 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { ImmutableArray } from '../../../../../../../common/types';
+import { setIn, getIn } from '../../../../models/policy_details_config';
 import { EventsCheckbox } from './checkbox';
 import { OS, UIPolicyConfig } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
@@ -16,18 +18,45 @@ import {
   totalWindowsEvents,
 } from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
-import { setIn, getIn } from '../../../../models/policy_details_config';
 
 export const WindowsEvents = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedWindowsEvents);
   const total = usePolicyDetailsSelector(totalWindowsEvents);
 
-  const checkboxes: Array<{
+  const checkboxes: ImmutableArray<{
     name: string;
     os: 'windows';
     protectionField: keyof UIPolicyConfig['windows']['events'];
   }> = useMemo(
     () => [
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.dllDriverLoad', {
+          defaultMessage: 'DLL and Driver Load',
+        }),
+        os: OS.windows,
+        protectionField: 'dll_and_driver_load',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.dns', {
+          defaultMessage: 'DNS',
+        }),
+        os: OS.windows,
+        protectionField: 'dns',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.file', {
+          defaultMessage: 'File',
+        }),
+        os: OS.windows,
+        protectionField: 'file',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.network', {
+          defaultMessage: 'Network',
+        }),
+        os: OS.windows,
+        protectionField: 'network',
+      },
       {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.process', {
           defaultMessage: 'Process',
@@ -36,11 +65,18 @@ export const WindowsEvents = React.memo(() => {
         protectionField: 'process',
       },
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.network', {
-          defaultMessage: 'Network',
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.registry', {
+          defaultMessage: 'Registry',
         }),
         os: OS.windows,
-        protectionField: 'network',
+        protectionField: 'registry',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.security', {
+          defaultMessage: 'Security',
+        }),
+        os: OS.windows,
+        protectionField: 'security',
       },
     ],
     []
@@ -97,7 +133,7 @@ export const WindowsEvents = React.memo(() => {
         ],
         []
       )}
-      id="windowsEventingForm"
+      id="windowsEventsForm"
       rightCorner={collectionsEnabled}
       children={renderCheckboxes}
     />

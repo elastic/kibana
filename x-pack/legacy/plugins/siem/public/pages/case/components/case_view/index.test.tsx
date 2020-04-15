@@ -8,13 +8,8 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
-import { CaseComponent, CaseView } from './';
-import {
-  basicCaseClosed,
-  caseClosedProps,
-  caseProps,
-  caseUserActions,
-} from '../__mock__/case_data';
+import { CaseComponent, CaseProps, CaseView } from './';
+import { basicCase, basicCaseClosed, caseUserActions } from '../../../../containers/case/mock';
 import { TestProviders } from '../../../../mock';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { useGetCase } from '../../../../containers/case/use_get_case';
@@ -28,6 +23,19 @@ jest.mock('../use_push_to_service');
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const usePushToServiceMock = usePushToService as jest.Mock;
+
+export const caseProps: CaseProps = {
+  caseId: basicCase.id,
+  userCanCrud: true,
+  caseData: basicCase,
+  fetchCase: jest.fn(),
+  updateCase: jest.fn(),
+};
+
+export const caseClosedProps: CaseProps = {
+  ...caseProps,
+  caseData: basicCaseClosed,
+};
 
 describe('CaseView ', () => {
   const updateCaseProperty = jest.fn();
