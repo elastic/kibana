@@ -73,7 +73,6 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
                 missing: 'N/A',
               },
               aggs: {
-                status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
                 duration: { stats: { field: 'monitor.duration.us' } },
               },
             },

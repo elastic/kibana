@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FilterGroupComponent } from './filter_group';
-export { FilterGroup } from './filter_group_container';
+export { SnapshotComponent } from './snapshot';
+export { Snapshot } from './snapshot_container';

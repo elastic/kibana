@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { LocationLink } from '../../overview/monitor_list/monitor_list_drawer';
+import { LocationLink } from '../../common/location_link';
 
 const EuiPopoverRight = styled(EuiFlexItem)`
   margin-left: auto;

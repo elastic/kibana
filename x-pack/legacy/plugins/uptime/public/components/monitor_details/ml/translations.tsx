@@ -96,13 +96,6 @@ export const MANAGE_ANOMALY_DETECTION = i18n.translate(
   }
 );
 
-export const VIEW_EXISTING_JOB = i18n.translate(
-  'xpack.uptime.ml.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText',
-  {
-    defaultMessage: 'View existing job',
-  }
-);
-
 export const ML_MANAGEMENT_PAGE = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.manageMLJobDescription.mlJobsPageLinkText',
   {

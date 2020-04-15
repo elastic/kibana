@@ -25,7 +25,7 @@ import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
-import { useMonitorId } from '../../../hooks/use_monitor';
+import { useMonitorId } from '../../../hooks';
 
 interface Props {
   onClose: () => void;

@@ -7,3 +7,4 @@
 export { DataMissing } from './data_missing';
 export { EmptyStateComponent } from './empty_state';
 export { EmptyIndex } from './empty_index';
+export { EmptyState } from './empty_state_container';

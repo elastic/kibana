@@ -4,13 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface CondensedCheck {
-  childStatuses: CondensedCheckStatus[];
-  location: string | null;
-  status: string;
-  timestamp: string;
-}
-
 export interface CondensedCheckStatus {
   ip?: string | null;
   status: string;

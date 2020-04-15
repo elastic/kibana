@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './ml';
 export * from './ping_list';
 export * from './location_map';
 export * from './monitor_status_details';
-
-export { PingHistogram } from './ping_histogram/ping_histogram_container';
+export * from './ping_histogram';
+export * from './monitor_charts';

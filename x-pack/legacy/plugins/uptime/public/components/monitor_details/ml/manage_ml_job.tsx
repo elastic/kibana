@@ -13,7 +13,7 @@ import { UptimeSettingsContext } from '../../../contexts';
 import * as labels from './translations';
 import { getMLJobLinkHref } from './ml_job_link';
 import { useGetUrlParams } from '../../../hooks';
-import { useMonitorId } from '../../../hooks/use_monitor';
+import { useMonitorId } from '../../../hooks';
 
 interface Props {
   hasMLJob: boolean;

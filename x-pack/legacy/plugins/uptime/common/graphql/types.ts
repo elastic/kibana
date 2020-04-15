@@ -52,10 +52,6 @@ export interface Location {
   lon?: number | null;
 }
 
-export interface DocCount {
-  count: UnsignedInteger;
-}
-
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
   /** Used to go to the next page of results */
