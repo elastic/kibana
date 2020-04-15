@@ -302,11 +302,25 @@ describe('rule helpers', () => {
     test('returns expected ActionsStepRule rule object', () => {
       const mockedRule = {
         ...mockRule('test-id'),
-        actions: [],
+        actions: [
+          {
+            id: 'id',
+            group: 'group',
+            params: {},
+            action_type_id: 'action_type_id',
+          },
+        ],
       };
       const result: ActionsStepRule = getActionsStepsData(mockedRule);
       const expected = {
-        actions: [],
+        actions: [
+          {
+            id: 'id',
+            group: 'group',
+            params: {},
+            actionTypeId: 'action_type_id',
+          },
+        ],
         enabled: mockedRule.enabled,
         isNew: false,
         throttle: 'no_actions',
