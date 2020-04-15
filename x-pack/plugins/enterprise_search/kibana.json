@@ -1,9 +1,9 @@
 {
-  "id": "appSearch",
+  "id": "enterpriseSearch",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": ["home"],
-  "configPath": ["appSearch"],
+  "configPath": ["enterpriseSearch"],
   "server": true,
   "ui": true
 }

@@ -6,10 +6,10 @@
 
 import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { AppSearchPlugin } from './plugin';
+import { EnterpriseSearchPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
-  return new AppSearchPlugin(initializerContext);
+  return new EnterpriseSearchPlugin(initializerContext);
 };
 
 export const configSchema = schema.object({

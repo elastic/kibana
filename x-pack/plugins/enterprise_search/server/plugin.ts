@@ -8,13 +8,13 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
 
-import { registerEnginesRoute } from './routes/engines';
+import { registerEnginesRoute } from './routes/app_search/engines';
 
 export interface ServerConfigType {
   host?: string;
 }
 
-export class AppSearchPlugin implements Plugin {
+export class EnterpriseSearchPlugin implements Plugin {
   private config: Observable<ServerConfigType>;
 
   constructor(initializerContext: PluginInitializerContext) {
