@@ -19,17 +19,21 @@ jest.mock('../../../../containers/case/use_get_tags');
 
 const onFilterChanged = jest.fn();
 const fetchReporters = jest.fn();
+const fetchTags = jest.fn();
+const setIsRefetchFilters = jest.fn();
 
 const props = {
   countClosedCases: 1234,
   countOpenCases: 99,
   onFilterChanged,
   initial: DEFAULT_FILTER_OPTIONS,
+  isRefetchFilters: false,
+  setIsRefetchFilters,
 };
 describe('CasesTableFilters ', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'] });
+    (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags });
     (useGetReporters as jest.Mock).mockReturnValue({
       reporters: ['casetester'],
       respReporters: [{ username: 'casetester' }],
@@ -57,7 +61,7 @@ describe('CasesTableFilters ', () => {
         .text()
     ).toEqual('Closed cases (1234)');
   });
-  it('should call onFilterChange when tags change', () => {
+  it('should call onFilterChange when selected tags change', () => {
     const wrapper = mount(
       <TestProviders>
         <CasesTableFilters {...props} />
@@ -74,7 +78,7 @@ describe('CasesTableFilters ', () => {
 
     expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
   });
-  it('should call onFilterChange when reporters change', () => {
+  it('should call onFilterChange when selected reporters change', () => {
     const wrapper = mount(
       <TestProviders>
         <CasesTableFilters {...props} />
@@ -117,5 +121,48 @@ describe('CasesTableFilters ', () => {
       .simulate('click');
 
     expect(onFilterChanged).toBeCalledWith({ status: 'closed' });
+  });
+  it('should refetch tags and reporters when isRefetchFilters is true', () => {
+    mount(
+      <TestProviders>
+        <CasesTableFilters {...{ ...props, isRefetchFilters: true }} />
+      </TestProviders>
+    );
+    expect(fetchReporters).toHaveBeenCalledTimes(1);
+    expect(fetchTags).toHaveBeenCalledTimes(1);
+    expect(setIsRefetchFilters).toHaveBeenCalledWith(false);
+  });
+  it('should remove tag from selected tags when tag no longer exists', () => {
+    const ourProps = {
+      ...props,
+      initial: {
+        ...DEFAULT_FILTER_OPTIONS,
+        tags: ['pepsi', 'rc'],
+      },
+    };
+    mount(
+      <TestProviders>
+        <CasesTableFilters {...ourProps} />
+      </TestProviders>
+    );
+    expect(onFilterChanged).toHaveBeenCalledWith({ tags: ['pepsi'] });
+  });
+  it('should remove reporter from selected reporters when reporter no longer exists', () => {
+    const ourProps = {
+      ...props,
+      initial: {
+        ...DEFAULT_FILTER_OPTIONS,
+        reporters: [
+          { username: 'casetester', full_name: null, email: null },
+          { username: 'batman', full_name: null, email: null },
+        ],
+      },
+    };
+    mount(
+      <TestProviders>
+        <CasesTableFilters {...ourProps} />
+      </TestProviders>
+    );
+    expect(onFilterChanged).toHaveBeenCalledWith({ reporters: [{ username: 'casetester' }] });
   });
 });
