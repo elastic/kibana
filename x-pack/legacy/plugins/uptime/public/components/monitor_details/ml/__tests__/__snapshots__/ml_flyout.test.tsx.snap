@@ -3,6 +3,7 @@
 exports[`ML Flyout component renders without errors 1`] = `
 <EuiFlyout
   closeButtonAriaLabel="Closes this dialog"
+  data-test-subj="uptimeMLFlyout"
   hideCloseButton={false}
   maxWidth={false}
   onClose={[Function]}
@@ -53,13 +54,23 @@ exports[`ML Flyout component renders without errors 1`] = `
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup
-      alignItems="flexEnd"
       justifyContent="spaceBetween"
     >
       <EuiFlexItem
         grow={false}
       >
+        <EuiButtonEmpty
+          disabled={false}
+          onClick={[Function]}
+        >
+          Cancel
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
         <EuiButton
+          data-test-subj="uptimeMLCreateJobBtn"
           disabled={true}
           fill={true}
           isLoading={false}
@@ -90,6 +101,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
   >
     <div
       class="euiFlyout euiFlyout--small"
+      data-test-subj="uptimeMLFlyout"
       role="dialog"
       tabindex="0"
     >
@@ -128,6 +140,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
           >
             <div
               class="euiCallOut euiCallOut--primary license-info-trial"
+              data-test-subj="uptimeMLLicenseInfo"
             >
               <div
                 class="euiCallOutHeader"
@@ -206,13 +219,32 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
         class="euiFlyoutFooter"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <button
+              class="euiButtonEmpty euiButtonEmpty--primary"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Cancel
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
               class="euiButton euiButton--primary euiButton--fill"
+              data-test-subj="uptimeMLCreateJobBtn"
               disabled=""
               type="button"
             >

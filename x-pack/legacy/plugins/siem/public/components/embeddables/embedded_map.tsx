@@ -8,9 +8,12 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
+import { npStart } from 'ui/new_platform';
 
-import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import {
+  EmbeddablePanel,
+  ErrorEmbeddable,
+} from '../../../../../../../src/plugins/embeddable/public';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 import { useIndexPatterns } from '../../hooks/use_index_patterns';
@@ -84,7 +87,9 @@ export const EmbeddedMapComponent = ({
   setQuery,
   startDate,
 }: EmbeddedMapProps) => {
-  const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | null>(null);
+  const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | undefined | ErrorEmbeddable>(
+    undefined
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [isIndexError, setIsIndexError] = useState(false);
@@ -198,8 +203,8 @@ export const EmbeddedMapComponent = ({
             data-test-subj="embeddable-panel"
             embeddable={embeddable}
             getActions={services.uiActions.getTriggerCompatibleActions}
-            getEmbeddableFactory={start.getEmbeddableFactory}
-            getAllEmbeddableFactories={start.getEmbeddableFactories}
+            getEmbeddableFactory={npStart.plugins.embeddable.getEmbeddableFactory}
+            getAllEmbeddableFactories={npStart.plugins.embeddable.getEmbeddableFactories}
             notifications={services.notifications}
             overlays={services.overlays}
             inspector={services.inspector}

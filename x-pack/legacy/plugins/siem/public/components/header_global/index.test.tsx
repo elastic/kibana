@@ -10,6 +10,16 @@ import React from 'react';
 import '../../mock/match_media';
 import { HeaderGlobal } from './index';
 
+jest.mock('react-router-dom', () => ({
+  useLocation: () => ({
+    pathname: '/app/siem#/hosts/allHosts',
+    hash: '',
+    search: '',
+    state: '',
+  }),
+  withRouter: () => jest.fn(),
+}));
+
 jest.mock('ui/new_platform');
 
 // Test will fail because we will to need to mock some core services to make the test work
@@ -19,6 +29,10 @@ jest.mock('../search_bar', () => ({
 }));
 
 describe('HeaderGlobal', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('it renders', () => {
     const wrapper = shallow(<HeaderGlobal />);
 

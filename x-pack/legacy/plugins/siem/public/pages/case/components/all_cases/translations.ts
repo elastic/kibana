@@ -46,6 +46,10 @@ export const BULK_ACTIONS = i18n.translate('xpack.siem.case.caseTable.bulkAction
   defaultMessage: 'Bulk actions',
 });
 
+export const SERVICENOW_INCIDENT = i18n.translate('xpack.siem.case.caseTable.snIncident', {
+  defaultMessage: 'ServiceNow Incident',
+});
+
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.siem.case.caseTable.searchPlaceholder', {
   defaultMessage: 'e.g. case name',
 });
@@ -59,9 +63,11 @@ export const CLOSED_CASES = i18n.translate('xpack.siem.case.caseTable.closedCase
 export const CLOSED = i18n.translate('xpack.siem.case.caseTable.closed', {
   defaultMessage: 'Closed',
 });
+
 export const DELETE = i18n.translate('xpack.siem.case.caseTable.delete', {
   defaultMessage: 'Delete',
 });
+
 export const REQUIRES_UPDATE = i18n.translate('xpack.siem.case.caseTable.requiresUpdate', {
   defaultMessage: ' requires update',
 });
@@ -75,4 +81,8 @@ export const NOT_PUSHED = i18n.translate('xpack.siem.case.caseTable.notPushed', 
 
 export const REFRESH = i18n.translate('xpack.siem.case.caseTable.refreshTitle', {
   defaultMessage: 'Refresh',
+});
+
+export const SERVICENOW_LINK_ARIA = i18n.translate('xpack.siem.case.caseTable.serviceNowLinkAria', {
+  defaultMessage: 'click to view the incident on servicenow',
 });

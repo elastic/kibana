@@ -35,6 +35,7 @@ interface CaseStatusProps {
   badgeColor: string;
   buttonLabel: string;
   caseData: Case;
+  disabled?: boolean;
   icon: string;
   isLoading: boolean;
   isSelected: boolean;
@@ -49,6 +50,7 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
   badgeColor,
   buttonLabel,
   caseData,
+  disabled = false,
   icon,
   isLoading,
   isSelected,
@@ -82,13 +84,14 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="l" alignItems="center">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="refresh" onClick={onRefresh}>
+          <EuiButtonEmpty data-test-subj="case-refresh" iconType="refresh" onClick={onRefresh}>
             {i18n.CASE_REFRESH}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButtonToggle
             data-test-subj="toggle-case-status"
+            isDisabled={disabled}
             iconType={icon}
             isLoading={isLoading}
             isSelected={isSelected}
@@ -97,7 +100,7 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <CaseViewActions caseData={caseData} />
+          <CaseViewActions caseData={caseData} disabled={disabled} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

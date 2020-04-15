@@ -6,12 +6,7 @@
 
 import * as t from 'io-ts';
 
-export const RuleTypeSchema = t.keyof({
-  query: null,
-  saved_query: null,
-  machine_learning: null,
-});
-export type RuleType = t.TypeOf<typeof RuleTypeSchema>;
+import { RuleTypeSchema } from '../../../../common/detection_engine/types';
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
@@ -75,7 +70,7 @@ const MetaRule = t.intersection([
   }),
   t.partial({
     throttle: t.string,
-    kibanaSiemAppUrl: t.string,
+    kibana_siem_app_url: t.string,
   }),
 ]);
 

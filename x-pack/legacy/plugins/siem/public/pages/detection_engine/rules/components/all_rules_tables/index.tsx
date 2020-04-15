@@ -4,30 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiTab, EuiTabs, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiTab,
+  EuiTabs,
+  EuiEmptyPrompt,
+  Direction,
+  EuiTableSelectionType,
+} from '@elastic/eui';
 import React, { useMemo, memo, useState } from 'react';
 import styled from 'styled-components';
 
+import { EuiBasicTableOnChange } from '../../types';
 import * as i18n from '../../translations';
-import { RuleStatusRowItemType } from '../../../../../pages/detection_engine/rules/all/columns';
-import { Rules } from '../../../../../containers/detection_engine/rules';
+import {
+  RulesColumns,
+  RuleStatusRowItemType,
+} from '../../../../../pages/detection_engine/rules/all/columns';
+import { Rule, Rules } from '../../../../../containers/detection_engine/rules';
 
 // EuiBasicTable give me a hardtime with adding the ref attributes so I went the easy way
 // after few hours of fight with typescript !!!! I lost :(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
+export interface SortingType {
+  sort: {
+    field: 'enabled';
+    direction: Direction;
+  };
+}
+
 interface AllRulesTablesProps {
-  euiBasicTableSelectionProps: unknown;
+  euiBasicTableSelectionProps: EuiTableSelectionType<Rule>;
   hasNoPermissions: boolean;
-  monitoringColumns: unknown;
-  paginationMemo: unknown;
+  monitoringColumns: Array<EuiBasicTableColumn<RuleStatusRowItemType>>;
+  pagination: {
+    pageIndex: number;
+    pageSize: number;
+    totalItemCount: number;
+    pageSizeOptions: number[];
+  };
   rules: Rules;
-  rulesColumns: unknown;
-  rulesStatuses: RuleStatusRowItemType[] | null;
-  sorting: unknown;
-  tableOnChangeCallback: unknown;
-  tableRef?: unknown;
+  rulesColumns: RulesColumns[];
+  rulesStatuses: RuleStatusRowItemType[];
+  sorting: {
+    sort: {
+      field: 'enabled';
+      direction: Direction;
+    };
+  };
+  tableOnChangeCallback: ({ page, sort }: EuiBasicTableOnChange) => void;
+  tableRef?: React.MutableRefObject<EuiBasicTable | undefined>;
 }
 
 enum AllRulesTabs {
@@ -52,7 +81,7 @@ const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
   euiBasicTableSelectionProps,
   hasNoPermissions,
   monitoringColumns,
-  paginationMemo,
+  pagination,
   rules,
   rulesColumns,
   rulesStatuses,
@@ -95,9 +124,9 @@ const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
           items={rules ?? []}
           noItemsMessage={emptyPrompt}
           onChange={tableOnChangeCallback}
-          pagination={paginationMemo}
+          pagination={pagination}
           ref={tableRef}
-          {...sorting}
+          sorting={sorting}
           selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
         />
       )}
@@ -110,8 +139,8 @@ const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
           items={rulesStatuses}
           noItemsMessage={emptyPrompt}
           onChange={tableOnChangeCallback}
-          pagination={paginationMemo}
-          {...sorting}
+          pagination={pagination}
+          sorting={sorting}
         />
       )}
     </>

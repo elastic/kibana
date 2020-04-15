@@ -28,15 +28,14 @@ describe('updateRules', () => {
     await updateRules({
       alertsClient,
       actionsClient,
-      actions: [],
       savedObjectsClient,
       id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       ...rule.params,
       enabled: false,
-      throttle: null,
       interval: '',
       name: '',
       tags: [],
+      actions: [],
     });
 
     expect(alertsClient.disable).toHaveBeenCalledWith(
@@ -56,15 +55,14 @@ describe('updateRules', () => {
     await updateRules({
       alertsClient,
       actionsClient,
-      actions: [],
       savedObjectsClient,
       id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       ...rule.params,
       enabled: true,
-      throttle: null,
       interval: '',
       name: '',
       tags: [],
+      actions: [],
     });
 
     expect(alertsClient.enable).toHaveBeenCalledWith(
@@ -86,15 +84,14 @@ describe('updateRules', () => {
     await updateRules({
       alertsClient,
       actionsClient,
-      actions: [],
       savedObjectsClient,
       id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       ...params,
       enabled: true,
-      throttle: null,
       interval: '',
       name: '',
       tags: [],
+      actions: [],
     });
 
     expect(alertsClient.update).toHaveBeenCalledWith(

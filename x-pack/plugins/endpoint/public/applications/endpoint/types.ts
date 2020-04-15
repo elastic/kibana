@@ -17,7 +17,14 @@ import {
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
-import { Datasource } from '../../../../ingest_manager/common/types/models';
+import {
+  Datasource,
+  NewDatasource,
+  GetAgentStatusResponse,
+  GetDatasourcesResponse,
+  GetOneDatasourceResponse,
+  UpdateDatasourceResponse,
+} from '../../../../ingest_manager/common';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -53,9 +60,27 @@ export interface ServerApiError {
 }
 
 /**
- * An Endpoint Policy.
+ * New policy data. Used when updating the policy record via ingest APIs
  */
-export type PolicyData = Datasource;
+export type NewPolicyData = NewDatasource & {
+  inputs: [
+    {
+      type: 'endpoint';
+      enabled: boolean;
+      streams: [];
+      config: {
+        policy: {
+          value: PolicyConfig;
+        };
+      };
+    }
+  ];
+};
+
+/**
+ * Endpoint Policy data, which extends Ingest's `Datasource` type
+ */
+export type PolicyData = Datasource & NewPolicyData;
 
 /**
  * Policy list store state
@@ -73,6 +98,8 @@ export interface PolicyListState {
   pageIndex: number;
   /** data is being retrieved from server */
   isLoading: boolean;
+  /** current location information */
+  location?: Immutable<EndpointAppLocation>;
 }
 
 /**
@@ -81,57 +108,112 @@ export interface PolicyListState {
 export interface PolicyDetailsState {
   /** A single policy item  */
   policyItem?: PolicyData;
-  /** data is being retrieved from server */
-  policyConfig?: PolicyConfig;
+  /** API error if loading data failed */
+  apiError?: ServerApiError;
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<EndpointAppLocation>;
+  /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
+  agentStatusSummary: GetAgentStatusResponse['results'];
+  /** Status of an update to the policy  */
+  updateStatus?: {
+    success: boolean;
+    error?: ServerApiError;
+  };
 }
 
 /**
- * Policy Details configuration
+ * The URL search params that are supported by the Policy List page view
+ */
+export interface PolicyListUrlSearchParams {
+  page_index: number;
+  page_size: number;
+}
+
+/**
+ * Endpoint Policy configuration
  */
 export interface PolicyConfig {
+  windows: {
+    events: {
+      dll_and_driver_load: boolean;
+      dns: boolean;
+      file: boolean;
+      network: boolean;
+      process: boolean;
+      registry: boolean;
+      security: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  mac: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  linux: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+}
+
+interface PolicyConfigAdvancedOptions {
+  elasticsearch: {
+    indices: {
+      control: string;
+      event: string;
+      logging: string;
+    };
+    kernel: {
+      connect: boolean;
+      process: boolean;
+    };
+  };
+}
+
+/**
+ * Windows-specific policy configuration that is supported via the UI
+ */
+type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+
+/**
+ * Mac-specific policy configuration that is supported via the UI
+ */
+type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+
+/**
+ * Linux-specific policy configuration that is supported via the UI
+ */
+type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
+
+/**
+ * The set of Policy configuration settings that are show/edited via the UI
+ */
+export interface UIPolicyConfig {
   windows: WindowsPolicyConfig;
   mac: MacPolicyConfig;
   linux: LinuxPolicyConfig;
-}
-
-/**
- * Windows-specific policy configuration
- */
-interface WindowsPolicyConfig {
-  /** malware mode can be detect, prevent or prevent and notify user */
-  malware: {
-    mode: string;
-  };
-  eventing: {
-    process: boolean;
-    network: boolean;
-  };
-}
-
-/**
- * Mac-specific policy configuration
- */
-interface MacPolicyConfig {
-  /** malware mode can be detect, prevent or prevent and notify user */
-  malware: {
-    mode: string;
-  };
-  eventing: {
-    process: boolean;
-    network: boolean;
-  };
-}
-/**
- * Linux-specific policy configuration
- */
-interface LinuxPolicyConfig {
-  eventing: {
-    process: boolean;
-    network: boolean;
-  };
 }
 
 /** OS used in Policy */
@@ -141,10 +223,42 @@ export enum OS {
   linux = 'linux',
 }
 
-/** Used in Policy */
-export enum EventingFields {
-  process = 'process',
-  network = 'network',
+/**
+ * Returns the keys of an object whose values meet a criteria.
+ *  Ex) interface largeNestedObject = {
+ *         a: {
+ *           food: Foods;
+ *           toiletPaper: true;
+ *         };
+ *         b: {
+ *           food: Foods;
+ *           streamingServices: Streams;
+ *         };
+ *         c: {};
+ *    }
+ *
+ *    type hasFoods = KeysByValueCriteria<largeNestedObject, { food: Foods }>;
+ *    The above type will be: [a, b] only, and will not include c.
+ *
+ */
+export type KeysByValueCriteria<O, Criteria> = {
+  [K in keyof O]: O[K] extends Criteria ? K : never;
+}[keyof O];
+
+/** Returns an array of the policy OSes that have a malware protection field */
+
+export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
+/** Policy: Malware protection fields */
+export interface MalwareFields {
+  mode: ProtectionModes;
+}
+
+/** Policy protection mode options */
+export enum ProtectionModes {
+  detect = 'detect',
+  prevent = 'prevent',
+  preventNotify = 'preventNotify',
+  off = 'off',
 }
 
 export interface GlobalState {
@@ -222,4 +336,16 @@ export interface AlertingIndexUIQueryParams {
   query?: string;
   date_range?: string;
   filters?: string;
+}
+
+export interface GetPolicyListResponse extends GetDatasourcesResponse {
+  items: PolicyData[];
+}
+
+export interface GetPolicyResponse extends GetOneDatasourceResponse {
+  item: PolicyData;
+}
+
+export interface UpdatePolicyResponse extends UpdateDatasourceResponse {
+  item: PolicyData;
 }

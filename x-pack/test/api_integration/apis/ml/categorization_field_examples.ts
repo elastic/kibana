@@ -79,7 +79,7 @@ const defaultRequestBody = {
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
-  const mlSecurity = getService('mlSecurity');
+  const ml = getService('ml');
 
   const testDataList = [
     {
@@ -300,7 +300,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(testData.title, async () => {
         const { body } = await supertest
           .post('/api/ml/jobs/categorization_field_examples')
-          .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
+          .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);

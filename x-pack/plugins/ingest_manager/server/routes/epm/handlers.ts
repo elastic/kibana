@@ -75,8 +75,8 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
   response
 ) => {
   try {
-    const { pkgkey, filePath } = request.params;
-    const registryResponse = await getFile(`/package/${pkgkey}/${filePath}`);
+    const { pkgName, pkgVersion, filePath } = request.params;
+    const registryResponse = await getFile(`/package/${pkgName}/${pkgVersion}/${filePath}`);
     const contentType = registryResponse.headers.get('Content-Type');
     const customResponseObj: CustomHttpResponseOptions<typeof registryResponse.body> = {
       body: registryResponse.body,
@@ -102,7 +102,9 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const res = await getPackageInfo({ savedObjectsClient, pkgkey });
+    // TODO: change epm API to /packageName/version so we don't need to do this
+    const [pkgName, pkgVersion] = pkgkey.split('-');
+    const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
     const body: GetInfoResponse = {
       response: res,
       success: true,

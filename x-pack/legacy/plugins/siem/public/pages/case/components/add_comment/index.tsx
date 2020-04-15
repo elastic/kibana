@@ -31,6 +31,7 @@ const initialCommentValue: CommentRequest = {
 
 interface AddCommentProps {
   caseId: string;
+  disabled?: boolean;
   insertQuote: string | null;
   onCommentSaving?: () => void;
   onCommentPosted: (newCase: Case) => void;
@@ -38,7 +39,7 @@ interface AddCommentProps {
 }
 
 export const AddComment = React.memo<AddCommentProps>(
-  ({ caseId, insertQuote, showLoading = true, onCommentPosted, onCommentSaving }) => {
+  ({ caseId, disabled, insertQuote, showLoading = true, onCommentPosted, onCommentSaving }) => {
     const { isLoading, postComment } = usePostComment(caseId);
     const { form } = useForm<CommentRequest>({
       defaultValue: initialCommentValue,
@@ -70,10 +71,9 @@ export const AddComment = React.memo<AddCommentProps>(
         form.reset();
       }
     }, [form, onCommentPosted, onCommentSaving]);
-
     return (
       <span id="add-comment-permLink">
-        {isLoading && showLoading && <MySpinner size="xl" />}
+        {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
         <Form form={form}>
           <UseField
             path="comment"
@@ -81,13 +81,14 @@ export const AddComment = React.memo<AddCommentProps>(
             componentProps={{
               idAria: 'caseComment',
               isDisabled: isLoading,
-              dataTestSubj: 'caseComment',
+              dataTestSubj: 'add-comment',
               placeholder: i18n.ADD_COMMENT_HELP_TEXT,
               onCursorPositionUpdate: handleCursorChange,
               bottomRightContent: (
                 <EuiButton
+                  data-test-subj="submit-comment"
                   iconType="plusInCircle"
-                  isDisabled={isLoading}
+                  isDisabled={isLoading || disabled}
                   isLoading={isLoading}
                   onClick={onSubmit}
                   size="s"

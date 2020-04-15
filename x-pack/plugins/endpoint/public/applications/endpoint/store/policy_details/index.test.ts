@@ -7,8 +7,9 @@
 import { PolicyDetailsState } from '../../types';
 import { createStore, Dispatch, Store } from 'redux';
 import { policyDetailsReducer, PolicyDetailsAction } from './index';
-import { policyConfig, windowsEventing } from './selectors';
+import { policyConfig } from './selectors';
 import { clone } from '../../models/policy_details_config';
+import { generatePolicy } from '../../models/policy';
 
 describe('policy details: ', () => {
   let store: Store<PolicyDetailsState>;
@@ -30,7 +31,18 @@ describe('policy details: ', () => {
           config_id: '',
           enabled: true,
           output_id: '',
-          inputs: [],
+          inputs: [
+            {
+              type: 'endpoint',
+              enabled: true,
+              streams: [],
+              config: {
+                policy: {
+                  value: generatePolicy(),
+                },
+              },
+            },
+          ],
           namespace: '',
           package: {
             name: '',
@@ -39,37 +51,11 @@ describe('policy details: ', () => {
           },
           revision: 1,
         },
-        policyConfig: {
-          windows: {
-            malware: {
-              mode: 'detect',
-            },
-            eventing: {
-              process: false,
-              network: false,
-            },
-          },
-          mac: {
-            malware: {
-              mode: '',
-            },
-            eventing: {
-              process: false,
-              network: false,
-            },
-          },
-          linux: {
-            eventing: {
-              process: false,
-              network: false,
-            },
-          },
-        },
       },
     });
   });
 
-  describe('when the user has enabled windows process eventing', () => {
+  describe('when the user has enabled windows process events', () => {
     beforeEach(() => {
       const config = policyConfig(getState());
       if (!config) {
@@ -77,7 +63,7 @@ describe('policy details: ', () => {
       }
 
       const newPayload1 = clone(config);
-      newPayload1.windows.eventing.process = true;
+      newPayload1.windows.events.process = true;
 
       dispatch({
         type: 'userChangedPolicyConfig',
@@ -85,8 +71,53 @@ describe('policy details: ', () => {
       });
     });
 
-    it('windows process eventing is enabled', async () => {
-      expect(windowsEventing(getState())!.process).toEqual(true);
+    it('windows process events is enabled', () => {
+      const config = policyConfig(getState());
+      expect(config!.windows.events.process).toEqual(true);
+    });
+  });
+
+  describe('when the user has enabled mac file events', () => {
+    beforeEach(() => {
+      const config = policyConfig(getState());
+      if (!config) {
+        throw new Error();
+      }
+
+      const newPayload1 = clone(config);
+      newPayload1.mac.events.file = true;
+
+      dispatch({
+        type: 'userChangedPolicyConfig',
+        payload: { policyConfig: newPayload1 },
+      });
+    });
+
+    it('mac file events is enabled', () => {
+      const config = policyConfig(getState());
+      expect(config!.mac.events.file).toEqual(true);
+    });
+  });
+
+  describe('when the user has enabled linux process events', () => {
+    beforeEach(() => {
+      const config = policyConfig(getState());
+      if (!config) {
+        throw new Error();
+      }
+
+      const newPayload1 = clone(config);
+      newPayload1.linux.events.file = true;
+
+      dispatch({
+        type: 'userChangedPolicyConfig',
+        payload: { policyConfig: newPayload1 },
+      });
+    });
+
+    it('linux file events is enabled', () => {
+      const config = policyConfig(getState());
+      expect(config!.linux.events.file).toEqual(true);
     });
   });
 });
