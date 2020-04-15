@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { isEqual } from 'lodash/fp';
 import {
   EuiFieldSearch,
@@ -25,6 +25,8 @@ interface CasesTableFiltersProps {
   countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
+  isRefetchFilters: boolean;
+  setIsRefetchFilters: (val: boolean) => void;
 }
 
 /**
@@ -41,6 +43,8 @@ const CasesTableFiltersComponent = ({
   countOpenCases,
   onFilterChanged,
   initial = defaultInitial,
+  isRefetchFilters,
+  setIsRefetchFilters,
 }: CasesTableFiltersProps) => {
   const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map(r => r.full_name ?? r.username ?? '')
@@ -48,8 +52,28 @@ const CasesTableFiltersComponent = ({
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [showOpenCases, setShowOpenCases] = useState(initial.status === 'open');
-  const { tags } = useGetTags();
-  const { reporters, respReporters } = useGetReporters();
+  const { tags, fetchTags } = useGetTags();
+  const { reporters, respReporters, fetchReporters } = useGetReporters();
+
+  useEffect(() => {
+    if (isRefetchFilters) {
+      fetchTags();
+      fetchReporters();
+      setIsRefetchFilters(false);
+    }
+  }, [isRefetchFilters]);
+  useEffect(() => {
+    if (selectedReporters.length) {
+      const newReporters = selectedReporters.filter(r => reporters.includes(r));
+      handleSelectedReporters(newReporters);
+    }
+  }, [reporters]);
+  useEffect(() => {
+    if (selectedTags.length) {
+      const newTags = selectedTags.filter(t => tags.includes(t));
+      handleSelectedTags(newTags);
+    }
+  }, [tags]);
 
   const handleSelectedReporters = useCallback(
     newReporters => {

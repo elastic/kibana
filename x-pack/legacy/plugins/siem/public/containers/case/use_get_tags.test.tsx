@@ -5,7 +5,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useGetTags, TagsState } from './use_get_tags';
+import { useGetTags, UseGetTags } from './use_get_tags';
 import { tags } from './mock';
 import * as api from './api';
 
@@ -20,7 +20,7 @@ describe('useGetTags', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, TagsState>(() => useGetTags());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
       await waitForNextUpdate();
       expect(result.current).toEqual({
         tags: [],
@@ -33,7 +33,7 @@ describe('useGetTags', () => {
   it('calls getTags api', async () => {
     const spyOnGetTags = jest.spyOn(api, 'getTags');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, TagsState>(() => useGetTags());
+      const { waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal);
@@ -42,7 +42,7 @@ describe('useGetTags', () => {
 
   it('fetch tags', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, TagsState>(() => useGetTags());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -60,7 +60,7 @@ describe('useGetTags', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, TagsState>(() => useGetTags());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
       await waitForNextUpdate();
       await waitForNextUpdate();
 

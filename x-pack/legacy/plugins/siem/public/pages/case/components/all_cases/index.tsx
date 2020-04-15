@@ -129,13 +129,20 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     id: '',
   });
   const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
-
-  const refreshCases = useCallback(() => {
-    refetchCases();
-    fetchCasesStatus();
-    setSelectedCases([]);
-    setDeleteBulk([]);
-  }, []);
+  const [isRefetchFilters, setIsRefetchFilters] = useState(false);
+  const refreshCases = useCallback(
+    (dataRefresh = true) => {
+      if (dataRefresh) refetchCases();
+      fetchCasesStatus();
+      setSelectedCases([]);
+      setDeleteBulk([]);
+      setIsRefetchFilters(true);
+    },
+    [filterOptions, queryParams]
+  );
+  useEffect(() => {
+    refreshCases(false);
+  }, [filterOptions, queryParams]);
 
   useEffect(() => {
     if (isDeleted) {
@@ -347,6 +354,8 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
             tags: filterOptions.tags,
             status: filterOptions.status,
           }}
+          isRefetchFilters={isRefetchFilters}
+          setIsRefetchFilters={setIsRefetchFilters}
         />
         {isCasesLoading && isDataEmpty ? (
           <Div>
