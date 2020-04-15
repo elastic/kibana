@@ -10,7 +10,7 @@ import { SOURCE_TYPES } from '../../common/constants';
 import { XYZTMSSourceDescriptor } from '../../common/descriptor_types';
 import { ITMSSource, AbstractTMSSource } from './sources/tms_source';
 import { ILayer } from './layer';
-import { AbstractStyle, IStyle } from './styles/abstract_style';
+import { AbstractStyle } from './styles/abstract_style';
 
 const sourceDescriptor: XYZTMSSourceDescriptor = {
   type: SOURCE_TYPES.EMS_XYZ,

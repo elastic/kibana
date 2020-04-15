@@ -7,6 +7,8 @@
 import { createSelector } from 'reselect';
 import _ from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TileStyle } from '../../../../../plugins/maps/public/layers/styles/tile/tile_style';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TileLayer } from '../../../../../plugins/maps/public/layers/tile_layer';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { VectorTileLayer } from '../../../../../plugins/maps/public/layers/vector_tile_layer';
@@ -34,7 +36,7 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
 
   switch (layerDescriptor.type) {
     case TileLayer.type:
-      return new TileLayer({ layerDescriptor, source });
+      return new TileLayer({ layerDescriptor, source, style: new TileStyle() });
     case VectorLayer.type:
       const joins = [];
       if (layerDescriptor.joins) {
@@ -45,11 +47,11 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
       }
       return new VectorLayer({ layerDescriptor, source, joins });
     case VectorTileLayer.type:
-      return new VectorTileLayer({ layerDescriptor, source });
+      return new VectorTileLayer({ layerDescriptor, source, style: new TileStyle() });
     case HeatmapLayer.type:
       return new HeatmapLayer({ layerDescriptor, source });
     case BlendedVectorLayer.type:
-      return new BlendedVectorLayer({ layerDescriptor, source });
+      return new BlendedVectorLayer({ layerDescriptor, source, joins: [] });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }

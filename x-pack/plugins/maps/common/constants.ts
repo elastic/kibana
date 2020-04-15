@@ -168,6 +168,7 @@ export enum STYLE_TYPE {
 export enum LAYER_STYLE_TYPE {
   VECTOR = 'VECTOR',
   HEATMAP = 'HEATMAP',
+  TILE = 'TILE',
 }
 
 export const COLOR_MAP_TYPE = {

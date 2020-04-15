@@ -76,11 +76,11 @@ export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {
   name: string;
 };
 
-export type KibanaTilemapSourceDescriptor = {
+export type KibanaTilemapSourceDescriptor = AbstractSourceDescriptor & {
   type: string;
 };
 
-export type WMSSourceDescriptor = {
+export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   type: string;
   serviceUrl: string;
   layers: string;
