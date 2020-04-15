@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { ErrorCallout } from '../error_callout';
 import {
   getValuesFromResponse,
   getDependentVar,
@@ -54,6 +53,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
+  const [isTrainingFilter, setIsTrainingFilter] = useState<boolean | undefined>(undefined);
   const [trainingDocsCount, setTrainingDocsCount] = useState<null | number>(null);
   const [generalizationDocsCount, setGeneralizationDocsCount] = useState<null | number>(null);
 
@@ -92,8 +92,8 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     } else {
       setIsLoadingGeneralization(false);
       setGeneralizationEval({
-        meanSquaredError: '',
-        rSquared: '',
+        meanSquaredError: '--',
+        rSquared: '--',
         error: genErrorEval.error,
       });
     }
@@ -128,89 +128,40 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     } else {
       setIsLoadingTraining(false);
       setTrainingEval({
-        meanSquaredError: '',
-        rSquared: '',
+        meanSquaredError: '--',
+        rSquared: '--',
         error: trainingErrorEval.error,
       });
     }
   };
 
-  const loadData = async ({ isTraining }: { isTraining?: boolean }) => {
-    // searchBar query is filtering for testing data
-    if (isTraining !== undefined && isTraining === false) {
-      loadGeneralizationData();
-
-      const docsCountResp = await loadDocsCount({
-        isTraining: false,
-        searchQuery,
-        resultsField,
-        destIndex: jobConfig.dest.index,
-      });
-
-      if (docsCountResp.success === true) {
-        setGeneralizationDocsCount(docsCountResp.docsCount);
-      } else {
-        setGeneralizationDocsCount(null);
-      }
-
-      setTrainingDocsCount(0);
-      setTrainingEval({
-        meanSquaredError: '--',
-        rSquared: '--',
-        error: null,
-      });
-    } else if (isTraining !== undefined && isTraining === true) {
-      // searchBar query is filtering for training data
-      loadTrainingData();
-
-      const docsCountResp = await loadDocsCount({
-        isTraining: true,
-        searchQuery,
-        resultsField,
-        destIndex: jobConfig.dest.index,
-      });
-
-      if (docsCountResp.success === true) {
-        setTrainingDocsCount(docsCountResp.docsCount);
-      } else {
-        setTrainingDocsCount(null);
-      }
-
-      setGeneralizationDocsCount(0);
-      setGeneralizationEval({
-        meanSquaredError: '--',
-        rSquared: '--',
-        error: null,
-      });
+  const loadData = async () => {
+    loadGeneralizationData(false);
+    const genDocsCountResp = await loadDocsCount({
+      ignoreDefaultQuery: false,
+      isTraining: false,
+      searchQuery,
+      resultsField,
+      destIndex: jobConfig.dest.index,
+    });
+    if (genDocsCountResp.success === true) {
+      setGeneralizationDocsCount(genDocsCountResp.docsCount);
     } else {
-      // No is_training clause/filter from search bar so load both
-      loadGeneralizationData(false);
-      const genDocsCountResp = await loadDocsCount({
-        ignoreDefaultQuery: false,
-        isTraining: false,
-        searchQuery,
-        resultsField,
-        destIndex: jobConfig.dest.index,
-      });
-      if (genDocsCountResp.success === true) {
-        setGeneralizationDocsCount(genDocsCountResp.docsCount);
-      } else {
-        setGeneralizationDocsCount(null);
-      }
+      setGeneralizationDocsCount(null);
+    }
 
-      loadTrainingData(false);
-      const trainDocsCountResp = await loadDocsCount({
-        ignoreDefaultQuery: false,
-        isTraining: true,
-        searchQuery,
-        resultsField,
-        destIndex: jobConfig.dest.index,
-      });
-      if (trainDocsCountResp.success === true) {
-        setTrainingDocsCount(trainDocsCountResp.docsCount);
-      } else {
-        setTrainingDocsCount(null);
-      }
+    loadTrainingData(false);
+    const trainDocsCountResp = await loadDocsCount({
+      ignoreDefaultQuery: false,
+      isTraining: true,
+      searchQuery,
+      resultsField,
+      destIndex: jobConfig.dest.index,
+    });
+    if (trainDocsCountResp.success === true) {
+      setTrainingDocsCount(trainDocsCountResp.docsCount);
+    } else {
+      setTrainingDocsCount(null);
     }
   };
 
@@ -247,9 +198,8 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       }
     }
 
-    isTraining = isTraining;
-
-    loadData({ isTraining });
+    setIsTrainingFilter(isTraining);
+    loadData();
   }, [JSON.stringify(searchQuery)]);
 
   return (
@@ -313,13 +263,18 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                 defaultMessage="{docsCount, plural, one {# doc} other {# docs}} evaluated"
                 values={{ docsCount: generalizationDocsCount }}
               />
+              {isTrainingFilter === true && generalizationDocsCount === 0 && (
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.regressionExploration.generalizationFilterText"
+                  defaultMessage=". Filtering for training data."
+                />
+              )}
             </EuiText>
           )}
           <EuiSpacer />
-          <EuiFlexGroup>
-            {generalizationEval.error !== null && <ErrorCallout error={generalizationEval.error} />}
-            {generalizationEval.error === null && (
-              <Fragment>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem>
+              <EuiFlexGroup>
                 <EuiFlexItem>
                   <EvaluateStat
                     dataTestSubj={'mlDFAnalyticsRegressionGenMSEstat'}
@@ -336,7 +291,14 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                     isMSE={false}
                   />
                 </EuiFlexItem>
-              </Fragment>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {generalizationEval.error !== null && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="danger">
+                  {generalizationEval.error}
+                </EuiText>
+              </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -358,13 +320,18 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                 defaultMessage="{docsCount, plural, one {# doc} other {# docs}} evaluated"
                 values={{ docsCount: trainingDocsCount }}
               />
+              {isTrainingFilter === false && trainingDocsCount === 0 && (
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.regressionExploration.trainingFilterText"
+                  defaultMessage=". Filtering for testing data."
+                />
+              )}
             </EuiText>
           )}
           <EuiSpacer />
-          <EuiFlexGroup>
-            {trainingEval.error !== null && <ErrorCallout error={trainingEval.error} />}
-            {trainingEval.error === null && (
-              <Fragment>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem>
+              <EuiFlexGroup>
                 <EuiFlexItem>
                   <EvaluateStat
                     dataTestSubj={'mlDFAnalyticsRegressionTrainingMSEstat'}
@@ -381,7 +348,14 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                     isMSE={false}
                   />
                 </EuiFlexItem>
-              </Fragment>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {trainingEval.error !== null && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="danger">
+                  {trainingEval.error}
+                </EuiText>
+              </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>

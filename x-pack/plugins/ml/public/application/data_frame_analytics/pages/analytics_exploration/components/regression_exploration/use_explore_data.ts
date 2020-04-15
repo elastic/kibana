@@ -30,7 +30,7 @@ import { Dictionary } from '../../../../../../../common/types/common';
 import { isKeywordAndTextType } from '../../../../common/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
-  LoadExploreDataArg,
+  LoadRegressionExploreDataArg,
   defaultSearchQuery,
   ResultsSearchQuery,
   isResultsSearchBoolQuery,
@@ -81,9 +81,8 @@ export const useExploreData = (
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [tableFields, setTableFields] = useState<string[]>([]);
   const [tableItems, setTableItems] = useState<TableItem[]>([]);
-  const [fieldTypes, setFieldTypes] = useState<any>({}); // TODO: update type
+  const [fieldTypes, setFieldTypes] = useState<{ [key: string]: ES_FIELD_TYPES }>({});
   const [rowCount, setRowCount] = useState(0);
-  const [depVarType, setDepVarType] = useState<string | undefined>(undefined);
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
@@ -99,11 +98,11 @@ export const useExploreData = (
   const getDefaultSelectedFields = () => {
     const { fields } = newJobCapsService;
     if (selectedFields.length === 0 && jobConfig !== undefined) {
-      const {
-        selectedFields: defaultSelected,
-        docFields,
-        depVarType: dvType,
-      } = getDefaultFieldsFromJobCaps(fields, jobConfig, needsDestIndexFields);
+      const { selectedFields: defaultSelected, docFields } = getDefaultFieldsFromJobCaps(
+        fields,
+        jobConfig,
+        needsDestIndexFields
+      );
 
       const types: { [key: string]: ES_FIELD_TYPES } = {};
       const allFields: string[] = [];
@@ -113,7 +112,6 @@ export const useExploreData = (
         allFields.push(field.id);
       });
 
-      setDepVarType(dvType);
       setFieldTypes(types);
       setSelectedFields(defaultSelected.map(field => field.id));
       setTableFields(allFields);
@@ -123,8 +121,7 @@ export const useExploreData = (
   const loadExploreData = async ({
     filterByIsTraining: isTraining,
     searchQuery: incomingQuery,
-    requiresKeyword,
-  }: LoadExploreDataArg) => {
+  }: LoadRegressionExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
@@ -155,8 +152,7 @@ export const useExploreData = (
             },
           };
 
-          if (trainingQuery !== undefined) {
-            // @ts-ignore // TODO: fix type here
+          if (trainingQuery !== undefined && isResultsSearchBoolQuery(query)) {
             query.bool.must.push(trainingQuery);
           }
         } else if (isResultsSearchBoolQuery(searchQueryClone)) {
@@ -182,7 +178,7 @@ export const useExploreData = (
         const sort: EsSorting = sortingColumns
           .map(column => {
             const { id } = column;
-            column.id = requiresKeyword ? `${id}.keyword` : id;
+            column.id = isKeywordAndTextType(id) ? `${id}.keyword` : id;
             return column;
           })
           .reduce((s, column) => {
@@ -257,35 +253,24 @@ export const useExploreData = (
   }, [jobConfig && jobConfig.id]);
 
   // By default set sorting to descending on the prediction field (`<dependent_varible or prediction_field_name>_prediction`).
-  // if that's not available sort ascending on the first column. Check if the current sorting field is still available.
   useEffect(() => {
-    if (selectedFields.length > 0) {
-      const predictedFieldSelected = selectedFields.some(field => field === predictedFieldName);
-      // CHECK IF keyword suffix is needed (if predicted field is selected we have to check the dependent variable type)
-      let sortByField = predictedFieldSelected ? dependentVariable : selectedFields[0];
-      sortByField = predictedFieldSelected ? predictedFieldName : sortByField;
-      const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
+    const sortByField = isKeywordAndTextType(dependentVariable)
+      ? `${predictedFieldName}.keyword`
+      : predictedFieldName;
+    const direction = SORT_DIRECTION.DESC;
 
-      setSortingColumns([{ id: sortByField, direction }]);
-    }
+    setSortingColumns([{ id: sortByField, direction }]);
   }, [jobConfig && jobConfig.id]);
 
   useEffect(() => {
-    if (selectedFields.length > 0) {
-      const predictedFieldSelected = selectedFields.some(field => field === predictedFieldName);
-      // CHECK IF keyword suffix is needed (if predicted field is selected we have to check the dependent variable type)
-      const sortByField = predictedFieldSelected ? dependentVariable : selectedFields[0];
-      const requiresKeyword = isKeywordAndTextType(sortByField);
-
-      loadExploreData({ filterByIsTraining, searchQuery, requiresKeyword });
-    }
+    loadExploreData({ filterByIsTraining, searchQuery });
   }, [
     filterByIsTraining,
     jobConfig && jobConfig.id,
     pagination,
     searchQuery,
     selectedFields,
-    sortingColumns.length,
+    sortingColumns,
   ]);
 
   return {

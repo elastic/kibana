@@ -52,12 +52,9 @@ export interface ClassificationAnalysis {
   classification: Classification;
 }
 
-export interface LoadExploreDataArg {
+export interface LoadRegressionExploreDataArg {
   filterByIsTraining?: boolean;
   searchQuery: SavedSearchQuery;
-  requiresKeyword?: boolean;
-  pageIndex?: number;
-  pageSize?: number;
 }
 
 export const SEARCH_SIZE = 1000;
@@ -400,7 +397,7 @@ export function getEvalQueryBody({
   resultsField,
   isTraining,
   searchQuery,
-  ignoreDefaultQuery, // TODO: I'm not sure we need this anymore
+  ignoreDefaultQuery,
 }: {
   resultsField: string;
   isTraining: boolean;
