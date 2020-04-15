@@ -36,6 +36,7 @@ import {
   DynamicStylePropertyOptions,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
+import { IStyle } from './styles/abstract_style';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
@@ -229,7 +230,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._documentSource;
   }
 
-  getCurrentStyle() {
+  getCurrentStyle(): IStyle {
     return this._isClustered ? this._clusterStyle : this._documentStyle;
   }
 

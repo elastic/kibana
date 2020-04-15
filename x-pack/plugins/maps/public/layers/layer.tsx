@@ -95,6 +95,7 @@ export type IconAndTooltipContent = {
 export interface ILayerArguments {
   layerDescriptor: LayerDescriptor;
   source: ISource;
+  style: IStyle;
 }
 
 export class AbstractLayer implements ILayer {
@@ -124,9 +125,10 @@ export class AbstractLayer implements ILayer {
     }
   }
 
-  constructor({ layerDescriptor, source }: ILayerArguments) {
+  constructor({ layerDescriptor, source, style }: ILayerArguments) {
     this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
+    this._style = style;
     if (this._descriptor.__dataRequests) {
       this._dataRequests = this._descriptor.__dataRequests.map(
         dataRequest => new DataRequest(dataRequest)
