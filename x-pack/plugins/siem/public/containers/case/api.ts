@@ -245,7 +245,7 @@ export const pushToService = async (
     `${ACTION_URL}/${connectorId}/_execute`,
     {
       method: 'POST',
-      body: JSON.stringify({ params: casePushParams }),
+      body: JSON.stringify({ params: { action: 'pushToService', actionParams: casePushParams } }),
       signal,
     }
   );

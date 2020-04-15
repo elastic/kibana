@@ -418,7 +418,7 @@ describe('Case Configuration API', () => {
       await pushToService(connectorId, casePushParams, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`/api/action/${connectorId}/_execute`, {
         method: 'POST',
-        body: JSON.stringify({ params: casePushParams }),
+        body: JSON.stringify({ params: { action: 'pushToService', actionParams: casePushParams } }),
         signal: abortCtrl.signal,
       });
     });
