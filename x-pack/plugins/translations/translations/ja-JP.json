@@ -16089,7 +16089,6 @@
     "xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel": "ユーザー名",
     "xpack.triggersActionsUI.sections.editConnectorForm.betaBadgeTooltipContent": "{pluginName} はベータ段階で、変更される可能性があります。デザインとコードはオフィシャル GA 機能よりも完成度が低く、現状のまま保証なしで提供されています。ベータ機能にはオフィシャル GA 機能の SLA が適用されません。",
     "xpack.triggersActionsUI.sections.editConnectorForm.cancelButtonLabel": "キャンセル",
-    "xpack.triggersActionsUI.sections.editConnectorForm.flyoutTitle": "コネクターを編集",
     "xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel": "保存",
     "xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText": "コネクターを更新できません。",
     "xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText": "「{connectorName}」を更新しました",
