@@ -168,7 +168,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
           }),
           layerId,
           accessors: sortedColumns,
-          supportsMoreColumns: true,
+          supportsMoreColumns: sortedColumns.length < 3,
           filterOperations: bucketedOperations,
           required: true,
         },
@@ -190,6 +190,11 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
   setDimension({ prevState, layerId, columnId, groupId }) {
     return {
       ...prevState,
+
+      shape:
+        prevState.shape === 'donut' && prevState.layers.every(l => l.slices.length === 1)
+          ? 'pie'
+          : prevState.shape,
       layers: prevState.layers.map(l => {
         if (l.layerId !== layerId) {
           return l;

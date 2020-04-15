@@ -76,7 +76,7 @@ function getExpressionForLayer(
     return `esaggs
       index="${indexPattern.id}"
       metricsAtAllLevels=true
-      partialRows=false
+      partialRows=true
       includeFormatHints=true
       aggConfigs={lens_auto_date aggConfigs='${JSON.stringify(
         aggs

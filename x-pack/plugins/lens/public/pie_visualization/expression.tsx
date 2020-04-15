@@ -99,6 +99,7 @@ export const pie: ExpressionFunctionDefinition<'lens_pie', LensMultiTable, Args,
 export const getPieRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartTheme: PartialTheme;
+  isDarkMode: boolean;
 }): ExpressionRenderDefinition<PieProps> => ({
   name: 'lens_pie_renderer',
   displayName: i18n.translate('xpack.lens.pie.visualizationName', {
@@ -116,6 +117,7 @@ export const getPieRenderer = (dependencies: {
         {...dependencies}
         formatFactory={formatFactory}
         executeTriggerActions={executeTriggerActions}
+        isDarkMode={dependencies.isDarkMode}
       />,
       domNode,
       () => {
@@ -132,13 +134,14 @@ export function PieComponent(
   props: PieProps & {
     formatFactory: FormatFactory;
     chartTheme: Exclude<PartialTheme, undefined>;
+    isDarkMode: boolean;
     executeTriggerActions: UiActionsStart['executeTriggerActions'];
   }
 ) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartTheme, executeTriggerActions } = props;
+  const { chartTheme, isDarkMode, executeTriggerActions } = props;
   const { shape, hideLabels, slices, metric } = props.args;
 
   if (!hideLabels) {
@@ -152,6 +155,7 @@ export function PieComponent(
     valueFont: {
       fontWeight: 800,
     },
+    valueFormatter: () => '',
   };
 
   // The datatable for pie charts should include subtotals, like this:
@@ -177,7 +181,7 @@ export function PieComponent(
       groupByRollup: (d: Datum) => d[col.id] ?? EMPTY_SLICE,
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
       nodeLabel: (d: unknown) => {
-        if (hideLabels) {
+        if (hideLabels || d === EMPTY_SLICE) {
           return '';
         }
         if (col.formatHint) {
@@ -195,12 +199,16 @@ export function PieComponent(
           : fillLabel,
       shape: {
         fillColor: d => {
+          // Color is determined by the positional index of the top layer
+          // This is done recursively until we reach the top layer
           let parentIndex = 0;
           let tempParent: typeof d | typeof d['parent'] = d;
           while (tempParent.parent && tempParent.depth > 0) {
             parentIndex = tempParent.sortIndex;
             tempParent = tempParent.parent;
           }
+
+          // Look up round-robin color from default palette
           const outputColor =
             chartTheme.colors!.vizColors?.[parentIndex % chartTheme.colors!.vizColors.length] ||
             chartTheme.colors!.defaultVizColor!;
@@ -221,8 +229,19 @@ export function PieComponent(
   const config: RecursivePartial<PartitionConfig> = {
     partitionLayout: shape === 'treemap' ? PartitionLayout.treemap : PartitionLayout.sunburst,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
-    outerSizeRatio: 1,
+    outerSizeRatio: 1, // Use full height of embeddable
     specialFirstInnermostSector: false,
+    minFontSize: 16,
+    // Treemap can handle larger labels due to rectangular shape
+    maxFontSize: shape === 'treemap' ? 36 : 24,
+    // Labels are added outside the outer ring when the slice is too small
+    linkLabel: {
+      fontSize: 16,
+      // Dashboard background color is affected by dark mode, which we need
+      // to account for in outer labels
+      textColor: isDarkMode ? 'white' : 'black',
+    },
+    sectorLineStroke: isDarkMode ? 'rgb(26, 27, 32)' : undefined,
   };
   if (shape !== 'treemap') {
     config.emptySizeRatio = shape === 'donut' ? 0.3 : 0;
@@ -274,6 +293,8 @@ export function PieComponent(
     <VisualizationContainer className="lnsSunburstExpression__container" isReady={state.isReady}>
       <Chart>
         <Settings
+          showLegend={!hideLabels && columnGroups.length > 1}
+          legendMaxDepth={1 /* Color is based only on first layer */}
           onElementClick={args => {
             // This is a working around a bug in the chart library
             // see https://github.com/elastic/elastic-charts/issues/624

@@ -10,7 +10,7 @@ import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
-import { SeriesIdentifier } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
+import { XYChartSeriesIdentifier } from '@elastic/charts';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
@@ -64,7 +64,7 @@ export const DurationChartComponent = ({
     });
   };
 
-  const legendToggleVisibility = (legendItem: SeriesIdentifier | null) => {
+  const legendToggleVisibility = (legendItem: XYChartSeriesIdentifier | null) => {
     if (legendItem) {
       setHiddenLegends(prevState => {
         if (prevState.includes(legendItem.specId)) {

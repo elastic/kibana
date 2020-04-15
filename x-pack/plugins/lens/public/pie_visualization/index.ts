@@ -6,7 +6,6 @@
 
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { CoreSetup, CoreStart } from 'src/core/public';
-// import { FormatFactory } from '../legacy';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { pieVisualization } from './pie_visualization';
 import { treemapVisualization } from './treemap_visualization';
@@ -40,6 +39,7 @@ export class PieVisualization {
         chartTheme: core.uiSettings.get<boolean>('theme:darkMode')
           ? EUI_CHARTS_THEME_DARK.theme
           : EUI_CHARTS_THEME_LIGHT.theme,
+        isDarkMode: core.uiSettings.get<boolean>('theme:darkMode'),
       })
     );
 

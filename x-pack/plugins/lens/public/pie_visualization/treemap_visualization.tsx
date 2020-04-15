@@ -72,8 +72,7 @@ export const treemapVisualization: Visualization<PieVisualizationState, PieVisua
 
     const [slices, metrics] = partition(table.columns, col => col.operation.isBucketed);
 
-    // Only support one slice
-    if (slices.length !== 1 || metrics.length > 1) {
+    if (slices.length > 2 || metrics.length > 1) {
       return [];
     }
 
@@ -81,12 +80,12 @@ export const treemapVisualization: Visualization<PieVisualizationState, PieVisua
       table.changeType === 'unchanged'
         ? i18n.translate('xpack.lens.pie.suggestionLabel', {
             defaultMessage: 'As {chartName}',
-            values: { chartName: state ? CHART_NAMES[state.shape].label : CHART_NAMES.donut.label },
+            values: { chartName: CHART_NAMES.treemap.label },
           })
         : i18n.translate('xpack.lens.pie.suggestionOf', {
             defaultMessage: '{chartName} {operations}',
             values: {
-              chartName: state ? CHART_NAMES[state.shape].label : CHART_NAMES.donut.label,
+              chartName: CHART_NAMES.treemap.label,
               operations:
                 table.label ||
                 table.columns
@@ -139,13 +138,13 @@ export const treemapVisualization: Visualization<PieVisualizationState, PieVisua
     return {
       groups: [
         {
-          groupId: 'rectangel',
+          groupId: 'rectangle',
           groupLabel: i18n.translate('xpack.lens.treemap.rectangle', {
             defaultMessage: 'Rectangle',
           }),
           layerId,
           accessors: sortedColumns,
-          supportsMoreColumns: sortedColumns.length < 1,
+          supportsMoreColumns: sortedColumns.length < 2,
           filterOperations: bucketedOperations,
           required: true,
         },
@@ -164,6 +163,21 @@ export const treemapVisualization: Visualization<PieVisualizationState, PieVisua
     };
   },
 
-  // toExpression,
-  // toPreviewExpression,
+  setDimension({ prevState, layerId, columnId, groupId }) {
+    return {
+      ...prevState,
+      layers: prevState.layers.map(l => {
+        if (l.layerId !== layerId) {
+          return l;
+        }
+        if (groupId === 'rectangle') {
+          return {
+            ...l,
+            slices: [...l.slices, columnId],
+          };
+        }
+        return { ...l, metric: columnId };
+      }),
+    };
+  },
 };
