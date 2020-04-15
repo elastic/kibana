@@ -1,11 +1,3 @@
-// EUI global scope
-
-@import '@elastic/eui/src/themes/eui/eui_colors_light';
-
-@import '@elastic/eui/src/global_styling/functions/index';
-@import '@elastic/eui/src/global_styling/variables/index';
-@import '@elastic/eui/src/global_styling/mixins/index';
-
 @import '../public/timelion_vis';
 @import '../public/timelion_editor';
 @import '../public/components/index';
