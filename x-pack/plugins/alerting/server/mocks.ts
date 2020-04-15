@@ -7,7 +7,6 @@
 import { alertsClientMock } from './alerts_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { savedObjectsClientMock } from '../../../../src/core/server/mocks';
-import { createScopedSeachApiMock } from '../../../../src/plugins/data/server/mocks';
 import { AlertInstance } from './alert_instance';
 
 export { alertsClientMock };
@@ -57,7 +56,6 @@ const createAlertServicesMock = () => {
       .mockReturnValue(alertInstanceFactoryMock),
     callCluster: jest.fn(),
     savedObjectsClient: savedObjectsClientMock.create(),
-    search: createScopedSeachApiMock().search,
   };
 };
 
