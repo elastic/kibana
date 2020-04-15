@@ -161,6 +161,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return selectedOption.getVisibleText();
     }
 
+    public async getChartIntervalScaledToDesc() {
+      await header.waitUntilLoadingHasFinished();
+      return await testSubjects.getVisibleText('discoverIntervalSelectScaledToDesc');
+    }
+
     public async setChartInterval(interval: string) {
       const optionElement = await find.byCssSelector(`option[label="${interval}"]`, 5000);
       await optionElement.click();
