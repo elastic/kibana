@@ -163,7 +163,7 @@ describe('CreateIndexPatternWizard', () => {
 
     component.setState({ indexPattern: 'foo' });
     await component.instance().createIndexPattern(undefined, 'id');
-    expect(services.config.get).toBeCalled();
+    expect(services.uiSettings.get).toBeCalled();
     expect(create).toBeCalled();
     expect(clear).toBeCalledWith('id');
     expect(services.changeUrl).toBeCalledWith(`/management/kibana/index_patterns/id`);
