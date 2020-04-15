@@ -135,7 +135,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     }
     return currentColumn;
   },
-  paramEditor: ({ state, setState, currentColumn, columnId: currentColumnId, layerId }) => {
+  paramEditor: ({ state, setState, currentColumn, layerId }) => {
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {

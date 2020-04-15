@@ -41,5 +41,3 @@ export interface MonitorDurationResult {
   /** The maximum duration value in this chart. */
   durationMaxValue: number;
 }
-
-export * from './ping/histogram';

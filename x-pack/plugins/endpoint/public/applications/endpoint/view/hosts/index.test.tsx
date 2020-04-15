@@ -6,40 +6,26 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
-import { EuiThemeProvider } from '../../../../../../../legacy/common/eui_styled_components';
-import { appStoreFactory } from '../../store';
-import { RouteCapture } from '../route_capture';
-import { createMemoryHistory, MemoryHistory } from 'history';
-import { Router } from 'react-router-dom';
+import { fireEvent } from '@testing-library/react';
 import { AppAction } from '../../types';
 import { HostList } from './index';
-import { mockHostResultList } from '../../store/hosts/mock_host_result_list';
+import {
+  mockHostDetailsApiResult,
+  mockHostResultList,
+} from '../../store/hosts/mock_host_result_list';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../mocks';
+import { HostInfo } from '../../../../../common/types';
 
 describe('when on the hosts page', () => {
-  let render: () => reactTestingLibrary.RenderResult;
-  let history: MemoryHistory<never>;
-  let store: ReturnType<typeof appStoreFactory>;
+  let render: () => ReturnType<AppContextTestRender['render']>;
+  let history: AppContextTestRender['history'];
+  let store: AppContextTestRender['store'];
+  let coreStart: AppContextTestRender['coreStart'];
 
   beforeEach(async () => {
-    history = createMemoryHistory<never>();
-    store = appStoreFactory();
-    render = () => {
-      return reactTestingLibrary.render(
-        <Provider store={store}>
-          <I18nProvider>
-            <EuiThemeProvider>
-              <Router history={history}>
-                <RouteCapture>
-                  <HostList />
-                </RouteCapture>
-              </Router>
-            </EuiThemeProvider>
-          </I18nProvider>
-        </Provider>
-      );
-    };
+    const mockedContext = createAppRootMockRenderer();
+    ({ history, store, coreStart } = mockedContext);
+    render = () => mockedContext.render(<HostList />);
   });
 
   it('should show a table', async () => {
@@ -56,7 +42,7 @@ describe('when on the hosts page', () => {
         expect(e).not.toBeNull();
       });
     });
-    describe('when data loads', () => {
+    describe('when list data loads', () => {
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const action: AppAction = {
@@ -76,6 +62,16 @@ describe('when on the hosts page', () => {
       describe('when the user clicks the hostname in the table', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
+          const hostDetailsApiResponse = mockHostDetailsApiResult();
+
+          coreStart.http.get.mockReturnValue(Promise.resolve(hostDetailsApiResponse));
+          reactTestingLibrary.act(() => {
+            store.dispatch({
+              type: 'serverReturnedHostDetails',
+              payload: hostDetailsApiResponse,
+            });
+          });
+
           renderResult = render();
           const detailsLink = await renderResult.findByTestId('hostnameCellLink');
           if (detailsLink) {
@@ -93,18 +89,69 @@ describe('when on the hosts page', () => {
   });
 
   describe('when there is a selected host in the url', () => {
+    let hostDetails: HostInfo;
     beforeEach(() => {
+      const {
+        host_status,
+        metadata: { host, ...details },
+      } = mockHostDetailsApiResult();
+      hostDetails = {
+        host_status,
+        metadata: {
+          ...details,
+          host: {
+            ...host,
+            id: '1',
+          },
+        },
+      };
+
+      coreStart.http.get.mockReturnValue(Promise.resolve(hostDetails));
+      coreStart.application.getUrlForApp.mockReturnValue('/app/logs');
+
       reactTestingLibrary.act(() => {
         history.push({
           ...history.location,
           search: '?selected_host=1',
         });
       });
+      reactTestingLibrary.act(() => {
+        store.dispatch({
+          type: 'serverReturnedHostDetails',
+          payload: hostDetails,
+        });
+      });
     });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should show the flyout', () => {
       const renderResult = render();
       return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
         expect(flyout).not.toBeNull();
+      });
+    });
+    it('should include the link to logs', async () => {
+      const renderResult = render();
+      const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
+      expect(linkToLogs).not.toBeNull();
+      expect(linkToLogs.textContent).toEqual('Endpoint Logs');
+      expect(linkToLogs.getAttribute('href')).toEqual(
+        "/app/logs/stream?logFilter=(expression:'host.id:1',kind:kuery)"
+      );
+    });
+    describe('when link to logs is clicked', () => {
+      beforeEach(async () => {
+        const renderResult = render();
+        const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
+        reactTestingLibrary.act(() => {
+          fireEvent.click(linkToLogs);
+        });
+      });
+
+      it('should navigate to logs without full page refresh', async () => {
+        expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
       });
     });
   });

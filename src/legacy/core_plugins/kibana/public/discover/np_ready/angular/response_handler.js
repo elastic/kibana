@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { buildPointSeriesData, getServices } from '../../kibana_services';
+import { getServices } from '../../kibana_services';
+import { buildPointSeriesData } from './helpers';
 
 function tableResponseHandler(table, dimensions) {
   const converted = { tables: [] };

@@ -8,7 +8,7 @@ import moment from 'moment';
 import React from 'react';
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { InfraFormatterType, InfraOptions, InfraWaffleMapLegendMode } from '../lib/lib';
+import { InfraFormatterType, InfraOptions } from '../lib/lib';
 import { RendererFunction } from '../utils/typed_react';
 
 const euiVisColorPalette = euiPaletteColorBlind();
@@ -29,7 +29,7 @@ const initialState = {
       metric: { type: 'cpu' },
       groupBy: [],
       legend: {
-        type: InfraWaffleMapLegendMode.gradient,
+        type: 'gradient',
         rules: [
           {
             value: 0,

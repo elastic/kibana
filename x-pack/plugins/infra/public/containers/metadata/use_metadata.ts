@@ -13,17 +13,18 @@ import { useHTTPRequest } from '../../hooks/use_http_request';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 import { InventoryMetric, InventoryItemType } from '../../../common/inventory_models/types';
 import { getFilteredMetrics } from './lib/get_filtered_metrics';
+import { MetricsTimeInput } from '../../pages/metrics/hooks/use_metrics_time';
 
 export function useMetadata(
   nodeId: string,
   nodeType: InventoryItemType,
   requiredMetrics: InventoryMetric[],
-  sourceId: string
+  sourceId: string,
+  timeRange: MetricsTimeInput
 ) {
   const decodeResponse = (response: any) => {
     return pipe(InfraMetadataRT.decode(response), fold(throwErrors(createPlainError), identity));
   };
-
   const { error, loading, response, makeRequest } = useHTTPRequest<InfraMetadata>(
     '/api/infra/metadata',
     'POST',
@@ -31,6 +32,7 @@ export function useMetadata(
       nodeId,
       nodeType,
       sourceId,
+      timeRange: { from: timeRange.from, to: timeRange.to },
     }),
     decodeResponse
   );
