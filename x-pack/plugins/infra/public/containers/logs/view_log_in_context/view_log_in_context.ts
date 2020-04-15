@@ -53,6 +53,7 @@ export const useViewLogInContext = (
         sourceId,
         startTimestamp,
         endTimestamp,
+        center: contextEntry.cursor,
         query: getQueryFromLogEntry(contextEntry),
       });
       setEntries(data.entries);

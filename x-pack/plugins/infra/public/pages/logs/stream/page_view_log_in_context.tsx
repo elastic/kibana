@@ -5,6 +5,7 @@
  */
 
 import React, { useContext, useCallback, useMemo } from 'react';
+import { noop } from 'lodash';
 import {
   EuiOverlayMask,
   EuiModal,
@@ -12,6 +13,8 @@ import {
   EuiTitle,
   EuiText,
   EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
@@ -20,6 +23,7 @@ import { Source } from '../../../containers/source';
 import { useColumnWidths } from '../../../components/logging/log_text_stream/log_entry_column';
 import { LogEntryRow } from '../../../components/logging/log_text_stream/log_entry_row';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
+import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
 
 export const PageViewLogInContext: React.FC = () => {
   const { source } = useContext(Source.Context);
@@ -29,11 +33,22 @@ export const PageViewLogInContext: React.FC = () => {
   ]);
   const { columnWidths, CharacterDimensionsProbe } = useColumnWidths({
     columnConfigurations,
-    scale: textScale, // FIXME
+    scale: textScale,
   });
-  const [{ contextEntry, entries }, { setContextEntry }] = useContext(ViewLogInContext.Context);
-
+  const [{ contextEntry, entries, isLoading }, { setContextEntry }] = useContext(
+    ViewLogInContext.Context
+  );
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
+
+  const streamItems = useMemo(
+    () =>
+      entries.map(entry => ({
+        kind: 'logEntry' as const,
+        logEntry: entry,
+        highlights: [],
+      })),
+    [entries]
+  );
 
   if (!contextEntry) {
     return null;
@@ -41,28 +56,60 @@ export const PageViewLogInContext: React.FC = () => {
 
   return (
     <EuiOverlayMask>
-      <EuiModal onClose={closeModal} maxWidth={false}>
-        <EuiModalBody>
-          <EuiTitle size="xxxs">
-            <h2>Selected log message</h2>
-          </EuiTitle>
-          <CharacterDimensionsProbe />
-          <LogEntryRow
-            columnConfigurations={columnConfigurations}
-            columnWidths={columnWidths}
-            logEntry={contextEntry}
-            highlights={[]}
-            isActiveHighlight={false}
-            isHighlighted={true}
-            scale={textScale}
-            wrap={textWrap}
-          />
-          <EuiSpacer />
-          <LogEntryContext context={contextEntry.context} />
-
-          <EuiSpacer />
-
-          <p>Surrounding Entry Count: {entries.length}</p>
+      <EuiModal onClose={closeModal}>
+        <EuiModalBody style={{ height: 600 }}>
+          <EuiFlexGroup direction="column" wrap={false} style={{ height: '100%' }}>
+            <EuiFlexItem grow={false}>
+              <EuiSpacer />
+              <EuiTitle size="xxxs">
+                <h2>Selected log message</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CharacterDimensionsProbe />
+              <LogEntryRow
+                columnConfigurations={columnConfigurations}
+                columnWidths={columnWidths}
+                logEntry={contextEntry}
+                highlights={[]}
+                isActiveHighlight={false}
+                isHighlighted={true}
+                scale={textScale}
+                wrap={textWrap}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <LogEntryContext context={contextEntry.context} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <ScrollableLogTextStreamView
+                target={contextEntry.cursor}
+                columnConfigurations={columnConfigurations}
+                items={streamItems}
+                scale={textScale}
+                wrap={textWrap}
+                isReloading={isLoading}
+                isLoadingMore={false}
+                hasMoreBeforeStart={false}
+                hasMoreAfterEnd={false}
+                isStreaming={false}
+                lastLoadedTime={null}
+                jumpToTarget={noop}
+                reportVisibleInterval={noop}
+                loadNewerItems={noop}
+                reloadItems={noop}
+                setFlyoutItem={noop}
+                setFlyoutVisibility={noop}
+                setContextEntry={noop}
+                highlightedItem={contextEntry.id}
+                currentHighlightKey={null}
+                startDateExpression={''}
+                endDateExpression={''}
+                updateDateRange={noop}
+                startLiveStreaming={noop}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiModalBody>
       </EuiModal>
     </EuiOverlayMask>
