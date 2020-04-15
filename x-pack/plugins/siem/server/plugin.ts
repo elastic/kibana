@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
   CoreStart,
+  Plugin as IPlugin,
   PluginInitializerContext,
   Logger,
 } from '../../../../src/core/server';
@@ -60,7 +61,12 @@ export interface StartPlugins {
   alerting: AlertingStart;
 }
 
-export class Plugin {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginStart {}
+
+export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly name = 'siem';
   private readonly logger: Logger;
   private readonly config$: Observable<ConfigType>;
@@ -201,7 +207,11 @@ export class Plugin {
 
     const libs = compose(core, plugins, this.context.env.mode.prod);
     initServer(libs);
+
+    return {};
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {}
+  public start(core: CoreStart, plugins: StartPlugins) {
+    return {};
+  }
 }
