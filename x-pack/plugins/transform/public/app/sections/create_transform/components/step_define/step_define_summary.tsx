@@ -19,7 +19,7 @@ import {
 
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
-import { IndexPreview } from '../../../../../shared_imports';
+import { DataGrid } from '../../../../../shared_imports';
 
 import { useToastNotifications } from '../../../../app_dependencies';
 import {
@@ -145,7 +145,7 @@ export const StepDefineSummary: FC<Props> = ({
 
       <EuiFlexItem>
         <EuiText>
-          <IndexPreview
+          <DataGrid
             {...pivotPreviewProps}
             copyToClipboard={getPivotPreviewDevConsoleStatement(previewRequest)}
             copyToClipboardDescription={i18n.translate(

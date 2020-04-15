@@ -6,5 +6,5 @@
 
 export { multiColumnSortFactory } from './common';
 export { useDataGrid } from './use_data_grid';
-export { IndexPreview } from './index_preview';
+export { DataGrid } from './data_grid';
 export { RenderCellValue, UseIndexDataReturnType, INDEX_STATUS } from './types';

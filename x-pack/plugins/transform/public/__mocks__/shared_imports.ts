@@ -17,8 +17,8 @@ export { getErrorMessage } from '../../../ml/common/util/errors';
 export {
   multiColumnSortFactory,
   useDataGrid,
-  IndexPreview,
+  DataGrid,
   RenderCellValue,
   UseIndexDataReturnType,
   INDEX_STATUS,
-} from '../../../ml/public/application/components/index_preview';
+} from '../../../ml/public/application/components/data_grid';

@@ -8,11 +8,11 @@ import React from 'react';
 
 import { EuiTitle } from '@elastic/eui';
 
-interface IndexPreviewTitle {
-  indexPreviewTitle: string;
+interface DataGridTitle {
+  dataGridTitle: string;
 }
-export const IndexPreviewTitle: React.FC<IndexPreviewTitle> = ({ indexPreviewTitle }) => (
+export const DataGridTitle: React.FC<DataGridTitle> = ({ dataGridTitle }) => (
   <EuiTitle size="xs">
-    <span>{indexPreviewTitle}</span>
+    <span>{dataGridTitle}</span>
   </EuiTitle>
 );

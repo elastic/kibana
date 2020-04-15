@@ -12,7 +12,7 @@ import '@testing-library/jest-dom/extend-expect';
 
 import { CoreSetup } from 'src/core/public';
 
-import { IndexPreview, UseIndexDataReturnType, INDEX_STATUS } from '../../shared_imports';
+import { DataGrid, UseIndexDataReturnType, INDEX_STATUS } from '../../shared_imports';
 
 import { SimpleQuery } from '../common';
 
@@ -53,7 +53,7 @@ describe('Transform: useIndexData()', () => {
   });
 });
 
-describe('Transform: <IndexPreview /> with useIndexData()', () => {
+describe('Transform: <DataGrid /> with useIndexData()', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
   test('Minimal initialization', async done => {
     // Arrange
@@ -72,7 +72,7 @@ describe('Transform: <IndexPreview /> with useIndexData()', () => {
         toastNotifications: {} as CoreSetup['notifications']['toasts'],
       };
 
-      return <IndexPreview {...props} />;
+      return <DataGrid {...props} />;
     };
     const { getByText } = render(<Wrapper />);
 

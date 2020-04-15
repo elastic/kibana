@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { IndexPreview } from '../../../../../shared_imports';
+import { DataGrid } from '../../../../../shared_imports';
 
 import { useToastNotifications } from '../../../../app_dependencies';
 import { getPivotQuery, TransformPivotConfig } from '../../../../common';
@@ -40,7 +40,7 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
   const pivotPreviewProps = usePivotData(indexPatternTitle, pivotQuery, aggList, groupByList);
 
   return (
-    <IndexPreview
+    <DataGrid
       {...pivotPreviewProps}
       dataTestSubj="transformPivotPreview"
       toastNotifications={toastNotifications}

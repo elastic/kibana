@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_index_preview.scss';
+import './_data_grid.scss';
 
 import React, { useEffect, FC } from 'react';
 
@@ -24,7 +24,7 @@ import {
 import { CoreSetup } from 'src/core/public';
 
 import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
-import { IndexPreviewTitle } from './index_preview_title';
+import { DataGridTitle } from './data_grid_title';
 import { INDEX_STATUS, UseIndexDataReturnType } from './types';
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
@@ -44,7 +44,7 @@ function isWithHeader(arg: any): arg is PropsWithHeader {
 
 type Props = PropsWithHeader | PropsWithoutHeader;
 
-export const IndexPreview: FC<Props> = props => {
+export const DataGrid: FC<Props> = props => {
   const {
     columns,
     dataTestSubj,
@@ -69,7 +69,7 @@ export const IndexPreview: FC<Props> = props => {
     if (invalidSortingColumnns.length > 0) {
       invalidSortingColumnns.forEach(columnId => {
         toastNotifications.addDanger(
-          i18n.translate('xpack.ml.indexPreview.invalidSortingColumnError', {
+          i18n.translate('xpack.ml.dataGrid.invalidSortingColumnError', {
             defaultMessage: `The column '{columnId}' cannot be used for sorting.`,
             values: { columnId },
           })
@@ -81,15 +81,15 @@ export const IndexPreview: FC<Props> = props => {
   if (status === INDEX_STATUS.LOADED && data.length === 0) {
     return (
       <div data-test-subj={`${dataTestSubj} empty`}>
-        {isWithHeader(props) && <IndexPreviewTitle indexPreviewTitle={props.title} />}
+        {isWithHeader(props) && <DataGridTitle dataGridTitle={props.title} />}
         <EuiCallOut
-          title={i18n.translate('xpack.ml.indexPreview.IndexNoDataCalloutTitle', {
+          title={i18n.translate('xpack.ml.dataGrid.IndexNoDataCalloutTitle', {
             defaultMessage: 'Empty index query result.',
           })}
           color="primary"
         >
           <p>
-            {i18n.translate('xpack.ml.indexPreview.IndexNoDataCalloutBody', {
+            {i18n.translate('xpack.ml.dataGrid.IndexNoDataCalloutBody', {
               defaultMessage:
                 'The query for the index returned no results. Please make sure you have sufficient permissions, the index contains documents and your query is not too restrictive.',
             })}
@@ -102,9 +102,9 @@ export const IndexPreview: FC<Props> = props => {
   if (noDataMessage !== '') {
     return (
       <div data-test-subj={`${dataTestSubj} empty`}>
-        {isWithHeader(props) && <IndexPreviewTitle indexPreviewTitle={props.title} />}
+        {isWithHeader(props) && <DataGridTitle dataGridTitle={props.title} />}
         <EuiCallOut
-          title={i18n.translate('xpack.ml.indexPreview.IndexPreviewNoDataCalloutTitle', {
+          title={i18n.translate('xpack.ml.dataGrid.dataGridNoDataCalloutTitle', {
             defaultMessage: 'Index preview not available',
           })}
           color="primary"
@@ -120,7 +120,7 @@ export const IndexPreview: FC<Props> = props => {
       {isWithHeader(props) && (
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem>
-            <IndexPreviewTitle indexPreviewTitle={props.title} />
+            <DataGridTitle dataGridTitle={props.title} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiCopy
@@ -141,7 +141,7 @@ export const IndexPreview: FC<Props> = props => {
       {status === INDEX_STATUS.ERROR && (
         <div data-test-subj={`${dataTestSubj} error`}>
           <EuiCallOut
-            title={i18n.translate('xpack.ml.indexPreview.indexDataError', {
+            title={i18n.translate('xpack.ml.dataGrid.indexDataError', {
               defaultMessage: 'An error occurred loading the index data.',
             })}
             color="danger"

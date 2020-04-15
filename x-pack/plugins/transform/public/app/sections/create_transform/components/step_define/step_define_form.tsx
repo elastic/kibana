@@ -35,7 +35,7 @@ import {
 
 import { useXJsonMode } from '../../../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 
-import { IndexPreview } from '../../../../../shared_imports';
+import { DataGrid } from '../../../../../shared_imports';
 
 import {
   getIndexDevConsoleStatement,
@@ -981,7 +981,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
       </EuiFlexItem>
 
       <EuiFlexItem grow={false} style={{ maxWidth: 'calc(100% - 468px)' }}>
-        <IndexPreview
+        <DataGrid
           {...indexPreviewProps}
           copyToClipboard={getIndexDevConsoleStatement(pivotQuery, indexPattern.title)}
           copyToClipboardDescription={i18n.translate(
@@ -998,7 +998,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
           toastNotifications={toastNotifications}
         />
         <EuiHorizontalRule />
-        <IndexPreview
+        <DataGrid
           {...pivotPreviewProps}
           copyToClipboard={getPivotPreviewDevConsoleStatement(previewRequest)}
           copyToClipboardDescription={i18n.translate(
