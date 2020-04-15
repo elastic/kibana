@@ -267,6 +267,11 @@ export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuer
   return keys.length === 1 && keys[0] === 'bool';
 };
 
+export const isQueryStringQuery = (arg: any): arg is QueryStringQuery => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === 'query_string';
+};
+
 export const isRegressionEvaluateResponse = (arg: any): arg is RegressionEvaluateResponse => {
   const keys = Object.keys(arg);
   return (
@@ -391,6 +396,10 @@ interface ResultsSearchTermQuery {
   term: Dictionary<any>;
 }
 
+interface QueryStringQuery {
+  query_string: Dictionary<any>;
+}
+
 export type ResultsSearchQuery = ResultsSearchBoolQuery | ResultsSearchTermQuery | SavedSearchQuery;
 
 export function getEvalQueryBody({
@@ -419,8 +428,14 @@ export function getEvalQueryBody({
 
     searchQueryClone.bool.must.push(trainingQuery);
     query = searchQueryClone;
+  } else if (isQueryStringQuery(searchQueryClone)) {
+    query = {
+      bool: {
+        must: [searchQueryClone, trainingQuery],
+      },
+    };
   } else {
-    // Not a bool query so we need to create it so can add the trainingQuery
+    // Not a bool or string query so we need to create it so can add the trainingQuery
     query = {
       bool: {
         must: [trainingQuery],
