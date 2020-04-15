@@ -21,6 +21,7 @@ function getQueryFromLogEntry(entry: LogEntry) {
 
   return JSON.stringify(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(expression)));
 }
+
 interface ViewLogInContextProps {
   sourceId: string;
   startTimestamp: number;
@@ -37,11 +38,11 @@ interface ViewLogInContextCallbacks {
 }
 
 export const useViewLogInContext = (
-  _props: ViewLogInContextProps
+  props: ViewLogInContextProps
 ): [ViewLogInContextState, ViewLogInContextCallbacks] => {
   const [contextEntry, setContextEntry] = useState<LogEntry | undefined>();
   const [entries, setEntries] = useState<LogEntry[]>([]);
-  const { startTimestamp, endTimestamp, sourceId } = _props;
+  const { startTimestamp, endTimestamp, sourceId } = props;
 
   const maybeFetchLogs = useCallback(async () => {
     if (contextEntry) {
