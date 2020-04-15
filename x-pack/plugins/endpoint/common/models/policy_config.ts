@@ -7,11 +7,9 @@
 import { PolicyConfig, ProtectionModes } from '../types';
 
 /**
- * Generate a new Policy model.
- * NOTE: in the near future, this will likely be removed and an API call to EPM will be used to retrieve
- * the latest from the Endpoint package
+ * Return a new default `PolicyConfig`.
  */
-export const generatePolicy = (): PolicyConfig => {
+export const factory = (): PolicyConfig => {
   return {
     windows: {
       events: {
