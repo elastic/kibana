@@ -25,7 +25,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { search } from '../../../../../plugins/data/public';
-import { NumberInputOption, SwitchOption, SelectOption } from '../../../vis_type_vislib/public';
+import {
+  SwitchOption,
+  SelectOption,
+  NumberInputOption,
+} from '../../../../../plugins/charts/public';
 import { TableVisParams } from '../types';
 import { totalAggregations } from './utils';
 

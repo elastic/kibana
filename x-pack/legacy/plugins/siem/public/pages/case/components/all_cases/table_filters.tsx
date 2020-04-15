@@ -42,7 +42,7 @@ const CasesTableFiltersComponent = ({
   onFilterChanged,
   initial = defaultInitial,
 }: CasesTableFiltersProps) => {
-  const [selectedReporters, setselectedReporters] = useState(
+  const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map(r => r.full_name ?? r.username ?? '')
   );
   const [search, setSearch] = useState(initial.search);
@@ -54,7 +54,7 @@ const CasesTableFiltersComponent = ({
   const handleSelectedReporters = useCallback(
     newReporters => {
       if (!isEqual(newReporters, selectedReporters)) {
-        setselectedReporters(newReporters);
+        setSelectedReporters(newReporters);
         const reportersObj = respReporters.filter(
           r => newReporters.includes(r.username) || newReporters.includes(r.full_name)
         );
@@ -97,6 +97,7 @@ const CasesTableFiltersComponent = ({
       <EuiFlexItem grow={true}>
         <EuiFieldSearch
           aria-label={i18n.SEARCH_CASES}
+          data-test-subj="search-cases"
           fullWidth
           incremental={false}
           placeholder={i18n.SEARCH_PLACEHOLDER}
@@ -107,6 +108,7 @@ const CasesTableFiltersComponent = ({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiFilterButton
+            data-test-subj="open-case-count"
             withNext
             hasActiveFilters={showOpenCases}
             onClick={handleToggleFilter.bind(null, true)}
@@ -115,6 +117,7 @@ const CasesTableFiltersComponent = ({
             {countOpenCases != null ? ` (${countOpenCases})` : ''}
           </EuiFilterButton>
           <EuiFilterButton
+            data-test-subj="closed-case-count"
             hasActiveFilters={!showOpenCases}
             onClick={handleToggleFilter.bind(null, false)}
           >

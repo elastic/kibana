@@ -24,6 +24,7 @@
       - [7. Switch to new platform services](#7-switch-to-new-platform-services)
       - [8. Migrate to the new plugin system](#8-migrate-to-the-new-plugin-system)
       - [Bonus: Tips for complex migration scenarios](#bonus-tips-for-complex-migration-scenarios)
+  - [Keep Kibana fast](#keep-kibana-fast)
   - [Frequently asked questions](#frequently-asked-questions)
     - [Is migrating a plugin an all-or-nothing thing?](#is-migrating-a-plugin-an-all-or-nothing-thing)
     - [Do plugins need to be converted to TypeScript?](#do-plugins-need-to-be-converted-to-typescript)
@@ -932,6 +933,66 @@ Other plugins may want to move subsystems over individually. Examples of pieces 
 For a few plugins, some of these steps (such as angular removal) could be a months-long process. In those cases, it may be helpful from an organizational perspective to maintain a clear separation of code that is and isn't "ready" for the new platform.
 
 One convention that is useful for this is creating a dedicated `public/np_ready` directory to house the code that is ready to migrate, and gradually move more and more code into it until the rest of your plugin is essentially empty. At that point, you'll be able to copy your `index.ts`, `plugin.ts`, and the contents of `./np_ready` over into your plugin in the new platform, leaving your legacy shim behind. This carries the added benefit of providing a way for us to introduce helpful tooling in the future, such as [custom eslint rules](https://github.com/elastic/kibana/pull/40537), which could be run against that specific directory to ensure your code is ready to migrate.
+
+## Keep Kibana fast
+**tl;dr**: Load as much code lazily as possible.
+Everyone loves snappy applications with responsive UI and hates spinners. Users deserve the best user experiences regardless of whether they run Kibana locally or in the cloud, regardless of their hardware & environment.
+There are 2 main aspects of the perceived speed of an application: loading time and responsiveness to user actions.
+New platform loads and bootstraps **all** the plugins whenever a user lands on any page. It means that adding every new application affects overall **loading performance** in the new platform, as plugin code is loaded **eagerly** to initialize the plugin and provide plugin API to dependent plugins.
+However, it's usually not necessary that the whole plugin code should be loaded and initialized at once. The plugin could keep on loading code covering API functionality on Kibana bootstrap but load UI related code lazily on-demand, when an application page or management section is mounted.
+Always prefer to require UI root components lazily when possible (such as in mount handlers). Even if their size may seem negligible, they are likely using some heavy-weight libraries that will also be removed from the initial plugin bundle, therefore, reducing its size by a significant amount.
+
+```typescript
+import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
+export class MyPlugin implements Plugin<MyPluginSetup> {
+  setup(core: CoreSetup, plugins: SetupDeps){
+   core.application.register({
+     id: 'app',
+     title: 'My app',
+     async mount(params: AppMountParameters) {
+        const { mountApp } = await import('./app/mount_app');
+        return mountApp(await core.getStartServices(), params);
+     },
+   });
+   plugins.management.sections.getSection('another').registerApp({
+      id: 'app',
+      title: 'My app',
+      order: 1,
+      async mount(params) {
+        const { mountManagementSection } = await import('./app/mount_management_section');
+        return mountManagementSection(coreSetup, params);
+      },
+   })
+   return {
+      doSomething(){}
+   }
+ }
+}
+```
+
+#### How to understand how big the bundle size of my plugin is?
+New platform plugins are distributed as a pre-built with `@kbn/optimizer` package artifacts. It allows us to get rid of the shipping of `optimizer` in the distributable version of Kibana.
+Every NP plugin artifact contains all plugin dependencies required to run the plugin, except some stateful dependencies shared across plugin bundles via `@kbn/ui-shared-deps`.
+It means that NP plugin artifacts tend to have a bigger size than the legacy platform version.
+To understand the current size of your plugin artifact, run `@kbn/optimizer` as
+```bash
+node scripts/build_kibana_platform_plugins.js --dist --no-examples
+```
+and check the output in the `target` sub-folder of your plugin folder
+```bash
+ls -lh plugins/my_plugin/target/public/
+# output
+# an async chunk loaded on demand
+... 262K 0.plugin.js
+# eagerly loaded chunk
+... 50K  my_plugin.plugin.js
+```
+you might see at least one js bundle - `my_plugin.plugin.js`. This is the only artifact loaded by the platform during bootstrap in the browser. The rule of thumb is to keep its size as small as possible.
+Other lazily loaded parts of your plugin present in the same folder as separate chunks under `{number}.plugin.js` names.
+If you want to investigate what your plugin bundle consists of you need to run `@kbn/optimizer` with `--profile` flag to get generated [webpack stats file](https://webpack.js.org/api/stats/).
+Many OSS tools are allowing you to analyze generated stats file
+- [an official tool](http://webpack.github.io/analyse/#modules) from webpack authors
+- [webpack-visualizer](https://chrisbateman.github.io/webpack-visualizer/)
 
 ## Frequently asked questions
 

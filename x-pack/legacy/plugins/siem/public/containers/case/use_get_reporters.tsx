@@ -26,7 +26,7 @@ const initialData: ReportersState = {
   isError: false,
 };
 
-interface UseGetReporters extends ReportersState {
+export interface UseGetReporters extends ReportersState {
   fetchReporters: () => void;
 }
 

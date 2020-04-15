@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { IndexMgmtSetup } from '../../../../../plugins/index_management/public';
+import { IndexManagementPluginSetup } from '../../../../../plugins/index_management/public';
 
 const propertyPath = 'isFollowerIndex';
 
@@ -21,7 +21,7 @@ const followerBadgeExtension = {
   filterExpression: 'isFollowerIndex:true',
 };
 
-export const extendIndexManagement = (indexManagement?: IndexMgmtSetup) => {
+export const extendIndexManagement = (indexManagement?: IndexManagementPluginSetup) => {
   if (indexManagement) {
     indexManagement.extensionsService.addBadge(followerBadgeExtension);
   }

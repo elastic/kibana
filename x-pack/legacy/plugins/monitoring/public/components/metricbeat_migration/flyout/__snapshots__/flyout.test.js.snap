@@ -161,7 +161,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
           "children": <EuiText>
             <p>
               <ForwardRef
-                href="https://www.elastic.co/guide/en/apm/metricbeat/current/metricbeat-installation.html"
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -220,7 +220,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/apm/reference/current/configuring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -287,7 +287,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/apm/reference/current/configuring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -311,7 +311,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
           "children": <EuiText>
             <p>
               <ForwardRef
-                href="https://www.elastic.co/guide/en/apm/metricbeat/current/metricbeat-starting.html"
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -601,7 +601,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -668,7 +668,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1290,7 +1290,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/kibana/reference/current/monitoring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/kibana/current/monitoring-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1357,7 +1357,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/kibana/reference/current/monitoring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/kibana/current/monitoring-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1629,7 +1629,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/logstash/reference/current/configuring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/logstash/current/monitoring-with-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1696,7 +1696,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/logstash/reference/current/configuring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/logstash/current/monitoring-with-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1943,7 +1943,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -2010,7 +2010,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-configuration.html"
                               target="_blank"
                             >
                               <FormattedMessage

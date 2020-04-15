@@ -5,19 +5,19 @@
  */
 
 import { TileLayer } from './tile_layer';
-import { EMS_XYZ } from '../../common/constants';
+import { SOURCE_TYPES } from '../../common/constants';
 import { XYZTMSSourceDescriptor } from '../../common/descriptor_types';
 import { ITMSSource, AbstractTMSSource } from './sources/tms_source';
 import { ILayer } from './layer';
 
 const sourceDescriptor: XYZTMSSourceDescriptor = {
-  type: EMS_XYZ,
+  type: SOURCE_TYPES.EMS_XYZ,
   urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
   id: 'foobar',
 };
 
 class MockTileSource extends AbstractTMSSource implements ITMSSource {
-  private readonly _descriptor: XYZTMSSourceDescriptor;
+  readonly _descriptor: XYZTMSSourceDescriptor;
   constructor(descriptor: XYZTMSSourceDescriptor) {
     super(descriptor, {});
     this._descriptor = descriptor;

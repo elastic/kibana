@@ -29,7 +29,7 @@ import * as migrations from './migrations';
 export const myType: SavedObjectsType = {
   name: 'MyType',
   hidden: false,
-  namespaceAgnostic: true,
+  namespaceType: 'multiple',
   mappings: {
     properties: {
       textField: {
