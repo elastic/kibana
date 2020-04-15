@@ -119,6 +119,26 @@ export const selectedMacEvents = (state: PolicyDetailsState): number => {
   return 0;
 };
 
+/** Returns the total number of possible linux eventing configurations */
+export const totalLinuxEvents = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.keys(config.linux.events).length;
+  }
+  return 0;
+};
+
+/** Returns the number of selected liinux eventing configurations */
+export const selectedLinuxEvents = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.values(config.linux.events).reduce((count, event) => {
+      return event === true ? count + 1 : count;
+    }, 0);
+  }
+  return 0;
+};
+
 /** is there an api call in flight */
 export const isLoading = (state: PolicyDetailsState) => state.isLoading;
 
