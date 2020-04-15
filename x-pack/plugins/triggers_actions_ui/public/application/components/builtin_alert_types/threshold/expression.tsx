@@ -328,6 +328,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
+                          data-test-subj="closePopover"
                           iconType="cross"
                           color="danger"
                           aria-label={i18n.translate(

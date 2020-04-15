@@ -16,6 +16,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const server = getService('kibanaServer');
+  const uptime = getService('uptime');
 
   describe('Uptime app', function() {
     this.tags('ciGroup6');
@@ -58,12 +59,14 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         await esArchiver.unload(ARCHIVE);
         await esArchiver.load(ARCHIVE);
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+        await uptime.navigation.goToUptime();
       });
       after(async () => await esArchiver.unload(ARCHIVE));
 
-      loadTestFile(require.resolve('./feature_controls'));
       loadTestFile(require.resolve('./overview'));
       loadTestFile(require.resolve('./monitor'));
+      loadTestFile(require.resolve('./ml_anomaly'));
+      loadTestFile(require.resolve('./feature_controls'));
     });
   });
 };

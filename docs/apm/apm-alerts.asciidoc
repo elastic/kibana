@@ -1,12 +1,16 @@
 [role="xpack"]
 [[apm-alerts]]
-=== Create an alert
+=== Alerts
+
+++++
+<titleabbrev>Create an alert</titleabbrev>
+++++
 
 beta::[]
 
-The APM app is integrated with Kibana's {kibana-ref}/alerting-getting-started.html[alerting and actions] feature.
-It provides a set of built-in **actions** and APM specific threshold **alerts** for you to use,
-and allows all alerts to be centrally managed from <<management,Kibana Management>>.
+The APM app integrates with Kibana's {kibana-ref}/alerting-getting-started.html[alerting and actions] feature.
+It provides a set of built-in **actions** and APM specific threshold **alerts** for you to use
+and enables central management of all alerts from <<management,Kibana Management>>.
 
 [role="screenshot"]
 image::apm/images/apm-alert.png[Create an alert in the APM app]
@@ -28,9 +32,9 @@ This guide creates an alert for the `opbeans-java` service based on the followin
 From the APM app, navigate to the `opbeans-java` service and select
 **Alerts** > **Create threshold alert** > **Transaction duration**.
 
-The name of your alert will automatically be set as `Transaction duration | opbeans-java`,
-and the alert will be tagged with `apm` and `service.name:opbeans-java`.
-Feel free to edit either of these defaults.
+`Transaction duration | opbeans-java` is automatically set as the name of the alert,
+and `apm` and `service.name:opbeans-java` are added as tags.
+It's fine to change the name of the alert, but do not edit the tags.
 
 Based on the alert criteria, define the following alert details:
 
@@ -42,7 +46,7 @@ Based on the alert criteria, define the following alert details:
 * **FOR THE LAST** - `5 minutes`
 
 Select an action type.
-Multiple action types can be selected, but in this example we want to post to a slack channel.
+Multiple action types can be selected, but in this example, we want to post to a Slack channel.
 Select **Slack** > **Create a connector**.
 Enter a name for the connector,
 and paste the webhook URL.
@@ -63,9 +67,9 @@ This guide creates an alert for the `opbeans-python` service based on the follow
 From the APM app, navigate to the `opbeans-python` service and select
 **Alerts** > **Create threshold alert** > **Error rate**.
 
-The name of your alert will automatically be set as `Error rate | opbeans-python`,
-and the alert will be tagged with `apm` and `service.name:opbeans-python`.
-Feel free to edit either of these defaults.
+`Error rate | opbeans-python` is automatically set as the name of the alert,
+and `apm` and `service.name:opbeans-python` are added as tags.
+It's fine to change the name of the alert, but do not edit the tags.
 
 Based on the alert criteria, define the following alert details:
 
@@ -93,5 +97,5 @@ From this page, you can create, edit, disable, mute, and delete alerts, and crea
 See {kibana-ref}/alerting-getting-started.html[alerting and actions] for more information.
 
 NOTE: If you are using an **on-premise** Elastic Stack deployment with security,
-TLS must be configured for communication between Elasticsearch and Kibana.
+communication between Elasticsearch and Kibana must have TLS configured.
 More information is in the alerting {kibana-ref}/alerting-getting-started.html#alerting-setup-prerequisites[prerequisites].
