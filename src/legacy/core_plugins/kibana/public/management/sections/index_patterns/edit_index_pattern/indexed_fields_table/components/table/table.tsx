@@ -27,110 +27,107 @@ import { IIndexPattern } from '../../../../../../../../../../../plugins/data/pub
 import { IndexedFieldItem } from '../../types';
 
 // localized labels
-const infoLabel = i18n.translate(
+const additionalInfoAriaLabel = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.additionalInfoAriaLabel',
   { defaultMessage: 'Additional field information' }
 );
 
-const timeLabel = i18n.translate(
+const primaryTimeAriaLabel = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.primaryTimeAriaLabel',
   { defaultMessage: 'Primary time field' }
 );
 
-const timeContent = i18n.translate(
+const primaryTimeTooltip = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.primaryTimeTooltip',
   { defaultMessage: 'This field represents the time that events occurred.' }
 );
 
-const label = i18n.translate('kbn.management.editIndexPattern.fields.table.multiTypeAria', {
-  defaultMessage: 'Multiple type field',
-});
-
-const content = i18n.translate('kbn.management.editIndexPattern.fields.table.multiTypeTooltip', {
-  defaultMessage:
-    'The type of this field changes across indices. It is unavailable for many analysis functions.',
-});
-
-const displayNameColumn = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.nameHeader',
+const multiTypeAriaLabel = i18n.translate(
+  'kbn.management.editIndexPattern.fields.table.multiTypeAria',
   {
-    defaultMessage: 'Name',
+    defaultMessage: 'Multiple type field',
   }
 );
 
-const typeNameColumn = i18n.translate('kbn.management.editIndexPattern.fields.table.typeHeader', {
+const multiTypeTooltip = i18n.translate(
+  'kbn.management.editIndexPattern.fields.table.multiTypeTooltip',
+  {
+    defaultMessage:
+      'The type of this field changes across indices. It is unavailable for many analysis functions.',
+  }
+);
+
+const nameHeader = i18n.translate('kbn.management.editIndexPattern.fields.table.nameHeader', {
+  defaultMessage: 'Name',
+});
+
+const typeHeader = i18n.translate('kbn.management.editIndexPattern.fields.table.typeHeader', {
   defaultMessage: 'Type',
 });
 
-const formatNameColumn = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.formatHeader',
-  {
-    defaultMessage: 'Format',
-  }
-);
+const formatHeader = i18n.translate('kbn.management.editIndexPattern.fields.table.formatHeader', {
+  defaultMessage: 'Format',
+});
 
-const searchableNameColumn = i18n.translate(
+const searchableHeader = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.searchableHeader',
   {
     defaultMessage: 'Searchable',
   }
 );
 
-const searchableDescriptionColumn = i18n.translate(
+const searchableDescription = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.searchableDescription',
   { defaultMessage: 'These fields can be used in the filter bar' }
 );
 
-const isSearchableLabel = i18n.translate(
+const isSearchableAriaLabel = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.isSearchableAria',
   {
     defaultMessage: 'Is searchable',
   }
 );
 
-const aggregatableNameColumn = i18n.translate(
+const aggregatableLabel = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.aggregatableLabel',
   {
     defaultMessage: 'Aggregatable',
   }
 );
 
-const aggregatableDescriptionColumn = i18n.translate(
+const aggregatableDescription = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.aggregatableDescription',
   { defaultMessage: 'These fields can be used in visualization aggregations' }
 );
 
-const isAggregatableLabel = i18n.translate(
+const isAggregatableAriaLabel = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.isAggregatableAria',
   {
     defaultMessage: 'Is aggregatable',
   }
 );
 
-const excludedNameColumn = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.excludedLabel',
-  {
-    defaultMessage: 'Excluded',
-  }
-);
+const excludedLabel = i18n.translate('kbn.management.editIndexPattern.fields.table.excludedLabel', {
+  defaultMessage: 'Excluded',
+});
 
-const excludedDescriptionColumn = i18n.translate(
+const excludedDescription = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.excludedDescription',
   { defaultMessage: 'Fields that are excluded from _source when it is fetched' }
 );
 
-const isExcludedLabel = i18n.translate(
+const isExcludedAriaLabel = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.isExcludedAria',
   {
     defaultMessage: 'Is excluded',
   }
 );
 
-const editNameAction = i18n.translate('kbn.management.editIndexPattern.fields.table.editLabel', {
+const editLabel = i18n.translate('kbn.management.editIndexPattern.fields.table.editLabel', {
   defaultMessage: 'Edit',
 });
 
-const editDescriptionAction = i18n.translate(
+const editDescription = i18n.translate(
   'kbn.management.editIndexPattern.fields.table.editDescription',
   { defaultMessage: 'Edit' }
 );
@@ -158,7 +155,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
             <EuiIconTip
               type="questionInCircle"
               color="primary"
-              aria-label={infoLabel}
+              aria-label={additionalInfoAriaLabel}
               content={field.info.map((info: string, i: number) => (
                 <div key={i}>{info}</div>
               ))}
@@ -168,7 +165,12 @@ export class Table extends PureComponent<IndexedFieldProps> {
         {indexPattern.timeFieldName === name ? (
           <span>
             &nbsp;
-            <EuiIconTip type="clock" color="primary" aria-label={timeLabel} content={timeContent} />
+            <EuiIconTip
+              type="clock"
+              color="primary"
+              aria-label={primaryTimeAriaLabel}
+              content={primaryTimeTooltip}
+            />
           </span>
         ) : null}
       </span>
@@ -182,7 +184,12 @@ export class Table extends PureComponent<IndexedFieldProps> {
         {isConflict ? (
           <span>
             &nbsp;
-            <EuiIconTip type="alert" color="warning" aria-label={label} content={content} />
+            <EuiIconTip
+              type="alert"
+              color="warning"
+              aria-label={multiTypeAriaLabel}
+              content={multiTypeTooltip}
+            />
           </span>
         ) : (
           ''
@@ -202,7 +209,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
     const columns: Array<EuiBasicTableColumn<IndexedFieldItem>> = [
       {
         field: 'displayName',
-        name: displayNameColumn,
+        name: nameHeader,
         dataType: 'string',
         sortable: true,
         render: (value: string, field: IndexedFieldItem) => {
@@ -213,7 +220,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
       },
       {
         field: 'type',
-        name: typeNameColumn,
+        name: typeHeader,
         dataType: 'string',
         sortable: true,
         render: (value: string) => {
@@ -223,40 +230,40 @@ export class Table extends PureComponent<IndexedFieldProps> {
       },
       {
         field: 'format',
-        name: formatNameColumn,
+        name: formatHeader,
         dataType: 'string',
         sortable: true,
       },
       {
         field: 'searchable',
-        name: searchableNameColumn,
-        description: searchableDescriptionColumn,
+        name: searchableHeader,
+        description: searchableDescription,
         dataType: 'boolean',
         sortable: true,
-        render: (value: string) => this.renderBooleanTemplate(value, isSearchableLabel),
+        render: (value: string) => this.renderBooleanTemplate(value, isSearchableAriaLabel),
       },
       {
         field: 'aggregatable',
-        name: aggregatableNameColumn,
-        description: aggregatableDescriptionColumn,
+        name: aggregatableLabel,
+        description: aggregatableDescription,
         dataType: 'boolean',
         sortable: true,
-        render: (value: string) => this.renderBooleanTemplate(value, isAggregatableLabel),
+        render: (value: string) => this.renderBooleanTemplate(value, isAggregatableAriaLabel),
       },
       {
         field: 'excluded',
-        name: excludedNameColumn,
-        description: excludedDescriptionColumn,
+        name: excludedLabel,
+        description: excludedDescription,
         dataType: 'boolean',
         sortable: true,
-        render: (value: string) => this.renderBooleanTemplate(value, isExcludedLabel),
+        render: (value: string) => this.renderBooleanTemplate(value, isExcludedAriaLabel),
       },
       {
         name: '',
         actions: [
           {
-            name: editNameAction,
-            description: editDescriptionAction,
+            name: editLabel,
+            description: editDescription,
             icon: 'pencil',
             onClick: editField,
             type: 'icon',

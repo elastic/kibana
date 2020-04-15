@@ -56,7 +56,7 @@ const items: IndexedFieldItem[] = [
 ];
 
 describe('Table', () => {
-  test('should render normally', async () => {
+  test('should render normally', () => {
     const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
@@ -64,7 +64,7 @@ describe('Table', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('should render normal field name', async () => {
+  test('should render normal field name', () => {
     const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
@@ -73,7 +73,7 @@ describe('Table', () => {
     expect(tableCell).toMatchSnapshot();
   });
 
-  test('should render timestamp field name', async () => {
+  test('should render timestamp field name', () => {
     const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
@@ -82,7 +82,7 @@ describe('Table', () => {
     expect(tableCell).toMatchSnapshot();
   });
 
-  test('should render the boolean template (true)', async () => {
+  test('should render the boolean template (true)', () => {
     const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
@@ -91,7 +91,7 @@ describe('Table', () => {
     expect(tableCell).toMatchSnapshot();
   });
 
-  test('should render the boolean template (false)', async () => {
+  test('should render the boolean template (false)', () => {
     const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
@@ -100,7 +100,7 @@ describe('Table', () => {
     expect(tableCell).toMatchSnapshot();
   });
 
-  test('should render normal type', async () => {
+  test('should render normal type', () => {
     const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
@@ -109,7 +109,7 @@ describe('Table', () => {
     expect(tableCell).toMatchSnapshot();
   });
 
-  test('should render conflicting type', async () => {
+  test('should render conflicting type', () => {
     const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );

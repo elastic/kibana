@@ -27,8 +27,8 @@ import { IndexedFieldItem } from './types';
 interface IndexedFieldsTableProps {
   fields: IndexPatternField[];
   indexPattern: IIndexPattern;
-  fieldFilter: string;
-  indexedFieldTypeFilter: string;
+  fieldFilter?: string;
+  indexedFieldTypeFilter?: string;
   helpers: {
     redirectToRoute: (obj: any, route: string) => void;
     getFieldInfo: (indexPattern: IIndexPattern, field: string) => string[];
