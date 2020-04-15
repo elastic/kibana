@@ -16251,7 +16251,6 @@
     "xpack.uptime.emptyStateError.notAuthorized": "您无权查看 Uptime 数据，请联系系统管理员。",
     "xpack.uptime.emptyStateError.notFoundPage": "未找到页面",
     "xpack.uptime.emptyStateError.title": "错误",
-    "xpack.uptime.errorMessage": "错误：{message}",
     "xpack.uptime.featureCatalogueDescription": "执行终端节点运行状况检查和运行时间监测。",
     "xpack.uptime.featureRegistry.uptimeFeatureName": "运行时间",
     "xpack.uptime.filterBar.ariaLabel": "概览页面的输入筛选条件",
