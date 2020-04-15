@@ -16,14 +16,22 @@ import {
   IEmbeddable,
   defaultEmbeddableFactoryProvider,
   EmbeddableContext,
+  PANEL_NOTIFICATION_TRIGGER,
 } from '../../../../src/plugins/embeddable/public';
-import { EnhancedEmbeddable } from './types';
+import { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
 import { EmbeddableActionStorage } from './embeddables/embeddable_action_storage';
 import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
 } from '../../advanced_ui_actions/public';
+import { PanelNotificationsAction, ACTION_PANEL_NOTIFICATIONS } from './actions';
+
+declare module '../../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_PANEL_NOTIFICATIONS]: EnhancedEmbeddableContext;
+  }
+}
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
@@ -49,6 +57,10 @@ export class EmbeddableEnhancedPlugin
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.setCustomEmbeddableFactoryProvider(plugins);
+
+    const panelNotificationAction = new PanelNotificationsAction();
+    plugins.advancedUiActions.registerAction(panelNotificationAction);
+    plugins.advancedUiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
 
     return {};
   }
