@@ -137,11 +137,7 @@ export const singleBulkCreate = async ({
     const errorCountByMessage = errorAggregator(response, [409]);
     if (!isEmpty(errorCountByMessage)) {
       logger.error(
-        `[-] bulkResponse had errors with responses of:\n${JSON.stringify(
-          errorCountByMessage,
-          null,
-          2
-        )}`
+        `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
       );
     }
   }
