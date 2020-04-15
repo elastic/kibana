@@ -110,7 +110,7 @@ describe('parent pipeline aggs', function() {
               schema: 'metric',
             },
           ],
-          { typesRegistry }
+          { typesRegistry, fieldFormats: getInternalStartServices().fieldFormats }
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)

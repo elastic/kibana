@@ -59,9 +59,9 @@ const dataFetchReducer = (state: DeleteState, action: Action): DeleteState => {
   }
 };
 
-interface UseDeleteCase extends DeleteState {
+export interface UseDeleteCase extends DeleteState {
   dispatchResetIsDeleted: () => void;
-  handleOnDeleteConfirm: (caseIds: DeleteCase[]) => void;
+  handleOnDeleteConfirm: (cases: DeleteCase[]) => void;
   handleToggleModal: () => void;
 }
 
@@ -117,8 +117,8 @@ export const useDeleteCases = (): UseDeleteCase => {
   }, [state.isDisplayConfirmDeleteModal]);
 
   const handleOnDeleteConfirm = useCallback(
-    caseIds => {
-      dispatchDeleteCases(caseIds);
+    (cases: DeleteCase[]) => {
+      dispatchDeleteCases(cases);
       dispatchToggleDeleteModal();
     },
     [state.isDisplayConfirmDeleteModal]
