@@ -44,13 +44,18 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
     notifications,
   } = useKibana().services;
 
+  const actions: AlertAction[] = useMemo(
+    () => (!isEmpty(field.value) ? (field.value as AlertAction[]) : []),
+    [field.value]
+  );
+
   const setActionIdByIndex = useCallback(
     (id: string, index: number) => {
-      const updatedActions = [...(field.value as Array<Partial<AlertAction>>)];
+      const updatedActions = [...(actions as Array<Partial<AlertAction>>)];
       updatedActions[index] = deepMerge(updatedActions[index], { id });
       field.setValue(updatedActions);
     },
-    [field]
+    [field.setValue, actions]
   );
 
   const setAlertProperty = useCallback(
@@ -61,11 +66,11 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
   const setActionParamsProperty = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (key: string, value: any, index: number) => {
-      const updatedActions = [...(field.value as AlertAction[])];
+      const updatedActions = [...actions];
       updatedActions[index].params[key] = value;
       field.setValue(updatedActions);
     },
-    [field]
+    [field.setValue, actions]
   );
 
   useEffect(() => {
@@ -99,11 +104,6 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
     field.errors,
     setFieldErrors,
   ]);
-
-  const actions: AlertAction[] = useMemo(
-    () => (!isEmpty(field.value) ? (field.value as AlertAction[]) : []),
-    [field.value]
-  );
 
   if (!supportedActionTypes) return <></>;
 
