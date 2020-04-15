@@ -26,6 +26,7 @@ const mockLocationWithState = {
   state: {
     insertTimeline: {
       timelineId: 'timeline-id',
+      timelineSavedObjectId: '34578-3497-5893-47589-34759',
       timelineTitle: 'Timeline title',
     },
   },
