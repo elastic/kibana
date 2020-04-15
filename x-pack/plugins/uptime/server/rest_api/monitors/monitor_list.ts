@@ -5,11 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isRight } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMRestApiRouteFactory } from '../types';
 import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants';
-import { MonitorSummaryResultType } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
 
 export const createMonitorListRoute: UMRestApiRouteFactory = libs => ({
@@ -60,28 +57,12 @@ export const createMonitorListRoute: UMRestApiRouteFactory = libs => ({
 
     const totalSummaryCount = indexStatus?.docCount ?? 0;
 
-    const decoded = MonitorSummaryResultType.decode({
-      summaries,
-      nextPagePagination,
-      prevPagePagination,
-      totalSummaryCount,
-    });
-
-    if (isRight(decoded)) {
-      return response.ok({
-        body: {
-          ...decoded.right,
-        },
-      });
-    }
-    // eslint-disable-next-line no-console
-    console.error(
-      `Error from ${API_URLS.MONITOR_LIST}`,
-      JSON.stringify(PathReporter.report(decoded))
-    );
-    return response.internalError({
+    return response.ok({
       body: {
-        message: 'Error parsing Elasticsearch response',
+        summaries,
+        nextPagePagination,
+        prevPagePagination,
+        totalSummaryCount,
       },
     });
   },
