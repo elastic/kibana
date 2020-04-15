@@ -19,24 +19,10 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const config = getService('config');
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'security', 'settings', 'share', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'security', 'share', 'timePicker']);
 
   class ReportingPage {
-    async initTests() {
-      log.debug('ReportingPage:initTests');
-      await PageObjects.settings.navigateTo();
-      await esArchiver.loadIfNeeded('../../functional/es_archives/logstash_functional');
-      await esArchiver.load('reporting/historic');
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-      });
-
-      await browser.setWindowSize(1600, 850);
-    }
-
     async forceSharedItemsContainerSize({ width }) {
       await browser.execute(`
         var el = document.querySelector('[data-shared-items-container]');
@@ -128,6 +114,20 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async getGenerateReportButton() {
       return await retry.try(async () => await testSubjects.find('generateReportButton'));
+    }
+
+    async isGenerateReportButtonDisabled() {
+      const generateReportButton = await this.getGenerateReportButton();
+      return await retry.try(async () => {
+        const isDisabled = await generateReportButton.getAttribute('disabled');
+        return isDisabled;
+      });
+    }
+
+    async canReportBeCreated() {
+      await this.clickGenerateReportButton();
+      const success = await this.checkForReportingToasts();
+      return success;
     }
 
     async checkUsePrintLayout() {

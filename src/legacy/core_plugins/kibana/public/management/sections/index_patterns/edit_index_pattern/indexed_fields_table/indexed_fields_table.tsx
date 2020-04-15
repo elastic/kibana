@@ -73,7 +73,6 @@ export class IndexedFieldsTable extends Component<
           return {
             ...field,
             displayName: field.displayName,
-            routes: field.routes,
             indexPattern: field.indexPattern,
             format: getFieldFormat(indexPattern, field.name),
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
@@ -113,7 +112,7 @@ export class IndexedFieldsTable extends Component<
         <Table
           indexPattern={indexPattern}
           items={fields}
-          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+          editField={field => this.props.helpers.redirectToRoute(field)}
         />
       </div>
     );

@@ -9,7 +9,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
 import {
-  Doc,
+  ImportDoc,
   ImportFailure,
   ImportResponse,
   Mappings,
@@ -20,6 +20,7 @@ import {
 const CHUNK_SIZE = 5000;
 const MAX_CHUNK_CHAR_COUNT = 1000000;
 const IMPORT_RETRIES = 5;
+const STRING_CHUNKS_MB = 100;
 
 export interface ImportConfig {
   settings: Settings;
@@ -34,12 +35,19 @@ export interface ImportResults {
   error?: any;
 }
 
-export class Importer {
+export interface CreateDocsResponse {
+  success: boolean;
+  remainder: number;
+  docs: ImportDoc[];
+  error?: any;
+}
+
+export abstract class Importer {
   private _settings: Settings;
   private _mappings: Mappings;
   private _pipeline: IngestPipeline;
 
-  protected _docArray: Doc[] = [];
+  protected _docArray: ImportDoc[] = [];
 
   constructor({ settings, mappings, pipeline }: ImportConfig) {
     this._settings = settings;
@@ -47,7 +55,33 @@ export class Importer {
     this._pipeline = pipeline;
   }
 
-  async initializeImport(index: string) {
+  public read(data: ArrayBuffer) {
+    const decoder = new TextDecoder();
+    const size = STRING_CHUNKS_MB * Math.pow(2, 20);
+
+    // chop the data up into 100MB chunks for processing.
+    // if the chop produces a partial line at the end, a character "remainder" count
+    // is returned which is used to roll the next chunk back that many chars so
+    // it is included in the next chunk.
+    const parts = Math.ceil(data.byteLength / size);
+    let remainder = 0;
+    for (let i = 0; i < parts; i++) {
+      const byteArray = decoder.decode(data.slice(i * size - remainder, (i + 1) * size));
+      const { success, docs, remainder: tempRemainder } = this._createDocs(byteArray);
+      if (success) {
+        this._docArray = this._docArray.concat(docs);
+        remainder = tempRemainder;
+      } else {
+        return { success: false };
+      }
+    }
+
+    return { success: true };
+  }
+
+  protected abstract _createDocs(t: string): CreateDocsResponse;
+
+  public async initializeImport(index: string) {
     const settings = this._settings;
     const mappings = this._mappings;
     const pipeline = this._pipeline;
@@ -75,7 +109,7 @@ export class Importer {
     return createIndexResp;
   }
 
-  async import(
+  public async import(
     id: string,
     index: string,
     pipelineId: string,
@@ -201,8 +235,8 @@ function updatePipelineTimezone(ingestPipeline: IngestPipeline) {
   }
 }
 
-function createDocumentChunks(docArray: Doc[]) {
-  const chunks: Doc[][] = [];
+function createDocumentChunks(docArray: ImportDoc[]) {
+  const chunks: ImportDoc[][] = [];
   // chop docArray into 5000 doc chunks
   const tempChunks = chunk(docArray, CHUNK_SIZE);
 
