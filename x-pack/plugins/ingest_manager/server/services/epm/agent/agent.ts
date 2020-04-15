@@ -5,19 +5,12 @@
  */
 
 import Handlebars from 'handlebars';
-import { RegistryVarsEntry } from '../../../types';
 
-/**
- * This takes a dataset object as input and merges it with the input template.
- * It returns the resolved template as a string.
- */
-export function createInput(vars: RegistryVarsEntry[], inputTemplate: string): string {
-  const view: Record<RegistryVarsEntry['name'], RegistryVarsEntry['default']> = {};
+interface StreamVars {
+  [k: string]: string | string[];
+}
 
-  for (const v of vars) {
-    view[v.name] = v.default;
-  }
-
-  const template = Handlebars.compile(inputTemplate);
-  return template(view);
+export function createStream(vars: StreamVars, streamTemplate: string) {
+  const template = Handlebars.compile(streamTemplate);
+  return template(vars);
 }
