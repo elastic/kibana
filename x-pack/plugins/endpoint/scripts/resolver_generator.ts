@@ -35,7 +35,9 @@ async function main() {
     eventIndex: {
       alias: 'ei',
       describe: 'index to store events in',
-      default: 'events-endpoint-default-1',
+      // This should be changed to events-endpoint-default-1 when this issue gets resolved:
+      // https://github.com/elastic/endpoint-app-team/issues/311
+      default: 'events-endpoint-1',
       type: 'string',
     },
     metadataIndex: {
