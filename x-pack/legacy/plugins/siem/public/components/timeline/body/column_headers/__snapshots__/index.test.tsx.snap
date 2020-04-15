@@ -485,8 +485,11 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
     <Connect(Droppable)
       direction="horizontal"
       droppableId="droppableId.timelineColumns.test"
+      getContainerForClone={[Function]}
       ignoreContainerClipping={false}
+      isCombineEnabled={false}
       isDropDisabled={false}
+      mode="standard"
       renderClone={[Function]}
       type="drag-type-field"
     >
