@@ -12,9 +12,9 @@ import { monitorStatusSelector } from '../state/selectors';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useMonitorId, useUptimeTelemetry, UptimePage } from '../hooks';
-import { MonitorCharts } from '../components/monitor_details';
-import { MonitorStatusDetails } from '../components/monitor_details';
-import { PingList } from '../components/monitor_details';
+import { MonitorCharts } from '../components/monitor';
+import { MonitorStatusDetails } from '../components/monitor';
+import { PingList } from '../components/monitor';
 
 export const MonitorPage: React.FC = () => {
   const monitorId = useMonitorId();

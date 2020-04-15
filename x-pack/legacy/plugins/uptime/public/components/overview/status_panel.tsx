@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { PingHistogram } from '../monitor_details';
+import { PingHistogram } from '../monitor';
 import { Snapshot } from './snapshot/snapshot_container';
 
 const STATUS_CHART_HEIGHT = '160px';
