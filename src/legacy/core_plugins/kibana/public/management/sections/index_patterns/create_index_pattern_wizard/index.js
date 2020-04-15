@@ -36,10 +36,9 @@ uiRoutes.when('/management/kibana/index_pattern', {
         $routeParams.type
       );
       const services = {
-        config: npStart.core.uiSettings,
+        uiSettings: npStart.core.uiSettings,
         es: npStart.plugins.data.search.__LEGACY.esClient,
         indexPatterns: npStart.plugins.data.indexPatterns,
-        $http: npStart.core.http,
         savedObjectsClient: npStart.core.savedObjects.client,
         indexPatternCreationType,
         changeUrl: url => {

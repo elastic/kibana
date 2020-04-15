@@ -53,14 +53,14 @@ const services = {
   es: search.__LEGACY.esClient,
   indexPatterns,
   savedObjectsClient: savedObjects.client as SavedObjectsClient,
-  config: uiSettings,
+  uiSettings,
   changeUrl: jest.fn(),
   openConfirm: overlays.openConfirm,
   indexPatternCreationType: mockIndexPatternCreationType,
 };
 
 describe('CreateIndexPatternWizard', () => {
-  test(`defaults to the loading state`, async () => {
+  test(`defaults to the loading state`, () => {
     const component = shallow(
       <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
     );

@@ -47,7 +47,7 @@ interface CreateIndexPatternWizardProps {
     es: DataPublicPluginStart['search']['__LEGACY']['esClient'];
     indexPatterns: DataPublicPluginStart['indexPatterns'];
     savedObjectsClient: SavedObjectsClient;
-    config: IUiSettingsClient;
+    uiSettings: IUiSettingsClient;
     changeUrl: (url: string) => void;
     openConfirm: OverlayStart['openConfirm'];
   };
@@ -256,7 +256,7 @@ export class CreateIndexPatternWizard extends Component<
           savedObjectsClient={services.savedObjectsClient}
           indexPatternCreationType={indexPatternCreationType}
           goToNextStep={this.goToTimeFieldStep}
-          uiSettings={services.config}
+          uiSettings={services.uiSettings}
         />
       );
     }
