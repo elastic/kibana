@@ -69,6 +69,10 @@ export const DESCRIPTION = i18n.translate('xpack.siem.case.caseView.description'
   defaultMessage: 'Description',
 });
 
+export const SELECT_CONNECTOR = i18n.translate('xpack.siem.case.caseView.selectConnector', {
+  defaultMessage: 'Select a 3rd party connector',
+});
+
 export const DESCRIPTION_REQUIRED = i18n.translate(
   'xpack.siem.case.createCase.descriptionFieldRequiredError',
   {

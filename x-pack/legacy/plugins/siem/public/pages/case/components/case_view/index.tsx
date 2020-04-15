@@ -67,7 +67,6 @@ export const CaseComponent = React.memo<CaseProps>(
     const basePath = window.location.origin + useBasePath();
     const caseLink = `${basePath}/app/siem#/case/${caseId}`;
     const search = useGetUrlSearch(navTabs.case);
-
     const [initLoadingData, setInitLoadingData] = useState(true);
     const {
       caseUserActions,
