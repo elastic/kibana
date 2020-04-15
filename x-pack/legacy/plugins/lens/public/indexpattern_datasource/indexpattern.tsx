@@ -55,7 +55,7 @@ export interface DraggedField {
 }
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
-  const { dataType, label, isBucketed, scale, sourceField } = column;
+  const { dataType, label, isBucketed, scale } = column;
   return {
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
@@ -319,7 +319,7 @@ export function getIndexPatternDatasource({
           return null;
         },
         primaryTimeFieldName:
-          state.indexPatterns[state.layers[layerId].indexPatternId]?.timeFieldName,
+          state.indexPatterns[state.layers[layerId].indexPatternId].timeFieldName,
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {

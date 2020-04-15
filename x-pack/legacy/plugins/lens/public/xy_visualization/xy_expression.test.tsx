@@ -204,7 +204,6 @@ const sampleLayer: LayerArgs = {
 const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
   xTitle: '',
   yTitle: '',
-  primaryTimeFieldName: null,
   legend: {
     type: 'lens_xy_legendConfig',
     isVisible: false,

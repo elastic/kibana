@@ -85,7 +85,7 @@ export const xyChart: ExpressionFunctionDefinition<
       help: 'Y axis title',
     },
     primaryTimeFieldName: {
-      types: ['string', 'null'],
+      types: ['string'],
       required: false,
       help: 'Used for filtering on the index pattern',
     },
