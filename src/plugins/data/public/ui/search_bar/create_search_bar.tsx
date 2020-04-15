@@ -124,7 +124,8 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
     const defaultQuery = {
       query: '',
-      language: core.uiSettings.get('search:queryLanguage'),
+      language:
+        storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage'),
     };
     const [query, setQuery] = useState<Query>(props.query || defaultQuery);
 
@@ -161,7 +162,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       setQuery,
       savedQueryId: props.savedQueryId,
       notifications: core.notifications,
-      uiSettings: core.uiSettings,
+      defaultLanguage: defaultQuery.language,
     });
 
     // Fire onQuerySubmit on query or timerange change
