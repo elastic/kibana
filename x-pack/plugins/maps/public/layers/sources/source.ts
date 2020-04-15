@@ -67,10 +67,6 @@ export interface ISource {
 export class AbstractSource implements ISource {
   static isIndexingSource = false;
 
-  static createDescriptor(): SourceDescriptor {
-    throw new Error('Must implement Source.createDescriptor');
-  }
-
   readonly _descriptor: SourceDescriptor;
   readonly _inspectorAdapters?: object;
 

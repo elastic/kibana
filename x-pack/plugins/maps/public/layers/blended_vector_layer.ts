@@ -37,6 +37,7 @@ import {
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { IStyle } from './styles/abstract_style';
+import { IVectorSource } from './sources/vector_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
@@ -243,7 +244,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
     const searchFilters = this._getSearchFilters(
       syncContext.dataFilters,
-      this.getSource() as IVectorStyle,
+      this.getSource() as IVectorSource,
       this.getCurrentStyle() as IVectorStyle
     );
     const canSkipFetch = await canSkipSourceUpdate({

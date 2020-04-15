@@ -5,7 +5,7 @@
  */
 
 import { AbstractESAggSource } from '../es_agg_source';
-import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
+import { ESGeoGridSourceDescriptor, SourceDescriptor } from '../../../../common/descriptor_types';
 import { GRID_RESOLUTION } from '../../../../common/constants';
 
 export class ESGeoGridSource extends AbstractESAggSource {

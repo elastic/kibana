@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from './util/data_request';
 import {
-  LAYER_TYPE,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
@@ -41,7 +40,7 @@ export interface ILayer {
   getSourceDataRequest(): DataRequest | undefined;
   getSource(): ISource;
   getSourceForEditing(): ISource;
-  syncData(syncContext: SyncContext): Promise<void>;
+  syncData(syncContext: SyncContext): void;
   supportsElasticsearchFilters(): boolean;
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
@@ -53,7 +52,7 @@ export interface ILayer {
   getMinZoom(): number;
   getMaxZoom(): number;
   getAlpha(): number;
-  getQuery(): Query;
+  getQuery(): Query | null;
   getStyle(): IStyle;
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
@@ -74,7 +73,7 @@ export interface ILayer {
   getQueryableIndexPatternIds(): string[];
   getType(): string | undefined;
   isVisible(): boolean;
-  cloneDescriptor(): LayerDescriptor;
+  cloneDescriptor(): Promise<LayerDescriptor>;
   renderStyleEditor({
     onStyleDescriptorChange,
   }: {
@@ -83,12 +82,12 @@ export interface ILayer {
 }
 export type Footnote = {
   icon: ReactElement<any>;
-  message: string | undefined;
+  message?: string | null;
 };
 export type IconAndTooltipContent = {
-  icon: ReactElement<any>;
+  icon?: ReactElement<any> | null;
   tooltipContent?: string | null;
-  footnotes?: Footnote[];
+  footnotes?: Footnote[] | null;
   areResultsTrimmed?: boolean;
 };
 
@@ -105,18 +104,18 @@ export class AbstractLayer implements ILayer {
   protected readonly _dataRequests: DataRequest[];
 
   static createDescriptor(options: Partial<LayerDescriptor>): LayerDescriptor {
-    const layerDescriptor: LayerDescriptor = { ...options };
-
-    layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
-    layerDescriptor.id = _.get(options, 'id', uuid());
-    layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
-    layerDescriptor.minZoom = _.get(options, 'minZoom', MIN_ZOOM);
-    layerDescriptor.maxZoom = _.get(options, 'maxZoom', MAX_ZOOM);
-    layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
-    layerDescriptor.visible = _.get(options, 'visible', true);
-    layerDescriptor.style = _.get(options, 'style', {});
-
-    return layerDescriptor;
+    return {
+      ...options,
+      sourceDescriptor: options.sourceDescriptor ? options.sourceDescriptor : null,
+      __dataRequests: _.get(options, '__dataRequests', []),
+      id: _.get(options, 'id', uuid()),
+      label: options.label && options.label.length > 0 ? options.label : null,
+      minZoom: _.get(options, 'minZoom', MIN_ZOOM),
+      maxZoom: _.get(options, 'maxZoom', MAX_ZOOM),
+      alpha: _.get(options, 'alpha', 0.75),
+      visible: _.get(options, 'visible', true),
+      style: _.get(options, 'style', null),
+    };
   }
 
   destroy() {
@@ -138,7 +137,7 @@ export class AbstractLayer implements ILayer {
     }
   }
 
-  static getBoundDataForSource(mbMap: unkown, sourceId: string): FeatureCollection {
+  static getBoundDataForSource(mbMap: unknown, sourceId: string): FeatureCollection {
     // @ts-ignore
     const mbStyle = mbMap.getStyle();
     return mbStyle.sources[sourceId].data;
@@ -153,7 +152,8 @@ export class AbstractLayer implements ILayer {
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
 
-    // todo: fix this. This is hacky, and relies on knowledge of vector_layer
+    // todo: remove this
+    // This should not be in AbstractLayer. It relies on knowledge of VectorLayerDescriptor
     // @ts-ignore
     if (clonedDescriptor.joins) {
       // @ts-ignore
@@ -305,7 +305,7 @@ export class AbstractLayer implements ILayer {
   }
 
   showAtZoomLevel(zoom: number): boolean {
-    return zoom >= this._descriptor.minZoom && zoom <= this._descriptor.maxZoom;
+    return zoom >= this.getMinZoom() && zoom <= this.getMaxZoom();
   }
 
   getMinZoom(): number {
@@ -320,8 +320,8 @@ export class AbstractLayer implements ILayer {
     return typeof this._descriptor.alpha === 'number' ? this._descriptor.alpha : 1;
   }
 
-  getQuery(): Query {
-    return this._descriptor.query;
+  getQuery(): Query | null {
+    return this._descriptor.query ? this._descriptor.query : null;
   }
 
   getCurrentStyle(): IStyle {
@@ -338,7 +338,7 @@ export class AbstractLayer implements ILayer {
     return source.renderSourceSettingsEditor({ onChange });
   }
 
-  getPrevRequestToken(dataId): symbol | undefined {
+  getPrevRequestToken(dataId: string): symbol | undefined {
     const prevDataRequest = this.getDataRequest(dataId);
     if (!prevDataRequest) {
       return;
@@ -353,6 +353,9 @@ export class AbstractLayer implements ILayer {
     }
 
     const requestTokens = this._dataRequests.map(dataRequest => dataRequest.getRequestToken());
+
+    // Compact removes all the undefineds
+    // @ts-ignore
     return _.compact(requestTokens);
   }
 
@@ -360,7 +363,7 @@ export class AbstractLayer implements ILayer {
     return this.getDataRequest(SOURCE_DATA_ID_ORIGIN);
   }
 
-  getDataRequest(id): DataRequest | undefined {
+  getDataRequest(id: string): DataRequest | undefined {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === id);
   }
 
@@ -373,14 +376,16 @@ export class AbstractLayer implements ILayer {
   }
 
   getErrors(): string {
-    return this.hasErrors() ? this._descriptor.__errorMessage : '';
+    return this.hasErrors() && this._descriptor.__errorMessage
+      ? this._descriptor.__errorMessage
+      : '';
   }
 
   toLayerDescriptor(): LayerDescriptor {
     return this._descriptor;
   }
 
-  syncData(syncContext: SyncContext): Promise<void> {
+  async syncData(syncContext: SyncContext) {
     // no-op by default
   }
 

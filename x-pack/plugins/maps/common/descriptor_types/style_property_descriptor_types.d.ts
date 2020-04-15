@@ -183,7 +183,7 @@ export type VectorStylePropertiesDescriptor = {
 };
 
 export type StyleDescriptor = {
-  type: LAYER_STYLE_TYPE;
+  type: string;
 };
 
 export type VectorStyleDescriptor = StyleDescriptor & {

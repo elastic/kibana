@@ -4,17 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TileLayer } from './tile_layer';
+// eslint-disable-next-line max-classes-per-file
+import { ITileLayerArguments, TileLayer } from './tile_layer';
 import { SOURCE_TYPES } from '../../common/constants';
 import { XYZTMSSourceDescriptor } from '../../common/descriptor_types';
 import { ITMSSource, AbstractTMSSource } from './sources/tms_source';
 import { ILayer } from './layer';
+import { AbstractStyle, IStyle } from './styles/abstract_style';
 
 const sourceDescriptor: XYZTMSSourceDescriptor = {
   type: SOURCE_TYPES.EMS_XYZ,
   urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
   id: 'foobar',
 };
+
+class MockStyle extends AbstractStyle {
+  constructor() {
+    super({ type: 'foobar' });
+  }
+}
 
 class MockTileSource extends AbstractTMSSource implements ITMSSource {
   readonly _descriptor: XYZTMSSourceDescriptor;
@@ -38,10 +46,14 @@ class MockTileSource extends AbstractTMSSource implements ITMSSource {
 describe('TileLayer', () => {
   it('should use display-label from source', async () => {
     const source = new MockTileSource(sourceDescriptor);
-    const layer: ILayer = new TileLayer({
+
+    const args: ITileLayerArguments = {
       source,
       layerDescriptor: { id: 'layerid', sourceDescriptor },
-    });
+      style: new MockStyle(),
+    };
+
+    const layer: ILayer = new TileLayer(args);
     expect(await source.getDisplayName()).toEqual(await layer.getDisplayName());
   });
 
@@ -50,6 +62,7 @@ describe('TileLayer', () => {
     const layer: ILayer = new TileLayer({
       source,
       layerDescriptor: { id: 'layerid', sourceDescriptor, label: 'custom' },
+      style: new MockStyle(),
     });
     expect('custom').toEqual(await layer.getDisplayName());
   });
