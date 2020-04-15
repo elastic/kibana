@@ -13,17 +13,22 @@ export interface GetDatasourcesRequest {
   };
 }
 
+export interface GetDatasourcesResponse {
+  items: Datasource[];
+  total: number;
+  page: number;
+  perPage: number;
+  success: boolean;
+}
+
 export interface GetOneDatasourceRequest {
   params: {
     datasourceId: string;
   };
 }
 
-export interface GetDatasourcesResponse {
-  items: Datasource[];
-  total: number;
-  page: number;
-  perPage: number;
+export interface GetOneDatasourceResponse {
+  item: Datasource;
   success: boolean;
 }
 
@@ -39,6 +44,8 @@ export interface CreateDatasourceResponse {
 export type UpdateDatasourceRequest = GetOneDatasourceRequest & {
   body: NewDatasource;
 };
+
+export type UpdateDatasourceResponse = CreateDatasourceResponse;
 
 export interface DeleteDatasourcesRequest {
   body: {

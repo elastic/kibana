@@ -8,7 +8,7 @@ import { HttpStart } from 'kibana/public';
 import { Dispatch } from 'redux';
 import { INGEST_API_DATASOURCES } from './services/ingest';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
-import { AppAction, GetDatasourcesResponse, GlobalState, MiddlewareFactory } from '../../types';
+import { AppAction, GetPolicyListResponse, GlobalState, MiddlewareFactory } from '../../types';
 
 const generator = new EndpointDocGenerator('policy-list');
 
@@ -19,13 +19,13 @@ const generator = new EndpointDocGenerator('policy-list');
  */
 export const setPolicyListApiMockImplementation = (
   mockedHttpService: jest.Mocked<HttpStart>,
-  responseItems: GetDatasourcesResponse['items'] = [generator.generatePolicyDatasource()]
+  responseItems: GetPolicyListResponse['items'] = [generator.generatePolicyDatasource()]
 ): void => {
   mockedHttpService.get.mockImplementation((...args) => {
     const [path] = args;
     if (typeof path === 'string') {
       if (path === INGEST_API_DATASOURCES) {
-        return Promise.resolve<GetDatasourcesResponse>({
+        return Promise.resolve<GetPolicyListResponse>({
           items: responseItems,
           total: 10,
           page: 1,

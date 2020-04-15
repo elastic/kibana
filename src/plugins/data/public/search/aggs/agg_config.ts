@@ -25,7 +25,7 @@ import { IAggConfigs } from './agg_configs';
 import { FetchOptions } from '../fetch';
 import { ISearchSource } from '../search_source';
 import { FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../common';
-import { getFieldFormats } from '../../../public/services';
+import { FieldFormatsStart } from '../../field_formats';
 
 export interface AggConfigOptions {
   type: IAggType;
@@ -33,6 +33,10 @@ export interface AggConfigOptions {
   id?: string;
   params?: Record<string, any>;
   schema?: string;
+}
+
+export interface AggConfigDependencies {
+  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -93,8 +97,13 @@ export class AggConfig {
   private __type: IAggType;
   private __typeDecorations: any;
   private subAggs: AggConfig[] = [];
+  private readonly fieldFormats: FieldFormatsStart;
 
-  constructor(aggConfigs: IAggConfigs, opts: AggConfigOptions) {
+  constructor(
+    aggConfigs: IAggConfigs,
+    opts: AggConfigOptions,
+    { fieldFormats }: AggConfigDependencies
+  ) {
     this.aggConfigs = aggConfigs;
     this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs as any));
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
@@ -115,6 +124,8 @@ export class AggConfig {
 
     // @ts-ignore
     this.__type = this.__type;
+
+    this.fieldFormats = fieldFormats;
   }
 
   /**
@@ -341,12 +352,10 @@ export class AggConfig {
   }
 
   fieldOwnFormatter(contentType?: FieldFormatsContentType, defaultFormat?: any) {
-    const fieldFormatsService = getFieldFormats();
-
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;
-    if (!format) format = fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.STRING);
+    if (!format) format = this.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
     return format.getConverterFor(contentType);
   }
 
