@@ -159,20 +159,8 @@ export const SymbolIds = {
  */
 const SymbolsAndShapes = memo(() => (
   <>
-    <symbol
-      id={SymbolIds.processNodeLabel}
-      viewBox="0 0 144 25"
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <rect
-        x="1"
-        y="1"
-        width="142"
-        height="23"
-        fill="inherit"
-        strokeWidth="0"
-        paintOrder="normal"
-      />
+    <symbol id={SymbolIds.processNodeLabel} viewBox="0 0 1 1" preserveAspectRatio="none">
+      <rect x="0" y="0" width="1" height="1" fill="inherit" strokeWidth="0" paintOrder="normal" />
     </symbol>
     <symbol id={SymbolIds.runningProcessCube} viewBox="0 0 88 100">
       <title>Running Process</title>

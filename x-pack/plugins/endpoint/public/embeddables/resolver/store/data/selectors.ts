@@ -297,7 +297,7 @@ function* levelOrderWithWidths(
         metadata.firstChildWidth = width;
       } else {
         const firstChildWidth = widths.get(siblings[0]);
-        const lastChildWidth = widths.get(siblings[0]);
+        const lastChildWidth = widths.get(siblings[siblings.length - 1]);
         if (firstChildWidth === undefined || lastChildWidth === undefined) {
           /**
            * All widths have been precalcluated, so this will not happen.
