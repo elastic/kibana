@@ -21,6 +21,7 @@ const shimCoreStart = {
 };
 
 const shimSetupPlugins: CanvasSetupDeps = {
+  data: npSetup.plugins.data,
   expressions: npSetup.plugins.expressions,
   home: npSetup.plugins.home,
 };

@@ -10,6 +10,7 @@ import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
+import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
@@ -20,7 +21,7 @@ import { legacyRegistries } from './legacy_plugin_support';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { initFunctions } from './functions';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
-export { CoreStart };
+export { CoreStart, CoreSetup };
 
 /**
  * These are the private interfaces for the services your plugin depends on.
@@ -28,6 +29,7 @@ export { CoreStart };
  */
 // This interface will be built out as we require other plugins for setup
 export interface CanvasSetupDeps {
+  data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
   home: HomePublicPluginSetup;
 }
@@ -94,7 +96,13 @@ export class CanvasPlugin
     canvasApi.addTypes(legacyRegistries.types.getOriginalFns());
 
     // Register core canvas stuff
-    canvasApi.addFunctions(initFunctions({ typesRegistry: plugins.expressions.__LEGACY.types }));
+    canvasApi.addFunctions(
+      initFunctions({
+        calculateBounds: plugins.data.query.timefilter.timefilter.calculateBounds,
+        prependBasePath: core.http.basePath.prepend,
+        typesRegistry: plugins.expressions.__LEGACY.types,
+      })
+    );
     canvasApi.addArgumentUIs(argTypeSpecs);
     canvasApi.addTransitions(transitions);
 
