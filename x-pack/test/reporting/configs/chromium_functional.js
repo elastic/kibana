@@ -5,7 +5,6 @@
  */
 
 export default async function({ readConfigFile }) {
-  // TODO move reporting tests to x-pack/test/functional/apps/<integration_app>/reporting
   const functionalConfig = await readConfigFile(require.resolve('../../functional/config.js'));
 
   return {
