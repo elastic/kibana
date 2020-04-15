@@ -8,8 +8,6 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
-import { ImmutableArray } from '../../../../../../../common/types';
-import { setIn, getIn } from '../../../../models/policy_details_config';
 import { EventsCheckbox } from './checkbox';
 import { OS, UIPolicyConfig } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
@@ -18,12 +16,13 @@ import {
   totalWindowsEvents,
 } from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
+import { setIn, getIn } from '../../../../models/policy_details_config';
 
 export const WindowsEvents = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedWindowsEvents);
   const total = usePolicyDetailsSelector(totalWindowsEvents);
 
-  const checkboxes: ImmutableArray<{
+  const checkboxes: Array<{
     name: string;
     os: 'windows';
     protectionField: keyof UIPolicyConfig['windows']['events'];
@@ -133,7 +132,7 @@ export const WindowsEvents = React.memo(() => {
         ],
         []
       )}
-      id="windowsEventsForm"
+      id="windowsEventingForm"
       rightCorner={collectionsEnabled}
       children={renderCheckboxes}
     />
