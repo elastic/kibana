@@ -29,21 +29,25 @@ export const chartSchema = {
   splitFieldValue: schema.maybe(schema.nullable(schema.string())),
 };
 
-export const datafeedIdsSchema = { datafeedIds: schema.arrayOf(schema.maybe(schema.string())) };
+export const datafeedIdsSchema = schema.object({
+  datafeedIds: schema.arrayOf(schema.maybe(schema.string())),
+});
 
-export const forceStartDatafeedSchema = {
+export const forceStartDatafeedSchema = schema.object({
   datafeedIds: schema.arrayOf(schema.maybe(schema.string())),
   start: schema.maybe(schema.number()),
   end: schema.maybe(schema.number()),
-};
+});
 
-export const jobIdsSchema = {
+export const jobIdsSchema = schema.object({
   jobIds: schema.maybe(
     schema.oneOf([schema.string(), schema.arrayOf(schema.maybe(schema.string()))])
   ),
-};
+});
 
-export const jobsWithTimerangeSchema = { dateFormatTz: schema.maybe(schema.string()) };
+export const jobsWithTimerangeSchema = {
+  dateFormatTz: schema.maybe(schema.string()),
+};
 
 export const lookBackProgressSchema = {
   jobId: schema.string(),
