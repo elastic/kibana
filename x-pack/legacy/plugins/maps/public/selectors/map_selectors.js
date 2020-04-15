@@ -65,7 +65,7 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
 
 export const getMapSettings = ({ map }) => map.settings;
 
-const getRollbackMapSettings = ({ map }) => map.__rollBackSettings;
+const getRollbackMapSettings = ({ map }) => map.__rollbackSettings;
 
 export const hasMapSettingsChanges = createSelector(
   getMapSettings,

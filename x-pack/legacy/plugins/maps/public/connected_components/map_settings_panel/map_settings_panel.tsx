@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MapSettings, MapStoreState } from '../../../../../../plugins/maps/public/reducers/map';
+import { NavigationPanel } from './navigation_panel';
 
 interface Props {
   cancelChanges: () => void;
@@ -57,7 +58,11 @@ export function MapSettingsPanel({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <div className="mapLayerPanel__body">form goes here</div>
+      <div className="mapLayerPanel__body">
+        <div className="mapLayerPanel__bodyOverflow">
+          <NavigationPanel mapSettings={mapSettings} updateMapSetting={updateMapSetting} />
+        </div>
+      </div>
 
       <EuiFlyoutFooter className="mapLayerPanel__footer">
         <EuiFlexGroup responsive={false}>
