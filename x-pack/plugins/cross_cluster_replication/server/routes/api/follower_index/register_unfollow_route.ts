@@ -11,7 +11,11 @@ import { RouteDependencies } from '../../../types';
 /**
  * Unfollow follower index's leader index
  */
-export const registerUnfollowRoute = ({ router, license, lib }: RouteDependencies) => {
+export const registerUnfollowRoute = ({
+  router,
+  license,
+  lib: { isEsError, formatEsError },
+}: RouteDependencies) => {
   const paramsSchema = schema.object({ id: schema.string() });
 
   router.put(
@@ -30,11 +34,8 @@ export const registerUnfollowRoute = ({ router, license, lib }: RouteDependencie
       const errors: Array<{ id: string; error: any }> = [];
 
       const formatError = (err: any) => {
-        if (lib.isEsError(err)) {
-          return response.customError({
-            statusCode: err.statusCode,
-            body: err,
-          });
+        if (isEsError(err)) {
+          return response.customError(formatEsError(err));
         }
         // Case: default
         return response.internalError({ body: err });

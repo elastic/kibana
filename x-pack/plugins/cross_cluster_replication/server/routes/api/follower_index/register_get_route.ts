@@ -12,7 +12,11 @@ import { RouteDependencies } from '../../../types';
 /**
  * Returns a single follower index pattern
  */
-export const registerGetRoute = ({ router, license, lib }: RouteDependencies) => {
+export const registerGetRoute = ({
+  router,
+  license,
+  lib: { isEsError, formatEsError },
+}: RouteDependencies) => {
   const paramsSchema = schema.object({
     id: schema.string(),
   });
@@ -63,11 +67,8 @@ export const registerGetRoute = ({ router, license, lib }: RouteDependencies) =>
           });
         }
       } catch (err) {
-        if (lib.isEsError(err)) {
-          return response.customError({
-            statusCode: err.statusCode,
-            body: err,
-          });
+        if (isEsError(err)) {
+          return response.customError(formatEsError(err));
         }
         // Case: default
         return response.internalError({ body: err });

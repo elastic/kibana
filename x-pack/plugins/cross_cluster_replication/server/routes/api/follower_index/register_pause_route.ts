@@ -11,7 +11,11 @@ import { RouteDependencies } from '../../../types';
 /**
  * Pauses a follower index
  */
-export const registerPauseRoute = ({ router, license, lib }: RouteDependencies) => {
+export const registerPauseRoute = ({
+  router,
+  license,
+  lib: { isEsError, formatEsError },
+}: RouteDependencies) => {
   const paramsSchema = schema.object({ id: schema.string() });
 
   router.put(
@@ -29,11 +33,8 @@ export const registerPauseRoute = ({ router, license, lib }: RouteDependencies) 
       const errors: Array<{ id: string; error: any }> = [];
 
       const formatError = (err: any) => {
-        if (lib.isEsError(err)) {
-          return response.customError({
-            statusCode: err.statusCode,
-            body: err,
-          });
+        if (isEsError(err)) {
+          return response.customError(formatEsError(err));
         }
         // Case: default
         return response.internalError({ body: err });

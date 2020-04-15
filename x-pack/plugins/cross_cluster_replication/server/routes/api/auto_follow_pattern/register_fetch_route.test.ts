@@ -13,6 +13,7 @@ import {
 } from 'src/core/server';
 
 import { isEsError } from '../../../lib/is_es_error';
+import { formatEsError } from '../../../lib/format_es_error';
 import { License } from '../../../services';
 import { registerFetchRoute } from './register_fetch_route';
 
@@ -31,6 +32,7 @@ describe('[CCR API] Fetch all auto-follow patterns', () => {
       } as License,
       lib: {
         isEsError,
+        formatEsError,
       },
     });
 

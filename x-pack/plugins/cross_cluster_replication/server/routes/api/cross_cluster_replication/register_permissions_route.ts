@@ -10,7 +10,12 @@ import { RouteDependencies } from '../../../types';
 /**
  * Returns whether the user has CCR permissions
  */
-export const registerPermissionsRoute = ({ router, license, lib, security }: RouteDependencies) => {
+export const registerPermissionsRoute = ({
+  router,
+  license,
+  lib: { isEsError, formatEsError },
+  security,
+}: RouteDependencies) => {
   router.get(
     {
       path: addBasePath('/permissions'),
@@ -54,11 +59,8 @@ export const registerPermissionsRoute = ({ router, license, lib, security }: Rou
           },
         });
       } catch (err) {
-        if (lib.isEsError(err)) {
-          return response.customError({
-            statusCode: err.statusCode,
-            body: err,
-          });
+        if (isEsError(err)) {
+          return response.customError(formatEsError(err));
         }
         // Case: default
         return response.internalError({ body: err });

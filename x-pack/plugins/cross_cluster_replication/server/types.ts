@@ -10,6 +10,7 @@ import { IndexManagementPluginSetup } from '../../index_management/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { License } from './services';
 import { isEsError } from './lib/is_es_error';
+import { formatEsError } from './lib/format_es_error';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -23,5 +24,6 @@ export interface RouteDependencies {
   security?: SecurityPluginSetup;
   lib: {
     isEsError: typeof isEsError;
+    formatEsError: typeof formatEsError;
   };
 }

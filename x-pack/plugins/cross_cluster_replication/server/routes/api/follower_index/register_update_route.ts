@@ -14,7 +14,11 @@ import { RouteDependencies } from '../../../types';
 /**
  * Update a follower index
  */
-export const registerUpdateRoute = ({ router, license, lib }: RouteDependencies) => {
+export const registerUpdateRoute = ({
+  router,
+  license,
+  lib: { isEsError, formatEsError },
+}: RouteDependencies) => {
   const paramsSchema = schema.object({ id: schema.string() });
 
   router.put(
@@ -60,11 +64,8 @@ export const registerUpdateRoute = ({ router, license, lib }: RouteDependencies)
           ),
         });
       } catch (err) {
-        if (lib.isEsError(err)) {
-          return response.customError({
-            statusCode: err.statusCode,
-            body: err,
-          });
+        if (isEsError(err)) {
+          return response.customError(formatEsError(err));
         }
         // Case: default
         return response.internalError({ body: err });

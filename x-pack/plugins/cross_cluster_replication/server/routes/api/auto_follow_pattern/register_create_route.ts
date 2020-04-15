@@ -13,7 +13,11 @@ import { RouteDependencies } from '../../../types';
 /**
  * Create an auto-follow pattern
  */
-export const registerCreateRoute = ({ router, license, lib }: RouteDependencies) => {
+export const registerCreateRoute = ({
+  router,
+  license,
+  lib: { isEsError, formatEsError },
+}: RouteDependencies) => {
   const bodySchema = schema.object(
     {
       id: schema.string(),
@@ -46,11 +50,8 @@ export const registerCreateRoute = ({ router, license, lib }: RouteDependencies)
         });
       } catch (err) {
         if (err.statusCode !== 404) {
-          if (lib.isEsError(err)) {
-            return response.customError({
-              statusCode: err.statusCode,
-              body: err,
-            });
+          if (isEsError(err)) {
+            return response.customError(formatEsError(err));
           }
           // Case: default
           return response.internalError({ body: err });
@@ -65,11 +66,8 @@ export const registerCreateRoute = ({ router, license, lib }: RouteDependencies)
           ),
         });
       } catch (err) {
-        if (lib.isEsError(err)) {
-          return response.customError({
-            statusCode: err.statusCode,
-            body: err,
-          });
+        if (isEsError(err)) {
+          return response.customError(formatEsError(err));
         }
         // Case: default
         return response.internalError({ body: err });

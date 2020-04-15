@@ -13,7 +13,11 @@ import { RouteDependencies } from '../../../types';
 /**
  * Update an auto-follow pattern
  */
-export const registerUpdateRoute = ({ router, license, lib }: RouteDependencies) => {
+export const registerUpdateRoute = ({
+  router,
+  license,
+  lib: { isEsError, formatEsError },
+}: RouteDependencies) => {
   const paramsSchema = schema.object({
     id: schema.string(),
   });
@@ -38,11 +42,8 @@ export const registerUpdateRoute = ({ router, license, lib }: RouteDependencies)
           ),
         });
       } catch (err) {
-        if (lib.isEsError(err)) {
-          return response.customError({
-            statusCode: err.statusCode,
-            body: err,
-          });
+        if (isEsError(err)) {
+          return response.customError(formatEsError(err));
         }
         // Case: default
         return response.internalError({ body: err });

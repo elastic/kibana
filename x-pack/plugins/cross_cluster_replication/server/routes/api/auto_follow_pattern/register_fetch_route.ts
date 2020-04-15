@@ -11,7 +11,11 @@ import { RouteDependencies } from '../../../types';
 /**
  * Get a list of all auto-follow patterns
  */
-export const registerFetchRoute = ({ router, license, lib }: RouteDependencies) => {
+export const registerFetchRoute = ({
+  router,
+  license,
+  lib: { isEsError, formatEsError },
+}: RouteDependencies) => {
   router.get(
     {
       path: addBasePath('/auto_follow_patterns'),
@@ -28,11 +32,8 @@ export const registerFetchRoute = ({ router, license, lib }: RouteDependencies) 
           },
         });
       } catch (err) {
-        if (lib.isEsError(err)) {
-          return response.customError({
-            statusCode: err.statusCode,
-            body: err,
-          });
+        if (isEsError(err)) {
+          return response.customError(formatEsError(err));
         }
         // Case: default
         return response.internalError({ body: err });

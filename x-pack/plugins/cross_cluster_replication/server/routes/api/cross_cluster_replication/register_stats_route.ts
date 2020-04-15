@@ -11,7 +11,11 @@ import { RouteDependencies } from '../../../types';
 /**
  * Returns Auto-follow stats
  */
-export const registerStatsRoute = ({ router, license, lib }: RouteDependencies) => {
+export const registerStatsRoute = ({
+  router,
+  license,
+  lib: { isEsError, formatEsError },
+}: RouteDependencies) => {
   router.get(
     {
       path: addBasePath('/stats/auto_follow'),
@@ -27,11 +31,8 @@ export const registerStatsRoute = ({ router, license, lib }: RouteDependencies) 
           body: deserializeAutoFollowStats(autoFollowStats),
         });
       } catch (err) {
-        if (lib.isEsError(err)) {
-          return response.customError({
-            statusCode: err.statusCode,
-            body: err,
-          });
+        if (isEsError(err)) {
+          return response.customError(formatEsError(err));
         }
         // Case: default
         return response.internalError({ body: err });
