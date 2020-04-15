@@ -5,6 +5,11 @@
 <titleabbrev>APM settings</titleabbrev>
 ++++
 
+ifeval::[{branch} == 7.x]
+:apm-server-ref:       https://www.elastic.co/guide/en/apm/server/master
+:apm-overview-ref-v:   https://www.elastic.co/guide/en/apm/get-started/master
+endif::[]
+
 These settings allow the APM app to function, and specify the data that it surfaces.
 Unless you've customized your setup,
 you do not need to configure any settings to use the APM app.

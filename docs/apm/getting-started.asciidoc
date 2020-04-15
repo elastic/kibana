@@ -28,7 +28,7 @@ Curated charts and tables display the different types of APM data, which allows 
 * <<service-maps>>
 
 TIP: Want to learn more about the Elastic APM ecosystem?
-See the {apm-get-started-ref}/overview.html[APM Overview].
+See the {apm-overview-ref-v}/overview.html[APM Overview].
 
 include::services.asciidoc[]
 
