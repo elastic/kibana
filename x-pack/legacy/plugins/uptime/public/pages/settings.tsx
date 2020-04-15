@@ -9,13 +9,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCode,
-  EuiDescribedFormGroup,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -27,11 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { Link } from 'react-router-dom';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
-import { defaultDynamicSettings, DynamicSettings } from '../../common/runtime_types';
+import { DynamicSettings } from '../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { UptimePage, useUptimeTelemetry } from '../hooks';
+import { IndicesForm } from '../components/settings/indices_form';
+import { CertificateExpirationForm } from '../components/settings/certificate_form';
 
 export const SettingsPage = () => {
   const dss = useSelector(selectDynamicSettings);
@@ -117,68 +115,18 @@ export const SettingsPage = () => {
           <EuiFlexItem grow={false}>
             <form onSubmit={onApply}>
               <EuiForm>
-                <EuiTitle size="s">
-                  <h3>
-                    <FormattedMessage
-                      id="xpack.uptime.sourceConfiguration.indicesSectionTitle"
-                      defaultMessage="Indices"
-                    />
-                  </h3>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <EuiDescribedFormGroup
-                  title={
-                    <h4>
-                      <FormattedMessage
-                        id="xpack.uptime.sourceConfiguration.heartbeatIndicesTitle"
-                        defaultMessage="Uptime indices"
-                      />
-                    </h4>
-                  }
-                  description={
-                    <FormattedMessage
-                      id="xpack.uptime.sourceConfiguration.heartbeatIndicesDescription"
-                      defaultMessage="Index pattern for matching indices that contain Heartbeat data"
-                    />
-                  }
-                >
-                  <EuiFormRow
-                    describedByIds={['heartbeatIndices']}
-                    error={fieldErrors?.heartbeatIndices}
-                    fullWidth
-                    helpText={
-                      <FormattedMessage
-                        id="xpack.uptime.sourceConfiguration.heartbeatIndicesDefaultValue"
-                        defaultMessage="The default value is {defaultValue}"
-                        values={{
-                          defaultValue: (
-                            <EuiCode>{defaultDynamicSettings.heartbeatIndices}</EuiCode>
-                          ),
-                        }}
-                      />
-                    }
-                    isInvalid={!!fieldErrors?.heartbeatIndices}
-                    label={
-                      <FormattedMessage
-                        id="xpack.uptime.sourceConfiguration.heartbeatIndicesLabel"
-                        defaultMessage="Heartbeat indices"
-                      />
-                    }
-                  >
-                    <EuiFieldText
-                      data-test-subj={`heartbeat-indices-input-${
-                        dss.loading ? 'loading' : 'loaded'
-                      }`}
-                      fullWidth
-                      disabled={isFormDisabled}
-                      isLoading={dss.loading}
-                      value={formFields?.heartbeatIndices || ''}
-                      onChange={(event: any) =>
-                        onChangeFormField('heartbeatIndices', event.currentTarget.value)
-                      }
-                    />
-                  </EuiFormRow>
-                </EuiDescribedFormGroup>
+                <IndicesForm
+                  onChange={onChangeFormField}
+                  formFields={formFields}
+                  fieldErrors={fieldErrors}
+                  isDisabled={isFormDisabled}
+                />
+                <CertificateExpirationForm
+                  onChange={onChangeFormField}
+                  formFields={formFields}
+                  fieldErrors={fieldErrors}
+                  isDisabled={isFormDisabled}
+                />
 
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
