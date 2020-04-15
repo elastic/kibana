@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { set, omit, isNil } from 'lodash/fp';
-import { TEMPLATE_TIMELINE_URL } from '../../../../common/constants';
+import { TIMELINE_URL } from '../../../../common/constants';
 import {
   transformError,
   buildSiemResponse,
@@ -27,7 +27,7 @@ export const updateTimelinesRoute = (
 ) => {
   router.patch(
     {
-      path: TEMPLATE_TIMELINE_URL,
+      path: TIMELINE_URL,
       validate: {
         body: buildRouteValidation<UpdateTimeline>(updateTimelineSchema),
       },

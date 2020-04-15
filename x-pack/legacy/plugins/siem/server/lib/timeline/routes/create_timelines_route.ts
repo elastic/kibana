@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { set, omit, isNil } from 'lodash/fp';
-import { TEMPLATE_TIMELINE_URL } from '../../../../common/constants';
+import { TIMELINE_URL } from '../../../../common/constants';
 import {
   transformError,
   buildSiemResponse,
   buildRouteValidation,
 } from '../../detection_engine/routes/utils';
-import { createTemplateTimelines } from './utils/create_template_timelines';
 import { FrameworkRequest } from '../../framework';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
@@ -27,7 +26,7 @@ export const createTimelinesRoute = (
 ) => {
   router.post(
     {
-      path: TEMPLATE_TIMELINE_URL,
+      path: TIMELINE_URL,
       validate: {
         body: buildRouteValidation<Createimeline>(createTimelineSchema),
       },
