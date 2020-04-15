@@ -12,8 +12,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'spaceSelector', 'header']);
   const globalNav = getService('globalNav');
 
-  // eslint-disable-next-line ban/ban
-  describe.only('preserve url', function() {
+  describe('preserve url', function() {
     before(async function() {
       await esArchiver.load('spaces/multi_space');
     });
