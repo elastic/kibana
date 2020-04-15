@@ -12,7 +12,7 @@ import { EditorFrameInstance } from '../types';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-import { SavedObjectSaveModal } from '../../../../../../src/plugins/saved_objects/public';
+import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import {
   esFilters,
   FilterManager,
