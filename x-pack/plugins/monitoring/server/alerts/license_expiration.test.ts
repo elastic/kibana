@@ -8,8 +8,6 @@ import moment from 'moment-timezone';
 import { getLicenseExpiration } from './license_expiration';
 import { ALERT_TYPE_LICENSE_EXPIRATION } from '../../common/constants';
 import { Logger } from 'src/core/server';
-import { AlertServices } from '../../../alerting/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
 import {
   AlertCommonParams,
   AlertCommonState,
@@ -18,6 +16,7 @@ import {
 } from './types';
 import { executeActions } from '../lib/alerts/license_expiration.lib';
 import { PreparedAlert, getPreparedAlert } from '../lib/alerts/get_prepared_alert';
+import { alertsMock, AlertServicesMock } from '../../../alerting/server/mocks';
 
 jest.mock('../lib/alerts/license_expiration.lib', () => ({
   executeActions: jest.fn(),
@@ -32,18 +31,8 @@ jest.mock('../lib/alerts/get_prepared_alert', () => ({
   }),
 }));
 
-interface MockServices {
-  callCluster: jest.Mock;
-  alertInstanceFactory: jest.Mock;
-  savedObjectsClient: jest.Mock;
-}
-
 describe('getLicenseExpiration', () => {
-  const services: MockServices | AlertServices = {
-    callCluster: jest.fn(),
-    alertInstanceFactory: jest.fn(),
-    savedObjectsClient: savedObjectsClientMock.create(),
-  };
+  const services: AlertServicesMock = alertsMock.createAlertServices();
 
   const params: AlertCommonParams = {
     dateFormat: 'YYYY',

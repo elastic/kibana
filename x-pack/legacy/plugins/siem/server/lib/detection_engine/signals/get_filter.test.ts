@@ -5,42 +5,28 @@
  */
 
 import { getQueryFilter, getFilter } from './get_filter';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { PartialFilter } from '../types';
-import { AlertServices } from '../../../../../../../plugins/alerting/server';
+import { alertsMock, AlertServicesMock } from '../../../../../../../plugins/alerting/server/mocks';
 
 describe('get_filter', () => {
-  let savedObjectsClient = savedObjectsClientMock.create();
-  savedObjectsClient.get = jest.fn().mockImplementation(() => ({
-    attributes: {
-      query: { query: 'host.name: linux', language: 'kuery' },
-      filters: [],
-    },
-  }));
-  let servicesMock: AlertServices = {
-    savedObjectsClient,
-    callCluster: jest.fn(),
-    alertInstanceFactory: jest.fn(),
-  };
+  let servicesMock: AlertServicesMock;
 
   beforeAll(() => {
     jest.resetAllMocks();
   });
 
   beforeEach(() => {
-    savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.get = jest.fn().mockImplementation(() => ({
+    servicesMock = alertsMock.createAlertServices();
+    servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
+      id,
+      type,
+      references: [],
       attributes: {
         query: { query: 'host.name: linux', language: 'kuery' },
         language: 'kuery',
         filters: [],
       },
     }));
-    servicesMock = {
-      savedObjectsClient,
-      callCluster: jest.fn(),
-      alertInstanceFactory: jest.fn(),
-    };
   });
 
   afterEach(() => {
