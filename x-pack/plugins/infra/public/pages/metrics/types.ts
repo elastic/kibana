@@ -7,7 +7,7 @@
 import rt from 'io-ts';
 import { EuiTheme } from '../../../../observability/public';
 import { InventoryFormatterTypeRT } from '../../../common/inventory_models/types';
-import { MetricsTimeInput } from './containers/with_metrics_time';
+import { MetricsTimeInput } from './hooks/use_metrics_time';
 import { NodeDetailsMetricData } from '../../../common/http_api/node_details_api';
 
 export interface LayoutProps {

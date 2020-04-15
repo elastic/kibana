@@ -169,7 +169,7 @@ export const monitorStatesSchema = gql`
     DESC
   }
 
-  extend type Query {
+  type Query {
     "Fetches the current state of Uptime monitors for the given parameters."
     getMonitorStates(
       dateRangeStart: String!
