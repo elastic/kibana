@@ -26,6 +26,7 @@ describe('useGetTags', () => {
         tags: [],
         isLoading: true,
         isError: false,
+        fetchTags: result.current.fetchTags,
       });
     });
   });
@@ -49,7 +50,19 @@ describe('useGetTags', () => {
         tags,
         isLoading: false,
         isError: false,
+        fetchTags: result.current.fetchTags,
       });
+    });
+  });
+
+  it('refetch tags', async () => {
+    const spyOnGetTags = jest.spyOn(api, 'getTags');
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      result.current.fetchTags();
+      expect(spyOnGetTags).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -68,6 +81,7 @@ describe('useGetTags', () => {
         tags: [],
         isLoading: false,
         isError: true,
+        fetchTags: result.current.fetchTags,
       });
     });
   });
