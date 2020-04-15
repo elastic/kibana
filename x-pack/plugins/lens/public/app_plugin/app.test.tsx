@@ -12,6 +12,7 @@ import { EditorFrameInstance } from '../types';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
+import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import {
   esFilters,
   FilterManager,
@@ -649,6 +650,27 @@ describe('Lens App', () => {
             filters: [unpinned],
           },
         });
+      });
+
+      it('does not show the copy button on first save', async () => {
+        const args = defaultArgs;
+        args.editorFrame = frame;
+
+        instance = mount(<App {...args} />);
+
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        await act(async () =>
+          onChange({
+            filterableIndexPatterns: [],
+            doc: ({ expression: 'valid expression' } as unknown) as Document,
+          })
+        );
+        instance.update();
+
+        await act(async () => getButton(instance).run(instance.getDOMNode()));
+        instance.update();
+
+        expect(instance.find(SavedObjectSaveModal).prop('showCopyOnSave')).toEqual(false);
       });
     });
   });
