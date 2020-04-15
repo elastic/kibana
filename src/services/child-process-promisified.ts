@@ -3,17 +3,16 @@ import { promisify } from 'util';
 import { logger } from './logger';
 
 export async function exec(cmd: string, options: child_process.ExecOptions) {
-  logger.info(`exec: \`${cmd}\``);
   const execPromisified = promisify(child_process.exec);
   try {
     const res = await execPromisified(cmd, {
       maxBuffer: 100 * 1024 * 1024,
       ...options,
     });
-    logger.verbose(`exec response (success):`, res);
+    logger.verbose(`exec success '${cmd}':`, res);
     return res;
   } catch (e) {
-    logger.info(`exec response (error):`, e);
+    logger.info(`exec error '${cmd}':`, e);
     throw e;
   }
 }

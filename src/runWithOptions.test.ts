@@ -39,6 +39,7 @@ describe('runWithOptions', () => {
       fork: true,
       gitHostname: 'github.com',
       labels: [],
+      mainline: undefined,
       multiple: false,
       multipleBranches: false,
       multipleCommits: false,

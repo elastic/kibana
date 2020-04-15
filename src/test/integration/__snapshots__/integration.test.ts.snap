@@ -430,47 +430,27 @@ Array [
     },
   ],
   Array [
-    "[INFO] exec: \`git remote rm origin\`",
-    undefined,
-  ],
-  Array [
-    "[VERBOSE] exec response (success):",
+    "[VERBOSE] exec success 'git remote rm origin':",
     "",
   ],
   Array [
-    "[INFO] exec: \`git remote rm sqren\`",
-    undefined,
-  ],
-  Array [
-    "[INFO] exec response (error):",
+    "[INFO] exec error 'git remote rm sqren':",
     [Error: Command failed: git remote rm sqren
 fatal: No such remote: 'sqren'
 ],
   ],
   Array [
-    "[INFO] exec: \`git remote add sqren https://myAccessToken@github.com/sqren/backport-demo.git\`",
-    undefined,
-  ],
-  Array [
-    "[VERBOSE] exec response (success):",
+    "[VERBOSE] exec success 'git remote add sqren https://myAccessToken@github.com/sqren/backport-demo.git':",
     "",
   ],
   Array [
-    "[INFO] exec: \`git remote rm elastic\`",
-    undefined,
-  ],
-  Array [
-    "[INFO] exec response (error):",
+    "[INFO] exec error 'git remote rm elastic':",
     [Error: Command failed: git remote rm elastic
 fatal: No such remote: 'elastic'
 ],
   ],
   Array [
-    "[INFO] exec: \`git remote add elastic https://myAccessToken@github.com/elastic/backport-demo.git\`",
-    undefined,
-  ],
-  Array [
-    "[VERBOSE] exec response (success):",
+    "[VERBOSE] exec success 'git remote add elastic https://myAccessToken@github.com/elastic/backport-demo.git':",
     "",
   ],
   Array [
@@ -482,28 +462,16 @@ fatal: No such remote: 'elastic'
     undefined,
   ],
   Array [
-    "[INFO] exec: \`git reset --hard && git clean -d --force && git fetch elastic 6.0 && git checkout -B backport/6.0/pr-85 elastic/6.0 --no-track\`",
-    undefined,
-  ],
-  Array [
-    "[VERBOSE] exec response (success):",
+    "[VERBOSE] exec success 'git reset --hard && git clean -d --force && git fetch elastic 6.0 && git checkout -B backport/6.0/pr-85 elastic/6.0 --no-track':",
     "HEAD is now at <COMMIT HASH> Add 👻
 ",
   ],
   Array [
-    "[INFO] exec: \`git fetch elastic master:master --force\`",
-    undefined,
-  ],
-  Array [
-    "[VERBOSE] exec response (success):",
+    "[VERBOSE] exec success 'git fetch elastic master:master --force':",
     "",
   ],
   Array [
-    "[INFO] exec: \`git cherry-pick f3b618b9421fdecdb36862f907afbdd6344b361d\`",
-    undefined,
-  ],
-  Array [
-    "[VERBOSE] exec response (success):",
+    "[VERBOSE] exec success 'git cherry-pick f3b618b9421fdecdb36862f907afbdd6344b361d':",
     "[backport/6.0/pr-85 <COMMIT HASH>] Add witch (#85)
  Date: Thu Apr 11 00:46:08 2019 +0200
  1 file changed, 1 insertion(+), 1 deletion(-)
@@ -514,19 +482,11 @@ fatal: No such remote: 'elastic'
     undefined,
   ],
   Array [
-    "[INFO] exec: \`git push sqren backport/6.0/pr-85:backport/6.0/pr-85 --force\`",
-    undefined,
-  ],
-  Array [
-    "[VERBOSE] exec response (success):",
+    "[VERBOSE] exec success 'git push sqren backport/6.0/pr-85:backport/6.0/pr-85 --force':",
     "",
   ],
   Array [
-    "[INFO] exec: \`git checkout master && git branch -D backport/6.0/pr-85\`",
-    undefined,
-  ],
-  Array [
-    "[VERBOSE] exec response (success):",
+    "[VERBOSE] exec success 'git checkout master && git branch -D backport/6.0/pr-85':",
     "Deleted branch backport/6.0/pr-85 (was <COMMIT HASH>).
 ",
   ],

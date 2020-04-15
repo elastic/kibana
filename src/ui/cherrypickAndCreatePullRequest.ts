@@ -101,8 +101,8 @@ async function waitForCherrypick(
   ).start();
 
   try {
-    const didCherrypick = await cherrypick(options, commit);
-    if (didCherrypick) {
+    const { needsResolving } = await cherrypick(options, commit);
+    if (!needsResolving) {
       cherrypickSpinner.succeed();
       return;
     }

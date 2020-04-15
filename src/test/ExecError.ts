@@ -3,18 +3,15 @@ export class ExecError extends Error {
   cmd: string | undefined;
   stdout: string | undefined;
   stderr: string | undefined;
-  constructor(
-    public message: string,
-    error: {
-      cmd?: string;
-      killed?: boolean;
-      code?: number;
-      signal?: NodeJS.Signals;
-      stdout?: string;
-      stderr?: string;
-    }
-  ) {
-    super(message);
+  constructor(error: {
+    cmd?: string;
+    killed?: boolean;
+    code?: number;
+    signal?: NodeJS.Signals | null;
+    stdout?: string;
+    stderr?: string;
+  }) {
+    super(error.stderr);
     this.name = 'ExecError';
     this.code = error.code;
     this.cmd = error.cmd;

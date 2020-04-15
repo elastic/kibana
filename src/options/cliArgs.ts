@@ -75,6 +75,25 @@ export function getOptionsFromCliArgs(
       description: 'Pull request labels for the resulting backport PRs',
       type: 'array',
     })
+    .option('mainline', {
+      description:
+        'Parent id of merge commit. Defaults to 1 when supplied without arguments',
+      type: 'number',
+      coerce: (mainline) => {
+        // `--mainline` (default to 1 when no parent is given)
+        if (mainline === undefined) {
+          return 1;
+        }
+
+        // use specified mainline parent
+        if (Number.isInteger(mainline)) {
+          return mainline as number;
+        }
+
+        // Invalid value provided
+        throw new Error(`--mainline must be an integer. Received: ${mainline}`);
+      },
+    })
     .option('multiple', {
       default: configOptions.multiple,
       description: 'Select multiple branches/commits',

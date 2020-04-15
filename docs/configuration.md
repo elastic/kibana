@@ -117,6 +117,15 @@ Config:
 }
 ```
 
+#### `mainline`
+
+When backporting a merge commit the parent id must be specified. This is directly passed to `git cherry-pick` and additional details can be read on the [Git Docs](https://git-scm.com/docs/git-cherry-pick#Documentation/git-cherry-pick.txt---mainlineparent-number)
+
+**Examples:**
+
+- Defaults to 1 when no parent id is given: `backport --mainline`
+- Specifying parent id: `backport --mainline 2`
+
 #### `multipleCommits`
 
 `true`: you will be able to select multiple commits to backport. You will use `<space>` to select, and `<enter>` to confirm you selection.

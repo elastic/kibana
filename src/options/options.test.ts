@@ -115,6 +115,7 @@ describe('validateRequiredOptions', () => {
     fork: true,
     gitHostname: 'github.com',
     labels: [],
+    mainline: undefined,
     multiple: false,
     multipleBranches: true,
     multipleCommits: false,

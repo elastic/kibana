@@ -240,14 +240,6 @@ describe('cherrypickAndCreatePullRequest', () => {
         Press ENTER to continue",
           ],
           Array [
-            "The following files have conflicts:
-         - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
-
-        You do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.
-
-        Press ENTER to continue",
-          ],
-          Array [
             "The following files are unstaged:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
@@ -263,9 +255,6 @@ describe('cherrypickAndCreatePullRequest', () => {
         Backporting the following commits to 6.x:
          - myCommitMessage
         ",
-          ],
-          Array [
-            "",
           ],
           Array [
             "",
@@ -324,17 +313,17 @@ function setupExecSpy() {
 
       // cherrypick
       if (cmd === 'git cherry-pick mySha') {
-        throw new ExecError('cherrypick failed', { cmd });
+        throw new ExecError({ cmd });
       }
 
-      // filesWithConflicts
+      // getFilesWithConflicts
       if (cmd === 'git --no-pager diff --check') {
         conflictCheckCounts++;
         if (conflictCheckCounts >= 4) {
           return { stderr: '', stdout: '' };
         }
 
-        throw new ExecError('Not all conflicts resolved', {
+        throw new ExecError({
           code: 2,
           cmd,
           stdout: `conflicting-file.txt:1: leftover conflict marker\nconflicting-file.txt:3: leftover conflict marker\nconflicting-file.txt:5: leftover conflict marker\n`,

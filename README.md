@@ -106,6 +106,7 @@ The above commands will start an interactive prompt. You can use the `arrow keys
 | --github-api-base-url-v3 | Base url for Github's Rest (v3) API                    | https://api.github.com         | string  |
 | --github-api-base-url-v4 | Base url for Github's GraphQL (v4) API                 | https://api.github.com/graphql | string  |
 | --labels                 | Pull request labels                                    |                                | string  |
+| --mainline               | Parent id of merge commit                              | 1 (when no parent id given)    | number  |
 | --multiple               | Select multiple commits/branches                       | false                          | boolean |
 | --path                   | Only list commits touching files under a specific path |                                | string  |
 | --pr-description         | Pull request description suffix                        |                                | string  |

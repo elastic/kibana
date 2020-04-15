@@ -27,6 +27,12 @@ Array [
     },
   ],
   Array [
+    "git --no-pager diff --name-only --diff-filter=U",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
     "git --no-pager diff --check",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
