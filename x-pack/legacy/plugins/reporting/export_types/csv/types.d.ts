@@ -109,5 +109,6 @@ export interface GenerateCsvParams {
     maxSizeBytes: number;
     scroll: ScrollConfig;
     checkForFormulas?: boolean;
+    escapeFormulaValues: boolean;
   };
 }

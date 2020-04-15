@@ -136,6 +136,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
         checkForFormulas: config.get('csv', 'checkForFormulas'),
         maxSizeBytes: config.get('csv', 'maxSizeBytes'),
         scroll: config.get('csv', 'scroll'),
+        escapeFormulaValues: config.get('csv', 'escapeFormulaValues'),
       },
     });
 

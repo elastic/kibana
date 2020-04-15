@@ -5,15 +5,23 @@
  */
 
 import { RawValue } from './types';
+import { CSV_FORMULA_CHARS } from '../../../../common/constants';
 
 const nonAlphaNumRE = /[^a-zA-Z0-9]/;
 const allDoubleQuoteRE = /"/g;
 
-export function createEscapeValue(quoteValues: boolean): (val: RawValue) => string {
+const valHasFormulas = (val: string) =>
+  CSV_FORMULA_CHARS.some(formulaChar => val.startsWith(formulaChar));
+
+export function createEscapeValue(
+  quoteValues: boolean,
+  escapeFormulas: boolean
+): (val: RawValue) => string {
   return function escapeValue(val: RawValue) {
     if (val && typeof val === 'string') {
-      if (quoteValues && nonAlphaNumRE.test(val)) {
-        return `"${val.replace(allDoubleQuoteRE, '""')}"`;
+      const formulasEscaped = escapeFormulas && valHasFormulas(val) ? "'" + val : val;
+      if (quoteValues && nonAlphaNumRE.test(formulasEscaped)) {
+        return `"${formulasEscaped.replace(allDoubleQuoteRE, '""')}"`;
       }
     }
 

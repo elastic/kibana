@@ -109,6 +109,7 @@ export interface ReportingConfigType {
     checkForFormulas: boolean;
     maxSizeBytes: number;
     useByteOrderMarkEncoding: boolean;
+    escapeFormulaValues: boolean;
   };
   encryptionKey: string;
   kibanaServer: any;

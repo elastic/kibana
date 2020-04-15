@@ -26,7 +26,7 @@ export function createGenerateCsv(logger: Logger) {
     cancellationToken,
     settings,
   }: GenerateCsvParams): Promise<SavedSearchGeneratorResult> {
-    const escapeValue = createEscapeValue(settings.quoteValues);
+    const escapeValue = createEscapeValue(settings.quoteValues, settings.escapeFormulaValues);
     const builder = new MaxSizeStringBuilder(settings.maxSizeBytes);
     const header = `${fields.map(escapeValue).join(settings.separator)}\n`;
     if (!builder.tryAppend(header)) {

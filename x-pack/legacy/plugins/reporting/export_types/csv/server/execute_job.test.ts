@@ -446,6 +446,50 @@ describe('CSV Execute Job', function() {
     });
   });
 
+  describe('Formula values', () => {
+    it('escapes values with formulas', async () => {
+      configGetStub.withArgs('csv', 'escapeFormulaValues').returns(true);
+      callAsCurrentUserStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { one: `=cmd|' /C calc'!A0`, two: 'bar' } }],
+        },
+        _scroll_id: 'scrollId',
+      });
+
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
+      const jobParams = getJobDocPayload({
+        headers: encryptedHeaders,
+        fields: ['one', 'two'],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      });
+      const { content } = await executeJob('job123', jobParams, cancellationToken);
+
+      expect(content).toEqual("one,two\n\"'=cmd|' /C calc'!A0\",bar\n");
+    });
+
+    it('does not escapes values with formulas', async () => {
+      configGetStub.withArgs('csv', 'escapeFormulaValues').returns(false);
+      callAsCurrentUserStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { one: `=cmd|' /C calc'!A0`, two: 'bar' } }],
+        },
+        _scroll_id: 'scrollId',
+      });
+
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
+      const jobParams = getJobDocPayload({
+        headers: encryptedHeaders,
+        fields: ['one', 'two'],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      });
+      const { content } = await executeJob('job123', jobParams, cancellationToken);
+
+      expect(content).toEqual('one,two\n"=cmd|\' /C calc\'!A0",bar\n');
+    });
+  });
+
   describe('Elasticsearch call errors', function() {
     it('should reject Promise if search call errors out', async function() {
       callAsCurrentUserStub.rejects(new Error());
