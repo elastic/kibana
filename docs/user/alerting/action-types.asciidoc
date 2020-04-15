@@ -14,7 +14,7 @@
 [NOTE]
 ==============================================
 Some action types are paid commercial features, while others are free. 
-For a comparison of the Elastic license levels, 
+For a comparison of the Elastic subscription levels, 
 see https://www.elastic.co/subscriptions[the subscription page]. 
 ==============================================
 
