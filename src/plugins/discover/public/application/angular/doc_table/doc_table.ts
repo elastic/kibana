@@ -23,7 +23,7 @@ import { dispatchRenderComplete } from '../../../../../kibana_utils/public';
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 import { getServices } from '../../../kibana_services';
 
-interface LazyScope extends ng.IScope {
+export interface LazyScope extends ng.IScope {
   [key: string]: any;
 }
 
