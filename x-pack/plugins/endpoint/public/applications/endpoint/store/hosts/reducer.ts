@@ -49,12 +49,6 @@ export const hostListReducer: ImmutableReducer<HostListState, AppAction> = (
       ...state,
       detailsError: action.payload,
     };
-  } else if (action.type === 'userPaginatedHostList') {
-    return {
-      ...state,
-      ...action.payload,
-      loading: true,
-    };
   } else if (action.type === 'userChangedUrl') {
     return {
       ...state,

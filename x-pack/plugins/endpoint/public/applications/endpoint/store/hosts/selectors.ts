@@ -37,7 +37,11 @@ export const uiQueryParams: (
       // Removes the `?` from the beginning of query string if it exists
       const query = querystring.parse(location.search.slice(1));
 
-      const keys: Array<keyof HostIndexUIQueryParams> = ['selected_host'];
+      const keys: Array<keyof HostIndexUIQueryParams> = [
+        'selected_host',
+        'page_size',
+        'page_index',
+      ];
 
       for (const key of keys) {
         const value = query[key];

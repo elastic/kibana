@@ -5,7 +5,7 @@
  */
 
 import { MiddlewareFactory } from '../../types';
-import { pageIndex, pageSize, isOnHostPage, hasSelectedHost, uiQueryParams } from './selectors';
+import { isOnHostPage, hasSelectedHost, uiQueryParams } from './selectors';
 import { HostListState } from '../../types';
 import { AppAction } from '../action';
 
@@ -14,19 +14,17 @@ export const hostMiddlewareFactory: MiddlewareFactory<HostListState> = coreStart
     next(action);
     const state = getState();
     if (
-      (action.type === 'userChangedUrl' &&
-        isOnHostPage(state) &&
-        hasSelectedHost(state) !== true) ||
-      action.type === 'userPaginatedHostList'
+      action.type === 'userChangedUrl' &&
+      isOnHostPage(state) &&
+      hasSelectedHost(state) !== true
     ) {
-      const hostPageIndex = pageIndex(state);
-      const hostPageSize = pageSize(state);
+      const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
       const response = await coreStart.http.post('/api/endpoint/metadata', {
         body: JSON.stringify({
-          paging_properties: [{ page_index: hostPageIndex }, { page_size: hostPageSize }],
+          paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
         }),
       });
-      response.request_page_index = hostPageIndex;
+      response.request_page_index = pageIndex;
       dispatch({
         type: 'serverReturnedHostList',
         payload: response,

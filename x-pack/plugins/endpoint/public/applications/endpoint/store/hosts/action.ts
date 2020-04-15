@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostListPagination, ServerApiError } from '../../types';
+import { ServerApiError } from '../../types';
 import { HostResultList, HostInfo } from '../../../../../common/types';
 
 interface ServerReturnedHostList {
@@ -22,13 +22,7 @@ interface ServerFailedToReturnHostDetails {
   payload: ServerApiError;
 }
 
-interface UserPaginatedHostList {
-  type: 'userPaginatedHostList';
-  payload: HostListPagination;
-}
-
 export type HostAction =
   | ServerReturnedHostList
   | ServerReturnedHostDetails
-  | ServerFailedToReturnHostDetails
-  | UserPaginatedHostList;
+  | ServerFailedToReturnHostDetails;

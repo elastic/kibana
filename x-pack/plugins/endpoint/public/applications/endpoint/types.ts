@@ -46,12 +46,22 @@ export interface HostListState {
   location?: Immutable<EndpointAppLocation>;
 }
 
-export interface HostListPagination {
-  pageIndex: number;
-  pageSize: number;
-}
+/**
+ * Query params on the host page parsed from the URL
+ */
 export interface HostIndexUIQueryParams {
+  /**
+   * If host id is present, show the host detail flyout for the selected id
+   */
   selected_host?: string;
+  /**
+   * How many items to show in list
+   */
+  page_size?: string;
+  /**
+   * Which page to show
+   */
+  page_index?: string;
 }
 
 export interface ServerApiError {

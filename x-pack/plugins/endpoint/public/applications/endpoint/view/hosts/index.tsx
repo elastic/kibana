@@ -5,7 +5,6 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPage,
@@ -26,7 +25,6 @@ import { createStructuredSelector } from 'reselect';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { HostDetailsFlyout } from './details';
 import * as selectors from '../../store/hosts/selectors';
-import { HostAction } from '../../store/hosts/action';
 import { useHostListSelector } from './hooks';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
@@ -34,7 +32,6 @@ import { HostMetadata, Immutable } from '../../../../../common/types';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const HostList = () => {
-  const dispatch = useDispatch<(a: HostAction) => void>();
   const history = useHistory();
   const {
     listData,
@@ -59,12 +56,15 @@ export const HostList = () => {
   const onTableChange = useCallback(
     ({ page }: { page: { index: number; size: number } }) => {
       const { index, size } = page;
-      dispatch({
-        type: 'userPaginatedHostList',
-        payload: { pageIndex: index, pageSize: size },
-      });
+      history.push(
+        urlFromQueryParams({
+          ...queryParams,
+          page_index: JSON.stringify(index),
+          page_size: JSON.stringify(size),
+        })
+      );
     },
-    [dispatch]
+    [history, queryParams]
   );
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostMetadata>>> = useMemo(() => {
