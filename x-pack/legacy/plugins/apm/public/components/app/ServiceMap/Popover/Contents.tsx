@@ -27,6 +27,30 @@ interface ContentsProps {
   selectedNodeServiceName: string;
 }
 
+// IE 11 does not handle flex properties as expected. With browser detection,
+// we can use regular div elements to render contents that are almost identical.
+//
+// This method of detecting IE is from a Stack Overflow answer:
+// https://stackoverflow.com/a/21825207
+//
+// @ts-ignore `documentMode` is not recognized as a valid property of `document`.
+const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
+
+const FlexColumnGroup = (props: {
+  children: React.ReactNode;
+  style: React.CSSProperties;
+  direction: 'column';
+  gutterSize: 's';
+}) => {
+  if (isIE11) {
+    const { direction, gutterSize, ...rest } = props;
+    return <div {...rest} />;
+  }
+  return <EuiFlexGroup {...props} />;
+};
+const FlexColumnItem = (props: { children: React.ReactNode }) =>
+  isIE11 ? <div {...props} /> : <EuiFlexItem {...props} />;
+
 export function Contents({
   selectedNodeData,
   isService,
@@ -36,18 +60,18 @@ export function Contents({
 }: ContentsProps) {
   const frameworkName = selectedNodeData[SERVICE_FRAMEWORK_NAME];
   return (
-    <EuiFlexGroup
+    <FlexColumnGroup
       direction="column"
       gutterSize="s"
       style={{ minWidth: popoverMinWidth }}
     >
-      <EuiFlexItem>
+      <FlexColumnItem>
         <EuiTitle size="xxs">
           <h3>{label}</h3>
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
-      </EuiFlexItem>
-      <EuiFlexItem>
+      </FlexColumnItem>
+      <FlexColumnItem>
         {isService ? (
           <ServiceMetricFetcher
             frameworkName={frameworkName}
@@ -56,13 +80,13 @@ export function Contents({
         ) : (
           <Info {...selectedNodeData} />
         )}
-      </EuiFlexItem>
+      </FlexColumnItem>
       {isService && (
         <Buttons
           onFocusClick={onFocusClick}
           selectedNodeServiceName={selectedNodeServiceName}
         />
       )}
-    </EuiFlexGroup>
+    </FlexColumnGroup>
   );
 }
