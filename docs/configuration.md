@@ -99,6 +99,22 @@ Default: `false`
 
 CLI: `--all`
 
+#### `branchLabelMapping`
+
+Pre-select branch options based on labels on the source PR.
+
+Example:
+```json
+{
+  "branchLabelMapping": {
+    "v8.0.0": "",
+    "^v7.8.0$": "7.x",
+    "^v(\\d+).(\\d+).\\d+$": "$1.$2"
+  }
+}
+```
+*Note: backslashes must be escaped.*
+
 #### `fork`
 
 `true`: Create backport branch in users own fork
@@ -116,6 +132,30 @@ Config:
   "fork": false
 }
 ```
+
+#### `gitHostname`
+
+Hostname for Github.
+
+Default: `github.com`
+
+CLI: `--git-hostname "github.my-private-company.com"`
+
+#### `githubApiBaseUrlV3`
+
+Base url for Github's REST (v3) API
+
+Default: `https://api.github.com`
+
+CLI: `--github-api-base-url-v3 "https://api.github.my-private-company.com"`
+
+#### `githubApiBaseUrlV4`
+
+Base url for Github's GraphQL (v4) API
+
+Default: `https://api.github.com/graphql`
+
+CLI: `--github-api-base-url-v4 "https://github-enterprise.acme-inc.com/api"`
 
 #### `mainline`
 
@@ -211,27 +251,3 @@ Config:
   "sourceBranch": "7.x"
 }
 ```
-
-#### `gitHostname`
-
-Hostname for Github.
-
-Default: `github.com`
-
-CLI: `--git-hostname "github.my-private-company.com"`
-
-#### `githubApiBaseUrlV3`
-
-Base url for Github's REST (v3) API
-
-Default: `https://api.github.com`
-
-CLI: `--github-api-base-url-v3 "https://api.github.my-private-company.com"`
-
-#### `githubApiBaseUrlV4`
-
-Base url for Github's GraphQL (v4) API
-
-Default: `https://api.github.com/graphql`
-
-CLI: `--github-api-base-url-v4 "https://github-enterprise.acme-inc.com/api"`
