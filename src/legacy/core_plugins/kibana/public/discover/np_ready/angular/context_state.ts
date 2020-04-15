@@ -17,7 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
-import { createBrowserHistory, createHashHistory, History } from 'history';
+import { createHashHistory, History } from 'history';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
@@ -126,7 +126,7 @@ export function getState({
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
-    history: history ? history : createBrowserHistory(),
+    history: history ? history : createHashHistory(),
   });
 
   const globalStateInitial = stateStorage.get(GLOBAL_STATE_URL_KEY) as GlobalState;
