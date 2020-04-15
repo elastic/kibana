@@ -23,6 +23,7 @@ export const DownloadButton = ({ getUrl, job }: Props) => {
     <EuiButton
       size="s"
       data-test-subj="downloadCompletedReportButton"
+      data-test-href={getUrl(job.id)}
       onClick={() => {
         downloadReport();
       }}
