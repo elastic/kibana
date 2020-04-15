@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function QueryBarProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -25,6 +26,7 @@ export function QueryBarProvider({ getService, getPageObjects }: FtrProviderCont
   const log = getService('log');
   const PageObjects = getPageObjects(['header', 'common']);
   const find = getService('find');
+  const browser = getService('browser');
 
   class QueryBar {
     async getQueryString(): Promise<string> {
@@ -61,6 +63,24 @@ export function QueryBarProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async clickQuerySubmitButton(): Promise<void> {
       await testSubjects.click('querySubmitButton');
+    }
+
+    public async switchQueryLanguage(lang: 'kql' | 'lucene'): Promise<void> {
+      await testSubjects.click('switchQueryLanguageButton');
+      const kqlToggle = await testSubjects.find('languageToggle');
+      const currentLang =
+        (await kqlToggle.getAttribute('aria-checked')) === 'true' ? 'kql' : 'lucene';
+      if (lang !== currentLang) {
+        await kqlToggle.click();
+      }
+
+      await browser.pressKeys(browser.keys.ESCAPE); // close popover
+      await this.expectQueryLanguageOrFail(lang); // make sure lang is switched
+    }
+
+    public async expectQueryLanguageOrFail(lang: 'kql' | 'lucene'): Promise<void> {
+      const queryLanguageButton = await testSubjects.find('switchQueryLanguageButton');
+      expect((await queryLanguageButton.getVisibleText()).toLowerCase()).to.eql(lang);
     }
   }
 
