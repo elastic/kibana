@@ -53,6 +53,7 @@ exports[`MonitorList component MonitorListPagination component renders a no item
 >
   <MonitorListComponent
     getMonitorList={[MockFunction]}
+    lastRefresh={123}
     monitorList={
       Object {
         "errors": Array [],
@@ -122,6 +123,7 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
 >
   <MonitorListComponent
     getMonitorList={[MockFunction]}
+    lastRefresh={123}
     monitorList={
       Object {
         "errors": Array [],
@@ -132,61 +134,61 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
             Object {
               "monitor_id": "foo",
               "state": Object {
-                "@timestamp": "123",
                 "checks": Array [
                   Object {
-                    "@timestamp": 124,
                     "monitor": Object {
                       "ip": "127.0.0.1",
                       "status": "up",
                     },
+                    "timestamp": 124,
                   },
                   Object {
-                    "@timestamp": 125,
                     "monitor": Object {
                       "ip": "127.0.0.2",
                       "status": "down",
                     },
+                    "timestamp": 125,
                   },
                   Object {
-                    "@timestamp": 126,
                     "monitor": Object {
                       "ip": "127.0.0.3",
                       "status": "down",
                     },
+                    "timestamp": 126,
                   },
                 ],
                 "summary": Object {
                   "down": 2,
                   "up": 1,
                 },
+                "timestamp": "123",
                 "url": Object {},
               },
             },
             Object {
               "monitor_id": "bar",
               "state": Object {
-                "@timestamp": "125",
                 "checks": Array [
                   Object {
-                    "@timestamp": 125,
                     "monitor": Object {
                       "ip": "127.0.0.1",
                       "status": "up",
                     },
+                    "timestamp": 125,
                   },
                   Object {
-                    "@timestamp": 126,
                     "monitor": Object {
                       "ip": "127.0.0.2",
                       "status": "up",
                     },
+                    "timestamp": 126,
                   },
                 ],
                 "summary": Object {
                   "down": 0,
                   "up": 2,
                 },
+                "timestamp": "125",
                 "url": Object {},
               },
             },
@@ -253,6 +255,7 @@ exports[`MonitorList component renders a no items message when no data is provid
 >
   <MonitorListComponent
     getMonitorList={[MockFunction]}
+    lastRefresh={123}
     monitorList={
       Object {
         "errors": Array [],
@@ -322,6 +325,7 @@ exports[`MonitorList component renders error list 1`] = `
 >
   <MonitorListComponent
     getMonitorList={[MockFunction]}
+    lastRefresh={123}
     monitorList={
       Object {
         "errors": Array [
@@ -334,61 +338,61 @@ exports[`MonitorList component renders error list 1`] = `
             Object {
               "monitor_id": "foo",
               "state": Object {
-                "@timestamp": "123",
                 "checks": Array [
                   Object {
-                    "@timestamp": 124,
                     "monitor": Object {
                       "ip": "127.0.0.1",
                       "status": "up",
                     },
+                    "timestamp": 124,
                   },
                   Object {
-                    "@timestamp": 125,
                     "monitor": Object {
                       "ip": "127.0.0.2",
                       "status": "down",
                     },
+                    "timestamp": 125,
                   },
                   Object {
-                    "@timestamp": 126,
                     "monitor": Object {
                       "ip": "127.0.0.3",
                       "status": "down",
                     },
+                    "timestamp": 126,
                   },
                 ],
                 "summary": Object {
                   "down": 2,
                   "up": 1,
                 },
+                "timestamp": "123",
                 "url": Object {},
               },
             },
             Object {
               "monitor_id": "bar",
               "state": Object {
-                "@timestamp": "125",
                 "checks": Array [
                   Object {
-                    "@timestamp": 125,
                     "monitor": Object {
                       "ip": "127.0.0.1",
                       "status": "up",
                     },
+                    "timestamp": 125,
                   },
                   Object {
-                    "@timestamp": 126,
                     "monitor": Object {
                       "ip": "127.0.0.2",
                       "status": "up",
                     },
+                    "timestamp": 126,
                   },
                 ],
                 "summary": Object {
                   "down": 0,
                   "up": 2,
                 },
+                "timestamp": "125",
                 "url": Object {},
               },
             },
@@ -455,6 +459,7 @@ exports[`MonitorList component renders loading state 1`] = `
 >
   <MonitorListComponent
     getMonitorList={[MockFunction]}
+    lastRefresh={123}
     monitorList={
       Object {
         "errors": Array [],
@@ -465,61 +470,61 @@ exports[`MonitorList component renders loading state 1`] = `
             Object {
               "monitor_id": "foo",
               "state": Object {
-                "@timestamp": "123",
                 "checks": Array [
                   Object {
-                    "@timestamp": 124,
                     "monitor": Object {
                       "ip": "127.0.0.1",
                       "status": "up",
                     },
+                    "timestamp": 124,
                   },
                   Object {
-                    "@timestamp": 125,
                     "monitor": Object {
                       "ip": "127.0.0.2",
                       "status": "down",
                     },
+                    "timestamp": 125,
                   },
                   Object {
-                    "@timestamp": 126,
                     "monitor": Object {
                       "ip": "127.0.0.3",
                       "status": "down",
                     },
+                    "timestamp": 126,
                   },
                 ],
                 "summary": Object {
                   "down": 2,
                   "up": 1,
                 },
+                "timestamp": "123",
                 "url": Object {},
               },
             },
             Object {
               "monitor_id": "bar",
               "state": Object {
-                "@timestamp": "125",
                 "checks": Array [
                   Object {
-                    "@timestamp": 125,
                     "monitor": Object {
                       "ip": "127.0.0.1",
                       "status": "up",
                     },
+                    "timestamp": 125,
                   },
                   Object {
-                    "@timestamp": 126,
                     "monitor": Object {
                       "ip": "127.0.0.2",
                       "status": "up",
                     },
+                    "timestamp": 126,
                   },
                 ],
                 "summary": Object {
                   "down": 0,
                   "up": 2,
                 },
+                "timestamp": "125",
                 "url": Object {},
               },
             },
@@ -1135,6 +1140,7 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
 >
   <MonitorListComponent
     getMonitorList={[MockFunction]}
+    lastRefresh={123}
     monitorList={
       Object {
         "errors": Array [],
@@ -1145,61 +1151,61 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
             Object {
               "monitor_id": "foo",
               "state": Object {
-                "@timestamp": "123",
                 "checks": Array [
                   Object {
-                    "@timestamp": 124,
                     "monitor": Object {
                       "ip": "127.0.0.1",
                       "status": "up",
                     },
+                    "timestamp": 124,
                   },
                   Object {
-                    "@timestamp": 125,
                     "monitor": Object {
                       "ip": "127.0.0.2",
                       "status": "down",
                     },
+                    "timestamp": 125,
                   },
                   Object {
-                    "@timestamp": 126,
                     "monitor": Object {
                       "ip": "127.0.0.3",
                       "status": "down",
                     },
+                    "timestamp": 126,
                   },
                 ],
                 "summary": Object {
                   "down": 2,
                   "up": 1,
                 },
+                "timestamp": "123",
                 "url": Object {},
               },
             },
             Object {
               "monitor_id": "bar",
               "state": Object {
-                "@timestamp": "125",
                 "checks": Array [
                   Object {
-                    "@timestamp": 125,
                     "monitor": Object {
                       "ip": "127.0.0.1",
                       "status": "up",
                     },
+                    "timestamp": 125,
                   },
                   Object {
-                    "@timestamp": 126,
                     "monitor": Object {
                       "ip": "127.0.0.2",
                       "status": "up",
                     },
+                    "timestamp": 126,
                   },
                 ],
                 "summary": Object {
                   "down": 0,
                   "up": 2,
                 },
+                "timestamp": "125",
                 "url": Object {},
               },
             },

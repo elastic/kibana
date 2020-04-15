@@ -81,16 +81,16 @@ describe('fetching a page', () => {
           Object {
             "monitor_id": "foo",
             "state": Object {
-              "@timestamp": "946598400000",
               "summary": Object {},
+              "timestamp": "946598400000",
               "url": Object {},
             },
           },
           Object {
             "monitor_id": "bar",
             "state": Object {
-              "@timestamp": "946598400000",
               "summary": Object {},
+              "timestamp": "946598400000",
               "url": Object {},
             },
           },
