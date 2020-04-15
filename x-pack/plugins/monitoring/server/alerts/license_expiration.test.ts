@@ -95,6 +95,7 @@ describe('getLicenseExpiration', () => {
   }
 
   afterEach(() => {
+    jest.clearAllMocks();
     (executeActions as jest.Mock).mockClear();
     (getPreparedAlert as jest.Mock).mockClear();
   });
@@ -124,7 +125,7 @@ describe('getLicenseExpiration', () => {
     const newState = result[clusterUuid] as AlertLicensePerClusterState;
     expect(newState.expiredCheckDateMS > 0).toBe(true);
     expect(executeActions).toHaveBeenCalledWith(
-      undefined,
+      services.alertInstanceFactory(ALERT_TYPE_LICENSE_EXPIRATION),
       cluster,
       moment.utc(expiryDateMS),
       dateFormat,
@@ -146,7 +147,7 @@ describe('getLicenseExpiration', () => {
     const newState = result[clusterUuid] as AlertLicensePerClusterState;
     expect(newState.expiredCheckDateMS).toBe(0);
     expect(executeActions).toHaveBeenCalledWith(
-      undefined,
+      services.alertInstanceFactory(ALERT_TYPE_LICENSE_EXPIRATION),
       cluster,
       moment.utc(expiryDateMS),
       dateFormat,
@@ -185,7 +186,7 @@ describe('getLicenseExpiration', () => {
     const newState = result[clusterUuid] as AlertLicensePerClusterState;
     expect(newState.expiredCheckDateMS > 0).toBe(true);
     expect(executeActions).toHaveBeenCalledWith(
-      undefined,
+      services.alertInstanceFactory(ALERT_TYPE_LICENSE_EXPIRATION),
       cluster,
       moment.utc(expiryDateMS),
       dateFormat,
