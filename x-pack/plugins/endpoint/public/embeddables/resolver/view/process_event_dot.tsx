@@ -61,7 +61,17 @@ const nodeAssets = {
 
 const ChildEventsButton = () => {
   return (
-    <EuiButton onClick={() => {}} color="ghost" size="s" iconType="arrowDown" iconSide="right">
+    <EuiButton
+      onClick={(clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+      }}
+      color="ghost"
+      size="s"
+      iconType="arrowDown"
+      iconSide="right"
+      tabIndex={-1}
+    >
       Events
     </EuiButton>
   );
@@ -69,7 +79,15 @@ const ChildEventsButton = () => {
 
 const RelatedAlertsButton = () => {
   return (
-    <EuiButton onClick={() => {}} color="ghost" size="s">
+    <EuiButton
+      onClick={(clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+      }}
+      color="ghost"
+      size="s"
+      tabIndex={-1}
+    >
       Related Alerts
     </EuiButton>
   );
@@ -361,6 +379,8 @@ export const ProcessEventDot = styled(
   white-space: nowrap;
   will-change: left, top, width, height;
   contain: strict;
+  min-width: 280px;
+  min-height: 90px;
 
   //dasharray & dashoffset should be equal to "pull" the stroke back
   //when it is transitioned.
