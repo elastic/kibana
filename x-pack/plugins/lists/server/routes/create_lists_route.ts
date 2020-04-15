@@ -13,10 +13,10 @@ import {
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
 import { createListsSchema, CreateListsSchema } from '../../common/schemas';
-import { createList, getList } from '../lists';
-import { ConfigType } from '../config';
 
-export const createListsRoute = (router: IRouter, { listsIndex }: ConfigType): void => {
+import { getListClient } from '.';
+
+export const createListsRoute = (router: IRouter): void => {
   router.post(
     {
       path: LIST_URL,
@@ -31,11 +31,11 @@ export const createListsRoute = (router: IRouter, { listsIndex }: ConfigType): v
       const siemResponse = buildSiemResponse(response);
       try {
         const { name, description, id, type } = request.body;
-        const clusterClient = context.core.elasticsearch.dataClient;
+        const lists = getListClient(context);
         // TODO: We need a await getIndexExists(clusterClient.callAsCurrentUser, index);
         // to throw an error if the index does not exist just yet
         if (id != null) {
-          const list = await getList({ id, clusterClient, listsIndex });
+          const list = await lists.getList({ id });
           if (list != null) {
             return siemResponse.error({
               statusCode: 409,
@@ -43,7 +43,7 @@ export const createListsRoute = (router: IRouter, { listsIndex }: ConfigType): v
             });
           }
         }
-        const list = await createList({ name, description, id, clusterClient, listsIndex, type });
+        const list = await lists.createList({ id, name, description, type });
         // TODO: outbound validation
         return response.ok({ body: list });
       } catch (err) {

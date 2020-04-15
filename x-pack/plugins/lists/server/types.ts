@@ -5,6 +5,8 @@
  */
 import { Type } from '../common/schemas';
 
+import { ListsClient } from './client';
+
 export interface BaseElasticListType {
   name: string;
   description: string;
@@ -44,3 +46,11 @@ export type ElasticListItemsType =
     };
 
 export type ElasticListItemsInputType = BaseElasticListItemType & ElasticListItemsType;
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    lists?: {
+      getListsClient: () => ListsClient;
+    };
+  }
+}
