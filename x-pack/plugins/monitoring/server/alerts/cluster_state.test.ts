@@ -96,7 +96,7 @@ describe('getClusterState', () => {
   it('should alert if green -> yellow', async () => {
     const result = await setupAlert(AlertClusterStateState.Green, AlertClusterStateState.Yellow);
     expect(executeActions).toHaveBeenCalledWith(
-      undefined,
+      services.alertInstanceFactory(ALERT_TYPE_CLUSTER_STATE),
       cluster,
       AlertClusterStateState.Yellow,
       emailAddress
@@ -110,7 +110,7 @@ describe('getClusterState', () => {
   it('should alert if yellow -> green', async () => {
     const result = await setupAlert(AlertClusterStateState.Yellow, AlertClusterStateState.Green);
     expect(executeActions).toHaveBeenCalledWith(
-      undefined,
+      services.alertInstanceFactory(ALERT_TYPE_CLUSTER_STATE),
       cluster,
       AlertClusterStateState.Green,
       emailAddress,
@@ -124,7 +124,7 @@ describe('getClusterState', () => {
   it('should alert if green -> red', async () => {
     const result = await setupAlert(AlertClusterStateState.Green, AlertClusterStateState.Red);
     expect(executeActions).toHaveBeenCalledWith(
-      undefined,
+      services.alertInstanceFactory(ALERT_TYPE_CLUSTER_STATE),
       cluster,
       AlertClusterStateState.Red,
       emailAddress
@@ -138,7 +138,7 @@ describe('getClusterState', () => {
   it('should alert if red -> green', async () => {
     const result = await setupAlert(AlertClusterStateState.Red, AlertClusterStateState.Green);
     expect(executeActions).toHaveBeenCalledWith(
-      undefined,
+      services.alertInstanceFactory(ALERT_TYPE_CLUSTER_STATE),
       cluster,
       AlertClusterStateState.Green,
       emailAddress,
