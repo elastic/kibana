@@ -28,7 +28,6 @@ interface State {
   layerName: string;
   minSourceZoom: number;
   maxSourceZoom: number;
-  mvtCanPreview: boolean;
 }
 
 export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
@@ -37,11 +36,15 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
     layerName: '',
     minSourceZoom: MIN_ZOOM,
     maxSourceZoom: MAX_ZOOM,
-    mvtCanPreview: false,
   };
 
   _sourceConfigChange = _.debounce(() => {
-    if (this.state.mvtCanPreview && this.state.layerName) {
+    const canPreview =
+      this.state.urlTemplate.indexOf('{x}') >= 0 &&
+      this.state.urlTemplate.indexOf('{y}') >= 0 &&
+      this.state.urlTemplate.indexOf('{z}') >= 0;
+
+    if (canPreview && this.state.layerName) {
       this.props.onSourceConfigChange({
         urlTemplate: this.state.urlTemplate,
         layerName: this.state.layerName,
@@ -54,12 +57,9 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
   // @ts-ignore
   _handleUrlTemplateChange = (e: ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
-    const canPreview =
-      url.indexOf('{x}') >= 0 && url.indexOf('{y}') >= 0 && url.indexOf('{z}') >= 0;
     this.setState(
       {
         urlTemplate: url,
-        mvtCanPreview: canPreview,
       },
       () => this._sourceConfigChange()
     );

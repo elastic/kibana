@@ -6,13 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { ImmutableSourceProperty } from '../source';
+import { AbstractSource, ImmutableSourceProperty } from '../source';
 import { TiledVectorLayer } from '../../tiled_vector_layer';
-import {
-  AbstractVectorSource,
-  GeoJsonWithMeta,
-  ITiledSingleLayerVectorSource,
-} from '../vector_source';
+import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { IField } from '../../fields/field';
@@ -27,11 +23,14 @@ import {
 } from '../../../../common/descriptor_types';
 import { VectorLayerArguments } from '../../vector_layer';
 
-export const sourceTitle = i18n.translate('xpack.maps.source.tiledVectorTitle', {
-  defaultMessage: 'Vector Tile Layer',
-});
+export const sourceTitle = i18n.translate(
+  'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
+  {
+    defaultMessage: 'Vector Tile Layer',
+  }
+);
 
-export class MVTSingleLayerVectorSource extends AbstractVectorSource
+export class MVTSingleLayerVectorSource extends AbstractSource
   implements ITiledSingleLayerVectorSource {
   static createDescriptor({
     urlTemplate,
@@ -96,9 +95,24 @@ export class MVTSingleLayerVectorSource extends AbstractVectorSource
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
       { label: getUrlLabel(), value: this._descriptor.urlTemplate },
-      { label: 'Layer name', value: this._descriptor.layerName },
-      { label: 'Min zoom', value: this._descriptor.minSourceZoom.toString() },
-      { label: 'Max zoom', value: this._descriptor.maxSourceZoom.toString() },
+      {
+        label: i18n.translate('xpack.maps.source.MVTSingleLayerVectorSource.layerNameMessage', {
+          defaultMessage: 'Layer name',
+        }),
+        value: this._descriptor.layerName,
+      },
+      {
+        label: i18n.translate('xpack.maps.source.MVTSingleLayerVectorSource.minZoomMessage', {
+          defaultMessage: 'Min zoom',
+        }),
+        value: this._descriptor.minSourceZoom.toString(),
+      },
+      {
+        label: i18n.translate('xpack.maps.source.MVTSingleLayerVectorSource.maxZoomMessage', {
+          defaultMessage: 'Max zoom',
+        }),
+        value: this._descriptor.maxSourceZoom.toString(),
+      },
     ];
   }
 

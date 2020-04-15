@@ -13,12 +13,13 @@ import {
   updateLayerMinZoom,
   updateLayerAlpha,
 } from '../../../actions/map_actions';
+import { MAX_ZOOM } from '../../../../../../../plugins/maps/common/constants';
 
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
-    minSourceZoom: selectedLayer.getMinSourceZoom(),
-    maxSourceZoom: selectedLayer.getMaxZoom(),
+    minVisibilityZoom: selectedLayer.getMinSourceZoom(),
+    maxVisibilityZoom: MAX_ZOOM,
     alpha: selectedLayer.getAlpha(),
     label: selectedLayer.getLabel(),
     layerId: selectedLayer.getId(),

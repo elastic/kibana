@@ -20,8 +20,8 @@ export function LayerSettings(props) {
   };
 
   const onZoomChange = ([min, max]) => {
-    props.updateMinZoom(props.layerId, Math.max(props.minSourceZoom, parseInt(min, 10)));
-    props.updateMaxZoom(props.layerId, Math.min(props.maxSourceZoom, parseInt(max, 10)));
+    props.updateMinZoom(props.layerId, Math.max(props.minVisibilityZoom, parseInt(min, 10)));
+    props.updateMaxZoom(props.layerId, Math.min(props.maxVisibilityZoom, parseInt(max, 10)));
   };
 
   const onAlphaChange = alpha => {
@@ -36,8 +36,8 @@ export function LayerSettings(props) {
           defaultMessage: 'Visibility',
         })}
         formRowDisplay="columnCompressed"
-        min={props.minSourceZoom}
-        max={props.maxSourceZoom}
+        min={props.minVisibilityZoom}
+        max={props.maxVisibilityZoom}
         value={[props.minZoom, props.maxZoom]}
         showInput="inputWithPopover"
         showRange
