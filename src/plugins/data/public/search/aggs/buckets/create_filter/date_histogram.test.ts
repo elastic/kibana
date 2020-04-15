@@ -78,7 +78,10 @@ describe('AggConfig Filters', () => {
             params: { field: field.name, interval, customInterval: '5d' },
           },
         ],
-        { typesRegistry: mockAggTypesRegistry([getDateHistogramBucketAgg(aggTypesDependencies)]) }
+        {
+          typesRegistry: mockAggTypesRegistry([getDateHistogramBucketAgg(aggTypesDependencies)]),
+          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+        }
       );
       const bucketKey = 1422579600000;
 

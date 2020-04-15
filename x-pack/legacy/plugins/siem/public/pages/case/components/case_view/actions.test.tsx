@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { TestProviders } from '../../../../mock';
-import { data } from './__mock__';
+import { basicCase } from '../../../../containers/case/mock';
 import { CaseViewActions } from './actions';
 jest.mock('../../../../containers/case/use_delete_cases');
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
@@ -34,7 +34,7 @@ describe('CaseView actions', () => {
   it('clicking trash toggles modal', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseViewActions caseData={data} />
+        <CaseViewActions caseData={basicCase} />
       </TestProviders>
     );
 
@@ -54,12 +54,14 @@ describe('CaseView actions', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <CaseViewActions caseData={data} />
+        <CaseViewActions caseData={basicCase} />
       </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
-    expect(handleOnDeleteConfirm.mock.calls[0][0]).toEqual([{ id: data.id, title: data.title }]);
+    expect(handleOnDeleteConfirm.mock.calls[0][0]).toEqual([
+      { id: basicCase.id, title: basicCase.title },
+    ]);
   });
 });

@@ -290,6 +290,10 @@ export const npSetup = {
         }),
       },
     },
+    indexPatternManagement: {
+      list: { addListConfig: sinon.fake() },
+      creation: { addCreationConfig: sinon.fake() },
+    },
     discover: {
       docViews: {
         addDocView: sinon.fake(),
@@ -304,6 +308,12 @@ export const npSetup = {
       createReactVisualization: sinon.fake(),
       registerAlias: sinon.fake(),
       hideTypes: sinon.fake(),
+    },
+
+    mapsLegacy: {
+      serviceSettings: sinon.fake(),
+      getPrecision: sinon.fake(),
+      getZoomPrecision: sinon.fake(),
     },
   },
 };
@@ -323,6 +333,17 @@ export const npStart = {
         getSection: () => ({
           registerApp: sinon.fake(),
         }),
+      },
+    },
+    indexPatternManagement: {
+      list: {
+        getType: sinon.fake(),
+        getIndexPatternCreationOptions: sinon.fake(),
+      },
+      creation: {
+        getIndexPatternTags: sinon.fake(),
+        getFieldInfo: sinon.fake(),
+        areScriptedFieldsEnabled: sinon.fake(),
       },
     },
     embeddable: {
@@ -432,6 +453,7 @@ export const npStart = {
           createAggConfigs: (indexPattern, configStates = []) => {
             return new AggConfigs(indexPattern, configStates, {
               typesRegistry: aggTypesRegistry.start(),
+              fieldFormats: getFieldFormatsRegistry(mockCoreStart),
             });
           },
           types: aggTypesRegistry.start(),
