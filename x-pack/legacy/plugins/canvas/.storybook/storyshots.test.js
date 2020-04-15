@@ -63,6 +63,7 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
 });
 
 
+// Mock React Portal for components that use modals, tooltips, etc
 ReactDOM.createPortal = jest.fn((element) => {
   return element;
 });
