@@ -196,46 +196,53 @@ exports[`EmptyState component does not render empty state with appropriate base 
                 >
                   <EuiEmptyPrompt
                     actions={
-                      <EuiButton
-                        color="primary"
-                        fill={true}
-                        href="/app/kibana#/home/tutorial/uptimeMonitors"
-                        iconType="help"
-                      >
-                        <FormattedMessage
-                          defaultMessage="Add data with Heartbeat"
-                          id="xpack.uptime.emptyState.addDataWithHeartbeat"
-                          values={Object {}}
-                        />
-                      </EuiButton>
+                      <ForwardRef>
+                        <EuiFlexItem>
+                          <EuiButton
+                            color="primary"
+                            fill={true}
+                            href="/app/kibana#/home/tutorial/uptimeMonitors"
+                          >
+                            <FormattedMessage
+                              defaultMessage="View setup instructions"
+                              id="xpack.uptime.emptyState.viewSetupInstructions"
+                              values={Object {}}
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiButton
+                            color="primary"
+                            href="/app/uptime#/settings"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Update index pattern settings"
+                              id="xpack.uptime.emptyState.updateIndexPattern"
+                              values={Object {}}
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </ForwardRef>
                     }
                     body={
                       <React.Fragment>
                         <p>
                           <FormattedMessage
-                            defaultMessage="Configure Heartbeat to start logging uptime data."
+                            defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
                             id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                             values={Object {}}
                           />
                         </p>
                         <p>
                           <FormattedMessage
-                            defaultMessage="{settingsLink} to match an index containing Heartbeat data."
+                            defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config."
                             id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
-                            values={
-                              Object {
-                                "settingsLink": <ForwardRef
-                                  to="/settings"
-                                >
-                                  Update the index pattern 
-                                </ForwardRef>,
-                              }
-                            }
+                            values={Object {}}
                           />
                         </p>
                       </React.Fragment>
                     }
-                    iconType="uptimeApp"
+                    iconType="logoUptime"
                     title={
                       <EuiTitle
                         size="l"
@@ -260,11 +267,11 @@ exports[`EmptyState component does not render empty state with appropriate base 
                       <EuiIcon
                         color="subdued"
                         size="xxl"
-                        type="uptimeApp"
+                        type="logoUptime"
                       >
                         <div
                           color="subdued"
-                          data-euiicon-type="uptimeApp"
+                          data-euiicon-type="logoUptime"
                           size="xxl"
                         />
                       </EuiIcon>
@@ -317,43 +324,20 @@ exports[`EmptyState component does not render empty state with appropriate base 
                             >
                               <p>
                                 <FormattedMessage
-                                  defaultMessage="Configure Heartbeat to start logging uptime data."
+                                  defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
                                   id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                                   values={Object {}}
                                 >
-                                  Configure Heartbeat to start logging uptime data.
+                                  If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services.
                                 </FormattedMessage>
                               </p>
                               <p>
                                 <FormattedMessage
-                                  defaultMessage="{settingsLink} to match an index containing Heartbeat data."
+                                  defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config."
                                   id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
-                                  values={
-                                    Object {
-                                      "settingsLink": <ForwardRef
-                                        to="/settings"
-                                      >
-                                        Update the index pattern 
-                                      </ForwardRef>,
-                                    }
-                                  }
+                                  values={Object {}}
                                 >
-                                  <Link
-                                    to="/settings"
-                                  >
-                                    <LinkAnchor
-                                      href="/settings"
-                                      navigate={[Function]}
-                                    >
-                                      <a
-                                        href="/settings"
-                                        onClick={[Function]}
-                                      >
-                                        Update the index pattern 
-                                      </a>
-                                    </LinkAnchor>
-                                  </Link>
-                                   to match an index containing Heartbeat data.
+                                  If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config.
                                 </FormattedMessage>
                               </p>
                             </div>
@@ -374,47 +358,77 @@ exports[`EmptyState component does not render empty state with appropriate base 
                           className="euiSpacer euiSpacer--s"
                         />
                       </EuiSpacer>
-                      <EuiButton
-                        color="primary"
-                        fill={true}
-                        href="/app/kibana#/home/tutorial/uptimeMonitors"
-                        iconType="help"
-                      >
-                        <a
-                          className="euiButton euiButton--primary euiButton--fill"
-                          href="/app/kibana#/home/tutorial/uptimeMonitors"
-                          rel="noreferrer"
+                      <EuiFlexGroup>
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
-                          <span
-                            className="euiButton__content"
-                          >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiButton__icon"
-                              size="m"
-                              type="help"
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
                             >
-                              <div
-                                aria-hidden="true"
-                                className="euiButton__icon"
-                                data-euiicon-type="help"
-                                size="m"
-                              />
-                            </EuiIcon>
-                            <span
-                              className="euiButton__text"
-                            >
-                              <FormattedMessage
-                                defaultMessage="Add data with Heartbeat"
-                                id="xpack.uptime.emptyState.addDataWithHeartbeat"
-                                values={Object {}}
+                              <EuiButton
+                                color="primary"
+                                fill={true}
+                                href="/app/kibana#/home/tutorial/uptimeMonitors"
                               >
-                                Add data with Heartbeat
-                              </FormattedMessage>
-                            </span>
-                          </span>
-                        </a>
-                      </EuiButton>
+                                <a
+                                  className="euiButton euiButton--primary euiButton--fill"
+                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
+                                  rel="noreferrer"
+                                >
+                                  <span
+                                    className="euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="View setup instructions"
+                                        id="xpack.uptime.emptyState.viewSetupInstructions"
+                                        values={Object {}}
+                                      >
+                                        View setup instructions
+                                      </FormattedMessage>
+                                    </span>
+                                  </span>
+                                </a>
+                              </EuiButton>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiButton
+                                color="primary"
+                                href="/app/uptime#/settings"
+                              >
+                                <a
+                                  className="euiButton euiButton--primary"
+                                  href="/app/uptime#/settings"
+                                  rel="noreferrer"
+                                >
+                                  <span
+                                    className="euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="Update index pattern settings"
+                                        id="xpack.uptime.emptyState.updateIndexPattern"
+                                        values={Object {}}
+                                      >
+                                        Update index pattern settings
+                                      </FormattedMessage>
+                                    </span>
+                                  </span>
+                                </a>
+                              </EuiButton>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
                     </div>
                   </EuiEmptyPrompt>
                 </div>
@@ -781,7 +795,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
     <DataOrIndexMissing
       headingMessage={
         <FormattedMessage
-          defaultMessage="Uptime index {indexName} not found"
+          defaultMessage="No indices found matching pattern {indexName}"
           id="xpack.uptime.emptyState.noIndexTitle"
           values={
             Object {
@@ -828,53 +842,60 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                 >
                   <EuiEmptyPrompt
                     actions={
-                      <EuiButton
-                        color="primary"
-                        fill={true}
-                        href="/app/kibana#/home/tutorial/uptimeMonitors"
-                        iconType="help"
-                      >
-                        <FormattedMessage
-                          defaultMessage="Add data with Heartbeat"
-                          id="xpack.uptime.emptyState.addDataWithHeartbeat"
-                          values={Object {}}
-                        />
-                      </EuiButton>
+                      <ForwardRef>
+                        <EuiFlexItem>
+                          <EuiButton
+                            color="primary"
+                            fill={true}
+                            href="/app/kibana#/home/tutorial/uptimeMonitors"
+                          >
+                            <FormattedMessage
+                              defaultMessage="View setup instructions"
+                              id="xpack.uptime.emptyState.viewSetupInstructions"
+                              values={Object {}}
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiButton
+                            color="primary"
+                            href="/app/uptime#/settings"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Update index pattern settings"
+                              id="xpack.uptime.emptyState.updateIndexPattern"
+                              values={Object {}}
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </ForwardRef>
                     }
                     body={
                       <React.Fragment>
                         <p>
                           <FormattedMessage
-                            defaultMessage="Configure Heartbeat to start logging uptime data."
+                            defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
                             id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                             values={Object {}}
                           />
                         </p>
                         <p>
                           <FormattedMessage
-                            defaultMessage="{settingsLink} to match an index containing Heartbeat data."
+                            defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config."
                             id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
-                            values={
-                              Object {
-                                "settingsLink": <ForwardRef
-                                  to="/settings"
-                                >
-                                  Update the index pattern 
-                                </ForwardRef>,
-                              }
-                            }
+                            values={Object {}}
                           />
                         </p>
                       </React.Fragment>
                     }
-                    iconType="uptimeApp"
+                    iconType="logoUptime"
                     title={
                       <EuiTitle
                         size="l"
                       >
                         <h3>
                           <FormattedMessage
-                            defaultMessage="Uptime index {indexName} not found"
+                            defaultMessage="No indices found matching pattern {indexName}"
                             id="xpack.uptime.emptyState.noIndexTitle"
                             values={
                               Object {
@@ -892,11 +913,11 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                       <EuiIcon
                         color="subdued"
                         size="xxl"
-                        type="uptimeApp"
+                        type="logoUptime"
                       >
                         <div
                           color="subdued"
-                          data-euiicon-type="uptimeApp"
+                          data-euiicon-type="logoUptime"
                           size="xxl"
                         />
                       </EuiIcon>
@@ -922,7 +943,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                 className="euiTitle euiTitle--large euiTitle euiTitle--medium"
                               >
                                 <FormattedMessage
-                                  defaultMessage="Uptime index {indexName} not found"
+                                  defaultMessage="No indices found matching pattern {indexName}"
                                   id="xpack.uptime.emptyState.noIndexTitle"
                                   values={
                                     Object {
@@ -930,9 +951,8 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                     }
                                   }
                                 >
-                                  Uptime index 
+                                  No indices found matching pattern 
                                   <em />
-                                   not found
                                 </FormattedMessage>
                               </h3>
                             </EuiTitle>
@@ -950,43 +970,20 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                             >
                               <p>
                                 <FormattedMessage
-                                  defaultMessage="Configure Heartbeat to start logging uptime data."
+                                  defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
                                   id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                                   values={Object {}}
                                 >
-                                  Configure Heartbeat to start logging uptime data.
+                                  If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services.
                                 </FormattedMessage>
                               </p>
                               <p>
                                 <FormattedMessage
-                                  defaultMessage="{settingsLink} to match an index containing Heartbeat data."
+                                  defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config."
                                   id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
-                                  values={
-                                    Object {
-                                      "settingsLink": <ForwardRef
-                                        to="/settings"
-                                      >
-                                        Update the index pattern 
-                                      </ForwardRef>,
-                                    }
-                                  }
+                                  values={Object {}}
                                 >
-                                  <Link
-                                    to="/settings"
-                                  >
-                                    <LinkAnchor
-                                      href="/settings"
-                                      navigate={[Function]}
-                                    >
-                                      <a
-                                        href="/settings"
-                                        onClick={[Function]}
-                                      >
-                                        Update the index pattern 
-                                      </a>
-                                    </LinkAnchor>
-                                  </Link>
-                                   to match an index containing Heartbeat data.
+                                  If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config.
                                 </FormattedMessage>
                               </p>
                             </div>
@@ -1007,47 +1004,77 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                           className="euiSpacer euiSpacer--s"
                         />
                       </EuiSpacer>
-                      <EuiButton
-                        color="primary"
-                        fill={true}
-                        href="/app/kibana#/home/tutorial/uptimeMonitors"
-                        iconType="help"
-                      >
-                        <a
-                          className="euiButton euiButton--primary euiButton--fill"
-                          href="/app/kibana#/home/tutorial/uptimeMonitors"
-                          rel="noreferrer"
+                      <EuiFlexGroup>
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
-                          <span
-                            className="euiButton__content"
-                          >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiButton__icon"
-                              size="m"
-                              type="help"
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
                             >
-                              <div
-                                aria-hidden="true"
-                                className="euiButton__icon"
-                                data-euiicon-type="help"
-                                size="m"
-                              />
-                            </EuiIcon>
-                            <span
-                              className="euiButton__text"
-                            >
-                              <FormattedMessage
-                                defaultMessage="Add data with Heartbeat"
-                                id="xpack.uptime.emptyState.addDataWithHeartbeat"
-                                values={Object {}}
+                              <EuiButton
+                                color="primary"
+                                fill={true}
+                                href="/app/kibana#/home/tutorial/uptimeMonitors"
                               >
-                                Add data with Heartbeat
-                              </FormattedMessage>
-                            </span>
-                          </span>
-                        </a>
-                      </EuiButton>
+                                <a
+                                  className="euiButton euiButton--primary euiButton--fill"
+                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
+                                  rel="noreferrer"
+                                >
+                                  <span
+                                    className="euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="View setup instructions"
+                                        id="xpack.uptime.emptyState.viewSetupInstructions"
+                                        values={Object {}}
+                                      >
+                                        View setup instructions
+                                      </FormattedMessage>
+                                    </span>
+                                  </span>
+                                </a>
+                              </EuiButton>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiButton
+                                color="primary"
+                                href="/app/uptime#/settings"
+                              >
+                                <a
+                                  className="euiButton euiButton--primary"
+                                  href="/app/uptime#/settings"
+                                  rel="noreferrer"
+                                >
+                                  <span
+                                    className="euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="Update index pattern settings"
+                                        id="xpack.uptime.emptyState.updateIndexPattern"
+                                        values={Object {}}
+                                      >
+                                        Update index pattern settings
+                                      </FormattedMessage>
+                                    </span>
+                                  </span>
+                                </a>
+                              </EuiButton>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
                     </div>
                   </EuiEmptyPrompt>
                 </div>

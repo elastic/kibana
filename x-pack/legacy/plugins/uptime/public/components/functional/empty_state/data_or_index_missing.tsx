@@ -26,10 +26,6 @@ interface DataMissingProps {
   settings?: DynamicSettings;
 }
 
-const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.empty_state.settingsLink', {
-  defaultMessage: 'Update the index pattern ',
-});
-
 export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProps) => {
   const { basePath } = useContext(UptimeSettingsContext);
   return (
@@ -38,7 +34,7 @@ export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProp
         <EuiSpacer size="m" />
         <EuiPanel>
           <EuiEmptyPrompt
-            iconType="uptimeApp"
+            iconType="logoUptime"
             title={
               <EuiTitle size="l">
                 <h3>{headingMessage}</h3>
@@ -49,32 +45,41 @@ export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProp
                 <p>
                   <FormattedMessage
                     id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                    defaultMessage="Configure Heartbeat to start logging uptime data."
+                    defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
                   />
                 </p>
                 <p>
                   <FormattedMessage
                     id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
-                    defaultMessage="{settingsLink} to match an index containing Heartbeat data."
-                    values={{
-                      settingsLink: <Link to={SETTINGS_ROUTE}>{SETTINGS_LINK_TEXT}</Link>,
-                    }}
+                    defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch,
+                    update your index pattern settings and insure they are aligned with your Heartbeat config."
                   />
                 </p>
               </>
             }
             actions={
-              <EuiButton
-                fill
-                color="primary"
-                iconType="help"
-                href={`${basePath}/app/kibana#/home/tutorial/uptimeMonitors`}
-              >
-                <FormattedMessage
-                  id="xpack.uptime.emptyState.addDataWithHeartbeat"
-                  defaultMessage="Add data with Heartbeat"
-                />
-              </EuiButton>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiButton
+                    fill
+                    color="primary"
+                    href={`${basePath}/app/kibana#/home/tutorial/uptimeMonitors`}
+                  >
+                    <FormattedMessage
+                      id="xpack.uptime.emptyState.viewSetupInstructions"
+                      defaultMessage="View setup instructions"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton color="primary" href={`${basePath}/app/uptime#/settings`}>
+                    <FormattedMessage
+                      id="xpack.uptime.emptyState.updateIndexPattern"
+                      defaultMessage="Update index pattern settings"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             }
           />
         </EuiPanel>

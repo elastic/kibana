@@ -19,46 +19,53 @@ exports[`DataOrIndexMissing component renders headingMessage 1`] = `
     <EuiPanel>
       <EuiEmptyPrompt
         actions={
-          <EuiButton
-            color="primary"
-            fill={true}
-            href="/app/kibana#/home/tutorial/uptimeMonitors"
-            iconType="help"
-          >
-            <FormattedMessage
-              defaultMessage="Add data with Heartbeat"
-              id="xpack.uptime.emptyState.addDataWithHeartbeat"
-              values={Object {}}
-            />
-          </EuiButton>
+          <ForwardRef>
+            <EuiFlexItem>
+              <EuiButton
+                color="primary"
+                fill={true}
+                href="/app/kibana#/home/tutorial/uptimeMonitors"
+              >
+                <FormattedMessage
+                  defaultMessage="View setup instructions"
+                  id="xpack.uptime.emptyState.viewSetupInstructions"
+                  values={Object {}}
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButton
+                color="primary"
+                href="/app/uptime#/settings"
+              >
+                <FormattedMessage
+                  defaultMessage="Update index pattern settings"
+                  id="xpack.uptime.emptyState.updateIndexPattern"
+                  values={Object {}}
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </ForwardRef>
         }
         body={
           <React.Fragment>
             <p>
               <FormattedMessage
-                defaultMessage="Configure Heartbeat to start logging uptime data."
+                defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
                 id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
-                defaultMessage="{settingsLink} to match an index containing Heartbeat data."
+                defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config."
                 id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
-                values={
-                  Object {
-                    "settingsLink": <ForwardRef
-                      to="/settings"
-                    >
-                      Update the index pattern 
-                    </ForwardRef>,
-                  }
-                }
+                values={Object {}}
               />
             </p>
           </React.Fragment>
         }
-        iconType="uptimeApp"
+        iconType="logoUptime"
         title={
           <EuiTitle
             size="l"
