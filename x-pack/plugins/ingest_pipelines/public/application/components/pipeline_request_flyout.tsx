@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -34,6 +34,8 @@ export const PipelineRequestFlyout: React.FunctionComponent<Props> = ({
   const endpoint = `PUT _ingest/pipeline/${name || '<pipelineName>'}`;
   const payload = JSON.stringify(pipelineBody, null, 2);
   const request = `${endpoint}\n${payload}`;
+  const uuid = useRef(0);
+  uuid.current++;
 
   return (
     <EuiFlyout maxWidth={480} onClose={closeFlyout}>
@@ -67,8 +69,7 @@ export const PipelineRequestFlyout: React.FunctionComponent<Props> = ({
         </EuiText>
 
         <EuiSpacer />
-
-        <EuiCodeBlock language="json" isCopyable>
+        <EuiCodeBlock language="json" isCopyable key={uuid.current}>
           {request}
         </EuiCodeBlock>
       </EuiFlyoutBody>
