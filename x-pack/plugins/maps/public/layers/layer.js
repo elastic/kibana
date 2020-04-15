@@ -219,6 +219,26 @@ export class AbstractLayer {
     return this._source.getMinZoom();
   }
 
+  _requiresPrevSourceCleanup() {
+    return false;
+  }
+
+  _removeStaleMbSourcesAndLayers(mbMap) {
+    if (this._requiresPrevSourceCleanup(mbMap)) {
+      const mbStyle = mbMap.getStyle();
+      mbStyle.layers.forEach(mbLayer => {
+        if (this.ownsMbLayerId(mbLayer.id)) {
+          mbMap.removeLayer(mbLayer.id);
+        }
+      });
+      Object.keys(mbStyle.sources).some(mbSourceId => {
+        if (this.ownsMbSourceId(mbSourceId)) {
+          mbMap.removeSource(mbSourceId);
+        }
+      });
+    }
+  }
+
   getAlpha() {
     return this._descriptor.alpha;
   }

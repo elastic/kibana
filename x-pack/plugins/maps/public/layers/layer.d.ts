@@ -46,4 +46,6 @@ export class AbstractLayer implements ILayer {
   getMaxZoom(): number;
   getMinSourceZoom(): number;
   getQuery(): MapQuery;
+  _removeStaleMbSourcesAndLayers(mbMap: unknown): void;
+  _requiresPrevSourceCleanup(mbMap: unknown): boolean;
 }

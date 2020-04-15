@@ -641,7 +641,7 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  _setMbPointsProperties(mbMap, options) {
+  _setMbPointsProperties(mbMap, mvtSourceLayer) {
     const pointLayerId = this._getMbPointLayerId();
     const symbolLayerId = this._getMbSymbolLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
@@ -658,7 +658,7 @@ export class VectorLayer extends AbstractLayer {
       if (symbolLayer) {
         mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
       }
-      this._setMbCircleProperties(mbMap, options);
+      this._setMbCircleProperties(mbMap, mvtSourceLayer);
     } else {
       markerLayerId = symbolLayerId;
       textLayerId = symbolLayerId;
@@ -666,7 +666,7 @@ export class VectorLayer extends AbstractLayer {
         mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
         mbMap.setLayoutProperty(this._getMbTextLayerId(), 'visibility', 'none');
       }
-      this._setMbSymbolProperties(mbMap, options);
+      this._setMbSymbolProperties(mbMap, mvtSourceLayer);
     }
 
     this.syncVisibilityWithMb(mbMap, markerLayerId);
@@ -677,7 +677,7 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  _setMbCircleProperties(mbMap, { mvtSourceLayer }) {
+  _setMbCircleProperties(mbMap, mvtSourceLayer) {
     const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
@@ -728,7 +728,7 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  _setMbSymbolProperties(mbMap, { mvtSourceLayer }) {
+  _setMbSymbolProperties(mbMap, mvtSourceLayer) {
     const sourceId = this.getId();
     const symbolLayerId = this._getMbSymbolLayerId();
     const symbolLayer = mbMap.getLayer(symbolLayerId);
@@ -763,7 +763,7 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  _setMbLinePolygonProperties(mbMap, { mvtSourceLayer }) {
+  _setMbLinePolygonProperties(mbMap, mvtSourceLayer) {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
@@ -815,8 +815,8 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _syncStylePropertiesWithMb(mbMap) {
-    this._setMbPointsProperties(mbMap, {});
-    this._setMbLinePolygonProperties(mbMap, {});
+    this._setMbPointsProperties(mbMap);
+    this._setMbLinePolygonProperties(mbMap);
   }
 
   _syncSourceBindingWithMb(mbMap) {

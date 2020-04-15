@@ -6,18 +6,14 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { IVectorStyle, VectorStyle } from './styles/vector/vector_style';
+import { VectorStyle } from './styles/vector/vector_style';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 import { VectorLayer, VectorLayerArguments } from './vector_layer';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
-import { ITiledSingleLayerVectorSource, IVectorSource } from './sources/vector_source';
+import { ITiledSingleLayerVectorSource } from './sources/vector_source';
 import { SyncContext } from '../actions/map_actions';
 import { ISource } from './sources/source';
-import {
-  MapFilters,
-  VectorLayerDescriptor,
-  VectorSourceRequestMeta,
-} from '../../common/descriptor_types';
+import { VectorLayerDescriptor, VectorSourceRequestMeta } from '../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from './sources/mvt_single_layer_vector_source/mvt_single_layer_vector_source_editor';
 
 export class TiledVectorLayer extends VectorLayer {
@@ -50,24 +46,6 @@ export class TiledVectorLayer extends VectorLayer {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };
   }
-
-  // _getSearchFilters(
-  //   mapFilters: MapFilters,
-  //   source: IVectorSource,
-  //   style: IVectorStyle
-  // ): VectorSourceRequestMeta {
-  //   const fieldNames = [...source.getFieldNames(), ...style.getSourceFieldNames()];
-  //
-  //   const requestMeta: VectorSourceRequestMeta = {
-  //     ...mapFilters,
-  //     applyGlobalQuery: this._source.getApplyGlobalQuery(),
-  //     sourceMeta: this._source.getSyncMeta(),
-  //     fieldNames,
-  //     sourceQuery: this.getQuery(),
-  //   };
-  //
-  //   return requestMeta;
-  // }
 
   async _syncMVTUrlTemplate({ startLoading, stopLoading, onLoadError, dataFilters }: SyncContext) {
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
@@ -147,13 +125,12 @@ export class TiledVectorLayer extends VectorLayer {
       return;
     }
     const sourceMeta: MVTSingleLayerVectorSourceConfig = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-    const options = { mvtSourceLayer: sourceMeta.layerName };
 
-    this._setMbPointsProperties(mbMap, options);
-    this._setMbLinePolygonProperties(mbMap, options);
+    this._setMbPointsProperties(mbMap, sourceMeta.layerName);
+    this._setMbLinePolygonProperties(mbMap, sourceMeta.layerName);
   }
 
-  _requiresPrevSourceCleanup(mbMap: unknown) {
+  _requiresPrevSourceCleanup(mbMap: unknown): boolean {
     // @ts-ignore
     const mbTileSource = mbMap.getSource(this.getId());
     if (!mbTileSource) {
@@ -177,26 +154,7 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   syncLayerWithMB(mbMap: unknown) {
-    const requiresCleanup = this._requiresPrevSourceCleanup(mbMap);
-    if (requiresCleanup) {
-      // @ts-ignore
-      const mbStyle = mbMap.getStyle();
-      // @ts-ignore
-      mbStyle.layers.forEach(mbLayer => {
-        if (this.ownsMbLayerId(mbLayer.id)) {
-          // @ts-ignore
-          mbMap.removeLayer(mbLayer.id);
-        }
-      });
-      // @ts-ignore
-      Object.keys(mbStyle.sources).some(mbSourceId => {
-        if (this.ownsMbSourceId(mbSourceId)) {
-          // @ts-ignore
-          mbMap.removeSource(mbSourceId);
-        }
-      });
-    }
-
+    this._removeStaleMbSourcesAndLayers(mbMap);
     this._syncSourceBindingWithMb(mbMap);
     this._syncStylePropertiesWithMb(mbMap);
   }

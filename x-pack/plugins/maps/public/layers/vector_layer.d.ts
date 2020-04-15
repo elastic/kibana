@@ -65,7 +65,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   _syncData(syncContext: SyncContext, source: IVectorSource, style: IVectorStyle): Promise<void>;
   ownsMbSourceId(sourceId: string): boolean;
   ownsMbLayerId(sourceId: string): boolean;
-  _setMbPointsProperties(mbMap: unknown, options: unknown): void;
-  _setMbLinePolygonProperties(mbMap: unknown, options: unknown): void;
+  _setMbPointsProperties(mbMap: unknown, mvtSourceLayer?: string): void;
+  _setMbLinePolygonProperties(mbMap: unknown, mvtSourceLayer?: string): void;
   getSource(): IVectorSource;
 }
