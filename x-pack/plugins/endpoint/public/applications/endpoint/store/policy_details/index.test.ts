@@ -9,7 +9,7 @@ import { createStore, Dispatch, Store } from 'redux';
 import { policyDetailsReducer, PolicyDetailsAction } from './index';
 import { policyConfig } from './selectors';
 import { clone } from '../../models/policy_details_config';
-import { generatePolicy } from '../../models/policy';
+import { factory as policyConfigFactory } from '../../../../../common/models/policy_config';
 
 describe('policy details: ', () => {
   let store: Store<PolicyDetailsState>;
@@ -38,7 +38,7 @@ describe('policy details: ', () => {
               streams: [],
               config: {
                 policy: {
-                  value: generatePolicy(),
+                  value: policyConfigFactory(),
                 },
               },
             },
