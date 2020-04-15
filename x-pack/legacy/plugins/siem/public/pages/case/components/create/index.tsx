@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -25,7 +25,6 @@ import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
 import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
-import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
 import { ConnectorSelector } from '../connector_selector/form';
 
 export const CommonUseField = getUseField({ component: Field });
@@ -87,6 +86,7 @@ export const Create = React.memo(() => {
   if (isCancel) {
     return <Redirect to={`/${SiemPageName.case}`} />;
   }
+  console.log('connectors', connectors);
   return (
     <EuiPanel>
       {isLoading && <MySpinner data-test-subj="create-case-loading-spinner" size="xl" />}

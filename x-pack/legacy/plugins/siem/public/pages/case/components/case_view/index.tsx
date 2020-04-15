@@ -64,6 +64,7 @@ export interface CaseProps extends Props {
 
 export const CaseComponent = React.memo<CaseProps>(
   ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
+    console.log('caseData', caseData);
     const basePath = window.location.origin + useBasePath();
     const caseLink = `${basePath}/app/siem#/case/${caseId}`;
     const search = useGetUrlSearch(navTabs.case);
