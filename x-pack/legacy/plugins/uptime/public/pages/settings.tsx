@@ -21,13 +21,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Link } from 'react-router-dom';
-import { AppState } from '../state';
 import { selectDynamicSettings } from '../state/selectors';
-import { DynamicSettingsState } from '../state/reducers/dynamic_settings';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { defaultDynamicSettings, DynamicSettings } from '../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
@@ -35,20 +33,9 @@ import { OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { UptimePage, useUptimeTelemetry } from '../hooks';
 
-interface Props {
-  dynamicSettingsState: DynamicSettingsState;
-}
+export const SettingsPage = () => {
+  const dss = useSelector(selectDynamicSettings);
 
-interface DispatchProps {
-  dispatchGetDynamicSettings: typeof getDynamicSettings;
-  dispatchSetDynamicSettings: typeof setDynamicSettings;
-}
-
-export const SettingsPageComponent = ({
-  dynamicSettingsState: dss,
-  dispatchGetDynamicSettings,
-  dispatchSetDynamicSettings,
-}: Props & DispatchProps) => {
   const settingsBreadcrumbText = i18n.translate('xpack.uptime.settingsBreadcrumbText', {
     defaultMessage: 'Settings',
   });
@@ -56,9 +43,11 @@ export const SettingsPageComponent = ({
 
   useUptimeTelemetry(UptimePage.Settings);
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    dispatchGetDynamicSettings({});
-  }, [dispatchGetDynamicSettings]);
+    dispatch(getDynamicSettings({}));
+  }, [dispatch]);
 
   const [formFields, setFormFields] = useState<DynamicSettings | null>(dss.settings || null);
 
@@ -81,7 +70,7 @@ export const SettingsPageComponent = ({
   const onApply = (event: React.FormEvent) => {
     event.preventDefault();
     if (formFields) {
-      dispatchSetDynamicSettings(formFields);
+      dispatch(setDynamicSettings(formFields));
     }
   };
 
@@ -230,18 +219,3 @@ export const SettingsPageComponent = ({
     </>
   );
 };
-
-const mapStateToProps = (state: AppState) => ({
-  dynamicSettingsState: selectDynamicSettings(state),
-});
-
-const mapDispatchToProps = (dispatch: any) => ({
-  dispatchGetDynamicSettings: () => {
-    return dispatch(getDynamicSettings({}));
-  },
-  dispatchSetDynamicSettings: (settings: DynamicSettings) => {
-    return dispatch(setDynamicSettings(settings));
-  },
-});
-
-export const SettingsPage = connect(mapStateToProps, mapDispatchToProps)(SettingsPageComponent);
