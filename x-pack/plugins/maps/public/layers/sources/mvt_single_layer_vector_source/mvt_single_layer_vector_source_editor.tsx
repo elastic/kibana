@@ -88,10 +88,21 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
   render() {
     return (
       <Fragment>
-        <EuiFormRow label="Url">
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.MVTSingleLayerVectorSourceEditor.urlMessage', {
+            defaultMessage: 'Url',
+          })}
+        >
           <EuiFieldText value={this.state.urlTemplate} onChange={this._handleUrlTemplateChange} />
         </EuiFormRow>
-        <EuiFormRow label="Layer name">
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.layerNameMessage',
+            {
+              defaultMessage: 'Layer name',
+            }
+          )}
+        >
           <EuiFieldText value={this.state.layerName} onChange={this._handleLayerNameInputChange} />
         </EuiFormRow>
         <ValidatedDualRange
@@ -106,9 +117,12 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
           onChange={this._handleZoomRangeChange}
           allowEmptyRange={false}
           compressed
-          prepend={i18n.translate('xpack.maps.source.mvtVectorSource.dataZoomRangeMessage', {
-            defaultMessage: 'Zoom levels',
-          })}
+          prepend={i18n.translate(
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.dataZoomRangeMessage',
+            {
+              defaultMessage: 'Zoom levels',
+            }
+          )}
         />
       </Fragment>
     );
