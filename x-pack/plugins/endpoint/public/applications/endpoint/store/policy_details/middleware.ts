@@ -8,7 +8,7 @@ import {
   MiddlewareFactory,
   PolicyData,
   PolicyDetailsState,
-  UpdateDatasourceResponse,
+  UpdatePolicyResponse,
 } from '../../types';
 import { policyIdFromParams, isOnPolicyDetailsPage, policyDetails } from './selectors';
 import { generatePolicy } from '../../models/policy';
@@ -77,7 +77,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
       const { id, revision, ...updatedPolicyItem } = policyDetails(state) as PolicyData;
 
-      let apiResponse: UpdateDatasourceResponse;
+      let apiResponse: UpdatePolicyResponse;
       try {
         apiResponse = await sendPutDatasource(http, id, updatedPolicyItem);
       } catch (error) {
