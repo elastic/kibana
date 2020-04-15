@@ -13,7 +13,7 @@ import { getMigrationStatusStep, getSecurityStep } from '../common_instructions'
 
 export function getApmInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {
   const securitySetup = getSecurityStep(
-    `${ELASTIC_WEBSITE_URL}guide/en/apm/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`
+    `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-configuration.html`
   );
 
   const installMetricbeatStep = {
@@ -27,7 +27,7 @@ export function getApmInstructionsForEnablingMetricbeat(product, _meta, { esMoni
       <EuiText>
         <p>
           <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/apm/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation.html`}
+            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation.html`}
             target="_blank"
           >
             <FormattedMessage
@@ -115,7 +115,7 @@ export function getApmInstructionsForEnablingMetricbeat(product, _meta, { esMoni
       <EuiText>
         <p>
           <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/apm/metricbeat/${DOC_LINK_VERSION}/metricbeat-starting.html`}
+            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-starting.html`}
             target="_blank"
           >
             <FormattedMessage

@@ -61,7 +61,7 @@ interface OwnProps {
 
 type SignalsTableComponentProps = OwnProps & PropsFromRedux;
 
-const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
+export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
   canUserCRUD,
   clearEventsDeleted,
   clearEventsLoading,

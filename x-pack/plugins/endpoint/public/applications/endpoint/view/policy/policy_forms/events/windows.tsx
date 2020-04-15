@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { EventsCheckbox } from './checkbox';
-import { OS, UIPolicyConfig } from '../../../../types';
+import { OS } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   selectedWindowsEvents,
@@ -17,23 +17,38 @@ import {
 } from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
 import { setIn, getIn } from '../../../../models/policy_details_config';
+import { UIPolicyConfig, ImmutableArray } from '../../../../../../../common/types';
 
 export const WindowsEvents = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedWindowsEvents);
   const total = usePolicyDetailsSelector(totalWindowsEvents);
 
-  const checkboxes: Array<{
-    name: string;
-    os: 'windows';
-    protectionField: keyof UIPolicyConfig['windows']['events'];
-  }> = useMemo(
-    () => [
+  const checkboxes = useMemo(() => {
+    const items: ImmutableArray<{
+      name: string;
+      os: 'windows';
+      protectionField: keyof UIPolicyConfig['windows']['events'];
+    }> = [
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.process', {
-          defaultMessage: 'Process',
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.dllDriverLoad', {
+          defaultMessage: 'DLL and Driver Load',
         }),
         os: OS.windows,
-        protectionField: 'process',
+        protectionField: 'dll_and_driver_load',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.dns', {
+          defaultMessage: 'DNS',
+        }),
+        os: OS.windows,
+        protectionField: 'dns',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.file', {
+          defaultMessage: 'File',
+        }),
+        os: OS.windows,
+        protectionField: 'file',
       },
       {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.network', {
@@ -42,11 +57,28 @@ export const WindowsEvents = React.memo(() => {
         os: OS.windows,
         protectionField: 'network',
       },
-    ],
-    []
-  );
-
-  const renderCheckboxes = useMemo(() => {
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.process', {
+          defaultMessage: 'Process',
+        }),
+        os: OS.windows,
+        protectionField: 'process',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.registry', {
+          defaultMessage: 'Registry',
+        }),
+        os: OS.windows,
+        protectionField: 'registry',
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.security', {
+          defaultMessage: 'Security',
+        }),
+        os: OS.windows,
+        protectionField: 'security',
+      },
+    ];
     return (
       <>
         <EuiTitle size="xxs">
@@ -58,7 +90,7 @@ export const WindowsEvents = React.memo(() => {
           </h5>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {checkboxes.map((item, index) => {
+        {items.map((item, index) => {
           return (
             <EventsCheckbox
               name={item.name}
@@ -72,7 +104,7 @@ export const WindowsEvents = React.memo(() => {
         })}
       </>
     );
-  }, [checkboxes]);
+  }, []);
 
   const collectionsEnabled = useMemo(() => {
     return (
@@ -91,15 +123,16 @@ export const WindowsEvents = React.memo(() => {
       type={i18n.translate('xpack.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      supportedOss={useMemo(
-        () => [
-          i18n.translate('xpack.endpoint.policy.details.windows', { defaultMessage: 'Windows' }),
-        ],
-        []
-      )}
-      id="windowsEventingForm"
+      description={i18n.translate('xpack.endpoint.policy.details.windowsLabel', {
+        defaultMessage: 'Windows',
+      })}
+      supportedOss={i18n.translate('xpack.endpoint.policy.details.windows', {
+        defaultMessage: 'Windows',
+      })}
+      dataTestSubj="windowsEventingForm"
       rightCorner={collectionsEnabled}
-      children={renderCheckboxes}
-    />
+    >
+      {checkboxes}
+    </ConfigForm>
   );
 });
