@@ -18,13 +18,13 @@ import { Alerts } from '../../components/alerts';
 import { MonitoringViewBaseEuiTableController } from '../base_eui_table_controller';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink } from '@elastic/eui';
-import { CODE_PATH_ALERTS, KIBANA_ALERTING_ENABLED } from '../../../common/constants';
+import { CODE_PATH_ALERTS, KIBANA_CLUSTER_ALERTS_ENABLED } from '../../../common/constants';
 
 function getPageData($injector) {
   const globalState = $injector.get('globalState');
   const $http = $injector.get('$http');
   const Private = $injector.get('Private');
-  const url = KIBANA_ALERTING_ENABLED
+  const url = KIBANA_CLUSTER_ALERTS_ENABLED
     ? `../api/monitoring/v1/alert_status`
     : `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/legacy_alerts`;
 
@@ -36,7 +36,7 @@ function getPageData($injector) {
     },
   };
 
-  if (!KIBANA_ALERTING_ENABLED) {
+  if (!KIBANA_CLUSTER_ALERTS_ENABLED) {
     data.ccs = globalState.ccs;
   }
 
@@ -44,7 +44,7 @@ function getPageData($injector) {
     .post(url, data)
     .then(response => {
       const result = get(response, 'data', []);
-      if (KIBANA_ALERTING_ENABLED) {
+      if (KIBANA_CLUSTER_ALERTS_ENABLED) {
         return result.alerts;
       }
       return result;

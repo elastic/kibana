@@ -222,7 +222,7 @@ export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
  * as the only way to see the new UI and actually run Kibana alerts. It will
  * be false until all alerts have been migrated, then it will be removed
  */
-export const KIBANA_ALERTING_ENABLED = true;
+export const KIBANA_CLUSTER_ALERTS_ENABLED = false;
 
 /**
  * The prefix for all alert types used by monitoring
@@ -242,9 +242,14 @@ export const ALERT_TYPE_CLUSTER_STATE = `${ALERT_TYPE_PREFIX}alert_type_cluster_
  */
 const ALERT_TYPE_GUARD_RAIL = `${ALERT_TYPE_PREFIX}alert_type_guard_rail`;
 export const ALERT_GUARD_RAIL_TYPE_CPU_USAGE = `${ALERT_TYPE_GUARD_RAIL}cpu_usage`;
-export const MONITORING_CONFIG_ALERT_GUARD_RAIL_THRESHOLD = `monitoring:alertingGuardRail:threshold`;
-export const MONITORING_CONFIG_ALERT_GUARD_RAIL_THROTTLE = `monitoring:alertingGuardRail:throttle`;
+export const MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THRESHOLD = `monitoring:alertingGuardRail:cpuUsage:threshold`;
+export const MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THROTTLE = `monitoring:alertingGuardRail:cpuUsage:throttle`;
 export const ALERT_GUARD_RAIL_TYPES = [ALERT_GUARD_RAIL_TYPE_CPU_USAGE];
+
+/**
+ * A listing of all alert types
+ */
+export const GUARD_RAILS_ALERT_TYPES = [ALERT_GUARD_RAIL_TYPE_CPU_USAGE];
 
 /**
  * A listing of all alert types
@@ -252,7 +257,7 @@ export const ALERT_GUARD_RAIL_TYPES = [ALERT_GUARD_RAIL_TYPE_CPU_USAGE];
 export const ALERT_TYPES = [
   ALERT_TYPE_LICENSE_EXPIRATION,
   ALERT_TYPE_CLUSTER_STATE,
-  ALERT_GUARD_RAIL_TYPE_CPU_USAGE,
+  ...GUARD_RAILS_ALERT_TYPES,
 ];
 
 /**

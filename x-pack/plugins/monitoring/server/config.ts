@@ -228,7 +228,7 @@ export const configSchema = schema.object({
   alerts: schema.object({
     cpu_usage: schema.object({
       email: schema.object({
-        tokens: schema.recordOf(schema.string(), schema.string()),
+        tokens: schema.maybe(schema.recordOf(schema.string(), schema.string())),
         subject: schema.string({ defaultValue: '' }),
         message: schema.string({ defaultValue: '' }),
       }),

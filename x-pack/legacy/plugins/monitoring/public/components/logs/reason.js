@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { Monospace } from '../metricbeat_migration/instruction_steps/components/monospace/monospace';
 
-export const Reason = ({ reason }) => {
+export const getReasonAsText = reason => {
   let title = i18n.translate('xpack.monitoring.logs.reason.defaultTitle', {
     defaultMessage: 'No log data found',
   });
@@ -205,6 +205,11 @@ export const Reason = ({ reason }) => {
     );
   }
 
+  return { title, message };
+};
+
+export const Reason = ({ reason }) => {
+  const { title, message } = getReasonAsText(reason);
   return (
     <EuiCallOut title={title} color="warning" iconType="help">
       <p>{message}</p>

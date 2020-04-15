@@ -14,12 +14,14 @@ import {
   EUI_SORT_DESCENDING,
   ALERT_TYPE_LICENSE_EXPIRATION,
   ALERT_TYPE_CLUSTER_STATE,
+  ALERT_GUARD_RAIL_TYPE_CPU_USAGE,
 } from '../../../common/constants';
 import { mapSeverity } from './map_severity';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { replaceTokens } from '../../lib/alerts';
 
 const linkToCategories = {
   'elasticsearch/nodes': 'Elasticsearch Nodes',
@@ -28,6 +30,7 @@ const linkToCategories = {
   'logstash/instances': 'Logstash Nodes',
   [ALERT_TYPE_LICENSE_EXPIRATION]: 'License expiration',
   [ALERT_TYPE_CLUSTER_STATE]: 'Cluster state',
+  [ALERT_GUARD_RAIL_TYPE_CPU_USAGE]: 'Elasticsearch Nodes',
 };
 const getColumns = (kbnUrl, scope, timezone) => [
   {
@@ -102,7 +105,10 @@ const getColumns = (kbnUrl, scope, timezone) => [
     field: 'message',
     sortable: true,
     render: (_message, alert) => {
-      const message = get(alert, 'message.text', get(alert, 'message', ''));
+      let message = _message;
+      if (alert.type) {
+        message = replaceTokens(alert);
+      }
       return (
         <FormattedAlert
           prefix={alert.prefix}
@@ -145,13 +151,15 @@ const getColumns = (kbnUrl, scope, timezone) => [
     }),
     field: 'timestamp',
     sortable: true,
-    render: timestamp =>
-      i18n.translate('xpack.monitoring.alerts.triggeredColumnValue', {
+    render: (_timestamp, alert) => {
+      const timestamp = alert.type ? alert.triggeredMS : _timestamp;
+      return i18n.translate('xpack.monitoring.alerts.triggeredColumnValue', {
         defaultMessage: '{timestamp} ago',
         values: {
           timestamp: formatTimestampToDuration(timestamp, CALCULATE_DURATION_SINCE),
         },
-      }),
+      });
+    },
   },
 ];
 

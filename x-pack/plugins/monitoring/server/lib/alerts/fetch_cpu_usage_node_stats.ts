@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertCommonCluster, AlertCpuUsageNodeStats } from '../../alerts/types';
+import { AlertCluster, AlertCpuUsageNodeStats } from '../../alerts/types';
 
 export async function fetchCpuUsageNodeStats(
   callCluster: any,
   index: string,
-  clusters: AlertCommonCluster[]
+  clusters: AlertCluster[]
 ): Promise<AlertCpuUsageNodeStats[]> {
   const filterPath = [
     'hits.hits._source.node_stats.node_id',

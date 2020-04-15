@@ -21,7 +21,12 @@ import {
  * @param initialTime {Object} moment object (not required)
  * @return string
  */
-export function formatTimestampToDuration(timestamp, calculationFlag, initialTime) {
+export function formatTimestampToDuration(
+  timestamp,
+  calculationFlag,
+  initialTime,
+  useMomentHumanize = false
+) {
   initialTime = initialTime || moment();
   let timeDuration;
   if (calculationFlag === CALCULATE_DURATION_SINCE) {
@@ -36,7 +41,9 @@ export function formatTimestampToDuration(timestamp, calculationFlag, initialTim
 
   // See https://github.com/elastic/x-pack-kibana/issues/3554
   let duration;
-  if (Math.abs(initialTime.diff(timestamp, 'months')) >= 1) {
+  if (useMomentHumanize) {
+    duration = moment.duration(timeDuration).humanize();
+  } else if (Math.abs(initialTime.diff(timestamp, 'months')) >= 1) {
     // time diff is greater than 1 month, show months / days
     duration = moment.duration(timeDuration).format(FORMAT_DURATION_TEMPLATE_LONG);
   } else if (Math.abs(initialTime.diff(timestamp, 'minutes')) >= 1) {
@@ -48,7 +55,7 @@ export function formatTimestampToDuration(timestamp, calculationFlag, initialTim
   }
 
   return duration
-    .replace(/ 0 mins$/, '')
-    .replace(/ 0 hrs$/, '')
-    .replace(/ 0 days$/, ''); // See https://github.com/jsmreese/moment-duration-format/issues/64
+    .replace(/ -?0 mins$/, '')
+    .replace(/ -?0 hrs$/, '')
+    .replace(/ -?0 days$/, ''); // See https://github.com/jsmreese/moment-duration-format/issues/64
 }

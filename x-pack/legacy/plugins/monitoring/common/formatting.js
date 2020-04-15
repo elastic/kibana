@@ -21,7 +21,6 @@ export function formatDateTimeLocal(date, timezone) {
   if (timezone === 'Browser') {
     timezone = moment.tz.guess() || 'utc';
   }
-
   return moment.tz(date, timezone).format('LL LTS');
 }
 

@@ -92,7 +92,7 @@ export function createEnableGuardRailsRoute(server) {
             data: {
               enabled: true,
               alertTypeId: type,
-              schedule: { interval: '1m' },
+              schedule: { interval: '10s' },
               actions: [
                 {
                   group: 'default',

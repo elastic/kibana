@@ -6,7 +6,7 @@
 import { Moment } from 'moment';
 import { UiSettingsServiceStart, ICustomClusterClient, Logger } from 'kibana/server';
 import { AlertExecutorOptions } from '../../../alerting/server';
-import { AlertClusterStateState, AlertCommonPerClusterMessageTokenType } from './enums';
+import { AlertClusterStateType, AlertMessageTokenType } from './enums';
 import { MonitoringConfig } from '../config';
 
 export interface AlertLicense {
@@ -16,75 +16,65 @@ export interface AlertLicense {
   clusterUuid: string;
 }
 
-export interface AlertClusterState {
-  state: AlertClusterStateState;
-  clusterUuid: string;
+export interface AlertState {
+  cluster: AlertCluster;
+  ui: AlertUiState;
 }
 
-export interface AlertCommonState {
-  [clusterUuid: string]: AlertCommonPerClusterState;
+export interface AlertClusterState extends AlertState {
+  state: AlertClusterStateType;
 }
 
-export interface AlertCommonPerClusterState {
-  ui: AlertCommonPerClusterUiState;
-}
-
-export interface AlertClusterStatePerClusterState extends AlertCommonPerClusterState {
-  state: AlertClusterStateState;
-}
-
-export interface AlertLicensePerClusterState extends AlertCommonPerClusterState {
+export interface AlertLicenseState extends AlertState {
   expiredCheckDateMS: number;
 }
 
-export interface AlertCpuUsagePerClusterState extends AlertCommonPerClusterState {
+export interface AlertCpuUsageState extends AlertState {
   cpuUsage: number;
+  nodeId: string;
+  nodeName: string;
 }
 
-export interface AlertCommonPerClusterUiState {
+export interface AlertUiState {
   isFiring: boolean;
   severity: number;
-  message: AlertCommonPerClusterMessage | null;
+  message: AlertMessage | null;
   resolvedMS: number;
   lastCheckedMS: number;
   triggeredMS: number;
 }
 
-export interface AlertCommonPerClusterMessage {
+export interface AlertMessage {
   text: string; // Do this. #link this is a link #link
-  tokens?: AlertCommonPerClusterMessageToken[];
+  tokens?: AlertMessageToken[];
 }
 
-export interface AlertCommonPerClusterMessageToken {
+export interface AlertMessageToken {
   startToken: string;
   endToken?: string;
-  type: AlertCommonPerClusterMessageTokenType;
+  type: AlertMessageTokenType;
 }
 
-export interface AlertCommonPerClusterMessageLinkToken extends AlertCommonPerClusterMessageToken {
+export interface AlertMessageLinkToken extends AlertMessageToken {
   url?: string;
 }
 
-export interface AlertCommonPerClusterMessageTimeToken extends AlertCommonPerClusterMessageToken {
+export interface AlertMessageTimeToken extends AlertMessageToken {
   isRelative: boolean;
   isAbsolute: boolean;
   timestamp: number;
 }
 
-export interface AlertLicensePerClusterUiState extends AlertCommonPerClusterUiState {
+export interface AlertLicenseUiState extends AlertUiState {
   expirationTime: number;
 }
 
-export interface AlertCommonCluster {
+export interface AlertCluster {
   clusterUuid: string;
   clusterName: string;
 }
 
-export interface AlertCommonExecutorOptions extends AlertExecutorOptions {
-  state: AlertCommonState;
-}
-
-export interface AlertCommonParams {
+export interface AlertParams {
   dateFormat: string;
   timezone: string;
 }
@@ -94,6 +84,7 @@ export interface AlertCreationParameters {
   monitoringCluster: ICustomClusterClient;
   getLogger: (...scopes: string[]) => Logger;
   config: MonitoringConfig;
+  kibanaUrl: string;
 }
 
 export interface AlertCpuUsageNodeStats {
@@ -104,4 +95,10 @@ export interface AlertCpuUsageNodeStats {
   containerUsage: number;
   containerPeriods: number;
   containerQuota: number;
+}
+
+export interface AlertCpuUsageActionable {
+  cluster: AlertCluster;
+  nodeName: string;
+  cpuUsage: number;
 }

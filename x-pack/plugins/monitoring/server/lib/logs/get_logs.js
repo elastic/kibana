@@ -96,6 +96,8 @@ export async function getLogs(
   let result = {};
   try {
     const response = await callWithRequest(req, 'search', params);
+    // console.log(JSON.stringify(params, null, 2))
+    // console.log(JSON.stringify(response, null, 2))
     result = await handleResponse(response, req, filebeatIndexPattern, {
       clusterUuid,
       nodeUuid,

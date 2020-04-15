@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import { resolve } from 'path';
 import { config } from './config';
 import { getUiExports } from './ui_exports';
-import { KIBANA_ALERTING_ENABLED } from './common/constants';
+import { KIBANA_CLUSTER_ALERTS_ENABLED } from './common/constants';
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana
@@ -16,7 +16,7 @@ import { KIBANA_ALERTING_ENABLED } from './common/constants';
  * @return {Object} Monitoring UI Kibana plugin object
  */
 const deps = ['kibana', 'elasticsearch', 'xpack_main'];
-if (KIBANA_ALERTING_ENABLED) {
+if (KIBANA_CLUSTER_ALERTS_ENABLED) {
   deps.push(...['alerting', 'actions']);
 }
 export const monitoring = kibana => {

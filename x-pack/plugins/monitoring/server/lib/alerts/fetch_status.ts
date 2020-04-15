@@ -38,7 +38,8 @@ export async function fetchStatus(
           // Now that we have the id, we can get the state
           const states = await alertsClient.getAlertState({ id });
           if (!states || !states.alertTypeState) {
-            log.warn(`No alert states found for type ${type} which is unexpected.`);
+            // console.log(JSON.stringify(states, null, 2))
+            // log.warn(`No alert states found for type ${type} which is unexpected.`);
             return resolve(false);
           }
 

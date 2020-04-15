@@ -89,6 +89,7 @@ function createLocalConfigModule(core: AppMountContext['core']) {
       return {
         $get: () => ({
           get: core.uiSettings.get.bind(core.uiSettings),
+          set: core.uiSettings.set.bind(core.uiSettings),
         }),
       };
     });

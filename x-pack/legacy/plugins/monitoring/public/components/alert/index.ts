@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './legacy_alerts';
-export * from './alerts';
-export * from './alert';
-export * from './enable_guardrails';
+export { Alert } from './alert';

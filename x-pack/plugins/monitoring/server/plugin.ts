@@ -13,7 +13,7 @@ import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_col
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
-  KIBANA_ALERTING_ENABLED,
+  KIBANA_CLUSTER_ALERTS_ENABLED,
   KIBANA_STATS_TYPE_MONITORING,
 } from '../common/constants';
 import {
@@ -147,20 +147,26 @@ export class Plugin {
     });
     await this.licenseService.refresh();
 
-    if (KIBANA_ALERTING_ENABLED) {
-      const alertingCreationParams: AlertCreationParameters = {
-        getUiSettingsService: async () => {
-          const coreStart = (await core.getStartServices())[0];
-          return coreStart.uiSettings;
-        },
-        monitoringCluster: cluster,
-        getLogger: this.getLogger,
-        config,
-      };
+    const serverInfo = core.http.getServerInfo();
+    let kibanaUrl = `${serverInfo.protocol}://${serverInfo.host}:${serverInfo.port}`;
+    if (core.http.basePath.serverBasePath) {
+      kibanaUrl += `/${core.http.basePath.serverBasePath}`;
+    }
+    const alertingCreationParams: AlertCreationParameters = {
+      getUiSettingsService: async () => {
+        const coreStart = (await core.getStartServices())[0];
+        return coreStart.uiSettings;
+      },
+      monitoringCluster: cluster,
+      getLogger: this.getLogger,
+      config,
+      kibanaUrl,
+    };
+    plugins.alerting.registerType(getGuardRailCpuUsage(alertingCreationParams));
 
-      plugins.alerting.registerType(getLicenseExpiration(alertingCreationParams));
-      plugins.alerting.registerType(getClusterState(alertingCreationParams));
-      plugins.alerting.registerType(getGuardRailCpuUsage(alertingCreationParams));
+    if (KIBANA_CLUSTER_ALERTS_ENABLED) {
+      // plugins.alerting.registerType(getLicenseExpiration(alertingCreationParams));
+      // plugins.alerting.registerType(getClusterState(alertingCreationParams));
     }
 
     // Initialize telemetry
@@ -180,7 +186,6 @@ export class Plugin {
     const kibanaCollectionEnabled = config.kibana.collection.enabled;
     if (kibanaCollectionEnabled) {
       // Start kibana internal collection
-      const serverInfo = core.http.getServerInfo();
       const bulkUploader = (this.bulkUploader = initBulkUploader({
         elasticsearch: core.elasticsearch,
         config,

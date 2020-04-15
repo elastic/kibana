@@ -9,7 +9,12 @@ import { alertsClusterSearch } from '../../../../cluster_alerts/alerts_cluster_s
 import { checkLicense } from '../../../../cluster_alerts/check_license';
 import { getClusterLicense } from '../../../../lib/cluster/get_cluster_license';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
-import { INDEX_PATTERN_ELASTICSEARCH, INDEX_ALERTS } from '../../../../../common/constants';
+import {
+  INDEX_PATTERN_ELASTICSEARCH,
+  INDEX_ALERTS,
+  GUARD_RAILS_ALERT_TYPES,
+} from '../../../../../common/constants';
+import { fetchStatus } from '../../../../lib/alerts/fetch_status';
 
 /*
  * Cluster Alerts route.
@@ -32,8 +37,9 @@ export function legacyClusterAlertsRoute(server) {
         }),
       },
     },
-    handler(req) {
+    async handler(req) {
       const config = server.config();
+      const alertsClient = req.getAlertsClient ? req.getAlertsClient() : null;
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
@@ -43,15 +49,25 @@ export function legacyClusterAlertsRoute(server) {
         end: req.payload.timeRange.max,
       };
 
-      return getClusterLicense(req, esIndexPattern, clusterUuid).then(license =>
-        alertsClusterSearch(
-          req,
-          alertsIndex,
-          { cluster_uuid: clusterUuid, license },
-          checkLicense,
-          options
-        )
+      const license = await getClusterLicense(req, esIndexPattern, clusterUuid);
+      const legacyAlerts = await alertsClusterSearch(
+        req,
+        alertsIndex,
+        { cluster_uuid: clusterUuid, license },
+        checkLicense,
+        options
       );
+
+      return [
+        ...legacyAlerts,
+        ...(await fetchStatus(
+          alertsClient,
+          GUARD_RAILS_ALERT_TYPES,
+          options.start,
+          options.end,
+          req.logger
+        )),
+      ];
     },
   });
 }

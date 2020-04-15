@@ -9,26 +9,20 @@ import { i18n } from '@kbn/i18n';
 import {
   ALERT_GUARD_RAIL_TYPE_CPU_USAGE,
   INDEX_PATTERN_ELASTICSEARCH,
-  MONITORING_CONFIG_ALERT_GUARD_RAIL_THRESHOLD,
-  MONITORING_CONFIG_ALERT_GUARD_RAIL_THROTTLE,
 } from '../../common/constants';
-import { AlertType } from '../../../alerting/server';
-import { executeActions, getUiMessage } from '../lib/alerts/guard_rail_cpu_usage.lib';
+import { AlertType, AlertExecutorOptions } from '../../../alerting/server';
 import {
-  AlertCommonExecutorOptions,
-  AlertCommonState,
-  AlertCreationParameters,
-  AlertCpuUsagePerClusterState,
-  AlertCommonCluster,
-} from './types';
+  executeActions,
+  getUiMessage,
+  // getThrottle,
+  getThreshold,
+} from '../lib/alerts/guard_rail_cpu_usage.lib';
+import { AlertCreationParameters, AlertCpuUsageState, AlertCluster } from './types';
 import { getPreparedAlert } from '../lib/alerts/get_prepared_alert';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 
-const DEFAULT_THRESHOLD = 90;
-const DEFAULT_THROTTLE = '10m';
-
 export const getGuardRailCpuUsage = (creationParams: AlertCreationParameters): AlertType => {
-  const { getUiSettingsService, monitoringCluster, getLogger, config } = creationParams;
+  const { getUiSettingsService, monitoringCluster, getLogger, config, kibanaUrl } = creationParams;
   const logger = getLogger(ALERT_GUARD_RAIL_TYPE_CPU_USAGE);
   return {
     id: ALERT_GUARD_RAIL_TYPE_CPU_USAGE,
@@ -42,11 +36,7 @@ export const getGuardRailCpuUsage = (creationParams: AlertCreationParameters): A
       },
     ],
     defaultActionGroupId: 'default',
-    async executor({
-      services,
-      params,
-      state,
-    }: AlertCommonExecutorOptions): Promise<AlertCommonState> {
+    async executor({ services, params, state }: AlertExecutorOptions): Promise<void> {
       logger.debug(
         `Firing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
       );
@@ -62,20 +52,25 @@ export const getGuardRailCpuUsage = (creationParams: AlertCreationParameters): A
       );
 
       if (!preparedAlert) {
-        return state;
+        return;
       }
 
-      const { emailAddress, callCluster, indexPattern, clusters, dateFormat } = preparedAlert;
+      const { emailAddress, callCluster, indexPattern, clusters } = preparedAlert;
 
       const stats = await fetchCpuUsageNodeStats(callCluster, indexPattern, clusters);
       if (stats.length === 0) {
         logger.warn(`No data found for cpu usage alert.`);
-        return state;
+        return;
       }
 
-      const result: AlertCommonState = { ...state };
-      const defaultAlertState: AlertCpuUsagePerClusterState = {
+      const defaultAlertState: AlertCpuUsageState = {
         cpuUsage: 0,
+        nodeId: '',
+        nodeName: '',
+        cluster: {
+          clusterUuid: '',
+          clusterName: '',
+        },
         ui: {
           isFiring: false,
           message: null,
@@ -90,31 +85,28 @@ export const getGuardRailCpuUsage = (creationParams: AlertCreationParameters): A
         services.savedObjectsClient
       );
 
-      let configuredThrottle = await uiSettings.get<string>(
-        MONITORING_CONFIG_ALERT_GUARD_RAIL_THROTTLE
-      );
-      if (!configuredThrottle) {
-        configuredThrottle = DEFAULT_THROTTLE;
-      }
-      let configuredThreshold = await uiSettings.get<number>(
-        MONITORING_CONFIG_ALERT_GUARD_RAIL_THRESHOLD
-      );
-      if (isNaN(configuredThreshold)) {
-        configuredThreshold = DEFAULT_THRESHOLD;
-      }
+      // const throttle = await getThrottle(uiSettings);
+      const threshold = await getThreshold(uiSettings);
 
-      logger.debug(`Using ${configuredThreshold} threshold`);
+      logger.debug(`Using ${threshold} threshold`);
 
       for (const stat of stats) {
-        const alertState: AlertCpuUsagePerClusterState =
-          (state[stat.clusterUuid] as AlertCpuUsagePerClusterState) || defaultAlertState;
-        const cluster = clusters.find(
-          (c: AlertCommonCluster) => c.clusterUuid === stat.clusterUuid
-        );
+        const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === stat.clusterUuid);
         if (!cluster) {
           logger.warn(`Unable to find cluster for clusterUuid='${stat.clusterUuid}'`);
           continue;
         }
+
+        const instance = services.alertInstanceFactory(
+          `${ALERT_GUARD_RAIL_TYPE_CPU_USAGE}:${stat.clusterUuid}:${stat.nodeId}`
+        );
+        const alertState: AlertCpuUsageState = {
+          ...defaultAlertState,
+          ...instance.getState(),
+          cluster,
+          nodeId: stat.nodeId,
+          nodeName: stat.nodeName,
+        };
 
         let cpuUsage = 0;
         if (config.ui.container.elasticsearch.enabled) {
@@ -124,68 +116,34 @@ export const getGuardRailCpuUsage = (creationParams: AlertCreationParameters): A
           cpuUsage = stat.cpuUsage;
         }
 
-        const ui = alertState.ui;
-        let triggered = ui.triggeredMS;
-        let resolved = ui.resolvedMS;
-        let message = ui.message || {};
-        let lastCpuUsage = alertState.cpuUsage;
-        let severity = ui.severity;
-        let isFiring = ui.isFiring;
-        const instance = services.alertInstanceFactory(ALERT_GUARD_RAIL_TYPE_CPU_USAGE);
-
-        if (cpuUsage > configuredThreshold) {
+        let shouldExecuteActions = false;
+        if (cpuUsage > threshold) {
           logger.debug(
-            `Cpu usage (${cpuUsage}%) is over the configured threshold of ${configuredThreshold}%`
+            `Cpu usage (${cpuUsage}%) is over the configured threshold of ${threshold}%`
           );
-          executeActions(
-            instance,
-            cluster,
-            config,
-            stat.nodeName,
-            cpuUsage,
-            dateFormat,
-            emailAddress
-          );
-          lastCpuUsage = cpuUsage;
-          triggered = moment().valueOf();
-          message = getUiMessage(cpuUsage, stat.nodeName, triggered);
-          severity = 2001;
-          resolved = 0;
-          isFiring = true;
-        } else if (cpuUsage < configuredThreshold && isFiring) {
+          alertState.cpuUsage = cpuUsage;
+          alertState.ui.triggeredMS = +new Date();
+          alertState.ui.message = getUiMessage(alertState, stat);
+          alertState.ui.severity = 2001;
+          alertState.ui.resolvedMS = 0;
+          alertState.ui.isFiring = true;
+          shouldExecuteActions = true;
+        } else if (cpuUsage < threshold && alertState.ui.isFiring) {
           logger.debug(
-            `Cpu usage (${cpuUsage}%) is under the configured threshold of ${configuredThreshold}%`
+            `Cpu usage (${cpuUsage}%) is under the configured threshold of ${threshold}%`
           );
-          executeActions(
-            instance,
-            cluster,
-            config,
-            stat.nodeName,
-            cpuUsage,
-            dateFormat,
-            emailAddress,
-            true
-          );
-          lastCpuUsage = cpuUsage;
-          isFiring = false;
-          resolved = moment().valueOf();
-          message = getUiMessage(cpuUsage, stat.nodeName, resolved, true);
+          alertState.cpuUsage = cpuUsage;
+          alertState.ui.isFiring = false;
+          alertState.ui.resolvedMS = moment().valueOf();
+          alertState.ui.message = getUiMessage(alertState, stat);
+          shouldExecuteActions = true;
         }
 
-        result[stat.clusterUuid] = {
-          cpuUsage: lastCpuUsage,
-          ui: {
-            message,
-            isFiring,
-            severity,
-            resolvedMS: resolved,
-            triggeredMS: triggered,
-            lastCheckedMS: moment().valueOf(),
-          },
-        } as AlertCpuUsagePerClusterState;
+        instance.replaceState(alertState);
+        if (shouldExecuteActions) {
+          executeActions(instance, alertState, stat, cluster, kibanaUrl, config, emailAddress);
+        }
       }
-
-      return result;
     },
   };
 };

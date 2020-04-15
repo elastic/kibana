@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum AlertClusterStateState {
+export enum AlertClusterStateType {
   Green = 'green',
   Red = 'red',
   Yellow = 'yellow',
 }
 
-export enum AlertCommonPerClusterMessageTokenType {
+export enum AlertMessageTokenType {
   Time = 'time',
   Link = 'link',
 }

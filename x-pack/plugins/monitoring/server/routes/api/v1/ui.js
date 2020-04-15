@@ -18,6 +18,7 @@ export {
   mlJobRoute,
   ccrRoute,
   ccrShardRoute,
+  logsRoute,
 } from './elasticsearch';
 export {
   clusterSettingsCheckRoute,

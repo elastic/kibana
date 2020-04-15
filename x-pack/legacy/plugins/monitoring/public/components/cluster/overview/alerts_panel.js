@@ -5,16 +5,15 @@
  */
 
 import React, { Fragment } from 'react';
-import moment from 'moment-timezone';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import {
   CALCULATE_DURATION_SINCE,
-  KIBANA_ALERTING_ENABLED,
-  CALCULATE_DURATION_UNTIL,
+  KIBANA_CLUSTER_ALERTS_ENABLED,
 } from '../../../../common/constants';
 import { formatDateTimeLocal } from '../../../../common/formatting';
+import { replaceTokens } from '../../../lib/alerts';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -26,40 +25,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiCallOut,
-  EuiLink,
 } from '@elastic/eui';
-
-function replaceTokens(alert) {
-  if (!alert.message.tokens) {
-    return alert.message.text;
-  }
-
-  let text = alert.message.text;
-
-  for (const token of alert.message.tokens) {
-    if (token.type === 'time') {
-      // alert.expirationTime will not work here!!!!
-      text = text.replace(
-        token.startToken,
-        token.isRelative
-          ? formatTimestampToDuration(token.timestamp, CALCULATE_DURATION_UNTIL)
-          : moment.tz(token.timestamp, moment.tz.guess()).format('LLL z')
-      );
-    } else if (token.type === 'link') {
-      const linkPart = new RegExp(`${token.startToken}(.+?)${token.endToken}`).exec(text);
-      // TODO: we assume this is at the end, which works for now but will not always work
-      const nonLinkText = text.replace(linkPart[0], '');
-      text = (
-        <Fragment>
-          {nonLinkText}
-          <EuiLink href={`#${token.url}`}>{linkPart[1]}</EuiLink>
-        </Fragment>
-      );
-    }
-  }
-
-  return text;
-}
 
 export function AlertsPanel({ alerts, changeUrl }) {
   const goToAlerts = () => changeUrl('/alerts');
@@ -120,53 +86,56 @@ export function AlertsPanel({ alerts, changeUrl }) {
     );
   }
 
-  const alertsList = KIBANA_ALERTING_ENABLED
-    ? alerts.map((alert, idx) => {
-        const callOutProps = mapSeverity(alert.severity);
-        const message = replaceTokens(alert);
+  const alertsList = alerts.map((alert, idx) => {
+    // New alert type
+    if (alert.type) {
+      const callOutProps = mapSeverity(alert.severity);
+      const message = replaceTokens(alert);
 
-        if (!alert.isFiring) {
-          callOutProps.title = i18n.translate(
-            'xpack.monitoring.cluster.overview.alertsPanel.severityIconTitle',
-            {
-              defaultMessage: '{severityIconTitle} (resolved {time} ago)',
-              values: {
-                severityIconTitle: callOutProps.title,
-                time: formatTimestampToDuration(alert.resolvedMS, CALCULATE_DURATION_SINCE),
-              },
-            }
-          );
-          callOutProps.color = 'success';
-          callOutProps.iconType = 'check';
-        }
-
-        return (
-          <Fragment key={idx}>
-            <EuiCallOut {...callOutProps}>
-              <p>{message}</p>
-              <EuiText size="xs">
-                <p data-test-subj="alertMeta" className="monCallout--meta">
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.alertsPanel.lastCheckedTimeText"
-                    defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
-                    values={{
-                      updateDateTime: formatDateTimeLocal(alert.lastCheckedMS),
-                      duration: formatTimestampToDuration(
-                        alert.triggeredMS,
-                        CALCULATE_DURATION_SINCE
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiText>
-            </EuiCallOut>
-            <EuiSpacer />
-          </Fragment>
+      if (!alert.isFiring) {
+        callOutProps.title = i18n.translate(
+          'xpack.monitoring.cluster.overview.alertsPanel.severityIconTitle',
+          {
+            defaultMessage: '{severityIconTitle} (resolved {time} ago)',
+            values: {
+              severityIconTitle: callOutProps.title,
+              time: formatTimestampToDuration(alert.resolvedMS, CALCULATE_DURATION_SINCE),
+            },
+          }
         );
-      })
-    : alerts.map((item, index) => (
-        <TopAlertItem item={item} key={`top-alert-item-${index}`} index={index} />
-      ));
+        callOutProps.color = 'success';
+        callOutProps.iconType = 'check';
+      }
+
+      return (
+        <Fragment key={idx}>
+          <EuiCallOut {...callOutProps}>
+            <p>{message}</p>
+            <EuiText size="xs">
+              <p data-test-subj="alertMeta" className="monCallout--meta">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.alertsPanel.lastCheckedTimeText"
+                  defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
+                  values={{
+                    updateDateTime: formatDateTimeLocal(alert.lastCheckedMS),
+                    duration: formatTimestampToDuration(
+                      alert.triggeredMS,
+                      CALCULATE_DURATION_SINCE
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer />
+        </Fragment>
+      );
+    }
+    // Only support legacy alerts when this is disabled
+    else if (!KIBANA_CLUSTER_ALERTS_ENABLED) {
+      return <TopAlertItem item={alert} key={`top-alert-item-${idx}`} index={idx} />;
+    }
+  });
 
   return (
     <div data-test-subj="clusterAlertsContainer">

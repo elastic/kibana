@@ -16,13 +16,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertsStatus } from '../../alerts/status';
 import {
   STANDALONE_CLUSTER_CLUSTER_UUID,
-  KIBANA_ALERTING_ENABLED,
+  KIBANA_CLUSTER_ALERTS_ENABLED,
 } from '../../../../common/constants';
 
 export function Overview(props) {
   const isFromStandaloneCluster = props.cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
-  const kibanaAlerts = KIBANA_ALERTING_ENABLED ? (
+  const kibanaAlerts = KIBANA_CLUSTER_ALERTS_ENABLED ? (
     <AlertsStatus emailAddress={props.emailAddress} />
   ) : null;
 

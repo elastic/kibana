@@ -202,6 +202,7 @@ export class Logs extends PureComponent {
       nodeId,
       indexUuid,
       logs: { limit },
+      renderTitle = true,
     } = this.props;
 
     let description;
@@ -234,13 +235,15 @@ export class Logs extends PureComponent {
 
     return (
       <div>
-        <EuiTitle>
-          <h1>
-            {i18n.translate('xpack.monitoring.logs.listing.pageTitle', {
-              defaultMessage: 'Recent Log Entries',
-            })}
-          </h1>
-        </EuiTitle>
+        {renderTitle ? (
+          <EuiTitle>
+            <h1>
+              {i18n.translate('xpack.monitoring.logs.listing.pageTitle', {
+                defaultMessage: 'Recent Log Entries',
+              })}
+            </h1>
+          </EuiTitle>
+        ) : null}
         <EuiText size="s">
           <p>{description}</p>
         </EuiText>
