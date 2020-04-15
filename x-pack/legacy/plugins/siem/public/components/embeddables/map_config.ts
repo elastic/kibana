@@ -13,6 +13,7 @@ import {
   LayerMappingDetails,
 } from './types';
 import * as i18n from './translations';
+import { SOURCE_TYPES } from '../../../../../../plugins/maps/common/constants';
 const euiVisColorPalette = euiPaletteColorBlind();
 
 // Update field mappings to modify what fields will be returned to map tooltip
@@ -101,7 +102,7 @@ export const lmc: LayerMappingCollection = {
 export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
   return [
     {
-      sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
+      sourceDescriptor: { type: SOURCE_TYPES.EMS_TMS, isAutoSelect: true },
       id: uuid.v4(),
       label: null,
       minZoom: 0,
@@ -260,7 +261,7 @@ export const getLineLayer = (
   layerDetails: LayerMapping
 ) => ({
   sourceDescriptor: {
-    type: 'ES_PEW_PEW',
+    type: SOURCE_TYPES.ES_PEW_PEW,
     applyGlobalQuery: true,
     id: uuid.v4(),
     indexPatternId,

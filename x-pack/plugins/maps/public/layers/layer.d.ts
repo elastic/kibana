@@ -25,6 +25,7 @@ export interface ILayerArguments {
 }
 
 export class AbstractLayer implements ILayer {
+  static createDescriptor(options: Partial<LayerDescriptor>, mapColors?: string[]): LayerDescriptor;
   constructor(layerArguments: ILayerArguments);
   getBounds(mapFilters: MapFilters): Promise<MapExtent>;
   getDataRequest(id: string): DataRequest | undefined;
