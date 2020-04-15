@@ -43,6 +43,7 @@ actionExecutor.initialize({
   actionTypeRegistry,
   encryptedSavedObjectsPlugin,
   eventLogger: eventLoggerMock.create(),
+  preconfiguredActions: [],
 });
 
 beforeEach(() => {
@@ -232,6 +233,7 @@ test('throws an error when passing isESOUsingEphemeralEncryptionKey with value o
     actionTypeRegistry,
     encryptedSavedObjectsPlugin,
     eventLogger: eventLoggerMock.create(),
+    preconfiguredActions: [],
   });
   await expect(
     customActionExecutor.execute(executeParams)

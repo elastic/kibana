@@ -58,6 +58,7 @@ describe('AggConfig Filters', () => {
 
       return new AggConfigs(indexPattern, aggs, {
         typesRegistry: mockAggTypesRegistry([getTermsBucketAgg(aggTypesDependencies)]),
+        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
       });
     };
 

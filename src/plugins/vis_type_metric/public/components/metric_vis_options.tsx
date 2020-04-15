@@ -37,9 +37,9 @@ import {
   SwitchOption,
   RangeOption,
   SetColorSchemaOptionsValue,
-} from '../../../../legacy/core_plugins/vis_type_vislib/public';
+  SetColorRangeValue,
+} from '../../../charts/public';
 import { MetricVisParam, VisParams } from '../types';
-import { SetColorRangeValue } from '../../../../legacy/core_plugins/vis_type_vislib/public/components/common/color_ranges';
 
 function MetricVisOptions({
   stateParams,

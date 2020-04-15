@@ -19,8 +19,7 @@
 
 import { Range } from '../../expressions/public';
 import { SchemaConfig } from '../../visualizations/public';
-import { ColorModes, Labels, Style } from '../../../legacy/core_plugins/vis_type_vislib/public';
-import { ColorSchemas } from '../../charts/public';
+import { ColorModes, Labels, Style, ColorSchemas } from '../../charts/public';
 
 export const visType = 'metric';
 

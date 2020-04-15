@@ -22,9 +22,10 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
 
   const getMessageVariables = () =>
-    messageVariables?.map((variable: string) => (
+    messageVariables?.map((variable: string, i: number) => (
       <EuiContextMenuItem
         key={variable}
+        data-test-subj={`variableMenuButton-${i}`}
         icon="empty"
         onClick={() => {
           onSelectEventHandler(variable);
