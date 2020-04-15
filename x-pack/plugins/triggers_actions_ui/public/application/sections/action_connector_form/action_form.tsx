@@ -147,15 +147,22 @@ export const ActionForm = ({
       setIsLoadingConnectors(false);
     }
   }
+  const preconfiguredMessage = i18n.translate(
+    'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
+    {
+      defaultMessage: '(pre-configured)',
+    }
+  );
   const getSelectedOptions = (actionItemId: string) => {
     const val = connectors.find(connector => connector.id === actionItemId);
     if (!val) {
       return [];
     }
+    const optionTitle = `${val.name} ${val.isPreconfigured ? preconfiguredMessage : ''}`;
     return [
       {
-        label: val.name,
-        value: val.name,
+        label: optionTitle,
+        value: optionTitle,
         id: actionItemId,
       },
     ];
@@ -270,7 +277,9 @@ export const ActionForm = ({
                         defaultMessage="{actionConnectorName}"
                         id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
                         values={{
-                          actionConnectorName: actionConnector.name,
+                          actionConnectorName: `${actionConnector.name} ${
+                            actionConnector.isPreconfigured ? preconfiguredMessage : ''
+                          }`,
                         }}
                       />
                     </EuiFlexItem>

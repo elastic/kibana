@@ -6,7 +6,6 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useContext, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { MonitorCharts, PingList } from '../components/functional';
 import { UptimeRefreshContext } from '../contexts';
@@ -16,11 +15,10 @@ import { MonitorStatusDetails } from '../components/connected';
 import { monitorStatusSelector } from '../state/selectors';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { useMonitorId } from '../hooks/use_monitor';
 
 export const MonitorPage: React.FC = () => {
-  // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
-  let { monitorId } = useParams();
-  monitorId = atob(monitorId || '');
+  const monitorId = useMonitorId();
 
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
   const { refreshApp } = useContext(UptimeRefreshContext);
