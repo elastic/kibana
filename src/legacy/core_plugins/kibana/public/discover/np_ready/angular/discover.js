@@ -828,13 +828,9 @@ function discoverController(
     if (newSavedQueryId) {
       setAppState({ savedQuery: newSavedQueryId });
     } else {
-      //reset filters and query string, remove savedQuery from state
+      // remove savedQueryId from state
       const state = {
         ...appStateContainer.getState(),
-        query: getDefaultQuery(
-          localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
-        ),
-        filters: [],
       };
       delete state.savedQuery;
       appStateContainer.set(state);
