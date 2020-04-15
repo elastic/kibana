@@ -5,15 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import path from 'path';
-import fs from 'fs';
-import { promisify } from 'util';
-import { checkIfPngsMatch } from './lib';
-
-const writeFileAsync = promisify(fs.writeFile);
-const mkdirAsync = promisify(fs.mkdir);
-
-const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
 /*
  * TODO Remove this file and spread the tests to various apps
@@ -23,7 +14,6 @@ export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
-  const config = getService('config');
   const PageObjects = getPageObjects([
     'reporting',
     'common',
@@ -94,23 +84,8 @@ export default function({ getService, getPageObjects }) {
       });
 
       describe('Preserve Layout', () => {
-        it('matches baseline report', async function() {
-          const writeSessionReport = async (name, rawPdf, reportExt) => {
-            const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
-            await mkdirAsync(sessionDirectory, { recursive: true });
-            const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
-            await writeFileAsync(sessionReportPath, rawPdf);
-            return sessionReportPath;
-          };
-          const getBaselineReportPath = (fileName, reportExt) => {
-            const baselineFolder = path.resolve(REPORTS_FOLDER, 'baseline');
-            const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
-            log.debug(`getBaselineReportPath (${fullPath})`);
-            return fullPath;
-          };
-
+        it('Job completes and generates a download URL', async function() {
           this.timeout(300000);
-
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
           await PageObjects.reporting.openPngReportingPanel();
@@ -119,17 +94,7 @@ export default function({ getService, getPageObjects }) {
           await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
           const url = await PageObjects.reporting.getReportURL(60000);
-          const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-          const reportFileName = 'dashboard_preserve_layout';
-          const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
-          const percentSimilar = await checkIfPngsMatch(
-            sessionReportPath,
-            getBaselineReportPath(reportFileName, 'png'),
-            config.get('screenshots.directory'),
-            log
-          );
-
-          expect(percentSimilar).to.be.lessThan(0.1);
+          expect(url).to.match(/download/);
         });
       });
     });
