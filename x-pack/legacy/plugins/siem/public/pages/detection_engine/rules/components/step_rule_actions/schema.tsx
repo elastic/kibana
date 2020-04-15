@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   AlertAction,
-  TriggersAndActionsUIPublicPluginStart,
+  ActionTypeRegistryContract,
 } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 import { FormSchema, FormData, ValidationFunc, ERROR_CODE } from '../../../../../shared_imports';
 import * as I18n from './translations';
@@ -18,7 +18,7 @@ import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } f
 
 export const validateSingleAction = (
   actionItem: AlertAction,
-  actionTypeRegistry: TriggersAndActionsUIPublicPluginStart['actionTypeRegistry']
+  actionTypeRegistry: ActionTypeRegistryContract
 ): string[] => {
   if (!isUuidv4(actionItem.id)) {
     return [I18n.NO_CONNECTOR_SELECTED];
@@ -30,9 +30,7 @@ export const validateSingleAction = (
   return [...actionParamsErrors, ...mustacheErrors];
 };
 
-export const validateRuleActionsField = (
-  actionTypeRegistry: TriggersAndActionsUIPublicPluginStart['actionTypeRegistry']
-) => (
+export const validateRuleActionsField = (actionTypeRegistry: ActionTypeRegistryContract) => (
   ...data: Parameters<ValidationFunc>
 ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
   const [{ value, path }] = data as [{ value: AlertAction[]; path: string }];
@@ -62,7 +60,7 @@ export const validateRuleActionsField = (
 export const getSchema = ({
   actionTypeRegistry,
 }: {
-  actionTypeRegistry: TriggersAndActionsUIPublicPluginStart['actionTypeRegistry'];
+  actionTypeRegistry: ActionTypeRegistryContract;
 }): FormSchema<FormData> => ({
   actions: {
     validations: [

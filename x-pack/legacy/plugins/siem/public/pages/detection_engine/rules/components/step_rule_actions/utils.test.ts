@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getActionTypeRegistryMock } from './test_utils';
+import { actionTypeRegistryMock } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 describe('stepRuleActions utils', () => {
@@ -47,15 +47,24 @@ describe('stepRuleActions utils', () => {
   });
 
   describe('validateActionParams', () => {
-    let validateParamsMock: jest.Mock;
+    const validateParamsMock = jest.fn();
+    const actionTypeRegistry = actionTypeRegistryMock.create();
 
     beforeAll(() => {
-      validateParamsMock = jest.fn();
+      const actionMock = {
+        id: 'id',
+        iconClass: 'iconClass',
+        validateParams: validateParamsMock,
+        selectMessage: 'message',
+        validateConnector: jest.fn(),
+        actionConnectorFields: () => null,
+        actionParamsFields: [],
+      };
+      actionTypeRegistry.get.mockReturnValue(actionMock);
     });
 
     it('should validate action params', () => {
       validateParamsMock.mockReturnValue({ errors: [] });
-      const actionTypeRegistryMock = getActionTypeRegistryMock(validateParamsMock);
 
       expect(
         validateActionParams(
@@ -67,7 +76,7 @@ describe('stepRuleActions utils', () => {
               message: 'Message',
             },
           },
-          actionTypeRegistryMock
+          actionTypeRegistry
         )
       ).toHaveLength(0);
     });
@@ -76,7 +85,6 @@ describe('stepRuleActions utils', () => {
       validateParamsMock.mockReturnValue({
         errors: ['Message is required'],
       });
-      const actionTypeRegistryMock = getActionTypeRegistryMock(validateParamsMock);
 
       expect(
         validateActionParams(
@@ -86,7 +94,7 @@ describe('stepRuleActions utils', () => {
             actionTypeId: '.slack',
             params: {},
           },
-          actionTypeRegistryMock
+          actionTypeRegistry
         )
       ).toHaveLength(1);
     });
@@ -99,7 +107,6 @@ describe('stepRuleActions utils', () => {
           },
         ],
       });
-      const actionTypeRegistryMock = getActionTypeRegistryMock(validateParamsMock);
 
       expect(
         validateActionParams(
@@ -109,7 +116,7 @@ describe('stepRuleActions utils', () => {
             actionTypeId: '.slack',
             params: {},
           },
-          actionTypeRegistryMock
+          actionTypeRegistry
         )
       ).toHaveLength(0);
     });
@@ -118,7 +125,6 @@ describe('stepRuleActions utils', () => {
       validateParamsMock.mockReturnValue({
         errors: ['Message is required', 'Message is required', 'Message is required'],
       });
-      const actionTypeRegistryMock = getActionTypeRegistryMock(validateParamsMock);
 
       expect(
         validateActionParams(
@@ -128,7 +134,7 @@ describe('stepRuleActions utils', () => {
             actionTypeId: '.slack',
             params: {},
           },
-          actionTypeRegistryMock
+          actionTypeRegistry
         )
       ).toHaveLength(1);
     });

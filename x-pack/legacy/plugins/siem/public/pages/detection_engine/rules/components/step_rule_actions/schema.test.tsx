@@ -6,12 +6,12 @@
 
 import { validateSingleAction, validateRuleActionsField } from './schema';
 import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } from './utils';
-import { getActionTypeRegistryMock } from './test_utils';
+import { actionTypeRegistryMock } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 import { FormHook } from '../../../../../shared_imports';
 jest.mock('./utils');
 
 describe('stepRuleActions schema', () => {
-  const actionTypeRegistryMock = getActionTypeRegistryMock(jest.fn());
+  const actionTypeRegistry = actionTypeRegistryMock.create();
 
   describe('validateSingleAction', () => {
     it('should validate single action', () => {
@@ -27,7 +27,7 @@ describe('stepRuleActions schema', () => {
             actionTypeId: '.slack',
             params: {},
           },
-          actionTypeRegistryMock
+          actionTypeRegistry
         )
       ).toHaveLength(0);
     });
@@ -46,7 +46,7 @@ describe('stepRuleActions schema', () => {
             message: '{{{mustache}}',
           },
         },
-        actionTypeRegistryMock
+        actionTypeRegistry
       );
 
       expect(errors).toHaveLength(1);
@@ -65,7 +65,7 @@ describe('stepRuleActions schema', () => {
           actionTypeId: '.slack',
           params: {},
         },
-        actionTypeRegistryMock
+        actionTypeRegistry
       );
       expect(errors).toHaveLength(1);
       expect(errors[0]).toEqual('No connector selected');
@@ -74,7 +74,7 @@ describe('stepRuleActions schema', () => {
 
   describe('validateRuleActionsField', () => {
     it('should validate rule actions field', () => {
-      const validator = validateRuleActionsField(actionTypeRegistryMock);
+      const validator = validateRuleActionsField(actionTypeRegistry);
 
       const result = validator({
         path: '',
@@ -89,7 +89,7 @@ describe('stepRuleActions schema', () => {
 
     it('should validate incorrect rule actions field', () => {
       (getActionTypeName as jest.Mock).mockReturnValue('Slack');
-      const validator = validateRuleActionsField(actionTypeRegistryMock);
+      const validator = validateRuleActionsField(actionTypeRegistry);
 
       const result = validator({
         path: '',

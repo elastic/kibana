@@ -9,7 +9,7 @@ import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
 
 import {
   AlertAction,
-  TriggersAndActionsUIPublicPluginStart,
+  ActionTypeRegistryContract,
 } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 import * as I18n from './translations';
 
@@ -42,7 +42,7 @@ export const validateMustache = (params: AlertAction['params']) => {
 
 export const validateActionParams = (
   actionItem: AlertAction,
-  actionTypeRegistry: TriggersAndActionsUIPublicPluginStart['actionTypeRegistry']
+  actionTypeRegistry: ActionTypeRegistryContract
 ): string[] => {
   const actionErrors = actionTypeRegistry
     .get(actionItem.actionTypeId)

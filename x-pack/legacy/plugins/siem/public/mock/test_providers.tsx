@@ -17,7 +17,6 @@ import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 
-import { FieldHook, useForm } from '../shared_imports';
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
 import { createKibanaContextProviderMock } from './kibana_react';
