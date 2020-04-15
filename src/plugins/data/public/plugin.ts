@@ -176,7 +176,6 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       indexPatterns,
       getInternalStartServices: this.getInternalStartServices,
     });
-
     setSearchService(search);
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));

@@ -99,11 +99,13 @@ describe('Saved Object', () => {
   function createInitializedSavedObject(config: SavedObjectConfig = {}) {
     const savedObject = new SavedObjectClass(config);
     savedObject.title = 'my saved object';
+
     return savedObject.init!();
   }
 
   beforeEach(() => {
     (dataStartMock.search.createSearchSource as jest.Mock).mockReset();
+
     SavedObjectClass = createSavedObjectClass({
       savedObjectsClient: savedObjectsClientStub,
       indexPatterns: dataStartMock.indexPatterns,
