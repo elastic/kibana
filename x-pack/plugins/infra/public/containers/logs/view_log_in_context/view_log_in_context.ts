@@ -30,6 +30,7 @@ interface ViewLogInContextProps {
 
 export interface ViewLogInContextState {
   entries: LogEntry[];
+  isLoading: boolean;
   contextEntry?: LogEntry;
 }
 
@@ -42,10 +43,12 @@ export const useViewLogInContext = (
 ): [ViewLogInContextState, ViewLogInContextCallbacks] => {
   const [contextEntry, setContextEntry] = useState<LogEntry | undefined>();
   const [entries, setEntries] = useState<LogEntry[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { startTimestamp, endTimestamp, sourceId } = props;
 
   const maybeFetchLogs = useCallback(async () => {
     if (contextEntry) {
+      setIsLoading(true);
       const { data } = await fetchLogEntries({
         sourceId,
         startTimestamp,
@@ -53,8 +56,10 @@ export const useViewLogInContext = (
         query: getQueryFromLogEntry(contextEntry),
       });
       setEntries(data.entries);
+      setIsLoading(false);
     } else {
       setEntries([]);
+      setIsLoading(false);
     }
   }, [contextEntry, startTimestamp, endTimestamp, sourceId]);
 
@@ -66,6 +71,7 @@ export const useViewLogInContext = (
     {
       contextEntry,
       entries,
+      isLoading,
     },
     {
       setContextEntry,
