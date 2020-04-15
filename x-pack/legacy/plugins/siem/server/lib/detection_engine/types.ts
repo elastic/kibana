@@ -34,6 +34,11 @@ export interface Meta {
   kibana_siem_app_url?: string | undefined;
 }
 
+export interface Language {
+  lucene: string;
+  kuery: string;
+}
+
 export interface RuleAlertParams {
   actions: RuleAlertAction[];
   anomalyThreshold: number | undefined;
@@ -47,7 +52,7 @@ export interface RuleAlertParams {
   index: string[] | undefined | null;
   interval: string;
   ruleId: string | undefined | null;
-  language: string | undefined | null;
+  language: keyof Language | undefined | null;
   maxSignals: number;
   machineLearningJobId: string | undefined;
   riskScore: number;

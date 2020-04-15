@@ -13,16 +13,16 @@ import {
   esFilters,
   IIndexPattern,
 } from '../../../../../../../../src/plugins/data/server';
-import { PartialFilter, RuleAlertParams } from '../types';
+import { PartialFilter, RuleAlertParams, Language } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
 import { buildQueryExceptions } from './build_exceptions_query';
 
 export const getQueryFilter = (
   query: string,
-  language: string,
+  language: keyof Language,
   filters: PartialFilter[],
   index: string[],
-  lists?: RuleAlertParams['lists']
+  lists: RuleAlertParams['lists']
 ) => {
   const indexPattern = {
     fields: [],
@@ -48,7 +48,7 @@ export const getQueryFilter = (
 interface GetFilterArgs {
   type: RuleAlertParams['type'];
   filters: PartialFilter[] | undefined | null;
-  language: string | undefined | null;
+  language: keyof Language | undefined | null;
   query: string | undefined | null;
   savedId: string | undefined | null;
   services: AlertServices;
@@ -60,7 +60,7 @@ interface QueryAttributes {
   // NOTE: doesn't match Query interface
   query: {
     query: string;
-    language: string;
+    language: keyof Language;
   };
   filters: PartialFilter[];
 }

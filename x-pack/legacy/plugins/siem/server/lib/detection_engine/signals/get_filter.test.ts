@@ -49,7 +49,7 @@ describe('get_filter', () => {
 
   describe('getQueryFilter', () => {
     test('it should work with an empty filter as kuery', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*']);
+      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
       expect(esQuery).toEqual({
         bool: {
           must: [],
@@ -74,7 +74,7 @@ describe('get_filter', () => {
     });
 
     test('it should work with an empty filter as lucene', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'lucene', [], ['auditbeat-*']);
+      const esQuery = getQueryFilter('host.name: linux', 'lucene', [], ['auditbeat-*'], []);
       expect(esQuery).toEqual({
         bool: {
           must: [
@@ -116,7 +116,8 @@ describe('get_filter', () => {
             },
           },
         ],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -159,7 +160,8 @@ describe('get_filter', () => {
             },
           },
         ],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -208,7 +210,8 @@ describe('get_filter', () => {
         'host.name: windows',
         'kuery',
         [query, exists],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -266,7 +269,8 @@ describe('get_filter', () => {
             },
           },
         ],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -314,7 +318,8 @@ describe('get_filter', () => {
             },
           },
         ],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -363,7 +368,8 @@ describe('get_filter', () => {
             },
           },
         ],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -435,6 +441,48 @@ describe('get_filter', () => {
                 ],
               },
             },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
+    });
+
+    test('it should work with an empty list', () => {
+      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
+      expect(esQuery).toEqual({
+        bool: {
+          filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
+    });
+
+    test('it should work when lists has value null', () => {
+      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], null);
+      expect(esQuery).toEqual({
+        bool: {
+          filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
+    });
+
+    test('it should work when lists has value undefined', () => {
+      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], undefined);
+      expect(esQuery).toEqual({
+        bool: {
+          filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
           ],
           must: [],
           must_not: [],
@@ -597,7 +645,8 @@ describe('get_filter', () => {
         '(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610182 or 2610183 or 2610184 or 2610185 or 2610186 or 2610187)',
         'kuery',
         [],
-        ['my custom index']
+        ['my custom index'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {

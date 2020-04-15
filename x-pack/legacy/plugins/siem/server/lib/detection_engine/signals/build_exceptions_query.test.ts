@@ -18,35 +18,29 @@ import { List } from '../routes/schemas/types/lists_default_array';
 
 describe('build_exceptions_query', () => {
   describe('getLanguageBooleanOperator', () => {
-    test('it returns value uppercased if languae is "lucene"', () => {
-      const result = getLanguageBooleanOperator('lucene', 'jibberjabber');
+    test('it returns value as uppercase if language is "lucene"', () => {
+      const result = getLanguageBooleanOperator({ language: 'lucene', value: 'not' });
 
-      expect(result).toEqual('JIBBERJABBER');
+      expect(result).toEqual('NOT');
     });
 
-    test('it returns value as is if languae is "kuery"', () => {
-      const result = getLanguageBooleanOperator('kuery', 'jibberjabber');
+    test('it returns value as is if language is "kuery"', () => {
+      const result = getLanguageBooleanOperator({ language: 'kuery', value: 'not' });
 
-      expect(result).toEqual('jibberjabber');
-    });
-
-    test('it returns value as is if languae is NOT "lucene"', () => {
-      const result = getLanguageBooleanOperator('something', 'jibberjabber');
-
-      expect(result).toEqual('jibberjabber');
+      expect(result).toEqual('not');
     });
   });
 
   describe('operatorBuilder', () => {
     describe('kuery', () => {
       test('it returns "not " when operator is "excluded"', () => {
-        const operator = operatorBuilder('excluded', 'kuery');
+        const operator = operatorBuilder({ operator: 'excluded', language: 'kuery' });
 
         expect(operator).toEqual(' and ');
       });
 
       test('it returns empty string when operator is "included"', () => {
-        const operator = operatorBuilder('included', 'kuery');
+        const operator = operatorBuilder({ operator: 'included', language: 'kuery' });
 
         expect(operator).toEqual(' and not ');
       });
@@ -54,13 +48,13 @@ describe('build_exceptions_query', () => {
 
     describe('lucene', () => {
       test('it returns "NOT " when operator is "excluded"', () => {
-        const operator = operatorBuilder('excluded', 'lucene');
+        const operator = operatorBuilder({ operator: 'excluded', language: 'lucene' });
 
         expect(operator).toEqual(' AND ');
       });
 
       test('it returns empty string when operator is "included"', () => {
-        const operator = operatorBuilder('included', 'lucene');
+        const operator = operatorBuilder({ operator: 'included', language: 'lucene' });
 
         expect(operator).toEqual(' AND NOT ');
       });
@@ -1126,7 +1120,11 @@ describe('build_exceptions_query', () => {
 
   describe('buildQueryExceptions', () => {
     test('it returns original query if no lists exist', () => {
-      const query = buildQueryExceptions({ query: 'host.name: *', language: 'kuery' });
+      const query = buildQueryExceptions({
+        query: 'host.name: *',
+        language: 'kuery',
+        lists: undefined,
+      });
       const expectedQuery = 'host.name: *';
 
       expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
