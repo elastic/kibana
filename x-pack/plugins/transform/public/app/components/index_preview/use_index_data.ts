@@ -5,11 +5,9 @@
  */
 
 import moment from 'moment-timezone';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
-
-import { EuiDataGridSorting } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
@@ -19,26 +17,12 @@ import { getNestedProperty } from '../../../../common/utils/object_utils';
 
 import { getErrorMessage } from '../../../shared_imports';
 
-import {
-  isDefaultQuery,
-  matchAllQuery,
-  EsDocSource,
-  EsFieldName,
-  PivotQuery,
-  INIT_MAX_COLUMNS,
-} from '../../common';
+import { isDefaultQuery, matchAllQuery, PivotQuery } from '../../common';
 import { SearchItems } from '../../hooks/use_search_items';
 import { useApi } from '../../hooks/use_api';
 
-import {
-  IndexPagination,
-  OnChangeItemsPerPage,
-  OnChangePage,
-  OnSort,
-  RenderCellValue,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
-} from './types';
+import { RenderCellValue, UseIndexDataReturnType, INDEX_STATUS } from './types';
+import { useDataGrid } from './use_data_grid';
 
 type EsSorting = Dictionary<{
   order: 'asc' | 'desc';
@@ -56,65 +40,11 @@ interface SearchResponse7 extends SearchResponse<any> {
 
 type IndexSearchResponse = SearchResponse7;
 
-const defaultPagination: IndexPagination = { pageIndex: 0, pageSize: 5 };
-
 export const useIndexData = (
   indexPattern: SearchItems['indexPattern'],
   query: PivotQuery
 ): UseIndexDataReturnType => {
-  const [errorMessage, setErrorMessage] = useState('');
-  const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
-  const [pagination, setPagination] = useState(defaultPagination);
-  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-  const [rowCount, setRowCount] = useState(0);
-  const [tableItems, setTableItems] = useState<EsDocSource[]>([]);
   const api = useApi();
-
-  useEffect(() => {
-    setPagination(defaultPagination);
-    // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(query)]);
-
-  const getIndexData = async function() {
-    setErrorMessage('');
-    setStatus(INDEX_STATUS.LOADING);
-
-    const sort: EsSorting = sortingColumns.reduce((s, column) => {
-      s[column.id] = { order: column.direction };
-      return s;
-    }, {} as EsSorting);
-
-    const esSearchRequest = {
-      index: indexPattern.title,
-      body: {
-        // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
-        query: isDefaultQuery(query) ? matchAllQuery : query,
-        from: pagination.pageIndex * pagination.pageSize,
-        size: pagination.pageSize,
-        ...(Object.keys(sort).length > 0 ? { sort } : {}),
-      },
-    };
-
-    try {
-      const resp: IndexSearchResponse = await api.esSearch(esSearchRequest);
-
-      const docs = resp.hits.hits.map(d => d._source);
-
-      setRowCount(resp.hits.total.value);
-      setTableItems(docs);
-      setStatus(INDEX_STATUS.LOADED);
-    } catch (e) {
-      setErrorMessage(getErrorMessage(e));
-      setStatus(INDEX_STATUS.ERROR);
-    }
-  };
-
-  useEffect(() => {
-    getIndexData();
-    // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
 
   const allFields = indexPattern.fields.map(f => f.name);
   const indexPatternFields: string[] = allFields.filter(f => {
@@ -160,50 +90,64 @@ export const useIndexData = (
     }),
   ];
 
-  // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>([]);
+  const dataGrid = useDataGrid(columns);
 
-  const defaultVisibleColumns = indexPatternFields.splice(0, INIT_MAX_COLUMNS);
+  const {
+    pagination,
+    resetPagination,
+    setErrorMessage,
+    setRowCount,
+    setStatus,
+    setTableItems,
+    sortingColumns,
+    tableItems,
+  } = dataGrid;
 
   useEffect(() => {
-    setVisibleColumns(defaultVisibleColumns);
+    resetPagination();
+    // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultVisibleColumns.join()]);
+  }, [JSON.stringify(query)]);
 
-  const [invalidSortingColumnns, setInvalidSortingColumnns] = useState<string[]>([]);
+  const getIndexData = async function() {
+    setErrorMessage('');
+    setStatus(INDEX_STATUS.LOADING);
 
-  const onSort: OnSort = useCallback(
-    sc => {
-      // Check if an unsupported column type for sorting was selected.
-      const updatedInvalidSortingColumnns = sc.reduce<string[]>((arr, current) => {
-        const columnType = columns.find(dgc => dgc.id === current.id);
-        if (columnType?.schema === 'json') {
-          arr.push(current.id);
-        }
-        return arr;
-      }, []);
-      setInvalidSortingColumnns(updatedInvalidSortingColumnns);
-      if (updatedInvalidSortingColumnns.length === 0) {
-        setSortingColumns(sc);
-      }
-    },
-    [columns]
-  );
+    const sort: EsSorting = sortingColumns.reduce((s, column) => {
+      s[column.id] = { order: column.direction };
+      return s;
+    }, {} as EsSorting);
 
-  const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
-    pageSize => {
-      setPagination(p => {
-        const pageIndex = Math.floor((p.pageSize * p.pageIndex) / pageSize);
-        return { pageIndex, pageSize };
-      });
-    },
-    [setPagination]
-  );
+    const esSearchRequest = {
+      index: indexPattern.title,
+      body: {
+        // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
+        query: isDefaultQuery(query) ? matchAllQuery : query,
+        from: pagination.pageIndex * pagination.pageSize,
+        size: pagination.pageSize,
+        ...(Object.keys(sort).length > 0 ? { sort } : {}),
+      },
+    };
 
-  const onChangePage: OnChangePage = useCallback(
-    pageIndex => setPagination(p => ({ ...p, pageIndex })),
-    [setPagination]
-  );
+    try {
+      const resp: IndexSearchResponse = await api.esSearch(esSearchRequest);
+
+      const docs = resp.hits.hits.map(d => d._source);
+
+      setRowCount(resp.hits.total.value);
+      setTableItems(docs);
+      setStatus(INDEX_STATUS.LOADED);
+    } catch (e) {
+      setErrorMessage(getErrorMessage(e));
+      setStatus(INDEX_STATUS.ERROR);
+    }
+  };
+
+  useEffect(() => {
+    getIndexData();
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
 
   const renderCellValue: RenderCellValue = useMemo(() => {
     return ({
@@ -244,20 +188,20 @@ export const useIndexData = (
 
   return {
     columns,
-    errorMessage,
-    invalidSortingColumnns,
-    onChangeItemsPerPage,
-    onChangePage,
-    onSort,
+    errorMessage: dataGrid.errorMessage,
+    invalidSortingColumnns: dataGrid.invalidSortingColumnns,
+    onChangeItemsPerPage: dataGrid.onChangeItemsPerPage,
+    onChangePage: dataGrid.onChangePage,
+    onSort: dataGrid.onSort,
     noDataMessage: '',
     pagination,
-    setPagination,
-    setVisibleColumns,
+    setPagination: dataGrid.setPagination,
+    setVisibleColumns: dataGrid.setVisibleColumns,
     renderCellValue,
-    rowCount,
+    rowCount: dataGrid.rowCount,
     sortingColumns,
-    status,
+    status: dataGrid.status,
     tableItems,
-    visibleColumns,
+    visibleColumns: dataGrid.visibleColumns,
   };
 };

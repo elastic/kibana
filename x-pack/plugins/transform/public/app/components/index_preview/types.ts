@@ -6,7 +6,7 @@
 
 import { Dispatch, SetStateAction } from 'react';
 
-import { EuiDataGridPaginationProps, EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGridPaginationProps, EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
 import { EsDocSource, EsFieldName } from '../../common';
 
@@ -38,7 +38,7 @@ export type RenderCellValue = ({
 }) => any;
 
 export interface UseIndexDataReturnType {
-  columns: Array<{ id: string; schema: string | undefined }>;
+  columns: EuiDataGridColumn[];
   errorMessage: string;
   invalidSortingColumnns: EsFieldName[];
   noDataMessage: string;

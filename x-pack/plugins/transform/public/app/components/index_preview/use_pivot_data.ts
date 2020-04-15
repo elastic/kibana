@@ -5,9 +5,7 @@
  */
 
 import moment from 'moment-timezone';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-
-import { EuiDataGridSorting } from '@elastic/eui';
+import { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -21,30 +19,18 @@ import { getErrorMessage } from '../../../shared_imports';
 
 import {
   getPreviewRequestBody,
-  EsDocSource,
-  EsFieldName,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotGroupByConfig,
   PivotQuery,
   PreviewMappings,
-  INIT_MAX_COLUMNS,
 } from '../../common';
 import { SearchItems } from '../../hooks/use_search_items';
 import { useApi } from '../../hooks/use_api';
 
 import { multiColumnSortFactory } from './common';
-import {
-  IndexPagination,
-  OnChangeItemsPerPage,
-  OnChangePage,
-  OnSort,
-  RenderCellValue,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
-} from './types';
-
-const defaultPagination: IndexPagination = { pageIndex: 0, pageSize: 5 };
+import { RenderCellValue, UseIndexDataReturnType, INDEX_STATUS } from './types';
+import { useDataGrid } from './use_data_grid';
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -68,78 +54,11 @@ export const usePivotData = (
   aggs: PivotAggsConfigDict,
   groupBy: PivotGroupByConfigDict
 ): UseIndexDataReturnType => {
-  const [noDataMessage, setNoDataMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
-  const [pagination, setPagination] = useState(defaultPagination);
-  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-  const [rowCount, setRowCount] = useState(0);
-  const [tableItems, setTableItems] = useState<EsDocSource[]>([]);
   const [previewMappings, setPreviewMappings] = useState<PreviewMappings>({ properties: {} });
   const api = useApi();
 
   const aggsArr = dictionaryToArray(aggs);
   const groupByArr = dictionaryToArray(groupBy);
-
-  const previewRequest = getPreviewRequestBody(indexPatternTitle, query, groupByArr, aggsArr);
-
-  const getPreviewData = async () => {
-    if (aggsArr.length === 0 || groupByArr.length === 0) {
-      setTableItems([]);
-      setRowCount(0);
-      setNoDataMessage(
-        i18n.translate('xpack.transform.pivotPreview.PivotPreviewIncompleteConfigCalloutBody', {
-          defaultMessage: 'Please choose at least one group-by field and aggregation.',
-        })
-      );
-      return;
-    }
-
-    setErrorMessage('');
-    setNoDataMessage('');
-    setStatus(INDEX_STATUS.LOADING);
-
-    try {
-      const resp = await api.getTransformsPreview(previewRequest);
-      setTableItems(resp.preview);
-      setRowCount(resp.preview.length);
-      setPreviewMappings(resp.generated_dest_index.mappings);
-      setStatus(INDEX_STATUS.LOADED);
-
-      if (resp.preview.length === 0) {
-        setNoDataMessage(
-          i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody', {
-            defaultMessage:
-              'The preview request did not return any data. Please ensure the optional query returns data and that values exist for the field used by group-by and aggregation fields.',
-          })
-        );
-      }
-    } catch (e) {
-      setErrorMessage(getErrorMessage(e));
-      setTableItems([]);
-      setRowCount(0);
-      setPreviewMappings({ properties: {} });
-      setStatus(INDEX_STATUS.ERROR);
-    }
-  };
-
-  useEffect(() => {
-    setPagination(defaultPagination);
-    // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(query)]);
-
-  useEffect(() => {
-    getPreviewData();
-    // custom comparison
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [
-    indexPatternTitle,
-    JSON.stringify(aggsArr),
-    JSON.stringify(groupByArr),
-    JSON.stringify(query),
-    /* eslint-enable react-hooks/exhaustive-deps */
-  ]);
 
   // Filters mapping properties of type `object`, which get returned for nested field parents.
   const columnKeys = Object.keys(previewMappings.properties).filter(
@@ -186,54 +105,83 @@ export const usePivotData = (
     return { id, schema };
   });
 
-  // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>([]);
+  const dataGrid = useDataGrid(columns);
 
-  const defaultVisibleColumns = columnKeys.splice(0, INIT_MAX_COLUMNS);
+  const {
+    pagination,
+    resetPagination,
+    setErrorMessage,
+    setNoDataMessage,
+    setRowCount,
+    setStatus,
+    setTableItems,
+    sortingColumns,
+    tableItems,
+  } = dataGrid;
+
+  const previewRequest = getPreviewRequestBody(indexPatternTitle, query, groupByArr, aggsArr);
+
+  const getPreviewData = async () => {
+    if (aggsArr.length === 0 || groupByArr.length === 0) {
+      setTableItems([]);
+      setRowCount(0);
+      setNoDataMessage(
+        i18n.translate('xpack.transform.pivotPreview.PivotPreviewIncompleteConfigCalloutBody', {
+          defaultMessage: 'Please choose at least one group-by field and aggregation.',
+        })
+      );
+      return;
+    }
+
+    setErrorMessage('');
+    setNoDataMessage('');
+    setStatus(INDEX_STATUS.LOADING);
+
+    try {
+      const resp = await api.getTransformsPreview(previewRequest);
+      setTableItems(resp.preview);
+      setRowCount(resp.preview.length);
+      setPreviewMappings(resp.generated_dest_index.mappings);
+      setStatus(INDEX_STATUS.LOADED);
+
+      if (resp.preview.length === 0) {
+        setNoDataMessage(
+          i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody', {
+            defaultMessage:
+              'The preview request did not return any data. Please ensure the optional query returns data and that values exist for the field used by group-by and aggregation fields.',
+          })
+        );
+      }
+    } catch (e) {
+      setErrorMessage(getErrorMessage(e));
+      setTableItems([]);
+      setRowCount(0);
+      setPreviewMappings({ properties: {} });
+      setStatus(INDEX_STATUS.ERROR);
+    }
+  };
 
   useEffect(() => {
-    setVisibleColumns(defaultVisibleColumns);
+    resetPagination();
+    // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultVisibleColumns.join()]);
+  }, [JSON.stringify(query)]);
 
-  const [invalidSortingColumnns, setInvalidSortingColumnns] = useState<string[]>([]);
-
-  const onSort: OnSort = useCallback(
-    sc => {
-      // Check if an unsupported column type for sorting was selected.
-      const updatedInvalidSortingColumnns = sc.reduce<string[]>((arr, current) => {
-        const columnType = columns.find(dgc => dgc.id === current.id);
-        if (columnType?.schema === 'json') {
-          arr.push(current.id);
-        }
-        return arr;
-      }, []);
-      setInvalidSortingColumnns(updatedInvalidSortingColumnns);
-      if (updatedInvalidSortingColumnns.length === 0) {
-        setSortingColumns(sc);
-      }
-    },
-    [columns]
-  );
+  useEffect(() => {
+    getPreviewData();
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [
+    indexPatternTitle,
+    JSON.stringify(aggsArr),
+    JSON.stringify(groupByArr),
+    JSON.stringify(query),
+    /* eslint-enable react-hooks/exhaustive-deps */
+  ]);
 
   if (sortingColumns.length > 0) {
     tableItems.sort(multiColumnSortFactory(sortingColumns));
   }
-
-  const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
-    pageSize => {
-      setPagination(p => {
-        const pageIndex = Math.floor((p.pageSize * p.pageIndex) / pageSize);
-        return { pageIndex, pageSize };
-      });
-    },
-    [setPagination]
-  );
-
-  const onChangePage: OnChangePage = useCallback(
-    pageIndex => setPagination(p => ({ ...p, pageIndex })),
-    [setPagination]
-  );
 
   const pageData = tableItems.slice(
     pagination.pageIndex * pagination.pageSize,
@@ -282,20 +230,20 @@ export const usePivotData = (
 
   return {
     columns,
-    errorMessage,
-    invalidSortingColumnns,
-    noDataMessage,
-    onChangeItemsPerPage,
-    onChangePage,
-    onSort,
+    errorMessage: dataGrid.errorMessage,
+    invalidSortingColumnns: dataGrid.invalidSortingColumnns,
+    onChangeItemsPerPage: dataGrid.onChangeItemsPerPage,
+    onChangePage: dataGrid.onChangePage,
+    onSort: dataGrid.onSort,
+    noDataMessage: dataGrid.noDataMessage,
     pagination,
-    setPagination,
-    setVisibleColumns,
+    setPagination: dataGrid.setPagination,
+    setVisibleColumns: dataGrid.setVisibleColumns,
     renderCellValue,
-    rowCount,
+    rowCount: dataGrid.rowCount,
     sortingColumns,
-    status,
+    status: dataGrid.status,
     tableItems,
-    visibleColumns,
+    visibleColumns: dataGrid.visibleColumns,
   };
 };
