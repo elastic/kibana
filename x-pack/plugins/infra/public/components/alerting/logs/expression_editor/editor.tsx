@@ -101,7 +101,7 @@ export const ExpressionEditor: React.FC<Props> = props => {
     [alertParams.count, setAlertParams]
   );
 
-  const updateCriteria = useCallback(
+  const updateCriterion = useCallback(
     (idx, criterionParams) => {
       const nextCriteria = alertParams.criteria?.map((criterion, index) => {
         return idx === index ? { ...criterion, ...criterionParams } : criterion;
@@ -127,12 +127,22 @@ export const ExpressionEditor: React.FC<Props> = props => {
     [setAlertParams]
   );
 
-  const addCriteria = useCallback(() => {
+  const addCriterion = useCallback(() => {
     const nextCriteria = alertParams?.criteria
       ? [...alertParams.criteria, DEFAULT_CRITERIA]
       : [DEFAULT_CRITERIA];
     setAlertParams('criteria', nextCriteria);
   }, [alertParams, setAlertParams]);
+
+  const removeCriterion = useCallback(
+    idx => {
+      const nextCriteria = alertParams?.criteria.filter((criterion, index) => {
+        return index !== idx;
+      });
+      setAlertParams('criteria', nextCriteria);
+    },
+    [alertParams, setAlertParams]
+  );
 
   const emptyError = useMemo(() => {
     return {
@@ -155,7 +165,8 @@ export const ExpressionEditor: React.FC<Props> = props => {
       <Criteria
         fields={supportedFields}
         criteria={alertParams.criteria}
-        updateCriteria={updateCriteria}
+        updateCriterion={updateCriterion}
+        removeCriterion={removeCriterion}
       />
 
       <ForLastExpression
@@ -172,10 +183,10 @@ export const ExpressionEditor: React.FC<Props> = props => {
           iconSide={'left'}
           flush={'left'}
           iconType={'plusInCircleFilled'}
-          onClick={addCriteria}
+          onClick={addCriterion}
         >
           <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.addCondition"
+            id="xpack.infra.logs.alertFlyout.addCondition"
             defaultMessage="Add condition"
           />
         </EuiButtonEmpty>

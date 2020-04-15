@@ -14,11 +14,20 @@ import {
   EuiFieldNumber,
   EuiExpression,
   EuiFieldText,
+  EuiButtonIcon,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Comparator } from '../../../../../server/lib/alerting/log_threshold/types';
 
-export const Criterion: React.FC = ({ idx, fields, criterion, updateCriteria }) => {
+export const Criterion: React.FC = ({
+  idx,
+  fields,
+  criterion,
+  updateCriterion,
+  removeCriterion,
+  canDelete,
+}) => {
   const [isFieldPopoverOpen, setIsFieldPopoverOpen] = useState(false);
   const [isComparatorPopoverOpen, setIsComparatorPopoverOpen] = useState(false);
 
@@ -84,7 +93,7 @@ export const Criterion: React.FC = ({ idx, fields, criterion, updateCriteria }) 
             <EuiSelect
               compressed
               value={criterion.field}
-              onChange={e => updateCriteria(idx, { field: e.target.value })}
+              onChange={e => updateCriterion(idx, { field: e.target.value })}
               options={fieldOptions}
             />
           </div>
@@ -113,7 +122,7 @@ export const Criterion: React.FC = ({ idx, fields, criterion, updateCriteria }) 
             <EuiSelect
               compressed
               value={criterion.comparator}
-              onChange={e => updateCriteria(idx, { comparator: e.target.value })}
+              onChange={e => updateCriterion(idx, { comparator: e.target.value })}
               options={compatibleComparatorOptions}
             />
             {fieldInfo.type === 'number' ? (
@@ -122,19 +131,31 @@ export const Criterion: React.FC = ({ idx, fields, criterion, updateCriteria }) 
                 value={criterion.value}
                 onChange={e => {
                   const number = parseInt(e.target.value, 10);
-                  updateCriteria(idx, { value: number ? number : undefined });
+                  updateCriterion(idx, { value: number ? number : undefined });
                 }}
               />
             ) : (
               <EuiFieldText
                 compressed
                 value={criterion.value}
-                onChange={e => updateCriteria(idx, { value: e.target.value })}
+                onChange={e => updateCriterion(idx, { value: e.target.value })}
               />
             )}
           </div>
         </EuiPopover>
       </EuiFlexItem>
+      {canDelete && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            aria-label={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
+              defaultMessage: 'Remove condition',
+            })}
+            color={'danger'}
+            iconType={'trash'}
+            onClick={() => removeCriterion(idx)}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
