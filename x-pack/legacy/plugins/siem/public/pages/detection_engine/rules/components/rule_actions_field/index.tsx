@@ -84,7 +84,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
   }, []);
 
   useEffect(() => {
-    if (field.form.isSubmitting) {
+    if (field.form.isSubmitting || !field.errors.length) {
       return setFieldErrors(null);
     }
     if (
