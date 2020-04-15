@@ -12,6 +12,7 @@ import {
   KibanaAssetType,
   CallESAsCurrentUser,
   DefaultPackages,
+  ElasticsearchAssetType,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
@@ -21,6 +22,7 @@ import { installTemplates } from '../elasticsearch/template/install';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
+import { deleteAssetsByType } from './remove';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -55,6 +57,7 @@ export async function installPackage(options: {
     // per dataset and we should then save them
     installILMPolicy(pkgName, pkgVersion, callCluster),
   ]);
+  // install or update the templates
   const installedTemplates = await installTemplates(
     registryPackageInfo,
     callCluster,
@@ -68,10 +71,22 @@ export async function installPackage(options: {
   ];
   const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
 
+  // delete the previous version's installation's pipelines
+  if (installedPkg) {
+    try {
+      await deleteAssetsByType({
+        savedObjectsClient,
+        callCluster,
+        installedObjects: installedPkg.attributes.installed,
+        assetType: ElasticsearchAssetType.ingestPipeline,
+      });
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
   // Save references to installed assets in the package's saved object state
   return saveInstallationReferences({
     savedObjectsClient,
-    pkgkey,
     pkgName,
     pkgVersion,
     internal,
@@ -102,7 +117,6 @@ export async function installKibanaAssets(options: {
 
 export async function saveInstallationReferences(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
   pkgName: string;
   pkgVersion: string;
   internal: boolean;
