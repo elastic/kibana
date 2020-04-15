@@ -66,9 +66,8 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('should visualize monthly data with different day intervals', async () => {
-      //Nov 1, 2017 @ 01:00:00.000 - Mar 21, 2018 @ 02:00:00.000
-      const fromTime = '2017-11-01 00:00:00.000';
-      const toTime = '2018-03-21 00:00:00.000';
+      const fromTime = 'Nov 01, 2017 @ 00:00:00.000';
+      const toTime = 'Mar 21, 2018 @ 00:00:00.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.discover.setChartInterval('Monthly');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -76,24 +75,25 @@ export default function({ getService, getPageObjects }) {
       expect(chartCanvasExist).to.be(true);
     });
     it('should visualize weekly data with within DST changes', async () => {
-      //Nov 1, 2017 @ 01:00:00.000 - Mar 21, 2018 @ 02:00:00.000
-      const fromTime = '2018-03-01 00:00:00.000';
-      const toTime = '2018-05-01 00:00:00.000';
+      const fromTime = 'Mar 01, 2018 @ 00:00:00.000';
+      const toTime = 'May 01, 2018 @ 00:00:00.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.discover.setChartInterval('Weekly');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
-    it('should visualize monthly data with different years Scaled to 30d', async () => {
-      //Nov 1, 2017 @ 01:00:00.000 - Mar 21, 2018 @ 02:00:00.000
-      const fromTime = '2010-01-01 00:00:00.000';
-      const toTime = '2018-03-21 00:00:00.000';
+    it('should visualize monthly data with different years Scaled to 30 days', async () => {
+      const fromTime = 'Jan 01, 2010 @ 00:00:00.000';
+      const toTime = 'Mar 21, 2019 @ 00:00:00.000';
+
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.discover.setChartInterval('Daily');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
+      const chartIntervalScaledDesc = await PageObjects.discover.getChartIntervalScaledToDesc();
+      expect(chartIntervalScaledDesc).to.be('Scaled to 30 days');
     });
   });
 }
