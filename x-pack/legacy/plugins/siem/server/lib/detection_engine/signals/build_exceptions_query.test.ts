@@ -12,6 +12,7 @@ import {
   buildMatch,
   buildMatchAll,
   evaluateValues,
+  formatQuery,
   getLanguageBooleanOperator,
 } from './build_exceptions_query';
 import { List } from '../routes/schemas/types/lists_default_array';
@@ -427,10 +428,39 @@ describe('build_exceptions_query', () => {
     });
   });
 
+  describe('formatQuery', () => {
+    test('it returns query if "exceptions" is empty array', () => {
+      const formattedQuery = formatQuery({ exceptions: [], query: 'a:*', language: 'kuery' });
+
+      expect(formattedQuery).toEqual('a:*');
+    });
+
+    test('it returns expected query string when single exception in array', () => {
+      const formattedQuery = formatQuery({
+        exceptions: [' and b:(value-1 or value-2) and not c:*'],
+        query: 'a:*',
+        language: 'kuery',
+      });
+
+      expect(formattedQuery).toEqual('(a:* and b:(value-1 or value-2) and not c:*)');
+    });
+
+    test('it returns expected query string when multiple exceptions in array', () => {
+      const formattedQuery = formatQuery({
+        exceptions: [' and b:(value-1 or value-2) and not c:*', ' and not d:*'],
+        query: 'a:*',
+        language: 'kuery',
+      });
+
+      expect(formattedQuery).toEqual(
+        '(a:* and b:(value-1 or value-2) and not c:*) or (a:* and not d:*)'
+      );
+    });
+  });
+
   describe('buildExceptions', () => {
     test('it returns empty array if empty lists array passed in', () => {
       const query = buildExceptions({
-        includeQuery: true,
         query: 'a:*',
         language: 'kuery',
         lists: [],
@@ -468,12 +498,11 @@ describe('build_exceptions_query', () => {
         },
       ];
       const query = buildExceptions({
-        includeQuery: true,
         query: 'a:*',
         language: 'kuery',
         lists,
       });
-      const expectedQuery = ['(a:* and not b:(value-1 or value-2))', '(a:* and c:value-3)'];
+      const expectedQuery = [' and not b:(value-1 or value-2)', ' and c:value-3'];
 
       expect(query).toEqual(expectedQuery);
     });
@@ -509,12 +538,11 @@ describe('build_exceptions_query', () => {
         },
       ];
       const query = buildExceptions({
-        includeQuery: true,
         query: 'a:*',
         language: 'kuery',
         lists,
       });
-      const expectedQuery = ['(a:* and not b:(value-1 or value-2) and c:value-3)'];
+      const expectedQuery = [' and not b:(value-1 or value-2) and c:value-3'];
 
       expect(query).toEqual(expectedQuery);
     });
@@ -539,12 +567,11 @@ describe('build_exceptions_query', () => {
         },
       ];
       const query = buildExceptions({
-        includeQuery: true,
         query: 'a:*',
         language: 'kuery',
         lists,
       });
-      const expectedQuery = ['(a:* and not b:(value-1 or value-2))'];
+      const expectedQuery = [' and not b:(value-1 or value-2)'];
 
       expect(query).toEqual(expectedQuery);
     });
@@ -569,12 +596,11 @@ describe('build_exceptions_query', () => {
         },
       ];
       const query = buildExceptions({
-        includeQuery: true,
         query: 'a:*',
         language: 'kuery',
         lists,
       });
-      const expectedQuery = ['(a:* and not b:(value-1 or value-2))'];
+      const expectedQuery = [' and not b:(value-1 or value-2)'];
 
       expect(query).toEqual(expectedQuery);
     });
@@ -615,15 +641,11 @@ describe('build_exceptions_query', () => {
         },
       ];
       const query = buildExceptions({
-        includeQuery: true,
         query: 'a:*',
         language: 'kuery',
         lists,
       });
-      const expectedQuery = [
-        '(a:* and not b:(value-1 or value-2) and c:value-3)',
-        '(a:* and not d:*)',
-      ];
+      const expectedQuery = [' and not b:(value-1 or value-2) and c:value-3', ' and not d:*'];
 
       expect(query).toEqual(expectedQuery);
     });
@@ -664,15 +686,11 @@ describe('build_exceptions_query', () => {
         },
       ];
       const query = buildExceptions({
-        includeQuery: true,
         query: 'a:*',
         language: 'lucene',
         lists,
       });
-      const expectedQuery = [
-        '(a:* AND NOT b:(value-1 OR value-2) AND c:value-3)',
-        '(a:* AND _exists_e)',
-      ];
+      const expectedQuery = [' AND NOT b:(value-1 OR value-2) AND c:value-3', ' AND _exists_e'];
 
       expect(query).toEqual(expectedQuery);
     });
@@ -689,12 +707,11 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
-        const expectedQuery = ['(a:* and not b:*)'];
+        const expectedQuery = [' and not b:*'];
 
         expect(query).toEqual(expectedQuery);
       });
@@ -710,12 +727,11 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
-        const expectedQuery = ['(a:* and b:*)'];
+        const expectedQuery = [' and b:*'];
 
         expect(query).toEqual(expectedQuery);
       });
@@ -738,12 +754,11 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
-        const expectedQuery = ['(a:* and b:* and c:*)'];
+        const expectedQuery = [' and b:* and c:*'];
 
         expect(query).toEqual(expectedQuery);
       });
@@ -776,12 +791,11 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
-        const expectedQuery = ['(a:* and not b:* and c:* and not d:*)', '(a:* and not e:*)'];
+        const expectedQuery = [' and not b:* and c:* and not d:*', ' and not e:*'];
 
         expect(query).toEqual(expectedQuery);
       });
@@ -804,12 +818,11 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
-        const expectedQuery = ['(a:* and not b:value)'];
+        const expectedQuery = [' and not b:value'];
 
         expect(query).toEqual(expectedQuery);
       });
@@ -830,12 +843,11 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
-        const expectedQuery = ['(a:* and b:value)'];
+        const expectedQuery = [' and b:value'];
 
         expect(query).toEqual(expectedQuery);
       });
@@ -868,12 +880,11 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
-        const expectedQuery = ['(a:* and b:value and c:valueC)'];
+        const expectedQuery = [' and b:value and c:valueC'];
 
         expect(query).toEqual(expectedQuery);
       });
@@ -926,14 +937,13 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
         const expectedQuery = [
-          '(a:* and not b:value and c:valueC and not d:valueC)',
-          '(a:* and not e:valueC)',
+          ' and not b:value and c:valueC and not d:valueC',
+          ' and not e:valueC',
         ];
 
         expect(query).toEqual(expectedQuery);
@@ -960,12 +970,11 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
-        const expectedQuery = ['(a:* and not b:(value or value-1))'];
+        const expectedQuery = [' and not b:(value or value-1)'];
 
         expect(query).toEqual(expectedQuery);
       });
@@ -989,12 +998,11 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
-        const expectedQuery = ['(a:* and b:(value or value-1))'];
+        const expectedQuery = [' and b:(value or value-1)'];
 
         expect(query).toEqual(expectedQuery);
       });
@@ -1033,12 +1041,11 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
-        const expectedQuery = ['(a:* and b:(value or value-1) and not c:(valueC or value-2))'];
+        const expectedQuery = [' and b:(value or value-1) and not c:(valueC or value-2)'];
 
         expect(query).toEqual(expectedQuery);
       });
@@ -1103,14 +1110,13 @@ describe('build_exceptions_query', () => {
           },
         ];
         const query = buildExceptions({
-          includeQuery: true,
           query: 'a:*',
           language: 'kuery',
           lists,
         });
         const expectedQuery = [
-          '(a:* and not b:(value or value-1) and c:(valueC or value-2) and not d:(valueD or value-3))',
-          '(a:* and not e:(valueE or value-4))',
+          ' and not b:(value or value-1) and c:(valueC or value-2) and not d:(valueD or value-3)',
+          ' and not e:(valueE or value-4)',
         ];
 
         expect(query).toEqual(expectedQuery);
