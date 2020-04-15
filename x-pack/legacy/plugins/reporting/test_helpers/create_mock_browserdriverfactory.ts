@@ -92,7 +92,7 @@ const defaultOpts: CreateMockBrowserDriverFactoryOpts = {
 
 export const createMockBrowserDriverFactory = async (
   logger: Logger,
-  opts: Partial<CreateMockBrowserDriverFactoryOpts>
+  opts: Partial<CreateMockBrowserDriverFactoryOpts> = {}
 ): Promise<HeadlessChromiumDriverFactory> => {
   const captureConfig = {
     timeouts: { openUrl: 30000, waitForElements: 30000, renderComplete: 30000 },

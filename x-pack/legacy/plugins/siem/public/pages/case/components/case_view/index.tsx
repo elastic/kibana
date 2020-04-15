@@ -271,7 +271,11 @@ export const CaseComponent = React.memo<CaseProps>(
                           onChange={toggleStatusCase}
                         />
                       </EuiFlexItem>
-                      {hasDataToPush && <EuiFlexItem grow={false}>{pushButton}</EuiFlexItem>}
+                      {hasDataToPush && (
+                        <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
+                          {pushButton}
+                        </EuiFlexItem>
+                      )}
                     </EuiFlexGroup>
                   </>
                 )}
@@ -316,7 +320,7 @@ export const CaseView = React.memo(({ caseId, userCanCrud }: Props) => {
     return (
       <MyEuiFlexGroup justifyContent="center" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
+          <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
         </EuiFlexItem>
       </MyEuiFlexGroup>
     );

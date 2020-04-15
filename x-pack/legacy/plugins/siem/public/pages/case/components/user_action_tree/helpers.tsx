@@ -41,14 +41,16 @@ export const getLabelTitle = ({ action, field, firstIndexPushToService, index }:
 
 const getTagsLabelTitle = (action: CaseUserActions) => (
   <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
-    <EuiFlexItem>
+    <EuiFlexItem data-test-subj="ua-tags-label">
       {action.action === 'add' && i18n.ADDED_FIELD}
       {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
     </EuiFlexItem>
     {action.newValue != null &&
       action.newValue.split(',').map(tag => (
         <EuiFlexItem grow={false} key={tag}>
-          <EuiBadge color="default">{tag}</EuiBadge>
+          <EuiBadge data-test-subj={`ua-tag`} color="default">
+            {tag}
+          </EuiBadge>
         </EuiFlexItem>
       ))}
   </EuiFlexGroup>
@@ -61,12 +63,12 @@ const getPushedServiceLabelTitle = (
 ) => {
   const pushedVal = JSON.parse(action.newValue ?? '') as CaseFullExternalService;
   return (
-    <EuiFlexGroup alignItems="baseline" gutterSize="xs">
-      <EuiFlexItem>
+    <EuiFlexGroup alignItems="baseline" gutterSize="xs" data-test-subj="pushed-service-label-title">
+      <EuiFlexItem data-test-subj="pushed-label">
         {firstIndexPushToService === index ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink href={pushedVal?.external_url} target="_blank">
+        <EuiLink data-test-subj="pushed-value" href={pushedVal?.external_url} target="_blank">
           {pushedVal?.connector_name} {pushedVal?.external_title}
         </EuiLink>
       </EuiFlexItem>
