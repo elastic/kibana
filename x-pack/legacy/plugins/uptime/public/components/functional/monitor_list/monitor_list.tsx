@@ -58,7 +58,7 @@ export const MonitorListComponent: React.FC<Props> = ({
   filters,
   getMonitorList,
   lastRefresh,
-  monitorList: { list, errors, loading },
+  monitorList: { list, error, loading },
   linkParameters,
 }) => {
   const [pageSize, setPageSize] = useState<number>(getPageSizeValue());
@@ -192,7 +192,7 @@ export const MonitorListComponent: React.FC<Props> = ({
       <EuiSpacer size="s" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
-        error={errors.join(';')}
+        error={error?.message}
         // Only set loading to true when there are no items present to prevent the bug outlined in
         // in https://github.com/elastic/eui/issues/2393 . Once that is fixed we can simply set the value here to
         // loading={loading}

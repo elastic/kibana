@@ -10,7 +10,7 @@ import { MonitorSummaryResult } from '../../../common/runtime_types';
 
 export interface MonitorList {
   list: MonitorSummaryResult;
-  errors: Error[];
+  error?: Error;
   loading: boolean;
 }
 
@@ -21,7 +21,6 @@ export const initialState: MonitorList = {
     summaries: [],
     totalSummaryCount: 0,
   },
-  errors: [],
   loading: false,
 };
 
@@ -39,11 +38,12 @@ export const monitorListReducer = handleActions<MonitorList, Payload>(
     ) => ({
       ...state,
       loading: false,
+      error: undefined,
       list: { ...action.payload },
     }),
     [String(getMonitorListFailure)]: (state: MonitorList, action: Action<Error>) => ({
       ...state,
-      errors: [...state.errors, action.payload],
+      error: action.payload,
       loading: false,
     }),
   },

@@ -56,7 +56,6 @@ exports[`MonitorList component MonitorListPagination component renders a no item
     lastRefresh={123}
     monitorList={
       Object {
-        "errors": Array [],
         "list": Object {
           "nextPagePagination": null,
           "prevPagePagination": null,
@@ -126,7 +125,6 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
     lastRefresh={123}
     monitorList={
       Object {
-        "errors": Array [],
         "list": Object {
           "nextPagePagination": "{\\"cursorKey\\":{\\"monitor_id\\":456},\\"cursorDirection\\":\\"AFTER\\",\\"sortOrder\\":\\"ASC\\"}",
           "prevPagePagination": "{\\"cursorKey\\":{\\"monitor_id\\":123},\\"cursorDirection\\":\\"BEFORE\\",\\"sortOrder\\":\\"ASC\\"}",
@@ -258,7 +256,6 @@ exports[`MonitorList component renders a no items message when no data is provid
     lastRefresh={123}
     monitorList={
       Object {
-        "errors": Array [],
         "list": Object {
           "nextPagePagination": null,
           "prevPagePagination": null,
@@ -328,9 +325,7 @@ exports[`MonitorList component renders error list 1`] = `
     lastRefresh={123}
     monitorList={
       Object {
-        "errors": Array [
-          [Error: foo message],
-        ],
+        "error": [Error: foo message],
         "list": Object {
           "nextPagePagination": null,
           "prevPagePagination": null,
@@ -462,7 +457,6 @@ exports[`MonitorList component renders loading state 1`] = `
     lastRefresh={123}
     monitorList={
       Object {
-        "errors": Array [],
         "list": Object {
           "nextPagePagination": null,
           "prevPagePagination": null,
@@ -1143,7 +1137,6 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
     lastRefresh={123}
     monitorList={
       Object {
-        "errors": Array [],
         "list": Object {
           "nextPagePagination": null,
           "prevPagePagination": null,

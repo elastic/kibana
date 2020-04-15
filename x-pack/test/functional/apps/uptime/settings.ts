@@ -53,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     // Failing: https://github.com/elastic/kibana/issues/60863
-    it.skip('changing index pattern setting is reflected elsewhere in UI', async () => {
+    it('changing index pattern setting is reflected elsewhere in UI', async () => {
       const settings = uptimeService.settings;
 
       const originalCount = await uptimePage.getSnapshotCount();

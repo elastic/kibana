@@ -78,7 +78,6 @@ describe('state selectors', () => {
         summaries: [],
         totalSummaryCount: 0,
       },
-      errors: [],
       loading: false,
     },
     ml: {

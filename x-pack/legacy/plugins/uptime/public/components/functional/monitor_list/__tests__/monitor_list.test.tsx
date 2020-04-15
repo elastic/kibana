@@ -98,7 +98,7 @@ describe('MonitorList component', () => {
   it('shallow renders the monitor list', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        monitorList={{ list: result, errors: [], loading: false }}
+        monitorList={{ list: result, loading: false }}
         lastRefresh={123}
         getMonitorList={jest.fn()}
       />
@@ -117,7 +117,6 @@ describe('MonitorList component', () => {
             prevPagePagination: null,
             totalSummaryCount: 0,
           },
-          errors: [],
           loading: true,
         }}
         lastRefresh={123}
@@ -130,7 +129,7 @@ describe('MonitorList component', () => {
   it('renders the monitor list', () => {
     const component = renderWithRouter(
       <MonitorListComponent
-        monitorList={{ list: result, errors: [], loading: false }}
+        monitorList={{ list: result, loading: false }}
         lastRefresh={123}
         getMonitorList={jest.fn()}
       />
@@ -142,7 +141,7 @@ describe('MonitorList component', () => {
   it('renders error list', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        monitorList={{ list: result, errors: [new Error('foo message')], loading: false }}
+        monitorList={{ list: result, error: new Error('foo message'), loading: false }}
         lastRefresh={123}
         getMonitorList={jest.fn()}
       />
@@ -154,7 +153,7 @@ describe('MonitorList component', () => {
   it('renders loading state', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        monitorList={{ list: result, errors: [], loading: true }}
+        monitorList={{ list: result, loading: true }}
         lastRefresh={123}
         getMonitorList={jest.fn()}
       />
@@ -252,7 +251,6 @@ describe('MonitorList component', () => {
             list: {
               ...paginationResult,
             },
-            errors: [],
             loading: false,
           }}
           lastRefresh={123}
@@ -273,7 +271,6 @@ describe('MonitorList component', () => {
               prevPagePagination: null,
               totalSummaryCount: 0,
             },
-            errors: [],
             loading: false,
           }}
           lastRefresh={123}
