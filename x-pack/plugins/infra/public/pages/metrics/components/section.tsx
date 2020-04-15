@@ -41,6 +41,9 @@ export const Section: FunctionComponent<SectionProps> = ({
       if (metric === null) {
         return accumulatedChildren;
       }
+      if (!child.props.label) {
+        return accumulatedChildren;
+      }
       return [
         ...accumulatedChildren,
         {

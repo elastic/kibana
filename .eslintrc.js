@@ -109,7 +109,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/lens/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/lens/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         'react-hooks/rules-of-hooks': 'off',
@@ -536,9 +536,15 @@ module.exports = {
      * ML overrides
      */
     {
-      files: ['x-pack/legacy/plugins/ml/**/*.js'],
+      files: ['x-pack/plugins/ml/**/*.js'],
       rules: {
         'no-shadow': 'error',
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: './x-pack',
+          },
+        ],
       },
     },
 
@@ -728,7 +734,7 @@ module.exports = {
      * Lens overrides
      */
     {
-      files: ['x-pack/legacy/plugins/lens/**/*.{ts,tsx}', 'x-pack/plugins/lens/**/*.{ts,tsx}'],
+      files: ['x-pack/plugins/lens/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },

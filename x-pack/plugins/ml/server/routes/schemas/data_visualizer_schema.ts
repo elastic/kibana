@@ -6,33 +6,27 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const dataVisualizerFieldStatsSchema = {
-  params: schema.object({
-    indexPatternTitle: schema.string(),
-  }),
-  body: schema.object({
-    query: schema.any(),
-    fields: schema.arrayOf(schema.any()),
-    samplerShardSize: schema.number(),
-    timeFieldName: schema.maybe(schema.string()),
-    earliest: schema.maybe(schema.number()),
-    latest: schema.maybe(schema.number()),
-    interval: schema.maybe(schema.string()),
-    maxExamples: schema.number(),
-  }),
-};
+export const indexPatternTitleSchema = schema.object({
+  indexPatternTitle: schema.string(),
+});
 
-export const dataVisualizerOverallStatsSchema = {
-  params: schema.object({
-    indexPatternTitle: schema.string(),
-  }),
-  body: schema.object({
-    query: schema.any(),
-    aggregatableFields: schema.arrayOf(schema.string()),
-    nonAggregatableFields: schema.arrayOf(schema.string()),
-    samplerShardSize: schema.number(),
-    timeFieldName: schema.maybe(schema.string()),
-    earliest: schema.maybe(schema.number()),
-    latest: schema.maybe(schema.number()),
-  }),
-};
+export const dataVisualizerFieldStatsSchema = schema.object({
+  query: schema.any(),
+  fields: schema.arrayOf(schema.any()),
+  samplerShardSize: schema.number(),
+  timeFieldName: schema.maybe(schema.string()),
+  earliest: schema.maybe(schema.number()),
+  latest: schema.maybe(schema.number()),
+  interval: schema.maybe(schema.string()),
+  maxExamples: schema.number(),
+});
+
+export const dataVisualizerOverallStatsSchema = schema.object({
+  query: schema.any(),
+  aggregatableFields: schema.arrayOf(schema.string()),
+  nonAggregatableFields: schema.arrayOf(schema.string()),
+  samplerShardSize: schema.number(),
+  timeFieldName: schema.maybe(schema.string()),
+  earliest: schema.maybe(schema.number()),
+  latest: schema.maybe(schema.number()),
+});
