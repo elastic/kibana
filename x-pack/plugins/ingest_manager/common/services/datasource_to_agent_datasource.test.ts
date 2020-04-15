@@ -38,6 +38,10 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
           fooVar: { value: 'foo-value' },
           fooVar2: { value: [1, 2] },
         },
+        pkg_stream: {
+          fooKey: 'fooValue1',
+          fooKey2: ['fooValue2'],
+        },
       },
       {
         id: 'test-logs-bar',
@@ -95,7 +99,7 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
     });
   });
 
-  it('returns agent datasource config with flattened input and stream configs', () => {
+  it('returns agent datasource config with flattened input and package stream', () => {
     expect(storedDatasourceToAgentDatasource({ ...mockDatasource, inputs: [mockInput] })).toEqual({
       id: 'mock-datasource',
       namespace: 'default',
@@ -105,34 +109,18 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         {
           type: 'test-logs',
           enabled: true,
-          inputVar: 'input-value',
-          inputVar3: {
-            testField: 'test',
-          },
           streams: [
             {
               id: 'test-logs-foo',
               enabled: true,
               dataset: 'foo',
-              fooVar: 'foo-value',
-              fooVar2: [1, 2],
+              fooKey: 'fooValue1',
+              fooKey2: ['fooValue2'],
             },
             {
               id: 'test-logs-bar',
               enabled: true,
               dataset: 'bar',
-              barVar: 'bar-value',
-              barVar2: [1, 2],
-              barVar3: [
-                {
-                  namespace: 'mockNamespace',
-                  anotherProp: 'test',
-                },
-                {
-                  namespace: 'mockNamespace2',
-                  anotherProp: 'test2',
-                },
-              ],
             },
           ],
         },
@@ -160,17 +148,13 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         {
           type: 'test-logs',
           enabled: true,
-          inputVar: 'input-value',
-          inputVar3: {
-            testField: 'test',
-          },
           streams: [
             {
               id: 'test-logs-foo',
               enabled: true,
               dataset: 'foo',
-              fooVar: 'foo-value',
-              fooVar2: [1, 2],
+              fooKey: 'fooValue1',
+              fooKey2: ['fooValue2'],
             },
           ],
         },

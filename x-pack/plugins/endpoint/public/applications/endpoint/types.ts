@@ -17,8 +17,14 @@ import {
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
-import { Datasource, NewDatasource } from '../../../../ingest_manager/common/types/models';
-import { GetAgentStatusResponse } from '../../../../ingest_manager/common/types/rest_spec';
+import {
+  Datasource,
+  NewDatasource,
+  GetAgentStatusResponse,
+  GetDatasourcesResponse,
+  GetOneDatasourceResponse,
+  UpdateDatasourceResponse,
+} from '../../../../ingest_manager/common';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -92,6 +98,8 @@ export interface PolicyListState {
   pageIndex: number;
   /** data is being retrieved from server */
   isLoading: boolean;
+  /** current location information */
+  location?: Immutable<EndpointAppLocation>;
 }
 
 /**
@@ -115,24 +123,53 @@ export interface PolicyDetailsState {
 }
 
 /**
+ * The URL search params that are supported by the Policy List page view
+ */
+export interface PolicyListUrlSearchParams {
+  page_index: number;
+  page_size: number;
+}
+
+/**
  * Endpoint Policy configuration
  */
 export interface PolicyConfig {
-  windows: UIPolicyConfig['windows'] & {
+  windows: {
+    events: {
+      dll_and_driver_load: boolean;
+      dns: boolean;
+      file: boolean;
+      network: boolean;
+      process: boolean;
+      registry: boolean;
+      security: boolean;
+    };
+    malware: MalwareFields;
     logging: {
       stdout: string;
       file: string;
     };
     advanced: PolicyConfigAdvancedOptions;
   };
-  mac: UIPolicyConfig['mac'] & {
+  mac: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    malware: MalwareFields;
     logging: {
       stdout: string;
       file: string;
     };
     advanced: PolicyConfigAdvancedOptions;
   };
-  linux: UIPolicyConfig['linux'] & {
+  linux: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
     logging: {
       stdout: string;
       file: string;
@@ -156,51 +193,34 @@ interface PolicyConfigAdvancedOptions {
 }
 
 /**
+ * Windows-specific policy configuration that is supported via the UI
+ */
+type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+
+/**
+ * Mac-specific policy configuration that is supported via the UI
+ */
+type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+
+/**
+ * Linux-specific policy configuration that is supported via the UI
+ */
+type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
+
+/**
  * The set of Policy configuration settings that are show/edited via the UI
  */
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
-export type UIPolicyConfig = {
-  windows: {
-    events: {
-      process: boolean;
-      network: boolean;
-    };
-    /** malware mode can be off, detect, prevent or prevent and notify user */
-    malware: MalwareFields;
-  };
-  mac: {
-    events: {
-      file: boolean;
-      process: boolean;
-      network: boolean;
-    };
-    malware: MalwareFields;
-  };
-
-  /**
-   * Linux-specific policy configuration that is supported via the UI
-   */
-  linux: {
-    events: {
-      file: boolean;
-      process: boolean;
-      network: boolean;
-    };
-  };
-};
+export interface UIPolicyConfig {
+  windows: WindowsPolicyConfig;
+  mac: MacPolicyConfig;
+  linux: LinuxPolicyConfig;
+}
 
 /** OS used in Policy */
 export enum OS {
   windows = 'windows',
   mac = 'mac',
   linux = 'linux',
-}
-
-/** Used in Policy */
-export enum EventingFields {
-  process = 'process',
-  network = 'network',
-  file = 'file',
 }
 
 /**
@@ -316,4 +336,16 @@ export interface AlertingIndexUIQueryParams {
   query?: string;
   date_range?: string;
   filters?: string;
+}
+
+export interface GetPolicyListResponse extends GetDatasourcesResponse {
+  items: PolicyData[];
+}
+
+export interface GetPolicyResponse extends GetOneDatasourceResponse {
+  item: PolicyData;
+}
+
+export interface UpdatePolicyResponse extends UpdateDatasourceResponse {
+  item: PolicyData;
 }

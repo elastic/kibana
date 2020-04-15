@@ -41,7 +41,7 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
   }
 };
 
-interface UsePostComment extends NewCommentState {
+export interface UsePostComment extends NewCommentState {
   postComment: (data: CommentRequest, updateCase: (newCase: Case) => void) => void;
 }
 
