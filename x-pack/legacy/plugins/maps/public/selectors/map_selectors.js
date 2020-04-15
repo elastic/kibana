@@ -51,7 +51,7 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
     case HeatmapLayer.type:
       return new HeatmapLayer({ layerDescriptor, source });
     case BlendedVectorLayer.type:
-      return new BlendedVectorLayer({ layerDescriptor, source, joins: [] });
+      return new BlendedVectorLayer({ layerDescriptor, source });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }

@@ -18,7 +18,7 @@ import { IVectorStyle } from './styles/vector/vector_style';
 import { IField } from './fields/field';
 import { SyncContext } from '../actions/map_actions';
 
-type VectorLayerArguments = {
+export type VectorLayerArguments = {
   source: IVectorSource;
   joins: IJoin[];
   layerDescriptor: VectorLayerDescriptor;

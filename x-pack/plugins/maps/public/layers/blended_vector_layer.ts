@@ -147,6 +147,11 @@ function getClusterStyleDescriptor(
   return clusterStyleDescriptor;
 }
 
+export interface BlendedVectorLayerArguments {
+  source: IVectorSource;
+  layerDescriptor: VectorLayerDescriptor;
+}
+
 export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   static type = LAYER_TYPE.BLENDED_VECTOR;
 
@@ -165,8 +170,11 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   private readonly _documentSource: IESSource;
   private readonly _documentStyle: IVectorStyle;
 
-  constructor(options: VectorLayerArguments) {
-    super(options);
+  constructor(options: BlendedVectorLayerArguments) {
+    super({
+      ...options,
+      joins: [],
+    });
 
     this._documentSource = this._source as IESSource; // VectorLayer constructor sets _source as document source
     this._documentStyle = this._style as IVectorStyle; // VectorLayer constructor sets _style as document source

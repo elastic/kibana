@@ -60,13 +60,10 @@ export interface ISource {
   shouldBeIndexed(): boolean;
   getPreIndexedShape(): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
-  loadStylePropsMeta(args: unknown): Promise<unknown>; // todo
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
 }
 
 export class AbstractSource implements ISource {
-  static isIndexingSource = false;
-
   readonly _descriptor: SourceDescriptor;
   readonly _inspectorAdapters?: object;
 
@@ -106,11 +103,6 @@ export class AbstractSource implements ISource {
     return '';
   }
 
-  /**
-   * return attribution for this layer as array of objects with url and label property.
-   * e.g. [{ url: 'example.com', label: 'foobar' }]
-   * @return {Promise<null>}
-   */
   async getAttributions(): Promise<Attribution[]> {
     return [];
   }
@@ -160,7 +152,7 @@ export class AbstractSource implements ISource {
   }
 
   shouldBeIndexed(): boolean {
-    return AbstractSource.isIndexingSource;
+    return false;
   }
 
   isESSource(): boolean {
@@ -175,10 +167,6 @@ export class AbstractSource implements ISource {
   // Returns function used to format value
   async createFieldFormatter(field: IField): Promise<FieldFormatter | null> {
     return null;
-  }
-
-  async loadStylePropsMeta(args: unknown): Promise<unknown> {
-    throw new Error(`Source#loadStylePropsMeta not implemented`);
   }
 
   async getValueSuggestions(field: IField, query: string): Promise<string[]> {

@@ -5,14 +5,18 @@
  */
 
 import { ReactElement } from 'react';
-import { StyleDescriptor } from '../../../common/descriptor_types';
+import { StyleDescriptor, StyleMetaDescriptor } from '../../../common/descriptor_types';
 import { ILayer } from '../layer';
+import { IField } from '../fields/field';
+import { DataRequest } from '../util/data_request';
 
 // todo: not sure if this is the right one
 export interface IStyle {
   getDescriptor(): StyleDescriptor;
-  getDescriptorWithMissingStylePropsRemoved(): unknown;
-  pluckStyleMetaFromSourceDataRequest(): unknown;
+  getDescriptorWithMissingStylePropsRemoved(
+    nextFields: IField[]
+  ): { hasChanges: boolean; nextStyleDescriptor?: StyleDescriptor };
+  pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): StyleMetaDescriptor;
   renderEditor({
     layer,
     onStyleDescriptorChange,
@@ -30,13 +34,15 @@ export class AbstractStyle implements IStyle {
     this._descriptor = descriptor;
   }
 
-  getDescriptorWithMissingStylePropsRemoved(/* nextOrdinalFields */) {
+  getDescriptorWithMissingStylePropsRemoved(
+    nextFields: IField[]
+  ): { hasChanges: boolean; nextStyleDescriptor?: StyleDescriptor } {
     return {
       hasChanges: false,
     };
   }
 
-  async pluckStyleMetaFromSourceDataRequest(/* sourceDataRequest */) {
+  pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): StyleMetaDescriptor {
     return {};
   }
 

@@ -20,6 +20,7 @@ export interface IESSource extends IVectorSource {
     limit: number,
     initialSearchContext?: object
   ): Promise<SearchSource>;
+  loadStylePropsMeta(args: unknown): Promise<unknown>; // todo
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
@@ -33,4 +34,5 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     limit: number,
     initialSearchContext?: object
   ): Promise<SearchSource>;
+  loadStylePropsMeta(args: unknown): Promise<unknown>; // todo
 }
