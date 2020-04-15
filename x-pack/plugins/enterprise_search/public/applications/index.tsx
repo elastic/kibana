@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParams } from 'src/core/public';
 import { ClientConfigType } from '../plugin';
 
-import { Main } from './components/main';
+import { Main } from './app_search';
 
 export const renderApp = (core: CoreStart, params: AppMountParams, config: ClientConfigType) => {
   ReactDOM.render(<Main http={core.http} appSearchUrl={config.host} />, params.element);

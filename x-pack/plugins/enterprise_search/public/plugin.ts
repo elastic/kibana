@@ -16,9 +16,9 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 
-import AppSearchLogo from './assets/logo.svg';
+import AppSearchLogo from './applications/app_search/assets/logo.svg';
 
 export interface ClientConfigType {
   host?: string;
@@ -27,7 +27,7 @@ export interface PluginsSetup {
   home?: HomePublicPluginSetup;
 }
 
-export class AppSearchPlugin implements Plugin {
+export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -38,14 +38,14 @@ export class AppSearchPlugin implements Plugin {
     const config = this.config;
 
     core.application.register({
-      id: 'app_search',
-      title: 'App Search',
+      id: 'enterprise_search',
+      title: 'App Search', // TODO: This will eventually be 'Enterprise Search' once there's more than just App Search in here
       euiIconType: AppSearchLogo, // TODO: Temporary - App Search will likely no longer need an icon once the nav structure changes.
       category: DEFAULT_APP_CATEGORIES.management, // TODO - This is likely not final/correct
       order: 10, // TODO - This will also likely not be needed once new nav structure changes land
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
-        const { renderApp } = await import('./applications/app');
+        const { renderApp } = await import('./applications');
 
         return renderApp(coreStart, params, config);
       },
@@ -57,10 +57,11 @@ export class AppSearchPlugin implements Plugin {
       icon: AppSearchLogo,
       description:
         'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
-      path: '/app/app_search',
+      path: '/app/enterprise_search/app_search',
       category: FeatureCatalogueCategory.DATA,
       showOnHomePage: true,
     });
+    // TODO: Workplace Search will likely also register its own feature catalogue section/card.
   }
 
   public start(core: CoreStart) {}

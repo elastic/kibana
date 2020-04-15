@@ -5,8 +5,8 @@
  */
 
 import { PluginInitializerContext } from 'src/core/public';
-import { AppSearchPlugin } from './plugin';
+import { EnterpriseSearchPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
-  return new AppSearchPlugin(initializerContext);
+  return new EnterpriseSearchPlugin(initializerContext);
 };

@@ -23,7 +23,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 
-import GettingStarted from '../../../assets/getting_started.png';
+import GettingStarted from '../../assets/getting_started.png';
 import './setup_guide.scss';
 
 export const SetupGuide: React.FC<> = () => {

@@ -15,8 +15,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import EnginesIcon from '../../../assets/engine.svg';
-import MetaEnginesIcon from '../../../assets/meta_engine.svg';
+import EnginesIcon from '../../assets/engine.svg';
+import MetaEnginesIcon from '../../assets/meta_engine.svg';
 
 import { LoadingState, EmptyState, NoUserState, ErrorState } from '../empty_states';
 import { EngineOverviewHeader } from '../engine_overview_header';
