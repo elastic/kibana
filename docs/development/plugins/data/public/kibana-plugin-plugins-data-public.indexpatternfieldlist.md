@@ -24,5 +24,5 @@ export declare class FieldList extends Array<Field> implements IFieldList
 |  [getByName](./kibana-plugin-plugins-data-public.indexpatternfieldlist.getbyname.md) |  | <code>(name: string) =&gt; Field &#124; undefined</code> |  |
 |  [getByType](./kibana-plugin-plugins-data-public.indexpatternfieldlist.getbytype.md) |  | <code>(type: string) =&gt; any[]</code> |  |
 |  [remove](./kibana-plugin-plugins-data-public.indexpatternfieldlist.remove.md) |  | <code>(field: IFieldType) =&gt; void</code> |  |
-|  [update](./kibana-plugin-plugins-data-public.indexpatternfieldlist.update.md) |  | <code>(field: Field) =&gt; void</code> |  |
+|  [update](./kibana-plugin-plugins-data-public.indexpatternfieldlist.update.md) |  | <code>(field: Record&lt;string, any&gt;) =&gt; void</code> |  |
 

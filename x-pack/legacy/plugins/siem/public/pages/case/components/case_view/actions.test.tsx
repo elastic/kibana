@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { TestProviders } from '../../../../mock';
-import { basicCase } from '../__mock__/case_data';
+import { basicCase } from '../../../../containers/case/mock';
 import { CaseViewActions } from './actions';
 jest.mock('../../../../containers/case/use_delete_cases');
 const useDeleteCasesMock = useDeleteCases as jest.Mock;

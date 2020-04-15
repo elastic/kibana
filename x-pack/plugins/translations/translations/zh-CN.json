@@ -799,8 +799,6 @@
     "data.search.searchBar.savedQueryDescriptionLabelText": "描述",
     "data.search.searchBar.savedQueryDescriptionText": "保存想要再次使用的查询文本和筛选。",
     "data.search.searchBar.savedQueryForm.titleConflictText": "标题与现有已保存查询有冲突",
-    "data.search.searchBar.savedQueryForm.titleMissingText": "“名称”必填",
-    "data.search.searchBar.savedQueryForm.whitespaceErrorText": "标题不能包含前导或尾随空格",
     "data.search.searchBar.savedQueryFormCancelButtonText": "取消",
     "data.search.searchBar.savedQueryFormSaveButtonText": "保存",
     "data.search.searchBar.savedQueryFormTitle": "保存查询",

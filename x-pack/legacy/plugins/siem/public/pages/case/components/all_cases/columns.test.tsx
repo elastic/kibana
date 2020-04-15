@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 
 import { ServiceNowColumn } from './columns';
 
-import { useGetCasesMockState } from '../__mock__/case_data';
+import { useGetCasesMockState } from '../../../../containers/case/mock';
 
 describe('ServiceNowColumn ', () => {
   it('Not pushed render', () => {
