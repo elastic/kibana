@@ -14,16 +14,15 @@ import {
   EuiForm,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { isEqual } from 'lodash';
+import { isEqual, set, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Link } from 'react-router-dom';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
-import { DynamicSettings } from '../../common/runtime_types';
+import { DynamicSettings, DynamicSettingsType } from '../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -53,15 +52,22 @@ export const SettingsPage = () => {
     setFormFields({ ...dss.settings });
   }
 
+  const blankStr = 'May not be blank';
   const fieldErrors = formFields && {
-    heartbeatIndices: formFields.heartbeatIndices.match(/^\S+$/) ? null : 'May not be blank',
+    heartbeatIndices: formFields.heartbeatIndices.match(/^\S+$/) ? null : blankStr,
+    certificatesThresholds: {
+      errorState: formFields.certificatesThresholds?.errorState ? null : blankStr,
+      warningState: formFields.certificatesThresholds?.warningState ? null : blankStr,
+    },
   };
+
   const isFormValid = !(fieldErrors && Object.values(fieldErrors).find(v => !!v));
 
   const onChangeFormField = (field: keyof DynamicSettings, value: any) => {
     if (formFields) {
-      formFields[field] = value;
-      setFormFields({ ...formFields });
+      const newFormFields = cloneDeep(formFields);
+      set(newFormFields, field, value);
+      setFormFields(cloneDeep(newFormFields));
     }
   };
 

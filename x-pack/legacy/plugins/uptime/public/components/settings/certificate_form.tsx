@@ -44,35 +44,37 @@ export const CertificateExpirationForm: React.FC = ({
         title={
           <h4>
             <FormattedMessage
-              id="xpack.uptime.sourceConfiguration.heartbeatIndicesTitle"
-              defaultMessage="Uptime indices"
+              id="xpack.uptime.sourceConfiguration.stateThresholds"
+              defaultMessage="Expiration State Thresholds"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.uptime.sourceConfiguration.heartbeatIndicesDescription"
-            defaultMessage="Index pattern for matching indices that contain Heartbeat data"
+            id="xpack.uptime.sourceConfiguration.stateThresholdsDescription"
+            defaultMessage="Set certificate expiration warning/error thresholds"
           />
         }
       >
         <EuiFormRow
-          describedByIds={['heartbeatIndices']}
-          error={fieldErrors?.heartbeatIndices}
+          describedByIds={['errorState']}
+          error={fieldErrors?.certificatesThresholds?.errorState}
           fullWidth
           helpText={
             <FormattedMessage
-              id="xpack.uptime.sourceConfiguration.heartbeatIndicesDefaultValue"
+              id="xpack.uptime.sourceConfiguration.errorStateDefaultValue"
               defaultMessage="The default value is {defaultValue}"
               values={{
-                defaultValue: <EuiCode>{defaultDynamicSettings.heartbeatIndices}</EuiCode>,
+                defaultValue: (
+                  <EuiCode>{defaultDynamicSettings.certificatesThresholds.errorState}</EuiCode>
+                ),
               }}
             />
           }
-          isInvalid={!!fieldErrors?.heartbeatIndices}
+          isInvalid={!!fieldErrors?.certificatesThresholds?.errorState}
           label={
             <FormattedMessage
-              id="xpack.uptime.sourceConfiguration.heartbeatIndicesLabel"
+              id="xpack.uptime.sourceConfiguration.errorStateLabel"
               defaultMessage="Error state"
             />
           }
@@ -80,36 +82,43 @@ export const CertificateExpirationForm: React.FC = ({
           <EuiFlexGroup>
             <EuiFlexItem grow={2}>
               <EuiFieldNumber
-                data-test-subj={`heartbeat-indices-input-${dss.loading ? 'loading' : 'loaded'}`}
+                data-test-subj={`error-state-threshold-input-${dss.loading ? 'loading' : 'loaded'}`}
                 fullWidth
                 disabled={isDisabled}
                 isLoading={dss.loading}
-                value={formFields?.heartbeatIndices || ''}
-                onChange={(event: any) => onChange('heartbeatIndices', event.currentTarget.value)}
+                value={formFields?.certificatesThresholds?.errorState || ''}
+                onChange={({ currentTarget: { value } }: any) =>
+                  onChange(
+                    'certificatesThresholds.errorState',
+                    value === '' ? undefined : Number(value)
+                  )
+                }
               />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
-              <EuiSelect />
+              <EuiSelect options={[{ value: 'day', text: 'Days' }]} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
         <EuiFormRow
-          describedByIds={['heartbeatIndices']}
-          error={fieldErrors?.heartbeatIndices}
+          describedByIds={['warningState']}
+          error={fieldErrors?.certificatesThresholds?.warningState}
           fullWidth
           helpText={
             <FormattedMessage
-              id="xpack.uptime.sourceConfiguration.heartbeatIndicesDefaultValue"
+              id="xpack.uptime.sourceConfiguration.warningStateDefaultValue"
               defaultMessage="The default value is {defaultValue}"
               values={{
-                defaultValue: <EuiCode>{defaultDynamicSettings.heartbeatIndices}</EuiCode>,
+                defaultValue: (
+                  <EuiCode>{defaultDynamicSettings.certificatesThresholds.warningState}</EuiCode>
+                ),
               }}
             />
           }
-          isInvalid={!!fieldErrors?.heartbeatIndices}
+          isInvalid={!!fieldErrors?.certificatesThresholds.warningState}
           label={
             <FormattedMessage
-              id="xpack.uptime.sourceConfiguration.heartbeatIndicesLabel"
+              id="xpack.uptime.sourceConfiguration.warningStateLabel"
               defaultMessage="Warning state"
             />
           }
@@ -117,16 +126,20 @@ export const CertificateExpirationForm: React.FC = ({
           <EuiFlexGroup>
             <EuiFlexItem grow={2}>
               <EuiFieldNumber
-                data-test-subj={`heartbeat-indices-input-${dss.loading ? 'loading' : 'loaded'}`}
+                data-test-subj={`warning-state-threshold-input-${
+                  dss.loading ? 'loading' : 'loaded'
+                }`}
                 fullWidth
                 disabled={isDisabled}
                 isLoading={dss.loading}
-                value={formFields?.heartbeatIndices || ''}
-                onChange={(event: any) => onChange('heartbeatIndices', event.currentTarget.value)}
+                value={formFields?.certificatesThresholds?.warningState || ''}
+                onChange={(event: any) =>
+                  onChange('certificatesThresholds.warningState', Number(event.currentTarget.value))
+                }
               />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
-              <EuiSelect />
+              <EuiSelect options={[{ value: 'day', text: 'Days' }]} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
