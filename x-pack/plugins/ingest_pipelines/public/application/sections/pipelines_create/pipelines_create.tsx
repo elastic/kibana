@@ -43,6 +43,10 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
     history.push(BASE_PATH);
   };
 
+  const onCancel = () => {
+    history.push(BASE_PATH);
+  };
+
   useEffect(() => {
     services.breadcrumbs.setBreadcrumbs('create');
   }, [services]);
@@ -82,7 +86,12 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
 
         <EuiSpacer size="l" />
 
-        <PipelineForm onSave={onSave} isSaving={isSaving} saveError={saveError} />
+        <PipelineForm
+          onSave={onSave}
+          onCancel={onCancel}
+          isSaving={isSaving}
+          saveError={saveError}
+        />
       </EuiPageContent>
     </EuiPageBody>
   );

@@ -33,6 +33,7 @@ import { pipelineFormSchema } from './schema';
 
 interface Props {
   onSave: (pipeline: Pipeline) => void;
+  onCancel: () => void;
   isSaving: boolean;
   saveError: any;
   defaultValue?: Pipeline;
@@ -54,6 +55,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
   isSaving,
   saveError,
   isEditing,
+  onCancel,
 }) => {
   const { services } = useKibana();
 
@@ -94,22 +96,6 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      {saveError ? (
-        <>
-          <SectionError
-            title={
-              <FormattedMessage
-                id="xpack.ingestPipelines.form.savePipelineError"
-                defaultMessage="Unable to create pipeline"
-              />
-            }
-            error={saveError}
-            data-test-subj="savePipelineError"
-          />
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
-
       <Form
         form={form}
         data-test-subj="pipelineForm"
@@ -292,20 +278,49 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
 
         <EuiSpacer size="l" />
 
+        {/* Request error */}
+        {saveError ? (
+          <>
+            <SectionError
+              title={
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.savePipelineError"
+                  defaultMessage="Unable to create pipeline"
+                />
+              }
+              error={saveError}
+              data-test-subj="savePipelineError"
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+
         {/* Form submission */}
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              color="secondary"
-              iconType="check"
-              onClick={form.submit}
-              data-test-subj="submitButton"
-              disabled={form.isSubmitted && form.isValid === false}
-              isLoading={isSaving}
-            >
-              {saveButtonLabel}
-            </EuiButton>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiButton
+                  fill
+                  color="secondary"
+                  iconType="check"
+                  onClick={form.submit}
+                  data-test-subj="submitButton"
+                  disabled={form.isSubmitted && form.isValid === false}
+                  isLoading={isSaving}
+                >
+                  {saveButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonEmpty color="primary" onClick={onCancel}>
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.form.cancelButtonLabel"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

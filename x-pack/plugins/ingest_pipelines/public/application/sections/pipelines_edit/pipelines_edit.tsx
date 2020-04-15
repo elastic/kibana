@@ -56,6 +56,10 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
     history.push(BASE_PATH);
   };
 
+  const onCancel = () => {
+    history.push(BASE_PATH);
+  };
+
   useEffect(() => {
     services.breadcrumbs.setBreadcrumbs('edit');
   }, [services.breadcrumbs]);
@@ -88,6 +92,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
     content = (
       <PipelineForm
         onSave={onSave}
+        onCancel={onCancel}
         isSaving={isSaving}
         saveError={saveError}
         defaultValue={pipeline}
