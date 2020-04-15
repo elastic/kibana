@@ -14,7 +14,7 @@ import { TileServiceSelect } from './tile_service_select';
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { EMS_TMS } from '../../../../common/constants';
+import { SOURCE_TYPES } from '../../../../common/constants';
 import { getInjectedVarFunc, getUiSettings } from '../../../kibana_services';
 import { registerSource } from '../source_registry';
 
@@ -23,7 +23,7 @@ const sourceTitle = i18n.translate('xpack.maps.source.emsTileTitle', {
 });
 
 export class EMSTMSSource extends AbstractTMSSource {
-  static type = EMS_TMS;
+  static type = SOURCE_TYPES.EMS_TMS;
 
   static createDescriptor(sourceConfig) {
     return {
@@ -148,7 +148,7 @@ export class EMSTMSSource extends AbstractTMSSource {
 
 registerSource({
   ConstructorFunction: EMSTMSSource,
-  type: EMS_TMS,
+  type: SOURCE_TYPES.EMS_TMS,
 });
 
 export const emsBaseMapLayerWizardConfig = {
