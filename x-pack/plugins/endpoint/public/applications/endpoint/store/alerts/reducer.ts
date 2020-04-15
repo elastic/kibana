@@ -20,6 +20,15 @@ const initialState = (): AlertListState => {
       patterns: [],
     },
     allowlistModalIsOpen: false,
+    allowlistForm: {
+      advancedOptionsAreOpen: false,
+      comment: '',
+      filePath: false,
+      sha256: false,
+      signer: false,
+      actingProcessPath: false,
+      closeAlerts: false,
+    },
   };
 };
 
@@ -70,6 +79,31 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
     return {
       ...state,
       allowlistModalIsOpen: false,
+    };
+  } else if (action.type === 'userOpenedAllowlistAdvancedOptions') {
+    return {
+      ...state,
+      allowlistForm: {
+        ...state.allowlistForm,
+        advancedOptionsAreOpen: true,
+      },
+    };
+  } else if (action.type === 'userClosedAllowlistAdvancedOptions') {
+    return {
+      ...state,
+      allowlistForm: {
+        ...state.allowlistForm,
+        advancedOptionsAreOpen: false,
+      },
+    };
+  } else if (action.type === 'userChangedAllowlistForm') {
+    const [key, value] = action.payload;
+    return {
+      ...state,
+      allowlistForm: {
+        ...state.allowlistForm,
+        [key]: value,
+      },
     };
   }
 

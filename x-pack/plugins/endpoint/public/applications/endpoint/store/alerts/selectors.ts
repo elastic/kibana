@@ -25,6 +25,8 @@ export const selectedAlertDetailsData = (state: AlertListState) => state.alertDe
 
 export const allowlistModalIsOpen = (state: AlertListState) => state.allowlistModalIsOpen;
 
+export const allowlistForm = (state: AlertListState) => state.allowlistForm;
+
 /**
  * Returns the alert list pagination data from state
  */

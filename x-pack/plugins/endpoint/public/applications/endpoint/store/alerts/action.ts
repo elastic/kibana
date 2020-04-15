@@ -31,9 +31,25 @@ interface UserClosedAllowlistModal {
   readonly type: 'userClosedAllowlistModal';
 }
 
+interface UserOpenedAllowlistAdvancedOptions {
+  readonly type: 'userOpenedAllowlistAdvancedOptions';
+}
+
+interface UserClosedAllowlistAdvancedOptions {
+  readonly type: 'userClosedAllowlistAdvancedOptions';
+}
+
+interface UserChangedAllowlistForm {
+  readonly type: 'userChangedAllowlistForm';
+  readonly payload: [string, string | boolean];
+}
+
 export type AlertAction =
   | ServerReturnedAlertsData
   | ServerReturnedAlertDetailsData
   | ServerReturnedSearchBarIndexPatterns
   | UserOpenedAllowlistModal
-  | UserClosedAllowlistModal;
+  | UserClosedAllowlistModal
+  | UserOpenedAllowlistAdvancedOptions
+  | UserClosedAllowlistAdvancedOptions
+  | UserChangedAllowlistForm;

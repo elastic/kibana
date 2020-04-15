@@ -43,7 +43,7 @@ import { AlertDetailsOverview } from './details';
 import { FormattedDate } from './formatted_date';
 import { AlertIndexSearchBar } from './index_search_bar';
 import { AlertAction } from '../../store/alerts';
-import { AllowlistForm } from './allowlist_form';
+import { AllowlistForm } from './allowlist/allowlist_form';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
@@ -244,7 +244,7 @@ export const AlertIndex = memo(() => {
           </EuiFlyoutBody>
         </EuiFlyout>
       )}
-      {allowListModalIsOpen && (
+      {allowlistModalIsOpen && (
         <EuiOverlayMask>
           <EuiModal onClose={closeAllowlistModal}>
             <EuiModalHeader>
@@ -260,7 +260,7 @@ export const AlertIndex = memo(() => {
             </EuiModalBody>
 
             <EuiModalFooter>
-              <EuiButtonEmpty onClick={closeAllowListModal}>
+              <EuiButtonEmpty onClick={closeAllowlistModal}>
                 {i18n.translate(
                   'xpack.endpoint.application.endpoint.alerts.allowlistModal.cancel',
                   {
@@ -269,7 +269,7 @@ export const AlertIndex = memo(() => {
                 )}
               </EuiButtonEmpty>
 
-              <EuiButton onClick={closeAllowListModal} fill>
+              <EuiButton onClick={closeAllowlistModal} fill>
                 {i18n.translate(
                   'xpack.endpoint.application.endpoint.alerts.allowlistModal.submit',
                   {

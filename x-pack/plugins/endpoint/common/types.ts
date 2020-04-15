@@ -31,7 +31,7 @@ export type Direction = 'asc' | 'desc';
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
-  static ALERT_INDEX_NAME = 'events-endpoint-1';
+  static ALERT_INDEX_NAME = '.alerts-endpoint-000001';
   static EVENT_INDEX_NAME = 'events-endpoint-*';
   static DEFAULT_TOTAL_HITS = 10000;
   /**

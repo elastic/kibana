@@ -37,7 +37,8 @@ export const TakeActionDropdown = memo(() => {
   }, []);
 
   const openAllowlistModal = useCallback(() => {
-    dispatch({ type: 'userOpenedAllowListModal' });
+    dispatch({ type: 'userOpenedAllowlistModal' });
+    setIsDropdownOpen(false);
   }, [dispatch]);
 
   return (

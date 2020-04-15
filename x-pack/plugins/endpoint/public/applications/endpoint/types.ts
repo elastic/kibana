@@ -314,6 +314,16 @@ export interface AlertListState {
   readonly searchBar: AlertsSearchBarState;
 
   readonly allowlistModalIsOpen: boolean;
+
+  readonly allowlistForm: {
+    readonly advancedOptionsAreOpen: boolean;
+    readonly comment: string;
+    readonly filePath: boolean;
+    readonly sha256: boolean;
+    readonly signer: boolean;
+    readonly actingProcessPath: boolean;
+    readonly closeAlerts: boolean;
+  };
 }
 
 /**
