@@ -11,11 +11,17 @@ jest.mock('getos', () => {
 import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
 import getos from 'getos';
 
-function defaultTest(os, expectedDefault) {
+interface TestObject {
+  os: string;
+  dist?: string;
+  release?: string;
+}
+
+function defaultTest(os: TestObject, expectedDefault: boolean) {
   test(`${expectedDefault ? 'disabled' : 'enabled'} on ${JSON.stringify(os)}`, async () => {
-    getos.mockImplementation(cb => cb(null, os));
+    (getos as jest.Mock).mockImplementation(cb => cb(null, os));
     const actualDefault = await getDefaultChromiumSandboxDisabled();
-    expect(actualDefault).toBe(expectedDefault);
+    expect(actualDefault.disableSandbox).toBe(expectedDefault);
   });
 }
 

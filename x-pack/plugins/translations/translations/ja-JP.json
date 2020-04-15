@@ -12443,7 +12443,6 @@
     "xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel": "印刷用に最適化",
     "xpack.reporting.selfCheck.ok": "レポートプラグイン自己チェックOK!",
     "xpack.reporting.selfCheck.warning": "レポートプラグイン自己チェックで警告が発生しました: {err}",
-    "xpack.reporting.selfCheckEncryptionKey.warning": "{setting}のランダムキーを生成しています。保留中のレポートの再開が失敗しないように、kibana.ymlで{setting}を設定してください",
     "xpack.reporting.shareContextMenu.csvReportsButtonLabel": "CSV レポート",
     "xpack.reporting.shareContextMenu.pdfReportsButtonLabel": "PDF レポート",
     "xpack.reporting.shareContextMenu.pngReportsButtonLabel": "PNG レポート",

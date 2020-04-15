@@ -31,12 +31,17 @@ const distroSupportsUnprivilegedUsernamespaces = (distro: string) => {
   return true;
 };
 
-export async function getDefaultChromiumSandboxDisabled() {
+interface OsSummary {
+  disableSandbox: boolean;
+  os: { os: string; dist?: string; release?: string };
+}
+
+export async function getDefaultChromiumSandboxDisabled(): Promise<OsSummary> {
   const os = await getos();
 
   if (os.os === 'linux' && !distroSupportsUnprivilegedUsernamespaces(os.dist)) {
-    return true;
+    return { os, disableSandbox: true };
   } else {
-    return false;
+    return { os, disableSandbox: false };
   }
 }
