@@ -7,10 +7,24 @@
 import { Dispatch } from 'redux';
 import { AppAction, GlobalState, MiddlewareFactory } from '../types';
 
+type UnionOfActionTypeToAction<S extends AppAction = AppAction> = S extends unknown
+  ? { [K in S['type']]: S }
+  : never;
+
+type UnionToIntersection<U> = (U extends unknown
+? (k: U) => void
+: never) extends (k: infer I) => void
+  ? I
+  : never;
+
+type ActionsMap<A extends AppAction = AppAction> = UnionToIntersection<
+  UnionOfActionTypeToAction<A>
+>;
+
 /**
  * Utilities for testing Redux middleware
  */
-export interface MiddlewareActionSpyHelper<S = GlobalState> {
+export interface MiddlewareActionSpyHelper<S = GlobalState, A extends AppAction = AppAction> {
   /**
    * Returns a promise that is fulfilled when the given action is dispatched or a timeout occurs.
    * The use of this method instead of a `sleep()` type of delay should avoid test case instability
@@ -18,7 +32,7 @@ export interface MiddlewareActionSpyHelper<S = GlobalState> {
    *
    * @param actionType
    */
-  waitForAction: (actionType: AppAction['type']) => Promise<void>;
+  waitForAction: <T extends keyof ActionsMap<A>>(actionType: T) => Promise<ActionsMap<A>[T]>;
   /**
    * A property holding the information around the calls that were processed by the  internal
    * `actionSpyMiddlware`. This property holds the information typically found in Jets's mocked
@@ -30,7 +44,7 @@ export interface MiddlewareActionSpyHelper<S = GlobalState> {
    * Also - do not hold on to references to this property value if `jest.clearAllMocks()` or
    * `jest.resetAllMocks()` is called between usages of the value.
    */
-  dispatchSpy: jest.Mock<Dispatch<AppAction>>['mock'];
+  dispatchSpy: jest.Mock<Dispatch<A>>['mock'];
   /**
    * Redux middleware that enables spying on the action that are dispatched through the store
    */
@@ -65,23 +79,26 @@ export interface MiddlewareActionSpyHelper<S = GlobalState> {
  *   expect(dispatchSpy.calls.length).toBe(2)
  * });
  */
-export const createSpyMiddleware = <S = GlobalState>(): MiddlewareActionSpyHelper<S> => {
-  type ActionWatcher = (action: AppAction) => void;
+export const createSpyMiddleware = <
+  S = GlobalState,
+  A extends AppAction = AppAction
+>(): MiddlewareActionSpyHelper<S, A> => {
+  type ActionWatcher = (action: A) => void;
 
   const watchers = new Set<ActionWatcher>();
-  let spyDispatch: jest.Mock<Dispatch<AppAction>>;
+  let spyDispatch: jest.Mock<Dispatch<A>>;
 
   return {
-    waitForAction: async (actionType: string) => {
+    waitForAction: async actionType => {
       // Error is defined here so that we get a better stack trace that points to the test from where it was used
       const err = new Error(`action '${actionType}' was not dispatched within the allocated time`);
 
-      await new Promise((resolve, reject) => {
+      return new Promise<ActionsMap<A>[typeof actionType]>((resolve, reject) => {
         const watch: ActionWatcher = action => {
           if (action.type === actionType) {
             watchers.delete(watch);
             clearTimeout(timeout);
-            resolve();
+            resolve((action as unknown) as ActionsMap<A>[typeof actionType]);
           }
         };
 
