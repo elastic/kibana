@@ -8,6 +8,7 @@ import { IIndexPattern } from 'src/plugins/data/public';
 
 export function getLicenseId(): any;
 export function getInspector(): any;
+export function getFileUploadComponent(): any;
 export function getIndexPatternSelectComponent(): any;
 export function getHttp(): any;
 export function getTimeFilter(): any;
