@@ -10,15 +10,14 @@ import {
   buildSiemResponse,
   buildRouteValidation,
 } from '../../detection_engine/routes/utils';
-import { createTemplateTimelines } from './utils/create_template_timelines';
+import { createTimelines, getTimeline } from './utils/create_timelines';
 import { FrameworkRequest } from '../../framework';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
 import { SetupPlugins } from '../../../plugin';
-import { Createimeline } from '../types';
-import { createTimelines } from './utils/create_timelines';
+import { UpdateTimeline } from '../types';
 
-import { getTimeline, timelineSavedObjectOmittedFields } from './utils/import_timelines';
+import { timelineSavedObjectOmittedFields } from './utils/import_timelines';
 import { updateTimelineSchema } from './schemas/update_timelines_schema';
 export const updateTimelinesRoute = (
   router: IRouter,
@@ -61,7 +60,7 @@ export const updateTimelinesRoute = (
         } else {
           await createTimelines(
             (frameworkRequest as unknown) as FrameworkRequest,
-            omit(timelineSavedObjectOmittedFields, request.body),
+            omit(timelineSavedObjectOmittedFields, timeline),
             timelineId,
             version
           );

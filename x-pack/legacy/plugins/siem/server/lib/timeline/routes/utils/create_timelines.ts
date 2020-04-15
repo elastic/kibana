@@ -6,6 +6,10 @@
 import { Timeline } from '../../saved_object';
 import { PinnedEvent } from '../../../pinned_event/saved_object';
 import { Note } from '../../../note/saved_object';
+import { FrameworkRequest } from '../../../framework';
+import { SavedTimeline } from '../../types';
+import { NoteResult } from '../../../../../public/graphql/types';
+import { SavedNote } from '../../../note/types';
 
 const pinnedEventLib = new PinnedEvent();
 const timelineLib = new Timeline();

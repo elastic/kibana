@@ -14,11 +14,11 @@ import { FrameworkRequest } from '../../framework';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
 import { SetupPlugins } from '../../../plugin';
-import { Createimeline } from '../types';
-import { createTimelines } from './utils/create_timelines';
+import { CreateTimeline } from '../types';
+import { createTimelines, getTimeline } from './utils/create_timelines';
 
-import { getTimeline, timelineSavedObjectOmittedFields } from './utils/import_timelines';
-import { createTimelineSchema } from './schemas/import_timelines_schema';
+import { timelineSavedObjectOmittedFields } from './utils/import_timelines';
+import { createTimelineSchema } from './schemas/create_timelines_schema';
 export const createTimelinesRoute = (
   router: IRouter,
   config: LegacyServices['config'],
@@ -28,7 +28,7 @@ export const createTimelinesRoute = (
     {
       path: TIMELINE_URL,
       validate: {
-        body: buildRouteValidation<Createimeline>(createTimelineSchema),
+        body: buildRouteValidation<CreateTimeline>(createTimelineSchema),
       },
       options: {
         tags: ['access:siem'],
@@ -55,7 +55,7 @@ export const createTimelinesRoute = (
         if (existTimeline == null || isNil(timelineId)) {
           const newTimeline = await createTimelines(
             (frameworkRequest as unknown) as FrameworkRequest,
-            omit(timelineSavedObjectOmittedFields, request.body),
+            omit(timelineSavedObjectOmittedFields, timeline),
             timelineId,
             version
           );

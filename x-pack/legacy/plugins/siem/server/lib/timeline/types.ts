@@ -248,11 +248,13 @@ export type ExportedTimelines = TimelineSavedObject &
     pinnedEventIds: string[];
   };
 
-export interface Createtimeline {
+export interface CreateTimeline {
   timeline: TimelineSavedObject;
   timelineId?: string | null;
-  timelineVersion?: string | null;
+  version?: string | null;
 }
+
+export type UpdateTimeline = CreateTimeline;
 
 export interface BulkGetInput {
   type: string;
