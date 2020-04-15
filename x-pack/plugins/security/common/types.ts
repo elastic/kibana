@@ -8,5 +8,5 @@ export interface SessionInfo {
   now: number;
   idleTimeoutExpiration: number | null;
   lifespanExpiration: number | null;
-  provider: string;
+  provider: { type: string; name: string };
 }

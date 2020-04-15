@@ -8,6 +8,7 @@ import { ApplicationSetup, StartServicesAccessor, HttpSetup } from 'src/core/pub
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
 import { PluginStartDependencies } from '../plugin';
+import { accessNoticeApp } from './access_notice';
 import { loginApp } from './login';
 import { logoutApp } from './logout';
 import { loggedOutApp } from './logged_out';
@@ -37,6 +38,7 @@ export class AuthenticationService {
     const getCurrentUser = async () =>
       (await http.get('/internal/security/me', { asSystemRequest: true })) as AuthenticatedUser;
 
+    accessNoticeApp.create({ application, getStartServices });
     loginApp.create({ application, config, getStartServices, http });
     logoutApp.create({ application, http });
     loggedOutApp.create({ application, getStartServices, http });

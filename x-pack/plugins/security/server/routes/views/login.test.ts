@@ -141,6 +141,10 @@ describe('Login view routes', () => {
   });
 
   describe('Login state route', () => {
+    function getAuthcConfig(authcConfig: Record<string, unknown> = {}) {
+      return routeDefinitionParamsMock.create({ authc: { ...authcConfig } }).config.authc;
+    }
+
     let routeHandler: RequestHandler<any, any, any, 'get'>;
     let routeConfig: RouteConfig<any, any, any, 'get'>;
     beforeEach(() => {
@@ -235,14 +239,14 @@ describe('Login view routes', () => {
       const request = httpServerMock.createKibanaRequest();
       const contextMock = coreMock.createRequestHandlerContext();
 
-      const cases: Array<[boolean, ConfigType['authc']['sortedProviders']]> = [
-        [false, []],
-        [true, [{ type: 'basic', name: 'basic1', options: { order: 0, showInSelector: true } }]],
-        [true, [{ type: 'token', name: 'token1', options: { order: 0, showInSelector: true } }]],
+      const cases: Array<[boolean, ConfigType['authc']]> = [
+        [false, getAuthcConfig({ providers: { basic: { basic1: { order: 0, enabled: false } } } })],
+        [true, getAuthcConfig({ providers: { basic: { basic1: { order: 0 } } } })],
+        [true, getAuthcConfig({ providers: { token: { token1: { order: 0 } } } })],
       ];
 
-      for (const [showLoginForm, sortedProviders] of cases) {
-        config.authc.sortedProviders = sortedProviders;
+      for (const [showLoginForm, authcConfig] of cases) {
+        config.authc = authcConfig;
 
         const expectedPayload = expect.objectContaining({ showLoginForm });
         await expect(
@@ -261,46 +265,38 @@ describe('Login view routes', () => {
       const request = httpServerMock.createKibanaRequest();
       const contextMock = coreMock.createRequestHandlerContext();
 
-      const cases: Array<[
-        boolean,
-        ConfigType['authc']['sortedProviders'],
-        LoginState['selector']['providers']
-      ]> = [
+      const cases: Array<[ConfigType['authc'], LoginState['selector']['providers']]> = [
         // selector is disabled, providers shouldn't be returned.
         [
-          false,
-          [
-            { type: 'basic', name: 'basic1', options: { order: 0, showInSelector: true } },
-            { type: 'saml', name: 'saml1', options: { order: 1, showInSelector: true } },
-          ],
+          getAuthcConfig({
+            selector: { enabled: false },
+            providers: {
+              basic: { basic1: { order: 0 } },
+              saml: { saml1: { order: 1, realm: 'realm1' } },
+            },
+          }),
           [],
         ],
         // selector is enabled, but only basic/token is available, providers shouldn't be returned.
         [
-          true,
-          [{ type: 'basic', name: 'basic1', options: { order: 0, showInSelector: true } }],
+          getAuthcConfig({
+            selector: { enabled: true },
+            providers: { basic: { basic1: { order: 0 } } },
+          }),
           [],
         ],
         // selector is enabled, non-basic/token providers should be returned
         [
-          true,
-          [
-            {
-              type: 'basic',
-              name: 'basic1',
-              options: { order: 0, showInSelector: true, description: 'some-desc1' },
+          getAuthcConfig({
+            selector: { enabled: true },
+            providers: {
+              basic: { basic1: { order: 0 } },
+              saml: {
+                saml1: { order: 1, description: 'some-desc2', realm: 'realm1' },
+                saml2: { order: 2, description: 'some-desc3', realm: 'realm2' },
+              },
             },
-            {
-              type: 'saml',
-              name: 'saml1',
-              options: { order: 1, showInSelector: true, description: 'some-desc2' },
-            },
-            {
-              type: 'saml',
-              name: 'saml2',
-              options: { order: 2, showInSelector: true, description: 'some-desc3' },
-            },
-          ],
+          }),
           [
             { type: 'saml', name: 'saml1', description: 'some-desc2' },
             { type: 'saml', name: 'saml2', description: 'some-desc3' },
@@ -308,34 +304,30 @@ describe('Login view routes', () => {
         ],
         // selector is enabled, only non-basic/token providers that are enabled in selector should be returned.
         [
-          true,
-          [
-            {
-              type: 'basic',
-              name: 'basic1',
-              options: { order: 0, showInSelector: true, description: 'some-desc1' },
+          getAuthcConfig({
+            selector: { enabled: true },
+            providers: {
+              basic: { basic1: { order: 0 } },
+              saml: {
+                saml1: {
+                  order: 1,
+                  description: 'some-desc2',
+                  realm: 'realm1',
+                  showInSelector: false,
+                },
+                saml2: { order: 2, description: 'some-desc3', realm: 'realm2' },
+              },
             },
-            {
-              type: 'saml',
-              name: 'saml1',
-              options: { order: 1, showInSelector: false, description: 'some-desc2' },
-            },
-            {
-              type: 'saml',
-              name: 'saml2',
-              options: { order: 2, showInSelector: true, description: 'some-desc3' },
-            },
-          ],
+          }),
           [{ type: 'saml', name: 'saml2', description: 'some-desc3' }],
         ],
       ];
 
-      for (const [selectorEnabled, sortedProviders, expectedProviders] of cases) {
-        config.authc.selector.enabled = selectorEnabled;
-        config.authc.sortedProviders = sortedProviders;
+      for (const [authcConfig, expectedProviders] of cases) {
+        config.authc = authcConfig;
 
         const expectedPayload = expect.objectContaining({
-          selector: { enabled: selectorEnabled, providers: expectedProviders },
+          selector: { enabled: authcConfig.selector.enabled, providers: expectedProviders },
         });
         await expect(
           routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)

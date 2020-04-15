@@ -30,6 +30,7 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     showInSelector: schema.boolean({ defaultValue: true }),
     order: schema.number({ min: 0 }),
     description: schema.maybe(schema.string()),
+    accessNotice: schema.maybe(schema.string()),
     ...overrides,
   };
 }
@@ -147,7 +148,15 @@ export const ConfigSchema = schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
       defaultValue: {
-        basic: { basic: { enabled: true, showInSelector: true, order: 0, description: undefined } },
+        basic: {
+          basic: {
+            enabled: true,
+            showInSelector: true,
+            order: 0,
+            description: undefined,
+            accessNotice: undefined,
+          },
+        },
         token: undefined,
         saml: undefined,
         oidc: undefined,
@@ -225,25 +234,19 @@ export function createConfig(
   const sortedProviders: Array<{
     type: keyof ProvidersConfigType;
     name: string;
-    options: { order: number; showInSelector: boolean; description?: string };
+    order: number;
   }> = [];
   for (const [type, providerGroup] of Object.entries(providers)) {
-    for (const [name, { enabled, showInSelector, order, description }] of Object.entries(
-      providerGroup ?? {}
-    )) {
+    for (const [name, { enabled, order }] of Object.entries(providerGroup ?? {})) {
       if (!enabled) {
         delete providerGroup![name];
       } else {
-        sortedProviders.push({
-          type: type as any,
-          name,
-          options: { order, showInSelector, description },
-        });
+        sortedProviders.push({ type: type as any, name, order });
       }
     }
   }
 
-  sortedProviders.sort(({ options: { order: orderA } }, { options: { order: orderB } }) =>
+  sortedProviders.sort(({ order: orderA }, { order: orderB }) =>
     orderA < orderB ? -1 : orderA > orderB ? 1 : 0
   );
 
@@ -253,7 +256,8 @@ export function createConfig(
     typeof config.authc.selector.enabled === 'boolean'
       ? config.authc.selector.enabled
       : !isUsingLegacyProvidersFormat &&
-        sortedProviders.filter(provider => provider.options.showInSelector).length > 1;
+        sortedProviders.filter(({ type, name }) => providers[type]?.[name].showInSelector).length >
+          1;
 
   return {
     ...config,

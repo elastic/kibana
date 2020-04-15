@@ -57,12 +57,15 @@ export function defineLoginRoutes({
 
       let showLoginForm = false;
       const providers = [];
-      for (const { type, name, options } of sortedProviders) {
-        if (options.showInSelector) {
+      for (const { type, name } of sortedProviders) {
+        // Since `config.authc.sortedProviders` is based on `config.authc.providers` config we can
+        // be sure that config is present for every provider in `config.authc.sortedProviders`.
+        const { showInSelector, description } = config.authc.providers[type]?.[name]!;
+        if (showInSelector) {
           if (type === 'basic' || type === 'token') {
             showLoginForm = true;
           } else if (selector.enabled) {
-            providers.push({ type, name, description: options.description });
+            providers.push({ type, name, description });
           }
         }
       }

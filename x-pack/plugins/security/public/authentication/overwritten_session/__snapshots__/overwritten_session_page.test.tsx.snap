@@ -11,7 +11,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
   }
 >
   <div
-    className="secAuthenticationStatePage"
+    className="secAuthenticationStatePage "
   >
     <header
       className="secAuthenticationStatePage__header"

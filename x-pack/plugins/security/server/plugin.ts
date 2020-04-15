@@ -48,7 +48,15 @@ export interface LegacyAPI {
  * Describes public Security plugin contract returned at the `setup` stage.
  */
 export interface SecurityPluginSetup {
-  authc: Authentication;
+  authc: Pick<
+    Authentication,
+    | 'isAuthenticated'
+    | 'getCurrentUser'
+    | 'createAPIKey'
+    | 'invalidateAPIKey'
+    | 'grantAPIKeyAsInternalUser'
+    | 'invalidateAPIKeyAsInternalUser'
+  >;
   authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
 
   /**
@@ -126,7 +134,9 @@ export class Plugin {
       license$: licensing.license$,
     });
 
+    const auditLogger = new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger);
     const authc = await setupAuthentication({
+      auditLogger,
       http: core.http,
       clusterClient: this.clusterClient,
       config,
@@ -146,7 +156,7 @@ export class Plugin {
     });
 
     setupSavedObjects({
-      auditLogger: new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger),
+      auditLogger,
       authz,
       savedObjects: core.savedObjects,
       getSpacesService: this.getSpacesService,
@@ -167,7 +177,14 @@ export class Plugin {
     });
 
     return deepFreeze<SecurityPluginSetup>({
-      authc,
+      authc: {
+        isAuthenticated: authc.isAuthenticated,
+        getCurrentUser: authc.getCurrentUser,
+        createAPIKey: authc.createAPIKey,
+        invalidateAPIKey: authc.invalidateAPIKey,
+        grantAPIKeyAsInternalUser: authc.grantAPIKeyAsInternalUser,
+        invalidateAPIKeyAsInternalUser: authc.invalidateAPIKeyAsInternalUser,
+      },
 
       authz: {
         actions: authz.actions,

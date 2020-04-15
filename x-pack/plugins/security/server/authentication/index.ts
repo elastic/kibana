@@ -10,12 +10,13 @@ import {
   KibanaRequest,
   LoggerFactory,
 } from '../../../../../src/core/server';
+import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
+import { SecurityAuditLogger } from '../audit';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
 import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
-import { SecurityLicense } from '../../common/licensing';
 
 export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
@@ -35,6 +36,7 @@ export {
 } from './http_authentication';
 
 interface SetupAuthenticationParams {
+  auditLogger: SecurityAuditLogger;
   http: CoreSetup['http'];
   clusterClient: IClusterClient;
   config: ConfigType;
@@ -45,6 +47,7 @@ interface SetupAuthenticationParams {
 export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
 
 export async function setupAuthentication({
+  auditLogger,
   http,
   clusterClient,
   config,
@@ -82,6 +85,8 @@ export async function setupAuthentication({
   };
 
   const authenticator = new Authenticator({
+    auditLogger,
+    getCurrentUser,
     clusterClient,
     basePath: http.basePath,
     config: { session: config.session, authc: config.authc },
@@ -171,6 +176,7 @@ export async function setupAuthentication({
     logout: authenticator.logout.bind(authenticator),
     getSessionInfo: authenticator.getSessionInfo.bind(authenticator),
     isProviderTypeEnabled: authenticator.isProviderTypeEnabled.bind(authenticator),
+    acknowledgeAccessNotice: authenticator.acknowledgeAccessNotice.bind(authenticator),
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),

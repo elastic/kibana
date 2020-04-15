@@ -21,6 +21,7 @@ import {
   sessionStorageMock,
 } from '../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { securityAuditLoggerMock } from '../audit/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { AuthenticationResult } from './authentication_result';
 import { Authenticator, AuthenticatorOptions, ProviderSession } from './authenticator';
@@ -39,6 +40,8 @@ function getMockOptions({
   selector?: AuthenticatorOptions['config']['authc']['selector'];
 } = {}) {
   return {
+    auditLogger: securityAuditLoggerMock.create(),
+    getCurrentUser: jest.fn(),
     clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
     loggers: loggingServiceMock.create(),
@@ -1108,6 +1111,124 @@ describe('Authenticator', () => {
         expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
       });
     });
+
+    describe('with Access Notice', () => {
+      const mockUser = mockAuthenticatedUser();
+      beforeEach(() => {
+        mockOptions = getMockOptions({
+          providers: { basic: { basic1: { order: 0, accessNotice: 'some notice' } } },
+        });
+        mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+
+        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(mockUser)
+        );
+
+        authenticator = new Authenticator(mockOptions);
+      });
+
+      it('does not redirect to Access Notice if there is no active session', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue(null);
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('does not redirect AJAX requests to Access Notice', async () => {
+        const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('does not redirect to Access Notice if request cannot be handled', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+          AuthenticationResult.notHandled()
+        );
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.notHandled()
+        );
+      });
+
+      it('does not redirect to Access Notice if authentication fails', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        const failureReason = new Error('something went wrong');
+        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+          AuthenticationResult.failed(failureReason)
+        );
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.failed(failureReason)
+        );
+      });
+
+      it('does not redirect to Access Notice if redirect is required to complete authentication', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+          AuthenticationResult.redirectTo('/some-url')
+        );
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.redirectTo('/some-url')
+        );
+      });
+
+      it('does not redirect to Access Notice if user has already acknowledged it', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue({
+          ...mockSessVal,
+          flags: { accessNoticeAcknowledged: true },
+        });
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('does not redirect to Access Notice its own requests', async () => {
+        const request = httpServerMock.createKibanaRequest({ path: '/security/access_notice' });
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('does not redirect to Access Notice if it is not configured', async () => {
+        mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+        mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+        authenticator = new Authenticator(mockOptions);
+
+        const request = httpServerMock.createKibanaRequest();
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('redirects to Access Notice when needed.', async () => {
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        const request = httpServerMock.createKibanaRequest();
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/security/access_notice?next=%2Fmock-server-basepath%2Fpath'
+          )
+        );
+      });
+    });
   });
 
   describe('`logout` method', () => {
@@ -1228,13 +1349,13 @@ describe('Authenticator', () => {
         now: currentDate,
         idleTimeoutExpiration: currentDate + 60000,
         lifespanExpiration: currentDate + 120000,
-        provider: 'basic1',
+        provider: { type: 'basic' as 'basic', name: 'basic1' },
       };
       mockSessionStorage.get.mockResolvedValue({
         idleTimeoutExpiration: mockInfo.idleTimeoutExpiration,
         lifespanExpiration: mockInfo.lifespanExpiration,
         state,
-        provider: { type: 'basic', name: mockInfo.provider },
+        provider: mockInfo.provider,
         path: mockOptions.basePath.serverBasePath,
       });
       jest.spyOn(Date, 'now').mockImplementation(() => currentDate);
@@ -1272,6 +1393,69 @@ describe('Authenticator', () => {
       );
       expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
       expect(authenticator.isProviderTypeEnabled('saml')).toBe(true);
+    });
+  });
+
+  describe('`acknowledgeAccessNotice` method', () => {
+    let authenticator: Authenticator;
+    let mockOptions: ReturnType<typeof getMockOptions>;
+    let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
+    let mockSessionValue: any;
+    beforeEach(() => {
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      mockSessionStorage = sessionStorageMock.create();
+      mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+      mockSessionValue = {
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
+        state: { authorization: 'Basic xxx' },
+        provider: { type: 'basic', name: 'basic1' },
+        path: mockOptions.basePath.serverBasePath,
+      };
+      mockSessionStorage.get.mockResolvedValue(mockSessionValue);
+      mockOptions.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+
+      authenticator = new Authenticator(mockOptions);
+    });
+
+    it('fails if user is not authenticated', async () => {
+      mockOptions.getCurrentUser.mockReturnValue(null);
+
+      await expect(
+        authenticator.acknowledgeAccessNotice(httpServerMock.createKibanaRequest())
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot acknowledge access notice for unauthenticated user."`
+      );
+
+      expect(mockSessionStorage.set).not.toHaveBeenCalled();
+    });
+
+    it('fails if cannot retrieve user session', async () => {
+      mockSessionStorage.get.mockResolvedValue(null);
+
+      await expect(
+        authenticator.acknowledgeAccessNotice(httpServerMock.createKibanaRequest())
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot acknowledge access notice for unauthenticated user."`
+      );
+
+      expect(mockSessionStorage.set).not.toHaveBeenCalled();
+    });
+
+    it('properly acknowledges access notice for the authenticated user', async () => {
+      await authenticator.acknowledgeAccessNotice(httpServerMock.createKibanaRequest());
+
+      expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
+      expect(mockSessionStorage.set).toHaveBeenCalledWith({
+        ...mockSessionValue,
+        flags: { accessNoticeAcknowledged: true },
+      });
+
+      expect(mockOptions.auditLogger.accessNoticeAcknowledged).toHaveBeenCalledTimes(1);
+      expect(mockOptions.auditLogger.accessNoticeAcknowledged).toHaveBeenCalledWith('user', {
+        type: 'basic',
+        name: 'basic1',
+      });
     });
   });
 });

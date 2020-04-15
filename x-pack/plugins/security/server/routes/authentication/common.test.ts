@@ -433,4 +433,44 @@ describe('Common authentication routes', () => {
       });
     });
   });
+
+  describe('acknowledge access notice', () => {
+    let routeHandler: RequestHandler<any, any, any>;
+    let routeConfig: RouteConfig<any, any, any, any>;
+    beforeEach(() => {
+      const [acsRouteConfig, acsRouteHandler] = router.post.mock.calls.find(
+        ([{ path }]) => path === '/internal/security/access_notice/acknowledge'
+      )!;
+
+      routeConfig = acsRouteConfig;
+      routeHandler = acsRouteHandler;
+    });
+
+    it('correctly defines route.', () => {
+      expect(routeConfig.options).toBeUndefined();
+      expect(routeConfig.validate).toBe(false);
+    });
+
+    it('returns 500 if acknowledge throws unhandled exception.', async () => {
+      const unhandledException = new Error('Something went wrong.');
+      authc.acknowledgeAccessNotice.mockRejectedValue(unhandledException);
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 500,
+        payload: 'Internal Error',
+        options: {},
+      });
+    });
+
+    it('returns 204 if successfully acknowledged.', async () => {
+      authc.acknowledgeAccessNotice.mockResolvedValue(undefined);
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 204,
+        options: {},
+      });
+    });
+  });
 });

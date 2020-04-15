@@ -1,0 +1,198 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccessNoticePage renders as expected when state is available 1`] = `
+<AuthenticationStatePage
+  className="secAccessNoticePage"
+  title={
+    <FormattedMessage
+      defaultMessage="Access Notice"
+      id="xpack.security.accessNotice.title"
+      values={Object {}}
+    />
+  }
+>
+  <div
+    className="secAuthenticationStatePage secAccessNoticePage"
+  >
+    <header
+      className="secAuthenticationStatePage__header"
+    >
+      <div
+        className="secAuthenticationStatePage__content eui-textCenter"
+      >
+        <EuiSpacer
+          size="xxl"
+        >
+          <div
+            className="euiSpacer euiSpacer--xxl"
+          />
+        </EuiSpacer>
+        <span
+          className="secAuthenticationStatePage__logo"
+        >
+          <EuiIcon
+            size="xxl"
+            type="logoKibana"
+          >
+            <div
+              data-euiicon-type="logoKibana"
+              size="xxl"
+            />
+          </EuiIcon>
+        </span>
+        <EuiTitle
+          className="secAuthenticationStatePage__title"
+          size="l"
+        >
+          <h1
+            className="euiTitle euiTitle--large secAuthenticationStatePage__title"
+          >
+            <FormattedMessage
+              defaultMessage="Access Notice"
+              id="xpack.security.accessNotice.title"
+              values={Object {}}
+            >
+              Access Notice
+            </FormattedMessage>
+          </h1>
+        </EuiTitle>
+        <EuiSpacer
+          size="xl"
+        >
+          <div
+            className="euiSpacer euiSpacer--xl"
+          />
+        </EuiSpacer>
+      </div>
+    </header>
+    <div
+      className="secAuthenticationStatePage__content eui-textCenter"
+    >
+      <form
+        onSubmit={[Function]}
+      >
+        <EuiPanel>
+          <div
+            className="euiPanel euiPanel--paddingMedium"
+          >
+            <EuiFlexGroup
+              direction="column"
+              justifyContent="spaceBetween"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionColumn euiFlexGroup--responsive"
+              >
+                <EuiFlexItem
+                  className="secAccessNoticePage__text"
+                >
+                  <div
+                    className="euiFlexItem secAccessNoticePage__text"
+                  >
+                    <EuiText
+                      textAlign="left"
+                    >
+                      <div
+                        className="euiText euiText--medium"
+                      >
+                        <EuiTextAlign
+                          textAlign="left"
+                        >
+                          <div
+                            className="euiTextAlign euiTextAlign--left"
+                          >
+                            <ReactMarkdown
+                              astPlugins={Array []}
+                              escapeHtml={true}
+                              plugins={Array []}
+                              rawSourcePos={false}
+                              renderers={Object {}}
+                              skipHtml={false}
+                              sourcePos={false}
+                              transformLinkUri={[Function]}
+                            >
+                              <div
+                                key="root-1-1"
+                              >
+                                <p
+                                  key="paragraph-1-1"
+                                >
+                                  This is 
+                                  <a
+                                    href="../link"
+                                    key="link-1-9"
+                                  >
+                                    link
+                                  </a>
+                                </p>
+                              </div>
+                            </ReactMarkdown>
+                          </div>
+                        </EuiTextAlign>
+                      </div>
+                    </EuiText>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  className="secAccessNoticePage__acknowledge"
+                >
+                  <div
+                    className="euiFlexItem secAccessNoticePage__acknowledge"
+                  >
+                    <EuiSpacer
+                      size="s"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--s"
+                      />
+                    </EuiSpacer>
+                    <EuiButton
+                      color="primary"
+                      data-test-subj="accessNoticeAcknowledge"
+                      fill={true}
+                      isDisabled={false}
+                      isLoading={false}
+                      onClick={[Function]}
+                      type="submit"
+                    >
+                      <button
+                        className="euiButton euiButton--primary euiButton--fill"
+                        data-test-subj="accessNoticeAcknowledge"
+                        disabled={false}
+                        onClick={[Function]}
+                        type="submit"
+                      >
+                        <span
+                          className="euiButton__content"
+                        >
+                          <span
+                            className="euiButton__text"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Acknowledge and continue"
+                              id="xpack.security.accessNotice.acknowledgeButtonText"
+                              values={Object {}}
+                            >
+                              Acknowledge and continue
+                            </FormattedMessage>
+                          </span>
+                        </span>
+                      </button>
+                    </EuiButton>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiPanel>
+        <EuiSpacer
+          size="xxl"
+        >
+          <div
+            className="euiSpacer euiSpacer--xxl"
+          />
+        </EuiSpacer>
+      </form>
+    </div>
+  </div>
+</AuthenticationStatePage>
+`;

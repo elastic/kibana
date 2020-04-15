@@ -1,0 +1,15 @@
+.secAccessNoticePage__text {
+  @include euiScrollBar;
+
+  max-height: $euiSize * 20;
+  overflow-y: auto;
+  padding: $euiSize;
+}
+
+.secAccessNoticePage__acknowledge {
+  align-self: end;
+}
+
+.secAccessNoticePage .secAuthenticationStatePage__content {
+  max-width: 600px;
+}
