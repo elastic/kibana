@@ -34,6 +34,8 @@ export const PipelineRequestFlyout: React.FunctionComponent<Props> = ({
   const endpoint = `PUT _ingest/pipeline/${name || '<pipelineName>'}`;
   const payload = JSON.stringify(pipelineBody, null, 2);
   const request = `${endpoint}\n${payload}`;
+  // Hack so that copied-to-clipboard value updates as content changes
+  // Related issue: https://github.com/elastic/eui/issues/3321
   const uuid = useRef(0);
   uuid.current++;
 

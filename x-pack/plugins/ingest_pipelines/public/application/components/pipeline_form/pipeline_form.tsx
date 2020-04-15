@@ -75,7 +75,12 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
     onSubmit: handleSave,
   });
 
-  const saveButtonLabel = isEditing ? (
+  const saveButtonLabel = isSaving ? (
+    <FormattedMessage
+      id="xpack.ingestPipelines.form.savingButtonLabel"
+      defaultMessage="Saving..."
+    />
+  ) : isEditing ? (
     <FormattedMessage
       id="xpack.ingestPipelines.form.saveButtonLabel"
       defaultMessage="Save pipeline"
@@ -299,14 +304,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
               disabled={form.isSubmitted && form.isValid === false}
               isLoading={isSaving}
             >
-              {isSaving ? (
-                <FormattedMessage
-                  id="xpack.ingestPipelines.form.savingButtonLabel"
-                  defaultMessage="Saving..."
-                />
-              ) : (
-                saveButtonLabel
-              )}
+              {saveButtonLabel}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
