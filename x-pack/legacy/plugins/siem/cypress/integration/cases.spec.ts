@@ -7,6 +7,11 @@
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
+import { CASES } from '../urls/navigation';
+import { goToCreateNewCase } from '../tasks/all_cases';
+import { createNewCase } from '../tasks/create_new_case';
+import { case1 } from '../objects/case';
+
 describe('Cases', () => {
   before(() => {
     esArchiverLoad('timeline');
@@ -17,8 +22,11 @@ describe('Cases', () => {
   });
 
   it('Creates a new case with timeline and opens the timeline', () => {
-    loginAndWaitForPageWithoutDateRange('/app/siem#/case');
-    cy.get('[data-test-subj="createNewCaseBtn"]').click({ force: true });
+    loginAndWaitForPageWithoutDateRange(CASES);
+    goToCreateNewCase();
+    createNewCase(case1);
+
+    /*
     cy.get(
       '[data-test-subj="caseTitle"] [data-test-subj="input"]'
     ).type('This is the title of the case', { force: true });
@@ -36,7 +44,7 @@ describe('Cases', () => {
       .click({ force: true });
     cy.get('[data-test-subj="create-case-submit"]').click({ force: true });
     cy.get('[data-test-subj="create-case-loading-spinner"]').should('exist');
-    cy.get('[data-test-subj="create-case-loading-spinner"]').should('not.exist');
+    cy.get('[data-test-subj="create-case-loading-spinner"]').should('not.exist'); */
 
     cy.get('[data-test-subj="backToCases"]').click({ force: true });
 
