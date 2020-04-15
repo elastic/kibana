@@ -63,7 +63,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       describe('Print Layout', () => {
-        it('downloads a PDF file', async function() {
+        it('Job completes and generates a download URL', async function() {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(300000);
@@ -74,10 +74,7 @@ export default function({ getService, getPageObjects }) {
           await PageObjects.reporting.clickGenerateReportButton();
 
           const url = await PageObjects.reporting.getReportURL(60000);
-          const res = await PageObjects.reporting.getResponse(url);
-
-          expect(res.statusCode).to.equal(200);
-          expect(res.headers['content-type']).to.equal('application/pdf');
+          expect(url).to.match(/download/);
         });
       });
 
@@ -208,7 +205,7 @@ export default function({ getService, getPageObjects }) {
           expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
 
-        it('downloaded PDF has OK status', async function() {
+        it('Job completes and generates a download URL', async function() {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);
@@ -219,10 +216,7 @@ export default function({ getService, getPageObjects }) {
           await PageObjects.reporting.clickGenerateReportButton();
 
           const url = await PageObjects.reporting.getReportURL(60000);
-          const res = await PageObjects.reporting.getResponse(url);
-
-          expect(res.statusCode).to.equal(200);
-          expect(res.headers['content-type']).to.equal('application/pdf');
+          expect(url).to.match(/download/);
         });
       });
     });
