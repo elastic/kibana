@@ -42623,28 +42623,21 @@ module.exports = require("tty");
 const os = __webpack_require__(11);
 const hasFlag = __webpack_require__(12);
 
-const {env} = process;
+const env = process.env;
 
 let forceColor;
 if (hasFlag('no-color') ||
 	hasFlag('no-colors') ||
-	hasFlag('color=false') ||
-	hasFlag('color=never')) {
-	forceColor = 0;
+	hasFlag('color=false')) {
+	forceColor = false;
 } else if (hasFlag('color') ||
 	hasFlag('colors') ||
 	hasFlag('color=true') ||
 	hasFlag('color=always')) {
-	forceColor = 1;
+	forceColor = true;
 }
 if ('FORCE_COLOR' in env) {
-	if (env.FORCE_COLOR === true || env.FORCE_COLOR === 'true') {
-		forceColor = 1;
-	} else if (env.FORCE_COLOR === false || env.FORCE_COLOR === 'false') {
-		forceColor = 0;
-	} else {
-		forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
-	}
+	forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
 }
 
 function translateLevel(level) {
@@ -42661,7 +42654,7 @@ function translateLevel(level) {
 }
 
 function supportsColor(stream) {
-	if (forceColor === 0) {
+	if (forceColor === false) {
 		return 0;
 	}
 
@@ -42675,15 +42668,11 @@ function supportsColor(stream) {
 		return 2;
 	}
 
-	if (stream && !stream.isTTY && forceColor === undefined) {
+	if (stream && !stream.isTTY && forceColor !== true) {
 		return 0;
 	}
 
-	const min = forceColor || 0;
-
-	if (env.TERM === 'dumb') {
-		return min;
-	}
+	const min = forceColor ? 1 : 0;
 
 	if (process.platform === 'win32') {
 		// Node.js 7.5.0 is the first version of Node.js to include a patch to
@@ -42742,6 +42731,10 @@ function supportsColor(stream) {
 
 	if ('COLORTERM' in env) {
 		return 1;
+	}
+
+	if (env.TERM === 'dumb') {
+		return min;
 	}
 
 	return min;
