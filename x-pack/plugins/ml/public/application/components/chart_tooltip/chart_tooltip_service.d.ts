@@ -14,6 +14,10 @@ export interface ChartTooltipValue extends TooltipValue {
   skipHeader?: boolean;
 }
 
+export interface TooltipHeader {
+  skipHeader: boolean;
+}
+
 interface ChartTooltipState {
   isTooltipVisible: boolean;
   offset: ToolTipOffset;
@@ -30,9 +34,9 @@ interface ToolTipOffset {
   y: number;
 }
 
-interface MlChartTooltipService {
+export interface MlChartTooltipService {
   show: (
-    tooltipData: ChartTooltipValue[],
+    tooltipData: [TooltipHeader | TooltipValue, TooltipValue],
     target?: HTMLElement | null,
     offset?: ToolTipOffset
   ) => void;

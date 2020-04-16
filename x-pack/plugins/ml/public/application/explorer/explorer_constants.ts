@@ -14,7 +14,7 @@ export const DRAG_SELECT_ACTION = {
   NEW_SELECTION: 'newSelection',
   ELEMENT_SELECT: 'elementSelect',
   DRAG_START: 'dragStart',
-};
+} as const;
 
 export const EXPLORER_ACTION = {
   CLEAR_INFLUENCER_FILTER_SETTINGS: 'clearInfluencerFilterSettings',

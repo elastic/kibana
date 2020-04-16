@@ -17,11 +17,13 @@ export declare interface TimeBucketsInterval {
   expression: string;
 }
 
-export class TimeBuckets {
-  setBarTarget: (barTarget: number) => void;
-  setMaxBars: (maxBars: number) => void;
-  setInterval: (interval: string) => void;
-  setBounds: (bounds: TimeRangeBounds) => void;
-  getBounds: () => { min: any; max: any };
-  getInterval: () => TimeBucketsInterval;
+export declare class TimeBuckets {
+  constructor();
+  public setBarTarget(barTarget: number): void;
+  public setMaxBars(maxBars: number): void;
+  public setInterval(interval: string): void;
+  public setBounds(bounds: TimeRangeBounds): void;
+  public getBounds(): { min: any; max: any };
+  public getInterval(): TimeBucketsInterval;
+  public getScaledDateFormat(): string;
 }
