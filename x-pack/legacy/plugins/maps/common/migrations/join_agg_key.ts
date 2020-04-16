@@ -9,11 +9,11 @@ import {
   AGG_DELIMITER,
   AGG_TYPE,
   FIELD_ORIGIN,
-  getJoinAggKey,
   JOIN_FIELD_NAME_PREFIX,
   LAYER_TYPE,
   VECTOR_STYLES,
 } from '../constants';
+import { getJoinAggKey } from '../get_join_key';
 import {
   AggDescriptor,
   JoinDescriptor,

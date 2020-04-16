@@ -3,12 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 import { i18n } from '@kbn/i18n';
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
@@ -74,21 +68,6 @@ export enum FIELD_ORIGIN {
   JOIN = 'join',
 }
 export const JOIN_FIELD_NAME_PREFIX = '__kbnjoin__';
-
-// function in common since its needed by migration
-export function getJoinAggKey({
-  aggType,
-  aggFieldName,
-  rightSourceId,
-}: {
-  aggType: AGG_TYPE;
-  aggFieldName?: string;
-  rightSourceId: string;
-}) {
-  const metricKey =
-    aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${aggFieldName}` : aggType;
-  return `${JOIN_FIELD_NAME_PREFIX}${metricKey}__${rightSourceId}`;
-}
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 export const META_ID_ORIGIN_SUFFIX = 'meta';
