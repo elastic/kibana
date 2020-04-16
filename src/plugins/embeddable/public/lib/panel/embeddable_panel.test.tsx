@@ -224,7 +224,7 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
       return undefined;
     },
   };
-  const getActions = () => Promise.resolve([action]);
+  const getActions = () => Promise.resolve([action]) as any;
 
   const { component: component1 } = await renderInEditModeAndOpenContextMenu(
     {
@@ -260,7 +260,7 @@ test('HelloWorldContainer hides disabled badges', async () => {
       return undefined;
     },
   };
-  const getActions = () => Promise.resolve([action]);
+  const getActions = () => Promise.resolve([action]) as any;
 
   const { component: component1 } = await renderInEditModeAndOpenContextMenu(
     {
