@@ -22,7 +22,7 @@ function mapStateToProps(state = {}) {
     isReadOnly: getIsReadOnly(state),
     isLayerTOCOpen: getIsLayerTOCOpen(state),
     layerList: getLayerList(state),
-    isAddButtonActive: getFlyoutDisplay(state) === FLYOUT_STATE.NONE,
+    isFlyoutOpen: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
   };
 }
 
@@ -38,7 +38,7 @@ function mapDispatchToProps(dispatch) {
     openLayerTOC: () => {
       dispatch(setIsLayerTOCOpen(true));
     },
-    openMapSettings: async flyoutDisplay => {
+    openMapSettings: async () => {
       await dispatch(setSelectedLayer(null));
       dispatch(trackMapSettings());
       dispatch(updateFlyout(FLYOUT_STATE.MAP_SETTINGS_PANEL));

@@ -57,7 +57,7 @@ export function LayerControl({
   closeLayerTOC,
   openLayerTOC,
   layerList,
-  isAddButtonActive,
+  isFlyoutOpen,
   openMapSettings,
 }) {
   if (!isLayerTOCOpen) {
@@ -92,7 +92,7 @@ export function LayerControl({
       <Fragment>
         <EuiSpacer size="s" />
         <EuiButton
-          isDisabled={!isAddButtonActive}
+          isDisabled={isFlyoutOpen}
           className="mapLayerControl__addLayerButton"
           fill
           fullWidth
@@ -110,6 +110,7 @@ export function LayerControl({
       <EuiFlexItem grow={false}>
         <EuiToolTip delay="long" content={openMapSettingsLabel}>
           <EuiButtonIcon
+            isDisabled={isFlyoutOpen}
             className="mapLayerControl__openMapSettingsButton"
             onClick={openMapSettings}
             iconType="gear"
