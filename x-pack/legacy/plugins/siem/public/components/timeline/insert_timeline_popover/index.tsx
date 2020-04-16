@@ -23,6 +23,7 @@ interface InsertTimelinePopoverProps {
 interface RouterState {
   insertTimeline: {
     timelineId: string;
+    timelineSavedObjectId: string;
     timelineTitle: string;
   };
 }
@@ -46,7 +47,7 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
       );
       onTimelineChange(
         routerState.insertTimeline.timelineTitle,
-        routerState.insertTimeline.timelineId
+        routerState.insertTimeline.timelineSavedObjectId
       );
       setRouterState(null);
     }

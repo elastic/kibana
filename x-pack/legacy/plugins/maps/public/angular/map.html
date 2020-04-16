@@ -3,11 +3,11 @@
   <div id="maps-top-nav">
     <div>
       <kbn-top-nav
-        ng-show="chrome.getVisible()"
+        ng-show="isVisible"
         app-name="'maps'"
         config="topNavMenu"
-        show-search-bar="chrome.getVisible()"
-        show-filter-bar="chrome.getVisible()"
+        show-search-bar="isVisible"
+        show-filter-bar="isVisible"
         show-date-picker="showDatePicker"
         show-save-query="showSaveQuery"
         query="query"
