@@ -16,7 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { EmbeddableStart, EmbeddableSetup } from '.';
+import {
+  EmbeddableStart,
+  EmbeddableSetup,
+  EmbeddableSetupDependencies,
+  EmbeddableStartDependencies,
+} from '.';
 import { EmbeddablePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
 
@@ -45,14 +50,14 @@ const createStartContract = (): Start => {
   return startContract;
 };
 
-const createInstance = () => {
+const createInstance = (setupPlugins: Partial<EmbeddableSetupDependencies> = {}) => {
   const plugin = new EmbeddablePublicPlugin({} as any);
   const setup = plugin.setup(coreMock.createSetup(), {
-    uiActions: uiActionsPluginMock.createSetupContract(),
+    uiActions: setupPlugins.uiActions || uiActionsPluginMock.createSetupContract(),
   });
-  const doStart = () =>
+  const doStart = (startPlugins: Partial<EmbeddableStartDependencies> = {}) =>
     plugin.start(coreMock.createStart(), {
-      uiActions: uiActionsPluginMock.createStartContract(),
+      uiActions: startPlugins.uiActions || uiActionsPluginMock.createStartContract(),
       inspector: inspectorPluginMock.createStartContract(),
     });
   return {

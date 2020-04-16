@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable */
-
-export {
-  ActionFactory
-} from '../../../../../../src/plugins/ui_actions/public/actions/action_factory';
+export * from './panel_notifications_action';

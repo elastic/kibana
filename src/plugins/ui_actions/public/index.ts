@@ -29,12 +29,9 @@ export { UiActionsServiceParams, UiActionsService } from './service';
 export {
   Action,
   ActionDefinition as UiActionsActionDefinition,
-  ActionFactoryDefinition as UiActionsActionFactoryDefinition,
   ActionInternal as UiActionsActionInternal,
   createAction,
   IncompatibleActionError,
-  SerializedAction as UiActionsSerializedAction,
-  SerializedEvent as UiActionsSerializedEvent,
 } from './actions';
 export { buildContextMenuForActions } from './context_menu';
 export {

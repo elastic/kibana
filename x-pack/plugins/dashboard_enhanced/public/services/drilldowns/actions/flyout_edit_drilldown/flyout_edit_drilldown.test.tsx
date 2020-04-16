@@ -8,13 +8,13 @@ import { FlyoutEditDrilldownAction, FlyoutEditDrilldownParams } from './flyout_e
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { drilldownsPluginMock } from '../../../../../../drilldowns/public/mocks';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
-import { uiActionsPluginMock } from '../../../../../../../../src/plugins/ui_actions/public/mocks';
+import { uiActionsEnhancedPluginMock } from '../../../../../../advanced_ui_actions/public/mocks';
 import { EnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
 import { MockEmbeddable, enhanceEmbeddable } from '../test_helpers';
 
 const overlays = coreMock.createStart().overlays;
 const drilldowns = drilldownsPluginMock.createStartContract();
-const uiActionsPlugin = uiActionsPluginMock.createPlugin();
+const uiActionsPlugin = uiActionsEnhancedPluginMock.createPlugin();
 const uiActions = uiActionsPlugin.doStart();
 
 uiActionsPlugin.setup.registerActionFactory({

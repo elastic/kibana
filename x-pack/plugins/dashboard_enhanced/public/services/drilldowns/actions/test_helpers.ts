@@ -9,12 +9,13 @@ import { EnhancedEmbeddable } from '../../../../../embeddable_enhanced/public';
 import {
   UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
+  AdvancedUiActionsStart,
 } from '../../../../../advanced_ui_actions/public';
 import {
   TriggerContextMapping,
   UiActionsStart,
 } from '../../../../../../../src/plugins/ui_actions/public';
-import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
+import { uiActionsEnhancedPluginMock } from '../../../../../advanced_ui_actions/public/mocks';
 
 export class MockEmbeddable extends Embeddable {
   public readonly type = 'mock';
@@ -35,7 +36,7 @@ export class MockEmbeddable extends Embeddable {
 
 export const enhanceEmbeddable = <E extends MockEmbeddable>(
   embeddable: E,
-  uiActions: UiActionsStart = uiActionsPluginMock.createStartContract()
+  uiActions: AdvancedUiActionsStart = uiActionsEnhancedPluginMock.createStartContract()
 ): EnhancedEmbeddable<E> => {
   (embeddable as EnhancedEmbeddable<E>).enhancements = {
     dynamicActions: new DynamicActionManager({

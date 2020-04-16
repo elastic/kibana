@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
-import { ActionFactory } from '../../services';
+import { ActionFactory } from '../../dynamic_actions';
 
 type ActionBaseConfig = object;
 type ActionFactoryBaseContext = object;

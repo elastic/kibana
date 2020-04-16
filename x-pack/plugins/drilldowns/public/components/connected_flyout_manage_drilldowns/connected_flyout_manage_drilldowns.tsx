@@ -10,14 +10,14 @@ import {
   AdvancedUiActionsActionFactory as ActionFactory,
   AdvancedUiActionsStart,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
+  UiActionsEnhancedSerializedAction,
+  UiActionsEnhancedSerializedEvent,
 } from '../../../../advanced_ui_actions/public';
 import { NotificationsStart } from '../../../../../../src/core/public';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
 import {
-  UiActionsSerializedEvent,
-  UiActionsSerializedAction,
   VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
   TriggerContextMapping,
@@ -132,7 +132,7 @@ export function createFlyoutManageDrilldowns({
      * Maps drilldown to list item view model
      */
     function mapToDrilldownToDrilldownListItem(
-      drilldown: UiActionsSerializedEvent
+      drilldown: UiActionsEnhancedSerializedEvent
     ): DrilldownListItem {
       const actionFactory = allActionFactoriesById[drilldown.action.factoryId];
       return {
@@ -284,7 +284,7 @@ function useDrilldownsStateManager(
   }
 
   async function createDrilldown(
-    action: UiActionsSerializedAction<any>,
+    action: UiActionsEnhancedSerializedAction<any>,
     selectedTriggers: Array<keyof TriggerContextMapping>
   ) {
     await run(async () => {
@@ -298,7 +298,7 @@ function useDrilldownsStateManager(
 
   async function editDrilldown(
     drilldownId: string,
-    action: UiActionsSerializedAction<any>,
+    action: UiActionsEnhancedSerializedAction<any>,
     selectedTriggers: Array<keyof TriggerContextMapping>
   ) {
     await run(async () => {

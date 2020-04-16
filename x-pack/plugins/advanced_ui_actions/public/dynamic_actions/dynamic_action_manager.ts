@@ -6,15 +6,15 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Subscription } from 'rxjs';
-import { ActionStorage, SerializedEvent } from './dynamic_action_storage';
+import { ActionStorage } from './dynamic_action_storage';
 import {
-  UiActionsService,
-  UiActionsSerializedAction as SerializedAction,
   TriggerContextMapping,
   UiActionsActionDefinition as ActionDefinition,
 } from '../../../../../src/plugins/ui_actions/public';
 import { defaultState, transitions, selectors, State } from './dynamic_action_manager_state';
 import { StateContainer, createStateContainer } from '../../../../../src/plugins/kibana_utils';
+import { StartContract } from '../plugin';
+import { SerializedAction, SerializedEvent } from './types';
 
 const compareEvents = (
   a: ReadonlyArray<{ eventId: string }>,
@@ -30,7 +30,7 @@ export type DynamicActionManagerState = State;
 export interface DynamicActionManagerParams {
   storage: ActionStorage;
   uiActions: Pick<
-    UiActionsService,
+    StartContract,
     'registerAction' | 'attachAction' | 'unregisterAction' | 'detachAction' | 'getActionFactory'
   >;
   isCompatible: <C = unknown>(context: C) => Promise<boolean>;

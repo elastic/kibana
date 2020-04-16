@@ -25,7 +25,12 @@ import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 
 import { Start as InspectorStartContract } from '../inspector';
-import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER, EmbeddableContext } from '../triggers';
+import {
+  CONTEXT_MENU_TRIGGER,
+  PANEL_BADGE_TRIGGER,
+  PANEL_NOTIFICATION_TRIGGER,
+  EmbeddableContext,
+} from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
 
@@ -65,14 +70,13 @@ interface State {
   hidePanelTitles: boolean;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
-  eventCount?: number;
+  notifications: Array<Action<EmbeddableContext>>;
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
   private embeddableRoot: React.RefObject<HTMLDivElement>;
   private parentSubscription?: Subscription;
   private subscription?: Subscription;
-  private eventCountSubscription?: Subscription;
   private mounted: boolean = false;
   private generateId = htmlIdGenerator();
 
@@ -92,6 +96,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       hidePanelTitles,
       closeContextMenu: false,
       badges: [],
+      notifications: [],
     };
 
     this.embeddableRoot = React.createRef();
@@ -113,6 +118,22 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     });
   }
 
+  private async refreshNotifications() {
+    let notifications = await this.props.getActions(PANEL_NOTIFICATION_TRIGGER, {
+      embeddable: this.props.embeddable,
+    });
+    if (!this.mounted) return;
+
+    const { disabledActions } = this.props.embeddable.getInput();
+    if (disabledActions) {
+      notifications = notifications.filter(badge => disabledActions.indexOf(badge.id) === -1);
+    }
+
+    this.setState({
+      notifications,
+    });
+  }
+
   public UNSAFE_componentWillMount() {
     this.mounted = true;
     const { embeddable } = this.props;
@@ -125,6 +146,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         });
 
         this.refreshBadges();
+        this.refreshNotifications();
       }
     });
 
@@ -136,6 +158,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           });
 
           this.refreshBadges();
+          this.refreshNotifications();
         }
       });
     }
@@ -145,9 +168,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     this.mounted = false;
     if (this.subscription) {
       this.subscription.unsubscribe();
-    }
-    if (this.eventCountSubscription) {
-      this.eventCountSubscription.unsubscribe();
     }
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
@@ -188,9 +208,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             closeContextMenu={this.state.closeContextMenu}
             title={title}
             badges={this.state.badges}
+            notifications={this.state.notifications}
             embeddable={this.props.embeddable}
             headerId={headerId}
-            eventCount={this.state.eventCount}
           />
         )}
         <div className="embPanel__content" ref={this.embeddableRoot} />
@@ -201,17 +221,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   public componentDidMount() {
     if (this.embeddableRoot.current) {
       this.props.embeddable.render(this.embeddableRoot.current);
-    }
-
-    const dynamicActions = (this.props.embeddable.enhancements as any)?.dynamicActions;
-    if (dynamicActions) {
-      this.setState({ eventCount: dynamicActions.state.get().events.length });
-      this.eventCountSubscription = dynamicActions.state.state$.subscribe(
-        ({ events }: { events: unknown[] }) => {
-          if (!this.mounted) return;
-          this.setState({ eventCount: events.length });
-        }
-      );
     }
   }
 

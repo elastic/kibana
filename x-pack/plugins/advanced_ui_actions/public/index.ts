@@ -21,7 +21,9 @@ export { ActionWizard } from './components';
 export {
   ActionFactoryDefinition as AdvancedUiActionsActionFactoryDefinition,
   ActionFactory as AdvancedUiActionsActionFactory,
-} from './services/action_factory_service';
+  SerializedAction as UiActionsEnhancedSerializedAction,
+  SerializedEvent as UiActionsEnhancedSerializedEvent,
+} from './dynamic_actions';
 export {
   Configurable as AdvancedUiActionsConfigurable,
   CollectConfigProps as AdvancedUiActionsCollectConfigProps,

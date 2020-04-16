@@ -39,9 +39,9 @@ export interface PanelHeaderProps {
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
+  notifications: Array<Action<EmbeddableContext>>;
   embeddable: IEmbeddable;
   headerId?: string;
-  eventCount?: number;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -55,6 +55,22 @@ function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmb
     >
       {badge.getDisplayName({ embeddable })}
     </EuiBadge>
+  ));
+}
+
+function renderNotifications(
+  notifications: Array<Action<EmbeddableContext>>,
+  embeddable: IEmbeddable
+) {
+  return notifications.map(notification => (
+    <EuiNotificationBadge
+      data-test-subj={`embeddablePanelNotification-${notification.id}`}
+      key={notification.id}
+      style={{ marginTop: '4px', marginRight: '4px' }}
+      onClick={() => notification.execute({ embeddable })}
+    >
+      {notification.getDisplayName({ embeddable })}
+    </EuiNotificationBadge>
   ));
 }
 
@@ -90,9 +106,9 @@ export function PanelHeader({
   getActionContextMenuPanel,
   closeContextMenu,
   badges,
+  notifications,
   embeddable,
   headerId,
-  eventCount,
 }: PanelHeaderProps) {
   const viewDescription = getViewDescription(embeddable);
   const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
@@ -150,14 +166,7 @@ export function PanelHeader({
         )}
         {renderBadges(badges, embeddable)}
       </h2>
-      {!isViewMode && !!eventCount && (
-        <EuiNotificationBadge
-          style={{ marginTop: '4px', marginRight: '4px' }}
-          data-test-subj={'embeddablePanelDrilldownCount'}
-        >
-          {eventCount}
-        </EuiNotificationBadge>
-      )}
+      {renderNotifications(notifications, embeddable)}
       <PanelOptionsMenu
         isViewMode={isViewMode}
         getActionContextMenuPanel={getActionContextMenuPanel}

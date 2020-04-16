@@ -36,11 +36,8 @@ export interface StartContract {}
 export class DashboardEnhancedPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
   public readonly drilldowns = new DashboardDrilldownsService();
-  public readonly config: { drilldowns: { enabled: boolean } };
 
-  constructor(protected readonly context: PluginInitializerContext) {
-    this.config = context.config.get();
-  }
+  constructor(protected readonly context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.drilldowns.bootstrap(core, plugins, {

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './action_factory_service';
+export * from './ui_actions_service_enhancements';

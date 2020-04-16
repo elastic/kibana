@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UiActionsSerializedEvent as SerializedEvent } from '../../../../../src/plugins/ui_actions/public';
-import { UiActionsEnhancedAbstractActionStorage as AbstractActionStorage } from '../../../advanced_ui_actions/public';
+import {
+  UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
+  UiActionsEnhancedSerializedEvent as SerializedEvent,
+} from '../../../advanced_ui_actions/public';
 import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 
 export class EmbeddableActionStorage extends AbstractActionStorage {
