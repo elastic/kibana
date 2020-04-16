@@ -190,7 +190,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           const hitCount = await PageObjects.discover.getHitCount();
           expect(parseInt(hitCount, 10)).to.be.greaterThan(0);
           await PageObjects.discover.clickFieldListItem('bytes');
-          await PageObjects.discover.expectFieldListItemVisualize('bytes');
+          await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
         });
       });
 
@@ -283,7 +283,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           const hitCount = await PageObjects.discover.getHitCount();
           expect(parseInt(hitCount, 10)).to.be.greaterThan(0);
           await PageObjects.discover.clickFieldListItem('bytes');
-          await PageObjects.discover.expectFieldListItemVisualize('bytes');
+          await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
         });
       });
 
