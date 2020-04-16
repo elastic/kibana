@@ -20,10 +20,9 @@ import '../../../../plugins/maps/public/angular/services/gis_map_saved_object_lo
 import './angular/map_controller';
 import './routes';
 // @ts-ignore
-import { PluginInitializerContext } from 'kibana/public';
 import { MapsPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) => {
+export const plugin = () => {
   return new MapsPlugin();
 };
 

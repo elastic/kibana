@@ -33,6 +33,7 @@ import {
   setVisualizations,
   // @ts-ignore
 } from './kibana_services';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -92,8 +93,13 @@ export class MapsPlugin
       MapsPluginStartDependencies
     > {
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
+    bindSetupCoreAndPlugins(core, plugins);
+
     plugins.inspector.registerView(MapView);
+    plugins.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
-  public start(core: CoreStart, plugins: any) {}
+  public start(core: CoreStart, plugins: any) {
+    bindStartCoreAndPlugins(core, plugins);
+  }
 }

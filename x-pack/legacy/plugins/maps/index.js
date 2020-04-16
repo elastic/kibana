@@ -52,7 +52,6 @@ export function maps(kibana) {
         };
       },
       embeddableFactories: ['plugins/maps/embeddable/map_embeddable_factory'],
-      home: ['plugins/maps/legacy_register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'maps-telemetry': {
