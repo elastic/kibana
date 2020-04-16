@@ -30,6 +30,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
 
   return (
     <EuiInMemoryTable
+      itemId="name"
       isSelectable
       selection={{
         onSelectionChange: setSelection,
@@ -89,7 +90,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           name: i18n.translate('xpack.ingestPipelines.list.table.nameColumnTitle', {
             defaultMessage: 'Name',
           }),
-          render: (name: any, pipeline) => (
+          render: (name: string, pipeline) => (
             <EuiLink onClick={() => onViewPipelineClick(pipeline)}>{name}</EuiLink>
           ),
         },
