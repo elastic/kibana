@@ -17,6 +17,9 @@ describe('FeatureUsageService', () => {
     jest.restoreAllMocks();
   });
 
+  const toObj = (map: ReadonlyMap<string, any>): Record<string, any> =>
+    Object.fromEntries(map.entries());
+
   describe('#setup', () => {
     describe('#register', () => {
       it('throws when registering the same feature twice', () => {
@@ -37,7 +40,7 @@ describe('FeatureUsageService', () => {
         const start = service.start();
         start.notifyUsage('feature', 127001);
 
-        expect(start.getLastUsages().feature).toBe(127001);
+        expect(start.getLastUsages().get('feature')).toBe(127001);
       });
 
       it('uses the current time when `usedAt` is unspecified', () => {
@@ -48,7 +51,7 @@ describe('FeatureUsageService', () => {
         const start = service.start();
         start.notifyUsage('feature');
 
-        expect(start.getLastUsages().feature).toBe(42);
+        expect(start.getLastUsages().get('feature')).toBe(42);
       });
 
       it('throws when notifying for an unregistered feature', () => {
@@ -69,7 +72,7 @@ describe('FeatureUsageService', () => {
         start.notifyUsage('featureA', 127001);
         start.notifyUsage('featureB', 6666);
 
-        expect(start.getLastUsages()).toEqual({
+        expect(toObj(start.getLastUsages())).toEqual({
           featureA: 127001,
           featureB: 6666,
         });
@@ -82,7 +85,7 @@ describe('FeatureUsageService', () => {
         start.notifyUsage('featureA', 1000);
         start.notifyUsage('featureA', 500);
 
-        expect(start.getLastUsages()).toEqual({
+        expect(toObj(start.getLastUsages())).toEqual({
           featureA: 1000,
         });
       });
@@ -94,9 +97,27 @@ describe('FeatureUsageService', () => {
         const start = service.start();
         start.notifyUsage('featureA', 127001);
 
-        expect(start.getLastUsages()).toEqual({
+        expect(toObj(start.getLastUsages())).toEqual({
           featureA: 127001,
         });
+      });
+    });
+
+    describe('#clear', () => {
+      it('clears the whole last usages map', () => {
+        const setup = service.setup();
+        setup.register('featureA');
+        setup.register('featureB');
+
+        const start = service.start();
+        start.notifyUsage('featureA');
+        start.notifyUsage('featureB');
+
+        expect([...start.getLastUsages().keys()]).toEqual(['featureA', 'featureB']);
+
+        start.clear();
+
+        expect([...start.getLastUsages().keys()]).toEqual([]);
       });
     });
   });

@@ -9,12 +9,13 @@ export interface FeatureUsageServiceSetup {
 }
 export interface FeatureUsageServiceStart {
   notifyUsage(featureName: string, usedAt?: number): void;
-  getLastUsages(): Record<string, number>;
+  getLastUsages(): ReadonlyMap<string, number>;
+  clear(): void;
 }
 
 export class FeatureUsageService {
-  private features: string[] = [];
-  private lastUsages = new Map<string, number>();
+  private readonly features: string[] = [];
+  private readonly lastUsages = new Map<string, number>();
 
   public setup(): FeatureUsageServiceSetup {
     return {
@@ -36,7 +37,10 @@ export class FeatureUsageService {
         const currentValue = this.lastUsages.get(featureName) ?? 0;
         this.lastUsages.set(featureName, Math.max(usedAt, currentValue));
       },
-      getLastUsages: () => Object.fromEntries(this.lastUsages.entries()),
+      getLastUsages: () => new Map(this.lastUsages.entries()),
+      clear: () => {
+        this.lastUsages.clear();
+      },
     };
   }
 }
