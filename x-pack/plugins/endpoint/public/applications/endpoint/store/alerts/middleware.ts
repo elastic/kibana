@@ -15,10 +15,14 @@ import { EndpointAppConstants } from '../../../../../common/types';
 export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreStart, depsStart) => {
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
-    const indexName = EndpointAppConstants.ALERT_INDEX_NAME;
-    const fields = await indexPatterns.getFieldsForWildcard({ pattern: indexName });
+    const eventsPattern: { indexPattern: string } = await coreStart.http.get(
+      `${EndpointAppConstants.INDEX_PATTERN_ROUTE}/${EndpointAppConstants.EVENT_DATASET}`
+    );
+    const fields = await indexPatterns.getFieldsForWildcard({
+      pattern: eventsPattern.indexPattern,
+    });
     const indexPattern: IIndexPattern = {
-      title: indexName,
+      title: eventsPattern.indexPattern,
       fields,
     };
 
