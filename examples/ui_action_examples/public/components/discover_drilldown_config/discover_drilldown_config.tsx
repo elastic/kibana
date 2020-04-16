@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { txtChooseDestinationIndexPattern } from './i18n';
 
 export interface IndexPatternItem {
@@ -52,26 +52,30 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
   return (
     <>
       {!!onCustomIndexPatternToggle && (
-        <EuiFormRow hasChildLabel={false}>
-          <EuiSwitch
-            name="customIndexPattern"
-            label="Use custom index pattern"
-            checked={!!customIndexPattern}
-            onChange={onCustomIndexPatternToggle}
-          />
-        </EuiFormRow>
+        <>
+          <EuiFormRow hasChildLabel={false}>
+            <EuiSwitch
+              name="customIndexPattern"
+              label="Use custom index pattern"
+              checked={!!customIndexPattern}
+              onChange={onCustomIndexPatternToggle}
+            />
+          </EuiFormRow>
+          {!!customIndexPattern && (
+            <EuiFormRow label={txtChooseDestinationIndexPattern}>
+              <EuiSelect
+                name="selectDashboard"
+                hasNoInitialSelection={true}
+                options={indexPatterns.map(({ id, title }) => ({ value: id, text: title }))}
+                value={activeIndexPatternId}
+                onChange={e => onIndexPatternSelect(e.target.value)}
+              />
+            </EuiFormRow>
+          )}
+          <EuiSpacer size="xl" />
+        </>
       )}
-      {!!customIndexPattern && (
-        <EuiFormRow label={txtChooseDestinationIndexPattern}>
-          <EuiSelect
-            name="selectDashboard"
-            hasNoInitialSelection={true}
-            options={indexPatterns.map(({ id, title }) => ({ value: id, text: title }))}
-            value={activeIndexPatternId}
-            onChange={e => onIndexPatternSelect(e.target.value)}
-          />
-        </EuiFormRow>
-      )}
+
       {!!onCarryFiltersAndQueryToggle && (
         <EuiFormRow hasChildLabel={false}>
           <EuiSwitch
