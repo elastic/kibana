@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import './index_header';
+import { IndexHeader } from './index_header';
 import './create_edit_field';
 import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
@@ -44,10 +44,13 @@ import { createEditIndexPatternPageStateContainer } from './edit_index_pattern_s
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
 const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
+const REACT_INDEX_HEADER_DOM_ELEMENT_ID = 'reactIndexHeader';
 
 const TAB_INDEXED_FIELDS = 'indexedFields';
 const TAB_SCRIPTED_FIELDS = 'scriptedFields';
 const TAB_SOURCE_FILTERS = 'sourceFilters';
+
+const EDIT_FIELD_PATH = '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}';
 
 function updateSourceFiltersTable($scope) {
   $scope.$$postDigest(() => {
@@ -97,8 +100,8 @@ function updateScriptedFieldsTable($scope) {
           fieldFilter={$scope.fieldFilter}
           scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
           helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.changeToRoute(obj, route);
+            redirectToRoute: field => {
+              $scope.kbnUrl.changePath(EDIT_FIELD_PATH, field);
               $scope.$apply();
             },
             getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
@@ -140,8 +143,8 @@ function updateIndexedFieldsTable($scope) {
           fieldWildcardMatcher={$scope.fieldWildcardMatcher}
           indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
           helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.changeToRoute(obj, route);
+            redirectToRoute: field => {
+              $scope.kbnUrl.changePath(EDIT_FIELD_PATH, field);
               $scope.$apply();
             },
             getFieldInfo: $scope.getFieldInfo,
@@ -156,6 +159,33 @@ function updateIndexedFieldsTable($scope) {
 function destroyIndexedFieldsTable() {
   const node = document.getElementById(REACT_INDEXED_FIELDS_DOM_ELEMENT_ID);
   node && unmountComponentAtNode(node);
+}
+
+function destroyIndexHeader() {
+  const node = document.getElementById(REACT_INDEX_HEADER_DOM_ELEMENT_ID);
+  node && unmountComponentAtNode(node);
+}
+
+function renderIndexHeader($scope, config) {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_INDEX_HEADER_DOM_ELEMENT_ID);
+    if (!node) {
+      return;
+    }
+
+    render(
+      <I18nContext>
+        <IndexHeader
+          indexPattern={$scope.indexPattern}
+          setDefault={$scope.setDefaultPattern}
+          refreshFields={$scope.refreshFields}
+          deleteIndexPattern={$scope.removePattern}
+          defaultIndex={config.get('defaultIndex')}
+        />
+      </I18nContext>,
+      node
+    );
+  });
 }
 
 function handleTabChange($scope, newTab) {
@@ -389,6 +419,9 @@ uiModules
       destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
       destroySourceFiltersTable();
+      destroyIndexHeader();
       destroyState();
     });
+
+    renderIndexHeader($scope, config);
   });
