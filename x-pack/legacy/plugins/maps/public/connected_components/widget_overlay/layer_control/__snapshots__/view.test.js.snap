@@ -35,6 +35,25 @@ exports[`LayerControl is rendered 1`] = `
           grow={false}
         >
           <EuiToolTip
+            content="Edit map settings"
+            delay="long"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Edit map settings"
+              className="mapLayerControl__openMapSettingsButton"
+              color="text"
+              data-test-subj="mapOpenMapSettingsButton"
+              iconType="gear"
+              isDisabled={false}
+              onClick={[Function]}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiToolTip
             content="Collapse layers panel"
             delay="long"
             position="top"
@@ -65,7 +84,7 @@ exports[`LayerControl is rendered 1`] = `
     data-test-subj="addLayerButton"
     fill={true}
     fullWidth={true}
-    isDisabled={true}
+    isDisabled={false}
     onClick={[Function]}
   >
     <FormattedMessage
@@ -185,5 +204,101 @@ exports[`LayerControl isReadOnly 1`] = `
       <LayerTOC />
     </EuiFlexItem>
   </EuiPanel>
+</Fragment>
+`;
+
+exports[`LayerControl should disable buttons when flyout is open 1`] = `
+<Fragment>
+  <EuiPanel
+    className="mapWidgetControl mapWidgetControl-hasShadow"
+    grow={false}
+    paddingSize="none"
+  >
+    <EuiFlexItem
+      className="mapWidgetControl__headerFlexItem"
+      grow={false}
+    >
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiTitle
+            className="mapWidgetControl__header"
+            size="xxxs"
+          >
+            <h2>
+              <FormattedMessage
+                defaultMessage="Layers"
+                id="xpack.maps.layerControl.layersTitle"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiToolTip
+            content="Edit map settings"
+            delay="long"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Edit map settings"
+              className="mapLayerControl__openMapSettingsButton"
+              color="text"
+              data-test-subj="mapOpenMapSettingsButton"
+              iconType="gear"
+              isDisabled={true}
+              onClick={[Function]}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiToolTip
+            content="Collapse layers panel"
+            delay="long"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Collapse layers panel"
+              className="mapLayerControl__closeLayerTOCButton"
+              color="text"
+              data-test-subj="mapToggleLegendButton"
+              iconType="menuRight"
+              onClick={[Function]}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="mapLayerControl"
+    >
+      <LayerTOC />
+    </EuiFlexItem>
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButton
+    className="mapLayerControl__addLayerButton"
+    data-test-subj="addLayerButton"
+    fill={true}
+    fullWidth={true}
+    isDisabled={true}
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Add layer"
+      id="xpack.maps.layerControl.addLayerButtonLabel"
+      values={Object {}}
+    />
+  </EuiButton>
 </Fragment>
 `;

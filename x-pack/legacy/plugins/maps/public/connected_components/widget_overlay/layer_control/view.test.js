@@ -19,13 +19,21 @@ const defaultProps = {
   showAddLayerWizard: () => {},
   closeLayerTOC: () => {},
   openLayerTOC: () => {},
+  openMapSettings: () => {},
   isLayerTOCOpen: true,
   layerList: [],
+  isFlyoutOpen: false,
 };
 
 describe('LayerControl', () => {
   test('is rendered', () => {
     const component = shallow(<LayerControl {...defaultProps} />);
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should disable buttons when flyout is open', () => {
+    const component = shallow(<LayerControl {...defaultProps} isFlyoutOpen={true} />);
 
     expect(component).toMatchSnapshot();
   });
