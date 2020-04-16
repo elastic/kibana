@@ -44,6 +44,7 @@ export class Field implements IFieldType {
   scripted?: boolean;
   subType?: IFieldSubType;
   displayName?: string;
+  indexPattern?: IndexPattern;
   format: any;
   $$spec: FieldSpec;
 

@@ -4,22 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { getInputIndex } from './get_input_output_index';
 import { defaultIndexPattern } from '../../../../default_index_pattern';
-import { AlertServices } from '../../../../../../../plugins/alerting/server';
+import { alertsMock, AlertServicesMock } from '../../../../../../../plugins/alerting/server/mocks';
 
 describe('get_input_output_index', () => {
-  let savedObjectsClient = savedObjectsClientMock.create();
-  savedObjectsClient.get = jest.fn().mockImplementation(() => ({
-    attributes: {},
-  }));
-  let servicesMock: AlertServices = {
-    savedObjectsClient,
-    callCluster: jest.fn(),
-    alertInstanceFactory: jest.fn(),
-  };
+  let servicesMock: AlertServicesMock;
 
   beforeAll(() => {
     jest.resetAllMocks();
@@ -30,20 +21,21 @@ describe('get_input_output_index', () => {
   });
 
   beforeEach(() => {
-    savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.get = jest.fn().mockImplementation(() => ({
+    servicesMock = alertsMock.createAlertServices();
+    servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
+      id,
+      type,
+      references: [],
       attributes: {},
     }));
-    servicesMock = {
-      savedObjectsClient,
-      callCluster: jest.fn(),
-      alertInstanceFactory: jest.fn(),
-    };
   });
 
   describe('getInputOutputIndex', () => {
     test('Returns inputIndex if inputIndex is passed in', async () => {
-      savedObjectsClient.get = jest.fn().mockImplementation(() => ({
+      servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
+        id,
+        type,
+        references: [],
         attributes: {},
       }));
       const inputIndex = await getInputIndex(servicesMock, '8.0.0', ['test-input-index-1']);
@@ -51,7 +43,10 @@ describe('get_input_output_index', () => {
     });
 
     test('Returns a saved object inputIndex if passed in inputIndex is undefined', async () => {
-      savedObjectsClient.get = jest.fn().mockImplementation(() => ({
+      servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
+        id,
+        type,
+        references: [],
         attributes: {
           [DEFAULT_INDEX_KEY]: ['configured-index-1', 'configured-index-2'],
         },
@@ -61,7 +56,10 @@ describe('get_input_output_index', () => {
     });
 
     test('Returns a saved object inputIndex if passed in inputIndex is null', async () => {
-      savedObjectsClient.get = jest.fn().mockImplementation(() => ({
+      servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
+        id,
+        type,
+        references: [],
         attributes: {
           [DEFAULT_INDEX_KEY]: ['configured-index-1', 'configured-index-2'],
         },
@@ -71,7 +69,10 @@ describe('get_input_output_index', () => {
     });
 
     test('Returns a saved object inputIndex default from constants if inputIndex passed in is null and the key is also null', async () => {
-      savedObjectsClient.get = jest.fn().mockImplementation(() => ({
+      servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
+        id,
+        type,
+        references: [],
         attributes: {
           [DEFAULT_INDEX_KEY]: null,
         },
@@ -81,7 +82,10 @@ describe('get_input_output_index', () => {
     });
 
     test('Returns a saved object inputIndex default from constants if inputIndex passed in is undefined and the key is also null', async () => {
-      savedObjectsClient.get = jest.fn().mockImplementation(() => ({
+      servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
+        id,
+        type,
+        references: [],
         attributes: {
           [DEFAULT_INDEX_KEY]: null,
         },
