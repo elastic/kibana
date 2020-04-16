@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { LicensingPluginSetup, ILicense } from '../../licensing/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -14,7 +14,10 @@ import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
  */
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MapsLegacyLicensingSetupDependencies {}
+export interface MapsLegacyLicensingSetupDependencies {
+  licensing: LicensingPluginSetup;
+  mapsLegacy: any;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsLegacyLicensingStartDependencies {}
 
@@ -29,8 +32,8 @@ export class MapsLegacyLicensing
       mapsLegacy: { serviceSettings },
     } = plugins;
     if (licensing) {
-      licensing.license$.subscribe(license => {
-        const { uid, isActive }: { uid: string; isActive: boolean } = license;
+      licensing.license$.subscribe((license: ILicense) => {
+        const { uid, isActive } = license;
         if (isActive && license.hasAtLeast('basic')) {
           serviceSettings.setQueryParams({ license: uid });
           serviceSettings.disableZoomMessage();
