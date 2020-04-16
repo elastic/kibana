@@ -11,7 +11,8 @@ import { UIM_APP_NAME } from '../constants';
 
 export { METRIC_TYPE };
 
-export let trackUiMetric: (metricType: UiStatsMetricType, eventName: string) => void;
+// usageCollection is an optional dependency, so we default to a no-op.
+export let trackUiMetric = (metricType: UiStatsMetricType, eventName: string) => {};
 
 export function init(usageCollection: UsageCollectionSetup): void {
   trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, UIM_APP_NAME);
