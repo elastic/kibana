@@ -23,6 +23,7 @@ export interface DatasourceInputStream {
   dataset: string;
   processors?: string[];
   config?: DatasourceConfigRecord;
+  pkg_stream?: any;
 }
 
 export interface DatasourceInput {
