@@ -7,7 +7,9 @@
 import { createEsContext } from './context';
 import { ClusterClient, Logger } from '../../../../../src/core/server';
 import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
-
+jest.mock('../lib/../../../../package.json', () => ({
+  version: '1.2.3',
+}));
 type EsClusterClient = Pick<jest.Mocked<ClusterClient>, 'callAsInternalUser' | 'asScoped'>;
 
 let logger: Logger;
@@ -42,12 +44,12 @@ describe('createEsContext', () => {
     const esNames = context.esNames;
     expect(esNames).toStrictEqual({
       base: 'test-index',
-      alias: 'test-index-event-log-8.0.0',
+      alias: 'test-index-event-log-1.2.3',
       ilmPolicy: 'test-index-event-log-policy',
       indexPattern: 'test-index-event-log-*',
-      indexPatternWithVersion: 'test-index-event-log-8.0.0-*',
-      indexTemplate: 'test-index-event-log-8.0.0-template',
-      initialIndex: 'test-index-event-log-8.0.0-000001',
+      indexPatternWithVersion: 'test-index-event-log-1.2.3-*',
+      indexTemplate: 'test-index-event-log-1.2.3-template',
+      initialIndex: 'test-index-event-log-1.2.3-000001',
     });
   });
 

@@ -38,7 +38,7 @@ export default function({ getService }: FtrProviderContext) {
         .get('kbnTestServer.serverArgs')
         .find((val: string) => val === '--xpack.eventLog.indexEntries=true');
       const result = await isIndexingEntries();
-      const exists = await es.indices.exists({ index: '.kibana-event-log-8.0.0-000001' });
+      const exists = await es.indices.exists({ index: '.kibana-event-log-*' });
       expect(exists).to.be.eql(true);
       expect(configValue).to.be.eql(
         `--xpack.eventLog.indexEntries=${result.body.isIndexingEntries}`
@@ -105,7 +105,9 @@ export default function({ getService }: FtrProviderContext) {
         kibana: { saved_objects: [{ type: 'event_log_test', id: eventId }] },
       };
       await startTimingEventLogger(event);
-      setTimeout(() => log.debug('doing some action'), 500);
+      retry.try(async () => {
+        Promise.resolve(log.debug('doing some action'));
+      });
       await stopTimingEventLogger(event);
       await logTestEvent(eventId, event);
 
@@ -133,7 +135,9 @@ export default function({ getService }: FtrProviderContext) {
         kibana: { saved_objects: [{ type: 'action', id: eventId }] },
       };
       await startTimingEventLogger(event);
-      setTimeout(() => log.debug('doing some action'), 500);
+      retry.try(async () => {
+        Promise.resolve(log.debug('doing some action'));
+      });
       await stopTimingEventLogger(event);
       await logTestEvent(eventId, event);
 
