@@ -22,6 +22,7 @@ import { LevelLogger } from '../../../../server/lib';
 import { createMockBrowserDriverFactory, createMockLayoutInstance } from '../../../../test_helpers';
 import { ConditionalHeaders, HeadlessChromiumDriver } from '../../../../types';
 import { CaptureConfig } from '../../../../server/types';
+import * as contexts from './constants';
 import { screenshotsObservableFactory } from './observable';
 import { ElementsPositionAndAttribute } from './types';
 
@@ -57,10 +58,30 @@ describe('Screenshot Observable Pipeline', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "elementsPositionAndAttributes": Array [
+            Object {
+              "attributes": Object {
+                "description": "Default ",
+                "title": "Default Mock Title",
+              },
+              "position": Object {
+                "boundingClientRect": Object {
+                  "height": 600,
+                  "left": 0,
+                  "top": 0,
+                  "width": 800,
+                },
+                "scroll": Object {
+                  "x": 0,
+                  "y": 0,
+                },
+              },
+            },
+          ],
           "error": undefined,
           "screenshots": Array [
             Object {
-              "base64EncodedData": "allyourBase64 of boundingClientRect,scroll",
+              "base64EncodedData": "allyourBase64",
               "description": "Default ",
               "title": "Default Mock Title",
             },
@@ -95,6 +116,26 @@ describe('Screenshot Observable Pipeline', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "elementsPositionAndAttributes": Array [
+            Object {
+              "attributes": Object {
+                "description": "Default ",
+                "title": "Default Mock Title",
+              },
+              "position": Object {
+                "boundingClientRect": Object {
+                  "height": 600,
+                  "left": 0,
+                  "top": 0,
+                  "width": 800,
+                },
+                "scroll": Object {
+                  "x": 0,
+                  "y": 0,
+                },
+              },
+            },
+          ],
           "error": undefined,
           "screenshots": Array [
             Object {
@@ -106,6 +147,26 @@ describe('Screenshot Observable Pipeline', () => {
           "timeRange": "Default GetTimeRange Result",
         },
         Object {
+          "elementsPositionAndAttributes": Array [
+            Object {
+              "attributes": Object {
+                "description": "Default ",
+                "title": "Default Mock Title",
+              },
+              "position": Object {
+                "boundingClientRect": Object {
+                  "height": 600,
+                  "left": 0,
+                  "top": 0,
+                  "width": 800,
+                },
+                "scroll": Object {
+                  "x": 0,
+                  "y": 0,
+                },
+              },
+            },
+          ],
           "error": undefined,
           "screenshots": Array [
             Object {
@@ -150,10 +211,27 @@ describe('Screenshot Observable Pipeline', () => {
       await expect(getScreenshot()).resolves.toMatchInlineSnapshot(`
               Array [
                 Object {
+                  "elementsPositionAndAttributes": Array [
+                    Object {
+                      "attributes": Object {},
+                      "position": Object {
+                        "boundingClientRect": Object {
+                          "height": 200,
+                          "left": 0,
+                          "top": 0,
+                          "width": 200,
+                        },
+                        "scroll": Object {
+                          "x": 0,
+                          "y": 0,
+                        },
+                      },
+                    },
+                  ],
                   "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
                   "screenshots": Array [
                     Object {
-                      "base64EncodedData": "allyourBase64 of boundingClientRect,scroll",
+                      "base64EncodedData": "allyourBase64",
                       "description": undefined,
                       "title": undefined,
                     },
@@ -161,10 +239,27 @@ describe('Screenshot Observable Pipeline', () => {
                   "timeRange": null,
                 },
                 Object {
+                  "elementsPositionAndAttributes": Array [
+                    Object {
+                      "attributes": Object {},
+                      "position": Object {
+                        "boundingClientRect": Object {
+                          "height": 200,
+                          "left": 0,
+                          "top": 0,
+                          "width": 200,
+                        },
+                        "scroll": Object {
+                          "x": 0,
+                          "y": 0,
+                        },
+                      },
+                    },
+                  ],
                   "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
                   "screenshots": Array [
                     Object {
-                      "base64EncodedData": "allyourBase64 of boundingClientRect,scroll",
+                      "base64EncodedData": "allyourBase64",
                       "description": undefined,
                       "title": undefined,
                     },
@@ -208,15 +303,96 @@ describe('Screenshot Observable Pipeline', () => {
       await expect(getScreenshot()).resolves.toMatchInlineSnapshot(`
               Array [
                 Object {
+                  "elementsPositionAndAttributes": Array [
+                    Object {
+                      "attributes": Object {},
+                      "position": Object {
+                        "boundingClientRect": Object {
+                          "height": 200,
+                          "left": 0,
+                          "top": 0,
+                          "width": 200,
+                        },
+                        "scroll": Object {
+                          "x": 0,
+                          "y": 0,
+                        },
+                      },
+                    },
+                  ],
                   "error": "Instant timeout has fired!",
                   "screenshots": Array [
                     Object {
-                      "base64EncodedData": "allyourBase64 of boundingClientRect,scroll",
+                      "base64EncodedData": "allyourBase64",
                       "description": undefined,
                       "title": undefined,
                     },
                   ],
                   "timeRange": null,
+                },
+              ]
+            `);
+    });
+
+    it(`uses defaults for element positions and size when Kibana page is not ready`, async () => {
+      // mocks
+      const mockBrowserEvaluate = jest.fn();
+      mockBrowserEvaluate.mockImplementation(() => {
+        const lastCallIndex = mockBrowserEvaluate.mock.calls.length - 1;
+        const { context: mockCall } = mockBrowserEvaluate.mock.calls[lastCallIndex][1];
+
+        if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
+          return Promise.resolve(null);
+        } else {
+          return Promise.resolve();
+        }
+      });
+      mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
+        evaluate: mockBrowserEvaluate,
+      });
+      mockLayout.getViewport = () => null;
+
+      // test
+      const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+      const getScreenshot = async () => {
+        return await getScreenshots$({
+          logger,
+          urls: ['/welcome/home/start/index.php3?page=./home.php3'],
+          conditionalHeaders: {} as ConditionalHeaders,
+          layout: mockLayout,
+          browserTimezone: 'UTC',
+        }).toPromise();
+      };
+
+      await expect(getScreenshot()).resolves.toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "elementsPositionAndAttributes": Array [
+                    Object {
+                      "attributes": Object {},
+                      "position": Object {
+                        "boundingClientRect": Object {
+                          "height": 1200,
+                          "left": 0,
+                          "top": 0,
+                          "width": 1800,
+                        },
+                        "scroll": Object {
+                          "x": 0,
+                          "y": 0,
+                        },
+                      },
+                    },
+                  ],
+                  "error": undefined,
+                  "screenshots": Array [
+                    Object {
+                      "base64EncodedData": "allyourBase64",
+                      "description": undefined,
+                      "title": undefined,
+                    },
+                  ],
+                  "timeRange": undefined,
                 },
               ]
             `);

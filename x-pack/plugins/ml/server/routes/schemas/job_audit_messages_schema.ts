@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cpus } from 'os';
+import { schema } from '@kbn/config-schema';
 
-const defaultCPUCount = 2;
+export const jobIdSchema = schema.object({ jobId: schema.maybe(schema.string()) });
 
-function cpuCount() {
-  try {
-    return cpus().length;
-  } catch (e) {
-    return defaultCPUCount;
-  }
-}
-
-export const config = {
-  concurrency: cpuCount(),
-};
+export const jobAuditMessagesQuerySchema = schema.maybe(
+  schema.object({ from: schema.maybe(schema.any()) })
+);

@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { schema } from '@kbn/config-schema';
 
-export const reportingPollConfig = {
-  jobCompletionNotifier: { interval: 10000, intervalErrorMultiplier: 5 },
-  jobsRefresh: { interval: 5000, intervalErrorMultiplier: 5 },
-};
+export const indicesSchema = schema.object({
+  index: schema.maybe(schema.string()),
+  fields: schema.maybe(schema.arrayOf(schema.string())),
+});
