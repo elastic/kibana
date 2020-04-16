@@ -60,6 +60,7 @@ export class VectorStyle extends AbstractStyle {
 
   constructor(descriptor = {}, source, layer) {
     super();
+    descriptor = descriptor === null ? {} : descriptor;
     this._source = source;
     this._layer = layer;
     this._descriptor = {
