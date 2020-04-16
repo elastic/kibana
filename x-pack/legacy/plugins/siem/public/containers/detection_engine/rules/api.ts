@@ -266,8 +266,8 @@ export const getRuleStatusById = async ({
   signal: AbortSignal;
 }): Promise<RuleStatusResponse> =>
   KibanaServices.get().http.fetch<RuleStatusResponse>(DETECTION_ENGINE_RULES_STATUS_URL, {
-    method: 'GET',
-    query: { ids: JSON.stringify([id]) },
+    method: 'POST',
+    body: JSON.stringify({ ids: [id] }),
     signal,
   });
 
@@ -289,8 +289,8 @@ export const getRulesStatusByIds = async ({
   const res = await KibanaServices.get().http.fetch<RuleStatusResponse>(
     DETECTION_ENGINE_RULES_STATUS_URL,
     {
-      method: 'GET',
-      query: { ids: JSON.stringify(ids) },
+      method: 'POST',
+      body: JSON.stringify({ ids }),
       signal,
     }
   );

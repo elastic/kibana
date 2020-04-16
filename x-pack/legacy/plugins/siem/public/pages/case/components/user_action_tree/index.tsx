@@ -179,7 +179,7 @@ export const UserActionTree = React.memo(
           markdown={MarkdownDescription}
           onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
           onQuote={handleManageQuote.bind(null, caseData.description)}
-          username={caseData.createdBy.username ?? 'Unknown'}
+          username={caseData.createdBy.username ?? i18n.UNKNOWN}
         />
 
         {caseUserActions.map((action, index) => {
