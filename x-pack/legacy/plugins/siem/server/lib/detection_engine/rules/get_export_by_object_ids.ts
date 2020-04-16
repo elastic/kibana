@@ -8,8 +8,9 @@ import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { isAlertType } from '../rules/types';
 import { readRules } from './read_rules';
-import { transformDataToNdjson, transformAlertToRule } from '../routes/rules/utils';
+import { transformAlertToRule } from '../routes/rules/utils';
 import { OutputRuleAlertRest } from '../types';
+import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
 
 interface ExportSuccesRule {
   statusCode: 200;
