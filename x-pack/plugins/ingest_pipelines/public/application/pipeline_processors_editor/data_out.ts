@@ -17,14 +17,19 @@ export interface DataOutResult {
 
 const convertEditorProcessorToProcessor = (processor: PipelineEditorProcessor): Processor => {
   const { options, onFailure, type } = processor;
-  return {
+  const outProcessor = {
     [type]: {
-      on_failure: onFailure?.length
-        ? convertProcessors(onFailure)
-        : (onFailure as Processor[] | undefined),
       ...options,
     },
   };
+
+  if (onFailure?.length) {
+    outProcessor[type].on_failure = convertProcessors(onFailure);
+  } else if (onFailure) {
+    outProcessor[type].on_failure = [];
+  }
+
+  return outProcessor;
 };
 
 const convertProcessors = (processors: PipelineEditorProcessor[]) => {

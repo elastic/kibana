@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setup } from './pipeline_editor_helpers';
+import { setup } from './pipeline_processors_editor_helpers';
 
-const testPipeline = {
-  name: 'test',
-  description: 'This is a test pipeline',
-  version: 1,
+const testProcessors = {
   processors: [
     {
       script: {
@@ -24,14 +21,17 @@ const testPipeline = {
       },
     },
   ],
-  onFailure: [],
 };
 
 describe('Pipeline Editor', () => {
   it('provides the same data out it got in if nothing changes', async () => {
-    const onDone = jest.fn();
-    const { clickDoneButton } = await setup({ pipeline: testPipeline as any, onSubmit: onDone });
-    await clickDoneButton();
-    expect(onDone).toHaveBeenCalledWith(testPipeline);
+    let stateReaderRef: any;
+    await setup({
+      ...(testProcessors as any),
+      stateReaderRef: ref => (stateReaderRef = ref),
+    });
+
+    const data = stateReaderRef.current();
+    expect(data).toEqual(testProcessors);
   });
 });

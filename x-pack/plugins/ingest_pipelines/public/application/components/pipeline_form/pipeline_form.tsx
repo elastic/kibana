@@ -141,7 +141,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
     return (
       <>
         <PipelineProcessorsEditor
-          stateReaderRef={editorStateRef => setProcessorStateReaderRef(editorStateRef)}
+          stateReaderRef={ref => setProcessorStateReaderRef(ref)}
           processors={processors}
         />
         <EuiSpacer size="l" />
