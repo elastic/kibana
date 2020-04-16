@@ -28,12 +28,19 @@ import {
 } from '../../../../ingest_manager/common';
 
 export { AppAction };
+
+/**
+ * Takes application-standard middleware dependencies
+ * and returns a redux middleware.
+ */
 export type MiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart,
   depsStart: EndpointPluginStartDependencies
 ) => (
-  api: MiddlewareAPI<Dispatch<AppAction>, S>
-) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
+  api: MiddlewareAPI<Dispatch<Immutable<AppAction> | AppAction>, Immutable<S>>
+) => (
+  next: Dispatch<Immutable<AppAction> | AppAction>
+) => (action: Immutable<AppAction>) => unknown;
 
 export interface HostListState {
   hosts: HostMetadata[];

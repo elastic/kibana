@@ -6,7 +6,6 @@
 
 import { IIndexPattern } from 'src/plugins/data/public';
 import { AlertResultList, AlertDetails } from '../../../../../common/types';
-import { AppAction } from '../action';
 import { MiddlewareFactory, AlertListState } from '../../types';
 import { isOnAlertPage, apiQueryParams, hasSelectedAlert, uiQueryParams } from './selectors';
 import { cloneHttpFetchQuery } from '../../../../common/clone_http_fetch_query';
@@ -29,7 +28,7 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
     return [indexPattern];
   }
 
-  return api => next => async (action: AppAction) => {
+  return api => next => async action => {
     next(action);
     const state = api.getState();
     if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {

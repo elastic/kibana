@@ -22,6 +22,7 @@ import { policyDetailsMiddlewareFactory } from './policy_details';
 import { GlobalState, MiddlewareFactory } from '../types';
 import { AppAction } from './action';
 import { EndpointPluginStartDependencies } from '../../../plugin';
+import { Immutable } from '../../../../common/types';
 
 const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
   ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ name: 'EndpointApp' })
@@ -37,10 +38,10 @@ export type Selector<S, R> = (state: S) => R;
  */
 export const substateMiddlewareFactory = <Substate>(
   selector: Selector<GlobalState, Substate>,
-  middleware: Middleware<{}, Substate, Dispatch<AppAction>>
-): Middleware<{}, GlobalState, Dispatch<AppAction>> => {
+  middleware: Middleware<{}, Substate, Dispatch<Immutable<AppAction> | AppAction>>
+): Middleware<{}, GlobalState, Dispatch<AppAction | Immutable<AppAction>>> => {
   return api => {
-    const substateAPI: MiddlewareAPI<Dispatch<AppAction>, Substate> = {
+    const substateAPI: MiddlewareAPI<Dispatch<AppAction | Immutable<AppAction>>, Substate> = {
       ...api,
       getState() {
         return selector(api.getState());
