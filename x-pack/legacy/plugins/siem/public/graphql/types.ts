@@ -1946,6 +1946,8 @@ export interface TimelineResult {
 
   templateTimelineId?: Maybe<string>;
 
+  type?: Maybe<string>;
+
   updated?: Maybe<number>;
 
   updatedBy?: Maybe<string>;
@@ -4031,6 +4033,10 @@ export namespace GetAllTimeline {
     pinnedEventIds: Maybe<string[]>;
 
     title: Maybe<string>;
+
+    type: Maybe<string>;
+
+    templateTimelineId: Maybe<string>;
 
     created: Maybe<number>;
 

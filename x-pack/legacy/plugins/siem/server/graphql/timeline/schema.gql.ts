@@ -238,6 +238,7 @@ export const timelineSchema = gql`
     sort: SortTimelineResult
     title: String
     templateTimelineId: String
+    type: String
     updated: Float
     updatedBy: String
     version: String!

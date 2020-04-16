@@ -72,7 +72,6 @@ export class Timeline {
       sortField: sort != null ? sort.sortField : undefined,
       sortOrder: sort != null ? sort.sortOrder : undefined,
     };
-
     return this.getAllSavedTimeline(request, options);
   }
 

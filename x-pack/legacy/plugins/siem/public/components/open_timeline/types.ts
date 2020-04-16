@@ -36,6 +36,10 @@ export interface TimelineActionsOverflowColumns {
   } | null>;
 }
 
+enum TimelineTypes {
+  default = 'default',
+  template = 'template',
+}
 /** The results of the query run by the OpenTimeline component */
 export interface OpenTimelineResult {
   created?: number | null;
@@ -47,6 +51,8 @@ export interface OpenTimelineResult {
   pinnedEventIds?: Readonly<Record<string, boolean>> | null;
   savedObjectId?: string | null;
   title?: string | null;
+  templateTimelineId?: string | null;
+  type?: TimelineTypes.template | TimelineTypes.default;
   updated?: number | null;
   updatedBy?: string | null;
 }
