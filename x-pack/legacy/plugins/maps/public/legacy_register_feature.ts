@@ -5,7 +5,7 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
+import { featureCatalogueEntry } from '../../../../plugins/maps/public/feature_catalogue_entry';
 
 const {
   plugins: { home },

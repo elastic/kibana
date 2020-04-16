@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { APP_ID, APP_ICON } from '../common/constants';
-import { getAppTitle } from '../common/i18n_getters';
-import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
+import { APP_ID, APP_ICON } from '../../../legacy/plugins/maps/common/constants';
+import { getAppTitle } from '../../../legacy/plugins/maps/common/i18n_getters';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 
 export const featureCatalogueEntry = {
   id: APP_ID,

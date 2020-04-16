@@ -29,7 +29,7 @@ import {
 import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
 import { Provider } from 'react-redux';
 import { GisMap } from '../../../../../plugins/maps/public/connected_components/gis_map';
-import { addHelpMenuToAppChrome } from '../help_menu_util';
+import { addHelpMenuToAppChrome } from '../../../../../plugins/maps/public/help_menu_util';
 import {
   setSelectedLayer,
   setRefreshConfig,

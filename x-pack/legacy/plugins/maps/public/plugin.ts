@@ -25,7 +25,7 @@ import {
 } from '../../../../plugins/maps/public/plugin'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
+import { featureCatalogueEntry } from '../../../../plugins/maps/public/feature_catalogue_entry';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
