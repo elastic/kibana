@@ -139,7 +139,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
   ]);
 
   useEffect(() => {
-    if (hasExistingMLJob && !isMLJobCreating && !hasMLJob) {
+    if (hasExistingMLJob && !isMLJobCreating && !hasMLJob && heartbeatIndices) {
       setIsCreatingJob(true);
       dispatch(createMLJobAction.get({ monitorId: monitorId as string, heartbeatIndices }));
     }
