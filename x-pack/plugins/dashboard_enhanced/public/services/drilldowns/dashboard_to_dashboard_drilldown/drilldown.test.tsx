@@ -148,16 +148,34 @@ describe('.execute()', () => {
     expect(navigatedPath).toEqual(expect.stringContaining(`dashboard/${testDashboardId}`));
   });
 
-  test('navigates with query', async () => {
+  test('query is removed with query if filters are disabled', async () => {
     const queryString = 'querystring';
     const queryLanguage = 'kuery';
     const { navigatedPath } = await setupTestBed(
-      {},
+      {
+        useCurrentFilters: false,
+      },
       {
         query: { query: queryString, language: queryLanguage },
       },
-      [],
-      true
+      []
+    );
+
+    expect(navigatedPath).toEqual(expect.not.stringContaining(queryString));
+    expect(navigatedPath).toEqual(expect.not.stringContaining(queryLanguage));
+  });
+
+  test('navigates with query if filters are enabled', async () => {
+    const queryString = 'querystring';
+    const queryLanguage = 'kuery';
+    const { navigatedPath } = await setupTestBed(
+      {
+        useCurrentFilters: true,
+      },
+      {
+        query: { query: queryString, language: queryLanguage },
+      },
+      []
     );
 
     expect(navigatedPath).toEqual(expect.stringContaining(queryString));
