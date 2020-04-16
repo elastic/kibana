@@ -6,16 +6,29 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { PluginInitializerContext } from 'kibana/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  EmbeddableContext,
+  CONTEXT_MENU_TRIGGER,
+} from '../../../../src/plugins/embeddable/public';
+import { ViewInDiscoverAction, ACTION_VIEW_IN_DISCOVER } from './actions';
+
+declare module '../../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_VIEW_IN_DISCOVER]: EmbeddableContext;
+  }
+}
 
 export interface DiscoverEnhancedSetupDependencies {
-  uiActions: any;
+  uiActions: UiActionsSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface DiscoverEnhancedStartDependencies {
-  navigation: NavigationStart;
-  data: DataPublicPluginStart;
+  uiActions: UiActionsStart;
+  embeddable: EmbeddableStart;
 }
 
 export class DiscoverEnhancedPlugin
@@ -26,7 +39,10 @@ export class DiscoverEnhancedPlugin
   setup(
     core: CoreSetup<DiscoverEnhancedStartDependencies>,
     { uiActions }: DiscoverEnhancedSetupDependencies
-  ) {}
+  ) {
+    const viewInDiscoverAction = new ViewInDiscoverAction();
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, viewInDiscoverAction);
+  }
 
   start(core: CoreStart, plugins: DiscoverEnhancedStartDependencies) {}
 
