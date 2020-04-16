@@ -28,9 +28,9 @@ This is required to encrypt parameters the must be secured, for example, PagerDu
 ** To access the Elastic Alerting functionality, you need
 application privileges to access Metrics, APM, Uptime, or SIEM.
 ** If you are using a self-managed deployment with security, you need
-Transport Security Layer (TLS) enabled for communication {ref}/configuring-tls.html#configuring-tls-kib-es[between {es} and {kib}].
+Transport Security Layer (TLS) enabled for communication between Elasticsearch and Kibana.
 Elastic Alerts uses API keys to secure background alert checks and actions,
-and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
+and API keys require TLS on the HTTP interface.
 
 Although not a requirement, to harden the integrations security you might want to
 review the <<action-settings, Actions settings>> that are available to you.
