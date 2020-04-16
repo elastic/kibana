@@ -74,7 +74,7 @@ export const registerProviderActionsRoute = (
         eventLogService.registerProviderActions(provider, actions);
         logger.info(`registered`);
       } catch (e) {
-        response.badRequest({ body: e });
+        return response.badRequest({ body: e });
       }
       return response.ok({ body: {} });
     }
@@ -117,16 +117,22 @@ export const getProviderActionsRoute = (
 ) => {
   router.get(
     {
-      path: `/api/log_event_fixture/getProviderActions`,
-      validate: {},
+      path: `/api/log_event_fixture/{provider}/getProviderActions`,
+      validate: {
+        params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
+      },
     },
     async function(
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
+      const { provider } = req.params as { provider: string };
+
       logger.info(`test if get all provider actions is registered`);
-      return res.ok({ body: { actions: eventLogService.getProviderActions() } });
+      return res.ok({
+        body: { actions: [...(eventLogService.getProviderActions().get(provider) ?? [])] },
+      });
     }
   );
 };
@@ -217,6 +223,64 @@ export const isEventLogServiceLoggingEntriesRoute = (
     ): Promise<IKibanaResponse<any>> {
       logger.info(`test if event logger is logging entries`);
       return res.ok({ body: { isLoggingEntries: eventLogService.isLoggingEntries() } });
+    }
+  );
+};
+
+export const startTimingEventLoggerRoute = (
+  router: IRouter,
+  eventLogService: IEventLogService,
+  logger: Logger
+) => {
+  router.post(
+    {
+      path: '/api/log_event_fixture/startTimingEventLogger',
+      validate: {
+        body: value => ({ value }),
+      },
+      options: { authRequired: false },
+    },
+    (context, request, response) => {
+      const event: IValidatedEvent = request.body;
+      try {
+        logger.info(`started timing for event: ${event}`);
+
+        const eventLogger = eventLogService.getLogger(event);
+        eventLogger.startTiming(event);
+        logger.info(`registered`);
+      } catch (e) {
+        return response.badRequest({ body: e });
+      }
+      return response.ok({ body: {} });
+    }
+  );
+};
+
+export const stopTimingEventLoggerRoute = (
+  router: IRouter,
+  eventLogService: IEventLogService,
+  logger: Logger
+) => {
+  router.post(
+    {
+      path: '/api/log_event_fixture/stopTimingEventLogger',
+      validate: {
+        body: value => ({ value }),
+      },
+      options: { authRequired: false },
+    },
+    (context, request, response) => {
+      const event: IValidatedEvent = request.body;
+      try {
+        logger.info(`started timing for event: ${event}`);
+
+        const eventLogger = eventLogService.getLogger(event);
+        eventLogger.stopTiming(event);
+        logger.info(`registered`);
+      } catch (e) {
+        return response.badRequest({ body: e });
+      }
+      return response.ok({ body: {} });
     }
   );
 };
