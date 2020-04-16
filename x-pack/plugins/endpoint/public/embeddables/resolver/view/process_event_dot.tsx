@@ -342,6 +342,7 @@ export const ProcessEventDot = styled(
                   textAlign: 'center',
                   maxWidth: '20rem',
                   minWidth: '12rem',
+                  width: '60%',
                   overflow: 'hidden',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
