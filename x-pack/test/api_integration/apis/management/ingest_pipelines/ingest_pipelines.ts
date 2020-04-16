@@ -226,14 +226,18 @@ export default function({ getService }: FtrProviderContext) {
 
         const uri = `${API_BASE_PATH}/${PIPELINE_ONE_ID},${PIPELINE_TWO_ID}`;
 
-        const { body } = await supertest
+        const {
+          body: { itemsDeleted, errors },
+        } = await supertest
           .delete(uri)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
-        expect(body).to.eql({
-          itemsDeleted: [PIPELINE_ONE_ID, PIPELINE_TWO_ID],
-          errors: [],
+        expect(errors).to.eql([]);
+
+        // The itemsDeleted array order isn't guaranteed, so we assert against each pipeline name instead
+        [PIPELINE_ONE_ID, PIPELINE_TWO_ID].forEach(pipelineName => {
+          expect(itemsDeleted.includes(pipelineName)).to.be(true);
         });
       });
 
