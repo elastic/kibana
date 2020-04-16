@@ -125,7 +125,6 @@ Here's the event written to the event log index:
       "duration": 1000000
     },
     "kibana": {
-      "namespace": "default",
       "saved_objects": [
         {
           "type": "action",
