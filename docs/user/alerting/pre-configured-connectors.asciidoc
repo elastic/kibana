@@ -1,0 +1,82 @@
+[role="xpack"]
+[[pre-configured-connectors]]
+== Pre-configured connectors
+
+Action connectors, which have all the information they need prior to startup, can be pre-configured with Kibana.yml.
+Sensitive configuration like credentials can use either kibana.yml or the Kibana keystore.
+
+[float]
+[[pre-configured-features]]
+=== Pre-configured connectors features
+
++
+- Require zero setup. Configuration and secrets/credentials needed to execute an action are pre-defined, including the connector name and id.
+- Appear in all spaces, because they are not saved objects.
+- Cannot be edited or deleted in the API or in the UI
+
+The following example shows a valid configuration 2 out of the box connectors.
++
+--
+  xpack.actions.preconfigured:
+    - id: 'my-slack1'
+      actionTypeId: .slack
+      name: 'Slack #xyz'
+      config:
+        webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
+
+    - id: 'webhook-service'
+      actionTypeId: .webhook
+      name: 'Email service'
+      config:
+        url: 'https://email-alert-service.elastic.co'
+        method: post
+        headers:
+          header1: value1
+          header2: value2
+      secrets:
+        user: elastic
+        password: changeme
+--
+
+id::      Action connector identifier.
+actionTypeId::      Action type identifier.
+name::      Name of pre-configured connector.
+config::      Action type specific configuration.
+secrets::      Sensitive configuration like username and password, keys.
+
+[NOTE]
+==============================================
+Sensitive properties like passwords can also be stored in the Kibana keystore. 
+==============================================
+
+[float]
+[[pre-configured-connector-alert-form]]
+=== Pre-configured connector in alert form
+
+The usage workflow at the beginning looks the same. When attaching an action to an alert, select from a list of available action types.
+Then select the Slack or Webhook type (those action types was pre-configured previously). 
+Observe that pre-configured connector is installed, and it’s automatically selected:
+
+[role="screenshot"]
+image::images/alert-pre-configured-slack-connector.png[Create alert with selected Slack action type]
+
+The dropdown is populated with other pre-configured slack connectors.
+The `pre-configured` label distinguishes them from space-aware connectors that use saved objects:
+
+[role="screenshot"]
+image::images/alert-pre-configured-connectors-dropdown.png[Dropdown list with pre-cofigured connectors]
+
+[float]
+[[managing-pre-configured-connectors]]
+=== Managing pre-configured connectors
+
+Pre-configured connectors appear in the connector list, regardless of which space the user is in. They are tagged as “pre-configured” and cannot be deleted.
+
+[role="screenshot"]
+image::images/pre-configured-connectors-managing.png[Connectors managing tab with pre-cofigured]
+
+Clicking on a pre-configured connector will show the description but not any of the configuration. 
+A message indicates that this is a pre-configured connector and cannot be edited.
+
+[role="screenshot"]
+image::images/pre-configured-connectors-view-screen.png[Pre-configured connector view details]
