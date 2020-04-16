@@ -17,8 +17,14 @@ import {
 } from '@elastic/eui';
 import { defaultDynamicSettings } from '../../../common/runtime_types';
 import { selectDynamicSettings } from '../../state/selectors';
+import { SettingsFormProps } from './certificate_form';
 
-export const IndicesForm: React.FC = ({ onChange, formFields, fieldErrors, isDisabled }) => {
+export const IndicesForm: React.FC<SettingsFormProps> = ({
+  onChange,
+  formFields,
+  fieldErrors,
+  isDisabled,
+}) => {
   const dss = useSelector(selectDynamicSettings);
 
   return (
