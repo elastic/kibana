@@ -30,12 +30,12 @@ import geckoDriver from 'geckodriver';
 import { Builder, Capabilities, By, logging, until } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
-// @ts-ignore types not available
-import ie from 'selenium-webdriver/ie';
+import edge from 'selenium-webdriver/edge';
 // @ts-ignore internal modules are not typed
 import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
+import { installDriver } from 'ms-chromium-edge-driver';
 
 import { pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
@@ -65,6 +65,7 @@ Executor.prototype.execute = preventParallelCalls(
 );
 
 let attemptCounter = 0;
+let edgePaths: { driverPath: string | undefined; browserPath: string | undefined };
 async function attemptToCreateCommand(
   log: ToolingLog,
   browserType: Browsers,
@@ -131,6 +132,41 @@ async function attemptToCreateCommand(
             }))
           ),
         };
+      }
+
+      case 'msedge': {
+        if (edgePaths && edgePaths.browserPath && edgePaths.driverPath) {
+          const edgeOptions = new edge.Options();
+          if (headlessBrowser === '1') {
+            // @ts-ignore internal modules are not typed
+            edgeOptions.headless();
+          }
+          // @ts-ignore internal modules are not typed
+          edgeOptions.setEdgeChromium(true);
+          // @ts-ignore internal modules are not typed
+          edgeOptions.setBinaryPath(edgePaths.browserPath);
+          const session = await new Builder()
+            .forBrowser('MicrosoftEdge')
+            .setEdgeOptions(edgeOptions)
+            .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath))
+            .build();
+          return {
+            session,
+            consoleLog$: pollForLogEntry$(session, logging.Type.BROWSER, logPollingMs).pipe(
+              takeUntil(lifecycle.cleanup.after$),
+              map(({ message, level: { name: level } }) => ({
+                message: message.replace(/\\n/g, '\n'),
+                level,
+              }))
+            ),
+          };
+        } else {
+          throw new Error(
+            `Chromium Edge session requires browser or driver path to be defined: ${JSON.stringify(
+              edgePaths
+            )}`
+          );
+        }
       }
 
       case 'firefox': {
@@ -261,6 +297,11 @@ export async function initWebDriver(
 
     log.verbose(entry.message);
   });
+
+  // download Edge driver only in case of usage
+  if (browserType === Browsers.ChromiumEdge) {
+    edgePaths = await installDriver();
+  }
 
   return await Promise.race([
     (async () => {
