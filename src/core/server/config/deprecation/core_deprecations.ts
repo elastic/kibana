@@ -128,56 +128,6 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('optimize.lazyHost', 'optimize.watchHost'),
   renameFromRoot('optimize.lazyPrebuild', 'optimize.watchPrebuild'),
   renameFromRoot('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
-  // Monitoring renames
-  // TODO: Remove these from here once the monitoring plugin is migrated to NP
-  renameFromRoot('xpack.monitoring.enabled', 'monitoring.enabled'),
-  renameFromRoot('xpack.monitoring.ui.enabled', 'monitoring.ui.enabled'),
-  renameFromRoot(
-    'xpack.monitoring.kibana.collection.enabled',
-    'monitoring.kibana.collection.enabled'
-  ),
-  renameFromRoot('xpack.monitoring.max_bucket_size', 'monitoring.ui.max_bucket_size'),
-  renameFromRoot('xpack.monitoring.min_interval_seconds', 'monitoring.ui.min_interval_seconds'),
-  renameFromRoot(
-    'xpack.monitoring.show_license_expiration',
-    'monitoring.ui.show_license_expiration'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.ui.container.elasticsearch.enabled',
-    'monitoring.ui.container.elasticsearch.enabled'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.ui.container.logstash.enabled',
-    'monitoring.ui.container.logstash.enabled'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.tests.cloud_detector.enabled',
-    'monitoring.tests.cloud_detector.enabled'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.kibana.collection.interval',
-    'monitoring.kibana.collection.interval'
-  ),
-  renameFromRoot('xpack.monitoring.elasticsearch.hosts', 'monitoring.ui.elasticsearch.hosts'),
-  renameFromRoot('xpack.monitoring.elasticsearch.username', 'monitoring.ui.elasticsearch.username'),
-  renameFromRoot('xpack.monitoring.elasticsearch.password', 'monitoring.ui.elasticsearch.password'),
-  renameFromRoot(
-    'xpack.monitoring.xpack_api_polling_frequency_millis',
-    'monitoring.xpack_api_polling_frequency_millis'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.cluster_alerts.email_notifications.enabled',
-    'monitoring.cluster_alerts.email_notifications.enabled'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.cluster_alerts.email_notifications.email_address',
-    'monitoring.cluster_alerts.email_notifications.email_address'
-  ),
-  renameFromRoot('xpack.monitoring.ccs.enabled', 'monitoring.ui.ccs.enabled'),
-  renameFromRoot(
-    'xpack.monitoring.elasticsearch.logFetchCount',
-    'monitoring.ui.elasticsearch.logFetchCount'
-  ),
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,
