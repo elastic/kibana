@@ -19,7 +19,6 @@ import {
 import {
   CreateConnectorArgs,
   ConnectorPublicConfigurationType,
-  ConnectorSecretConfigurationType,
   CreateActionTypeArgs,
   ExecutorParams,
   MapRecord,
@@ -69,11 +68,9 @@ export const createConnectorExecutor = ({
 ): Promise<ActionTypeExecutorResult> => {
   const actionId = execOptions.actionId;
   const {
-    apiUrl,
     casesConfiguration: { mapping: configurationMapping },
   } = execOptions.config as ConnectorPublicConfigurationType;
 
-  const { username, password } = execOptions.secrets as ConnectorSecretConfigurationType;
   const params = execOptions.params as ExecutorParams;
   const { action, actionParams } = params;
   const { comments, externalId, ...restParams } = actionParams;
@@ -87,7 +84,10 @@ export const createConnectorExecutor = ({
     actionId,
   };
 
-  const externalService = createExternalService({ url: apiUrl, username, password });
+  const externalService = createExternalService({
+    config: execOptions.config,
+    secrets: execOptions.secrets,
+  });
 
   if (!api[action]) {
     throw new Error('[Action][Connector] Unsupported action type');

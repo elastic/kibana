@@ -30,9 +30,8 @@ describe('ServiceNow service', () => {
 
   beforeAll(() => {
     service = createExternalService({
-      url: 'https://dev102283.service-now.com',
-      username: 'admin',
-      password: 'admin',
+      config: { apiUrl: 'https://dev102283.service-now.com' },
+      secrets: { username: 'admin', password: 'admin' },
     });
   });
 
@@ -43,19 +42,28 @@ describe('ServiceNow service', () => {
   describe('createExternalService', () => {
     test('throws without url', () => {
       expect(() =>
-        createExternalService({ url: null, username: 'admin', password: 'admin' })
+        createExternalService({
+          config: { apiUrl: null },
+          secrets: { username: 'admin', password: 'admin' },
+        })
       ).toThrow();
     });
 
     test('throws without username', () => {
       expect(() =>
-        createExternalService({ url: 'test.com', username: '', password: 'admin' })
+        createExternalService({
+          config: { apiUrl: 'test.com' },
+          secrets: { username: '', password: 'admin' },
+        })
       ).toThrow();
     });
 
     test('throws without password', () => {
       expect(() =>
-        createExternalService({ url: 'test.com', username: '', password: undefined })
+        createExternalService({
+          config: { apiUrl: 'test.com' },
+          secrets: { username: '', password: undefined },
+        })
       ).toThrow();
     });
   });

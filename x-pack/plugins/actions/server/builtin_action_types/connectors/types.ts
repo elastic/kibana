@@ -42,9 +42,8 @@ export interface ConnectorConfiguration {
 }
 
 export interface ExternalServiceCredential {
-  url: string;
-  username: string;
-  password: string;
+  config: Record<string, any>;
+  secrets: Record<string, any>;
 }
 
 export interface ConnectorValidation {
