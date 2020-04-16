@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PipelineForm } from './pipeline_form';
-
-export { SectionError } from './section_error';
-
-export { PipelineRequestFlyoutProvider as PipelineRequestFlyout } from './pipeline_request_flyout_provider';
+export { PipelinesEdit } from './pipelines_edit';

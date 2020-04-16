@@ -47,7 +47,7 @@ describe('pipeline_serialization', () => {
               },
             },
           ],
-          onFailure: [
+          on_failure: [
             {
               set: {
                 field: 'error.message',

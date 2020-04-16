@@ -13,7 +13,7 @@ import { Pipeline } from '../../../../common/types';
 export interface Props {
   pipelines: Pipeline[];
   onReloadClick: () => void;
-  onEditPipelineClick: (pipeline: Pipeline) => void;
+  onEditPipelineClick: (pipeineName: string) => void;
   onDeletePipelineClick: (pipeline: Pipeline) => void;
   onViewPipelineClick: (pipeline: Pipeline) => void;
 }
@@ -85,7 +85,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
               ),
               type: 'icon',
               icon: 'pencil',
-              onClick: onEditPipelineClick,
+              onClick: ({ name }) => onEditPipelineClick(name),
             },
             {
               name: i18n.translate('xpack.ingestPipelines.list.table.deleteActionLabel', {

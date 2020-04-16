@@ -18,26 +18,38 @@ import {
 
 import { BASE_PATH } from '../../../../common/constants';
 import { Pipeline } from '../../../../common/types';
-import { useKibana } from '../../../shared_imports';
-import { PipelineForm } from '../../components';
-import { PipelineEditor } from '../../pipeline_editor';
+import { useKibana, SectionLoading } from '../../../shared_imports';
+import { PipelineForm, SectionError } from '../../components';
 
-export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+interface MatchParams {
+  name: string;
+}
+
+export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+  match: {
+    params: { name },
+  },
+  history,
+}) => {
   const { services } = useKibana();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const onSave = async (pipeline: Pipeline) => {
+  const decodedPipelineName = decodeURI(decodeURIComponent(name));
+
+  const { error, data: pipeline, isLoading } = services.api.useLoadPipeline(decodedPipelineName);
+
+  const onSave = async (updatedPipeline: Pipeline) => {
     setIsSaving(true);
     setSaveError(null);
 
-    const { error } = await services.api.createPipeline(pipeline);
+    const { error: savePipelineError } = await services.api.updatePipeline(updatedPipeline);
 
     setIsSaving(false);
 
-    if (error) {
-      setSaveError(error);
+    if (savePipelineError) {
+      setSaveError(savePipelineError);
       return;
     }
 
@@ -49,8 +61,45 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
   };
 
   useEffect(() => {
-    services.breadcrumbs.setBreadcrumbs('create');
-  }, [services]);
+    services.breadcrumbs.setBreadcrumbs('edit');
+  }, [services.breadcrumbs]);
+
+  let content;
+
+  if (isLoading) {
+    content = (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.ingestPipelines.edit.loadingPipelinesDescription"
+          defaultMessage="Loading pipeline…"
+        />
+      </SectionLoading>
+    );
+  } else if (error) {
+    content = (
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.ingestPipelines.edit.fetchPipelineError"
+            defaultMessage="Error loading pipeline"
+          />
+        }
+        error={error}
+        data-test-subj="fetchPipelineError"
+      />
+    );
+  } else if (pipeline) {
+    content = (
+      <PipelineForm
+        onSave={onSave}
+        onCancel={onCancel}
+        isSaving={isSaving}
+        saveError={saveError}
+        defaultValue={pipeline}
+        isEditing={true}
+      />
+    );
+  }
 
   return (
     <EuiPageBody>
@@ -61,8 +110,9 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
               <EuiTitle size="l" data-test-subj="remoteClusterPageTitle">
                 <h1 data-test-subj="pageTitle">
                   <FormattedMessage
-                    id="xpack.ingestPipelines.create.pageTitle"
-                    defaultMessage="Create pipeline"
+                    id="xpack.ingestPipelines.edit.pageTitle"
+                    defaultMessage="Edit pipeline '{name}'"
+                    values={{ name: decodedPipelineName }}
                   />
                 </h1>
               </EuiTitle>
@@ -77,8 +127,8 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
                 iconType="help"
               >
                 <FormattedMessage
-                  id="xpack.ingestPipelines.create.docsButtonLabel"
-                  defaultMessage="Create pipeline docs"
+                  id="xpack.ingestPipelines.edit.docsButtonLabel"
+                  defaultMessage="Edit pipeline docs"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -87,41 +137,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
 
         <EuiSpacer size="l" />
 
-        {/* TODO: Temporary home for the pipeline editor, move it somewhere else */}
-        <PipelineEditor
-          onSubmit={() => {
-            // TODO do something here
-          }}
-          pipeline={{
-            name: '',
-            description: '',
-            version: 1,
-            processors: [
-              {
-                set: {
-                  field: 'test',
-                  value: 'test',
-                },
-              },
-              {
-                gsub: {
-                  field: '_index',
-                  pattern: '(.monitoring-\\w+-)6(-.+)',
-                  replacement: '$17$2',
-                },
-              },
-            ],
-            onFailure: [],
-          }}
-        />
-        <EuiSpacer size="l" />
-
-        <PipelineForm
-          onSave={onSave}
-          onCancel={onCancel}
-          isSaving={isSaving}
-          saveError={saveError}
-        />
+        {content}
       </EuiPageContent>
     </EuiPageBody>
   );

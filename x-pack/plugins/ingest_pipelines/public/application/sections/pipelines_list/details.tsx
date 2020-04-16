@@ -24,7 +24,7 @@ import { PipelineDetailsJsonBlock } from './details_json_block';
 
 export interface Props {
   pipeline: Pipeline;
-  onEditClick: () => void;
+  onEditClick: (pipelineName: string) => void;
   onDeleteClick: () => void;
   onClose: () => void;
 }
@@ -80,7 +80,7 @@ export const PipelineDetails: FunctionComponent<Props> = ({
         />
 
         {/* On Failure Processor JSON */}
-        {pipeline.onFailure?.length && (
+        {pipeline.on_failure?.length && (
           <>
             <EuiSpacer size="m" />
             <PipelineDetailsJsonBlock
@@ -91,7 +91,7 @@ export const PipelineDetails: FunctionComponent<Props> = ({
                   defaultMessage: 'On failure processors JSON',
                 }
               )}
-              json={pipeline.onFailure}
+              json={pipeline.on_failure}
             />
           </>
         )}
@@ -109,7 +109,7 @@ export const PipelineDetails: FunctionComponent<Props> = ({
           </EuiFlexItem>
           <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onEditClick}>
+              <EuiButtonEmpty onClick={() => onEditClick(pipeline.name)}>
                 {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.editButtonLabel', {
                   defaultMessage: 'Edit',
                 })}
