@@ -6,3 +6,4 @@
 
 export { WindowsEvents } from './windows';
 export { MacEvents } from './mac';
+export { LinuxEvents } from './linux';

@@ -944,11 +944,11 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     format: any;
     // (undocumented)
+    indexPattern?: IndexPattern;
+    // (undocumented)
     lang?: string;
     // (undocumented)
     name: string;
-    // (undocumented)
-    routes: Record<string, string>;
     // (undocumented)
     script?: string;
     // (undocumented)
@@ -979,7 +979,7 @@ export class IndexPatternFieldList extends Array<IndexPatternField> implements I
     // (undocumented)
     remove: (field: IFieldType) => void;
     // (undocumented)
-    update: (field: IndexPatternField) => void;
+    update: (field: Record<string, any>) => void;
 }
 
 // Warning: (ae-missing-release-tag) "indexPatterns" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

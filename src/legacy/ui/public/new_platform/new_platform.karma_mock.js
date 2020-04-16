@@ -454,6 +454,7 @@ export const npStart = {
           createAggConfigs: (indexPattern, configStates = []) => {
             return new AggConfigs(indexPattern, configStates, {
               typesRegistry: aggTypesRegistry.start(),
+              fieldFormats: getFieldFormatsRegistry(mockCoreStart),
             });
           },
           types: aggTypesRegistry.start(),
