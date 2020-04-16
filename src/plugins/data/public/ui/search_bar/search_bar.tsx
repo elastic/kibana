@@ -114,6 +114,15 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         query: nextProps.query.query,
         language: nextProps.query.language,
       };
+    } else if (
+      nextProps.query &&
+      prevState.query &&
+      nextProps.query.language !== prevState.query.language
+    ) {
+      nextQuery = {
+        query: '',
+        language: nextProps.query.language,
+      };
     }
 
     let nextDateRange = null;
@@ -353,20 +362,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
   }
 
-  public onClearSavedQuery = () => {
-    const query: Query = {
-      query: '',
-      language: get(this.state, 'query.language'),
-    };
-    this.setState({
-      ...this.state,
-      query,
-    });
-    if (this.props.onClearSavedQuery) {
-      this.props.onClearSavedQuery();
-    }
-  };
-
   public render() {
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManagementComponent
@@ -376,7 +371,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onSaveAsNew={this.onInitiateSaveNew}
         onLoad={this.onLoadSavedQuery}
         savedQueryService={this.savedQueryService}
-        onClearSavedQuery={this.onClearSavedQuery}
+        onClearSavedQuery={this.props.onClearSavedQuery}
       />
     );
 
