@@ -7,20 +7,6 @@
 import { Dispatch } from 'redux';
 import { AppAction, GlobalState, MiddlewareFactory } from '../types';
 
-type UnionOfActionTypeToAction<S extends AppAction = AppAction> = S extends unknown
-  ? { [K in S['type']]: S }
-  : never;
-
-type UnionToIntersection<U> = (U extends unknown
-? (k: U) => void
-: never) extends (k: infer I) => void
-  ? I
-  : never;
-
-type ActionsMap<A extends AppAction = AppAction> = UnionToIntersection<
-  UnionOfActionTypeToAction<A>
->;
-
 /**
  * Utilities for testing Redux middleware
  */
@@ -33,10 +19,10 @@ export interface MiddlewareActionSpyHelper<S = GlobalState, A extends AppAction 
    *
    * @param actionType
    */
-  waitForAction: <T extends keyof ActionsMap<A>>(actionType: T) => Promise<ActionsMap<A>[T]>;
+  waitForAction: <T extends A['type']>(actionType: T) => Promise<A extends { type: T } ? A : never>;
   /**
    * A property holding the information around the calls that were processed by the  internal
-   * `actionSpyMiddlware`. This property holds the information typically found in Jets's mocked
+   * `actionSpyMiddelware`. This property holds the information typically found in Jets's mocked
    * function `mock` property - [see here for more information](https://jestjs.io/docs/en/mock-functions#mock-property)
    *
    * **Note**: this property will only be set **after* the `actionSpyMiddlware` has been
@@ -91,15 +77,17 @@ export const createSpyMiddleware = <
 
   return {
     waitForAction: async actionType => {
+      type ResolvedAction = A extends { type: typeof actionType } ? A : never;
+
       // Error is defined here so that we get a better stack trace that points to the test from where it was used
       const err = new Error(`action '${actionType}' was not dispatched within the allocated time`);
 
-      return new Promise<ActionsMap<A>[typeof actionType]>((resolve, reject) => {
+      return new Promise<ResolvedAction>((resolve, reject) => {
         const watch: ActionWatcher = action => {
           if (action.type === actionType) {
             watchers.delete(watch);
             clearTimeout(timeout);
-            resolve((action as unknown) as ActionsMap<A>[typeof actionType]);
+            resolve(action as ResolvedAction);
           }
         };
 
