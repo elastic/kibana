@@ -4,21 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment-timezone';
-import { useEffect, useMemo } from 'react';
-
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
-
-import { formatHumanReadableDateTimeSeconds } from '../../../common/utils/date_utils';
-import { getNestedProperty } from '../../../common/utils/object_utils';
+import { useEffect } from 'react';
 
 import {
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   getErrorMessage,
   useDataGrid,
+  useRenderCellValue,
   EsSorting,
-  RenderCellValue,
   SearchResponse7,
   UseIndexDataReturnType,
   INDEX_STATUS,
@@ -107,42 +101,7 @@ export const useIndexData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
 
-  const renderCellValue: RenderCellValue = useMemo(() => {
-    return ({
-      rowIndex,
-      columnId,
-      setCellProps,
-    }: {
-      rowIndex: number;
-      columnId: string;
-      setCellProps: any;
-    }) => {
-      const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
-
-      const cellValue = tableItems.hasOwnProperty(adjustedRowIndex)
-        ? getNestedProperty(tableItems[adjustedRowIndex], columnId, null)
-        : null;
-
-      if (typeof cellValue === 'object' && cellValue !== null) {
-        return JSON.stringify(cellValue);
-      }
-
-      if (cellValue === undefined || cellValue === null) {
-        return null;
-      }
-
-      const field = indexPattern.fields.getByName(columnId);
-      if (field?.type === KBN_FIELD_TYPES.DATE) {
-        return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
-      }
-
-      if (field?.type === KBN_FIELD_TYPES.BOOLEAN) {
-        return cellValue ? 'true' : 'false';
-      }
-
-      return cellValue;
-    };
-  }, [indexPattern.fields, pagination.pageIndex, pagination.pageSize, tableItems]);
+  const renderCellValue = useRenderCellValue(indexPattern, pagination, tableItems);
 
   return {
     columns,

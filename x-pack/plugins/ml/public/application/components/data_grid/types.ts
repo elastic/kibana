@@ -11,9 +11,8 @@ import { EuiDataGridPaginationProps, EuiDataGridSorting, EuiDataGridColumn } fro
 
 import { Dictionary } from '../../../../common/types/common';
 
-// TODO move to common location and share with application/data_frame_analytics/common/fields.ts
-export type EsDocSource = Record<string, any>;
-export type EsFieldName = string;
+export type ColumnId = string;
+export type DataGridItem = Record<string, any>;
 
 export enum INDEX_STATUS {
   UNUSED,
@@ -43,8 +42,6 @@ export type RenderCellValue = ({
   setCellProps: any;
 }) => any;
 
-export type DataGridItem = Record<string, any>;
-
 export type EsSorting = Dictionary<{
   order: 'asc' | 'desc';
 }>;
@@ -62,18 +59,18 @@ export interface SearchResponse7 extends SearchResponse<any> {
 export interface UseIndexDataReturnType {
   columns: EuiDataGridColumn[];
   errorMessage: string;
-  invalidSortingColumnns: EsFieldName[];
+  invalidSortingColumnns: ColumnId[];
   noDataMessage: string;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onChangePage: OnChangePage;
   onSort: OnSort;
   pagination: IndexPagination;
   setPagination: Dispatch<SetStateAction<IndexPagination>>;
-  setVisibleColumns: Dispatch<SetStateAction<EsFieldName[]>>;
+  setVisibleColumns: Dispatch<SetStateAction<ColumnId[]>>;
   renderCellValue: RenderCellValue;
   rowCount: number;
   sortingColumns: EuiDataGridSorting['columns'];
   status: INDEX_STATUS;
-  tableItems: EsDocSource[];
-  visibleColumns: EsFieldName[];
+  tableItems: DataGridItem[];
+  visibleColumns: ColumnId[];
 }

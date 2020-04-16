@@ -10,8 +10,8 @@ import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
 import { INIT_MAX_COLUMNS } from './common';
 import {
-  EsDocSource,
-  EsFieldName,
+  ColumnId,
+  DataGridItem,
   IndexPagination,
   OnChangeItemsPerPage,
   OnChangePage,
@@ -19,14 +19,14 @@ import {
   INDEX_STATUS,
 } from './types';
 
-const defaultPagination: IndexPagination = { pageIndex: 0, pageSize: 5 };
+export const useDataGrid = (columns: EuiDataGridColumn[], defaultPageSize = 5) => {
+  const defaultPagination: IndexPagination = { pageIndex: 0, pageSize: defaultPageSize };
 
-export const useDataGrid = (columns: EuiDataGridColumn[]) => {
   const [noDataMessage, setNoDataMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
   const [rowCount, setRowCount] = useState(0);
-  const [tableItems, setTableItems] = useState<EsDocSource[]>([]);
+  const [tableItems, setTableItems] = useState<DataGridItem[]>([]);
   const [pagination, setPagination] = useState(defaultPagination);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
@@ -45,7 +45,7 @@ export const useDataGrid = (columns: EuiDataGridColumn[]) => {
   const resetPagination = () => setPagination(defaultPagination);
 
   // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>([]);
+  const [visibleColumns, setVisibleColumns] = useState<ColumnId[]>([]);
 
   const columnIds = columns.map(c => c.id);
   const defaultVisibleColumns = columnIds.splice(0, INIT_MAX_COLUMNS);

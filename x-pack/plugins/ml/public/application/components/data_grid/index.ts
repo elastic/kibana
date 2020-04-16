@@ -8,6 +8,7 @@ export {
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
+  useRenderCellValue,
 } from './common';
 export { useDataGrid } from './use_data_grid';
 export { DataGrid } from './data_grid';

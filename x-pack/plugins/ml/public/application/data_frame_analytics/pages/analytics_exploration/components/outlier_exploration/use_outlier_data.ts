@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
@@ -19,12 +19,12 @@ import {
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   useDataGrid,
+  useRenderCellValue,
   EsSorting,
   SearchResponse7,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { mlFieldFormatService } from '../../../../../services/field_format_service';
 import { ml } from '../../../../../services/ml_api_service';
 
 import { DataFrameAnalyticsConfig, INDEX_STATUS } from '../../../../common';
@@ -64,7 +64,7 @@ export const useOutlierData = (
     );
   }
 
-  const dataGrid = useDataGrid(columns);
+  const dataGrid = useDataGrid(columns, 25);
 
   const {
     pagination,
@@ -139,36 +139,12 @@ export const useOutlierData = (
     jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, tableItems) : 1
   );
 
-  const renderCellValue = useMemo(() => {
-    const resultsField = jobConfig?.dest.results_field ?? '';
-
-    return ({
-      rowIndex,
-      columnId,
-      setCellProps,
-    }: {
-      rowIndex: number;
-      columnId: string;
-      setCellProps: any;
-    }) => {
-      const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
-
-      const fullItem = tableItems[adjustedRowIndex];
-
-      if (fullItem === undefined) {
-        return null;
-      }
-
-      let format: any;
-
-      if (indexPattern !== undefined) {
-        format = mlFieldFormatService.getFieldFormatFromIndexPattern(indexPattern, columnId, '');
-      }
-
-      const cellValue =
-        fullItem.hasOwnProperty(columnId) && fullItem[columnId] !== undefined
-          ? fullItem[columnId]
-          : null;
+  const renderCellValue = useRenderCellValue(
+    indexPattern,
+    pagination,
+    tableItems,
+    (columnId, cellValue, fullItem, setCellProps) => {
+      const resultsField = jobConfig?.dest.results_field ?? '';
 
       const split = columnId.split('.');
       let backgroundColor;
@@ -188,26 +164,8 @@ export const useOutlierData = (
           style: { backgroundColor },
         });
       }
-
-      if (format !== undefined) {
-        return format.convert(cellValue, 'text');
-      }
-
-      if (typeof cellValue === 'string' || cellValue === null) {
-        return cellValue;
-      }
-
-      if (typeof cellValue === 'boolean') {
-        return cellValue ? 'true' : 'false';
-      }
-
-      if (typeof cellValue === 'object' && cellValue !== null) {
-        return JSON.stringify(cellValue);
-      }
-
-      return cellValue;
-    };
-  }, [jobConfig, rowCount, tableItems, pagination.pageIndex, pagination.pageSize]);
+    }
+  );
 
   return {
     columns,

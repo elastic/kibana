@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment-timezone';
+import { useMemo } from 'react';
+
 import { EuiDataGridSorting, EuiDataGridStyle } from '@elastic/eui';
 
 import {
@@ -12,7 +15,11 @@ import {
   KBN_FIELD_TYPES,
 } from '../../../../../../../src/plugins/data/public';
 
+import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 import { getNestedProperty } from '../../util/object_utils';
+import { mlFieldFormatService } from '../../services/field_format_service';
+
+import { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
 export const INIT_MAX_COLUMNS = 20;
 
@@ -73,6 +80,88 @@ export const getDataGridSchemaFromKibanaFieldType = (field: IFieldType | undefin
   }
 
   return schema;
+};
+
+export const useRenderCellValue = (
+  indexPattern: IndexPattern | undefined,
+  pagination: IndexPagination,
+  tableItems: DataGridItem[],
+  cellPropsCallback?: (
+    columnId: string,
+    cellValue: any,
+    fullItem: Record<string, any>,
+    setCellProps: any
+  ) => void
+): RenderCellValue => {
+  const renderCellValue: RenderCellValue = useMemo(() => {
+    return ({
+      rowIndex,
+      columnId,
+      setCellProps,
+    }: {
+      rowIndex: number;
+      columnId: string;
+      setCellProps: any;
+    }) => {
+      const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
+
+      const fullItem = tableItems[adjustedRowIndex];
+
+      if (fullItem === undefined) {
+        return null;
+      }
+
+      if (indexPattern === undefined) {
+        return null;
+      }
+
+      let format: any;
+
+      if (indexPattern !== undefined) {
+        format = mlFieldFormatService.getFieldFormatFromIndexPattern(indexPattern, columnId, '');
+      }
+
+      const cellValue = tableItems.hasOwnProperty(adjustedRowIndex)
+        ? getNestedProperty(tableItems[adjustedRowIndex], columnId, null)
+        : null;
+
+      if (typeof cellValue === 'object' && cellValue !== null) {
+        return JSON.stringify(cellValue);
+      }
+
+      if (cellValue === undefined || cellValue === null) {
+        return null;
+      }
+
+      if (format !== undefined) {
+        return format.convert(cellValue, 'text');
+      }
+
+      if (typeof cellValue === 'string' || cellValue === null) {
+        return cellValue;
+      }
+
+      const field = indexPattern.fields.getByName(columnId);
+      if (field?.type === KBN_FIELD_TYPES.DATE) {
+        return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
+      }
+
+      if (typeof cellValue === 'boolean') {
+        return cellValue ? 'true' : 'false';
+      }
+
+      if (typeof cellValue === 'object' && cellValue !== null) {
+        return JSON.stringify(cellValue);
+      }
+
+      if (typeof cellPropsCallback === 'function') {
+        cellPropsCallback(columnId, cellValue, fullItem, setCellProps);
+      }
+
+      return cellValue;
+    };
+  }, [indexPattern?.fields, pagination.pageIndex, pagination.pageSize, tableItems]);
+  return renderCellValue;
 };
 
 /**

@@ -23,6 +23,7 @@ export {
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
   useDataGrid,
+  useRenderCellValue,
   DataGrid,
   EsSorting,
   RenderCellValue,
