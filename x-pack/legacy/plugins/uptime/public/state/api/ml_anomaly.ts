@@ -48,11 +48,8 @@ export const createMLJob = async ({
     query: {
       bool: {
         filter: [
-          {
-            term: {
-              'monitor.id': lowerCaseMonitorId,
-            },
-          },
+          { term: { 'monitor.id': lowerCaseMonitorId } },
+          { range: { 'monitor.duration.us': { gt: 0 } } },
         ],
       },
     },
