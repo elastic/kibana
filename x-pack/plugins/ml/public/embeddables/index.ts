@@ -11,12 +11,13 @@ import {
 } from './anomaly_swimlane';
 import { MlSetupDependencies } from '../plugin';
 
-export function registerEmbeddables(
-  pluginsSetup: MlSetupDependencies,
-  overlays: CoreStart['overlays']
-) {
+export function registerEmbeddables(pluginsSetup: MlSetupDependencies) {
+  const anomalySwimlaneEmbeddableFactory = new AnomalySwimlaneEmbeddableFactory();
   pluginsSetup.embeddable.registerEmbeddableFactory(
     ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-    new AnomalySwimlaneEmbeddableFactory(overlays)
+    anomalySwimlaneEmbeddableFactory
   );
+  return (overlays: CoreStart['overlays']) => {
+    anomalySwimlaneEmbeddableFactory.setDependencies(overlays);
+  };
 }

@@ -25,7 +25,13 @@ export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
   public readonly type = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
-  constructor(private readonly overlays: CoreStart['overlays']) {}
+  private overlays: CoreStart['overlays'] | undefined = undefined;
+
+  constructor() {}
+
+  public setDependencies(overlays: CoreStart['overlays']) {
+    this.overlays = overlays;
+  }
 
   public async isEditable() {
     return true;
@@ -39,6 +45,10 @@ export class AnomalySwimlaneEmbeddableFactory
 
   public async getExplicitInput(): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
     return new Promise(resolve => {
+      if (this.overlays === undefined) {
+        throw new Error('overlays service is not initialized');
+      }
+
       const modalSession = this.overlays.openModal(
         toMountPoint(
           <AnomalySwimlaneInitializer
