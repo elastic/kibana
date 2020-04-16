@@ -14,6 +14,7 @@ import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_han
 import { I18nContext } from 'ui/i18n';
 import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { Alert } from '../../components/alert';
+import { MissingAlert } from '../../components/alert/missing_alert';
 import { MonitoringViewBaseEuiTableController } from '../base_eui_table_controller';
 import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
@@ -79,7 +80,11 @@ uiRoutes.when('/alert/:id', {
       this.data = $route.current.locals.alertState;
 
       const renderReact = data => {
-        const app = <Alert alertState={data} uiSettings={config} refresh={this.updateData} />;
+        const app = data.alert ? (
+          <Alert alertState={data.alert} uiSettings={config} refresh={this.updateData} />
+        ) : (
+          <MissingAlert type={alertId} />
+        );
 
         render(
           <I18nContext>

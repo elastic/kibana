@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IUiSettingsClient } from 'kibana/server';
-import { pick, get } from 'lodash';
+import { pick } from 'lodash';
 import { Logger } from '../../../../../../src/core/server';
 import { AlertsClient } from '../../../../alerting/server';
 import {
   getThreshold as getGuardRailCpuUsageThreshold,
-  getThrottle as getGuardRailCpuUsageThrottle,
+  enhanceAlertState,
 } from './guard_rail_cpu_usage.lib';
 import { ALERT_GUARD_RAIL_TYPE_CPU_USAGE } from '../../../common/constants';
-// @ts-ignore
-import { getLogs } from '../logs/get_logs';
-// @ts-ignore
-import { getMetrics } from '../details/get_metrics';
 import { AlertCpuUsageState } from '../../alerts/types';
 
 export async function fetchAlert(
@@ -25,8 +21,6 @@ export async function fetchAlert(
   log: Logger,
   legacyConfig: any,
   legacyRequest: any,
-  filebeatIndexPattern: string,
-  elasticsearchIndexPattern: string,
   start: number,
   end: number
 ): Promise<any> {
@@ -58,37 +52,25 @@ export async function fetchAlert(
   for (const instanceId in states.alertInstances) {
     if (states.alertInstances.hasOwnProperty(instanceId)) {
       const instance = states.alertInstances[instanceId];
-      const state: AlertCpuUsageState = (instance.state as unknown) as AlertCpuUsageState;
-      let logs = { enabled: false };
-      let metrics = null;
-      if (state) {
-        logs = await getLogs(legacyConfig, legacyRequest, filebeatIndexPattern, {
-          clusterUuid: state.cluster.clusterUuid,
-          nodeUuid: state.nodeId,
-          start,
-          end,
-        });
-        const showCgroupMetricsElasticsearch = legacyConfig.get(
-          'monitoring.ui.container.elasticsearch.enabled'
-        );
-        const metric = showCgroupMetricsElasticsearch
-          ? 'node_cgroup_quota_as_cpu_utilization'
-          : 'node_cpu_utilization';
-        const metricData = await getMetrics(
-          legacyRequest,
-          elasticsearchIndexPattern,
-          [metric],
-          [{ term: { 'source_node.uuid': state.nodeId } }]
-        );
-        metrics = metricData[metric][0].data;
+
+      let enhancedState = {};
+      switch (type) {
+        case ALERT_GUARD_RAIL_TYPE_CPU_USAGE:
+          enhancedState = await enhanceAlertState(
+            legacyConfig,
+            legacyRequest,
+            start,
+            end,
+            (instance.state as unknown) as AlertCpuUsageState
+          );
+          break;
       }
 
       instances.push({
         ...instance,
         instanceId,
         muted: mutedInstanceIds.includes(instanceId),
-        logs,
-        metrics,
+        ...enhancedState,
       });
     }
   }
@@ -99,13 +81,12 @@ export async function fetchAlert(
     raw: pick(alert, ['name', 'tags', 'schedule', 'throttle', 'params', 'actions']),
     type,
     instances,
-    throttle: '',
+    throttle: alert.throttle,
     threshold: 0,
   };
 
   switch (type) {
     case ALERT_GUARD_RAIL_TYPE_CPU_USAGE:
-      result.throttle = await getGuardRailCpuUsageThrottle(uiSettings);
       result.threshold = await getGuardRailCpuUsageThreshold(uiSettings);
       break;
   }

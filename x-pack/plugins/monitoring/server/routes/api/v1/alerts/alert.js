@@ -7,8 +7,6 @@
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { fetchAlert } from '../../../../lib/alerts/fetch_alert';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 
 /*
  * Cluster Alerts route.
@@ -23,7 +21,6 @@ export function alertRoute(server) {
           alertId: schema.string(),
         }),
         payload: schema.object({
-          ccs: schema.maybe(schema.string()),
           timeRange: schema.object({
             min: schema.string(),
             max: schema.string(),
@@ -33,19 +30,8 @@ export function alertRoute(server) {
     },
     async handler(req) {
       const config = server.config();
-      const ccs = '*';
       const start = moment(req.payload.timeRange.min).valueOf();
       const end = moment(req.payload.timeRange.max).valueOf();
-      const filebeatIndexPattern = prefixIndexPattern(
-        config,
-        config.get('monitoring.ui.logs.index'),
-        ccs
-      );
-      const elasticsearchIndexPattern = prefixIndexPattern(
-        config,
-        INDEX_PATTERN_ELASTICSEARCH,
-        ccs
-      );
 
       const alert = await fetchAlert(
         req.getAlertsClient(),
@@ -54,12 +40,10 @@ export function alertRoute(server) {
         req.logger,
         config,
         req,
-        filebeatIndexPattern,
-        elasticsearchIndexPattern,
         start,
         end
       );
-      return alert;
+      return { alert };
     },
   });
 }

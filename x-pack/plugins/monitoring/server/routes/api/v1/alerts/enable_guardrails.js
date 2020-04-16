@@ -91,8 +91,10 @@ export function createEnableGuardRailsRoute(server) {
           const result = await alertsClient.create({
             data: {
               enabled: true,
+              name: type,
               alertTypeId: type,
-              schedule: { interval: '10s' },
+              throttle: '10m', // default
+              schedule: { interval: '1m' },
               actions: [
                 {
                   group: 'default',

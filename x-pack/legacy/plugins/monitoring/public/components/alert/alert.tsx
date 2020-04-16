@@ -31,10 +31,7 @@ import {
 import { Chart, LineSeries, ScaleType, Settings, TooltipType } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { AlertCpuUsageState } from '../../../../../../plugins/monitoring/server/alerts/types';
-import {
-  MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THRESHOLD,
-  MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THROTTLE,
-} from '../../../../../../plugins/monitoring/common/constants';
+import { MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THRESHOLD } from '../../../../../../plugins/monitoring/common/constants';
 // @ts-ignore
 import { formatDateTimeLocal } from '../../../../../../plugins/monitoring/common/formatting';
 // @ts-ignore
@@ -94,17 +91,14 @@ export const Alert: React.FC<AlertProps> = (props: AlertProps) => {
       await uiSettings.set(MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THRESHOLD, threshold);
     }
     if (throttle !== alertState.throttle) {
-      await Promise.all([
-        uiSettings.set(MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THROTTLE, throttle),
-        kfetch({
-          method: 'PUT',
-          pathname: `/api/alert/${alertState.id}`,
-          body: JSON.stringify({
-            ...alertState.raw,
-            throttle,
-          }),
+      await kfetch({
+        method: 'PUT',
+        pathname: `/api/alert/${alertState.id}`,
+        body: JSON.stringify({
+          ...alertState.raw,
+          throttle,
         }),
-      ]);
+      });
     }
     await refresh();
     setIsSavingConfiguration(false);
@@ -162,6 +156,10 @@ export const Alert: React.FC<AlertProps> = (props: AlertProps) => {
       width: '35%',
       field: 'state.cpuUsage',
       render: (field: string, instance: AlertStateInstancesUi) => {
+        if (!instance.metrics) {
+          return <EuiText>{field}%</EuiText>;
+        }
+
         const chart = (
           <Chart>
             <Settings
@@ -337,6 +335,14 @@ export const Alert: React.FC<AlertProps> = (props: AlertProps) => {
               defaultMessage: 'View logs',
             });
 
+            if (!instance.logs) {
+              return (
+                <EuiButtonEmpty disabled iconType="eyeClosed">
+                  {viewLogs}
+                </EuiButtonEmpty>
+              );
+            }
+
             if (!instance.logs.enabled) {
               const reason = getReasonAsText(instance.logs.reason);
               const reasonText = (
@@ -364,6 +370,10 @@ export const Alert: React.FC<AlertProps> = (props: AlertProps) => {
   ];
 
   function getContent() {
+    if (!alertState) {
+      return null;
+    }
+
     if (alertState.instances.length === 0) {
       return (
         <EuiCallOut

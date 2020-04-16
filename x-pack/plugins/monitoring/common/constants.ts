@@ -241,9 +241,8 @@ export const ALERT_TYPE_CLUSTER_STATE = `${ALERT_TYPE_PREFIX}alert_type_cluster_
  * This is the alert type id for the generic guard rail alert
  */
 const ALERT_TYPE_GUARD_RAIL = `${ALERT_TYPE_PREFIX}alert_type_guard_rail`;
-export const ALERT_GUARD_RAIL_TYPE_CPU_USAGE = `${ALERT_TYPE_GUARD_RAIL}cpu_usage`;
+export const ALERT_GUARD_RAIL_TYPE_CPU_USAGE = `${ALERT_TYPE_GUARD_RAIL}_cpu_usage`;
 export const MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THRESHOLD = `monitoring:alertingGuardRail:cpuUsage:threshold`;
-export const MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THROTTLE = `monitoring:alertingGuardRail:cpuUsage:throttle`;
 export const ALERT_GUARD_RAIL_TYPES = [ALERT_GUARD_RAIL_TYPE_CPU_USAGE];
 
 /**

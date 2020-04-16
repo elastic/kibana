@@ -11,12 +11,7 @@ import {
   INDEX_PATTERN_ELASTICSEARCH,
 } from '../../common/constants';
 import { AlertType, AlertExecutorOptions } from '../../../alerting/server';
-import {
-  executeActions,
-  getUiMessage,
-  // getThrottle,
-  getThreshold,
-} from '../lib/alerts/guard_rail_cpu_usage.lib';
+import { executeActions, getUiMessage, getThreshold } from '../lib/alerts/guard_rail_cpu_usage.lib';
 import { AlertCreationParameters, AlertCpuUsageState, AlertCluster } from './types';
 import { getPreparedAlert } from '../lib/alerts/get_prepared_alert';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
@@ -85,7 +80,6 @@ export const getGuardRailCpuUsage = (creationParams: AlertCreationParameters): A
         services.savedObjectsClient
       );
 
-      // const throttle = await getThrottle(uiSettings);
       const threshold = await getThreshold(uiSettings);
 
       logger.debug(`Using ${threshold} threshold`);

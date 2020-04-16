@@ -17,10 +17,16 @@ import {
 import {
   ALERT_GUARD_RAIL_TYPE_CPU_USAGE,
   MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THRESHOLD,
-  MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THROTTLE,
+  INDEX_PATTERN_ELASTICSEARCH,
 } from '../../../common/constants';
 import { AlertMessageTokenType } from '../../alerts/enums';
 import { MonitoringConfig } from '../../config';
+// @ts-ignore
+import { getLogs } from '../logs/get_logs';
+// @ts-ignore
+import { getMetrics } from '../details/get_metrics';
+// @ts-ignore
+import { prefixIndexPattern } from '../ccs_utils';
 
 const RESOLVED_SUBJECT_TEXT = i18n.translate('xpack.monitoring.alerts.cpuUsage.subject.resolved', {
   defaultMessage: 'RESOLVED',
@@ -38,9 +44,16 @@ const RESOLVED_MESSAGE_TEXT = i18n.translate('xpack.monitoring.alerts.cpuUsage.m
   defaultMessage: 'This cluster alert has been resolved: ',
 });
 
-function tokenize(message: string, config: MonitoringConfig) {
+function tokenize(
+  message: string,
+  config: MonitoringConfig,
+  defaults: Record<string, any> | null = null
+) {
   let tokenized = message;
-  const tokens = config.alerts.cpu_usage.email.tokens;
+  const tokens: Record<string, any> = {
+    ...config.alerts.cpu_usage.email.tokens,
+    ...(defaults || {}),
+  };
   for (const name in tokens) {
     if (tokens.hasOwnProperty(name)) {
       tokenized = tokenized.replace(`{${name}}`, tokens[name]);
@@ -64,19 +77,21 @@ export function executeActions(
     config
   );
   const url = `${kibanaUrl}/app/monitoring#/alert/${ALERT_GUARD_RAIL_TYPE_CPU_USAGE}`;
+  const defaults: Record<string, any> = {
+    clusterName: cluster.clusterName,
+    cpuUsage: alertState.cpuUsage,
+    nodeName: stat.nodeName,
+    url,
+  };
   const message = tokenize(
     `${alertState.ui.isFiring ? '' : RESOLVED_MESSAGE_TEXT} ${config.alerts.cpu_usage.email
       .message ||
       i18n.translate('xpack.monitoring.alerts.cpuUsage.message', {
         defaultMessage: `We detected that **{nodeName}** in **{clusterName}** is reporting cpu usage of **{cpuUsage}%**. [Click to view more]({url})`,
-        values: {
-          clusterName: cluster.clusterName,
-          cpuUsage: alertState.cpuUsage,
-          nodeName: stat.nodeName,
-          url,
-        },
+        values: defaults,
       })}`,
-    config
+    config,
+    defaults
   );
 
   instance.scheduleActions('default', {
@@ -119,12 +134,6 @@ export function getUiMessage(
       },
     }),
     tokens: [
-      // {
-      //   startToken: '#relative',
-      //   type: AlertMessageTokenType.Time,
-      //   isRelative: true,
-      //   isAbsolute: false,
-      // } as AlertMessageTimeToken,
       {
         startToken: '#absolute',
         type: AlertMessageTokenType.Time,
@@ -147,6 +156,45 @@ export async function getThreshold(uiSettings: IUiSettingsClient) {
   return parseInt(raw, 10);
 }
 
-export async function getThrottle(uiSettings: IUiSettingsClient) {
-  return await uiSettings.get<string>(MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THROTTLE);
+export async function enhanceAlertState(
+  legacyConfig: any,
+  legacyRequest: any,
+  start: number,
+  end: number,
+  state: AlertCpuUsageState
+) {
+  const ccs = '*';
+  const filebeatIndexPattern = prefixIndexPattern(
+    legacyConfig,
+    legacyConfig.get('monitoring.ui.logs.index'),
+    ccs
+  );
+  const elasticsearchIndexPattern = prefixIndexPattern(
+    legacyConfig,
+    INDEX_PATTERN_ELASTICSEARCH,
+    ccs
+  );
+
+  const logs = await getLogs(legacyConfig, legacyRequest, filebeatIndexPattern, {
+    clusterUuid: state.cluster.clusterUuid,
+    nodeUuid: state.nodeId,
+    start,
+    end,
+  });
+
+  const showCgroupMetricsElasticsearch = legacyConfig.get(
+    'monitoring.ui.container.elasticsearch.enabled'
+  );
+  const metric = showCgroupMetricsElasticsearch
+    ? 'node_cgroup_quota_as_cpu_utilization'
+    : 'node_cpu_utilization';
+  const metricData = await getMetrics(
+    legacyRequest,
+    elasticsearchIndexPattern,
+    [metric],
+    [{ term: { 'source_node.uuid': state.nodeId } }]
+  );
+  const metrics = metricData[metric][0].data;
+
+  return { logs, metrics };
 }

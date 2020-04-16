@@ -8,8 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import {
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
-  MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THRESHOLD,
-  MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THROTTLE,
+  // MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THRESHOLD,
 } from './common/constants';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
@@ -31,26 +30,16 @@ export const getUiExports = () => {
     }),
     category: ['monitoring'],
   };
-  uiSettingDefaults[MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THRESHOLD] = {
-    name: i18n.translate('xpack.monitoring.alertingGuardRailCpuUsage.name', {
-      defaultMessage: 'Alerting CPU Usage threshold',
-    }),
-    value: 90,
-    description: i18n.translate('xpack.monitoring.alertingEmailAddress.description', {
-      defaultMessage: `The threshold that, when passed, will trigger an alert`,
-    }),
-    category: ['monitoring'],
-  };
-  uiSettingDefaults[MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THROTTLE] = {
-    name: i18n.translate('xpack.monitoring.alertingGuardRailCpuUsage.name', {
-      defaultMessage: 'Alerting CPU Usage throttle',
-    }),
-    value: '10m',
-    description: i18n.translate('xpack.monitoring.alertingEmailAddress.description', {
-      defaultMessage: `How often this alert should fire an email`,
-    }),
-    category: ['monitoring'],
-  };
+  // uiSettingDefaults[MONITORING_CONFIG_ALERT_GUARD_RAIL_CPU_USAGE_THRESHOLD] = {
+  //   name: i18n.translate('xpack.monitoring.alertingGuardRailCpuUsage.name', {
+  //     defaultMessage: 'Alerting CPU Usage threshold',
+  //   }),
+  //   value: 90,
+  //   description: i18n.translate('xpack.monitoring.alertingEmailAddress.description', {
+  //     defaultMessage: `The threshold that, when passed, will trigger an alert`,
+  //   }),
+  //   category: ['monitoring'],
+  // };
 
   return {
     app: {
