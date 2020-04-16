@@ -236,3 +236,7 @@ export const transformComments = (comments: Comment[], pipes: string[]): Comment
     }).value,
   }));
 };
+
+export const getErrorMessage = (connector: string, msg: string) => {
+  return `[Action][${connector}]: ${msg}`;
+};

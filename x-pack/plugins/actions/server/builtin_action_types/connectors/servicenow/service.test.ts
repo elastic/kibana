@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 
-import { getErrorMessage, createExternalService } from './service';
+import { createExternalService } from './service';
 import * as utils from '../utils';
 import { ExternalService } from '../types';
 import { object } from 'joi';
@@ -65,13 +65,6 @@ describe('ServiceNow service', () => {
           secrets: { username: '', password: undefined },
         })
       ).toThrow();
-    });
-  });
-
-  describe('getErrorMessage', () => {
-    test('return correct message', () => {
-      const msg = getErrorMessage('An error has occurred');
-      expect(msg).toBe('[Action][ServiceNow]: An error has occurred');
     });
   });
 

@@ -17,6 +17,7 @@ import {
   throwIfNotAlive,
   request,
   patch,
+  getErrorMessage,
 } from './utils';
 
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
@@ -577,5 +578,12 @@ describe('patch', () => {
   test('it fetch correctly', async () => {
     await patch({ axios, url: '/test', data: { id: '123' } });
     expect(axiosMock).toHaveBeenCalledWith('/test', { method: 'patch', data: { id: '123' } });
+  });
+});
+
+describe('getErrorMessage', () => {
+  test('it returns the correct error message', () => {
+    const msg = getErrorMessage('My connector name', 'An error has occurred');
+    expect(msg).toBe('[Action][My connector name]: An error has occurred');
   });
 });

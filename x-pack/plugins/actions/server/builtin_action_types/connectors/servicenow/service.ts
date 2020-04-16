@@ -13,7 +13,9 @@ import {
   ConnectorPublicConfigurationType,
   ConnectorSecretConfigurationType,
 } from '../types';
-import { addTimeZoneToDate, patch, request } from '../utils';
+import { addTimeZoneToDate, patch, request, getErrorMessage } from '../utils';
+
+import * as i18n from './translations';
 
 const API_VERSION = 'v2';
 const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
@@ -21,10 +23,6 @@ const COMMENT_URL = `api/now/${API_VERSION}/table/incident`;
 
 // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
 const VIEW_INCIDENT_URL = `nav_to.do?uri=incident.do?sys_id=`;
-
-export const getErrorMessage = (msg: string) => {
-  return `[Action][ServiceNow]: ${msg}`;
-};
 
 export const createExternalService = ({
   config,
@@ -57,7 +55,7 @@ export const createExternalService = ({
       return { ...res.data.result };
     } catch (error) {
       throw new Error(
-        getErrorMessage(`Unable to get incident with id ${id}. Error: ${error.message}`)
+        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}`)
       );
     }
   };
@@ -78,7 +76,9 @@ export const createExternalService = ({
         url: getIncidentViewURL(res.data.result.sys_id),
       };
     } catch (error) {
-      throw new Error(getErrorMessage(`Unable to create incident. Error: ${error.message}`));
+      throw new Error(
+        getErrorMessage(i18n.NAME, `Unable to create incident. Error: ${error.message}`)
+      );
     }
   };
 
@@ -98,7 +98,10 @@ export const createExternalService = ({
       };
     } catch (error) {
       throw new Error(
-        getErrorMessage(`Unable to update incident with id ${incidentId}. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to update incident with id ${incidentId}. Error: ${error.message}`
+        )
       );
     }
   };
@@ -118,6 +121,7 @@ export const createExternalService = ({
     } catch (error) {
       throw new Error(
         getErrorMessage(
+          i18n.NAME,
           `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}`
         )
       );
