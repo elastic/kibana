@@ -22,12 +22,19 @@ export const registerUpdateRoute = ({
     id: schema.string(),
   });
 
+  const bodySchema = schema.object({
+    active: schema.boolean(),
+    remoteCluster: schema.string(),
+    leaderIndexPatterns: schema.arrayOf(schema.string()),
+    followIndexPattern: schema.string(),
+  });
+
   router.put(
     {
       path: addBasePath('/auto_follow_patterns/{id}'),
       validate: {
         params: paramsSchema,
-        body: schema.object({}, { unknowns: 'allow' }),
+        body: bodySchema,
       },
     },
     license.guardApiRoute(async (context, request, response) => {

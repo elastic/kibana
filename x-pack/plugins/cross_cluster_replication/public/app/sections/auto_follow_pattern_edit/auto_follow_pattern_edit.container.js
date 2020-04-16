@@ -39,8 +39,23 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   getAutoFollowPattern: id => dispatch(getAutoFollowPattern(id)),
   selectAutoFollowPattern: id => dispatch(selectEditAutoFollowPattern(id)),
-  saveAutoFollowPattern: (id, autoFollowPattern) =>
-    dispatch(saveAutoFollowPattern(id, autoFollowPattern, true)),
+  saveAutoFollowPattern: (id, autoFollowPattern) => {
+    // Strip out errors.
+    const { active, remoteCluster, leaderIndexPatterns, followIndexPattern } = autoFollowPattern;
+
+    dispatch(
+      saveAutoFollowPattern(
+        id,
+        {
+          active,
+          remoteCluster,
+          leaderIndexPatterns,
+          followIndexPattern,
+        },
+        true
+      )
+    );
+  },
   clearApiError: () => {
     dispatch(clearApiError(`${scope}-get`));
     dispatch(clearApiError(`${scope}-save`));

@@ -19,12 +19,21 @@ export const registerCreateRoute = ({
   license,
   lib: { isEsError, formatEsError },
 }: RouteDependencies) => {
-  const bodySchema = schema.object(
-    {
-      name: schema.string(),
-    },
-    { unknowns: 'allow' }
-  );
+  const bodySchema = schema.object({
+    name: schema.string(),
+    remoteCluster: schema.string(),
+    leaderIndex: schema.string(),
+    maxReadRequestOperationCount: schema.maybe(schema.number()),
+    maxOutstandingReadRequests: schema.maybe(schema.number()),
+    maxReadRequestSize: schema.maybe(schema.string()), // byte value
+    maxWriteRequestOperationCount: schema.maybe(schema.number()),
+    maxWriteRequestSize: schema.maybe(schema.string()), // byte value
+    maxOutstandingWriteRequests: schema.maybe(schema.number()),
+    maxWriteBufferCount: schema.maybe(schema.number()),
+    maxWriteBufferSize: schema.maybe(schema.string()), // byte value
+    maxRetryDelay: schema.maybe(schema.string()), // time value
+    readPollTimeout: schema.maybe(schema.string()), // time value
+  });
 
   router.post(
     {

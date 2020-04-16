@@ -18,12 +18,12 @@ export const registerCreateRoute = ({
   license,
   lib: { isEsError, formatEsError },
 }: RouteDependencies) => {
-  const bodySchema = schema.object(
-    {
-      id: schema.string(),
-    },
-    { unknowns: 'allow' }
-  );
+  const bodySchema = schema.object({
+    id: schema.string(),
+    remoteCluster: schema.string(),
+    leaderIndexPatterns: schema.arrayOf(schema.string()),
+    followIndexPattern: schema.string(),
+  });
 
   router.post(
     {
