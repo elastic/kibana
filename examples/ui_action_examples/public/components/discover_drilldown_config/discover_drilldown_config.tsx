@@ -62,10 +62,11 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
             />
           </EuiFormRow>
           {!!customIndexPattern && (
-            <EuiFormRow label={txtChooseDestinationIndexPattern}>
+            <EuiFormRow fullWidth label={txtChooseDestinationIndexPattern}>
               <EuiSelect
                 name="selectDashboard"
                 hasNoInitialSelection={true}
+                fullWidth
                 options={[
                   { id: '', text: 'Pick one...' },
                   ...indexPatterns.map(({ id, title }) => ({ value: id, text: title })),
