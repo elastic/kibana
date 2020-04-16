@@ -50,7 +50,7 @@ const navTabs: Immutable<NavTabs[]> = [
 ];
 
 const NavTab = memo<{ tab: NavTabs }>(({ tab }) => {
-  const location = useLocation();
+  const { pathname } = useLocation();
   const { services } = useKibana();
   const onClickHandler = useNavigateByRouterEventHandler(tab.href);
   const BASE_PATH = services.application.getUrlForApp('endpoint');
@@ -60,10 +60,7 @@ const NavTab = memo<{ tab: NavTabs }>(({ tab }) => {
       data-test-subj={`${tab.id}EndpointTab`}
       href={`${BASE_PATH}${tab.href}`}
       onClick={onClickHandler}
-      isSelected={
-        tab.href === location.pathname ||
-        (tab.href !== '/' && location.pathname.startsWith(tab.href))
-      }
+      isSelected={tab.href === pathname || (tab.href !== '/' && pathname.startsWith(tab.href))}
     >
       {tab.name}
     </EuiTab>
