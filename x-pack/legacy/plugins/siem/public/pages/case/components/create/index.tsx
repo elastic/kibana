@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,6 +24,7 @@ import { useInsertTimeline } from '../../../../components/timeline/insert_timeli
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
 import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
+import { useGetTags } from '../../../../containers/case/use_get_tags';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -59,6 +60,14 @@ export const Create = React.memo(() => {
     options: { stripEmptyFields: false },
     schema,
   });
+  const { tags: tagOptions } = useGetTags();
+  const options = useMemo(
+    () =>
+      tagOptions.map(label => ({
+        label,
+      })),
+    [tagOptions]
+  );
   const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CasePostRequest>(
     form,
     'description'
@@ -108,6 +117,8 @@ export const Create = React.memo(() => {
                 fullWidth: true,
                 placeholder: '',
                 disabled: isLoading,
+                options,
+                noSuggestions: false,
               },
             }}
           />

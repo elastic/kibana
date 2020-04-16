@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiText,
   EuiHorizontalRule,
@@ -21,6 +21,8 @@ import * as i18n from './translations';
 import { Form, useForm } from '../../../../shared_imports';
 import { schema } from './schema';
 import { CommonUseField } from '../create';
+import { useGetTags } from '../../../../containers/case/use_get_tags';
+import { ComboBoxField } from './form';
 
 interface TagListProps {
   disabled?: boolean;
@@ -54,7 +56,14 @@ export const TagList = React.memo(
         setIsEditTags(false);
       }
     }, [form, onSubmit]);
-
+    const { tags: tagOptions } = useGetTags();
+    const options = useMemo(
+      () =>
+        tagOptions.map(label => ({
+          label,
+        })),
+      [tagOptions]
+    );
     return (
       <EuiText>
         <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -92,12 +101,15 @@ export const TagList = React.memo(
                 <Form form={form}>
                   <CommonUseField
                     path="tags"
+                    // component={ComboBoxField}
                     componentProps={{
                       idAria: 'caseTags',
                       'data-test-subj': 'caseTags',
                       euiFieldProps: {
                         fullWidth: true,
                         placeholder: '',
+                        options,
+                        noSuggestions: false,
                       },
                     }}
                   />
