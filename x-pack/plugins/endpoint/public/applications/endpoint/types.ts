@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, MiddlewareAPI } from 'redux';
+import { Dispatch, MiddlewareAPI, Action as ReduxAction, AnyAction as ReduxAnyAction } from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
   HostMetadata,
@@ -13,12 +13,19 @@ import {
   Immutable,
   ImmutableArray,
   AlertDetails,
+  MalwareFields,
+  UIPolicyConfig,
+  PolicyData,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
-import { Datasource, NewDatasource } from '../../../../ingest_manager/common/types/models';
-import { GetAgentStatusResponse } from '../../../../ingest_manager/common/types/rest_spec';
+import {
+  GetAgentStatusResponse,
+  GetDatasourcesResponse,
+  GetOneDatasourceResponse,
+  UpdateDatasourceResponse,
+} from '../../../../ingest_manager/common';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -54,29 +61,6 @@ export interface ServerApiError {
 }
 
 /**
- * New policy data. Used when updating the policy record via ingest APIs
- */
-export type NewPolicyData = NewDatasource & {
-  inputs: [
-    {
-      type: 'endpoint';
-      enabled: boolean;
-      streams: [];
-      config: {
-        policy: {
-          value: PolicyConfig;
-        };
-      };
-    }
-  ];
-};
-
-/**
- * Endpoint Policy data, which extends Ingest's `Datasource` type
- */
-export type PolicyData = Datasource & NewPolicyData;
-
-/**
  * Policy list store state
  */
 export interface PolicyListState {
@@ -92,6 +76,8 @@ export interface PolicyListState {
   pageIndex: number;
   /** data is being retrieved from server */
   isLoading: boolean;
+  /** current location information */
+  location?: Immutable<EndpointAppLocation>;
 }
 
 /**
@@ -115,24 +101,53 @@ export interface PolicyDetailsState {
 }
 
 /**
+ * The URL search params that are supported by the Policy List page view
+ */
+export interface PolicyListUrlSearchParams {
+  page_index: number;
+  page_size: number;
+}
+
+/**
  * Endpoint Policy configuration
  */
 export interface PolicyConfig {
-  windows: UIPolicyConfig['windows'] & {
+  windows: {
+    events: {
+      dll_and_driver_load: boolean;
+      dns: boolean;
+      file: boolean;
+      network: boolean;
+      process: boolean;
+      registry: boolean;
+      security: boolean;
+    };
+    malware: MalwareFields;
     logging: {
       stdout: string;
       file: string;
     };
     advanced: PolicyConfigAdvancedOptions;
   };
-  mac: UIPolicyConfig['mac'] & {
+  mac: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    malware: MalwareFields;
     logging: {
       stdout: string;
       file: string;
     };
     advanced: PolicyConfigAdvancedOptions;
   };
-  linux: UIPolicyConfig['linux'] & {
+  linux: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
     logging: {
       stdout: string;
       file: string;
@@ -155,52 +170,11 @@ interface PolicyConfigAdvancedOptions {
   };
 }
 
-/**
- * The set of Policy configuration settings that are show/edited via the UI
- */
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
-export type UIPolicyConfig = {
-  windows: {
-    events: {
-      process: boolean;
-      network: boolean;
-    };
-    /** malware mode can be off, detect, prevent or prevent and notify user */
-    malware: MalwareFields;
-  };
-  mac: {
-    events: {
-      file: boolean;
-      process: boolean;
-      network: boolean;
-    };
-    malware: MalwareFields;
-  };
-
-  /**
-   * Linux-specific policy configuration that is supported via the UI
-   */
-  linux: {
-    events: {
-      file: boolean;
-      process: boolean;
-      network: boolean;
-    };
-  };
-};
-
 /** OS used in Policy */
 export enum OS {
   windows = 'windows',
   mac = 'mac',
   linux = 'linux',
-}
-
-/** Used in Policy */
-export enum EventingFields {
-  process = 'process',
-  network = 'network',
-  file = 'file',
 }
 
 /**
@@ -226,20 +200,7 @@ export type KeysByValueCriteria<O, Criteria> = {
 }[keyof O];
 
 /** Returns an array of the policy OSes that have a malware protection field */
-
 export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
-/** Policy: Malware protection fields */
-export interface MalwareFields {
-  mode: ProtectionModes;
-}
-
-/** Policy protection mode options */
-export enum ProtectionModes {
-  detect = 'detect',
-  prevent = 'prevent',
-  preventNotify = 'preventNotify',
-  off = 'off',
-}
 
 export interface GlobalState {
   readonly hostList: HostListState;
@@ -317,3 +278,40 @@ export interface AlertingIndexUIQueryParams {
   date_range?: string;
   filters?: string;
 }
+
+export interface GetPolicyListResponse extends GetDatasourcesResponse {
+  items: PolicyData[];
+}
+
+export interface GetPolicyResponse extends GetOneDatasourceResponse {
+  item: PolicyData;
+}
+
+export interface UpdatePolicyResponse extends UpdateDatasourceResponse {
+  item: PolicyData;
+}
+
+/**
+ * Like `Reducer` from `redux` but it accepts immutable versions of `state` and `action`.
+ * Use this type for all Reducers in order to help enforce our pattern of immutable state.
+ */
+export type ImmutableReducer<State, Action> = (
+  state: Immutable<State> | undefined,
+  action: Immutable<Action>
+) => State | Immutable<State>;
+
+/**
+ * A alternate interface for `redux`'s `combineReducers`. Will work with the same underlying implementation,
+ * but will enforce that `Immutable` versions of `state` and `action` are received.
+ */
+export type ImmutableCombineReducers = <S, A extends ReduxAction = ReduxAnyAction>(
+  reducers: ImmutableReducersMapObject<S, A>
+) => ImmutableReducer<S, A>;
+
+/**
+ * Like `redux`'s `ReducersMapObject` (which is used by `combineReducers`) but enforces that
+ * the `state` and `action` received are `Immutable` versions.
+ */
+type ImmutableReducersMapObject<S, A extends ReduxAction = ReduxAction> = {
+  [K in keyof S]: ImmutableReducer<S[K], A>;
+};

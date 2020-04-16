@@ -56,7 +56,7 @@ test('getHref returns the edit urls', async () => {
   if (action.getHref) {
     const embeddable = new EditableEmbeddable({ id: '123', viewMode: ViewMode.EDIT }, true);
     expect(
-      action.getHref({
+      await action.getHref({
         embeddable,
       })
     ).toBe(embeddable.getOutput().editUrl);
