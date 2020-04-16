@@ -31,6 +31,7 @@ import { getTimezone } from '../../../../plugins/vis_type_timelion/public';
 
 import 'uiExports/savedObjectTypes';
 
+require('ui/i18n');
 require('ui/autoload/all');
 
 // TODO: remove ui imports completely (move to plugins)
@@ -57,7 +58,7 @@ require('plugins/timelion/directives/timelion_options_sheet');
 
 document.title = 'Timelion - Kibana';
 
-const app = require('ui/modules').get('apps/timelion', []);
+const app = require('ui/modules').get('apps/timelion', ['i18n', 'ngSanitize']);
 
 require('ui/routes').enable();
 
