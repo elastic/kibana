@@ -5,11 +5,11 @@
  */
 
 import _ from 'lodash';
-import { ES_SEARCH, SORT_ORDER } from '../constants';
+import { SOURCE_TYPES, SORT_ORDER } from '../constants';
 
 function isEsDocumentSource(layerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
-  return sourceType === ES_SEARCH;
+  return sourceType === SOURCE_TYPES.ES_SEARCH;
 }
 
 export function topHitsTimeToSort({ attributes }) {

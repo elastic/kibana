@@ -18,12 +18,12 @@
  */
 
 import chrome from 'ui/chrome';
-import 'ui/vis/map/service_settings';
 import { CoreStart, Plugin } from 'kibana/public';
+// TODO: Determine why visualizations don't populate without this
+import 'angular-sanitize';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
-  serviceSettings: any;
   $injector: any;
 }
 
@@ -34,11 +34,6 @@ export class LegacyDependenciesPlugin
 
     return {
       $injector,
-      // Settings for EMSClient.
-      // EMSClient, which currently lives in the tile_map vis,
-      //  will probably end up being exposed from the future vis_type_maps plugin,
-      //  which would register both the tile_map and the region_map vis plugins.
-      serviceSettings: $injector.get('serviceSettings'),
     } as LegacyDependenciesPluginSetup;
   }
 

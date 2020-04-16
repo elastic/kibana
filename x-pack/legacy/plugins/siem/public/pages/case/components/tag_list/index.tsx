@@ -61,10 +61,11 @@ export const TagList = React.memo(
           <EuiFlexItem grow={false}>
             <h4>{i18n.TAGS}</h4>
           </EuiFlexItem>
-          {isLoading && <EuiLoadingSpinner />}
+          {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
           {!isLoading && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
               <EuiButtonIcon
+                data-test-subj="tag-list-edit-button"
                 isDisabled={disabled}
                 aria-label={i18n.EDIT_TAGS_ARIA}
                 iconType={'pencil'}
@@ -74,17 +75,19 @@ export const TagList = React.memo(
           )}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-        <MyFlexGroup gutterSize="xs">
-          {tags.length === 0 && !isEditTags && <p>{i18n.NO_TAGS}</p>}
+        <MyFlexGroup gutterSize="xs" data-test-subj="grr">
+          {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
           {tags.length > 0 &&
             !isEditTags &&
             tags.map((tag, key) => (
               <EuiFlexItem grow={false} key={`${tag}${key}`}>
-                <EuiBadge color="hollow">{tag}</EuiBadge>
+                <EuiBadge data-test-subj="case-tag" color="hollow">
+                  {tag}
+                </EuiBadge>
               </EuiFlexItem>
             ))}
           {isEditTags && (
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup data-test-subj="edit-tags" direction="column">
               <EuiFlexItem>
                 <Form form={form}>
                   <CommonUseField
@@ -105,6 +108,7 @@ export const TagList = React.memo(
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="secondary"
+                      data-test-subj="edit-tags-submit"
                       fill
                       iconType="save"
                       onClick={onSubmitTags}
@@ -115,6 +119,7 @@ export const TagList = React.memo(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="edit-tags-cancel"
                       iconType="cross"
                       onClick={setIsEditTags.bind(null, false)}
                       size="s"
