@@ -209,9 +209,12 @@
 # Endpoint
 /x-pack/plugins/endpoint/ @elastic/endpoint-app-team
 /x-pack/test/api_integration/apis/endpoint/ @elastic/endpoint-app-team
+/x-pack/test/endpoint_api_integration_no_ingest/ @elastic/endpoint-app-team
 /x-pack/test/functional_endpoint/ @elastic/endpoint-app-team
 /x-pack/test/functional_endpoint_ingest_failure/ @elastic/endpoint-app-team
 /x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team
+/x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/endpoint-app-team
+/x-pack/test/plugin_functional/test_suites/resolver/ @elastic/endpoint-app-team
 
 # SIEM
 /x-pack/legacy/plugins/siem/ @elastic/siem
