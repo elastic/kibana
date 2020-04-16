@@ -18,7 +18,7 @@ import { withTheme } from '../../../../observability/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LayoutContent } from '../../../public/pages/metrics/components/layout_content';
 
-export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>
     <LayoutContent>
       <Section
@@ -30,6 +30,7 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
           }
         )}
         metrics={metrics}
+        onChangeRangeTime={onChangeRangeTime}
       >
         <SubSection
           id="awsS3BucketSize"

@@ -266,11 +266,17 @@ export class WorkpadLoader extends React.PureComponent {
             data-test-subj="canvasWorkpadLoaderTable"
           />
           <EuiSpacer />
-          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiPagination activePage={pageNumber} onPageClick={setPage} pageCount={totalPages} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {rows.length > 0 && (
+            <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiPagination
+                  activePage={pageNumber}
+                  onPageClick={setPage}
+                  pageCount={totalPages}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </WorkpadDropzone>
       </Fragment>
     );

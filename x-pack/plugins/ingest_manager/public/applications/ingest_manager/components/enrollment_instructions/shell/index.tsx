@@ -43,7 +43,7 @@ export const ShellEnrollmentInstructions: React.FunctionComponent<Props> = ({
   //   apiKey.api_key
   // } sh -c "$(curl ${kibanaUrl}/api/ingest_manager/fleet/install/${currentPlatform})"`;
 
-  const quickInstallInstructions = `./agent enroll ${kibanaUrl} ${apiKey.api_key}`;
+  const quickInstallInstructions = `./elastic-agent enroll ${kibanaUrl} ${apiKey.api_key}`;
 
   return (
     <>

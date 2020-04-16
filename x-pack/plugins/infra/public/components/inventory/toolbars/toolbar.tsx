@@ -5,7 +5,6 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { Action } from 'typescript-fsa';
 import { EuiFlexItem } from '@elastic/eui';
 import {
   SnapshotMetricInput,
@@ -16,33 +15,23 @@ import { InventoryCloudAccount } from '../../../../common/http_api/inventory_met
 import { findToolbar } from '../../../../common/inventory_models/toolbars';
 import { ToolbarWrapper } from './toolbar_wrapper';
 
-import { waffleOptionsSelectors } from '../../../store';
 import { InfraGroupByOptions } from '../../../lib/lib';
-import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
-import { SavedViewsToolbarControls } from '../../saved_views/toolbar_control';
-import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { WaffleOptionsState } from '../../../pages/inventory_view/hooks/use_waffle_options';
+import { SavedViews } from './save_views';
 
-export interface ToolbarProps {
+export interface ToolbarProps
+  extends Omit<WaffleOptionsState, 'view' | 'boundsOverride' | 'autoBounds'> {
   createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
-  changeMetric: (payload: SnapshotMetricInput) => Action<SnapshotMetricInput>;
-  changeGroupBy: (payload: SnapshotGroupBy) => Action<SnapshotGroupBy>;
-  changeCustomOptions: (payload: InfraGroupByOptions[]) => Action<InfraGroupByOptions[]>;
-  changeAccount: (id: string) => Action<string>;
-  changeRegion: (name: string) => Action<string>;
-  customOptions: ReturnType<typeof waffleOptionsSelectors.selectCustomOptions>;
-  groupBy: ReturnType<typeof waffleOptionsSelectors.selectGroupBy>;
-  metric: ReturnType<typeof waffleOptionsSelectors.selectMetric>;
-  nodeType: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
-  accountId: ReturnType<typeof waffleOptionsSelectors.selectAccountId>;
-  region: ReturnType<typeof waffleOptionsSelectors.selectRegion>;
+  changeMetric: (payload: SnapshotMetricInput) => void;
+  changeGroupBy: (payload: SnapshotGroupBy) => void;
+  changeCustomOptions: (payload: InfraGroupByOptions[]) => void;
+  changeAccount: (id: string) => void;
+  changeRegion: (name: string) => void;
   accounts: InventoryCloudAccount[];
   regions: string[];
-  customMetrics: ReturnType<typeof waffleOptionsSelectors.selectCustomMetrics>;
-  changeCustomMetrics: (
-    payload: SnapshotCustomMetricInput[]
-  ) => Action<SnapshotCustomMetricInput[]>;
+  changeCustomMetrics: (payload: SnapshotCustomMetricInput[]) => void;
 }
 
 const wrapToolbarItems = (
@@ -57,16 +46,7 @@ const wrapToolbarItems = (
           <ToolbarItems {...props} accounts={accounts} regions={regions} />
           <EuiFlexItem grow={true} />
           <EuiFlexItem grow={false}>
-            <WithWaffleViewState indexPattern={props.createDerivedIndexPattern('metrics')}>
-              {({ defaultViewState, viewState, onViewChange }) => (
-                <SavedViewsToolbarControls
-                  defaultViewState={defaultViewState}
-                  viewState={viewState}
-                  onViewChange={onViewChange}
-                  viewType={inventoryViewSavedObjectType}
-                />
-              )}
-            </WithWaffleViewState>
+            <SavedViews />
           </EuiFlexItem>
         </>
       )}

@@ -53,12 +53,14 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/force_start_datafeeds Start datafeeds
    * @apiName ForceStartDatafeeds
    * @apiDescription Starts one or more datafeeds
+   *
+   * @apiSchema (body) forceStartDatafeedSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/force_start_datafeeds',
       validate: {
-        body: schema.object(forceStartDatafeedSchema),
+        body: forceStartDatafeedSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -82,12 +84,14 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/stop_datafeeds Stop datafeeds
    * @apiName StopDatafeeds
    * @apiDescription Stops one or more datafeeds
+   *
+   * @apiSchema (body) datafeedIdsSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/stop_datafeeds',
       validate: {
-        body: schema.object(datafeedIdsSchema),
+        body: datafeedIdsSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -111,12 +115,14 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/delete_jobs Delete jobs
    * @apiName DeleteJobs
    * @apiDescription Deletes an existing anomaly detection job
+   *
+   * @apiSchema (body) jobIdsSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/delete_jobs',
       validate: {
-        body: schema.object(jobIdsSchema),
+        body: jobIdsSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -140,12 +146,14 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/close_jobs Close jobs
    * @apiName CloseJobs
    * @apiDescription Closes one or more anomaly detection jobs
+   *
+   * @apiSchema (body) jobIdsSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/close_jobs',
       validate: {
-        body: schema.object(jobIdsSchema),
+        body: jobIdsSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -169,12 +177,14 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/jobs_summary Jobs summary
    * @apiName JobsSummary
    * @apiDescription Creates a summary jobs list. Jobs include job stats, datafeed stats, and calendars.
+   *
+   * @apiSchema (body) jobIdsSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/jobs_summary',
       validate: {
-        body: schema.object(jobIdsSchema),
+        body: jobIdsSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -198,6 +208,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/jobs_with_time_range Jobs with time range
    * @apiName JobsWithTimeRange
    * @apiDescription Creates a list of jobs with data about the job's time range
+   *
+   * @apiSchema (body) jobsWithTimerangeSchema
    */
   router.post(
     {
@@ -226,12 +238,14 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/jobs Create jobs list
    * @apiName CreateFullJobsList
    * @apiDescription Creates a list of jobs
+   *
+   * @apiSchema (body) jobIdsSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/jobs',
       validate: {
-        body: schema.object(jobIdsSchema),
+        body: jobIdsSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -281,6 +295,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/update_groups Update job groups
    * @apiName UpdateGroups
    * @apiDescription Updates 'groups' property of an anomaly detection job
+   *
+   * @apiSchema (body) updateGroupsSchema
    */
   router.post(
     {
@@ -336,12 +352,14 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/jobs_exist Check if jobs exist
    * @apiName JobsExist
    * @apiDescription Checks if each of the jobs in the specified list of IDs exist
+   *
+   * @apiSchema (body) jobIdsSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/jobs_exist',
       validate: {
-        body: schema.object(jobIdsSchema),
+        body: jobIdsSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -397,6 +415,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/new_job_line_chart Get job line chart data
    * @apiName NewJobLineChart
    * @apiDescription Returns line chart data for anomaly detection job
+   *
+   * @apiSchema (body) chartSchema
    */
   router.post(
     {
@@ -447,6 +467,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/new_job_population_chart Get population job chart data
    * @apiName NewJobPopulationChart
    * @apiDescription Returns population job chart data
+   *
+   * @apiSchema (body) chartSchema
    */
   router.post(
     {
@@ -523,6 +545,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/look_back_progress Get lookback progress
    * @apiName GetLookBackProgress
    * @apiDescription Returns current progress of anomaly detection job
+   *
+   * @apiSchema (body) lookBackProgressSchema
    */
   router.post(
     {
@@ -552,6 +576,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/categorization_field_examples Get categorization field examples
    * @apiName ValidateCategoryExamples
    * @apiDescription Validates category examples
+   *
+   * @apiSchema (body) categorizationFieldExamplesSchema
    */
   router.post(
     {
@@ -611,6 +637,8 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/jobs/top_categories Get top categories
    * @apiName TopCategories
    * @apiDescription Returns list of top categories
+   *
+   * @apiSchema (body) topCategoriesSchema
    */
   router.post(
     {

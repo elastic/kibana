@@ -4,7 +4,7 @@
   "false_positives": [
     "A new and unusual program or artifact download in the course of software upgrades, debugging, or troubleshooting could trigger this signal. Users downloading and running programs from unusual locations, such as temporary directories, browser caches, or profile paths could trigger this signal."
   ],
-  "from": "now-16m",
+  "from": "now-45m",
   "interval": "15m",
   "machine_learning_job_id": "windows_anomalous_path_activity_ecs",
   "name": "Unusual Windows Path Activity",

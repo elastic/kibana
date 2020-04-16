@@ -20,4 +20,4 @@
 export {
   ProcessedImportResponse,
   processImportResponse,
-} from './management/sections/objects/lib/process_import_response';
+} from '../../../../plugins/saved_objects_management/public/lib';

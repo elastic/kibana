@@ -67,7 +67,7 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const [item, savedObject] = await Promise.all([
+  const [item, savedObject, assets] = await Promise.all([
     Registry.fetchInfo(pkgName, pkgVersion),
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.getArchiveInfo(pkgName, pkgVersion),
@@ -80,7 +80,7 @@ export async function getPackageInfo(options: {
   const updated = {
     ...item,
     title: item.title || nameAsTitle(item.name),
-    assets: Registry.groupPathsByService(item?.assets || []),
+    assets: Registry.groupPathsByService(assets || []),
   };
   return createInstallableFrom(updated, savedObject);
 }
