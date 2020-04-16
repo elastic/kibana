@@ -23,6 +23,7 @@ import { VisualizationsSetup } from '../../visualizations/public';
 
 import { markdownVisDefinition } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
+import { ConfigSchema } from '../config';
 
 import './index.scss';
 
@@ -34,9 +35,9 @@ export interface MarkdownPluginSetupDependencies {
 
 /** @internal */
 export class MarkdownPlugin implements Plugin<void, void> {
-  initializerContext: PluginInitializerContext;
+  initializerContext: PluginInitializerContext<ConfigSchema>;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
