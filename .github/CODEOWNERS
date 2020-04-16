@@ -19,6 +19,7 @@
 /src/plugins/discover/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/vis_type_timeseries/ @elastic/kibana-app
+/src/plugins/vis_type_metric/ @elastic/kibana-app
 
 # Core UI
 # Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
@@ -130,7 +131,6 @@
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
-/src/legacy/server/i18n/ @elastic/kibana-platform
 /src/legacy/server/logging/ @elastic/kibana-platform
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
 /src/legacy/server/status/ @elastic/kibana-platform
@@ -149,7 +149,10 @@
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
 # Kibana Localization
-/src/dev/i18n/ @elastic/kibana-localization
+/src/dev/i18n/  @elastic/kibana-localization
+/src/legacy/server/i18n/  @elastic/kibana-localization
+/src/core/public/i18n/  @elastic/kibana-localization
+/packages/kbn-i18n/  @elastic/kibana-localization
 
 # Pulse
 /packages/kbn-analytics/ @elastic/pulse

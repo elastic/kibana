@@ -25,9 +25,9 @@ import {
   Range,
   Render,
   Style,
-} from '../../../../plugins/expressions/public';
+} from '../../expressions/public';
 import { visType, DimensionsVisParam, VisParams } from './types';
-import { ColorSchemas, vislibColorMaps, ColorModes } from '../../../../plugins/charts/public';
+import { ColorSchemas, vislibColorMaps, ColorModes } from '../../charts/public';
 
 export type Input = KibanaDatatable;
 

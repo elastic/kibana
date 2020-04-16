@@ -17,18 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
-import { MetricVisPluginSetupDependencies } from './plugin';
-import { plugin } from '.';
+import { createGetterSetter } from '../../kibana_utils/common';
+import { DataPublicPluginStart } from '../../data/public';
 
-const plugins: Readonly<MetricVisPluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: npSetup.plugins.visualizations,
-  charts: npSetup.plugins.charts,
-};
-
-const pluginInstance = plugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core, { data: npStart.plugins.data });
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('metric data.fieldFormats');

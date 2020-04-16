@@ -1,5 +1,3 @@
-@import 'src/legacy/ui/public/styles/styling_constants';
-
 // Prefix all styles with "mtr" to avoid conflicts.
 // Examples
 //   mtrChart
@@ -7,4 +5,4 @@
 //   mtrChart__legend--small
 //   mtrChart__legend-isLoading
 
-@import './metric_vis';
+@import 'metric_vis';
