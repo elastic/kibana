@@ -86,8 +86,8 @@ export class DashboardToDashboardDrilldown
       // context.data is `unknown` and comes from `EmbeddableVisTriggerContext`
       try {
         return (context.data as any).range
-          ? await createFiltersFromValueClickAction(context.data as any)
-          : await createFiltersFromRangeSelectAction(context.data as any);
+          ? await createFiltersFromRangeSelectAction(context.data as any)
+          : await createFiltersFromValueClickAction(context.data as any);
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn("DashboardToDashboard drilldown: can't extract filters from event", e);
