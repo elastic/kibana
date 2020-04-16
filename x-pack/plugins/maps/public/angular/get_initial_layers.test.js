@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../../../plugins/maps/public/meta', () => {
+jest.mock('../meta', () => {
   return {};
 });
-jest.mock('../../../../../plugins/maps/public/kibana_services');
+jest.mock('../kibana_services');
 
 import { getInitialLayers } from './get_initial_layers';
 
@@ -15,8 +15,7 @@ const layerListNotProvided = undefined;
 
 describe('Saved object has layer list', () => {
   beforeEach(() => {
-    require('../../../../../plugins/maps/public/kibana_services').getInjectedVarFunc = () =>
-      jest.fn();
+    require('../kibana_services').getInjectedVarFunc = () => jest.fn();
   });
 
   it('Should get initial layers from saved object', () => {
@@ -33,7 +32,7 @@ describe('Saved object has layer list', () => {
 
 describe('kibana.yml configured with map.tilemap.url', () => {
   beforeAll(() => {
-    require('../../../../../plugins/maps/public/meta').getKibanaTileMap = () => {
+    require('../meta').getKibanaTileMap = () => {
       return {
         url: 'myTileUrl',
       };
@@ -63,10 +62,10 @@ describe('kibana.yml configured with map.tilemap.url', () => {
 
 describe('EMS is enabled', () => {
   beforeAll(() => {
-    require('../../../../../plugins/maps/public/meta').getKibanaTileMap = () => {
+    require('../meta').getKibanaTileMap = () => {
       return null;
     };
-    require('../../../../../plugins/maps/public/kibana_services').getInjectedVarFunc = () => key => {
+    require('../kibana_services').getInjectedVarFunc = () => key => {
       switch (key) {
         case 'emsTileLayerId':
           return {
@@ -107,11 +106,11 @@ describe('EMS is enabled', () => {
 
 describe('EMS is not enabled', () => {
   beforeAll(() => {
-    require('../../../../../plugins/maps/public/meta').getKibanaTileMap = () => {
+    require('../meta').getKibanaTileMap = () => {
       return null;
     };
 
-    require('../../../../../plugins/maps/public/kibana_services').getInjectedVarFunc = () => key => {
+    require('../kibana_services').getInjectedVarFunc = () => key => {
       switch (key) {
         case 'isEmsEnabled':
           return false;

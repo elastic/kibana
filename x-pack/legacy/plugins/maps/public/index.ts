@@ -16,7 +16,7 @@ import 'uiExports/embeddableActions';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
 
-import './angular/services/gis_map_saved_object_loader';
+import '../../../../plugins/maps/public/angular/services/gis_map_saved_object_loader';
 import './angular/map_controller';
 import './routes';
 // @ts-ignore

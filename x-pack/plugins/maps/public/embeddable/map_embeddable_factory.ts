@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IIndexPattern } from 'src/plugins/data/public';
 // @ts-ignore
-import { getMapsSavedObjectLoader } from '../../../../legacy/plugins/maps/public/angular/services/gis_map_saved_object_loader';
+import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
 import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
 import {
   getIndexPatternService,
@@ -26,7 +26,7 @@ import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/con
 import { createMapStore } from '../reducers/store';
 import { addLayerWithoutDataSync } from '../actions/map_actions';
 import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
-import { getInitialLayers } from '../../../../legacy/plugins/maps/public/angular/get_initial_layers';
+import { getInitialLayers } from '../angular/get_initial_layers';
 import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {

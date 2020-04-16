@@ -5,7 +5,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getUiSettings } from '../../../../../plugins/maps/public/kibana_services';
+import { getUiSettings } from '../kibana_services';
 
 export function getInitialQuery({ mapStateJSON, appState = {}, userQueryLanguage }) {
   const settings = getUiSettings();

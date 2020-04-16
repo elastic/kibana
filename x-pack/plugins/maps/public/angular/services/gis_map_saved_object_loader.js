@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { createSavedGisMapClass } from './saved_gis_map';
-import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
+import { SavedObjectLoader } from '../../../../../../src/plugins/saved_objects/public';
 import {
   getCoreChrome,
   getSavedObjectsClient,
@@ -14,7 +14,7 @@ import {
   getCoreOverlays,
   getData,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/maps/public/kibana_services';
+} from '../../kibana_services';
 
 export const getMapsSavedObjectLoader = _.once(function() {
   const services = {

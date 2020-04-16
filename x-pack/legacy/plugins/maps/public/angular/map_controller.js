@@ -60,10 +60,10 @@ import {
 } from '../../../../../plugins/maps/public/selectors/map_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
-import { getInitialLayers } from './get_initial_layers';
-import { getInitialQuery } from './get_initial_query';
-import { getInitialTimeFilters } from './get_initial_time_filters';
-import { getInitialRefreshConfig } from './get_initial_refresh_config';
+import { getInitialLayers } from '../../../../../plugins/maps/public/angular/get_initial_layers';
+import { getInitialQuery } from '../../../../../plugins/maps/public/angular/get_initial_query';
+import { getInitialTimeFilters } from '../../../../../plugins/maps/public/angular/get_initial_time_filters';
+import { getInitialRefreshConfig } from '../../../../../plugins/maps/public/angular/get_initial_refresh_config';
 import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../common/constants';
 import { npSetup, npStart } from 'ui/new_platform';
 import { esFilters } from '../../../../../../src/plugins/data/public';

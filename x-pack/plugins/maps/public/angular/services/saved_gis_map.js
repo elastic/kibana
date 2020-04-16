@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { createSavedObjectClass } from '../../../../../../../src/plugins/saved_objects/public';
+import { createSavedObjectClass } from '../../../../../../src/plugins/saved_objects/public';
 import {
   getTimeFilters,
   getMapZoom,
@@ -15,17 +15,17 @@ import {
   getRefreshConfig,
   getQuery,
   getFilters,
-} from '../../../../../../plugins/maps/public/selectors/map_selectors';
+} from '../../selectors/map_selectors';
+import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../selectors/ui_selectors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { copyPersistentState } from '../../reducers/util';
 import {
-  getIsLayerTOCOpen,
-  getOpenTOCDetails,
-} from '../../../../../../plugins/maps/public/selectors/ui_selectors';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { convertMapExtentToPolygon } from '../../../../../../plugins/maps/public/elasticsearch_geo_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { copyPersistentState } from '../../../../../../plugins/maps/public/reducers/util';
-import { extractReferences, injectReferences } from '../../../common/migrations/references';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+  extractReferences,
+  injectReferences,
+} from '../../../../../legacy/plugins/maps/common/migrations/references';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../legacy/plugins/maps/common/constants';
 
 export function createSavedGisMapClass(services) {
   const SavedObjectClass = createSavedObjectClass(services);
