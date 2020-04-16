@@ -14,7 +14,12 @@ import {
   LAYER_TYPE,
   VECTOR_STYLES,
 } from '../constants';
-import { AggDescriptor, JoinDescriptor, LayerDescriptor } from '../descriptor_types';
+import {
+  AggDescriptor,
+  JoinDescriptor,
+  LayerDescriptor,
+  VectorLayerDescriptor,
+} from '../descriptor_types';
 import { MapSavedObjectAttributes } from '../../../../../plugins/maps/common/map_saved_object_type';
 
 const GROUP_BY_DELIMITER = '_groupby_';
@@ -59,14 +64,21 @@ export function migrateJoinAggKey({
   const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
   layerList.forEach((layerDescriptor: LayerDescriptor) => {
     if (
-      (layerDescriptor.type === LAYER_TYPE.VECTOR ||
-        layerDescriptor.type === LAYER_TYPE.BLENDED_VECTOR) &&
-      layerDescriptor.style &&
-      layerDescriptor.joins &&
-      layerDescriptor.joins.length
+      layerDescriptor.type === LAYER_TYPE.VECTOR ||
+      layerDescriptor.type === LAYER_TYPE.BLENDED_VECTOR
     ) {
+      const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
+
+      if (
+        !vectorLayerDescriptor.style ||
+        !vectorLayerDescriptor.joins ||
+        vectorLayerDescriptor.joins.length === 0
+      ) {
+        return;
+      }
+
       const legacyJoinFields = new Map<string, JoinDescriptor>();
-      layerDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
+      vectorLayerDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
         _.get(joinDescriptor, 'right.metrics', []).forEach((aggDescriptor: AggDescriptor) => {
           const legacyAggKey = getLegacyAggKey({
             aggType: aggDescriptor.type,
@@ -84,8 +96,8 @@ export function migrateJoinAggKey({
         });
       });
 
-      Object.keys(layerDescriptor.style.properties).forEach(key => {
-        const style: any = layerDescriptor.style!.properties[key as VECTOR_STYLES];
+      Object.keys(vectorLayerDescriptor.style.properties).forEach(key => {
+        const style: any = vectorLayerDescriptor.style!.properties[key as VECTOR_STYLES];
         if (_.get(style, 'options.field.origin') === FIELD_ORIGIN.JOIN) {
           const joinDescriptor = legacyJoinFields.get(style.options.field.name);
           if (joinDescriptor) {

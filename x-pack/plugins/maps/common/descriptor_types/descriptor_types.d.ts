@@ -109,7 +109,7 @@ export type SourceDescriptor =
   | ESGeoGridSourceDescriptor
   | EMSFileSourceDescriptor;
 
-export type BaseLayerDescriptor = {
+export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
   __errorMessage?: string;
@@ -123,12 +123,10 @@ export type BaseLayerDescriptor = {
   visible?: boolean;
 };
 
-export type VectorLayerDescriptor = BaseLayerDescriptor & {
+export type VectorLayerDescriptor = LayerDescriptor & {
   joins?: JoinDescriptor[];
   style?: VectorStyleDescriptor;
 };
-
-export type LayerDescriptor = VectorLayerDescriptor;
 
 export type RangeFieldMeta = {
   min: number;
