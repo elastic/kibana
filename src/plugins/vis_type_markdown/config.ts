@@ -17,17 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
-import { MarkdownPluginSetupDependencies } from './plugin';
-import { plugin } from '.';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-const plugins: Readonly<MarkdownPluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: npSetup.plugins.visualizations,
-};
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+});
 
-const pluginInstance = plugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core);
+export type ConfigSchema = TypeOf<typeof configSchema>;
