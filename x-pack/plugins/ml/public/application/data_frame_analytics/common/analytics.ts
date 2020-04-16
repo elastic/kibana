@@ -52,7 +52,7 @@ export interface ClassificationAnalysis {
   classification: Classification;
 }
 
-export interface LoadRegressionExploreDataArg {
+export interface LoadExploreDataArg {
   filterByIsTraining?: boolean;
   searchQuery: SavedSearchQuery;
 }
@@ -409,7 +409,7 @@ export function getEvalQueryBody({
   ignoreDefaultQuery,
 }: {
   resultsField: string;
-  isTraining: boolean;
+  isTraining?: boolean;
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
 }) {
@@ -426,9 +426,12 @@ export function getEvalQueryBody({
       searchQueryClone.bool.must = [];
     }
 
-    searchQueryClone.bool.must.push(trainingQuery);
+    if (isTraining !== undefined) {
+      searchQueryClone.bool.must.push(trainingQuery);
+    }
+
     query = searchQueryClone;
-  } else if (isQueryStringQuery(searchQueryClone)) {
+  } else if (isQueryStringQuery(searchQueryClone) && isTraining !== undefined) {
     query = {
       bool: {
         must: [searchQueryClone, trainingQuery],
@@ -438,7 +441,7 @@ export function getEvalQueryBody({
     // Not a bool or string query so we need to create it so can add the trainingQuery
     query = {
       bool: {
-        must: [trainingQuery],
+        must: isTraining !== undefined ? [trainingQuery] : [],
       },
     };
   }
@@ -456,7 +459,7 @@ interface EvaluateMetrics {
 }
 
 interface LoadEvalDataConfig {
-  isTraining: boolean;
+  isTraining?: boolean;
   index: string;
   dependentVariable: string;
   resultsField: string;
