@@ -14,6 +14,8 @@ import {
   MapCenterAndZoom,
   MapRefreshConfig,
 } from '../../common/descriptor_types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { MapSettings } from '../../../../../plugins/maps/public/reducers/map';
 
 export type SyncContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;

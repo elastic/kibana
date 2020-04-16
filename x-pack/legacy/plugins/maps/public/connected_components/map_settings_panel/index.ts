@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FLYOUT_STATE } from '../../../../../../plugins/maps/public/reducers/ui';
@@ -12,14 +13,14 @@ import { rollbackMapSettings, updateMapSetting } from '../../actions/map_actions
 import { getMapSettings, hasMapSettingsChanges } from '../../selectors/map_selectors';
 import { updateFlyout } from '../../actions/ui_actions';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state) {
   return {
     settings: getMapSettings(state),
     hasMapSettingsChanges: hasMapSettingsChanges(state),
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
     cancelChanges: () => {
       dispatch(rollbackMapSettings());
@@ -28,7 +29,7 @@ function mapDispatchToProps(dispatch) {
     keepChanges: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
     },
-    updateMapSetting: (settingKey, settingValue) => {
+    updateMapSetting: (settingKey: string, settingValue: string) => {
       dispatch(updateMapSetting(settingKey, settingValue));
     },
   };

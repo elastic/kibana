@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MapSettings, MapStoreState } from '../../../../../../plugins/maps/public/reducers/map';
+import { MapSettings } from '../../../../../../plugins/maps/public/reducers/map';
 import { NavigationPanel } from './navigation_panel';
 
 interface Props {

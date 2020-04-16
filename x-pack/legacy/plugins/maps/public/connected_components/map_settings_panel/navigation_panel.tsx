@@ -9,8 +9,8 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MapSettings, MapStoreState } from '../../../../../../plugins/maps/public/reducers/map';
-import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public';
+import { MapSettings } from '../../../../../../plugins/maps/public/reducers/map';
+import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kibana_react/public';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 
 interface Props {
@@ -19,9 +19,9 @@ interface Props {
 }
 
 export function NavigationPanel({ settings, updateMapSetting }: Props) {
-  const onZoomChange = ([min, max]) => {
-    updateMapSetting('minZoom', Math.max(MIN_ZOOM, parseInt(min, 10)));
-    updateMapSetting('maxZoom', Math.min(MAX_ZOOM, parseInt(max, 10)));
+  const onZoomChange = (value: Value) => {
+    updateMapSetting('minZoom', Math.max(MIN_ZOOM, parseInt(value[0], 10)));
+    updateMapSetting('maxZoom', Math.min(MAX_ZOOM, parseInt(value[1], 10)));
   };
 
   return (

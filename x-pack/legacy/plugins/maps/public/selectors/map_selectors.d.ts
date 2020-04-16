@@ -7,7 +7,9 @@
 import { AnyAction } from 'redux';
 import { MapCenter } from '../../common/descriptor_types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MapSettings, MapStoreState } from '../../../../../plugins/maps/public/reducers/map';
+import { MapStoreState } from '../../../../../plugins/maps/public/reducers/store';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { MapSettings } from '../../../../../plugins/maps/public/reducers/map';
 
 export function getHiddenLayerIds(state: MapStoreState): string[];
 
