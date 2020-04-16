@@ -70,6 +70,7 @@
  */
 
 import _ from 'lodash';
+import { map } from 'rxjs/operators';
 import { SavedObjectReference } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
@@ -187,32 +188,40 @@ export class SearchSource {
 
   /**
    * Run a search using the search service
-   * @return {Promise<SearchResponse<unknown>>}
+   * @return {Observable<SearchResponse<unknown>>}
    */
-  private runSearch(
-    searchRequest: SearchRequest,
-    esShardTimeout: number,
-    abortSignal?: AbortSignal
-  ) {
-    const abortController = new AbortController();
-    const { signal } = abortController;
+  private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
+    const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
     const searchParams = getSearchParams(getUiSettings(), esShardTimeout);
     const params = {
       index: searchRequest.index.title || searchRequest.index,
       body: searchRequest.body,
       ...searchParams,
     };
-    const searching = getSearchService()
+    return getSearchService()
       .search({ params, indexType: searchRequest.indexType }, { signal })
-      .toPromise()
-      .then(({ rawResponse }) => rawResponse);
-
-    const response = searching.then(result => handleResponse(searchRequest, result));
-    if (abortSignal) abortSignal.addEventListener('abort', () => abortController.abort());
-
-    return response;
+      .pipe(map(({ rawResponse }) => handleResponse(searchRequest, rawResponse)));
   }
 
+  /**
+   * Run a search using the search service
+   * @return {Promise<SearchResponse<unknown>>}
+   */
+  private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
+    const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
+    return await fetchSoon(
+      searchRequest,
+      {
+        ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
+        ...options,
+      },
+      {
+        searchService: getSearchService(),
+        config: getUiSettings(),
+        esShardTimeout,
+      }
+    );
+  }
   /**
    * Fetch this source and reject the returned Promise on error
    *
@@ -224,24 +233,11 @@ export class SearchSource {
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
 
-    const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
-    const legacySearch = getUiSettings().get('courier:batchSearches');
     let response;
-    if (legacySearch) {
-      response = await fetchSoon(
-        searchRequest,
-        {
-          ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
-          ...options,
-        },
-        {
-          searchService: getSearchService(),
-          config: getUiSettings(),
-          esShardTimeout,
-        }
-      );
+    if (getUiSettings().get('courier:batchSearches')) {
+      response = await this.legacyFetch(searchRequest, options);
     } else {
-      response = this.runSearch(searchRequest, esShardTimeout, options.abortSignal);
+      response = this.fetch$(searchRequest, options.abortSignal).toPromise();
     }
 
     if (response.error) {
