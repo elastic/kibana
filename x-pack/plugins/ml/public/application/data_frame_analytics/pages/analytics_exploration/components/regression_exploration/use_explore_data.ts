@@ -24,7 +24,6 @@ import {
   DataFrameAnalyticsConfig,
   EsFieldName,
   INDEX_STATUS,
-  SEARCH_SIZE,
 } from '../../../../common';
 import { Dictionary } from '../../../../../../../common/types/common';
 import { isKeywordAndTextType } from '../../../../common/fields';
@@ -188,7 +187,6 @@ export const useExploreData = (
 
         const resp: SearchResponse7 = await ml.esSearch({
           index: jobConfig.dest.index,
-          size: SEARCH_SIZE,
           body: {
             query,
             from: pageIndex * pageSize,

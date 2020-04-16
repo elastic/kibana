@@ -65,7 +65,7 @@ interface Props {
 export const ResultsTable: FC<Props> = React.memo(
   ({ indexPattern, jobConfig, jobStatus, setEvaluateSearchQuery }) => {
     const needsDestIndexFields = indexPattern && indexPattern.title === jobConfig.source.index[0];
-
+    const resultsField = jobConfig.dest.results_field;
     const {
       errorMessage,
       fieldTypes,
@@ -93,6 +93,7 @@ export const ResultsTable: FC<Props> = React.memo(
         // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
         // To fall back to the default string schema it needs to be undefined.
         let schema;
+        let isSortable = true;
         const type = fieldTypes[field];
         const isNumber =
           type !== undefined &&
@@ -109,9 +110,16 @@ export const ResultsTable: FC<Props> = React.memo(
           case 'geo_point':
             schema = 'json';
             break;
+          case 'boolean':
+            schema = 'boolean';
+            break;
         }
 
-        return { id: field, schema };
+        if (field === `${resultsField}.feature_importance`) {
+          isSortable = false;
+        }
+
+        return { id: field, schema, isSortable };
       });
 
     const docFieldsCount = tableFields.length;
