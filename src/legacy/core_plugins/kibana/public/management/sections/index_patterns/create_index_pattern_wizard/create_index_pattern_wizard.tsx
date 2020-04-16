@@ -75,12 +75,7 @@ export class CreateIndexPatternWizard extends Component<
     isInitiallyLoadingIndices: true,
     isIncludingSystemIndices: false,
     toasts: [],
-    indexPatternCreationType: {} as IndexPatternCreationConfig,
   };
-
-  constructor(props: CreateIndexPatternWizardProps) {
-    super(props);
-  }
 
   async UNSAFE_componentWillMount() {
     this.fetchData();
