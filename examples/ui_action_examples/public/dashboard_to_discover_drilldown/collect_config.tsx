@@ -52,11 +52,19 @@ export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
 
   return (
     <DiscoverDrilldownConfig
-      activeDashboardId={config.indexPatternId}
+      activeIndexPatternId={config.indexPatternId}
       indexPatterns={indexPatterns}
-      onDashboardSelect={indexPatternId => {
+      onIndexPatternSelect={indexPatternId => {
         onConfig({ ...config, indexPatternId });
       }}
+      customIndexPattern={config.customIndexPattern}
+      onCustomIndexPatternToggle={() =>
+        onConfig({
+          ...config,
+          customIndexPattern: !config.customIndexPattern,
+          indexPatternId: undefined,
+        })
+      }
       carryFiltersAndQuery={config.carryFiltersAndQuery}
       onCarryFiltersAndQueryToggle={() =>
         onConfig({

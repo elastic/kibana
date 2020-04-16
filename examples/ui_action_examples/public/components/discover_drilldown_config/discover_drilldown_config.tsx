@@ -27,9 +27,11 @@ export interface IndexPatternItem {
 }
 
 export interface DiscoverDrilldownConfigProps {
-  activeDashboardId?: string;
+  activeIndexPatternId?: string;
   indexPatterns: IndexPatternItem[];
-  onDashboardSelect: (dashboardId: string) => void;
+  onIndexPatternSelect: (indexPatternId: string) => void;
+  customIndexPattern?: boolean;
+  onCustomIndexPatternToggle?: () => void;
   carryFiltersAndQuery?: boolean;
   onCarryFiltersAndQueryToggle?: () => void;
   carryTimeRange?: boolean;
@@ -37,9 +39,11 @@ export interface DiscoverDrilldownConfigProps {
 }
 
 export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = ({
-  activeDashboardId,
+  activeIndexPatternId,
   indexPatterns,
-  onDashboardSelect,
+  onIndexPatternSelect,
+  customIndexPattern,
+  onCustomIndexPatternToggle,
   carryFiltersAndQuery,
   onCarryFiltersAndQueryToggle,
   carryTimeRange,
@@ -47,19 +51,31 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
 }) => {
   return (
     <>
-      <EuiFormRow label={txtChooseDestinationIndexPattern}>
-        <EuiSelect
-          name="selectDashboard"
-          hasNoInitialSelection={true}
-          options={indexPatterns.map(({ id, title }) => ({ value: id, text: title }))}
-          value={activeDashboardId}
-          onChange={e => onDashboardSelect(e.target.value)}
-        />
-      </EuiFormRow>
+      {!!onCustomIndexPatternToggle && (
+        <EuiFormRow hasChildLabel={false}>
+          <EuiSwitch
+            name="customIndexPattern"
+            label="Use custom index pattern"
+            checked={!!customIndexPattern}
+            onChange={onCustomIndexPatternToggle}
+          />
+        </EuiFormRow>
+      )}
+      {!!customIndexPattern && (
+        <EuiFormRow label={txtChooseDestinationIndexPattern}>
+          <EuiSelect
+            name="selectDashboard"
+            hasNoInitialSelection={true}
+            options={indexPatterns.map(({ id, title }) => ({ value: id, text: title }))}
+            value={activeIndexPatternId}
+            onChange={e => onIndexPatternSelect(e.target.value)}
+          />
+        </EuiFormRow>
+      )}
       {!!onCarryFiltersAndQueryToggle && (
         <EuiFormRow hasChildLabel={false}>
           <EuiSwitch
-            name="useCurrentFilters"
+            name="carryFiltersAndQuery"
             label="Carry over filters and query"
             checked={!!carryFiltersAndQuery}
             onChange={onCarryFiltersAndQueryToggle}
@@ -69,7 +85,7 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
       {!!onCarryTimeRangeToggle && (
         <EuiFormRow hasChildLabel={false}>
           <EuiSwitch
-            name="useCurrentDateRange"
+            name="carryTimeRange"
             label="Carry over time range"
             checked={!!carryTimeRange}
             onChange={onCarryTimeRangeToggle}

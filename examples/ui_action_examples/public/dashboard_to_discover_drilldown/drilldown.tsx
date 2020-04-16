@@ -50,13 +50,13 @@ export class DashboardToDiscoverDrilldown
   public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
-    pickIndexPattern: false,
+    customIndexPattern: false,
     carryFiltersAndQuery: true,
     carryTimeRange: true,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
-    if (!config.indexPatternId) return false;
+    if (config.customIndexPattern && !config.indexPatternId) return false;
     return true;
   };
 

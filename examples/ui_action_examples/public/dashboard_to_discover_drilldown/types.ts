@@ -30,7 +30,7 @@ export interface Config {
   /**
    * Whether to use a user selected index pattern, stored in `indexPatternId` field.
    */
-  pickIndexPattern: boolean;
+  customIndexPattern: boolean;
 
   /**
    * ID of index pattern picked by user in UI. If not set, drilldown will use
