@@ -54,7 +54,7 @@ export abstract class Layout {
 
   public abstract getPdfPageSize(pageSizeParams: PageSizeParams): string | Size;
 
-  public abstract getViewport(itemsCount: number): ViewZoomWidthHeight;
+  public abstract getViewport(itemsCount: number): ViewZoomWidthHeight | null;
 
   public abstract getBrowserZoom(): number;
 
