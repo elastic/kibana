@@ -9,8 +9,6 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
-
-import { I18nContext } from 'ui/i18n';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import {
@@ -18,8 +16,8 @@ import {
   IContainer,
   EmbeddableInput,
   EmbeddableOutput,
-} from '../../../../../../src/plugins/embeddable/public';
-import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
+} from '../../../../../src/plugins/embeddable/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 import {
   esFilters,
   IIndexPattern,
@@ -27,11 +25,11 @@ import {
   Filter,
   Query,
   RefreshInterval,
-} from '../../../../../../src/plugins/data/public';
+} from '../../../../../src/plugins/data/public';
 
-import { GisMap } from '../../../../../plugins/maps/public/connected_components/gis_map';
+import { GisMap } from '../connected_components/gis_map';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createMapStore, MapStore } from '../../../../../plugins/maps/public/reducers/store';
+import { createMapStore, MapStore } from '../reducers/store';
 import {
   setGotoWithCenter,
   replaceLayerList,
@@ -44,33 +42,22 @@ import {
   hideLayerControl,
   hideViewControl,
   setHiddenLayers,
-} from '../../../../../plugins/maps/public/actions/map_actions';
-import { MapCenterAndZoom } from '../../../../../plugins/maps/common/descriptor_types';
-import {
-  setReadOnly,
-  setIsLayerTOCOpen,
-  setOpenTOCDetails,
-} from '../../../../../plugins/maps/public/actions/ui_actions';
-import {
-  getIsLayerTOCOpen,
-  getOpenTOCDetails,
-} from '../../../../../plugins/maps/public/selectors/ui_selectors';
+} from '../actions/map_actions';
+import { MapCenterAndZoom } from '../../common/descriptor_types';
+import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
+import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
   setEventHandlers,
   EventHandlers,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
-import {
-  getMapCenter,
-  getMapZoom,
-  getHiddenLayerIds,
-} from '../../../../../plugins/maps/public/selectors/map_selectors';
+} from '../reducers/non_serializable_instances';
+import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { RenderToolTipContent } from '../../../../../plugins/maps/public/layers/tooltips/tooltip_property';
+import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getUiActions } from '../../../../../plugins/maps/public/kibana_services';
+import { getUiActions } from '../kibana_services';
 
 interface MapEmbeddableConfig {
   editUrl?: string;
@@ -260,12 +247,10 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
 
     render(
       <Provider store={this._store}>
-        <I18nContext>
-          <GisMap
-            addFilters={this.input.hideFilterActions ? null : this.addFilters}
-            renderTooltipContent={this._renderTooltipContent}
-          />
-        </I18nContext>
+        <GisMap
+          addFilters={this.input.hideFilterActions ? null : this.addFilters}
+          renderTooltipContent={this._renderTooltipContent}
+        />
       </Provider>,
       this._domNode
     );

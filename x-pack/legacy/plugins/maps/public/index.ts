@@ -32,4 +32,4 @@ export {
   RenderTooltipContentParams,
   ITooltipProperty,
 } from '../../../../plugins/maps/public/layers/tooltips/tooltip_property';
-export { MapEmbeddable, MapEmbeddableInput } from './embeddable';
+export { MapEmbeddable, MapEmbeddableInput } from '../../../../plugins/maps/public/embeddable';
