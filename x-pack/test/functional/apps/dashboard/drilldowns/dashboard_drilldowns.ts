@@ -136,15 +136,15 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       {
         location: areaChart,
         offset: {
-          x: 150,
-          y: 100,
+          x: -100,
+          y: 0,
         },
       },
       {
         location: areaChart,
         offset: {
-          x: 200,
-          y: 100,
+          x: 100,
+          y: 0,
         },
       }
     );
