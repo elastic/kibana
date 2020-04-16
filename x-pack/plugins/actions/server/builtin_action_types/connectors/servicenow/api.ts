@@ -68,15 +68,18 @@ const pushToServiceHandler = async ({
   ) {
     const commentsTransformed = transformComments(comments, ['informationAdded']);
 
-    const createdComments = await Promise.all(
-      commentsTransformed.map(comment =>
-        externalService.createComment({
-          incidentId: res.id,
-          comment,
-          field: mapping.get('comments').target,
-        })
-      )
-    );
+    // Create comments sequentially.
+    const promises = comments.reduce(async (prevPromise, currentComment) => {
+      const totalComments = await prevPromise;
+      const comment = await externalService.createComment({
+        incidentId: res.id,
+        comment: currentComment,
+        field: mapping.get('comments').target,
+      });
+      return [...totalComments, comment];
+    }, Promise.resolve([] as ExternalServiceCommentResponse[]));
+
+    const createdComments = await promises;
 
     const zippedComments: ExternalServiceCommentResponse[] = zipWith(
       commentsTransformed,
