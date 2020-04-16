@@ -9,8 +9,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldPassword,
   EuiSpacer,
+  EuiFieldPassword,
 } from '@elastic/eui';
 
 import { isEmpty, get } from 'lodash/fp';
@@ -21,42 +21,43 @@ import {
   ValidationResult,
   ActionParamsProps,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../triggers_actions_ui/public/types';
+} from '../../../../../../../plugins/triggers_actions_ui/public/types';
 
 import { FieldMapping } from '../../../pages/case/components/configure_cases/field_mapping';
 
 import * as i18n from './translations';
 
-import { ServiceNowActionConnector } from './types';
+import { ResilientActionConnector } from './types';
 import { isUrlInvalid } from '../validators';
 
 import { defaultMapping } from '../config';
 import { CasesConfigurationMapping } from '../../../containers/case/configure/types';
 
 import { connector } from './config';
-import logo from './logo.svg';
 
-interface ServiceNowActionParams {
+interface ResilientActionParams {
   message: string;
 }
 
 interface Errors {
   apiUrl: string[];
-  username: string[];
-  password: string[];
+  orgId: string[];
+  apiKey: string[];
+  apiSecret: string[];
 }
 
 export function getActionType(): ActionTypeModel {
   return {
     id: connector.id,
-    iconClass: logo,
-    selectMessage: i18n.SERVICENOW_DESC,
+    iconClass: connector.logo,
+    selectMessage: i18n.RESILIENT_DESC,
     actionTypeTitle: connector.name,
-    validateConnector: (action: ServiceNowActionConnector): ValidationResult => {
+    validateConnector: (action: ResilientActionConnector): ValidationResult => {
       const errors: Errors = {
         apiUrl: [],
-        username: [],
-        password: [],
+        orgId: [],
+        apiKey: [],
+        apiSecret: [],
       };
 
       if (!action.config.apiUrl) {
@@ -67,37 +68,42 @@ export function getActionType(): ActionTypeModel {
         errors.apiUrl = [...errors.apiUrl, i18n.API_URL_INVALID];
       }
 
-      if (!action.secrets.username) {
-        errors.username = [...errors.username, i18n.USERNAME_REQUIRED];
+      if (!action.config.orgId) {
+        errors.orgId = [...errors.orgId, i18n.RESILIENT_ORG_ID_REQUIRED];
       }
 
-      if (!action.secrets.password) {
-        errors.password = [...errors.password, i18n.PASSWORD_REQUIRED];
+      if (!action.secrets.apiKey) {
+        errors.apiKey = [...errors.apiKey, i18n.API_KEY_REQUIRED];
+      }
+
+      if (!action.secrets.apiSecret) {
+        errors.apiSecret = [...errors.apiSecret, i18n.API_SECRET_REQUIRED];
       }
 
       return { errors };
     },
-    validateParams: (actionParams: ServiceNowActionParams): ValidationResult => {
+    validateParams: (actionParams: ResilientActionParams): ValidationResult => {
       return { errors: {} };
     },
-    actionConnectorFields: ServiceNowConnectorFields,
-    actionParamsFields: ServiceNowParamsFields,
+    actionConnectorFields: ResilientConnectorFields,
+    actionParamsFields: ResilientParamsFields,
   };
 }
 
-const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
-  ServiceNowActionConnector
+const ResilientConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  ResilientActionConnector
 >> = ({ action, editActionConfig, editActionSecrets, errors }) => {
   /* We do not provide defaults values to the fields (like empty string for apiUrl) intentionally.
    * If we do, errors will be shown the first time the flyout is open even though the user did not
    * interact with the form. Also, we would like to show errors for empty fields provided by the user.
   /*/
-  const { apiUrl, casesConfiguration: { mapping = [] } = {} } = action.config;
-  const { username, password } = action.secrets;
+  const { apiUrl, orgId, casesConfiguration: { mapping = [] } = {} } = action.config;
+  const { apiKey, apiSecret } = action.secrets;
 
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
-  const isUsernameInvalid: boolean = errors.username.length > 0 && username != null;
-  const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
+  const isOrgIdInvalid: boolean = errors.orgId.length > 0 && orgId != null;
+  const isApiKeyInvalid: boolean = errors.apiKey.length > 0 && apiKey != null;
+  const isApiSecretInvalid: boolean = errors.apiSecret.length > 0 && apiSecret != null;
 
   /**
    * We need to distinguish between the add flyout and the edit flyout.
@@ -109,8 +115,8 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
 
   useEffect(() => {
     if (!isEmpty(apiUrl)) {
-      editActionSecrets('username', '');
-      editActionSecrets('password', '');
+      editActionSecrets('apiKey', '');
+      editActionSecrets('apiSecret', '');
     }
   }, []);
 
@@ -128,7 +134,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
 
   const handleOnBlurActionConfig = useCallback(
     (key: string) => {
-      if (key === 'apiUrl' && action.config[key] == null) {
+      if (['apiUrl', 'orgId'].includes(key) && get(key, action.config) == null) {
         editActionConfig(key, '');
       }
     },
@@ -142,7 +148,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
 
   const handleOnBlurSecretConfig = useCallback(
     (key: string) => {
-      if (['username', 'password'].includes(key) && get(key, action.secrets) == null) {
+      if (['apiKey', 'apiSecret'].includes(key) && get(key, action.secrets) == null) {
         editActionSecrets(key, '');
       }
     },
@@ -186,20 +192,20 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            id="connector-servicenow-username"
+            id="orgId"
             fullWidth
-            error={errors.username}
-            isInvalid={isUsernameInvalid}
-            label={i18n.USERNAME_LABEL}
+            error={errors.orgId}
+            isInvalid={isOrgIdInvalid}
+            label={i18n.RESILIENT_ORG_ID}
           >
             <EuiFieldText
               fullWidth
-              isInvalid={isUsernameInvalid}
-              name="connector-servicenow-username"
-              value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="usernameFromInput"
-              onChange={handleOnChangeSecretConfig.bind(null, 'username')}
-              onBlur={handleOnBlurSecretConfig.bind(null, 'username')}
+              isInvalid={isOrgIdInvalid}
+              name="orgId"
+              value={orgId || ''} // Needed to prevent uncontrolled input error when value is undefined
+              data-test-subj="orgIdFromInput"
+              onChange={handleOnChangeActionConfig.bind(null, 'orgId')}
+              onBlur={handleOnBlurActionConfig.bind(null, 'orgId')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -208,20 +214,42 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            id="connector-servicenow-password"
+            id="connector-resilient-apiKey"
             fullWidth
-            error={errors.password}
-            isInvalid={isPasswordInvalid}
-            label={i18n.PASSWORD_LABEL}
+            error={errors.apiKey}
+            isInvalid={isApiKeyInvalid}
+            label={i18n.API_KEY_LABEL}
+          >
+            <EuiFieldText
+              fullWidth
+              isInvalid={isApiKeyInvalid}
+              name="connector-resilient-apiKey"
+              value={apiKey || ''} // Needed to prevent uncontrolled input error when value is undefined
+              data-test-subj="apiKeyFromInput"
+              onChange={handleOnChangeSecretConfig.bind(null, 'apiKey')}
+              onBlur={handleOnBlurSecretConfig.bind(null, 'apiKey')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            id="connector-resilient-apiSecret"
+            fullWidth
+            error={errors.apiSecret}
+            isInvalid={isApiSecretInvalid}
+            label={i18n.API_SECRET_LABEL}
           >
             <EuiFieldPassword
               fullWidth
-              isInvalid={isPasswordInvalid}
-              name="connector-servicenow-password"
-              value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="passwordFromInput"
-              onChange={handleOnChangeSecretConfig.bind(null, 'password')}
-              onBlur={handleOnBlurSecretConfig.bind(null, 'password')}
+              isInvalid={isApiSecretInvalid}
+              name="connector-resilient-apiSecret"
+              value={apiSecret || ''} // Needed to prevent uncontrolled input error when value is undefined
+              data-test-subj="apiSecretFromInput"
+              onChange={handleOnChangeSecretConfig.bind(null, 'apiSecret')}
+              onBlur={handleOnBlurSecretConfig.bind(null, 'apiSecret')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -240,8 +268,11 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
   );
 };
 
-const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
-  ServiceNowActionParams
->> = ({ actionParams, editAction, index, errors }) => {
+const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
+  actionParams,
+  editAction,
+  index,
+  errors,
+}) => {
   return null;
 };

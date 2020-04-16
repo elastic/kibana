@@ -6,16 +6,11 @@
 
 import axios from 'axios';
 
-import {
-  ExternalServiceCredential,
-  ExternalService,
-  ExternalServiceParams,
-  ConnectorPublicConfigurationType,
-  ConnectorSecretConfigurationType,
-} from '../types';
+import { ExternalServiceCredential, ExternalService, ExternalServiceParams } from '../types';
 import { addTimeZoneToDate, patch, request, getErrorMessage } from '../utils';
 
 import * as i18n from './translations';
+import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 
 const API_VERSION = 'v2';
 const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
@@ -28,8 +23,8 @@ export const createExternalService = ({
   config,
   secrets,
 }: ExternalServiceCredential): ExternalService => {
-  const { apiUrl: url } = config as ConnectorPublicConfigurationType;
-  const { username, password } = secrets as ConnectorSecretConfigurationType;
+  const { apiUrl: url } = config as ServiceNowPublicConfigurationType;
+  const { username, password } = secrets as ServiceNowSecretConfigurationType;
 
   if (!url || !username || !password) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);

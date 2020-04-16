@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-restricted-imports */
-/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { ActionType } from '../../../../../../plugins/triggers_actions_ui/public';
 
 import {
   ConfigType,
@@ -17,7 +16,6 @@ export interface ServiceNowActionConnector {
   secrets: SecretsType;
 }
 
-export interface Connector {
-  actionTypeId: string;
+export interface Connector extends ActionType {
   logo: string;
 }
