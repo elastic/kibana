@@ -14,8 +14,8 @@ import {
   getIsReadOnly,
   getIsLayerTOCOpen,
   getFlyoutDisplay,
-} from '../../../../../../legacy/plugins/maps/public/selectors/ui_selectors';
-import { getLayerList } from '../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+} from '../../../selectors/ui_selectors';
+import { getLayerList } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {

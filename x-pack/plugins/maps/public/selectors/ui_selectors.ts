@@ -5,9 +5,9 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MapStoreState } from '../../../../../plugins/maps/public/reducers/store';
+import { MapStoreState } from '../reducers/store';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FLYOUT_STATE, INDEXING_STAGE } from '../../../../../plugins/maps/public/reducers/ui';
+import { FLYOUT_STATE, INDEXING_STAGE } from '../reducers/ui';
 
 export const getFlyoutDisplay = ({ ui }: MapStoreState): FLYOUT_STATE => ui.flyoutDisplay;
 export const getIsSetViewOpen = ({ ui }: MapStoreState): boolean => ui.isSetViewOpen;

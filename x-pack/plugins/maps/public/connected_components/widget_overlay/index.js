@@ -7,10 +7,7 @@
 import { connect } from 'react-redux';
 import { WidgetOverlay } from './widget_overlay';
 
-import {
-  isLayerControlHidden,
-  isViewControlHidden,
-} from '../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+import { isLayerControlHidden, isViewControlHidden } from '../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {

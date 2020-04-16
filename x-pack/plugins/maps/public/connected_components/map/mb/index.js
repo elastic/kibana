@@ -23,7 +23,7 @@ import {
   isInteractiveDisabled,
   isTooltipControlDisabled,
   isViewControlHidden,
-} from '../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+} from '../../../selectors/map_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 

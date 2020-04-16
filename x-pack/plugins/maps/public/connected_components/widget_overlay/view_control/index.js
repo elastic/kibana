@@ -6,10 +6,7 @@
 
 import { connect } from 'react-redux';
 import { ViewControl } from './view_control';
-import {
-  getMouseCoordinates,
-  getMapZoom,
-} from '../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+import { getMouseCoordinates, getMapZoom } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {

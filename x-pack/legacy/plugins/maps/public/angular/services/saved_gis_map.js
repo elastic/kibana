@@ -15,8 +15,11 @@ import {
   getRefreshConfig,
   getQuery,
   getFilters,
-} from '../../selectors/map_selectors';
-import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../selectors/ui_selectors';
+} from '../../../../../../plugins/maps/public/selectors/map_selectors';
+import {
+  getIsLayerTOCOpen,
+  getOpenTOCDetails,
+} from '../../../../../../plugins/maps/public/selectors/ui_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { convertMapExtentToPolygon } from '../../../../../../plugins/maps/public/elasticsearch_geo_utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

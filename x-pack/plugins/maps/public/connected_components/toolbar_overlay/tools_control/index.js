@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { ToolsControl } from './tools_control';
-import { isDrawingFilter } from '../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+import { isDrawingFilter } from '../../../selectors/map_selectors';
 import { updateDrawState } from '../../../actions/map_actions';
 
 function mapStateToProps(state = {}) {

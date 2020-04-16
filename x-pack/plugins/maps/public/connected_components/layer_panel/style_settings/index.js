@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { StyleSettings } from './style_settings';
-import { getSelectedLayer } from '../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+import { getSelectedLayer } from '../../../selectors/map_selectors';
 import { updateLayerStyleForSelectedLayer } from '../../../actions/map_actions';
 
 function mapStateToProps(state = {}) {

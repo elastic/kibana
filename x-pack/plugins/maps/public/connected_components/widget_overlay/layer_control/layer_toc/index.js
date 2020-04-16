@@ -7,8 +7,8 @@
 import { connect } from 'react-redux';
 import { LayerTOC } from './view';
 import { updateLayerOrder } from '../../../../actions/map_actions';
-import { getLayerList } from '../../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
-import { getIsReadOnly } from '../../../../../../../legacy/plugins/maps/public/selectors/ui_selectors';
+import { getLayerList } from '../../../../selectors/map_selectors';
+import { getIsReadOnly } from '../../../../selectors/ui_selectors';
 
 const mapDispatchToProps = {
   updateLayerOrder: newOrder => updateLayerOrder(newOrder),

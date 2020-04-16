@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { LayerErrors } from './layer_errors';
-import { getSelectedLayer } from '../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+import { getSelectedLayer } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {

@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { LayerPanel } from './view';
-import { getSelectedLayer } from '../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+import { getSelectedLayer } from '../../selectors/map_selectors';
 import { fitToLayerExtent, updateSourceProp } from '../../actions/map_actions';
 
 function mapStateToProps(state = {}) {

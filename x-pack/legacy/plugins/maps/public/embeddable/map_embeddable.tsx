@@ -51,14 +51,21 @@ import {
   setIsLayerTOCOpen,
   setOpenTOCDetails,
 } from '../../../../../plugins/maps/public/actions/ui_actions';
-import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
+import {
+  getIsLayerTOCOpen,
+  getOpenTOCDetails,
+} from '../../../../../plugins/maps/public/selectors/ui_selectors';
 import {
   getInspectorAdapters,
   setEventHandlers,
   EventHandlers,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
-import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
+import {
+  getMapCenter,
+  getMapZoom,
+  getHiddenLayerIds,
+} from '../../../../../plugins/maps/public/selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { RenderToolTipContent } from '../../../../../plugins/maps/public/layers/tooltips/tooltip_property';

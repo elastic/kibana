@@ -7,10 +7,7 @@
 import { connect } from 'react-redux';
 import { DrawControl } from './draw_control';
 import { updateDrawState } from '../../../../actions/map_actions';
-import {
-  getDrawState,
-  isDrawingFilter,
-} from '../../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+import { getDrawState, isDrawingFilter } from '../../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {

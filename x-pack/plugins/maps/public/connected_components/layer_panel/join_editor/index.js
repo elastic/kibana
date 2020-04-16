@@ -9,7 +9,7 @@ import { JoinEditor } from './view';
 import {
   getSelectedLayer,
   getSelectedLayerJoinDescriptors,
-} from '../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+} from '../../../selectors/map_selectors';
 import { setJoinsForLayer } from '../../../actions/map_actions';
 
 function mapDispatchToProps(dispatch) {

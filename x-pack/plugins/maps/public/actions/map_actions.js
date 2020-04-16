@@ -19,7 +19,7 @@ import {
   getOpenTooltips,
   getQuery,
   getDataRequestDescriptor,
-} from '../../../../legacy/plugins/maps/public/selectors/map_selectors';
+} from '../selectors/map_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FLYOUT_STATE } from '../reducers/ui';
 import {

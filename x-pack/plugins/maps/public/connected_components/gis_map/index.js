@@ -9,10 +9,7 @@ import { GisMap } from './view';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { exitFullScreen } from '../../actions/ui_actions';
-import {
-  getFlyoutDisplay,
-  getIsFullScreen,
-} from '../../../../../legacy/plugins/maps/public/selectors/ui_selectors';
+import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
 import { triggerRefreshTimer, cancelAllInFlightRequests } from '../../actions/map_actions';
 import {
   areLayersLoaded,
@@ -20,7 +17,7 @@ import {
   getMapInitError,
   getQueryableUniqueIndexPatternIds,
   isToolbarOverlayHidden,
-} from '../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+} from '../../selectors/map_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getCoreChrome } from '../../kibana_services';
 

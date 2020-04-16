@@ -17,7 +17,7 @@ import {
   getOpenTooltips,
   getHasLockedTooltips,
   isDrawingFilter,
-} from '../../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+} from '../../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {

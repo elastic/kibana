@@ -10,10 +10,7 @@ import { TOCEntry } from './view';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FLYOUT_STATE } from '../../../../../reducers/ui';
 import { updateFlyout, hideTOCDetails, showTOCDetails } from '../../../../../actions/ui_actions';
-import {
-  getIsReadOnly,
-  getOpenTOCDetails,
-} from '../../../../../../../../legacy/plugins/maps/public/selectors/ui_selectors';
+import { getIsReadOnly, getOpenTOCDetails } from '../../../../../selectors/ui_selectors';
 import {
   fitToLayerExtent,
   setSelectedLayer,
@@ -27,7 +24,7 @@ import {
   hasDirtyState,
   getSelectedLayer,
   isUsingSearch,
-} from '../../../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+} from '../../../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}, ownProps) {
   return {

@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { LayerSettings } from './layer_settings';
-import { getSelectedLayer } from '../../../../../../legacy/plugins/maps/public/selectors/map_selectors';
+import { getSelectedLayer } from '../../../selectors/map_selectors';
 import {
   updateLayerLabel,
   updateLayerMaxZoom,

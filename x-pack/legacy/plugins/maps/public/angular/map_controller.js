@@ -50,14 +50,14 @@ import {
   setIsLayerTOCOpen,
   setOpenTOCDetails,
 } from '../../../../../plugins/maps/public/actions/ui_actions';
-import { getIsFullScreen } from '../selectors/ui_selectors';
+import { getIsFullScreen } from '../../../../../plugins/maps/public/selectors/ui_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util';
 import {
   getQueryableUniqueIndexPatternIds,
   hasDirtyState,
   getLayerListRaw,
-} from '../selectors/map_selectors';
+} from '../../../../../plugins/maps/public/selectors/map_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { getInitialLayers } from './get_initial_layers';
