@@ -35,6 +35,12 @@ export interface DrilldownDefinition<
   id: string;
 
   /**
+   * Determines the display order of the drilldowns in the flyout picker.
+   * Higher numbers are displayed first.
+   */
+  order?: number;
+
+  /**
    * Function that returns default config for this drilldown.
    */
   createConfig: ActionFactoryDefinition<

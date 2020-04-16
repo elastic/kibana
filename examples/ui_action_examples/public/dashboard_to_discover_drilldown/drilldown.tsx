@@ -38,7 +38,7 @@ export class DashboardToDiscoverDrilldown
 
   public readonly id = DASHBOARD_TO_DISCOVER_DRILLDOWN;
 
-  public readonly order = 100;
+  public readonly order = 50;
 
   public readonly getDisplayName = () => txtGoToDiscover;
 
