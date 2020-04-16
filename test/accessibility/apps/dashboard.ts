@@ -33,6 +33,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
       await PageObjects.home.addSampleDataSet('flights');
+      await PageObjects.home.isSampleDataSetInstalled('flights');
     });
 
     after(async () => {
