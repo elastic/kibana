@@ -13,7 +13,8 @@
     "home",
     "licensing",
     "usageCollection",
-    "share"
+    "share",
+    "embeddable"
   ],
   "optionalPlugins": [
     "security",

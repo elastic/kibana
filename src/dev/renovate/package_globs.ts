@@ -26,6 +26,7 @@ import { REPO_ROOT } from '../constants';
 export const PACKAGE_GLOBS = [
   'package.json',
   'x-pack/package.json',
+  'x-pack/plugins/*/package.json',
   'x-pack/legacy/plugins/*/package.json',
   'packages/*/package.json',
   'examples/*/package.json',

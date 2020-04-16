@@ -18,6 +18,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { initManagementSection } from './application/management';
@@ -26,6 +27,7 @@ import { setDependencyCache } from './application/util/dependency_cache';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 import { registerFeature } from './register_feature';
 import { MlConfigType } from '../common/types/ml_config';
+import { registerEmbeddables } from './embeddables';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -38,9 +40,11 @@ export interface MlSetupDependencies {
   usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   home: HomePublicPluginSetup;
+  embeddable: EmbeddableSetup;
 }
 
-export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
+export class MlPlugin
+  implements Plugin<MlPluginSetup, MlPluginStart, MlSetupDependencies, MlStartDependencies> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   setup(core: CoreSetup<MlStartDependencies, MlPluginStart>, pluginsSetup: MlSetupDependencies) {
@@ -56,6 +60,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { renderApp } = await import('./application/app');
+
         return renderApp(
           coreStart,
           {
@@ -68,6 +73,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
             mlConfig,
+            embeddable: pluginsSetup.embeddable,
           },
           {
             element: params.element,
@@ -82,6 +88,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     registerFeature(pluginsSetup.home);
 
     initManagementSection(pluginsSetup, core);
+
+    core.getStartServices().then(([coreStart]) => {
+      registerEmbeddables(pluginsSetup, coreStart.overlays);
+    });
+
     return {};
   }
 
