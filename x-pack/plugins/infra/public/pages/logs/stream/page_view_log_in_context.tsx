@@ -103,9 +103,6 @@ export const PageViewLogInContext: React.FC = () => {
                 reportVisibleInterval={noop}
                 loadNewerItems={noop}
                 reloadItems={noop}
-                setFlyoutItem={noop}
-                setFlyoutVisibility={noop}
-                setContextEntry={noop}
                 highlightedItem={contextEntry.id}
                 currentHighlightKey={null}
                 startDateExpression={''}
