@@ -30,7 +30,7 @@ const testPipeline = {
 describe('Pipeline Editor', () => {
   it('provides the same data out it got in if nothing changes', async () => {
     const onDone = jest.fn();
-    const { clickDoneButton } = await setup({ pipeline: testPipeline as any, onDone });
+    const { clickDoneButton } = await setup({ pipeline: testPipeline as any, onSubmit: onDone });
     await clickDoneButton();
     expect(onDone).toHaveBeenCalledWith(testPipeline);
   });

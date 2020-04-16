@@ -23,12 +23,11 @@ const convertToPipelineEditorProcessor = (processor: Processor): PipelineEditorP
   const onFailure = options.on_failure?.length
     ? convertProcessors(options.on_failure)
     : (options.on_failure as PipelineEditorProcessor[] | undefined);
-  return {
-    id: uuid.v4(),
+  return createPipelineEditorProcessor({
     type,
     onFailure,
     options,
-  };
+  });
 };
 
 const convertProcessors = (processors: Processor[]) => {
@@ -39,6 +38,15 @@ const convertProcessors = (processors: Processor[]) => {
   }
   return convertedProcessors;
 };
+
+export const createPipelineEditorProcessor = (args: {
+  type: string;
+  options: any;
+  onFailure?: PipelineEditorProcessor[];
+}) => ({
+  id: uuid.v4(),
+  ...args,
+});
 
 export const prepareDataIn = (pipeline: Pipeline): DataIn => {
   return {

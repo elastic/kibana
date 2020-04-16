@@ -6,9 +6,12 @@
 
 import { ESCommonProcessorOptions } from '../../../common/types';
 
+export type ProcessorOptions<CustomProcessorOptions = {}> = ESCommonProcessorOptions &
+  CustomProcessorOptions;
+
 export interface PipelineEditorProcessor<CustomProcessorOptions = {}> {
   readonly id: string;
   type: string;
-  options: ESCommonProcessorOptions & CustomProcessorOptions;
+  options: ProcessorOptions<CustomProcessorOptions>;
   onFailure?: PipelineEditorProcessor[];
 }

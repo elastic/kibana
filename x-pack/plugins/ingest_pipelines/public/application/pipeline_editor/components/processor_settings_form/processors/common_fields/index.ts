@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FormFlyout } from './form_flyout';
-export { ProcessorSettingsForm } from './processor_settings_form';
+export { ProcessorTypeField } from './processor_type_field';
+
+export { CommonProcessorFields } from './common_processor_fields';

@@ -54,9 +54,9 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
 
         <EuiSpacer size="l" />
 
-        {/* Temporary home for the pipeline editor */}
+        {/* TODO: Temporary home for the pipeline editor, move it somewhere else */}
         <PipelineEditor
-          onDone={() => {
+          onSubmit={() => {
             // TODO do something here
           }}
           pipeline={{
