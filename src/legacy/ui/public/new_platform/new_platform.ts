@@ -22,6 +22,7 @@ import { IScope } from 'angular';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
+import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { DashboardStart } from '../../../../plugins/dashboard/public';
 import { setSetupServices, setStartServices } from './set_services';
 import {
@@ -93,6 +94,7 @@ export interface PluginsSetup {
   savedObjectsManagement: SavedObjectsManagementPluginSetup;
   mapsLegacy: MapsLegacyPluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
+  visTypeXy?: VisTypeXyPluginSetup;
 }
 
 export interface PluginsStart {
