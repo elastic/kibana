@@ -7,7 +7,7 @@
 jest.mock('../../../../../plugins/maps/public/meta', () => {
   return {};
 });
-jest.mock('../kibana_services');
+jest.mock('../../../../../plugins/maps/public/kibana_services');
 
 import { getInitialLayers } from './get_initial_layers';
 
@@ -15,7 +15,8 @@ const layerListNotProvided = undefined;
 
 describe('Saved object has layer list', () => {
   beforeEach(() => {
-    require('../kibana_services').getInjectedVarFunc = () => jest.fn();
+    require('../../../../../plugins/maps/public/kibana_services').getInjectedVarFunc = () =>
+      jest.fn();
   });
 
   it('Should get initial layers from saved object', () => {
@@ -65,7 +66,7 @@ describe('EMS is enabled', () => {
     require('../../../../../plugins/maps/public/meta').getKibanaTileMap = () => {
       return null;
     };
-    require('../kibana_services').getInjectedVarFunc = () => key => {
+    require('../../../../../plugins/maps/public/kibana_services').getInjectedVarFunc = () => key => {
       switch (key) {
         case 'emsTileLayerId':
           return {
@@ -110,7 +111,7 @@ describe('EMS is not enabled', () => {
       return null;
     };
 
-    require('../kibana_services').getInjectedVarFunc = () => key => {
+    require('../../../../../plugins/maps/public/kibana_services').getInjectedVarFunc = () => key => {
       switch (key) {
         case 'isEmsEnabled':
           return false;
