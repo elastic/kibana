@@ -17,34 +17,39 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { VisParams } from './timelion_vis_fn';
-import { TimelionInterval, TimelionExpressionInput } from './components';
+import { RangeOption, SwitchOption } from '../../charts/public';
+import { MarkdownVisParams } from './types';
 
-export type TimelionOptionsProps = VisOptionsProps<VisParams>;
-
-function TimelionOptions({ stateParams, setValue, setValidity }: TimelionOptionsProps) {
-  const setInterval = useCallback((value: VisParams['interval']) => setValue('interval', value), [
-    setValue,
-  ]);
-  const setExpressionInput = useCallback(
-    (value: VisParams['expression']) => setValue('expression', value),
-    [setValue]
-  );
-
+function SettingsOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
   return (
-    <EuiPanel className="visEditorSidebar__timelionOptions" paddingSize="s">
-      <TimelionInterval
-        value={stateParams.interval}
-        setValue={setInterval}
-        setValidity={setValidity}
+    <EuiPanel paddingSize="s">
+      <RangeOption
+        label={i18n.translate('visTypeMarkdown.params.fontSizeLabel', {
+          defaultMessage: 'Base font size in points',
+        })}
+        max={36}
+        min={8}
+        paramName="fontSize"
+        showInput
+        value={stateParams.fontSize}
+        setValue={setValue}
       />
-      <TimelionExpressionInput value={stateParams.expression} setValue={setExpressionInput} />
+
+      <SwitchOption
+        label={i18n.translate('visTypeMarkdown.params.openLinksLabel', {
+          defaultMessage: 'Open links in new tab',
+        })}
+        paramName="openLinksInNewTab"
+        value={stateParams.openLinksInNewTab}
+        setValue={setValue}
+      />
     </EuiPanel>
   );
 }
 
-export { TimelionOptions };
+export { SettingsOptions };
