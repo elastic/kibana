@@ -17,36 +17,11 @@
  * under the License.
  */
 
-import { getFieldFormat } from '../get_field_format';
+import { get } from 'lodash';
+import { IIndexPattern } from '../../../../../../../../../../plugins/data/public';
 
-const indexPattern = {
-  fieldFormatMap: {
-    Elastic: {
-      type: {
-        title: 'string',
-      },
-    },
-  },
-};
-
-describe('getFieldFormat', () => {
-  it('should handle no arguments', () => {
-    expect(getFieldFormat()).toEqual('');
-  });
-
-  it('should handle no field name', () => {
-    expect(getFieldFormat(indexPattern)).toEqual('');
-  });
-
-  it('should handle empty name', () => {
-    expect(getFieldFormat(indexPattern, '')).toEqual('');
-  });
-
-  it('should handle undefined field name', () => {
-    expect(getFieldFormat(indexPattern, 'none')).toEqual(undefined);
-  });
-
-  it('should retrieve field format', () => {
-    expect(getFieldFormat(indexPattern, 'Elastic')).toEqual('string');
-  });
-});
+export function getFieldFormat(indexPattern?: IIndexPattern, fieldName?: string): string {
+  return indexPattern && fieldName
+    ? get(indexPattern, ['fieldFormatMap', fieldName, 'type', 'title'])
+    : '';
+}

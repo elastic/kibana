@@ -18,26 +18,33 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { createSelector } from 'reselect';
-
+import { IndexPatternField, IIndexPattern } from '../../../../../../../../../plugins/data/public';
 import { Table } from './components/table';
 import { getFieldFormat } from './lib';
+import { IndexedFieldItem } from './types';
 
-export class IndexedFieldsTable extends Component {
-  static propTypes = {
-    fields: PropTypes.array.isRequired,
-    indexPattern: PropTypes.object.isRequired,
-    fieldFilter: PropTypes.string,
-    indexedFieldTypeFilter: PropTypes.string,
-    helpers: PropTypes.shape({
-      redirectToRoute: PropTypes.func.isRequired,
-      getFieldInfo: PropTypes.func,
-    }),
-    fieldWildcardMatcher: PropTypes.func.isRequired,
+interface IndexedFieldsTableProps {
+  fields: IndexPatternField[];
+  indexPattern: IIndexPattern;
+  fieldFilter?: string;
+  indexedFieldTypeFilter?: string;
+  helpers: {
+    redirectToRoute: (obj: any) => void;
+    getFieldInfo: (indexPattern: IIndexPattern, field: string) => string[];
   };
+  fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
+}
 
-  constructor(props) {
+interface IndexedFieldsTableState {
+  fields: IndexedFieldItem[];
+}
+
+export class IndexedFieldsTable extends Component<
+  IndexedFieldsTableProps,
+  IndexedFieldsTableState
+> {
+  constructor(props: IndexedFieldsTableProps) {
     super(props);
 
     this.state = {
@@ -45,7 +52,7 @@ export class IndexedFieldsTable extends Component {
     };
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: IndexedFieldsTableProps) {
     if (nextProps.fields !== this.props.fields) {
       this.setState({
         fields: this.mapFields(nextProps.fields),
@@ -53,10 +60,11 @@ export class IndexedFieldsTable extends Component {
     }
   }
 
-  mapFields(fields) {
+  mapFields(fields: IndexPatternField[]): IndexedFieldItem[] {
     const { indexPattern, fieldWildcardMatcher, helpers } = this.props;
     const sourceFilters =
-      indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value);
+      indexPattern.sourceFilters &&
+      indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
     return (
@@ -76,9 +84,10 @@ export class IndexedFieldsTable extends Component {
   }
 
   getFilteredFields = createSelector(
-    state => state.fields,
-    (state, props) => props.fieldFilter,
-    (state, props) => props.indexedFieldTypeFilter,
+    (state: IndexedFieldsTableState) => state.fields,
+    (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) => props.fieldFilter,
+    (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) =>
+      props.indexedFieldTypeFilter,
     (fields, fieldFilter, indexedFieldTypeFilter) => {
       if (fieldFilter) {
         const normalizedFieldFilter = fieldFilter.toLowerCase();

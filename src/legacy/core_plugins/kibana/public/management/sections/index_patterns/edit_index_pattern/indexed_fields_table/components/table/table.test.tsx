@@ -19,31 +19,53 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-
-import { Table } from '../table';
+import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
+import { IndexedFieldItem } from '../../types';
+import { Table } from './table';
 
 const indexPattern = {
   timeFieldName: 'timestamp',
-};
+} as IIndexPattern;
 
-const items = [
-  { name: 'Elastic', displayName: 'Elastic', searchable: true, info: {} },
-  { name: 'timestamp', displayName: 'timestamp', type: 'date', info: {} },
-  { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict', info: {} },
+const items: IndexedFieldItem[] = [
+  {
+    name: 'Elastic',
+    displayName: 'Elastic',
+    searchable: true,
+    info: [],
+    type: 'name',
+    excluded: false,
+    format: '',
+  },
+  {
+    name: 'timestamp',
+    displayName: 'timestamp',
+    type: 'date',
+    info: [],
+    excluded: false,
+    format: 'YYYY-MM-DD',
+  },
+  {
+    name: 'conflictingField',
+    displayName: 'conflictingField',
+    type: 'conflict',
+    info: [],
+    excluded: false,
+    format: '',
+  },
 ];
 
 describe('Table', () => {
-  it('should render normally', async () => {
-    const component = shallowWithI18nProvider(
+  test('should render normally', () => {
+    const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     expect(component).toMatchSnapshot();
   });
 
-  it('should render normal field name', async () => {
-    const component = shallowWithI18nProvider(
+  test('should render normal field name', () => {
+    const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
@@ -51,8 +73,8 @@ describe('Table', () => {
     expect(tableCell).toMatchSnapshot();
   });
 
-  it('should render timestamp field name', async () => {
-    const component = shallowWithI18nProvider(
+  test('should render timestamp field name', () => {
+    const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
@@ -60,8 +82,8 @@ describe('Table', () => {
     expect(tableCell).toMatchSnapshot();
   });
 
-  it('should render the boolean template (true)', async () => {
-    const component = shallowWithI18nProvider(
+  test('should render the boolean template (true)', () => {
+    const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
@@ -69,8 +91,8 @@ describe('Table', () => {
     expect(tableCell).toMatchSnapshot();
   });
 
-  it('should render the boolean template (false)', async () => {
-    const component = shallowWithI18nProvider(
+  test('should render the boolean template (false)', () => {
+    const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
@@ -78,8 +100,8 @@ describe('Table', () => {
     expect(tableCell).toMatchSnapshot();
   });
 
-  it('should render normal type', async () => {
-    const component = shallowWithI18nProvider(
+  test('should render normal type', () => {
+    const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
@@ -87,8 +109,8 @@ describe('Table', () => {
     expect(tableCell).toMatchSnapshot();
   });
 
-  it('should render conflicting type', async () => {
-    const component = shallowWithI18nProvider(
+  test('should render conflicting type', () => {
+    const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
@@ -96,10 +118,10 @@ describe('Table', () => {
     expect(tableCell).toMatchSnapshot();
   });
 
-  it('should allow edits', () => {
+  test('should allow edits', () => {
     const editField = jest.fn();
 
-    const component = shallowWithI18nProvider(
+    const component = shallow(
       <Table indexPattern={indexPattern} items={items} editField={editField} />
     );
 
