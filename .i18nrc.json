@@ -8,6 +8,7 @@
     "data": "src/plugins/data",
     "embeddableApi": "src/plugins/embeddable",
     "embeddableExamples": "examples/embeddable_examples",
+    "uiActionsExamples": "examples/ui_action_examples",
     "share": "src/plugins/share",
     "home": "src/plugins/home",
     "charts": "src/plugins/charts",

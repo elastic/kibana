@@ -17,13 +17,26 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from '../../../src/core/public';
-import { UiActionsSetup } from '../../../src/plugins/ui_actions/public';
+import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
+import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import { DrilldownsSetup, DrilldownsStart } from '../../../x-pack/plugins/drilldowns/public';
 import { createHelloWorldAction, ACTION_HELLO_WORLD } from './hello_world_action';
 import { helloWorldTrigger, HELLO_WORLD_TRIGGER_ID } from './hello_world_trigger';
+import { DashboardToDiscoverDrilldown } from './dashboard_to_discover_drilldown';
 
 interface UiActionExamplesSetupDependencies {
   uiActions: UiActionsSetup;
+  drilldowns: DrilldownsSetup;
+}
+
+interface UiActionExamplesStartDependencies {
+  uiActions: UiActionsStart;
+  drilldowns: DrilldownsStart;
+}
+
+export interface StartDeps {
+  core: CoreStart;
+  plugins: UiActionExamplesStartDependencies;
 }
 
 declare module '../../../src/plugins/ui_actions/public' {
@@ -37,8 +50,16 @@ declare module '../../../src/plugins/ui_actions/public' {
 }
 
 export class UiActionExamplesPlugin
-  implements Plugin<void, void, UiActionExamplesSetupDependencies> {
-  public setup(core: CoreSetup, { uiActions }: UiActionExamplesSetupDependencies) {
+  implements
+    Plugin<void, void, UiActionExamplesSetupDependencies, UiActionExamplesStartDependencies> {
+  private startDeps?: StartDeps;
+
+  private readonly getStartServicesOrDie = (): StartDeps => {
+    if (!this.startDeps) throw new Error('Start dependencies not ready.');
+    return this.startDeps;
+  };
+
+  public setup(core: CoreSetup, { uiActions, drilldowns }: UiActionExamplesSetupDependencies) {
     uiActions.registerTrigger(helloWorldTrigger);
 
     const helloWorldAction = createHelloWorldAction(async () => ({
@@ -47,8 +68,17 @@ export class UiActionExamplesPlugin
 
     uiActions.registerAction(helloWorldAction);
     uiActions.addTriggerAction(helloWorldTrigger.id, helloWorldAction);
+
+    drilldowns.registerDrilldown(
+      new DashboardToDiscoverDrilldown({
+        start: this.getStartServicesOrDie,
+      })
+    );
   }
 
-  public start() {}
+  public start(core: CoreStart, plugins: UiActionExamplesStartDependencies) {
+    this.startDeps = { core, plugins };
+  }
+
   public stop() {}
 }
