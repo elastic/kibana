@@ -72,6 +72,8 @@ Canvas::
 * Updates esdocs datasource {pull}59512[#59512]
 * Improves expression autocomplete {pull}52035[#52035]
 Dashboard::
+* Use Elasticsearch `_async_search` instead of `_search` when it is available (excluding TSVB, Timelion, and Vega) {pull}59224[#59224}
+* When queries run more than 10 seconds, show a pop-up to allow users to run the queries beyond the configured timeout or cancel the queries {pull}60706[#60706]
 * Dashboard/add panel flow {pull}59918[#59918]
 * Moves the "Create New" button in add panel flyout to the top to make it more visible to the user {pull}56428[#56428]
 Lens and visualizations::
@@ -178,8 +180,9 @@ SIEM::
 * ServiceNow action improvements {pull}60052[#60052]
 Security::
 * Uses links instead of click handlers when switching spaces {pull}57730[#57730]
-* Adds support for deprecated roles {pull}57209[#57209]
-* Supports for sub-feature privileges {pull}60563[#60563]
+* Introduce a login selector screen when multiple auth providers are enabled {pull}53010[#53010]
+* Warn when using deprecated roles {pull}57209[#57209]
+* Support for subfeature privileges {pull}60563[#60563]
 Telemetry::
 * Application Usage implemented in @kbn/analytics {pull}58401[#58401]
 * Server-side Migration to NP {pull}60485[#60485]
@@ -327,8 +330,7 @@ Visualizations::
 [[deprecation-7.7.0]]
 === Deprecations
 Monitoring::
-* Changes all configs to `monitoring.*` {pull}54919[#54919]
-* Changes all configs to `monitoring.*` {pull}56215[#56215]
+* Changes all configs to `monitoring.*` {pull}54919[#54919], {pull}56215[#56215]
 Platform::
 * Migrates Vega and Graph configs to new platform {pull}57011[#57011]
 
