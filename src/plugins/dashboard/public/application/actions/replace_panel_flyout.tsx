@@ -28,6 +28,7 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   EmbeddableStart,
+  SavedObjectEmbeddableInput,
 } from '../../embeddable_plugin';
 
 interface Props {
@@ -66,7 +67,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     });
   };
 
-  public onReplacePanel = async (id: string, type: string, name: string) => {
+  public onReplacePanel = async (savedObjectId: string, type: string, name: string) => {
     const originalPanels = this.props.container.getInput().panels;
     const filteredPanels = { ...originalPanels };
 
@@ -76,7 +77,9 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     const nny = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.y;
 
     // add the new view
-    const newObj = await this.props.container.addSavedObjectEmbeddable(type, id);
+    const newObj = await this.props.container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, {
+      savedObjectId,
+    });
 
     const finalPanels = _.cloneDeep(this.props.container.getInput().panels);
     (finalPanels[newObj.id] as DashboardPanelState).gridData.w = nnw;
