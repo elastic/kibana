@@ -10,7 +10,7 @@ import { npSetup } from 'ui/new_platform';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { FeatureCatalogueCategory } from '../../../../../../src/plugins/home/public';
 // @ts-ignore
-import { PLUGIN } from '../../common/constants';
+import { PLUGIN } from '../../../../../plugins/logstash/common/constants';
 
 const {
   plugins: { home },
