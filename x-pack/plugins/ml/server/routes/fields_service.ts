@@ -35,6 +35,8 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/fields_service/field_cardinality Get cardinality of fields
    * @apiName GetCardinalityOfFields
    * @apiDescription Returns the cardinality of one or more fields. Returns an Object whose keys are the names of the fields, with values equal to the cardinality of the field
+   *
+   * @apiSchema (body) getCardinalityOfFieldsSchema
    */
   router.post(
     {
@@ -63,6 +65,8 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/fields_service/time_field_range Get time field range
    * @apiName GetTimeFieldRange
    * @apiDescription Returns the timefield range for the given index
+   *
+   * @apiSchema (body) getTimeFieldRangeSchema
    */
   router.post(
     {
