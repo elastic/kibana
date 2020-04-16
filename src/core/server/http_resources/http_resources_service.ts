@@ -36,7 +36,6 @@ import {
   HttpResources,
   HttpResourcesResponseOptions,
   HttpResourcesRenderOptions,
-  StaticHttpResourcesRenderOptions,
   HttpResourcesRequestHandler,
   HttpResourcesServiceToolkit,
 } from './types';
@@ -63,33 +62,18 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
   stop() {}
 
   private createRegistrar(deps: SetupDeps, router: IRouter): HttpResources {
-    const register = <P, Q, B>(
-      route: RouteConfig<P, Q, B, 'get'>,
-      handler: HttpResourcesRequestHandler<P, Q, B>
-    ) => {
-      return router.get<P, Q, B>(route, (context, request, response) => {
-        return handler(context, request, {
-          ...response,
-          ...this.createResponseToolkit(deps, context, request, response),
-        });
-      });
-    };
-
     return {
-      registerCoreApp: (options: StaticHttpResourcesRenderOptions) => {
-        register({ path: options.path, validate: false }, async (context, request, response) => {
-          return response.renderCoreApp({ headers: options.headers });
+      register: <P, Q, B>(
+        route: RouteConfig<P, Q, B, 'get'>,
+        handler: HttpResourcesRequestHandler<P, Q, B>
+      ) => {
+        return router.get<P, Q, B>(route, (context, request, response) => {
+          return handler(context, request, {
+            ...response,
+            ...this.createResponseToolkit(deps, context, request, response),
+          });
         });
       },
-      registerAnonymousCoreApp: (options: StaticHttpResourcesRenderOptions) => {
-        register(
-          { path: options.path, validate: false, options: { authRequired: false } },
-          async (context, request, response) => {
-            return response.renderAnonymousCoreApp({ headers: options.headers });
-          }
-        );
-      },
-      register,
     };
   }
 

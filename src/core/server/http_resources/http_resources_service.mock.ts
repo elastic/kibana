@@ -20,8 +20,6 @@ import { httpServerMock } from '../http/http_server.mocks';
 import { HttpResources, HttpResourcesServiceToolkit } from './types';
 
 const createHttpResourcesMock = (): jest.Mocked<HttpResources> => ({
-  registerCoreApp: jest.fn(),
-  registerAnonymousCoreApp: jest.fn(),
   register: jest.fn(),
 });
 

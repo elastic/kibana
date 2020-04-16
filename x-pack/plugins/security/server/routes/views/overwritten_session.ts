@@ -10,5 +10,8 @@ import { RouteDefinitionParams } from '..';
  * Defines routes required for the Overwritten Session view.
  */
 export function defineOverwrittenSessionRoutes({ httpResources }: RouteDefinitionParams) {
-  httpResources.registerCoreApp({ path: '/security/overwritten_session' });
+  httpResources.register(
+    { path: '/security/overwritten_session', validate: false },
+    (context, req, res) => res.renderCoreApp()
+  );
 }

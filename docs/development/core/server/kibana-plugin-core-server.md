@@ -180,7 +180,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SessionStorage](./kibana-plugin-core-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageCookieOptions](./kibana-plugin-core-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-core-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
-|  [StaticHttpResourcesRenderOptions](./kibana-plugin-core-server.statichttpresourcesrenderoptions.md) | Options for static HttpResources declaration |
 |  [StatusServiceSetup](./kibana-plugin-core-server.statusservicesetup.md) | API for accessing status of Core and this plugin's dependencies as well as for customizing this plugin's status. |
 |  [StringValidationRegex](./kibana-plugin-core-server.stringvalidationregex.md) | StringValidation with regex object |
 |  [StringValidationRegexString](./kibana-plugin-core-server.stringvalidationregexstring.md) | StringValidation as regex string |

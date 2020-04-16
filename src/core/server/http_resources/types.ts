@@ -28,14 +28,6 @@ import {
 } from '../http';
 
 /**
- * Options for static HttpResources declaration
- * @public
- */
-export interface StaticHttpResourcesRenderOptions extends HttpResourcesRenderOptions {
-  path: string;
-}
-
-/**
  * Allows to configure HTTP response parameters
  * @public
  */
@@ -116,10 +108,6 @@ export interface InternalHttpResourcesSetup {
  * @public
  */
 export interface HttpResources {
-  /** To register a route handler rendering HTML bootstrapping Kibana application. */
-  registerCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
-  /** To register a route handler rendering HTML bootstrapping Kibana application without retrieving user-specific information. */
-  registerAnonymousCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
   /** To register a route handler executing passed function to form response. */
   register: <P, Q, B>(
     route: RouteConfig<P, Q, B, 'get'>,

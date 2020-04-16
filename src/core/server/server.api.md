@@ -866,8 +866,6 @@ export type Headers = {
 // @public
 export interface HttpResources {
     register: <P, Q, B>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B>) => void;
-    registerAnonymousCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
-    registerCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
 }
 
 // @public
@@ -2396,12 +2394,6 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
 
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
-
-// @public
-export interface StaticHttpResourcesRenderOptions extends HttpResourcesRenderOptions {
-    // (undocumented)
-    path: string;
-}
 
 // @public
 export interface StatusServiceSetup {

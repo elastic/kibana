@@ -20,7 +20,10 @@ describe('View routes', () => {
     expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
       .toMatchInlineSnapshot(`
       Array [
+        "/security/account",
         "/security/logged_out",
+        "/logout",
+        "/security/overwritten_session",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(
@@ -40,7 +43,10 @@ describe('View routes', () => {
       .toMatchInlineSnapshot(`
       Array [
         "/login",
+        "/security/account",
         "/security/logged_out",
+        "/logout",
+        "/security/overwritten_session",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
@@ -62,7 +68,10 @@ describe('View routes', () => {
       .toMatchInlineSnapshot(`
       Array [
         "/login",
+        "/security/account",
         "/security/logged_out",
+        "/logout",
+        "/security/overwritten_session",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
@@ -84,7 +93,10 @@ describe('View routes', () => {
       .toMatchInlineSnapshot(`
       Array [
         "/login",
+        "/security/account",
         "/security/logged_out",
+        "/logout",
+        "/security/overwritten_session",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`

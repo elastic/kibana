@@ -10,5 +10,8 @@ import { RouteDefinitionParams } from '..';
  * Defines routes required for the Logout out view.
  */
 export function defineLogoutRoutes({ httpResources }: RouteDefinitionParams) {
-  httpResources.registerAnonymousCoreApp({ path: '/logout' });
+  httpResources.register(
+    { path: '/logout', validate: false, options: { authRequired: false } },
+    (context, request, response) => response.renderAnonymousCoreApp()
+  );
 }

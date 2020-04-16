@@ -35,21 +35,6 @@ describe('http resources service', () => {
       await root.shutdown();
     });
 
-    describe('registerAnonymousCoreApp', () => {
-      it('renders core application', async () => {
-        const { http, httpResources } = await root.setup();
-
-        const router = http.createRouter('');
-        const resources = httpResources.createRegistrar(router);
-        resources.registerAnonymousCoreApp({ path: '/render-anon-core' });
-
-        await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-anon-core').expect(200);
-
-        expect(response.text.length).toBeGreaterThan(0);
-      });
-    });
-
     describe('renderAnonymousCoreApp', () => {
       it('renders core application', async () => {
         const { http, httpResources } = await root.setup();

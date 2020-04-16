@@ -17,6 +17,4 @@ export interface HttpResources
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [register](./kibana-plugin-core-server.httpresources.register.md) | <code>&lt;P, Q, B&gt;(route: RouteConfig&lt;P, Q, B, 'get'&gt;, handler: HttpResourcesRequestHandler&lt;P, Q, B&gt;) =&gt; void</code> | To register a route handler executing passed function to form response. |
-|  [registerAnonymousCoreApp](./kibana-plugin-core-server.httpresources.registeranonymouscoreapp.md) | <code>(route: StaticHttpResourcesRenderOptions) =&gt; void</code> | To register a route handler rendering HTML bootstrapping Kibana application without retrieving user-specific information. |
-|  [registerCoreApp](./kibana-plugin-core-server.httpresources.registercoreapp.md) | <code>(route: StaticHttpResourcesRenderOptions) =&gt; void</code> | To register a route handler rendering HTML bootstrapping Kibana application. |
 
