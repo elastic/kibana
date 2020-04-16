@@ -29,8 +29,9 @@ export class MapsLegacyLicensing
       mapsLegacy: { serviceSettings },
     } = plugins;
     if (licensing) {
-      licensing.license$.subscribe(({ uid, isActive }: { uid: string; isActive: boolean }) => {
-        if (isActive) {
+      licensing.license$.subscribe(license => {
+        const { uid, isActive }: { uid: string; isActive: boolean } = license;
+        if (isActive && license.hasAtLeast('basic')) {
           serviceSettings.setQueryParams({ license: uid });
           serviceSettings.disableZoomMessage();
         } else {
