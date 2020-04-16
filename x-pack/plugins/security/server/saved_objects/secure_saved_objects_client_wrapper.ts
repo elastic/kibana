@@ -279,7 +279,9 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       const _a = a.toLowerCase();
       const _b = b.toLowerCase();
       if (_a === '?') {
-        return 1;
+        return 1; // make sure '?' is always at the end of the list
+      } else if (_b === '?') {
+        return -1; // make sure '?' is always at the end of the list
       } else if (_a < _b) {
         return -1;
       } else if (_a > _b) {

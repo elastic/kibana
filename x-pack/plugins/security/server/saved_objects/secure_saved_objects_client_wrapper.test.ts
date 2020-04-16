@@ -398,7 +398,7 @@ describe('#bulkCreate', () => {
     await expectPrivilegeCheck(client.bulkCreate, { objects, options });
   });
 
-  test(`filters namespaces that the user doesn't have access to`, async () => {
+  test(`filters namespaces that the user doesn't have access to (moving '?' last)`, async () => {
     const objects = [obj1, obj2];
     await expectObjectsNamespaceFiltering(client.bulkCreate, { objects, options });
   });
@@ -433,7 +433,7 @@ describe('#bulkGet', () => {
     await expectPrivilegeCheck(client.bulkGet, { objects, options });
   });
 
-  test(`filters namespaces that the user doesn't have access to`, async () => {
+  test(`filters namespaces that the user doesn't have access to (moving '?' last)`, async () => {
     const objects = [obj1, obj2];
     await expectObjectsNamespaceFiltering(client.bulkGet, { objects, options });
   });
@@ -468,7 +468,7 @@ describe('#bulkUpdate', () => {
     await expectPrivilegeCheck(client.bulkUpdate, { objects, options });
   });
 
-  test(`filters namespaces that the user doesn't have access to`, async () => {
+  test(`filters namespaces that the user doesn't have access to (moving '?' last)`, async () => {
     const objects = [obj1, obj2];
     await expectObjectsNamespaceFiltering(client.bulkUpdate, { objects, options });
   });
@@ -499,7 +499,7 @@ describe('#create', () => {
     await expectPrivilegeCheck(client.create, { type, attributes, options });
   });
 
-  test(`filters namespaces that the user doesn't have access to`, async () => {
+  test(`filters namespaces that the user doesn't have access to (moving '?' last)`, async () => {
     await expectObjectNamespaceFiltering(client.create, { type, attributes, options });
   });
 });
@@ -562,7 +562,7 @@ describe('#find', () => {
     await expectPrivilegeCheck(client.find, { options });
   });
 
-  test(`filters namespaces that the user doesn't have access to`, async () => {
+  test(`filters namespaces that the user doesn't have access to (moving '?' last)`, async () => {
     const options = Object.freeze({ type: [type1, type2], namespace: 'some-ns' });
     await expectObjectsNamespaceFiltering(client.find, { options });
   });
@@ -593,7 +593,7 @@ describe('#get', () => {
     await expectPrivilegeCheck(client.get, { type, id, options });
   });
 
-  test(`filters namespaces that the user doesn't have access to`, async () => {
+  test(`filters namespaces that the user doesn't have access to (moving '?' last)`, async () => {
     await expectObjectNamespaceFiltering(client.get, { type, id, options });
   });
 });
@@ -691,7 +691,7 @@ describe('#update', () => {
     await expectPrivilegeCheck(client.update, { type, id, attributes, options });
   });
 
-  test(`filters namespaces that the user doesn't have access to`, async () => {
+  test(`filters namespaces that the user doesn't have access to (moving '?' last)`, async () => {
     await expectObjectNamespaceFiltering(client.update, { type, id, attributes, options });
   });
 });
