@@ -37,7 +37,7 @@ export type PreIndexedShape = {
 export type FieldFormatter = (value: string | number | null | undefined | boolean) => string;
 
 export interface ISource {
-  createDefaultLayer(options?: LayerDescriptor): ILayer;
+  createDefaultLayer(options?: Partial<LayerDescriptor>): ILayer;
   destroy(): void;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): Adapters | undefined;
@@ -69,7 +69,7 @@ export interface ISource {
 
 export class AbstractSource implements ISource {
   readonly _descriptor: SourceDescriptor;
-  readonly _inspectorAdapters?: Adapters;
+  readonly _inspectorAdapters?: Adapters | undefined;
 
   constructor(descriptor: SourceDescriptor, inspectorAdapters?: Adapters) {
     this._descriptor = descriptor;
@@ -99,7 +99,7 @@ export class AbstractSource implements ISource {
     return this._inspectorAdapters;
   }
 
-  createDefaultLayer(): ILayer {
+  createDefaultLayer(options?: Partial<LayerDescriptor>): ILayer {
     throw new Error(`Source#createDefaultLayer not implemented`);
   }
 

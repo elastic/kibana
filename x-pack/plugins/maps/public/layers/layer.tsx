@@ -329,6 +329,7 @@ export class AbstractLayer implements ILayer {
     if (this._requiresPrevSourceCleanup(mbMap)) {
       // @ts-ignore
       const mbStyle = mbMap.getStyle();
+      // @ts-ignore
       mbStyle.layers.forEach(mbLayer => {
         // @ts-ignore
         if (this.ownsMbLayerId(mbLayer.id)) {
@@ -436,7 +437,7 @@ export class AbstractLayer implements ILayer {
     return false;
   }
 
-  syncLayerWithMB() {
+  syncLayerWithMB(mbMap: unknown) {
     throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
 
