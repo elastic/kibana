@@ -25,7 +25,7 @@ interface Props {
   cancelChanges: () => void;
   hasMapSettingsChanges: boolean;
   keepChanges: () => void;
-  mapSettings: MapSettings;
+  settings: MapSettings;
   updateMapSetting: (settingKey: string, settingValue: string | number | boolean) => void;
 }
 
@@ -33,7 +33,7 @@ export function MapSettingsPanel({
   cancelChanges,
   hasMapSettingsChanges,
   keepChanges,
-  mapSettings,
+  settings,
   updateMapSetting,
 }: Props) {
   // TODO move common text like Cancel and Close to common i18n translation
@@ -60,7 +60,7 @@ export function MapSettingsPanel({
 
       <div className="mapLayerPanel__body">
         <div className="mapLayerPanel__bodyOverflow">
-          <NavigationPanel mapSettings={mapSettings} updateMapSetting={updateMapSetting} />
+          <NavigationPanel settings={settings} updateMapSetting={updateMapSetting} />
         </div>
       </div>
 

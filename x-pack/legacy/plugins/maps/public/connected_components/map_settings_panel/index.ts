@@ -14,7 +14,7 @@ import { updateFlyout } from '../../actions/ui_actions';
 
 function mapStateToProps(state = {}) {
   return {
-    mapSettings: getMapSettings(state),
+    settings: getMapSettings(state),
     hasMapSettingsChanges: hasMapSettingsChanges(state),
   };
 }

@@ -78,7 +78,7 @@ export class MBMapContainer extends React.Component {
   }
 
   _debouncedSync = _.debounce(() => {
-    if (this._isMounted) {
+    if (this._isMounted || !this.props.isMapReady) {
       if (!this.state.hasSyncedLayerList) {
         this.setState(
           {
@@ -90,6 +90,7 @@ export class MBMapContainer extends React.Component {
           }
         );
       }
+      this._syncSettings();
     }
   }, 256);
 
@@ -131,6 +132,8 @@ export class MBMapContainer extends React.Component {
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false),
         interactive: !this.props.disableInteractive,
+        maxZoom: this.props.settings.maxZoom,
+        minZoom: this.props.settings.minZoom,
       };
       const initialView = _.get(this.props.goto, 'center');
       if (initialView) {
@@ -261,17 +264,13 @@ export class MBMapContainer extends React.Component {
   };
 
   _syncMbMapWithLayerList = () => {
-    if (!this.props.isMapReady) {
-      return;
-    }
-
     removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
     this.props.layerList.forEach(layer => layer.syncLayerWithMB(this.state.mbMap));
     syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
   };
 
   _syncMbMapWithInspector = () => {
-    if (!this.props.isMapReady || !this.props.inspectorAdapters.map) {
+    if (!this.props.inspectorAdapters.map) {
       return;
     }
 
@@ -283,6 +282,15 @@ export class MBMapContainer extends React.Component {
       stats,
       style: this.state.mbMap.getStyle(),
     });
+  };
+
+  _syncSettings = () => {
+    if (this.props.settings.minZoom !== this.state.mbMap.getMinZoom()) {
+      this.state.mbMap.setMinZoom(this.props.settings.minZoom);
+    }
+    if (this.props.settings.maxZoom !== this.state.mbMap.getMaxZoom()) {
+      this.state.mbMap.setMaxZoom(this.props.settings.maxZoom);
+    }
   };
 
   render() {

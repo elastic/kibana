@@ -189,7 +189,7 @@ export function map(state = INITIAL_STATE, action) {
     case SET_MAP_SETTINGS:
       return {
         ...state,
-        settings: action.settings,
+        settings: { ...getDefaultMapSettings(), ...action.settings },
       };
     case ROLLBACK_MAP_SETTINGS:
       return state.__rollbackSettings

@@ -28,6 +28,7 @@ import {
   replaceLayerList,
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
+  setMapSettings,
 } from '../actions/map_actions';
 import {
   DEFAULT_IS_LAYER_TOC_OPEN,
@@ -362,6 +363,9 @@ app.controller(
         );
         if (mapState.filters) {
           savedObjectFilters = mapState.filters;
+        }
+        if (mapState.settings) {
+          store.dispatch(setMapSettings(mapState.settings));
         }
       }
 

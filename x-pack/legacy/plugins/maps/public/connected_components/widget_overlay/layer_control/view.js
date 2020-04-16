@@ -81,7 +81,12 @@ export function LayerControl({
     );
   }
 
+  const openMapSettingsLabel = i18n.translate('xpack.maps.layerControl.openMapSettingsLabel', {
+    defaultMessage: 'Edit map settings',
+  });
+
   let addLayer;
+  let mapSettingsBtn;
   if (!isReadOnly) {
     addLayer = (
       <Fragment>
@@ -101,11 +106,21 @@ export function LayerControl({
         </EuiButton>
       </Fragment>
     );
+    mapSettingsBtn = (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip delay="long" content={openMapSettingsLabel}>
+          <EuiButtonIcon
+            className="mapLayerControl__openMapSettingsButton"
+            onClick={openMapSettings}
+            iconType="gear"
+            color="text"
+            aria-label={openMapSettingsLabel}
+            data-test-subj="mapOpenMapSettingsButton"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
   }
-
-  const openMapSettingsLabel = i18n.translate('xpack.maps.layerControl.openMapSettingsLabel', {
-    defaultMessage: 'Edit map settings',
-  });
 
   return (
     <Fragment>
@@ -131,18 +146,7 @@ export function LayerControl({
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip delay="long" content={openMapSettingsLabel}>
-                <EuiButtonIcon
-                  className="mapLayerControl__openMapSettingsButton"
-                  onClick={openMapSettings}
-                  iconType="gear"
-                  color="text"
-                  aria-label={openMapSettingsLabel}
-                  data-test-subj="mapOpenMapSettingsButton"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
+            {mapSettingsBtn}
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 delay="long"

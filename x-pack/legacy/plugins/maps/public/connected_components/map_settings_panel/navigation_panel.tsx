@@ -14,11 +14,11 @@ import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_reac
 import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 
 interface Props {
-  mapSettings: MapSettings;
+  settings: MapSettings;
   updateMapSetting: (settingKey: string, settingValue: string | number | boolean) => void;
 }
 
-export function NavigationPanel({ mapSettings, updateMapSetting }: Props) {
+export function NavigationPanel({ settings, updateMapSetting }: Props) {
   const onZoomChange = ([min, max]) => {
     updateMapSetting('minZoom', Math.max(MIN_ZOOM, parseInt(min, 10)));
     updateMapSetting('maxZoom', Math.min(MAX_ZOOM, parseInt(max, 10)));
@@ -43,7 +43,7 @@ export function NavigationPanel({ mapSettings, updateMapSetting }: Props) {
         formRowDisplay="columnCompressed"
         min={MIN_ZOOM}
         max={MAX_ZOOM}
-        value={[mapSettings.minZoom, mapSettings.maxZoom]}
+        value={[settings.minZoom, settings.maxZoom]}
         showInput="inputWithPopover"
         showRange
         showLabels
