@@ -17,18 +17,42 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { isEqual, set, cloneDeep } from 'lodash';
+import { cloneDeep, isEqual, set } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Link } from 'react-router-dom';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
-import { DynamicSettings, DynamicSettingsType } from '../../common/runtime_types';
+import { DynamicSettings } from '../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { UptimePage, useUptimeTelemetry } from '../hooks';
 import { IndicesForm } from '../components/settings/indices_form';
-import { CertificateExpirationForm } from '../components/settings/certificate_form';
+import {
+  CertificateExpirationForm,
+  OnFieldChangeType,
+} from '../components/settings/certificate_form';
+
+const getFieldErrors = (formFields: DynamicSettings | null) => {
+  if (formFields) {
+    const blankStr = 'May not be blank';
+    const { certificatesThresholds, heartbeatIndices } = formFields;
+    const heartbeatIndErr = heartbeatIndices.match(/^\S+$/) ? '' : blankStr;
+    const errorStateErr = certificatesThresholds?.errorState ? null : blankStr;
+    const warningStateErr = certificatesThresholds?.warningState ? null : blankStr;
+    return {
+      heartbeatIndices: heartbeatIndErr,
+      certificatesThresholds:
+        errorStateErr || warningStateErr
+          ? {
+              errorState: errorStateErr,
+              warningState: warningStateErr,
+            }
+          : null,
+    };
+  }
+  return null;
+};
 
 export const SettingsPage = () => {
   const dss = useSelector(selectDynamicSettings);
@@ -52,18 +76,11 @@ export const SettingsPage = () => {
     setFormFields({ ...dss.settings });
   }
 
-  const blankStr = 'May not be blank';
-  const fieldErrors = formFields && {
-    heartbeatIndices: formFields.heartbeatIndices.match(/^\S+$/) ? null : blankStr,
-    certificatesThresholds: {
-      errorState: formFields.certificatesThresholds?.errorState ? null : blankStr,
-      warningState: formFields.certificatesThresholds?.warningState ? null : blankStr,
-    },
-  };
+  const fieldErrors = getFieldErrors(formFields);
 
   const isFormValid = !(fieldErrors && Object.values(fieldErrors).find(v => !!v));
 
-  const onChangeFormField = (field: keyof DynamicSettings, value: any) => {
+  const onChangeFormField: OnFieldChangeType = (field, value) => {
     if (formFields) {
       const newFormFields = cloneDeep(formFields);
       set(newFormFields, field, value);

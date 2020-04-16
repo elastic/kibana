@@ -18,10 +18,21 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { defaultDynamicSettings } from '../../../common/runtime_types';
+import { defaultDynamicSettings, DynamicSettings } from '../../../common/runtime_types';
 import { selectDynamicSettings } from '../../state/selectors';
 
-export const CertificateExpirationForm: React.FC = ({
+type NumStr = string | number;
+
+export type OnFieldChangeType = (field: string, value?: NumStr) => void;
+
+export interface SettingsFormProps {
+  onChange: OnFieldChangeType;
+  formFields: DynamicSettings | null;
+  fieldErrors: any;
+  isDisabled: boolean;
+}
+
+export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
   onChange,
   formFields,
   fieldErrors,
@@ -66,7 +77,7 @@ export const CertificateExpirationForm: React.FC = ({
               defaultMessage="The default value is {defaultValue}"
               values={{
                 defaultValue: (
-                  <EuiCode>{defaultDynamicSettings.certificatesThresholds.errorState}</EuiCode>
+                  <EuiCode>{defaultDynamicSettings?.certificatesThresholds?.errorState}</EuiCode>
                 ),
               }}
             />
@@ -110,12 +121,12 @@ export const CertificateExpirationForm: React.FC = ({
               defaultMessage="The default value is {defaultValue}"
               values={{
                 defaultValue: (
-                  <EuiCode>{defaultDynamicSettings.certificatesThresholds.warningState}</EuiCode>
+                  <EuiCode>{defaultDynamicSettings?.certificatesThresholds?.warningState}</EuiCode>
                 ),
               }}
             />
           }
-          isInvalid={!!fieldErrors?.certificatesThresholds.warningState}
+          isInvalid={!!fieldErrors?.certificatesThresholds?.warningState}
           label={
             <FormattedMessage
               id="xpack.uptime.sourceConfiguration.warningStateLabel"

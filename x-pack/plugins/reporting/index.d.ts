@@ -14,7 +14,12 @@ import {
 } from '../../../src/core/public';
 
 export type JobId = string;
-export type JobStatus = 'completed' | 'pending' | 'processing' | 'failed';
+export type JobStatus =
+  | 'completed'
+  | 'completed_with_warnings'
+  | 'pending'
+  | 'processing'
+  | 'failed';
 
 export type HttpService = HttpSetup;
 export type NotificationsService = NotificationsStart;

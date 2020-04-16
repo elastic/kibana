@@ -9,5 +9,7 @@
 <b>Signature:</b>
 
 ```typescript
-http: HttpServiceSetup;
+http: HttpServiceSetup & {
+        resources: HttpResources;
+    };
 ```
