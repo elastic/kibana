@@ -179,3 +179,23 @@ test('tests processing object field with no other attributes', () => {
   const mappings = generateMappings(processedFields);
   expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldMapping));
 });
+
+test('tests processing object field with enabled set to false', () => {
+  const objectFieldEnabledFalseLiteralYml = `
+- name: objectField
+  type: object
+  enabled: false
+`;
+  const objectFieldEnabledFalseMapping = {
+    properties: {
+      objectField: {
+        type: 'object',
+        enabled: false,
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldEnabledFalseLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldEnabledFalseMapping));
+});

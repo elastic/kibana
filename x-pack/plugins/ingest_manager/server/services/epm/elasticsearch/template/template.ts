@@ -89,8 +89,10 @@ export function generateMappings(fields: Field[]): Mappings {
           }
           break;
         case 'object':
-          // TODO improve
           fieldProps.type = 'object';
+          if (field.hasOwnProperty('enabled')) {
+            fieldProps.enabled = field.enabled;
+          }
           break;
         case 'array':
           // this assumes array fields were validated in an earlier step
