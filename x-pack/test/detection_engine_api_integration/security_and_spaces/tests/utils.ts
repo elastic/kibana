@@ -197,6 +197,19 @@ export const deleteAllAlerts = async (es: any): Promise<void> => {
 };
 
 /**
+ * Remove all rules statuses from the .kibana index
+ * @param es The ElasticSearch handle
+ */
+export const deleteAllRulesStatuses = async (es: any): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:siem-detection-engine-rule-status',
+    waitForCompletion: true,
+    refresh: 'wait_for',
+  });
+};
+
+/**
  * Creates the signals index for use inside of beforeEach blocks of tests
  * @param supertest The supertest client library
  */
