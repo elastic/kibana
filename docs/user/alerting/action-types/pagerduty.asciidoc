@@ -10,7 +10,7 @@ The PagerDuty action type uses the https://v2.developer.pagerduty.com/docs/event
 
 [float]
 [[pagerduty-benefits]]
-=== PagerDuty and Elastic integration benefits
+=== PagerDuty + Elastic integration benefits
 
 By integrating PagerDuty with Elastic Alerts, you can:
 
@@ -20,65 +20,44 @@ By integrating PagerDuty with Elastic Alerts, you can:
 
 [float]
 [[pagerduty-how-it-works]]
-=== How it works
+==== How it works
 
-{kib} allows you to create threshold alerts of a generic type that you can use for all your indices.
+{kib} allows you to create threshold alerts to notify you of a significant move
+in your datasets. You can create alerts of a generic type that you can use for all your indices.
 You can also create specific alerts for Observability and SIEM.
-Create an alert to be notified of a significant move in your datasets. Elastic Alerts will generate PagerDuty incidents.
-
-. To connect your {kib} alerts to PagerDuty incidents, create a PagerDuty Connector in Kibana.  You can:
-+
-* Create a connector as part of creating an alert by selecting PagerDuty in the *Actions*
-section of the alert configuration and selecting *Add new*.
-* Alternatively, create a connector by navigating to Management from the {kib} navbar and selecting
-*Alerts and Actions*. Then select the *Connectors* tab, click on the *Create connector* button, and select the PagerDuty option.
-
-. Enter a name for the connector, the API URL, and the Routing Key.
-+
-* See <<pagerduty-integration-walkthrough, Integration walkthrough>> for how to obtain
-the endpoint and key information from PagerDuty.
-* See <<pagerduty-connector-configuration, Connector configuration>> for additional details.
-
-. Save the Connector and reuse it in your alerts, as needed in the alerts’ *Actions* section.
-
-. Finalize your alert definition by selecting the PagerDuty Connector that you have created
-and by determining the value of the incident parameters according to your needs.
-Kibana is very flexible on how you can do this and allows you to determine these
-values dynamically through alert context parameters.
-See <<pagerduty-connector-configuration, Action configuration>> for more details.
+Elastic Alerts triggers a new incident on the corresponding PagerDuty service.
 
 [float]
-=== Requirements
+==== Requirements
 
-* In the kibana.yml configuration file, add the saved objects encryption setting.
+In the kibana.yml configuration file, you must add the <<general-alert-action-settings, saved objects encryption setting>>.
 This is required to encrypt parameters the must be secured, for example, PagerDuty’s integration key.
 
-* If you have security enabled:
-** To access the Elastic Alerting functionality, you need
+If you have security enabled:
+* You must have
 application privileges to access Metrics, APM, Uptime, or SIEM.
-** If you are using a self-managed deployment with security, you need
-Transport Security Layer (TLS) enabled for communication between Elasticsearch and Kibana.
+* If you are using a self-managed deployment with security, you must have
+Transport Security Layer (TLS) enabled for communication <<configuring-tls-kib-es, between Elasticsearch and Kibana>>.
 Elastic Alerts uses API keys to secure background alert checks and actions,
-and API keys require TLS on the HTTP interface.
+and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
 
 Although not a requirement, to harden the integrations security you might want to
 review the <<action-settings, Actions settings>> that are available to you.
 
 [float]
 [[pagerduty-support]]
-=== Support
-If you need help with this integration, get in touch with the Kibana team:
-* Visit https://support.elastic.co[support.elastic.co] or use
-the *Ask Elastic* option in the Kibana Help menu.
-* Select the Kibana option at https://discuss.elastic.co/[discuss.elastic.co].
+==== Support
+If you need help with this integration, get in touch with the Kibana team by visiting
+https://support.elastic.co[support.elastic.co] or by using the *Ask Elastic* option in the Kibana Help menu.
+You can also select the Kibana category at https://discuss.elastic.co/[discuss.elastic.co].
 
 [float]
 [[pagerduty-integration-walkthrough]]
-=== Integration with PagerDuty walkthrough
+==== Integration with PagerDuty walkthrough
 
 [float]
 [[pagerduty-in-pagerduty]]
-==== In PagerDuty
+===== In PagerDuty
 
 . From the *Configuration* menu, select *Services*.
 . Add an integration to a service:
@@ -89,7 +68,7 @@ Then, select the *Integrations* tab and click the *New Integration* button.
 * If you are creating a new service for your integration,
 go to
 https://support.pagerduty.com/docs/services-and-integrations#section-configuring-services-and-integrations[Configuring Services and Integrations]
-and follow the steps outlined in the *Create a New Service* section, selecting Elastic as the Integration Type in step 4.
+and follow the steps outlined in the *Create a New Service* section, selecting *Elastic* as the *Integration Type* in step 4.
 Continue with the <<pagerduty-in-elastic, In Elastic>> section once you have finished these steps.
 
 . Enter an *Integration Name* in the format Elastic-service-name (for example, Elastic-Alerting or Kibana-APM-Alerting)
@@ -107,12 +86,21 @@ image::user/alerting/images/pagerduty-integration.png[PagerDuty Integrations tab
 [[pagerduty-in-elastic]]
 ===== In Elastic
 
-. Create a PagerDuty Connector as described in <<pagerduty-how-it-works, How it works>>.
+. Create a PagerDuty Connector in Kibana.  You can:
++
+* Create a connector as part of creating an alert by selecting PagerDuty in the *Actions*
+section of the alert configuration and selecting *Add new*.
+* Alternatively, create a connector by navigating to *Management* from the {kib} navbar and selecting
+*Alerts and Actions*. Then, select the *Connectors* tab, click the *Create connector* button, and select the PagerDuty option.
 
 . Configure the connector by giving it a name and entering the API URL and Routing Key.
 +
-*See <<pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and key information from PagerDuty and
+See <<pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and key information from PagerDuty and
 <<pagerduty-connector-configuration, Connector configuration>> for additional details.
+
+. Save the Connector.
+
+. Create an alert using *Management > Alerts and Actions* or the application of your choice.
 
 . Set up an action using your PagerDuty connector, by determining:
 +
@@ -125,9 +113,10 @@ to each corresponding field. For more details on these parameters, see the
 <<pagerduty-action-configuration, Actions Configuration>> and the PagerDuty
 https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[API v2 documentation].
 
+
 [float]
 [[pagerduty-uninstall]]
-=== How to Uninstall
+==== How to uninstall
 To remove a PagerDuty connector from an alert, simply remove it
 from the *Actions* section of that alert, using the remove (x) icon.
 This will disable the integration for the particular alert.
