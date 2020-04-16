@@ -12,7 +12,7 @@ import { transformElasticToListsItems, getQueryFilterFromTypeValue } from '../ut
 
 interface GetListItemsByValuesOptions {
   listId: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsItemsIndex: string;
   type: Type;
   value: string[];
@@ -20,12 +20,12 @@ interface GetListItemsByValuesOptions {
 
 export const getListItemsByValues = async ({
   listId,
-  clusterClient,
+  dataClient,
   listsItemsIndex,
   type,
   value,
 }: GetListItemsByValuesOptions): Promise<ListsItemsSchema[]> => {
-  const response: SearchResponse<ElasticListItemReturnType> = await clusterClient.callAsCurrentUser(
+  const response: SearchResponse<ElasticListItemReturnType> = await dataClient.callAsCurrentUser(
     'search',
     {
       index: listsItemsIndex,

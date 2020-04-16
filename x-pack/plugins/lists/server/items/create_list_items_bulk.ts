@@ -18,16 +18,18 @@ interface CreateListItemsBulkOptions {
   listId: string;
   type: Type;
   value: string[];
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsItemsIndex: string;
+  user: string;
 }
 
 export const createListItemsBulk = async ({
   listId,
   type,
   value,
-  clusterClient,
+  dataClient,
   listsItemsIndex,
+  user,
 }: CreateListItemsBulkOptions): Promise<void> => {
   // It causes errors if you try to add items to bulk that do not exist within ES
   if (!value.length) {
@@ -43,6 +45,8 @@ export const createListItemsBulk = async ({
         created_at: createdAt,
         tie_breaker_id: tieBreakerId,
         updated_at: createdAt,
+        updated_by: user,
+        created_by: user,
         ...transformListItemsToElasticQuery({ type, value: singleValue }),
       };
       const createBody: CreateBulkType = { create: { _index: listsItemsIndex } };
@@ -51,7 +55,7 @@ export const createListItemsBulk = async ({
     []
   );
 
-  await clusterClient.callAsCurrentUser('bulk', {
+  await dataClient.callAsCurrentUser('bulk', {
     body,
     index: listsItemsIndex,
   });

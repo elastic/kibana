@@ -8,6 +8,7 @@ import { first } from 'rxjs/operators';
 import { Logger, PluginInitializerContext, ElasticsearchServiceSetup } from 'kibana/server';
 import { CoreSetup } from 'src/core/server';
 
+import { SecurityPluginSetup } from '../../security/server';
 import { SpacesServiceSetup } from '../../spaces/server';
 
 import { ConfigType } from './config';
@@ -21,6 +22,7 @@ export class ListsPlugin {
   private spaces: SpacesServiceSetup | undefined | null;
   private config: ConfigType | undefined | null;
   private elasticsearch: ElasticsearchServiceSetup | undefined | null;
+  private security: SecurityPluginSetup | undefined | null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -35,6 +37,7 @@ export class ListsPlugin {
       this.spaces = plugins.spaces?.spacesService;
       this.config = config;
       this.elasticsearch = core.elasticsearch;
+      this.security = plugins.security;
 
       core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
       const router = core.http.createRouter();
@@ -52,7 +55,7 @@ export class ListsPlugin {
 
   private createRouteHandlerContext = (): ContextProvider => {
     return async (context, request): ContextProviderReturn => {
-      const { spaces, config, elasticsearch } = this;
+      const { spaces, config, security, elasticsearch } = this;
       const {
         core: {
           elasticsearch: { dataClient },
@@ -62,6 +65,8 @@ export class ListsPlugin {
         throw new TypeError('Configuration is required for this plugin to operate');
       } else if (elasticsearch == null) {
         throw new TypeError('Elastic Search is required for this plugin to operate');
+      } else if (security == null) {
+        throw new TypeError('Security plugin is required for this plugin to operate');
       } else {
         return {
           getListsClient: (): ListsClient =>
@@ -70,6 +75,7 @@ export class ListsPlugin {
               spaces,
               config,
               dataClient,
+              security,
             }),
         };
       }

@@ -30,7 +30,7 @@ export const importListsItemsRoute = (router: IRouter): void => {
         body: buildRouteValidationIoTS<ImportListsItemsSchema>(importListsItemsSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:list'],
         body: {
           output: 'stream',
         },

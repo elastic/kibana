@@ -14,7 +14,7 @@ interface DeleteListItemByValueOptions {
   listId: string;
   type: Type;
   value: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsItemsIndex: string;
 }
 
@@ -22,7 +22,7 @@ export const deleteListItemByValue = async ({
   listId,
   value,
   type,
-  clusterClient,
+  dataClient,
   listsItemsIndex,
 }: DeleteListItemByValueOptions): Promise<ListsItemsSchema[]> => {
   // TODO: Check before we call into these functions at the validation level that the string is not empty?
@@ -30,7 +30,7 @@ export const deleteListItemByValue = async ({
     type,
     value: [value],
     listId,
-    clusterClient,
+    dataClient,
     listsItemsIndex,
   });
   const values = listItems.map(listItem => listItem.value);
@@ -39,7 +39,7 @@ export const deleteListItemByValue = async ({
     value: values,
     listId,
   });
-  await clusterClient.callAsCurrentUser('deleteByQuery', {
+  await dataClient.callAsCurrentUser('deleteByQuery', {
     index: listsItemsIndex,
     body: {
       query: {

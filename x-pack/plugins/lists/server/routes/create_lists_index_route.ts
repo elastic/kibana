@@ -20,7 +20,7 @@ export const createListsIndexRoute = (router: IRouter): void => {
       path: LIST_INDEX,
       validate: false,
       options: {
-        tags: ['access:siem'],
+        tags: ['access:list'],
       },
     },
     async (context, _, response) => {

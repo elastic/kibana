@@ -23,10 +23,10 @@
       "type": "date"
     },
     "created_by": {
-      "type": "date"
+      "type": "keyword"
     },
-    "modified_by": {
-      "type": "date"
+    "updated_by": {
+      "type": "keyword"
     }
   }
 }

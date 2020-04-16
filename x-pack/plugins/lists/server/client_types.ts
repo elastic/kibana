@@ -8,6 +8,7 @@ import { PassThrough, Readable } from 'stream';
 
 import { KibanaRequest } from 'src/core/server';
 
+import { SecurityPluginSetup } from '../../security/server';
 import { SpacesServiceSetup } from '../../spaces/server';
 import { Type } from '../common/schemas';
 
@@ -19,6 +20,7 @@ export interface ConstructorOptions {
   dataClient: DataClient;
   request: KibanaRequest;
   spaces: SpacesServiceSetup | undefined | null;
+  security: SecurityPluginSetup;
 }
 
 export interface GetListOptions {

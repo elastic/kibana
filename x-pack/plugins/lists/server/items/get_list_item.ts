@@ -11,29 +11,29 @@ import { DataClient } from '../types';
 
 interface GetListItemOptions {
   id: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsItemsIndex: string;
 }
 
 export const getListItem = async ({
   id,
-  clusterClient,
+  dataClient,
   listsItemsIndex,
 }: GetListItemOptions): Promise<ListsItemsSchema | null> => {
-  const result: SearchResponse<Omit<
-    ListsItemsSchema,
-    'id'
-  >> = await clusterClient.callAsCurrentUser('search', {
-    body: {
-      query: {
-        term: {
-          _id: id,
+  const result: SearchResponse<Omit<ListsItemsSchema, 'id'>> = await dataClient.callAsCurrentUser(
+    'search',
+    {
+      body: {
+        query: {
+          term: {
+            _id: id,
+          },
         },
       },
-    },
-    index: listsItemsIndex,
-    ignoreUnavailable: true,
-  });
+      index: listsItemsIndex,
+      ignoreUnavailable: true,
+    }
+  );
 
   if (result.hits.hits.length) {
     return {

@@ -7,7 +7,7 @@
 import { CreateDocumentResponse } from 'elasticsearch';
 
 import { ListsSchema } from '../../common/schemas';
-import { DataClient } from '../types';
+import { DataClient, ElasticListUpdateInputType } from '../types';
 
 import { getList } from '.';
 
@@ -15,27 +15,35 @@ interface UpdateListOptions {
   id: string;
   name: string | null | undefined;
   description: string | null | undefined;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsIndex: string;
+  user: string;
 }
 
 export const updateList = async ({
   id,
   name,
   description,
-  clusterClient,
+  dataClient,
   listsIndex,
+  user,
 }: UpdateListOptions): Promise<ListsSchema | null> => {
   const updatedAt = new Date().toISOString();
-  const list = await getList({ id, clusterClient, listsIndex });
+  const list = await getList({ id, dataClient, listsIndex });
   if (list == null) {
     return null;
   } else {
+    const doc: ElasticListUpdateInputType = {
+      name,
+      description,
+      updated_at: updatedAt,
+      updated_by: user,
+    };
     // There isn't a UpdateDocumentResponse so I am using a CreateDocumentResponse here for the type
-    const response: CreateDocumentResponse = await clusterClient.callAsCurrentUser('update', {
+    const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('update', {
       index: listsIndex,
       id,
-      body: { doc: { name, description, updated_at: updatedAt } }, // TODO: Add strong types for the body
+      body: { doc },
     });
     return {
       id: response._id,
@@ -45,7 +53,8 @@ export const updateList = async ({
       updated_at: updatedAt,
       tie_breaker_id: list.tie_breaker_id,
       type: list.type,
-      // TODO: Add the rest of the elements
+      updated_by: user,
+      created_by: list.created_by,
     };
   }
 };

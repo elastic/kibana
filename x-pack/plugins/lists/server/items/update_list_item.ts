@@ -16,7 +16,7 @@ interface UpdateListItemOptions {
   listId: string;
   type: Type;
   value: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsItemsIndex: string;
 }
 
@@ -24,7 +24,7 @@ export const updateListItem = async ({
   listId,
   type,
   value,
-  clusterClient,
+  dataClient,
   listsItemsIndex,
 }: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
   const updatedAt = new Date().toISOString();
@@ -33,13 +33,13 @@ export const updateListItem = async ({
     type,
     value,
     listsItemsIndex,
-    clusterClient,
+    dataClient,
   });
   if (listItem == null) {
     return null;
   } else {
     // There isn't a UpdateDocumentResponse so I'm using CreateDocumentResponse here as a type
-    const response: CreateDocumentResponse = await clusterClient.callAsCurrentUser('update', {
+    const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('update', {
       index: listsItemsIndex,
       id: listItem.id,
       body: {

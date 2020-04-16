@@ -11,22 +11,22 @@ import { getList } from '.';
 
 interface DeleteOptions {
   id: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsIndex: string;
   listsItemsIndex: string;
 }
 
 export const deleteList = async ({
   id,
-  clusterClient,
+  dataClient,
   listsIndex,
   listsItemsIndex,
 }: DeleteOptions): Promise<ListsSchema | null> => {
-  const list = await getList({ id, clusterClient, listsIndex });
+  const list = await getList({ id, dataClient, listsIndex });
   if (list == null) {
     return null;
   } else {
-    await clusterClient.callAsCurrentUser('deleteByQuery', {
+    await dataClient.callAsCurrentUser('deleteByQuery', {
       index: listsItemsIndex,
       body: {
         query: {
@@ -37,7 +37,7 @@ export const deleteList = async ({
       },
     });
 
-    await clusterClient.callAsCurrentUser('delete', {
+    await dataClient.callAsCurrentUser('delete', {
       index: listsIndex,
       id,
     });

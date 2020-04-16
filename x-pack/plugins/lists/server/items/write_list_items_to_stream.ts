@@ -18,7 +18,7 @@ export const SIZE = 100;
 
 interface WriteListItemsToStreamOptions {
   listId: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsItemsIndex: string;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
@@ -26,7 +26,7 @@ interface WriteListItemsToStreamOptions {
 
 export const writeListItemsToStream = ({
   listId,
-  clusterClient,
+  dataClient,
   stream,
   listsItemsIndex,
   stringToAppend,
@@ -36,7 +36,7 @@ export const writeListItemsToStream = ({
   setTimeout(async () => {
     let searchAfter = await writeNextResponse({
       listId,
-      clusterClient,
+      dataClient,
       stream,
       listsItemsIndex,
       searchAfter: undefined,
@@ -45,7 +45,7 @@ export const writeListItemsToStream = ({
     while (searchAfter != null) {
       searchAfter = await writeNextResponse({
         listId,
-        clusterClient,
+        dataClient,
         stream,
         listsItemsIndex,
         searchAfter,
@@ -58,7 +58,7 @@ export const writeListItemsToStream = ({
 
 interface WriteNextResponseOptions {
   listId: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsItemsIndex: string;
   stream: PassThrough;
   searchAfter: string[] | undefined;
@@ -67,14 +67,14 @@ interface WriteNextResponseOptions {
 
 export const writeNextResponse = async ({
   listId,
-  clusterClient,
+  dataClient,
   stream,
   listsItemsIndex,
   searchAfter,
   stringToAppend,
 }: WriteNextResponseOptions): Promise<string[] | undefined> => {
   const response = await getResponse({
-    clusterClient,
+    dataClient,
     searchAfter,
     listId,
     listsItemsIndex,
@@ -97,7 +97,7 @@ export const getSearchAfterFromResponse = <T>({
 };
 
 interface GetResponseOptions {
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listId: string;
   searchAfter: undefined | string[];
   listsItemsIndex: string;
@@ -105,13 +105,13 @@ interface GetResponseOptions {
 }
 
 export const getResponse = async ({
-  clusterClient,
+  dataClient,
   searchAfter,
   listId,
   listsItemsIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<SearchResponse<ElasticListItemReturnType>> => {
-  return clusterClient.callAsCurrentUser('search', {
+  return dataClient.callAsCurrentUser('search', {
     index: listsItemsIndex,
     ignoreUnavailable: true,
     body: {

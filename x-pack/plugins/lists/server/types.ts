@@ -19,19 +19,27 @@ export interface BaseElasticListType {
   meta?: object; // TODO: Implement this in the code
   created_at: string;
   updated_at: string;
-
-  // TODO: Figure out how to implement these below
-  // created_by: string;
-  // modified_by: string;
+  created_by: string;
+  updated_by: string;
 }
 
 export type ElasticListReturnType = BaseElasticListType;
 export type ElasticListInputType = BaseElasticListType;
 
+export interface ElasticListUpdateInputType {
+  name: string | null | undefined;
+  description: string | null | undefined;
+  meta?: object | null | undefined; // TODO: Implement this in the code
+  updated_at: string;
+  updated_by: string;
+}
+
 export interface BaseElasticListItemType {
   list_id: string;
   created_at: string;
   updated_at: string;
+  created_by: string;
+  updated_by: string;
   tie_breaker_id: string;
   meta?: object; // TODO: Implement this in the code
 }

@@ -15,8 +15,9 @@ interface CreateListOptions {
   type: Type;
   name: string;
   description: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsIndex: string;
+  user: string;
 }
 
 export const createList = async ({
@@ -24,8 +25,9 @@ export const createList = async ({
   name,
   type,
   description,
-  clusterClient,
+  dataClient,
   listsIndex,
+  user,
 }: CreateListOptions): Promise<ListsSchema> => {
   const createdAt = new Date().toISOString();
   const body: ElasticListInputType = {
@@ -35,8 +37,10 @@ export const createList = async ({
     tie_breaker_id: uuid.v4(),
     updated_at: createdAt,
     created_at: createdAt,
+    created_by: user,
+    updated_by: user,
   };
-  const response: CreateDocumentResponse = await clusterClient.callAsCurrentUser('index', {
+  const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('index', {
     index: listsIndex,
     id,
     body,

@@ -11,16 +11,16 @@ import { DataClient } from '../types';
 
 interface GetListOptions {
   id: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsIndex: string;
 }
 
 export const getList = async ({
   id,
-  clusterClient,
+  dataClient,
   listsIndex,
 }: GetListOptions): Promise<ListsSchema | null> => {
-  const result: SearchResponse<Omit<ListsSchema, 'id'>> = await clusterClient.callAsCurrentUser(
+  const result: SearchResponse<Omit<ListsSchema, 'id'>> = await dataClient.callAsCurrentUser(
     'search',
     {
       body: {

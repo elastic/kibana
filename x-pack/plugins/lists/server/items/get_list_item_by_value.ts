@@ -11,7 +11,7 @@ import { getListItemsByValues } from '.';
 
 interface GetListItemByValueOptions {
   listId: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsItemsIndex: string;
   type: Type;
   value: string;
@@ -19,14 +19,14 @@ interface GetListItemByValueOptions {
 
 export const getListItemByValue = async ({
   listId,
-  clusterClient,
+  dataClient,
   listsItemsIndex,
   type,
   value,
 }: GetListItemByValueOptions): Promise<ListsItemsSchema | null> => {
   const listItems = await getListItemsByValues({
     listId,
-    clusterClient,
+    dataClient,
     listsItemsIndex,
     type,
     value: [value],

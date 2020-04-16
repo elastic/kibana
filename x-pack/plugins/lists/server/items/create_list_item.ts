@@ -16,8 +16,9 @@ interface CreateListItemOptions {
   listId: string;
   type: Type;
   value: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsItemsIndex: string;
+  user: string;
 }
 
 export const createListItem = async ({
@@ -25,8 +26,9 @@ export const createListItem = async ({
   listId,
   type,
   value,
-  clusterClient,
+  dataClient,
   listsItemsIndex,
+  user,
 }: CreateListItemOptions): Promise<ListsItemsSchema> => {
   const createdAt = new Date().toISOString();
   const tieBreakerId = uuid.v4();
@@ -35,10 +37,12 @@ export const createListItem = async ({
     created_at: createdAt,
     tie_breaker_id: tieBreakerId,
     updated_at: createdAt,
+    updated_by: user,
+    created_by: user,
     ...transformListItemsToElasticQuery({ type, value }),
   };
 
-  const response: CreateDocumentResponse = await clusterClient.callAsCurrentUser('index', {
+  const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('index', {
     index: listsItemsIndex,
     id,
     body,

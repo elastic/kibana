@@ -7,3 +7,4 @@
 export * from './get_query_filter_from_type_value';
 export * from './transform_elastic_to_list_items';
 export * from './transform_list_items_to_elastic_query';
+export * from './get_user';

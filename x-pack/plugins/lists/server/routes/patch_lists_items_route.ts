@@ -26,7 +26,7 @@ export const patchListsItemsRoute = (router: IRouter): void => {
         body: buildRouteValidationIoTS<PatchListsItemsSchema>(patchListsItemsSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:list'],
       },
     },
     async (context, request, response) => {

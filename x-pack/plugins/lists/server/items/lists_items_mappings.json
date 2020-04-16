@@ -21,6 +21,12 @@
     },
     "updated_at": {
       "type": "date"
+    },
+    "created_by": {
+      "type": "keyword"
+    },
+    "updated_by": {
+      "type": "keyword"
     }
   }
 }

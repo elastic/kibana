@@ -14,27 +14,30 @@ import { createListItemsBulk, getListItemsByValues, BufferLines } from '.';
 interface WriteLinesToBulkListItemsOptions {
   listId: string;
   stream: Readable;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsItemsIndex: string;
   type: Type;
+  user: string;
 }
 
 export const writeLinesToBulkListItems = ({
   listId,
   stream,
-  clusterClient,
+  dataClient,
   listsItemsIndex,
   type,
+  user,
 }: WriteLinesToBulkListItemsOptions): Promise<void> => {
   return new Promise<void>(resolve => {
     const readBuffer = new BufferLines({ input: stream });
     readBuffer.on('lines', async (lines: string[]) => {
       await writeBufferToItems({
         listId,
-        clusterClient,
+        dataClient,
         buffer: lines,
         listsItemsIndex,
         type,
+        user,
       });
     });
 
@@ -46,10 +49,11 @@ export const writeLinesToBulkListItems = ({
 
 interface WriteBufferToItemsOptions {
   listId: string;
-  clusterClient: DataClient;
+  dataClient: DataClient;
   listsItemsIndex: string;
   buffer: string[];
   type: Type;
+  user: string;
 }
 
 interface LinesResult {
@@ -59,14 +63,15 @@ interface LinesResult {
 
 export const writeBufferToItems = async ({
   listId,
-  clusterClient,
+  dataClient,
   listsItemsIndex,
   buffer,
   type,
+  user,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
   const items = await getListItemsByValues({
     listId,
-    clusterClient,
+    dataClient,
     listsItemsIndex,
     type,
     value: buffer,
@@ -80,8 +85,9 @@ export const writeBufferToItems = async ({
     listId,
     type,
     value: duplicatesRemoved,
-    clusterClient,
+    dataClient,
     listsItemsIndex,
+    user,
   });
   return { linesProcessed, duplicatesFound };
 };

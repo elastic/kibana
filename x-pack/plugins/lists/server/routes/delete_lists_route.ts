@@ -24,7 +24,7 @@ export const deleteListsRoute = (router: IRouter): void => {
         query: buildRouteValidationIoTS<DeleteListsSchema>(deleteListsSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:list'],
       },
     },
     async (context, request, response) => {

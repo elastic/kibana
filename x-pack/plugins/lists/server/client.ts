@@ -6,6 +6,7 @@
 
 import { KibanaRequest, ScopedClusterClient } from 'src/core/server';
 
+import { SecurityPluginSetup } from '../../security/server';
 import { deleteTemplate } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/delete_template';
 import { deletePolicy } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/delete_policy';
 import { deleteAllIndex } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/delete_all_index';
@@ -59,6 +60,7 @@ import {
   GetListItemOptions,
   GetListItemsByValueOptions,
 } from './client_types';
+import { getUser } from './utils';
 
 export class ListsClient {
   private readonly spaces: SpacesServiceSetup | undefined | null;
@@ -68,12 +70,14 @@ export class ListsClient {
     'callAsCurrentUser' | 'callAsInternalUser'
   >;
   private readonly request: KibanaRequest;
+  private readonly security: SecurityPluginSetup;
 
-  constructor({ request, spaces, config, dataClient }: ConstructorOptions) {
+  constructor({ request, spaces, config, dataClient, security }: ConstructorOptions) {
     this.request = request;
     this.spaces = spaces;
     this.config = config;
     this.dataClient = dataClient;
+    this.security = security;
   }
 
   public getListIndex = (): string => {
@@ -97,7 +101,7 @@ export class ListsClient {
   public getList = async ({ id }: GetListOptions): Promise<ListsSchema | null> => {
     const { dataClient } = this;
     const listsIndex = this.getListIndex();
-    return getList({ id, clusterClient: dataClient, listsIndex });
+    return getList({ id, dataClient, listsIndex });
   };
 
   public createList = async ({
@@ -106,9 +110,10 @@ export class ListsClient {
     description,
     type,
   }: CreateListOptions): Promise<ListsSchema> => {
-    const { dataClient } = this;
+    const { dataClient, security, request } = this;
     const listsIndex = this.getListIndex();
-    return createList({ name, description, id, clusterClient: dataClient, listsIndex, type });
+    const user = getUser({ security, request });
+    return createList({ name, description, id, dataClient, listsIndex, user, type });
   };
 
   public createListIfItDoesNotExist = async ({
@@ -286,7 +291,7 @@ export class ListsClient {
   }: DeleteListItemOptions): Promise<ListsItemsSchema | null> => {
     const { dataClient } = this;
     const listsItemsIndex = this.getListItemIndex();
-    return deleteListItem({ id, clusterClient: dataClient, listsItemsIndex });
+    return deleteListItem({ id, dataClient, listsItemsIndex });
   };
 
   public deleteListItemByValue = async ({
@@ -300,7 +305,7 @@ export class ListsClient {
       type,
       listId,
       value,
-      clusterClient: dataClient,
+      dataClient,
       listsItemsIndex,
     });
   };
@@ -312,7 +317,7 @@ export class ListsClient {
     return deleteList({
       id,
       listsIndex,
-      clusterClient: dataClient,
+      dataClient,
       listsItemsIndex,
     });
   };
@@ -328,7 +333,7 @@ export class ListsClient {
     writeListItemsToStream({
       listId,
       stream,
-      clusterClient: dataClient,
+      dataClient,
       listsItemsIndex,
       stringToAppend,
     });
@@ -340,14 +345,16 @@ export class ListsClient {
     listId,
     stream,
   }: WriteLinesToBulkListItemsOptions): Promise<void> => {
-    const { dataClient } = this;
+    const { dataClient, security, request } = this;
     const listsItemsIndex = this.getListItemIndex();
+    const user = getUser({ security, request });
     return writeLinesToBulkListItems({
       listId,
       type,
       stream,
-      clusterClient: dataClient,
+      dataClient,
       listsItemsIndex,
+      user,
     });
   };
 
@@ -362,7 +369,7 @@ export class ListsClient {
       type,
       listId,
       value,
-      clusterClient: dataClient,
+      dataClient,
       listsItemsIndex,
     });
   };
@@ -373,15 +380,17 @@ export class ListsClient {
     value,
     type,
   }: CreateListItemOptions): Promise<ListsItemsSchema> => {
-    const { dataClient } = this;
+    const { dataClient, security, request } = this;
     const listsItemsIndex = this.getListItemIndex();
+    const user = getUser({ security, request });
     return createListItem({
       id,
       listId,
       type,
       value,
-      clusterClient: dataClient,
+      dataClient,
       listsItemsIndex,
+      user,
     });
   };
 
@@ -396,7 +405,7 @@ export class ListsClient {
       listId,
       type,
       value,
-      clusterClient: dataClient,
+      dataClient,
       listsItemsIndex,
     });
   };
@@ -406,14 +415,16 @@ export class ListsClient {
     name,
     description,
   }: UpdateListOptions): Promise<ListsSchema | null> => {
-    const { dataClient } = this;
+    const { dataClient, security, request } = this;
+    const user = getUser({ security, request });
     const listsIndex = this.getListIndex();
     return updateList({
       id,
       name,
       description,
-      clusterClient: dataClient,
+      dataClient,
       listsIndex,
+      user,
     });
   };
 
@@ -422,7 +433,7 @@ export class ListsClient {
     const listsItemsIndex = this.getListItemIndex();
     return getListItem({
       id,
-      clusterClient: dataClient,
+      dataClient,
       listsItemsIndex,
     });
   };
@@ -438,7 +449,7 @@ export class ListsClient {
       type,
       listId,
       value,
-      clusterClient: dataClient,
+      dataClient,
       listsItemsIndex,
     });
   };

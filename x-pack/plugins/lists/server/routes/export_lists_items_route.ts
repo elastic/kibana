@@ -27,7 +27,7 @@ export const exportListsItemsRoute = (router: IRouter): void => {
         // TODO: Do we want to add a body here like export_rules_route and allow a size limit?
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:list'],
       },
     },
     async (context, request, response) => {

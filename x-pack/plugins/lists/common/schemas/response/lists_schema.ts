@@ -17,6 +17,8 @@ import {
   created_at,
   updated_at,
   tie_breaker_id,
+  updated_by,
+  created_by,
 } from '../common/schemas';
 
 export const listsSchema = t.intersection([
@@ -29,7 +31,8 @@ export const listsSchema = t.intersection([
       created_at,
       updated_at,
       tie_breaker_id,
-      // TODO: Add created_by, updated_by, etc...
+      updated_by,
+      created_by,
     })
   ),
   t.exact(t.partial({ meta })),
