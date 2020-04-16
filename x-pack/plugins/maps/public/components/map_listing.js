@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getToasts } from '../../../../../plugins/maps/public/kibana_services';
+import { getToasts } from '../kibana_services';
 import {
   EuiTitle,
   EuiFieldSearch,
@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { addHelpMenuToAppChrome } from '../help_menu_util';
+import { addHelpMenuToAppChrome } from '../../../../legacy/plugins/maps/public/help_menu_util';
 
 export const EMPTY_FILTER = '';
 

@@ -26,7 +26,7 @@ import {
   getData,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../kibana_services';
-import { GlobalFilterCheckbox } from '../../../../../../legacy/plugins/maps/public/components/global_filter_checkbox';
+import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 
 export class FilterEditor extends Component {
   state = {

@@ -8,7 +8,7 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { EuiIcon, EuiOverlayMask, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
-import { LayerTocActions } from '../../../../../../../../legacy/plugins/maps/public/components/layer_toc_actions';
+import { LayerTocActions } from '../../../../../components/layer_toc_actions';
 import { i18n } from '@kbn/i18n';
 
 function escapeLayerName(name) {

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
-import { GlobalFilterCheckbox } from '../../../../../../../legacy/plugins/maps/public/components/global_filter_checkbox';
+import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
 
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

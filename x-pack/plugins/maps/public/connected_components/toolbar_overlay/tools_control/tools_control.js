@@ -19,8 +19,8 @@ import {
   ES_GEO_FIELD_TYPE,
 } from '../../../../../../legacy/plugins/maps/common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { GeometryFilterForm } from '../../../../../../legacy/plugins/maps/public/components/geometry_filter_form';
-import { DistanceFilterForm } from '../../../../../../legacy/plugins/maps/public/components/distance_filter_form';
+import { GeometryFilterForm } from '../../../components/geometry_filter_form';
+import { DistanceFilterForm } from '../../../components/distance_filter_form';
 
 const DRAW_SHAPE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
   defaultMessage: 'Draw shape to filter data',

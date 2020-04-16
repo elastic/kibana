@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createSpatialFilterWithGeometry } from '../../../elasticsearch_geo_utils';
 import { GEO_JSON_TYPE } from '../../../../../../legacy/plugins/maps/common/constants';
-import { GeometryFilterForm } from '../../../../../../legacy/plugins/maps/public/components/geometry_filter_form';
+import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { UrlOverflowService } from '../../../../../../../src/plugins/kibana_legacy/public';
 import rison from 'rison-node';
