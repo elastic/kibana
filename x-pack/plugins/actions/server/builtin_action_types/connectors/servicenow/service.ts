@@ -32,7 +32,7 @@ export const createExternalService = ({
   const { username, password } = secrets as ConnectorSecretConfigurationType;
 
   if (!url || !username || !password) {
-    throw Error('[Action][ServiceNow]: Wrong configuration.');
+    throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
   const incidentUrl = `${url}/${INCIDENT_URL}`;
