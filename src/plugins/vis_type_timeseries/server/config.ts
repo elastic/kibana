@@ -17,9 +17,15 @@
  * under the License.
  */
 
-export enum Browsers {
-  Chrome = 'chrome',
-  Firefox = 'firefox',
-  InternetExplorer = 'ie',
-  ChromiumEdge = 'msedge',
-}
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const config = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+
+  /** @deprecated **/
+  chartResolution: schema.number({ defaultValue: 150 }),
+  /** @deprecated **/
+  minimumBucketSize: schema.number({ defaultValue: 10 }),
+});
+
+export type VisTypeTimeseriesConfig = TypeOf<typeof config>;
