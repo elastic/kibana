@@ -3,10 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { flow } from 'fp-ts/lib/function';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useState, useMemo } from 'react';
+import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -21,35 +19,48 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { Pipeline } from '../../../common/types';
+import { Processor } from '../../../common/types';
 
 import { FormFlyout } from './components';
 import { prepareDataIn } from './data_in';
-import { prepareDataOut } from './data_out';
+import { prepareDataOut, DataOutResult } from './data_out';
 import { useEditorState } from './reducer';
 import { PipelineEditorProcessor } from './types';
 
-export interface Props {
-  pipeline: Pipeline;
-  onSubmit: (pipeline: Pipeline) => void;
+interface OnUpdateArg {
+  readData: () => DataOutResult;
 }
 
-export const PipelineEditor: FunctionComponent<Props> = ({
-  pipeline: originalPipeline,
-  onSubmit,
+export interface Props {
+  processors: Processor[];
+  onFailure?: Processor[];
+  onUpdate: (arg: OnUpdateArg) => void;
+}
+
+export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
+  processors: originalProcessors,
+  onUpdate,
 }) => {
-  const pipeline = useMemo(() => prepareDataIn(originalPipeline), [originalPipeline]);
-  const [{ processors }, dispatch] = useEditorState(pipeline);
+  const dataInResult = useMemo(() => prepareDataIn({ processors: originalProcessors }), [
+    originalProcessors,
+  ]);
+  const [state, dispatch] = useEditorState(dataInResult);
+  const { processors } = state;
   const [selectedProcessor, setSelectedProcessor] = useState<PipelineEditorProcessor | undefined>(
     undefined
   );
   const [isAddingNewProcessor, setIsAddingNewProcessor] = useState<boolean>(false);
-  const getData = flow(prepareDataOut, onSubmit);
 
   const dismissFlyout = () => {
     setSelectedProcessor(undefined);
     setIsAddingNewProcessor(false);
   };
+
+  useEffect(() => {
+    onUpdate({
+      readData: () => prepareDataOut(state),
+    });
+  }, [state, onUpdate]);
 
   return (
     <>
@@ -119,10 +130,7 @@ export const PipelineEditor: FunctionComponent<Props> = ({
         <EuiButton onClick={() => setIsAddingNewProcessor(true)}>Add a processor</EuiButton>
       </EuiPanel>
       <EuiSpacer size="m" />
-      <EuiButton
-        data-test-subj="pipelineEditorDoneButton"
-        onClick={() => getData({ ...pipeline, processors })}
-      >
+      <EuiButton data-test-subj="pipelineEditorDoneButton" onClick={() => getData({ processors })}>
         {/* TODO: Translate */}
         Save
       </EuiButton>

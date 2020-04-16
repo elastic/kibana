@@ -5,9 +5,9 @@
  */
 
 import { registerTestBed } from '../../../../../../test_utils';
-import { PipelineEditor, Props } from '../pipeline_editor';
+import { PipelineProcessorsEditor, Props } from '../pipeline_procssors_editor';
 
-const testBedSetup = registerTestBed<TestSubject>(PipelineEditor, { doMountAsync: false });
+const testBedSetup = registerTestBed<TestSubject>(PipelineProcessorsEditor, { doMountAsync: false });
 
 export const setup = async (props: Props) => {
   const { find, component } = await testBedSetup(props);

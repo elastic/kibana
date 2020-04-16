@@ -3,9 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { DataIn } from './data_in';
-import { Pipeline, Processor } from '../../../common/types';
+import { Processor } from '../../../common/types';
+
+import { DataInResult } from './data_in';
 import { PipelineEditorProcessor } from './types';
+
+type DataOutArgs = DataInResult;
+
+export interface DataOutResult {
+  processors: Processor[];
+  onFailure?: Processor[];
+}
 
 const convertEditorProcessorToProcessor = (processor: PipelineEditorProcessor): Processor => {
   const { options, onFailure, type } = processor;
@@ -28,9 +36,9 @@ const convertProcessors = (processors: PipelineEditorProcessor[]) => {
   return convertedProcessors;
 };
 
-export const prepareDataOut = (data: DataIn): Pipeline => {
+export const prepareDataOut = ({ processors, onFailure }: DataOutArgs): DataOutResult => {
   return {
-    ...data.pipeline,
-    processors: convertProcessors(data.processors),
+    processors: convertProcessors(processors),
+    onFailure: onFailure ? convertProcessors(onFailure) : undefined,
   };
 };

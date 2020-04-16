@@ -30,6 +30,7 @@ import { Pipeline } from '../../../../common/types';
 
 import { SectionError, PipelineRequestFlyout } from '../';
 import { pipelineFormSchema } from './schema';
+import { PipelineProcessorsEditor } from '../../pipeline_processors_editor';
 
 interface Props {
   onSave: (pipeline: Pipeline) => void;
@@ -59,6 +60,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
 }) => {
   const { services } = useKibana();
 
+  const [showJsonProcessorsEditor, setShowJsonProcessorsEditor] = useState(false);
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(Boolean(defaultValue.version));
   const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(
     Boolean(defaultValue.on_failure)
@@ -76,6 +78,72 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
     defaultValue,
     onSubmit: handleSave,
   });
+
+  const renderProcessorsEditorSection = () => {
+    if (showJsonProcessorsEditor) {
+      return (
+        <FormRow
+          title={
+            <FormattedMessage
+              id="xpack.ingestPipelines.form.processorsFieldTitle"
+              defaultMessage="Processors"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.ingestPipelines.form.processorsFieldDescription"
+              defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink href={services.documentation.getProcessorsUrl()} target="_blank">
+                    {i18n.translate('xpack.ingestPipelines.form.processorsDocumentionLink', {
+                      defaultMessage: 'Learn more.',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        >
+          <UseField
+            path="processors"
+            component={JsonEditorField}
+            componentProps={{
+              ['data-test-subj']: 'processorsField',
+              euiCodeEditorProps: {
+                height: '300px',
+                'aria-label': i18n.translate(
+                  'xpack.ingestPipelines.form.processorsFieldAriaLabel',
+                  {
+                    defaultMessage: 'Processors JSON editor',
+                  }
+                ),
+              },
+            }}
+          />
+        </FormRow>
+      );
+    }
+
+    const formProcessorValue = form.getFields().processors?.value ?? defaultValue?.processors;
+
+    const processors =
+      typeof formProcessorValue === 'string' && formProcessorValue
+        ? JSON.parse(formProcessorValue)
+        : defaultValue?.processors ?? [];
+
+    return (
+      <>
+        <PipelineProcessorsEditor
+          onSubmit={({ processors: editorProcessors }) => {
+            form.setFieldValue('processors', JSON.stringify(editorProcessors));
+          }}
+          processors={processors}
+        />
+        <EuiSpacer size="l" />
+      </>
+    );
+  };
 
   const saveButtonLabel = isSaving ? (
     <FormattedMessage
@@ -172,47 +240,13 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
           />
         </FormRow>
 
-        {/* Processors field */}
-        <FormRow
-          title={
-            <FormattedMessage
-              id="xpack.ingestPipelines.form.processorsFieldTitle"
-              defaultMessage="Processors"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.ingestPipelines.form.processorsFieldDescription"
-              defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink href={services.documentation.getProcessorsUrl()} target="_blank">
-                    {i18n.translate('xpack.ingestPipelines.form.processorsDocumentionLink', {
-                      defaultMessage: 'Learn more.',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />
-          }
-        >
-          <UseField
-            path="processors"
-            component={JsonEditorField}
-            componentProps={{
-              ['data-test-subj']: 'processorsField',
-              euiCodeEditorProps: {
-                height: '300px',
-                'aria-label': i18n.translate(
-                  'xpack.ingestPipelines.form.processorsFieldAriaLabel',
-                  {
-                    defaultMessage: 'Processors JSON editor',
-                  }
-                ),
-              },
-            }}
-          />
-        </FormRow>
+        {/* TODO: Translate */}
+        <EuiSwitch
+          label="Show JSON editor"
+          checked={showJsonProcessorsEditor}
+          onChange={() => setShowJsonProcessorsEditor(prev => !prev)}
+        />
+        {renderProcessorsEditorSection()}
 
         {/* On-failure field */}
         <FormRow

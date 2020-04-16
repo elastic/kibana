@@ -5,10 +5,10 @@
  */
 import { Reducer, useReducer } from 'react';
 import { euiDragDropReorder } from '@elastic/eui';
-import { createPipelineEditorProcessor, DataIn } from './data_in';
+import { createPipelineEditorProcessor, DataInResult } from './data_in';
 import { PipelineEditorProcessor } from './types';
 
-type State = DataIn;
+type State = DataInResult;
 
 type Action =
   | { type: 'addProcessor'; payload: { processor: Omit<PipelineEditorProcessor, 'id'> } }
@@ -66,4 +66,4 @@ const reducer: Reducer<State, Action> = (state, action) => {
   return state;
 };
 
-export const useEditorState = (state: DataIn) => useReducer<typeof reducer>(reducer, state);
+export const useEditorState = (state: State) => useReducer<typeof reducer>(reducer, state);

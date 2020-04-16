@@ -20,7 +20,6 @@ import { BASE_PATH } from '../../../../common/constants';
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import { PipelineForm } from '../../components';
-import { PipelineEditor } from '../../pipeline_editor';
 
 export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const { services } = useKibana();
@@ -85,35 +84,6 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
           </EuiFlexGroup>
         </EuiTitle>
 
-        <EuiSpacer size="l" />
-
-        {/* TODO: Temporary home for the pipeline editor, move it somewhere else */}
-        <PipelineEditor
-          onSubmit={() => {
-            // TODO do something here
-          }}
-          pipeline={{
-            name: '',
-            description: '',
-            version: 1,
-            processors: [
-              {
-                set: {
-                  field: 'test',
-                  value: 'test',
-                },
-              },
-              {
-                gsub: {
-                  field: '_index',
-                  pattern: '(.monitoring-\\w+-)6(-.+)',
-                  replacement: '$17$2',
-                },
-              },
-            ],
-            onFailure: [],
-          }}
-        />
         <EuiSpacer size="l" />
 
         <PipelineForm

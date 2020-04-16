@@ -5,12 +5,18 @@
  */
 
 import uuid from 'uuid';
-import { Pipeline, Processor } from '../../../common/types';
+
+import { Processor } from '../../../common/types';
 import { PipelineEditorProcessor } from './types';
 
-export interface DataIn {
-  readonly pipeline: Pipeline;
+export interface DataInArgs {
+  processors: Processor[];
+  onFailure?: Processor[];
+}
+
+export interface DataInResult {
   processors: PipelineEditorProcessor[];
+  onFailure?: PipelineEditorProcessor[];
 }
 
 const getProcessorType = (processor: Processor): string => {
@@ -48,9 +54,9 @@ export const createPipelineEditorProcessor = (args: {
   ...args,
 });
 
-export const prepareDataIn = (pipeline: Pipeline): DataIn => {
+export const prepareDataIn = ({ processors, onFailure }: DataInArgs): DataInResult => {
   return {
-    pipeline,
-    processors: convertProcessors(pipeline.processors),
+    processors: convertProcessors(processors),
+    onFailure: onFailure ? convertProcessors(onFailure) : undefined,
   };
 };
