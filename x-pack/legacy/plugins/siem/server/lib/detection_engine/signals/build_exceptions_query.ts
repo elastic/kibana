@@ -7,23 +7,25 @@ import { Query } from '../../../../../../../../src/plugins/data/server';
 import { List, ListOperator, ListValues } from '../routes/schemas/types/lists_default_array';
 import { RuleAlertParams, Language } from '../types';
 
-interface Operators {
-  and: string;
-  not: string;
-  or: string;
-}
+type Operators = 'and' | 'or' | 'not';
+type LuceneOperators = 'AND' | 'OR' | 'NOT';
 
 export const getLanguageBooleanOperator = ({
   language,
   value,
 }: {
-  language: keyof Language;
-  value: keyof Operators;
-}) => {
-  if (language === 'lucene') {
-    return value.toUpperCase();
-  } else {
-    return value;
+  language: Language;
+  value: Operators;
+}): Operators | LuceneOperators => {
+  switch (language) {
+    case 'lucene':
+      const luceneValues: Record<Operators, LuceneOperators> = { and: 'AND', or: 'OR', not: 'NOT' };
+
+      return luceneValues[value];
+    case 'kuery':
+      return value;
+    default:
+      return value;
   }
 };
 
@@ -32,14 +34,25 @@ export const operatorBuilder = ({
   language,
 }: {
   operator: ListOperator;
-  language: keyof Language;
+  language: Language;
 }): string => {
-  return operator === 'excluded'
-    ? ` ${getLanguageBooleanOperator({ language, value: 'and' })} `
-    : ` ${getLanguageBooleanOperator({ language, value: 'and' })} ${getLanguageBooleanOperator({
-        language,
-        value: 'not',
-      })} `;
+  const and = getLanguageBooleanOperator({
+    language,
+    value: 'and',
+  });
+  const or = getLanguageBooleanOperator({
+    language,
+    value: 'not',
+  });
+
+  switch (operator) {
+    case 'excluded':
+      return ` ${and} `;
+    case 'included':
+      return ` ${and} ${or} `;
+    default:
+      return '';
+  }
 };
 
 export const buildExists = ({
@@ -49,13 +62,15 @@ export const buildExists = ({
 }: {
   operator: ListOperator;
   field: string;
-  language: keyof Language;
+  language: Language;
 }): string => {
+  const exceptionOperator = operatorBuilder({ operator, language });
+
   switch (language) {
     case 'kuery':
-      return `${operatorBuilder({ operator, language })}${field}:*`;
+      return `${exceptionOperator}${field}:*`;
     case 'lucene':
-      return `${operatorBuilder({ operator, language })}_exists_${field}`;
+      return `${exceptionOperator}_exists_${field}`;
     default:
       return '';
   }
@@ -70,10 +85,16 @@ export const buildMatch = ({
   operator: ListOperator;
   field: string;
   values: ListValues[];
-  language: keyof Language;
-}) => {
-  const value = values[0].name;
-  return `${operatorBuilder({ operator, language })}${field}:${value}`;
+  language: Language;
+}): string => {
+  if (values.length > 0) {
+    const exceptionOperator = operatorBuilder({ operator, language });
+    const [exception] = values;
+
+    return `${exceptionOperator}${field}:${exception.name}`;
+  } else {
+    return '';
+  }
 };
 
 export const buildMatchAll = ({
@@ -85,36 +106,33 @@ export const buildMatchAll = ({
   operator: ListOperator;
   field: string;
   values: ListValues[];
-  language: keyof Language;
-}) => {
-  if (values.length === 1) {
-    return buildMatch({ operator, field, values, language });
-  } else {
-    const matchAllValues = values.map(value => {
-      return value.name;
-    });
+  language: Language;
+}): string => {
+  switch (values.length) {
+    case 0:
+      return '';
+    case 1:
+      return buildMatch({ operator, field, values, language });
+    default:
+      const or = getLanguageBooleanOperator({ language, value: 'or' });
+      const exceptionOperator = operatorBuilder({ operator, language });
+      const matchAllValues = values.map(value => {
+        return value.name;
+      });
 
-    return `${operatorBuilder({ operator, language })}${field}:(${matchAllValues.join(
-      ` ${getLanguageBooleanOperator({ language, value: 'or' })} `
-    )})`;
+      return `${exceptionOperator}${field}:(${matchAllValues.join(` ${or} `)})`;
   }
 };
 
-export const evaluateValues = ({
-  list,
-  language,
-}: {
-  list: List;
-  language: keyof Language;
-}): string => {
+export const evaluateValues = ({ list, language }: { list: List; language: Language }): string => {
   const { values_operator: operator, values_type: type, field, values } = list;
   switch (type) {
     case 'exists':
       return buildExists({ operator, field, language });
     case 'match':
-      return buildMatch({ operator, field, values: values!, language });
+      return buildMatch({ operator, field, values: values ?? [], language });
     case 'match_all':
-      return buildMatchAll({ operator, field, values: values!, language });
+      return buildMatchAll({ operator, field, values: values ?? [], language });
     default:
       return '';
   }
@@ -127,14 +145,15 @@ export const formatQuery = ({
 }: {
   exceptions: string[];
   query: string;
-  language: keyof Language;
-}) => {
+  language: Language;
+}): string => {
   if (exceptions.length > 0) {
-    const formattedExceptions = exceptions.map(item => {
-      return `(${query}${item})`;
+    const or = getLanguageBooleanOperator({ language, value: 'or' });
+    const formattedExceptions = exceptions.map(exception => {
+      return `(${query}${exception})`;
     });
 
-    return formattedExceptions.join(` ${getLanguageBooleanOperator({ language, value: 'or' })} `);
+    return formattedExceptions.join(` ${or} `);
   } else {
     return query;
   }
@@ -147,14 +166,15 @@ export const buildExceptions = ({
 }: {
   query: string;
   lists: List[];
-  language: keyof Language;
+  language: Language;
 }): string[] => {
-  return lists.reduce<string[]>((acc, item) => {
-    const { and, ...exceptionDetails } = { ...item };
-    const andExceptions = and ? buildExceptions({ query, lists: and, language }) : [];
-    const exception = [evaluateValues({ list: exceptionDetails, language }), ...andExceptions];
+  return lists.reduce<string[]>((accum, listItem) => {
+    const { and, ...exceptionDetails } = { ...listItem };
+    const andExceptionsSegments = and ? buildExceptions({ query, lists: and, language }) : [];
+    const exceptionSegment = evaluateValues({ list: exceptionDetails, language });
+    const exception = [...exceptionSegment, ...andExceptionsSegments];
 
-    return [...acc, exception.join('')];
+    return [...accum, exception.join('')];
   }, []);
 };
 
@@ -164,16 +184,16 @@ export const buildQueryExceptions = ({
   lists,
 }: {
   query: string;
-  language: keyof Language;
+  language: Language;
   lists: RuleAlertParams['lists'];
 }): Query[] => {
   if (lists && lists !== null) {
     const exceptions = buildExceptions({ lists, language, query });
-    const formattedExceptions = formatQuery({ exceptions, language, query });
+    const formattedQuery = formatQuery({ exceptions, language, query });
 
     return [
       {
-        query: formattedExceptions,
+        query: formattedQuery,
         language,
       },
     ];

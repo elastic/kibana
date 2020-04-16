@@ -19,7 +19,7 @@ import { buildQueryExceptions } from './build_exceptions_query';
 
 export const getQueryFilter = (
   query: string,
-  language: keyof Language,
+  language: Language,
   filters: PartialFilter[],
   index: string[],
   lists: RuleAlertParams['lists']
@@ -48,7 +48,7 @@ export const getQueryFilter = (
 interface GetFilterArgs {
   type: RuleAlertParams['type'];
   filters: PartialFilter[] | undefined | null;
-  language: keyof Language | undefined | null;
+  language: Language | undefined | null;
   query: string | undefined | null;
   savedId: string | undefined | null;
   services: AlertServices;
@@ -60,7 +60,7 @@ interface QueryAttributes {
   // NOTE: doesn't match Query interface
   query: {
     query: string;
-    language: keyof Language;
+    language: Language;
   };
   filters: PartialFilter[];
 }

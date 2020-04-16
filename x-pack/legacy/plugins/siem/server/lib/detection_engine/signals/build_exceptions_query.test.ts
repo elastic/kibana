@@ -94,6 +94,17 @@ describe('build_exceptions_query', () => {
 
   describe('buildMatch', () => {
     describe('kuery', () => {
+      test('it returns empty string if no items in "values"', () => {
+        const query = buildMatch({
+          operator: 'included',
+          field: 'host.name',
+          values: [],
+          language: 'kuery',
+        });
+
+        expect(query).toEqual('');
+      });
+
       test('it returns formatted string when operator is "included"', () => {
         const values = [
           {
@@ -204,6 +215,33 @@ describe('build_exceptions_query', () => {
 
   describe('buildMatchAll', () => {
     describe('kuery', () => {
+      test('it returns empty string if given an empty array for "values"', () => {
+        const exceptionSegment = buildMatchAll({
+          operator: 'included',
+          field: 'host.name',
+          values: [],
+          language: 'kuery',
+        });
+
+        expect(exceptionSegment).toEqual('');
+      });
+
+      test('it returns formatted string when "values" includes only one item', () => {
+        const values = [
+          {
+            name: 'suricata',
+          },
+        ];
+        const exceptionSegment = buildMatchAll({
+          operator: 'included',
+          field: 'host.name',
+          values,
+          language: 'kuery',
+        });
+
+        expect(exceptionSegment).toEqual(' and not host.name:suricata');
+      });
+
       test('it returns formatted string when operator is "included"', () => {
         const values = [
           {
@@ -213,14 +251,14 @@ describe('build_exceptions_query', () => {
             name: 'auditd',
           },
         ];
-        const query = buildMatchAll({
+        const exceptionSegment = buildMatchAll({
           operator: 'included',
           field: 'host.name',
           values,
           language: 'kuery',
         });
 
-        expect(query).toEqual(' and not host.name:(suricata or auditd)');
+        expect(exceptionSegment).toEqual(' and not host.name:(suricata or auditd)');
       });
 
       test('it returns formatted string when operator is "excluded"', () => {
@@ -232,30 +270,14 @@ describe('build_exceptions_query', () => {
             name: 'auditd',
           },
         ];
-        const query = buildMatchAll({
+        const exceptionSegment = buildMatchAll({
           operator: 'excluded',
           field: 'host.name',
           values,
           language: 'kuery',
         });
 
-        expect(query).toEqual(' and host.name:(suricata or auditd)');
-      });
-
-      test('it returns formatted string when "values" includes only one item', () => {
-        const values = [
-          {
-            name: 'suricata',
-          },
-        ];
-        const query = buildMatchAll({
-          operator: 'included',
-          field: 'host.name',
-          values,
-          language: 'kuery',
-        });
-
-        expect(query).toEqual(' and not host.name:suricata');
+        expect(exceptionSegment).toEqual(' and host.name:(suricata or auditd)');
       });
     });
 
@@ -269,14 +291,14 @@ describe('build_exceptions_query', () => {
             name: 'auditd',
           },
         ];
-        const query = buildMatchAll({
+        const exceptionSegment = buildMatchAll({
           operator: 'included',
           field: 'host.name',
           values,
           language: 'lucene',
         });
 
-        expect(query).toEqual(' AND NOT host.name:(suricata OR auditd)');
+        expect(exceptionSegment).toEqual(' AND NOT host.name:(suricata OR auditd)');
       });
 
       test('it returns formatted string when operator is "excluded"', () => {
@@ -288,14 +310,14 @@ describe('build_exceptions_query', () => {
             name: 'auditd',
           },
         ];
-        const query = buildMatchAll({
+        const exceptionSegment = buildMatchAll({
           operator: 'excluded',
           field: 'host.name',
           values,
           language: 'lucene',
         });
 
-        expect(query).toEqual(' AND host.name:(suricata OR auditd)');
+        expect(exceptionSegment).toEqual(' AND host.name:(suricata OR auditd)');
       });
 
       test('it returns formatted string when "values" includes only one item', () => {
@@ -304,14 +326,14 @@ describe('build_exceptions_query', () => {
             name: 'suricata',
           },
         ];
-        const query = buildMatchAll({
+        const exceptionSegment = buildMatchAll({
           operator: 'included',
           field: 'host.name',
           values,
           language: 'lucene',
         });
 
-        expect(query).toEqual(' AND NOT host.name:suricata');
+        expect(exceptionSegment).toEqual(' AND NOT host.name:suricata');
       });
     });
   });
