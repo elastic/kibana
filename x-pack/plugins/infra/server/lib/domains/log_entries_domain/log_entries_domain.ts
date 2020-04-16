@@ -113,7 +113,7 @@ export class InfraLogEntriesDomain {
     params: LogEntriesParams
   ): Promise<LogEntry[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
 
@@ -179,7 +179,7 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryBucket[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
@@ -203,7 +203,7 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryHighlightsBucket[][]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const messageFormattingRules = compileFormattingRules(
