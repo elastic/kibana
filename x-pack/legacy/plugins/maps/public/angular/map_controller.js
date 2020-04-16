@@ -37,7 +37,7 @@ import {
   replaceLayerList,
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
-} from '../actions/map_actions';
+} from '../../../../../plugins/maps/public/actions/map_actions';
 import {
   DEFAULT_IS_LAYER_TOC_OPEN,
   FLYOUT_STATE,
@@ -49,7 +49,7 @@ import {
   setReadOnly,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
-} from '../actions/ui_actions';
+} from '../../../../../plugins/maps/public/actions/ui_actions';
 import { getIsFullScreen } from '../selectors/ui_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util';

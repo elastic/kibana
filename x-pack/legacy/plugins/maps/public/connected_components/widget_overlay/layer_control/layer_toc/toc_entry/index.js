@@ -9,7 +9,11 @@ import { connect } from 'react-redux';
 import { TOCEntry } from './view';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FLYOUT_STATE } from '../../../../../../../../../plugins/maps/public/reducers/ui';
-import { updateFlyout, hideTOCDetails, showTOCDetails } from '../../../../../actions/ui_actions';
+import {
+  updateFlyout,
+  hideTOCDetails,
+  showTOCDetails,
+} from '../../../../../../../../../plugins/maps/public/actions/ui_actions';
 import { getIsReadOnly, getOpenTOCDetails } from '../../../../../selectors/ui_selectors';
 import {
   fitToLayerExtent,
@@ -18,7 +22,7 @@ import {
   removeTransientLayer,
   cloneLayer,
   removeLayer,
-} from '../../../../../actions/map_actions';
+} from '../../../../../../../../../plugins/maps/public/actions/map_actions';
 
 import {
   hasDirtyState,

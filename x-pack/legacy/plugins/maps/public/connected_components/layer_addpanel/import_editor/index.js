@@ -10,7 +10,7 @@ import { ImportEditor } from './view';
 import { getInspectorAdapters } from '../../../../../../../plugins/maps/public/reducers/non_serializable_instances';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { INDEXING_STAGE } from '../../../../../../../plugins/maps/public/reducers/ui';
-import { updateIndexingStage } from '../../../actions/ui_actions';
+import { updateIndexingStage } from '../../../../../../../plugins/maps/public/actions/ui_actions';
 import { getIndexingStage } from '../../../selectors/ui_selectors';
 
 function mapStateToProps(state = {}) {

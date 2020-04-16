@@ -44,9 +44,13 @@ import {
   hideLayerControl,
   hideViewControl,
   setHiddenLayers,
-} from '../actions/map_actions';
+} from '../../../../../plugins/maps/public/actions/map_actions';
 import { MapCenterAndZoom } from '../../../../../plugins/maps/common/descriptor_types';
-import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
+import {
+  setReadOnly,
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
+} from '../../../../../plugins/maps/public/actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,

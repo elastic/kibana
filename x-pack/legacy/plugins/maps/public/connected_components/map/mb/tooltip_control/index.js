@@ -11,7 +11,7 @@ import {
   openOnClickTooltip,
   closeOnHoverTooltip,
   openOnHoverTooltip,
-} from '../../../../actions/map_actions';
+} from '../../../../../../../../plugins/maps/public/actions/map_actions';
 import {
   getLayerList,
   getOpenTooltips,

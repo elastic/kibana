@@ -12,7 +12,7 @@ import {
   updateLayerMaxZoom,
   updateLayerMinZoom,
   updateLayerAlpha,
-} from '../../../actions/map_actions';
+} from '../../../../../../../plugins/maps/public/actions/map_actions';
 
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);

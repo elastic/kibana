@@ -6,9 +6,12 @@
 
 import { connect } from 'react-redux';
 import { SetViewControl } from './set_view_control';
-import { setGotoWithCenter } from '../../../actions/map_actions';
+import { setGotoWithCenter } from '../../../../../../../plugins/maps/public/actions/map_actions';
 import { getMapZoom, getMapCenter } from '../../../selectors/map_selectors';
-import { closeSetView, openSetView } from '../../../actions/ui_actions';
+import {
+  closeSetView,
+  openSetView,
+} from '../../../../../../../plugins/maps/public/actions/ui_actions';
 import { getIsSetViewOpen } from '../../../selectors/ui_selectors';
 
 function mapStateToProps(state = {}) {

@@ -21,14 +21,14 @@ describe('map_actions', () => {
     beforeEach(() => {
       // getLayerList mocked to return emtpy array because
       // syncDataForAllLayers is triggered by selector and internally calls getLayerList
-      require('../selectors/map_selectors').getLayerList = () => {
+      require('../../../../legacy/plugins/maps/public/selectors/map_selectors').getLayerList = () => {
         return [];
       };
     });
 
     describe('store mapState is empty', () => {
       beforeEach(() => {
-        require('../selectors/map_selectors').getDataFilters = () => {
+        require('../../../../legacy/plugins/maps/public/selectors/map_selectors').getDataFilters = () => {
           return {};
         };
       });
@@ -79,7 +79,7 @@ describe('map_actions', () => {
     describe('store mapState is populated', () => {
       const initialZoom = 10;
       beforeEach(() => {
-        require('../selectors/map_selectors').getDataFilters = () => {
+        require('../../../../legacy/plugins/maps/public/selectors/map_selectors').getDataFilters = () => {
           return {
             zoom: initialZoom,
             buffer: {

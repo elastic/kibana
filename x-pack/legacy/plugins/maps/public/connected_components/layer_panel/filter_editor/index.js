@@ -7,7 +7,10 @@
 import { connect } from 'react-redux';
 import { FilterEditor } from './filter_editor';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
-import { setLayerQuery, updateSourceProp } from '../../../actions/map_actions';
+import {
+  setLayerQuery,
+  updateSourceProp,
+} from '../../../../../../../plugins/maps/public/actions/map_actions';
 
 function mapStateToProps(state = {}) {
   return {

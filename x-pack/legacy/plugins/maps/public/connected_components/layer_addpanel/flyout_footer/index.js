@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
-import { clearTransientLayerStateAndCloseFlyout } from '../../../actions/map_actions';
+import { clearTransientLayerStateAndCloseFlyout } from '../../../../../../../plugins/maps/public/actions/map_actions';
 
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
