@@ -26,7 +26,6 @@ import './engine_overview.scss';
 
 interface IEngineOverviewProps {
   appSearchUrl: string;
-  showSetupGuideFlag();
   http();
 }
 
