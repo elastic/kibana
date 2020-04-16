@@ -91,3 +91,49 @@ export async function fetchSearchSourceAndRecordWithInspector({
 
   return resp;
 }
+
+let savedObjectsClient;
+export const setSavedObjectsClient = coreSavedObjectsClient =>
+  (savedObjectsClient = coreSavedObjectsClient);
+export const getSavedObjectsClient = () => savedObjectsClient;
+
+let chrome;
+export const setCoreChrome = coreChrome => (chrome = coreChrome);
+export const getCoreChrome = () => chrome;
+
+let mapsCapabilities;
+export const setMapsCapabilities = coreAppMapsCapabilities =>
+  (mapsCapabilities = coreAppMapsCapabilities);
+export const getMapsCapabilities = () => mapsCapabilities;
+
+let visualizations;
+export const setVisualizations = visPlugin => (visualizations = visPlugin);
+export const getVisualizations = () => visualizations;
+
+let docLinks;
+export const setDocLinks = coreDocLinks => (docLinks = coreDocLinks);
+export const getDocLinks = () => docLinks;
+
+let overlays;
+export const setCoreOverlays = coreOverlays => (overlays = coreOverlays);
+export const getCoreOverlays = () => overlays;
+
+let data;
+export const setData = dataPlugin => (data = dataPlugin);
+export const getData = () => data;
+
+let uiActions;
+export const setUiActions = pluginUiActions => (uiActions = pluginUiActions);
+export const getUiActions = () => uiActions;
+
+let core;
+export const setCore = kibanaCore => (core = kibanaCore);
+export const getCore = () => core;
+
+let navigation;
+export const setNavigation = pluginNavigation => (navigation = pluginNavigation);
+export const getNavigation = () => navigation;
+
+let coreI18n;
+export const setCoreI18n = kibanaCoreI18n => (coreI18n = kibanaCoreI18n);
+export const getCoreI18n = () => coreI18n;

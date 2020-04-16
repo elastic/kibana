@@ -17,14 +17,6 @@ import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { registerLayerWizards } from '../../../../plugins/maps/public/layers/load_layer_wizards';
 // @ts-ignore
 import { MapListing } from './components/map_listing';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import {
-  setInspector,
-  setIndexPatternSelect,
-  setTimeFilter,
-  setInjectedVarFunc,
-  setIndexPatternService,
-} from './kibana_services';
 // @ts-ignore
 import {
   bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
@@ -61,21 +53,6 @@ interface MapsPluginStartDependencies {
   // file_upload TODO: Export type from file upload and use here
 }
 
-export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
-  const { injectedMetadata } = core;
-  setInjectedVarFunc(injectedMetadata.getInjectedVar);
-  setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
-};
-
-export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
-  const { data, inspector } = plugins;
-  setInspector(inspector);
-  setIndexPatternSelect(data.ui.IndexPatternSelect);
-  setTimeFilter(data.query.timefilter.timefilter);
-  setIndexPatternService(data.indexPatterns);
-  registerLayerWizards();
-};
-
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   public setup(core: CoreSetup, { __LEGACY: { uiModules }, np }: MapsPluginSetupDependencies) {
@@ -85,14 +62,13 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
-    bindSetupCoreAndPlugins(core, np);
     bindNpSetupCoreAndPlugins(core, np);
 
     np.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
-    bindStartCoreAndPlugins(core, plugins);
     bindNpStartCoreAndPlugins(core, plugins);
+    registerLayerWizards();
   }
 }

@@ -15,7 +15,7 @@ jest.mock('../../../../../plugins/maps/public/reducers/non_serializable_instance
     return {};
   },
 }));
-jest.mock('../kibana_services', () => ({
+jest.mock('../../../../../plugins/maps/public/kibana_services', () => ({
   getTimeFilter: () => ({
     getTime: () => {
       return {

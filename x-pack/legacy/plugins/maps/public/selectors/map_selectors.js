@@ -17,8 +17,9 @@ import { HeatmapLayer } from '../../../../../plugins/maps/public/layers/heatmap_
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { BlendedVectorLayer } from '../../../../../plugins/maps/public/layers/blended_vector_layer';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getTimeFilter } from '../../../../../plugins/maps/public/kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TiledVectorLayer } from '../../../../../plugins/maps/public/layers/tiled_vector_layer';
-import { getTimeFilter } from '../kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import {
