@@ -161,3 +161,21 @@ test('tests processing keyword field with multi fields with analyzed text field'
   const mappings = generateMappings(processedFields);
   expect(JSON.stringify(mappings)).toEqual(JSON.stringify(keywordWithAnalyzedMultiFieldsMapping));
 });
+
+test('tests processing object field with no other attributes', () => {
+  const objectFieldLiteralYml = `
+- name: objectField
+  type: object
+`;
+  const objectFieldMapping = {
+    properties: {
+      objectField: {
+        type: 'object',
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldMapping));
+});
