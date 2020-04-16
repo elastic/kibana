@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as Rx from 'rxjs';
-import { startWith, switchMap, take } from 'rxjs/operators';
 import expect from '@kbn/expect/expect.js';
 import { IEvent } from '../../../../plugins/event_log/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -104,11 +102,6 @@ export default function({ getService }: FtrProviderContext) {
         event: { action: 'action1', provider: 'provider4' },
         kibana: { saved_objects: [{ type: 'event_log_test', id: eventId }] },
       };
-      await startTimingEventLogger(event);
-      retry.try(async () => {
-        Promise.resolve(log.debug('doing some action'));
-      });
-      await stopTimingEventLogger(event);
       await logTestEvent(eventId, event);
 
       await retry.try(async () => {
@@ -118,40 +111,8 @@ export default function({ getService }: FtrProviderContext) {
           .get(uri)
           .set('kbn-xsrf', 'foo')
           .expect(200);
-        expect(result.body.data.length).to.be.eql(1);
+        expect(result.body.data.length).to.be.above(1);
       });
-    });
-
-    it('should allow write an event to system logger if logging entries is enabled', async () => {
-      const initResult = await isProviderActionRegistered('provider5', 'test');
-
-      if (!initResult.body.isProviderActionRegistered) {
-        await registerProviderActions('provider5', ['test']);
-      }
-
-      const eventId = '1';
-      const event: IEvent = {
-        event: { action: 'action1', provider: 'provider5' },
-        kibana: { saved_objects: [{ type: 'action', id: eventId }] },
-      };
-      await startTimingEventLogger(event);
-      retry.try(async () => {
-        Promise.resolve(log.debug('doing some action'));
-      });
-      await stopTimingEventLogger(event);
-      await logTestEvent(eventId, event);
-
-      const promise = log
-        .getWritten$()
-        .pipe(
-          startWith(null),
-          switchMap(() => Rx.timer(5000)),
-          take(1)
-        )
-        .toPromise();
-      expect(await promise).to.be.eql('');
-
-      // (`${EVENT_LOGGED_PREFIX}${JSON.stringify(doc.body)}`);
     });
   });
 
@@ -208,24 +169,6 @@ export default function({ getService }: FtrProviderContext) {
     return await supertest
       .get(`/api/log_event_fixture/isEventLogServiceLoggingEntries`)
       .set('kbn-xsrf', 'foo')
-      .expect(200);
-  }
-
-  async function startTimingEventLogger(event: IEvent) {
-    log.debug(`startTimingEventLogger ${event}`);
-    return await supertest
-      .post(`/api/log_event_fixture/startTimingEventLogger`)
-      .set('kbn-xsrf', 'xxx')
-      .send(event)
-      .expect(200);
-  }
-
-  async function stopTimingEventLogger(event: IEvent) {
-    log.debug(`stopTimingEventLogger ${event}`);
-    return await supertest
-      .post(`/api/log_event_fixture/stopTimingEventLogger`)
-      .set('kbn-xsrf', 'xxx')
-      .send(event)
       .expect(200);
   }
 

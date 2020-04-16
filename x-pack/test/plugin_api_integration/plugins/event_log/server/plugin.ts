@@ -62,8 +62,6 @@ export class EventLogFixturePlugin
     isIndexingEntriesRoute(router, eventLog, this.logger);
     isEventLogServiceLoggingEntriesRoute(router, eventLog, this.logger);
     isEventLogServiceEnabledRoute(router, eventLog, this.logger);
-    startTimingEventLoggerRoute(router, eventLog, this.logger);
-    stopTimingEventLoggerRoute(router, eventLog, this.logger);
   }
 
   public start() {}
