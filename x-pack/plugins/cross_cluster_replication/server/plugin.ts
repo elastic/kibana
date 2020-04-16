@@ -78,7 +78,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
 
   async setup(
     { http, elasticsearch }: CoreSetup,
-    { licensing, indexManagement, security }: Dependencies
+    { licensing, indexManagement, remoteClusters, security }: Dependencies
   ): Promise<void> {
     const router = http.createRouter();
     const config = await this.config$.pipe(first()).toPromise();
@@ -116,7 +116,12 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
       },
     });
 
-    if (config.ui.enabled) {
+    // The UI is also dependent upon the Remote Clusters UI.
+    const isCcrUiEnabled = config.ui.enabled && remoteClusters.isUiEnabled;
+
+    // If the UI isn't enabled, then we don't want to expose any CCR concepts in the UI, including
+    // "follower" badges for follower indices.
+    if (isCcrUiEnabled) {
       if (indexManagement.indexDataEnricher) {
         indexManagement.indexDataEnricher.add(ccrDataEnricher);
       }

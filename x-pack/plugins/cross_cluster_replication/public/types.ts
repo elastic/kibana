@@ -7,12 +7,14 @@
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
+import { RemoteClustersPluginSetup } from '../../remote_clusters/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
 export interface PluginDependencies {
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
   indexManagement: IndexManagementPluginSetup;
+  remoteClusters: RemoteClustersPluginSetup;
   licensing: LicensingPluginSetup;
 }
 

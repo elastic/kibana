@@ -21,15 +21,18 @@ export class CrossClusterReplicationPlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(coreSetup: CoreSetup, plugins: PluginDependencies) {
-    plugins.licensing.license$
+    const { licensing, remoteClusters, usageCollection, management, indexManagement } = plugins;
+
+    licensing.license$
       .pipe(first())
       .toPromise()
       .then(license => {
         const isLicenseOk = license.isAvailable && license.isActive;
 
-        const {
-          ui: { enabled: isCcrUiEnabled },
-        } = this.initializerContext.config.get<ClientConfigType>();
+        const config = this.initializerContext.config.get<ClientConfigType>();
+
+        // The UI is also dependent upon the Remote Clusters UI.
+        const isCcrUiEnabled = config.ui.enabled && remoteClusters.isUiEnabled;
 
         if (isLicenseOk && isCcrUiEnabled) {
           const {
@@ -38,8 +41,6 @@ export class CrossClusterReplicationPlugin implements Plugin {
             fatalErrors,
             getStartServices,
           } = coreSetup;
-
-          const { usageCollection, management, indexManagement } = plugins;
 
           // Initialize services even if the app isn't mounted, because they're used by index management extensions.
           setHttpClient(http);
