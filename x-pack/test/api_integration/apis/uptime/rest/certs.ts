@@ -15,6 +15,7 @@ import { CertType } from '../../../../../legacy/plugins/uptime/common/runtime_ty
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const legacyEsService = getService('legacyEs');
+  const esArchiver = getService('esArchiver');
 
   describe('certs api', () => {
     describe('empty index', async () => {
@@ -23,6 +24,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(JSON.stringify(apiResponse.body)).to.eql('{"certs":[]}');
       });
     });
+
     describe('when data is present', async () => {
       const now = moment();
       const cnva = now.add(6, 'months').toISOString();
@@ -59,15 +61,21 @@ export default function({ getService }: FtrProviderContext) {
           d => d
         );
       });
+      after('unload test docs', () => {
+        esArchiver.unload('uptime/blank');
+      });
 
       it('pause so I can check stuff', async () => {
         const apiResponse = await supertest.get(API_URLS.CERTS);
         const { body } = apiResponse;
+
         expect(body.certs).not.to.be(undefined);
         expect(Array.isArray(body.certs)).to.be(true);
         expect(body.certs).to.have.length(1);
+
         const decoded = CertType.decode(body.certs[0]);
         expect(isRight(decoded)).to.be(true);
+
         const cert = body.certs[0];
         expect(Array.isArray(cert.monitors)).to.be(true);
         expect(cert.monitors[0]).to.eql({ id: monitorId });
