@@ -59,10 +59,12 @@ export interface FullAgentConfig {
   };
   datasources: FullAgentConfigDatasource[];
   revision?: number;
-  'settings.monitoring'?: {
-    use_output: string;
-    enabled: boolean;
-    metrics: boolean;
-    logs: boolean;
+  settings?: {
+    monitoring: {
+      use_output: string;
+      enabled: boolean;
+      metrics: boolean;
+      logs: boolean;
+    };
   };
 }

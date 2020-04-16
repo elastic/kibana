@@ -83,11 +83,13 @@ describe('agent config', () => {
         },
         datasources: [],
         revision: 1,
-        'settings.monitoring': {
-          use_output: 'default',
-          enabled: true,
-          logs: true,
-          metrics: false,
+        settings: {
+          monitoring: {
+            use_output: 'default',
+            enabled: true,
+            logs: true,
+            metrics: false,
+          },
         },
       });
     });
@@ -111,11 +113,13 @@ describe('agent config', () => {
         },
         datasources: [],
         revision: 1,
-        'settings.monitoring': {
-          use_output: 'default',
-          enabled: true,
-          logs: false,
-          metrics: true,
+        settings: {
+          monitoring: {
+            use_output: 'default',
+            enabled: true,
+            logs: false,
+            metrics: true,
+          },
         },
       });
     });

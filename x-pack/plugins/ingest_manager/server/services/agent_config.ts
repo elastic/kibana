@@ -330,11 +330,13 @@ class AgentConfigService {
       revision: config.revision,
       ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
         ? {
-            'settings.monitoring': {
-              use_output: defaultOutput.name,
-              enabled: true,
-              logs: config.monitoring_enabled.indexOf('logs') >= 0,
-              metrics: config.monitoring_enabled.indexOf('metrics') >= 0,
+            settings: {
+              monitoring: {
+                use_output: defaultOutput.name,
+                enabled: true,
+                logs: config.monitoring_enabled.indexOf('logs') >= 0,
+                metrics: config.monitoring_enabled.indexOf('metrics') >= 0,
+              },
             },
           }
         : {}),
