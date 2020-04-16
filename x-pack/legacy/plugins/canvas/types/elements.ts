@@ -43,10 +43,6 @@ export interface CustomElement {
    */
   image?: string;
   /**
-   * the type of the element
-   */
-  type?: string;
-  /**
    * the element object stringified
    */
   content: string;
