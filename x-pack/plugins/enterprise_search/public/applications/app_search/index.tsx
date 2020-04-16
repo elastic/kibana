@@ -5,20 +5,30 @@
  */
 
 import React, { useState } from 'react';
+import { Route, Redirect } from 'react-router-dom';
 
 import { SetupGuide } from './components/setup_guide';
 import { EngineOverview } from './components/engine_overview';
 
-interface IMainProps {
+interface IAppSearchProps {
   appSearchUrl?: string;
 }
 
-export const Main: React.FC<IMainProps> = props => {
+export const AppSearch: React.FC<IAppSearchProps> = props => {
   const [showSetupGuide, showSetupGuideFlag] = useState(!props.appSearchUrl);
 
-  return showSetupGuide ? (
-    <SetupGuide {...props} />
-  ) : (
-    <EngineOverview {...props} showSetupGuideFlag={showSetupGuideFlag} />
+  return (
+    <>
+      <Route exact path="/app_search">
+        {showSetupGuide ? (
+          <Redirect to="/app_search/setup_guide" />
+        ) : (
+          <EngineOverview {...props} showSetupGuideFlag={showSetupGuideFlag} />
+        )}
+      </Route>
+      <Route path="/app_search/setup_guide">
+        <SetupGuide {...props} />
+      </Route>
+    </>
   );
 };
