@@ -10,10 +10,12 @@ import { HashRouter } from 'react-router-dom';
 import { I18nStart } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
 
+import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
+import { init as initDocumentation } from './services/documentation_links';
 import { App } from './app';
 import { ccrStore } from './store';
 
-export const renderApp = (element: Element, I18nContext: I18nStart['Context']): UnmountCallback => {
+const renderApp = (element: Element, I18nContext: I18nStart['Context']): UnmountCallback => {
   render(
     <I18nContext>
       <Provider store={ccrStore}>
@@ -27,3 +29,23 @@ export const renderApp = (element: Element, I18nContext: I18nStart['Context']): 
 
   return () => unmountComponentAtNode(element);
 };
+
+export async function mountApp({
+  element,
+  setBreadcrumbs,
+  I18nContext,
+  ELASTIC_WEBSITE_URL,
+  DOC_LINK_VERSION,
+}: {
+  element: Element;
+  setBreadcrumbs: SetBreadcrumbs;
+  I18nContext: I18nStart['Context'];
+  ELASTIC_WEBSITE_URL: string;
+  DOC_LINK_VERSION: string;
+}): UnmountCallback {
+  // Initialize additional services.
+  initBreadcrumbs(setBreadcrumbs);
+  initDocumentation(`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`);
+
+  return renderApp(element, I18nContext);
+}

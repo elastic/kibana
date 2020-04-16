@@ -10,8 +10,6 @@ import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
 import { PLUGIN } from '../common/constants';
-import { init as initBreadcrumbs } from './app/services/breadcrumbs';
-import { init as initDocumentation } from './app/services/documentation_links';
 import { init as initUiMetric } from './app/services/track_ui_metric';
 import { init as initNotification } from './app/services/notifications';
 import { PluginDependencies, ClientConfigType } from './types';
@@ -53,20 +51,21 @@ export class CrossClusterReplicationPlugin implements Plugin {
             title: PLUGIN.TITLE,
             order: 4,
             mount: async ({ element, setBreadcrumbs }) => {
+              const { mountApp } = await import('./app');
+
               const [coreStart] = await getStartServices();
               const {
                 i18n: { Context: I18nContext },
                 docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
               } = coreStart;
 
-              // Initialize additional services.
-              initBreadcrumbs(setBreadcrumbs);
-              initDocumentation(
-                `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`
-              );
-
-              const { renderApp } = await import('./app');
-              return renderApp(element, I18nContext);
+              return mountApp({
+                element,
+                setBreadcrumbs,
+                I18nContext,
+                ELASTIC_WEBSITE_URL,
+                DOC_LINK_VERSION,
+              });
             },
           });
 

@@ -11,7 +11,7 @@ import { ManagementAppMountParams } from '../../../../../../src/plugins/manageme
 
 import { BASE_PATH } from '../../../common/constants';
 
-type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
+export type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
 let setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 
