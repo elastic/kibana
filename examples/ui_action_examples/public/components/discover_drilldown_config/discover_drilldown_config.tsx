@@ -66,8 +66,11 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
               <EuiSelect
                 name="selectDashboard"
                 hasNoInitialSelection={true}
-                options={indexPatterns.map(({ id, title }) => ({ value: id, text: title }))}
-                value={activeIndexPatternId}
+                options={[
+                  { id: '', text: 'Pick one...' },
+                  ...indexPatterns.map(({ id, title }) => ({ value: id, text: title })),
+                ]}
+                value={activeIndexPatternId || ''}
                 onChange={e => onIndexPatternSelect(e.target.value)}
               />
             </EuiFormRow>

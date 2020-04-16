@@ -27,6 +27,13 @@ import { DASHBOARD_TO_DISCOVER_DRILLDOWN } from './constants';
 import { DrilldownDefinition as Drilldown } from '../../../../x-pack/plugins/drilldowns/public';
 import { txtGoToDiscover } from './i18n';
 
+const isOutputWithIndexPatterns = (
+  output: unknown
+): output is { indexPatterns: Array<{ id: string }> } => {
+  if (!output || typeof output !== 'object') return false;
+  return Array.isArray((output as any).indexPatterns);
+};
+
 export interface Params {
   start: StartServicesGetter<Pick<Start, 'data'>>;
 }
@@ -60,7 +67,22 @@ export class DashboardToDiscoverDrilldown
     return true;
   };
 
-  public readonly execute = () => {
-    alert('Go to discover!');
+  public readonly execute = async (config: Config, context: ActionContext) => {
+    let indexPatternId =
+      !!config.customIndexPattern && !!config.indexPatternId ? config.indexPatternId : '';
+
+    if (!indexPatternId && !!context.embeddable) {
+      const output = context.embeddable!.getOutput();
+      if (isOutputWithIndexPatterns(output) && output.indexPatterns.length > 0) {
+        indexPatternId = output.indexPatterns[0].id;
+      }
+    }
+
+    const index = indexPatternId ? `,index:'${indexPatternId}'` : '';
+    const path = `#/discover?_g=(filters:!(),refreshInterval:(pause:!f,value:900000),time:(from:now-7d,to:now))&_a=(columns:!(_source),filters:!()${index},interval:auto,query:(language:kuery,query:''),sort:!())`;
+
+    await this.params.start().core.application.navigateToApp('kibana', {
+      path,
+    });
   };
 }
