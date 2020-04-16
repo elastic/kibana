@@ -138,7 +138,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   );
   const refreshCases = useCallback(
     (dataRefresh = true) => {
-      if (dataRefresh) refetchCases();
+      if (dataRefresh) refetchCases(filterOptions, queryParams);
       fetchCasesStatus();
       setSelectedCases([]);
       setDeleteBulk([]);
