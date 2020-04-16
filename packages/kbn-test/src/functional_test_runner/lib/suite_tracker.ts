@@ -56,7 +56,7 @@ export class SuiteTracker {
 
   getTracked(suite: object): SuiteInProgress {
     if (!this.inProgressSuites.has(suite)) {
-      this.inProgressSuites.set(suite, {} as SuiteInProgress);
+      this.inProgressSuites.set(suite, { success: undefined } as SuiteInProgress);
     }
     return this.inProgressSuites.get(suite)!;
   }
@@ -97,7 +97,7 @@ export class SuiteTracker {
       tracked.endTime = new Date();
 
       // The suite ended without any children failing, so we can mark it as successful
-      if (!('success' in tracked)) {
+      if (typeof tracked.success === 'undefined') {
         tracked.success = true;
       }
 
