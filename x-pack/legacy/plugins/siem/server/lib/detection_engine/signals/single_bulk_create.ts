@@ -9,7 +9,7 @@ import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { SignalSearchResponse, BulkResponse } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams } from '../types';
+import { RuleTypeParams, RefreshTypes } from '../types';
 import { generateId, makeFloatString } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../../src/core/server';
@@ -31,6 +31,7 @@ interface SingleBulkCreateParams {
   enabled: boolean;
   tags: string[];
   throttle: string;
+  refresh: RefreshTypes;
 }
 
 /**
@@ -77,6 +78,7 @@ export const singleBulkCreate = async ({
   updatedBy,
   interval,
   enabled,
+  refresh,
   tags,
   throttle,
 }: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
@@ -124,7 +126,7 @@ export const singleBulkCreate = async ({
   const start = performance.now();
   const response: BulkResponse = await services.callCluster('bulk', {
     index: signalsIndex,
-    refresh: false,
+    refresh,
     body: bulkBody,
   });
   const end = performance.now();

@@ -6,7 +6,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import {
-  CasesConnectorsFindResult,
+  Connector,
   CasesConfigurePatch,
   CasesConfigureResponse,
   CasesConfigureRequest,
@@ -18,7 +18,7 @@ import { ApiProps } from '../types';
 import { convertToCamelCase, decodeCaseConfigureResponse } from '../utils';
 import { CaseConfigure } from './types';
 
-export const fetchConnectors = async ({ signal }: ApiProps): Promise<CasesConnectorsFindResult> => {
+export const fetchConnectors = async ({ signal }: ApiProps): Promise<Connector[]> => {
   const response = await KibanaServices.get().http.fetch(
     `${CASES_CONFIGURE_URL}/connectors/_find`,
     {

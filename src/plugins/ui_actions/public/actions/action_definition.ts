@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiComponent } from 'src/plugins/kibana_utils/common';
+import { UiComponent } from 'src/plugins/kibana_utils/public';
 import { ActionType, ActionContextMapping } from '../types';
 
 export interface ActionDefinition<T extends ActionType> {
@@ -63,7 +63,7 @@ export interface ActionDefinition<T extends ActionType> {
   /**
    * If this returns something truthy, this is used in addition to the `execute` method when clicked.
    */
-  getHref?(context: ActionContextMapping[T]): string | undefined;
+  getHref?(context: ActionContextMapping[T]): Promise<string | undefined>;
 
   /**
    * Executes the action.

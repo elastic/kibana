@@ -18,24 +18,45 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
     const username = 'foo-user';
     const action = 'foo-action';
     const types = ['foo-type-1', 'foo-type-2'];
-    const missing = [`saved_object:${types[0]}/foo-action`, `saved_object:${types[1]}/foo-action`];
+    const spaceIds = ['foo-space', 'bar-space'];
+    const missing = [
+      {
+        spaceId: 'foo-space',
+        privilege: `saved_object:${types[0]}/${action}`,
+      },
+      {
+        spaceId: 'foo-space',
+        privilege: `saved_object:${types[1]}/${action}`,
+      },
+    ];
     const args = {
       foo: 'bar',
       baz: 'quz',
     };
 
-    securityAuditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
+    securityAuditLogger.savedObjectsAuthorizationFailure(
+      username,
+      action,
+      types,
+      spaceIds,
+      missing,
+      args
+    );
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       'saved_objects_authorization_failure',
-      expect.stringContaining(`${username} unauthorized to ${action}`),
+      expect.any(String),
       {
         username,
         action,
         types,
+        spaceIds,
         missing,
         args,
       }
+    );
+    expect(auditLogger.log.mock.calls[0][1]).toMatchInlineSnapshot(
+      `"foo-user unauthorized to [foo-action] [foo-type-1,foo-type-2] in [foo-space,bar-space]: missing [(foo-space)saved_object:foo-type-1/foo-action,(foo-space)saved_object:foo-type-2/foo-action]"`
     );
   });
 });
@@ -47,22 +68,27 @@ describe(`#savedObjectsAuthorizationSuccess`, () => {
     const username = 'foo-user';
     const action = 'foo-action';
     const types = ['foo-type-1', 'foo-type-2'];
+    const spaceIds = ['foo-space', 'bar-space'];
     const args = {
       foo: 'bar',
       baz: 'quz',
     };
 
-    securityAuditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
+    securityAuditLogger.savedObjectsAuthorizationSuccess(username, action, types, spaceIds, args);
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       'saved_objects_authorization_success',
-      expect.stringContaining(`${username} authorized to ${action}`),
+      expect.any(String),
       {
         username,
         action,
         types,
+        spaceIds,
         args,
       }
+    );
+    expect(auditLogger.log.mock.calls[0][1]).toMatchInlineSnapshot(
+      `"foo-user authorized to [foo-action] [foo-type-1,foo-type-2] in [foo-space,bar-space]"`
     );
   });
 });

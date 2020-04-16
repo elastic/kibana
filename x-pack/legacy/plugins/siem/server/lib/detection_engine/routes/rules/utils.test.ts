@@ -12,7 +12,6 @@ import {
   transformTags,
   getIdBulkError,
   transformOrBulkError,
-  transformDataToNdjson,
   transformAlertsToRules,
   transformOrImportError,
   getDuplicates,
@@ -22,14 +21,13 @@ import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { ImportRuleAlertRest, RuleAlertParamsRest, RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
-import { sampleRule } from '../../signals/__mocks__/es_results';
 import { getSimpleRule, getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { PartialAlert } from '../../../../../../../../plugins/alerting/server';
 import { SanitizedAlert } from '../../../../../../../../plugins/alerting/server/types';
 import { RuleAlertType } from '../../rules/types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -393,47 +391,6 @@ describe('utils', () => {
         error: { message: 'Internal error transforming', status_code: 500 },
       };
       expect(output).toEqual(expected);
-    });
-  });
-
-  describe('transformDataToNdjson', () => {
-    test('if rules are empty it returns an empty string', () => {
-      const ruleNdjson = transformDataToNdjson([]);
-      expect(ruleNdjson).toEqual('');
-    });
-
-    test('single rule will transform with new line ending character for ndjson', () => {
-      const rule = sampleRule();
-      const ruleNdjson = transformDataToNdjson([rule]);
-      expect(ruleNdjson.endsWith('\n')).toBe(true);
-    });
-
-    test('multiple rules will transform with two new line ending characters for ndjson', () => {
-      const result1 = sampleRule();
-      const result2 = sampleRule();
-      result2.id = 'some other id';
-      result2.rule_id = 'some other id';
-      result2.name = 'Some other rule';
-
-      const ruleNdjson = transformDataToNdjson([result1, result2]);
-      // this is how we count characters in JavaScript :-)
-      const count = ruleNdjson.split('\n').length - 1;
-      expect(count).toBe(2);
-    });
-
-    test('you can parse two rules back out without errors', () => {
-      const result1 = sampleRule();
-      const result2 = sampleRule();
-      result2.id = 'some other id';
-      result2.rule_id = 'some other id';
-      result2.name = 'Some other rule';
-
-      const ruleNdjson = transformDataToNdjson([result1, result2]);
-      const ruleStrings = ruleNdjson.split('\n');
-      const reParsed1 = JSON.parse(ruleStrings[0]);
-      const reParsed2 = JSON.parse(ruleStrings[1]);
-      expect(reParsed1).toEqual(result1);
-      expect(reParsed2).toEqual(result2);
     });
   });
 

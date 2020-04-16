@@ -65,8 +65,6 @@ export const INTERNAL_IDENTIFIER = '__internal';
 export const INTERNAL_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_id`;
 export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id`;
 export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable`;
-export const INTERNAL_NOTIFICATION_ID_KEY = `${INTERNAL_IDENTIFIER}_notification_id`;
-export const INTERNAL_NOTIFICATION_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_notification_rule_id`;
 
 /**
  * Detection engine routes

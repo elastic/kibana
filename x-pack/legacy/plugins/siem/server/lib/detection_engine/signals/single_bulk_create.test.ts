@@ -16,17 +16,13 @@ import {
   sampleBulkCreateErrorResult,
   sampleDocWithAncestors,
 } from './__mocks__/es_results';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { singleBulkCreate, filterDuplicateRules } from './single_bulk_create';
-
-export const mockService = {
-  callCluster: jest.fn(),
-  alertInstanceFactory: jest.fn(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+import { alertsMock, AlertServicesMock } from '../../../../../../../plugins/alerting/server/mocks';
 
 describe('singleBulkCreate', () => {
+  const mockService: AlertServicesMock = alertsMock.createAlertServices();
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -135,7 +131,7 @@ describe('singleBulkCreate', () => {
 
   test('create successful bulk create', async () => {
     const sampleParams = sampleRuleAlertParams();
-    mockService.callCluster.mockReturnValueOnce({
+    mockService.callCluster.mockResolvedValueOnce({
       took: 100,
       errors: false,
       items: [
@@ -159,6 +155,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -168,7 +165,7 @@ describe('singleBulkCreate', () => {
 
   test('create successful bulk create with docs with no versioning', async () => {
     const sampleParams = sampleRuleAlertParams();
-    mockService.callCluster.mockReturnValueOnce({
+    mockService.callCluster.mockResolvedValueOnce({
       took: 100,
       errors: false,
       items: [
@@ -192,6 +189,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -201,7 +199,7 @@ describe('singleBulkCreate', () => {
 
   test('create unsuccessful bulk create due to empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
-    mockService.callCluster.mockReturnValue(false);
+    mockService.callCluster.mockResolvedValue(false);
     const { success, createdItemsCount } = await singleBulkCreate({
       someResult: sampleEmptyDocSearchResults(),
       ruleParams: sampleParams,
@@ -217,6 +215,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -227,7 +226,7 @@ describe('singleBulkCreate', () => {
   test('create successful bulk create when bulk create has duplicate errors', async () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
-    mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
+    mockService.callCluster.mockResolvedValue(sampleBulkCreateDuplicateResult);
     const { success, createdItemsCount } = await singleBulkCreate({
       someResult: sampleSearchResult(),
       ruleParams: sampleParams,
@@ -243,6 +242,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -255,7 +255,7 @@ describe('singleBulkCreate', () => {
   test('create successful bulk create when bulk create has multiple error statuses', async () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
-    mockService.callCluster.mockReturnValue(sampleBulkCreateErrorResult);
+    mockService.callCluster.mockResolvedValue(sampleBulkCreateErrorResult);
     const { success, createdItemsCount } = await singleBulkCreate({
       someResult: sampleSearchResult(),
       ruleParams: sampleParams,
@@ -271,6 +271,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -349,7 +350,7 @@ describe('singleBulkCreate', () => {
 
   test('create successful and returns proper createdItemsCount', async () => {
     const sampleParams = sampleRuleAlertParams();
-    mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
+    mockService.callCluster.mockResolvedValue(sampleBulkCreateDuplicateResult);
     const { success, createdItemsCount } = await singleBulkCreate({
       someResult: sampleDocSearchResultsNoSortId(),
       ruleParams: sampleParams,
@@ -365,6 +366,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });

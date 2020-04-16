@@ -60,12 +60,9 @@ const EditableTitleComponent: React.FC<Props> = ({
   }, [changedTitle, title]);
 
   const handleOnChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      onTitleChange(e.target.value);
-    },
-    [onTitleChange]
+    (e: ChangeEvent<HTMLInputElement>) => onTitleChange(e.target.value),
+    []
   );
-
   return editMode ? (
     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
@@ -107,7 +104,7 @@ const EditableTitleComponent: React.FC<Props> = ({
         <Title title={title} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {isLoading && <MySpinner />}
+        {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
         {!isLoading && (
           <MyEuiButtonIcon
             isDisabled={disabled}

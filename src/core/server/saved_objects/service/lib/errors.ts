@@ -33,6 +33,8 @@ const CODE_REQUEST_ENTITY_TOO_LARGE = 'SavedObjectsClient/requestEntityTooLarge'
 const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
 // 409 - Conflict
 const CODE_CONFLICT = 'SavedObjectsClient/conflict';
+// 400 - Es Cannot Execute Script
+const CODE_ES_CANNOT_EXECUTE_SCRIPT = 'SavedObjectsClient/esCannotExecuteScript';
 // 503 - Es Unavailable
 const CODE_ES_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
 // 503 - Unable to automatically create index because of action.auto_create_index setting
@@ -152,8 +154,22 @@ export class SavedObjectsErrorHelpers {
     return decorate(error, CODE_CONFLICT, 409, reason);
   }
 
+  public static createConflictError(type: string, id: string) {
+    return SavedObjectsErrorHelpers.decorateConflictError(
+      Boom.conflict(`Saved object [${type}/${id}] conflict`)
+    );
+  }
+
   public static isConflictError(error: Error | DecoratedError) {
     return isSavedObjectsClientError(error) && error[code] === CODE_CONFLICT;
+  }
+
+  public static decorateEsCannotExecuteScriptError(error: Error, reason?: string) {
+    return decorate(error, CODE_ES_CANNOT_EXECUTE_SCRIPT, 400, reason);
+  }
+
+  public static isEsCannotExecuteScriptError(error: Error | DecoratedError) {
+    return isSavedObjectsClientError(error) && error[code] === CODE_ES_CANNOT_EXECUTE_SCRIPT;
   }
 
   public static decorateEsUnavailableError(error: Error, reason?: string) {

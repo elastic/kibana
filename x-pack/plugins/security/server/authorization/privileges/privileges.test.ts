@@ -409,13 +409,18 @@ describe('features', () => {
           },
           privileges: null,
           reserved: {
-            privilege: {
-              savedObject: {
-                all: ['ignore-me-1', 'ignore-me-2'],
-                read: ['ignore-me-1', 'ignore-me-2'],
+            privileges: [
+              {
+                id: 'reserved',
+                privilege: {
+                  savedObject: {
+                    all: ['ignore-me-1', 'ignore-me-2'],
+                    read: ['ignore-me-1', 'ignore-me-2'],
+                  },
+                  ui: ['ignore-me-1'],
+                },
               },
-              ui: ['ignore-me-1'],
-            },
+            ],
             description: '',
           },
         }),
@@ -591,13 +596,18 @@ describe('reserved', () => {
         },
         privileges: null,
         reserved: {
-          privilege: {
-            savedObject: {
-              all: [],
-              read: [],
+          privileges: [
+            {
+              id: 'foo',
+              privilege: {
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: [],
+              },
             },
-            ui: [],
-          },
+          ],
           description: '',
         },
       }),
@@ -627,13 +637,18 @@ describe('reserved', () => {
         app: [],
         privileges: null,
         reserved: {
-          privilege: {
-            savedObject: {
-              all: ['savedObject-all-1', 'savedObject-all-2'],
-              read: ['savedObject-read-1', 'savedObject-read-2'],
+          privileges: [
+            {
+              id: 'foo',
+              privilege: {
+                savedObject: {
+                  all: ['savedObject-all-1', 'savedObject-all-2'],
+                  read: ['savedObject-read-1', 'savedObject-read-2'],
+                },
+                ui: ['ui-1', 'ui-2'],
+              },
             },
-            ui: ['ui-1', 'ui-2'],
-          },
+          ],
           description: '',
         },
       }),

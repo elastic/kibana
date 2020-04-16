@@ -8,14 +8,14 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { AlertsClient, AlertServices } from '../../../../../../../plugins/alerting/server';
 import { updateOrCreateRuleActionsSavedObject } from '../rule_actions/update_or_create_rule_actions_saved_object';
 import { updateNotifications } from '../notifications/update_notifications';
-import { updateRuleActions } from './update_rule_actions';
+import { RuleActions } from '../rule_actions/types';
 
 interface UpdateRulesNotifications {
   alertsClient: AlertsClient;
   savedObjectsClient: AlertServices['savedObjectsClient'];
   ruleAlertId: string;
   actions: RuleAlertAction[] | undefined;
-  throttle: string | undefined;
+  throttle: string | null | undefined;
   enabled: boolean;
   name: string;
 }
@@ -28,18 +28,12 @@ export const updateRulesNotifications = async ({
   enabled,
   name,
   throttle,
-}: UpdateRulesNotifications) => {
+}: UpdateRulesNotifications): Promise<RuleActions> => {
   const ruleActions = await updateOrCreateRuleActionsSavedObject({
     savedObjectsClient,
     ruleAlertId,
     actions,
     throttle,
-  });
-
-  await updateRuleActions({
-    alertsClient,
-    savedObjectsClient,
-    ruleAlertId,
   });
 
   await updateNotifications({
@@ -48,7 +42,7 @@ export const updateRulesNotifications = async ({
     enabled,
     name,
     actions: ruleActions.actions,
-    interval: ruleActions?.alertThrottle,
+    interval: ruleActions.alertThrottle,
   });
 
   return ruleActions;

@@ -10,7 +10,7 @@ import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { AnalyticsJobType } from '../../hooks/use_create_analytics_form/state';
 import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../common/fields';
 
-const CATEGORICAL_TYPES = new Set(['ip', 'keyword', 'text']);
+const CATEGORICAL_TYPES = new Set(['ip', 'keyword']);
 
 // List of system fields we want to ignore for the numeric field check.
 export const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];

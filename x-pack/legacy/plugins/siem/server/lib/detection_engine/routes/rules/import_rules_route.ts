@@ -26,13 +26,13 @@ import {
   buildSiemResponse,
   validateLicenseForRuleType,
 } from '../utils';
-import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
 import { patchRules } from '../../rules/patch_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
 import { ImportRulesSchema, importRulesSchema } from '../schemas/response/import_rules_schema';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
 import { validate } from './validate';
+import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -196,6 +196,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         note,
                         version,
                         lists,
+                        actions: [], // Actions are not imported nor exported at this time
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
                     } else if (rule != null && request.query.overwrite) {

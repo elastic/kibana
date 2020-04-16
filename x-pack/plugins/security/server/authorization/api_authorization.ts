@@ -24,7 +24,6 @@ export function initAPIAuthorization(
 
     // if there are no tags starting with "access:", just continue
     if (actionTags.length === 0) {
-      logger.debug('API endpoint is not marked with "access:" tags, skipping.');
       return toolkit.next();
     }
 
@@ -34,11 +33,11 @@ export function initAPIAuthorization(
 
     // we've actually authorized the request
     if (checkPrivilegesResponse.hasAllRequested) {
-      logger.debug(`authorized for "${request.url.path}"`);
+      logger.debug(`User authorized for "${request.url.path}"`);
       return toolkit.next();
     }
 
-    logger.debug(`not authorized for "${request.url.path}"`);
+    logger.warn(`User not authorized for "${request.url.path}": responding with 404`);
     return response.notFound();
   });
 }

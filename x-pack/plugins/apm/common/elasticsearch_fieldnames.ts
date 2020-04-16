@@ -60,6 +60,7 @@ export const ERROR_LOG_LEVEL = 'error.log.level';
 export const ERROR_LOG_MESSAGE = 'error.log.message';
 export const ERROR_EXC_MESSAGE = 'error.exception.message'; // only to be used in es queries, since error.exception is now an array
 export const ERROR_EXC_HANDLED = 'error.exception.handled'; // only to be used in es queries, since error.exception is now an array
+export const ERROR_EXC_TYPE = 'error.exception.type';
 export const ERROR_PAGE_URL = 'error.page.url';
 
 // METRICS

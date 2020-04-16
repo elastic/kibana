@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../../../plugins/alerting/server';
 import { readRules } from './read_rules';
 import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
@@ -46,6 +47,7 @@ export const updateRules = async ({
   lists,
   anomalyThreshold,
   machineLearningJobId,
+  actions,
 }: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -90,8 +92,8 @@ export const updateRules = async ({
       tags: addTags(tags, rule.params.ruleId, rule.params.immutable),
       name,
       schedule: { interval },
-      actions: rule.actions,
-      throttle: rule.throttle,
+      actions: actions.map(transformRuleToAlertAction),
+      throttle: null,
       params: {
         description,
         ruleId: rule.params.ruleId,

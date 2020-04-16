@@ -9,12 +9,13 @@ import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { ruleActionsSavedObjectType } from './saved_object_mappings';
 import { IRuleActionsAttributesSavedObjectAttributes } from './types';
 import { getThrottleOptions, getRuleActionsFromSavedObject } from './utils';
+import { RulesActionsSavedObject } from './get_rule_actions_saved_object';
 
 interface CreateRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: AlertServices['savedObjectsClient'];
   actions: RuleAlertAction[] | undefined;
-  throttle: string | undefined;
+  throttle: string | null | undefined;
 }
 
 export const createRuleActionsSavedObject = async ({
@@ -22,7 +23,7 @@ export const createRuleActionsSavedObject = async ({
   savedObjectsClient,
   actions = [],
   throttle,
-}: CreateRuleActionsSavedObject) => {
+}: CreateRuleActionsSavedObject): Promise<RulesActionsSavedObject> => {
   const ruleActionsSavedObject = await savedObjectsClient.create<
     IRuleActionsAttributesSavedObjectAttributes
   >(ruleActionsSavedObjectType, {

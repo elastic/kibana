@@ -47,6 +47,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        isPreconfigured: false,
         name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
@@ -60,6 +61,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'A slack action',
         actionTypeId: '.slack',
         config: {},

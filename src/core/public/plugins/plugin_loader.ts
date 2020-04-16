@@ -32,7 +32,7 @@ export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string,
  */
 export interface CoreWindow {
   __kbnBundles__: {
-    [pluginBundleName: string]: UnknownPluginInitializer | undefined;
+    [pluginBundleName: string]: { plugin: UnknownPluginInitializer } | undefined;
   };
 }
 
@@ -70,9 +70,28 @@ export const loadPluginBundle: LoadPluginBundle = <
 ) =>
   new Promise<PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>>(
     (resolve, reject) => {
-      const script = document.createElement('script');
       const coreWindow = (window as unknown) as CoreWindow;
+      const exportId = `plugin/${pluginName}`;
 
+      const readPluginExport = () => {
+        const PluginExport: any = coreWindow.__kbnBundles__[exportId];
+        if (typeof PluginExport?.plugin !== 'function') {
+          reject(
+            new Error(`Definition of plugin "${pluginName}" should be a function (${bundlePath}).`)
+          );
+        } else {
+          resolve(
+            PluginExport.plugin as PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>
+          );
+        }
+      };
+
+      if (coreWindow.__kbnBundles__[exportId]) {
+        readPluginExport();
+        return;
+      }
+
+      const script = document.createElement('script');
       // Assumes that all plugin bundles get put into the bundles/plugins subdirectory
       const bundlePath = addBasePath(`/bundles/plugin/${pluginName}/${pluginName}.plugin.js`);
       script.setAttribute('src', bundlePath);
@@ -89,15 +108,7 @@ export const loadPluginBundle: LoadPluginBundle = <
       // Wire up resolve and reject
       script.onload = () => {
         cleanupTag();
-
-        const initializer = coreWindow.__kbnBundles__[`plugin/${pluginName}`];
-        if (!initializer || typeof initializer !== 'function') {
-          reject(
-            new Error(`Definition of plugin "${pluginName}" should be a function (${bundlePath}).`)
-          );
-        } else {
-          resolve(initializer as PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>);
-        }
+        readPluginExport();
       };
 
       script.onerror = () => {

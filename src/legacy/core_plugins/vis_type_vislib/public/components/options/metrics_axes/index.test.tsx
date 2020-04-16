@@ -95,6 +95,7 @@ describe('MetricsAxisOptions component', () => {
           schemas: { metrics: [{ name: 'metric' }] },
         },
         setState: jest.fn(),
+        serialize: jest.fn(),
       },
       stateParams: {
         valueAxes: [axis],

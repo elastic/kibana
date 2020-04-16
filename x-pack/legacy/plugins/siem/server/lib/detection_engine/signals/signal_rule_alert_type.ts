@@ -24,7 +24,10 @@ import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
+import {
+  scheduleNotificationActions,
+  NotificationRuleTypeParams,
+} from '../notifications/schedule_notification_actions';
 import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
@@ -95,6 +98,7 @@ export const signalRulesAlertType = ({
         params: ruleParams,
       } = savedObject.attributes;
       const updatedAt = savedObject.updated_at ?? '';
+      const refresh = actions.length ? 'wait_for' : false;
       const buildRuleMessage = buildRuleMessageFactory({
         id: alertId,
         ruleId,
@@ -178,6 +182,7 @@ export const signalRulesAlertType = ({
             updatedAt,
             interval,
             enabled,
+            refresh,
             tags,
           });
           result.success = success;
@@ -238,6 +243,7 @@ export const signalRulesAlertType = ({
             interval,
             enabled,
             pageSize: searchAfterSize,
+            refresh,
             tags,
             throttle,
           });
@@ -246,7 +252,7 @@ export const signalRulesAlertType = ({
 
         if (result.success) {
           if (actions.length) {
-            const notificationRuleParams = {
+            const notificationRuleParams: NotificationRuleTypeParams = {
               ...ruleParams,
               name,
               id: savedObject.id,
@@ -259,7 +265,7 @@ export const signalRulesAlertType = ({
               from: fromInMs,
               to: toInMs,
               id: savedObject.id,
-              kibanaSiemAppUrl: meta?.kibanaSiemAppUrl as string,
+              kibanaSiemAppUrl: meta?.kibana_siem_app_url,
             });
 
             logger.info(

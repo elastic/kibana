@@ -22,10 +22,6 @@ import { MetricVisComponent } from './components/metric_vis_component';
 
 jest.mock('ui/new_platform');
 
-jest.mock('../../vis_default_editor/public', () => ({
-  Schemas: class {},
-}));
-
 describe('metric_vis - createMetricVisTypeDefinition', () => {
   it('has metric vis component set', () => {
     const def = createMetricVisTypeDefinition();

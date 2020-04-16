@@ -36,6 +36,7 @@ export interface SavedObjectsRawDoc {
 export interface SavedObjectsRawDocSource {
   type: string;
   namespace?: string;
+  namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
   updated_at?: string;
   references?: SavedObjectReference[];
@@ -54,6 +55,7 @@ interface SavedObjectDoc {
   id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
   namespace?: string;
+  namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
   version?: string;
   updated_at?: string;

@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { PluginsStart } from './legacy_imports';
-import { ManagementSetup as ManagementSetupLegacy } from '../../../../../src/legacy/core_plugins/management/public/np_ready';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
 // @ts-ignore
 import { RollupIndexPatternCreationConfig } from './index_pattern_creation/rollup_index_pattern_creation_config';
@@ -25,7 +24,8 @@ import {
 // @ts-ignore
 import { CRUD_APP_BASE_PATH } from './crud_app/constants';
 import { ManagementSetup } from '../../../../../src/plugins/management/public';
-import { IndexMgmtSetup } from '../../../../plugins/index_management/public';
+import { IndexManagementPluginSetup } from '../../../../plugins/index_management/public';
+import { IndexPatternManagementSetup } from '../../../../../src/plugins/index_pattern_management/public';
 import { search } from '../../../../../src/plugins/data/public';
 // @ts-ignore
 import { setEsBaseAndXPackBase, setHttp } from './crud_app/services';
@@ -33,23 +33,16 @@ import { setNotifications, setFatalErrors } from './kibana_services';
 import { renderApp } from './application';
 
 export interface RollupPluginSetupDependencies {
-  __LEGACY: {
-    managementLegacy: ManagementSetupLegacy;
-  };
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
-  indexManagement?: IndexMgmtSetup;
+  indexManagement?: IndexManagementPluginSetup;
+  indexPatternManagement: IndexPatternManagementSetup;
 }
 
 export class RollupPlugin implements Plugin {
   setup(
     core: CoreSetup,
-    {
-      __LEGACY: { managementLegacy },
-      home,
-      management,
-      indexManagement,
-    }: RollupPluginSetupDependencies
+    { home, management, indexManagement, indexPatternManagement }: RollupPluginSetupDependencies
   ) {
     setFatalErrors(core.fatalErrors);
 
@@ -61,8 +54,8 @@ export class RollupPlugin implements Plugin {
     const isRollupIndexPatternsEnabled = core.uiSettings.get(CONFIG_ROLLUPS);
 
     if (isRollupIndexPatternsEnabled) {
-      managementLegacy.indexPattern.creation.add(RollupIndexPatternCreationConfig);
-      managementLegacy.indexPattern.list.add(RollupIndexPatternListConfig);
+      indexPatternManagement.creation.addCreationConfig(RollupIndexPatternCreationConfig);
+      indexPatternManagement.list.addListConfig(RollupIndexPatternListConfig);
     }
 
     if (home) {

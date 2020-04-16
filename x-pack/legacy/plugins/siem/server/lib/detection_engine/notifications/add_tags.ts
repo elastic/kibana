@@ -6,5 +6,5 @@
 
 import { INTERNAL_RULE_ALERT_ID_KEY } from '../../../../common/constants';
 
-export const addTags = (tags: string[] = [], ruleAlertId: string): string[] =>
+export const addTags = (tags: string[], ruleAlertId: string): string[] =>
   Array.from(new Set([...tags, `${INTERNAL_RULE_ALERT_ID_KEY}:${ruleAlertId}`]));

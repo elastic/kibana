@@ -10,7 +10,7 @@ export const getNotificationResultsLink = ({
   from,
   to,
 }: {
-  kibanaSiemAppUrl: string;
+  kibanaSiemAppUrl?: string;
   id: string;
   from?: string;
   to?: string;

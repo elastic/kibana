@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TmsLayer } from 'ui/vis/map/service_settings';
+import { TmsLayer } from '../../../../plugins/maps_legacy/public';
 import { MapTypes } from './map_types';
 
 export interface WMSOptions {

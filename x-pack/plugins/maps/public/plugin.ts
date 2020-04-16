@@ -43,9 +43,9 @@ export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
-  const { file_upload, data, inspector } = plugins;
+  const { fileUpload, data, inspector } = plugins;
   setInspector(inspector);
-  setFileUpload(file_upload);
+  setFileUpload(fileUpload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
   setIndexPatternService(data.indexPatterns);

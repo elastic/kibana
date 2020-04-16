@@ -11,6 +11,10 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, Alert, AlertAction } from '../../../types';
 import { ActionForm } from './action_form';
+jest.mock('../../lib/action_connector_api', () => ({
+  loadAllActions: jest.fn(),
+  loadActionTypes: jest.fn(),
+}));
 const actionTypeRegistry = actionTypeRegistryMock.create();
 describe('action_form', () => {
   let deps: any;
@@ -73,6 +77,17 @@ describe('action_form', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
+      const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
+      loadAllActions.mockResolvedValueOnce([
+        {
+          secrets: {},
+          id: 'test',
+          actionTypeId: actionType.id,
+          name: 'Test connector',
+          config: {},
+          isPreconfigured: false,
+        },
+      ]);
       const mockes = coreMock.createSetup();
       deps = {
         toastNotifications: mockes.notifications.toasts,

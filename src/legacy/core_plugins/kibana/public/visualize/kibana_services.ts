@@ -36,7 +36,7 @@ import { VisualizationsStart } from '../../../../../plugins/visualizations/publi
 import { SavedVisualizations } from './np_ready/types';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import { KibanaLegacyStart } from '../../../../../plugins/kibana_legacy/public';
-import { DefaultEditorController } from '../../../vis_default_editor/public';
+import { DefaultEditorController } from '../../../../../plugins/vis_default_editor/public';
 
 export interface VisualizeKibanaServices {
   pluginInitializerContext: PluginInitializerContext;
