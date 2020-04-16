@@ -711,8 +711,6 @@ httpResources.register(
     return response.renderCoreApp();
   }
 );
-// or if no additional logic required, you can use a shortcut method:
-httpResources.registerCoreApp({ path: '/chromeless' });
 ```
 
 You can also specify to exclude user data from the bundle metadata. User data
@@ -728,8 +726,6 @@ httpResources.register(
     return response.renderAnonymousCoreApp();
   }
 );
-// or if no additional logic required, you can use a shortcut method as well:
-httpResources.registerAnonymousCoreApp({ path: '/chromeless' });
 ```
 
 ## Saved Objects types
