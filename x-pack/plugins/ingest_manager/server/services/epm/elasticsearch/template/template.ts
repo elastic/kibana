@@ -93,6 +93,9 @@ export function generateMappings(fields: Field[]): Mappings {
           if (field.hasOwnProperty('enabled')) {
             fieldProps.enabled = field.enabled;
           }
+          if (field.hasOwnProperty('dynamic')) {
+            fieldProps.dynamic = field.dynamic;
+          }
           break;
         case 'array':
           // this assumes array fields were validated in an earlier step

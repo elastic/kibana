@@ -199,3 +199,63 @@ test('tests processing object field with enabled set to false', () => {
   const mappings = generateMappings(processedFields);
   expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldEnabledFalseMapping));
 });
+
+test('tests processing object field with dynamic set to false', () => {
+  const objectFieldDynamicFalseLiteralYml = `
+- name: objectField
+  type: object
+  dynamic: false
+`;
+  const objectFieldDynamicFalseMapping = {
+    properties: {
+      objectField: {
+        type: 'object',
+        dynamic: false,
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldDynamicFalseLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicFalseMapping));
+});
+
+test('tests processing object field with dynamic set to true', () => {
+  const objectFieldDynamicTrueLiteralYml = `
+- name: objectField
+  type: object
+  dynamic: true
+`;
+  const objectFieldDynamicTrueMapping = {
+    properties: {
+      objectField: {
+        type: 'object',
+        dynamic: true,
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldDynamicTrueLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicTrueMapping));
+});
+
+test('tests processing object field with dynamic set to strict', () => {
+  const objectFieldDynamicStrictLiteralYml = `
+- name: objectField
+  type: object
+  dynamic: strict
+`;
+  const objectFieldDynamicStrictMapping = {
+    properties: {
+      objectField: {
+        type: 'object',
+        dynamic: 'strict',
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldDynamicStrictLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicStrictMapping));
+});
