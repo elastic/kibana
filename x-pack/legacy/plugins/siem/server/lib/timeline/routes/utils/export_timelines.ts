@@ -26,12 +26,11 @@ import {
 import {
   ExportedTimelines,
   ExportTimelineSavedObjectsClient,
-  ExportTimelineRequest,
   ExportedNotes,
   TimelineSavedObject,
 } from '../../types';
+import { transformDataToNdjson } from '../../../../utils/read_stream/create_stream_from_ndjson';
 
-import { transformDataToNdjson } from '../../../detection_engine/routes/rules/utils';
 export type TimelineSavedObjectsClient = Pick<
   SavedObjectsClient,
   | 'get'
@@ -142,23 +141,17 @@ const getTimelines = async (
 
 const getTimelinesFromObjects = async (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
-  request: ExportTimelineRequest
+  ids: string[]
 ): Promise<ExportedTimelines[]> => {
-  const timelines: TimelineSavedObject[] = await getTimelines(savedObjectsClient, request.body.ids);
+  const timelines: TimelineSavedObject[] = await getTimelines(savedObjectsClient, ids);
   // To Do for feature freeze
   // if (timelines.length !== request.body.ids.length) {
   //   //figure out which is missing to tell user
   // }
 
   const [notes, pinnedEventIds] = await Promise.all([
-    Promise.all(
-      request.body.ids.map(timelineId => getNotesByTimelineId(savedObjectsClient, timelineId))
-    ),
-    Promise.all(
-      request.body.ids.map(timelineId =>
-        getPinnedEventsByTimelineId(savedObjectsClient, timelineId)
-      )
-    ),
+    Promise.all(ids.map(timelineId => getNotesByTimelineId(savedObjectsClient, timelineId))),
+    Promise.all(ids.map(timelineId => getPinnedEventsByTimelineId(savedObjectsClient, timelineId))),
   ]);
 
   const myNotes = notes.reduce<NoteSavedObject[]>(
@@ -171,7 +164,7 @@ const getTimelinesFromObjects = async (
     []
   );
 
-  const myResponse = request.body.ids.reduce<ExportedTimelines[]>((acc, timelineId) => {
+  const myResponse = ids.reduce<ExportedTimelines[]>((acc, timelineId) => {
     const myTimeline = timelines.find(t => t.savedObjectId === timelineId);
     if (myTimeline != null) {
       const timelineNotes = myNotes.filter(n => n.timelineId === timelineId);
@@ -193,11 +186,11 @@ const getTimelinesFromObjects = async (
 
 export const getExportTimelineByObjectIds = async ({
   client,
-  request,
+  ids,
 }: {
   client: ExportTimelineSavedObjectsClient;
-  request: ExportTimelineRequest;
+  ids: string[];
 }) => {
-  const timeline = await getTimelinesFromObjects(client, request);
+  const timeline = await getTimelinesFromObjects(client, ids);
   return transformDataToNdjson(timeline);
 };
