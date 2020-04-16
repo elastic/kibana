@@ -15,7 +15,7 @@ import { getMigrationStatusStep, getSecurityStep } from '../common_instructions'
 export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {
   const beatType = product.beatType;
   const securitySetup = getSecurityStep(
-    `${ELASTIC_WEBSITE_URL}guide/en/beats/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`
+    `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-configuration.html`
   );
 
   const installMetricbeatStep = {
