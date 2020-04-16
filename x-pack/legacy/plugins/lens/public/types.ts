@@ -166,7 +166,6 @@ export interface DatasourcePublicAPI {
   datasourceId: string;
   getTableSpec: () => Array<{ columnId: string }>;
   getOperationForColumnId: (columnId: string) => Operation | null;
-  primaryTimeFieldName?: string | null;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {

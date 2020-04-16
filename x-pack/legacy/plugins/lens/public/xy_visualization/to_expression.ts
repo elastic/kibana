@@ -109,8 +109,6 @@ export const buildExpression = (
     return null;
   }
 
-  const timeFieldName = frame?.datasourceLayers[validLayers[0].layerId].primaryTimeFieldName;
-
   return {
     type: 'expression',
     chain: [
@@ -120,7 +118,6 @@ export const buildExpression = (
         arguments: {
           xTitle: [xTitle],
           yTitle: [yTitle],
-          primaryTimeFieldName: timeFieldName ? [timeFieldName] : [],
           legend: [
             {
               type: 'expression',

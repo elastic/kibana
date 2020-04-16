@@ -63,7 +63,6 @@ export function createMockDatasource(id: string): DatasourceMock {
     datasourceId: id,
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
-    primaryTimeFieldName: 'timefield',
   };
 
   return {

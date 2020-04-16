@@ -96,9 +96,9 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   public supportedTriggers() {
     switch (this.savedVis.visualizationType) {
       case 'lnsXY':
-        // TODO: case 'lnsDatatable':
-        return [VIS_EVENT_TO_TRIGGER.filter];
-
+        return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
+      // case 'lnsDatatable':
+      //   return [VIS_EVENT_TO_TRIGGER.filter];
       case 'lnsMetric':
       default:
         return [];

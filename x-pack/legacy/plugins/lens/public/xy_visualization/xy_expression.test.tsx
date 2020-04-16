@@ -580,7 +580,7 @@ describe('xy_expression', () => {
       expect(component.find(Settings).prop('rotation')).toEqual(90);
     });
 
-    test('onBrushEnd returns correct context data', () => {
+    test('onBrushEnd returns correct context data for date histogram data', () => {
       const { args } = sampleArgs();
 
       const wrapper = mountWithIntl(
@@ -588,7 +588,6 @@ describe('xy_expression', () => {
           data={dateHistogramData}
           args={{
             ...args,
-            primaryTimeFieldName: 'order_date',
             layers: [dateHistogramLayer],
           }}
           formatFactory={getFormatSpy}
@@ -646,7 +645,6 @@ describe('xy_expression', () => {
           data={data}
           args={{
             ...args,
-            primaryTimeFieldName: 'my_time',
             layers: [
               {
                 layerId: 'first',
@@ -690,7 +688,6 @@ describe('xy_expression', () => {
             },
           ],
         },
-        timeFieldName: 'my_time',
       });
     });
 

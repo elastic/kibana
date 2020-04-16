@@ -318,8 +318,6 @@ export function getIndexPatternDatasource({
           }
           return null;
         },
-        primaryTimeFieldName:
-          state.indexPatterns[state.layers[layerId].indexPatternId].timeFieldName,
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {

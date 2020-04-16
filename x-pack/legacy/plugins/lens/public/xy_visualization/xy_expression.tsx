@@ -38,7 +38,7 @@ import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { parseInterval } from '../../../../../../src/plugins/data/common';
-import { getExecuteTriggerActions } from './services';
+import { getExecuteTriggerActions } from '../services';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -83,11 +83,6 @@ export const xyChart: ExpressionFunctionDefinition<
     yTitle: {
       types: ['string'],
       help: 'Y axis title',
-    },
-    primaryTimeFieldName: {
-      types: ['string'],
-      required: false,
-      help: 'Used for filtering on the index pattern',
     },
     legend: {
       types: ['lens_xy_legendConfig'],
@@ -252,6 +247,9 @@ export function XYChart({
             layers[layers.findIndex(layer => data.tables[layer.layerId].rows.length)];
           const table = data.tables[firstLayerWithData.layerId];
 
+          const xAxisFieldName = xAxisColumn?.meta?.aggConfigParams?.field;
+          const timeFieldName = xDomain && xAxisFieldName;
+
           // TODO: simplify the context structure: https://github.com/elastic/kibana/issues/62936
           const context: EmbeddableVisTriggerContext = {
             data: {
@@ -275,7 +273,7 @@ export function XYChart({
                 ],
               },
             },
-            timeFieldName: args.primaryTimeFieldName,
+            timeFieldName,
           };
           executeTriggerActions(VIS_EVENT_TO_TRIGGER.brush, context);
         }}
@@ -315,6 +313,9 @@ export function XYChart({
             });
           }
 
+          const xAxisFieldName = xAxisColumn?.meta?.aggConfigParams?.field;
+          const timeFieldName = xDomain && xAxisFieldName;
+
           const context: EmbeddableVisTriggerContext = {
             data: {
               data: points.map(point => ({
@@ -324,7 +325,7 @@ export function XYChart({
                 table,
               })),
             },
-            timeFieldName: args.primaryTimeFieldName,
+            timeFieldName,
           };
           executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
         }}
