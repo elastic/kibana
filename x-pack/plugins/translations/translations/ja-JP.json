@@ -9587,8 +9587,6 @@
     "xpack.ml.dataframe.analytics.regressionExploration.generalError": "データの読み込み中にエラーが発生しました。",
     "xpack.ml.dataframe.analytics.regressionExploration.generalizationDocsCount": "{docsCount, plural, one {# doc} other {# docs}}が評価されました",
     "xpack.ml.dataframe.analytics.regressionExploration.generalizationErrorTitle": "一般化エラー",
-    "xpack.ml.dataframe.analytics.regressionExploration.indexArrayBadgeContent": "配列",
-    "xpack.ml.dataframe.analytics.regressionExploration.indexArrayToolTipContent": "この配列ベースの列の完全なコンテンツは表示できません。",
     "xpack.ml.dataframe.analytics.regressionExploration.indexError": "インデックスデータの読み込み中にエラーが発生しました。",
     "xpack.ml.dataframe.analytics.regressionExploration.isTestingLabel": "テスト",
     "xpack.ml.dataframe.analytics.regressionExploration.isTrainingLabel": "トレーニング",
