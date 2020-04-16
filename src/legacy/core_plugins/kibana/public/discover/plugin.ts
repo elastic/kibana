@@ -100,7 +100,7 @@ export class DiscoverPlugin implements Plugin<void, void> {
     } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/discover',
-      storageKey: 'lastUrl:discover',
+      storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [

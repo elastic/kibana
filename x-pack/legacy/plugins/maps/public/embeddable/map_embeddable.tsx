@@ -11,7 +11,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { I18nContext } from 'ui/i18n';
-import { npStart } from 'ui/new_platform';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import {
@@ -57,7 +56,10 @@ import {
 } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RenderToolTipContent } from '../../../../../plugins/maps/public/layers/tooltips/tooltip_property';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getUiActions } from '../../../../../plugins/maps/public/kibana_services';
 
 interface MapEmbeddableConfig {
   editUrl?: string;
@@ -128,6 +130,14 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
 
     this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
   }
+
+  setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
+    this._renderTooltipContent = renderTooltipContent;
+  };
+
+  setEventHandlers = (eventHandlers: EventHandlers) => {
+    this._eventHandlers = eventHandlers;
+  };
 
   getInspectorAdapters() {
     return getInspectorAdapters(this._store.getState());
@@ -260,7 +270,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
   }
 
   addFilters = (filters: Filter[]) => {
-    npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+    getUiActions().executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
       filters,
     });

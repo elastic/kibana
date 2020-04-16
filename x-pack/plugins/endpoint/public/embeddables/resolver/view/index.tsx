@@ -59,6 +59,7 @@ export const Resolver = styled(
 
     const { projectionMatrix, ref, onMouseDown } = useCamera();
     const isLoading = useSelector(selectors.isLoading);
+    const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
 
     useLayoutEffect(() => {
       dispatch({
@@ -66,6 +67,7 @@ export const Resolver = styled(
         payload: { selectedEvent },
       });
     }, [dispatch, selectedEvent]);
+
     return (
       <div data-test-subj="resolverEmbeddable" className={className}>
         {isLoading ? (
@@ -79,6 +81,7 @@ export const Resolver = styled(
             ref={ref}
             role="tree"
             tabIndex={0}
+            aria-activedescendant={activeDescendantId || undefined}
           >
             {edgeLineSegments.map(([startPosition, endPosition], index) => (
               <EdgeLine

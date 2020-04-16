@@ -22,7 +22,7 @@ import { LayoutContent } from '../../../public/pages/metrics/components/layout_c
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetadataDetails } from '../../../public/pages/metrics/components/metadata_details';
 
-export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>
     <MetadataDetails />
     <LayoutContent>
@@ -40,6 +40,7 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
           }
         )}
         metrics={metrics}
+        onChangeRangeTime={onChangeRangeTime}
       >
         <SubSection id="containerOverview">
           <GaugesSectionVis

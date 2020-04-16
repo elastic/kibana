@@ -20,7 +20,7 @@ enum MessageLevels {
   error = 'error',
 }
 
-const AuditIcon: React.FC<{
+const AuditIconComponent: React.FC<{
   message: SiemJob['auditMessage'];
 }> = ({ message }) => {
   if (!message) {
@@ -45,7 +45,9 @@ const AuditIcon: React.FC<{
   );
 };
 
-export const JobStatusBadge: React.FC<{ job: SiemJob }> = ({ job }) => {
+export const AuditIcon = React.memo(AuditIconComponent);
+
+const JobStatusBadgeComponent: React.FC<{ job: SiemJob }> = ({ job }) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
   const color = isStarted ? 'secondary' : 'danger';
   const text = isStarted ? ML_JOB_STARTED : ML_JOB_STOPPED;
@@ -57,6 +59,8 @@ export const JobStatusBadge: React.FC<{ job: SiemJob }> = ({ job }) => {
   );
 };
 
+export const JobStatusBadge = React.memo(JobStatusBadgeComponent);
+
 const JobLink = styled(EuiLink)`
   margin-right: ${({ theme }) => theme.eui.euiSizeS};
 `;
@@ -65,8 +69,10 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-export const MlJobDescription: React.FC<{ job: SiemJob }> = ({ job }) => {
-  const jobUrl = useKibana().services.application.getUrlForApp('ml#/jobs');
+const MlJobDescriptionComponent: React.FC<{ job: SiemJob }> = ({ job }) => {
+  const jobUrl = useKibana().services.application.getUrlForApp(
+    `ml#/jobs?mlManagement=(jobId:${encodeURI(job.id)})`
+  );
 
   return (
     <Wrapper>
@@ -80,6 +86,8 @@ export const MlJobDescription: React.FC<{ job: SiemJob }> = ({ job }) => {
     </Wrapper>
   );
 };
+
+export const MlJobDescription = React.memo(MlJobDescriptionComponent);
 
 export const buildMlJobDescription = (
   jobId: string,

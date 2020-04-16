@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { search } from '../../../../../plugins/data/public';
 const { isValidEsInterval } = search.aggs;
-import { useValidation } from '../../../vis_default_editor/public';
+import { useValidation } from '../../../../../plugins/vis_default_editor/public';
 
 const intervalOptions = [
   {

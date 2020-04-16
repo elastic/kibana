@@ -132,6 +132,7 @@ export const createRulesRoute = (router: IRouter): void => {
           note,
           version: 1,
           lists,
+          actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is rule, otherwise we are a notification and should not enable it,
         });
 
         const ruleActions = await updateRulesNotifications({

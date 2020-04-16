@@ -17,7 +17,7 @@ interface Props {
 
 export const UptimeAlertsFlyoutWrapper = ({ alertTypeId, canChangeTrigger }: Props) => {
   const dispatch = useDispatch();
-  const setAddFlyoutVisiblity = (value: React.SetStateAction<boolean>) =>
+  const setAddFlyoutVisibility = (value: React.SetStateAction<boolean>) =>
     // @ts-ignore the value here is a boolean, and it works with the action creator function
     dispatch(setAlertFlyoutVisible(value));
 
@@ -28,7 +28,7 @@ export const UptimeAlertsFlyoutWrapper = ({ alertTypeId, canChangeTrigger }: Pro
       alertFlyoutVisible={alertFlyoutVisible}
       alertTypeId={alertTypeId}
       canChangeTrigger={canChangeTrigger}
-      setAlertFlyoutVisibility={setAddFlyoutVisiblity}
+      setAlertFlyoutVisibility={setAddFlyoutVisibility}
     />
   );
 };

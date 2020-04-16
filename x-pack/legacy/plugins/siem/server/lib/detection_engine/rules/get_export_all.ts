@@ -7,7 +7,8 @@
 import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { getNonPackagedRules } from './get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
-import { transformAlertsToRules, transformDataToNdjson } from '../routes/rules/utils';
+import { transformAlertsToRules } from '../routes/rules/utils';
+import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
 
 export const getExportAll = async (
   alertsClient: AlertsClient

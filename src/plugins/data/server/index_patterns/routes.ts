@@ -70,7 +70,22 @@ export function registerRoutes(http: HttpServiceSetup) {
           },
         });
       } catch (error) {
-        return response.notFound();
+        if (
+          typeof error === 'object' &&
+          !!error?.isBoom &&
+          !!error?.output?.payload &&
+          typeof error?.output?.payload === 'object'
+        ) {
+          const payload = error?.output?.payload;
+          return response.notFound({
+            body: {
+              message: payload.message,
+              attributes: payload,
+            },
+          });
+        } else {
+          return response.notFound();
+        }
       }
     }
   );

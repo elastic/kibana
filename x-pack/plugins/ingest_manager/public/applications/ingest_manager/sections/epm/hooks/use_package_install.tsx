@@ -6,8 +6,8 @@
 
 import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { useLinks } from '.';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage } from '../../../hooks';
@@ -25,7 +25,6 @@ type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'>;
 
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
   const [packages, setPackage] = useState<PackagesInstall>({});
-  const { toDetailView } = useLinks();
 
   const setPackageInstallStatus = useCallback(
     ({ name, status }: { name: PackageInfo['name']; status: InstallStatus }) => {
@@ -46,34 +45,43 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
       if (res.error) {
         setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
         notifications.toasts.addWarning({
-          title: `Failed to install ${title} package`,
-          text:
-            'Something went wrong while trying to install this package. Please try again later.',
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageInstallErrorTitle"
+              defaultMessage="Failed to install {title} package"
+              values={{ title }}
+            />
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageInstallErrorDescription"
+              defaultMessage="Something went wrong while trying to install this package. Please try again later."
+            />
+          ),
           iconType: 'alert',
         });
       } else {
         setPackageInstallStatus({ name, status: InstallStatus.installed });
-        const SuccessMsg = <p>Successfully installed {name}</p>;
 
         notifications.toasts.addSuccess({
-          title: `Installed ${title} package`,
-          text: toMountPoint(SuccessMsg),
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageInstallSuccessTitle"
+              defaultMessage="Installed {title}"
+              values={{ title }}
+            />
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageInstallSuccessDescription"
+              defaultMessage="Successfully installed {title}"
+              values={{ title }}
+            />
+          ),
         });
-
-        // TODO: this should probably live somewhere else and use <Redirect />,
-        // this hook could return the request state and a component could
-        // use that state. the component should be able to unsubscribe to prevent memory leaks
-        const packageUrl = toDetailView({ name, version });
-        const dataSourcesUrl = toDetailView({
-          name,
-          version,
-          panel: 'data-sources',
-          withAppRoot: false,
-        });
-        if (window.location.href.includes(packageUrl)) window.location.hash = dataSourcesUrl;
       }
     },
-    [notifications.toasts, setPackageInstallStatus, toDetailView]
+    [notifications.toasts, setPackageInstallStatus]
   );
 
   const getPackageInstallStatus = useCallback(
@@ -83,7 +91,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
     [packages]
   );
 
-  const deletePackage = useCallback(
+  const uninstallPackage = useCallback(
     async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
       setPackageInstallStatus({ name, status: InstallStatus.uninstalling });
       const pkgkey = `${name}-${version}`;
@@ -92,30 +100,43 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
       if (res.error) {
         setPackageInstallStatus({ name, status: InstallStatus.installed });
         notifications.toasts.addWarning({
-          title: `Failed to delete ${title} package`,
-          text: 'Something went wrong while trying to delete this package. Please try again later.',
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageUninstallErrorTitle"
+              defaultMessage="Failed to uninstall {title} package"
+              values={{ title }}
+            />
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageUninstallErrorDescription"
+              defaultMessage="Something went wrong while trying to uninstall this package. Please try again later."
+            />
+          ),
           iconType: 'alert',
         });
       } else {
         setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
 
-        const SuccessMsg = <p>Successfully deleted {title}</p>;
-
         notifications.toasts.addSuccess({
-          title: `Deleted ${title} package`,
-          text: toMountPoint(SuccessMsg),
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageUninstallSuccessTitle"
+              defaultMessage="Uninstalled {title}"
+              values={{ title }}
+            />
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageUninstallSuccessDescription"
+              defaultMessage="Successfully uninstalled {title}"
+              values={{ title }}
+            />
+          ),
         });
-
-        const packageUrl = toDetailView({ name, version });
-        const dataSourcesUrl = toDetailView({
-          name,
-          version,
-          panel: 'data-sources',
-        });
-        if (window.location.href.includes(packageUrl)) window.location.href = dataSourcesUrl;
       }
     },
-    [notifications.toasts, setPackageInstallStatus, toDetailView]
+    [notifications.toasts, setPackageInstallStatus]
   );
 
   return {
@@ -123,7 +144,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
     installPackage,
     setPackageInstallStatus,
     getPackageInstallStatus,
-    deletePackage,
+    uninstallPackage,
   };
 }
 
@@ -132,11 +153,11 @@ export const [
   useInstallPackage,
   useSetPackageInstallStatus,
   useGetPackageInstallStatus,
-  useDeletePackage,
+  useUninstallPackage,
 ] = createContainer(
   usePackageInstall,
   value => value.installPackage,
   value => value.setPackageInstallStatus,
   value => value.getPackageInstallStatus,
-  value => value.deletePackage
+  value => value.uninstallPackage
 );

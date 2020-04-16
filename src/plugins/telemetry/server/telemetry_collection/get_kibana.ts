@@ -55,6 +55,10 @@ export function handleKibanaStats(
     ...kibanaStats.os,
   };
   const formattedOsStats = Object.entries(os).reduce((acc, [key, value]) => {
+    if (typeof value !== 'string') {
+      // There are new fields reported now from the "os" property like "load", "memory", etc. They are objects.
+      return acc;
+    }
     return {
       ...acc,
       [`${key}s`]: [{ [key]: value, count: 1 }],

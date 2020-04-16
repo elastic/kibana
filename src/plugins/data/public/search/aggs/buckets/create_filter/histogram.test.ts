@@ -19,20 +19,16 @@
 
 import { createFilterHistogram } from './histogram';
 import { AggConfigs } from '../../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
+import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { IBucketAggConfig } from '../_bucket_agg_type';
+import { IBucketAggConfig } from '../bucket_agg_type';
 import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common';
+import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 
 describe('AggConfig Filters', () => {
   describe('histogram', () => {
-    beforeEach(() => {
-      mockDataServices();
-    });
-
-    const typesRegistry = mockAggTypesRegistry();
-
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
+    const fieldFormats = fieldFormatsServiceMock.createStartContract();
     const getAggConfigs = () => {
       const field = {
         name: 'bytes',
@@ -61,11 +57,11 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry }
+        { typesRegistry: mockAggTypesRegistry(), fieldFormats }
       );
     };
 
-    it('should return an range filter for histogram', () => {
+    test('should return an range filter for histogram', () => {
       const aggConfigs = getAggConfigs();
       const filter = createFilterHistogram(aggConfigs.aggs[0] as IBucketAggConfig, '2048');
 

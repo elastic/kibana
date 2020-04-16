@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { IBucketAggConfig } from '../_bucket_agg_type';
+import { IBucketAggConfig } from '../bucket_agg_type';
 import { buildQueryFilter } from '../../../../../common';
 
 export const createFilterFilters = (aggConfig: IBucketAggConfig, key: string) => {

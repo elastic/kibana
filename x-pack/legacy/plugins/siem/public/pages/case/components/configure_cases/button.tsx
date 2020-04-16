@@ -8,7 +8,7 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { getConfigureCasesUrl } from '../../../../components/link_to';
 
-interface ConfigureCaseButtonProps {
+export interface ConfigureCaseButtonProps {
   label: string;
   isDisabled: boolean;
   msgTooltip: JSX.Element;
@@ -32,6 +32,7 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
         iconType="controlsHorizontal"
         isDisabled={isDisabled}
         aria-label={label}
+        data-test-subj="configure-case-button"
       >
         {label}
       </EuiButton>
@@ -39,7 +40,12 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
     [label, isDisabled, urlSearch]
   );
   return showToolTip ? (
-    <EuiToolTip position="top" title={titleTooltip} content={<p>{msgTooltip}</p>}>
+    <EuiToolTip
+      position="top"
+      title={titleTooltip}
+      content={<p>{msgTooltip}</p>}
+      data-test-subj="configure-case-tooltip"
+    >
       {configureCaseButton}
     </EuiToolTip>
   ) : (

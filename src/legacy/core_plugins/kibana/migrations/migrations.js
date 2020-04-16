@@ -18,7 +18,10 @@
  */
 
 import { get } from 'lodash';
-import { migrations730 as dashboardMigrations730 } from '../public/dashboard/migrations';
+import {
+  migrateMatchAllQuery,
+  migrations730 as dashboardMigrations730,
+} from '../public/dashboard/migrations';
 
 function migrateIndexPattern(doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -60,6 +63,7 @@ function migrateIndexPattern(doc) {
 
 export const migrations = {
   dashboard: {
+    '6.7.2': migrateMatchAllQuery,
     '7.0.0': doc => {
       // Set new "references" attribute
       doc.references = doc.references || [];

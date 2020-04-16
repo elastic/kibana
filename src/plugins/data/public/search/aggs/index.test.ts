@@ -20,16 +20,22 @@
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { getAggTypes } from './index';
 
-import { isBucketAggType } from './buckets/_bucket_agg_type';
+import { isBucketAggType } from './buckets/bucket_agg_type';
 import { isMetricAggType } from './metrics/metric_agg_type';
 import { QueryStart } from '../../query';
+import { FieldFormatsStart } from '../../field_formats';
 
 describe('AggTypesComponent', () => {
-  const core = coreMock.createSetup();
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createSetup();
+
   const aggTypes = getAggTypes({
-    uiSettings: core.uiSettings,
-    notifications: core.notifications,
+    uiSettings: coreSetup.uiSettings,
     query: {} as QueryStart,
+    getInternalStartServices: () => ({
+      notifications: coreStart.notifications,
+      fieldFormats: {} as FieldFormatsStart,
+    }),
   });
 
   const { buckets, metrics } = aggTypes;

@@ -17,9 +17,9 @@ Array [
     "key": "api_request_time",
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
@@ -29,15 +29,19 @@ Array [
     "options": Array [
       Object {
         "text": "off",
+        "value": "off",
       },
       Object {
         "text": "errors",
+        "value": "errors",
       },
       Object {
         "text": "transactions",
+        "value": "transactions",
       },
       Object {
         "text": "all",
+        "value": "all",
       },
     ],
     "type": "select",
@@ -82,9 +86,9 @@ Array [
     "key": "profiling_inferred_spans_min_duration",
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
@@ -93,9 +97,9 @@ Array [
     "key": "profiling_inferred_spans_sampling_interval",
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
@@ -109,20 +113,21 @@ Array [
     "key": "server_timeout",
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
   },
   Object {
     "key": "span_frames_min_duration",
+    "min": -1,
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
@@ -137,9 +142,9 @@ Array [
     "key": "stress_monitor_cpu_duration_threshold",
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
@@ -152,8 +157,9 @@ Array [
   },
   Object {
     "key": "stress_monitor_gc_stress_threshold",
-    "type": "boolean",
-    "validationName": "(\\"true\\" | \\"false\\")",
+    "type": "float",
+    "validationError": "Must be a number between 0.000 and 1",
+    "validationName": "numberFloatRt",
   },
   Object {
     "key": "stress_monitor_system_cpu_relief_threshold",
@@ -166,12 +172,6 @@ Array [
     "type": "float",
     "validationError": "Must be a number between 0.000 and 1",
     "validationName": "numberFloatRt",
-  },
-  Object {
-    "key": "trace_methods_duration_threshold",
-    "type": "integer",
-    "validationError": "Must be an integer",
-    "validationName": "integerRt",
   },
   Object {
     "key": "transaction_max_spans",

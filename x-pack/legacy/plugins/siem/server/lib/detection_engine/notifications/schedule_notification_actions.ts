@@ -8,14 +8,14 @@ import { mapKeys, snakeCase } from 'lodash/fp';
 import { AlertInstance } from '../../../../../../../plugins/alerting/server';
 import { RuleTypeParams } from '../types';
 
-type NotificationRuleTypeParams = RuleTypeParams & {
+export type NotificationRuleTypeParams = RuleTypeParams & {
   name: string;
   id: string;
 };
 
 interface ScheduleNotificationActions {
   alertInstance: AlertInstance;
-  signalsCount: string;
+  signalsCount: number;
   resultsLink: string;
   ruleParams: NotificationRuleTypeParams;
 }
@@ -23,7 +23,7 @@ interface ScheduleNotificationActions {
 export const scheduleNotificationActions = ({
   alertInstance,
   signalsCount,
-  resultsLink,
+  resultsLink = '',
   ruleParams,
 }: ScheduleNotificationActions): AlertInstance =>
   alertInstance

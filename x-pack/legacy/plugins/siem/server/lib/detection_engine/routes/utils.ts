@@ -309,7 +309,7 @@ export const validateLicenseForRuleType = ({
 }: {
   license: ILicense;
   ruleType: RuleType;
-}) => {
+}): void => {
   if (isMlRule(ruleType) && !license.hasAtLeast(MINIMUM_ML_LICENSE)) {
     const message = i18n.translate('xpack.siem.licensing.unsupportedMachineLearningMessage', {
       defaultMessage:

@@ -16,7 +16,7 @@ type Func = (ruleId: string) => void;
 export type ReturnRuleStatus = [boolean, RuleStatus | null, Func | null];
 export interface ReturnRulesStatuses {
   loading: boolean;
-  rulesStatuses: RuleStatusRowItemType[] | null;
+  rulesStatuses: RuleStatusRowItemType[];
 }
 
 /**

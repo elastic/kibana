@@ -27,6 +27,7 @@ describe('Step1', () => {
       actionTypeId: '1abc',
       name: 'Testing',
       config: {},
+      isPreconfigured: false,
     },
   ];
   const selectedEmailActionId = emailActions[0].id;
@@ -83,6 +84,7 @@ describe('Step1', () => {
             actionTypeId: '.email',
             name: '',
             config: {},
+            isPreconfigured: false,
           },
         ],
         selectedEmailActionId: NEW_ACTION_ID,

@@ -73,7 +73,7 @@ export const Create = React.memo(() => {
 
   const handleSetIsCancel = useCallback(() => {
     setIsCancel(true);
-  }, [isCancel]);
+  }, []);
 
   if (caseData != null && caseData.id) {
     return <Redirect to={`/${SiemPageName.case}/${caseData.id}`} />;
@@ -85,7 +85,7 @@ export const Create = React.memo(() => {
 
   return (
     <EuiPanel>
-      {isLoading && <MySpinner size="xl" />}
+      {isLoading && <MySpinner data-test-subj="create-case-loading-spinner" size="xl" />}
       <Form form={form}>
         <CommonUseField
           path="title"
@@ -107,7 +107,7 @@ export const Create = React.memo(() => {
               euiFieldProps: {
                 fullWidth: true,
                 placeholder: '',
-                isDisabled: isLoading,
+                disabled: isLoading,
               },
             }}
           />
@@ -151,6 +151,7 @@ export const Create = React.memo(() => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="create-case-submit"
               fill
               iconType="plusInCircle"
               isDisabled={isLoading}

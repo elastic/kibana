@@ -9,5 +9,5 @@ See [SavedObjectTypeRegistry](./kibana-plugin-core-server.savedobjecttyperegistr
 <b>Signature:</b>
 
 ```typescript
-export declare type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden' | 'getImportableAndExportableTypes' | 'isImportableAndExportable'>;
+export declare type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerType'>;
 ```

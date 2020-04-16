@@ -9,6 +9,7 @@ import { updateNotifications } from './update_notifications';
 import { readNotifications } from './read_notifications';
 import { createNotifications } from './create_notifications';
 import { getNotificationResult } from '../routes/__mocks__/request_responses';
+import { UpdateNotificationParams } from './types';
 jest.mock('./read_notifications');
 jest.mock('./create_notifications');
 
@@ -30,7 +31,6 @@ describe('updateNotifications', () => {
       enabled: true,
       interval: '10m',
       name: '',
-      tags: [],
     });
 
     expect(alertsClient.update).toHaveBeenCalledWith(
@@ -48,14 +48,13 @@ describe('updateNotifications', () => {
   it('should create a new notification if did not exist', async () => {
     (readNotifications as jest.Mock).mockResolvedValue(null);
 
-    const params = {
+    const params: UpdateNotificationParams = {
       alertsClient,
       actions: [],
       ruleAlertId: 'new-rule-id',
       enabled: true,
       interval: '10m',
       name: '',
-      tags: [],
     };
 
     await updateNotifications(params);
@@ -73,7 +72,6 @@ describe('updateNotifications', () => {
       enabled: true,
       interval: null,
       name: '',
-      tags: [],
     });
 
     expect(alertsClient.delete).toHaveBeenCalledWith(
@@ -98,7 +96,6 @@ describe('updateNotifications', () => {
       enabled: true,
       interval: '10m',
       name: '',
-      tags: [],
     });
 
     expect(alertsClient.update).toHaveBeenCalledWith(
@@ -125,10 +122,8 @@ describe('updateNotifications', () => {
       alertsClient,
       actions: [],
       enabled: true,
-      id: notification.id,
       ruleAlertId,
       name: notification.name,
-      tags: notification.tags,
       interval: null,
     });
 

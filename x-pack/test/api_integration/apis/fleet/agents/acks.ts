@@ -18,8 +18,7 @@ export default function(providerContext: FtrProviderContext) {
   const supertest = getSupertestWithoutAuth(providerContext);
   let apiKey: { id: string; api_key: string };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/60471
-  describe.skip('fleet_agents_acks', () => {
+  describe('fleet_agents_acks', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 
@@ -179,7 +178,7 @@ export default function(providerContext: FtrProviderContext) {
           ],
         })
         .expect(400);
-      expect(apiResponse.message).to.eql('all actions should belong to current agent');
+      expect(apiResponse.message).to.eql('One or more actions cannot be found');
     });
 
     it('should return a 400 when request event list contains action types that are not allowed for acknowledgement', async () => {

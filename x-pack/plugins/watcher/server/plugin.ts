@@ -19,7 +19,6 @@ import {
 } from 'kibana/server';
 import { PLUGIN } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';
-import { LICENSE_CHECK_STATE } from '../../licensing/server';
 
 import { registerSettingsRoutes } from './routes/api/settings';
 import { registerIndicesRoutes } from './routes/api/indices';
@@ -73,7 +72,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
 
     licensing.license$.subscribe(async license => {
       const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
-      const hasMinimumLicense = state === LICENSE_CHECK_STATE.Valid;
+      const hasMinimumLicense = state === 'valid';
       if (hasMinimumLicense && license.getFeature(PLUGIN.ID)) {
         this.log.info('Enabling Watcher plugin.');
         this.licenseStatus = {

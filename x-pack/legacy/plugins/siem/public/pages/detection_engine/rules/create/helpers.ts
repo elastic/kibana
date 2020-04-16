@@ -155,7 +155,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
     enabled,
     throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {
-      kibanaSiemAppUrl,
+      kibana_siem_app_url: kibanaSiemAppUrl,
     },
   };
 };

@@ -15,10 +15,14 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import { MlSetupDependencies, MlStartDependencies } from '../plugin';
+import { MlConfigType } from '../../common/types/ml_config';
 
 import { MlRouter } from './routing';
 
-type MlDependencies = MlSetupDependencies & MlStartDependencies;
+type MlDependencies = MlSetupDependencies &
+  MlStartDependencies & {
+    mlConfig: MlConfigType;
+  };
 
 interface AppProps {
   coreStart: CoreStart;
@@ -74,6 +78,7 @@ export const renderApp = (
     http: coreStart.http,
     security: deps.security,
     urlGenerators: deps.share.urlGenerators,
+    mlConfig: deps.mlConfig,
   });
 
   const mlLicense = setLicenseCache(deps.licensing);

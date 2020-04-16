@@ -43,6 +43,9 @@ const createStartContract = (): VisualizationsStart => ({
   createVis: jest.fn(),
   convertFromSerializedVis: jest.fn(),
   convertToSerializedVis: jest.fn(),
+  __LEGACY: {
+    createVisEmbeddableFromObject: jest.fn(),
+  },
 });
 
 const createInstance = async () => {

@@ -3,14 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import { EuiLink, EuiText } from '@elastic/eui';
 import Mustache from 'mustache';
+import React from 'react';
+import styled from 'styled-components';
 import { CustomLink } from '../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
-import {
-  SectionLinks,
-  SectionLink
-} from '../../../../../../../../plugins/observability/public';
+import { px, truncate, units } from '../../../../style/variables';
+
+const LinkContainer = styled.li`
+  margin-top: ${px(units.half)};
+  &:first-of-type {
+    margin-top: 0;
+  }
+`;
+
+const TruncateText = styled(EuiText)`
+  font-weight: 500;
+  line-height: ${px(units.unit)};
+  ${truncate(px(units.unit * 25))}
+`;
 
 export const CustomLinkSection = ({
   customLinks,
@@ -19,7 +31,7 @@ export const CustomLinkSection = ({
   customLinks: CustomLink[];
   transaction: Transaction;
 }) => (
-  <SectionLinks>
+  <ul>
     {customLinks.map(link => {
       let href = link.url;
       try {
@@ -28,13 +40,12 @@ export const CustomLinkSection = ({
         // ignores any error that happens
       }
       return (
-        <SectionLink
-          key={link.id}
-          label={link.label}
-          href={href}
-          target="_blank"
-        />
+        <LinkContainer key={link.id}>
+          <EuiLink href={href} target="_blank">
+            <TruncateText size="s">{link.label}</TruncateText>
+          </EuiLink>
+        </LinkContainer>
       );
     })}
-  </SectionLinks>
+  </ul>
 );

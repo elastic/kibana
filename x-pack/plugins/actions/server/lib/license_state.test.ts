@@ -8,7 +8,7 @@ import { ActionType } from '../types';
 import { BehaviorSubject } from 'rxjs';
 import { LicenseState, ILicenseState } from './license_state';
 import { licensingMock } from '../../../licensing/server/mocks';
-import { LICENSE_CHECK_STATE, ILicense } from '../../../licensing/server';
+import { ILicense } from '../../../licensing/server';
 
 describe('checkLicense()', () => {
   let getRawLicense: any;
@@ -21,7 +21,7 @@ describe('checkLicense()', () => {
     beforeEach(() => {
       const license = licensingMock.createLicense({ license: { status: 'invalid' } });
       license.check = jest.fn(() => ({
-        state: LICENSE_CHECK_STATE.Invalid,
+        state: 'invalid',
       }));
       getRawLicense.mockReturnValue(license);
     });
@@ -38,7 +38,7 @@ describe('checkLicense()', () => {
     beforeEach(() => {
       const license = licensingMock.createLicense({ license: { status: 'active' } });
       license.check = jest.fn(() => ({
-        state: LICENSE_CHECK_STATE.Valid,
+        state: 'valid',
       }));
       getRawLicense.mockReturnValue(license);
     });

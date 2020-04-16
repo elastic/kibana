@@ -12,8 +12,6 @@ import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { NEXT_MAJOR_VERSION } from '../common/version';
 import { Config } from '../common/config';
 
-import { renderApp } from './application/render_app';
-
 interface Dependencies {
   cloud: CloudSetup;
   management: ManagementSetup;
@@ -21,7 +19,7 @@ interface Dependencies {
 
 export class UpgradeAssistantUIPlugin implements Plugin {
   constructor(private ctx: PluginInitializerContext) {}
-  setup({ http, getStartServices }: CoreSetup, { cloud, management }: Dependencies) {
+  setup(coreSetup: CoreSetup, { cloud, management }: Dependencies) {
     const { enabled } = this.ctx.config.get<Config>();
     if (!enabled) {
       return;
@@ -36,9 +34,9 @@ export class UpgradeAssistantUIPlugin implements Plugin {
         values: { version: `${NEXT_MAJOR_VERSION}.0` },
       }),
       order: 1000,
-      async mount({ element }) {
-        const [{ i18n: i18nDep, docLinks }] = await getStartServices();
-        return renderApp({ element, isCloudEnabled, http, i18n: i18nDep, docLinks });
+      async mount(params) {
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        return mountManagementSection(coreSetup, isCloudEnabled, params);
       },
     });
   }

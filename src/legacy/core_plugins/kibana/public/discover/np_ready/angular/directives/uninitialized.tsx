@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 
 import { EuiButton, EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
@@ -28,38 +28,40 @@ interface Props {
 
 export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageContent horizontalPosition="center">
-          <EuiEmptyPrompt
-            iconType="discoverApp"
-            title={
-              <h2>
-                <FormattedMessage
-                  id="kbn.discover.uninitializedTitle"
-                  defaultMessage="Start searching"
-                />
-              </h2>
-            }
-            body={
-              <p>
-                <FormattedMessage
-                  id="kbn.discover.uninitializedText"
-                  defaultMessage="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query."
-                />
-              </p>
-            }
-            actions={
-              <EuiButton color="primary" fill onClick={onRefresh}>
-                <FormattedMessage
-                  id="kbn.discover.uninitializedRefreshButtonText"
-                  defaultMessage="Refresh data"
-                />
-              </EuiButton>
-            }
-          />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <I18nProvider>
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageContent horizontalPosition="center">
+            <EuiEmptyPrompt
+              iconType="discoverApp"
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="kbn.discover.uninitializedTitle"
+                    defaultMessage="Start searching"
+                  />
+                </h2>
+              }
+              body={
+                <p>
+                  <FormattedMessage
+                    id="kbn.discover.uninitializedText"
+                    defaultMessage="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query."
+                  />
+                </p>
+              }
+              actions={
+                <EuiButton color="primary" fill onClick={onRefresh}>
+                  <FormattedMessage
+                    id="kbn.discover.uninitializedRefreshButtonText"
+                    defaultMessage="Refresh data"
+                  />
+                </EuiButton>
+              }
+            />
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    </I18nProvider>
   );
 };

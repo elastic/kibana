@@ -37,6 +37,7 @@ export function includedFields(type: string | string[] = '*', fields?: string[] 
       return [...acc, ...sourceFields.map(f => `${t}.${f}`)];
     }, [])
     .concat('namespace')
+    .concat('namespaces')
     .concat('type')
     .concat('references')
     .concat('migrationVersion')

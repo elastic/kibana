@@ -70,26 +70,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/legacy/core_plugins/expressions/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: [
-        'src/legacy/core_plugins/vis_default_editor/public/components/controls/**/*.{ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/ui/public/vis/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/plugins/es_ui_shared/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -129,7 +109,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/lens/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/lens/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         'react-hooks/rules-of-hooks': 'off',
@@ -553,35 +533,18 @@ module.exports = {
     },
 
     /**
-     * Graph overrides
-     */
-    {
-      files: ['x-pack/legacy/plugins/graph/**/*.js'],
-      globals: {
-        angular: true,
-        $: true,
-      },
-      rules: {
-        'block-scoped-var': 'off',
-        camelcase: 'off',
-        eqeqeq: 'off',
-        'guard-for-in': 'off',
-        'new-cap': 'off',
-        'no-loop-func': 'off',
-        'no-redeclare': 'off',
-        'no-shadow': 'off',
-        'no-unused-vars': 'off',
-        'one-var': 'off',
-      },
-    },
-
-    /**
      * ML overrides
      */
     {
-      files: ['x-pack/legacy/plugins/ml/**/*.js'],
+      files: ['x-pack/plugins/ml/**/*.js'],
       rules: {
         'no-shadow': 'error',
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: './x-pack',
+          },
+        ],
       },
     },
 
@@ -771,7 +734,7 @@ module.exports = {
      * Lens overrides
      */
     {
-      files: ['x-pack/legacy/plugins/lens/**/*.ts', 'x-pack/legacy/plugins/lens/**/*.tsx'],
+      files: ['x-pack/plugins/lens/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -885,8 +848,10 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: ['src/legacy/core_plugins/metrics/**/*.js'],
-      excludedFiles: 'src/legacy/core_plugins/metrics/index.js',
+      files: [
+        'src/plugins/vis_type_timeseries/**/*.{js,ts,tsx}',
+        'src/legacy/core_plugins/vis_type_timeseries/**/*.{js,ts,tsx}',
+      ],
       rules: {
         'import/no-default-export': 'error',
       },

@@ -44,7 +44,7 @@ export function ConnectionStatus({ isConnected, mode }) {
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
 
           <EuiFlexItem className="remoteClustersConnectionStatus__message">
-            <EuiText>{message}</EuiText>
+            <EuiText size="s">{message}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

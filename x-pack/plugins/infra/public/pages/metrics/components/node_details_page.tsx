@@ -22,7 +22,7 @@ import { MetricsTimeControls } from './time_controls';
 import { SideNavContext, NavItem } from '../lib/side_nav_context';
 import { PageBody } from './page_body';
 import { euiStyled } from '../../../../../observability/public';
-import { MetricsTimeInput } from '../containers/with_metrics_time';
+import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { InfraMetadata } from '../../../../common/http_api/metadata_api';
 import { PageError } from './page_error';
 import { MetadataContext } from '../../../pages/metrics/containers/metadata_context';
@@ -94,7 +94,7 @@ export const NodeDetailsPage = (props: Props) => {
                         setRefreshInterval={props.setRefreshInterval}
                         onChangeTimeRange={props.setTimeRange}
                         setAutoReload={props.setAutoReload}
-                        onRefresh={props.triggerRefresh}
+                        onRefresh={refetch}
                       />
                     </MetricsTitleTimeRangeContainer>
                   </EuiPageHeaderSection>

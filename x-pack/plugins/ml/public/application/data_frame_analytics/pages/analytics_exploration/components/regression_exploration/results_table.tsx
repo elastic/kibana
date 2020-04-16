@@ -213,6 +213,7 @@ export const ResultsTable: FC<Props> = React.memo(
           switch (type) {
             case ES_FIELD_TYPES.BOOLEAN:
               column.dataType = ES_FIELD_TYPES.BOOLEAN;
+              column.render = d => (d ? 'true' : 'false');
               break;
             case ES_FIELD_TYPES.DATE:
               column.align = 'right';

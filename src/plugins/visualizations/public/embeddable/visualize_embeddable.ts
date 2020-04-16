@@ -33,8 +33,8 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   Embeddable,
-  Container,
   EmbeddableVisTriggerContext,
+  IContainer,
 } from '../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
 import { IExpressionLoaderParams, ExpressionsStart } from '../../../../plugins/expressions/public';
@@ -89,7 +89,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     timefilter: TimefilterContract,
     { vis, editUrl, indexPatterns, editable }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
-    parent?: Container
+    parent?: IContainer
   ) {
     super(
       initialInput,
@@ -116,7 +116,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       })
     );
   }
-
   public getVisualizationDescription() {
     return this.vis.description;
   }

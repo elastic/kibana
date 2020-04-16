@@ -5,14 +5,15 @@
  */
 
 import { createSelector } from 'reselect';
-import { PolicyConfig, PolicyDetailsState, UIPolicyConfig } from '../../types';
-import { generatePolicy } from '../../models/policy';
+import { PolicyDetailsState } from '../../types';
+import { Immutable, PolicyConfig, UIPolicyConfig } from '../../../../../common/types';
+import { factory as policyConfigFactory } from '../../../../../common/models/policy_config';
 
 /** Returns the policy details */
-export const policyDetails = (state: PolicyDetailsState) => state.policyItem;
+export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
 
 /** Returns a boolean of whether the user is on the policy details page or not */
-export const isOnPolicyDetailsPage = (state: PolicyDetailsState) => {
+export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
   if (state.location) {
     const pathnameParts = state.location.pathname.split('/');
     return pathnameParts[1] === 'policy' && pathnameParts[2];
@@ -32,14 +33,16 @@ export const policyIdFromParams: (state: PolicyDetailsState) => string = createS
   }
 );
 
+const defaultFullPolicy: Immutable<PolicyConfig> = policyConfigFactory();
+
 /**
  * Returns the full Endpoint Policy, which will include private settings not shown on the UI.
  * Note: this will return a default full policy if the `policyItem` is `undefined`
  */
-export const fullPolicy: (s: PolicyDetailsState) => PolicyConfig = createSelector(
+export const fullPolicy: (s: Immutable<PolicyDetailsState>) => PolicyConfig = createSelector(
   policyDetails,
   policyData => {
-    return policyData?.inputs[0]?.config?.policy?.value ?? generatePolicy();
+    return policyData?.inputs[0]?.config?.policy?.value ?? defaultFullPolicy;
   }
 );
 
@@ -79,14 +82,8 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
   }
 );
 
-/** Returns an object of all the windows eventing configuration */
-export const windowsEventing = (state: PolicyDetailsState) => {
-  const config = policyConfig(state);
-  return config && config.windows.events;
-};
-
 /** Returns the total number of possible windows eventing configurations */
-export const totalWindowsEventing = (state: PolicyDetailsState): number => {
+export const totalWindowsEvents = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {
     return Object.keys(config.windows.events).length;
@@ -95,10 +92,50 @@ export const totalWindowsEventing = (state: PolicyDetailsState): number => {
 };
 
 /** Returns the number of selected windows eventing configurations */
-export const selectedWindowsEventing = (state: PolicyDetailsState): number => {
+export const selectedWindowsEvents = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {
     return Object.values(config.windows.events).reduce((count, event) => {
+      return event === true ? count + 1 : count;
+    }, 0);
+  }
+  return 0;
+};
+
+/** Returns the total number of possible mac eventing configurations */
+export const totalMacEvents = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.keys(config.mac.events).length;
+  }
+  return 0;
+};
+
+/** Returns the number of selected mac eventing configurations */
+export const selectedMacEvents = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.values(config.mac.events).reduce((count, event) => {
+      return event === true ? count + 1 : count;
+    }, 0);
+  }
+  return 0;
+};
+
+/** Returns the total number of possible linux eventing configurations */
+export const totalLinuxEvents = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.keys(config.linux.events).length;
+  }
+  return 0;
+};
+
+/** Returns the number of selected liinux eventing configurations */
+export const selectedLinuxEvents = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.values(config.linux.events).reduce((count, event) => {
       return event === true ? count + 1 : count;
     }, 0);
   }

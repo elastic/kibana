@@ -19,16 +19,19 @@ import {
 } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
-import { getGapBetweenRuns, makeFloatString } from './utils';
+import { getGapBetweenRuns, makeFloatString, parseScheduleDates } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import { getSignalsCount } from '../notifications/get_signals_count';
-import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
+import {
+  scheduleNotificationActions,
+  NotificationRuleTypeParams,
+} from '../notifications/schedule_notification_actions';
 import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
+import { getNotificationResultsLink } from '../notifications/utils';
 
 export const signalRulesAlertType = ({
   logger,
@@ -41,7 +44,7 @@ export const signalRulesAlertType = ({
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
-    name: 'SIEM Signals',
+    name: 'SIEM signal',
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
     validate: {
@@ -55,6 +58,7 @@ export const signalRulesAlertType = ({
         index,
         filters,
         language,
+        maxSignals,
         meta,
         machineLearningJobId,
         outputIndex,
@@ -63,6 +67,15 @@ export const signalRulesAlertType = ({
         to,
         type,
       } = params;
+      const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
+      let hasError: boolean = false;
+      let result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        bulkCreateTimes: [],
+        searchAfterTimes: [],
+        lastLookBackDate: null,
+        createdSignalsCount: 0,
+      };
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(services.savedObjectsClient);
       const ruleStatusService = await ruleStatusServiceFactory({
         alertId,
@@ -85,6 +98,7 @@ export const signalRulesAlertType = ({
         params: ruleParams,
       } = savedObject.attributes;
       const updatedAt = savedObject.updated_at ?? '';
+      const refresh = actions.length ? 'wait_for' : false;
       const buildRuleMessage = buildRuleMessageFactory({
         id: alertId,
         ruleId,
@@ -104,16 +118,9 @@ export const signalRulesAlertType = ({
         );
         logger.warn(gapMessage);
 
+        hasError = true;
         await ruleStatusService.error(gapMessage, { gap: gapString });
       }
-
-      const searchAfterSize = Math.min(params.maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-      let result: SearchAfterAndBulkCreateReturnType = {
-        success: false,
-        bulkCreateTimes: [],
-        searchAfterTimes: [],
-        lastLookBackDate: null,
-      };
 
       try {
         if (isMlRule(type)) {
@@ -126,7 +133,7 @@ export const signalRulesAlertType = ({
                 'Machine learning rule is missing job id and/or anomaly threshold:',
                 `job id: "${machineLearningJobId}"`,
                 `anomaly threshold: "${anomalyThreshold}"`,
-              ].join('\n')
+              ].join(' ')
             );
           }
 
@@ -143,6 +150,7 @@ export const signalRulesAlertType = ({
               `datafeed status: "${jobSummary?.datafeedState}"`
             );
             logger.warn(errorMessage);
+            hasError = true;
             await ruleStatusService.error(errorMessage);
           }
 
@@ -158,7 +166,7 @@ export const signalRulesAlertType = ({
             logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
           }
 
-          const { success, bulkCreateDuration } = await bulkCreateMlSignals({
+          const { success, bulkCreateDuration, createdItemsCount } = await bulkCreateMlSignals({
             actions,
             throttle,
             someResult: anomalyResults,
@@ -174,9 +182,11 @@ export const signalRulesAlertType = ({
             updatedAt,
             interval,
             enabled,
+            refresh,
             tags,
           });
           result.success = success;
+          result.createdSignalsCount = createdItemsCount;
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
@@ -233,6 +243,7 @@ export const signalRulesAlertType = ({
             interval,
             enabled,
             pageSize: searchAfterSize,
+            refresh,
             tags,
             throttle,
           });
@@ -241,28 +252,31 @@ export const signalRulesAlertType = ({
 
         if (result.success) {
           if (actions.length) {
-            const notificationRuleParams = {
+            const notificationRuleParams: NotificationRuleTypeParams = {
               ...ruleParams,
               name,
               id: savedObject.id,
             };
-            const { signalsCount, resultsLink } = await getSignalsCount({
-              from: `now-${interval}`,
-              to: 'now',
-              index: ruleParams.outputIndex,
-              ruleId: ruleParams.ruleId!,
-              kibanaSiemAppUrl: meta?.kibanaSiemAppUrl as string,
-              ruleAlertId: savedObject.id,
-              callCluster: services.callCluster,
+
+            const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
+            const toInMs = parseScheduleDates('now')?.format('x');
+
+            const resultsLink = getNotificationResultsLink({
+              from: fromInMs,
+              to: toInMs,
+              id: savedObject.id,
+              kibanaSiemAppUrl: meta?.kibana_siem_app_url,
             });
 
-            logger.info(buildRuleMessage(`Found ${signalsCount} signals for notification.`));
+            logger.info(
+              buildRuleMessage(`Found ${result.createdSignalsCount} signals for notification.`)
+            );
 
-            if (signalsCount) {
+            if (result.createdSignalsCount) {
               const alertInstance = services.alertInstanceFactory(alertId);
               scheduleNotificationActions({
                 alertInstance,
-                signalsCount,
+                signalsCount: result.createdSignalsCount,
                 resultsLink,
                 ruleParams: notificationRuleParams,
               });
@@ -270,11 +284,13 @@ export const signalRulesAlertType = ({
           }
 
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
-          await ruleStatusService.success('succeeded', {
-            bulkCreateTimeDurations: result.bulkCreateTimes,
-            searchAfterTimeDurations: result.searchAfterTimes,
-            lastLookBackDate: result.lastLookBackDate?.toISOString(),
-          });
+          if (!hasError) {
+            await ruleStatusService.success('succeeded', {
+              bulkCreateTimeDurations: result.bulkCreateTimes,
+              searchAfterTimeDurations: result.searchAfterTimes,
+              lastLookBackDate: result.lastLookBackDate?.toISOString(),
+            });
+          }
         } else {
           const errorMessage = buildRuleMessage(
             'Bulk Indexing of signals failed. Check logs for further details.'

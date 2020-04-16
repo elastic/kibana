@@ -138,7 +138,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
         name: i18n.translate(
           'xpack.ingestManager.configDetails.datasourcesTable.packageNameColumnTitle',
           {
-            defaultMessage: 'Package',
+            defaultMessage: 'Integration',
           }
         ),
         render(packageTitle: string, datasource: InMemoryDatasource) {
@@ -150,6 +150,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
                     packageName={datasource.package.name}
                     version={datasource.package.version}
                     size="m"
+                    tryApi={true}
                   />
                 </EuiFlexItem>
               )}
