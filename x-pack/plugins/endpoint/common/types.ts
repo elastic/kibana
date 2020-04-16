@@ -7,6 +7,7 @@
 import { SearchResponse } from 'elasticsearch';
 import { TypeOf } from '@kbn/config-schema';
 import { alertingIndexGetQuerySchema } from './schema/alert_index';
+import { indexPatternGetParamsSchema } from './schema/index_pattern';
 import { Datasource, NewDatasource } from '../../ingest_manager/common';
 
 /**
@@ -33,9 +34,9 @@ export type Direction = 'asc' | 'desc';
 
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
-  static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
+  static INDEX_PATTERN_ROUTE = `${EndpointAppConstants.BASE_API_URL}/index_pattern`;
   static ALERT_INDEX_NAME = 'events-endpoint-1';
-  static EVENT_INDEX_NAME = 'events-endpoint-*';
+  static EVENT_DATASET = 'events';
   static DEFAULT_TOTAL_HITS = 10000;
   /**
    * Legacy events are stored in indices with endgame-* prefix
@@ -445,6 +446,11 @@ export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
  * Result of the validated query params when handling alert index requests.
  */
 export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;
+
+/**
+ * Result of the validated params when handling an index pattern request.
+ */
+export type IndexPatternGetParamsResult = TypeOf<typeof indexPatternGetParamsSchema>;
 
 /**
  * Endpoint Policy configuration
