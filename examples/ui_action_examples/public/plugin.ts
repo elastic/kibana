@@ -51,7 +51,10 @@ declare module '../../../src/plugins/ui_actions/public' {
 export class UiActionExamplesPlugin
   implements
     Plugin<void, void, UiActionExamplesSetupDependencies, UiActionExamplesStartDependencies> {
-  public setup(core: CoreSetup, { uiActions, drilldowns }: UiActionExamplesSetupDependencies) {
+  public setup(
+    core: CoreSetup<UiActionExamplesStartDependencies>,
+    { uiActions, drilldowns }: UiActionExamplesSetupDependencies
+  ) {
     const start = createStartServicesGetter(core.getStartServices);
 
     uiActions.registerTrigger(helloWorldTrigger);
