@@ -8,7 +8,9 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { Cert } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
 export interface GetCertsParams {
-  from: number;
+  from: string;
+  to: string;
+  index: number;
   search: string;
   size: number;
 }
@@ -16,7 +18,9 @@ export interface GetCertsParams {
 export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   callES,
   dynamicSettings,
+  index,
   from,
+  to,
   search,
   size,
 }) => {
@@ -24,7 +28,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   const params: any = {
     index: dynamicSettings.heartbeatIndices,
     body: {
-      from,
+      from: index,
       size,
       query: {
         bool: {
@@ -37,7 +41,8 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
             {
               range: {
                 '@timestamp': {
-                  gte: 'now-1d',
+                  gte: from,
+                  lte: to,
                 },
               },
             },
@@ -47,10 +52,10 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
       _source: [
         'monitor.id',
         'monitor.name',
-        'tls.common_name',
+        'tls.server.x509.issuer.common_name',
+        'tls.server.x509.subject.common_name',
         'tls.server.hash.sha1',
         'tls.server.hash.sha256',
-        'tls.server.issuer',
         'tls.certificate_not_valid_before',
         'tls.certificate_not_valid_after',
       ],
@@ -109,12 +114,14 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
       _source: {
         tls: {
           server: {
-            issuer,
+            x509: {
+              issuer: { common_name: issuer },
+              subject: { common_name },
+            },
             hash: { sha1, sha256 },
           },
           certificate_not_valid_after,
           certificate_not_valid_before,
-          common_name,
         },
       },
     } = hit;

@@ -14,6 +14,7 @@ export const CertType = t.intersection([
         id: t.string,
       })
     ),
+    sha256: t.string,
   }),
   t.partial({
     certificate_not_valid_after: t.string,
@@ -21,7 +22,6 @@ export const CertType = t.intersection([
     common_name: t.string,
     issuer: t.string,
     sha1: t.string,
-    sha256: t.string,
   }),
 ]);
 
