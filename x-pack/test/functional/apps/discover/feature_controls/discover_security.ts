@@ -185,13 +185,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
+        await setDiscoverTimeRange();
         await retry.try(async () => {
-          await setDiscoverTimeRange();
-          const hasNoResults = await PageObjects.discover.hasNoResults();
-          expect(hasNoResults).to.be(false);
-
+          const hitCount = await PageObjects.discover.getHitCount();
+          expect(parseInt(hitCount, 10)).to.be.greaterThan(0);
           await PageObjects.discover.clickFieldListItem('bytes');
-          await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+          await PageObjects.discover.expectFieldListItemVisualize('bytes');
         });
       });
 
@@ -279,12 +278,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
+        await setDiscoverTimeRange();
         await retry.try(async () => {
-          await setDiscoverTimeRange();
-          const hasNoResults = await PageObjects.discover.hasNoResults();
-          expect(hasNoResults).to.be(false);
+          const hitCount = await PageObjects.discover.getHitCount();
+          expect(parseInt(hitCount, 10)).to.be.greaterThan(0);
           await PageObjects.discover.clickFieldListItem('bytes');
-          await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+          await PageObjects.discover.expectFieldListItemVisualize('bytes');
         });
       });
 
@@ -360,11 +359,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`shows the visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
+        await setDiscoverTimeRange();
         await retry.try(async () => {
-          await setDiscoverTimeRange();
-          const hasNoResults = await PageObjects.discover.hasNoResults();
-          expect(hasNoResults).to.be(false);
-
+          const hitCount = await PageObjects.discover.getHitCount();
+          expect(parseInt(hitCount, 10)).to.be.greaterThan(0);
           await PageObjects.discover.clickFieldListItem('bytes');
           await PageObjects.discover.expectFieldListItemVisualize('bytes');
         });
