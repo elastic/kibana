@@ -19,17 +19,25 @@ beforeEach(() => {
 });
 
 describe('createEsContext', () => {
-  test('should return is ready state as falsy if not initialized', async () => {
-    const context = createEsContext({ logger, clusterClient, indexNameRoot: 'test0' });
+  test('should return is ready state as falsy if not initialized', () => {
+    const context = createEsContext({
+      logger,
+      clusterClientPromise: Promise.resolve(clusterClient),
+      indexNameRoot: 'test0',
+    });
 
     expect(context.initialized).toBeFalsy();
 
-    await context.initialize();
+    context.initialize();
     expect(context.initialized).toBeTruthy();
   });
 
   test('should return esNames', () => {
-    const context = createEsContext({ logger, clusterClient, indexNameRoot: 'test-index' });
+    const context = createEsContext({
+      logger,
+      clusterClientPromise: Promise.resolve(clusterClient),
+      indexNameRoot: 'test-index',
+    });
 
     const esNames = context.esNames;
     expect(esNames).toStrictEqual({
@@ -44,7 +52,11 @@ describe('createEsContext', () => {
   });
 
   test('should return exist false for esAdapter ilm policy, index template and alias before initialize', async () => {
-    const context = createEsContext({ logger, clusterClient, indexNameRoot: 'test1' });
+    const context = createEsContext({
+      logger,
+      clusterClientPromise: Promise.resolve(clusterClient),
+      indexNameRoot: 'test1',
+    });
     clusterClient.callAsInternalUser.mockResolvedValue(false);
 
     const doesAliasExist = await context.esAdapter.doesAliasExist(context.esNames.alias);
@@ -57,9 +69,13 @@ describe('createEsContext', () => {
   });
 
   test('should return exist true for esAdapter ilm policy, index template and alias after initialize', async () => {
-    const context = createEsContext({ logger, clusterClient, indexNameRoot: 'test2' });
+    const context = createEsContext({
+      logger,
+      clusterClientPromise: Promise.resolve(clusterClient),
+      indexNameRoot: 'test2',
+    });
     clusterClient.callAsInternalUser.mockResolvedValue(true);
-    await context.initialize();
+    context.initialize();
 
     const doesIlmPolicyExist = await context.esAdapter.doesIlmPolicyExist(
       context.esNames.ilmPolicy
