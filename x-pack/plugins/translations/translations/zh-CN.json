@@ -9595,7 +9595,6 @@
     "xpack.ml.dataframe.analytics.create.startDataFrameAnalyticsSuccessMessage": "数据帧分析 {jobId} 启动请求已确认。",
     "xpack.ml.dataframe.analytics.create.trainingPercentLabel": "训练百分比",
     "xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle": "功能影响分数",
-    "xpack.ml.dataframe.analytics.exploration.dataGridAriaLabel": "离群值检测结果表",
     "xpack.ml.dataframe.analytics.exploration.experimentalBadgeLabel": "实验性",
     "xpack.ml.dataframe.analytics.exploration.experimentalBadgeTooltipContent": "数据帧分析为实验功能。我们很乐意听取您的反馈意见。",
     "xpack.ml.dataframe.analytics.exploration.indexError": "加载索引数据时出错。",

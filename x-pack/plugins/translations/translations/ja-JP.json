@@ -9592,7 +9592,6 @@
     "xpack.ml.dataframe.analytics.create.startDataFrameAnalyticsSuccessMessage": "データフレーム分析 {jobId} の開始リクエストが受け付けられました。",
     "xpack.ml.dataframe.analytics.create.trainingPercentLabel": "トレーニングパーセンテージ",
     "xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle": "機能影響スコア",
-    "xpack.ml.dataframe.analytics.exploration.dataGridAriaLabel": "外れ値検出結果表",
     "xpack.ml.dataframe.analytics.exploration.experimentalBadgeLabel": "実験的",
     "xpack.ml.dataframe.analytics.exploration.experimentalBadgeTooltipContent": "データフレーム分析は実験段階の機能です。フィードバックをお待ちしています。",
     "xpack.ml.dataframe.analytics.exploration.indexError": "インデックスデータの読み込み中にエラーが発生しました。",
