@@ -9,7 +9,6 @@
 /src/legacy/server/sample_data/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/visualize/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 /src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
@@ -18,6 +17,7 @@
 /src/plugins/timelion/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
+/src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/vis_type_timeseries/ @elastic/kibana-app
 /src/plugins/vis_type_metric/ @elastic/kibana-app
 /src/plugins/vis_type_markdown/ @elastic/kibana-app

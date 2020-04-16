@@ -22,21 +22,18 @@ import {
   CoreStart,
   SavedObjectsClientContract,
   ToastsStart,
-  IUiSettingsClient,
-  I18nStart,
   PluginInitializerContext,
+  I18nStart,
 } from 'kibana/public';
 
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { EmbeddableStart } from '../../../../../plugins/embeddable/public';
-import { SharePluginStart } from '../../../../../plugins/share/public';
-import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plugins/data/public';
-import { VisualizationsStart } from '../../../../../plugins/visualizations/public';
-import { SavedVisualizations } from './np_ready/types';
-import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
-import { KibanaLegacyStart } from '../../../../../plugins/kibana_legacy/public';
-import { DefaultEditorController } from '../../../../../plugins/vis_default_editor/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
+import { Storage } from '../../kibana_utils/public';
+import { SharePluginStart } from '../../share/public';
+import { DataPublicPluginStart } from '../../data/public';
+import { VisualizationsStart } from '../../visualizations/public';
+import { SavedVisualizations } from './application/types';
+import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { DefaultEditorController } from '../../vis_default_editor/public';
 
 export interface VisualizeKibanaServices {
   pluginInitializerContext: PluginInitializerContext;
@@ -44,20 +41,15 @@ export interface VisualizeKibanaServices {
   chrome: ChromeStart;
   core: CoreStart;
   data: DataPublicPluginStart;
-  embeddable: EmbeddableStart;
-  indexPatterns: IndexPatternsContract;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
   savedObjectsClient: SavedObjectsClientContract;
-  savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   savedVisualizations: SavedVisualizations;
-  share: SharePluginStart;
-  uiSettings: IUiSettingsClient;
+  share?: SharePluginStart;
   config: KibanaLegacyStart['config'];
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
-  usageCollection?: UsageCollectionSetup;
   I18nContext: I18nStart['Context'];
   setActiveUrl: (newUrl: string) => void;
   DefaultVisualizationEditor: typeof DefaultEditorController;

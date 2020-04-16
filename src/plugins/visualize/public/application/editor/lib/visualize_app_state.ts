@@ -24,7 +24,7 @@ import {
   createStateContainer,
   syncState,
   IKbnUrlStateStorage,
-} from '../../../../../../../../plugins/kibana_utils/public';
+} from '../../../../../kibana_utils/public';
 import { PureVisState, VisualizeAppState, VisualizeAppStateTransitions } from '../../types';
 
 const STATE_STORAGE_KEY = '_a';

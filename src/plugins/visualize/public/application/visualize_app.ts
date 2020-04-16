@@ -17,12 +17,15 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
-import { plugin } from './index';
+import { IModule } from 'angular';
+import { VisualizeKibanaServices } from '../kibana_services';
 
-const instance = plugin({
-  env: npSetup.plugins.kibanaLegacy.env,
-} as PluginInitializerContext);
-instance.setup(npSetup.core, npSetup.plugins);
-instance.start(npStart.core, npStart.plugins);
+// @ts-ignore
+import { initEditorDirective } from './editor/editor';
+// @ts-ignore
+import { initListingDirective } from './listing/visualize_listing';
+
+export function initVisualizeAppDirective(app: IModule, deps: VisualizeKibanaServices) {
+  initEditorDirective(app, deps);
+  initListingDirective(app, deps.I18nContext);
+}
