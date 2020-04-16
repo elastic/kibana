@@ -88,6 +88,12 @@ const jobStatusLabelsMap = new Map<JobStatuses, string>([
     }),
   ],
   [
+    JobStatuses.WARNINGS,
+    i18n.translate('xpack.reporting.jobStatuses.warningText', {
+      defaultMessage: 'Completed with warnings',
+    }),
+  ],
+  [
     JobStatuses.FAILED,
     i18n.translate('xpack.reporting.jobStatuses.failedText', {
       defaultMessage: 'Failed',
@@ -410,7 +416,11 @@ class ReportListingUi extends Component<Props, State> {
             statusTimestamp = this.formatDate(record.started_at);
           } else if (
             record.completed_at &&
-            (status === JobStatuses.COMPLETED || status === JobStatuses.FAILED)
+            ([
+              JobStatuses.COMPLETED,
+              JobStatuses.FAILED,
+              JobStatuses.WARNINGS,
+            ] as string[]).includes(status)
           ) {
             statusTimestamp = this.formatDate(record.completed_at);
           }
