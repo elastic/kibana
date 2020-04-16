@@ -15,6 +15,8 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center; /* Corrects horizontal centering in IE11 */
 `;
 
+EmptyPrompt.displayName = 'EmptyPrompt';
+
 interface PrePackagedRulesPromptProps {
   createPrePackagedRules: () => void;
   loading: boolean;

@@ -41,6 +41,11 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
   };
 };
 
+export const selectPingList = ({ pingList, ui: { lastRefresh } }: AppState) => ({
+  pings: pingList,
+  lastRefresh,
+});
+
 const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
 
 export const hasMLFeatureAvailable = createSelector(
