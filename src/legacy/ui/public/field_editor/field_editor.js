@@ -66,7 +66,7 @@ import { ScriptingHelpFlyout } from './components/scripting_help';
 import { FieldFormatEditor } from './components/field_format_editor';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
-import { copyField, executeScript, isScriptValid } from './lib';
+import { executeScript, isScriptValid } from './lib';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -100,7 +100,6 @@ export class FieldEditor extends PureComponent {
     indexPattern: PropTypes.object.isRequired,
     field: PropTypes.object.isRequired,
     helpers: PropTypes.shape({
-      Field: PropTypes.func.isRequired,
       getConfig: PropTypes.func.isRequired,
       $http: PropTypes.func.isRequired,
       fieldFormatEditors: PropTypes.object.isRequired,
@@ -111,11 +110,7 @@ export class FieldEditor extends PureComponent {
   constructor(props) {
     super(props);
 
-    const {
-      field,
-      indexPattern,
-      helpers: { Field },
-    } = props;
+    const { field, indexPattern } = props;
 
     this.state = {
       isReady: false,
@@ -125,7 +120,7 @@ export class FieldEditor extends PureComponent {
       fieldTypes: [],
       fieldTypeFormats: [],
       existingFieldNames: indexPattern.fields.map(f => f.name),
-      field: copyField(field, indexPattern, Field),
+      field: { ...field, format: field.format },
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -730,7 +725,7 @@ export class FieldEditor extends PureComponent {
   };
 
   saveField = async () => {
-    const field = this.state.field.toActualField();
+    const field = this.state.field;
     const { indexPattern } = this.props;
     const { fieldFormatId } = this.state;
 

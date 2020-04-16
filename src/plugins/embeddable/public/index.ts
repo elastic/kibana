@@ -64,6 +64,8 @@ export {
   PropertySpec,
   ViewMode,
   withEmbeddableSubscription,
+  SavedObjectEmbeddableInput,
+  isSavedObjectEmbeddableInput,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {
