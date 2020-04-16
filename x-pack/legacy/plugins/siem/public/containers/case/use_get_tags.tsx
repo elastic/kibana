@@ -20,6 +20,10 @@ type Action =
   | { type: 'FETCH_SUCCESS'; payload: string[] }
   | { type: 'FETCH_FAILURE' };
 
+export interface UseGetTags extends TagsState {
+  fetchTags: () => void;
+}
+
 const dataFetchReducer = (state: TagsState, action: Action): TagsState => {
   switch (action.type) {
     case 'FETCH_INIT':
@@ -47,7 +51,7 @@ const dataFetchReducer = (state: TagsState, action: Action): TagsState => {
 };
 const initialData: string[] = [];
 
-export const useGetTags = (): TagsState => {
+export const useGetTags = (): UseGetTags => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -55,7 +59,7 @@ export const useGetTags = (): TagsState => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  useEffect(() => {
+  const callFetch = () => {
     let didCancel = false;
     const abortCtrl = new AbortController();
 
@@ -82,6 +86,9 @@ export const useGetTags = (): TagsState => {
       abortCtrl.abort();
       didCancel = true;
     };
+  };
+  useEffect(() => {
+    callFetch();
   }, []);
-  return state;
+  return { ...state, fetchTags: callFetch };
 };
