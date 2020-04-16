@@ -20,6 +20,8 @@ export const THROTTLE_OPTIONS = [
   { value: '7d', text: 'Weekly' },
 ];
 
+export const DEFAULT_THROTTLE_OPTION = THROTTLE_OPTIONS[0];
+
 type ThrottleSelectField = typeof SelectField;
 
 export const ThrottleSelectField: ThrottleSelectField = props => {
