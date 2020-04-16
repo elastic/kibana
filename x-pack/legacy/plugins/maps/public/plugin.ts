@@ -4,18 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import '../../../../plugins/maps/public/layers/layer_wizard_registry';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import '../../../../plugins/maps/public/layers/sources/source_registry';
-
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 // @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { registerLayerWizards } from '../../../../plugins/maps/public/layers/load_layer_wizards';
 // @ts-ignore
 import { MapListing } from './components/map_listing';
 // @ts-ignore
@@ -70,6 +63,5 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
     bindNpStartCoreAndPlugins(core, plugins);
-    registerLayerWizards();
   }
 }
