@@ -5,7 +5,11 @@
  */
 
 import { SavedObject } from 'kibana/server';
-import { CaseAttributes, CommentAttributes } from '../../../../common/api';
+import {
+  CaseAttributes,
+  CommentAttributes,
+  CasesConfigureAttributes,
+} from '../../../../common/api';
 
 export const mockCases: Array<SavedObject<CaseAttributes>> = [
   {
@@ -225,7 +229,33 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
       },
     ],
     updated_at: '2019-11-25T22:32:30.608Z',
+    version: 'WzYsMV0=',
+  },
+];
 
+export const mockCaseConfigure: Array<SavedObject<CasesConfigureAttributes>> = [
+  {
+    type: 'cases-configure',
+    id: 'mock-configuration-1',
+    attributes: {
+      connector_id: '123',
+      connector_name: 'My connector',
+      closure_type: 'close-by-user',
+      created_at: '2020-04-09T09:43:51.778Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      updated_at: '2020-04-09T09:43:51.778Z',
+      updated_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+    },
+    references: [],
+    updated_at: '2020-04-09T09:43:51.778Z',
     version: 'WzYsMV0=',
   },
 ];

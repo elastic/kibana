@@ -34,6 +34,8 @@ import { FieldEditor } from 'ui/field_editor';
 import { I18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
+import { IndexHeader } from '../index_header';
+
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
 const renderFieldEditor = (
   $scope,
@@ -49,11 +51,11 @@ const renderFieldEditor = (
 
     render(
       <I18nContext>
+        <IndexHeader indexPattern={indexPattern} />
         <FieldEditor
           indexPattern={indexPattern}
           field={field}
           helpers={{
-            Field: IndexPatternField,
             getConfig,
             $http,
             fieldFormatEditors,
