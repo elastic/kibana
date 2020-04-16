@@ -15,6 +15,7 @@ import {
   PinnedEventSavedObject,
 } from '../pinned_event/types';
 import { SavedObjectsClient } from '../../../../../../../src/core/server';
+import { TimelineType } from '../../graphql/types';
 
 /*
  *  ColumnHeader Types
@@ -136,7 +137,11 @@ const SavedSortRuntimeType = runtimeTypes.partial({
 /*
  *  Timeline Types
  */
-const TimelineTypeLiteral = runtimeTypes.literal('template', 'default');
+
+export const TimelineTypeLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(TimelineType.template),
+  runtimeTypes.literal(TimelineType.default),
+]);
 
 export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
@@ -148,11 +153,11 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   kqlMode: unionWithNullType(runtimeTypes.string),
   kqlQuery: unionWithNullType(SavedFilterQueryQueryRuntimeType),
   title: unionWithNullType(runtimeTypes.string),
+  templateTimelineId: unionWithNullType(runtimeTypes.string),
+  timelineType: unionWithNullType(TimelineTypeLiteralRt),
   dateRange: unionWithNullType(SavedDateRangePickerRuntimeType),
   savedQueryId: unionWithNullType(runtimeTypes.string),
   sort: unionWithNullType(SavedSortRuntimeType),
-  templateTimelineId: unionWithNullType(runtimeTypes.string),
-  type: TimelineTypeLiteral,
   created: unionWithNullType(runtimeTypes.number),
   createdBy: unionWithNullType(runtimeTypes.string),
   updated: unionWithNullType(runtimeTypes.number),
@@ -176,7 +181,7 @@ export const TimelineSavedObjectRuntimeType = runtimeTypes.intersection([
   runtimeTypes.partial({
     savedObjectId: runtimeTypes.string,
     templateTimelineId: runtimeTypes.string,
-    type: TimelineTypeLiteral,
+    timelineType: TimelineTypeLiteralRt,
   }),
 ]);
 
@@ -192,8 +197,6 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
     notes: runtimeTypes.array(NoteSavedObjectToReturnRuntimeType),
     pinnedEventIds: runtimeTypes.array(runtimeTypes.string),
     pinnedEventsSaveObject: runtimeTypes.array(PinnedEventToReturnSavedObjectRuntimeType),
-    templateTimelineId: unionWithNullType(runtimeTypes.string),
-    type: TimelineTypeLiteral,
   }),
 ]);
 
@@ -241,13 +244,6 @@ export type ExportedTimelines = TimelineSavedObject &
   ExportedNotes & {
     pinnedEventIds: string[];
   };
-
-export enum TimelineTypeLiterals {
-  default = 'default',
-  template = 'template',
-}
-
-type TimelineTypeLiteral = TimelineTypeLiterals.default | TimelineTypeLiterals.template;
 
 export interface BulkGetInput {
   type: string;

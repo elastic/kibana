@@ -5,16 +5,13 @@
  */
 import * as rt from 'io-ts';
 import { unionWithNullType } from '../../../framework';
-import { SavedTimelineRuntimeType, TimelineTypeLiterals } from '../../types';
+import { SavedTimelineRuntimeType, TimelineTypeLiteralRt } from '../../types';
 
 export const createTimelineSchema = rt.type({
   templateTimelineId: unionWithNullType(rt.string),
   timeline: SavedTimelineRuntimeType,
   timelineId: unionWithNullType(rt.string),
   version: unionWithNullType(rt.string),
-  type: rt.union([
-    rt.literal(TimelineTypeLiterals.default),
-    rt.literal(TimelineTypeLiterals.template),
-  ]),
+  timelineType: TimelineTypeLiteralRt,
   pinndedEventIds: rt.array(unionWithNullType(rt.string)),
 });

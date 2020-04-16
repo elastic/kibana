@@ -9737,10 +9737,10 @@
             "deprecationReason": null
           },
           {
-            "name": "type",
+            "name": "timelineType",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "ENUM", "name": "TimelineType", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -10340,6 +10340,29 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "TimelineType",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "default",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "template",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "PageInfoTimeline",
         "description": "",
@@ -10877,6 +10900,18 @@
             "name": "title",
             "description": "",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "templateTimelineId",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "timelineType",
+            "description": "",
+            "type": { "kind": "ENUM", "name": "TimelineType", "ofType": null },
             "defaultValue": null
           },
           {

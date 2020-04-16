@@ -10,13 +10,13 @@ import { FrameworkRequest } from '../../framework';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
 import { SetupPlugins } from '../../../plugin';
-import { TimelineTypeLiterals } from '../types';
 import { createTimelines, getTimeline } from './utils/create_timelines';
 
 import { timelineSavedObjectOmittedFields } from './utils/import_timelines';
 import { createTimelineSchema } from './schemas/create_timelines_schema';
 import { createTemplateTimelines } from './utils/create_template_timelines';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { TimelineType } from '../../../graphql/types';
 
 export const createTimelinesRoute = (
   router: IRouter,
@@ -39,8 +39,8 @@ export const createTimelinesRoute = (
       try {
         const savedObjectsClient = context.core.savedObjects.client;
         const user = await security?.authc.getCurrentUser(request);
-        const { timelineId, templateTimelineId, timeline, type, version } = request.body;
-        const isHandlingTemplateTimeline = type === TimelineTypeLiterals.template;
+        const { timelineId, templateTimelineId, timeline, timelineType, version } = request.body;
+        const isHandlingTemplateTimeline = timelineType === TimelineType.template;
         let existTimeline = null;
         let existTemplateTimeline = null;
         let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);

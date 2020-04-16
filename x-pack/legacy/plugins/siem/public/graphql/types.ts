@@ -132,6 +132,10 @@ export interface TimelineInput {
 
   title?: Maybe<string>;
 
+  templateTimelineId?: Maybe<string>;
+
+  timelineType?: Maybe<TimelineType>;
+
   dateRange?: Maybe<DateRangePickerInput>;
 
   savedQueryId?: Maybe<string>;
@@ -332,6 +336,11 @@ export enum NetworkDnsFields {
 
 export enum TlsFields {
   _id = '_id',
+}
+
+export enum TimelineType {
+  default = 'default',
+  template = 'template',
 }
 
 export enum SortFieldTimeline {
@@ -1946,7 +1955,7 @@ export interface TimelineResult {
 
   templateTimelineId?: Maybe<string>;
 
-  type?: Maybe<string>;
+  timelineType?: Maybe<TimelineType>;
 
   updated?: Maybe<number>;
 
@@ -4034,7 +4043,7 @@ export namespace GetAllTimeline {
 
     title: Maybe<string>;
 
-    type: Maybe<string>;
+    timelineType: Maybe<TimelineType>;
 
     templateTimelineId: Maybe<string>;
 

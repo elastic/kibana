@@ -15,6 +15,7 @@ import {
   ResponseFavoriteTimeline,
   TimelineResult,
   Maybe,
+  TimelineType,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 import { Note } from '../note/saved_object';
@@ -193,6 +194,7 @@ export class Timeline {
           ...timeline,
           savedObjectId: '',
           version: '',
+          timelineType: TimelineType.default,
         };
         return {
           code: 403,
