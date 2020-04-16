@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
       testTitleSuffix: 'when no partition field is provided with regular function',
       user: USER.ML_POWERUSER,
       requestBody: {
-        indexPattern: 'ecommerce',
+        indexPattern: 'ft_ecommerce',
         analysisConfig: {
           bucket_span: '15m',
           detectors: [
@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
       testTitleSuffix: 'with 1 metric and 1 influencer same as split field',
       user: USER.ML_POWERUSER,
       requestBody: {
-        indexPattern: 'ecommerce',
+        indexPattern: 'ft_ecommerce',
         analysisConfig: {
           bucket_span: '15m',
           detectors: [
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
       testTitleSuffix: 'with 3 influencers, split by city',
       user: USER.ML_POWERUSER,
       requestBody: {
-        indexPattern: 'ecommerce',
+        indexPattern: 'ft_ecommerce',
         analysisConfig: {
           bucket_span: '15m',
           detectors: [
@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
         '2 detectors split by city and manufacturer, 4 influencers, filtering by country code',
       user: USER.ML_POWERUSER,
       requestBody: {
-        indexPattern: 'ecommerce',
+        indexPattern: 'ft_ecommerce',
         analysisConfig: {
           bucket_span: '2d',
           detectors: [
@@ -148,11 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('calculate model memory limit', function() {
     before(async () => {
-      await esArchiver.load('ml/ecommerce');
-    });
-
-    after(async () => {
-      await esArchiver.unload('ml/ecommerce');
+      await esArchiver.loadIfNeeded('ml/ecommerce');
     });
 
     for (const testData of testDataList) {

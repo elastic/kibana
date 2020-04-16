@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
         aggTypes: ['avg'],
         duration: { start: 1560297859000, end: 1562975136000 },
         fields: ['taxless_total_price'],
-        index: 'ecommerce',
+        index: 'ft_ecommerce',
         query: { bool: { must: [{ match_all: {} }] } },
         timeField: 'order_date',
       },
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
         aggTypes: ['avg', 'sum'],
         duration: { start: 1560297859000, end: 1562975136000 },
         fields: ['products.base_price', 'products.base_unit_price'],
-        index: 'ecommerce',
+        index: 'ft_ecommerce',
         query: { bool: { must: [{ match_all: {} }] } },
         timeField: 'order_date',
       },
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
         aggTypes: ['avg'],
         duration: { start: 1560297859000, end: 1562975136000 },
         fields: ['taxless_total_price'],
-        index: 'ecommerce',
+        index: 'ft_ecommerce',
         query: { bool: { must: [{ match_all: {} }] } },
         splitField: 'customer_first_name.keyword',
         timeField: 'order_date',
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
         duration: { start: 1560297859000, end: 1562975136000 },
         fields: ['taxless_total_price'],
         filters: [],
-        index: 'ecommerce',
+        index: 'ft_ecommerce',
         query: { bool: { must: [{ match_all: {} }] } },
         timeField: 'order_date',
       },
@@ -91,11 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('bucket span estimator', function() {
     before(async () => {
-      await esArchiver.load('ml/ecommerce');
-    });
-
-    after(async () => {
-      await esArchiver.unload('ml/ecommerce');
+      await esArchiver.loadIfNeeded('ml/ecommerce');
     });
 
     describe('with default settings', function() {

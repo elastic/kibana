@@ -7,6 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService, loadTestFile }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   describe('Machine Learning', function() {
@@ -20,6 +21,12 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     after(async () => {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
+
+      await ml.testResources.deleteIndexPattern('kibana_sample_data_logs');
+
+      await esArchiver.unload('ml/ecommerce');
+      await esArchiver.unload('ml/categorization');
+      await esArchiver.unload('ml/sample_logs');
     });
 
     loadTestFile(require.resolve('./bucket_span_estimator'));

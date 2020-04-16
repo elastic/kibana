@@ -20,19 +20,20 @@ export default function({ getService }: FtrProviderContext) {
   describe('creation_index_pattern', function() {
     this.tags(['smoke']);
     before(async () => {
-      await esArchiver.load('ml/ecommerce');
+      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+
       await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/ecommerce');
       await transform.api.cleanTransformIndices();
     });
 
     const testDataList = [
       {
         suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
-        source: 'ecommerce',
+        source: 'ft_ecommerce',
         groupByEntries: [
           {
             identifier: 'terms(category.keyword)',
@@ -96,7 +97,7 @@ export default function({ getService }: FtrProviderContext) {
       },
       {
         suiteTitle: 'batch transform with terms group and percentiles agg',
-        source: 'ecommerce',
+        source: 'ft_ecommerce',
         groupByEntries: [
           {
             identifier: 'terms(geoip.country_iso_code)',
@@ -154,6 +155,7 @@ export default function({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function() {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
+          await transform.testResources.deleteIndexPattern(testData.destinationIndex);
         });
 
         it('loads the home page', async () => {

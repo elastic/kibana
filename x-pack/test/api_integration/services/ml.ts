@@ -9,14 +9,17 @@ import { FtrProviderContext } from '../../functional/ftr_provider_context';
 import {
   MachineLearningAPIProvider,
   MachineLearningSecurityCommonProvider,
+  MachineLearningTestResourcesProvider,
 } from '../../functional/services/machine_learning';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const api = MachineLearningAPIProvider(context);
   const securityCommon = MachineLearningSecurityCommonProvider(context);
+  const testResources = MachineLearningTestResourcesProvider(context);
 
   return {
     api,
     securityCommon,
+    testResources,
   };
 }

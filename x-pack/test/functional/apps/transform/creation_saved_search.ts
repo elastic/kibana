@@ -20,19 +20,21 @@ export default function({ getService }: FtrProviderContext) {
   describe('creation_saved_search', function() {
     this.tags(['smoke']);
     before(async () => {
-      await esArchiver.load('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/farequote');
+      await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await transform.testResources.createSavedSearchFarequoteFilterIfNeeded();
+
       await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/farequote');
       await transform.api.cleanTransformIndices();
     });
 
     const testDataList = [
       {
         suiteTitle: 'batch transform with terms groups and avg agg with saved search filter',
-        source: 'farequote_filter',
+        source: 'ft_farequote_filter',
         groupByEntries: [
           {
             identifier: 'terms(airline)',
@@ -61,7 +63,7 @@ export default function({ getService }: FtrProviderContext) {
             mode: 'batch',
             progress: '100',
           },
-          sourceIndex: 'farequote',
+          sourceIndex: 'ft_farequote',
           sourcePreview: {
             column: 2,
             values: ['ASA'],
@@ -74,6 +76,7 @@ export default function({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function() {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
+          await transform.testResources.deleteIndexPattern(testData.destinationIndex);
         });
 
         it('loads the home page', async () => {
