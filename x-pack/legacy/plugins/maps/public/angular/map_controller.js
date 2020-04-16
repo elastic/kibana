@@ -28,7 +28,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
 import { Provider } from 'react-redux';
-import { GisMap } from '../connected_components/gis_map';
+import { GisMap } from '../../../../../plugins/maps/public/connected_components/gis_map';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import {
   setSelectedLayer,

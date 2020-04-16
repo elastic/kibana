@@ -29,7 +29,7 @@ import {
   RefreshInterval,
 } from '../../../../../../src/plugins/data/public';
 
-import { GisMap } from '../connected_components/gis_map';
+import { GisMap } from '../../../../../plugins/maps/public/connected_components/gis_map';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMapStore, MapStore } from '../../../../../plugins/maps/public/reducers/store';
 import {

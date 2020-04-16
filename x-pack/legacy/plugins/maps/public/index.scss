@@ -12,6 +12,6 @@
 
 @import './main';
 @import './mapbox_hacks';
-@import './connected_components/index';
+@import '../../../../plugins/maps/public/connected_components/index';
 @import './components/index';
 @import '../../../../plugins/maps/public/layers/index';
