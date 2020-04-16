@@ -50,7 +50,7 @@ export class EventLogFixturePlugin
     core.savedObjects.registerType({
       name: 'event_log_test',
       hidden: false,
-      namespaceAgnostic: true,
+      namespaceType: 'agnostic',
       mappings: {
         properties: {},
       },
