@@ -129,6 +129,14 @@ app.controller(
       return _.get($state, 'filters', []);
     }
 
+    const visibleSubscription = getCoreChrome()
+      .getIsVisible$()
+      .subscribe(isVisible => {
+        $scope.$evalAsync(() => {
+          $scope.isVisible = isVisible;
+        });
+      });
+
     $scope.$listen(globalState, 'fetch_with_changes', diff => {
       if (diff.includes('time') || diff.includes('filters')) {
         onQueryChange({
@@ -460,6 +468,8 @@ app.controller(
 
     $scope.$on('$destroy', () => {
       window.removeEventListener('beforeunload', beforeUnload);
+      visibleSubscription.unsubscribe();
+      getCoreChrome().setIsVisible(true);
 
       if (unsubscribe) {
         unsubscribe();
@@ -553,6 +563,7 @@ app.controller(
         }),
         testId: 'mapsFullScreenMode',
         run() {
+          getCoreChrome().setIsVisible(false);
           store.dispatch(enableFullScreen());
         },
       },
