@@ -63,7 +63,12 @@ export const PageViewLogInContext: React.FC = () => {
       <EuiModal onClose={closeModal} maxWidth={false}>
         <EuiModalBody style={{ width: vw - MODAL_MARGIN * 2, height: vh - MODAL_MARGIN * 2 }}>
           <CharacterDimensionsProbe />
-          <EuiFlexGroup direction="column" wrap={false} style={{ height: '100%' }}>
+          <EuiFlexGroup
+            direction="column"
+            responsive={false}
+            wrap={false}
+            style={{ height: '100%' }}
+          >
             <EuiFlexItem grow={false}>
               <EuiSpacer />
               <EuiTitle size="xxxs">
