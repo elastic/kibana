@@ -5,21 +5,19 @@
  */
 import { set, omit, isNil } from 'lodash/fp';
 import { TIMELINE_URL } from '../../../../common/constants';
-import {
-  transformError,
-  buildSiemResponse,
-  buildRouteValidation,
-} from '../../detection_engine/routes/utils';
+import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 import { FrameworkRequest } from '../../framework';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
 import { SetupPlugins } from '../../../plugin';
-import { CreateTimeline, TimelineTypeLiterals } from '../types';
+import { TimelineTypeLiterals } from '../types';
 import { createTimelines, getTimeline } from './utils/create_timelines';
 
 import { timelineSavedObjectOmittedFields } from './utils/import_timelines';
 import { createTimelineSchema } from './schemas/create_timelines_schema';
 import { createTemplateTimelines } from './utils/create_template_timelines';
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+
 export const createTimelinesRoute = (
   router: IRouter,
   config: LegacyServices['config'],
@@ -29,7 +27,7 @@ export const createTimelinesRoute = (
     {
       path: TIMELINE_URL,
       validate: {
-        body: buildRouteValidation<CreateTimeline>(createTimelineSchema),
+        body: buildRouteValidation(createTimelineSchema),
       },
       options: {
         tags: ['access:siem'],
@@ -75,17 +73,15 @@ export const createTimelinesRoute = (
                 },
               },
             });
-          } else if (!isNil(existTimeline) || !isNil(timelineId)) {
+          } else {
             // Try to Update timeline with POST
             return siemResponse.error({
               body: 'UPDATE timeline with POST is not allowed, please use PATCH instead',
               statusCode: 405,
             });
           }
-        }
-
-        // Manipulate template timeline
-        if (isHandlingTemplateTimeline) {
+        } else {
+          // Manipulate template timeline
           if (
             !isNil(templateTimelineId) &&
             existTimeline?.templateTimelineId === templateTimelineId

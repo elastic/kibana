@@ -5,21 +5,19 @@
  */
 import { set, omit, isNil } from 'lodash/fp';
 import { TIMELINE_URL } from '../../../../common/constants';
-import {
-  transformError,
-  buildSiemResponse,
-  buildRouteValidation,
-} from '../../detection_engine/routes/utils';
+import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 import { createTimelines, getTimeline } from './utils/create_timelines';
 import { FrameworkRequest } from '../../framework';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
 import { SetupPlugins } from '../../../plugin';
-import { UpdateTimeline, TimelineTypeLiterals } from '../types';
+import { TimelineTypeLiterals } from '../types';
 
 import { timelineSavedObjectOmittedFields } from './utils/import_timelines';
 import { updateTimelineSchema } from './schemas/update_timelines_schema';
 import { createTemplateTimelines } from './utils/create_template_timelines';
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+
 export const updateTimelinesRoute = (
   router: IRouter,
   config: LegacyServices['config'],
@@ -29,7 +27,7 @@ export const updateTimelinesRoute = (
     {
       path: TIMELINE_URL,
       validate: {
-        body: buildRouteValidation<UpdateTimeline>(updateTimelineSchema),
+        body: buildRouteValidation(updateTimelineSchema),
       },
       options: {
         tags: ['access:siem'],
@@ -82,10 +80,8 @@ export const updateTimelinesRoute = (
               },
             });
           }
-        }
-
-        // Manipulate template timeline
-        if (isHandlingTemplateTimeline) {
+        } else {
+          // Manipulate template timeline
           if (
             !isNil(templateTimelineId) &&
             existTimeline?.templateTimelineId === templateTimelineId

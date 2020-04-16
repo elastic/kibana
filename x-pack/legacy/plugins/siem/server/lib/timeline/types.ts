@@ -248,15 +248,6 @@ export enum TimelineTypeLiterals {
 }
 
 type TimelineTypeLiteral = TimelineTypeLiterals.default | TimelineTypeLiterals.template;
-export interface CreateTimeline {
-  timeline: TimelineSavedObject;
-  timelineId?: string | null;
-  templateTimelineId?: string | null;
-  type: TimelineTypeLiteral;
-  version?: string | null;
-}
-
-export type UpdateTimeline = CreateTimeline;
 
 export interface BulkGetInput {
   type: string;
