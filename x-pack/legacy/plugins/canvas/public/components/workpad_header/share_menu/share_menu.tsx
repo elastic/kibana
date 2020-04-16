@@ -7,11 +7,11 @@
 import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { ComponentStrings } from '../../../../i18n/components';
+import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { Popover, ClosePopoverFn } from '../../popover';
 import { PDFPanel } from './pdf_panel';
 import { ShareWebsiteFlyout } from './flyout';
-import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { ComponentStrings } from '../../../../i18n/components';
 
 const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
 

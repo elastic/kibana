@@ -6,7 +6,6 @@
 
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-// @ts-ignore Untyped local
 import {
   getWorkpad,
   getRenderedWorkpad,
@@ -14,18 +13,15 @@ import {
 } from '../../../../state/selectors/workpad';
 // @ts-ignore Untyped local
 import { notify } from '../../../../lib/notify';
-// @ts-ignore Untyped local
 import {
   downloadRenderedWorkpad,
   downloadRuntime,
   downloadZippedRuntime,
-  // @ts-ignore Untyped local
 } from '../../../../lib/download_workpad';
 import { ShareWebsiteFlyout as Component, Props as ComponentProps } from './share_website_flyout';
 import { State, CanvasWorkpad } from '../../../../../types';
 import { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
-// @ts-ignore Untyped local.
-import { fetch, arrayBufferFetch } from '../../../../../common/lib/fetch';
+import { arrayBufferFetch } from '../../../../../common/lib/fetch';
 import { API_ROUTE_SHAREABLE_ZIP } from '../../../../../common/lib/constants';
 import { renderFunctionNames } from '../../../../../shareable_runtime/supported_renderers';
 

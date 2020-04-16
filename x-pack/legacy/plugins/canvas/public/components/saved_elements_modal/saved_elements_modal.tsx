@@ -19,11 +19,11 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { map, sortBy } from 'lodash';
+import { ComponentStrings } from '../../../i18n';
+import { CustomElement } from '../../../types';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';
 import { CustomElementModal } from '../custom_element_modal';
-import { ComponentStrings } from '../../../i18n';
 import { ElementGrid } from './element_grid';
-import { CustomElement } from '../../../types';
 
 const { SavedElementsModal: strings } = ComponentStrings;
 

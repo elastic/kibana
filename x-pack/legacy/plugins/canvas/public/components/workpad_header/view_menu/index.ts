@@ -10,12 +10,10 @@ import { Dispatch } from 'redux';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
 // @ts-ignore Untyped local
-
+import { notify } from '../../../lib/notify';
 import { State, CanvasWorkpadBoundingBox } from '../../../../types';
 // @ts-ignore Untyped local
-import { fetch, arrayBufferFetch } from '../../../../common/lib/fetch';
-// @ts-ignore Untyped local
-import { notify } from '../../../lib/notify';
+import { fetchAllRenderables } from '../../../state/actions/elements';
 // @ts-ignore Untyped local
 import { setZoomScale, setFullscreen, selectToplevelNodes } from '../../../state/actions/transient';
 // @ts-ignore Untyped local
@@ -27,10 +25,8 @@ import {
   getWorkpadHeight,
   isWriteable,
 } from '../../../state/selectors/workpad';
-// @ts-ignore Untyped local
-import { fetchAllRenderables } from '../../../state/actions/elements';
 import { ViewMenu as Component, Props as ComponentProps } from './view_menu';
-import { getFitZoomScale } from './get_fit_zoom_scale';
+import { getFitZoomScale } from './lib/get_fit_zoom_scale';
 
 interface StateProps {
   zoomScale: number;

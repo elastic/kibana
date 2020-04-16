@@ -5,9 +5,7 @@
  */
 
 import { AxiosPromise } from 'axios';
-// @ts-ignore unconverted local file
 import { API_ROUTE_CUSTOM_ELEMENT } from '../../common/lib/constants';
-// @ts-ignore unconverted local file
 import { fetch } from '../../common/lib/fetch';
 import { CustomElement } from '../../types';
 import { getCoreStart } from '../legacy';

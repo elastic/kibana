@@ -7,21 +7,14 @@
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { jobCompletionNotifications } from '../../../../../../../plugins/reporting/public';
-// @ts-ignore Untyped local
 import { getWorkpad, getPages } from '../../../state/selectors/workpad';
 // @ts-ignore Untyped local
 import { notify } from '../../../lib/notify';
 import { getWindow } from '../../../lib/get_window';
-// @ts-ignore Untyped local
-import {
-  downloadWorkpad,
-  // @ts-ignore Untyped local
-} from '../../../lib/download_workpad';
+import { downloadWorkpad } from '../../../lib/download_workpad';
 import { ShareMenu as Component, Props as ComponentProps } from './share_menu';
 import { getPdfUrl, createPdf } from './utils';
 import { State, CanvasWorkpad } from '../../../../types';
-// @ts-ignore Untyped local.
-import { fetch, arrayBufferFetch } from '../../../../common/lib/fetch';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 import { WithKibanaProps } from '../../../index';
 

@@ -13,9 +13,9 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL } from '../../../../common/lib/constants';
-import { Popover, ClosePopoverFn } from '../../popover';
-import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { ComponentStrings } from '../../../../i18n/components';
+import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
+import { Popover, ClosePopoverFn } from '../../popover';
 
 const { WorkpadHeaderViewMenu: strings } = ComponentStrings;
 

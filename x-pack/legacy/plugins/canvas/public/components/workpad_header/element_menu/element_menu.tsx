@@ -14,16 +14,15 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
+import { ComponentStrings } from '../../../../i18n/components';
 import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { ComponentStrings } from '../../../../i18n/components';
+import { getId } from '../../../lib/get_id';
 import { AddEmbeddablePanel } from '../../embeddable_flyout';
 import { Popover, ClosePopoverFn } from '../../popover';
 // @ts-ignore Untyped local
 import { AssetManager } from '../../asset_manager';
-// @ts-ignore Untyped local
 import { SavedElementsModal } from '../../saved_elements_modal';
-import { getId } from '../../../lib/get_id';
 
 interface CategorizedElementLists {
   [key: string]: ElementSpec[];
