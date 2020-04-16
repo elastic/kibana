@@ -167,7 +167,7 @@ SIEM::
 Security::
 * Uses links instead of click handlers when switching spaces {pull}57730[#57730]
 * Adds support for deprecated roles {pull}57209[#57209]
-* Supports for sub-feature privileges {pull}60563[#60563]
+* Support for subfeature privileges {pull}60563[#60563]
 Telemetry::
 * Application Usage implemented in @kbn/analytics {pull}58401[#58401]
 * Server-side Migration to NP {pull}60485[#60485]
