@@ -7,12 +7,12 @@ Sensitive configuration like credentials can use either kibana.yml or the Kibana
 
 [float]
 [[pre-configured-features]]
-=== Pre-configured connectors features
+=== Features
 
 +
 - Require zero setup. Configuration and secrets/credentials needed to execute an action are pre-defined, including the connector name and id.
 - Appear in all spaces, because they are not saved objects.
-- Cannot be edited or deleted in the API or in the UI
+- Cannot be edited or deleted in the API or in the UI.
 
 The following example shows a valid configuration 2 out of the box connectors.
 +
