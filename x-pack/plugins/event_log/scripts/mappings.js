@@ -20,17 +20,12 @@ exports.EcsKibanaExtensionsMappings = {
         },
       },
     },
-    // relevant kibana space
-    namespace: {
-      type: 'keyword',
-      ignore_above: 1024,
-    },
     // array of saved object references, for "linking" via search
     saved_objects: {
       type: 'nested',
       properties: {
-        // 'kibana' for typical saved object, 'task_manager' for TM, etc
-        store: {
+        // relevant kibana space
+        namespace: {
           type: 'keyword',
           ignore_above: 1024,
         },
@@ -61,9 +56,8 @@ exports.EcsEventLogProperties = [
   'error.message',
   'user.name',
   'kibana.server_uuid',
-  'kibana.namespace',
   'kibana.alerting.instance_id',
-  'kibana.saved_objects.store',
+  'kibana.saved_objects.namespace',
   'kibana.saved_objects.id',
   'kibana.saved_objects.name',
   'kibana.saved_objects.type',

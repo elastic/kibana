@@ -5,38 +5,20 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useContext, useState } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { MonitorCharts, PingList } from '../components/functional';
-import { UptimeRefreshContext } from '../contexts';
-import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
-import { MonitorStatusDetails } from '../components/connected';
+import { MonitorStatusDetails, PingList } from '../components/connected';
 import { monitorStatusSelector } from '../state/selectors';
 import { PageHeader } from './page_header';
+import { MonitorCharts } from '../components/functional';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { useMonitorId } from '../hooks/use_monitor';
+import { useMonitorId, useUptimeTelemetry, UptimePage } from '../hooks';
 
 export const MonitorPage: React.FC = () => {
   const monitorId = useMonitorId();
 
-  const [pingListPageCount, setPingListPageCount] = useState<number>(10);
-  const { refreshApp } = useContext(UptimeRefreshContext);
-  const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
-  const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
-
-  const [selectedLocation, setSelectedLocation] = useState(undefined);
-  const [pingListIndex, setPingListIndex] = useState(0);
-
   const selectedMonitor = useSelector(monitorStatusSelector);
-
-  const sharedVariables = {
-    dateRangeStart,
-    dateRangeEnd,
-    monitorId,
-    location: selectedLocation,
-  };
 
   useUptimeTelemetry(UptimePage.Monitor);
 
@@ -53,25 +35,7 @@ export const MonitorPage: React.FC = () => {
       <EuiSpacer size="s" />
       <MonitorCharts monitorId={monitorId} />
       <EuiSpacer size="s" />
-      <PingList
-        onPageCountChange={setPingListPageCount}
-        onSelectedLocationChange={setSelectedLocation}
-        onSelectedStatusChange={(selectedStatus: string | undefined) => {
-          updateUrlParams({ selectedPingStatus: selectedStatus || '' });
-          refreshApp();
-        }}
-        onPageIndexChange={(index: number) => setPingListIndex(index)}
-        pageIndex={pingListIndex}
-        pageSize={pingListPageCount}
-        selectedOption={selectedPingStatus}
-        selectedLocation={selectedLocation}
-        variables={{
-          ...sharedVariables,
-          page: pingListIndex,
-          size: pingListPageCount,
-          status: selectedPingStatus,
-        }}
-      />
+      <PingList monitorId={monitorId} />
     </>
   );
 };
