@@ -66,7 +66,7 @@ export interface RuleAlertParams {
   type: RuleType;
   version: number;
   throttle: string | undefined | null;
-  lists: ListsDefaultArraySchema | null | undefined;
+  exceptions_list: ListsDefaultArraySchema | null | undefined;
 }
 
 export type RuleTypeParams = Omit<

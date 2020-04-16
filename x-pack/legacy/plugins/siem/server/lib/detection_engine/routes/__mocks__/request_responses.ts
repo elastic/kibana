@@ -448,7 +448,7 @@ export const getResult = (): RuleAlertType => ({
     references: ['http://www.example.com', 'https://ww.example.com'],
     note: '# Investigative notes',
     version: 1,
-    lists: [
+    exceptions_list: [
       {
         field: 'source.ip',
         values_operator: 'included',

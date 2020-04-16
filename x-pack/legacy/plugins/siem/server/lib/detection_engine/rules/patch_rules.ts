@@ -44,7 +44,7 @@ export const patchRules = async ({
   references,
   note,
   version,
-  lists,
+  exceptions_list,
   anomalyThreshold,
   machineLearningJobId,
 }: PatchRuleParams): Promise<PartialAlert | null> => {
@@ -78,7 +78,7 @@ export const patchRules = async ({
     references,
     version,
     note,
-    lists,
+    exceptions_list,
     anomalyThreshold,
     machineLearningJobId,
   });
@@ -110,7 +110,7 @@ export const patchRules = async ({
       references,
       note,
       version: calculatedVersion,
-      lists,
+      exceptions_list,
       anomalyThreshold,
       machineLearningJobId,
     }

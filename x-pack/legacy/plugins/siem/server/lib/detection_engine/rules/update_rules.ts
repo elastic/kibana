@@ -44,7 +44,7 @@ export const updateRules = async ({
   references,
   version,
   note,
-  lists,
+  exceptions_list,
   anomalyThreshold,
   machineLearningJobId,
   actions,
@@ -83,8 +83,8 @@ export const updateRules = async ({
     machineLearningJobId,
   });
 
-  // TODO: Remove this and use regular lists once the feature is stable for a release
-  const listsParam = hasListsFeature() ? { lists } : {};
+  // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
+  const exceptionsListParam = hasListsFeature() ? { exceptions_list } : {};
 
   const update = await alertsClient.update({
     id: rule.id,
@@ -120,7 +120,7 @@ export const updateRules = async ({
         version: calculatedVersion,
         anomalyThreshold,
         machineLearningJobId,
-        ...listsParam,
+        ...exceptionsListParam,
       },
     },
   });
