@@ -8,8 +8,30 @@ import React, { Component, Fragment } from 'react';
 
 import { EuiButtonEmpty, EuiPopover, EuiContextMenu, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ILayer } from '../../../../../../../../../../plugins/maps/public/layers/layer';
 
-export class LayerTocActions extends Component {
+interface Props {
+  cloneLayer: (layerId: string) => void;
+  displayName: string;
+  editLayer: () => void;
+  escapedDisplayName: string;
+  fitToBounds: (layerId: string) => void;
+  isEditButtonDisabled: boolean;
+  isReadOnly: boolean;
+  isUsingSearch: boolean;
+  layer: ILayer;
+  removeLayer: (layerId: string) => void;
+  toggleVisible: (layerId: string) => void;
+  zoom: number;
+}
+
+interface State {
+  isPopoverOpen: boolean;
+  supportsFitToBounds: boolean;
+}
+
+export class TOCEntryActionsPopover extends Component<Props, State> {
   state = {
     isPopoverOpen: false,
     supportsFitToBounds: false,
@@ -41,6 +63,22 @@ export class LayerTocActions extends Component {
     this.setState(() => ({
       isPopoverOpen: false,
     }));
+  };
+
+  _cloneLayer = () => {
+    this.props.cloneLayer(this.props.layer.getId());
+  };
+
+  _fitToBounds = () => {
+    this.props.fitToBounds(this.props.layer.getId());
+  };
+
+  _removeLayer = () => {
+    this.props.fitToBounds(this.props.layer.getId());
+  };
+
+  _toggleVisible = () => {
+    this.props.toggleVisible(this.props.layer.getId());
   };
 
   _renderPopoverToggleButton() {
@@ -108,7 +146,7 @@ export class LayerTocActions extends Component {
         disabled: !this.state.supportsFitToBounds,
         onClick: () => {
           this._closePopover();
-          this.props.fitToBounds();
+          this._fitToBounds();
         },
       },
       {
@@ -123,13 +161,14 @@ export class LayerTocActions extends Component {
         'data-test-subj': 'layerVisibilityToggleButton',
         onClick: () => {
           this._closePopover();
-          this.props.toggleVisible();
+          this._toggleVisible();
         },
       },
     ];
 
     if (!this.props.isReadOnly) {
       actionItems.push({
+        disabled: this.props.isEditButtonDisabled,
         name: i18n.translate('xpack.maps.layerTocActions.editLayerTitle', {
           defaultMessage: 'Edit layer',
         }),
@@ -148,7 +187,7 @@ export class LayerTocActions extends Component {
         'data-test-subj': 'cloneLayerButton',
         onClick: () => {
           this._closePopover();
-          this.props.cloneLayer();
+          this._cloneLayer();
         },
       });
       actionItems.push({
@@ -159,7 +198,7 @@ export class LayerTocActions extends Component {
         'data-test-subj': 'removeLayerButton',
         onClick: () => {
           this._closePopover();
-          this.props.removeLayer();
+          this._removeLayer();
         },
       });
     }
@@ -174,7 +213,6 @@ export class LayerTocActions extends Component {
   }
 
   render() {
-    console.log('render');
     return (
       <EuiPopover
         id="contextMenu"
