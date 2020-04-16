@@ -16,6 +16,8 @@ import {
   getQueryableUniqueIndexPatternIds,
   isToolbarOverlayHidden,
 } from '../../selectors/map_selectors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getCoreChrome } from '../../../../../../plugins/maps/public/kibana_services';
 
 function mapStateToProps(state = {}) {
   return {
@@ -32,7 +34,10 @@ function mapStateToProps(state = {}) {
 function mapDispatchToProps(dispatch) {
   return {
     triggerRefreshTimer: () => dispatch(triggerRefreshTimer()),
-    exitFullScreen: () => dispatch(exitFullScreen()),
+    exitFullScreen: () => {
+      dispatch(exitFullScreen());
+      getCoreChrome().setIsVisible(true);
+    },
     cancelAllInFlightRequests: () => dispatch(cancelAllInFlightRequests()),
   };
 }

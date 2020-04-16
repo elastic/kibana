@@ -13,7 +13,8 @@ import { ToolbarOverlay } from '../toolbar_overlay/index';
 import { LayerPanel } from '../layer_panel/index';
 import { AddLayerPanel } from '../layer_addpanel/index';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
-import { ExitFullScreenButton } from 'ui/exit_full_screen';
+import { ExitFullScreenButton } from '../../../../../../../src/plugins/kibana_react/public';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIndexPatternsFromIds } from '../../../../../../plugins/maps/public/index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
