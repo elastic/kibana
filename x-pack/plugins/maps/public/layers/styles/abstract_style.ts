@@ -43,7 +43,7 @@ export class AbstractStyle implements IStyle {
   }
 
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): StyleMetaDescriptor {
-    return {};
+    return { fieldMeta: {} };
   }
 
   getDescriptor(): StyleDescriptor {

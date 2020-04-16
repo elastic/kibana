@@ -14,7 +14,6 @@ import { LayerDescriptor, XYZTMSSourceDescriptor } from '../../../../common/desc
 import { Attribution, ImmutableSourceProperty } from '../source';
 import { XYZTMSSourceConfig } from './xyz_tms_editor';
 import { ILayer } from '../../layer';
-import { TileStyle } from '../../styles/tile/tile_style';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
   defaultMessage: 'Tile Map Service',
@@ -58,7 +57,6 @@ export class XYZTMSSource extends AbstractTMSSource {
     return new TileLayer({
       layerDescriptor,
       source: this,
-      style: new TileStyle(),
     });
   }
 

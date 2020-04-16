@@ -7,6 +7,7 @@
 import { AbstractLayer } from './layer';
 import _ from 'lodash';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
+import { TileStyle } from './styles/tile/tile_style';
 
 export class TileLayer extends AbstractLayer {
   static type = LAYER_TYPE.TILE;
@@ -16,6 +17,10 @@ export class TileLayer extends AbstractLayer {
     tileLayerDescriptor.type = TileLayer.type;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     return tileLayerDescriptor;
+  }
+
+  constructor({ source, layerDescriptor }) {
+    super({ source, layerDescriptor, style: new TileStyle() });
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {

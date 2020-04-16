@@ -24,7 +24,7 @@ import {
 } from '../../common/constants';
 import { ESGeoGridSource } from './sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
-import { IVectorLayer, VectorLayerArguments } from './vector_layer';
+import { IVectorLayer } from './vector_layer';
 import { IESSource } from './sources/es_source';
 import { IESAggSource } from './sources/es_agg_source';
 import { ISource } from './sources/source';
