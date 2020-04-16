@@ -44,10 +44,17 @@ import {
   siblingPipelineAggHelper,
 } from './aggs';
 
+import { FieldFormatsStart } from '../field_formats';
+
 interface SearchServiceSetupDependencies {
   packageInfo: PackageInfo;
   query: QuerySetup;
   getInternalStartServices: GetInternalStartServicesFn;
+}
+
+interface SearchStartDependencies {
+  fieldFormats: FieldFormatsStart;
+  indexPatterns: IndexPatternsContract;
 }
 
 /**
@@ -110,7 +117,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
 
-  public start(core: CoreStart, indexPatterns: IndexPatternsContract): ISearchStart {
+  public start(
+    core: CoreStart,
+    { fieldFormats, indexPatterns }: SearchStartDependencies
+  ): ISearchStart {
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -131,6 +141,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
             typesRegistry: aggTypesStart,
+            fieldFormats,
           });
         },
         types: aggTypesStart,
