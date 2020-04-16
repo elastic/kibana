@@ -1088,21 +1088,13 @@
     pirates "^4.0.0"
     source-map-support "^0.5.16"
 
-"@babel/runtime-corejs2@^7.2.0", "@babel/runtime-corejs2@^7.4.2", "@babel/runtime-corejs2@^7.6.3":
+"@babel/runtime-corejs2@^7.2.0", "@babel/runtime-corejs2@^7.6.3":
   version "7.9.2"
   resolved "https://registry.yarnpkg.com/@babel/runtime-corejs2/-/runtime-corejs2-7.9.2.tgz#f11d074ff99b9b4319b5ecf0501f12202bf2bf4d"
   integrity sha512-ayjSOxuK2GaSDJFCtLgHnYjuMyIpViNujWrZo8GUpN60/n7juzJKK5yOo6RFVb0zdU9ACJFK+MsZrUnj3OmXMw==
   dependencies:
     core-js "^2.6.5"
     regenerator-runtime "^0.13.4"
-
-"@babel/runtime@7.0.0-beta.54":
-  version "7.0.0-beta.54"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.0.0-beta.54.tgz#39ebb42723fe7ca4b3e1b00e967e80138d47cadf"
-  integrity sha1-Oeu0JyP+fKSz4bAOln6AE41Hyt8=
-  dependencies:
-    core-js "^2.5.7"
-    regenerator-runtime "^0.12.0"
 
 "@babel/runtime@7.3.4":
   version "7.3.4"
@@ -9812,7 +9804,7 @@ core-js@^1.0.0:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-1.2.7.tgz#652294c14651db28fa93bd2d5ff2983a4f08c636"
   integrity sha1-ZSKUwUZR2yj6k70tX/KYOk8IxjY=
 
-core-js@^2.2.0, core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.1, core-js@^2.5.3, core-js@^2.5.7, core-js@^2.6.5, core-js@^2.6.9:
+core-js@^2.2.0, core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.1, core-js@^2.5.3, core-js@^2.6.5, core-js@^2.6.9:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
@@ -10145,12 +10137,7 @@ cson@5.1.0:
     requirefresh "^2.1.0"
     safefs "^4.1.0"
 
-css-box-model@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/css-box-model/-/css-box-model-1.0.0.tgz#60142814f2b25be00c4aac65ea1a55a531b18922"
-  integrity sha512-MGipbCM6/HGmsOwN6Enq1OvNKy8H5Q1XKoyBszxwv2efly7ZVg+HcFILX8O6S0xfj27l1+6P7FyCjcQ90m5HBQ==
-
-css-box-model@^1.1.1, css-box-model@^1.2.0:
+css-box-model@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/css-box-model/-/css-box-model-1.2.0.tgz#3a26377b4162b3200d2ede4b064ec5b6a75186d0"
   integrity sha512-lri0br+jSNV0kkkiGEp9y9y3Njq2PmpqbeGWRFQJuZteZzY9iC9GZhQ8Y4WpPwM/2YocjHePxy14igJY7YKzkA==
@@ -20187,17 +20174,12 @@ mem@^4.0.0:
     mimic-fn "^1.0.0"
     p-is-promise "^1.1.0"
 
-memoize-one@^4.0.0:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-4.0.2.tgz#3fb8db695aa14ab9c0f1644e1585a8806adc1aee"
-  integrity sha512-ucx2DmXTeZTsS4GPPUZCbULAN7kdPT1G+H49Y34JjbQ5ESc6OGhVxKvb1iKhr9v19ZB9OtnHwNnhUnNR/7Wteg==
-
 memoize-one@^5.0.0:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-5.0.1.tgz#35a709ffb6e5f0cb79f9679a96f09ec3a35addfa"
   integrity sha512-S3plzyksLOSF4pkf1Xlb7mA8ZRKZlgp3ebg7rULbfwPT8Ww7uZz5CbLgRKaR92GeXpsNiFbfCRWf/uOrCYIbRg==
 
-memoize-one@^5.0.1, memoize-one@^5.1.1:
+memoize-one@^5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-5.1.1.tgz#047b6e3199b508eaec03504de71229b8eb1d75c0"
   integrity sha512-HKeeBpWvqiVJD57ZUAsJNm71eHTykffzcLZVYWiVfQeI1rJtuEaS7hQiEpWfVVk18donPwJEcFKIkCmPJNOhHA==
@@ -23469,15 +23451,6 @@ prop-types@15.6.0:
     loose-envify "^1.3.1"
     object-assign "^4.1.1"
 
-prop-types@15.6.1:
-  version "15.6.1"
-  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
-  integrity sha512-4ec7bY1Y66LymSUOH/zARVYObB23AT2h8cf6e/O6ZALB/N0sqZFEx7rq6EYPX2MkOdKORuooI/H5k9TlR4q7kQ==
-  dependencies:
-    fbjs "^0.8.16"
-    loose-envify "^1.3.1"
-    object-assign "^4.1.1"
-
 prop-types@15.7.2, prop-types@15.x, prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.6, prop-types@^15.5.7, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
@@ -24102,20 +24075,6 @@ react-apollo@^2.1.4:
     lodash "^4.17.10"
     prop-types "^15.6.0"
 
-react-beautiful-dnd@^10.0.0:
-  version "10.1.1"
-  resolved "https://registry.yarnpkg.com/react-beautiful-dnd/-/react-beautiful-dnd-10.1.1.tgz#d753088d77d7632e77cf8a8935fafcffa38f574b"
-  integrity sha512-TdE06Shfp56wm28EzjgC56EEMgGI5PDHejJ2bxuAZvZr8CVsbksklsJC06Hxf0MSL7FHbflL/RpkJck9isuxHg==
-  dependencies:
-    "@babel/runtime-corejs2" "^7.4.2"
-    css-box-model "^1.1.1"
-    memoize-one "^5.0.1"
-    prop-types "^15.6.1"
-    raf-schd "^4.0.0"
-    react-redux "^5.0.7"
-    redux "^4.0.1"
-    tiny-invariant "^1.0.4"
-
 react-beautiful-dnd@^12.2.0:
   version "12.2.0"
   resolved "https://registry.yarnpkg.com/react-beautiful-dnd/-/react-beautiful-dnd-12.2.0.tgz#e5f6222f9e7934c6ed4ee09024547f9e353ae423"
@@ -24141,21 +24100,6 @@ react-beautiful-dnd@^13.0.0:
     react-redux "^7.1.1"
     redux "^4.0.4"
     use-memo-one "^1.1.1"
-
-react-beautiful-dnd@^8.0.7:
-  version "8.0.7"
-  resolved "https://registry.yarnpkg.com/react-beautiful-dnd/-/react-beautiful-dnd-8.0.7.tgz#2cc7ba62bffe08d3dad862fd8f48204440901b43"
-  integrity sha512-j2cClhKuACXp/KcG+YXSrVxZ7AQl13dG9X+ojstR6H2G0yoA+1GZn/O147PWVVScmfk/mSt60GNseH7vjae7vQ==
-  dependencies:
-    "@babel/runtime" "7.0.0-beta.54"
-    css-box-model "^1.0.0"
-    memoize-one "^4.0.0"
-    prop-types "15.6.1"
-    raf-schd "^4.0.0"
-    react-motion "^0.5.2"
-    react-redux "^5.0.7"
-    redux "^4.0.0"
-    tiny-invariant "^0.0.3"
 
 react-clientside-effect@^1.2.0:
   version "1.2.0"
@@ -24522,15 +24466,6 @@ react-motion@^0.4.8:
     prop-types "^15.5.8"
     raf "^3.1.0"
 
-react-motion@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/react-motion/-/react-motion-0.5.2.tgz#0dd3a69e411316567927917c6626551ba0607316"
-  integrity sha512-9q3YAvHoUiWlP3cK0v+w1N5Z23HXMj4IF4YuvjvWegWqNPfLXsOBE/V7UvQGpXxHFKRQQcNcVQE31g9SB/6qgQ==
-  dependencies:
-    performance-now "^0.2.0"
-    prop-types "^15.5.8"
-    raf "^3.1.0"
-
 react-onclickoutside@^6.5.0:
   version "6.7.1"
   resolved "https://registry.yarnpkg.com/react-onclickoutside/-/react-onclickoutside-6.7.1.tgz#6a5b5b8b4eae6b776259712c89c8a2b36b17be93"
@@ -24597,7 +24532,7 @@ react-portal@^3.2.0:
   dependencies:
     prop-types "^15.5.8"
 
-react-redux@^5.0.7, react-redux@^5.1.2:
+react-redux@^5.1.2:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-5.1.2.tgz#b19cf9e21d694422727bf798e934a916c4080f57"
   integrity sha512-Ns1G0XXc8hDyH/OcBHOxNgQx9ayH3SPxBnFCOidGKSle8pKihysQw2rG/PmciUQRoclhVBO8HMhiRmGXnDja9Q==
@@ -25320,18 +25255,18 @@ redux@^4.0.0:
     loose-envify "^1.1.0"
     symbol-observable "^1.2.0"
 
-redux@^4.0.1, redux@^4.0.5:
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/redux/-/redux-4.0.5.tgz#4db5de5816e17891de8a80c424232d06f051d93f"
-  integrity sha512-VSz1uMAH24DM6MF72vcojpYPtrTUu3ByVWfPL1nPfVRb5mZVTve5GnNCUV53QM/BZ66xfWrm0CTWoM+Xlz8V1w==
-  dependencies:
-    loose-envify "^1.4.0"
-    symbol-observable "^1.2.0"
-
 redux@^4.0.4:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/redux/-/redux-4.0.4.tgz#4ee1aeb164b63d6a1bcc57ae4aa0b6e6fa7a3796"
   integrity sha512-vKv4WdiJxOWKxK0yRoaK3Y4pxxB0ilzVx6dszU2W8wLxlb2yikRph4iV/ymtdJ6ZxpBLFbyrxklnT5yBbQSl3Q==
+  dependencies:
+    loose-envify "^1.4.0"
+    symbol-observable "^1.2.0"
+
+redux@^4.0.5:
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/redux/-/redux-4.0.5.tgz#4db5de5816e17891de8a80c424232d06f051d93f"
+  integrity sha512-VSz1uMAH24DM6MF72vcojpYPtrTUu3ByVWfPL1nPfVRb5mZVTve5GnNCUV53QM/BZ66xfWrm0CTWoM+Xlz8V1w==
   dependencies:
     loose-envify "^1.4.0"
     symbol-observable "^1.2.0"
@@ -28919,20 +28854,10 @@ tiny-inflate@^1.0.0, tiny-inflate@^1.0.2:
   resolved "https://registry.yarnpkg.com/tiny-inflate/-/tiny-inflate-1.0.2.tgz#93d9decffc8805bd57eae4310f0b745e9b6fb3a7"
   integrity sha1-k9nez/yIBb1X6uQxDwt0Xptvs6c=
 
-tiny-invariant@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-0.0.3.tgz#4c7283c950e290889e9e94f64d3586ec9156cf44"
-  integrity sha512-SA2YwvDrCITM9fTvHTHRpq9W6L2fBsClbqm3maT5PZux4Z73SPPDYwJMtnoWh6WMgmCkJij/LaOlWiqJqFMK8g==
-
 tiny-invariant@^1.0.2:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-1.0.4.tgz#346b5415fd93cb696b0c4e8a96697ff590f92463"
   integrity sha512-lMhRd/djQJ3MoaHEBrw8e2/uM4rs9YMNk0iOr8rHQ0QdbM7D4l0gFl3szKdeixrlyfm9Zqi4dxHCM2qVG8ND5g==
-
-tiny-invariant@^1.0.4:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-1.1.0.tgz#634c5f8efdc27714b7f386c35e6760991d230875"
-  integrity sha512-ytxQvrb1cPc9WBEI/HSeYYoGD0kWnGEOR8RY6KomWLBVhqz0RgTwVO9dLrGz7dC+nN9llyI7OKAgRq8Vq4ZBSw==
 
 tiny-invariant@^1.0.6:
   version "1.0.6"
