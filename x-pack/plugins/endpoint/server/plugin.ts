@@ -12,6 +12,7 @@ import { EndpointAppContext } from './types';
 import { registerAlertRoutes } from './routes/alerts';
 import { registerResolverRoutes } from './routes/resolver';
 import { registerEndpointRoutes } from './routes/metadata';
+import { IngestManagerRequestHandlerContext } from '../../ingest_manager/common/types';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -19,6 +20,12 @@ export interface EndpointPluginStartDependencies {} // eslint-disable-line @type
 
 export interface EndpointPluginSetupDependencies {
   features: FeaturesPluginSetupContract;
+}
+
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    ingestManagerPlugin?: IngestManagerRequestHandlerContext;
+  }
 }
 
 export class EndpointPlugin

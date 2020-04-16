@@ -23,6 +23,7 @@ import { SearchResponse } from 'elasticsearch';
 import { EndpointConfigSchema } from '../../config';
 import * as data from '../../test_data/all_metadata_data.json';
 import { registerEndpointRoutes } from './index';
+import { IngestManagerRequestHandlerContext } from '../../../../ingest_manager/common/types';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -31,6 +32,7 @@ describe('test endpoint route', () => {
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
   let routeHandler: RequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
+  let mockedIngestManagerRequestHandlerContext: jest.Mocked<IngestManagerRequestHandlerContext>;
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient() as jest.Mocked<
@@ -40,6 +42,9 @@ describe('test endpoint route', () => {
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
+    mockedIngestManagerRequestHandlerContext = {
+      getAgent: jest.fn(),
+    };
     registerEndpointRoutes(routerMock, {
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
@@ -57,6 +62,7 @@ describe('test endpoint route', () => {
       path.startsWith('/api/endpoint/metadata')
     )!;
 
+    mockedIngestManagerRequestHandlerContext.getAgent = jest.fn().mockReturnValue('error');
     await routeHandler(
       ({
         core: {
@@ -64,6 +70,7 @@ describe('test endpoint route', () => {
             dataClient: mockScopedClient,
           },
         },
+        ingestManagerPlugin: mockedIngestManagerRequestHandlerContext,
       } as unknown) as RequestHandlerContext,
       mockRequest,
       mockResponse
@@ -98,7 +105,7 @@ describe('test endpoint route', () => {
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/metadata')
     )!;
-
+    mockedIngestManagerRequestHandlerContext.getAgent = jest.fn().mockReturnValue('error');
     await routeHandler(
       ({
         core: {
@@ -106,6 +113,7 @@ describe('test endpoint route', () => {
             dataClient: mockScopedClient,
           },
         },
+        ingestManagerPlugin: mockedIngestManagerRequestHandlerContext,
       } as unknown) as RequestHandlerContext,
       mockRequest,
       mockResponse
@@ -145,7 +153,7 @@ describe('test endpoint route', () => {
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/metadata')
     )!;
-
+    mockedIngestManagerRequestHandlerContext.getAgent = jest.fn().mockReturnValue('error');
     await routeHandler(
       ({
         core: {
@@ -153,6 +161,7 @@ describe('test endpoint route', () => {
             dataClient: mockScopedClient,
           },
         },
+        ingestManagerPlugin: mockedIngestManagerRequestHandlerContext,
       } as unknown) as RequestHandlerContext,
       mockRequest,
       mockResponse
@@ -210,7 +219,7 @@ describe('test endpoint route', () => {
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
         path.startsWith('/api/endpoint/metadata')
       )!;
-
+      mockedIngestManagerRequestHandlerContext.getAgent = jest.fn().mockReturnValue('error');
       await routeHandler(
         ({
           core: {
@@ -218,6 +227,7 @@ describe('test endpoint route', () => {
               dataClient: mockScopedClient,
             },
           },
+          ingestManagerPlugin: mockedIngestManagerRequestHandlerContext,
         } as unknown) as RequestHandlerContext,
         mockRequest,
         mockResponse
@@ -241,7 +251,7 @@ describe('test endpoint route', () => {
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
         path.startsWith('/api/endpoint/metadata')
       )!;
-
+      mockedIngestManagerRequestHandlerContext.getAgent = jest.fn().mockReturnValue('error');
       await routeHandler(
         ({
           core: {
@@ -249,6 +259,7 @@ describe('test endpoint route', () => {
               dataClient: mockScopedClient,
             },
           },
+          ingestManagerPlugin: mockedIngestManagerRequestHandlerContext,
         } as unknown) as RequestHandlerContext,
         mockRequest,
         mockResponse

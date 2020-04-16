@@ -39,6 +39,14 @@ import {
 
 import { IngestManagerConfigType } from '../common';
 import { appContextService } from './services';
+import { createIngestManagerRequestHandlerContext } from './ingest_manager_route_handler_context';
+import { IngestManagerRequestHandlerContext } from '../common/types';
+
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    ingestManagerPlugin?: IngestManagerRequestHandlerContext;
+  }
+}
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -121,6 +129,10 @@ export class IngestManagerPlugin implements Plugin {
     }
 
     if (config.fleet.enabled) {
+      core.http.registerRouteHandlerContext(
+        'ingestManagerPlugin',
+        createIngestManagerRequestHandlerContext()
+      );
       registerSetupRoutes(router);
       registerAgentRoutes(router);
       registerEnrollmentApiKeyRoutes(router);

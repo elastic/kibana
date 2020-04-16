@@ -3,8 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Agent } from './models';
+
 export * from './models';
 export * from './rest_spec';
+
+export interface IngestManagerRequestHandlerContext {
+  getAgent: (agentId: string) => Promise<Agent>;
+}
 
 export interface IngestManagerConfigType {
   enabled: boolean;
