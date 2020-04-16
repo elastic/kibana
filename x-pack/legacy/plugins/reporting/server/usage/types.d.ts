@@ -13,14 +13,25 @@ interface StatusCounts {
   [statusType: string]: number;
 }
 
+interface StatusByAppCounts {
+  [statusType: string]: {
+    [appType: string]: number;
+  };
+}
+
 export interface KeyCountBucket {
   key: string;
   doc_count: number;
 }
 
 export interface AggregationBuckets {
-  buckets: KeyCountBucket[];
+  doc_count?: number;
+  doc_count_error_upper_bound?: number;
+  sum_other_doc_count?: number;
+  buckets?: any;
   pdf?: {
+    doc_count_error_upper_bound?: number;
+    sum_other_doc_count?: number;
     buckets: KeyCountBucket[];
   };
 }
@@ -29,13 +40,22 @@ export interface AggregationBuckets {
  * Mapped Types and Intersection Types
  */
 
-type AggregationKeys = 'jobTypes' | 'layoutTypes' | 'objectTypes' | 'statusTypes';
-export type AggregationResults = { [K in AggregationKeys]: AggregationBuckets } & {
+type AggregationKeys = 'jobTypes' | 'layoutTypes' | 'objectTypes' | 'statusTypes' | 'statusByApp';
+export type AggregationResultBuckets = { [K in AggregationKeys]: AggregationBuckets } & {
   doc_count: number;
 };
 
-type RangeAggregationKeys = 'all' | 'lastDay' | 'last7Days';
-export type RangeAggregationResults = { [K in RangeAggregationKeys]?: AggregationResults };
+export interface SearchResponse {
+  aggregations: {
+    ranges: {
+      buckets: {
+        all: AggregationResultBuckets;
+        last7Days: AggregationResultBuckets;
+        lastDay: AggregationResultBuckets;
+      };
+    };
+  };
+}
 
 type BaseJobTypeKeys = 'csv' | 'PNG';
 export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
@@ -54,7 +74,19 @@ export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
 export type RangeStats = JobTypes & {
   _all: number;
   status: StatusCounts;
+  status_by_app: StatusByAppCounts;
 };
 
 export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
 export type FeatureAvailabilityMap = { [F in ExportType]: boolean };
+
+export type ReportingUsage = {
+  available: boolean;
+  enabled: boolean;
+  browser_type: string;
+  csv: AvailableTotal;
+  PNG: AvailableTotal;
+  printable_pdf: AvailableTotal;
+  last7Days: RangeStats;
+  lastDay: RangeStats;
+} & RangeStats;

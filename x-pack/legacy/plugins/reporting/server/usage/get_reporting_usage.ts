@@ -11,13 +11,13 @@ import { ReportingConfig } from '../types';
 import { decorateRangeStats } from './decorate_range_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import {
-  AggregationBuckets,
-  AggregationResults,
   FeatureAvailabilityMap,
   JobTypes,
   KeyCountBucket,
-  RangeAggregationResults,
   RangeStats,
+  ReportingUsage,
+  SearchResponse,
+  AggregationResultBuckets,
 } from './types';
 
 type XPackInfo = XPackMainPlugin['info'];
@@ -29,6 +29,7 @@ const LAYOUT_TYPES_FIELD = 'meta.layout.keyword';
 const OBJECT_TYPES_KEY = 'objectTypes';
 const OBJECT_TYPES_FIELD = 'meta.objectType.keyword';
 const STATUS_TYPES_KEY = 'statusTypes';
+const STATUS_BY_APP_KEY = 'statusByApp';
 const STATUS_TYPES_FIELD = 'status';
 
 const DEFAULT_TERMS_SIZE = 10;
@@ -38,8 +39,8 @@ const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
 const getKeyCount = (buckets: KeyCountBucket[]): { [key: string]: number } =>
   buckets.reduce((accum, { key, doc_count: count }) => ({ ...accum, [key]: count }), {});
 
-function getAggStats(aggs: AggregationResults) {
-  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
+function getAggStats(aggs: AggregationResultBuckets): RangeStats {
+  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY];
   const jobTypes: JobTypes = jobBuckets.reduce(
     (accum: JobTypes, { key, doc_count: count }: { key: string; doc_count: number }) => {
       return {
@@ -74,7 +75,13 @@ function getAggStats(aggs: AggregationResults) {
     statusTypes = getKeyCount(statusBuckets);
   }
 
-  return { _all: all, status: statusTypes, ...jobTypes };
+  const statusByApp = {
+    completed: {
+      canvas: 10,
+    },
+  };
+
+  return { _all: all, status: statusTypes, status_by_app: statusByApp, ...jobTypes };
 }
 
 type RangeStatSets = Partial<
@@ -83,12 +90,13 @@ type RangeStatSets = Partial<
     last7Days: RangeStats;
   }
 >;
-async function handleResponse(response: AggregationResults): Promise<RangeStatSets> {
-  const buckets = get(response, 'aggregations.ranges.buckets');
+
+async function handleResponse(response: SearchResponse): Promise<RangeStatSets> {
+  const buckets = get<SearchResponse['aggregations']['ranges']['buckets']>(response, 'aggregations.ranges.buckets'); // prettier-ignore
   if (!buckets) {
     return {};
   }
-  const { lastDay, last7Days, all } = buckets as RangeAggregationResults;
+  const { lastDay, last7Days, all } = buckets;
 
   const lastDayUsage = lastDay ? getAggStats(lastDay) : ({} as RangeStats);
   const last7DaysUsage = last7Days ? getAggStats(last7Days) : ({} as RangeStats);
@@ -106,7 +114,7 @@ export async function getReportingUsage(
   xpackMainInfo: XPackInfo,
   callCluster: ESCallCluster,
   exportTypesRegistry: ExportTypesRegistry
-) {
+): Promise<ReportingUsage> {
   const reportingIndex = config.get('index');
 
   const params = {
@@ -126,6 +134,17 @@ export async function getReportingUsage(
           aggs: {
             [JOB_TYPES_KEY]: { terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
             [STATUS_TYPES_KEY]: { terms: { field: STATUS_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
+            [STATUS_BY_APP_KEY]: {
+              terms: { field: 'status', size: DEFAULT_TERMS_SIZE },
+              aggs: {
+                appName: {
+                  terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE },
+                  aggs: {
+                    jobType: { terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
+                  },
+                },
+              },
+            },
             [OBJECT_TYPES_KEY]: {
               filter: { term: { jobtype: PRINTABLE_PDF_JOBTYPE } },
               aggs: { pdf: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } } },
@@ -141,7 +160,7 @@ export async function getReportingUsage(
   };
 
   return callCluster('search', params)
-    .then((response: AggregationResults) => handleResponse(response))
+    .then((response: SearchResponse) => handleResponse(response))
     .then((usage: RangeStatSets) => {
       // Allow this to explicitly throw an exception if/when this config is deprecated,
       // because we shouldn't collect browserType in that case!
