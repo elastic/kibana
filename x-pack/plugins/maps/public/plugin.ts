@@ -33,7 +33,6 @@ import {
   setVisualizations,
   setSearchService,
   setInjectedMetadata,
-  // @ts-ignore
 } from './kibana_services';
 
 export interface MapsPluginSetupDependencies {

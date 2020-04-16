@@ -30,6 +30,8 @@ export function getUiActions(): any;
 export function getCore(): any;
 export function getNavigation(): any;
 export function getCoreI18n(): any;
+export function getSearchService(): any;
+export function getInjectedMetadata(): any;
 
 export function setLicenseId(args: unknown): void;
 export function setInspector(args: unknown): void;
@@ -53,3 +55,5 @@ export function setUiActions(args: unknown): void;
 export function setCore(args: unknown): void;
 export function setNavigation(args: unknown): void;
 export function setCoreI18n(args: unknown): void;
+export function setSearchService(args: unknown): any;
+export function setInjectedMetadata(args: unknown): any;
