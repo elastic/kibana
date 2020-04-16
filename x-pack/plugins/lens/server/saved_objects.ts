@@ -6,6 +6,7 @@
 
 import { CoreSetup } from 'kibana/server';
 import { getEditPath } from '../common';
+import { migrations } from './migrations';
 
 export function setupSavedObjects(core: CoreSetup) {
   core.savedObjects.registerType({
@@ -22,6 +23,7 @@ export function setupSavedObjects(core: CoreSetup) {
         uiCapabilitiesPath: 'visualize.show',
       }),
     },
+    migrations,
     mappings: {
       properties: {
         title: {

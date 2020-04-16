@@ -9,22 +9,23 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { EventsCheckbox } from './checkbox';
-import { OS, UIPolicyConfig } from '../../../../types';
+import { OS } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { selectedMacEvents, totalMacEvents } from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
 import { getIn, setIn } from '../../../../models/policy_details_config';
+import { UIPolicyConfig } from '../../../../../../../common/types';
 
 export const MacEvents = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedMacEvents);
   const total = usePolicyDetailsSelector(totalMacEvents);
 
-  const checkboxes: Array<{
-    name: string;
-    os: 'mac';
-    protectionField: keyof UIPolicyConfig['mac']['events'];
-  }> = useMemo(
-    () => [
+  const checkboxes = useMemo(() => {
+    const items: Array<{
+      name: string;
+      os: 'mac';
+      protectionField: keyof UIPolicyConfig['mac']['events'];
+    }> = [
       {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.mac.events.file', {
           defaultMessage: 'File',
@@ -46,11 +47,7 @@ export const MacEvents = React.memo(() => {
         os: OS.mac,
         protectionField: 'network',
       },
-    ],
-    []
-  );
-
-  const renderCheckboxes = () => {
+    ];
     return (
       <>
         <EuiTitle size="xxs">
@@ -62,7 +59,7 @@ export const MacEvents = React.memo(() => {
           </h5>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {checkboxes.map((item, index) => {
+        {items.map((item, index) => {
           return (
             <EventsCheckbox
               name={item.name}
@@ -76,9 +73,9 @@ export const MacEvents = React.memo(() => {
         })}
       </>
     );
-  };
+  }, []);
 
-  const collectionsEnabled = () => {
+  const collectionsEnabled = useMemo(() => {
     return (
       <EuiText size="s" color="subdued">
         <FormattedMessage
@@ -88,19 +85,21 @@ export const MacEvents = React.memo(() => {
         />
       </EuiText>
     );
-  };
+  }, [selected, total]);
 
   return (
     <ConfigForm
       type={i18n.translate('xpack.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      supportedOss={[
-        i18n.translate('xpack.endpoint.policy.details.mac', { defaultMessage: 'Mac' }),
-      ]}
-      id="macEventingForm"
-      rightCorner={collectionsEnabled()}
-      children={renderCheckboxes()}
-    />
+      description={i18n.translate('xpack.endpoint.policy.details.eventCollectionLabel', {
+        defaultMessage: 'Event Collection',
+      })}
+      supportedOss={i18n.translate('xpack.endpoint.policy.details.mac', { defaultMessage: 'Mac' })}
+      dataTestSubj="macEventingForm"
+      rightCorner={collectionsEnabled}
+    >
+      {checkboxes}
+    </ConfigForm>
   );
 });
