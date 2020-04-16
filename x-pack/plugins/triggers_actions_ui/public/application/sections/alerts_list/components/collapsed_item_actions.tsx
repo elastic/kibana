@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
   EuiText,
   EuiSpacer,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { AlertTableItem } from '../../../../types';
@@ -70,8 +71,8 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       panelPaddingSize="none"
       data-test-subj="collapsedItemActions"
     >
-      <EuiContextMenuPanel hasFocus={false}>
-        <EuiContextMenuItem className="actCollapsedItemActions__item">
+      <EuiContextMenuPanel className="actCollapsedItemActions" hasFocus={false}>
+        <div className="actCollapsedItemActions__item">
           <EuiSwitch
             name="disable"
             disabled={!canSave}
@@ -100,8 +101,8 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
               defaultMessage="When disabled, the alert is not checked"
             />
           </EuiText>
-        </EuiContextMenuItem>
-        <EuiContextMenuItem className="actCollapsedItemActions__item">
+        </div>
+        <div className="actCollapsedItemActions__item">
           <EuiSwitch
             name="mute"
             checked={item.muteAll}
@@ -130,19 +131,28 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
               defaultMessage="When muted, the alert is checked, but no action is performed"
             />
           </EuiText>
-        </EuiContextMenuItem>
+        </div>
         <EuiHorizontalRule margin="none" />
         <EuiContextMenuItem
           disabled={!canDelete}
-          icon="trash"
           data-test-subj="deleteAlert"
           onClick={() => setAlertsToDelete([item.id])}
-          className="actCollapsedItemActions__delete"
         >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.deleteTitle"
-            defaultMessage="Delete"
-          />
+          <div className="actCollapsedItemActions__delete">
+            <div className="actCollapsedItemActions__deleteIcon">
+              <EuiIcon color="danger" type="trash" />
+            </div>
+            <div className="actCollapsedItemActions__deleteLabel">
+              <EuiText size="s" color="danger">
+                <p>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.deleteTitle"
+                    defaultMessage="Delete"
+                  />
+                </p>
+              </EuiText>
+            </div>
+          </div>
         </EuiContextMenuItem>
       </EuiContextMenuPanel>
     </EuiPopover>
