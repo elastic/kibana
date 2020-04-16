@@ -13,7 +13,7 @@ import 'brace/mode/plain_text';
 import 'brace/theme/github';
 
 import { isEmpty } from 'lodash';
-import { TOOLTIPS } from '../../../common/constants/tooltips';
+import { TOOLTIPS } from '../../../../../../plugins/logstash/common/constants/tooltips';
 import {
   EuiButton,
   EuiButtonEmpty,

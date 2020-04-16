@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-update: (field: Field) => void;
+update: (field: Record<string, any>) => void;
 ```
