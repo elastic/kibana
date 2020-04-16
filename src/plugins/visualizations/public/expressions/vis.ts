@@ -116,9 +116,7 @@ export class ExprVis extends EventEmitter {
   }
 
   forceReload() {
-    if (this.uiState) {
-      this.uiState.emit('reload');
-    }
+    this.emit('reload');
   }
 
   isHierarchical() {

@@ -75,7 +75,7 @@ export class VisEditor extends Component {
   handleUiState = (field, value) => {
     this.props.vis.uiState.set(field, value);
     // reload visualization because data might need to be re-fetched
-    this.props.vis.forceReload();
+    this.props.vis.uiState.emit('reload');
   };
 
   updateVisState = debounce(() => {
