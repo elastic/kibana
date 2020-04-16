@@ -627,8 +627,8 @@ export class DashboardStateManager {
     if (state.viewMode === ViewMode.VIEW) {
       const { panels, ...stateWithoutPanels } = state;
       return stateWithoutPanels;
-    } else {
-      return state;
     }
+
+    return state;
   }
 }

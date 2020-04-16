@@ -114,7 +114,7 @@ export default function({ getPageObjects, getService }) {
     });
 
     // see https://github.com/elastic/kibana/issues/61596 on why it is specific to maps
-    it("dashboard's back button should work", async () => {
+    it("dashboard's back button should navigate to previous page", async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
