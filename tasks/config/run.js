@@ -58,6 +58,7 @@ module.exports = function(grunt) {
     '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
+    '--optimize.validateSyntaxOfNodeModules=false',
     '--server.port=5610',
     '--migrations.skip=true',
   ];
@@ -237,6 +238,8 @@ module.exports = function(grunt) {
         'test/server_integration/http/ssl/config.js',
         '--config',
         'test/server_integration/http/ssl_redirect/config.js',
+        '--config',
+        'test/server_integration/http/cache/config.js',
         '--bail',
         '--debug',
         '--kibana-install-dir',

@@ -9,7 +9,9 @@ import {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
+  ActionsStepRuleJson,
   AboutStepRule,
+  ActionsStepRule,
   ScheduleStepRule,
   DefineStepRule,
 } from '../types';
@@ -18,13 +20,16 @@ import {
   formatDefineStepData,
   formatScheduleStepData,
   formatAboutStepData,
+  formatActionsStepData,
   formatRule,
+  filterRuleFieldsForType,
 } from './helpers';
 import {
   mockDefineStepRule,
   mockQueryBar,
   mockScheduleStepRule,
   mockAboutStepRule,
+  mockActionsStepRule,
 } from '../all/__mocks__/mock';
 
 describe('helpers', () => {
@@ -88,6 +93,8 @@ describe('helpers', () => {
         saved_id: 'test123',
         index: ['filebeat-'],
         type: 'saved_query',
+        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
+        timeline_title: 'Titled timeline',
       };
 
       expect(result).toEqual(expected);
@@ -109,6 +116,119 @@ describe('helpers', () => {
         index: ['filebeat-'],
         saved_id: '',
         type: 'query',
+        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
+        timeline_title: 'Titled timeline',
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object without timeline_id and timeline_title if timeline.id is null', () => {
+      const mockStepData = {
+        ...mockData,
+      };
+      delete mockStepData.timeline.id;
+
+      const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
+
+      const expected = {
+        language: 'kuery',
+        filters: mockQueryBar.filters,
+        query: 'test query',
+        index: ['filebeat-'],
+        saved_id: 'test123',
+        type: 'saved_query',
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with timeline_id and timeline_title if timeline.id is "', () => {
+      const mockStepData = {
+        ...mockData,
+        timeline: {
+          ...mockData.timeline,
+          id: '',
+        },
+      };
+      const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
+
+      const expected = {
+        language: 'kuery',
+        filters: mockQueryBar.filters,
+        query: 'test query',
+        index: ['filebeat-'],
+        saved_id: 'test123',
+        type: 'saved_query',
+        timeline_id: '',
+        timeline_title: 'Titled timeline',
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object without timeline_id and timeline_title if timeline.title is null', () => {
+      const mockStepData = {
+        ...mockData,
+        timeline: {
+          ...mockData.timeline,
+          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
+        },
+      };
+      delete mockStepData.timeline.title;
+      const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
+
+      const expected = {
+        language: 'kuery',
+        filters: mockQueryBar.filters,
+        query: 'test query',
+        index: ['filebeat-'],
+        saved_id: 'test123',
+        type: 'saved_query',
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with timeline_id and timeline_title if timeline.title is "', () => {
+      const mockStepData = {
+        ...mockData,
+        timeline: {
+          ...mockData.timeline,
+          title: '',
+        },
+      };
+      const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
+
+      const expected = {
+        language: 'kuery',
+        filters: mockQueryBar.filters,
+        query: 'test query',
+        index: ['filebeat-'],
+        saved_id: 'test123',
+        type: 'saved_query',
+        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
+        timeline_title: '',
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns ML fields if type is machine_learning', () => {
+      const mockStepData: DefineStepRule = {
+        ...mockData,
+        ruleType: 'machine_learning',
+        anomalyThreshold: 44,
+        machineLearningJobId: 'some_jobert_id',
+      };
+      const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
+
+      const expected = {
+        type: 'machine_learning',
+        anomaly_threshold: 44,
+        machine_learning_job_id: 'some_jobert_id',
+        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
+        timeline_title: 'Titled timeline',
       };
 
       expect(result).toEqual(expected);
@@ -125,7 +245,6 @@ describe('helpers', () => {
     test('returns formatted object as ScheduleStepRuleJson', () => {
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockData);
       const expected = {
-        enabled: false,
         from: 'now-660s',
         to: 'now',
         interval: '5m',
@@ -144,7 +263,6 @@ describe('helpers', () => {
       delete mockStepData.to;
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-660s',
         to: 'now',
         interval: '5m',
@@ -163,7 +281,6 @@ describe('helpers', () => {
       };
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-660s',
         to: 'now',
         interval: '5m',
@@ -182,7 +299,6 @@ describe('helpers', () => {
       };
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-300s',
         to: 'now',
         interval: '5m',
@@ -201,7 +317,6 @@ describe('helpers', () => {
       };
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-360s',
         to: 'now',
         interval: 'random',
@@ -249,8 +364,6 @@ describe('helpers', () => {
             ],
           },
         ],
-        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-        timeline_title: 'Titled timeline',
       };
 
       expect(result).toEqual(expected);
@@ -289,8 +402,6 @@ describe('helpers', () => {
             ],
           },
         ],
-        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-        timeline_title: 'Titled timeline',
       };
 
       expect(result).toEqual(expected);
@@ -327,160 +438,6 @@ describe('helpers', () => {
             ],
           },
         ],
-        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-        timeline_title: 'Titled timeline',
-      };
-
-      expect(result).toEqual(expected);
-    });
-
-    test('returns formatted object without timeline_id and timeline_title if timeline.id is null', () => {
-      const mockStepData = {
-        ...mockData,
-      };
-      delete mockStepData.timeline.id;
-      const result: AboutStepRuleJson = formatAboutStepData(mockStepData);
-      const expected = {
-        description: '24/7',
-        false_positives: ['test'],
-        name: 'Query with rule-id',
-        note: '# this is some markdown documentation',
-        references: ['www.test.co'],
-        risk_score: 21,
-        severity: 'low',
-        tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
-        ],
-      };
-
-      expect(result).toEqual(expected);
-    });
-
-    test('returns formatted object with timeline_id and timeline_title if timeline.id is "', () => {
-      const mockStepData = {
-        ...mockData,
-        timeline: {
-          ...mockData.timeline,
-          id: '',
-        },
-      };
-      const result: AboutStepRuleJson = formatAboutStepData(mockStepData);
-      const expected = {
-        description: '24/7',
-        false_positives: ['test'],
-        name: 'Query with rule-id',
-        note: '# this is some markdown documentation',
-        references: ['www.test.co'],
-        risk_score: 21,
-        severity: 'low',
-        tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
-        ],
-        timeline_id: '',
-        timeline_title: 'Titled timeline',
-      };
-
-      expect(result).toEqual(expected);
-    });
-
-    test('returns formatted object without timeline_id and timeline_title if timeline.title is null', () => {
-      const mockStepData = {
-        ...mockData,
-        timeline: {
-          ...mockData.timeline,
-          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-        },
-      };
-      delete mockStepData.timeline.title;
-      const result: AboutStepRuleJson = formatAboutStepData(mockStepData);
-      const expected = {
-        description: '24/7',
-        false_positives: ['test'],
-        name: 'Query with rule-id',
-        note: '# this is some markdown documentation',
-        references: ['www.test.co'],
-        risk_score: 21,
-        severity: 'low',
-        tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
-        ],
-      };
-
-      expect(result).toEqual(expected);
-    });
-
-    test('returns formatted object with timeline_id and timeline_title if timeline.title is "', () => {
-      const mockStepData = {
-        ...mockData,
-        timeline: {
-          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-          title: '',
-        },
-      };
-      const result: AboutStepRuleJson = formatAboutStepData(mockStepData);
-      const expected = {
-        description: '24/7',
-        false_positives: ['test'],
-        name: 'Query with rule-id',
-        note: '# this is some markdown documentation',
-        references: ['www.test.co'],
-        risk_score: 21,
-        severity: 'low',
-        tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: { id: '1234', name: 'tactic1', reference: 'reference1' },
-            technique: [{ id: '456', name: 'technique1', reference: 'technique reference' }],
-          },
-        ],
-        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-        timeline_title: '',
       };
 
       expect(result).toEqual(expected);
@@ -539,8 +496,144 @@ describe('helpers', () => {
             technique: [{ id: '456', name: 'technique1', reference: 'technique reference' }],
           },
         ],
-        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-        timeline_title: 'Titled timeline',
+      };
+
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe('formatActionsStepData', () => {
+    let mockData: ActionsStepRule;
+
+    beforeEach(() => {
+      mockData = mockActionsStepRule();
+    });
+
+    test('returns formatted object as ActionsStepRuleJson', () => {
+      const result: ActionsStepRuleJson = formatActionsStepData(mockData);
+      const expected = {
+        actions: [],
+        enabled: false,
+        meta: {
+          kibana_siem_app_url: 'http://localhost:5601/app/siem',
+        },
+        throttle: 'no_actions',
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns proper throttle value for no_actions', () => {
+      const mockStepData = {
+        ...mockData,
+        throttle: 'no_actions',
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [],
+        enabled: false,
+        meta: {
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
+        },
+        throttle: 'no_actions',
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns proper throttle value for rule', () => {
+      const mockStepData = {
+        ...mockData,
+        throttle: 'rule',
+        actions: [
+          {
+            group: 'default',
+            id: 'id',
+            actionTypeId: 'actionTypeId',
+            params: {},
+          },
+        ],
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [
+          {
+            group: mockStepData.actions[0].group,
+            id: mockStepData.actions[0].id,
+            action_type_id: mockStepData.actions[0].actionTypeId,
+            params: mockStepData.actions[0].params,
+          },
+        ],
+        enabled: false,
+        meta: {
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
+        },
+        throttle: 'rule',
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns proper throttle value for interval', () => {
+      const mockStepData = {
+        ...mockData,
+        throttle: '1d',
+        actions: [
+          {
+            group: 'default',
+            id: 'id',
+            actionTypeId: 'actionTypeId',
+            params: {},
+          },
+        ],
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [
+          {
+            group: mockStepData.actions[0].group,
+            id: mockStepData.actions[0].id,
+            action_type_id: mockStepData.actions[0].actionTypeId,
+            params: mockStepData.actions[0].params,
+          },
+        ],
+        enabled: false,
+        meta: {
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
+        },
+        throttle: mockStepData.throttle,
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns actions with action_type_id', () => {
+      const mockAction = {
+        group: 'default',
+        id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        params: { message: 'ML Rule generated {{state.signals_count}} signals' },
+        actionTypeId: '.slack',
+      };
+
+      const mockStepData = {
+        ...mockData,
+        actions: [mockAction],
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [
+          {
+            group: mockAction.group,
+            id: mockAction.id,
+            params: mockAction.params,
+            action_type_id: mockAction.actionTypeId,
+          },
+        ],
+        enabled: false,
+        meta: {
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
+        },
+        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);
@@ -551,15 +644,17 @@ describe('helpers', () => {
     let mockAbout: AboutStepRule;
     let mockDefine: DefineStepRule;
     let mockSchedule: ScheduleStepRule;
+    let mockActions: ActionsStepRule;
 
     beforeEach(() => {
       mockAbout = mockAboutStepRule();
       mockDefine = mockDefineStepRule();
       mockSchedule = mockScheduleStepRule();
+      mockActions = mockActionsStepRule();
     });
 
     test('returns NewRule with type of saved_query when saved_id exists', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule);
+      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
 
       expect(result.type).toEqual('saved_query');
     });
@@ -572,15 +667,64 @@ describe('helpers', () => {
           saved_id: '',
         },
       };
-      const result: NewRule = formatRule(mockDefineStepRuleWithoutSavedId, mockAbout, mockSchedule);
+      const result: NewRule = formatRule(
+        mockDefineStepRuleWithoutSavedId,
+        mockAbout,
+        mockSchedule,
+        mockActions
+      );
 
       expect(result.type).toEqual('query');
     });
 
     test('returns NewRule without id if ruleId does not exist', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule);
+      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
 
       expect(result.id).toBeUndefined();
+    });
+  });
+
+  describe('filterRuleFieldsForType', () => {
+    let fields: DefineStepRule;
+
+    beforeEach(() => {
+      fields = mockDefineStepRule();
+    });
+
+    it('removes query fields if the type is machine learning', () => {
+      const result = filterRuleFieldsForType(fields, 'machine_learning');
+      expect(result).not.toHaveProperty('index');
+      expect(result).not.toHaveProperty('queryBar');
+    });
+
+    it('leaves ML fields if the type is machine learning', () => {
+      const result = filterRuleFieldsForType(fields, 'machine_learning');
+      expect(result).toHaveProperty('anomalyThreshold');
+      expect(result).toHaveProperty('machineLearningJobId');
+    });
+
+    it('leaves arbitrary fields if the type is machine learning', () => {
+      const result = filterRuleFieldsForType(fields, 'machine_learning');
+      expect(result).toHaveProperty('timeline');
+      expect(result).toHaveProperty('ruleType');
+    });
+
+    it('removes ML fields if the type is not machine learning', () => {
+      const result = filterRuleFieldsForType(fields, 'query');
+      expect(result).not.toHaveProperty('anomalyThreshold');
+      expect(result).not.toHaveProperty('machineLearningJobId');
+    });
+
+    it('leaves query fields if the type is query', () => {
+      const result = filterRuleFieldsForType(fields, 'query');
+      expect(result).toHaveProperty('index');
+      expect(result).toHaveProperty('queryBar');
+    });
+
+    it('leaves arbitrary fields if the type is query', () => {
+      const result = filterRuleFieldsForType(fields, 'query');
+      expect(result).toHaveProperty('timeline');
+      expect(result).toHaveProperty('ruleType');
     });
   });
 });

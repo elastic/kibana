@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from 'src/core/public';
+import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
 import { APIKeysGridPage } from './api_keys_grid';
@@ -15,7 +15,7 @@ import { APIKeysAPIClient } from './api_keys_api_client';
 import { DocumentationLinksService } from './documentation_links';
 
 interface CreateParams {
-  getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 export const apiKeysManagementApp = Object.freeze({

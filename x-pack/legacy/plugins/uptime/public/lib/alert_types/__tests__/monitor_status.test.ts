@@ -88,7 +88,7 @@ describe('monitor status alert type', () => {
           `);
       });
 
-      it('has unparse-able `from` value', () => {
+      it('has unparseable `from` value', () => {
         expect(
           validate({
             ...params,
@@ -106,7 +106,7 @@ describe('monitor status alert type', () => {
         `);
       });
 
-      it('has unparse-able `to` value', () => {
+      it('has unparseable `to` value', () => {
         expect(
           validate({
             ...params,
@@ -153,7 +153,7 @@ describe('monitor status alert type', () => {
         `);
       });
 
-      it('is < 1', () => {
+      it('is less than 1', () => {
         expect(validate({ ...params, numTimes: 0 })).toMatchInlineSnapshot(`
           Object {
             "errors": Object {
@@ -170,10 +170,11 @@ describe('monitor status alert type', () => {
       Object {
         "alertParamsExpression": [Function],
         "defaultActionMessage": "{{context.message}}
-      {{context.completeIdList}}",
+      Last triggered at: {{state.lastTriggeredAt}}
+      {{context.downMonitorsWithGeo}}",
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
-        "name": "Uptime Monitor Status",
+        "name": "Uptime monitor status",
         "validate": [Function],
       }
     `);

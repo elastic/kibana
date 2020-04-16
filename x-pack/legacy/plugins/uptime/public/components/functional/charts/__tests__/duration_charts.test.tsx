@@ -43,29 +43,16 @@ describe('MonitorCharts component', () => {
           ],
         },
       ],
-      status: [
-        { x: 1548697620000, up: 74, down: null, total: 74 },
-        { x: 1548697920000, up: 75, down: null, total: 75 },
-        { x: 1548698220000, up: 75, down: null, total: 75 },
-        { x: 1548698520000, up: 73, down: null, total: 73 },
-        { x: 1548698820000, up: 75, down: null, total: 75 },
-        { x: 1548699120000, up: 74, down: null, total: 74 },
-        { x: 1548699420000, up: 75, down: null, total: 75 },
-        { x: 1548699720000, up: 75, down: null, total: 75 },
-        { x: 1548700020000, up: 75, down: null, total: 75 },
-        { x: 1548700320000, up: 75, down: null, total: 75 },
-        { x: 1548700620000, up: 75, down: null, total: 75 },
-      ],
-      statusMaxCount: 75,
-      durationMaxValue: 6669234,
     },
   };
 
   it('renders the component without errors', () => {
     const component = shallowWithRouter(
       <DurationChartComponent
-        locationDurationLines={chartResponse.monitorChartsData.locationDurationLines}
         loading={false}
+        hasMLJob={false}
+        anomalies={null}
+        locationDurationLines={chartResponse.monitorChartsData.locationDurationLines}
       />
     );
     expect(component).toMatchSnapshot();

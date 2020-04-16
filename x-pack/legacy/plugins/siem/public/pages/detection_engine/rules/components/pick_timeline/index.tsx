@@ -59,7 +59,6 @@ export const PickTimeline = ({
       helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
-      fullWidth
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >

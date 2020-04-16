@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
-import { Feature } from '../../../../../../plugins/features/public';
+import { FeatureConfig } from '../../../../../../plugins/features/public';
 import { Space } from '../../../../common/model/space';
 import { getEnabledFeatures } from '../../lib/feature_utils';
 import { SectionPanel } from '../section_panel';
@@ -16,7 +16,7 @@ import { FeatureTable } from './feature_table';
 
 interface Props {
   space: Partial<Space>;
-  features: Feature[];
+  features: FeatureConfig[];
   securityEnabled: boolean;
   onChange: (space: Partial<Space>) => void;
 }

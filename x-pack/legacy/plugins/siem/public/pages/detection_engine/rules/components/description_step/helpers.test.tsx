@@ -22,6 +22,7 @@ import {
   buildSeverityDescription,
   buildUrlsDescription,
   buildNoteDescription,
+  buildRuleTypeDescription,
 } from './helpers';
 import { ListItems } from './types';
 
@@ -383,6 +384,32 @@ describe('helpers', () => {
       const result: ListItems[] = buildNoteDescription('Test label', '');
 
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('buildRuleTypeDescription', () => {
+    it('returns the label for a machine_learning type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'machine_learning');
+
+      expect(result.title).toEqual('Test label');
+    });
+
+    it('returns a humanized description for a machine_learning type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'machine_learning');
+
+      expect(result.description).toEqual('Machine Learning');
+    });
+
+    it('returns the label for a query type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'query');
+
+      expect(result.title).toEqual('Test label');
+    });
+
+    it('returns a humanized description for a query type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'query');
+
+      expect(result.description).toEqual('Query');
     });
   });
 });

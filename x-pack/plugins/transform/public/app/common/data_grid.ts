@@ -6,6 +6,8 @@
 
 import { EuiDataGridStyle } from '@elastic/eui';
 
+export const INIT_MAX_COLUMNS = 20;
+
 export const euiDataGridStyle: EuiDataGridStyle = {
   border: 'all',
   fontSize: 's',

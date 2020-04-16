@@ -6,25 +6,23 @@
 
 import { handleActions } from 'redux-actions';
 import { indexStatusAction } from '../actions';
-import { handleAsyncAction } from './utils';
-import { IReducerState } from './types';
+import { getAsyncInitialState, handleAsyncAction } from './utils';
+import { AsyncInitialState } from './types';
 import { StatesIndexStatus } from '../../../common/runtime_types';
 
-export interface IndexStatusState extends IReducerState {
-  data: StatesIndexStatus | null;
+export interface IndexStatusState {
+  indexStatus: AsyncInitialState<StatesIndexStatus | null>;
 }
 
 const initialState: IndexStatusState = {
-  data: null,
-  loading: false,
-  errors: [],
+  indexStatus: getAsyncInitialState(),
 };
 
 type PayLoad = StatesIndexStatus & Error;
 
 export const indexStatusReducer = handleActions<IndexStatusState, PayLoad>(
   {
-    ...handleAsyncAction('data', indexStatusAction),
+    ...handleAsyncAction('indexStatus', indexStatusAction),
   },
   initialState
 );

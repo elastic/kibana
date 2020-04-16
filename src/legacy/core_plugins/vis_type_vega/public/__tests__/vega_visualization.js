@@ -39,16 +39,20 @@ import vegaMapImage256 from './vega_map_image_256.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-import {
-  setup as visualizationsSetup,
-  start as visualizationsStart,
-} from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
 // TODO This is an integration test and thus requires a running platform. When moving to the new platform,
 // this test has to be migrated to the newly created integration test environment.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npStart } from 'ui/new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
 import { setInjectedVars } from '../services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -59,7 +63,7 @@ describe('VegaVisualizations', () => {
   let vis;
   let imageComparator;
   let vegaVisualizationDependencies;
-  let visRegComplete = false;
+  let vegaVisType;
 
   setInjectedVars({
     emsTileLayerId: {},
@@ -69,9 +73,34 @@ describe('VegaVisualizations', () => {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject($injector => {
+    ngMock.inject(() => {
+      setInjectedVarFunc(injectedVar => {
+        switch (injectedVar) {
+          case 'mapConfig':
+            return {
+              emsFileApiUrl: '',
+              emsTileApiUrl: '',
+              emsLandingPageUrl: '',
+            };
+          case 'tilemapsConfig':
+            return {
+              deprecated: {
+                config: {
+                  options: {
+                    attribution: '123',
+                  },
+                },
+              },
+            };
+          case 'version':
+            return '123';
+          default:
+            return 'not found';
+        }
+      });
+      const serviceSettings = new ServiceSettings();
       vegaVisualizationDependencies = {
-        serviceSettings: $injector.get('serviceSettings'),
+        serviceSettings,
         core: {
           uiSettings: npStart.core.uiSettings,
         },
@@ -89,13 +118,7 @@ describe('VegaVisualizations', () => {
         },
       };
 
-      if (!visRegComplete) {
-        visRegComplete = true;
-        visualizationsSetup.createBaseVisualization(
-          createVegaTypeDefinition(vegaVisualizationDependencies)
-        );
-      }
-
+      vegaVisType = new BaseVisType(createVegaTypeDefinition(vegaVisualizationDependencies));
       VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
     })
   );
@@ -105,7 +128,9 @@ describe('VegaVisualizations', () => {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
-      vis = visualizationsStart.createVis('vega', { type: 'vega' });
+      vis = new ExprVis({
+        type: vegaVisType,
+      });
     });
 
     afterEach(function() {

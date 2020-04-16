@@ -13,6 +13,7 @@ import { AlertsContextProvider } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import { AlertEdit } from './alert_edit';
+import { AppContextProvider } from '../../app_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
@@ -32,7 +33,14 @@ describe('alert_edit', () => {
       uiSettings: mockedCoreSetup.uiSettings,
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
+
+    mockedCoreSetup.http.get.mockResolvedValue({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
+    });
+
     const alertType = {
       id: 'my-alert-type',
       iconClass: 'test',
@@ -102,24 +110,27 @@ describe('alert_edit', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <AlertsContextProvider
-        value={{
-          reloadAlerts: () => {
-            return new Promise<void>(() => {});
-          },
-          http: deps!.http,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          alertTypeRegistry: deps!.alertTypeRegistry,
-          toastNotifications: deps!.toastNotifications,
-          uiSettings: deps!.uiSettings,
-        }}
-      >
-        <AlertEdit
-          editFlyoutVisible={true}
-          setEditFlyoutVisibility={() => {}}
-          initialAlert={alert}
-        />
-      </AlertsContextProvider>
+      <AppContextProvider appDeps={deps}>
+        <AlertsContextProvider
+          value={{
+            reloadAlerts: () => {
+              return new Promise<void>(() => {});
+            },
+            http: deps!.http,
+            actionTypeRegistry: deps!.actionTypeRegistry,
+            alertTypeRegistry: deps!.alertTypeRegistry,
+            toastNotifications: deps!.toastNotifications,
+            uiSettings: deps!.uiSettings,
+            docLinks: deps.docLinks,
+          }}
+        >
+          <AlertEdit
+            editFlyoutVisible={true}
+            setEditFlyoutVisibility={() => {}}
+            initialAlert={alert}
+          />
+        </AlertsContextProvider>
+      </AppContextProvider>
     );
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {
@@ -147,8 +158,6 @@ describe('alert_edit', () => {
         .first()
         .simulate('click');
     });
-    expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Failed to save alert: Fail message'
-    );
+    expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith('Fail message');
   });
 });

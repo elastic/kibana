@@ -6,32 +6,60 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescriptionList } from '@elastic/eui';
-import { Immutable, AlertData } from '../../../../../../../common/types';
+import { EuiHealth } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { Immutable, AlertDetails } from '../../../../../../../common/types';
 
-export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertData> }) => {
+export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDetails> }) => {
   const columns = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostName', {
-          defaultMessage: 'Host Name',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostNameCurrent', {
+          defaultMessage: 'Host Name (Current)',
+        }),
+        description: alertData.state.host_metadata.host.hostname,
+      },
+      {
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostNameOriginal', {
+          defaultMessage: 'Host Name (At time of alert)',
         }),
         description: alertData.host.hostname,
       },
       {
-        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostIP', {
-          defaultMessage: 'Host IP',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostIPCurrent', {
+          defaultMessage: 'Host IP (Current)',
+        }),
+        description: alertData.state.host_metadata.host.ip.join(', '),
+      },
+      {
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostIPOriginal', {
+          defaultMessage: 'Host IP (At time of alert)',
         }),
         description: alertData.host.ip.join(', '),
       },
       {
-        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.status', {
-          defaultMessage: 'Status',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.currentStatus', {
+          defaultMessage: 'Current Status',
         }),
-        description: 'TODO',
+        description: (
+          <EuiHealth color="success">
+            {' '}
+            <FormattedMessage
+              id="xpack.endpoint.application.endpoint.alertDetails.endpoint.status.online"
+              defaultMessage="Online"
+            />
+          </EuiHealth>
+        ),
       },
       {
-        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.os', {
-          defaultMessage: 'OS',
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.osCurrent', {
+          defaultMessage: 'OS (Current)',
+        }),
+        description: alertData.state.host_metadata.host.os.name,
+      },
+      {
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.osOriginal', {
+          defaultMessage: 'OS (At time of alert)',
         }),
         description: alertData.host.os.name,
       },

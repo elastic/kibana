@@ -122,7 +122,7 @@ export const registerRoutes = (router: IRouter) => {
     },
     postNewAgentActionHandlerBuilder({
       getAgent: AgentService.getAgent,
-      updateAgentActions: AgentService.updateAgentActions,
+      createAgentAction: AgentService.createAgentAction,
     })
   );
 

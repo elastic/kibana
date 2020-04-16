@@ -437,7 +437,7 @@ export const createJsAgentInstructions = (apmServerUrl = '') => [
     title: i18n.translate(
       'xpack.apm.tutorial.jsClient.enableRealUserMonitoring.title',
       {
-        defaultMessage: 'Enable Real User Monitoring support in APM server'
+        defaultMessage: 'Enable Real User Monitoring support in APM Server'
       }
     ),
     textPre: i18n.translate(

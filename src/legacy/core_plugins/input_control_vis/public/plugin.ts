@@ -20,11 +20,14 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/p
 
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
+import {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../../plugins/visualizations/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
 
-type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies>;
+type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
 
 export interface InputControlVisDependencies {
   core: InputControlVisCoreSetup;
@@ -46,7 +49,7 @@ export interface InputControlVisPluginStartDependencies {
 }
 
 /** @internal */
-export class InputControlVisPlugin implements Plugin<Promise<void>, void> {
+export class InputControlVisPlugin implements Plugin<void, void> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(

@@ -13,6 +13,10 @@ export const ERROR_RETRIEVING_USER_DETAILS = i18n.translate(
   }
 );
 
+export const FAVORITES = i18n.translate('xpack.siem.recentTimelines.favoritesButtonLabel', {
+  defaultMessage: 'Favorites',
+});
+
 export const NO_FAVORITE_TIMELINES = i18n.translate(
   'xpack.siem.recentTimelines.noFavoriteTimelinesMessage',
   {
@@ -20,6 +24,10 @@ export const NO_FAVORITE_TIMELINES = i18n.translate(
       "You haven't favorited any timelines yet. Get out there and start threat hunting!",
   }
 );
+
+export const LAST_UPDATED = i18n.translate('xpack.siem.recentTimelines.lastUpdatedButtonLabel', {
+  defaultMessage: 'Last updated',
+});
 
 export const NO_TIMELINES = i18n.translate('xpack.siem.recentTimelines.noTimelinesMessage', {
   defaultMessage: "You haven't created any timelines yet. Get out there and start threat hunting!",

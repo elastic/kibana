@@ -73,6 +73,7 @@ export class UiBundlesController {
 
     this._workingDir = config.get('optimize.bundleDir');
     this._env = config.get('env.name');
+    this._validateSyntaxOfNodeModules = config.get('optimize.validateSyntaxOfNodeModules');
     this._context = {
       env: config.get('env.name'),
       sourceMaps: config.get('optimize.sourceMaps'),
@@ -133,6 +134,10 @@ export class UiBundlesController {
 
   isDevMode() {
     return this._env === 'development';
+  }
+
+  shouldValidateSyntaxOfNodeModules() {
+    return !!this._validateSyntaxOfNodeModules;
   }
 
   getWebpackPluginProviders() {

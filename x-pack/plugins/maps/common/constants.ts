@@ -43,25 +43,31 @@ export function createMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
 }
 
-export const LAYER_TYPE = {
-  TILE: 'TILE',
-  VECTOR: 'VECTOR',
-  VECTOR_TILE: 'VECTOR_TILE',
-  HEATMAP: 'HEATMAP',
-  BLENDED_VECTOR: 'BLENDED_VECTOR',
-};
+export enum LAYER_TYPE {
+  TILE = 'TILE',
+  VECTOR = 'VECTOR',
+  VECTOR_TILE = 'VECTOR_TILE',
+  HEATMAP = 'HEATMAP',
+  BLENDED_VECTOR = 'BLENDED_VECTOR',
+}
 
 export enum SORT_ORDER {
   ASC = 'asc',
   DESC = 'desc',
 }
 
-export const EMS_TMS = 'EMS_TMS';
-export const EMS_FILE = 'EMS_FILE';
-export const ES_GEO_GRID = 'ES_GEO_GRID';
-export const ES_SEARCH = 'ES_SEARCH';
-export const ES_PEW_PEW = 'ES_PEW_PEW';
-export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
+export enum SOURCE_TYPES {
+  EMS_TMS = 'EMS_TMS',
+  EMS_FILE = 'EMS_FILE',
+  ES_GEO_GRID = 'ES_GEO_GRID',
+  ES_SEARCH = 'ES_SEARCH',
+  ES_PEW_PEW = 'ES_PEW_PEW',
+  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. Name is a little unfortunate.
+  WMS = 'WMS',
+  KIBANA_TILEMAP = 'KIBANA_TILEMAP',
+  REGIONMAP_FILE = 'REGIONMAP_FILE',
+  GEOJSON_FILE = 'GEOJSON_FILE',
+}
 
 export enum FIELD_ORIGIN {
   SOURCE = 'source',
@@ -73,8 +79,6 @@ export const META_ID_ORIGIN_SUFFIX = 'meta';
 export const SOURCE_META_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${META_ID_ORIGIN_SUFFIX}`;
 export const FORMATTERS_ID_ORIGIN_SUFFIX = 'formatters';
 export const SOURCE_FORMATTERS_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${FORMATTERS_ID_ORIGIN_SUFFIX}`;
-
-export const GEOJSON_FILE = 'GEOJSON_FILE';
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
@@ -90,16 +94,16 @@ export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
 
 export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';
 
-export const ES_GEO_FIELD_TYPE = {
-  GEO_POINT: 'geo_point',
-  GEO_SHAPE: 'geo_shape',
-};
+export enum ES_GEO_FIELD_TYPE {
+  GEO_POINT = 'geo_point',
+  GEO_SHAPE = 'geo_shape',
+}
 
-export const ES_SPATIAL_RELATIONS = {
-  INTERSECTS: 'INTERSECTS',
-  DISJOINT: 'DISJOINT',
-  WITHIN: 'WITHIN',
-};
+export enum ES_SPATIAL_RELATIONS {
+  INTERSECTS = 'INTERSECTS',
+  DISJOINT = 'DISJOINT',
+  WITHIN = 'WITHIN',
+}
 
 export const GEO_JSON_TYPE = {
   POINT: 'Point',
@@ -120,11 +124,11 @@ export const EMPTY_FEATURE_COLLECTION = {
   features: [],
 };
 
-export const DRAW_TYPE = {
-  BOUNDS: 'BOUNDS',
-  DISTANCE: 'DISTANCE',
-  POLYGON: 'POLYGON',
-};
+export enum DRAW_TYPE {
+  BOUNDS = 'BOUNDS',
+  DISTANCE = 'DISTANCE',
+  POLYGON = 'POLYGON',
+}
 
 export enum AGG_TYPE {
   AVG = 'avg',
@@ -188,7 +192,7 @@ export enum LABEL_BORDER_SIZES {
   LARGE = 'LARGE',
 }
 
-export const DEFAULT_ICON = 'airfield';
+export const DEFAULT_ICON = 'marker';
 
 export enum VECTOR_STYLES {
   SYMBOLIZE_AS = 'symbolizeAs',
@@ -210,3 +214,5 @@ export enum SCALING_TYPES {
   CLUSTERS = 'CLUSTERS',
   TOP_HITS = 'TOP_HITS',
 }
+
+export const RGBA_0000 = 'rgba(0,0,0,0)';

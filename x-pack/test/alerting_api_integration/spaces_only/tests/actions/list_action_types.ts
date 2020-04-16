@@ -23,7 +23,7 @@ export default function listActionTypesTests({ getService }: FtrProviderContext)
         };
       }
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       // Check for values explicitly in order to avoid this test failing each time plugins register
       // a new action type
       expect(

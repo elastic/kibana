@@ -6,6 +6,7 @@
 
 import rison from 'rison-node';
 // @ts-ignore Untyped local.
+import { IBasePath } from 'kibana/public';
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
 import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
@@ -17,9 +18,7 @@ interface PageCount {
   pageCount: number;
 }
 
-type AddBasePath = (url: string) => string;
-
-type Arguments = [CanvasWorkpad, PageCount, AddBasePath];
+type Arguments = [CanvasWorkpad, PageCount, IBasePath];
 
 interface PdfUrlData {
   createPdfUri: string;
@@ -29,10 +28,11 @@ interface PdfUrlData {
 function getPdfUrlParts(
   { id, name: title, width, height }: CanvasWorkpad,
   { pageCount }: PageCount,
-  addBasePath: (path: string) => string
+  basePath: IBasePath
 ): PdfUrlData {
-  const reportingEntry = addBasePath('/api/reporting/generate');
-  const canvasEntry = '/app/canvas#';
+  const reportingEntry = basePath.prepend('/api/reporting/generate');
+  const urlPrefix = basePath.get().replace(basePath.serverBasePath, ''); // for Spaces prefix, which is included in basePath.get()
+  const canvasEntry = `${urlPrefix}/app/canvas#`;
 
   // The viewport in Reporting by specifying the dimensions. In order for things to work,
   // we need a viewport that will include all of the pages in the workpad. The viewport

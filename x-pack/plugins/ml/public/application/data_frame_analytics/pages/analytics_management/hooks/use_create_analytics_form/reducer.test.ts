@@ -9,17 +9,26 @@ import { merge } from 'lodash';
 import { ANALYSIS_CONFIG_TYPE, DataFrameAnalyticsConfig } from '../../../../common';
 
 import { ACTION } from './actions';
-import { reducer, validateAdvancedEditor, validateMinMML } from './reducer';
+import {
+  reducer,
+  validateAdvancedEditor,
+  validateMinMML,
+  validateNumTopFeatureImportanceValues,
+} from './reducer';
 import { getInitialState } from './state';
 
 type SourceIndex = DataFrameAnalyticsConfig['source']['index'];
 
 const getMockState = ({
   index,
+  trainingPercent = 75,
   modelMemoryLimit = '100mb',
+  numTopFeatureImportanceValues = 2,
 }: {
   index: SourceIndex;
+  trainingPercent?: number;
   modelMemoryLimit?: string;
+  numTopFeatureImportanceValues?: number;
 }) =>
   merge(getInitialState(), {
     form: {
@@ -31,7 +40,13 @@ const getMockState = ({
     jobConfig: {
       source: { index },
       dest: { index: 'the-destination-index' },
-      analysis: {},
+      analysis: {
+        classification: {
+          dependent_variable: 'the-variable',
+          num_top_feature_importance_values: numTopFeatureImportanceValues,
+          training_percent: trainingPercent,
+        },
+      },
       model_memory_limit: modelMemoryLimit,
     },
   });
@@ -151,6 +166,45 @@ describe('useCreateAnalyticsForm', () => {
         .isValid
     ).toBe(false);
   });
+
+  test('validateAdvancedEditor(): check training percent validation', () => {
+    // valid training_percent value
+    expect(
+      validateAdvancedEditor(getMockState({ index: 'the-source-index', trainingPercent: 75 }))
+        .isValid
+    ).toBe(true);
+    // invalid training_percent numeric value
+    expect(
+      validateAdvancedEditor(getMockState({ index: 'the-source-index', trainingPercent: 102 }))
+        .isValid
+    ).toBe(false);
+    // invalid training_percent numeric value if 0
+    expect(
+      validateAdvancedEditor(getMockState({ index: 'the-source-index', trainingPercent: 0 }))
+        .isValid
+    ).toBe(false);
+  });
+
+  test('validateAdvancedEditor(): check num_top_feature_importance_values validation', () => {
+    // valid num_top_feature_importance_values value
+    expect(
+      validateAdvancedEditor(
+        getMockState({ index: 'the-source-index', numTopFeatureImportanceValues: 1 })
+      ).isValid
+    ).toBe(true);
+    // invalid num_top_feature_importance_values numeric value
+    expect(
+      validateAdvancedEditor(
+        getMockState({ index: 'the-source-index', numTopFeatureImportanceValues: -1 })
+      ).isValid
+    ).toBe(false);
+    // invalid training_percent numeric value if not an integer
+    expect(
+      validateAdvancedEditor(
+        getMockState({ index: 'the-source-index', numTopFeatureImportanceValues: 1.1 })
+      ).isValid
+    ).toBe(false);
+  });
 });
 
 describe('validateMinMML', () => {
@@ -170,5 +224,26 @@ describe('validateMinMML', () => {
 
   test('should ignore empty parameters', () => {
     expect(validateMinMML((undefined as unknown) as string)('')).toEqual(null);
+  });
+});
+
+describe('validateNumTopFeatureImportanceValues()', () => {
+  test('should not allow below 0', () => {
+    expect(validateNumTopFeatureImportanceValues(-1)).toBe(false);
+  });
+
+  test('should not allow strings', () => {
+    expect(validateNumTopFeatureImportanceValues('1')).toBe(false);
+  });
+
+  test('should not allow floats', () => {
+    expect(validateNumTopFeatureImportanceValues(0.1)).toBe(false);
+    expect(validateNumTopFeatureImportanceValues(1.1)).toBe(false);
+    expect(validateNumTopFeatureImportanceValues(-1.1)).toBe(false);
+  });
+
+  test('should allow 0 and higher', () => {
+    expect(validateNumTopFeatureImportanceValues(0)).toBe(true);
+    expect(validateNumTopFeatureImportanceValues(1)).toBe(true);
   });
 });

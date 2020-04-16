@@ -22,22 +22,39 @@ import { createFilterDateHistogram } from './date_histogram';
 import { intervalOptions } from '../_interval_options';
 import { AggConfigs } from '../../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
-import { dateHistogramBucketAgg, IBucketDateHistogramAggConfig } from '../date_histogram';
+import {
+  getDateHistogramBucketAgg,
+  DateHistogramBucketAggDependencies,
+  IBucketDateHistogramAggConfig,
+} from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { RangeFilter } from '../../../../../common';
+import { coreMock, notificationServiceMock } from '../../../../../../../core/public/mocks';
+import { queryServiceMock } from '../../../../query/mocks';
+import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
-    beforeEach(() => {
-      mockDataServices();
-    });
-
-    const typesRegistry = mockAggTypesRegistry([dateHistogramBucketAgg]);
-
+    let aggTypesDependencies: DateHistogramBucketAggDependencies;
     let agg: IBucketDateHistogramAggConfig;
     let filter: RangeFilter;
     let bucketStart: any;
     let field: any;
+
+    beforeEach(() => {
+      const { uiSettings } = coreMock.createSetup();
+
+      aggTypesDependencies = {
+        uiSettings,
+        query: queryServiceMock.createSetupContract(),
+        getInternalStartServices: () => ({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
+        }),
+      };
+
+      mockDataServices();
+    });
 
     const init = (interval: string = 'auto', duration: any = moment.duration(15, 'minutes')) => {
       field = {
@@ -61,7 +78,10 @@ describe('AggConfig Filters', () => {
             params: { field: field.name, interval, customInterval: '5d' },
           },
         ],
-        { typesRegistry }
+        {
+          typesRegistry: mockAggTypesRegistry([getDateHistogramBucketAgg(aggTypesDependencies)]),
+          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+        }
       );
       const bucketKey = 1422579600000;
 
@@ -78,7 +98,7 @@ describe('AggConfig Filters', () => {
       filter = createFilterDateHistogram(agg, bucketKey);
     };
 
-    it('creates a valid range filter', () => {
+    test('creates a valid range filter', () => {
       init();
 
       expect(filter).toHaveProperty('range');
@@ -98,7 +118,7 @@ describe('AggConfig Filters', () => {
       expect(filter.meta).toHaveProperty('index', '1234');
     });
 
-    it('extends the filter edge to 1ms before the next bucket for all interval options', () => {
+    test('extends the filter edge to 1ms before the next bucket for all interval options', () => {
       intervalOptions.forEach(option => {
         let duration;
         if (option.val !== 'custom' && moment(1, option.val).isValid()) {

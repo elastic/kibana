@@ -18,6 +18,7 @@ const Popover = React.memo<UtilityBarActionProps>(
 
     return (
       <EuiPopover
+        ownFocus
         button={
           <LinkIcon
             color={color}

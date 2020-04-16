@@ -19,7 +19,7 @@ export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, 
 
   setup(
     { notifications: { toasts }, http, getStartServices }: CoreSetup,
-    { management, usageCollection }: Dependencies
+    { management, usageCollection, cloud }: Dependencies
   ) {
     const {
       ui: { enabled: isRemoteClustersUiEnabled },
@@ -48,8 +48,10 @@ export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, 
           initNotification(toasts, fatalErrors);
           initHttp(http);
 
+          const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
+
           const { renderApp } = await import('./application');
-          return renderApp(element, i18nContext);
+          return renderApp(element, i18nContext, { isCloudEnabled });
         },
       });
     }

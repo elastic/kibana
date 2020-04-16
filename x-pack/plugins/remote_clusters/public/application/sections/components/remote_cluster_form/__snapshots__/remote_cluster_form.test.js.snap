@@ -5,7 +5,6 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
   disabledFields={Object {}}
   fields={
     Object {
-      "mode": "sniff",
       "name": "",
       "nodeConnections": 3,
       "proxyAddress": "",
@@ -119,9 +118,12 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
   }
   save={[Function]}
 >
-  <EuiForm>
+  <EuiForm
+    data-test-subj="remoteClusterForm"
+  >
     <div
       className="euiForm"
+      data-test-subj="remoteClusterForm"
     >
       <EuiDescribedFormGroup
         description={
@@ -351,7 +353,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
         description={
           <React.Fragment>
             <FormattedMessage
-              defaultMessage="Use seed nodes by default, or switch to a single proxy address."
+              defaultMessage="Use seed nodes by default, or switch to proxy mode."
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
               values={Object {}}
             />
@@ -368,7 +370,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                 data-test-subj="remoteClusterFormConnectionModeToggle"
                 label={
                   <FormattedMessage
-                    defaultMessage="Use a single proxy address"
+                    defaultMessage="Use proxy mode"
                     id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                     values={Object {}}
                   />
@@ -444,11 +446,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           className="euiTextColor euiTextColor--subdued"
                         >
                           <FormattedMessage
-                            defaultMessage="Use seed nodes by default, or switch to a single proxy address."
+                            defaultMessage="Use seed nodes by default, or switch to proxy mode."
                             id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
                             values={Object {}}
                           >
-                            Use seed nodes by default, or switch to a single proxy address.
+                            Use seed nodes by default, or switch to proxy mode.
                           </FormattedMessage>
                           <EuiFormRow
                             describedByIds={Array []}
@@ -471,7 +473,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   id="mockId"
                                   label={
                                     <FormattedMessage
-                                      defaultMessage="Use a single proxy address"
+                                      defaultMessage="Use proxy mode"
                                       id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                                       values={Object {}}
                                     />
@@ -535,11 +537,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                       onClick={[Function]}
                                     >
                                       <FormattedMessage
-                                        defaultMessage="Use a single proxy address"
+                                        defaultMessage="Use proxy mode"
                                         id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                                         values={Object {}}
                                       >
-                                        Use a single proxy address
+                                        Use proxy mode
                                       </FormattedMessage>
                                     </span>
                                   </div>
@@ -688,6 +690,164 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                     </div>
                   </EuiFormRow>
                   <EuiFormRow
+                    data-test-subj="remoteClusterFormServerNameFormRow"
+                    describedByIds={Array []}
+                    display="row"
+                    error={null}
+                    fullWidth={true}
+                    hasChildLabel={true}
+                    hasEmptyLabelSpace={false}
+                    helpText={
+                      <FormattedMessage
+                        defaultMessage="A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. {learnMoreLink}"
+                        id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
+                        values={
+                          Object {
+                            "learnMoreLink": <ForwardRef
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Learn more."
+                                id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
+                                values={Object {}}
+                              />
+                            </ForwardRef>,
+                          }
+                        }
+                      />
+                    }
+                    isInvalid={false}
+                    label={
+                      <FormattedMessage
+                        defaultMessage="Server name (optional)"
+                        id="xpack.remoteClusters.remoteClusterForm.fieldServerNameOptionalLabel"
+                        values={Object {}}
+                      />
+                    }
+                    labelType="label"
+                  >
+                    <div
+                      className="euiFormRow euiFormRow--fullWidth"
+                      data-test-subj="remoteClusterFormServerNameFormRow"
+                      id="mockId-row"
+                    >
+                      <div
+                        className="euiFormRow__labelWrapper"
+                      >
+                        <EuiFormLabel
+                          aria-invalid={false}
+                          className="euiFormRow__label"
+                          htmlFor="mockId"
+                          isFocused={false}
+                          isInvalid={false}
+                          type="label"
+                        >
+                          <label
+                            aria-invalid={false}
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="mockId"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Server name (optional)"
+                              id="xpack.remoteClusters.remoteClusterForm.fieldServerNameOptionalLabel"
+                              values={Object {}}
+                            >
+                              Server name (optional)
+                            </FormattedMessage>
+                          </label>
+                        </EuiFormLabel>
+                      </div>
+                      <div
+                        className="euiFormRow__fieldWrapper"
+                      >
+                        <EuiFieldText
+                          aria-describedby="mockId-help"
+                          fullWidth={true}
+                          id="mockId"
+                          isInvalid={false}
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          value=""
+                        >
+                          <EuiFormControlLayout
+                            fullWidth={true}
+                            inputId="mockId"
+                          >
+                            <div
+                              className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                            >
+                              <div
+                                className="euiFormControlLayout__childrenWrapper"
+                              >
+                                <EuiValidatableControl
+                                  isInvalid={false}
+                                >
+                                  <input
+                                    aria-describedby="mockId-help"
+                                    className="euiFieldText euiFieldText--fullWidth"
+                                    id="mockId"
+                                    onBlur={[Function]}
+                                    onChange={[Function]}
+                                    onFocus={[Function]}
+                                    type="text"
+                                    value=""
+                                  />
+                                </EuiValidatableControl>
+                                <EuiFormControlLayoutIcons />
+                              </div>
+                            </div>
+                          </EuiFormControlLayout>
+                        </EuiFieldText>
+                        <EuiFormHelpText
+                          className="euiFormRow__text"
+                          id="mockId-help"
+                        >
+                          <div
+                            className="euiFormHelpText euiFormRow__text"
+                            id="mockId-help"
+                          >
+                            <FormattedMessage
+                              defaultMessage="A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. {learnMoreLink}"
+                              id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
+                              values={
+                                Object {
+                                  "learnMoreLink": <ForwardRef
+                                    target="_blank"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="Learn more."
+                                      id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
+                                      values={Object {}}
+                                    />
+                                  </ForwardRef>,
+                                }
+                              }
+                            >
+                              A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. 
+                              <EuiLink
+                                target="_blank"
+                              >
+                                <button
+                                  className="euiLink euiLink--primary"
+                                  type="button"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="Learn more."
+                                    id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
+                                    values={Object {}}
+                                  >
+                                    Learn more.
+                                  </FormattedMessage>
+                                </button>
+                              </EuiLink>
+                            </FormattedMessage>
+                          </div>
+                        </EuiFormHelpText>
+                      </div>
+                    </div>
+                  </EuiFormRow>
+                  <EuiFormRow
                     data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
                     describedByIds={Array []}
                     display="row"
@@ -795,156 +955,6 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               values={Object {}}
                             >
                               The number of socket connections to open per remote cluster.
-                            </FormattedMessage>
-                          </div>
-                        </EuiFormHelpText>
-                      </div>
-                    </div>
-                  </EuiFormRow>
-                  <EuiFormRow
-                    data-test-subj="remoteClusterFormServerNameFormRow"
-                    describedByIds={Array []}
-                    display="row"
-                    fullWidth={true}
-                    hasChildLabel={true}
-                    hasEmptyLabelSpace={false}
-                    helpText={
-                      <FormattedMessage
-                        defaultMessage="A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. {learnMoreLink}"
-                        id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
-                        values={
-                          Object {
-                            "learnMoreLink": <ForwardRef
-                              target="_blank"
-                            >
-                              <FormattedMessage
-                                defaultMessage="Learn more."
-                                id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
-                                values={Object {}}
-                              />
-                            </ForwardRef>,
-                          }
-                        }
-                      />
-                    }
-                    label={
-                      <FormattedMessage
-                        defaultMessage="Server name (optional)"
-                        id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
-                        values={Object {}}
-                      />
-                    }
-                    labelType="label"
-                  >
-                    <div
-                      className="euiFormRow euiFormRow--fullWidth"
-                      data-test-subj="remoteClusterFormServerNameFormRow"
-                      id="mockId-row"
-                    >
-                      <div
-                        className="euiFormRow__labelWrapper"
-                      >
-                        <EuiFormLabel
-                          className="euiFormRow__label"
-                          htmlFor="mockId"
-                          isFocused={false}
-                          type="label"
-                        >
-                          <label
-                            className="euiFormLabel euiFormRow__label"
-                            htmlFor="mockId"
-                          >
-                            <FormattedMessage
-                              defaultMessage="Server name (optional)"
-                              id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
-                              values={Object {}}
-                            >
-                              Server name (optional)
-                            </FormattedMessage>
-                          </label>
-                        </EuiFormLabel>
-                      </div>
-                      <div
-                        className="euiFormRow__fieldWrapper"
-                      >
-                        <EuiFieldText
-                          aria-describedby="mockId-help"
-                          fullWidth={true}
-                          id="mockId"
-                          onBlur={[Function]}
-                          onChange={[Function]}
-                          onFocus={[Function]}
-                          value=""
-                        >
-                          <EuiFormControlLayout
-                            fullWidth={true}
-                            inputId="mockId"
-                          >
-                            <div
-                              className="euiFormControlLayout euiFormControlLayout--fullWidth"
-                            >
-                              <div
-                                className="euiFormControlLayout__childrenWrapper"
-                              >
-                                <EuiValidatableControl>
-                                  <input
-                                    aria-describedby="mockId-help"
-                                    className="euiFieldText euiFieldText--fullWidth"
-                                    id="mockId"
-                                    onBlur={[Function]}
-                                    onChange={[Function]}
-                                    onFocus={[Function]}
-                                    type="text"
-                                    value=""
-                                  />
-                                </EuiValidatableControl>
-                                <EuiFormControlLayoutIcons />
-                              </div>
-                            </div>
-                          </EuiFormControlLayout>
-                        </EuiFieldText>
-                        <EuiFormHelpText
-                          className="euiFormRow__text"
-                          id="mockId-help"
-                        >
-                          <div
-                            className="euiFormHelpText euiFormRow__text"
-                            id="mockId-help"
-                          >
-                            <FormattedMessage
-                              defaultMessage="A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. {learnMoreLink}"
-                              id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
-                              values={
-                                Object {
-                                  "learnMoreLink": <ForwardRef
-                                    target="_blank"
-                                  >
-                                    <FormattedMessage
-                                      defaultMessage="Learn more."
-                                      id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
-                                      values={Object {}}
-                                    />
-                                  </ForwardRef>,
-                                }
-                              }
-                            >
-                              A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. 
-                              <EuiLink
-                                target="_blank"
-                              >
-                                <button
-                                  className="euiLink euiLink--primary"
-                                  type="button"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="Learn more."
-                                    id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
-                                    values={Object {}}
-                                  >
-                                    Learn more.
-                                  </FormattedMessage>
-                                </button>
-                              </EuiLink>
                             </FormattedMessage>
                           </div>
                         </EuiFormHelpText>
@@ -1344,6 +1354,7 @@ exports[`RemoteClusterForm renders untouched state 1`] = `
 Array [
   <div
     class="euiForm"
+    data-test-subj="remoteClusterForm"
   >
     <div
       class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
@@ -1440,7 +1451,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              Use seed nodes by default, or switch to a single proxy address.
+              Use seed nodes by default, or switch to proxy mode.
               <div
                 class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
                 id="mockId-row"
@@ -1484,7 +1495,7 @@ Array [
                       class="euiSwitch__label"
                       id="mockId"
                     >
-                      Use a single proxy address
+                      Use proxy mode
                     </span>
                   </div>
                 </div>

@@ -11,12 +11,10 @@ import { PatchRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './ty
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion, calculateName, calculateInterval } from './utils';
-import { transformRuleToAlertAction } from './transform_actions';
 
 export const patchRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
-  actions,
   savedObjectsClient,
   description,
   falsePositives,
@@ -41,7 +39,6 @@ export const patchRules = async ({
   severity,
   tags,
   threat,
-  throttle,
   to,
   type,
   references,
@@ -57,7 +54,6 @@ export const patchRules = async ({
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
-    actions,
     description,
     falsePositives,
     query,
@@ -77,7 +73,6 @@ export const patchRules = async ({
     severity,
     tags,
     threat,
-    throttle,
     to,
     type,
     references,
@@ -125,12 +120,12 @@ export const patchRules = async ({
     id: rule.id,
     data: {
       tags: addTags(tags ?? rule.tags, rule.params.ruleId, immutable ?? rule.params.immutable),
-      throttle: throttle !== undefined ? throttle : rule.throttle,
+      throttle: null,
       name: calculateName({ updatedName: name, originalName: rule.name }),
       schedule: {
         interval: calculateInterval(interval, rule.schedule.interval),
       },
-      actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
+      actions: rule.actions,
       params: nextParams,
     },
   });

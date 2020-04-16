@@ -28,8 +28,16 @@ import { truncatedColorMaps } from '../../../../plugins/charts/public';
 // TODO: reference to TILE_MAP plugin should be removed
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 
-export function createRegionMapVisualization({ serviceSettings, $injector, uiSettings }) {
-  const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
+export function createRegionMapVisualization({
+  serviceSettings,
+  $injector,
+  uiSettings,
+  notificationService,
+}) {
+  const BaseMapsVisualization = new BaseMapsVisualizationProvider(
+    serviceSettings,
+    notificationService
+  );
   const tooltipFormatter = new TileMapTooltipFormatter($injector);
 
   return class RegionMapsVisualization extends BaseMapsVisualization {
@@ -164,7 +172,8 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
       }
 
       this._choroplethLayer.on('select', event => {
-        const rowIndex = this._chartData.rows.findIndex(row => row[0] === event);
+        const { rows, columns } = this._chartData;
+        const rowIndex = rows.findIndex(row => row[columns[0].id] === event);
         this._vis.API.events.filter({
           table: this._chartData,
           column: 0,

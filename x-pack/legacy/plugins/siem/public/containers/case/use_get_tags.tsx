@@ -10,7 +10,7 @@ import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getTags } from './api';
 import * as i18n from './translations';
 
-interface TagsState {
+export interface TagsState {
   tags: string[];
   isLoading: boolean;
   isError: boolean;
@@ -19,6 +19,10 @@ type Action =
   | { type: 'FETCH_INIT' }
   | { type: 'FETCH_SUCCESS'; payload: string[] }
   | { type: 'FETCH_FAILURE' };
+
+export interface UseGetTags extends TagsState {
+  fetchTags: () => void;
+}
 
 const dataFetchReducer = (state: TagsState, action: Action): TagsState => {
   switch (action.type) {
@@ -47,20 +51,22 @@ const dataFetchReducer = (state: TagsState, action: Action): TagsState => {
 };
 const initialData: string[] = [];
 
-export const useGetTags = (): TagsState => {
+export const useGetTags = (): UseGetTags => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
+    isLoading: true,
     isError: false,
     tags: initialData,
   });
   const [, dispatchToaster] = useStateToaster();
 
-  useEffect(() => {
+  const callFetch = () => {
     let didCancel = false;
+    const abortCtrl = new AbortController();
+
     const fetchData = async () => {
       dispatch({ type: 'FETCH_INIT' });
       try {
-        const response = await getTags();
+        const response = await getTags(abortCtrl.signal);
         if (!didCancel) {
           dispatch({ type: 'FETCH_SUCCESS', payload: response });
         }
@@ -77,8 +83,12 @@ export const useGetTags = (): TagsState => {
     };
     fetchData();
     return () => {
+      abortCtrl.abort();
       didCancel = true;
     };
+  };
+  useEffect(() => {
+    callFetch();
   }, []);
-  return state;
+  return { ...state, fetchTags: callFetch };
 };

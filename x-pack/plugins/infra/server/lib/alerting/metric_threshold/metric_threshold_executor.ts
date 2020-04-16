@@ -5,12 +5,19 @@
  */
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { convertSavedObjectToSavedSourceConfiguration } from '../../sources/sources';
+import { infraSourceConfigurationSavedObjectType } from '../../sources/saved_object_mappings';
 import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../utils/get_all_composite_data';
 import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Comparator, AlertStates } from './types';
 import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
+import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { getDateHistogramOffset } from '../../snapshot/query_helpers';
+
+const TOTAL_BUCKETS = 5;
+const DEFAULT_INDEX_PATTERN = 'metricbeat-*';
 
 interface Aggregation {
   aggregatedIntervals: {
@@ -70,6 +77,12 @@ export const getElasticsearchMetricQuery = (
     throw new Error('Can only aggregate without a metric if using the document count aggregator');
   }
   const interval = `${timeSize}${timeUnit}`;
+  const to = Date.now();
+  const intervalAsSeconds = getIntervalInSeconds(interval);
+  // We need enough data for 5 buckets worth of data. We also need
+  // to convert the intervalAsSeconds to milliseconds.
+  const from = to - intervalAsSeconds * 1000 * TOTAL_BUCKETS;
+  const offset = getDateHistogramOffset(from, interval);
 
   const aggregations =
     aggType === 'count'
@@ -89,6 +102,11 @@ export const getElasticsearchMetricQuery = (
       date_histogram: {
         field: '@timestamp',
         fixed_interval: interval,
+        offset,
+        extended_bounds: {
+          min: from,
+          max: to,
+        },
       },
       aggregations,
     },
@@ -118,7 +136,9 @@ export const getElasticsearchMetricQuery = (
     {
       range: {
         '@timestamp': {
-          gte: `now-${interval}`,
+          gte: from,
+          lte: to,
+          format: 'epoch_millis',
         },
       },
     },
@@ -148,18 +168,42 @@ export const getElasticsearchMetricQuery = (
   };
 };
 
+const getIndexPattern: (
+  services: AlertServices,
+  sourceId?: string
+) => Promise<string> = async function({ savedObjectsClient }, sourceId = 'default') {
+  try {
+    const sourceConfiguration = await savedObjectsClient.get(
+      infraSourceConfigurationSavedObjectType,
+      sourceId
+    );
+    const { metricAlias } = convertSavedObjectToSavedSourceConfiguration(
+      sourceConfiguration
+    ).configuration;
+    return metricAlias || DEFAULT_INDEX_PATTERN;
+  } catch (e) {
+    if (e.output.statusCode === 404) {
+      return DEFAULT_INDEX_PATTERN;
+    } else {
+      throw e;
+    }
+  }
+};
+
 const getMetric: (
   services: AlertServices,
   params: MetricExpressionParams,
+  index: string,
   groupBy: string | undefined,
   filterQuery: string | undefined
 ) => Promise<Record<string, number>> = async function(
-  { callCluster },
+  { savedObjectsClient, callCluster },
   params,
+  index,
   groupBy,
   filterQuery
 ) {
-  const { indexPattern, aggType } = params;
+  const { aggType } = params;
   const searchBody = getElasticsearchMetricQuery(params, groupBy, filterQuery);
 
   try {
@@ -172,7 +216,7 @@ const getMetric: (
         response => response.aggregations?.groupings?.after_key
       );
       const compositeBuckets = (await getAllCompositeData(
-        body => callCluster('search', { body, index: indexPattern }),
+        body => callCluster('search', { body, index }),
         searchBody,
         bucketSelector,
         afterKeyHandler
@@ -187,7 +231,7 @@ const getMetric: (
     }
     const result = await callCluster('search', {
       body: searchBody,
-      index: indexPattern,
+      index,
     });
     return { '*': getCurrentValueFromAggregations(result.aggregations, aggType) };
   } catch (e) {
@@ -206,18 +250,31 @@ const comparatorMap = {
   [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
 };
 
+const mapToConditionsLookup = (
+  list: any[],
+  mapFn: (value: any, index: number, array: any[]) => unknown
+) =>
+  list
+    .map(mapFn)
+    .reduce(
+      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
+      {}
+    );
+
 export const createMetricThresholdExecutor = (alertUUID: string) =>
   async function({ services, params }: AlertExecutorOptions) {
-    const { criteria, groupBy, filterQuery } = params as {
+    const { criteria, groupBy, filterQuery, sourceId } = params as {
       criteria: MetricExpressionParams[];
       groupBy: string | undefined;
       filterQuery: string | undefined;
+      sourceId?: string;
     };
 
     const alertResults = await Promise.all(
       criteria.map(criterion =>
         (async () => {
-          const currentValues = await getMetric(services, criterion, groupBy, filterQuery);
+          const index = await getIndexPattern(services, sourceId);
+          const currentValues = await getMetric(services, criterion, index, groupBy, filterQuery);
           const { threshold, comparator } = criterion;
           const comparisonFunction = comparatorMap[comparator];
           return mapValues(currentValues, value => ({
@@ -244,7 +301,9 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
       if (shouldAlertFire) {
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           group,
-          value: alertResults.map(result => result[group].currentValue),
+          valueOf: mapToConditionsLookup(alertResults, result => result[group].currentValue),
+          thresholdOf: mapToConditionsLookup(criteria, criterion => criterion.threshold),
+          metricOf: mapToConditionsLookup(criteria, criterion => criterion.metric),
         });
       }
       // Future use: ability to fetch display current alert state

@@ -7,16 +7,32 @@
 import React from 'react';
 
 import { WrapperPage } from '../../components/wrapper_page';
-import { AllCases } from './components/all_cases';
+import { useGetUserSavedObjectPermissions } from '../../lib/kibana';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { AllCases } from './components/all_cases';
 
-export const CasesPage = React.memo(() => (
-  <>
-    <WrapperPage>
-      <AllCases />
-    </WrapperPage>
-    <SpyRoute />
-  </>
-));
+import { savedObjectReadOnly, CaseCallOut } from './components/callout';
+import { CaseSavedObjectNoPermissions } from './saved_object_no_permissions';
+
+export const CasesPage = React.memo(() => {
+  const userPermissions = useGetUserSavedObjectPermissions();
+
+  return userPermissions == null || userPermissions?.read ? (
+    <>
+      <WrapperPage>
+        {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
+          <CaseCallOut
+            title={savedObjectReadOnly.title}
+            message={savedObjectReadOnly.description}
+          />
+        )}
+        <AllCases userCanCrud={userPermissions?.crud ?? false} />
+      </WrapperPage>
+      <SpyRoute />
+    </>
+  ) : (
+    <CaseSavedObjectNoPermissions />
+  );
+});
 
 CasesPage.displayName = 'CasesPage';

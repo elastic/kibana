@@ -76,5 +76,16 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           message: 'Saved object [action/2] not found',
         });
     });
+
+    it(`shouldn't delete action from preconfigured list`, async () => {
+      await supertest
+        .delete(`${getUrlPrefix(Spaces.space1.id)}/api/action/my-slack1`)
+        .set('kbn-xsrf', 'foo')
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: `Preconfigured action my-slack1 is not allowed to delete.`,
+        });
+    });
   });
 }

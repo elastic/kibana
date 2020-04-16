@@ -9,7 +9,7 @@ import React from 'react';
 import { TraceLink } from '../';
 import * as hooks from '../../../../hooks/useFetcher';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const renderOptions = { wrapper: MockApmPluginContextWrapper };
 

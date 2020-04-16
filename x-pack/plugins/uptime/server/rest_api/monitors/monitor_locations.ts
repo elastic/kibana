@@ -19,9 +19,6 @@ export const createGetMonitorLocationsRoute: UMRestApiRouteFactory = (libs: UMSe
       dateEnd: schema.string(),
     }),
   },
-  options: {
-    tags: ['access:uptime-read'],
-  },
   handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
 

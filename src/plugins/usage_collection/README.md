@@ -83,14 +83,14 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CoreSetup, CoreStart } from 'kibana/server';
 
 class Plugin {
-  private savedObjectsClient?: ISavedObjectsRepository;
+  private savedObjectsRepository?: ISavedObjectsRepository;
 
   public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
-    registerMyPluginUsageCollector(() => this.savedObjectsClient, plugins.usageCollection);
+    registerMyPluginUsageCollector(() => this.savedObjectsRepository, plugins.usageCollection);
   }
 
   public start(core: CoreStart) {
-    this.savedObjectsClient = core.savedObjects.client
+    this.savedObjectsRepository = core.savedObjects.createInternalRepository();
   }
 }
 ```
@@ -101,7 +101,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ISavedObjectsRepository } from 'kibana/server';
 
 export function registerMyPluginUsageCollector(
-  getSavedObjectsClient: () => ISavedObjectsRepository | undefined,
+  getSavedObjectsRepository: () => ISavedObjectsRepository | undefined,
   usageCollection?: UsageCollectionSetup
   ): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered.
@@ -112,9 +112,9 @@ export function registerMyPluginUsageCollector(
   // create usage collector
   const myCollector = usageCollection.makeUsageCollector({
     type: MY_USAGE_TYPE,
-    isReady: () => typeof getSavedObjectsClient() !== 'undefined',
+    isReady: () => typeof getSavedObjectsRepository() !== 'undefined',
     fetch: async () => {
-      const savedObjectsClient = getSavedObjectsClient()!;
+      const savedObjectsRepository = getSavedObjectsRepository()!;
       // get something from the savedObjects
 
       return { my_objects };

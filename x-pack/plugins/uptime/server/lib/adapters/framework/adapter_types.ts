@@ -6,12 +6,17 @@
 
 import { GraphQLSchema } from 'graphql';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { IRouter, CallAPIOptions, SavedObjectsClientContract } from 'src/core/server';
+import {
+  IRouter,
+  CallAPIOptions,
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+} from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { DynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
-type APICaller = (
+export type APICaller = (
   endpoint: string,
   clientParams: Record<string, any>,
   options?: CallAPIOptions
@@ -22,7 +27,7 @@ export type UMElasticsearchQueryFn<P, R = any> = (
 ) => Promise<R> | R;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
-  client: SavedObjectsClientContract,
+  client: SavedObjectsClientContract | ISavedObjectsRepository,
   params?: P
 ) => Promise<T> | T;
 

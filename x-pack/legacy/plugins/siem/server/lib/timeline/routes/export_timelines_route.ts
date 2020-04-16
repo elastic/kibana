@@ -7,31 +7,24 @@
 import { set as _set } from 'lodash/fp';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
-import { ExportTimelineRequestParams } from '../types';
 
-import {
-  transformError,
-  buildRouteValidation,
-  buildSiemResponse,
-} from '../../detection_engine/routes/utils';
+import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 
+import { getExportTimelineByObjectIds } from './utils/export_timelines';
 import {
-  exportTimelinesSchema,
   exportTimelinesQuerySchema,
+  exportTimelinesRequestBodySchema,
 } from './schemas/export_timelines_schema';
-
-import { getExportTimelineByObjectIds } from './utils';
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 
 export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['config']) => {
   router.post(
     {
       path: TIMELINE_EXPORT_URL,
       validate: {
-        query: buildRouteValidation<ExportTimelineRequestParams['query']>(
-          exportTimelinesQuerySchema
-        ),
-        body: buildRouteValidation<ExportTimelineRequestParams['body']>(exportTimelinesSchema),
+        query: buildRouteValidation(exportTimelinesQuerySchema),
+        body: buildRouteValidation(exportTimelinesRequestBodySchema),
       },
       options: {
         tags: ['access:siem'],
@@ -42,6 +35,7 @@ export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['co
         const siemResponse = buildSiemResponse(response);
         const savedObjectsClient = context.core.savedObjects.client;
         const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
+
         if (request.body?.ids != null && request.body.ids.length > exportSizeLimit) {
           return siemResponse.error({
             statusCode: 400,
@@ -51,7 +45,7 @@ export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['co
 
         const responseBody = await getExportTimelineByObjectIds({
           client: savedObjectsClient,
-          request,
+          ids: request.body.ids,
         });
 
         return response.ok({

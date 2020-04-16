@@ -36,7 +36,7 @@ export function initPlugin(server: Hapi.Server, path: string) {
           }),
       },
     },
-    handler: pagerdutyHandler,
+    handler: pagerdutyHandler as Hapi.Lifecycle.Method,
   });
 }
 // Pagerduty simulator: create an action pointing here, and you can get

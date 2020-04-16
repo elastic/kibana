@@ -7,12 +7,15 @@
 import { SearchResponse } from 'elasticsearch';
 import { TypeOf } from '@kbn/config-schema';
 import { alertingIndexGetQuerySchema } from './schema/alert_index';
+import { Datasource, NewDatasource } from '../../ingest_manager/common';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
  */
 export type Immutable<T> = T extends undefined | null | boolean | string | number
   ? T
+  : unknown extends T
+  ? unknown
   : T extends Array<infer U>
   ? ImmutableArray<U>
   : T extends Map<infer K, infer V>
@@ -44,6 +47,7 @@ export class EndpointAppConstants {
    **/
   static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
   static ALERT_LIST_DEFAULT_SORT = '@timestamp';
+  static MAX_LONG_INT = '9223372036854775807'; // 2^63-1
 }
 
 export interface AlertResultList {
@@ -85,7 +89,7 @@ export interface AlertResultList {
 
 export interface HostResultList {
   /* the hosts restricted by the page size */
-  hosts: HostMetadata[];
+  hosts: HostInfo[];
   /* the total number of unique hosts in the index */
   total: number;
   /* the page size requested */
@@ -112,7 +116,7 @@ export interface HashFields {
   sha1: string;
   sha256: string;
 }
-export interface MalwareClassifierFields {
+export interface MalwareClassificationFields {
   identifier: string;
   score: number;
   threshold: number;
@@ -141,7 +145,7 @@ export interface DllFields {
   };
   compile_time: number;
   hash: HashFields;
-  malware_classifier: MalwareClassifierFields;
+  malware_classification: MalwareClassificationFields;
   mapped_address: number;
   mapped_size: number;
   path: string;
@@ -193,7 +197,7 @@ export type AlertEvent = Immutable<{
     executable: string;
     sid?: string;
     start: number;
-    malware_classifier?: MalwareClassifierFields;
+    malware_classification?: MalwareClassificationFields;
     token: {
       domain: string;
       type: string;
@@ -223,7 +227,7 @@ export type AlertEvent = Immutable<{
       trusted: boolean;
       subject_name: string;
     };
-    malware_classifier: MalwareClassifierFields;
+    malware_classification: MalwareClassificationFields;
     temp_file_path: string;
   };
   host: HostFields;
@@ -238,15 +242,54 @@ interface AlertMetadata {
   prev: string | null;
 }
 
+interface AlertState {
+  state: {
+    host_metadata: HostMetadata;
+  };
+}
+
 /**
  * Union of alert data and metadata.
  */
 export type AlertData = AlertEvent & AlertMetadata;
 
+export type AlertDetails = AlertData & AlertState;
+
+/**
+ * The status of the host
+ */
+export enum HostStatus {
+  /**
+   * Default state of the host when no host information is present or host information cannot
+   * be retrieved. e.g. API error
+   */
+  ERROR = 'error',
+
+  /**
+   * Host is online as indicated by its checkin status during the last checkin window
+   */
+  ONLINE = 'online',
+
+  /**
+   * Host is offline as indicated by its checkin status during the last checkin window
+   */
+  OFFLINE = 'offline',
+}
+
+export type HostInfo = Immutable<{
+  metadata: HostMetadata;
+  host_status: HostStatus;
+}>;
+
 export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
+  };
+  elastic: {
+    agent: {
+      id: string;
+    };
   };
   endpoint: {
     policy: {
@@ -336,11 +379,6 @@ export interface EndpointEvent {
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 
 /**
- * The PageId type is used for the payload when firing userNavigatedToPage actions
- */
-export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
-
-/**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
  * Similar to `TypeOf`, but allows strings as input for `schema.number()` (which is inline
  * with the behavior of the validator.) Also, for `schema.object`, when a value is a `schema.maybe`
@@ -407,3 +445,125 @@ export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
  * Result of the validated query params when handling alert index requests.
  */
 export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;
+
+/**
+ * Endpoint Policy configuration
+ */
+export interface PolicyConfig {
+  windows: {
+    events: {
+      dll_and_driver_load: boolean;
+      dns: boolean;
+      file: boolean;
+      network: boolean;
+      process: boolean;
+      registry: boolean;
+      security: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  mac: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  linux: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+}
+
+/**
+ * Windows-specific policy configuration that is supported via the UI
+ */
+type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+
+/**
+ * Mac-specific policy configuration that is supported via the UI
+ */
+type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+
+/**
+ * Linux-specific policy configuration that is supported via the UI
+ */
+type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
+
+/**
+ * The set of Policy configuration settings that are show/edited via the UI
+ */
+export interface UIPolicyConfig {
+  windows: WindowsPolicyConfig;
+  mac: MacPolicyConfig;
+  linux: LinuxPolicyConfig;
+}
+
+interface PolicyConfigAdvancedOptions {
+  elasticsearch: {
+    indices: {
+      control: string;
+      event: string;
+      logging: string;
+    };
+    kernel: {
+      connect: boolean;
+      process: boolean;
+    };
+  };
+}
+
+/** Policy: Malware protection fields */
+export interface MalwareFields {
+  mode: ProtectionModes;
+}
+
+/** Policy protection mode options */
+export enum ProtectionModes {
+  detect = 'detect',
+  prevent = 'prevent',
+  preventNotify = 'preventNotify',
+  off = 'off',
+}
+
+/**
+ * Endpoint Policy data, which extends Ingest's `Datasource` type
+ */
+export type PolicyData = Datasource & NewPolicyData;
+
+/**
+ * New policy data. Used when updating the policy record via ingest APIs
+ */
+export type NewPolicyData = NewDatasource & {
+  inputs: [
+    {
+      type: 'endpoint';
+      enabled: boolean;
+      streams: [];
+      config: {
+        policy: {
+          value: PolicyConfig;
+        };
+      };
+    }
+  ];
+};

@@ -26,6 +26,7 @@ export interface CaseConfigure {
   createdAt: string;
   createdBy: ElasticUser;
   connectorId: string;
+  connectorName: string;
   closureType: ClosureType;
   updatedAt: string;
   updatedBy: ElasticUser;

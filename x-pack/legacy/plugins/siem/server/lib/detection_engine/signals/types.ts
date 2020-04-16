@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleAlertParams, OutputRuleAlertRest, RuleAlertAction } from '../types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
 import {
   AlertType,
@@ -58,35 +59,35 @@ export interface SignalSource {
   };
 }
 
+export interface BulkItem {
+  create: {
+    _index: string;
+    _type?: string;
+    _id: string;
+    _version: number;
+    result?: string;
+    _shards?: {
+      total: number;
+      successful: number;
+      failed: number;
+    };
+    _seq_no?: number;
+    _primary_term?: number;
+    status: number;
+    error?: {
+      type: string;
+      reason: string;
+      index_uuid?: string;
+      shard: string;
+      index: string;
+    };
+  };
+}
+
 export interface BulkResponse {
   took: number;
   errors: boolean;
-  items: [
-    {
-      create: {
-        _index: string;
-        _type?: string;
-        _id: string;
-        _version: number;
-        result?: string;
-        _shards?: {
-          total: number;
-          successful: number;
-          failed: number;
-        };
-        _seq_no?: number;
-        _primary_term?: number;
-        status: number;
-        error?: {
-          type: string;
-          reason: string;
-          index_uuid?: string;
-          shard: string;
-          index: string;
-        };
-      };
-    }
-  ];
+  items: BulkItem[];
 }
 
 export interface MGetResponse {
@@ -157,5 +158,16 @@ export interface AlertAttributes {
   schedule: {
     interval: string;
   };
-  throttle: string | null;
+  throttle: string;
 }
+
+export interface RuleAlertAttributes extends AlertAttributes {
+  params: Omit<
+    RuleAlertParams,
+    'ruleId' | 'name' | 'enabled' | 'interval' | 'tags' | 'actions' | 'throttle'
+  > & {
+    ruleId: string;
+  };
+}
+
+export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;

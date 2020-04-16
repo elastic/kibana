@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Plugin, DataPublicPluginSetup, DataPublicPluginStart, IndexPatternsContract } from '.';
-import { fieldFormatsMock } from '../common/field_formats/mocks';
+import { Plugin, IndexPatternsContract } from '.';
+import { fieldFormatsServiceMock } from './field_formats/mocks';
 import { searchSetupMock, searchStartMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 
@@ -36,7 +36,7 @@ const createSetupContract = (): Setup => {
   return {
     autocomplete: autocompleteMock,
     search: searchSetupMock,
-    fieldFormats: fieldFormatsMock as DataPublicPluginSetup['fieldFormats'],
+    fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
   };
 };
@@ -49,7 +49,7 @@ const createStartContract = (): Start => {
     },
     autocomplete: autocompleteMock,
     search: searchStartMock,
-    fieldFormats: fieldFormatsMock as DataPublicPluginStart['fieldFormats'],
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
@@ -62,6 +62,7 @@ const createStartContract = (): Start => {
         },
       }),
       get: jest.fn().mockReturnValue(Promise.resolve({})),
+      clearCache: jest.fn(),
     } as unknown) as IndexPatternsContract,
   };
 };

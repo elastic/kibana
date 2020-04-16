@@ -20,10 +20,11 @@
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 
 describe('Terms Agg', () => {
   describe('order agg editor UI', () => {
-    const typesRegistry = mockAggTypesRegistry();
+    const fieldFormats = fieldFormatsServiceMock.createStartContract();
     const getAggConfigs = (params: Record<string, any> = {}) => {
       const indexPattern = {
         id: '1234',
@@ -48,11 +49,11 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry }
+        { typesRegistry: mockAggTypesRegistry(), fieldFormats }
       );
     };
 
-    it('converts object to string type', function() {
+    test('converts object to string type', () => {
       const aggConfigs = getAggConfigs({
         include: {
           pattern: '404',

@@ -189,6 +189,14 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       .filter(m => (m && m.count) >= clauses.length)
       .map(m => m.analytics);
 
+    let pageStart = pageIndex * pageSize;
+    if (pageStart >= filtered.length && filtered.length !== 0) {
+      // if the page start is larger than the number of items due to
+      // filters being applied, calculate a new page start
+      pageStart = Math.floor((filtered.length - 1) / pageSize) * pageSize;
+      setPageIndex(pageStart / pageSize);
+    }
+
     setFilteredAnalytics(filtered);
     setIsLoading(false);
   };

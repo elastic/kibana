@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApplicationSetup, CoreSetup, HttpSetup } from 'src/core/public';
+import { ApplicationSetup, StartServicesAccessor, HttpSetup } from 'src/core/public';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
 import { PluginStartDependencies } from '../plugin';
@@ -17,7 +17,7 @@ interface SetupParams {
   application: ApplicationSetup;
   config: ConfigType;
   http: HttpSetup;
-  getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 export interface AuthenticationServiceSetup {

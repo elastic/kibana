@@ -6,15 +6,15 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { CaseViewActions } from './actions';
-import { TestProviders } from '../../../../mock';
+
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
+import { TestProviders } from '../../../../mock';
+import { basicCase } from '../../../../containers/case/mock';
+import { CaseViewActions } from './actions';
 jest.mock('../../../../containers/case/use_delete_cases');
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 
 describe('CaseView actions', () => {
-  const caseTitle = 'Cool title';
-  const caseId = 'cool-id';
   const handleOnDeleteConfirm = jest.fn();
   const handleToggleModal = jest.fn();
   const dispatchResetIsDeleted = jest.fn();
@@ -34,7 +34,7 @@ describe('CaseView actions', () => {
   it('clicking trash toggles modal', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseViewActions caseTitle={caseTitle} caseId={caseId} />
+        <CaseViewActions caseData={basicCase} />
       </TestProviders>
     );
 
@@ -54,12 +54,14 @@ describe('CaseView actions', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <CaseViewActions caseTitle={caseTitle} caseId={caseId} />
+        <CaseViewActions caseData={basicCase} />
       </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
-    expect(handleOnDeleteConfirm.mock.calls[0][0]).toEqual([caseId]);
+    expect(handleOnDeleteConfirm.mock.calls[0][0]).toEqual([
+      { id: basicCase.id, title: basicCase.title },
+    ]);
   });
 });

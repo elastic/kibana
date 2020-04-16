@@ -25,6 +25,7 @@ exports[`Step1 editing should allow for editing 1`] = `
         "actionTypeId": "1abc",
         "config": Object {},
         "id": "1",
+        "isPreconfigured": false,
         "name": "Testing",
       }
     }

@@ -120,7 +120,7 @@ describe('migrateSymbolStyleDescriptor', () => {
               },
               icon: {
                 type: STYLE_TYPE.STATIC,
-                options: { value: 'airfield' },
+                options: { value: 'marker' },
               },
             },
           },

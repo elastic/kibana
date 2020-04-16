@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { toastNotifications } from 'ui/notify';
-import { MarkdownSimple } from '../../../../../../../src/legacy/core_plugins/kibana_react/public';
-import { PLUGIN } from '../../../common/constants';
+import { MarkdownSimple } from '../../../../../../../src/plugins/kibana_react/public';
+import { PLUGIN } from '../../../../../../plugins/logstash/common/constants';
 
 export class LogstashLicenseService {
   constructor(xpackInfoService, kbnUrlService, $timeout) {

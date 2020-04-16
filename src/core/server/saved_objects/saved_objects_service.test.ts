@@ -138,7 +138,7 @@ describe('SavedObjectsService', () => {
         const type = {
           name: 'someType',
           hidden: false,
-          namespaceAgnostic: false,
+          namespaceType: 'single' as 'single',
           mappings: { properties: {} },
         };
         setup.registerType(type);
@@ -171,14 +171,12 @@ describe('SavedObjectsService', () => {
       return expect(KibanaMigratorMock.mock.calls[0][0].callCluster()).resolves.toMatch('success');
     });
 
-    it('skips KibanaMigrator migrations when --optimize=true', async () => {
-      const coreContext = createCoreContext({
-        env: ({ cliArgs: { optimize: true }, packageInfo: { version: 'x.x.x' } } as unknown) as Env,
-      });
+    it('skips KibanaMigrator migrations when pluginsInitialized=false', async () => {
+      const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
 
       await soService.setup(createSetupDeps());
-      await soService.start({});
+      await soService.start({ pluginsInitialized: false });
       expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
@@ -253,7 +251,7 @@ describe('SavedObjectsService', () => {
         setup.registerType({
           name: 'someType',
           hidden: false,
-          namespaceAgnostic: false,
+          namespaceType: 'single' as 'single',
           mappings: { properties: {} },
         });
       }).toThrowErrorMatchingInlineSnapshot(

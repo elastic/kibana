@@ -31,7 +31,7 @@ export const useConnectors = (): ReturnConnectors => {
         const res = await fetchConnectors({ signal: abortCtrl.signal });
         if (!didCancel) {
           setLoading(false);
-          setConnectors(res.data);
+          setConnectors(res);
         }
       } catch (error) {
         if (!didCancel) {

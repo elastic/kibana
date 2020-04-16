@@ -18,6 +18,9 @@
  */
 import { coreMock } from '../../../core/public/mocks';
 import { testPlugin } from './tests/test_plugin';
+import { EmbeddableFactoryProvider } from './types';
+import { defaultEmbeddableFactoryProvider } from './lib';
+import { HelloWorldEmbeddable } from '../../../../examples/embeddable_examples/public';
 
 test('cannot register embeddable factory with the same ID', async () => {
   const coreSetup = coreMock.createSetup();
@@ -32,4 +35,76 @@ test('cannot register embeddable factory with the same ID', async () => {
   ).toThrowError(
     'Embeddable factory [embeddableFactoryId = ID] already registered in Embeddables API.'
   );
+});
+
+test('can set custom embeddable factory provider', async () => {
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+  const { setup, doStart } = testPlugin(coreSetup, coreStart);
+
+  const customProvider: EmbeddableFactoryProvider = def => ({
+    ...defaultEmbeddableFactoryProvider(def),
+    getDisplayName: () => 'Intercepted!',
+  });
+
+  setup.setCustomEmbeddableFactoryProvider(customProvider);
+  setup.registerEmbeddableFactory('test', {
+    type: 'test',
+    create: () => Promise.resolve(undefined),
+    getDisplayName: () => 'Test',
+    isEditable: () => Promise.resolve(true),
+  });
+
+  const start = doStart();
+  const factory = start.getEmbeddableFactory('test');
+  expect(factory!.getDisplayName()).toEqual('Intercepted!');
+});
+
+test('custom embeddable factory provider test for intercepting embeddable creation and destruction', async () => {
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+  const { setup, doStart } = testPlugin(coreSetup, coreStart);
+
+  let updateCount = 0;
+  const customProvider: EmbeddableFactoryProvider = def => {
+    return {
+      ...defaultEmbeddableFactoryProvider(def),
+      create: async (input, parent) => {
+        const embeddable = await defaultEmbeddableFactoryProvider(def).create(input, parent);
+        if (embeddable) {
+          const subscription = embeddable.getInput$().subscribe(
+            () => {
+              updateCount++;
+            },
+            () => {},
+            () => {
+              subscription.unsubscribe();
+              updateCount = 0;
+            }
+          );
+        }
+        return embeddable;
+      },
+    };
+  };
+
+  setup.setCustomEmbeddableFactoryProvider(customProvider);
+  setup.registerEmbeddableFactory('test', {
+    type: 'test',
+    create: (input, parent) => Promise.resolve(new HelloWorldEmbeddable(input, parent)),
+    getDisplayName: () => 'Test',
+    isEditable: () => Promise.resolve(true),
+  });
+
+  const start = doStart();
+  const factory = start.getEmbeddableFactory('test');
+
+  const embeddable = await factory?.create({ id: '123' });
+  embeddable!.updateInput({ title: 'boo' });
+  // initial subscription, plus the second update.
+  expect(updateCount).toEqual(2);
+
+  embeddable!.destroy();
+  await new Promise(resolve => process.nextTick(resolve));
+  expect(updateCount).toEqual(0);
 });

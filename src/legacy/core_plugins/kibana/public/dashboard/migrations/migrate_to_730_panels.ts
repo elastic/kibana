@@ -18,23 +18,20 @@
  */
 import { i18n } from '@kbn/i18n';
 import semver from 'semver';
-import { GridData } from 'src/plugins/dashboard/public';
-
 import uuid from 'uuid';
 import {
+  GridData,
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel630,
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
   RawSavedDashboardPanel610,
   RawSavedDashboardPanel620,
-} from './types';
-import {
   SavedDashboardPanelTo60,
   SavedDashboardPanel620,
   SavedDashboardPanel630,
   SavedDashboardPanel610,
-} from '../np_ready/types';
+} from '../../../../../../plugins/dashboard/public';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;

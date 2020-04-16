@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Joi from 'joi';
+import * as runtimeTypes from 'io-ts';
+import { unionWithNullType } from '../../../framework';
+import { SavedNoteRuntimeType } from '../../../note/types';
 
-/* eslint-disable @typescript-eslint/camelcase */
-
-export const ids = Joi.array().items(Joi.string());
-
-export const exclude_export_details = Joi.boolean();
-export const file_name = Joi.string();
+export const eventNotes = runtimeTypes.array(unionWithNullType(SavedNoteRuntimeType));
+export const globalNotes = runtimeTypes.array(unionWithNullType(SavedNoteRuntimeType));
+export const pinnedEventIds = runtimeTypes.array(unionWithNullType(runtimeTypes.string));

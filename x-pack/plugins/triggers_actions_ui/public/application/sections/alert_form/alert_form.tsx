@@ -24,6 +24,8 @@ import {
   EuiButtonIcon,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { some, filter, map, fold } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -258,7 +260,7 @@ export const AlertForm = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.checkWithTooltip', {
-          defaultMessage: 'This is some help text here for check alert.',
+          defaultMessage: 'Define how often to evaluate the condition.',
         })}
       />
     </>
@@ -268,13 +270,13 @@ export const AlertForm = ({
     <>
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.alertForm.renotifyFieldLabel"
-        defaultMessage="Re-notify every"
+        defaultMessage="Notify every"
       />{' '}
       <EuiIconTip
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
-          defaultMessage: 'This is some help text here for re-notify alert.',
+          defaultMessage: 'Define how often to repeat the action while the alert is active.',
         })}
       />
     </>
@@ -408,9 +410,23 @@ export const AlertForm = ({
                   name="throttle"
                   data-test-subj="throttleInput"
                   onChange={e => {
-                    const throttle = e.target.value !== '' ? parseInt(e.target.value, 10) : null;
-                    setAlertThrottle(throttle);
-                    setAlertProperty('throttle', `${e.target.value}${alertThrottleUnit}`);
+                    pipe(
+                      some(e.target.value.trim()),
+                      filter(value => value !== ''),
+                      map(value => parseInt(value, 10)),
+                      filter(value => !isNaN(value)),
+                      fold(
+                        () => {
+                          // unset throttle
+                          setAlertThrottle(null);
+                          setAlertProperty('throttle', null);
+                        },
+                        throttle => {
+                          setAlertThrottle(throttle);
+                          setAlertProperty('throttle', `${throttle}${alertThrottleUnit}`);
+                        }
+                      )
+                    );
                   }}
                 />
               </EuiFlexItem>
@@ -440,7 +456,7 @@ export const AlertForm = ({
           <EuiTitle size="s">
             <h5 id="alertTypeTitle">
               <FormattedMessage
-                defaultMessage="Trigger: Select a trigger type"
+                defaultMessage="Select a trigger type"
                 id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle"
               />
             </h5>

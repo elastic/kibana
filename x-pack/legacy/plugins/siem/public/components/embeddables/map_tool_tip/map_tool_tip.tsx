@@ -64,7 +64,7 @@ export const MapToolTipComponent = ({
             getLayerName(layerId),
           ]);
 
-          setFeatureProps(featureProperties);
+          setFeatureProps((featureProperties as unknown) as FeatureProperty[]);
           setFeatureGeometry(featureGeo);
           setLayerName(layerNameString);
         } catch (e) {

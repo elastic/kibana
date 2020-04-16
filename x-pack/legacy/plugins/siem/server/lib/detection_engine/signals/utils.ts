@@ -7,6 +7,7 @@ import { createHash } from 'crypto';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { parseDuration } from '../../../../../../../plugins/alerting/server';
+import { BulkResponse, BulkResponseErrorAggregation } from './types';
 
 export const generateId = (
   docIndex: string,
@@ -88,4 +89,48 @@ export const getGapBetweenRuns = ({
   const diff = moment.duration(now.diff(previousStartedAt));
   const drift = diff.subtract(intervalDuration);
   return drift.subtract(driftTolerance);
+};
+
+export const makeFloatString = (num: number): string => Number(num).toFixed(2);
+
+/**
+ * Given a BulkResponse this will return an aggregation based on the errors if any exist
+ * from the BulkResponse. Errors are aggregated on the reason as the unique key.
+ *
+ * Example would be:
+ * {
+ *   'Parse Error': {
+ *      count: 100,
+ *      statusCode: 400,
+ *   },
+ *   'Internal server error': {
+ *       count: 3,
+ *       statusCode: 500,
+ *   }
+ * }
+ * If this does not return any errors then you will get an empty object like so: {}
+ * @param response The bulk response to aggregate based on the error message
+ * @param ignoreStatusCodes Optional array of status codes to ignore when creating aggregate error messages
+ * @returns The aggregated example as shown above.
+ */
+export const errorAggregator = (
+  response: BulkResponse,
+  ignoreStatusCodes: number[]
+): BulkResponseErrorAggregation => {
+  return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
+    if (item.create.error != null && !ignoreStatusCodes.includes(item.create.status)) {
+      if (accum[item.create.error.reason] == null) {
+        accum[item.create.error.reason] = {
+          count: 1,
+          statusCode: item.create.status,
+        };
+      } else {
+        accum[item.create.error.reason] = {
+          count: accum[item.create.error.reason].count + 1,
+          statusCode: item.create.status,
+        };
+      }
+    }
+    return accum;
+  }, Object.create(null));
 };

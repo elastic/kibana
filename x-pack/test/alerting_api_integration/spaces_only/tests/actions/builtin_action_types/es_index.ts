@@ -38,11 +38,13 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        isPreconfigured: false,
         name: 'An index action',
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: false,
+          executionTimeField: null,
         },
       });
       createdActionID = createdAction.id;
@@ -54,9 +56,10 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'An index action',
         actionTypeId: '.index',
-        config: { index: ES_TEST_INDEX_NAME, refresh: false },
+        config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
       });
 
       // create action with all config props
@@ -76,6 +79,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       expect(createdActionWithIndex).to.eql({
         id: createdActionWithIndex.id,
+        isPreconfigured: false,
         name: 'An index action with index config',
         actionTypeId: '.index',
         config: {
@@ -93,6 +97,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       expect(fetchedActionWithIndex).to.eql({
         id: fetchedActionWithIndex.id,
+        isPreconfigured: false,
         name: 'An index action with index config',
         actionTypeId: '.index',
         config: {

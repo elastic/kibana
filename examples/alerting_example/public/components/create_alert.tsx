@@ -33,6 +33,7 @@ export const CreateAlert = ({
   triggers_actions_ui,
   charts,
   uiSettings,
+  docLinks,
   data,
   toastNotifications,
 }: AlertingExampleComponentParams) => {
@@ -56,6 +57,7 @@ export const CreateAlert = ({
             alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
             toastNotifications,
             uiSettings,
+            docLinks,
             charts,
             dataFieldsFormats: data.fieldFormats,
           }}

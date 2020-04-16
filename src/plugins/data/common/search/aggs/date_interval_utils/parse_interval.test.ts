@@ -46,6 +46,10 @@ describe('parseInterval', () => {
       validateDuration(parseInterval('5m'), 'm', 5);
     });
 
+    test('should correctly parse 500m interval', () => {
+      validateDuration(parseInterval('500m'), 'm', 500);
+    });
+
     test('should correctly parse 250ms interval', () => {
       validateDuration(parseInterval('250ms'), 'ms', 250);
     });

@@ -76,6 +76,7 @@ function ContextAppRouteController($routeParams, $scope, $route) {
     getFilters,
     setFilters,
     setAppState,
+    flushToUrl,
   } = getState({
     defaultStepSize: getServices().uiSettings.get('context:defaultSize'),
     timeFieldName: indexPattern.timeFieldName,
@@ -99,6 +100,7 @@ function ContextAppRouteController($routeParams, $scope, $route) {
       const [columns, predecessorCount, successorCount] = newValues;
       if (Array.isArray(columns) && predecessorCount >= 0 && successorCount >= 0) {
         setAppState({ columns, predecessorCount, successorCount });
+        flushToUrl(true);
       }
     }
   );

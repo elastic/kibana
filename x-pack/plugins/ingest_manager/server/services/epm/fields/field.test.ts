@@ -80,3 +80,103 @@ describe('getField searches recursively for nested field in fields given an arra
     expect(getField(searchFields, ['2', '2-2', '2-2-1'])?.name).toBe('2-2-1');
   });
 });
+
+describe('processFields', () => {
+  const flattenedFields = [
+    {
+      name: 'a.a',
+      type: 'text',
+    },
+    {
+      name: 'a.b',
+      type: 'text',
+    },
+  ];
+  const expandedFields = [
+    {
+      name: 'a',
+      type: 'group',
+      fields: [
+        {
+          name: 'a',
+          type: 'text',
+        },
+        {
+          name: 'b',
+          type: 'text',
+        },
+      ],
+    },
+  ];
+  test('correctly expands flattened fields', () => {
+    expect(JSON.stringify(processFields(flattenedFields))).toEqual(JSON.stringify(expandedFields));
+  });
+  test('leaves expanded fields unchanged', () => {
+    expect(JSON.stringify(processFields(expandedFields))).toEqual(JSON.stringify(expandedFields));
+  });
+
+  const mixedFieldsA = [
+    {
+      name: 'a.a',
+      type: 'group',
+      fields: [
+        {
+          name: 'a',
+          type: 'text',
+        },
+        {
+          name: 'b',
+          type: 'text',
+        },
+      ],
+    },
+  ];
+
+  const mixedFieldsB = [
+    {
+      name: 'a',
+      type: 'group',
+      fields: [
+        {
+          name: 'a.a',
+          type: 'text',
+        },
+        {
+          name: 'a.b',
+          type: 'text',
+        },
+      ],
+    },
+  ];
+
+  const mixedFieldsExpanded = [
+    {
+      name: 'a',
+      type: 'group',
+      fields: [
+        {
+          name: 'a',
+          type: 'group',
+          fields: [
+            {
+              name: 'a',
+              type: 'text',
+            },
+            {
+              name: 'b',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+  ];
+  test('correctly expands a mix of expanded and flattened fields', () => {
+    expect(JSON.stringify(processFields(mixedFieldsA))).toEqual(
+      JSON.stringify(mixedFieldsExpanded)
+    );
+    expect(JSON.stringify(processFields(mixedFieldsB))).toEqual(
+      JSON.stringify(mixedFieldsExpanded)
+    );
+  });
+});

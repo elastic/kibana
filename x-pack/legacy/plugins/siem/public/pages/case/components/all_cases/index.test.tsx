@@ -9,11 +9,15 @@ import { mount } from 'enzyme';
 import moment from 'moment-timezone';
 import { AllCases } from './';
 import { TestProviders } from '../../../../mock';
-import { useGetCasesMockState } from './__mock__';
+import { useGetCasesMockState } from '../../../../containers/case/mock';
+import * as i18n from './translations';
+
+import { getEmptyTagValue } from '../../../../components/empty_value';
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { useGetCases } from '../../../../containers/case/use_get_cases';
 import { useGetCasesStatus } from '../../../../containers/case/use_get_cases_status';
 import { useUpdateCases } from '../../../../containers/case/use_bulk_update_case';
+import { getCasesColumns } from './columns';
 jest.mock('../../../../containers/case/use_bulk_update_case');
 jest.mock('../../../../containers/case/use_delete_cases');
 jest.mock('../../../../containers/case/use_get_cases');
@@ -35,6 +39,7 @@ describe('AllCases', () => {
   const setSelectedCases = jest.fn();
   const updateBulkStatus = jest.fn();
   const fetchCasesStatus = jest.fn();
+  const emptyTag = getEmptyTagValue().props.children;
 
   const defaultGetCases = {
     ...useGetCasesMockState,
@@ -87,7 +92,7 @@ describe('AllCases', () => {
   it('should render AllCases', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     expect(
@@ -95,7 +100,9 @@ describe('AllCases', () => {
         .find(`a[data-test-subj="case-details-link"]`)
         .first()
         .prop('href')
-    ).toEqual(`#/link-to/case/${useGetCasesMockState.data.cases[0].id}`);
+    ).toEqual(
+      `#/link-to/case/${useGetCasesMockState.data.cases[0].id}?timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))`
+    );
     expect(
       wrapper
         .find(`a[data-test-subj="case-details-link"]`)
@@ -113,7 +120,7 @@ describe('AllCases', () => {
         .find(`[data-test-subj="case-table-column-createdBy"]`)
         .first()
         .text()
-    ).toEqual(useGetCasesMockState.data.cases[0].createdBy.username);
+    ).toEqual(useGetCasesMockState.data.cases[0].createdBy.fullName);
     expect(
       wrapper
         .find(`[data-test-subj="case-table-column-createdAt"]`)
@@ -127,10 +134,43 @@ describe('AllCases', () => {
         .text()
     ).toEqual('Showing 10 cases');
   });
+  it('should render empty fields', () => {
+    useGetCasesMock.mockImplementation(() => ({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        cases: [
+          {
+            ...defaultGetCases.data.cases[0],
+            id: null,
+            createdAt: null,
+            createdBy: null,
+            tags: null,
+            title: null,
+            totalComment: null,
+          },
+        ],
+      },
+    }));
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+    const checkIt = (columnName: string, key: number) => {
+      const column = wrapper.find('[data-test-subj="cases-table"] tbody .euiTableRowCell').at(key);
+      if (columnName === i18n.ACTIONS) {
+        return;
+      }
+      expect(column.find('.euiTableRowCell--hideForDesktop').text()).toEqual(columnName);
+      expect(column.find('span').text()).toEqual(emptyTag);
+    };
+    getCasesColumns([], 'open').map((i, key) => i.name != null && checkIt(`${i.name}`, key));
+  });
   it('should tableHeaderSortButton AllCases', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -147,7 +187,7 @@ describe('AllCases', () => {
   it('closes case when row action icon clicked', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -159,6 +199,30 @@ describe('AllCases', () => {
       caseId: firstCase.id,
       updateKey: 'status',
       updateValue: 'closed',
+      refetchCasesStatus: fetchCasesStatus,
+      version: firstCase.version,
+    });
+  });
+  it('opens case when row action icon clicked', () => {
+    useGetCasesMock.mockImplementation(() => ({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: 'closed' },
+    }));
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+    wrapper
+      .find('[data-test-subj="action-open"]')
+      .first()
+      .simulate('click');
+    const firstCase = useGetCasesMockState.data.cases[0];
+    expect(dispatchUpdateCaseProperty).toBeCalledWith({
+      caseId: firstCase.id,
+      updateKey: 'status',
+      updateValue: 'open',
       refetchCasesStatus: fetchCasesStatus,
       version: firstCase.version,
     });
@@ -180,7 +244,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -200,7 +264,7 @@ describe('AllCases', () => {
       .last()
       .simulate('click');
     expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual(
-      useGetCasesMockState.data.cases.map(theCase => theCase.id)
+      useGetCasesMockState.data.cases.map(({ id }) => ({ id }))
     );
   });
   it('Bulk close status update', () => {
@@ -211,7 +275,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -236,7 +300,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -257,7 +321,7 @@ describe('AllCases', () => {
 
     mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     expect(refetchCases).toBeCalled();
@@ -272,7 +336,7 @@ describe('AllCases', () => {
 
     mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     expect(refetchCases).toBeCalled();

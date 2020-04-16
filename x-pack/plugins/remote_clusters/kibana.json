@@ -11,7 +11,8 @@
     "indexManagement"
   ],
   "optionalPlugins": [
-    "usageCollection"
+    "usageCollection",
+    "cloud"
   ],
   "server": true,
   "ui": true

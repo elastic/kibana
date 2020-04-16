@@ -8,10 +8,12 @@ import React, { createContext, useMemo } from 'react';
 import { UptimeAppProps } from '../uptime_app';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../common/constants';
 import { CommonlyUsedRange } from '../components/functional/uptime_date_picker';
-import { useUrlParams } from '../hooks';
+import { useGetUrlParams } from '../hooks';
+import { ILicense } from '../../../../../plugins/licensing/common/types';
 
 export interface UptimeSettingsContextValues {
   basePath: string;
+  license?: ILicense | null;
   dateRangeStart: string;
   dateRangeEnd: string;
   isApmAvailable: boolean;
@@ -39,14 +41,27 @@ const defaultContext: UptimeSettingsContextValues = {
 export const UptimeSettingsContext = createContext(defaultContext);
 
 export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ children, ...props }) => {
-  const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, commonlyUsedRanges } = props;
+  const {
+    basePath,
+    isApmAvailable,
+    isInfraAvailable,
+    isLogsAvailable,
+    commonlyUsedRanges,
+    plugins,
+  } = props;
 
-  const [getUrlParams] = useUrlParams();
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
-  const { dateRangeStart, dateRangeEnd } = getUrlParams();
+  let license: ILicense | null = null;
+
+  // @ts-ignore
+  plugins.licensing.license$.subscribe((licenseItem: ILicense) => {
+    license = licenseItem;
+  });
 
   const value = useMemo(() => {
     return {
+      license,
       basePath,
       isApmAvailable,
       isInfraAvailable,
@@ -56,6 +71,7 @@ export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ childr
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
     };
   }, [
+    license,
     basePath,
     isApmAvailable,
     isInfraAvailable,

@@ -5,7 +5,8 @@
  */
 
 import { AlertAction } from '../../../../../../../../plugins/alerting/common';
-import { ThreatParams, PrepackagedRules, RuleAlertAction } from '../../types';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import { ThreatParams, PrepackagedRules } from '../../types';
 import { addPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
@@ -1560,25 +1561,31 @@ describe('add prepackaged rules schema', () => {
           lists: [
             {
               field: 'source.ip',
-              boolean_operator: 'and',
-              values: [
-                {
-                  name: '127.0.0.1',
-                  type: 'value',
-                },
-              ],
+              values_operator: 'included',
+              values_type: 'exists',
             },
             {
               field: 'host.name',
-              boolean_operator: 'and not',
+              values_operator: 'excluded',
+              values_type: 'match',
               values: [
                 {
                   name: 'rock01',
-                  type: 'value',
                 },
+              ],
+              and: [
                 {
-                  name: 'mothra',
-                  type: 'value',
+                  field: 'host.id',
+                  values_operator: 'included',
+                  values_type: 'match_all',
+                  values: [
+                    {
+                      name: '123',
+                    },
+                    {
+                      name: '678',
+                    },
+                  ],
                 },
               ],
             },

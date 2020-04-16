@@ -6,18 +6,24 @@
 
 import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
+import deepmerge from 'deepmerge';
 
-import { NewRule, RuleType } from '../../../../containers/detection_engine/rules';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../common/constants';
+import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
+import { RuleType } from '../../../../../common/detection_engine/types';
+import { isMlRule } from '../../../../../common/detection_engine/ml_helpers';
+import { NewRule } from '../../../../containers/detection_engine/rules';
 
 import {
   AboutStepRule,
   DefineStepRule,
   ScheduleStepRule,
+  ActionsStepRule,
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
+  ActionsStepRuleJson,
 } from '../types';
-import { isMlRule } from '../helpers';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
@@ -64,27 +70,35 @@ export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: R
 
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const ruleFields = filterRuleFieldsForType(defineStepData, defineStepData.ruleType);
+  const { ruleType, timeline } = ruleFields;
+  const baseFields = {
+    type: ruleType,
+    ...(timeline.id != null &&
+      timeline.title != null && {
+        timeline_id: timeline.id,
+        timeline_title: timeline.title,
+      }),
+  };
 
-  if (isMlFields(ruleFields)) {
-    const { anomalyThreshold, machineLearningJobId, isNew, ruleType, ...rest } = ruleFields;
-    return {
-      ...rest,
-      type: ruleType,
-      anomaly_threshold: anomalyThreshold,
-      machine_learning_job_id: machineLearningJobId,
-    };
-  } else {
-    const { queryBar, isNew, ruleType, ...rest } = ruleFields;
-    return {
-      ...rest,
-      type: ruleType,
-      filters: queryBar?.filters,
-      language: queryBar?.query?.language,
-      query: queryBar?.query?.query as string,
-      saved_id: queryBar?.saved_id,
-      ...(ruleType === 'query' && queryBar?.saved_id ? { type: 'saved_query' as RuleType } : {}),
-    };
-  }
+  const typeFields = isMlFields(ruleFields)
+    ? {
+        anomaly_threshold: ruleFields.anomalyThreshold,
+        machine_learning_job_id: ruleFields.machineLearningJobId,
+      }
+    : {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: ruleFields.queryBar?.saved_id,
+        ...(ruleType === 'query' &&
+          ruleFields.queryBar?.saved_id && { type: 'saved_query' as RuleType }),
+      };
+
+  return {
+    ...baseFields,
+    ...typeFields,
+  };
 };
 
 export const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
@@ -108,26 +122,11 @@ export const formatScheduleStepData = (scheduleData: ScheduleStepRule): Schedule
 };
 
 export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
-  const {
-    falsePositives,
-    references,
-    riskScore,
-    threat,
-    timeline,
-    isNew,
-    note,
-    ...rest
-  } = aboutStepData;
+  const { falsePositives, references, riskScore, threat, isNew, note, ...rest } = aboutStepData;
   return {
     false_positives: falsePositives.filter(item => !isEmpty(item)),
     references: references.filter(item => !isEmpty(item)),
     risk_score: riskScore,
-    ...(timeline.id != null && timeline.title != null
-      ? {
-          timeline_id: timeline.id,
-          timeline_title: timeline.title,
-        }
-      : {}),
     threat: threat
       .filter(singleThreat => singleThreat.tactic.name !== 'none')
       .map(singleThreat => ({
@@ -143,12 +142,33 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
   };
 };
 
+export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
+  const {
+    actions = [],
+    enabled,
+    kibanaSiemAppUrl,
+    throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
+  } = actionsStepData;
+
+  return {
+    actions: actions.map(transformAlertToRuleAction),
+    enabled,
+    throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
+    meta: {
+      kibana_siem_app_url: kibanaSiemAppUrl,
+    },
+  };
+};
+
 export const formatRule = (
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
-  scheduleData: ScheduleStepRule
-): NewRule => ({
-  ...formatDefineStepData(defineStepData),
-  ...formatAboutStepData(aboutStepData),
-  ...formatScheduleStepData(scheduleData),
-});
+  scheduleData: ScheduleStepRule,
+  actionsData: ActionsStepRule
+): NewRule =>
+  deepmerge.all([
+    formatDefineStepData(defineStepData),
+    formatAboutStepData(aboutStepData),
+    formatScheduleStepData(scheduleData),
+    formatActionsStepData(actionsData),
+  ]) as NewRule;

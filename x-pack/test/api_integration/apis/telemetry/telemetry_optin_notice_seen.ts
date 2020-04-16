@@ -13,12 +13,18 @@ export default function optInTest({ getService }: FtrProviderContext) {
   const client: Client = getService('legacyEs');
   const supertest = getService('supertest');
 
-  describe('/api/telemetry/v2/optIn API Telemetry User has seen OptIn Notice', () => {
+  describe('/api/telemetry/v2/userHasSeenNotice API Telemetry User has seen OptIn Notice', () => {
     it('should update telemetry setting field via PUT', async () => {
-      await client.delete({
-        index: '.kibana',
-        id: 'telemetry:telemetry',
-      } as DeleteDocumentParams);
+      try {
+        await client.delete({
+          index: '.kibana',
+          id: 'telemetry:telemetry',
+        } as DeleteDocumentParams);
+      } catch (err) {
+        if (err.statusCode !== 404) {
+          throw err;
+        }
+      }
 
       await supertest
         .put('/api/telemetry/v2/userHasSeenNotice')

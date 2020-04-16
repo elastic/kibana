@@ -6,14 +6,22 @@
 
 import React, { FC, useState } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup, EuiIconTip, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiIconTip,
+  EuiInputPopover,
+  EuiSuperSelect,
+  EuiText,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../../common/constants/search';
 
 import {
   esKuery,
@@ -21,8 +29,6 @@ import {
   Query,
   QueryStringInput,
 } from '../../../../../../../../../src/plugins/data/public';
-
-import { getToastNotifications } from '../../../../util/dependency_cache';
 
 interface Props {
   indexPattern: IndexPattern;
@@ -73,6 +79,7 @@ export const SearchPanel: FC<Props> = ({
     query: searchString || '',
     language: searchQueryLanguage,
   });
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
   const searchHandler = (query: Query) => {
     let filterQuery;
@@ -93,13 +100,7 @@ export const SearchPanel: FC<Props> = ({
       setSearchQueryLanguage(query.language);
     } catch (e) {
       console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addError(e, {
-        title: i18n.translate('xpack.ml.datavisualizer.invalidSyntaxErrorMessage', {
-          defaultMessage: 'Invalid syntax in search bar',
-        }),
-        toastMessage: e.message ? e.message : e,
-      });
+      setErrorMessage({ query: query.query as string, message: e.message });
     }
   };
   const searchChangeHandler = (query: Query) => setSearchInput(query);
@@ -107,22 +108,40 @@ export const SearchPanel: FC<Props> = ({
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center" data-test-subj="mlDataVisualizerSearchPanel">
       <EuiFlexItem>
-        <QueryStringInput
-          bubbleSubmitEvent={true}
-          query={searchInput}
-          indexPatterns={[indexPattern]}
-          onChange={searchChangeHandler}
-          onSubmit={searchHandler}
-          placeholder={i18n.translate(
-            'xpack.ml.datavisualizer.searchPanel.queryBarPlaceholderText',
-            {
-              defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
-            }
-          )}
-          disableAutoFocus={true}
-          dataTestSubj="transformQueryInput"
-          languageSwitcherPopoverAnchorPosition="rightDown"
-        />
+        <EuiInputPopover
+          style={{ maxWidth: '100%' }}
+          closePopover={() => setErrorMessage(undefined)}
+          input={
+            <QueryStringInput
+              bubbleSubmitEvent={true}
+              query={searchInput}
+              indexPatterns={[indexPattern]}
+              onChange={searchChangeHandler}
+              onSubmit={searchHandler}
+              placeholder={i18n.translate(
+                'xpack.ml.datavisualizer.searchPanel.queryBarPlaceholderText',
+                {
+                  defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
+                }
+              )}
+              disableAutoFocus={true}
+              dataTestSubj="transformQueryInput"
+              languageSwitcherPopoverAnchorPosition="rightDown"
+            />
+          }
+          isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
+        >
+          <EuiCode>
+            {i18n.translate(
+              'xpack.ml.datavisualizer.searchPanel.invalidKuerySyntaxErrorMessageQueryBar',
+              {
+                defaultMessage: 'Invalid query',
+              }
+            )}
+            {': '}
+            {errorMessage?.message.split('\n')[0]}
+          </EuiCode>
+        </EuiInputPopover>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

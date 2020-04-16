@@ -17,7 +17,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { ILicenseState, verifyApiAccess } from '../lib';
+import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
@@ -46,8 +46,15 @@ export const deleteActionRoute = (router: IRouter, licenseState: ILicenseState) 
       }
       const actionsClient = context.actions.getActionsClient();
       const { id } = req.params;
-      await actionsClient.delete({ id });
-      return res.noContent();
+      try {
+        await actionsClient.delete({ id });
+        return res.noContent();
+      } catch (e) {
+        if (isErrorThatHandlesItsOwnResponse(e)) {
+          return e.sendResponse(res);
+        }
+        throw e;
+      }
     })
   );
 };

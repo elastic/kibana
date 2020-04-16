@@ -1,0 +1,47 @@
+[role="xpack"]
+[[action-types]]
+== Action and connector types
+
+Actions are Kibana services or integrations with third-party systems that run as background tasks on the Kibana server when alert conditions are met. {kib} provides the following types of actions:
+
+[cols="2"]
+|===
+
+a| <<email-action-type, Email>>
+
+| Send email from your server.
+
+a| <<index-action-type, Index>>
+
+| Index data into Elasticsearch.
+
+a| <<pagerduty-action-type, PagerDuty>>
+
+| Send an event in PagerDuty.
+
+a| <<server-log-action-type, ServerLog>>
+
+| Add a message to a Kibana log.
+
+a| <<slack-action-type, Slack>>
+
+| Send a message to a Slack channel or user.
+
+a| <<webhook-action-type, Webhook>>
+
+| Send a request to a web service.
+|===
+
+[NOTE]
+==============================================
+Some action types are paid commercial features, while others are free. 
+For a comparison of the Elastic subscription levels, 
+see https://www.elastic.co/subscriptions[the subscription page]. 
+==============================================
+
+include::action-types/email.asciidoc[]
+include::action-types/index.asciidoc[]
+include::action-types/pagerduty.asciidoc[]
+include::action-types/server-log.asciidoc[]
+include::action-types/slack.asciidoc[]
+include::action-types/webhook.asciidoc[]

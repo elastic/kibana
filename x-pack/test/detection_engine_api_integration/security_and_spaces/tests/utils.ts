@@ -18,6 +18,8 @@ export const removeServerGeneratedProperties = (
     created_at,
     updated_at,
     id,
+    last_failure_at,
+    last_failure_message,
     last_success_at,
     last_success_message,
     status,
@@ -151,6 +153,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   to: 'now',
   type: 'query',
   threat: [],
+  throttle: 'no_actions',
   lists: [],
   version: 1,
 });
@@ -188,6 +191,19 @@ export const deleteAllAlerts = async (es: any): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:alert',
+    waitForCompletion: true,
+    refresh: 'wait_for',
+  });
+};
+
+/**
+ * Remove all rules statuses from the .kibana index
+ * @param es The ElasticSearch handle
+ */
+export const deleteAllRulesStatuses = async (es: any): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:siem-detection-engine-rule-status',
     waitForCompletion: true,
     refresh: 'wait_for',
   });
@@ -403,6 +419,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
     'http://www.example.com/some-article-about-attack',
     'Some plain text string here explaining why this is a valid thing to look out for',
   ],
+  throttle: 'no_actions',
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
   updated_by: 'elastic',

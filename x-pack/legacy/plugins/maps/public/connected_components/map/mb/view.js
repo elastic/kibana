@@ -12,18 +12,24 @@ import {
   removeOrphanedSourcesAndLayers,
   addSpritesheetToMap,
 } from './utils';
-import { getGlyphUrl, isRetina } from '../../../meta';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getGlyphUrl, isRetina } from '../../../../../../../plugins/maps/public/meta';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
-import chrome from 'ui/chrome';
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { DrawControl } from './draw_control';
 import { TooltipControl } from './tooltip_control';
-import { clampToLatBounds, clampToLonBounds } from '../../../elasticsearch_geo_utils';
+import {
+  clampToLatBounds,
+  clampToLonBounds,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../plugins/maps/public/elasticsearch_geo_utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInjectedVarFunc } from '../../../../../../../plugins/maps/public/kibana_services';
 
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
@@ -124,7 +130,7 @@ export class MBMapContainer extends React.Component {
         container: this.refs.mapContainer,
         style: mbStyle,
         scrollZoom: this.props.scrollZoom,
-        preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false),
+        preserveDrawingBuffer: getInjectedVarFunc()('preserveDrawingBuffer', false),
         interactive: !this.props.disableInteractive,
       };
       const initialView = _.get(this.props.goto, 'center');
@@ -235,12 +241,12 @@ export class MBMapContainer extends React.Component {
       //clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
       const lnLatBounds = new mapboxgl.LngLatBounds(
         new mapboxgl.LngLat(
-          clampToLonBounds(goto.bounds.min_lon),
-          clampToLatBounds(goto.bounds.min_lat)
+          clampToLonBounds(goto.bounds.minLon),
+          clampToLatBounds(goto.bounds.minLat)
         ),
         new mapboxgl.LngLat(
-          clampToLonBounds(goto.bounds.max_lon),
-          clampToLatBounds(goto.bounds.max_lat)
+          clampToLonBounds(goto.bounds.maxLon),
+          clampToLatBounds(goto.bounds.maxLat)
         )
       );
       //maxZoom ensure we're not zooming in too far on single points or small shapes

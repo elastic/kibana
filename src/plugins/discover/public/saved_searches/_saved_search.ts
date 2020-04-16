@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { createSavedObjectClass, SavedObjectKibanaServices } from '../../../saved_objects/public';
+import {
+  createSavedObjectClass,
+  SavedObject,
+  SavedObjectKibanaServices,
+} from '../../../saved_objects/public';
 
 export function createSavedSearchClass(services: SavedObjectKibanaServices) {
   const SavedObjectClass = createSavedObjectClass(services);
@@ -66,5 +70,5 @@ export function createSavedSearchClass(services: SavedObjectKibanaServices) {
     }
   }
 
-  return SavedSearch;
+  return SavedSearch as new (id: string) => SavedObject;
 }

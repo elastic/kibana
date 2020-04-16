@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { AdvancedSettings } from '../../../../public/lib/kibana_advanced_settings';
+import { getAdvancedSettings } from '../../../../public/lib/kibana_advanced_settings';
 import { TimeFilter as Component, Props } from './time_filter';
 
 export const TimeFilter = (props: Props) => {
-  const customQuickRanges = (AdvancedSettings.get('timepicker:quickRanges') || []).map(
+  const customQuickRanges = (getAdvancedSettings().get('timepicker:quickRanges') || []).map(
     ({ from, to, display }: { from: string; to: string; display: string }) => ({
       start: from,
       end: to,
@@ -17,7 +17,7 @@ export const TimeFilter = (props: Props) => {
     })
   );
 
-  const customDateFormat = AdvancedSettings.get('dateFormat');
+  const customDateFormat = getAdvancedSettings().get('dateFormat');
 
   return (
     <Component {...props} commonlyUsedRanges={customQuickRanges} dateFormat={customDateFormat} />

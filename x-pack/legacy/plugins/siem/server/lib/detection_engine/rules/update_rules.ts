@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../../../plugins/alerting/server';
 import { readRules } from './read_rules';
 import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
@@ -11,12 +12,10 @@ import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion } from './utils';
 import { hasListsFeature } from '../feature_flags';
-import { transformRuleToAlertAction } from './transform_actions';
 
 export const updateRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
-  actions,
   savedObjectsClient,
   description,
   falsePositives,
@@ -30,7 +29,6 @@ export const updateRules = async ({
   meta,
   filters,
   from,
-  immutable,
   id,
   ruleId,
   index,
@@ -41,7 +39,6 @@ export const updateRules = async ({
   severity,
   tags,
   threat,
-  throttle,
   to,
   type,
   references,
@@ -50,6 +47,7 @@ export const updateRules = async ({
   lists,
   anomalyThreshold,
   machineLearningJobId,
+  actions,
 }: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -57,7 +55,6 @@ export const updateRules = async ({
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
-    actions,
     description,
     falsePositives,
     query,
@@ -77,7 +74,6 @@ export const updateRules = async ({
     severity,
     tags,
     threat,
-    throttle,
     to,
     type,
     references,
@@ -93,17 +89,17 @@ export const updateRules = async ({
   const update = await alertsClient.update({
     id: rule.id,
     data: {
-      tags: addTags(tags, rule.params.ruleId, immutable),
+      tags: addTags(tags, rule.params.ruleId, rule.params.immutable),
       name,
       schedule: { interval },
-      actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
-      throttle: throttle !== undefined ? throttle : rule.throttle,
+      actions: actions.map(transformRuleToAlertAction),
+      throttle: null,
       params: {
         description,
         ruleId: rule.params.ruleId,
         falsePositives,
         from,
-        immutable,
+        immutable: rule.params.immutable,
         query,
         language,
         outputIndex,

@@ -23,6 +23,11 @@
           "event" : {
             "created" : "2020-01-23T21:56:55.336Z"
           },
+          "elastic": {
+            "agent": {
+              "id": "56a75650-3c8a-4e4f-ac17-6dd729c650e2"
+            }
+          },
           "endpoint" : {
             "policy" : {
               "id" : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
@@ -73,6 +78,11 @@
                     "event" : {
                       "created" : "2020-01-23T21:56:55.336Z"
                     },
+                    "elastic": {
+                      "agent": {
+                        "id": "56a75650-3c8a-4e4f-ac17-6dd729c650e2"
+                      }
+                    },
                     "endpoint" : {
                       "policy" : {
                         "id" : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
@@ -114,6 +124,11 @@
           "@timestamp" : 1579816615336,
           "event" : {
             "created" : "2020-01-23T21:56:55.336Z"
+          },
+          "elastic": {
+            "agent": {
+              "id": "c2d84d8f-d355-40de-8b54-5d318d4d1312"
+            }
           },
           "endpoint" : {
             "policy" : {
@@ -164,6 +179,11 @@
                     "@timestamp" : 1579816615336,
                     "event" : {
                       "created" : "2020-01-23T21:56:55.336Z"
+                    },
+                    "elastic": {
+                      "agent": {
+                        "id": "c2d84d8f-d355-40de-8b54-5d318d4d1312"
+                      }
                     },
                     "endpoint" : {
                       "policy" : {

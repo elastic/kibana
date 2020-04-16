@@ -38,6 +38,7 @@ export declare class SearchSource
 |  [getParent()](./kibana-plugin-plugins-data-public.searchsource.getparent.md) |  | Get the parent of this SearchSource  {<!-- -->undefined\|searchSource<!-- -->} |
 |  [getSearchRequestBody()](./kibana-plugin-plugins-data-public.searchsource.getsearchrequestbody.md) |  |  |
 |  [onRequestStart(handler)](./kibana-plugin-plugins-data-public.searchsource.onrequeststart.md) |  | Add a handler that will be notified whenever requests start |
+|  [serialize()](./kibana-plugin-plugins-data-public.searchsource.serialize.md) |  | Serializes the instance to a JSON string and a set of referenced objects. Use this method to get a representation of the search source which can be stored in a saved object.<!-- -->The references returned by this function can be mixed with other references in the same object, however make sure there are no name-collisions. The references will be named <code>kibanaSavedObjectMeta.searchSourceJSON.index</code> and <code>kibanaSavedObjectMeta.searchSourceJSON.filter[&lt;number&gt;].meta.index</code>.<!-- -->Using <code>createSearchSource</code>, the instance can be re-created. |
 |  [setField(field, value)](./kibana-plugin-plugins-data-public.searchsource.setfield.md) |  |  |
 |  [setFields(newFields)](./kibana-plugin-plugins-data-public.searchsource.setfields.md) |  |  |
 |  [setParent(parent, options)](./kibana-plugin-plugins-data-public.searchsource.setparent.md) |  | Set a searchSource that this source should inherit from |

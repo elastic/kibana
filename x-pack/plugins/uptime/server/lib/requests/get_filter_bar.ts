@@ -58,7 +58,7 @@ export const extractFilterAggsResults = (
     tags: [],
   };
   keys.forEach(key => {
-    const buckets = responseAggregations[key]?.term?.buckets ?? [];
+    const buckets = responseAggregations?.[key]?.term?.buckets ?? [];
     values[key] = buckets.map((item: { key: string | number }) => item.key);
   });
   return values;

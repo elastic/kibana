@@ -366,6 +366,7 @@ export {
   SearchStrategyProvider,
   ISearchSource,
   SearchSource,
+  createSearchSource,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
@@ -374,6 +375,8 @@ export {
   TabbedAggColumn,
   TabbedAggRow,
   TabbedTable,
+  SearchInterceptor,
+  RequestTimeoutError,
 } from './search';
 
 // Search namespace

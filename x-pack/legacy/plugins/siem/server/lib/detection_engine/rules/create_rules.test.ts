@@ -28,14 +28,13 @@ describe('createRules', () => {
     await createRules({
       alertsClient,
       actionsClient,
-      actions: [],
       ...params,
       ruleId: 'new-rule-id',
       enabled: true,
       interval: '',
-      throttle: null,
       name: '',
       tags: [],
+      actions: [],
     });
 
     expect(alertsClient.create).toHaveBeenCalledWith(

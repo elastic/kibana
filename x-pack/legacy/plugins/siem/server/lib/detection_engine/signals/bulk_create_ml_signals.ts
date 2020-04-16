@@ -9,8 +9,9 @@ import { SearchResponse } from 'elasticsearch';
 
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
-import { RuleTypeParams, RuleAlertAction } from '../types';
-import { singleBulkCreate } from './single_bulk_create';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { RuleTypeParams, RefreshTypes } from '../types';
+import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 
 interface BulkCreateMlSignalsParams {
@@ -28,8 +29,9 @@ interface BulkCreateMlSignalsParams {
   updatedBy: string;
   interval: string;
   enabled: boolean;
+  refresh: RefreshTypes;
   tags: string[];
-  throttle: string | null;
+  throttle: string;
 }
 
 interface EcsAnomaly extends Anomaly {
@@ -74,7 +76,9 @@ const transformAnomalyResultsToEcs = (results: AnomalyResults): SearchResponse<E
   };
 };
 
-export const bulkCreateMlSignals = async (params: BulkCreateMlSignalsParams) => {
+export const bulkCreateMlSignals = async (
+  params: BulkCreateMlSignalsParams
+): Promise<SingleBulkCreateResponse> => {
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
 

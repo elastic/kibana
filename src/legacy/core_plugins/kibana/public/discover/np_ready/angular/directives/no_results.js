@@ -18,7 +18,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 
 import {
@@ -247,29 +247,31 @@ export class DiscoverNoResults extends Component {
     }
 
     return (
-      <Fragment>
-        <EuiSpacer size="xl" />
+      <I18nProvider>
+        <Fragment>
+          <EuiSpacer size="xl" />
 
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false} className="dscNoResults">
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="kbn.discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
-                  defaultMessage="No results match your search criteria"
-                />
-              }
-              color="warning"
-              iconType="help"
-              data-test-subj="discoverNoResults"
-            />
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false} className="dscNoResults">
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="kbn.discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
+                    defaultMessage="No results match your search criteria"
+                  />
+                }
+                color="warning"
+                iconType="help"
+                data-test-subj="discoverNoResults"
+              />
 
-            {shardFailuresMessage}
-            {timeFieldMessage}
-            {luceneQueryMessage}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
+              {shardFailuresMessage}
+              {timeFieldMessage}
+              {luceneQueryMessage}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Fragment>
+      </I18nProvider>
     );
   }
 }

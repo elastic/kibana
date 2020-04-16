@@ -12,15 +12,15 @@ Given(`a user browses the APM UI application`, () => {
   loginAndWaitForPage(`/app/apm#/services`);
 });
 
-When(`the user inspects the opbeans-go service`, () => {
-  // click opbeans-go service
-  cy.get(':contains(opbeans-go)')
+When(`the user inspects the opbeans-node service`, () => {
+  // click opbeans-node service
+  cy.get(':contains(opbeans-node)')
     .last()
     .click({ force: true });
 });
 
 Then(`should redirect to correct path with correct params`, () => {
-  cy.url().should('contain', `/app/apm#/services/opbeans-go/transactions`);
+  cy.url().should('contain', `/app/apm#/services/opbeans-node/transactions`);
   cy.url().should('contain', `transactionType=request`);
 });
 

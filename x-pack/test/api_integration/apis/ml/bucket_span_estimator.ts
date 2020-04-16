@@ -18,7 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const esSupertest = getService('esSupertest');
   const supertest = getService('supertestWithoutAuth');
-  const mlSecurity = getService('mlSecurity');
+  const ml = getService('ml');
 
   const testDataList = [
     {
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
         it(`estimates the bucket span ${testData.testTitleSuffix}`, async () => {
           const { body } = await supertest
             .post('/api/ml/validate/estimate_bucket_span')
-            .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
+            .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
             .set(COMMON_HEADERS)
             .send(testData.requestBody)
             .expect(testData.expected.responseCode);
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`estimates the bucket span`, async () => {
         const { body } = await supertest
           .post('/api/ml/validate/estimate_bucket_span')
-          .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
+          .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`estimates the bucket span`, async () => {
         const { body } = await supertest
           .post('/api/ml/validate/estimate_bucket_span')
-          .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
+          .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);
