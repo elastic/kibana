@@ -20,38 +20,38 @@ import {
   prefixDatafeedId,
   getSafeAggregationName,
   getLatestDataOrBucketTimestamp,
-} from '../job_utils';
+} from './job_utils';
 
 describe('ML - job utils', () => {
   describe('calculateDatafeedFrequencyDefaultSeconds', () => {
-    it('returns correct frequency for 119', () => {
+    test('returns correct frequency for 119', () => {
       const result = calculateDatafeedFrequencyDefaultSeconds(119);
       expect(result).to.be(60);
     });
-    it('returns correct frequency for 120', () => {
+    test('returns correct frequency for 120', () => {
       const result = calculateDatafeedFrequencyDefaultSeconds(120);
       expect(result).to.be(60);
     });
-    it('returns correct frequency for 300', () => {
+    test('returns correct frequency for 300', () => {
       const result = calculateDatafeedFrequencyDefaultSeconds(300);
       expect(result).to.be(150);
     });
-    it('returns correct frequency for 601', () => {
+    test('returns correct frequency for 601', () => {
       const result = calculateDatafeedFrequencyDefaultSeconds(601);
       expect(result).to.be(300);
     });
-    it('returns correct frequency for 43200', () => {
+    test('returns correct frequency for 43200', () => {
       const result = calculateDatafeedFrequencyDefaultSeconds(43200);
       expect(result).to.be(600);
     });
-    it('returns correct frequency for 43201', () => {
+    test('returns correct frequency for 43201', () => {
       const result = calculateDatafeedFrequencyDefaultSeconds(43201);
       expect(result).to.be(3600);
     });
   });
 
   describe('isTimeSeriesViewJob', () => {
-    it('returns true when job has a single detector with a metric function', () => {
+    test('returns true when job has a single detector with a metric function', () => {
       const job = {
         analysis_config: {
           detectors: [
@@ -67,7 +67,7 @@ describe('ML - job utils', () => {
       expect(isTimeSeriesViewJob(job)).to.be(true);
     });
 
-    it('returns true when job has at least one detector with a metric function', () => {
+    test('returns true when job has at least one detector with a metric function', () => {
       const job = {
         analysis_config: {
           detectors: [
@@ -89,7 +89,7 @@ describe('ML - job utils', () => {
       expect(isTimeSeriesViewJob(job)).to.be(true);
     });
 
-    it('returns false when job does not have at least one detector with a metric function', () => {
+    test('returns false when job does not have at least one detector with a metric function', () => {
       const job = {
         analysis_config: {
           detectors: [
@@ -111,7 +111,7 @@ describe('ML - job utils', () => {
       expect(isTimeSeriesViewJob(job)).to.be(false);
     });
 
-    it('returns false when job has a single count by category detector', () => {
+    test('returns false when job has a single count by category detector', () => {
       const job = {
         analysis_config: {
           detectors: [
@@ -171,23 +171,23 @@ describe('ML - job utils', () => {
       },
     };
 
-    it('returns true for a detector with a metric function', () => {
+    test('returns true for a detector with a metric function', () => {
       expect(isTimeSeriesViewDetector(job, 0)).to.be(true);
     });
 
-    it('returns false for a detector with a non-metric function', () => {
+    test('returns false for a detector with a non-metric function', () => {
       expect(isTimeSeriesViewDetector(job, 1)).to.be(false);
     });
 
-    it('returns false for a detector using count on an mlcategory field', () => {
+    test('returns false for a detector using count on an mlcategory field', () => {
       expect(isTimeSeriesViewDetector(job, 2)).to.be(false);
     });
 
-    it('returns false for a detector using a script field as a by field', () => {
+    test('returns false for a detector using a script field as a by field', () => {
       expect(isTimeSeriesViewDetector(job, 3)).to.be(false);
     });
 
-    it('returns false for a detector using a script field as a metric field_name', () => {
+    test('returns false for a detector using a script field as a metric field_name', () => {
       expect(isTimeSeriesViewDetector(job, 4)).to.be(false);
     });
   });
@@ -233,7 +233,7 @@ describe('ML - job utils', () => {
           { function: 'time_of_day' }, // 34
           { function: 'time_of_week' }, // 35
           { function: 'lat_long' }, // 36
-          { function: 'mean', field_name: 'NetworkDiff' }, //37
+          { function: 'mean', field_name: 'NetworkDiff' }, // 37
         ],
       },
       datafeed_config: {
@@ -254,7 +254,7 @@ describe('ML - job utils', () => {
       },
     };
 
-    it('returns true for expected detectors', () => {
+    test('returns true for expected detectors', () => {
       expect(isSourceDataChartableForDetector(job, 0)).to.be(true);
       expect(isSourceDataChartableForDetector(job, 1)).to.be(true);
       expect(isSourceDataChartableForDetector(job, 2)).to.be(true);
@@ -282,7 +282,7 @@ describe('ML - job utils', () => {
       expect(isSourceDataChartableForDetector(job, 24)).to.be(true);
     });
 
-    it('returns false for expected detectors', () => {
+    test('returns false for expected detectors', () => {
       expect(isSourceDataChartableForDetector(job, 25)).to.be(false);
       expect(isSourceDataChartableForDetector(job, 26)).to.be(false);
       expect(isSourceDataChartableForDetector(job, 27)).to.be(false);
@@ -315,15 +315,15 @@ describe('ML - job utils', () => {
       },
     };
 
-    it('returns false when model plot is not enabled', () => {
+    test('returns false when model plot is not enabled', () => {
       expect(isModelPlotChartableForDetector(job1, 0)).to.be(false);
     });
 
-    it('returns true for count detector when model plot is enabled', () => {
+    test('returns true for count detector when model plot is enabled', () => {
       expect(isModelPlotChartableForDetector(job2, 0)).to.be(true);
     });
 
-    it('returns true for info_content detector when model plot is enabled', () => {
+    test('returns true for info_content detector when model plot is enabled', () => {
       expect(isModelPlotChartableForDetector(job2, 1)).to.be(true);
     });
   });
@@ -359,20 +359,20 @@ describe('ML - job utils', () => {
       },
     };
 
-    it('returns empty array for a detector with no partitioning fields', () => {
+    test('returns empty array for a detector with no partitioning fields', () => {
       const resp = getPartitioningFieldNames(job, 0);
       expect(resp).to.be.an('array');
       expect(resp).to.be.empty();
     });
 
-    it('returns expected array for a detector with a partition field', () => {
+    test('returns expected array for a detector with a partition field', () => {
       const resp = getPartitioningFieldNames(job, 1);
       expect(resp).to.be.an('array');
       expect(resp).to.have.length(1);
       expect(resp).to.contain('clientip');
     });
 
-    it('returns expected array for a detector with by and over fields', () => {
+    test('returns expected array for a detector with by and over fields', () => {
       const resp = getPartitioningFieldNames(job, 2);
       expect(resp).to.be.an('array');
       expect(resp).to.have.length(2);
@@ -380,7 +380,7 @@ describe('ML - job utils', () => {
       expect(resp).to.contain('clientip');
     });
 
-    it('returns expected array for a detector with partition, by and over fields', () => {
+    test('returns expected array for a detector with partition, by and over fields', () => {
       const resp = getPartitioningFieldNames(job, 3);
       expect(resp).to.be.an('array');
       expect(resp).to.have.length(3);
@@ -391,7 +391,7 @@ describe('ML - job utils', () => {
   });
 
   describe('isModelPlotEnabled', () => {
-    it('returns true for a job in which model plot has been enabled', () => {
+    test('returns true for a job in which model plot has been enabled', () => {
       const job = {
         analysis_config: {
           detectors: [
@@ -410,7 +410,7 @@ describe('ML - job utils', () => {
       expect(isModelPlotEnabled(job, 0)).to.be(true);
     });
 
-    it('returns expected values for a job in which model plot has been enabled with terms', () => {
+    test('returns expected values for a job in which model plot has been enabled with terms', () => {
       const job = {
         analysis_config: {
           detectors: [
@@ -449,7 +449,7 @@ describe('ML - job utils', () => {
       ).to.be(false);
     });
 
-    it('returns true for jobs in which model plot has not been enabled', () => {
+    test('returns true for jobs in which model plot has not been enabled', () => {
       const job1 = {
         analysis_config: {
           detectors: [
@@ -476,19 +476,19 @@ describe('ML - job utils', () => {
       job_version: '6.1.1',
     };
 
-    it('returns true for later job version', () => {
+    test('returns true for later job version', () => {
       expect(isJobVersionGte(job, '6.1.0')).to.be(true);
     });
-    it('returns true for equal job version', () => {
+    test('returns true for equal job version', () => {
       expect(isJobVersionGte(job, '6.1.1')).to.be(true);
     });
-    it('returns false for earlier job version', () => {
+    test('returns false for earlier job version', () => {
       expect(isJobVersionGte(job, '6.1.2')).to.be(false);
     });
   });
 
   describe('mlFunctionToESAggregation', () => {
-    it('returns correct ES aggregation type for ML function', () => {
+    test('returns correct ES aggregation type for ML function', () => {
       expect(mlFunctionToESAggregation('count')).to.be('count');
       expect(mlFunctionToESAggregation('low_count')).to.be('count');
       expect(mlFunctionToESAggregation('high_count')).to.be('count');
@@ -528,62 +528,62 @@ describe('ML - job utils', () => {
   });
 
   describe('isJobIdValid', () => {
-    it('returns true for job id: "good_job-name"', () => {
+    test('returns true for job id: "good_job-name"', () => {
       expect(isJobIdValid('good_job-name')).to.be(true);
     });
-    it('returns false for job id: "_bad_job-name"', () => {
+    test('returns false for job id: "_bad_job-name"', () => {
       expect(isJobIdValid('_bad_job-name')).to.be(false);
     });
-    it('returns false for job id: "bad_job-name_"', () => {
+    test('returns false for job id: "bad_job-name_"', () => {
       expect(isJobIdValid('bad_job-name_')).to.be(false);
     });
-    it('returns false for job id: "-bad_job-name"', () => {
+    test('returns false for job id: "-bad_job-name"', () => {
       expect(isJobIdValid('-bad_job-name')).to.be(false);
     });
-    it('returns false for job id: "bad_job-name-"', () => {
+    test('returns false for job id: "bad_job-name-"', () => {
       expect(isJobIdValid('bad_job-name-')).to.be(false);
     });
-    it('returns false for job id: "bad&job-name"', () => {
+    test('returns false for job id: "bad&job-name"', () => {
       expect(isJobIdValid('bad&job-name')).to.be(false);
     });
   });
 
   describe('ML_MEDIAN_PERCENTS', () => {
-    it("is '50.0'", () => {
+    test("is '50.0'", () => {
       expect(ML_MEDIAN_PERCENTS).to.be('50.0');
     });
   });
 
   describe('prefixDatafeedId', () => {
-    it('returns datafeed-prefix-job from datafeed-job"', () => {
+    test('returns datafeed-prefix-job from datafeed-job"', () => {
       expect(prefixDatafeedId('datafeed-job', 'prefix-')).to.be('datafeed-prefix-job');
     });
 
-    it('returns datafeed-prefix-job from job"', () => {
+    test('returns datafeed-prefix-job from job"', () => {
       expect(prefixDatafeedId('job', 'prefix-')).to.be('datafeed-prefix-job');
     });
   });
 
   describe('getSafeAggregationName', () => {
-    it('"foo" should be "foo"', () => {
+    test('"foo" should be "foo"', () => {
       expect(getSafeAggregationName('foo', 0)).to.be('foo');
     });
-    it('"foo.bar" should be "foo.bar"', () => {
+    test('"foo.bar" should be "foo.bar"', () => {
       expect(getSafeAggregationName('foo.bar', 0)).to.be('foo.bar');
     });
-    it('"foo&bar" should be "field_0"', () => {
+    test('"foo&bar" should be "field_0"', () => {
       expect(getSafeAggregationName('foo&bar', 0)).to.be('field_0');
     });
   });
 
   describe('getLatestDataOrBucketTimestamp', () => {
-    it('returns expected value when no gap in data at end of bucket processing', () => {
+    test('returns expected value when no gap in data at end of bucket processing', () => {
       expect(getLatestDataOrBucketTimestamp(1549929594000, 1549928700000)).to.be(1549929594000);
     });
-    it('returns expected value when there is a gap in data at end of bucket processing', () => {
+    test('returns expected value when there is a gap in data at end of bucket processing', () => {
       expect(getLatestDataOrBucketTimestamp(1549929594000, 1562256600000)).to.be(1562256600000);
     });
-    it('returns expected value when job has not run', () => {
+    test('returns expected value when job has not run', () => {
       expect(getLatestDataOrBucketTimestamp(undefined, undefined)).to.be(undefined);
     });
   });
