@@ -29,15 +29,9 @@ export class RemoteClustersServerPlugin implements Plugin<void, void, any, any> 
     this.licenseStatus = { valid: false };
   }
 
-  async setup(
-    { http, elasticsearch: elasticsearchService }: CoreSetup,
-    { licensing, cloud }: Dependencies
-  ) {
-    const elasticsearch = await elasticsearchService.adminClient;
+  async setup({ http }: CoreSetup, { licensing, cloud }: Dependencies) {
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
-      elasticsearch,
-      elasticsearchService,
       router,
       getLicenseStatus: () => this.licenseStatus,
       config: {

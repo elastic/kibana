@@ -12435,7 +12435,6 @@
     "xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel": "打印优化",
     "xpack.reporting.selfCheck.ok": "Reporting 插件自检正常！",
     "xpack.reporting.selfCheck.warning": "Reporting 插件自检生成警告：{err}",
-    "xpack.reporting.selfCheckEncryptionKey.warning": "正在为 {setting} 生成随机密钥。要防止待处理报告在重新启动时失败，请在 kibana.yml 中设置 {setting}",
     "xpack.reporting.shareContextMenu.csvReportsButtonLabel": "CSV 报告",
     "xpack.reporting.shareContextMenu.pdfReportsButtonLabel": "PDF 报告",
     "xpack.reporting.shareContextMenu.pngReportsButtonLabel": "PNG 报告",
