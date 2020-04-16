@@ -4,12 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/** @public */
 export interface FeatureUsageServiceSetup {
+  /**
+   * Register a feature to be able to notify of it's usages using the {@link FeatureUsageServiceStart | service start contract}.
+   */
   register(featureName: string): void;
 }
+
+/** @public */
 export interface FeatureUsageServiceStart {
+  /**
+   * Notify of a registered feature usage at given time.
+   * If `usedAt` is not specified, it will use the current time instead.
+   */
   notifyUsage(featureName: string, usedAt?: number): void;
+  /**
+   * Return a map containing last usage timestamp for all features.
+   * Features that were not used yet do not appear in the map.
+   */
   getLastUsages(): ReadonlyMap<string, number>;
+  /**
+   * Clear all usage records from the service.
+   */
   clear(): void;
 }
 

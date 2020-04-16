@@ -58,7 +58,6 @@ export interface LicensingPluginSetup {
    * Triggers licensing information re-fetch.
    */
   refresh(): Promise<ILicense>;
-
   /**
    * Creates a license poller to retrieve a license data with.
    * Allows a plugin to configure a cluster to retrieve data from at
@@ -68,9 +67,8 @@ export interface LicensingPluginSetup {
     clusterClient: IClusterClient,
     pollingFrequency: number
   ) => { license$: Observable<ILicense>; refresh(): Promise<ILicense> };
-
   /**
-   * TODO
+   * APIs to register licensed feature usage.
    */
   featureUsage: FeatureUsageServiceSetup;
 }
@@ -78,7 +76,7 @@ export interface LicensingPluginSetup {
 /** @public */
 export interface LicensingPluginStart {
   /**
-   * TODO
+   * APIs to manage licensed feature usage.
    */
   featureUsage: FeatureUsageServiceStart;
 }
