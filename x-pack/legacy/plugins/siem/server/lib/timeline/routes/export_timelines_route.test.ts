@@ -83,7 +83,7 @@ describe('export timelines', () => {
   });
 
   describe('request validation', () => {
-    test('disallows singular id query param', async () => {
+    test('return validation error for request body', async () => {
       const request = requestMock.create({
         method: 'get',
         path: TIMELINE_EXPORT_URL,
@@ -91,7 +91,26 @@ describe('export timelines', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('"id" is not allowed');
+      expect(result.badRequest.mock.calls[0][0]).toEqual(
+        'Invalid value undefined supplied to : { ids: Array<string> }/ids: Array<string>'
+      );
+    });
+
+    test('return validation error for request params', async () => {
+      const request = requestMock.create({
+        method: 'get',
+        path: TIMELINE_EXPORT_URL,
+        body: { id: 'someId' },
+      });
+      const result = server.validate(request);
+
+      expect(result.badRequest.mock.calls[1][0]).toEqual(
+        [
+          'Invalid value undefined supplied to : { file_name: string, exclude_export_details: ("true" | "false") }/file_name: string',
+          'Invalid value undefined supplied to : { file_name: string, exclude_export_details: ("true" | "false") }/exclude_export_details: ("true" | "false")/0: "true"',
+          'Invalid value undefined supplied to : { file_name: string, exclude_export_details: ("true" | "false") }/exclude_export_details: ("true" | "false")/1: "false"',
+        ].join('\n')
+      );
     });
   });
 });
