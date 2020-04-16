@@ -20,15 +20,14 @@ jest.mock('../../../../containers/case/use_get_tags');
 const onFilterChanged = jest.fn();
 const fetchReporters = jest.fn();
 const fetchTags = jest.fn();
-const setIsRefetchFilters = jest.fn();
+const setFilterRefetch = jest.fn();
 
 const props = {
   countClosedCases: 1234,
   countOpenCases: 99,
   onFilterChanged,
   initial: DEFAULT_FILTER_OPTIONS,
-  isRefetchFilters: false,
-  setIsRefetchFilters,
+  setFilterRefetch,
 };
 describe('CasesTableFilters ', () => {
   beforeEach(() => {
@@ -122,15 +121,13 @@ describe('CasesTableFilters ', () => {
 
     expect(onFilterChanged).toBeCalledWith({ status: 'closed' });
   });
-  it('should refetch tags and reporters when isRefetchFilters is true', () => {
+  it('should call on load setFilterRefetch', () => {
     mount(
       <TestProviders>
-        <CasesTableFilters {...{ ...props, isRefetchFilters: true }} />
+        <CasesTableFilters {...props} />
       </TestProviders>
     );
-    expect(fetchReporters).toHaveBeenCalledTimes(1);
-    expect(fetchTags).toHaveBeenCalledTimes(1);
-    expect(setIsRefetchFilters).toHaveBeenCalledWith(false);
+    expect(setFilterRefetch).toHaveBeenCalled();
   });
   it('should remove tag from selected tags when tag no longer exists', () => {
     const ourProps = {

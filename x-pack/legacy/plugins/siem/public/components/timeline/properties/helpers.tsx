@@ -21,7 +21,7 @@ import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
@@ -30,7 +30,7 @@ import { NOTES_PANEL_WIDTH } from './notes_size';
 import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
 import * as i18n from './translations';
 import { SiemPageName } from '../../../pages/home/types';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineSelectors } from '../../../store/timeline';
 import { State } from '../../../store';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';

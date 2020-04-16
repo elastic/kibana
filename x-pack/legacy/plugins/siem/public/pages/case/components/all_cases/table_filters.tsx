@@ -25,8 +25,7 @@ interface CasesTableFiltersProps {
   countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
-  isRefetchFilters: boolean;
-  setIsRefetchFilters: (val: boolean) => void;
+  setFilterRefetch: (val: () => void) => void;
 }
 
 /**
@@ -43,8 +42,7 @@ const CasesTableFiltersComponent = ({
   countOpenCases,
   onFilterChanged,
   initial = defaultInitial,
-  isRefetchFilters,
-  setIsRefetchFilters,
+  setFilterRefetch,
 }: CasesTableFiltersProps) => {
   const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map(r => r.full_name ?? r.username ?? '')
@@ -54,14 +52,15 @@ const CasesTableFiltersComponent = ({
   const [showOpenCases, setShowOpenCases] = useState(initial.status === 'open');
   const { tags, fetchTags } = useGetTags();
   const { reporters, respReporters, fetchReporters } = useGetReporters();
-
+  const refetch = useCallback(() => {
+    fetchTags();
+    fetchReporters();
+  }, [fetchReporters, fetchTags]);
   useEffect(() => {
-    if (isRefetchFilters) {
-      fetchTags();
-      fetchReporters();
-      setIsRefetchFilters(false);
+    if (setFilterRefetch != null) {
+      setFilterRefetch(refetch);
     }
-  }, [isRefetchFilters]);
+  }, [refetch, setFilterRefetch]);
   useEffect(() => {
     if (selectedReporters.length) {
       const newReporters = selectedReporters.filter(r => reporters.includes(r));
