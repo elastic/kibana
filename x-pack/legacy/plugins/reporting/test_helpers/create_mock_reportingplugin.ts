@@ -11,7 +11,6 @@ jest.mock('../server/browsers');
 jest.mock('../server/lib/create_queue');
 jest.mock('../server/lib/enqueue_job');
 jest.mock('../server/lib/validate');
-jest.mock('../log_configuration');
 
 import { EventEmitter } from 'events';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

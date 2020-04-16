@@ -7,7 +7,7 @@
 import React, { useContext, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { useUrlParams } from '../../../hooks';
+import { useGetUrlParams } from '../../../hooks';
 import { AppState } from '../../../state';
 import { monitorLocationsSelector } from '../../../state/selectors';
 import { getMonitorLocationsAction, MonitorLocationsPayload } from '../../../state/actions/monitor';
@@ -36,8 +36,7 @@ export const Container: React.FC<Props> = ({
 }: Props) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
-  const [getUrlParams] = useUrlParams();
-  const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = getUrlParams();
+  const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
 
   useEffect(() => {
     loadMonitorLocations({ dateStart, dateEnd, monitorId });

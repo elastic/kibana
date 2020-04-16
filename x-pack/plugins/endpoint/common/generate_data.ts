@@ -6,12 +6,8 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { AlertEvent, EndpointEvent, HostMetadata, OSFields, HostFields } from './types';
-// FIXME: move types/model to top-level
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PolicyData } from '../public/applications/endpoint/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { generatePolicy } from '../public/applications/endpoint/models/policy';
+import { AlertEvent, EndpointEvent, HostMetadata, OSFields, HostFields, PolicyData } from './types';
+import { factory as policyFactory } from './models/policy_config';
 
 export type Event = AlertEvent | EndpointEvent;
 
@@ -475,7 +471,7 @@ export class EndpointDocGenerator {
           streams: [],
           config: {
             policy: {
-              value: generatePolicy(),
+              value: policyFactory(),
             },
           },
         },

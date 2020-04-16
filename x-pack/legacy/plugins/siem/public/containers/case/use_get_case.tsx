@@ -53,7 +53,7 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
       return state;
   }
 };
-const initialData: Case = {
+export const initialData: Case = {
   id: '',
   closedAt: null,
   closedBy: null,
@@ -73,7 +73,7 @@ const initialData: Case = {
   version: '',
 };
 
-interface UseGetCase extends CaseState {
+export interface UseGetCase extends CaseState {
   fetchCase: () => void;
   updateCase: (newCase: Case) => void;
 }
