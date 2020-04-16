@@ -139,7 +139,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     });
 
     const docsCountResp = await loadDocsCount({
-      isTraining: false,
+      isTraining,
       searchQuery,
       resultsField,
       destIndex: jobConfig.dest.index,

@@ -413,7 +413,7 @@ export function getEvalQueryBody({
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
 }) {
-  let query;
+  let query: any;
 
   const trainingQuery: ResultsSearchQuery = {
     term: { [`${resultsField}.is_training`]: { value: isTraining } },
@@ -431,12 +431,15 @@ export function getEvalQueryBody({
     }
 
     query = searchQueryClone;
-  } else if (isQueryStringQuery(searchQueryClone) && isTraining !== undefined) {
+  } else if (isQueryStringQuery(searchQueryClone)) {
     query = {
       bool: {
-        must: [searchQueryClone, trainingQuery],
+        must: [searchQueryClone],
       },
     };
+    if (isTraining !== undefined) {
+      query.bool.must.push(trainingQuery);
+    }
   } else {
     // Not a bool or string query so we need to create it so can add the trainingQuery
     query = {
@@ -538,7 +541,7 @@ interface TrackTotalHitsSearchResponse {
 
 interface LoadDocsCountConfig {
   ignoreDefaultQuery?: boolean;
-  isTraining: boolean;
+  isTraining?: boolean;
   searchQuery: SavedSearchQuery;
   resultsField: string;
   destIndex: string;
