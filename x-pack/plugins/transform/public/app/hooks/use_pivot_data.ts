@@ -233,21 +233,8 @@ export const usePivotData = (
   }, [pageData, pagination.pageIndex, pagination.pageSize, previewMappings.properties]);
 
   return {
+    ...dataGrid,
     columns,
-    errorMessage: dataGrid.errorMessage,
-    invalidSortingColumnns: dataGrid.invalidSortingColumnns,
-    onChangeItemsPerPage: dataGrid.onChangeItemsPerPage,
-    onChangePage: dataGrid.onChangePage,
-    onSort: dataGrid.onSort,
-    noDataMessage: dataGrid.noDataMessage,
-    pagination,
-    setPagination: dataGrid.setPagination,
-    setVisibleColumns: dataGrid.setVisibleColumns,
     renderCellValue,
-    rowCount: dataGrid.rowCount,
-    sortingColumns,
-    status: dataGrid.status,
-    tableItems,
-    visibleColumns: dataGrid.visibleColumns,
   };
 };

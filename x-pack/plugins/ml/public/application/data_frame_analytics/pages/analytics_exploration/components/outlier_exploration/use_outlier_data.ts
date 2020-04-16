@@ -68,7 +68,6 @@ export const useOutlierData = (
 
   const {
     pagination,
-    rowCount,
     setErrorMessage,
     setRowCount,
     setSortingColumns,
@@ -168,21 +167,8 @@ export const useOutlierData = (
   );
 
   return {
+    ...dataGrid,
     columns,
-    errorMessage: dataGrid.errorMessage,
-    invalidSortingColumnns: dataGrid.invalidSortingColumnns,
-    onChangeItemsPerPage: dataGrid.onChangeItemsPerPage,
-    onChangePage: dataGrid.onChangePage,
-    onSort: dataGrid.onSort,
-    noDataMessage: '',
-    pagination,
-    setPagination: dataGrid.setPagination,
-    setVisibleColumns: dataGrid.setVisibleColumns,
     renderCellValue,
-    rowCount,
-    sortingColumns,
-    status: dataGrid.status,
-    tableItems,
-    visibleColumns: dataGrid.visibleColumns,
   };
 };
