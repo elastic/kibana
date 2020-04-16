@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "farequote",
+    "index": "ft_farequote",
     "mappings": {
       "properties": {
         "@timestamp": {

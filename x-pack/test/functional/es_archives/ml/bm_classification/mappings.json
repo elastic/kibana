@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "bank-marketing",
+    "index": "ft_bank_marketing",
     "mappings": {
       "properties": {
         "age": {

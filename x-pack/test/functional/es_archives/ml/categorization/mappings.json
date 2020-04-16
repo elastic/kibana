@@ -2,7 +2,7 @@
   "type": "index",
   "value": {
     "aliases": {},
-    "index": "categorization_functional_test",
+    "index": "ft_categorization",
     "mappings": {
       "properties": {
         "@timestamp": {

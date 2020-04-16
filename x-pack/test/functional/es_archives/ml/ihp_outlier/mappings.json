@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "ihp_outlier",
+    "index": "ft_ihp_outlier",
     "mappings": {
       "properties": {
         "1stFlrSF": {

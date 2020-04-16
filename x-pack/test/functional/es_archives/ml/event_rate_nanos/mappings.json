@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "event_rate_gen_trend_nanos",
+    "index": "ft_event_rate_gen_trend_nanos",
     "mappings": {
       "properties": {
         "@timestamp": {

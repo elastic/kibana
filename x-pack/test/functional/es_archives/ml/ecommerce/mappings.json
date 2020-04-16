@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "ecommerce",
+    "index": "ft_ecommerce",
     "mappings": {
       "properties": {
         "category": {

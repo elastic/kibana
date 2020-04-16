@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "egs_regression",
+    "index": "ft_egs_regression",
     "mappings": {
       "properties": {
         "g1": {
