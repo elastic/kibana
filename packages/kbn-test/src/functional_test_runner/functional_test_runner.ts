@@ -36,7 +36,6 @@ import {
 export class FunctionalTestRunner {
   public readonly lifecycle = new Lifecycle();
   public readonly failureMetadata = new FailureMetadata(this.lifecycle);
-  public readonly suiteTracker = new SuiteTracker(this.lifecycle);
   private closed = false;
 
   constructor(
@@ -54,6 +53,8 @@ export class FunctionalTestRunner {
 
   async run() {
     return await this._run(async (config, coreProviders) => {
+      SuiteTracker.startTracking(this.lifecycle, this.configFile);
+
       const providers = new ProviderCollection(this.log, [
         ...coreProviders,
         ...readProviderSpec('Service', config.get('services')),

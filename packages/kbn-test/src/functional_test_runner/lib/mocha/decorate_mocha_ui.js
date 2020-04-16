@@ -22,7 +22,7 @@ import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
 import { wrapRunnableArgs } from './wrap_runnable_args';
 
-export function decorateMochaUi(lifecycle, context, config) {
+export function decorateMochaUi(lifecycle, context) {
   // incremented at the start of each suite, decremented after
   // so that in each non-suite call we can know if we are within
   // a suite, or that when a suite is defined it is within a suite
@@ -69,8 +69,6 @@ export function decorateMochaUi(lifecycle, context, config) {
           const relativeFilePath = relative(REPO_ROOT, this.file);
           this.tags(relativeFilePath);
           this.suiteTag = relativeFilePath; // The tag that uniquely targets this suite/file
-
-          this.ftrConfig = config;
 
           provider.call(this);
 

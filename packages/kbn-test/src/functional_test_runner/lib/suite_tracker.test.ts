@@ -62,9 +62,6 @@ describe('SuiteTracker', () => {
 
   const createMock = (overrides = {}) => {
     return {
-      ftrConfig: {
-        path: resolve(REPO_ROOT, MOCK_CONFIG_PATH),
-      },
       file: resolve(REPO_ROOT, MOCK_TEST_PATH),
       title: 'A Test',
       suiteTag: MOCK_TEST_PATH,
@@ -74,7 +71,10 @@ describe('SuiteTracker', () => {
 
   const runLifecycleWithMocks = async (mocks: object[], fn: (objs: any) => any = () => {}) => {
     const lifecycle = new Lifecycle();
-    const suiteTracker = new SuiteTracker(lifecycle);
+    const suiteTracker = SuiteTracker.startTracking(
+      lifecycle,
+      resolve(REPO_ROOT, MOCK_CONFIG_PATH)
+    );
 
     const ret = { lifecycle, suiteTracker };
 

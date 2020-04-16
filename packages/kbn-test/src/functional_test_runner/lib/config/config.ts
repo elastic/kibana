@@ -35,7 +35,6 @@ interface Options {
 
 export class Config {
   private [$values]: Record<string, any>;
-  public path: string;
 
   constructor(options: Options) {
     const { settings = {}, primary = false, path = null } = options || {};
@@ -43,8 +42,6 @@ export class Config {
     if (!path) {
       throw new TypeError('path is a required option');
     }
-
-    this.path = path;
 
     const { error, value } = schema.validate(settings, {
       abortEarly: false,

@@ -46,30 +46,33 @@ const getTestMetadataPath = () => {
 };
 
 export class SuiteTracker {
-  lifecycle: Lifecycle;
   finishedSuitesByConfig: Record<string, Record<string, SuiteWithMetadata>> = {};
   inProgressSuites: Map<object, SuiteInProgress> = new Map<object, SuiteInProgress>();
 
-  getTracked(suite: object): SuiteInProgress {
-    if (!this.inProgressSuites.has(suite)) {
-      this.inProgressSuites.set(suite, { success: true } as SuiteInProgress);
-    }
-    return this.inProgressSuites.get(suite) || ({} as SuiteInProgress);
+  static startTracking(lifecycle: Lifecycle, configPath: string): SuiteTracker {
+    const suiteTracker = new SuiteTracker(lifecycle, configPath);
+    return suiteTracker;
   }
 
-  constructor(lifecycle: Lifecycle) {
-    this.lifecycle = lifecycle;
+  getTracked(suite: object): SuiteInProgress {
+    if (!this.inProgressSuites.has(suite)) {
+      this.inProgressSuites.set(suite, {} as SuiteInProgress);
+    }
+    return this.inProgressSuites.get(suite)!;
+  }
 
+  constructor(lifecycle: Lifecycle, configPathAbsolute: string) {
     if (fs.existsSync(getTestMetadataPath())) {
       fs.unlinkSync(getTestMetadataPath());
     } else {
       fs.mkdirSync(dirname(getTestMetadataPath()), { recursive: true });
     }
 
+    const config = relative(REPO_ROOT, configPathAbsolute);
+
     lifecycle.beforeTestSuite.add(suite => {
       const tracked = this.getTracked(suite);
       tracked.startTime = new Date();
-      tracked.success = true;
     });
 
     // If a test fails, we want to make sure all of the ancestors, all the way up to the root, get marked as failed
@@ -92,10 +95,15 @@ export class SuiteTracker {
     lifecycle.afterTestSuite.add(suite => {
       const tracked = this.getTracked(suite);
       tracked.endTime = new Date();
+
+      // The suite ended without any children failing, so we can mark it as successful
+      if (!('success' in tracked)) {
+        tracked.success = true;
+      }
+
       let duration = tracked.endTime.getTime() - (tracked.startTime || new Date()).getTime();
       duration = Math.floor(duration / 1000);
 
-      const config = relative(REPO_ROOT, suite.ftrConfig.path);
       const file = relative(REPO_ROOT, suite.file);
 
       this.finishedSuitesByConfig[config] = this.finishedSuitesByConfig[config] || {};
