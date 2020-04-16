@@ -27,6 +27,8 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('ml/ecommerce');
       await esArchiver.unload('ml/categorization');
       await esArchiver.unload('ml/sample_logs');
+
+      await ml.testResources.resetKibanaTimeZone();
     });
 
     loadTestFile(require.resolve('./bucket_span_estimator'));

@@ -290,6 +290,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('Categorization example endpoint - ', function() {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/categorization');
+      await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     for (const testData of testDataList) {

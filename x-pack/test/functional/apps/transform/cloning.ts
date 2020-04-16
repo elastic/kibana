@@ -34,6 +34,7 @@ export default function({ getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await transform.api.createAndRunTransform(transformConfig);
+      await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
     });

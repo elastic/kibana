@@ -92,6 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('bucket span estimator', function() {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
+      await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     describe('with default settings', function() {

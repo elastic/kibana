@@ -23,6 +23,7 @@ export default function({ getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await transform.testResources.createSavedSearchFarequoteFilterIfNeeded();
+      await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
     });

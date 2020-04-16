@@ -382,6 +382,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
+      await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
     });

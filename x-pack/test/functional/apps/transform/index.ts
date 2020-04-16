@@ -28,6 +28,8 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
 
       await esArchiver.unload('ml/farequote');
       await esArchiver.unload('ml/ecommerce');
+
+      await transform.testResources.resetKibanaTimeZone();
     });
 
     loadTestFile(require.resolve('./creation_index_pattern'));

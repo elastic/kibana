@@ -119,6 +119,10 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('module setup', function() {
+    before(async () => {
+      await ml.testResources.setKibanaTimeZoneToUTC();
+    });
+
     for (const testData of testDataListPositive) {
       describe('sets up module data', function() {
         before(async () => {
