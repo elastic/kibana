@@ -4,38 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, map } from 'rxjs/operators';
-import {
-  Logger,
-  PluginInitializerContext,
-  IContextProvider,
-  RequestHandler,
-  ElasticsearchServiceSetup,
-} from 'kibana/server';
+import { first } from 'rxjs/operators';
+import { Logger, PluginInitializerContext, ElasticsearchServiceSetup } from 'kibana/server';
 import { CoreSetup } from 'src/core/server';
-import { Observable } from 'rxjs';
 
-import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { SpacesServiceSetup } from '../../spaces/server';
 
 import { ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';
 import { ListsClient } from './client';
-
-const createConfig$ = (
-  context: PluginInitializerContext
-): Observable<Readonly<{
-  enabled: boolean;
-  listsIndex: string;
-  listsItemsIndex: string;
-}>> => {
-  return context.config.create<ConfigType>().pipe(map(config => config));
-};
-
-export interface PluginsSetup {
-  security: SecurityPluginSetup;
-  spaces: SpacesPluginSetup | undefined | null;
-}
+import { ContextProvider, ContextProviderReturn, PluginsSetup } from './types';
+import { createConfig$ } from './create_config';
 
 export class ListsPlugin {
   private readonly logger: Logger;
@@ -52,16 +31,15 @@ export class ListsPlugin {
       .pipe(first())
       .toPromise();
 
-    if (!config.enabled) {
-      return;
-    }
-    this.spaces = plugins.spaces?.spacesService;
-    this.config = config;
-    this.elasticsearch = core.elasticsearch;
+    if (config.enabled) {
+      this.spaces = plugins.spaces?.spacesService;
+      this.config = config;
+      this.elasticsearch = core.elasticsearch;
 
-    core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
-    const router = core.http.createRouter();
-    initRoutes(router, config);
+      core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
+      const router = core.http.createRouter();
+      initRoutes(router);
+    }
   }
 
   public start(): void {
@@ -72,17 +50,9 @@ export class ListsPlugin {
     this.logger.debug('Stopping plugin');
   }
 
-  private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<unknown, unknown, unknown>,
-    'lists'
-  > => {
-    return async (
-      context,
-      request
-    ): Promise<{
-      getListsClient: () => ListsClient;
-    }> => {
-      const { spaces, config, logger, elasticsearch } = this;
+  private createRouteHandlerContext = (): ContextProvider => {
+    return async (context, request): ContextProviderReturn => {
+      const { spaces, config, elasticsearch } = this;
       const {
         core: {
           elasticsearch: { dataClient },
@@ -99,7 +69,6 @@ export class ListsPlugin {
               request,
               spaces,
               config,
-              logger,
               dataClient,
             }),
         };

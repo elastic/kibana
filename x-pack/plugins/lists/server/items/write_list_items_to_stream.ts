@@ -6,10 +6,9 @@
 
 import { PassThrough } from 'stream';
 
-import { ScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 
-import { ElasticListItemReturnType } from '../types';
+import { ElasticListItemReturnType, DataClient } from '../types';
 
 /**
  * How many results to page through from the network at a time
@@ -17,19 +16,21 @@ import { ElasticListItemReturnType } from '../types';
  */
 export const SIZE = 100;
 
+interface WriteListItemsToStreamOptions {
+  listId: string;
+  clusterClient: DataClient;
+  listsItemsIndex: string;
+  stream: PassThrough;
+  stringToAppend: string | null | undefined;
+}
+
 export const writeListItemsToStream = ({
   listId,
   clusterClient,
   stream,
   listsItemsIndex,
   stringToAppend,
-}: {
-  listId: string;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-  stream: PassThrough;
-  stringToAppend?: string | null;
-}): void => {
+}: WriteListItemsToStreamOptions): void => {
   // Use a timeout to start the reading process on the next tick.
   // and prevent the async await from bubbling up to the caller
   setTimeout(async () => {
@@ -55,6 +56,15 @@ export const writeListItemsToStream = ({
   });
 };
 
+interface WriteNextResponseOptions {
+  listId: string;
+  clusterClient: DataClient;
+  listsItemsIndex: string;
+  stream: PassThrough;
+  searchAfter: string[] | undefined;
+  stringToAppend: string | null | undefined;
+}
+
 export const writeNextResponse = async ({
   listId,
   clusterClient,
@@ -62,14 +72,7 @@ export const writeNextResponse = async ({
   listsItemsIndex,
   searchAfter,
   stringToAppend,
-}: {
-  listId: string;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-  stream: PassThrough;
-  searchAfter: string[] | undefined;
-  stringToAppend: string | null | undefined;
-}): Promise<string[] | undefined> => {
+}: WriteNextResponseOptions): Promise<string[] | undefined> => {
   const response = await getResponse({
     clusterClient,
     searchAfter,
@@ -93,19 +96,21 @@ export const getSearchAfterFromResponse = <T>({
   return response.hits.hits[response.hits.hits.length - 1].sort;
 };
 
+interface GetResponseOptions {
+  clusterClient: DataClient;
+  listId: string;
+  searchAfter: undefined | string[];
+  listsItemsIndex: string;
+  size?: number;
+}
+
 export const getResponse = async ({
   clusterClient,
   searchAfter,
   listId,
   listsItemsIndex,
   size = SIZE,
-}: {
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listId: string;
-  searchAfter: undefined | string[];
-  listsItemsIndex: string;
-  size?: number;
-}): Promise<SearchResponse<ElasticListItemReturnType>> => {
+}: GetResponseOptions): Promise<SearchResponse<ElasticListItemReturnType>> => {
   return clusterClient.callAsCurrentUser('search', {
     index: listsItemsIndex,
     ignoreUnavailable: true,
@@ -122,15 +127,17 @@ export const getResponse = async ({
   });
 };
 
+interface WriteResponseHitsToStreamOptions {
+  response: SearchResponse<ElasticListItemReturnType>;
+  stream: PassThrough;
+  stringToAppend: string | null | undefined;
+}
+
 export const writeResponseHitsToStream = ({
   response,
   stream,
   stringToAppend,
-}: {
-  response: SearchResponse<ElasticListItemReturnType>;
-  stream: PassThrough;
-  stringToAppend: string | null | undefined;
-}): void => {
+}: WriteResponseHitsToStreamOptions): void => {
   response.hits.hits.forEach(hit => {
     if (hit._source.ip != null) {
       stream.push(hit._source.ip);

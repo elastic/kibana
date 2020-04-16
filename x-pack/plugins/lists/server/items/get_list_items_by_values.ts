@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 
 import { ListsItemsSchema, Type } from '../../common/schemas';
-import { ElasticListItemReturnType } from '../types';
+import { ElasticListItemReturnType, DataClient } from '../types';
 import { transformElasticToListsItems, getQueryFilterFromTypeValue } from '../utils';
+
+interface GetListItemsByValuesOptions {
+  listId: string;
+  clusterClient: DataClient;
+  listsItemsIndex: string;
+  type: Type;
+  value: string[];
+}
 
 export const getListItemsByValues = async ({
   listId,
@@ -17,13 +24,7 @@ export const getListItemsByValues = async ({
   listsItemsIndex,
   type,
   value,
-}: {
-  listId: string;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-  type: Type;
-  value: string[];
-}): Promise<ListsItemsSchema[]> => {
+}: GetListItemsByValuesOptions): Promise<ListsItemsSchema[]> => {
   const response: SearchResponse<ElasticListItemReturnType> = await clusterClient.callAsCurrentUser(
     'search',
     {

@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScopedClusterClient } from 'kibana/server';
-
 import { ListsItemsSchema, Type } from '../../common/schemas';
+import { DataClient } from '../types';
 
 import { getListItemsByValues } from '.';
+
+interface GetListItemByValueOptions {
+  listId: string;
+  clusterClient: DataClient;
+  listsItemsIndex: string;
+  type: Type;
+  value: string;
+}
 
 export const getListItemByValue = async ({
   listId,
@@ -16,13 +23,7 @@ export const getListItemByValue = async ({
   listsItemsIndex,
   type,
   value,
-}: {
-  listId: string;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-  type: Type;
-  value: string;
-}): Promise<ListsItemsSchema | null> => {
+}: GetListItemByValueOptions): Promise<ListsItemsSchema | null> => {
   const listItems = await getListItemsByValues({
     listId,
     clusterClient,

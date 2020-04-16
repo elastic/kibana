@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScopedClusterClient } from 'kibana/server';
 import { CreateDocumentResponse } from 'elasticsearch';
 
 import { ListsSchema } from '../../common/schemas';
+import { DataClient } from '../types';
 
 import { getList } from '.';
+
+interface UpdateListOptions {
+  id: string;
+  name: string | null | undefined;
+  description: string | null | undefined;
+  clusterClient: DataClient;
+  listsIndex: string;
+}
 
 export const updateList = async ({
   id,
@@ -17,13 +25,7 @@ export const updateList = async ({
   description,
   clusterClient,
   listsIndex,
-}: {
-  id: string;
-  name: string | null | undefined;
-  description: string | null | undefined;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsIndex: string;
-}): Promise<ListsSchema | null> => {
+}: UpdateListOptions): Promise<ListsSchema | null> => {
   const updatedAt = new Date().toISOString();
   const list = await getList({ id, clusterClient, listsIndex });
   if (list == null) {

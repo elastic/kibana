@@ -13,14 +13,10 @@ import {
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
 import { ReadListsItemsSchema, readListsItemsSchema } from '../../common/schemas';
-import { getListItemsByValues, getListItem } from '../items';
-import { getList } from '../lists';
-import { ConfigType } from '../config';
 
-export const readListsItemsRoute = (
-  router: IRouter,
-  { listsIndex, listsItemsIndex }: ConfigType
-): void => {
+import { getListClient } from '.';
+
+export const readListsItemsRoute = (router: IRouter): void => {
   router.get(
     {
       path: LIST_ITEM_URL,
@@ -35,47 +31,39 @@ export const readListsItemsRoute = (
       const siemResponse = buildSiemResponse(response);
       try {
         const { id, list_id: listId, value } = request.query;
-        const clusterClient = context.core.elasticsearch.dataClient;
+        const lists = getListClient(context);
         if (id != null) {
-          const listItem = await getListItem({
-            id,
-            clusterClient,
-            listsItemsIndex,
-          });
+          const listItem = await lists.getListItem({ id });
           if (listItem == null) {
             return siemResponse.error({
               statusCode: 404,
-              body: `id: "${id}" item does not exist`,
+              body: `list item id: "${id}" does not exist`,
             });
           } else {
             // TODO: outbound validation
-            // TODO: Should we return this as an array since the other value below can be an array?
             return response.ok({ body: listItem });
           }
         } else if (listId != null && value != null) {
-          const list = await getList({ id: listId, clusterClient, listsIndex });
+          const list = await lists.getList({ id: listId });
           if (list == null) {
             return siemResponse.error({
               statusCode: 404,
               body: `list id: "${listId}" does not exist`,
             });
           } else {
-            const listItems = await getListItemsByValues({
+            const listItem = await lists.getListItemByValue({
               type: list.type,
               listId,
-              value: [value],
-              clusterClient,
-              listsItemsIndex,
+              value,
             });
-            if (!listItems.length) {
-              // TODO: More specific error message that figures out which item value does not exist
+            if (!listItem) {
               return siemResponse.error({
                 statusCode: 404,
-                body: `list_id: "${listId}" item does not exist`,
+                body: `list_id: "${listId}" item of ${value} does not exist`,
               });
             } else {
               // TODO: outbound validation
-              return response.ok({ body: listItems });
+              return response.ok({ body: listItem });
             }
           }
         } else {

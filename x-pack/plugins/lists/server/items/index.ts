@@ -16,3 +16,4 @@ export * from './write_lines_to_bulk_list_items';
 export * from './write_list_items_to_stream';
 export * from './get_lists_items_template';
 export * from './delete_list_item';
+export * from './get_list_item_index';

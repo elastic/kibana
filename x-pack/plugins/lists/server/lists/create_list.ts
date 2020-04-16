@@ -5,11 +5,19 @@
  */
 
 import uuid from 'uuid';
-import { ScopedClusterClient } from 'kibana/server';
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ElasticListInputType } from '../types';
+import { ElasticListInputType, DataClient } from '../types';
 import { ListsSchema, Type } from '../../common/schemas';
+
+interface CreateListOptions {
+  id: string | null | undefined;
+  type: Type;
+  name: string;
+  description: string;
+  clusterClient: DataClient;
+  listsIndex: string;
+}
 
 export const createList = async ({
   id,
@@ -18,14 +26,7 @@ export const createList = async ({
   description,
   clusterClient,
   listsIndex,
-}: {
-  id: string | null | undefined;
-  type: Type;
-  name: string;
-  description: string;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsIndex: string;
-}): Promise<ListsSchema> => {
+}: CreateListOptions): Promise<ListsSchema> => {
   const createdAt = new Date().toISOString();
   const body: ElasticListInputType = {
     name,

@@ -32,20 +32,26 @@ export const createListsRoute = (router: IRouter): void => {
       try {
         const { name, description, id, type } = request.body;
         const lists = getListClient(context);
-        // TODO: We need a await getIndexExists(clusterClient.callAsCurrentUser, index);
-        // to throw an error if the index does not exist just yet
-        if (id != null) {
-          const list = await lists.getList({ id });
-          if (list != null) {
-            return siemResponse.error({
-              statusCode: 409,
-              body: `list id: "${id}" already exists`,
-            });
+        const listExists = await lists.getListIndexExists();
+        if (!listExists) {
+          return siemResponse.error({
+            statusCode: 400,
+            body: `To create a list, the index must exist first. Index "${lists.getListIndex()}" does not exist`,
+          });
+        } else {
+          if (id != null) {
+            const list = await lists.getList({ id });
+            if (list != null) {
+              return siemResponse.error({
+                statusCode: 409,
+                body: `list id: "${id}" already exists`,
+              });
+            }
           }
+          const list = await lists.createList({ id, name, description, type });
+          // TODO: outbound validation
+          return response.ok({ body: list });
         }
-        const list = await lists.createList({ id, name, description, type });
-        // TODO: outbound validation
-        return response.ok({ body: list });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

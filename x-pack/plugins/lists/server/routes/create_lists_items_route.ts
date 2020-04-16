@@ -13,14 +13,10 @@ import {
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
 import { createListsItemsSchema, CreateListsItemsSchema } from '../../common/schemas';
-import { createListItem, getListItemByValue } from '../items';
-import { getList } from '../lists';
-import { ConfigType } from '../config';
 
-export const createListsItemsRoute = (
-  router: IRouter,
-  { listsIndex, listsItemsIndex }: ConfigType
-): void => {
+import { getListClient } from '.';
+
+export const createListsItemsRoute = (router: IRouter): void => {
   router.post(
     {
       path: LIST_ITEM_URL,
@@ -35,35 +31,26 @@ export const createListsItemsRoute = (
       const siemResponse = buildSiemResponse(response);
       try {
         const { id, list_id: listId, value } = request.body;
-        const clusterClient = context.core.elasticsearch.dataClient;
-        const list = await getList({ id: listId, clusterClient, listsIndex });
+        const lists = getListClient(context);
+        const list = await lists.getList({ id: listId });
         if (list == null) {
           return siemResponse.error({
             statusCode: 404,
             body: `list id: "${listId}" does not exist`,
           });
         } else {
-          const listItem = await getListItemByValue({
-            listId,
-            type: list.type,
-            value,
-            clusterClient,
-            listsItemsIndex,
-          });
+          const listItem = await lists.getListItemByValue({ listId, type: list.type, value });
           if (listItem != null) {
             return siemResponse.error({
               statusCode: 409,
-              // TODO: Improve this error message by providing which list value
-              body: `list_id: "${listId}" already contains the given list value`,
+              body: `list_id: "${listId}" already contains the given value: ${value}`,
             });
           } else {
-            const createdListItem = await createListItem({
+            const createdListItem = await lists.createListItem({
               id,
               listId,
               type: list.type,
               value,
-              clusterClient,
-              listsItemsIndex,
             });
             // TODO: Transform and return this result set
             return response.ok({ body: createdListItem });

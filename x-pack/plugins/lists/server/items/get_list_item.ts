@@ -4,20 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 
 import { ListsItemsSchema } from '../../common/schemas';
+import { DataClient } from '../types';
+
+interface GetListItemOptions {
+  id: string;
+  clusterClient: DataClient;
+  listsItemsIndex: string;
+}
 
 export const getListItem = async ({
   id,
   clusterClient,
   listsItemsIndex,
-}: {
-  id: string;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-}): Promise<ListsItemsSchema | null> => {
+}: GetListItemOptions): Promise<ListsItemsSchema | null> => {
   const result: SearchResponse<Omit<
     ListsItemsSchema,
     'id'

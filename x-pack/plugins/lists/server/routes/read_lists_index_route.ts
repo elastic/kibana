@@ -11,13 +11,10 @@ import {
   transformError,
   buildSiemResponse,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
-import { getIndexExists } from '../../../../legacy/plugins/siem/server/lib/detection_engine/index/get_index_exists';
-import { ConfigType } from '../config';
 
-export const readListsIndexRoute = (
-  router: IRouter,
-  { listsIndex, listsItemsIndex }: ConfigType
-): void => {
+import { getListClient } from '.';
+
+export const readListsIndexRoute = (router: IRouter): void => {
   router.get(
     {
       path: LIST_INDEX,
@@ -26,16 +23,13 @@ export const readListsIndexRoute = (
         tags: ['access:siem'],
       },
     },
-    async (context, request, response) => {
+    async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const clusterClient = context.core.elasticsearch.dataClient;
-        const listsIndexExists = await getIndexExists(clusterClient.callAsCurrentUser, listsIndex);
-        const listsItemsIndexExists = await getIndexExists(
-          clusterClient.callAsCurrentUser,
-          listsItemsIndex
-        );
+        const lists = getListClient(context);
+        const listsIndexExists = await lists.getListIndexExists();
+        const listsItemsIndexExists = await lists.getListItemIndexExists();
 
         if (listsIndexExists || listsItemsIndexExists) {
           return response.ok({
@@ -44,17 +38,17 @@ export const readListsIndexRoute = (
         } else if (!listsIndexExists && listsItemsIndexExists) {
           return siemResponse.error({
             statusCode: 404,
-            body: `index ${listsIndex} does not exist`,
+            body: `index ${lists.getListIndex()} does not exist`,
           });
         } else if (!listsItemsIndexExists && listsIndexExists) {
           return siemResponse.error({
             statusCode: 404,
-            body: `index ${listsItemsIndex} does not exist`,
+            body: `index ${lists.getListItemIndex()} does not exist`,
           });
         } else {
           return siemResponse.error({
             statusCode: 404,
-            body: `index ${listsIndex} and index ${listsItemsIndex} does not exist`,
+            body: `index ${lists.getListIndex()} and index ${lists.getListItemIndex()} does not exist`,
           });
         }
       } catch (err) {

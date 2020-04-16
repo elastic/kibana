@@ -11,34 +11,26 @@ import {
   transformError,
   buildSiemResponse,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
-import { getIndexExists } from '../../../../legacy/plugins/siem/server/lib/detection_engine/index/get_index_exists';
-import { getPolicyExists } from '../../../../legacy/plugins/siem/server/lib/detection_engine/index/get_policy_exists';
-import { deletePolicy } from '../../../../legacy/plugins/siem/server/lib/detection_engine/index/delete_policy';
-import { getTemplateExists } from '../../../../legacy/plugins/siem/server/lib/detection_engine/index/get_template_exists';
-import { deleteAllIndex } from '../../../../legacy/plugins/siem/server/lib/detection_engine/index/delete_all_index';
-import { deleteTemplate } from '../../../../legacy/plugins/siem/server/lib/detection_engine/index/delete_template';
-import { ConfigType } from '../config';
+
+import { getListClient } from '.';
 
 /**
  * Deletes all of the indexes, template, ilm policies, and aliases. You can check
  * this by looking at each of these settings from ES after a deletion:
  *
- * GET /_template/.siem-lists-default
- * GET /.siem-lists-default-000001/
- * GET /_ilm/policy/.siem-lists-default
- * GET /_alias/.siem-lists-default
+ * GET /_template/.lists-default
+ * GET /.lists-default-000001/
+ * GET /_ilm/policy/.lists-default
+ * GET /_alias/.lists-default
  *
- * GET /_template/.siem-items-default
- * GET /.siem-items-default-000001/
- * GET /_ilm/policy/.siem-items-default
- * GET /_alias/.siem-items-default
+ * GET /_template/.items-default
+ * GET /.items-default-000001/
+ * GET /_ilm/policy/.items-default
+ * GET /_alias/.items-default
  *
  * And ensuring they're all gone
  */
-export const deleteListsIndexRoute = (
-  router: IRouter,
-  { listsIndex, listsItemsIndex }: ConfigType
-): void => {
+export const deleteListsIndexRoute = (router: IRouter): void => {
   router.delete(
     {
       path: LIST_INDEX,
@@ -47,46 +39,45 @@ export const deleteListsIndexRoute = (
         tags: ['access:siem'],
       },
     },
-    async (context, request, response) => {
+    async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const clusterClient = context.core.elasticsearch.dataClient;
-        const callCluster = clusterClient.callAsCurrentUser;
-        const listsIndexExists = await getIndexExists(callCluster, listsIndex);
-        const listsItemsIndexExists = await getIndexExists(callCluster, listsItemsIndex);
+        const lists = getListClient(context);
+        const listsIndexExists = await lists.getListIndexExists();
+        const listsItemsIndexExists = await lists.getListItemIndexExists();
 
         if (!listsIndexExists && !listsItemsIndexExists) {
           return siemResponse.error({
             statusCode: 404,
-            body: `index: "${listsIndexExists}" and "${listsItemsIndexExists}" does not exist`,
+            body: `index: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" does not exist`,
           });
         } else {
           if (listsIndexExists) {
-            await deleteAllIndex(callCluster, `${listsIndex}-*`);
+            await lists.deleteListIndex();
           }
           if (listsItemsIndexExists) {
-            await deleteAllIndex(callCluster, `${listsItemsIndex}-*`);
+            await lists.deleteListItemIndex();
           }
 
-          const listsPolicyExists = await getPolicyExists(callCluster, listsIndex);
-          const listsItemsPolicyExists = await getPolicyExists(callCluster, listsItemsIndex);
+          const listsPolicyExists = await lists.getListPolicyExists();
+          const listsItemsPolicyExists = await lists.getListItemPolicyExists();
 
           if (listsPolicyExists) {
-            await deletePolicy(callCluster, listsIndex);
+            await lists.deleteListPolicy();
           }
           if (listsItemsPolicyExists) {
-            await deletePolicy(callCluster, listsItemsIndex);
+            await lists.deleteListItemPolicy();
           }
 
-          const listsTemplateExists = await getTemplateExists(callCluster, listsIndex);
-          const listsItemsTemplateExists = await getTemplateExists(callCluster, listsItemsIndex);
+          const listsTemplateExists = await lists.getListTemplateExists();
+          const listsItemsTemplateExists = await lists.getListItemTemplateExists();
 
           if (listsTemplateExists) {
-            await deleteTemplate(callCluster, listsIndex);
+            await lists.deleteListTemplate();
           }
           if (listsItemsTemplateExists) {
-            await deleteTemplate(callCluster, listsItemsIndex);
+            await lists.deleteListItemTemplate();
           }
 
           return response.ok({ body: { acknowledged: true } });

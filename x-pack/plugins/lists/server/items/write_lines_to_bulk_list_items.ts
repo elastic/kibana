@@ -6,15 +6,17 @@
 
 import { Readable } from 'stream';
 
-import { ScopedClusterClient } from 'kibana/server';
-
 import { Type } from '../../common/schemas';
+import { DataClient } from '../types';
 
 import { createListItemsBulk, getListItemsByValues, BufferLines } from '.';
 
-interface LinesResult {
-  linesProcessed: number;
-  duplicatesFound: number;
+interface WriteLinesToBulkListItemsOptions {
+  listId: string;
+  stream: Readable;
+  clusterClient: DataClient;
+  listsItemsIndex: string;
+  type: Type;
 }
 
 export const writeLinesToBulkListItems = ({
@@ -23,13 +25,7 @@ export const writeLinesToBulkListItems = ({
   clusterClient,
   listsItemsIndex,
   type,
-}: {
-  listId: string;
-  stream: Readable;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-  type: Type;
-}): Promise<void> => {
+}: WriteLinesToBulkListItemsOptions): Promise<void> => {
   return new Promise<void>(resolve => {
     const readBuffer = new BufferLines({ input: stream });
     readBuffer.on('lines', async (lines: string[]) => {
@@ -48,19 +44,26 @@ export const writeLinesToBulkListItems = ({
   });
 };
 
+interface WriteBufferToItemsOptions {
+  listId: string;
+  clusterClient: DataClient;
+  listsItemsIndex: string;
+  buffer: string[];
+  type: Type;
+}
+
+interface LinesResult {
+  linesProcessed: number;
+  duplicatesFound: number;
+}
+
 export const writeBufferToItems = async ({
   listId,
   clusterClient,
   listsItemsIndex,
   buffer,
   type,
-}: {
-  listId: string;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-  buffer: string[];
-  type: Type;
-}): Promise<LinesResult> => {
+}: WriteBufferToItemsOptions): Promise<LinesResult> => {
   const items = await getListItemsByValues({
     listId,
     clusterClient,

@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScopedClusterClient } from 'kibana/server';
-
 import { ListsItemsSchema, Type } from '../../common/schemas';
 import { getQueryFilterFromTypeValue } from '../utils';
+import { DataClient } from '../types';
 
 import { getListItemsByValues } from './get_list_items_by_values';
+
+interface DeleteListItemByValueOptions {
+  listId: string;
+  type: Type;
+  value: string;
+  clusterClient: DataClient;
+  listsItemsIndex: string;
+}
 
 export const deleteListItemByValue = async ({
   listId,
@@ -17,13 +24,7 @@ export const deleteListItemByValue = async ({
   type,
   clusterClient,
   listsItemsIndex,
-}: {
-  listId: string;
-  type: Type;
-  value: string;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-}): Promise<ListsItemsSchema[]> => {
+}: DeleteListItemByValueOptions): Promise<ListsItemsSchema[]> => {
   // TODO: Check before we call into these functions at the validation level that the string is not empty?
   const listItems = await getListItemsByValues({
     type,

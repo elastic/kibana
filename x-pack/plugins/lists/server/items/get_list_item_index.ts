@@ -9,12 +9,16 @@ import { KibanaRequest } from 'kibana/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
 import { getSpace } from '../utils/get_space';
 
-interface GetListIndexOptions {
+interface GetListItemIndexOptions {
   spaces: SpacesServiceSetup | undefined | null;
   request: KibanaRequest;
-  listsIndexName: string;
+  listsItemsIndexName: string;
 }
 
-export const getListIndex = ({ spaces, request, listsIndexName }: GetListIndexOptions): string => {
-  return `${listsIndexName}-${getSpace({ request, spaces })}`;
+export const getListItemIndex = ({
+  spaces,
+  request,
+  listsItemsIndexName,
+}: GetListItemIndexOptions): string => {
+  return `${listsItemsIndexName}-${getSpace({ request, spaces })}`;
 };

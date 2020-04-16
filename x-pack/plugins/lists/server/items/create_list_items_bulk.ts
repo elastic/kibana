@@ -5,14 +5,21 @@
  */
 
 import uuid from 'uuid';
-import { ScopedClusterClient } from 'kibana/server';
 
 import { transformListItemsToElasticQuery } from '../utils';
-import { ElasticListItemsInputType } from '../types';
+import { ElasticListItemsInputType, DataClient } from '../types';
 import { Type } from '../../common/schemas';
 
 export interface CreateBulkType {
   create: { _index: string };
+}
+
+interface CreateListItemsBulkOptions {
+  listId: string;
+  type: Type;
+  value: string[];
+  clusterClient: DataClient;
+  listsItemsIndex: string;
 }
 
 export const createListItemsBulk = async ({
@@ -21,13 +28,7 @@ export const createListItemsBulk = async ({
   value,
   clusterClient,
   listsItemsIndex,
-}: {
-  listId: string;
-  type: Type;
-  value: string[];
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-}): Promise<void> => {
+}: CreateListItemsBulkOptions): Promise<void> => {
   // It causes errors if you try to add items to bulk that do not exist within ES
   if (!value.length) {
     return;

@@ -4,13 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScopedClusterClient } from 'kibana/server';
 import { CreateDocumentResponse } from 'elasticsearch';
 
 import { ListsItemsSchema, Type } from '../../common/schemas';
 import { transformListItemsToElasticQuery } from '../utils';
+import { DataClient } from '../types';
 
 import { getListItemByValue } from '.';
+
+interface UpdateListItemOptions {
+  listId: string;
+  type: Type;
+  value: string;
+  clusterClient: DataClient;
+  listsItemsIndex: string;
+}
 
 export const updateListItem = async ({
   listId,
@@ -18,13 +26,7 @@ export const updateListItem = async ({
   value,
   clusterClient,
   listsItemsIndex,
-}: {
-  listId: string;
-  type: Type;
-  value: string;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-}): Promise<ListsItemsSchema | null> => {
+}: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
   const updatedAt = new Date().toISOString();
   const listItem = await getListItemByValue({
     listId,

@@ -18,4 +18,4 @@ export * from './patch_lists_route';
 export * from './read_lists_index_route';
 export * from './read_lists_items_route';
 export * from './read_lists_route';
-export * from './get_list_client';
+export * from './utils';

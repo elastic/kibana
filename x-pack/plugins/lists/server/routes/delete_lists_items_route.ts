@@ -7,21 +7,16 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-// TODO: Move these utilities out of detection engine and into a more generic area
 import {
   transformError,
   buildSiemResponse,
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
 import { DeleteListsItemsSchema, deleteListsItemsSchema } from '../../common/schemas';
-import { deleteListItemByValue, deleteListItem } from '../items';
-import { getList } from '../lists';
-import { ConfigType } from '../config';
 
-export const deleteListsItemsRoute = (
-  router: IRouter,
-  { listsIndex, listsItemsIndex }: ConfigType
-): void => {
+import { getListClient } from '.';
+
+export const deleteListsItemsRoute = (router: IRouter): void => {
   router.delete(
     {
       path: LIST_ITEM_URL,
@@ -36,51 +31,36 @@ export const deleteListsItemsRoute = (
       const siemResponse = buildSiemResponse(response);
       try {
         const { id, list_id: listId, value } = request.query;
-        const clusterClient = context.core.elasticsearch.dataClient;
+        const lists = getListClient(context);
         if (id != null) {
-          const deleted = await deleteListItem({
-            id,
-            clusterClient,
-            listsItemsIndex,
-          });
+          const deleted = await lists.deleteListItem({ id });
           if (deleted == null) {
-            // TODO: More specifics on which item was not found
             return siemResponse.error({
               statusCode: 404,
-              body: `list_id: "${id}" item not found`,
+              body: `list item with id: "${id}" item not found`,
             });
           } else {
             // TODO: outbound validation
             return response.ok({ body: deleted });
           }
         } else if (listId != null && value != null) {
-          const list = await getList({
-            id: listId,
-            clusterClient,
-            listsIndex,
-          });
+          const list = await lists.getList({ id: listId });
           if (list == null) {
             return siemResponse.error({
               statusCode: 404,
-              body: `list id: "${listId}" does not exist`,
-            });
-          }
-          const deleted = await deleteListItemByValue({
-            type: list.type,
-            listId,
-            value,
-            clusterClient,
-            listsItemsIndex,
-          });
-          if (deleted == null) {
-            // TODO: More specifics on which item was not found
-            return siemResponse.error({
-              statusCode: 404,
-              body: `list_id: "${id}" item not found`,
+              body: `list_id: "${listId}" does not exist`,
             });
           } else {
-            // TODO: outbound validation
-            return response.ok({ body: deleted });
+            const deleted = await lists.deleteListItemByValue({ type: list.type, listId, value });
+            if (deleted == null) {
+              return siemResponse.error({
+                statusCode: 404,
+                body: `list_id: "${listId}" with ${value} was not found`,
+              });
+            } else {
+              // TODO: outbound validation
+              return response.ok({ body: deleted });
+            }
           }
         } else {
           return siemResponse.error({

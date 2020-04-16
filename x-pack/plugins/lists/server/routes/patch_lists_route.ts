@@ -13,12 +13,12 @@ import {
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
 import { patchListsSchema, PatchListsSchema } from '../../common/schemas';
-import { updateList } from '../lists';
-import { ConfigType } from '../config';
+
+import { getListClient } from '.';
 
 // TODO: Make sure you write updateListRoute and update_list.sh routes
 
-export const patchListsRoute = (router: IRouter, { listsIndex }: ConfigType): void => {
+export const patchListsRoute = (router: IRouter): void => {
   router.patch(
     {
       path: LIST_URL,
@@ -33,12 +33,12 @@ export const patchListsRoute = (router: IRouter, { listsIndex }: ConfigType): vo
       const siemResponse = buildSiemResponse(response);
       try {
         const { name, description, id } = request.body;
-        const clusterClient = context.core.elasticsearch.dataClient;
-        const list = await updateList({ id, name, description, listsIndex, clusterClient });
+        const lists = getListClient(context);
+        const list = await lists.updateList({ id, name, description });
         if (list == null) {
           return siemResponse.error({
             statusCode: 404,
-            body: `list_id: "${id}" found found`,
+            body: `list id: "${id}" found found`,
           });
         } else {
           // TODO: Transform and check the list on exit as well as validate it

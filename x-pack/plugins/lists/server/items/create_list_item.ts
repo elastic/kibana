@@ -5,12 +5,20 @@
  */
 
 import uuid from 'uuid';
-import { ScopedClusterClient } from 'kibana/server';
 import { CreateDocumentResponse } from 'elasticsearch';
 
 import { ListsItemsSchema, Type } from '../../common/schemas';
-import { ElasticListItemsInputType } from '../types';
+import { ElasticListItemsInputType, DataClient } from '../types';
 import { transformListItemsToElasticQuery } from '../utils';
+
+interface CreateListItemOptions {
+  id: string | undefined | null;
+  listId: string;
+  type: Type;
+  value: string;
+  clusterClient: DataClient;
+  listsItemsIndex: string;
+}
 
 export const createListItem = async ({
   id,
@@ -19,14 +27,7 @@ export const createListItem = async ({
   value,
   clusterClient,
   listsItemsIndex,
-}: {
-  id: string | undefined;
-  listId: string;
-  type: Type;
-  value: string;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-}): Promise<ListsItemsSchema> => {
+}: CreateListItemOptions): Promise<ListsItemsSchema> => {
   const createdAt = new Date().toISOString();
   const tieBreakerId = uuid.v4();
   const body: ElasticListItemsInputType = {

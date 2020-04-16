@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScopedClusterClient } from 'kibana/server';
-
 import { ListsItemsSchema } from '../../common/schemas';
+import { DataClient } from '../types';
 
 import { getListItem } from '.';
+
+interface DeleteListItemOptions {
+  id: string;
+  clusterClient: DataClient;
+  listsItemsIndex: string;
+}
 
 export const deleteListItem = async ({
   id,
   clusterClient,
   listsItemsIndex,
-}: {
-  id: string;
-  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsItemsIndex: string;
-}): Promise<ListsItemsSchema | null> => {
+}: DeleteListItemOptions): Promise<ListsItemsSchema | null> => {
   const listItem = await getListItem({ id, clusterClient, listsItemsIndex });
   if (listItem == null) {
     return null;

@@ -13,13 +13,10 @@ import {
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
 import { deleteListsSchema, DeleteListsSchema } from '../../common/schemas';
-import { deleteList } from '../lists';
-import { ConfigType } from '../config';
 
-export const deleteListsRoute = (
-  router: IRouter,
-  { listsIndex, listsItemsIndex }: ConfigType
-): void => {
+import { getListClient } from '.';
+
+export const deleteListsRoute = (router: IRouter): void => {
   router.delete(
     {
       path: LIST_URL,
@@ -33,13 +30,13 @@ export const deleteListsRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
+        const lists = getListClient(context);
         const { id } = request.query;
-        const clusterClient = context.core.elasticsearch.dataClient;
-        const deleted = await deleteList({ id, clusterClient, listsIndex, listsItemsIndex });
+        const deleted = await lists.deleteList({ id });
         if (deleted == null) {
           return siemResponse.error({
             statusCode: 404,
-            body: `list_id: "${id}" not found`,
+            body: `list id: "${id}" was not found`,
           });
         } else {
           // TODO: outbound validation

@@ -15,14 +15,10 @@ import {
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
 import { exportListsItemsQuerySchema, ExportListsItemsQuerySchema } from '../../common/schemas';
-import { writeListItemsToStream } from '../items';
-import { getList } from '../lists';
-import { ConfigType } from '../config';
 
-export const exportListsItemsRoute = (
-  router: IRouter,
-  { listsIndex, listsItemsIndex }: ConfigType
-): void => {
+import { getListClient } from '.';
+
+export const exportListsItemsRoute = (router: IRouter): void => {
   router.post(
     {
       path: `${LIST_ITEM_URL}/_export`,
@@ -38,8 +34,8 @@ export const exportListsItemsRoute = (
       const siemResponse = buildSiemResponse(response);
       try {
         const { list_id: listId } = request.query;
-        const clusterClient = context.core.elasticsearch.dataClient;
-        const list = await getList({ id: listId, clusterClient, listsIndex });
+        const lists = getListClient(context);
+        const list = await lists.getList({ id: listId });
         if (list == null) {
           return siemResponse.error({
             statusCode: 400,
@@ -50,14 +46,7 @@ export const exportListsItemsRoute = (
           const fileName = list.name;
 
           const stream = new Stream.PassThrough();
-          writeListItemsToStream({
-            listId,
-            stream,
-            clusterClient,
-            listsItemsIndex,
-            stringToAppend: '\n',
-          });
-
+          lists.writeListItemsToStream({ listId, stream, stringToAppend: '\n' });
           return response.ok({
             headers: {
               'Content-Disposition': `attachment; filename="${fileName}"`,

@@ -13,16 +13,12 @@ import {
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
 import { patchListsItemsSchema, PatchListsItemsSchema } from '../../common/schemas';
-import { updateListItem } from '../items';
-import { getList } from '../lists';
-import { ConfigType } from '../config';
+
+import { getListClient } from '.';
 
 // TODO: Make sure you write updateListItemRoute and update_list_item.sh routes
 
-export const patchListsItemsRoute = (
-  router: IRouter,
-  { listsIndex, listsItemsIndex }: ConfigType
-): void => {
+export const patchListsItemsRoute = (router: IRouter): void => {
   router.patch(
     {
       path: LIST_ITEM_URL,
@@ -37,20 +33,18 @@ export const patchListsItemsRoute = (
       const siemResponse = buildSiemResponse(response);
       try {
         const { value, list_id: listId } = request.body;
-        const clusterClient = context.core.elasticsearch.dataClient;
-        const list = await getList({ id: listId, clusterClient, listsIndex });
+        const lists = getListClient(context);
+        const list = await lists.getList({ id: listId });
         if (list == null) {
           return siemResponse.error({
             statusCode: 404,
             body: `list id: "${listId}" does not exist`,
           });
         } else {
-          const listItem = await updateListItem({
+          const listItem = await lists.updateListItem({
             listId,
-            type: list.type, // You cannot change a list type once created
+            type: list.type,
             value,
-            clusterClient,
-            listsItemsIndex,
           });
           if (listItem == null) {
             return siemResponse.error({

@@ -13,10 +13,10 @@ import {
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
 import { ReadListsSchema, readListsSchema } from '../../common/schemas';
-import { getList } from '../lists';
-import { ConfigType } from '../config';
 
-export const readListsRoute = (router: IRouter, { listsIndex }: ConfigType): void => {
+import { getListClient } from '.';
+
+export const readListsRoute = (router: IRouter): void => {
   router.get(
     {
       path: LIST_URL,
@@ -31,8 +31,8 @@ export const readListsRoute = (router: IRouter, { listsIndex }: ConfigType): voi
       const siemResponse = buildSiemResponse(response);
       try {
         const { id } = request.query;
-        const clusterClient = context.core.elasticsearch.dataClient;
-        const list = await getList({ id, clusterClient, listsIndex });
+        const lists = getListClient(context);
+        const list = await lists.getList({ id });
         if (list == null) {
           return siemResponse.error({
             statusCode: 404,
