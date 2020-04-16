@@ -23,7 +23,7 @@ import { searchSavedObjectTypeMigrations } from './search_migrations';
 export const searchSavedObjectType: SavedObjectsType = {
   name: 'search',
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   management: {
     icon: 'discoverApp',
     defaultSearchField: 'title',
