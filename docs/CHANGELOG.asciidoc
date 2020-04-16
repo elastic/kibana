@@ -45,6 +45,13 @@ See <<breaking-changes-7.7,breaking changes in 7.7>>.
 [float]
 [[enhancement-7.7.0]]
 === Enhancements
+Alerting::
+* Notifies user when security is enabled but TLS is not {pull}60270[#60270]
+* Displays warning when a permanent encryption key is missing and hides alerting UI appropriately {pull}62772[#62772]
+* Edits alert flyout {pull}58964[#58964]
+* Moves index params fields to connector config {pull}60349[#60349]
+* Adds the AlertDetails page {pull}55671[#55671]
+* License checks for actions plugin {pull}59070[#59070]
 APM::
 * Updates monospace font family variable {pull}57555[#57555]
 * Shows missing permissions message to the user on the Services overview {pull}56374[#56374]
@@ -68,16 +75,18 @@ Dashboard::
 * Use Elasticsearch `_async_search` instead of `_search` when it is available (excluding TSVB, Timelion, and Vega) {pull}59224[#59224}
 * When queries run more than 10 seconds, show a pop-up to allow users to run the queries beyond the configured timeout or cancel the queries {pull}60706[#60706]
 * Dashboard/add panel flow {pull}59918[#59918]
-* Moves create new to the top of SavedObjectFinder {pull}56428[#56428]
-Lens::
+* Moves the "Create New" button in add panel flyout to the top to make it more visible to the user {pull}56428[#56428]
+Lens and visualizations::
 * Creates Lens filters on click with bar, line, area charts {pull}57261[#57261]
 * Allows number formatting within Lens {pull}56253[#56253]
-* Simplifies state management from visualization {pull}58279[#58279]
-* Improves suggestions when dragging field for the second time {pull}60687[#60687]
+* Shows a warning when you have partially configured a visualization, such as a bar chart with only an X axis {pull}58279[#58279]
+* Improves suggestion logic when dragging fields into the chart {pull}60687[#60687]
 * Disallows duplicate percentiles {pull}58299[#58299]
 * EUICodeEditor for Visualize JSON  {pull}58679[#58679]
 * Supports Histogram Data Type {pull}59387[#59387]
-* Median label shows &quot;Median&quot; instead of &quot;50th percentile of&quot; {pull}58521[#58521]
+* Median aggregation labels now show "Median" instead of "50th percentile of" in Visualize. Custom labels are also used {pull}58521[#58521]
+* Adds positive_rate as a new aggregation to TSVB {pull}59843[#59843]
+* Makes linked saved search work when user navigates back using browser back button {pull}59690[#59690]
 Logs::
 * Uses the Super date picker in the log stream {pull}54280[#54280]
 * Adds expandable rows with category examples {pull}54586[#54586]
@@ -103,7 +112,7 @@ Machine Learning::
 * Uses EuiDataGrid for transform wizard {pull}52510[#52510]
 * Replaces KqlFilterBar with QueryStringInput {pull}59723[#59723]
 Management::
-* Adds support for proxy mode {pull}59221[#59221]
+* The Remote Clusters UI added support for enabling "proxy" mode when creating or editing a remote cluster {pull}59221[#59221]
 * Adds filter for ILM phase to Index Management {pull}57402[#57402]
 * Creates Painless Lab app {pull}57538[#57538]
 * Moves out of legacy {pull}55331[#55331]
@@ -114,6 +123,7 @@ Management::
 * Server-side batch reindexing {pull}58598[#58598]
 * Better handling of closed indices {pull}58890[#58890]
 * Advanced settings UI change to centralize save state {pull}53693[#53693]
+* The autocomplete in the dev console now supports many different types of Elasticsearch pipeline processors {pull}60553[#60553]
 Maps::
 * Improves Layer Style UI {pull}58406[#58406]
 * Shows field type icons in data driven styling field select {pull}55166[#55166]
@@ -144,9 +154,9 @@ Platform::
 * Variable support for interpreter {pull}54788[#54788]
 Reporting::
 * Handles page setup errors and capture the page, don't fail the job {pull}58683[#58683]
-* Allows reports to be deleted in Management &gt; Kibana &gt; Reporting {pull}60077[#60077]
+* Adds the ability to search and delete historical reports in Management > Kibana > Reporting {pull}60077[#60077]
 SIEM::
-* Overview: Recent cases widget {pull}60993[#60993]
+* Recent cases widget {pull}60993[#60993]
 * Adds custom reputation link {pull}57814[#57814]
 * Exports timeline {pull}58368[#58368]
 * Rule activity monitoring {pull}60816[#60816]
@@ -166,6 +176,8 @@ SIEM::
 * Adds note markdown field to backend {pull}59796[#59796]
 * Adds rule markdown field to rule create, detail, and edit flows {pull}60108[#60108]
 * Adds rule markdown to timeline global notes {pull}61026[#61026]
+* ServiceNow executor {pull}58894[#58894]
+* ServiceNow action improvements {pull}60052[#60052]
 Security::
 * Uses links instead of click handlers when switching spaces {pull}57730[#57730]
 * Introduce a login selector screen when multiple auth providers are enabled {pull}53010[#53010]
@@ -184,16 +196,17 @@ Uptime::
 * Implements drag and select on charts {pull}57089[#57089]
 * Fix/filter group autocomplete {pull}57686[#57686]
 * Ml detection of duration anomalies {pull}59785[#59785]
-Visualizations::
-* Adds Positive Rate to Aggregations {pull}59843[#59843]
-* Fixes linked search behavior {pull}59690[#59690]
 
 [float]
 [[bug-7.7.0]]
 === Bug fixes
-Alerts::
+Alerting::
 * Retains empty AlertsList when filter has removed all items {pull}60501[#60501]
 * Fixes alert threshold line disappears {pull}61499[#61499]
+* Cleanup action task params objects after successful execution {pull}55227[#55227]
+* Disables action plugin functionality when ESO plugin is using an ephemeral encryption key {pull}56906[#56906]
+* Makes slack param validation handle empty messages {pull}60468[#60468]
+* Makes user and password secrets optional {pull}56823[#56823]
 APM::
 * Changes &quot;url&quot; to &quot;urls&quot; in APM agent instructions {pull}60790[#60790]
 * Uses ES Permission API to check if a user has permissions to read from APM indices {pull}57311[#57311]
@@ -250,12 +263,12 @@ Machine Learning::
 * Clears {kib} index pattern cache on creation or form reset {pull}62184[#62184]
 Management::
 * Adds support for additional watch action statuses {pull}55092[#55092]
-* Upgrade assistant migration meta data can become stale {pull}60789[#60789]
-* Fixes doc links {pull}61331[#61331]
+* Fixes the Upgrade Assistant where the reindexing of an index was incorrectly marked as "Done", when it still required to be reindexed. This scenario could occur if a user reindexed an index, deleted it, then restored a snapshot of the index of an older version {pull}60789[#60789]
+* Fixes several invalid documentation links in the Snapshot and Restore UI {pull}61331[#61331]
 * Fixes for console error handling and loading of autocomplete {pull}58587[#58587]
-* Fixes grokdebugger simulate call in non-default space {pull}61423[#61423]
-* Handles the case where saving to history may throw an error {pull}62424[#62424]
-* Escapes single quotes surrounded by double quotes {pull}63229[#63229]
+* Fixes a bug that caused Grokdebugger simulation to break in non-Default Kibana spaces {pull}61423[#61423]
+* Fixes an issue where Console would not render the request output if localStorage quota was reached {pull}62424[#62424]
+* Fixes a bug with Console's Copy As cURL functionality that would not properly escape single quotes in JSON string values which created issues with copying SQL queries from Console to cURL {pull}63229[#63229]
 * System index templates can't be edited {pull}55229[#55229]
 * Not possible to edit a watch that was created with the API if the ID contains a dot {pull}59383[#59383]
 * Fixes console a11y failures {pull}57520[#57520]
@@ -285,7 +298,7 @@ Platform::
 * Fixes parse interval {pull}62267[#62267]
 * Avoid 'app not found' flickering while awaiting for mount {pull}56483[#56483]
 * Creates empty string filters when value not specified {pull}57442[#57442]
-* Fixes formatter on range aggregation {pull}58651[#58651]
+* Range aggregations now use the field formatter from the index pattern, instead of no formatter {pull}58651[#58651]
 Reporting::
 * Fixes error handling for job handler in route {pull}60161[#60161]
 Security::
