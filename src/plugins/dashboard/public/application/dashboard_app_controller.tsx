@@ -35,7 +35,6 @@ import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_emp
 import {
   connectToQueryState,
   esFilters,
-  Filter,
   IndexPattern,
   IndexPatternsContract,
   Query,
@@ -247,16 +246,20 @@ export class DashboardAppController {
 
     const getNavBarProps = () => {
       const isFullScreenMode = dashboardStateManager.getFullScreenMode();
+      const screenTitle = dashboardStateManager.getTitle();
       return {
         appName: 'dashboard',
         config: $scope.isVisible ? $scope.topNavMenu : undefined,
         className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
+        screenTitle,
         showSearchBar,
-        showFilterBar: showFilterBar(),
         showQueryBar,
+        showFilterBar: showFilterBar(),
+        indexPatterns: $scope.indexPatterns,
         showSaveQuery: $scope.showSaveQuery,
         query: $scope.model.query,
         savedQuery: $scope.savedQuery,
+        useDefaultBehaviors: true,
         onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }): void => {
           if (!payload.query) {
             $scope.updateQueryAndFetch({ query: $scope.model.query, dateRange: payload.dateRange });
@@ -264,16 +267,6 @@ export class DashboardAppController {
             $scope.updateQueryAndFetch({ query: payload.query, dateRange: payload.dateRange });
           }
         },
-        screenTitle: $scope.screenTitle,
-        indexPatterns: $scope.indexPatterns,
-        filters: $scope.model.filters,
-        onFiltersUpdated: $scope.onFiltersUpdated,
-        isRefreshPaused: $scope.model.refreshInterval.pause,
-        refreshInterval: $scope.model.refreshInterval.value,
-        onSaved: $scope.onQuerySaved,
-        onSavedQueryUpdated: $scope.onSavedQueryUpdated,
-        onClearSavedQuery: $scope.onClearSavedQuery,
-        onRefreshChange: $scope.onRefreshChange,
       };
     };
     const dashboardNavBar = document.getElementById('dashboardChrome');
@@ -345,7 +338,6 @@ export class DashboardAppController {
         refreshInterval: timefilter.getRefreshInterval(),
       };
       $scope.panels = dashboardStateManager.getPanels();
-      $scope.screenTitle = dashboardStateManager.getTitle();
     };
 
     const updateNavBar = () => {
@@ -562,38 +554,8 @@ export class DashboardAppController {
       });
     };
 
-    $scope.onFiltersUpdated = (filters: Filter[]) => {
-      // The filters will automatically be set when the queryFilter emits an update event (see below)
-      queryFilter.setFilters(filters);
-      updateNavBar();
-    };
-
     $scope.onQuerySaved = (savedQuery: SavedQuery) => {
       $scope.savedQuery = savedQuery;
-      updateNavBar();
-    };
-
-    $scope.onSavedQueryUpdated = (savedQuery: SavedQuery) => {
-      $scope.savedQuery = { ...savedQuery };
-      const filters = savedQuery.attributes.filters;
-      if (filters) {
-        queryFilter.setFilters(filters);
-      }
-      updateNavBar();
-    };
-
-    $scope.onClearSavedQuery = () => {
-      delete $scope.savedQuery;
-      dashboardStateManager.setSavedQueryId(undefined);
-      dashboardStateManager.applyFilters(
-        {
-          query: '',
-          language:
-            localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
-        },
-        queryFilter.getGlobalFilters()
-      );
-      queryFilter.setFilters(queryFilter.getGlobalFilters());
       updateNavBar();
     };
 
@@ -804,6 +766,9 @@ export class DashboardAppController {
         });
     }
 
+    $scope.showFilterBar = () =>
+      $scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode();
+
     $scope.showAddPanel = () => {
       dashboardStateManager.setFullScreenMode(false);
       /*
@@ -902,6 +867,7 @@ export class DashboardAppController {
           if ((response as { error: Error }).error) {
             dashboardStateManager.setTitle(currentTitle);
           }
+          updateNavBar();
           return response;
         });
       };
