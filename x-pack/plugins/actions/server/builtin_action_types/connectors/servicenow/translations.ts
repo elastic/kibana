@@ -9,15 +9,3 @@ import { i18n } from '@kbn/i18n';
 export const NAME = i18n.translate('xpack.actions.builtin.servicenowTitle', {
   defaultMessage: 'ServiceNow',
 });
-
-export const MAPPING_EMPTY = i18n.translate('xpack.actions.builtin.servicenow.emptyMapping', {
-  defaultMessage: '[casesConfiguration.mapping]: expected non-empty but got empty',
-});
-
-export const WHITE_LISTED_ERROR = (message: string) =>
-  i18n.translate('xpack.actions.builtin.servicenow.servicenowApiWhitelistError', {
-    defaultMessage: 'error configuring servicenow action: {message}',
-    values: {
-      message,
-    },
-  });

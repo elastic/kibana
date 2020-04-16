@@ -41,3 +41,15 @@ export const FIELD_INFORMATION = (
       });
   }
 };
+
+export const MAPPING_EMPTY = i18n.translate('xpack.actions.builtin.connector.emptyMapping', {
+  defaultMessage: '[casesConfiguration.mapping]: expected non-empty but got empty',
+});
+
+export const WHITE_LISTED_ERROR = (message: string) =>
+  i18n.translate('xpack.actions.builtin.connector.apiWhitelistError', {
+    defaultMessage: 'error configuring connector action: {message}',
+    values: {
+      message,
+    },
+  });

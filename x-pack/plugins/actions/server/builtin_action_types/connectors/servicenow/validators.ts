@@ -4,38 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
-
-import { ActionsConfigurationUtilities } from '../../../actions_config';
-import {
-  ConnectorSecretConfigurationType,
-  ConnectorPublicConfigurationType,
-  ConnectorValidation,
-} from '../types';
-
-import * as i18n from './translations';
-
-const validateConfig = (
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ConnectorPublicConfigurationType
-) => {
-  try {
-    if (isEmpty(configObject.casesConfiguration.mapping)) {
-      return i18n.MAPPING_EMPTY;
-    }
-
-    configurationUtilities.ensureWhitelistedUri(configObject.apiUrl);
-  } catch (whitelistError) {
-    return i18n.WHITE_LISTED_ERROR(whitelistError.message);
-  }
-};
-
-const validateSecrets = (
-  configurationUtilities: ActionsConfigurationUtilities,
-  secrets: ConnectorSecretConfigurationType
-) => {};
+import { validateCommonConfig, validateCommonSecrets } from '../validators';
+import { ConnectorValidation } from '../types';
 
 export const validate: ConnectorValidation = {
-  config: validateConfig,
-  secrets: validateSecrets,
+  config: validateCommonConfig,
+  secrets: validateCommonSecrets,
 };
