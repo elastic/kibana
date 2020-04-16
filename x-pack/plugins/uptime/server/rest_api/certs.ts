@@ -9,14 +9,21 @@ import { UMServerLibs } from '../lib/lib';
 import { UMRestApiRouteFactory } from '.';
 import { API_URLS } from '../../../../legacy/plugins/uptime/common/constants/rest_api';
 
+const DEFAULT_INDEX = 0;
+const DEFAULT_SIZE = 25;
+const DEFAULT_FROM = 'now-1d';
+const DEFAULT_TO = 'now';
+
 export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.CERTS,
   validate: {
     query: schema.object({
+      from: schema.maybe(schema.string()),
+      to: schema.maybe(schema.string()),
       search: schema.maybe(schema.string()),
-      from: schema.number(),
-      size: schema.number(),
+      index: schema.maybe(schema.number()),
+      size: schema.maybe(schema.number()),
     }),
   },
   writeAccess: false,
@@ -24,11 +31,23 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     tags: ['access:uptime-read'],
   },
   handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
-    const { from, search, size } = request.query;
+    const index = request.query?.index ?? DEFAULT_INDEX;
+    const size = request.query?.size ?? DEFAULT_SIZE;
+    const from = request.query?.from ?? DEFAULT_FROM;
+    const to = request.query?.to ?? DEFAULT_TO;
+    const { search } = request.query;
 
     return response.ok({
       body: {
-        certs: await libs.requests.getCerts({ callES, dynamicSettings, from, search, size }),
+        certs: await libs.requests.getCerts({
+          callES,
+          dynamicSettings,
+          index,
+          search,
+          size,
+          from,
+          to,
+        }),
       },
     });
   },
