@@ -38,7 +38,7 @@ export const createTemplateTimelines = async (
   timelineVersion?: string | null,
   templateTimelineId?: string | null
 ) => {
-  const newTemplateTimeline = await saveTemplateTimelines(
+  const { newTemplateTimelineId } = await saveTemplateTimelines(
     frameworkRequest,
     templateTimeline,
     timelineId,
@@ -46,5 +46,5 @@ export const createTemplateTimelines = async (
     templateTimelineId
   );
 
-  return newTemplateTimeline;
+  return newTemplateTimelineId;
 };
