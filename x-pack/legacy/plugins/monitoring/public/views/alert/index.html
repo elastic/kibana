@@ -1,3 +1,7 @@
-<monitoring-main name="alerts">
+<monitoring-main
+  name="alert"
+  instance="{{ alert.data.type }}"
+  resolver="{{ beat.data.summary.uuid }}"
+>
   <div id="monitoringAlertApp"></div>
 </monitoring-main>

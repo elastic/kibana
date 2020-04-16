@@ -304,6 +304,21 @@
       ></a>
     </div>
 
+    <div ng-if="monitoringMain.inAlert" class="euiTabs" role="navigation">
+      <a
+        ng-if="monitoringMain.instance"
+        class="euiTab"
+      >
+        Alert - {{ monitoringMain.instance }}
+      </a>
+      <!-- <a
+        class="euiTab"
+        data-test-subj="alertsPage"
+        i18n-id="xpack.monitoring.alertsNavigation.alertsLinkText"
+        i18n-default-message="Alert"
+      ></a> -->
+    </div>
+
     <div ng-if="monitoringMain.inListing" class="euiTabs" role="navigation">
       <a
         class="euiTab"

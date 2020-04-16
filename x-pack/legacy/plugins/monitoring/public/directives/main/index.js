@@ -120,6 +120,7 @@ export class MonitoringMainController {
     } else {
       this.inOverview = this.name === 'overview';
       this.inAlerts = this.name === 'alerts';
+      this.inAlert = this.name === 'alert';
       this.inListing = this.name === 'listing'; // || this.name === 'no-data';
     }
 
