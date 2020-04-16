@@ -5,7 +5,7 @@
  */
 import Boom from 'boom';
 import { SavedObjectsBulkResponse } from 'kibana/server';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import {
   Agent,
   AgentAction,
