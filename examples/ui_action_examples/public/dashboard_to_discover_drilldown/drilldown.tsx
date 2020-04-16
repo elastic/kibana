@@ -18,8 +18,9 @@
  */
 
 import React from 'react';
-import { StartDeps } from '../plugin';
+import { UiActionExamplesStartDependencies as Start } from '../plugin';
 import { reactToUiComponent } from '../../../../src/plugins/kibana_react/public';
+import { StartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { PlaceContext, ActionContext, Config, CollectConfigProps } from './types';
 import { CollectConfigContainer } from './collect_config';
 import { DASHBOARD_TO_DISCOVER_DRILLDOWN } from './constants';
@@ -27,9 +28,7 @@ import { DrilldownDefinition as Drilldown } from '../../../../x-pack/plugins/dri
 import { txtGoToDiscover } from './i18n';
 
 export interface Params {
-  start: () => {
-    core: Pick<StartDeps['core'], 'savedObjects'>;
-  };
+  start: StartServicesGetter<Pick<Start, 'data'>>;
 }
 
 export class DashboardToDiscoverDrilldown
@@ -51,9 +50,9 @@ export class DashboardToDiscoverDrilldown
   public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
-    indexPatternId: '123',
-    useCurrentFilters: true,
-    useCurrentDateRange: true,
+    pickIndexPattern: false,
+    carryFiltersAndQuery: true,
+    carryTimeRange: true,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {

@@ -18,8 +18,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { CollectConfigProps } from './types';
-import { DiscoverDrilldownConfig } from '../components/discover_drilldown_config';
+import { DiscoverDrilldownConfig, IndexPatternItem } from '../components/discover_drilldown_config';
 import { Params } from './drilldown';
 
 export interface CollectConfigContainerProps extends CollectConfigProps {
@@ -31,36 +32,43 @@ export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
   onConfig,
   params: { start },
 }) => {
-  const [dashboards] = useState([
-    { id: 'dashboard1', title: 'Dashboard 1' },
-    { id: 'dashboard2', title: 'Dashboard 2' },
-    { id: 'dashboard3', title: 'Dashboard 3' },
-    { id: 'dashboard4', title: 'Dashboard 4' },
-  ]);
+  const isMounted = useMountedState();
+  const [indexPatterns, setIndexPatterns] = useState<IndexPatternItem[]>([]);
 
   useEffect(() => {
-    // TODO: Load dashboards...
-  }, [start]);
+    (async () => {
+      const indexPatternSavedObjects = await start().plugins.data.indexPatterns.getCache();
+      if (!isMounted()) return;
+      setIndexPatterns(
+        indexPatternSavedObjects
+          ? indexPatternSavedObjects.map(indexPattern => ({
+              id: indexPattern.id,
+              title: indexPattern.attributes.title,
+            }))
+          : []
+      );
+    })();
+  }, [isMounted, start]);
 
   return (
     <DiscoverDrilldownConfig
       activeDashboardId={config.indexPatternId}
-      dashboards={dashboards}
-      currentFilters={config.useCurrentFilters}
-      keepRange={config.useCurrentDateRange}
+      indexPatterns={indexPatterns}
       onDashboardSelect={indexPatternId => {
         onConfig({ ...config, indexPatternId });
       }}
-      onCurrentFiltersToggle={() =>
+      carryFiltersAndQuery={config.carryFiltersAndQuery}
+      onCarryFiltersAndQueryToggle={() =>
         onConfig({
           ...config,
-          useCurrentFilters: !config.useCurrentFilters,
+          carryFiltersAndQuery: !config.carryFiltersAndQuery,
         })
       }
-      onKeepRangeToggle={() =>
+      carryTimeRange={config.carryTimeRange}
+      onCarryTimeRangeToggle={() =>
         onConfig({
           ...config,
-          useCurrentDateRange: !config.useCurrentDateRange,
+          carryTimeRange: !config.carryTimeRange,
         })
       }
     />

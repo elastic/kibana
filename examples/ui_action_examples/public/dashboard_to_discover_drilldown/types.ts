@@ -27,9 +27,26 @@ export type PlaceContext = EmbeddableContext;
 export type ActionContext = EmbeddableVisTriggerContext;
 
 export interface Config {
+  /**
+   * Whether to use a user selected index pattern, stored in `indexPatternId` field.
+   */
+  pickIndexPattern: boolean;
+
+  /**
+   * ID of index pattern picked by user in UI. If not set, drilldown will use
+   * the index pattern of the visualization.
+   */
   indexPatternId?: string;
-  useCurrentFilters: boolean;
-  useCurrentDateRange: boolean;
+
+  /**
+   * Whether to carry over source dashboard filters and query.
+   */
+  carryFiltersAndQuery: boolean;
+
+  /**
+   * Whether to carry over source dashboard time range.
+   */
+  carryTimeRange: boolean;
 }
 
 export type CollectConfigProps = UiActionsCollectConfigProps<Config>;

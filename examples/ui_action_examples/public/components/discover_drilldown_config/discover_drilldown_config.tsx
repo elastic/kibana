@@ -28,22 +28,22 @@ export interface IndexPatternItem {
 
 export interface DiscoverDrilldownConfigProps {
   activeDashboardId?: string;
-  dashboards: IndexPatternItem[];
-  currentFilters?: boolean;
-  keepRange?: boolean;
+  indexPatterns: IndexPatternItem[];
   onDashboardSelect: (dashboardId: string) => void;
-  onCurrentFiltersToggle?: () => void;
-  onKeepRangeToggle?: () => void;
+  carryFiltersAndQuery?: boolean;
+  onCarryFiltersAndQueryToggle?: () => void;
+  carryTimeRange?: boolean;
+  onCarryTimeRangeToggle?: () => void;
 }
 
 export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = ({
   activeDashboardId,
-  dashboards,
-  currentFilters,
-  keepRange,
+  indexPatterns,
   onDashboardSelect,
-  onCurrentFiltersToggle,
-  onKeepRangeToggle,
+  carryFiltersAndQuery,
+  onCarryFiltersAndQueryToggle,
+  carryTimeRange,
+  onCarryTimeRangeToggle,
 }) => {
   return (
     <>
@@ -51,28 +51,28 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
         <EuiSelect
           name="selectDashboard"
           hasNoInitialSelection={true}
-          options={dashboards.map(({ id, title }) => ({ value: id, text: title }))}
+          options={indexPatterns.map(({ id, title }) => ({ value: id, text: title }))}
           value={activeDashboardId}
           onChange={e => onDashboardSelect(e.target.value)}
         />
       </EuiFormRow>
-      {!!onCurrentFiltersToggle && (
+      {!!onCarryFiltersAndQueryToggle && (
         <EuiFormRow hasChildLabel={false}>
           <EuiSwitch
             name="useCurrentFilters"
-            label="Use current dashboard's filters"
-            checked={!!currentFilters}
-            onChange={onCurrentFiltersToggle}
+            label="Carry over filters and query"
+            checked={!!carryFiltersAndQuery}
+            onChange={onCarryFiltersAndQueryToggle}
           />
         </EuiFormRow>
       )}
-      {!!onKeepRangeToggle && (
+      {!!onCarryTimeRangeToggle && (
         <EuiFormRow hasChildLabel={false}>
           <EuiSwitch
             name="useCurrentDateRange"
-            label="Use current dashboard's date range"
-            checked={!!keepRange}
-            onChange={onKeepRangeToggle}
+            label="Carry over time range"
+            checked={!!carryTimeRange}
+            onChange={onCarryTimeRangeToggle}
           />
         </EuiFormRow>
       )}
