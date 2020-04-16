@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Render } from '../../../../plugins/expressions/public';
+import { ExpressionFunctionDefinition, Render } from '../../expressions/public';
 import { Arguments, MarkdownVisParams } from './types';
 
 interface RenderValue {
