@@ -33,6 +33,7 @@ import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
+import { SavedObjectEmbeddableInput } from '../../../../embeddables';
 
 interface Props {
   onClose: () => void;
@@ -98,8 +99,18 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     }
   };
 
-  public onAddPanel = async (id: string, type: string, name: string) => {
-    this.props.container.addSavedObjectEmbeddable(type, id);
+  public onAddPanel = async (savedObjectId: string, savedObjectType: string, name: string) => {
+    const factoryForSavedObjectType = [...this.props.getAllFactories()].find(
+      factory => factory.savedObjectMetaData && factory.savedObjectMetaData.type === savedObjectType
+    );
+    if (!factoryForSavedObjectType) {
+      throw new EmbeddableFactoryNotFoundError(savedObjectType);
+    }
+
+    this.props.container.addNewEmbeddable<SavedObjectEmbeddableInput>(
+      factoryForSavedObjectType.type,
+      { savedObjectId }
+    );
 
     this.showToast(name);
   };
