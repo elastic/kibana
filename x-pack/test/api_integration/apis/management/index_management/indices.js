@@ -193,8 +193,8 @@ export default function({ getService }) {
           'size',
           'isFrozen',
           'aliases',
-          'isRollupIndex', // data enricher
           'ilm', // data enricher
+          'isRollupIndex', // data enricher
           // Cloud disables CCR, so wouldn't expect follower indices.
           'isFollowerIndex', // data enricher
         ];
@@ -219,8 +219,8 @@ export default function({ getService }) {
             'size',
             'isFrozen',
             'aliases',
-            'isRollupIndex', // data enricher
             'ilm', // data enricher
+            'isRollupIndex', // data enricher
             // Cloud disables CCR, so wouldn't expect follower indices.
             'isFollowerIndex', // data enricher
           ];
