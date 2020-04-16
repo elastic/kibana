@@ -6,8 +6,8 @@
 
 import { PolicyListState, ImmutableReducer } from '../../types';
 import { AppAction } from '../action';
-import { isOnPolicyListPage } from './selectors';
 import { Immutable } from '../../../../../common/types';
+import { isOnPolicyPage, wasPreviouslyOnPolicyPage } from '../../lib/is_on_page';
 
 const initialPolicyListState = (): PolicyListState => {
   return {
@@ -44,10 +44,10 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
   if (action.type === 'userChangedUrl') {
     const newState: Immutable<PolicyListState> = {
       ...state,
-      location: action.payload,
     };
-    const isCurrentlyOnListPage = isOnPolicyListPage(newState);
-    const wasPreviouslyOnListPage = isOnPolicyListPage(state);
+
+    const isCurrentlyOnListPage = isOnPolicyPage();
+    const wasPreviouslyOnListPage = wasPreviouslyOnPolicyPage();
 
     // If on the current page, then return new state with location information
     // Also adjust some state if user is just entering the policy list view

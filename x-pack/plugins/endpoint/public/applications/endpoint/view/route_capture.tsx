@@ -8,6 +8,7 @@ import React, { memo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { EndpointAppLocation, AppAction } from '../types';
+import { storeCurrentLocation } from '../lib/is_on_page';
 
 /**
  * This component should be used above all routes, but below the Provider.
@@ -16,6 +17,7 @@ import { EndpointAppLocation, AppAction } from '../types';
 export const RouteCapture = memo(({ children }) => {
   const location: EndpointAppLocation = useLocation();
   const dispatch: (action: AppAction) => unknown = useDispatch();
+  storeCurrentLocation(location); // <<<== This line captures it "globally"
   dispatch({ type: 'userChangedUrl', payload: location });
   return <>{children}</>;
 });

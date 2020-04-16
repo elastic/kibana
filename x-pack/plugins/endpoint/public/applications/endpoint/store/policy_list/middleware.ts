@@ -6,7 +6,8 @@
 
 import { GetPolicyListResponse, ImmutableMiddlewareFactory, PolicyListState } from '../../types';
 import { sendGetEndpointSpecificDatasources } from './services/ingest';
-import { isOnPolicyListPage, urlSearchParams } from './selectors';
+import { urlSearchParams } from './selectors';
+import { isOnPolicyPage } from '../../lib/is_on_page';
 
 export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListState> = coreStart => {
   const http = coreStart.http;
@@ -16,7 +17,7 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
 
     const state = getState();
 
-    if (action.type === 'userChangedUrl' && isOnPolicyListPage(state)) {
+    if (action.type === 'userChangedUrl' && isOnPolicyPage()) {
       const { page_index: pageIndex, page_size: pageSize } = urlSearchParams(state);
       let response: GetPolicyListResponse;
 
