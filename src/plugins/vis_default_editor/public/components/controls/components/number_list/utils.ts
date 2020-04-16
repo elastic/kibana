@@ -92,7 +92,7 @@ function validateValueUnique(
     isDuplicate: false,
   };
 
-  if (inputValue && list.indexOf(inputValue) !== index) {
+  if (inputValue !== EMPTY_STRING && list.indexOf(inputValue) !== index) {
     result.isDuplicate = true;
     result.error = i18n.translate(
       'visDefaultEditor.controls.numberList.duplicateValueErrorMessage',
