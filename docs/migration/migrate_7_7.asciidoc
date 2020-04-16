@@ -19,9 +19,7 @@ The following section is re-used in the Installation and Upgrade Guide
 [float]
 === Breaking changes for users
 
-// tag::notable-breaking-changes[]
 There are no user-facing breaking changes in 7.7.
-// end::notable-breaking-changes[]
 
 [float]
 === Breaking changes for plugin developers
