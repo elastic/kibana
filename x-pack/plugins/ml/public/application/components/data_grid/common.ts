@@ -6,9 +6,74 @@
 
 import { EuiDataGridSorting, EuiDataGridStyle } from '@elastic/eui';
 
+import {
+  IndexPattern,
+  IFieldType,
+  KBN_FIELD_TYPES,
+} from '../../../../../../../src/plugins/data/public';
+
 import { getNestedProperty } from '../../util/object_utils';
 
 export const INIT_MAX_COLUMNS = 20;
+
+export const euiDataGridStyle: EuiDataGridStyle = {
+  border: 'all',
+  fontSize: 's',
+  cellPadding: 's',
+  stripes: false,
+  rowHover: 'none',
+  header: 'shade',
+};
+
+export const euiDataGridToolbarSettings = {
+  showColumnSelector: true,
+  showStyleSelector: false,
+  showSortSelector: true,
+  showFullScreenSelector: false,
+};
+
+export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): string[] => {
+  const allFields = indexPattern.fields.map(f => f.name);
+  const indexPatternFields: string[] = allFields.filter(f => {
+    if (indexPattern.metaFields.includes(f)) {
+      return false;
+    }
+
+    const fieldParts = f.split('.');
+    const lastPart = fieldParts.pop();
+    if (lastPart === 'keyword' && allFields.includes(fieldParts.join('.'))) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return indexPatternFields;
+};
+
+export const getDataGridSchemaFromKibanaFieldType = (field: IFieldType | undefined) => {
+  // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
+  // To fall back to the default string schema it needs to be undefined.
+  let schema;
+
+  switch (field?.type) {
+    case KBN_FIELD_TYPES.BOOLEAN:
+      schema = 'boolean';
+      break;
+    case KBN_FIELD_TYPES.DATE:
+      schema = 'datetime';
+      break;
+    case KBN_FIELD_TYPES.GEO_POINT:
+    case KBN_FIELD_TYPES.GEO_SHAPE:
+      schema = 'json';
+      break;
+    case KBN_FIELD_TYPES.NUMBER:
+      schema = 'numeric';
+      break;
+  }
+
+  return schema;
+};
 
 /**
  * Helper to sort an array of objects based on an EuiDataGrid sorting configuration.
@@ -53,20 +118,4 @@ export const multiColumnSortFactory = (sortingColumns: EuiDataGridSorting['colum
   };
 
   return sortFn;
-};
-
-export const euiDataGridStyle: EuiDataGridStyle = {
-  border: 'all',
-  fontSize: 's',
-  cellPadding: 's',
-  stripes: false,
-  rowHover: 'none',
-  header: 'shade',
-};
-
-export const euiDataGridToolbarSettings = {
-  showColumnSelector: true,
-  showStyleSelector: false,
-  showSortSelector: true,
-  showFullScreenSelector: false,
 };

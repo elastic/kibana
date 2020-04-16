@@ -4,7 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { multiColumnSortFactory } from './common';
+export {
+  getDataGridSchemaFromKibanaFieldType,
+  getFieldsFromKibanaIndexPattern,
+  multiColumnSortFactory,
+} from './common';
 export { useDataGrid } from './use_data_grid';
 export { DataGrid } from './data_grid';
-export { RenderCellValue, UseIndexDataReturnType, INDEX_STATUS } from './types';
+export {
+  DataGridItem,
+  EsSorting,
+  RenderCellValue,
+  SearchResponse7,
+  UseIndexDataReturnType,
+  INDEX_STATUS,
+} from './types';

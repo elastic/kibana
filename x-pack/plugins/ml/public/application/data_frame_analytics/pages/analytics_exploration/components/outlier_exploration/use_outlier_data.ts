@@ -4,104 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import { SearchResponse } from 'elasticsearch';
+import { useEffect, useMemo } from 'react';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
-import { Dictionary } from '../../../../../../../common/types/common';
+import { getErrorMessage } from '../../../../../../../common/util/errors';
 
 import {
   useColorRange,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
-import { useDataGrid, UseIndexDataReturnType } from '../../../../../components/data_grid';
+import {
+  getDataGridSchemaFromKibanaFieldType,
+  getFieldsFromKibanaIndexPattern,
+  useDataGrid,
+  EsSorting,
+  SearchResponse7,
+  UseIndexDataReturnType,
+} from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { mlFieldFormatService } from '../../../../../services/field_format_service';
 import { ml } from '../../../../../services/ml_api_service';
-import { getNestedProperty } from '../../../../../util/object_utils';
 
-import {
-  getDefaultSelectableFields,
-  getFlattenedFields,
-  DataFrameAnalyticsConfig,
-  EsFieldName,
-  INDEX_STATUS,
-  MAX_COLUMNS,
-  sortColumns,
-} from '../../../../common';
+import { DataFrameAnalyticsConfig, INDEX_STATUS } from '../../../../common';
 import { isKeywordAndTextType } from '../../../../common/fields';
 
-import { getOutlierScoreFieldName, OUTLIER_SCORE } from './common';
-
-const FEATURE_INFLUENCE = 'feature_influence';
-
-export type TableItem = Record<string, any>;
-
-type EsSorting = Dictionary<{
-  order: 'asc' | 'desc';
-}>;
-
-// The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
-interface SearchResponse7 extends SearchResponse<any> {
-  hits: SearchResponse<any>['hits'] & {
-    total: {
-      value: number;
-      relation: string;
-    };
-  };
-}
-
-const getFeatureCount = (resultsField: string, tableItems: TableItem[] = []) => {
-  if (tableItems.length === 0) {
-    return 0;
-  }
-
-  return Object.keys(tableItems[0]).filter(key =>
-    key.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
-  ).length;
-};
+import {
+  getFeatureCount,
+  getOutlierScoreFieldName,
+  FEATURE_INFLUENCE,
+  OUTLIER_SCORE,
+} from './common';
 
 export const useOutlierData = (
   indexPattern: IndexPattern | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: SavedSearchQuery
 ): UseIndexDataReturnType => {
-  const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
-  const [tableFields, setTableFields] = useState<string[]>([]);
-  const [tableItems, setTableItems] = useState<TableItem[]>([]);
-
+  // EuiDataGrid State
   const columns = [];
 
-  if (
-    jobConfig !== undefined &&
-    indexPattern !== undefined &&
-    selectedFields.length > 0 &&
-    tableItems.length > 0
-  ) {
+  if (jobConfig !== undefined && indexPattern !== undefined) {
+    const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
     const resultsField = jobConfig.dest.results_field;
     const removePrefix = new RegExp(`^${resultsField}\.${FEATURE_INFLUENCE}\.`, 'g');
     columns.push(
-      ...tableFields.sort(sortColumns(tableItems[0], resultsField)).map(id => {
+      ...indexPatternFields.map(id => {
         const idWithoutPrefix = id.replace(removePrefix, '');
         const field = indexPattern.fields.getByName(idWithoutPrefix);
-
-        // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
-        // To fall back to the default string schema it needs to be undefined.
-        let schema;
-
-        switch (field?.type) {
-          case 'date':
-            schema = 'datetime';
-            break;
-          case 'geo_point':
-            schema = 'json';
-            break;
-          case 'number':
-            schema = 'numeric';
-            break;
-        }
+        let schema = getDataGridSchemaFromKibanaFieldType(field);
 
         if (id === `${resultsField}.${OUTLIER_SCORE}`) {
           schema = 'numeric';
@@ -121,13 +73,10 @@ export const useOutlierData = (
     setRowCount,
     setSortingColumns,
     setStatus,
+    setTableItems,
     sortingColumns,
-    tableItems: dataGridTableItems,
+    tableItems,
   } = dataGrid;
-
-  useEffect(() => {
-    setTableItems(dataGridTableItems);
-  }, [dataGridTableItems]);
 
   // initialize sorting: reverse sort on outlier score column
   useEffect(() => {
@@ -137,94 +86,52 @@ export const useOutlierData = (
   }, [jobConfig && jobConfig.id]);
 
   // update data grid data
-  useEffect(() => {
-    (async () => {
-      if (jobConfig !== undefined) {
-        setErrorMessage('');
-        setStatus(INDEX_STATUS.LOADING);
+  const getIndexData = async () => {
+    if (jobConfig !== undefined) {
+      setErrorMessage('');
+      setStatus(INDEX_STATUS.LOADING);
 
-        try {
-          const resultsField = jobConfig.dest.results_field;
+      try {
+        const sort: EsSorting = sortingColumns
+          .map(column => {
+            const { id } = column;
+            column.id = isKeywordAndTextType(id) ? `${id}.keyword` : id;
+            return column;
+          })
+          .reduce((s, column) => {
+            s[column.id] = { order: column.direction };
+            return s;
+          }, {} as EsSorting);
 
-          const sort: EsSorting = sortingColumns
-            .map(column => {
-              const { id } = column;
-              column.id = isKeywordAndTextType(id) ? `${id}.keyword` : id;
-              return column;
-            })
-            .reduce((s, column) => {
-              s[column.id] = { order: column.direction };
-              return s;
-            }, {} as EsSorting);
+        const { pageIndex, pageSize } = pagination;
+        const resp: SearchResponse7 = await ml.esSearch({
+          index: jobConfig.dest.index,
+          body: {
+            query: searchQuery,
+            from: pageIndex * pageSize,
+            size: pageSize,
+            ...(Object.keys(sort).length > 0 ? { sort } : {}),
+          },
+        });
 
-          const { pageIndex, pageSize } = pagination;
-          const resp: SearchResponse7 = await ml.esSearch({
-            index: jobConfig.dest.index,
-            body: {
-              query: searchQuery,
-              from: pageIndex * pageSize,
-              size: pageSize,
-              ...(Object.keys(sort).length > 0 ? { sort } : {}),
-            },
-          });
+        setRowCount(resp.hits.total.value);
 
-          setRowCount(resp.hits.total.value);
+        const docs = resp.hits.hits.map(d => d._source);
 
-          const docs = resp.hits.hits;
-
-          if (docs.length === 0) {
-            setTableItems([]);
-            setStatus(INDEX_STATUS.LOADED);
-            return;
-          }
-
-          if (selectedFields.length === 0) {
-            const newSelectedFields = getDefaultSelectableFields(docs, resultsField);
-            setSelectedFields(newSelectedFields.sort().splice(0, MAX_COLUMNS));
-          }
-
-          // Create a version of the doc's source with flattened field names.
-          // This avoids confusion later on if a field name has dots in its name
-          // or is a nested fields when displaying it via EuiInMemoryTable.
-          const flattenedFields = getFlattenedFields(docs[0]._source, resultsField);
-          const transformedTableItems = docs.map(doc => {
-            const item: TableItem = {};
-            flattenedFields.forEach(ff => {
-              item[ff] = getNestedProperty(doc._source, ff);
-              if (item[ff] === undefined) {
-                // If the attribute is undefined, it means it was not a nested property
-                // but had dots in its actual name. This selects the property by its
-                // full name and assigns it to `item[ff]`.
-                item[ff] = doc._source[`"${ff}"`];
-              }
-              if (item[ff] === undefined) {
-                const parts = ff.split('.');
-                if (parts[0] === resultsField && parts.length >= 2) {
-                  parts.shift();
-                  if (doc._source[resultsField] !== undefined) {
-                    item[ff] = doc._source[resultsField][parts.join('.')];
-                  }
-                }
-              }
-            });
-            return item;
-          });
-
-          setTableFields(flattenedFields);
-          setTableItems(transformedTableItems);
-          setStatus(INDEX_STATUS.LOADED);
-        } catch (e) {
-          if (e.message !== undefined) {
-            setErrorMessage(e.message);
-          } else {
-            setErrorMessage(JSON.stringify(e));
-          }
-          setTableItems([]);
-          setStatus(INDEX_STATUS.ERROR);
-        }
+        setTableItems(docs);
+        setStatus(INDEX_STATUS.LOADED);
+      } catch (e) {
+        setErrorMessage(getErrorMessage(e));
+        setStatus(INDEX_STATUS.ERROR);
       }
-    })();
-  }, [jobConfig && jobConfig.id, pagination, searchQuery, selectedFields, sortingColumns]);
+    }
+  };
+
+  useEffect(() => {
+    getIndexData();
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobConfig && jobConfig.id, pagination, searchQuery, sortingColumns]);
 
   const colorRange = useColorRange(
     COLOR_RANGE.BLUE,

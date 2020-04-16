@@ -7,18 +7,19 @@
 import moment from 'moment-timezone';
 import { useEffect, useMemo } from 'react';
 
-import { SearchResponse } from 'elasticsearch';
-
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
-import { Dictionary } from '../../../common/types/common';
 import { formatHumanReadableDateTimeSeconds } from '../../../common/utils/date_utils';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
 import {
+  getDataGridSchemaFromKibanaFieldType,
+  getFieldsFromKibanaIndexPattern,
   getErrorMessage,
   useDataGrid,
+  EsSorting,
   RenderCellValue,
+  SearchResponse7,
   UseIndexDataReturnType,
   INDEX_STATUS,
 } from '../../shared_imports';
@@ -28,20 +29,6 @@ import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 
-type EsSorting = Dictionary<{
-  order: 'asc' | 'desc';
-}>;
-
-// The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
-interface SearchResponse7 extends SearchResponse<any> {
-  hits: SearchResponse<any>['hits'] & {
-    total: {
-      value: number;
-      relation: string;
-    };
-  };
-}
-
 type IndexSearchResponse = SearchResponse7;
 
 export const useIndexData = (
@@ -50,46 +37,13 @@ export const useIndexData = (
 ): UseIndexDataReturnType => {
   const api = useApi();
 
-  const allFields = indexPattern.fields.map(f => f.name);
-  const indexPatternFields: string[] = allFields.filter(f => {
-    if (indexPattern.metaFields.includes(f)) {
-      return false;
-    }
-
-    const fieldParts = f.split('.');
-    const lastPart = fieldParts.pop();
-    if (lastPart === 'keyword' && allFields.includes(fieldParts.join('.'))) {
-      return false;
-    }
-
-    return true;
-  });
+  const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
 
   // EuiDataGrid State
   const columns = [
     ...indexPatternFields.map(id => {
       const field = indexPattern.fields.getByName(id);
-
-      // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
-      // To fall back to the default string schema it needs to be undefined.
-      let schema;
-
-      switch (field?.type) {
-        case KBN_FIELD_TYPES.BOOLEAN:
-          schema = 'boolean';
-          break;
-        case KBN_FIELD_TYPES.DATE:
-          schema = 'datetime';
-          break;
-        case KBN_FIELD_TYPES.GEO_POINT:
-        case KBN_FIELD_TYPES.GEO_SHAPE:
-          schema = 'json';
-          break;
-        case KBN_FIELD_TYPES.NUMBER:
-          schema = 'numeric';
-          break;
-      }
-
+      const schema = getDataGridSchemaFromKibanaFieldType(field);
       return { id, schema };
     }),
   ];

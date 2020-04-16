@@ -4,9 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DataGridItem } from '../../../../../components/data_grid';
+
 import { DataFrameAnalyticsConfig } from '../../../../common';
 
+export const FEATURE_INFLUENCE = 'feature_influence';
 export const OUTLIER_SCORE = 'outlier_score';
 
 export const getOutlierScoreFieldName = (jobConfig: DataFrameAnalyticsConfig) =>
   `${jobConfig.dest.results_field}.${OUTLIER_SCORE}`;
+
+export const getFeatureCount = (resultsField: string, tableItems: DataGridItem[] = []) => {
+  if (tableItems.length === 0) {
+    return 0;
+  }
+
+  return Object.keys(tableItems[0]).filter(key =>
+    key.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
+  ).length;
+};

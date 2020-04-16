@@ -5,8 +5,11 @@
  */
 
 import { Dispatch, SetStateAction } from 'react';
+import { SearchResponse } from 'elasticsearch';
 
 import { EuiDataGridPaginationProps, EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
+
+import { Dictionary } from '../../../../common/types/common';
 
 // TODO move to common location and share with application/data_frame_analytics/common/fields.ts
 export type EsDocSource = Record<string, any>;
@@ -29,6 +32,7 @@ export type OnSort = (
     direction: 'asc' | 'desc';
   }>
 ) => void;
+
 export type RenderCellValue = ({
   rowIndex,
   columnId,
@@ -38,6 +42,22 @@ export type RenderCellValue = ({
   columnId: string;
   setCellProps: any;
 }) => any;
+
+export type DataGridItem = Record<string, any>;
+
+export type EsSorting = Dictionary<{
+  order: 'asc' | 'desc';
+}>;
+
+// The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
+export interface SearchResponse7 extends SearchResponse<any> {
+  hits: SearchResponse<any>['hits'] & {
+    total: {
+      value: number;
+      relation: string;
+    };
+  };
+}
 
 export interface UseIndexDataReturnType {
   columns: EuiDataGridColumn[];

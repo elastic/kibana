@@ -42,21 +42,10 @@ import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/
 
 import { ExplorationQueryBar } from '../exploration_query_bar';
 
+import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
 
 export type TableItem = Record<string, any>;
-
-const FEATURE_INFLUENCE = 'feature_influence';
-
-const getFeatureCount = (resultsField: string, tableItems: TableItem[] = []) => {
-  if (tableItems.length === 0) {
-    return 0;
-  }
-
-  return Object.keys(tableItems[0]).filter(key =>
-    key.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
-  ).length;
-};
 
 const ExplorationTitle: FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
@@ -157,18 +146,6 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
         </EuiCallOut>
       </EuiPanel>
     );
-  }
-
-  let tableError =
-    status === INDEX_STATUS.ERROR && errorMessage.includes('parsing_exception')
-      ? errorMessage
-      : undefined;
-
-  if (status === INDEX_STATUS.LOADED && tableItems.length === 0 && tableError === undefined) {
-    tableError = i18n.translate('xpack.ml.dataframe.analytics.exploration.noDataCalloutBody', {
-      defaultMessage:
-        'The query for the index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
-    });
   }
 
   const colorRange = useColorRange(

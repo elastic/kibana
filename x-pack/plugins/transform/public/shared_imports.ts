@@ -19,10 +19,14 @@ export {
 export { getErrorMessage } from '../../ml/common/util/errors';
 
 export {
+  getDataGridSchemaFromKibanaFieldType,
+  getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
   useDataGrid,
   DataGrid,
+  EsSorting,
   RenderCellValue,
+  SearchResponse7,
   UseIndexDataReturnType,
   INDEX_STATUS,
 } from '../../ml/public/application/components/data_grid';
