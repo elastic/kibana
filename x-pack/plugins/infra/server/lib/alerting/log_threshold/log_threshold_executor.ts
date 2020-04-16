@@ -7,22 +7,22 @@
 import { i18n } from '@kbn/i18n';
 import { AlertExecutorOptions } from '../../../../../alerting/server';
 import { AlertStates, Comparator, LogThresholdAlertParams } from './types';
+import { InfraBackendLibs } from '../../infra_types';
 
 const comparatorMap = {
   [Comparator.GT]: (a: number, b: number) => a > b,
   [Comparator.GT_OR_EQ]: (a: number, b: number) => a >= b,
 };
 
-export const createLogThresholdExecutor = (alertUUID: string) =>
+export const createLogThresholdExecutor = (alertUUID: string, libs: InfraBackendLibs) =>
   async function({ services, params }: AlertExecutorOptions) {
-    const alertInstance = services.alertInstanceFactory(alertUUID);
-    const { threshold, comparator, timeUnit, timeSize } = params as LogThresholdAlertParams;
-
+    const { alertInstanceFactory, savedObjectsClient } = services;
+    const { sources } = libs;
+    const alertInstance = alertInstanceFactory(alertUUID);
+    const { timeSize, timeUnit, count, criteria } = params as LogThresholdAlertParams;
     const interval = `${timeSize}${timeUnit}`;
-
-    const logCount = 1; // Replace this with a function to count matching logs over the `interval`
-    const comparisonFunction = comparatorMap[comparator];
-
+    const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
+    const indexPattern = sourceConfiguration.configuration.logAlias;
     const shouldAlertFire = comparisonFunction(logCount, threshold);
     const isNoData = false; // Set this to true if there is no log data over the specified interval
     const isError = false; // Set this to true if Elasticsearch throws an error when fetching logs

@@ -9,8 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { PluginSetupContract } from '../../../../../alerting/server';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from './types';
+import { InfraBackendLibs } from '../../infra_types';
 
-export async function registerMetricThresholdAlertType(alertingPlugin: PluginSetupContract) {
+export async function registerMetricThresholdAlertType(
+  alertingPlugin: PluginSetupContract,
+  libs: InfraBackendLibs
+) {
   if (!alertingPlugin) {
     throw new Error(
       'Cannot register metric threshold alert type.  Both the actions and alerting plugins need to be enabled.'

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { PluginSetupContract } from '../../../../../alerting/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID, Comparator } from './types';
+import { InfraBackendLibs } from '../../infra_types';
 
 // const sampleActionVariableDescription = i18n.translate(
 //   'xpack.infra.logs.alerting.threshold.sampleActionVariableDescription',
@@ -44,7 +45,10 @@ const criteriaSchema = schema.object({
   value: schema.oneOf([schema.number(), schema.string()]),
 });
 
-export async function registerLogThresholdAlertType(alertingPlugin: PluginSetupContract) {
+export async function registerLogThresholdAlertType(
+  alertingPlugin: PluginSetupContract,
+  libs: InfraBackendLibs
+) {
   if (!alertingPlugin) {
     throw new Error(
       'Cannot register log threshold alert type.  Both the actions and alerting plugins need to be enabled.'
@@ -66,7 +70,7 @@ export async function registerLogThresholdAlertType(alertingPlugin: PluginSetupC
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
-    executor: createLogThresholdExecutor(alertUUID),
+    executor: createLogThresholdExecutor(alertUUID, libs),
     // actionVariables: {
     //   context: [{ name: 'sample', description: sampleActionVariableDescription }],
     // },
