@@ -89,10 +89,10 @@ describe('.execute()', () => {
       getSavedObjectsClient: () => Promise.resolve(savedObjectsClient),
     });
     const selectRangeFiltersSpy = jest
-      .spyOn(dataPluginActions, 'createFiltersFromBrushEvent')
+      .spyOn(dataPluginActions, 'createFiltersFromRangeSelectAction')
       .mockImplementationOnce(() => Promise.resolve(filtersFromEvent));
     const valueClickFiltersSpy = jest
-      .spyOn(dataPluginActions, 'createFiltersFromValueClickEvent')
+      .spyOn(dataPluginActions, 'createFiltersFromValueClickAction')
       .mockImplementationOnce(() => Promise.resolve(filtersFromEvent));
 
     await drilldown.execute(

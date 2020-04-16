@@ -61,8 +61,8 @@ export class DashboardToDashboardDrilldown
     const navigateToApp = await this.params.getNavigateToApp();
 
     const {
-      createFiltersFromValueClickEvent,
-      createFiltersFromBrushEvent,
+      createFiltersFromRangeSelectAction,
+      createFiltersFromValueClickAction,
     } = await this.params.getDataPluginActions();
     const {
       timeRange: currentTimeRange,
@@ -85,12 +85,12 @@ export class DashboardToDashboardDrilldown
       // TODO: not sure what would be the best way to handle types here
       // context.data is `unknown` and comes from `EmbeddableVisTriggerContext`
       try {
-        return context.data.range
-          ? await createFiltersFromBrushEvent(context.data as any)
-          : await createFiltersFromValueClickEvent(context.data as any);
+        return (context.data as any).range
+          ? await createFiltersFromValueClickAction(context.data as any)
+          : await createFiltersFromRangeSelectAction(context.data as any);
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.warn('DashboardToDashboard drilldown: unable to extract filters from event', e);
+        console.warn("DashboardToDashboard drilldown: can't extract filters from event", e);
         return [];
       }
     })();
@@ -108,7 +108,7 @@ export class DashboardToDashboardDrilldown
 
     const dashboardPath = await getUrlGenerator(DASHBOARD_APP_URL_GENERATOR).createUrl({
       dashboardId: config.dashboardId,
-      query,
+      query: config.useCurrentFilters ? query : undefined,
       timeRange,
       filters: [...existingFilters, ...filtersFromEvent],
     });
