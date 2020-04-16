@@ -121,15 +121,15 @@ export const patchRulesBulkRoute = (router: IRouter) => {
               anomalyThreshold,
               machineLearningJobId,
             });
-            if (rule != null) {
+            if (rule != null && rule.enabled != null && rule.name != null) {
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: rule.id,
                 alertsClient,
                 savedObjectsClient,
-                enabled: rule.enabled!,
+                enabled: rule.enabled,
                 actions,
                 throttle,
-                name: rule.name!,
+                name: rule.name,
               });
               const ruleStatuses = await savedObjectsClient.find<
                 IRuleSavedAttributesSavedObjectAttributes

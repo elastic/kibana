@@ -15,12 +15,21 @@ import {
   LOADING_INITIAL_PREBUILT_RULES_TABLE,
   LOADING_SPINNER,
   PAGINATION_POPOVER_BTN,
+  RELOAD_PREBUILT_RULES_BTN,
   RULE_CHECKBOX,
   RULE_NAME,
+  RULE_SWITCH,
+  RULE_SWITCH_LOADER,
   RULES_TABLE,
+  SORT_RULES_BTN,
   THREE_HUNDRED_ROWS,
-  RELOAD_PREBUILT_RULES_BTN,
 } from '../screens/signal_detection_rules';
+
+export const activateRule = (rulePosition: number) => {
+  cy.get(RULE_SWITCH)
+    .eq(rulePosition)
+    .click({ force: true });
+};
 
 export const changeToThreeHundredRowsPerPage = () => {
   cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
@@ -71,6 +80,13 @@ export const selectNumberOfRules = (numberOfRules: number) => {
   }
 };
 
+export const sortByActivatedRules = () => {
+  cy.get(SORT_RULES_BTN).click({ force: true });
+  waitForRulesToBeLoaded();
+  cy.get(SORT_RULES_BTN).click({ force: true });
+  waitForRulesToBeLoaded();
+};
+
 export const waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded = () => {
   cy.get(LOADING_INITIAL_PREBUILT_RULES_TABLE).should('exist');
   cy.get(LOADING_INITIAL_PREBUILT_RULES_TABLE).should('not.exist');
@@ -79,6 +95,11 @@ export const waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded = () => {
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
   cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
   cy.get(RULES_TABLE).should('exist');
+};
+
+export const waitForRuleToBeActivated = () => {
+  cy.get(RULE_SWITCH_LOADER).should('exist');
+  cy.get(RULE_SWITCH_LOADER).should('not.exist');
 };
 
 export const waitForRulesToBeLoaded = () => {

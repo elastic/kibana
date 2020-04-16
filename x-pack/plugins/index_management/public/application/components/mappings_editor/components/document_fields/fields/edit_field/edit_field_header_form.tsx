@@ -90,7 +90,6 @@ export const EditFieldHeaderForm = React.memo(
           {/* Field sub type (if any) - will never be the case if we have an "other" type */}
           {hasSubType && (
             <EuiFlexItem>
-              {' '}
               <UseField
                 path="subType"
                 config={{

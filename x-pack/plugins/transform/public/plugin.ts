@@ -8,15 +8,18 @@ import { i18n as kbnI18n } from '@kbn/i18n';
 import { CoreSetup } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementSetup } from 'src/plugins/management/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { registerFeature } from './register_feature';
 
 export interface PluginsDependencies {
   data: DataPublicPluginStart;
   management: ManagementSetup;
+  home: HomePublicPluginSetup;
 }
 
 export class TransformUiPlugin {
   public setup(coreSetup: CoreSetup<PluginsDependencies>, pluginsSetup: PluginsDependencies): void {
-    const { management } = pluginsSetup;
+    const { management, home } = pluginsSetup;
 
     // Register management section
     const esSection = management.sections.getSection('elasticsearch');
@@ -33,6 +36,7 @@ export class TransformUiPlugin {
         },
       });
     }
+    registerFeature(home);
   }
 
   public start() {}

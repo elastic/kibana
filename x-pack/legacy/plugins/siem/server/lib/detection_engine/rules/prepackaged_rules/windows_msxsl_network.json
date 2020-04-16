@@ -4,7 +4,6 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
   "name": "Network Connection via MsXsl",
   "query": "process.name:msxsl.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)",
   "risk_score": 21,

@@ -27,6 +27,11 @@ import { getInitialLayers } from '../angular/get_initial_layers';
 import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 import '../angular/services/gis_map_saved_object_loader';
 import { bindSetupCoreAndPlugins, bindStartCoreAndPlugins } from '../plugin';
+// @ts-ignore
+import {
+  bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
+  bindStartCoreAndPlugins as bindNpStartCoreAndPlugins,
+} from '../../../../../plugins/maps/public/plugin'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
@@ -40,7 +45,9 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   constructor() {
     // Init required services. Necessary while in legacy
     bindSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
+    bindNpSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
     bindStartCoreAndPlugins(npStart.core, npStart.plugins);
+    bindNpStartCoreAndPlugins(npStart.core, npStart.plugins);
   }
 
   async isEditable() {

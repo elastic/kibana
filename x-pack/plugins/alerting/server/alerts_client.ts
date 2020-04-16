@@ -13,6 +13,7 @@ import {
   SavedObjectReference,
   SavedObject,
 } from 'src/core/server';
+import { PreConfiguredAction } from '../../actions/server';
 import {
   Alert,
   PartialAlert,
@@ -53,6 +54,7 @@ interface ConstructorOptions {
   getUserName: () => Promise<string | null>;
   createAPIKey: () => Promise<CreateAPIKeyResult>;
   invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export interface FindOptions {
@@ -123,6 +125,7 @@ export class AlertsClient {
   private readonly invalidateAPIKey: (
     params: InvalidateAPIKeyParams
   ) => Promise<InvalidateAPIKeyResult>;
+  private preconfiguredActions: PreConfiguredAction[];
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
 
   constructor({
@@ -136,6 +139,7 @@ export class AlertsClient {
     createAPIKey,
     invalidateAPIKey,
     encryptedSavedObjectsPlugin,
+    preconfiguredActions,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
@@ -147,6 +151,7 @@ export class AlertsClient {
     this.createAPIKey = createAPIKey;
     this.invalidateAPIKey = invalidateAPIKey;
     this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
+    this.preconfiguredActions = preconfiguredActions;
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
@@ -659,18 +664,37 @@ export class AlertsClient {
   private async denormalizeActions(
     alertActions: NormalizedAlertAction[]
   ): Promise<{ actions: RawAlert['actions']; references: SavedObjectReference[] }> {
-    // Fetch action objects in bulk
-    const actionIds = [...new Set(alertActions.map(alertAction => alertAction.id))];
-    const bulkGetOpts = actionIds.map(id => ({ id, type: 'action' }));
-    const bulkGetResult = await this.savedObjectsClient.bulkGet(bulkGetOpts);
     const actionMap = new Map<string, any>();
-    for (const action of bulkGetResult.saved_objects) {
-      if (action.error) {
-        throw Boom.badRequest(
-          `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
-        );
+    // map preconfigured actions
+    for (const alertAction of alertActions) {
+      const action = this.preconfiguredActions.find(
+        preconfiguredAction => preconfiguredAction.id === alertAction.id
+      );
+      if (action !== undefined) {
+        actionMap.set(action.id, action);
       }
-      actionMap.set(action.id, action);
+    }
+    // Fetch action objects in bulk
+    // Excluding preconfigured actions to avoid an not found error, which is already mapped
+    const actionIds = [
+      ...new Set(
+        alertActions
+          .filter(alertAction => !actionMap.has(alertAction.id))
+          .map(alertAction => alertAction.id)
+      ),
+    ];
+    if (actionIds.length > 0) {
+      const bulkGetOpts = actionIds.map(id => ({ id, type: 'action' }));
+      const bulkGetResult = await this.savedObjectsClient.bulkGet(bulkGetOpts);
+
+      for (const action of bulkGetResult.saved_objects) {
+        if (action.error) {
+          throw Boom.badRequest(
+            `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
+          );
+        }
+        actionMap.set(action.id, action);
+      }
     }
     // Extract references and set actionTypeId
     const references: SavedObjectReference[] = [];
@@ -681,10 +705,16 @@ export class AlertsClient {
         name: actionRef,
         type: 'action',
       });
+      const actionMapValue = actionMap.get(id);
+      // if action is a save object, than actionTypeId should be under attributes property
+      // if action is a preconfigured, than actionTypeId is the action property
+      const actionTypeId = actionIds.find(actionId => actionId === id)
+        ? actionMapValue.attributes.actionTypeId
+        : actionMapValue.actionTypeId;
       return {
         ...alertAction,
         actionRef,
-        actionTypeId: actionMap.get(id).attributes.actionTypeId,
+        actionTypeId,
       };
     });
     return {

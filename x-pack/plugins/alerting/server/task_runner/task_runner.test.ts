@@ -14,6 +14,8 @@ import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_o
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock } from '../../../actions/server/mocks';
+import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { IEventLogger } from '../../../event_log/server';
 
 const alertType = {
   id: 'test',
@@ -59,6 +61,7 @@ describe('Task Runner', () => {
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
+    eventLogger: jest.Mocked<IEventLogger>;
   } = {
     getServices: jest.fn().mockReturnValue(services),
     actionsPlugin: actionsMock.createStart(),
@@ -66,6 +69,7 @@ describe('Task Runner', () => {
     logger: loggingServiceMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     getBasePath: jest.fn().mockReturnValue(undefined),
+    eventLogger: eventLoggerMock.create(),
   };
 
   const mockedAlertTypeSavedObject = {
@@ -156,6 +160,26 @@ describe('Task Runner', () => {
     expect(call.services.alertInstanceFactory).toBeTruthy();
     expect(call.services.callCluster).toBeTruthy();
     expect(call.services).toBeTruthy();
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "execute",
+        },
+        "kibana": Object {
+          "saved_objects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+            },
+          ],
+        },
+        "message": "alert executed: test:1: 'alert-name'",
+      }
+    `);
   });
 
   test('actionsPlugin.execute is called per alert instance that is scheduled', async () => {
@@ -194,6 +218,75 @@ describe('Task Runner', () => {
                     },
                   ]
           `);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "event": Object {
+              "action": "execute",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "new-instance",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' created new instance: '1'",
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "execute-action",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "action",
+                },
+              ],
+            },
+            "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: undefined:1",
+          },
+        ],
+      ]
+    `);
   });
 
   test('persists alertInstances passed in from state, only if they are scheduled for execution', async () => {
@@ -240,6 +333,50 @@ describe('Task Runner', () => {
           },
         },
       }
+    `);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "event": Object {
+              "action": "execute",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "resolved-instance",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "2",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' resolved instance: '2'",
+          },
+        ],
+      ]
     `);
   });
 
@@ -409,6 +546,33 @@ describe('Task Runner', () => {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
         },
       }
+    `);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "error": Object {
+              "message": "OMG",
+            },
+            "event": Object {
+              "action": "execute",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "alert execution failure: test:1: 'alert-name'",
+          },
+        ],
+      ]
     `);
   });
 

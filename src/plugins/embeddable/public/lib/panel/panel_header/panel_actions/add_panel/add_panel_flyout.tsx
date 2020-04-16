@@ -29,7 +29,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';

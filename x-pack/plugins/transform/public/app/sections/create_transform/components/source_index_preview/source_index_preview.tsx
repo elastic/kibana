@@ -105,6 +105,9 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
       let schema;
 
       switch (field?.type) {
+        case KBN_FIELD_TYPES.BOOLEAN:
+          schema = 'boolean';
+          break;
         case KBN_FIELD_TYPES.DATE:
           schema = 'datetime';
           break;
@@ -188,6 +191,10 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
       const field = indexPattern.fields.getByName(columnId);
       if (field?.type === KBN_FIELD_TYPES.DATE) {
         return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
+      }
+
+      if (field?.type === KBN_FIELD_TYPES.BOOLEAN) {
+        return cellValue ? 'true' : 'false';
       }
 
       return cellValue;

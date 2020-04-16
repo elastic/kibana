@@ -24,11 +24,11 @@ import compactStringify from 'json-stringify-pretty-compact';
 import hjson from 'hjson';
 import { i18n } from '@kbn/i18n';
 
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
 import { VegaActionsMenu } from './vega_actions_menu';
-import { VisOptionsProps } from '../../../vis_default_editor/public';
 
 const aceOptions = {
   maxLines: Infinity,

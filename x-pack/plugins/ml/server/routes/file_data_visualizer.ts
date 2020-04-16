@@ -7,15 +7,17 @@
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from 'kibana/server';
 import { MAX_BYTES } from '../../common/constants/file_datavisualizer';
-import { wrapError } from '../client/error_wrapper';
 import {
   InputOverrides,
+  Settings,
+  IngestPipelineWrapper,
+  Mappings,
+} from '../../common/types/file_datavisualizer';
+import { wrapError } from '../client/error_wrapper';
+import {
   InputData,
   fileDataVisualizerProvider,
   importDataProvider,
-  Settings,
-  InjectPipeline,
-  Mappings,
 } from '../models/file_data_visualizer';
 
 import { RouteInitialization } from '../types';
@@ -32,7 +34,7 @@ function importData(
   index: string,
   settings: Settings,
   mappings: Mappings,
-  ingestPipeline: InjectPipeline,
+  ingestPipeline: IngestPipelineWrapper,
   data: InputData
 ) {
   const { importData: importDataFunc } = importDataProvider(context.ml!.mlClient.callAsCurrentUser);

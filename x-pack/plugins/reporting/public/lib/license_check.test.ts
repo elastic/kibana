@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { checkLicense } from './license_check';
-import { LicenseCheck } from '../../../licensing/public';
 
 describe('License check', () => {
   it('enables and shows links when licenses are good mkay', () => {
-    expect(checkLicense({ state: 'VALID' } as LicenseCheck)).toEqual({
+    expect(checkLicense({ state: 'valid' })).toEqual({
       enableLinks: true,
       showLinks: true,
       message: '',
@@ -16,7 +15,7 @@ describe('License check', () => {
   });
 
   it('disables and shows links when licenses are not valid', () => {
-    expect(checkLicense({ state: 'INVALID' } as LicenseCheck)).toEqual({
+    expect(checkLicense({ state: 'invalid' })).toEqual({
       enableLinks: false,
       showLinks: false,
       message: 'Your license does not support Reporting. Please upgrade your license.',
@@ -24,7 +23,7 @@ describe('License check', () => {
   });
 
   it('shows links, but disables them, on expired licenses', () => {
-    expect(checkLicense({ state: 'EXPIRED' } as LicenseCheck)).toEqual({
+    expect(checkLicense({ state: 'expired' })).toEqual({
       enableLinks: false,
       showLinks: true,
       message: 'You cannot use Reporting because your license has expired.',
@@ -32,7 +31,7 @@ describe('License check', () => {
   });
 
   it('shows links, but disables them, when license checks are unavailable', () => {
-    expect(checkLicense({ state: 'UNAVAILABLE' } as LicenseCheck)).toEqual({
+    expect(checkLicense({ state: 'unavailable' })).toEqual({
       enableLinks: false,
       showLinks: true,
       message:

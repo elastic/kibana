@@ -15,7 +15,7 @@ export enum API_URLS {
   PING_HISTOGRAM = `/api/uptime/ping/histogram`,
   SNAPSHOT_COUNT = `/api/uptime/snapshot/count`,
   FILTERS = `/api/uptime/filters`,
-  logPageView = `/api/uptime/logPageView`,
+  LOG_PAGE_VIEW = `/api/uptime/log_page_view`,
 
   ML_MODULE_JOBS = `/api/ml/modules/jobs_exist/`,
   ML_SETUP_MODULE = '/api/ml/modules/setup/',

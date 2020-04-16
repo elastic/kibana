@@ -4,7 +4,6 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
   "name": "Modification of Boot Configuration",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:bcdedit.exe and process.args:(/set and (bootstatuspolicy and ignoreallfailures or no and recoveryenabled))",
   "risk_score": 21,

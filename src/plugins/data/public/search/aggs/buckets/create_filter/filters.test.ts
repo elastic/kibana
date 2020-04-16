@@ -21,8 +21,9 @@ import { getFiltersBucketAgg, FiltersBucketAggDependencies } from '../filters';
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
-import { IBucketAggConfig } from '../_bucket_agg_type';
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { IBucketAggConfig } from '../bucket_agg_type';
+import { coreMock, notificationServiceMock } from '../../../../../../../core/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 
 describe('AggConfig Filters', () => {
   describe('filters', () => {
@@ -33,6 +34,10 @@ describe('AggConfig Filters', () => {
 
       aggTypesDependencies = {
         uiSettings,
+        getInternalStartServices: () => ({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
+        }),
       };
     });
 
@@ -64,10 +69,14 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry: mockAggTypesRegistry([getFiltersBucketAgg(aggTypesDependencies)]) }
+        {
+          typesRegistry: mockAggTypesRegistry([getFiltersBucketAgg(aggTypesDependencies)]),
+          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+        }
       );
     };
-    it('should return a filters filter', () => {
+
+    test('should return a filters filter', () => {
       const aggConfigs = getAggConfigs();
       const filter = createFilterFilters(aggConfigs.aggs[0] as IBucketAggConfig, 'type:nginx');
 

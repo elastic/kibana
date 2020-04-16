@@ -29,7 +29,6 @@ export declare class Field implements IFieldType
 |  [format](./kibana-plugin-plugins-data-public.indexpatternfield.format.md) |  | <code>any</code> |  |
 |  [lang](./kibana-plugin-plugins-data-public.indexpatternfield.lang.md) |  | <code>string</code> |  |
 |  [name](./kibana-plugin-plugins-data-public.indexpatternfield.name.md) |  | <code>string</code> |  |
-|  [routes](./kibana-plugin-plugins-data-public.indexpatternfield.routes.md) |  | <code>Record&lt;string, string&gt;</code> |  |
 |  [script](./kibana-plugin-plugins-data-public.indexpatternfield.script.md) |  | <code>string</code> |  |
 |  [scripted](./kibana-plugin-plugins-data-public.indexpatternfield.scripted.md) |  | <code>boolean</code> |  |
 |  [searchable](./kibana-plugin-plugins-data-public.indexpatternfield.searchable.md) |  | <code>boolean</code> |  |

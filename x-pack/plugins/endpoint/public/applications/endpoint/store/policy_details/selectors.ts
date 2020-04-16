@@ -79,14 +79,8 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
   }
 );
 
-/** Returns an object of all the windows eventing configuration */
-export const windowsEventing = (state: PolicyDetailsState) => {
-  const config = policyConfig(state);
-  return config && config.windows.events;
-};
-
 /** Returns the total number of possible windows eventing configurations */
-export const totalWindowsEventing = (state: PolicyDetailsState): number => {
+export const totalWindowsEvents = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {
     return Object.keys(config.windows.events).length;
@@ -95,10 +89,50 @@ export const totalWindowsEventing = (state: PolicyDetailsState): number => {
 };
 
 /** Returns the number of selected windows eventing configurations */
-export const selectedWindowsEventing = (state: PolicyDetailsState): number => {
+export const selectedWindowsEvents = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {
     return Object.values(config.windows.events).reduce((count, event) => {
+      return event === true ? count + 1 : count;
+    }, 0);
+  }
+  return 0;
+};
+
+/** Returns the total number of possible mac eventing configurations */
+export const totalMacEvents = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.keys(config.mac.events).length;
+  }
+  return 0;
+};
+
+/** Returns the number of selected mac eventing configurations */
+export const selectedMacEvents = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.values(config.mac.events).reduce((count, event) => {
+      return event === true ? count + 1 : count;
+    }, 0);
+  }
+  return 0;
+};
+
+/** Returns the total number of possible linux eventing configurations */
+export const totalLinuxEvents = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.keys(config.linux.events).length;
+  }
+  return 0;
+};
+
+/** Returns the number of selected liinux eventing configurations */
+export const selectedLinuxEvents = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.values(config.linux.events).reduce((count, event) => {
       return event === true ? count + 1 : count;
     }, 0);
   }

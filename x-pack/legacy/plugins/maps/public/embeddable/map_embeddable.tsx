@@ -57,7 +57,8 @@ import {
 } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RenderToolTipContent } from '../../../../../plugins/maps/public/layers/tooltips/tooltip_property';
 
 interface MapEmbeddableConfig {
   editUrl?: string;

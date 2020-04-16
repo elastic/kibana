@@ -15,7 +15,9 @@ import { AppMountParameters, CoreSetup, CoreStart } from 'src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
+import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
+import { DashboardConstants } from '../../../../../src/plugins/dashboard/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { EditorFrameService } from './editor_frame_service';
 import { IndexPatternDatasource } from './indexpattern_datasource';
@@ -37,16 +39,13 @@ import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../../../plugins/lens/com
 import { addEmbeddableToDashboardUrl, getUrlVars } from './helpers';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
-import { VisualizationsSetup, DashboardConstants } from './legacy_imports';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
-  __LEGACY: {
-    visualizations: VisualizationsSetup;
-  };
+  visualizations: VisualizationsSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -77,13 +76,7 @@ export class LensPlugin {
 
   setup(
     core: CoreSetup<LensPluginStartDependencies>,
-    {
-      kibanaLegacy,
-      expressions,
-      data,
-      embeddable,
-      __LEGACY: { visualizations },
-    }: LensPluginSetupDependencies
+    { kibanaLegacy, expressions, data, embeddable, visualizations }: LensPluginSetupDependencies
   ) {
     const editorFrameSetupInterface = this.editorFrameService.setup(core, {
       data,

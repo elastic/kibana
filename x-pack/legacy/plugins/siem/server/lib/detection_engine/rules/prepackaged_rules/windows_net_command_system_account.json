@@ -4,7 +4,6 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
   "name": "Net command via SYSTEM account",
   "query": "(process.name:net.exe or process.name:net1.exe and not process.parent.name:net.exe) and user.name:SYSTEM and event.action:\"Process Create (rule: ProcessCreate)\"",
   "risk_score": 21,

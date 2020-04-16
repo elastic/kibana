@@ -117,7 +117,7 @@ export const MlPopover = React.memo(() => {
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >
-            {i18n.ANOMALY_DETECTION}
+            {i18n.ML_JOB_SETTINGS}
           </EuiButtonEmpty>
         }
         isOpen={isPopoverOpen}
@@ -142,14 +142,14 @@ export const MlPopover = React.memo(() => {
               dispatch({ type: 'refresh' });
             }}
           >
-            {i18n.ANOMALY_DETECTION}
+            {i18n.ML_JOB_SETTINGS}
           </EuiButtonEmpty>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
       >
         <PopoverContentsDiv data-test-subj="ml-popover-contents">
-          <EuiPopoverTitle>{i18n.ANOMALY_DETECTION_TITLE}</EuiPopoverTitle>
+          <EuiPopoverTitle>{i18n.ML_JOB_SETTINGS}</EuiPopoverTitle>
           <PopoverDescription />
 
           <EuiSpacer />

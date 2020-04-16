@@ -41,6 +41,7 @@ describe('buildSignalsSearchQuery', () => {
                   '@timestamp': {
                     gt: from,
                     lte: to,
+                    format: 'epoch_millis',
                   },
                 },
               },

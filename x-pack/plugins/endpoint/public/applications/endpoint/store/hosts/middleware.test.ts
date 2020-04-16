@@ -58,6 +58,6 @@ describe('host list middleware', () => {
         paging_properties: [{ page_index: 0 }, { page_size: 10 }],
       }),
     });
-    expect(listData(getState())).toEqual(apiResponse.hosts);
+    expect(listData(getState())).toEqual(apiResponse.hosts.map(hostInfo => hostInfo.metadata));
   });
 });

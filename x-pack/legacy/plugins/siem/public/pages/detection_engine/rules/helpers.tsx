@@ -64,7 +64,7 @@ export const getActionsStepsData = (
     actions: actions?.map(transformRuleToAlertAction),
     isNew: false,
     throttle,
-    kibanaSiemAppUrl: meta?.kibanaSiemAppUrl,
+    kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,
   };
 };

@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { Filter } from 'src/plugins/data/public';
-import { RenderToolTipContent } from '../../layers/tooltips/tooltip_property';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RenderToolTipContent } from '../../../../../../plugins/maps/public/layers/tooltips/tooltip_property';
 
 export const GisMap: React.ComponentType<{
   addFilters: ((filters: Filter[]) => void) | null;

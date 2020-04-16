@@ -28,7 +28,7 @@ import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
 import { KBN_FIELD_TYPES, IFieldFormat } from '../../../common';
 import { ISearchSource } from '../search_source';
-import { getFieldFormats } from '../../../public/services';
+import { GetInternalStartServicesFn } from '../../types';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -60,15 +60,12 @@ export interface AggTypeConfig<
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 }
 
-const getFormat = (agg: AggConfig) => {
-  const field = agg.getField();
-  const fieldFormatsService = getFieldFormats();
-
-  return field ? field.format : fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.STRING);
-};
-
 // TODO need to make a more explicit interface for this
 export type IAggType = AggType;
+
+export interface AggTypeDependencies {
+  getInternalStartServices: GetInternalStartServicesFn;
+}
 
 export class AggType<
   TAggConfig extends AggConfig = AggConfig,
@@ -215,7 +212,10 @@ export class AggType<
    * @private
    * @param {object} config - used to set the properties of the AggType
    */
-  constructor(config: AggTypeConfig<TAggConfig>) {
+  constructor(
+    config: AggTypeConfig<TAggConfig>,
+    { getInternalStartServices }: AggTypeDependencies
+  ) {
     this.name = config.name;
     this.type = config.type || 'metrics';
     this.dslName = config.dslName || config.name;
@@ -251,14 +251,22 @@ export class AggType<
         });
       }
 
-      this.params = initParams(params);
+      this.params = initParams(params, { getInternalStartServices });
     }
 
     this.getRequestAggs = config.getRequestAggs || noop;
     this.getResponseAggs = config.getResponseAggs || (() => {});
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
     this.postFlightRequest = config.postFlightRequest || identity;
-    this.getFormat = config.getFormat || getFormat;
+
+    this.getFormat =
+      config.getFormat ||
+      ((agg: TAggConfig) => {
+        const field = agg.getField();
+        const { fieldFormats } = getInternalStartServices();
+
+        return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
+      });
     this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});
   }
 }

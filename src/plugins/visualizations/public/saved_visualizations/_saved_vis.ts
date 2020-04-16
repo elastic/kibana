@@ -35,7 +35,7 @@ import { extractReferences, injectReferences } from './saved_visualization_refer
 import { IIndexPattern, ISearchSource, SearchSource } from '../../../../plugins/data/public';
 import { ISavedVis, SerializedVis } from '../types';
 import { createSavedSearchesLoader } from '../../../../plugins/discover/public';
-import { getChrome, getOverlays, getIndexPatterns, getSavedObjects } from '../services';
+import { getChrome, getOverlays, getIndexPatterns, getSavedObjects, getSearch } from '../services';
 
 export const convertToSerializedVis = async (savedVis: ISavedVis): Promise<SerializedVis> => {
   const { visState } = savedVis;
@@ -87,6 +87,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
     const savedSearch = await createSavedSearchesLoader({
       savedObjectsClient: getSavedObjects().client,
       indexPatterns: getIndexPatterns(),
+      search: getSearch(),
       chrome: getChrome(),
       overlays: getOverlays(),
     }).get(savedSearchId);

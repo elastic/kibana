@@ -52,13 +52,12 @@ export type Fields = Field[];
  * expandFields takes the given fields read from yaml and expands them.
  * There are dotted fields in the field.yml like `foo.bar`. These should
  * be stored as an field within a 'group' field.
- *
- * Note: This function modifies the passed fields array.
  */
-export function expandFields(fields: Fields) {
+export function expandFields(fields: Fields): Fields {
+  const newFields: Fields = [];
+
   fields.forEach((field, key) => {
     const fieldName = field.name;
-
     // If the field name contains a dot, it means we need to
     // - take the first part of the name
     // - create a field of type 'group' with this first part
@@ -71,30 +70,29 @@ export function expandFields(fields: Fields) {
       const groupFieldName = nameParts[0];
 
       // Put back together the parts again for the new field name
-      const restFieldName = nameParts.slice(1).join('.');
+      const nestedFieldName = nameParts.slice(1).join('.');
 
       // keep all properties of the original field, but give it the shortened name
-      field.name = restFieldName;
+      const nestedField = { ...field, name: nestedFieldName };
 
       // create a new field of type group with the original field in the fields array
       const groupField: Field = {
         name: groupFieldName,
         type: 'group',
-        fields: [field],
+        fields: expandFields([nestedField]),
       };
-      // check child fields further down the tree
-      if (groupField.fields) {
-        expandFields(groupField.fields);
-      }
       // Replace the original field in the array with the new one
-      fields[key] = groupField;
+      newFields.push(groupField);
     } else {
       // even if this field doesn't have dots to expand, its child fields further down the tree might
-      if (field.fields) {
-        expandFields(field.fields);
+      const newField = { ...field };
+      if (newField.fields) {
+        newField.fields = expandFields(newField.fields);
       }
+      newFields.push(newField);
     }
   });
+  return newFields;
 }
 /**
  * dedupFields takes the given fields and merges sibling fields with the
@@ -180,8 +178,8 @@ export const getField = (fields: Fields, pathNames: string[]): Field | undefined
 };
 
 export function processFields(fields: Fields): Fields {
-  expandFields(fields);
-  const dedupedFields = dedupFields(fields);
+  const expandedFields = expandFields(fields);
+  const dedupedFields = dedupFields(expandedFields);
   return validateFields(dedupedFields, dedupedFields);
 }
 

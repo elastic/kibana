@@ -326,6 +326,38 @@ describe('Options', () => {
   });
 });
 
+describe('Cache-Control', () => {
+  it('does not allow responses to be cached by default', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false, options: {} }, (context, req, res) => res.ok());
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+  });
+
+  it('allows individual responses override the default cache-control header', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false, options: {} }, (context, req, res) =>
+      res.ok({
+        headers: {
+          'Cache-Control': 'public, max-age=1200',
+        },
+      })
+    );
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect('Cache-Control', 'public, max-age=1200');
+  });
+});
+
 describe('Handler', () => {
   it("Doesn't expose error details if handler throws", async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);

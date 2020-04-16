@@ -43,6 +43,10 @@ Assigning a feature privilege grants access to a specific feature.
 `all`:: Grants full read-write access.
 `read`:: Grants read-only access.
 
+===== Sub-feature privileges
+Some features allow for finer access control than the `all` and `read` privileges.
+This additional level of control is available in the Gold subscription level and higher.
+
 ===== Assigning feature privileges
 From the role management screen:
 
@@ -62,7 +66,8 @@ PUT /api/security/role/my_kibana_role
     {
       "base": [],
       "feature": {
-        "dashboard": ["all"]
+        "visualize": ["all"],
+        "dashboard": ["read", "url_create"]
       },
       "spaces": ["marketing"]
     }

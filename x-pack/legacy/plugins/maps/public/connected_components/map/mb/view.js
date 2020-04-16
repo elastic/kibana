@@ -12,7 +12,8 @@ import {
   removeOrphanedSourcesAndLayers,
   addSpritesheetToMap,
 } from './utils';
-import { getGlyphUrl, isRetina } from '../../../meta';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getGlyphUrl, isRetina } from '../../../../../../../plugins/maps/public/meta';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
@@ -23,7 +24,11 @@ import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { DrawControl } from './draw_control';
 import { TooltipControl } from './tooltip_control';
-import { clampToLatBounds, clampToLonBounds } from '../../../elasticsearch_geo_utils';
+import {
+  clampToLatBounds,
+  clampToLonBounds,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../plugins/maps/public/elasticsearch_geo_utils';
 
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);

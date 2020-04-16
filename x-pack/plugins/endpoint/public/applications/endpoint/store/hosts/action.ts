@@ -5,7 +5,7 @@
  */
 
 import { HostListPagination, ServerApiError } from '../../types';
-import { HostResultList, HostMetadata } from '../../../../../common/types';
+import { HostResultList, HostInfo } from '../../../../../common/types';
 
 interface ServerReturnedHostList {
   type: 'serverReturnedHostList';
@@ -14,7 +14,7 @@ interface ServerReturnedHostList {
 
 interface ServerReturnedHostDetails {
   type: 'serverReturnedHostDetails';
-  payload: HostMetadata;
+  payload: HostInfo;
 }
 
 interface ServerFailedToReturnHostDetails {

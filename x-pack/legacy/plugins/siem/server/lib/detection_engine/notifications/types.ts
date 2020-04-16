@@ -45,10 +45,11 @@ export interface Clients {
   alertsClient: AlertsClient;
 }
 
-export type UpdateNotificationParams = Omit<NotificationAlertParams, 'interval' | 'actions'> & {
+export type UpdateNotificationParams = Omit<
+  NotificationAlertParams,
+  'interval' | 'actions' | 'tags'
+> & {
   actions: RuleAlertAction[];
-  id?: string;
-  tags?: string[];
   interval: string | null | undefined;
   ruleAlertId: string;
 } & Clients;
@@ -64,8 +65,6 @@ export interface NotificationAlertParams {
   ruleAlertId: string;
   interval: string;
   name: string;
-  tags?: string[];
-  throttle?: null;
 }
 
 export type CreateNotificationParams = NotificationAlertParams & Clients;

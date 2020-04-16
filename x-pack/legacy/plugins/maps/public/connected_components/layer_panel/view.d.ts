@@ -5,10 +5,4 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { LAYER_TYPE } from '../../../common/constants';
-
-export type OnSourceChangeArgs = {
-  propName: string;
-  value: unknown;
-  newLayerType?: LAYER_TYPE;
-};
+export * from '../../../../../../plugins/maps/public/connected_components/layer_panel/view';

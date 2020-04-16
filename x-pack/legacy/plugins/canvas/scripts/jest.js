@@ -36,6 +36,14 @@ run(
         `!${path}/**/__tests__/**/*`,
         '--collectCoverageFrom', // Ignore coverage on example files
         `!${path}/**/__examples__/**/*`,
+        '--collectCoverageFrom', // Ignore flot files
+        `!${path}/**/flot-charts/**`,
+        '--collectCoverageFrom', // Ignore coverage files
+        `!${path}/**/coverage/**`,
+        '--collectCoverageFrom', // Ignore scripts
+        `!${path}/**/scripts/**`,
+        '--collectCoverageFrom', // Ignore mock files
+        `!${path}/**/mocks/**`,
         '--collectCoverageFrom', // Include JS files
         `${path}/**/*.js`,
         '--collectCoverageFrom', // Include TS/X files
@@ -76,7 +84,7 @@ run(
         --all              Runs all tests and snapshots.  Slower.
         --storybook        Runs Storybook Snapshot tests only.
         --update           Updates Storybook Snapshot tests.
-        --path <string>    Runs any tests at a given path. 
+        --path <string>    Runs any tests at a given path.
         --coverage         Collect coverage statistics.
       `,
     },

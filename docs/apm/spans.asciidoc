@@ -34,4 +34,4 @@ which indicates the next transaction in the trace.
 These transactions can be expanded and viewed in detail by clicking on them.
 
 After exploring these traces,
-you can return to the full trace by clicking *View full trace* in the upper right hand corner of the page.
+you can return to the full trace by clicking *View full trace*.

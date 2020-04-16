@@ -25,7 +25,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsStart, ActionType } from 'src/plugins/ui_actions/public';
+import { Action, UiActionsStart, ActionType } from '../../../../ui_actions/public';
 import { Trigger, ViewMode } from '../types';
 import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
@@ -41,7 +41,7 @@ import {
   ContactCardEmbeddableOutput,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
 // eslint-disable-next-line
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
+import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';
 

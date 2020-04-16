@@ -5,7 +5,7 @@
  */
 
 import { parseUrl, stringify } from 'query-string';
-import { DashboardConstants } from '../legacy_imports';
+import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
 
 type UrlVars = Record<string, string>;
 

@@ -4,7 +4,8 @@
   "requiredPlugins": [
     "home",
     "index_management",
-    "metrics"
+    "metrics",
+    "indexPatternManagement"
   ],
   "optionalPlugins": [
     "usageCollection"

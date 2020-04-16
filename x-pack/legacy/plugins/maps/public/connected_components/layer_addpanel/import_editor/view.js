@@ -7,7 +7,8 @@
 import React, { Fragment } from 'react';
 import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { uploadLayerWizardConfig } from '../../../layers/sources/client_file_source';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { uploadLayerWizardConfig } from '../../../../../../../plugins/maps/public/layers/sources/client_file_source';
 
 export const ImportEditor = ({ clearSource, isIndexingTriggered, ...props }) => {
   const editorProperties = getEditorProperties({ isIndexingTriggered, ...props });

@@ -5,7 +5,7 @@
  */
 
 import { Reducer } from 'redux';
-import { PolicyData, PolicyDetailsState, UIPolicyConfig } from '../../types';
+import { PolicyDetailsState, UIPolicyConfig } from '../../types';
 import { AppAction } from '../action';
 import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
 
@@ -74,8 +74,12 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
       ...state,
       location: action.payload,
     };
+    const isCurrentlyOnDetailsPage = isOnPolicyDetailsPage(newState);
+    const wasPreviouslyOnDetailsPage = isOnPolicyDetailsPage(state);
 
-    if (isOnPolicyDetailsPage(newState)) {
+    // Did user just enter the Detail page? if so, then set the loading indicator and return new state
+    if (isCurrentlyOnDetailsPage && !wasPreviouslyOnDetailsPage) {
+      newState.isLoading = true;
       return newState;
     }
     return {
@@ -85,10 +89,12 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
   }
 
   if (action.type === 'userChangedPolicyConfig') {
-    const newState = { ...state, policyItem: { ...(state.policyItem as PolicyData) } };
-    const newPolicy = (newState.policyItem.inputs[0].config.policy.value = {
-      ...fullPolicy(state),
-    });
+    if (!state.policyItem) {
+      return state;
+    }
+    const newState = { ...state, policyItem: { ...state.policyItem } };
+    const newPolicy: any = { ...fullPolicy(state) };
+    newState.policyItem.inputs[0].config.policy.value = newPolicy;
 
     Object.entries(action.payload.policyConfig).forEach(([section, newSettings]) => {
       newPolicy[section as keyof UIPolicyConfig] = {

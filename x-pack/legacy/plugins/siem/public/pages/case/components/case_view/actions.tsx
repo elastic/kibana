@@ -40,7 +40,6 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData, disable
     ),
     [isDisplayConfirmDeleteModal, caseData]
   );
-  // TO DO refactor each of these const's into their own components
   const propertyActions = useMemo(
     () => [
       {

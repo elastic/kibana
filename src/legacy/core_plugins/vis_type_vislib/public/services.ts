@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../../../plugins/kibana_utils/common';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
 export const [getDataActions, setDataActions] = createGetterSetter<

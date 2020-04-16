@@ -16,8 +16,6 @@ import { take } from 'rxjs/operators';
 import { CoreSetup } from 'kibana/public';
 import { MlStartDependencies, MlSetupDependencies } from '../../plugin';
 
-import { LICENSE_CHECK_STATE } from '../../../../licensing/public';
-
 import { PLUGIN_ID, PLUGIN_ICON } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 
@@ -27,7 +25,7 @@ export function initManagementSection(
 ) {
   const licensing = pluginsSetup.licensing.license$.pipe(take(1));
   licensing.subscribe(license => {
-    if (license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === LICENSE_CHECK_STATE.Valid) {
+    if (license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === 'valid') {
       const management = pluginsSetup.management;
       const mlSection = management.sections.register({
         id: PLUGIN_ID,

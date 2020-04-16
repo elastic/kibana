@@ -20,7 +20,7 @@
 import React from 'react';
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { VisOptionsProps } from '../../../../../../src/legacy/core_plugins/vis_default_editor/public/vis_options_props';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public/vis_options_props';
 
 interface CounterParams {
   counter: number;

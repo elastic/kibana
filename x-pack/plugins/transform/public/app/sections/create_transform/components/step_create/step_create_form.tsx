@@ -32,6 +32,8 @@ import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_reac
 
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
+import { getErrorMessage } from '../../../../../shared_imports';
+
 import { getTransformProgress, getDiscoverUrl } from '../../../../common';
 import { useApi } from '../../../../hooks/use_api';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
@@ -116,7 +118,9 @@ export const StepCreateForm: FC<Props> = React.memo(
             defaultMessage: 'An error occurred creating the transform {transformId}:',
             values: { transformId },
           }),
-          text: toMountPoint(<ToastNotificationText text={e} />),
+          text: toMountPoint(
+            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+          ),
         });
         setCreated(false);
         setLoading(false);
@@ -157,7 +161,9 @@ export const StepCreateForm: FC<Props> = React.memo(
             defaultMessage: 'An error occurred starting the transform {transformId}:',
             values: { transformId },
           }),
-          text: toMountPoint(<ToastNotificationText text={e} />),
+          text: toMountPoint(
+            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+          ),
         });
         setStarted(false);
         setLoading(false);
@@ -223,7 +229,9 @@ export const StepCreateForm: FC<Props> = React.memo(
               'An error occurred creating the Kibana index pattern {indexPatternName}:',
             values: { indexPatternName },
           }),
-          text: toMountPoint(<ToastNotificationText text={e} />),
+          text: toMountPoint(
+            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+          ),
         });
         setLoading(false);
         return false;
@@ -260,7 +268,9 @@ export const StepCreateForm: FC<Props> = React.memo(
               title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
                 defaultMessage: 'An error occurred getting the progress percentage:',
               }),
-              text: toMountPoint(<ToastNotificationText text={e} />),
+              text: toMountPoint(
+                <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              ),
             });
             clearInterval(interval);
           }

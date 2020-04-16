@@ -6,7 +6,7 @@
 
 import { Type } from '@kbn/config-schema';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { LicenseCheck, LICENSE_CHECK_STATE } from '../../../../../licensing/server';
+import { LicenseCheck } from '../../../../../licensing/server';
 import { GLOBAL_RESOURCE } from '../../../../common/constants';
 import { definePutRolesRoutes } from './put';
 
@@ -55,7 +55,7 @@ const putRoleTest = (
   {
     name,
     payload,
-    licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
+    licenseCheckResult = { state: 'valid' },
     apiResponses = [],
     asserts,
   }: TestOptions
@@ -140,7 +140,7 @@ describe('PUT role', () => {
   describe('failure', () => {
     putRoleTest('returns result of license checker', {
       name: 'foo-role',
-      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
+      licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
   });

@@ -34,7 +34,7 @@ export const hostListReducer: Reducer<HostListState, AppAction> = (
     } = action.payload;
     return {
       ...state,
-      hosts,
+      hosts: hosts.map(hostInfo => hostInfo.metadata),
       total,
       pageSize,
       pageIndex,
@@ -43,7 +43,7 @@ export const hostListReducer: Reducer<HostListState, AppAction> = (
   } else if (action.type === 'serverReturnedHostDetails') {
     return {
       ...state,
-      details: action.payload,
+      details: action.payload.metadata,
     };
   } else if (action.type === 'serverFailedToReturnHostDetails') {
     return {

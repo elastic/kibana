@@ -17,12 +17,11 @@ export const createNotifications = async ({
   ruleAlertId,
   interval,
   name,
-  tags,
 }: CreateNotificationParams): Promise<Alert> =>
   alertsClient.create({
     data: {
       name,
-      tags: addTags(tags, ruleAlertId),
+      tags: addTags([], ruleAlertId),
       alertTypeId: NOTIFICATIONS_ID,
       consumer: APP_ID,
       params: {
@@ -30,7 +29,7 @@ export const createNotifications = async ({
       },
       schedule: { interval },
       enabled,
-      actions: actions?.map(transformRuleToAlertAction),
+      actions: actions.map(transformRuleToAlertAction),
       throttle: null,
     },
   });

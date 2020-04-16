@@ -5,11 +5,11 @@
  */
 
 import _ from 'lodash';
-import { EMS_TMS, LAYER_TYPE } from '../constants';
+import { SOURCE_TYPES, LAYER_TYPE } from '../constants';
 
 function isEmsTileSource(layerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
-  return sourceType === EMS_TMS;
+  return sourceType === SOURCE_TYPES.EMS_TMS;
 }
 
 function isTileLayer(layerDescriptor) {

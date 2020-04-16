@@ -20,6 +20,7 @@
 import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Markdown } from '../../../../kibana_react/public';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';
@@ -53,7 +54,11 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
         <EuiText color="subdued" size="xs">
           <EuiIcon type="alert" color="danger" />
           <EuiSpacer size="s" />
-          {title}
+          <Markdown
+            markdown={title}
+            openLinksInNewTab={true}
+            data-test-subj="errorMessageMarkdown"
+          />
         </EuiText>
       </div>,
       dom

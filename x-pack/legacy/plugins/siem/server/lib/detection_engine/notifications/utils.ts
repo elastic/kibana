@@ -5,14 +5,17 @@
  */
 
 export const getNotificationResultsLink = ({
-  kibanaSiemAppUrl,
+  kibanaSiemAppUrl = '/app/siem',
   id,
   from,
   to,
 }: {
-  kibanaSiemAppUrl: string;
+  kibanaSiemAppUrl?: string;
   id: string;
-  from: string;
-  to: string;
-}) =>
-  `${kibanaSiemAppUrl}#/detections/rules/id/${id}?timerange=(global:(linkTo:!(timeline),timerange:(from:${from},kind:absolute,to:${to})),timeline:(linkTo:!(global),timerange:(from:${from},kind:absolute,to:${to})))`;
+  from?: string;
+  to?: string;
+}) => {
+  if (from == null || to == null) return '';
+
+  return `${kibanaSiemAppUrl}#/detections/rules/id/${id}?timerange=(global:(linkTo:!(timeline),timerange:(from:${from},kind:absolute,to:${to})),timeline:(linkTo:!(global),timerange:(from:${from},kind:absolute,to:${to})))`;
+};

@@ -16,14 +16,20 @@ export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning
 
 export interface NewAgentAction {
   type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
-  data?: string;
+  data?: any;
   sent_at?: string;
 }
 
 export type AgentAction = NewAgentAction & {
   id: string;
+  agent_id: string;
   created_at: string;
 } & SavedObjectAttributes;
+
+export interface AgentActionSOAttributes extends NewAgentAction, SavedObjectAttributes {
+  created_at: string;
+  agent_id: string;
+}
 
 export interface AgentEvent {
   type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';
@@ -62,7 +68,6 @@ interface AgentBase {
   config_revision?: number;
   config_newest_revision?: number;
   last_checkin?: string;
-  actions: AgentAction[];
 }
 
 export interface Agent extends AgentBase {

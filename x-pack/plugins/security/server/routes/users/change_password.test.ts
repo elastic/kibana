@@ -16,7 +16,6 @@ import {
   RouteConfig,
   ScopeableRequest,
 } from '../../../../../../src/core/server';
-import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 import { Authentication, AuthenticationResult } from '../../authentication';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
@@ -63,7 +62,7 @@ describe('Change password', () => {
 
     mockContext = ({
       licensing: {
-        license: { check: jest.fn().mockReturnValue({ check: LICENSE_CHECK_STATE.Valid }) },
+        license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
       },
     } as unknown) as RequestHandlerContext;
 

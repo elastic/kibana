@@ -48,7 +48,7 @@ export interface TestBed<T = string> {
     find('myForm.nameInput');
     ```
    */
-  find: (testSubject: T) => ReactWrapper<any>;
+  find: (testSubject: T, reactWrapper?: ReactWrapper) => ReactWrapper<any>;
   /**
    * Update the props of the mounted component
    *
@@ -60,7 +60,7 @@ export interface TestBed<T = string> {
    * Useful when loading a component that fetches a resource from the server
    * and we need to wait for the data to be fetched (and bypass any "loading" state).
    */
-  waitFor: (testSubject: T) => Promise<void>;
+  waitFor: (testSubject: T, count?: number) => Promise<void>;
   form: {
     /**
      * Set the value of a form text input.

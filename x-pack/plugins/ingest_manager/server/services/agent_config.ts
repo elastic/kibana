@@ -319,9 +319,9 @@ class AgentConfigService {
           return outputs;
         }, {} as FullAgentConfig['outputs']),
       },
-      datasources: (config.datasources as Datasource[]).map(ds =>
-        storedDatasourceToAgentDatasource(ds)
-      ),
+      datasources: (config.datasources as Datasource[])
+        .filter(datasource => datasource.enabled)
+        .map(ds => storedDatasourceToAgentDatasource(ds)),
       revision: config.revision,
     };
 

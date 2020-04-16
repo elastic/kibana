@@ -5,7 +5,6 @@
  */
 
 import { License } from './license';
-import { LICENSE_CHECK_STATE } from './types';
 import { licenseMock } from './licensing.mock';
 
 describe('License', () => {
@@ -86,21 +85,21 @@ describe('License', () => {
 
   describe('check', () => {
     it('provides availability status', () => {
-      expect(basicLicense.check('ccr', 'gold').state).toBe(LICENSE_CHECK_STATE.Invalid);
+      expect(basicLicense.check('ccr', 'gold').state).toBe('invalid');
 
-      expect(goldLicense.check('ccr', 'gold').state).toBe(LICENSE_CHECK_STATE.Valid);
-      expect(goldLicense.check('ccr', 'basic').state).toBe(LICENSE_CHECK_STATE.Valid);
+      expect(goldLicense.check('ccr', 'gold').state).toBe('valid');
+      expect(goldLicense.check('ccr', 'basic').state).toBe('valid');
 
-      expect(basicExpiredLicense.check('ccr', 'gold').state).toBe(LICENSE_CHECK_STATE.Expired);
+      expect(basicExpiredLicense.check('ccr', 'gold').state).toBe('expired');
 
-      expect(errorLicense.check('ccr', 'basic').state).toBe(LICENSE_CHECK_STATE.Unavailable);
-      expect(errorLicense.check('ccr', 'gold').state).toBe(LICENSE_CHECK_STATE.Unavailable);
+      expect(errorLicense.check('ccr', 'basic').state).toBe('unavailable');
+      expect(errorLicense.check('ccr', 'gold').state).toBe('unavailable');
 
-      expect(unavailableLicense.check('ccr', 'basic').state).toBe(LICENSE_CHECK_STATE.Unavailable);
-      expect(unavailableLicense.check('ccr', 'gold').state).toBe(LICENSE_CHECK_STATE.Unavailable);
+      expect(unavailableLicense.check('ccr', 'basic').state).toBe('unavailable');
+      expect(unavailableLicense.check('ccr', 'gold').state).toBe('unavailable');
 
-      expect(enterpriseLicense.check('ccr', 'gold').state).toBe(LICENSE_CHECK_STATE.Valid);
-      expect(enterpriseLicense.check('ccr', 'enterprise').state).toBe(LICENSE_CHECK_STATE.Valid);
+      expect(enterpriseLicense.check('ccr', 'gold').state).toBe('valid');
+      expect(enterpriseLicense.check('ccr', 'enterprise').state).toBe('valid');
     });
 
     it('throws in case of unknown license type', () => {

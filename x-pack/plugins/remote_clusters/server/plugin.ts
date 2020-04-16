@@ -7,7 +7,6 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
-import { LICENSE_CHECK_STATE } from '../../licensing/common/types';
 
 import { PLUGIN } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';
@@ -54,7 +53,7 @@ export class RemoteClustersServerPlugin implements Plugin<void, void, any, any> 
 
     licensing.license$.subscribe(license => {
       const { state, message } = license.check(PLUGIN.getI18nName(), PLUGIN.minimumLicenseType);
-      const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
+      const hasRequiredLicense = state === 'valid';
       if (hasRequiredLicense) {
         this.licenseStatus = { valid: true };
       } else {

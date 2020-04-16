@@ -30,11 +30,10 @@ export const installPipelines = async (
       if (dataset.ingest_pipeline) {
         acc.push(
           installPipelinesForDataset({
-            pkgkey: Registry.pkgToPkgKey(registryPackage),
             dataset,
             callCluster,
-            packageName: registryPackage.name,
-            packageVersion: registryPackage.version,
+            pkgName: registryPackage.name,
+            pkgVersion: registryPackage.version,
           })
         );
       }
@@ -68,19 +67,19 @@ export function rewriteIngestPipeline(
 
 export async function installPipelinesForDataset({
   callCluster,
-  pkgkey,
+  pkgName,
+  pkgVersion,
   dataset,
-  packageName,
-  packageVersion,
 }: {
   callCluster: CallESAsCurrentUser;
-  pkgkey: string;
+  pkgName: string;
+  pkgVersion: string;
   dataset: Dataset;
-  packageName: string;
-  packageVersion: string;
 }): Promise<AssetReference[]> {
-  const pipelinePaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
-    isDatasetPipeline(entry, dataset.path)
+  const pipelinePaths = await Registry.getArchiveInfo(
+    pkgName,
+    pkgVersion,
+    (entry: Registry.ArchiveEntry) => isDatasetPipeline(entry, dataset.path)
   );
   let pipelines: any[] = [];
   const substitutions: RewriteSubstitution[] = [];
@@ -90,7 +89,7 @@ export async function installPipelinesForDataset({
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
       dataset,
-      packageVersion,
+      packageVersion: pkgVersion,
     });
     const content = Registry.getAsset(path).toString('utf-8');
     pipelines.push({

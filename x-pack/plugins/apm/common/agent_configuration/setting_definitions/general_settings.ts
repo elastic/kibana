@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { getIntegerRt } from '../runtime_types/integer_rt';
 import { captureBodyRt } from '../runtime_types/capture_body_rt';
 import { RawSettingDefinition } from './types';
+import { getDurationRt } from '../runtime_types/duration_rt';
 
 /*
  * Settings added here will show up in the UI and will be validated on the client and server
@@ -62,14 +63,14 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.captureBody.description',
       {
         defaultMessage:
-          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables).'
+          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables).\nFor transactions that are initiated by receiving a message from a message broker, the agent can capture the textual message body.'
       }
     ),
     options: [
-      { text: 'off' },
-      { text: 'errors' },
-      { text: 'transactions' },
-      { text: 'all' }
+      { text: 'off', value: 'off' },
+      { text: 'errors', value: 'errors' },
+      { text: 'transactions', value: 'transactions' },
+      { text: 'all', value: 'all' }
     ],
     excludeAgents: ['js-base', 'rum-js']
   },
@@ -86,7 +87,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.captureHeaders.description',
       {
         defaultMessage:
-          'If set to `true`, the agent will capture request and response headers, including cookies.\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
+          'If set to `true`, the agent will capture HTTP request and response headers (including cookies), as well as message headers/properties when using messaging frameworks (like Kafka).\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
       }
     ),
     excludeAgents: ['js-base', 'rum-js', 'nodejs']
@@ -116,7 +117,7 @@ export const generalSettings: RawSettingDefinition[] = [
     }),
     description: i18n.translate('xpack.apm.agentConfig.recording.description', {
       defaultMessage:
-        'When recording, the agent instruments incoming HTTP requests, tracks errors, and collects and sends metrics. When inactive, the agent works as a noop, not collecting data and not communicating with the APM Server except for polling for updated configuration. As this is a reversible switch, agent threads are not being killed when inactivated, but they will be mostly idle in this state, so the overhead should be negligible. You can use this setting to dynamically control whether Elastic APM is enabled or disabled.'
+        'When recording, the agent instruments incoming HTTP requests, tracks errors, and collects and sends metrics. When set to non-recording, the agent works as a noop, not collecting data and not communicating with the APM Server except for polling for updated configuration. As this is a reversible switch, agent threads are not being killed when set to non-recording, but they will be mostly idle in this state, so the overhead should be negligible. You can use this setting to dynamically control whether Elastic APM is enabled or disabled.'
     }),
     excludeAgents: ['nodejs']
   },
@@ -143,6 +144,7 @@ export const generalSettings: RawSettingDefinition[] = [
   {
     key: 'span_frames_min_duration',
     type: 'duration',
+    validation: getDurationRt({ min: -1 }),
     defaultValue: '5ms',
     label: i18n.translate('xpack.apm.agentConfig.spanFramesMinDuration.label', {
       defaultMessage: 'Span frames minimum duration'
@@ -154,7 +156,8 @@ export const generalSettings: RawSettingDefinition[] = [
           'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.'
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs']
+    excludeAgents: ['js-base', 'rum-js', 'nodejs'],
+    min: -1
   },
 
   // STACK_TRACE_LIMIT
@@ -212,7 +215,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.transactionSampleRate.description',
       {
         defaultMessage:
-          'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but no context information, labels, or spans.'
+          'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but not context information, labels, or spans.'
       }
     )
   }

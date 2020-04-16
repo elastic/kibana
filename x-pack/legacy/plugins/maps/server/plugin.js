@@ -9,7 +9,6 @@ import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects'
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
-import { LICENSE_CHECK_STATE } from '../../../../plugins/licensing/server';
 import { initRoutes } from './routes';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 
@@ -52,7 +51,7 @@ export class MapPlugin {
 
     licensing.license$.subscribe(license => {
       const { state } = license.check('maps', 'basic');
-      if (state === LICENSE_CHECK_STATE.Valid && !routesInitialized) {
+      if (state === 'valid' && !routesInitialized) {
         routesInitialized = true;
         initRoutes(__LEGACY, license.uid);
       }

@@ -196,6 +196,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         note,
                         version,
                         lists,
+                        actions: [], // Actions are not imported nor exported at this time
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
                     } else if (rule != null && request.query.overwrite) {

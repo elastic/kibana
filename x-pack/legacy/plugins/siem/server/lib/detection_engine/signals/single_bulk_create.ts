@@ -9,7 +9,7 @@ import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { SignalSearchResponse, BulkResponse } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams } from '../types';
+import { RuleTypeParams, RefreshTypes } from '../types';
 import { generateId, makeFloatString } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../../src/core/server';
@@ -31,6 +31,7 @@ interface SingleBulkCreateParams {
   enabled: boolean;
   tags: string[];
   throttle: string;
+  refresh: RefreshTypes;
 }
 
 /**
@@ -58,6 +59,7 @@ export const filterDuplicateRules = (
 export interface SingleBulkCreateResponse {
   success: boolean;
   bulkCreateDuration?: string;
+  createdItemsCount: number;
 }
 
 // Bulk Index documents.
@@ -76,12 +78,13 @@ export const singleBulkCreate = async ({
   updatedBy,
   interval,
   enabled,
+  refresh,
   tags,
   throttle,
 }: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
   someResult.hits.hits = filterDuplicateRules(id, someResult);
   if (someResult.hits.hits.length === 0) {
-    return { success: true };
+    return { success: true, createdItemsCount: 0 };
   }
   // index documents after creating an ID based on the
   // source documents' originating index, and the original
@@ -123,7 +126,7 @@ export const singleBulkCreate = async ({
   const start = performance.now();
   const response: BulkResponse = await services.callCluster('bulk', {
     index: signalsIndex,
-    refresh: false,
+    refresh,
     body: bulkBody,
   });
   const end = performance.now();
@@ -145,5 +148,8 @@ export const singleBulkCreate = async ({
       );
     }
   }
-  return { success: true, bulkCreateDuration: makeFloatString(end - start) };
+
+  const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
+
+  return { success: true, bulkCreateDuration: makeFloatString(end - start), createdItemsCount };
 };

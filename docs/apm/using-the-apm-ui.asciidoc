@@ -15,6 +15,7 @@ APM is available via the navigation sidebar in {Kib}.
 * <<spans>>
 * <<errors>>
 * <<metrics>>
+* <<apm-alerts>>
 * <<machine-learning-integration>>
 * <<agent-configuration>>
 * <<advanced-queries>>
@@ -31,9 +32,13 @@ include::transactions.asciidoc[]
 
 include::spans.asciidoc[]
 
+include::service-maps.asciidoc[]
+
 include::errors.asciidoc[]
 
 include::metrics.asciidoc[]
+
+include::apm-alerts.asciidoc[]
 
 include::agent-configuration.asciidoc[]
 

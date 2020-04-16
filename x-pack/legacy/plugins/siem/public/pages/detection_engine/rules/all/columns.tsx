@@ -13,6 +13,7 @@ import {
   EuiTableActionsColumnType,
   EuiText,
   EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import * as H from 'history';
@@ -36,6 +37,8 @@ import {
 } from './actions';
 import { Action } from './reducer';
 import { LocalizedDateTooltip } from '../../../../components/localized_date_tooltip';
+import * as detectionI18n from '../../translations';
+import { isMlRule } from '../../../../../common/detection_engine/ml_helpers';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -88,6 +91,7 @@ interface GetColumns {
   dispatch: React.Dispatch<Action>;
   dispatchToaster: Dispatch<ActionToaster>;
   history: H.History;
+  hasMlPermissions: boolean;
   hasNoPermissions: boolean;
   loadingRuleIds: string[];
   reFetchRules: (refreshPrePackagedRule?: boolean) => void;
@@ -98,6 +102,7 @@ export const getColumns = ({
   dispatch,
   dispatchToaster,
   history,
+  hasMlPermissions,
   hasNoPermissions,
   loadingRuleIds,
   reFetchRules,
@@ -182,14 +187,25 @@ export const getColumns = ({
       field: 'enabled',
       name: i18n.COLUMN_ACTIVATE,
       render: (value: Rule['enabled'], item: Rule) => (
-        <RuleSwitch
-          data-test-subj="enabled"
-          dispatch={dispatch}
-          id={item.id}
-          enabled={item.enabled}
-          isDisabled={hasNoPermissions}
-          isLoading={loadingRuleIds.includes(item.id)}
-        />
+        <EuiToolTip
+          position="top"
+          content={
+            isMlRule(item.type) && !hasMlPermissions
+              ? detectionI18n.ML_RULES_DISABLED_MESSAGE
+              : undefined
+          }
+        >
+          <RuleSwitch
+            data-test-subj="enabled"
+            dispatch={dispatch}
+            id={item.id}
+            enabled={item.enabled}
+            isDisabled={
+              hasNoPermissions || (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
+            }
+            isLoading={loadingRuleIds.includes(item.id)}
+          />
+        </EuiToolTip>
       ),
       sortable: true,
       width: '95px',
