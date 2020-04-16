@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiPopoverTitle,
   EuiFlexItem,
@@ -20,6 +20,37 @@ import {
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Comparator } from '../../../../../server/lib/alerting/log_threshold/types';
+
+const getCompatibleComparatorsForField = fieldInfo => {
+  if (fieldInfo.type === 'number') {
+    return [
+      { value: Comparator.GT, text: Comparator.GT },
+      { value: Comparator.GT_OR_EQ, text: Comparator.GT_OR_EQ },
+      { value: Comparator.LT, text: Comparator.LT },
+      { value: Comparator.LT_OR_EQ, text: Comparator.LT_OR_EQ },
+      { value: Comparator.EQ, text: Comparator.EQ },
+      { value: Comparator.NOT_EQ, text: Comparator.NOT_EQ },
+    ];
+  } else if (fieldInfo.aggregatable) {
+    return [
+      { value: Comparator.EQ, text: Comparator.EQ },
+      { value: Comparator.NOT_EQ, text: Comparator.NOT_EQ },
+    ];
+  } else {
+    return [
+      { value: Comparator.MATCH, text: Comparator.MATCH },
+      { value: Comparator.NOT_MATCH, text: Comparator.NOT_MATCH },
+      { value: Comparator.MATCH_PHRASE, text: Comparator.MATCH_PHRASE },
+      { value: Comparator.NOT_MATCH_PHRASE, text: Comparator.NOT_MATCH_PHRASE },
+    ];
+  }
+};
+
+const getFieldInfo = (fields, fieldName) => {
+  return fields.find(field => {
+    return field.name === fieldName;
+  });
+};
 
 export const Criterion: React.FC = ({
   idx,
@@ -40,35 +71,34 @@ export const Criterion: React.FC = ({
   }, [fields]);
 
   const fieldInfo = useMemo(() => {
-    return fields.find(field => {
-      return field.name === criterion.field;
-    });
+    return getFieldInfo(fields, criterion.field);
   }, [fields, criterion]);
 
   const compatibleComparatorOptions = useMemo(() => {
-    if (fieldInfo.type === 'number') {
-      return [
-        { value: Comparator.GT, text: Comparator.GT },
-        { value: Comparator.GT_OR_EQ, text: Comparator.GT_OR_EQ },
-        { value: Comparator.LT, text: Comparator.LT },
-        { value: Comparator.LT_OR_EQ, text: Comparator.LT_OR_EQ },
-        { value: Comparator.EQ, text: Comparator.EQ },
-        { value: Comparator.NOT_EQ, text: Comparator.NOT_EQ },
-      ];
-    } else if (fieldInfo.aggregatable) {
-      return [
-        { value: Comparator.EQ, text: Comparator.EQ },
-        { value: Comparator.NOT_EQ, text: Comparator.NOT_EQ },
-      ];
-    } else {
-      return [
-        { value: Comparator.MATCH, text: Comparator.MATCH },
-        { value: Comparator.NOT_MATCH, text: Comparator.NOT_MATCH },
-        { value: Comparator.MATCH_PHRASE, text: Comparator.MATCH_PHRASE },
-        { value: Comparator.NOT_MATCH_PHRASE, text: Comparator.NOT_MATCH_PHRASE },
-      ];
-    }
+    return getCompatibleComparatorsForField(fieldInfo);
   }, [fieldInfo]);
+
+  const handleFieldChange = useCallback(
+    e => {
+      const fieldName = e.target.value;
+      const nextFieldInfo = getFieldInfo(fields, fieldName);
+      // If the field information we're dealing with has changed, reset the comparator and value.
+      if (
+        fieldInfo.type !== nextFieldInfo.type ||
+        fieldInfo.aggregatable !== nextFieldInfo.aggregatable
+      ) {
+        const compatibleComparators = getCompatibleComparatorsForField(nextFieldInfo);
+        updateCriterion(idx, {
+          field: fieldName,
+          comparator: compatibleComparators[0].value,
+          value: undefined,
+        });
+      } else {
+        updateCriterion(idx, { field: fieldName });
+      }
+    },
+    [fieldInfo.aggregatable, fieldInfo.type, fields, idx, updateCriterion]
+  );
 
   return (
     <EuiFlexGroup gutterSize="s">
@@ -97,7 +127,7 @@ export const Criterion: React.FC = ({
               <EuiSelect
                 compressed
                 value={criterion.field}
-                onChange={e => updateCriterion(idx, { field: e.target.value })}
+                onChange={handleFieldChange}
                 options={fieldOptions}
               />
             </EuiFormRow>
