@@ -5,11 +5,7 @@
  */
 
 import { createUptimeLink } from './create_uptime_link';
-import {
-  InfraWaffleMapOptions,
-  InfraWaffleMapLegendMode,
-  InfraFormatterType,
-} from '../../../lib/lib';
+import { InfraWaffleMapOptions, InfraFormatterType } from '../../../lib/lib';
 import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 
 const options: InfraWaffleMapOptions = {
@@ -26,7 +22,7 @@ const options: InfraWaffleMapOptions = {
   metric: { type: 'cpu' },
   groupBy: [],
   legend: {
-    type: InfraWaffleMapLegendMode.gradient,
+    type: 'gradient',
     rules: [],
   },
 };
