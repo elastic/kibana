@@ -11,6 +11,7 @@ import {
   JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
   JOB_STATUS_COMPLETED,
   JOB_STATUS_FAILED,
+  JOB_STATUS_WARNINGS,
 } from '../../constants';
 
 import {
@@ -112,7 +113,7 @@ export class ReportingNotifierStreamHandler {
             _source: { status: jobStatus },
           } = job;
           if (storedJobs.includes(jobId)) {
-            if (jobStatus === JOB_STATUS_COMPLETED) {
+            if (jobStatus === JOB_STATUS_COMPLETED || jobStatus === JOB_STATUS_WARNINGS) {
               completedJobs.push(summarizeJob(job));
             } else if (jobStatus === JOB_STATUS_FAILED) {
               failedJobs.push(summarizeJob(job));
