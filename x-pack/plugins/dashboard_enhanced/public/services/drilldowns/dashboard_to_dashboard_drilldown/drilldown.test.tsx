@@ -51,6 +51,13 @@ test('config component exist', () => {
   expect(drilldown.CollectConfig).toEqual(expect.any(Function));
 });
 
+test('initial config: switches are ON', () => {
+  const drilldown = new DashboardToDashboardDrilldown({} as any);
+  const { useCurrentDateRange, useCurrentFilters } = drilldown.createConfig();
+  expect(useCurrentDateRange).toBe(true);
+  expect(useCurrentFilters).toBe(true);
+});
+
 describe('.execute()', () => {
   /**
    * A convenience test setup helper
