@@ -228,12 +228,17 @@ Discover::
 Graph::
 * Specifies valid licenses for the Graph feature {pull}55911[#55911]
 * Improves graph missing workspace error message {pull}58876[#58876]
-Lens::
+Lens and visualizations::
 * Filters out pinned filters from saved object of Lens {pull}57197[#57197]
 * Adds using queries/filters for field existence endpoint {pull}59033[#59033]
 * Fixes display single bar in XYChart Bar Vis {pull}61452[#61452]
 * Resetting a layer generates new suggestions {pull}60674[#60674]
 * Fixes disabled switches in the editor {pull}62911[#62911]
+* Fixes broken Handlebar documentation links {pull}55866[#55866]
+* Shows timepicker in Timelion and TSVB {pull}58857[#58857]
+* Makes Vega remove filter work {pull}58871[#58871]
+* Makes d3 place nicely with object values {pull}62004[#62004]
+* Fixes position calculation of ticks in non-horizontal axes {pull}62309[#62309]
 Logs::
 * Correctly update the expanded log rate table rows {pull}60306[#60306]
 Machine Learning::
@@ -319,12 +324,6 @@ Uptime::
 * Fixes es query function null reference errors {pull}61465[#61465]
 * Fixes issue with Kibana Icon in Uptime App {pull}56837[#56837]
 * Adds tests for pages {pull}56736[#56736]
-Visualizations::
-* Fixes broken Handlebar documentation links {pull}55866[#55866]
-* Shows timepicker in Timelion and TSVB {pull}58857[#58857]
-* Makes Vega remove filter work {pull}58871[#58871]
-* Makes d3 place nicely with object values {pull}62004[#62004]
-* Fixes position calculation of ticks in non-horizontal axes {pull}62309[#62309]
 
 [float]
 [[deprecation-7.7.0]]
