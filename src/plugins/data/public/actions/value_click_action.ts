@@ -26,19 +26,22 @@ import {
 } from '../../../../plugins/ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
-import { createFiltersFromValueClickEvent } from './filters/create_filters_from_value_click_event';
+import {
+  createFiltersFromValueClickAction,
+  ValueClickEvent,
+} from './filters/create_filters_from_value_click';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
 
 export interface ValueClickActionContext {
-  data: any;
+  data: ValueClickEvent;
   timeFieldName: string;
 }
 
 async function isCompatible(context: ValueClickActionContext) {
   try {
-    const filters: Filter[] = await createFiltersFromValueClickEvent(context.data);
+    const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
     return filters.length > 0;
   } catch {
     return false;
@@ -52,7 +55,6 @@ export function valueClickAction(
   return createAction<typeof ACTION_VALUE_CLICK>({
     type: ACTION_VALUE_CLICK,
     id: ACTION_VALUE_CLICK,
-    getIconType: () => 'filter',
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',
@@ -64,11 +66,13 @@ export function valueClickAction(
         throw new IncompatibleActionError();
       }
 
-      let selectedFilters = await createFiltersFromValueClickEvent(data);
+      const filters: Filter[] = await createFiltersFromValueClickAction(data);
 
-      if (selectedFilters.length > 1) {
+      let selectedFilters = filters;
+
+      if (filters.length > 1) {
         const indexPatterns = await Promise.all(
-          selectedFilters.map(filter => {
+          filters.map(filter => {
             return getIndexPatterns().get(filter.meta.index!);
           })
         );
@@ -77,7 +81,7 @@ export function valueClickAction(
           const overlay = getOverlays().openModal(
             toMountPoint(
               applyFiltersPopover(
-                selectedFilters,
+                filters,
                 indexPatterns,
                 () => {
                   overlay.close();

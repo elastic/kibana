@@ -24,7 +24,7 @@ import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
-import { createFiltersFromBrushEvent, createFiltersFromValueClickEvent } from './actions';
+import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
@@ -49,8 +49,8 @@ export interface DataPublicPluginSetup {
 
 export interface DataPublicPluginStart {
   actions: {
-    createFiltersFromValueClickEvent: typeof createFiltersFromValueClickEvent;
-    createFiltersFromBrushEvent: typeof createFiltersFromBrushEvent;
+    createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
+    createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;
   };
   autocomplete: AutocompleteStart;
   indexPatterns: IndexPatternsContract;

@@ -23,19 +23,22 @@ import {
   IncompatibleActionError,
   ActionByType,
 } from '../../../../plugins/ui_actions/public';
-import { createFiltersFromBrushEvent } from './filters/create_filters_from_brush_event';
+import {
+  createFiltersFromRangeSelectAction,
+  RangeSelectEvent,
+} from './filters/create_filters_from_range_select';
 import { FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
 export interface SelectRangeActionContext {
-  data: any;
+  data: RangeSelectEvent;
   timeFieldName: string;
 }
 
 async function isCompatible(context: SelectRangeActionContext) {
   try {
-    return (await createFiltersFromBrushEvent(context.data)).length > 0;
+    return Boolean(await createFiltersFromRangeSelectAction(context.data));
   } catch {
     return false;
   }
@@ -48,7 +51,6 @@ export function selectRangeAction(
   return createAction<typeof ACTION_SELECT_RANGE>({
     type: ACTION_SELECT_RANGE,
     id: ACTION_SELECT_RANGE,
-    getIconType: () => 'filter',
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',
@@ -60,7 +62,7 @@ export function selectRangeAction(
         throw new IncompatibleActionError();
       }
 
-      const selectedFilters = await createFiltersFromBrushEvent(data);
+      const selectedFilters = await createFiltersFromRangeSelectAction(data);
 
       if (timeFieldName) {
         const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(

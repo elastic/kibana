@@ -17,31 +17,21 @@
  * under the License.
  */
 
-import { get, last } from 'lodash';
+import { last } from 'lodash';
 import moment from 'moment';
-import { esFilters, Filter, IFieldType, RangeFilterParams } from '../../../public';
+import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
 import { deserializeAggConfig } from '../../search/expressions/utils';
+import { KibanaDatatable } from '../../../../expressions';
 
-export interface BrushEvent {
-  data: {
-    ordered: {
-      date: boolean;
-    };
-    series: Array<Record<string, any>>;
-  };
+export interface RangeSelectEvent {
+  table: KibanaDatatable;
+  column: number;
   range: number[];
 }
 
-export async function createFiltersFromBrushEvent(event: BrushEvent): Promise<Filter[]> {
-  const isDate = get(event.data, 'ordered.date');
-  const xRaw: Record<string, any> = get(event.data, 'series[0].values[0].xRaw');
-
-  if (!xRaw) {
-    return [];
-  }
-
-  const column: Record<string, any> = xRaw.table.columns[xRaw.column];
+export async function createFiltersFromRangeSelectAction(event: RangeSelectEvent) {
+  const column: Record<string, any> = event.table.columns[event.column];
 
   if (!column || !column.meta) {
     return [];
@@ -65,6 +55,8 @@ export async function createFiltersFromBrushEvent(event: BrushEvent): Promise<Fi
     return [];
   }
 
+  const isDate = field.type === 'date';
+
   const range: RangeFilterParams = {
     gte: isDate ? moment(min).toISOString() : min,
     lt: isDate ? moment(max).toISOString() : max,
@@ -74,6 +66,5 @@ export async function createFiltersFromBrushEvent(event: BrushEvent): Promise<Fi
     range.format = 'strict_date_optional_time';
   }
 
-  const rangeFilter = esFilters.buildRangeFilter(field, range, indexPattern);
-  return rangeFilter ? esFilters.mapAndFlattenFilters([rangeFilter]) : [];
+  return esFilters.mapAndFlattenFilters([esFilters.buildRangeFilter(field, range, indexPattern)]);
 }

@@ -37,7 +37,7 @@ jest.mock('../../../legacy_imports', () => ({
 
 jest.mock('../../../services', () => ({
   getDataActions: () => ({
-    createFiltersFromValueClickEvent: jest.fn().mockResolvedValue(['yes']),
+    createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
   }),
 }));
 

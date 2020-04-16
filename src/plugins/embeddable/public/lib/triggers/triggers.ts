@@ -24,15 +24,10 @@ export interface EmbeddableContext {
   embeddable: IEmbeddable;
 }
 
-export interface EmbeddableVisTriggerContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable?: T;
+export interface EmbeddableVisTriggerContext {
+  embeddable?: IEmbeddable;
   timeFieldName?: string;
-  data: {
-    e?: MouseEvent;
-    data: unknown;
-    range?: unknown;
-    negate?: boolean;
-  };
+  data: unknown;
 }
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
@@ -46,12 +41,5 @@ export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
 export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
   id: PANEL_BADGE_TRIGGER,
   title: 'Panel badges',
-  description: 'Actions appear in title bar when an embeddable loads in a panel.',
-};
-
-export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
-export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
-  id: PANEL_NOTIFICATION_TRIGGER,
-  title: 'Panel notifications',
-  description: 'Actions appear in top-right corner of a panel.',
+  description: 'Actions appear in title bar when an embeddable loads in a panel',
 };
