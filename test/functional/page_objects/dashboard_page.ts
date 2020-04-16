@@ -515,8 +515,8 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       log.debug('getPanelDrilldownCount');
       const panel = (await this.getDashboardPanels())[panelIndex];
       try {
-        const count = await panel.findByCssSelector(
-          '[data-test-subj="embeddablePanelDrilldownCount"]'
+        const count = await panel.findByTestSubject(
+          'embeddablePanelNotification-ACTION_PANEL_NOTIFICATIONS'
         );
         return Number.parseInt(await count.getVisibleText(), 10);
       } catch (e) {

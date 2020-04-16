@@ -44,8 +44,8 @@ export class DashboardToDashboardDrilldown
 
   public readonly createConfig = () => ({
     dashboardId: '',
-    useCurrentFilters: false,
-    useCurrentDateRange: false,
+    useCurrentFilters: true,
+    useCurrentDateRange: true,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
