@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { Alert } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
@@ -148,74 +148,83 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   return (
-    <EuiContextMenuPanel hasFocus={false}>
+    <EuiFlexGroup direction="column" gutterSize="none">
       {!allAlertsMuted && (
-        <EuiContextMenuItem
-          onClick={onmMuteAllClick}
-          isLoading={isMutingAlerts}
-          isDisabled={isPerformingAction}
-          data-test-subj="muteAll"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
-            defaultMessage="Mute"
-          />
-        </EuiContextMenuItem>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onmMuteAllClick}
+            isLoading={isMutingAlerts}
+            isDisabled={isPerformingAction}
+            data-test-subj="muteAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
+              defaultMessage="Mute"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       )}
       {allAlertsMuted && (
-        <EuiContextMenuItem
-          onClick={onUnmuteAllClick}
-          isLoading={isUnmutingAlerts}
-          isDisabled={isPerformingAction}
-          data-test-subj="unmuteAll"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
-            defaultMessage="Unmute"
-          />
-        </EuiContextMenuItem>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onUnmuteAllClick}
+            isLoading={isUnmutingAlerts}
+            isDisabled={isPerformingAction}
+            data-test-subj="unmuteAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
+              defaultMessage="Unmute"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       )}
       {allAlertsDisabled && (
-        <EuiContextMenuItem
-          onClick={onEnableAllClick}
-          isLoading={isEnablingAlerts}
-          isDisabled={isPerformingAction}
-          data-test-subj="enableAll"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
-            defaultMessage="Enable"
-          />
-        </EuiContextMenuItem>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onEnableAllClick}
+            isLoading={isEnablingAlerts}
+            isDisabled={isPerformingAction}
+            data-test-subj="enableAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
+              defaultMessage="Enable"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       )}
       {!allAlertsDisabled && (
-        <EuiContextMenuItem
-          onClick={onDisableAllClick}
-          isLoading={isDisablingAlerts}
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onDisableAllClick}
+            isLoading={isDisablingAlerts}
+            isDisabled={isPerformingAction}
+            data-test-subj="disableAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
+              defaultMessage="Disable"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          onClick={deleteSelectedItems}
+          isLoading={isDeletingAlerts}
+          icon="trash"
           isDisabled={isPerformingAction}
-          data-test-subj="disableAll"
+          data-test-subj="deleteAll"
+          className="actBulkActionPopover__deleteAll"
         >
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
-            defaultMessage="Disable"
+            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
+            defaultMessage="Delete"
           />
-        </EuiContextMenuItem>
-      )}
-
-      <EuiContextMenuItem
-        onClick={deleteSelectedItems}
-        isLoading={isDeletingAlerts}
-        icon="trash"
-        isDisabled={isPerformingAction}
-        data-test-subj="deleteAll"
-        className="actBulkActionPopover__deleteAll"
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
-          defaultMessage="Delete"
-        />
-      </EuiContextMenuItem>
-    </EuiContextMenuPanel>
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
