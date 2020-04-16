@@ -22,8 +22,6 @@ export const alertDetailsHandlerWrapper = function(
     try {
       const alertId = req.params.id;
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('get', {
-        // Remove the hard coded reference to an alert index here
-        // https://github.com/elastic/endpoint-app-team/issues/311
         index: EndpointAppConstants.ALERT_INDEX_NAME,
         id: alertId,
       })) as GetResponse<AlertEvent>;
@@ -43,8 +41,6 @@ export const alertDetailsHandlerWrapper = function(
 
       return res.ok({
         body: {
-          // base64 encode the index in the response
-          // https://github.com/elastic/endpoint-app-team/issues/311
           id: response._id,
           ...response._source,
           state: {

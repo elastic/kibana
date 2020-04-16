@@ -65,6 +65,11 @@ describe('test endpoint route', () => {
           client: savedObjectsClient,
         },
       },
+      /**
+       * Using unknown here because the object defined is not a full `RequestHandlerContext`. We don't
+       * need all of the fields required to run the tests, but the `routeHandler` function requires a
+       * `RequestHandlerContext`.
+       */
     } as unknown) as RequestHandlerContext;
   }
 

@@ -13,6 +13,11 @@ export interface IndexPatternRetriever {
   getMetadataIndexPattern(ctx: RequestHandlerContext): Promise<string>;
 }
 
+/**
+ * This class is used to retrieve an index pattern. It should be used in the server side code whenever
+ * an index pattern is needed to query data within ES. The index pattern is constructed by the Ingest Manager
+ * based on the contents of the Endpoint Package in the Package Registry.
+ */
 export class IngestIndexPatternRetriever implements IndexPatternRetriever {
   private static endpointPackageName = 'endpoint';
   private static metadataDataset = 'metadata';
@@ -21,14 +26,34 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
     this.log = loggerFactory.get('index-pattern-retriever');
   }
 
+  /**
+   * Retrieves the index pattern for querying events within elasticsearch.
+   *
+   * @param ctx a RequestHandlerContext from a route handler
+   * @returns a string representing the index pattern (e.g. `events-endpoint-*`)
+   */
   async getEventIndexPattern(ctx: RequestHandlerContext) {
     return await this.getIndexPattern(ctx, EndpointAppConstants.EVENT_DATASET);
   }
 
+  /**
+   * Retrieves the index pattern for querying endpoint metadata within elasticsearch.
+   *
+   * @param ctx a RequestHandlerContext from a route handler
+   * @returns a string representing the index pattern (e.g. `metrics-endpoint-*`)
+   */
   async getMetadataIndexPattern(ctx: RequestHandlerContext) {
     return await this.getIndexPattern(ctx, IngestIndexPatternRetriever.metadataDataset);
   }
 
+  /**
+   * Retrieves the index pattern for a specific dataset for querying endpoint data.
+   *
+   * @param ctx a RequestHandlerContext from a route handler
+   * @param datasetPath a string of the path being used for a dataset within the Endpoint Package
+   * (e.g. `events`, `metadata`)
+   * @returns a string representing the index pattern (e.g. `metrics-endpoint-*`)
+   */
   async getIndexPattern(ctx: RequestHandlerContext, datasetPath: string) {
     try {
       const pattern = await this.service.getESIndexPattern(

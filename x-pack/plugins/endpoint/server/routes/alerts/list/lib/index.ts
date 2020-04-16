@@ -108,8 +108,6 @@ export async function mapToAlertResultList(
 
   function mapHit(entry: AlertHits[0]): AlertData {
     return {
-      // base64 encode the alert index in the id field here
-      // https://github.com/elastic/endpoint-app-team/issues/311
       id: entry._id,
       ...entry._source,
       prev: null,
