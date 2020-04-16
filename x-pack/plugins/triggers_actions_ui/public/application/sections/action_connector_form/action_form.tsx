@@ -157,6 +157,7 @@ export const ActionForm = ({
         label: val.name,
         value: val.name,
         id: actionItemId,
+        'data-test-subj': 'itemActionConnector',
       },
     ];
   };
@@ -170,13 +171,9 @@ export const ActionForm = ({
     index: number
   ) => {
     const optionsList = connectors
-      .filter(
-        connectorItem =>
-          connectorItem.actionTypeId === actionItem.actionTypeId &&
-          connectorItem.id === actionItem.id
-      )
-      .map(({ name, id }) => ({
-        label: name,
+      .filter(connectorItem => connectorItem.actionTypeId === actionItem.actionTypeId)
+      .map(({ name, id, isPreconfigured }) => ({
+        label: `${name} ${isPreconfigured ? preconfiguredMessage : ''}`,
         key: id,
         id,
       }));
@@ -224,6 +221,8 @@ export const ActionForm = ({
                 fullWidth
                 singleSelection={{ asPlainText: true }}
                 options={optionsList}
+                id={`selectActionConnector-${actionItem.id}`}
+                data-test-subj="selectActionConnector"
                 selectedOptions={getSelectedOptions(actionItem.id)}
                 onChange={selectedOptions => {
                   setActionIdByIndex(selectedOptions[0].id ?? '', index);
@@ -439,6 +438,7 @@ export const ActionForm = ({
     const actionTypeConnectors = connectors.filter(
       field => field.actionTypeId === actionTypeModel.id
     );
+
     if (actionTypeConnectors.length > 0) {
       actions.push({
         id: '',
