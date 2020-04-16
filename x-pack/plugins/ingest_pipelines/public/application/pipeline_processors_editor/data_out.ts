@@ -19,7 +19,7 @@ const convertEditorProcessorToProcessor = (processor: PipelineEditorProcessor): 
   const { options, onFailure, type } = processor;
   return {
     [type]: {
-      onFailure: onFailure?.length
+      on_failure: onFailure?.length
         ? convertProcessors(onFailure)
         : (onFailure as Processor[] | undefined),
       ...options,

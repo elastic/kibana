@@ -3,8 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
+import React, {
+  FunctionComponent,
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  MutableRefObject,
+} from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -27,19 +35,15 @@ import { prepareDataOut, DataOutResult } from './data_out';
 import { useEditorState } from './reducer';
 import { PipelineEditorProcessor } from './types';
 
-interface OnUpdateArg {
-  readData: () => DataOutResult;
-}
-
 export interface Props {
   processors: Processor[];
+  stateReaderRef: (state: MutableRefObject<() => DataOutResult>) => void;
   onFailure?: Processor[];
-  onUpdate: (arg: OnUpdateArg) => void;
 }
 
 export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   processors: originalProcessors,
-  onUpdate,
+  stateReaderRef,
 }) => {
   const dataInResult = useMemo(() => prepareDataIn({ processors: originalProcessors }), [
     originalProcessors,
@@ -50,17 +54,20 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
     undefined
   );
   const [isAddingNewProcessor, setIsAddingNewProcessor] = useState<boolean>(false);
+  const stateGetterRef = useRef(() => prepareDataOut(state));
+
+  useEffect(() => {
+    stateGetterRef.current = () => prepareDataOut(state);
+  }, [state]);
+
+  useEffect(() => {
+    stateReaderRef(stateGetterRef);
+  });
 
   const dismissFlyout = () => {
     setSelectedProcessor(undefined);
     setIsAddingNewProcessor(false);
   };
-
-  useEffect(() => {
-    onUpdate({
-      readData: () => prepareDataOut(state),
-    });
-  }, [state, onUpdate]);
 
   return (
     <>
@@ -129,11 +136,6 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
         {/* TODO: Translate */}
         <EuiButton onClick={() => setIsAddingNewProcessor(true)}>Add a processor</EuiButton>
       </EuiPanel>
-      <EuiSpacer size="m" />
-      <EuiButton data-test-subj="pipelineEditorDoneButton" onClick={() => getData({ processors })}>
-        {/* TODO: Translate */}
-        Save
-      </EuiButton>
       {selectedProcessor || isAddingNewProcessor ? (
         <FormFlyout
           processor={selectedProcessor}

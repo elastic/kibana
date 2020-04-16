@@ -60,6 +60,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
 }) => {
   const { services } = useKibana();
 
+  const [processorStateReaderRef, setProcessorStateReaderRef] = useState<any>();
   const [showJsonProcessorsEditor, setShowJsonProcessorsEditor] = useState(false);
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(Boolean(defaultValue.version));
   const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(
@@ -69,7 +70,12 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
 
   const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
     if (isValid) {
-      onSave(formData as Pipeline);
+      if (!showJsonProcessorsEditor) {
+        const { processors } = processorStateReaderRef.current();
+        onSave({ ...formData, processors } as Pipeline);
+      } else {
+        onSave(formData as Pipeline);
+      }
     }
   };
 
@@ -135,9 +141,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
     return (
       <>
         <PipelineProcessorsEditor
-          onSubmit={({ processors: editorProcessors }) => {
-            form.setFieldValue('processors', JSON.stringify(editorProcessors));
-          }}
+          stateReaderRef={editorStateRef => setProcessorStateReaderRef(editorStateRef)}
           processors={processors}
         />
         <EuiSpacer size="l" />
