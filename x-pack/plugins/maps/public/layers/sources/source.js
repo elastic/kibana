@@ -6,6 +6,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../reducers/util';
+import { MIN_ZOOM, MAX_ZOOM } from '../../../common/constants';
 
 export class AbstractSource {
   static isIndexingSource = false;
@@ -147,5 +148,13 @@ export class AbstractSource {
 
   async getValueSuggestions(/* field, query */) {
     return [];
+  }
+
+  getMinZoom() {
+    return MIN_ZOOM;
+  }
+
+  getMaxZoom() {
+    return MAX_ZOOM;
   }
 }

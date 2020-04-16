@@ -31,6 +31,8 @@ export interface ISource {
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributions(): Promise<Attribution[]>;
+  getMinZoom(): number;
+  getMaxZoom(): number;
 }
 
 export class AbstractSource implements ISource {
@@ -49,4 +51,6 @@ export class AbstractSource implements ISource {
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributions(): Promise<Attribution[]>;
+  getMinZoom(): number;
+  getMaxZoom(): number;
 }
