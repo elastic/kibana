@@ -1220,30 +1220,29 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/apm-rum-core@^4.7.0":
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-4.7.0.tgz#b00b58bf7380f2e36652e5333e3ca97608986e40"
-  integrity sha512-/lTZWfA3ces3qoKCx72Sc+w43lZkyktaQlbYoYO86h3tNX7tScc/7YBBHI9oxKMcXweqkKOcpnwNZFy71bb86w==
+"@elastic/apm-rum-core@^5.2.0":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.2.0.tgz#2ed30dc226c9b5779532ab2e6065a155587bcea4"
+  integrity sha512-3ti2dhrqfxjHFXgArQI/sVAG2AgZH0kB1nx+2WjLpuAh8gGS4R772M5VXcWcGQb8UW9jrANwwbW2hT2GKv+uOA==
   dependencies:
     error-stack-parser "^1.3.5"
-    es6-promise "^4.2.8"
     opentracing "^0.14.3"
-    uuid "^3.1.0"
+    promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^0.3.2":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-0.3.2.tgz#134634643e15ebcf97b6f17b2c74a50afdbe1c64"
-  integrity sha512-hU1srW9noygppyrLmipulu30c+LWEie8V/dQjEqLYMx2mRZRwNIue3midYgWa6qrWqgYZhwpAtWrWcXc+AWk2Q==
+"@elastic/apm-rum-react@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.1.1.tgz#3a2ba91efc9260da55ef6c31cce642a476eba828"
+  integrity sha512-ZMixw+82VbZIDBnz0dj5Fo4PZ7pnXlLjAA7XTi3AtSIEjpsZa7YIuCFzJdrgb/nOq7MOFkODkFPTiIYAM/yCqg==
   dependencies:
-    "@elastic/apm-rum" "^4.6.0"
+    "@elastic/apm-rum" "^5.1.1"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^4.6.0":
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-4.6.0.tgz#e2ac560dd4a4761c0e9b08c301418b1d4063bdd2"
-  integrity sha512-hsqvyTm5rT6lKgV06wvm8ID9aMsuJyw8wIOPjRwKmvzlTjayabxKTcr50lJJV8jY9OWfDkqymIqpHyCEChQAHQ==
+"@elastic/apm-rum@^5.1.1":
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.1.1.tgz#02d29fa606e66f9a3a88f629d468b02457b1b183"
+  integrity sha512-A0O/0ZffcHm1taLuXyFoUmV2+aARr+9+xbmsEDIExLV0yKaNlaLl3UaZrodSOZ1ijlCEsRRS+y2i0md93YKQTA==
   dependencies:
-    "@elastic/apm-rum-core" "^4.7.0"
+    "@elastic/apm-rum-core" "^5.2.0"
 
 "@elastic/charts@18.2.2":
   version "18.2.2"
@@ -12204,11 +12203,6 @@ es6-promise@^4.2.5:
   version "4.2.6"
   resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.6.tgz#b685edd8258886365ea62b57d30de28fadcd974f"
   integrity sha512-aRVgGdnmW2OiySVPUC9e6m+plolMAJKjZnQlCwNSuK5yQ0JN61DZSO1X1Ufd1foqWRAlig0rhduTCHe7sVtK5Q==
-
-es6-promise@^4.2.8:
-  version "4.2.8"
-  resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.8.tgz#4eb21594c972bc40553d276e510539143db53e0a"
-  integrity sha512-HJDGx5daxeIvxdBxvG2cb9g4tEvwIk3i8+nhX0yGrYmZUzbkdg8QbDevheDB8gd0//uPj4c1EQua8Q+MViT0/w==
 
 es6-promisify@^5.0.0:
   version "5.0.0"
@@ -23439,6 +23433,11 @@ promise-inflight@^1.0.1:
   resolved "https://registry.yarnpkg.com/promise-inflight/-/promise-inflight-1.0.1.tgz#98472870bf228132fcbdd868129bad12c3c029e3"
   integrity sha1-mEcocL8igTL8vdhoEputEsPAKeM=
 
+promise-polyfill@^8.1.3:
+  version "8.1.3"
+  resolved "https://registry.yarnpkg.com/promise-polyfill/-/promise-polyfill-8.1.3.tgz#8c99b3cf53f3a91c68226ffde7bde81d7f904116"
+  integrity sha512-MG5r82wBzh7pSKDRa9y+vllNHz3e3d4CNj1PQE4BQYxLme0gKYYBm9YENq+UkEikyZ0XbiGWxYlVw3Rl9O/U8g==
+
 promise.prototype.finally@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/promise.prototype.finally/-/promise.prototype.finally-3.1.0.tgz#66f161b1643636e50e7cf201dc1b84a857f3864e"
@@ -30674,7 +30673,7 @@ utils-regex-from-string@^1.0.0:
     regex-regex "^1.0.0"
     validate.io-string-primitive "^1.0.0"
 
-uuid@3.3.2, uuid@^3.0.1, uuid@^3.1.0, uuid@^3.3.2:
+uuid@3.3.2, uuid@^3.0.1, uuid@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
   integrity sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==
@@ -30689,7 +30688,7 @@ uuid@^3.0.0:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.1.0.tgz#3dd3d3e790abc24d7b0d3a034ffababe28ebbc04"
   integrity sha512-DIWtzUkw04M4k3bf1IcpS2tngXEL26YUD2M0tMDUpnUrz2hgzUBlD55a4FjdLGPvfHxS6uluGWvaVEqgBcVa+g==
 
-uuid@^3.3.3:
+uuid@^3.1.0, uuid@^3.3.3:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
