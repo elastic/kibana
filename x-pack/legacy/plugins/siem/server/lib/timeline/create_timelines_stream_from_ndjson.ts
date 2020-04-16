@@ -3,8 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import * as rt from 'io-ts';
 import { Transform } from 'stream';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { failure } from 'io-ts/lib/PathReporter';
+import { identity } from 'fp-ts/lib/function';
 import {
   createConcatStream,
   createSplitStream,
@@ -14,25 +18,27 @@ import {
   parseNdjsonStrings,
   filterExportedCounts,
   createLimitStream,
-} from '../detection_engine/rules/create_rules_stream_from_ndjson';
-import { importTimelinesSchema } from './routes/schemas/import_timelines_schema';
-import { BadRequestError } from '../detection_engine/errors/bad_request_error';
-import { ImportTimelineResponse } from './routes/utils/import_timelines';
+} from '../../utils/read_stream/create_stream_from_ndjson';
 
-export const validateTimelines = (): Transform => {
-  return createMapStream((obj: ImportTimelineResponse) => {
-    if (!(obj instanceof Error)) {
-      const validated = importTimelinesSchema.validate(obj);
-      if (validated.error != null) {
-        return new BadRequestError(validated.error.message);
-      } else {
-        return validated.value;
-      }
-    } else {
-      return obj;
-    }
-  });
+import { ImportTimelineResponse } from './routes/utils/import_timelines';
+import { ImportTimelinesSchemaRt } from './routes/schemas/import_timelines_schema';
+
+type ErrorFactory = (message: string) => Error;
+
+export const createPlainError = (message: string) => new Error(message);
+
+export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {
+  throw createError(failure(errors).join('\n'));
 };
+
+export const decodeOrThrow = <A, O, I>(
+  runtimeType: rt.Type<A, O, I>,
+  createError: ErrorFactory = createPlainError
+) => (inputValue: I) =>
+  pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+
+export const validateTimelines = (): Transform =>
+  createMapStream((obj: ImportTimelineResponse) => decodeOrThrow(ImportTimelinesSchemaRt)(obj));
 
 export const createTimelinesStreamFromNdJson = (ruleLimit: number) => {
   return [
