@@ -22,11 +22,11 @@ import { createSelector } from 'reselect';
 
 import { EuiSpacer } from '@elastic/eui';
 import { AddFilter, Table, Header, DeleteFilterConfirmationModal } from './components';
-import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
+import { IndexPattern } from '../../../../../../../../../plugins/data/public';
 import { SourceFiltersTableFilter } from './types';
 
 export interface SourceFiltersTableProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   filterFilter: string;
   fieldWildcardMatcher: Function;
   onAddOrRemoveFilter?: Function;

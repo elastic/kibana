@@ -26,7 +26,7 @@ import { IIndexPattern } from '../../../../../../../../../../../plugins/data/pub
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 
-const items: ScriptedFieldItem[] = [{ name: '1', lang: 'Elastic', script: '' }];
+const items: ScriptedFieldItem[] = [{ name: '1', lang: 'Elastic', script: '', type: '' }];
 
 describe('Table', () => {
   let indexPattern: IIndexPattern;

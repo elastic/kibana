@@ -19,7 +19,7 @@
 
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/public';
 import {
   DuplicateField,
   SavedObjectNotFound,
@@ -34,6 +34,7 @@ import { findByTitle, getRoutes } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { Field, FieldList, IFieldList } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
+import { PatternCache } from './_pattern_cache';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
@@ -42,6 +43,11 @@ import { TypeMeta } from './types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
+
+interface SourceFiltersTableFilter {
+  value: string;
+  clientId?: string | number;
+}
 
 export class IndexPattern implements IIndexPattern {
   [key: string]: any;
@@ -57,12 +63,12 @@ export class IndexPattern implements IIndexPattern {
   public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
+  public sourceFilters?: SourceFiltersTableFilter[]; // needed for index pattern ui
 
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientContract;
-  private patternCache: any;
-  private getConfig: any;
-  private sourceFilters?: [];
+  private readonly patternCache: PatternCache;
+  private readonly getConfig: IUiSettingsClient['get'];
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
@@ -94,7 +100,7 @@ export class IndexPattern implements IIndexPattern {
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
-    patternCache: any
+    patternCache: PatternCache
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -367,8 +373,8 @@ export class IndexPattern implements IIndexPattern {
           duplicateId,
           this.getConfig,
           this.savedObjectsClient,
-          this.patternCache,
-          this.fieldsFetcher
+          this.fieldsFetcher,
+          this.patternCache
         );
         await duplicatePattern.destroy();
       }
@@ -416,8 +422,8 @@ export class IndexPattern implements IIndexPattern {
             this.id,
             this.getConfig,
             this.savedObjectsClient,
-            this.patternCache,
-            this.fieldsFetcher
+            this.fieldsFetcher,
+            this.patternCache
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
@@ -460,7 +466,9 @@ export class IndexPattern implements IIndexPattern {
             this.version = samePattern.version;
 
             // Clear cache
-            this.patternCache.clear(this.id);
+            if (this.id) {
+              this.patternCache.clear(this.id);
+            }
 
             // Try the save again
             return this.save(saveAttempts);
@@ -516,8 +524,8 @@ export class IndexPattern implements IIndexPattern {
   }
 
   destroy() {
-    this.patternCache.clear(this.id);
     if (this.id) {
+      this.patternCache.clear(this.id);
       return this.savedObjectsClient.delete(type, this.id);
     }
   }

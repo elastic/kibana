@@ -20,7 +20,10 @@
 import { IFieldType } from './fields';
 
 export interface IIndexPattern {
-  [key: string]: any;
+  // TODO: IIndexPattern shouldn't include attributes.
+  // We need a dedicated type for index patterns inside a saved object
+  // as described in https://github.com/elastic/kibana/issues/54894
+  attributes: any;
   fields: IFieldType[];
   title: string;
   id?: string;

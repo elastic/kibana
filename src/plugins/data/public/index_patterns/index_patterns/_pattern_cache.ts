@@ -19,13 +19,15 @@
 
 import { IndexPattern } from './index_pattern';
 
-interface PatternCache {
+/** @internal */
+export interface PatternCache {
   get: (id: string) => IndexPattern;
   set: (id: string, value: IndexPattern) => IndexPattern;
   clear: (id: string) => void;
   clearAll: () => void;
 }
 
+/** @internal */
 export function createIndexPatternCache(): PatternCache {
   const vals: Record<string, any> = {};
   const cache: PatternCache = {

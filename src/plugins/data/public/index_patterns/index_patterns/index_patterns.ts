@@ -24,19 +24,18 @@ import {
   HttpStart,
 } from 'src/core/public';
 
-import { createIndexPatternCache } from './_pattern_cache';
+import { createIndexPatternCache, PatternCache } from './_pattern_cache';
 import { IndexPattern } from './index_pattern';
 import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_client';
-
-const indexPatternCache = createIndexPatternCache();
 
 type IndexPatternCachedFieldType = 'id' | 'title';
 
 export class IndexPatternsService {
-  private config: IUiSettingsClient;
-  private savedObjectsClient: SavedObjectsClientContract;
+  private readonly apiClient: IndexPatternsApiClient;
+  private readonly config: IUiSettingsClient;
+  private readonly indexPatternCache: PatternCache;
+  private readonly savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
-  private apiClient: IndexPatternsApiClient;
 
   constructor(
     config: IUiSettingsClient,
@@ -46,6 +45,7 @@ export class IndexPatternsService {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
+    this.indexPatternCache = createIndexPatternCache();
   }
 
   private async refreshSavedObjectsCache() {
@@ -105,9 +105,9 @@ export class IndexPatternsService {
   clearCache = (id?: string) => {
     this.savedObjectsCache = null;
     if (id) {
-      indexPatternCache.clear(id);
+      this.indexPatternCache.clear(id);
     } else {
-      indexPatternCache.clearAll();
+      this.indexPatternCache.clearAll();
     }
   };
   getCache = async () => {
@@ -127,23 +127,23 @@ export class IndexPatternsService {
   };
 
   get = async (id: string): Promise<IndexPattern> => {
-    const cache = indexPatternCache.get(id);
+    const cache = this.indexPatternCache.get(id);
     if (cache) {
       return cache;
     }
 
     const indexPattern = await this.make(id);
 
-    return indexPatternCache.set(id, indexPattern);
+    return this.indexPatternCache.set(id, indexPattern);
   };
 
   make = (id?: string): Promise<IndexPattern> => {
     const indexPattern = new IndexPattern(
       id,
-      (cfg: any) => this.config.get(cfg),
+      (cfg: string) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,
-      indexPatternCache
+      this.indexPatternCache
     );
 
     return indexPattern.init();

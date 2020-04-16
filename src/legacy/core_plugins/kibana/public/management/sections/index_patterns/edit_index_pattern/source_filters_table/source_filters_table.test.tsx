@@ -21,7 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { SourceFiltersTable } from './source_filters_table';
-import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
+import { IndexPattern } from '../../../../../../../../../plugins/data/public';
 
 jest.mock('@elastic/eui', () => ({
   EuiButton: 'eui-button',
@@ -52,7 +52,7 @@ const getIndexPatternMock = (mockedFields: any = {}) =>
   ({
     sourceFilters: [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }],
     ...mockedFields,
-  } as IIndexPattern);
+  } as IndexPattern);
 
 describe('SourceFiltersTable', () => {
   test('should render normally', () => {

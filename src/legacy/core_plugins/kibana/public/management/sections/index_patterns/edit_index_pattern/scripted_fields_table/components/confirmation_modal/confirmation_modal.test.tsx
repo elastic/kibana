@@ -26,7 +26,7 @@ describe('DeleteScritpedFieldConfirmationModal', () => {
   test('should render normally', () => {
     const component = shallow(
       <DeleteScritpedFieldConfirmationModal
-        field={{ name: '', script: '', lang: '' }}
+        field={{ name: '', script: '', lang: '', type: '' }}
         deleteField={() => {}}
         hideDeleteConfirmationModal={() => {}}
       />

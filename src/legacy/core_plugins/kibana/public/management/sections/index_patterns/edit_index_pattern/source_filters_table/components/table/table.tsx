@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SourceFiltersTableFilter } from '../../types';
 
-import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
+import { IndexPattern } from '../../../../../../../../../../../plugins/data/public';
 
 const filterHeader = i18n.translate('kbn.management.editIndexPattern.source.table.filterHeader', {
   defaultMessage: 'Filter',
@@ -69,7 +69,7 @@ const cancelAria = i18n.translate('kbn.management.editIndexPattern.source.table.
 });
 
 export interface TableProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   items: SourceFiltersTableFilter[];
   deleteFilter: Function;
   fieldWildcardMatcher: Function;

@@ -17,9 +17,12 @@
  * under the License.
  */
 
+import { IFieldType } from 'src/plugins/data/public';
+
 /** @internal **/
-export interface ScriptedFieldItem {
-  name: string;
-  lang: string;
-  script: string;
-}
+export type ScriptedFieldItem = IFieldType;
+// export interface ScriptedFieldItem {
+//   name: string;
+//   lang: string;
+//   script: string;
+// }

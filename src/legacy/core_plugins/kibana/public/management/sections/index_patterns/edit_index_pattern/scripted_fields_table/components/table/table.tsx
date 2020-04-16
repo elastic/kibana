@@ -22,14 +22,13 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
-import { ScriptedFieldItem } from '../../types';
-import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
+import { IIndexPattern, IFieldType } from '../../../../../../../../../../../plugins/data/public';
 
 interface TableProps {
   indexPattern: IIndexPattern;
-  items: ScriptedFieldItem[];
-  editField: (field: ScriptedFieldItem) => void;
-  deleteField: (field: ScriptedFieldItem) => void;
+  items: IFieldType[];
+  editField: (field: IFieldType) => void;
+  deleteField: (field: IFieldType) => void;
 }
 
 export class Table extends PureComponent<TableProps> {
@@ -43,7 +42,7 @@ export class Table extends PureComponent<TableProps> {
   render() {
     const { items, editField, deleteField } = this.props;
 
-    const columns: Array<EuiBasicTableColumn<ScriptedFieldItem>> = [
+    const columns: Array<EuiBasicTableColumn<IFieldType>> = [
       {
         field: 'displayName',
         name: i18n.translate('kbn.management.editIndexPattern.scripted.table.nameHeader', {

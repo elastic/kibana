@@ -104,7 +104,7 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     (cfg: any) => config.get(cfg),
     savedObjectsClient as any,
     apiClient,
-    patternCache
+    patternCache as any
   );
 
   setDocsourcePayload(id, payload);
@@ -374,7 +374,7 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache
+      patternCache as any
     );
     await pattern.init();
 
@@ -386,7 +386,7 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache
+      patternCache as any
     );
     await samePattern.init();
 

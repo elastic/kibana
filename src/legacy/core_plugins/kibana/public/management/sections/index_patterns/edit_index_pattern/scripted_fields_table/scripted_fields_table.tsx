@@ -29,10 +29,10 @@ import { EuiSpacer } from '@elastic/eui';
 import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
 import { ScriptedFieldItem } from './types';
 
-import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
+import { IndexPattern } from '../../../../../../../../../plugins/data/public';
 
 interface ScriptedFieldsTableProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   fieldFilter?: string;
   scriptedFieldLanguageFilter?: string;
   helpers: {
@@ -76,8 +76,8 @@ export class ScriptedFieldsTable extends Component<
     const supportedLangs = getSupportedScriptingLanguages();
 
     for (const field of fields) {
-      const lang: string = field.lang;
-      if (deprecatedLangs.includes(lang) || !supportedLangs.includes(lang)) {
+      const lang = field.lang;
+      if (lang && (deprecatedLangs.includes(lang) || !supportedLangs.includes(lang))) {
         deprecatedLangsInUse.push(lang);
       }
     }
@@ -125,7 +125,9 @@ export class ScriptedFieldsTable extends Component<
     const { indexPattern, onRemoveField } = this.props;
     const { fieldToDelete } = this.state;
 
-    indexPattern.removeScriptedField(fieldToDelete);
+    if (fieldToDelete) {
+      indexPattern.removeScriptedField(fieldToDelete);
+    }
 
     if (onRemoveField) {
       onRemoveField();
