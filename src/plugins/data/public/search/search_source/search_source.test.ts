@@ -24,20 +24,18 @@ import { setSearchService } from '../../services';
 import { searchStartMock } from '../mocks';
 import { fetchSoon } from '../legacy';
 import { CoreStart } from 'kibana/public';
+import { Observable } from 'rxjs';
 
 // Setup search service mock
 searchStartMock.search = jest.fn(() => {
-  return {
-    toPromise: () => {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve({
-            rawResponse: '',
-          });
-        }, 100);
+  return new Observable(subscriber => {
+    setTimeout(() => {
+      subscriber.next({
+        rawResponse: '',
       });
-    },
-  };
+      subscriber.complete();
+    }, 100);
+  });
 }) as any;
 setSearchService(searchStartMock);
 
