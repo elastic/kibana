@@ -166,7 +166,8 @@ SIEM::
 * Adds rule markdown to timeline global notes {pull}61026[#61026]
 Security::
 * Uses links instead of click handlers when switching spaces {pull}57730[#57730]
-* Adds support for deprecated roles {pull}57209[#57209]
+* Introduce a login selector screen when multiple auth providers are enabled {pull}53010[#53010]
+* Warn when using deprecated roles {pull}57209[#57209]
 * Support for subfeature privileges {pull}60563[#60563]
 Telemetry::
 * Application Usage implemented in @kbn/analytics {pull}58401[#58401]
