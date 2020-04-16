@@ -26,7 +26,7 @@ Refer to {ref}/ccr-overview.html[this document] for more information.
 
 Replication requires a leader index, the index being replicated, and a
 follower index, which will contain the leader index's replicated data.
-The follower index is passive in that it can serve read requests and searches,
+The follower index is passive in that it can read requests and searches,
 but cannot accept direct writes. Only the leader index is active for direct writes.
 
 You can configure follower indices in two ways:
@@ -49,7 +49,7 @@ image::images/follower_indices.png[][UI for adding follower indices]
 
 To automatically detect and follow new indices when they are created on a remote cluster,
 go to *Auto-follow patterns*. Creating an auto-follow pattern is useful when you have
-time-series data, like event logs, on the remote cluster that is created or rolled over on a daily basis.
+time series data, like event logs, on the remote cluster that is created or rolled over on a daily basis.
 
 When creating the pattern, you must reference the remote cluster that you
 connected to your local cluster. You must also specify a collection of index patterns
@@ -66,11 +66,8 @@ image::images/auto_follow_pattern.png[UI for adding an auto-follow pattern]
 [[manage-replication]]
 === Manage replication
 
-Use the list views in *Cross-cluster replication* to monitor whether the replication is active and
+Use the list views in *Cross-Cluster Replication* to monitor whether the replication is active and
 pause and resume replication.  You can also edit and remove the follower indices and auto-follow patterns.
 
-
-[float]
-==== Example
-
-* https://www.elastic.co/blog/bi-directional-replication-with-elasticsearch-cross-cluster-replication-ccr[Bi-directional replication with Elasticsearch cross-cluster replication]
+For an example of cross-cluster replication,
+refer to https://www.elastic.co/blog/bi-directional-replication-with-elasticsearch-cross-cluster-replication-ccr[Bi-directional replication with Elasticsearch cross-cluster replication].

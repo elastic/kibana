@@ -1,7 +1,7 @@
 [[working-remote-clusters]]
 == Remote Clusters
 
-Use *Remote Clusters* to establish a uni-directional
+Use *Remote Clusters* to establish a unidirectional
 connection from your cluster to other clusters. This functionality is
 required for {ref}/xpack-ccr.html[cross-cluster replication] and
 {ref}/modules-cross-cluster-search.html[cross-cluster search].

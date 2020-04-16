@@ -85,7 +85,8 @@ set the timespan for notification messages, and much more.
 
 | <<managing-alerts-and-actions, *Alerts and Actions*>>
 
-Centrally manage your alerts from across {kib}. Create and manage re-usable connectors for triggering actions.
+Centrally manage your alerts across {kib}. Create and manage reusable 
+connectors for triggering actions.
 
 | <<managing-fields, *Index Patterns*>>
 
