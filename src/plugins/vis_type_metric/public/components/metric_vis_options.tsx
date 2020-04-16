@@ -38,7 +38,7 @@ import {
   RangeOption,
   SetColorSchemaOptionsValue,
   SetColorRangeValue,
-} from '../../../../../plugins/charts/public';
+} from '../../../charts/public';
 import { MetricVisParam, VisParams } from '../types';
 
 function MetricVisOptions({
