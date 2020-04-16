@@ -1,3 +1,5 @@
 .actBulkActionPopover__deleteAll {
-  color: $euiColorDanger;
+  .euiButtonEmpty__text {
+    padding-top: $euiSizeXS;
+  }
 }

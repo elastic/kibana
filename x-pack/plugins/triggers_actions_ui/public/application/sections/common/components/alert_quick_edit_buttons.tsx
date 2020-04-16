@@ -148,7 +148,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup alignItems="baseline" direction="column" gutterSize="none">
       {!allAlertsMuted && (
         <EuiFlexItem>
           <EuiButtonEmpty
@@ -213,7 +213,8 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         <EuiButtonEmpty
           onClick={deleteSelectedItems}
           isLoading={isDeletingAlerts}
-          icon="trash"
+          iconType="trash"
+          color="danger"
           isDisabled={isPerformingAction}
           data-test-subj="deleteAll"
           className="actBulkActionPopover__deleteAll"
