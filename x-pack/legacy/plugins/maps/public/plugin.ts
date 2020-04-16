@@ -8,11 +8,12 @@
 import '../../../../plugins/maps/public/layers/layer_wizard_registry';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import '../../../../plugins/maps/public/layers/sources/source_registry';
+
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
-import { wrapInI18nContext } from 'ui/i18n';
-// @ts-ignore
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+// @ts-ignore
+import { wrapInI18nContext } from 'ui/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { registerLayerWizards } from '../../../../plugins/maps/public/layers/load_layer_wizards';
 // @ts-ignore
