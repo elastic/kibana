@@ -412,7 +412,7 @@ extract them to a `JSON` file or integrate translations back to Kibana. To know 
 ### Localization
 
 We cannot support accepting contributions to the translations from any source other than the translators we have engaged to do the work.
-We are still to develop a proper process to accept any contributed translation. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once contributions can be supported, but for the time being, we are not able to incorporate suggestions.
+We are still to develop a proper process to accept any contributed translations. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once contributions can be supported, but for the time being, we are not able to incorporate suggestions.
 
 ### Testing and Building
 
