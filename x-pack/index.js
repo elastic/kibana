@@ -29,7 +29,6 @@ import { uptime } from './legacy/plugins/uptime';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
-import { lens } from './legacy/plugins/lens';
 import { ingestManager } from './legacy/plugins/ingest_manager';
 import { triggersActionsUI } from './legacy/plugins/triggers_actions_ui';
 
@@ -58,7 +57,6 @@ module.exports = function(kibana) {
     upgradeAssistant(kibana),
     uptime(kibana),
     encryptedSavedObjects(kibana),
-    lens(kibana),
     actions(kibana),
     alerting(kibana),
     ingestManager(kibana),
