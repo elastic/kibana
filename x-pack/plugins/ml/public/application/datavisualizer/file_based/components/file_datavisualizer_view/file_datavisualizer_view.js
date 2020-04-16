@@ -24,13 +24,10 @@ import {
   readFile,
   createUrlOverrides,
   processResults,
-  reduceData,
   hasImportPermission,
 } from '../utils';
 
 import { MODE } from './constants';
-
-const UPLOAD_SIZE_MB = 5;
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -40,6 +37,7 @@ export class FileDataVisualizerView extends Component {
       files: {},
       fileName: '',
       fileContents: '',
+      data: [],
       fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
@@ -79,6 +77,7 @@ export class FileDataVisualizerView extends Component {
         loaded: false,
         fileName: '',
         fileContents: '',
+        data: [],
         fileSize: 0,
         fileTooLarge: false,
         fileCouldNotBeRead: false,
@@ -97,15 +96,15 @@ export class FileDataVisualizerView extends Component {
   async loadFile(file) {
     if (file.size <= this.maxFileUploadBytes) {
       try {
-        const fileContents = await readFile(file);
-        const data = fileContents.data;
+        const { data, fileContents } = await readFile(file);
         this.setState({
-          fileContents: data,
+          data,
+          fileContents,
           fileName: file.name,
           fileSize: file.size,
         });
 
-        await this.loadSettings(data);
+        await this.analyzeFile(fileContents);
       } catch (error) {
         this.setState({
           loaded: false,
@@ -124,14 +123,9 @@ export class FileDataVisualizerView extends Component {
     }
   }
 
-  async loadSettings(data, overrides, isRetry = false) {
+  async analyzeFile(fileContents, overrides, isRetry = false) {
     try {
-      // reduce the amount of data being sent to the endpoint
-      // 5MB should be enough to contain 1000 lines
-      const lessData = reduceData(data, UPLOAD_SIZE_MB);
-      console.log('overrides', overrides);
-      const { analyzeFile } = ml.fileDatavisualizer;
-      const resp = await analyzeFile(lessData, overrides);
+      const resp = await ml.fileDatavisualizer.analyzeFile(fileContents, overrides);
       const serverSettings = processResults(resp);
       const serverOverrides = resp.overrides;
 
@@ -198,7 +192,7 @@ export class FileDataVisualizerView extends Component {
           loading: true,
           loaded: false,
         });
-        this.loadSettings(data, this.previousOverrides, true);
+        this.analyzeFile(fileContents, this.previousOverrides, true);
       }
     }
   }
@@ -240,7 +234,7 @@ export class FileDataVisualizerView extends Component {
       },
       () => {
         const formattedOverrides = createUrlOverrides(overrides, this.originalSettings);
-        this.loadSettings(this.state.fileContents, formattedOverrides);
+        this.analyzeFile(this.state.fileContents, formattedOverrides);
       }
     );
   };
@@ -261,6 +255,7 @@ export class FileDataVisualizerView extends Component {
       results,
       explanation,
       fileContents,
+      data,
       fileName,
       fileSize,
       fileTooLarge,
@@ -339,6 +334,7 @@ export class FileDataVisualizerView extends Component {
               results={results}
               fileName={fileName}
               fileContents={fileContents}
+              data={data}
               indexPatterns={this.props.indexPatterns}
               kibanaConfig={this.props.kibanaConfig}
               showBottomBar={this.showBottomBar}

@@ -20,11 +20,13 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternService } from '../../../kibana_services';
+import {
+  getIndexPatternService,
+  getUiSettings,
+  getData,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../plugins/maps/public/kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
-
-import { npStart } from 'ui/new_platform';
-const { SearchBar } = npStart.plugins.data.ui;
 
 export class FilterEditor extends Component {
   state = {
@@ -84,7 +86,8 @@ export class FilterEditor extends Component {
 
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
-    const { uiSettings } = npStart.core;
+    const uiSettings = getUiSettings();
+    const { SearchBar } = getData().ui;
 
     return (
       <EuiPopover
