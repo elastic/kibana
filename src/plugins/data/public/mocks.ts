@@ -46,6 +46,7 @@ const createStartContract = (): Start => {
   return {
     actions: {
       createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
+      createFiltersFromRangeSelectAction: jest.fn(),
     },
     autocomplete: autocompleteMock,
     search: searchStartMock,

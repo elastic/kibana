@@ -9,5 +9,6 @@
 ```typescript
 actions: {
         createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
+        createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;
     };
 ```
