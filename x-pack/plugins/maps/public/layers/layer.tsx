@@ -51,6 +51,7 @@ export interface ILayer {
   showAtZoomLevel(zoom: number): boolean;
   getMinZoom(): number;
   getMaxZoom(): number;
+  getMinSourceZoom(): number;
   getAlpha(): number;
   getQuery(): Query | null;
   getStyle(): IStyle;
@@ -314,6 +315,10 @@ export class AbstractLayer implements ILayer {
 
   getMaxZoom(): number {
     return typeof this._descriptor.maxZoom === 'number' ? this._descriptor.maxZoom : MAX_ZOOM;
+  }
+
+  getMinSourceZoom(): number {
+    return this._source.getMinZoom();
   }
 
   getAlpha(): number {

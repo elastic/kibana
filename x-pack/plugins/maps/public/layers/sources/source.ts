@@ -16,6 +16,7 @@ import { copyPersistentState } from '../../reducers/util';
 import { LayerDescriptor, SourceDescriptor } from '../../../common/descriptor_types';
 import { ILayer } from '../layer';
 import { IField } from '../fields/field';
+import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 
 export type ImmutableSourceProperty = {
   label: string;
@@ -62,6 +63,8 @@ export interface ISource {
   getPreIndexedShape(): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
+  getMinZoom(): number;
+  getMaxZoom(): number;
 }
 
 export class AbstractSource implements ISource {
@@ -180,5 +183,13 @@ export class AbstractSource implements ISource {
 
   isFilterByMapBounds(): boolean {
     return false;
+  }
+
+  getMinZoom() {
+    return MIN_ZOOM;
+  }
+
+  getMaxZoom() {
+    return MAX_ZOOM;
   }
 }
