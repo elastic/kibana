@@ -105,6 +105,11 @@ export interface DrilldownDefinition<
    *  `UIAction` of this drilldown is being executed in.
    */
   execute(config: Config, context: ExecutionContext): void;
+
+  /**
+   * A link where drilldown should navigate on middle click or Ctrl + click.
+   */
+  getHref?(config: Config, context: ExecutionContext): string | undefined;
 }
 
 /**
