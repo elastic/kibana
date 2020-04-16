@@ -32,7 +32,7 @@ import {
   SavedObjectsManagementServiceRegistry,
   ISavedObjectsManagementServiceRegistry,
 } from './services';
-import { setSearchService } from './kibana_services';
+import { setSearchService, setInjectedMetadata, setUiSettings } from './kibana_services';
 import { registerServices } from './register_services';
 
 export interface SavedObjectsManagementPluginSetup {
@@ -121,6 +121,8 @@ export class SavedObjectsManagementPlugin
     const actionStart = this.actionService.start();
 
     setSearchService(data.search);
+    setUiSettings(core.uiSettings);
+    setInjectedMetadata(core.injectedMetadata);
 
     return {
       actions: actionStart,
