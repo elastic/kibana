@@ -25,7 +25,8 @@ import {
   createKbnUrlStateStorage,
   redirectWhenMissing,
   ensureDefaultIndexPattern,
-} from '../../../../../../plugins/kibana_utils/public';
+} from '../../../kibana_utils/public';
+import { createSavedSearchesLoader } from '../../../discover/public';
 
 import editorTemplate from './editor/editor.html';
 import visualizeListingTemplate from './listing/visualize_listing.html';
@@ -40,7 +41,6 @@ import {
   getCreateBreadcrumbs,
   getEditBreadcrumbs,
 } from './breadcrumbs';
-import { createSavedSearchesLoader } from '../../../../../../plugins/discover/public';
 
 const getResolvedResults = deps => {
   const { core, data, visualizations, createVisEmbeddableFromObject } = deps;
@@ -93,7 +93,7 @@ export function initVisualizeApp(app, deps) {
   app.factory('kbnUrlStateStorage', history =>
     createKbnUrlStateStorage({
       history,
-      useHash: deps.uiSettings.get('state:storeInSessionStorage'),
+      useHash: deps.core.uiSettings.get('state:storeInSessionStorage'),
     })
   );
 
@@ -107,10 +107,10 @@ export function initVisualizeApp(app, deps) {
         }
 
         return {
-          text: i18n.translate('kbn.visualize.badge.readOnly.text', {
+          text: i18n.translate('visualize.badge.readOnly.text', {
             defaultMessage: 'Read only',
           }),
-          tooltip: i18n.translate('kbn.visualize.badge.readOnly.tooltip', {
+          tooltip: i18n.translate('visualize.badge.readOnly.tooltip', {
             defaultMessage: 'Unable to save visualizations',
           }),
           iconType: 'glasses',
@@ -156,7 +156,7 @@ export function initVisualizeApp(app, deps) {
             if (shouldHaveIndex && !hasIndex) {
               throw new Error(
                 i18n.translate(
-                  'kbn.visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage',
+                  'visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage',
                   {
                     defaultMessage: 'You must provide either an indexPattern or a savedSearchId',
                   }

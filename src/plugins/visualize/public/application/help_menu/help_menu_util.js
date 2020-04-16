@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 export function addHelpMenuToAppChrome(chrome, docLinks) {
   chrome.setHelpExtension({
-    appName: i18n.translate('kbn.visualize.helpMenu.appName', {
+    appName: i18n.translate('visualize.helpMenu.appName', {
       defaultMessage: 'Visualize',
     }),
     links: [

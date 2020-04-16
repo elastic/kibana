@@ -24,7 +24,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../../kibana_services';
-import { syncQueryStateWithUrl } from '../../../../../../../plugins/data/public';
+import { syncQueryStateWithUrl } from '../../../../data/public';
 
 export function initListingDirective(app, I18nContext) {
   app.directive('visualizeListingTable', reactDirective =>
@@ -40,9 +40,8 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     savedVisualizations,
     data: { query },
     toastNotifications,
-    uiSettings,
     visualizations,
-    core: { docLinks, savedObjects },
+    core: { docLinks, savedObjects, uiSettings },
   } = getServices();
 
   // syncs `_g` portion of url with query services
@@ -110,7 +109,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
       })
     ).catch(error => {
       toastNotifications.addError(error, {
-        title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
+        title: i18n.translate('visualize.visualizeListingDeleteErrorTitle', {
           defaultMessage: 'Error deleting visualization',
         }),
       });
@@ -119,7 +118,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
 
   chrome.setBreadcrumbs([
     {
-      text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
+      text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
         defaultMessage: 'Visualize',
       }),
     },

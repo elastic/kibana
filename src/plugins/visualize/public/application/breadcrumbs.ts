@@ -24,7 +24,7 @@ import { VisualizeConstants } from './visualize_constants';
 export function getLandingBreadcrumbs() {
   return [
     {
-      text: i18n.translate('kbn.visualize.listing.breadcrumb', {
+      text: i18n.translate('visualize.listing.breadcrumb', {
         defaultMessage: 'Visualize',
       }),
       href: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
@@ -36,7 +36,7 @@ export function getWizardStep1Breadcrumbs() {
   return [
     ...getLandingBreadcrumbs(),
     {
-      text: i18n.translate('kbn.visualize.wizard.step1Breadcrumb', {
+      text: i18n.translate('visualize.wizard.step1Breadcrumb', {
         defaultMessage: 'Create',
       }),
     },
@@ -47,7 +47,7 @@ export function getWizardStep2Breadcrumbs() {
   return [
     ...getLandingBreadcrumbs(),
     {
-      text: i18n.translate('kbn.visualize.wizard.step2Breadcrumb', {
+      text: i18n.translate('visualize.wizard.step2Breadcrumb', {
         defaultMessage: 'Create',
       }),
     },
@@ -58,7 +58,7 @@ export function getCreateBreadcrumbs() {
   return [
     ...getLandingBreadcrumbs(),
     {
-      text: i18n.translate('kbn.visualize.editor.createBreadcrumb', {
+      text: i18n.translate('visualize.editor.createBreadcrumb', {
         defaultMessage: 'Create',
       }),
     },
