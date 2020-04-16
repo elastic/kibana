@@ -9,7 +9,7 @@ import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
-} from '../query_utils';
+} from './query_utils';
 
 describe('ML - query utils', () => {
   describe('buildBaseFilterCriteria', () => {
@@ -23,7 +23,7 @@ describe('ML - query utils', () => {
       },
     };
 
-    it('returns correct criteria for time range', () => {
+    test('returns correct criteria for time range', () => {
       expect(buildBaseFilterCriteria('timestamp', earliestMs, latestMs)).to.eql([
         {
           range: {
@@ -37,7 +37,7 @@ describe('ML - query utils', () => {
       ]);
     });
 
-    it('returns correct criteria for time range and query', () => {
+    test('returns correct criteria for time range and query', () => {
       expect(buildBaseFilterCriteria('timestamp', earliestMs, latestMs, query)).to.eql([
         {
           range: {
@@ -60,7 +60,7 @@ describe('ML - query utils', () => {
       },
     };
 
-    it('returns wrapped sampler aggregation for sampler shard size of 1000', () => {
+    test('returns wrapped sampler aggregation for sampler shard size of 1000', () => {
       expect(buildSamplerAggregation(testAggs, 1000)).to.eql({
         sample: {
           sampler: {
@@ -71,17 +71,17 @@ describe('ML - query utils', () => {
       });
     });
 
-    it('returns un-sampled aggregation as-is for sampler shard size of 0', () => {
+    test('returns un-sampled aggregation as-is for sampler shard size of 0', () => {
       expect(buildSamplerAggregation(testAggs, 0)).to.eql(testAggs);
     });
   });
 
   describe('getSamplerAggregationsResponsePath', () => {
-    it('returns correct path for sampler shard size of 1000', () => {
+    test('returns correct path for sampler shard size of 1000', () => {
       expect(getSamplerAggregationsResponsePath(1000)).to.eql(['sample']);
     });
 
-    it('returns correct path for sampler shard size of 0', () => {
+    test('returns correct path for sampler shard size of 0', () => {
       expect(getSamplerAggregationsResponsePath(0)).to.eql([]);
     });
   });
