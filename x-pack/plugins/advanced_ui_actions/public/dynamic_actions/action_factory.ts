@@ -17,7 +17,7 @@ export class ActionFactory<
   Config extends object = object,
   FactoryContext extends object = object,
   ActionContext extends object = object
-> implements Presentable<FactoryContext>, Configurable<Config, FactoryContext> {
+> implements Omit<Presentable<FactoryContext>, 'getHref'>, Configurable<Config, FactoryContext> {
   constructor(
     protected readonly def: ActionFactoryDefinition<Config, FactoryContext, ActionContext>
   ) {}
@@ -45,11 +45,6 @@ export class ActionFactory<
   public async isCompatible(context: FactoryContext): Promise<boolean> {
     if (!this.def.isCompatible) return true;
     return await this.def.isCompatible(context);
-  }
-
-  public getHref(context: FactoryContext): string | undefined {
-    if (!this.def.getHref) return undefined;
-    return this.def.getHref(context);
   }
 
   public create(
