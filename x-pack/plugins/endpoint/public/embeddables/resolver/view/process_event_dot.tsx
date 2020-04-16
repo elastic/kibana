@@ -72,7 +72,9 @@ const ChildEventsButton = () => {
       iconSide="right"
       tabIndex={-1}
     >
-      Events
+      {i18n.translate('xpack.endpoint.resolver.relatedEvents', {
+        defaultMessage: 'Events',
+      })}
     </EuiButton>
   );
 };
@@ -88,7 +90,9 @@ const RelatedAlertsButton = () => {
       size="s"
       tabIndex={-1}
     >
-      Related Alerts
+      {i18n.translate('xpack.endpoint.resolver.relatedAlerts', {
+        defaultMessage: 'Related Alerts',
+      })}
     </EuiButton>
   );
 };
@@ -329,14 +333,13 @@ export const ProcessEventDot = styled(
                 {descriptionText}
               </div>
               <div
-                className={magFactorX >= 2 ? "euiButton" : "euiButton euiButton--small"}
+                className={magFactorX >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
                 data-test-subject="nodeLabel"
                 id={labelId}
                 style={{
                   backgroundColor: labelBackground,
                   padding: '.15rem 0',
                   textAlign: 'center',
-                  width: '100%',
                   maxWidth: '20rem',
                   minWidth: '12rem',
                   overflow: 'hidden',
