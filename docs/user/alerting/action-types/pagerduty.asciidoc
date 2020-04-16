@@ -34,6 +34,7 @@ In the kibana.yml configuration file, you must add the <<general-alert-action-se
 This is required to encrypt parameters the must be secured, for example, PagerDuty’s integration key.
 
 If you have security enabled:
+
 * You must have
 application privileges to access Metrics, APM, Uptime, or SIEM.
 * If you are using a self-managed deployment with security, you must have
