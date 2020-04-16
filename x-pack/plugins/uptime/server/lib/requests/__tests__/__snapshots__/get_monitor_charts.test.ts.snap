@@ -46,8 +46,10 @@ Array [
               },
             },
             Object {
-              "term": Object {
-                "monitor.status": "up",
+              "range": Object {
+                "monitor.duration.us": Object {
+                  "gt": 0,
+                },
               },
             },
           ],
@@ -73,13 +75,6 @@ Array [
                 "duration": Object {
                   "stats": Object {
                     "field": "monitor.duration.us",
-                  },
-                },
-                "status": Object {
-                  "terms": Object {
-                    "field": "monitor.status",
-                    "shard_size": 2,
-                    "size": 2,
                   },
                 },
               },
