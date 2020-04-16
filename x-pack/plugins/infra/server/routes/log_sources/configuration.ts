@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import {
   getLogSourceConfigurationRequestParamsRT,
   getLogSourceConfigurationSuccessResponsePayloadRT,
   LOG_SOURCE_CONFIGURATION_PATH,
+  patchLogSourceConfigurationRequestBodyRT,
+  patchLogSourceConfigurationRequestParamsRT,
+  patchLogSourceConfigurationSuccessResponsePayloadRT,
 } from '../../../common/http_api/log_sources';
 import { createValidationFunction } from '../../../common/runtime_types';
 import { InfraBackendLibs } from '../../lib/infra_types';
-
-const validateGetLogSourceConfigurationRequestParams = createValidationFunction(
-  getLogSourceConfigurationRequestParamsRT
-);
 
 export const initLogSourceConfigurationRoutes = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -22,10 +22,10 @@ export const initLogSourceConfigurationRoutes = ({ framework, sources }: InfraBa
       method: 'get',
       path: LOG_SOURCE_CONFIGURATION_PATH,
       validate: {
-        params: validateGetLogSourceConfigurationRequestParams,
+        params: createValidationFunction(getLogSourceConfigurationRequestParamsRT),
       },
     },
-    async (requestContext, request, response) => {
+    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const { sourceId } = request.params;
 
       try {
@@ -36,14 +36,73 @@ export const initLogSourceConfigurationRoutes = ({ framework, sources }: InfraBa
             data: sourceConfiguration,
           }),
         });
-      } catch (e) {
-        const { statusCode = 500, message = 'Unknown error occurred' } = e;
+      } catch (error) {
+        if (Boom.isBoom(error)) {
+          throw error;
+        }
 
         return response.customError({
-          statusCode,
-          body: { message },
+          statusCode: error.statusCode ?? 500,
+          body: {
+            message: error.message ?? 'An unexpected error occurred',
+          },
         });
       }
-    }
+    })
+  );
+
+  framework.registerRoute(
+    {
+      method: 'patch',
+      path: LOG_SOURCE_CONFIGURATION_PATH,
+      validate: {
+        params: createValidationFunction(patchLogSourceConfigurationRequestParamsRT),
+        body: createValidationFunction(patchLogSourceConfigurationRequestBodyRT),
+      },
+    },
+    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
+      const { sourceId } = request.params;
+      const { data: patchedSourceConfigurationProperties } = request.body;
+
+      try {
+        const sourceConfiguration = await sources.getSourceConfiguration(requestContext, sourceId);
+
+        if (sourceConfiguration.origin === 'internal') {
+          response.conflict({
+            body: 'A conflicting read-only source configuration already exists.',
+          });
+        }
+
+        const sourceConfigurationExists = sourceConfiguration.origin === 'stored';
+        const patchedSourceConfiguration = await (sourceConfigurationExists
+          ? sources.updateSourceConfiguration(
+              requestContext,
+              sourceId,
+              patchedSourceConfigurationProperties
+            )
+          : sources.createSourceConfiguration(
+              requestContext,
+              sourceId,
+              patchedSourceConfigurationProperties
+            ));
+
+        return response.ok({
+          body: patchLogSourceConfigurationSuccessResponsePayloadRT.encode({
+            data: patchedSourceConfiguration,
+          }),
+        });
+      } catch (error) {
+        if (Boom.isBoom(error)) {
+          throw error;
+        }
+
+        return response.customError({
+          statusCode: error.statusCode ?? 500,
+          body: {
+            message: error.message ?? 'An unexpected error occurred',
+          },
+        });
+      }
+    })
   );
 };

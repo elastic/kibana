@@ -58,3 +58,5 @@ export const logSourceConfigurationRT = rt.strict({
   fields: logSourceFieldsConfigurationRT,
   logColumns: rt.array(logSourceColumnConfigurationRT),
 });
+
+export type LogSourceConfiguration = rt.TypeOf<typeof logSourceConfigurationRT>;
