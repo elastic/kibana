@@ -44,6 +44,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dynamic_settings'));
       loadTestFile(require.resolve('./snapshot'));
       loadTestFile(require.resolve('./monitor_states_generated'));
+      loadTestFile(require.resolve('./snapshot'));
       loadTestFile(require.resolve('./telemetry_collectors'));
     });
     describe('with real-world data', () => {

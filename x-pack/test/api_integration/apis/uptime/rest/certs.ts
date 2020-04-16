@@ -24,7 +24,6 @@ export default function({ getService }: FtrProviderContext) {
         expect(JSON.stringify(apiResponse.body)).to.eql('{"certs":[]}');
       });
     });
-
     describe('when data is present', async () => {
       const now = moment();
       const cnva = now.add(6, 'months').toISOString();
