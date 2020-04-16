@@ -49,11 +49,15 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const caps = await driver.getCapabilities();
   const browserVersion = caps.get(isW3CEnabled ? 'browserVersion' : 'version');
 
-  log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
+  log.info(
+    `Remote initialized: ${caps.get(
+      'browserName'
+    )} ${browserVersion}, w3c compliance=${isW3CEnabled}`
+  );
 
-  if (browserType === Browsers.Chrome) {
+  if ([Browsers.Chrome, Browsers.ChromiumEdge].includes(browserType)) {
     log.info(
-      `Chromedriver version: ${caps.get('chrome').chromedriverVersion}, w3c=${isW3CEnabled}`
+      `${browserType}driver version: ${caps.get(browserType)[`${browserType}driverVersion`]}`
     );
   }
 

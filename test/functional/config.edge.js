@@ -17,9 +17,18 @@
  * under the License.
  */
 
-export enum Browsers {
-  Chrome = 'chrome',
-  Firefox = 'firefox',
-  InternetExplorer = 'ie',
-  ChromiumEdge = 'msedge',
+export default async function({ readConfigFile }) {
+  const defaultConfig = await readConfigFile(require.resolve('./config'));
+
+  return {
+    ...defaultConfig.getAll(),
+
+    browser: {
+      type: 'msedge',
+    },
+
+    junit: {
+      reportName: 'MS Chromium Edge UI Functional Tests',
+    },
+  };
 }
