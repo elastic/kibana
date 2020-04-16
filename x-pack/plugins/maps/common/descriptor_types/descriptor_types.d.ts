@@ -113,8 +113,8 @@ export type SourceDescriptor =
   | EMSFileSourceDescriptor;
 
 export type Query = {
-  query?: string;
-  language?: string;
+  query: string;
+  language: string;
 };
 
 export type LayerDescriptor = {
