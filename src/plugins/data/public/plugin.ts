@@ -92,21 +92,11 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
   private getInternalStartServices(): InternalStartServices {
     return {
-      get fieldFormats() {
-        return getFieldFormats();
-      },
-      get notifications() {
-        return getNotifications();
-      },
-      get uiSettings() {
-        return getUiSettings();
-      },
-      get injectedMetadata() {
-        return getInjectedMetadata();
-      },
-      get searchService() {
-        return getSearchService();
-      },
+      fieldFormats: getFieldFormats(),
+      notifications: getNotifications(),
+      uiSettings: getUiSettings(),
+      injectedMetadata: getInjectedMetadata(),
+      searchService: getSearchService(),
     };
   }
 
@@ -174,7 +164,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     const search = this.searchService.start(core, {
       indexPatterns,
-      getInternalStartServices: this.getInternalStartServices,
+      fieldFormats,
     });
     setSearchService(search);
 

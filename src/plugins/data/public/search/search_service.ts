@@ -26,7 +26,6 @@ import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
-import { createSearchSource, getSearchSourceType } from './search_source';
 import { QuerySetup } from '../query/query_service';
 import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
@@ -43,6 +42,7 @@ import {
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
 } from './aggs';
+import { FieldFormatsStart } from '../field_formats';
 
 interface SearchServiceSetupDependencies {
   packageInfo: PackageInfo;
@@ -52,7 +52,7 @@ interface SearchServiceSetupDependencies {
 
 interface SearchServiceStartDependencies {
   indexPatterns: IndexPatternsContract;
-  getInternalStartServices: GetInternalStartServicesFn;
+  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -115,10 +115,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
 
-  public start(
-    core: CoreStart,
-    { indexPatterns, getInternalStartServices }: SearchServiceStartDependencies
-  ): ISearchStart {
+  public start(core: CoreStart, dependencies: SearchServiceStartDependencies): ISearchStart {
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -131,8 +128,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
 
-    const { fieldFormats } = getInternalStartServices();
-
     const aggTypesStart = this.aggTypesRegistry.start();
 
     return {
@@ -140,7 +135,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
-            fieldFormats,
+            fieldFormats: dependencies.fieldFormats,
             typesRegistry: aggTypesStart,
           });
         },
@@ -158,8 +153,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         // TODO: should an intercepror have a destroy method?
         this.searchInterceptor = searchInterceptor;
       },
-      SearchSource: getSearchSourceType(getInternalStartServices),
-      createSearchSource: createSearchSource(getInternalStartServices, indexPatterns),
       __LEGACY: {
         esClient: this.esClient!,
         AggConfig,

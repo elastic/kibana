@@ -101,6 +101,7 @@
 |  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
 |  [connectToQueryState](./kibana-plugin-plugins-data-public.connecttoquerystate.md) | Helper to setup two-way syncing of global data and a state container |
 |  [createSavedQueryService](./kibana-plugin-plugins-data-public.createsavedqueryservice.md) |  |
+|  [createSearchSourceFactory](./kibana-plugin-plugins-data-public.createsearchsourcefactory.md) | Deserializes a json string and a set of referenced objects to a <code>SearchSource</code> instance. Use this method to re-create the search source serialized using <code>searchSource.serialize</code>.<!-- -->This function is a factory function that returns the actual utility when calling it with the required service dependency (index patterns contract). A pre-wired version is also exposed in the start contract of the data plugin as part of the search service |
 |  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-public.es_search_strategy.md) |  |
 |  [esFilters](./kibana-plugin-plugins-data-public.esfilters.md) |  |
 |  [esKuery](./kibana-plugin-plugins-data-public.eskuery.md) |  |
@@ -108,6 +109,7 @@
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [FilterBar](./kibana-plugin-plugins-data-public.filterbar.md) |  |
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
+|  [getSearchSourceType](./kibana-plugin-plugins-data-public.getsearchsourcetype.md) | \* |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [QueryStringInput](./kibana-plugin-plugins-data-public.querystringinput.md) |  |
 |  [search](./kibana-plugin-plugins-data-public.search.md) |  |

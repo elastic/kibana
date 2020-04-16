@@ -27,6 +27,7 @@ import {
   Filter,
   IndexPatternsContract,
   IndexPattern,
+  getSearchSourceType,
 } from '../../../../../../../../../plugins/data/public';
 import { getServices } from '../../../../kibana_services';
 
@@ -115,7 +116,13 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
   }
 
   async function createSearchSource(indexPattern: IndexPattern, filters: Filter[]) {
-    const { SearchSource } = getServices();
+    const { uiSettings, search, injectedMetadata } = getServices();
+
+    const SearchSource = getSearchSourceType({
+      uiSettings,
+      search,
+      injectedMetadata,
+    });
 
     return new SearchSource()
       .setParent(undefined)

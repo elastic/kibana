@@ -21,7 +21,6 @@ import { getSearchSourceType, SearchSourceType } from './search_source';
 import { IndexPattern, SortDirection } from '../..';
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
-import { InternalStartServices } from '../../types';
 
 jest.mock('../fetch', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
@@ -55,14 +54,11 @@ describe('SearchSource', () => {
     const core = coreMock.createStart();
     const data = dataPluginMock.createStartContract();
 
-    SearchSource = getSearchSourceType(
-      () =>
-        (({
-          searchService: data.search,
-          uiSettings: core.uiSettings,
-          injectedMetadata: core.injectedMetadata,
-        } as unknown) as InternalStartServices)
-    );
+    SearchSource = getSearchSourceType({
+      search: data.search,
+      uiSettings: core.uiSettings,
+      injectedMetadata: core.injectedMetadata,
+    });
   });
 
   describe('#setField()', () => {

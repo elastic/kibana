@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { getSearchSourceType, ISearchSource } from './search_source';
-import { InternalStartServices } from '../../types';
+import { ISearchSource } from './search_source';
 
 export const searchSourceMock: MockedKeys<ISearchSource> = {
   setPreferredSearchStrategyId: jest.fn(),
@@ -40,11 +39,3 @@ export const searchSourceMock: MockedKeys<ISearchSource> = {
   history: [],
   serialize: jest.fn(),
 };
-
-export const SearchSource = jest.fn(fields => {
-  const ConcreteSearchSource = getSearchSourceType(() => ({} as InternalStartServices));
-
-  return new ConcreteSearchSource(fields);
-});
-
-export const createSearchSource = jest.fn();

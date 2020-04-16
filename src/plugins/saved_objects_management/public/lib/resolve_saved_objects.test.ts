@@ -25,8 +25,9 @@ import {
 } from './resolve_saved_objects';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
 import { IndexPatternsContract } from '../../../data/public';
-import { setSearchService } from '../kibana_services';
+import { setSearchService, setInjectedMetadata, setUiSettings } from '../kibana_services';
 import { dataPluginMock } from '../../../data/public/mocks';
+import { coreMock } from '../../../../core/public/mocks';
 
 class SavedObjectNotFound extends Error {
   constructor(options: Record<string, any>) {
@@ -47,6 +48,15 @@ const createObj = (props: Partial<SavedObject>): SavedObject =>
   } as SavedObject);
 
 describe('resolveSavedObjects', () => {
+  beforeEach(() => {
+    const search = dataPluginMock.createStartContract().search;
+    const { uiSettings, injectedMetadata } = coreMock.createStart();
+
+    setSearchService(search);
+    setUiSettings(uiSettings);
+    setInjectedMetadata(injectedMetadata);
+  });
+
   describe('resolveSavedObjects', () => {
     it('should take in saved objects and spit out conflicts', async () => {
       const savedObjects = [
@@ -235,12 +245,6 @@ describe('resolveSavedObjects', () => {
   });
 
   describe('resolveIndexPatternConflicts', () => {
-    beforeEach(() => {
-      const search = dataPluginMock.createStartContract().search;
-
-      setSearchService(search);
-    });
-
     it('should resave resolutions', async () => {
       const save = jest.fn();
 

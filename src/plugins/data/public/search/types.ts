@@ -18,7 +18,6 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { createSearchSource, SearchSourceType } from './search_source';
 import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
@@ -90,7 +89,5 @@ export interface ISearchStart {
   aggs: SearchAggsStart;
   setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
-  SearchSource: SearchSourceType;
-  createSearchSource: ReturnType<typeof createSearchSource>;
   __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
 }

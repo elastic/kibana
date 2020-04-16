@@ -20,10 +20,9 @@ import { transform, defaults, isFunction } from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
 import { migrateLegacyQuery } from '../../../../kibana_legacy/public';
 import { InvalidJSONProperty } from '../../../../kibana_utils/public';
-import { getSearchSourceType } from './search_source';
+import { getSearchSourceType, SearchSourceDependencies } from './search_source';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { SearchSourceFields } from './types';
-import { GetInternalStartServicesFn } from '../../types';
 
 /**
  * Deserializes a json string and a set of referenced objects to a `SearchSource` instance.
@@ -40,14 +39,12 @@ import { GetInternalStartServicesFn } from '../../types';
  * returned by `serializeSearchSource`.
  *
  *
- * @internal */
-export const createSearchSource = (
-  searchSourceDependencies: GetInternalStartServicesFn,
-  bindedIndexPatterns: IndexPatternsContract
-) => async (
+ * @public */
+export const createSearchSourceFactory = async (
   searchSourceJson: string,
   references: SavedObjectReference[],
-  indexPatterns: IndexPatternsContract = bindedIndexPatterns
+  indexPatterns: IndexPatternsContract,
+  searchSourceDependencies: SearchSourceDependencies
 ) => {
   const SearchSource = getSearchSourceType(searchSourceDependencies);
   const searchSource = new SearchSource();

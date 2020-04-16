@@ -30,11 +30,17 @@ import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
 import { IAggConfigs } from '../aggs';
-import { ISearchSource } from '../search_source';
+import { getSearchSourceType, ISearchSource } from '../search_source';
 import { tabifyAggResponse } from '../tabify';
 import { Filter, Query, serializeFieldFormat, TimeRange } from '../../../common';
 import { FilterManager, getTime } from '../../query';
-import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
+import {
+  getSearchService,
+  getQueryService,
+  getIndexPatterns,
+  getInjectedMetadata,
+  getUiSettings,
+} from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
 
@@ -253,7 +259,13 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
     const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
-    const searchSource = new searchService.SearchSource();
+    const SearchSource = getSearchSourceType({
+      search: searchService,
+      uiSettings: getUiSettings(),
+      injectedMetadata: getInjectedMetadata(),
+    });
+    const searchSource = new SearchSource();
+
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 

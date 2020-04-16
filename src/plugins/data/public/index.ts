@@ -376,6 +376,8 @@ export {
   TabbedTable,
   SearchInterceptor,
   RequestTimeoutError,
+  getSearchSourceType,
+  createSearchSourceFactory,
 } from './search';
 
 // Search namespace

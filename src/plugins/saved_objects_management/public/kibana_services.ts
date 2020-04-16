@@ -17,9 +17,18 @@
  * under the License.
  */
 
+import { CoreStart } from 'kibana/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 
 export const [getSearchService, setSearchService] = createGetterSetter<
   DataPublicPluginStart['search']
 >('Search');
+
+export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSettings']>(
+  'uiSettings'
+);
+
+export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
+  CoreStart['injectedMetadata']
+>('injectedMetadata');

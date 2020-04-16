@@ -60,6 +60,11 @@ let dataSearchService;
 export const setSearchService = searchService => (dataSearchService = searchService);
 export const getSearchService = () => dataSearchService;
 
+let injectedMetadata;
+export const setInjectedMetadata = injectedMetadataService =>
+  (dataSearchService = injectedMetadataService);
+export const getInjectedMetadata = () => injectedMetadata;
+
 let toast;
 export const setToasts = notificationToast => (toast = notificationToast);
 export const getToasts = () => toast;

@@ -18,5 +18,5 @@
  */
 
 export { getSearchSourceType, SearchSourceType, ISearchSource } from './search_source';
-export { createSearchSource } from './create_search_source';
+export { createSearchSourceFactory } from './create_search_source';
 export { SortDirection, EsQuerySortValue, SearchSourceFields } from './types';

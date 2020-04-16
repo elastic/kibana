@@ -21,8 +21,12 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { OverlayStart, SavedObjectReference } from 'src/core/public';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
-import { getSearchService } from '../kibana_services';
-import { IndexPatternsContract, IIndexPattern } from '../../../data/public';
+import { getSearchService, getInjectedMetadata, getUiSettings } from '../kibana_services';
+import {
+  IndexPatternsContract,
+  IIndexPattern,
+  createSearchSourceFactory,
+} from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
 
@@ -209,12 +213,15 @@ export async function resolveIndexPatternConflicts(
       // The user decided to skip this conflict so do nothing
       return;
     }
-    const { createSearchSource } = getSearchService();
-
-    obj.searchSource = await createSearchSource(
+    obj.searchSource = await createSearchSourceFactory(
       JSON.stringify(serializedSearchSource),
       replacedReferences,
-      indexPatterns
+      indexPatterns,
+      {
+        search: getSearchService(),
+        injectedMetadata: getInjectedMetadata(),
+        uiSettings: getUiSettings(),
+      }
     );
     if (await saveObject(obj, overwriteAll)) {
       importCount++;

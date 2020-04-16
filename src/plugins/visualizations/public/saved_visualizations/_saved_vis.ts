@@ -32,10 +32,18 @@ import {
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { IIndexPattern, ISearchSource } from '../../../../plugins/data/public';
+import { IIndexPattern, ISearchSource, getSearchSourceType } from '../../../../plugins/data/public';
 import { ISavedVis, SerializedVis } from '../types';
 import { createSavedSearchesLoader } from '../../../../plugins/discover/public';
-import { getChrome, getOverlays, getIndexPatterns, getSavedObjects, getSearch } from '../services';
+import {
+  getChrome,
+  getOverlays,
+  getIndexPatterns,
+  getSavedObjects,
+  getSearch,
+  getInjectedMetadata,
+  getUISettings,
+} from '../services';
 
 export const convertToSerializedVis = async (savedVis: ISavedVis): Promise<SerializedVis> => {
   const { visState } = savedVis;
@@ -81,9 +89,16 @@ export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
 
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
   const search = getSearch();
+  const injectedMetadata = getInjectedMetadata();
+  const uiSettings = getUISettings();
+
   const searchSource = inputSearchSource.createCopy
     ? inputSearchSource.createCopy()
-    : new search.SearchSource({ ...(inputSearchSource as any).fields });
+    : new (getSearchSourceType({
+        search,
+        uiSettings,
+        injectedMetadata,
+      }))({ ...(inputSearchSource as any).fields });
 
   if (savedSearchId) {
     const savedSearch = await createSavedSearchesLoader({
@@ -92,6 +107,8 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
       indexPatterns: getIndexPatterns(),
       chrome: getChrome(),
       overlays: getOverlays(),
+      uiSettings,
+      injectedMetadata,
     }).get(savedSearchId);
 
     searchSource.setParent(savedSearch.searchSource);

@@ -71,16 +71,21 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { uniqueId, uniq, extend, pick, difference, set, omit, keys, isFunction } from 'lodash';
-import { SavedObjectReference } from 'kibana/public';
+import { CoreStart, SavedObjectReference } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { IIndexPattern, SearchRequest } from '../..';
+import { DataPublicPluginStart, IIndexPattern, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
-import { GetInternalStartServicesFn } from '../../types';
+
+export interface SearchSourceDependencies {
+  uiSettings: CoreStart['uiSettings'];
+  search: DataPublicPluginStart['search'];
+  injectedMetadata: CoreStart['injectedMetadata'];
+}
 
 /** @internal **/
 export class SearchSource {
@@ -93,14 +98,11 @@ export class SearchSource {
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
   private fields: SearchSourceFields;
-  private readonly getInternalStartServices: GetInternalStartServicesFn;
+  private readonly dependencies: SearchSourceDependencies;
 
-  constructor(
-    fields: SearchSourceFields = {},
-    getInternalStartServices: GetInternalStartServicesFn
-  ) {
+  constructor(fields: SearchSourceFields = {}, dependencies: SearchSourceDependencies) {
     this.fields = fields;
-    this.getInternalStartServices = getInternalStartServices;
+    this.dependencies = dependencies;
   }
 
   /** ***
@@ -152,11 +154,11 @@ export class SearchSource {
   }
 
   create() {
-    return new SearchSource({}, this.getInternalStartServices);
+    return new SearchSource({}, this.dependencies);
   }
 
   createCopy() {
-    const newSearchSource = new SearchSource({}, this.getInternalStartServices);
+    const newSearchSource = new SearchSource({}, this.dependencies);
     newSearchSource.setFields({ ...this.fields });
     // when serializing the internal fields we lose the internal classes used in the index
     // pattern, so we have to set it again to workaround this behavior
@@ -166,7 +168,7 @@ export class SearchSource {
   }
 
   createChild(options = {}) {
-    const childSearchSource = new SearchSource({}, this.getInternalStartServices);
+    const childSearchSource = new SearchSource({}, this.dependencies);
     childSearchSource.setParent(this, options);
     return childSearchSource;
   }
@@ -202,7 +204,7 @@ export class SearchSource {
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
 
-    const { injectedMetadata, searchService, uiSettings } = this.getInternalStartServices();
+    const { injectedMetadata, search, uiSettings } = this.dependencies;
     const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
     const response = await fetchSoon(
       searchRequest,
@@ -211,7 +213,7 @@ export class SearchSource {
         ...options,
       },
       {
-        searchService,
+        searchService: search,
         config: uiSettings,
         esShardTimeout,
       }
@@ -304,7 +306,7 @@ export class SearchSource {
       }
     };
 
-    const { uiSettings } = this.getInternalStartServices();
+    const { uiSettings } = this.dependencies;
 
     switch (key) {
       case 'filter':
@@ -380,7 +382,7 @@ export class SearchSource {
       body._source = index.getSourceFiltering();
     }
 
-    const { uiSettings } = this.getInternalStartServices();
+    const { uiSettings } = this.dependencies;
 
     if (body._source) {
       // exclude source fields for this index pattern specified by the user
@@ -515,13 +517,11 @@ export class SearchSource {
   }
 }
 
-/** @internal **/
-export const getSearchSourceType = (
-  getInternalStartServices: GetInternalStartServicesFn
-): SearchSourceType => {
+/** @public **/
+export const getSearchSourceType = (dependencies: SearchSourceDependencies): SearchSourceType => {
   return class DecoratedSearchSource extends SearchSource {
     constructor(fields?: SearchSourceFields) {
-      super(fields, getInternalStartServices);
+      super(fields, dependencies);
     }
   };
 };

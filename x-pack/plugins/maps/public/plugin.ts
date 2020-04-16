@@ -21,6 +21,7 @@ import {
   setToasts,
   setUiSettings,
   setSearchService,
+  setInjectedMetadata,
   // @ts-ignore
 } from './kibana_services';
 
@@ -50,6 +51,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
   setSearchService(data.search);
+  setInjectedMetadata(core.injectedMetadata);
   setIndexPatternService(data.indexPatterns);
   setAutocompleteService(data.autocomplete);
 };

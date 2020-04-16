@@ -17,9 +17,9 @@
  * under the License.
  */
 import _ from 'lodash';
-import { EsResponse, SavedObject, SavedObjectConfig } from '../../types';
+import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
 import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
-import { DataPublicPluginStart, IndexPattern } from '../../../../data/public';
+import { IndexPattern, createSearchSourceFactory } from '../../../../data/public';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given
@@ -29,7 +29,7 @@ export async function applyESResp(
   resp: EsResponse,
   savedObject: SavedObject,
   config: SavedObjectConfig,
-  createSearchSource: DataPublicPluginStart['search']['createSearchSource']
+  dependencies: SavedObjectKibanaServices
 ) {
   const mapping = expandShorthand(config.mapping);
   const esType = config.type || '';
@@ -65,7 +65,16 @@ export async function applyESResp(
 
   if (config.searchSource) {
     try {
-      savedObject.searchSource = await createSearchSource(meta.searchSourceJSON, resp.references);
+      savedObject.searchSource = await createSearchSourceFactory(
+        meta.searchSourceJSON,
+        resp.references,
+        dependencies.indexPatterns,
+        {
+          search: dependencies.search,
+          uiSettings: dependencies.uiSettings,
+          injectedMetadata: dependencies.injectedMetadata,
+        }
+      );
     } catch (error) {
       if (
         error.constructor.name === 'SavedObjectNotFound' &&

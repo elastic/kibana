@@ -31,7 +31,6 @@ import {
   TimefilterContract,
   IndexPatternsContract,
   DataPublicPluginStart,
-  SearchSourceType,
 } from 'src/plugins/data/public';
 
 import { DiscoverStartPlugins } from './plugin';
@@ -64,8 +63,9 @@ export interface DiscoverServices {
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
+  injectedMetadata: CoreStart['injectedMetadata'];
+  search: DataPublicPluginStart['search'];
   visualizations: VisualizationsStart;
-  SearchSource: SearchSourceType;
 }
 export async function buildServices(
   core: CoreStart,
@@ -77,6 +77,8 @@ export async function buildServices(
     search: plugins.data.search,
     chrome: core.chrome,
     overlays: core.overlays,
+    injectedMetadata: core.injectedMetadata,
+    uiSettings: core.uiSettings,
   };
   const savedObjectService = createSavedSearchesLoader(services);
 
@@ -102,6 +104,7 @@ export async function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     visualizations: plugins.visualizations,
-    SearchSource: plugins.data.search.SearchSource,
+    injectedMetadata: core.injectedMetadata,
+    search: plugins.data.search,
   };
 }
