@@ -280,17 +280,6 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
         }
       },
     },
-    {
-      id: 'refresh',
-      label: i18n.translate('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
-      description: i18n.translate('kbn.visualize.topNavMenu.refreshButtonAriaLabel', {
-        defaultMessage: 'Refresh',
-      }),
-      run: function() {
-        embeddableHandler.reload();
-      },
-      testId: 'visualizeRefreshButton',
-    },
   ];
 
   if (savedVis.id) {

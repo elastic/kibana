@@ -100,6 +100,27 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 xyzSecret2: 'credential2',
               },
             },
+            {
+              id: 'preconfigured-es-index-action',
+              actionTypeId: '.index',
+              name: 'preconfigured_es_index_action',
+              config: {
+                index: 'functional-test-actions-index-preconfigured',
+                refresh: true,
+                executionTimeField: 'timestamp',
+              },
+            },
+            {
+              id: 'preconfigured.test.index-record',
+              actionTypeId: 'test.index-record',
+              name: 'Test:_Preconfigured_Index_Record',
+              config: {
+                unencrypted: 'ignored-but-required',
+              },
+              secrets: {
+                encrypted: 'this-is-also-ignored-and-also-required',
+              },
+            },
           ])}`,
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,

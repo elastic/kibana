@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-
-const settings = chrome.getUiSettingsClient();
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getUiSettings } from '../../../../../plugins/maps/public/kibana_services';
 
 export function getInitialQuery({ mapStateJSON, appState = {}, userQueryLanguage }) {
+  const settings = getUiSettings();
+
   if (appState.query) {
     return appState.query;
   }
