@@ -84,6 +84,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     searchFilters: unknown[],
     registerCancelCallback: (callback: () => void) => void
   ): Promise<GeoJsonWithMeta> {
+    // todo: remove this method
+    // This is a consequence of ITiledSingleLayerVectorSource extending IVectorSource.
     throw new Error('Does not implement getGeoJsonWithMeta');
   }
 

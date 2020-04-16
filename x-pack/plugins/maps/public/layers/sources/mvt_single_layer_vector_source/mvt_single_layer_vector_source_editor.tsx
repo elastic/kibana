@@ -54,7 +54,6 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
     }
   }, 200);
 
-  // @ts-ignore
   _handleUrlTemplateChange = (e: ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
     this.setState(
@@ -65,7 +64,6 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
     );
   };
 
-  // @ts-ignore
   _handleLayerNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const layerName = e.target.value;
     this.setState(
