@@ -329,7 +329,7 @@ export const ProcessEventDot = styled(
                 {descriptionText}
               </div>
               <div
-                className="euiButton"
+                className={magFactorX >= 2 ? "euiButton" : "euiButton euiButton--small"}
                 data-test-subject="nodeLabel"
                 id={labelId}
                 style={{
