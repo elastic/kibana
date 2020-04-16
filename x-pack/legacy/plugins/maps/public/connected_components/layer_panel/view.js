@@ -30,11 +30,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getData, getCore } from '../../../../../../plugins/maps/public/kibana_services';
 
 const localStorage = new Storage(window.localStorage);
-
-// This import will eventually become a dependency injected by the fully deangularized NP plugin.
-import { npStart } from 'ui/new_platform';
 
 export class LayerPanel extends React.Component {
   state = {
@@ -168,8 +167,8 @@ export class LayerPanel extends React.Component {
         services={{
           appName: 'maps',
           storage: localStorage,
-          data: npStart.plugins.data,
-          ...npStart.core,
+          data: getData(),
+          ...getCore(),
         }}
       >
         <EuiFlexGroup direction="column" gutterSize="none">
