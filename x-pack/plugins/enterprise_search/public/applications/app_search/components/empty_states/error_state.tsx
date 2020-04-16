@@ -5,21 +5,15 @@
  */
 
 import React from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiEmptyPrompt,
-  EuiCode,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import { EuiButton } from '../../../shared/react_router_helpers';
 
 import { EngineOverviewHeader } from '../engine_overview_header';
 import { IEmptyStatesProps } from './types';
 
 import './empty_states.scss';
 
-export const ErrorState: ReactFC<IEmptyStatesProps> = ({ appSearchUrl, showSetupGuideFlag }) => {
+export const ErrorState: ReactFC<IEmptyStatesProps> = ({ appSearchUrl }) => {
   return (
     <EuiPage restrictWidth className="empty-state">
       <EuiPageBody>
@@ -43,7 +37,7 @@ export const ErrorState: ReactFC<IEmptyStatesProps> = ({ appSearchUrl, showSetup
               </>
             }
             actions={
-              <EuiButton iconType="help" fill onClick={() => showSetupGuideFlag(true)}>
+              <EuiButton iconType="help" fill to="/app_search/setup_guide">
                 Review the setup guide
               </EuiButton>
             }
