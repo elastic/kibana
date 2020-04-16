@@ -8,6 +8,7 @@
 
 import { ReactElement } from 'react';
 
+import { Adapters } from 'src/plugins/inspector/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 // @ts-ignore
 import { copyPersistentState } from '../../reducers/util';
@@ -38,7 +39,7 @@ export interface ISource {
   createDefaultLayer(options?: LayerDescriptor): ILayer;
   destroy(): void;
   getDisplayName(): Promise<string>;
-  getInspectorAdapters(): object | undefined;
+  getInspectorAdapters(): Adapters | undefined;
   isFieldAware(): boolean;
   isFilterByMapBounds(): boolean;
   isGeoGridPrecisionAware(): boolean;
@@ -65,9 +66,9 @@ export interface ISource {
 
 export class AbstractSource implements ISource {
   readonly _descriptor: SourceDescriptor;
-  readonly _inspectorAdapters?: object;
+  readonly _inspectorAdapters?: Adapters;
 
-  constructor(descriptor: SourceDescriptor, inspectorAdapters?: object) {
+  constructor(descriptor: SourceDescriptor, inspectorAdapters?: Adapters) {
     this._descriptor = descriptor;
     this._inspectorAdapters = inspectorAdapters;
   }
@@ -91,7 +92,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  getInspectorAdapters(): object | undefined {
+  getInspectorAdapters(): Adapters | undefined {
     return this._inspectorAdapters;
   }
 
