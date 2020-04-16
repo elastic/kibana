@@ -23,7 +23,6 @@ The following example shows a valid configuration 2 out of the box connectors.
       name: 'Slack #xyz'
       config:
         webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
-
     - id: 'webhook-service'
       actionTypeId: .webhook
       name: 'Email service'
