@@ -19,14 +19,16 @@
 
 import _ from 'lodash';
 import { IndexHeader } from './index_header';
-import './create_edit_field';
+import { CreateEditField } from './create_edit_field';
 import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import { fatalError, toastNotifications } from 'ui/notify';
+import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
+import createEditFieldtemplate from './create_edit_field.html';
 import { fieldWildcardMatcher } from '../../../../../../../../plugins/kibana_utils/public';
 import { subscribeWithScope } from '../../../../../../../../plugins/kibana_legacy/public';
 import React from 'react';
@@ -37,8 +39,11 @@ import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { npStart } from 'ui/new_platform';
-
-import { getEditBreadcrumbs } from '../breadcrumbs';
+import {
+  getEditBreadcrumbs,
+  getEditFieldBreadcrumbs,
+  getCreateFieldBreadcrumbs,
+} from '../breadcrumbs';
 import { createEditIndexPatternPageStateContainer } from './edit_index_pattern_state_container';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
@@ -424,4 +429,83 @@ uiModules
     });
 
     renderIndexHeader($scope, config);
+  });
+
+// routes for create edit field. Will be removed after migartion all component to react.
+const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
+const renderCreateEditField = ($scope, $route, getConfig, $http, fieldFormatEditors) => {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_FIELD_EDITOR_ID);
+    if (!node) {
+      return;
+    }
+
+    render(
+      <I18nContext>
+        <CreateEditField
+          indexPattern={$route.current.locals.indexPattern}
+          mode={$route.current.mode}
+          fieldName={$route.current.params.fieldName}
+          fieldFormatEditors={fieldFormatEditors}
+          getConfig={getConfig}
+          servises={{
+            http: $http,
+            addWarning: npStart.core.notifications.toasts.addWarning,
+            docTitle: npStart.core.chrome.docTitle,
+          }}
+        />
+      </I18nContext>,
+      node
+    );
+  });
+};
+
+const destroyCreateEditField = () => {
+  const node = document.getElementById(REACT_FIELD_EDITOR_ID);
+  node && unmountComponentAtNode(node);
+};
+
+uiRoutes
+  .when('/management/kibana/index_patterns/:indexPatternId/field/:fieldName*', {
+    mode: 'edit',
+    k7Breadcrumbs: getEditFieldBreadcrumbs,
+  })
+  .when('/management/kibana/index_patterns/:indexPatternId/create-field/', {
+    mode: 'create',
+    k7Breadcrumbs: getCreateFieldBreadcrumbs,
+  })
+  .defaults(/management\/kibana\/index_patterns\/[^\/]+\/(field|create-field)(\/|$)/, {
+    template: createEditFieldtemplate,
+    mapBreadcrumbs($route, breadcrumbs) {
+      const { indexPattern } = $route.current.locals;
+      return breadcrumbs.map(crumb => {
+        if (crumb.id !== indexPattern.id) {
+          return crumb;
+        }
+
+        return {
+          ...crumb,
+          display: indexPattern.title,
+        };
+      });
+    },
+    resolve: {
+      indexPattern: function($route, Promise, redirectWhenMissing) {
+        const { indexPatterns } = npStart.plugins.data;
+        return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId)).catch(
+          redirectWhenMissing('/management/kibana/index_patterns')
+        );
+      },
+    },
+    controllerAs: 'fieldSettings',
+    controller: function FieldEditorPageController($scope, $route, $http, Private, config) {
+      const getConfig = (...args) => config.get(...args);
+      const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
+
+      renderCreateEditField($scope, $route, getConfig, $http, fieldFormatEditors);
+
+      $scope.$on('$destroy', () => {
+        destroyCreateEditField();
+      });
+    },
   });

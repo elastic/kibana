@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './create_edit_field';
+export { CreateEditField } from './create_edit_field';

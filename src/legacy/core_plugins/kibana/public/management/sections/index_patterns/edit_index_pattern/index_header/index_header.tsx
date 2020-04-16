@@ -30,8 +30,8 @@ import {
 import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
 
 interface IndexHeaderProps {
-  defaultIndex: string;
   indexPattern: IIndexPattern;
+  defaultIndex?: string;
   setDefault?: () => void;
   refreshFields?: () => void;
   deleteIndexPattern?: () => void;
