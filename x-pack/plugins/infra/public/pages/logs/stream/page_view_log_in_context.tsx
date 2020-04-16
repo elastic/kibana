@@ -24,6 +24,9 @@ import { useColumnWidths } from '../../../components/logging/log_text_stream/log
 import { LogEntryRow } from '../../../components/logging/log_text_stream/log_entry_row';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
+import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
+
+const MODAL_MARGIN = 25;
 
 export const PageViewLogInContext: React.FC = () => {
   const { source } = useContext(Source.Context);
@@ -39,6 +42,7 @@ export const PageViewLogInContext: React.FC = () => {
     ViewLogInContext.Context
   );
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
+  const { width: vw, height: vh } = useViewportDimensions();
 
   const streamItems = useMemo(
     () =>
@@ -56,17 +60,15 @@ export const PageViewLogInContext: React.FC = () => {
 
   return (
     <EuiOverlayMask>
-      <EuiModal onClose={closeModal}>
-        <EuiModalBody style={{ height: 600 }}>
+      <EuiModal onClose={closeModal} maxWidth={false}>
+        <EuiModalBody style={{ width: vw - MODAL_MARGIN * 2, height: vh - MODAL_MARGIN * 2 }}>
+          <CharacterDimensionsProbe />
           <EuiFlexGroup direction="column" wrap={false} style={{ height: '100%' }}>
             <EuiFlexItem grow={false}>
               <EuiSpacer />
               <EuiTitle size="xxxs">
                 <h2>Selected log message</h2>
               </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <CharacterDimensionsProbe />
               <LogEntryRow
                 columnConfigurations={columnConfigurations}
                 columnWidths={columnWidths}
@@ -75,13 +77,11 @@ export const PageViewLogInContext: React.FC = () => {
                 isActiveHighlight={false}
                 isHighlighted={true}
                 scale={textScale}
-                wrap={textWrap}
+                wrap={false}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <LogEntryContext context={contextEntry.context} />
-            </EuiFlexItem>
             <EuiFlexItem grow={1}>
+              <LogEntryContext context={contextEntry.context} />
               <ScrollableLogTextStreamView
                 target={contextEntry.cursor}
                 columnConfigurations={columnConfigurations}
