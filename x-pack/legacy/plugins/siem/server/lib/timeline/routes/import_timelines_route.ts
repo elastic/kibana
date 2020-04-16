@@ -6,8 +6,8 @@
 
 import { extname } from 'path';
 import { chunk, omit, set } from 'lodash/fp';
+
 import {
-  buildRouteValidation,
   buildSiemResponse,
   createBulkErrorObject,
   BulkError,
@@ -22,7 +22,6 @@ import {
   isBulkError,
   isImportRegular,
   ImportTimelineResponse,
-  ImportTimelinesRequestParams,
   ImportTimelinesSchema,
   PromiseFromStreams,
   timelineSavedObjectOmittedFields,
@@ -32,13 +31,13 @@ import { createTimelines, getTimeline } from './utils/create_timelines';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
 import { SetupPlugins } from '../../../plugin';
-import { importTimelinesPayloadSchema } from './schemas/import_timelines_schema';
+import { ImportTimelinesPayloadSchemaRt } from './schemas/import_timelines_schema';
 import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
 import { LegacyServices } from '../../../types';
 
 import { validate } from '../../detection_engine/routes/rules/validate';
 import { FrameworkRequest } from '../../framework';
-
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
 export const importTimelinesRoute = (
@@ -50,9 +49,7 @@ export const importTimelinesRoute = (
     {
       path: `${TIMELINE_IMPORT_URL}`,
       validate: {
-        body: buildRouteValidation<ImportTimelinesRequestParams['body']>(
-          importTimelinesPayloadSchema
-        ),
+        body: buildRouteValidation(ImportTimelinesPayloadSchemaRt),
       },
       options: {
         tags: ['access:siem'],
@@ -63,28 +60,30 @@ export const importTimelinesRoute = (
       },
     },
     async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const savedObjectsClient = context.core.savedObjects.client;
-      if (!savedObjectsClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
-      const { filename } = request.body.file.hapi;
-
-      const fileExtension = extname(filename).toLowerCase();
-
-      if (fileExtension !== '.ndjson') {
-        return siemResponse.error({
-          statusCode: 400,
-          body: `Invalid file extension ${fileExtension}`,
-        });
-      }
-
-      const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
-
       try {
+        const siemResponse = buildSiemResponse(response);
+        const savedObjectsClient = context.core.savedObjects.client;
+        if (!savedObjectsClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
+        const { file } = request.body;
+        const { filename } = file.hapi;
+
+        const fileExtension = extname(filename).toLowerCase();
+
+        if (fileExtension !== '.ndjson') {
+          return siemResponse.error({
+            statusCode: 400,
+            body: `Invalid file extension ${fileExtension}`,
+          });
+        }
+
+        const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
+
         const readStream = createTimelinesStreamFromNdJson(objectLimit);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-          request.body.file,
+          file,
           ...readStream,
         ]);
         const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueTimeline(
@@ -199,6 +198,7 @@ export const importTimelinesRoute = (
         }
       } catch (err) {
         const error = transformError(err);
+        const siemResponse = buildSiemResponse(response);
 
         return siemResponse.error({
           body: error.message,

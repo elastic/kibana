@@ -41,7 +41,7 @@ export async function getPackages(
     .map(item =>
       createInstallableFrom(
         item,
-        savedObjectsVisible.find(({ attributes }) => attributes.name === item.name)
+        savedObjectsVisible.find(({ id }) => id === item.name)
       )
     )
     .sort(sortByName);
@@ -53,9 +53,9 @@ export async function getPackageKeysByStatus(
   status: InstallationStatus
 ) {
   const allPackages = await getPackages({ savedObjectsClient });
-  return allPackages.reduce<string[]>((acc, pkg) => {
+  return allPackages.reduce<Array<{ pkgName: string; pkgVersion: string }>>((acc, pkg) => {
     if (pkg.status === status) {
-      acc.push(`${pkg.name}-${pkg.version}`);
+      acc.push({ pkgName: pkg.name, pkgVersion: pkg.version });
     }
     return acc;
   }, []);
@@ -63,13 +63,14 @@ export async function getPackageKeysByStatus(
 
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
+  pkgName: string;
+  pkgVersion: string;
 }): Promise<PackageInfo> {
-  const { savedObjectsClient, pkgkey } = options;
-  const [item, savedObject] = await Promise.all([
-    Registry.fetchInfo(pkgkey),
-    getInstallationObject({ savedObjectsClient, pkgkey }),
-    Registry.getArchiveInfo(pkgkey),
+  const { savedObjectsClient, pkgName, pkgVersion } = options;
+  const [item, savedObject, assets] = await Promise.all([
+    Registry.fetchInfo(pkgName, pkgVersion),
+    getInstallationObject({ savedObjectsClient, pkgName }),
+    Registry.getArchiveInfo(pkgName, pkgVersion),
   ] as const);
   // adding `as const` due to regression in TS 3.7.2
   // see https://github.com/microsoft/TypeScript/issues/34925#issuecomment-550021453
@@ -79,42 +80,27 @@ export async function getPackageInfo(options: {
   const updated = {
     ...item,
     title: item.title || nameAsTitle(item.name),
-    assets: Registry.groupPathsByService(item?.assets || []),
+    assets: Registry.groupPathsByService(assets || []),
   };
   return createInstallableFrom(updated, savedObject);
 }
 
 export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
+  pkgName: string;
 }) {
-  const { savedObjectsClient, pkgkey } = options;
+  const { savedObjectsClient, pkgName } = options;
   return savedObjectsClient
-    .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgkey)
+    .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
     .catch(e => undefined);
 }
 
 export async function getInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
+  pkgName: string;
 }) {
   const savedObject = await getInstallationObject(options);
   return savedObject?.attributes;
-}
-
-export async function findInstalledPackageByName(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-}): Promise<Installation | undefined> {
-  const { savedObjectsClient, pkgName } = options;
-
-  const res = await savedObjectsClient.find<Installation>({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-    search: pkgName,
-    searchFields: ['name'],
-  });
-  if (res.saved_objects.length) return res.saved_objects[0].attributes;
-  return undefined;
 }
 
 function sortByName(a: { name: string }, b: { name: string }) {

@@ -31,12 +31,12 @@ import {
   NumberInputOption,
   SelectOption,
   SwitchOption,
-} from '../../common';
-import { SetColorSchemaOptionsValue } from '../../common/color_schema';
+  SetColorSchemaOptionsValue,
+  SetColorRangeValue,
+} from '../../../../../../../plugins/charts/public';
 import { HeatmapVisParams } from '../../../heatmap';
 import { ValueAxis } from '../../../types';
 import { LabelsPanel } from './labels_panel';
-import { SetColorRangeValue } from '../../common/color_ranges';
 
 function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
   const { stateParams, vis, uiState, setValue, setValidity, setTouched } = props;

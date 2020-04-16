@@ -85,9 +85,29 @@ describe('convertLegacyTypes', () => {
         {
           pluginId: 'pluginB',
           properties: {
+            typeB: {
+              properties: {
+                fieldB: { type: 'text' },
+              },
+            },
+          },
+        },
+        {
+          pluginId: 'pluginC',
+          properties: {
             typeC: {
               properties: {
                 fieldC: { type: 'text' },
+              },
+            },
+          },
+        },
+        {
+          pluginId: 'pluginD',
+          properties: {
+            typeD: {
+              properties: {
+                fieldD: { type: 'text' },
               },
             },
           },
@@ -99,6 +119,18 @@ describe('convertLegacyTypes', () => {
           indexPattern: 'fooBar',
           hidden: true,
           isNamespaceAgnostic: true,
+        },
+        typeB: {
+          indexPattern: 'barBaz',
+          hidden: false,
+          multiNamespace: true,
+        },
+        typeD: {
+          indexPattern: 'bazQux',
+          hidden: false,
+          // if both isNamespaceAgnostic and multiNamespace are true, the resulting namespaceType is 'agnostic'
+          isNamespaceAgnostic: true,
+          multiNamespace: true,
         },
       },
       savedObjectValidations: {},
@@ -372,15 +404,29 @@ describe('convertTypesToLegacySchema', () => {
       {
         name: 'typeA',
         hidden: false,
-        namespaceAgnostic: true,
+        namespaceType: 'agnostic',
         mappings: { properties: {} },
         convertToAliasScript: 'some script',
       },
       {
         name: 'typeB',
         hidden: true,
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         indexPattern: 'myIndex',
+        mappings: { properties: {} },
+      },
+      {
+        name: 'typeC',
+        hidden: false,
+        namespaceType: 'multiple',
+        mappings: { properties: {} },
+      },
+      // deprecated test case
+      {
+        name: 'typeD',
+        hidden: false,
+        namespaceAgnostic: true,
+        namespaceType: 'multiple', // if namespaceAgnostic and namespaceType are both set, namespaceAgnostic takes precedence
         mappings: { properties: {} },
       },
     ];
@@ -388,12 +434,25 @@ describe('convertTypesToLegacySchema', () => {
       typeA: {
         hidden: false,
         isNamespaceAgnostic: true,
+        multiNamespace: false,
         convertToAliasScript: 'some script',
       },
       typeB: {
         hidden: true,
         isNamespaceAgnostic: false,
+        multiNamespace: false,
         indexPattern: 'myIndex',
+      },
+      typeC: {
+        hidden: false,
+        isNamespaceAgnostic: false,
+        multiNamespace: true,
+      },
+      // deprecated test case
+      typeD: {
+        hidden: false,
+        isNamespaceAgnostic: true,
+        multiNamespace: false,
       },
     });
   });

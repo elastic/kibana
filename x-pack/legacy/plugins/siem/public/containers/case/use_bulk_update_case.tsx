@@ -51,12 +51,12 @@ const dataFetchReducer = (state: UpdateState, action: Action): UpdateState => {
       return state;
   }
 };
-interface UseUpdateCase extends UpdateState {
+export interface UseUpdateCases extends UpdateState {
   updateBulkStatus: (cases: Case[], status: string) => void;
   dispatchResetIsUpdated: () => void;
 }
 
-export const useUpdateCases = (): UseUpdateCase => {
+export const useUpdateCases = (): UseUpdateCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,

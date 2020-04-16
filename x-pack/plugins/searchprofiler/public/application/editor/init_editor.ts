@@ -5,7 +5,7 @@
  */
 
 import ace from 'brace';
-import { installXJsonMode } from '../../../../es_ui_shared/console_lang';
+import { installXJsonMode } from '../../../../../../src/plugins/es_ui_shared/public';
 
 export function initializeEditor({
   el,

@@ -177,13 +177,9 @@ export class FilterManager {
   public setGlobalFilters(newGlobalFilters: Filter[]) {
     newGlobalFilters = mapAndFlattenFilters(newGlobalFilters);
     FilterManager.setFiltersStore(newGlobalFilters, FilterStateStore.GLOBAL_STATE, true);
-    const { appFilters: currentAppFilters } = this.getPartitionedFilters();
-    // remove duplicates from current app filters, to make sure global will take precedence
-    const filteredAppFilters = currentAppFilters.filter(
-      appFilter => !newGlobalFilters.find(globalFilter => compareFilters(globalFilter, appFilter))
-    );
+    const { appFilters } = this.getPartitionedFilters();
     const newFilters = this.mergeIncomingFilters({
-      appFilters: filteredAppFilters,
+      appFilters,
       globalFilters: newGlobalFilters,
     });
 
@@ -198,14 +194,9 @@ export class FilterManager {
   public setAppFilters(newAppFilters: Filter[]) {
     newAppFilters = mapAndFlattenFilters(newAppFilters);
     FilterManager.setFiltersStore(newAppFilters, FilterStateStore.APP_STATE, true);
-    const { globalFilters: currentGlobalFilters } = this.getPartitionedFilters();
-    // remove duplicates from current global filters, to make sure app will take precedence
-    const filteredGlobalFilters = currentGlobalFilters.filter(
-      globalFilter => !newAppFilters.find(appFilter => compareFilters(appFilter, globalFilter))
-    );
-
+    const { globalFilters } = this.getPartitionedFilters();
     const newFilters = this.mergeIncomingFilters({
-      globalFilters: filteredGlobalFilters,
+      globalFilters,
       appFilters: newAppFilters,
     });
     this.handleStateUpdate(newFilters);

@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { PhraseFilter } from '../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../src/plugins/data/public';
 import { TooltipFeature } from '../../../../../plugins/maps/common/descriptor_types';
 
 export interface ITooltipProperty {
@@ -14,7 +14,7 @@ export interface ITooltipProperty {
   getHtmlDisplayValue(): string;
   getRawValue(): string | undefined;
   isFilterable(): boolean;
-  getESFilters(): Promise<PhraseFilter[]>;
+  getESFilters(): Promise<Filter[]>;
 }
 
 export interface LoadFeatureProps {
@@ -70,7 +70,7 @@ export class TooltipProperty implements ITooltipProperty {
     return false;
   }
 
-  async getESFilters(): Promise<PhraseFilter[]> {
+  async getESFilters(): Promise<Filter[]> {
     return [];
   }
 }

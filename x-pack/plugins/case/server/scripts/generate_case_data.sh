@@ -11,6 +11,6 @@
 # ./generate_case_data.sh
 
 set -e
-./check_env_variables.sh
-./post_case.sh | jq '{ id: .id, version: .version }' -j;
+  ./check_env_variables.sh
+  ./post_case.sh | jq '{ id: .id, version: .version }';
 

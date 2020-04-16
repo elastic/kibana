@@ -19,6 +19,7 @@ interface MockUrlParamsComponentProps {
 const UseUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponentProps) => {
   const [params, setParams] = useState({});
   const [getUrlParams, updateUrlParams] = hook();
+  const queryParams = getUrlParams();
   return (
     <Fragment>
       {Object.keys(params).length > 0 ? <div>{JSON.stringify(params)}</div> : null}
@@ -30,7 +31,7 @@ const UseUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponen
       >
         Set url params
       </button>
-      <button id="getUrlParams" onClick={() => setParams(getUrlParams())}>
+      <button id="getUrlParams" onClick={() => setParams(queryParams)}>
         Get url params
       </button>
     </Fragment>

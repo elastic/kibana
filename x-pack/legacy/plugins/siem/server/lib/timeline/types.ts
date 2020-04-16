@@ -14,7 +14,7 @@ import {
   PinnedEventToReturnSavedObjectRuntimeType,
   PinnedEventSavedObject,
 } from '../pinned_event/types';
-import { SavedObjectsClient, KibanaRequest } from '../../../../../../../src/core/server';
+import { SavedObjectsClient } from '../../../../../../../src/core/server';
 
 /*
  *  ColumnHeader Types
@@ -212,20 +212,9 @@ export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
 export interface AllTimelineSavedObject
   extends runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType> {}
 
-export interface ExportTimelineRequestParams {
-  body: { ids: string[] };
-  query: {
-    file_name: string;
-    exclude_export_details: boolean;
-  };
-}
-
-export type ExportTimelineRequest = KibanaRequest<
-  unknown,
-  ExportTimelineRequestParams['query'],
-  ExportTimelineRequestParams['body'],
-  'post'
->;
+/**
+ * Import/export timelines
+ */
 
 export type ExportTimelineSavedObjectsClient = Pick<
   SavedObjectsClient,
