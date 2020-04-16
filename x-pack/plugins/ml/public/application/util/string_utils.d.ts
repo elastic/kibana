@@ -14,4 +14,8 @@ export function replaceStringTokens(
 
 export function detectorToString(dtr: any): string;
 
+export function sortByKey(list: any, reverse: boolean, comparator?: any): any;
+
 export function toLocaleString(x: number): string;
+
+export function mlEscape(str: string): string;

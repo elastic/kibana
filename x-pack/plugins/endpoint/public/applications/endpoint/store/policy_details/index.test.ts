@@ -9,7 +9,7 @@ import { createStore, Dispatch, Store } from 'redux';
 import { policyDetailsReducer, PolicyDetailsAction } from './index';
 import { policyConfig } from './selectors';
 import { clone } from '../../models/policy_details_config';
-import { generatePolicy } from '../../models/policy';
+import { factory as policyConfigFactory } from '../../../../../common/models/policy_config';
 
 describe('policy details: ', () => {
   let store: Store<PolicyDetailsState>;
@@ -38,7 +38,7 @@ describe('policy details: ', () => {
               streams: [],
               config: {
                 policy: {
-                  value: generatePolicy(),
+                  value: policyConfigFactory(),
                 },
               },
             },
@@ -96,6 +96,28 @@ describe('policy details: ', () => {
     it('mac file events is enabled', () => {
       const config = policyConfig(getState());
       expect(config!.mac.events.file).toEqual(true);
+    });
+  });
+
+  describe('when the user has enabled linux process events', () => {
+    beforeEach(() => {
+      const config = policyConfig(getState());
+      if (!config) {
+        throw new Error();
+      }
+
+      const newPayload1 = clone(config);
+      newPayload1.linux.events.file = true;
+
+      dispatch({
+        type: 'userChangedPolicyConfig',
+        payload: { policyConfig: newPayload1 },
+      });
+    });
+
+    it('linux file events is enabled', () => {
+      const config = policyConfig(getState());
+      expect(config!.linux.events.file).toEqual(true);
     });
   });
 });
