@@ -4,42 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { loggerMock } from 'src/core/server/logging/logger.mock';
 import { getResult } from '../routes/__mocks__/request_responses';
 import { rulesNotificationAlertType } from './rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
-import { AlertInstance } from '../../../../../../../plugins/alerting/server';
+import { alertsMock, AlertServicesMock } from '../../../../../../../plugins/alerting/server/mocks';
 import { NotificationExecutorOptions } from './types';
 jest.mock('./build_signals_query');
 
 describe('rules_notification_alert_type', () => {
   let payload: NotificationExecutorOptions;
   let alert: ReturnType<typeof rulesNotificationAlertType>;
-  let alertInstanceMock: Record<string, jest.Mock>;
-  let alertInstanceFactoryMock: () => AlertInstance;
-  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let callClusterMock: jest.Mock;
+  let alertServices: AlertServicesMock;
 
   beforeEach(() => {
-    alertInstanceMock = {
-      scheduleActions: jest.fn(),
-      replaceState: jest.fn(),
-    };
-    alertInstanceMock.replaceState.mockReturnValue(alertInstanceMock);
-    alertInstanceFactoryMock = jest.fn().mockReturnValue(alertInstanceMock);
-    callClusterMock = jest.fn();
-    savedObjectsClient = savedObjectsClientMock.create();
+    alertServices = alertsMock.createAlertServices();
     logger = loggerMock.create();
 
     payload = {
       alertId: '1111',
-      services: {
-        savedObjectsClient,
-        alertInstanceFactory: alertInstanceFactoryMock,
-        callCluster: callClusterMock,
-      },
+      services: alertServices,
       params: { ruleAlertId: '2222' },
       state: {},
       spaceId: '',
@@ -58,7 +43,7 @@ describe('rules_notification_alert_type', () => {
 
   describe('executor', () => {
     it('throws an error if rule alert was not found', async () => {
-      savedObjectsClient.get.mockResolvedValue({
+      alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         attributes: {},
         type: 'type',
@@ -72,13 +57,13 @@ describe('rules_notification_alert_type', () => {
 
     it('should call buildSignalsSearchQuery with proper params', async () => {
       const ruleAlert = getResult();
-      savedObjectsClient.get.mockResolvedValue({
+      alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',
         references: [],
         attributes: ruleAlert,
       });
-      callClusterMock.mockResolvedValue({
+      alertServices.callCluster.mockResolvedValue({
         count: 0,
       });
 
@@ -96,36 +81,38 @@ describe('rules_notification_alert_type', () => {
 
     it('should not call alertInstanceFactory if signalsCount was 0', async () => {
       const ruleAlert = getResult();
-      savedObjectsClient.get.mockResolvedValue({
+      alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',
         references: [],
         attributes: ruleAlert,
       });
-      callClusterMock.mockResolvedValue({
+      alertServices.callCluster.mockResolvedValue({
         count: 0,
       });
 
       await alert.executor(payload);
 
-      expect(alertInstanceFactoryMock).not.toHaveBeenCalled();
+      expect(alertServices.alertInstanceFactory).not.toHaveBeenCalled();
     });
 
     it('should call scheduleActions if signalsCount was greater than 0', async () => {
       const ruleAlert = getResult();
-      savedObjectsClient.get.mockResolvedValue({
+      alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',
         references: [],
         attributes: ruleAlert,
       });
-      callClusterMock.mockResolvedValue({
+      alertServices.callCluster.mockResolvedValue({
         count: 10,
       });
 
       await alert.executor(payload);
 
-      expect(alertInstanceFactoryMock).toHaveBeenCalled();
+      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+
+      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
       expect(alertInstanceMock.replaceState).toHaveBeenCalledWith(
         expect.objectContaining({ signals_count: 10 })
       );
