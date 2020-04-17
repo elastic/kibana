@@ -21,6 +21,12 @@ describe('ml_job_constants', () => {
     expect(getMlJobId('myServiceName', 'myTransactionType')).toBe(
       'myservicename-mytransactiontype-high_mean_response_time'
     );
+    expect(getMlJobId('my service name')).toBe(
+      'my_service_name-high_mean_response_time'
+    );
+    expect(getMlJobId('my service name', 'my transaction type')).toBe(
+      'my_service_name-my_transaction_type-high_mean_response_time'
+    );
   });
 
   it('getMlIndex', () => {
