@@ -34,3 +34,14 @@ export function setFatalErrors(newFatalErrors: FatalErrorsSetup) {
 export const [getUiStatsReporter, setUiStatsReporter] = createGetterSetter<
   (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void
 >('uiMetric');
+
+// default value if usageCollection is not available
+setUiStatsReporter(() => {});
+
+export function trackUiMetric(
+  type: UiStatsMetricType,
+  eventNames: string | string[],
+  count?: number
+) {
+  getUiStatsReporter()(type, eventNames, count);
+}

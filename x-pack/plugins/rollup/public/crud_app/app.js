@@ -11,7 +11,7 @@ import { HashRouter, Switch, Route, Redirect, withRouter } from 'react-router-do
 import { UIM_APP_LOAD } from '../../common';
 import { CRUD_APP_BASE_PATH } from './constants';
 import { registerRouter, setUserHasLeftApp, METRIC_TYPE } from './services';
-import { getUiStatsReporter } from '../kibana_services';
+import { trackUiMetric } from '../kibana_services';
 import { JobList, JobCreate } from './sections';
 
 class ShareRouterComponent extends Component {
@@ -43,7 +43,7 @@ const ShareRouter = withRouter(ShareRouterComponent);
 // eslint-disable-next-line react/no-multi-comp
 export class App extends Component {
   componentDidMount() {
-    getUiStatsReporter()(METRIC_TYPE.LOADED, UIM_APP_LOAD);
+    trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD);
   }
 
   componentWillUnmount() {

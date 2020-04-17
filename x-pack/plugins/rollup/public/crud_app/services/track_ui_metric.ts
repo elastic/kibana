@@ -5,7 +5,7 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { getUiStatsReporter } from '../../kibana_services';
+import { trackUiMetric } from '../../kibana_services';
 
 export { METRIC_TYPE };
 
@@ -16,7 +16,6 @@ export { METRIC_TYPE };
 export function trackUserRequest<TResponse>(request: Promise<TResponse>, actionType: string) {
   // Only track successful actions.
   return request.then(response => {
-    const trackUiMetric = getUiStatsReporter();
     trackUiMetric(METRIC_TYPE.LOADED, actionType);
     // We return the response immediately without waiting for the tracking request to resolve,
     // to avoid adding additional latency.

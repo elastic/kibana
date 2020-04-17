@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 // @ts-ignore
-import { rollupJobsStore } from './crud_app/store/index';
+import { rollupJobsStore } from './crud_app/store';
 // @ts-ignore
 import { App } from './crud_app/app';
 

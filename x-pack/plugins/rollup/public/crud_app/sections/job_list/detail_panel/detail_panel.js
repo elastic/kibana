@@ -35,7 +35,7 @@ import {
   UIM_DETAIL_PANEL_JSON_TAB_CLICK,
 } from '../../../../../common';
 import { METRIC_TYPE } from '../../../services';
-import { getUiStatsReporter } from '../../../../kibana_services';
+import { trackUiMetric } from '../../../../kibana_services';
 
 import {
   JobActionMenu,
@@ -111,7 +111,7 @@ export class DetailPanel extends Component {
       renderedTabs.push(
         <EuiTab
           onClick={() => {
-            getUiStatsReporter()(METRIC_TYPE.CLICK, tabToUiMetricMap[tab]);
+            trackUiMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab]);
             openDetailPanel({ panelType: tab, jobId: id });
           }}
           isSelected={isSelected}

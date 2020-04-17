@@ -39,7 +39,6 @@ export const createJob = jobConfig => async dispatch => {
       new Promise(resolve => setTimeout(resolve, 500)),
     ]);
   } catch (error) {
-    console.log(error);
     if (error) {
       const { body } = error;
       const statusCode = error.statusCode || (body && body.statusCode);

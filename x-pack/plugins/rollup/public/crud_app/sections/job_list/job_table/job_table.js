@@ -31,7 +31,7 @@ import {
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../common';
 import { METRIC_TYPE } from '../../../services';
-import { getUiStatsReporter } from '../../../../kibana_services';
+import { trackUiMetric } from '../../../../kibana_services';
 import { JobActionMenu, JobStatus } from '../../components';
 
 const COLUMNS = [
@@ -264,7 +264,7 @@ export class JobTable extends Component {
         content = (
           <EuiLink
             onClick={() => {
-              getUiStatsReporter()(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
+              trackUiMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(job.id);
             }}
           >

@@ -21,7 +21,7 @@ jest.mock('../../../../kibana_services', () => {
   const services = require.requireActual('../../../../kibana_services');
   return {
     ...services,
-    getUiStatsReporter: jest.fn(() => () => {}),
+    trackUiMetric: jest.fn(),
   };
 });
 
