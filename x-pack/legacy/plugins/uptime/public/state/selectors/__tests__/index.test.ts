@@ -58,6 +58,14 @@ describe('state selectors', () => {
       loading: false,
       errors: [],
     },
+    pingList: {
+      loading: false,
+      pingList: {
+        total: 0,
+        locations: [],
+        pings: [],
+      },
+    },
     monitorDuration: {
       durationLines: null,
       loading: false,

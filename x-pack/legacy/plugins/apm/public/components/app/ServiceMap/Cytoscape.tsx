@@ -211,7 +211,9 @@ export function Cytoscape({
       resetConnectedEdgeStyle(event.target);
     };
     const unselectHandler: cytoscape.EventHandler = event => {
-      resetConnectedEdgeStyle();
+      resetConnectedEdgeStyle(
+        serviceName ? event.cy.getElementById(serviceName) : undefined
+      );
     };
     const debugHandler: cytoscape.EventHandler = event => {
       const debugEnabled = sessionStorage.getItem('apm_debug') === 'true';

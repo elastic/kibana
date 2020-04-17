@@ -26,10 +26,12 @@ import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
+import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;
   let typesRegistry: AggTypesRegistryStart;
+  const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
   beforeEach(() => {
     jest.restoreAllMocks();
@@ -40,7 +42,7 @@ describe('AggConfig', () => {
 
   describe('#toDsl', () => {
     it('calls #write()', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -55,7 +57,7 @@ describe('AggConfig', () => {
     });
 
     it('uses the type name as the agg name', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -70,7 +72,7 @@ describe('AggConfig', () => {
     });
 
     it('uses the params from #write() output as the agg params', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -100,7 +102,7 @@ describe('AggConfig', () => {
           params: {},
         },
       ];
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
 
       const histoConfig = ac.byName('date_histogram')[0];
       const avgConfig = ac.byName('avg')[0];
@@ -210,8 +212,8 @@ describe('AggConfig', () => {
 
     testsIdentical.forEach((configState, index) => {
       it(`identical aggregations (${index})`, () => {
-        const ac1 = new AggConfigs(indexPattern, configState, { typesRegistry });
-        const ac2 = new AggConfigs(indexPattern, configState, { typesRegistry });
+        const ac1 = new AggConfigs(indexPattern, configState, { typesRegistry, fieldFormats });
+        const ac2 = new AggConfigs(indexPattern, configState, { typesRegistry, fieldFormats });
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(true);
       });
     });
@@ -251,8 +253,8 @@ describe('AggConfig', () => {
 
     testsIdenticalDifferentOrder.forEach((test, index) => {
       it(`identical aggregations (${index}) - init json is in different order`, () => {
-        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry });
-        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry });
+        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry, fieldFormats });
+        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry, fieldFormats });
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(true);
       });
     });
@@ -316,8 +318,8 @@ describe('AggConfig', () => {
 
     testsDifferent.forEach((test, index) => {
       it(`different aggregations (${index})`, () => {
-        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry });
-        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry });
+        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry, fieldFormats });
+        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry, fieldFormats });
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(false);
       });
     });
@@ -325,7 +327,7 @@ describe('AggConfig', () => {
 
   describe('#toJSON', () => {
     it('includes the aggs id, params, type and schema', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -356,8 +358,8 @@ describe('AggConfig', () => {
           params: {},
         },
       ];
-      const ac1 = new AggConfigs(indexPattern, configStates, { typesRegistry });
-      const ac2 = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac1 = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
+      const ac2 = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
 
       // this relies on the assumption that js-engines consistently loop over properties in insertion order.
       // most likely the case, but strictly speaking not guaranteed by the JS and JSON specifications.
@@ -369,7 +371,7 @@ describe('AggConfig', () => {
     let aggConfig: AggConfig;
 
     beforeEach(() => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       aggConfig = ac.createAggConfig({ type: 'count' } as CreateAggConfigParams);
     });
 
@@ -398,7 +400,7 @@ describe('AggConfig', () => {
 
   describe('#fieldFormatter - custom getFormat handler', () => {
     it('returns formatter from getFormat handler', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
         enabled: true,
         type: 'count',
@@ -439,7 +441,7 @@ describe('AggConfig', () => {
           },
         },
       };
-      const ac = new AggConfigs(indexPattern, [configStates], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [configStates], { typesRegistry, fieldFormats });
       aggConfig = ac.createAggConfig(configStates);
     });
 

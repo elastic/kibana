@@ -7,13 +7,13 @@
 import React, { useContext, useState } from 'react';
 
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
-import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { canDeleteMLJobSelector } from '../../../state/selectors';
 import { UptimeSettingsContext } from '../../../contexts';
 import * as labels from './translations';
 import { getMLJobLinkHref } from './ml_job_link';
-import { useUrlParams } from '../../../hooks';
+import { useGetUrlParams } from '../../../hooks';
+import { useMonitorId } from '../../../hooks/use_monitor';
 
 interface Props {
   hasMLJob: boolean;
@@ -28,14 +28,13 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
 
   const canDeleteMLJob = useSelector(canDeleteMLJobSelector);
 
-  const [getUrlParams] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd } = getUrlParams();
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
-  let { monitorId } = useParams();
-  monitorId = atob(monitorId || '');
+  const monitorId = useMonitorId();
 
   const button = (
     <EuiButtonEmpty
+      data-test-subj={hasMLJob ? 'uptimeManageMLJobBtn' : 'uptimeEnableAnomalyBtn'}
       iconType={hasMLJob ? 'arrowDown' : 'machineLearningApp'}
       iconSide={hasMLJob ? 'right' : 'left'}
       onClick={hasMLJob ? () => setIsPopOverOpen(true) : onEnableJob}
@@ -62,6 +61,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         },
         {
           name: labels.DISABLE_ANOMALY_DETECTION,
+          'data-test-subj': 'uptimeDeleteMLJobBtn',
           icon: <EuiIcon type="trash" size="m" />,
           onClick: () => {
             setIsPopOverOpen(false);
@@ -74,7 +74,11 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
 
   return (
     <EuiPopover button={button} isOpen={isPopOverOpen} closePopover={() => setIsPopOverOpen(false)}>
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={panels}
+        data-test-subj="uptimeManageMLContextMenu"
+      />
     </EuiPopover>
   );
 };

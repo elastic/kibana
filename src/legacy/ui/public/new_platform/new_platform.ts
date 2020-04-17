@@ -22,6 +22,7 @@ import { IScope } from 'angular';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
+import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { DashboardStart } from '../../../../plugins/dashboard/public';
 import { setSetupServices, setStartServices } from './set_services';
 import {
@@ -68,6 +69,8 @@ import {
   VisualizationsSetup,
   VisualizationsStart,
 } from '../../../../plugins/visualizations/public';
+import { VisTypeTimelionPluginStart } from '../../../../plugins/vis_type_timelion/public';
+import { MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -90,7 +93,9 @@ export interface PluginsSetup {
   visualizations: VisualizationsSetup;
   telemetry?: TelemetryPluginSetup;
   savedObjectsManagement: SavedObjectsManagementPluginSetup;
+  mapsLegacy: MapsLegacyPluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
+  visTypeXy?: VisTypeXyPluginSetup;
 }
 
 export interface PluginsStart {
@@ -112,6 +117,7 @@ export interface PluginsStart {
   telemetry?: TelemetryPluginStart;
   dashboard: DashboardStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  visTypeTimelion: VisTypeTimelionPluginStart;
   indexPatternManagement: IndexPatternManagementStart;
 }
 

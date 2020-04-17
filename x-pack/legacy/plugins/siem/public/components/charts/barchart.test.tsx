@@ -4,14 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { Chart, BarSeries, Axis, ScaleType } from '@elastic/charts';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
+
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import { TestProviders } from '../../mock';
 
 import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import { ChartSeriesData } from './common';
-import { Chart, BarSeries, Axis, ScaleType } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
+
+jest.mock('uuid', () => {
+  return {
+    v1: jest.fn(() => 'uuid.v1()'),
+    v4: jest.fn(() => 'uuid.v4()'),
+  };
+});
+
+const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 const customHeight = '100px';
 const customWidth = '120px';
@@ -115,6 +129,19 @@ const mockConfig = {
   },
   customHeight: 324,
 };
+
+// Suppress warnings about "react-beautiful-dnd"
+/* eslint-disable no-console */
+const originalError = console.error;
+const originalWarn = console.warn;
+beforeAll(() => {
+  console.warn = jest.fn();
+  console.error = jest.fn();
+});
+afterAll(() => {
+  console.error = originalError;
+  console.warn = originalWarn;
+});
 
 describe('BarChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
@@ -279,6 +306,91 @@ describe.each(chartDataSets)('BarChart with valid data [%o]', data => {
   it(`should render chart`, () => {
     expect(shallowWrapper.find('BarChartBase')).toHaveLength(1);
     expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
+  });
+
+  it('it does NOT render a draggable legend because stackByField is not provided', () => {
+    expect(shallowWrapper.find('[data-test-subj="draggable-legend"]').exists()).toBe(false);
+  });
+});
+
+describe.each(chartDataSets)('BarChart with stackByField', () => {
+  let wrapper: ReactWrapper;
+
+  const data = [
+    {
+      key: 'python.exe',
+      value: [
+        {
+          x: 1586754900000,
+          y: 9675,
+          g: 'python.exe',
+        },
+      ],
+    },
+    {
+      key: 'kernel',
+      value: [
+        {
+          x: 1586754900000,
+          y: 8708,
+          g: 'kernel',
+        },
+        {
+          x: 1586757600000,
+          y: 9282,
+          g: 'kernel',
+        },
+      ],
+    },
+    {
+      key: 'sshd',
+      value: [
+        {
+          x: 1586754900000,
+          y: 5907,
+          g: 'sshd',
+        },
+      ],
+    },
+  ];
+
+  const expectedColors = ['#1EA593', '#2B70F7', '#CE0060'];
+
+  const stackByField = 'process.name';
+
+  beforeAll(() => {
+    wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <TestProviders>
+          <BarChartComponent configs={mockConfig} barChart={data} stackByField={stackByField} />
+        </TestProviders>
+      </ThemeProvider>
+    );
+  });
+
+  it('it renders a draggable legend', () => {
+    expect(wrapper.find('[data-test-subj="draggable-legend"]').exists()).toBe(true);
+  });
+
+  expectedColors.forEach((color, i) => {
+    test(`it renders the expected legend color ${color} for legend item ${i}`, () => {
+      expect(wrapper.find(`div [color="${color}"]`).exists()).toBe(true);
+    });
+  });
+
+  data.forEach(datum => {
+    test(`it renders the expected draggable legend text for datum ${datum.key}`, () => {
+      const dataProviderId = `draggableId.content.draggable-legend-item-uuid_v4()-${escapeDataProviderId(
+        stackByField
+      )}-${escapeDataProviderId(datum.key)}`;
+
+      expect(
+        wrapper
+          .find(`div [data-rbd-draggable-id="${dataProviderId}"]`)
+          .first()
+          .text()
+      ).toEqual(datum.key);
+    });
   });
 });
 

@@ -17,7 +17,7 @@ export interface OwnProps {
   start: number;
 }
 
-const ALERTS_TABLE_ID = 'timeline-alerts-table';
+const ALERTS_TABLE_ID = 'alerts-table';
 const defaultAlertsFilters: Filter[] = [
   {
     meta: {
