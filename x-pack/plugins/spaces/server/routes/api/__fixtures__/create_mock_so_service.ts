@@ -46,37 +46,37 @@ export const createMockSavedObjectsService = (spaces: any[] = []) => {
   typeRegistry.getAllTypes.mockReturnValue([
     {
       name: 'visualization',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       hidden: false,
       mappings: { properties: {} },
     },
     {
       name: 'dashboard',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       hidden: false,
       mappings: { properties: {} },
     },
     {
       name: 'index-pattern',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       hidden: false,
       mappings: { properties: {} },
     },
     {
       name: 'globalType',
-      namespaceAgnostic: true,
+      namespaceType: 'agnostic',
       hidden: false,
       mappings: { properties: {} },
     },
     {
       name: 'space',
-      namespaceAgnostic: true,
+      namespaceType: 'agnostic',
       hidden: true,
       mappings: { properties: {} },
     },
   ]);
   typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
-    typeRegistry.getAllTypes().some(t => t.name === type && t.namespaceAgnostic)
+    typeRegistry.getAllTypes().some(t => t.name === type && t.namespaceType === 'agnostic')
   );
   savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
 

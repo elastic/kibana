@@ -167,7 +167,7 @@ export const DraggableBadge = React.memo<BadgeDraggableType>(
         tooltipContent={tooltipContent}
         queryValue={queryValue}
       >
-        <Badge iconType={iconType} color={color}>
+        <Badge iconType={iconType} color={color} title="">
           {children ? children : value !== '' ? value : getEmptyStringTag()}
         </Badge>
       </DefaultDraggable>
