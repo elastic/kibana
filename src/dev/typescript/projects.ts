@@ -45,6 +45,9 @@ export const PROJECTS = [
     .sync('examples/*/tsconfig.json', { cwd: REPO_ROOT })
     .map(path => new Project(resolve(REPO_ROOT, path))),
   ...glob
+    .sync('x-pack/examples/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map(path => new Project(resolve(REPO_ROOT, path))),
+  ...glob
     .sync('test/plugin_functional/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map(path => new Project(resolve(REPO_ROOT, path))),
 ];
