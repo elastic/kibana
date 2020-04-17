@@ -196,12 +196,12 @@ We are using es_archiver in order to manage the data that our Cypress tests need
 3. When you are sure that you have all the data you need run the following command from: `x-pack/plugins/siem`
 
 ```sh 
-node ../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../../test/siem_cypress/es_archives --config ../../../../test/functional/config.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/siem_cypress/es_archives --config ../../../test/functional/config.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
 ```
 
 Example: 
 ```sh
-node ../../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../../test/siem_cypress/es_archives --config ../../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9220
+node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/siem_cypress/es_archives --config ../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9220
 ```
 
 Note that the command is going to create the folder if does not exist in the directory with the imported data.
