@@ -536,9 +536,15 @@ module.exports = {
      * ML overrides
      */
     {
-      files: ['x-pack/legacy/plugins/ml/**/*.js'],
+      files: ['x-pack/plugins/ml/**/*.js'],
       rules: {
         'no-shadow': 'error',
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: './x-pack',
+          },
+        ],
       },
     },
 

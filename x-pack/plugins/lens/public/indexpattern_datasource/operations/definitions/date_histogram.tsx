@@ -42,6 +42,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
     defaultMessage: 'Date histogram',
   }),
+  priority: 3, // Higher than any metric
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'date' &&
