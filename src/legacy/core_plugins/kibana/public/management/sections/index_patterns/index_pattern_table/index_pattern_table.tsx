@@ -32,7 +32,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { CreateButton } from '../create_button';
-import { CreateIndexPatternPrompt } from '../create_index_pattern_prompt';
 import { IndexPattern, IndexPatternCreationOption } from '../types';
 
 const columns = [
@@ -97,14 +96,12 @@ interface State {
 export class IndexPatternTable extends React.Component<Props, State> {
   public readonly state = {
     showFlyout: this.props.indexPatterns.length === 0,
+    showEmptyPrompt: this.props.indexPatterns.length === 0,
   };
 
   public render() {
     return (
       <EuiPanel paddingSize="l" data-test-subj="indexPatternTable">
-        {this.state.showFlyout && (
-          <CreateIndexPatternPrompt onClose={() => this.setState({ showFlyout: false })} />
-        )}
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false} className="euiIEFlexWrapFix">
             <EuiFlexGroup alignItems="center" gutterSize="s">

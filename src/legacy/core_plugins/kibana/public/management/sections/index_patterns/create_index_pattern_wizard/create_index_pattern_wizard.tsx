@@ -19,7 +19,7 @@
 
 import React, { ReactElement, Component } from 'react';
 
-import { EuiGlobalToastList, EuiGlobalToastListToast } from '@elastic/eui';
+import { EuiGlobalToastList, EuiGlobalToastListToast, EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -238,32 +238,40 @@ export class CreateIndexPatternWizard extends Component<
       return <EmptyState onRefresh={this.fetchData} />;
     }
 
+    const header = this.renderHeader();
+
     if (step === 1) {
       const { services, initialQuery } = this.props;
       return (
-        <StepIndexPattern
-          allIndices={allIndices}
-          initialQuery={indexPattern || initialQuery}
-          isIncludingSystemIndices={isIncludingSystemIndices}
-          esService={services.es}
-          savedObjectsClient={services.savedObjectsClient}
-          indexPatternCreationType={services.indexPatternCreationType}
-          goToNextStep={this.goToTimeFieldStep}
-          uiSettings={services.uiSettings}
-        />
+        <EuiPageContent>
+          {header}
+          <StepIndexPattern
+            allIndices={allIndices}
+            initialQuery={indexPattern || initialQuery}
+            isIncludingSystemIndices={isIncludingSystemIndices}
+            esService={services.es}
+            savedObjectsClient={services.savedObjectsClient}
+            indexPatternCreationType={services.indexPatternCreationType}
+            goToNextStep={this.goToTimeFieldStep}
+            uiSettings={services.uiSettings}
+          />
+        </EuiPageContent>
       );
     }
 
     if (step === 2) {
       const { services } = this.props;
       return (
-        <StepTimeField
-          indexPattern={indexPattern}
-          indexPatternsService={services.indexPatterns}
-          goToPreviousStep={this.goToIndexPatternStep}
-          createIndexPattern={this.createIndexPattern}
-          indexPatternCreationType={services.indexPatternCreationType}
-        />
+        <EuiPageContent>
+          {header}
+          <StepTimeField
+            indexPattern={indexPattern}
+            indexPatternsService={services.indexPatterns}
+            goToPreviousStep={this.goToIndexPatternStep}
+            createIndexPattern={this.createIndexPattern}
+            indexPatternCreationType={services.indexPatternCreationType}
+          />
+        </EuiPageContent>
       );
     }
 
@@ -277,15 +285,11 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   render() {
-    const header = this.renderHeader();
     const content = this.renderContent();
 
     return (
-      <React.Fragment>
-        <div>
-          {header}
-          {content}
-        </div>
+      <>
+        {content}
         <EuiGlobalToastList
           toasts={this.state.toasts}
           dismissToast={({ id }) => {
@@ -293,7 +297,7 @@ export class CreateIndexPatternWizard extends Component<
           }}
           toastLifeTimeMs={6000}
         />
-      </React.Fragment>
+      </>
     );
   }
 }

@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { UICapabilitiesProvider } from 'ui/capabilities/react';
 import { getListBreadcrumbs } from './breadcrumbs';
+import { CreateIndexPatternPrompt } from './create_index_pattern_prompt';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -45,11 +46,15 @@ export function updateIndexPatternList(indexPatterns, kbnUrl, indexPatternCreati
   render(
     <I18nContext>
       <UICapabilitiesProvider>
-        <IndexPatternTable
-          indexPatterns={indexPatterns}
-          navTo={kbnUrl.redirect}
-          indexPatternCreationOptions={indexPatternCreationOptions}
-        />
+        {indexPatterns.length === 0 ? (
+          <CreateIndexPatternPrompt indexPatternCreationOptions={indexPatternCreationOptions} />
+        ) : (
+          <IndexPatternTable
+            indexPatterns={indexPatterns}
+            navTo={kbnUrl.redirect}
+            indexPatternCreationOptions={indexPatternCreationOptions}
+          />
+        )}
       </UICapabilitiesProvider>
     </I18nContext>,
     node
