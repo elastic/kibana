@@ -33,7 +33,6 @@ import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspecto
 import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
 import {
   setCoreStart,
-  setInspector,
   setInterpreter,
   setRenderersRegistry,
   setNotifications,
@@ -182,7 +181,6 @@ export class ExpressionsPublicPlugin
 
   public start(core: CoreStart, { inspector, bfetch }: ExpressionsStartDeps): ExpressionsStart {
     setCoreStart(core);
-    setInspector(inspector);
     setNotifications(core.notifications);
 
     const { expressions } = this;

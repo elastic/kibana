@@ -19,13 +19,13 @@
 
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { Adapters, InspectorSession } from '../../inspector/public';
+import { Adapters } from '../../inspector/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
 import { ExecutionContract } from '../common/execution/execution_contract';
 
 import { ExpressionRenderHandler } from './render';
-import { getInspector, getExpressionsService } from './services';
+import { getExpressionsService } from './services';
 
 type Data = any;
 
@@ -119,15 +119,6 @@ export class ExpressionLoader {
 
   getElement(): HTMLElement {
     return this.renderHandler.getElement();
-  }
-
-  openInspector(title: string): InspectorSession | undefined {
-    const inspector = this.inspect();
-    if (inspector) {
-      return getInspector().open(inspector, {
-        title,
-      });
-    }
   }
 
   inspect(): Adapters | undefined {
