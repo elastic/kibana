@@ -50,17 +50,18 @@ export default ({ getService }: FtrProviderContext): void => {
         .send(getSimpleRule())
         .expect(200);
 
-      await new Promise(resolve => setTimeout(resolve, 1000)).then(async () => {
-        // query the single rule from _find
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [resBody.id] })
-          .expect(200);
+      // wait for Task Manager to execute the rule and update status
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
-        // expected result for status should be 'going to run' or 'succeeded
-        expect(['succeeded', 'going to run']).to.contain(body[resBody.id].current_status.status);
-      });
+      // query the single rule from _find
+      const { body } = await supertest
+        .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+        .set('kbn-xsrf', 'true')
+        .send({ ids: [resBody.id] })
+        .expect(200);
+
+      // expected result for status should be 'going to run' or 'succeeded
+      expect(['succeeded', 'going to run']).to.contain(body[resBody.id].current_status.status);
     });
   });
 };
