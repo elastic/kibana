@@ -16,44 +16,48 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 // @ts-ignore
 import { FieldEditor } from 'ui/field_editor';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IndexHeader } from '../index_header';
 import { IndexPattern, IndexPatternField } from '../../../../../../../../../plugins/data/public';
+import { ChromeDocTitle, NotificationsStart } from '../../../../../../../../../core/public';
 
-interface CreateEditFieldProps {
+type CreateEditFieldProps = RouteComponentProps & {
   indexPattern: IndexPattern;
   mode?: string;
   fieldName?: string;
   fieldFormatEditors: any;
-  getConfig: () => any;
+  getConfig: (name: string) => any;
   servises: {
-    addWarning: Function;
+    notifications: NotificationsStart;
+    docTitle: ChromeDocTitle;
     http: Function;
-    docTitle: Record<string, any>;
   };
-}
+};
 
-export function CreateEditField({
-  indexPattern,
-  mode,
-  fieldName,
-  fieldFormatEditors,
-  getConfig,
-  servises,
-}: CreateEditFieldProps) {
-  const field: IndexPatternField | undefined =
-    mode === 'edit' && fieldName
-      ? indexPattern.fields.getByName(fieldName)
-      : new IndexPatternField(indexPattern, {
-          scripted: true,
-          type: 'number',
-        });
+export const CreateEditField = withRouter(
+  ({
+    indexPattern,
+    mode,
+    fieldName,
+    fieldFormatEditors,
+    getConfig,
+    servises,
+    history,
+  }: CreateEditFieldProps) => {
+    const field: IndexPatternField | undefined =
+      mode === 'edit' && fieldName
+        ? indexPattern.fields.getByName(fieldName)
+        : new IndexPatternField(indexPattern, {
+            scripted: true,
+            type: 'number',
+          });
 
-  useEffect(() => {
     if (mode === 'edit') {
       if (!field) {
         const message = i18n.translate('kbn.management.editIndexPattern.scripted.noFieldLabel', {
@@ -61,8 +65,8 @@ export function CreateEditField({
             "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
           values: { indexPatternTitle: indexPattern.title, fieldName },
         });
-        servises.addWarning(message);
-        window.history.pushState({}, '', `/management/kibana/index_patterns/${indexPattern.id}`);
+        servises.notifications.toasts.addWarning(message);
+        history.push(`/management/kibana/index_patterns/${indexPattern.id}`);
       }
     }
 
@@ -71,34 +75,37 @@ export function CreateEditField({
       i18n.translate('kbn.management.editIndexPattern.scripted.newFieldPlaceholder', {
         defaultMessage: 'New Scripted Field',
       });
+
     servises.docTitle.change([docFieldName, indexPattern.title]);
-  }, [field, fieldName, indexPattern, mode, servises]);
 
-  const redirectAway = () => {
-    setTimeout(() => {
-      window.history.pushState(
-        {},
-        '',
-        `/management/kibana/index_patterns/${indexPattern.id}?_a=(tab:${
-          field?.scripted ? 'scriptedFields' : 'indexedFields'
-        })`
-      );
-    });
-  };
+    const redirectAway = () => {
+      setTimeout(() => {
+        history.push(
+          `/management/kibana/index_patterns/${indexPattern.id}?_a=(tab:${
+            field?.scripted ? 'scriptedFields' : 'indexedFields'
+          })`
+        );
+      });
+    };
 
-  return (
-    <>
-      <IndexHeader indexPattern={indexPattern} />
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={field}
-        helpers={{
-          getConfig,
-          $http: servises.http,
-          fieldFormatEditors,
-          redirectAway,
-        }}
-      />
-    </>
-  );
-}
+    return (
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <IndexHeader indexPattern={indexPattern} defaultIndex={getConfig('defaultIndex')} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <FieldEditor
+            indexPattern={indexPattern}
+            field={field}
+            helpers={{
+              getConfig,
+              $http: servises.http,
+              fieldFormatEditors,
+              redirectAway,
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);

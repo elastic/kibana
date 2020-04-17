@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { HashRouter } from 'react-router-dom';
 import { IndexHeader } from './index_header';
 import { CreateEditField } from './create_edit_field';
 import { docTitle } from 'ui/doc_title';
@@ -441,20 +442,22 @@ const renderCreateEditField = ($scope, $route, getConfig, $http, fieldFormatEdit
     }
 
     render(
-      <I18nContext>
-        <CreateEditField
-          indexPattern={$route.current.locals.indexPattern}
-          mode={$route.current.mode}
-          fieldName={$route.current.params.fieldName}
-          fieldFormatEditors={fieldFormatEditors}
-          getConfig={getConfig}
-          servises={{
-            http: $http,
-            addWarning: npStart.core.notifications.toasts.addWarning,
-            docTitle: npStart.core.chrome.docTitle,
-          }}
-        />
-      </I18nContext>,
+      <HashRouter>
+        <I18nContext>
+          <CreateEditField
+            indexPattern={$route.current.locals.indexPattern}
+            mode={$route.current.mode}
+            fieldName={$route.current.params.fieldName}
+            fieldFormatEditors={fieldFormatEditors}
+            getConfig={getConfig}
+            servises={{
+              http: $http,
+              notifications: npStart.core.notifications,
+              docTitle: npStart.core.chrome.docTitle,
+            }}
+          />
+        </I18nContext>
+      </HashRouter>,
       node
     );
   });
