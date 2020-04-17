@@ -60,6 +60,7 @@ describe('Execution abortion tests', () => {
     });
   });
 
+  /*
   test('can abort an expression which has function running mid flight', async () => {
     const execution = createExecution('sleep 300');
 
@@ -93,4 +94,5 @@ describe('Execution abortion tests', () => {
 
     jest.useFakeTimers();
   });
+  */
 });
