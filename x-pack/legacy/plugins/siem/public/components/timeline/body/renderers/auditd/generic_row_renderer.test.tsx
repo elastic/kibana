@@ -19,6 +19,8 @@ import {
   createGenericFileRowRenderer,
 } from './generic_row_renderer';
 
+jest.mock('../../../../../pages/overview/events_by_dataset');
+
 describe('GenericRowRenderer', () => {
   const mount = useMountAppended();
 

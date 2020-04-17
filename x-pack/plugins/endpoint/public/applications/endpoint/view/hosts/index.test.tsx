@@ -21,10 +21,11 @@ describe('when on the hosts page', () => {
   let history: AppContextTestRender['history'];
   let store: AppContextTestRender['store'];
   let coreStart: AppContextTestRender['coreStart'];
+  let middlewareSpy: AppContextTestRender['middlewareSpy'];
 
   beforeEach(async () => {
     const mockedContext = createAppRootMockRenderer();
-    ({ history, store, coreStart } = mockedContext);
+    ({ history, store, coreStart, middlewareSpy } = mockedContext);
     render = () => mockedContext.render(<HostList />);
   });
 
@@ -132,6 +133,25 @@ describe('when on the hosts page', () => {
         expect(flyout).not.toBeNull();
       });
     });
+    it('should display policy status value as a link', async () => {
+      const renderResult = render();
+      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusLink).not.toBeNull();
+      expect(policyStatusLink.textContent).toEqual('Successful');
+      expect(policyStatusLink.getAttribute('href')).toEqual(
+        '?selected_host=1&show=policy_response'
+      );
+    });
+    it('should update the URL when policy status link is clicked', async () => {
+      const renderResult = render();
+      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
+      const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+      reactTestingLibrary.act(() => {
+        fireEvent.click(policyStatusLink);
+      });
+      const changedUrlAction = await userChangedUrlChecker;
+      expect(changedUrlAction.payload.search).toEqual('?selected_host=1&show=policy_response');
+    });
     it('should include the link to logs', async () => {
       const renderResult = render();
       const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
@@ -152,6 +172,49 @@ describe('when on the hosts page', () => {
 
       it('should navigate to logs without full page refresh', async () => {
         expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
+      });
+    });
+    describe('when showing host Policy Response', () => {
+      let renderResult: ReturnType<typeof render>;
+      beforeEach(async () => {
+        renderResult = render();
+        const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          fireEvent.click(policyStatusLink);
+        });
+        await userChangedUrlChecker;
+      });
+      it('should hide the host details panel', async () => {
+        const hostDetailsFlyout = await renderResult.queryByTestId('hostDetailsFlyoutBody');
+        expect(hostDetailsFlyout).toBeNull();
+      });
+      it('should display policy response sub-panel', async () => {
+        expect(
+          await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutHeader')
+        ).not.toBeNull();
+        expect(
+          await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutBody')
+        ).not.toBeNull();
+      });
+      it('should include the sub-panel title', async () => {
+        expect(
+          (await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutTitle')).textContent
+        ).toBe('Policy Response');
+      });
+      it('should include the back to details link', async () => {
+        const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
+        expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
+        expect(subHeaderBackLink.getAttribute('href')).toBe('?selected_host=1');
+      });
+      it('should update URL when back to details link is clicked', async () => {
+        const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          fireEvent.click(subHeaderBackLink);
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual('?selected_host=1');
       });
     });
   });

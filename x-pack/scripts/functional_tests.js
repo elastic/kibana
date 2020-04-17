@@ -47,6 +47,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/licensing_plugin/config.ts'),
   require.resolve('../test/licensing_plugin/config.public.ts'),
   require.resolve('../test/licensing_plugin/config.legacy.ts'),
+  require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
 ];
 
 require('@kbn/plugin-helpers').babelRegister();
