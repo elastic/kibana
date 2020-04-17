@@ -4,39 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Transform } from 'stream';
-import { has, isString } from 'lodash/fp';
 import { ImportRuleAlertRest } from '../types';
 import {
   createSplitStream,
   createMapStream,
-  createFilterStream,
   createConcatStream,
 } from '../../../../../../../../src/legacy/utils/streams';
 import { importRulesSchema } from '../routes/schemas/import_rules_schema';
 import { BadRequestError } from '../errors/bad_request_error';
-
-export interface RulesObjectsExportResultDetails {
-  /** number of successfully exported objects */
-  exportedCount: number;
-}
-
-export const parseNdjsonStrings = (): Transform => {
-  return createMapStream((ndJsonStr: string) => {
-    if (isString(ndJsonStr) && ndJsonStr.trim() !== '') {
-      try {
-        return JSON.parse(ndJsonStr);
-      } catch (err) {
-        return err;
-      }
-    }
-  });
-};
-
-export const filterExportedCounts = (): Transform => {
-  return createFilterStream<ImportRuleAlertRest | RulesObjectsExportResultDetails>(
-    obj => obj != null && !has('exported_count', obj)
-  );
-};
+import {
+  parseNdjsonStrings,
+  filterExportedCounts,
+  createLimitStream,
+} from '../../../utils/read_stream/create_stream_from_ndjson';
 
 export const validateRules = (): Transform => {
   return createMapStream((obj: ImportRuleAlertRest) => {
@@ -50,21 +30,6 @@ export const validateRules = (): Transform => {
     } else {
       return obj;
     }
-  });
-};
-
-// Adaptation from: saved_objects/import/create_limit_stream.ts
-export const createLimitStream = (limit: number): Transform => {
-  let counter = 0;
-  return new Transform({
-    objectMode: true,
-    async transform(obj, _, done) {
-      if (counter >= limit) {
-        return done(new Error(`Can't import more than ${limit} rules`));
-      }
-      counter++;
-      done(undefined, obj);
-    },
   });
 };
 

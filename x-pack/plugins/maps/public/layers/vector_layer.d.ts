@@ -9,6 +9,7 @@ import { AbstractLayer } from './layer';
 import { IVectorSource } from './sources/vector_source';
 import {
   MapFilters,
+  LayerDescriptor,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
 } from '../../common/descriptor_types';
@@ -20,7 +21,7 @@ import { SyncContext } from '../actions/map_actions';
 
 type VectorLayerArguments = {
   source: IVectorSource;
-  joins: IJoin[];
+  joins?: IJoin[];
   layerDescriptor: VectorLayerDescriptor;
 };
 
@@ -28,26 +29,43 @@ export interface IVectorLayer extends ILayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];
+  getSource(): IVectorSource;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static createDescriptor(
-    options: VectorLayerArguments,
-    mapColors: string[]
+    options: Partial<LayerDescriptor>,
+    mapColors?: string[]
   ): VectorLayerDescriptor;
 
   protected readonly _source: IVectorSource;
   protected readonly _style: IVectorStyle;
 
   constructor(options: VectorLayerArguments);
-
+  getLayerTypeIconName(): string;
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];
+  _syncSourceStyleMeta(
+    syncContext: SyncContext,
+    source: IVectorSource,
+    style: IVectorStyle
+  ): Promise<void>;
+  _syncSourceFormatters(
+    syncContext: SyncContext,
+    source: IVectorSource,
+    style: IVectorStyle
+  ): Promise<void>;
+  syncLayerWithMB(mbMap: unknown): void;
   _getSearchFilters(
     dataFilters: MapFilters,
     source: IVectorSource,
     style: IVectorStyle
   ): VectorSourceRequestMeta;
   _syncData(syncContext: SyncContext, source: IVectorSource, style: IVectorStyle): Promise<void>;
+  ownsMbSourceId(sourceId: string): boolean;
+  ownsMbLayerId(sourceId: string): boolean;
+  _setMbPointsProperties(mbMap: unknown, mvtSourceLayer?: string): void;
+  _setMbLinePolygonProperties(mbMap: unknown, mvtSourceLayer?: string): void;
+  getSource(): IVectorSource;
 }

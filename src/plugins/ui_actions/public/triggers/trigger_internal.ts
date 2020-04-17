@@ -55,13 +55,6 @@ export class TriggerInternal<T extends TriggerId> {
     action: Action<TriggerContextMapping[T]>,
     context: TriggerContextMapping[T]
   ) {
-    const href = action.getHref && action.getHref(context);
-
-    if (href) {
-      window.location.href = href;
-      return;
-    }
-
     await action.execute(context);
   }
 

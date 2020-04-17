@@ -26,9 +26,13 @@ export class DataRequest {
   }
 
   getMeta(): DataMeta {
-    return this.hasData()
-      ? _.get(this._descriptor, 'dataMeta', {})
-      : _.get(this._descriptor, 'dataMetaAtStart', {});
+    if (this._descriptor.dataMetaAtStart) {
+      return this._descriptor.dataMetaAtStart;
+    } else if (this._descriptor.dataMeta) {
+      return this._descriptor.dataMeta;
+    } else {
+      return {};
+    }
   }
 
   hasData(): boolean {
