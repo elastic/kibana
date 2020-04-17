@@ -9,7 +9,8 @@
     "data",
     "fileUpload",
     "uiActions",
-    "navigation"
+    "navigation",
+    "visualizations"
   ],
   "ui": true
 }

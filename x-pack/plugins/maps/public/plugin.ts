@@ -34,6 +34,7 @@ import {
   // @ts-ignore
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
+import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -97,6 +98,7 @@ export class MapsPlugin
 
     plugins.inspector.registerView(MapView);
     plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    plugins.visualizations.registerAlias(getMapsVisTypeAlias());
   }
 
   public start(core: CoreStart, plugins: any) {

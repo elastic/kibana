@@ -76,7 +76,6 @@ export function maps(kibana) {
       },
       mappings,
       migrations,
-      hacks: ['plugins/maps/register_vis_type_alias'],
     },
     config(Joi) {
       return Joi.object({
