@@ -1,8 +1,0 @@
-{
-  "id": "core_config_schema",
-  "version": "0.0.1",
-  "kibanaVersion": "kibana",
-  "configPath": ["core_config_schema"],
-  "server": true,
-  "ui": false
-}
