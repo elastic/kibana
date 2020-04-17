@@ -104,8 +104,8 @@ const providersConfigSchema = schema.object(
   {
     validate(config) {
       const checks = { sameOrder: new Map<number, string>(), sameName: new Map<string, string>() };
-      for (const [providerType, providerGroup] of Object.entries<any>(config)) {
-        for (const [providerName, { enabled, order }] of Object.entries<any>(providerGroup ?? {})) {
+      for (const [providerType, providerGroup] of Object.entries(config)) {
+        for (const [providerName, { enabled, order }] of Object.entries(providerGroup ?? {})) {
           if (!enabled) {
             continue;
           }

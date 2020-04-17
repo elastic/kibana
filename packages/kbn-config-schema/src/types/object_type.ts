@@ -57,10 +57,7 @@ interface UnknownOptions {
   unknowns?: 'allow' | 'ignore' | 'forbid';
 }
 
-export type ObjectTypeOptions<P extends Props = any> = TypeOptions<
-  { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } &
-    { [K in keyof RequiredProperties<P>]: TypeOf<P[K]> }
-> &
+export type ObjectTypeOptions<P extends Props = any> = TypeOptions<ObjectResultType<P>> &
   UnknownOptions;
 
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
