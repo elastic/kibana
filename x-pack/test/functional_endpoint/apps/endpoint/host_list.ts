@@ -167,7 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           '',
           '0',
           '00000000-0000-0000-0000-000000000000',
-          'active',
+          'Successful',
           '10.101.149.262606:a000:ffc0:39:11ef:37b9:3371:578c',
           'rezzani-7.example.com',
           '6.8.0',
