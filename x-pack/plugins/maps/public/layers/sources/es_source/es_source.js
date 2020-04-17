@@ -9,10 +9,8 @@ import {
   getAutocompleteService,
   fetchSearchSourceAndRecordWithInspector,
   getIndexPatternService,
-  getSearchService,
   getTimeFilter,
-  getInjectedMetadata,
-  getUiSettings,
+  getSearchSource,
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import _ from 'lodash';
@@ -23,7 +21,6 @@ import { copyPersistentState } from '../../../reducers/util';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../es_geo_grid_source/geo_tile_utils';
-import { getSearchSourceType } from '../../../../../../../src/plugins/data/public';
 
 export class AbstractESSource extends AbstractVectorSource {
   constructor(descriptor, inspectorAdapters) {
@@ -129,12 +126,7 @@ export class AbstractESSource extends AbstractVectorSource {
       allFilters.push(getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters));
     }
 
-    const SearchSource = getSearchSourceType({
-      search: getSearchService(),
-      injectedMetadata: getInjectedMetadata(),
-      uiSettings: getUiSettings(),
-    });
-
+    const SearchSource = getSearchSource();
     const searchSource = new SearchSource(initialSearchContext);
 
     searchSource.setField('index', indexPattern);
@@ -304,8 +296,9 @@ export class AbstractESSource extends AbstractVectorSource {
     }, {});
 
     const indexPattern = await this.getIndexPattern();
-    const { SearchSource } = getSearchService();
+    const SearchSource = getSearchSource();
     const searchSource = new SearchSource();
+
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
     searchSource.setField('aggs', aggs);

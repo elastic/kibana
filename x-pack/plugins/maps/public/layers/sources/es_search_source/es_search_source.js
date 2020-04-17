@@ -10,7 +10,7 @@ import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
-import { getSearchService, getInjectedMetadata, getUiSettings } from '../../../kibana_services';
+import { getSearchSource } from '../../../kibana_services';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { VectorLayer } from '../../vector_layer';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
@@ -33,7 +33,6 @@ import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { getField, addFieldToDSL } from '../../util/es_agg_utils';
 import { registerSource } from '../source_registry';
-import { getSearchSourceType } from '../../../../../../../src/plugins/data/public';
 
 const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -418,12 +417,7 @@ export class ESSearchSource extends AbstractESSource {
       return {};
     }
 
-    const SearchSource = getSearchSourceType({
-      search: getSearchService(),
-      injectedMetadata: getInjectedMetadata(),
-      uiSettings: getUiSettings(),
-    });
-
+    const SearchSource = getSearchSource();
     const searchSource = new SearchSource();
 
     searchSource.setField('index', indexPattern);

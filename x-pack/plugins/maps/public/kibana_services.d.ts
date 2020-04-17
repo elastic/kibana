@@ -32,6 +32,7 @@ export function getNavigation(): any;
 export function getCoreI18n(): any;
 export function getSearchService(): any;
 export function getInjectedMetadata(): any;
+export function getSearchSource(): any;
 
 export function setLicenseId(args: unknown): void;
 export function setInspector(args: unknown): void;

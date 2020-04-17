@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { esFilters, search } from '../../../../src/plugins/data/public';
+import { esFilters, search, getSearchSourceType } from '../../../../src/plugins/data/public';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 const { getRequestInspectorStats, getResponseInspectorStats } = search;
@@ -144,3 +144,11 @@ export const getNavigation = () => navigation;
 let coreI18n;
 export const setCoreI18n = kibanaCoreI18n => (coreI18n = kibanaCoreI18n);
 export const getCoreI18n = () => coreI18n;
+
+export const getSearchSource = () => {
+  return getSearchSourceType({
+    uiSettings,
+    search: dataSearchService,
+    injectedMetadata,
+  });
+};
