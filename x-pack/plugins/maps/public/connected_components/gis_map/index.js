@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { GisMap } from './view';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { exitFullScreen } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
@@ -18,7 +18,7 @@ import {
   getQueryableUniqueIndexPatternIds,
   isToolbarOverlayHidden,
 } from '../../selectors/map_selectors';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getCoreChrome } from '../../kibana_services';
 
 function mapStateToProps(state = {}) {

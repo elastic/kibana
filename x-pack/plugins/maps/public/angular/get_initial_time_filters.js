@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getUiSettings } from '../kibana_services';
 
 export function getInitialTimeFilters({ mapStateJSON, globalState = {} }) {

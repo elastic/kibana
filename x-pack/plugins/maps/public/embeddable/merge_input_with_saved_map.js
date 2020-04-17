@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
 
 const MAP_EMBEDDABLE_INPUT_KEYS = [

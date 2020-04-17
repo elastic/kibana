@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { DRAW_TYPE } from '../../../../../../../legacy/plugins/maps/common/constants';
+import { DRAW_TYPE } from '../../../../../common/constants';
 import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { DrawCircle } from './draw_circle';
@@ -15,7 +15,6 @@ import {
   createSpatialFilterWithGeometry,
   getBoundingBoxGeometry,
   roundCoordinates,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../elasticsearch_geo_utils';
 import { DrawTooltip } from './draw_tooltip';
 

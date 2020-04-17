@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getToasts } from '../kibana_services';
 import {
   EuiTitle,

@@ -12,14 +12,14 @@ import {
   removeOrphanedSourcesAndLayers,
   addSpritesheetToMap,
 } from './utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getGlyphUrl, isRetina } from '../../../meta';
 import {
   DECIMAL_DEGREES_PRECISION,
   MAX_ZOOM,
   MIN_ZOOM,
   ZOOM_PRECISION,
-} from '../../../../../../legacy/plugins/maps/common/constants';
+} from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
@@ -28,12 +28,8 @@ import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { DrawControl } from './draw_control';
 import { TooltipControl } from './tooltip_control';
-import {
-  clampToLatBounds,
-  clampToLonBounds,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../elasticsearch_geo_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { clampToLatBounds, clampToLonBounds } from '../../../elasticsearch_geo_utils';
+
 import { getInjectedVarFunc } from '../../../kibana_services';
 
 mapboxgl.workerUrl = mbWorkerUrl;

@@ -14,7 +14,7 @@ import { WhereExpression } from './where_expression';
 import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
 
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getIndexPatternService } from '../../../../kibana_services';
 
 export class Join extends Component {

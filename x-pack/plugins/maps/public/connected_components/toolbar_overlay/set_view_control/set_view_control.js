@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MAX_ZOOM, MIN_ZOOM } from '../../../../../../legacy/plugins/maps/common/constants';
+import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 
 function getViewString(lat, lon, zoom) {
   return `${lat},${lon},${zoom}`;

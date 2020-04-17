@@ -6,30 +6,26 @@
 
 import { createSelector } from 'reselect';
 import _ from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { TileLayer } from '../layers/tile_layer';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { VectorTileLayer } from '../layers/vector_tile_layer';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { VectorLayer } from '../layers/vector_layer';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { HeatmapLayer } from '../layers/heatmap_layer';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { BlendedVectorLayer } from '../layers/blended_vector_layer';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getTimeFilter } from '../kibana_services';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../layers/tiled_vector_layer';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import {
-  copyPersistentState,
-  TRACKED_LAYER_DESCRIPTOR,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../reducers/util';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
+
 import { InnerJoin } from '../layers/joins/inner_join';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getSourceByType } from '../layers/sources/source_registry';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {

@@ -14,10 +14,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  DRAW_TYPE,
-  ES_GEO_FIELD_TYPE,
-} from '../../../../../../legacy/plugins/maps/common/constants';
+import { DRAW_TYPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/distance_filter_form';

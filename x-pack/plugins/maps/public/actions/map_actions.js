@@ -20,21 +20,20 @@ import {
   getQuery,
   getDataRequestDescriptor,
 } from '../selectors/map_selectors';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { FLYOUT_STATE } from '../reducers/ui';
 import {
   cancelRequest,
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../reducers/non_serializable_instances';
 import { updateFlyout } from './ui_actions';
 import {
   FEATURE_ID_PROPERTY_NAME,
   LAYER_TYPE,
   SOURCE_DATA_ID_ORIGIN,
-} from '../../../../legacy/plugins/maps/common/constants';
+} from '../../common/constants';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';

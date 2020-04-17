@@ -30,7 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getData, getCore } from '../../kibana_services';
 
 const localStorage = new Storage(window.localStorage);

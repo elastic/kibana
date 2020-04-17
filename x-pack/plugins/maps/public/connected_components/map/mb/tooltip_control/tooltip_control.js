@@ -6,10 +6,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import {
-  FEATURE_ID_PROPERTY_NAME,
-  LON_INDEX,
-} from '../../../../../../../legacy/plugins/maps/common/constants';
+import { FEATURE_ID_PROPERTY_NAME, LON_INDEX } from '../../../../../common/constants';
 import { TooltipPopover } from './tooltip_popover';
 
 function justifyAnchorLocation(mbLngLat, targetFeature) {

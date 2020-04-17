@@ -14,10 +14,10 @@ import {
   EuiFormErrorText,
   EuiFormHelpText,
 } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { MetricsEditor } from '../../../../components/metrics_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AGG_TYPE } from '../../../../../../../legacy/plugins/maps/common/constants';
+import { AGG_TYPE } from '../../../../../common/constants';
 
 export class MetricsExpression extends Component {
   state = {

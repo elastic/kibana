@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { updateFlyout } from '../../../actions/ui_actions';
 import { hasDirtyState } from '../../../selectors/map_selectors';

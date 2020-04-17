@@ -6,12 +6,12 @@
 
 import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { FLYOUT_STATE, INDEXING_STAGE } from '../../reducers/ui';
 import { updateFlyout, updateIndexingStage } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIndexingStage } from '../../selectors/ui_selectors';
 import { getMapColors } from '../../selectors/map_selectors';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import {
   setTransientLayer,

@@ -8,11 +8,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  getUiSettings,
-  getData,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../kibana_services';
+import { getUiSettings, getData } from '../../../../kibana_services';
 
 export class WhereExpression extends Component {
   state = {

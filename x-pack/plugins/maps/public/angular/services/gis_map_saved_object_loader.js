@@ -13,7 +13,6 @@ import {
   getIndexPatternService,
   getCoreOverlays,
   getData,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../kibana_services';
 
 export const getMapsSavedObjectLoader = _.once(function() {

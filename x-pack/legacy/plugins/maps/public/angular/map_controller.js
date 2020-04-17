@@ -28,7 +28,9 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
 import { Provider } from 'react-redux';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { GisMap } from '../../../../../plugins/maps/public/connected_components/gis_map';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { addHelpMenuToAppChrome } from '../../../../../plugins/maps/public/help_menu_util';
 import {
   setSelectedLayer,
@@ -37,6 +39,7 @@ import {
   replaceLayerList,
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/actions/map_actions';
 import {
   DEFAULT_IS_LAYER_TOC_OPEN,
@@ -49,7 +52,9 @@ import {
   setReadOnly,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/actions/ui_actions';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIsFullScreen } from '../../../../../plugins/maps/public/selectors/ui_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util';
@@ -57,14 +62,19 @@ import {
   getQueryableUniqueIndexPatternIds,
   hasDirtyState,
   getLayerListRaw,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/selectors/map_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInitialLayers } from '../../../../../plugins/maps/public/angular/get_initial_layers';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInitialQuery } from '../../../../../plugins/maps/public/angular/get_initial_query';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInitialTimeFilters } from '../../../../../plugins/maps/public/angular/get_initial_time_filters';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInitialRefreshConfig } from '../../../../../plugins/maps/public/angular/get_initial_refresh_config';
-import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../common/constants';
+import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../../../../plugins/maps/common/constants';
 import { npSetup, npStart } from 'ui/new_platform';
 import { esFilters } from '../../../../../../src/plugins/data/public';
 import {

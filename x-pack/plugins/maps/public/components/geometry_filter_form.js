@@ -17,11 +17,8 @@ import {
   EuiFormErrorText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ES_GEO_FIELD_TYPE,
-  ES_SPATIAL_RELATIONS,
-} from '../../../../legacy/plugins/maps/common/constants';
-import { getEsSpatialRelationLabel } from '../../../../legacy/plugins/maps/common/i18n_getters';
+import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../common/constants';
+import { getEsSpatialRelationLabel } from '../../common/i18n_getters';
 import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
 
 export class GeometryFilterForm extends Component {

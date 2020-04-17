@@ -14,9 +14,8 @@ import { AddLayerPanel } from '../layer_addpanel';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
-import { ES_GEO_FIELD_TYPE } from '../../../../../legacy/plugins/maps/common/constants';
+import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';

@@ -13,7 +13,7 @@ import {
   updateLayerMinZoom,
   updateLayerAlpha,
 } from '../../../actions/map_actions';
-import { MAX_ZOOM } from '../../../../../../../plugins/maps/common/constants';
+import { MAX_ZOOM } from '../../../../common/constants';
 
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);

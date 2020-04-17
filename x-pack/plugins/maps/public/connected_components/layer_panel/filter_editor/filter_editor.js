@@ -20,12 +20,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  getIndexPatternService,
-  getUiSettings,
-  getData,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../kibana_services';
+import { getIndexPatternService, getUiSettings, getData } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 
 export class FilterEditor extends Component {

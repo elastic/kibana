@@ -10,19 +10,14 @@ import { IIndexPattern } from 'src/plugins/data/public';
 // @ts-ignore
 import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
 import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
-import {
-  getIndexPatternService,
-  getHttp,
-  getMapsCapabilities,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../kibana_services';
+import { getIndexPatternService, getHttp, getMapsCapabilities } from '../kibana_services';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../src/plugins/embeddable/public';
 
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { createMapStore } from '../reducers/store';
 import { addLayerWithoutDataSync } from '../actions/map_actions';
 import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';

@@ -20,7 +20,7 @@ import {
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '../descriptor_types';
-import { MapSavedObjectAttributes } from '../../../../../plugins/maps/common/map_saved_object_type';
+import { MapSavedObjectAttributes } from '../map_saved_object_type';
 
 const GROUP_BY_DELIMITER = '_groupby_';
 

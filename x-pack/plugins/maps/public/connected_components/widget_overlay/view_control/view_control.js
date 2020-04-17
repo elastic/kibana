@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React, { Fragment } from 'react';
 import { EuiText } from '@elastic/eui';
-import { DECIMAL_DEGREES_PRECISION } from '../../../../../../legacy/plugins/maps/common/constants';
+import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function ViewControl({ mouseCoordinates, zoom }) {

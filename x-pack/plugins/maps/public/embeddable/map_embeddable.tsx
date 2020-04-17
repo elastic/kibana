@@ -28,7 +28,7 @@ import {
 } from '../../../../../src/plugins/data/public';
 
 import { GisMap } from '../connected_components/gis_map';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { createMapStore, MapStore } from '../reducers/store';
 import {
   setGotoWithCenter,
@@ -50,13 +50,12 @@ import {
   getInspectorAdapters,
   setEventHandlers,
   EventHandlers,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getUiActions } from '../kibana_services';
 
 interface MapEmbeddableConfig {

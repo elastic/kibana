@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from 'react';
-import { LAT_INDEX, LON_INDEX } from '../../../../../../../legacy/plugins/maps/common/constants';
+import { LAT_INDEX, LON_INDEX } from '../../../../../common/constants';
 import { FeaturesTooltip } from '../../features_tooltip/features_tooltip';
 import { EuiPopover, EuiText } from '@elastic/eui';
 

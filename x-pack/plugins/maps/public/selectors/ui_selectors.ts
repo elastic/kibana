@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MapStoreState } from '../reducers/store';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { FLYOUT_STATE, INDEXING_STAGE } from '../reducers/ui';
 
 export const getFlyoutDisplay = ({ ui }: MapStoreState): FLYOUT_STATE => ui.flyoutDisplay;

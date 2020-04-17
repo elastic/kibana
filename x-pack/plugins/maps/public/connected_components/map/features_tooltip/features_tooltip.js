@@ -8,10 +8,7 @@ import React, { Fragment } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FeatureProperties } from './feature_properties';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  GEO_JSON_TYPE,
-  ES_GEO_FIELD_TYPE,
-} from '../../../../../../legacy/plugins/maps/common/constants';
+import { GEO_JSON_TYPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
 import { TooltipHeader } from './tooltip_header';
 

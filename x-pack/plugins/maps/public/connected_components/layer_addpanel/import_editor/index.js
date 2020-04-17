@@ -6,9 +6,9 @@
 
 import { connect } from 'react-redux';
 import { ImportEditor } from './view';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { INDEXING_STAGE } from '../../../reducers/ui';
 import { updateIndexingStage } from '../../../actions/ui_actions';
 import { getIndexingStage } from '../../../selectors/ui_selectors';
