@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface IEmptyStatesProps {
-  appSearchUrl: string;
-}
+export { enterpriseSearchBreadcrumbs } from './generate_breadcrumbs';
+export { appSearchBreadcrumbs } from './generate_breadcrumbs';
+export { SetAppSearchBreadcrumbs } from './set_breadcrumbs';

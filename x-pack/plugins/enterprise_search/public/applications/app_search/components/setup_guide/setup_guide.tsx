@@ -23,12 +23,15 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 
+import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+
 import GettingStarted from '../../assets/getting_started.png';
 import './setup_guide.scss';
 
-export const SetupGuide: React.FC<> = () => {
+export const SetupGuide: React.FC<> = props => {
   return (
     <EuiPage className="setup-guide">
+      <SetBreadcrumbs {...props} text="Setup Guide" />
       <EuiPageSideBar>
         <EuiText color="subdued" size="s">
           <strong>Setup Guide</strong>
