@@ -14,6 +14,7 @@ jest.mock('@elastic/eui', () => ({
   EuiComboBox: (props: any) => (
     <input
       data-test-subj={props['data-test-subj'] || 'mockComboBox'}
+      data-currentvalue={props.selectedOptions}
       onChange={async (syntheticEvent: any) => {
         props.onChange([syntheticEvent['0']]);
       }}
@@ -32,10 +33,15 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 const createActions = (testBed: TestBed<TestSubjects>) => {
-  const { find, waitFor, form, component } = testBed;
+  const { find, exists, waitFor, form, component } = testBed;
 
   const addField = async (name: string, type: string) => {
     const currentCount = find('fieldsListItem').length;
+
+    if (!exists('createFieldForm')) {
+      find('addFieldButton').simulate('click');
+      await waitFor('createFieldForm');
+    }
 
     form.setInputValue('nameParameterInput', name);
     find('createFieldForm.fieldType').simulate('change', [
@@ -87,11 +93,20 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     return value;
   };
 
+  const getComboBoxValue = (testSubject: TestSubjects) => {
+    const value = find(testSubject).props()['data-currentvalue'];
+    if (value === undefined) {
+      return [];
+    }
+    return value.map(({ label }: any) => label);
+  };
+
   return {
     selectTab,
     addField,
     updateJsonEditor,
     getJsonEditorValue,
+    getComboBoxValue,
   };
 };
 
@@ -117,6 +132,7 @@ export type TestSubjects =
   | 'formTab'
   | 'mappingsEditor'
   | 'fieldsListItem'
+  | 'fieldsListItem.fieldName'
   | 'fieldName'
   | 'mappingTypesDetectedCallout'
   | 'documentFields'
@@ -126,7 +142,13 @@ export type TestSubjects =
   | 'advancedConfiguration.numericDetection.input'
   | 'advancedConfiguration.dynamicMappingsToggle'
   | 'advancedConfiguration.dynamicMappingsToggle.input'
+  | 'advancedConfiguration.metaField'
+  | 'advancedConfiguration.routingRequiredToggle.input'
+  | 'sourceField.includesField'
+  | 'sourceField.excludesField'
   | 'dynamicTemplatesEditor'
   | 'nameParameterInput'
+  | 'addFieldButton'
+  | 'createFieldForm'
   | 'createFieldForm.fieldType'
   | 'createFieldForm.addButton';

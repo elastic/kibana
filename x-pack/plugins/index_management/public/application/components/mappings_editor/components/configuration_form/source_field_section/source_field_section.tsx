@@ -65,7 +65,7 @@ export const SourceFieldSection = () => {
   );
 
   const renderFormFields = () => (
-    <>
+    <div data-test-subj="sourceField">
       <UseField path="sourceField.includes">
         {({ label, helpText, value, setValue }) => (
           <EuiFormRow label={label} helpText={helpText} fullWidth>
@@ -89,6 +89,7 @@ export const SourceFieldSection = () => {
                 setValue([...(value as ComboBoxOption[]), newOption]);
               }}
               fullWidth
+              data-test-subj="includesField"
             />
           </EuiFormRow>
         )}
@@ -119,11 +120,12 @@ export const SourceFieldSection = () => {
                 setValue([...(value as ComboBoxOption[]), newOption]);
               }}
               fullWidth
+              data-test-subj="excludesField"
             />
           </EuiFormRow>
         )}
       </UseField>
-    </>
+    </div>
   );
 
   return (

@@ -8,9 +8,44 @@ import { act } from 'react-dom/test-utils';
 import { componentHelpers, MappingsEditorTestBed, nextTick, getRandomString } from './helpers';
 
 const { setup } = componentHelpers.mappingsEditor;
-const mockOnUpdate = () => undefined;
+const onUpdateHandler = jest.fn();
+
+const getDataForwarded = async () => {
+  const mockCalls = onUpdateHandler.mock.calls;
+
+  if (mockCalls.length === 0) {
+    throw new Error(
+      `Can't access data forwarded as the onUpdate() prop handler hasn't been called.`
+    );
+  }
+
+  const [arg] = mockCalls[mockCalls.length - 1];
+  const { isValid, validate, getData } = arg;
+
+  let isMappingsValid: boolean = false;
+  let data: any;
+
+  await act(async () => {
+    isMappingsValid = isValid === undefined ? await validate() : isValid;
+    data = getData(isMappingsValid);
+  });
+
+  return {
+    isValid: isMappingsValid,
+    data,
+  };
+};
+
+const expectDataUpdated = async (expected: any) => {
+  const { data } = await getDataForwarded();
+  expect(data).toEqual(expected);
+};
 
 describe('<MappingsEditor />', () => {
+  afterEach(() => {
+    onUpdateHandler.mockReset();
+  });
+
   describe('multiple mappings detection', () => {
     test('should show a warning when multiple mappings are detected', async () => {
       const defaultValue = {
@@ -29,7 +64,7 @@ describe('<MappingsEditor />', () => {
           },
         },
       };
-      const testBed = await setup({ onUpdate: mockOnUpdate, defaultValue });
+      const testBed = await setup({ onUpdate: onUpdateHandler, defaultValue });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
@@ -45,7 +80,7 @@ describe('<MappingsEditor />', () => {
           },
         },
       };
-      const testBed = await setup({ onUpdate: mockOnUpdate, defaultValue });
+      const testBed = await setup({ onUpdate: onUpdateHandler, defaultValue });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
@@ -175,52 +210,36 @@ describe('<MappingsEditor />', () => {
   });
 
   describe('component props', () => {
+    /**
+     * Note: the "indexSettings" prop will be tested along with the "analyzer" parameter on a field,
+     * as it is the only place where it is consumed by the mappings editor.
+     */
     const defaultMappings: any = {
       dynamic: true,
-      numeric_detection: true,
+      numeric_detection: false,
       date_detection: true,
-      properties: {},
-      dynamic_templates: [],
+      properties: {
+        title: { type: 'text' },
+        address: {
+          type: 'object',
+          properties: {
+            street: { type: 'text' },
+            city: { type: 'text' },
+          },
+        },
+      },
+      dynamic_templates: [{ initial: 'value' }],
       _source: {
         enabled: true,
-        includes: [],
-        excludes: [],
+        includes: ['field1', 'field2'],
+        excludes: ['field3'],
       },
-      _meta: {},
+      _meta: {
+        some: 'metaData',
+      },
       _routing: {
-        required: true,
+        required: false,
       },
-    };
-    const onUpdateHandler = jest.fn();
-
-    const getDataForwarded = async () => {
-      const mockCalls = onUpdateHandler.mock.calls;
-      if (mockCalls.length === 0) {
-        throw new Error(
-          `Can't access data forwarded as the onUpdate() prop handler hasn't been called.`
-        );
-      }
-
-      const [arg] = mockCalls[mockCalls.length - 1];
-      const { isValid, validate, getData } = arg;
-
-      let isMappingsValid: boolean = false;
-      let data: any;
-
-      await act(async () => {
-        isMappingsValid = isValid === undefined ? await validate() : isValid;
-        data = getData(isMappingsValid);
-      });
-
-      return {
-        isValid: isMappingsValid,
-        data,
-      };
-    };
-
-    const expectDataUpdated = async (expected: any) => {
-      const { data } = await getDataForwarded();
-      expect(data).toEqual(expected);
     };
 
     let testBed: MappingsEditorTestBed;
@@ -229,11 +248,64 @@ describe('<MappingsEditor />', () => {
       testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
     });
 
-    afterEach(() => {
-      onUpdateHandler.mockReset();
+    test('props.defaultValue => should prepopulate the editor data', async () => {
+      const {
+        actions: { selectTab, getJsonEditorValue, getComboBoxValue },
+        find,
+      } = testBed;
+
+      /**
+       * Mapped fields
+       */
+      expect(find('fieldsListItem').length).toEqual(Object.keys(defaultMappings.properties).length);
+
+      const fields = find('fieldsListItem.fieldName').map(item => item.text());
+      expect(fields).toEqual(Object.keys(defaultMappings.properties).sort());
+
+      /**
+       * Dynamic templates
+       */
+      await act(async () => {
+        await selectTab('templates');
+      });
+
+      const templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
+      expect(templatesValue).toEqual(defaultMappings.dynamic_templates);
+
+      /**
+       * Advanced settings
+       */
+      await act(async () => {
+        await selectTab('advanced');
+      });
+
+      const isDynamicMappingsEnabled = find(
+        'advancedConfiguration.dynamicMappingsToggle.input'
+      ).props()['aria-checked'];
+      expect(isDynamicMappingsEnabled).toBe(defaultMappings.dynamic);
+
+      const isNumericDetectionEnabled = find(
+        'advancedConfiguration.numericDetection.input'
+      ).props()['aria-checked'];
+      expect(isNumericDetectionEnabled).toBe(defaultMappings.numeric_detection);
+
+      expect(getComboBoxValue('sourceField.includesField')).toEqual(
+        defaultMappings._source.includes
+      );
+      expect(getComboBoxValue('sourceField.excludesField')).toEqual(
+        defaultMappings._source.excludes
+      );
+
+      const metaFieldValue = getJsonEditorValue('advancedConfiguration.metaField');
+      expect(metaFieldValue).toEqual(defaultMappings._meta);
+
+      const isRoutingRequired = find('advancedConfiguration.routingRequiredToggle.input').props()[
+        'aria-checked'
+      ];
+      expect(isRoutingRequired).toBe(defaultMappings._routing.required);
     });
 
-    test('onUpdate() => should forward the changes to the consumer component', async () => {
+    test('props.onUpdate() => should forward the changes to the consumer component', async () => {
       let updatedMappings = { ...defaultMappings };
 
       const {
@@ -248,7 +320,10 @@ describe('<MappingsEditor />', () => {
       const newField = { name: getRandomString(), type: 'text' };
       updatedMappings = {
         ...updatedMappings,
-        properties: { [newField.name]: { type: 'text' } },
+        properties: {
+          ...updatedMappings.properties,
+          [newField.name]: { type: 'text' },
+        },
       };
 
       await act(async () => {
@@ -292,10 +367,10 @@ describe('<MappingsEditor />', () => {
       updatedMappings = {
         ...updatedMappings,
         dynamic: 'strict',
+        date_detection: undefined,
+        dynamic_date_formats: undefined,
+        numeric_detection: undefined,
       };
-      delete updatedMappings.date_detection;
-      delete updatedMappings.dynamic_date_formats;
-      delete updatedMappings.numeric_detection;
 
       await expectDataUpdated(updatedMappings);
     });
