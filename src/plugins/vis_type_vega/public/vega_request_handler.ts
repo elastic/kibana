@@ -18,8 +18,8 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getSearchService } from '../../../../plugins/data/public/services';
-import { Filter, esQuery, TimeRange, Query } from '../../../../plugins/data/public';
+import { getSearchService } from '../../data/public/services';
+import { Filter, esQuery, TimeRange, Query } from '../../data/public';
 
 // @ts-ignore
 import { VegaParser } from './data_model/vega_parser';

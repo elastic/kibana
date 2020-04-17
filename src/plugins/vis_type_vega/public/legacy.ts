@@ -17,24 +17,22 @@
  * under the License.
  */
 
-import * as vega from 'vega-lib';
-import { VegaBaseView } from './vega_base_view';
+// import { PluginInitializerContext } from 'kibana/public';
+// import { npSetup, npStart } from 'ui/new_platform';
+// import { VegaPluginSetupDependencies, VegaPluginStartDependencies } from './plugin';
+// import { plugin } from '../../../legacy/core_plugins/vis_type_vega/public';
 
-export class VegaView extends VegaBaseView {
-  async _initViewCustomizations() {
-    // In some cases, Vega may be initialized twice... TBD
-    if (!this._$container) return;
+// const setupPlugins: Readonly<VegaPluginSetupDependencies> = {
+//   ...npSetup.plugins,
+//   visualizations: npSetup.plugins.visualizations,
+//   mapsLegacy: npSetup.plugins.mapsLegacy,
+// };
 
-    const view = new vega.View(vega.parse(this._parser.spec), this._vegaViewConfig);
-    this.setDebugValues(view, this._parser.spec, this._parser.vlspec);
+// const startPlugins: Readonly<VegaPluginStartDependencies> = {
+//   ...npStart.plugins,
+// };
 
-    view.warn = this.onWarn.bind(this);
-    view.error = this.onError.bind(this);
-    if (this._parser.useResize) this.updateVegaSize(view);
-    view.initialize(this._$container.get(0), this._$controls.get(0));
+// const pluginInstance = plugin({} as PluginInitializerContext);
 
-    if (this._parser.useHover) view.hover();
-
-    await this.setView(view);
-  }
-}
+// export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
+// export const start = pluginInstance.start(npStart.core, startPlugins);

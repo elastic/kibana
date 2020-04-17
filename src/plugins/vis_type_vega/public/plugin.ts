@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
-import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
+import { Plugin as DataPublicPlugin } from '../../data/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 import {
   setNotifications,
   setData,
@@ -30,8 +30,11 @@ import {
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
-import { IServiceSettings } from '../../../../plugins/maps_legacy/public';
+import { VisTypeVegaSetup } from '.';
+import { IServiceSettings } from '../../maps_legacy/public';
+import { ConfigSchema } from '../config';
+
+import './index.scss';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -58,18 +61,18 @@ export interface VegaPluginStartDependencies {
 
 /** @internal */
 export class VegaPlugin implements Plugin<Promise<void>, void> {
-  initializerContext: PluginInitializerContext;
+  initializerContext: PluginInitializerContext<ConfigSchema>;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
   public async setup(
     core: CoreSetup,
-    { data, expressions, visualizations, visTypeVega, mapsLegacy }: VegaPluginSetupDependencies
+    { data, expressions, visualizations, mapsLegacy }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
-      enableExternalUrls: visTypeVega.config.enableExternalUrls,
+      enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
       esShardTimeout: core.injectedMetadata.getInjectedVar('esShardTimeout') as number,
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });

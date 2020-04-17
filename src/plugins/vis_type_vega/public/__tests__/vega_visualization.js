@@ -45,14 +45,14 @@ import { createVegaTypeDefinition } from '../vega_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npStart } from 'ui/new_platform';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+import { BaseVisType } from '../../../visualizations/public/vis_types/base_vis_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
+import { ExprVis } from '../../../visualizations/public/expressions/vis';
 import { setInjectedVars } from '../services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
+import { setInjectedVarFunc } from '../../../maps_legacy/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
+import { ServiceSettings } from '../../../maps_legacy/public/map/service_settings';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;

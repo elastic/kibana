@@ -19,9 +19,9 @@
 
 import { SavedObjectsStart } from 'kibana/public';
 import { NotificationsStart } from 'src/core/public';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
-import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
-import { IUiSettingsClient } from '../../../../core/public';
+import { DataPublicPluginStart } from '../../data/public';
+import { createGetterSetter } from '../../kibana_utils/public';
+import { IUiSettingsClient } from '../../../core/public';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 
