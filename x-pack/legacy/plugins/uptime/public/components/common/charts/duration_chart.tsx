@@ -8,8 +8,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
-import { SeriesIdentifier } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
+import { Axis, Chart, Position, timeFormatter, Settings, SeriesIdentifier } from '@elastic/charts';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
@@ -27,7 +26,12 @@ interface DurationChartProps {
    */
   locationDurationLines: LocationDurationLine[];
 
+  /**
+   * To represent the loading spinner on chart
+   */
   loading: boolean;
+
+  hasMLJob: boolean;
 
   anomalies: AnomalyRecords | null;
 }
@@ -42,6 +46,7 @@ export const DurationChartComponent = ({
   locationDurationLines,
   anomalies,
   loading,
+  hasMLJob,
 }: DurationChartProps) => {
   const hasLines = locationDurationLines.length > 0;
   const [getUrlParams, updateUrlParams] = useUrlParams();

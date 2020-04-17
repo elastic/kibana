@@ -13,21 +13,24 @@ import {
   esFilters,
   IIndexPattern,
 } from '../../../../../../../../src/plugins/data/server';
-import { PartialFilter, RuleAlertParams } from '../types';
+import { PartialFilter, RuleAlertParams, Language } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
+import { buildQueryExceptions } from './build_exceptions_query';
 
 export const getQueryFilter = (
   query: string,
-  language: string,
+  language: Language,
   filters: PartialFilter[],
-  index: string[]
+  index: string[],
+  lists: RuleAlertParams['lists']
 ) => {
   const indexPattern = {
     fields: [],
     title: index.join(),
   } as IIndexPattern;
 
-  const queries: Query[] = [{ query, language }];
+  const queries: Query[] = buildQueryExceptions({ query, language, lists });
+
   const config = {
     allowLeadingWildcards: true,
     queryStringOptions: { analyze_wildcard: true },
@@ -45,18 +48,19 @@ export const getQueryFilter = (
 interface GetFilterArgs {
   type: RuleAlertParams['type'];
   filters: PartialFilter[] | undefined | null;
-  language: string | undefined | null;
+  language: Language | undefined | null;
   query: string | undefined | null;
   savedId: string | undefined | null;
   services: AlertServices;
   index: string[] | undefined | null;
+  lists: RuleAlertParams['lists'];
 }
 
 interface QueryAttributes {
   // NOTE: doesn't match Query interface
   query: {
     query: string;
-    language: string;
+    language: Language;
   };
   filters: PartialFilter[];
 }
@@ -69,11 +73,12 @@ export const getFilter = async ({
   services,
   type,
   query,
+  lists,
 }: GetFilterArgs): Promise<unknown> => {
   switch (type) {
     case 'query': {
       if (query != null && language != null && index != null) {
-        return getQueryFilter(query, language, filters || [], index);
+        return getQueryFilter(query, language, filters || [], index, lists);
       } else {
         throw new BadRequestError('query, filters, and index parameter should be defined');
       }
@@ -90,13 +95,14 @@ export const getFilter = async ({
             savedObject.attributes.query.query,
             savedObject.attributes.query.language,
             savedObject.attributes.filters,
-            index
+            index,
+            lists
           );
         } catch (err) {
           // saved object does not exist, so try and fall back if the user pushed
           // any additional language, query, filters, etc...
           if (query != null && language != null && index != null) {
-            return getQueryFilter(query, language, filters || [], index);
+            return getQueryFilter(query, language, filters || [], index, lists);
           } else {
             // user did not give any additional fall back mechanism for generating a rule
             // rethrow error for activity monitoring

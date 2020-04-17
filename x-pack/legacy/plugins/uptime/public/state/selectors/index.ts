@@ -102,3 +102,8 @@ export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: 
 export const indexStatusSelector = ({ indexStatus }: AppState) => {
   return indexStatus.indexStatus;
 };
+
+export const monitorListSelector = ({ monitorList, ui: { lastRefresh } }: AppState) => ({
+  monitorList,
+  lastRefresh,
+});
