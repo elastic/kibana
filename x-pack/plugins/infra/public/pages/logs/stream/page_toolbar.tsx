@@ -22,10 +22,12 @@ import { LogPositionState } from '../../../containers/logs/log_position';
 import { Source } from '../../../containers/source';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 
 export const LogsToolbar = () => {
-  const { createDerivedIndexPattern } = useContext(Source.Context);
-  const derivedIndexPattern = createDerivedIndexPattern('logs');
+  const { derivedIndexPattern } = useLogSourceContext();
+  // const { createDerivedIndexPattern } = useContext(Source.Context);
+  // const derivedIndexPattern = createDerivedIndexPattern('logs');
   const { availableTextScales, setTextScale, setTextWrap, textScale, textWrap } = useContext(
     LogViewConfiguration.Context
   );

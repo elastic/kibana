@@ -27,9 +27,11 @@ import { Source } from '../../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { source, sourceId, version } = useContext(Source.Context);
+  const { sourceConfiguration: source, sourceId } = useLogSourceContext();
+  // const { source, sourceId, version } = useContext(Source.Context);
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
@@ -73,7 +75,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           loading={isLoading}
         />
       ) : null}
-      <PageContent key={`${sourceId}-${version}`}>
+      <PageContent key={`${sourceId}-${source?.version}`}>
         <WithStreamItems>
           {({
             currentHighlightKey,

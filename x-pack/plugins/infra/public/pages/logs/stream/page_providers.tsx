@@ -14,10 +14,12 @@ import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/
 import { LogEntriesState } from '../../../containers/logs/log_entries';
 
 import { Source } from '../../../containers/source';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 
 const LogFilterStateProvider: React.FC = ({ children }) => {
-  const { createDerivedIndexPattern } = useContext(Source.Context);
-  const derivedIndexPattern = createDerivedIndexPattern('logs');
+  const { derivedIndexPattern } = useLogSourceContext();
+  // const { createDerivedIndexPattern } = useContext(Source.Context);
+  // const derivedIndexPattern = createDerivedIndexPattern('logs');
   return (
     <LogFilterState.Provider indexPattern={derivedIndexPattern}>
       <WithLogFilterUrlState />
@@ -27,7 +29,7 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
 };
 
 const LogEntriesStateProvider: React.FC = ({ children }) => {
-  const { sourceId } = useContext(Source.Context);
+  const { sourceId } = useLogSourceContext();
   const {
     startTimestamp,
     endTimestamp,
