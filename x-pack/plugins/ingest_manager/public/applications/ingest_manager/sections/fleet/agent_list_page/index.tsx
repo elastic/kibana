@@ -151,8 +151,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Table and search states
   const [search, setSearch] = useState(defaultKuery);
   const { pagination, pageSizeOptions, setPagination } = usePagination();
-  const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
-  const [areAllAgentsSelected, setAreAllAgentsSelected] = useState<boolean>(false);
 
   // Configs state (for filtering)
   const [isConfigsFilterOpen, setIsConfigsFilterOpen] = useState<boolean>(false);
@@ -245,47 +243,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           {host}
         </ConnectedLink>
       ),
-      footer: () => {
-        if (selectedAgents.length === agents.length && totalAgents > selectedAgents.length) {
-          return areAllAgentsSelected ? (
-            <FormattedMessage
-              id="xpack.ingestManager.agentList.allAgentsSelectedMessage"
-              defaultMessage="All {count} agents are selected. {clearSelectionLink}"
-              values={{
-                count: totalAgents,
-                clearSelectionLink: (
-                  <EuiLink onClick={() => setAreAllAgentsSelected(false)}>
-                    <FormattedMessage
-                      id="xpack.ingestManager.agentList.selectPageAgentsLinkText"
-                      defaultMessage="Select just this page"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.ingestManager.agentList.agentsOnPageSelectedMessage"
-              defaultMessage="{count, plural, one {# agent} other {# agents}} on this page are selected. {selectAllLink}"
-              values={{
-                count: selectedAgents.length,
-                selectAllLink: (
-                  <EuiLink onClick={() => setAreAllAgentsSelected(true)}>
-                    <FormattedMessage
-                      id="xpack.ingestManager.agentList.selectAllAgentsLinkText"
-                      defaultMessage="Select all {count} agents"
-                      values={{
-                        count: totalAgents,
-                      }}
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          );
-        }
-        return null;
-      },
     },
     {
       field: 'active',
@@ -424,47 +381,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         />
       )}
       <EuiFlexGroup alignItems={'center'}>
-        {selectedAgents.length ? (
-          <EuiFlexItem>
-            <AgentUnenrollProvider>
-              {unenrollAgentsPrompt => (
-                <EuiButton
-                  color="danger"
-                  onClick={() => {
-                    unenrollAgentsPrompt(
-                      areAllAgentsSelected ? search : selectedAgents.map(agent => agent.id),
-                      areAllAgentsSelected ? totalAgents : selectedAgents.length,
-                      () => {
-                        // Reload agents if on first page and no search query, otherwise
-                        // reset to first page and reset search, which will trigger a reload
-                        if (pagination.currentPage === 1 && !search) {
-                          agentsRequest.sendRequest();
-                        } else {
-                          setPagination({
-                            ...pagination,
-                            currentPage: 1,
-                          });
-                          setSearch('');
-                        }
-
-                        setAreAllAgentsSelected(false);
-                        setSelectedAgents([]);
-                      }
-                    );
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentList.unenrollButton"
-                    defaultMessage="Unenroll {count, plural, one {# agent} other {# agents}}"
-                    values={{
-                      count: areAllAgentsSelected ? totalAgents : selectedAgents.length,
-                    }}
-                  />
-                </EuiButton>
-              )}
-            </AgentUnenrollProvider>
-          </EuiFlexItem>
-        ) : null}
         <EuiFlexItem grow={4}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={6}>
@@ -609,14 +525,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         items={totalAgents ? agents : []}
         itemId="id"
         columns={columns}
-        isSelectable={true}
-        selection={{
-          selectable: (agent: Agent) => agent.active,
-          onSelectionChange: (newSelectedAgents: Agent[]) => {
-            setSelectedAgents(newSelectedAgents);
-            setAreAllAgentsSelected(false);
-          },
-        }}
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
