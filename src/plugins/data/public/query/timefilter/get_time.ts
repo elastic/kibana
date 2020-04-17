@@ -32,6 +32,44 @@ export function calculateBounds(timeRange: TimeRange, options: CalculateBoundsOp
   };
 }
 
+function createTimeRangeFilter(
+  indexPattern: IIndexPattern,
+  timeRange: TimeRange,
+  field: IFieldType,
+  forceNow?: Date
+) {
+  const bounds = calculateBounds(timeRange, { forceNow });
+  if (!bounds) {
+    return;
+  }
+  return buildRangeFilter(
+    field,
+    {
+      ...(bounds.min && { gte: bounds.min.toISOString() }),
+      ...(bounds.max && { lte: bounds.max.toISOString() }),
+      format: 'strict_date_optional_time',
+    },
+    indexPattern
+  );
+}
+
+export function getTimeForField(
+  indexPattern: IIndexPattern | undefined,
+  timeRange: TimeRange,
+  fieldName: string
+) {
+  if (!indexPattern) {
+    return;
+  }
+
+  const field = indexPattern.fields.find(f => f.name === fieldName);
+  if (!field) {
+    return;
+  }
+
+  return createTimeRangeFilter(indexPattern, timeRange, field);
+}
+
 export function getTime(
   indexPattern: IIndexPattern | undefined,
   timeRange: TimeRange,
@@ -50,17 +88,5 @@ export function getTime(
     return;
   }
 
-  const bounds = calculateBounds(timeRange, { forceNow });
-  if (!bounds) {
-    return;
-  }
-  return buildRangeFilter(
-    timefield,
-    {
-      ...(bounds.min && { gte: bounds.min.toISOString() }),
-      ...(bounds.max && { lte: bounds.max.toISOString() }),
-      format: 'strict_date_optional_time',
-    },
-    indexPattern
-  );
+  return createTimeRangeFilter(indexPattern, timeRange, timefield, forceNow);
 }

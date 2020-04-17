@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Moment } from 'moment';
 import { RangeFilterParams } from '../../../common';
 import { IAggConfig } from '../aggs';
 
@@ -25,11 +26,18 @@ export interface TabbedRangeFilterParams extends RangeFilterParams {
   name: string;
 }
 
+/** @internal */
+export interface TimeRangeInformation {
+  from?: Moment;
+  to?: Moment;
+  timeFields: string[];
+}
+
 /** @internal **/
 export interface TabbedResponseWriterOptions {
   metricsAtAllLevels: boolean;
   partialRows: boolean;
-  timeRange?: { [key: string]: RangeFilterParams };
+  timeRange?: TimeRangeInformation;
 }
 
 /** @internal */
