@@ -7,12 +7,13 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
+import { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
 
 import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
-import { DraggableWrapper, ConditionalPortal } from './draggable_wrapper';
+import { ConditionalPortal, DraggableWrapper, getStyle } from './draggable_wrapper';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('DraggableWrapper', () => {
@@ -47,6 +48,36 @@ describe('DraggableWrapper', () => {
       );
 
       expect(wrapper.text()).toEqual(message);
+    });
+
+    test('it does NOT render hover actions when the mouse is NOT over the draggable wrapper', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocksSource} addTypename={false}>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
+              <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            </DragDropContextWrapper>
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(false);
+    });
+
+    test('it renders hover actions when the mouse is over the draggable wrapper', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocksSource} addTypename={false}>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
+              <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            </DragDropContextWrapper>
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      wrapper.simulate('mouseenter');
+      wrapper.update();
+      expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
     });
   });
 
@@ -99,5 +130,37 @@ describe('ConditionalPortal', () => {
     );
 
     expect(props.registerProvider.mock.calls.length).toEqual(1);
+  });
+
+  describe('getStyle', () => {
+    const style: DraggingStyle = {
+      boxSizing: 'border-box',
+      height: 10,
+      left: 1,
+      pointerEvents: 'none',
+      position: 'fixed',
+      transition: 'none',
+      top: 123,
+      width: 50,
+      zIndex: 9999,
+    };
+
+    it('returns a style with no transitionDuration when the snapshot is not drop animating', () => {
+      const snapshot: DraggableStateSnapshot = {
+        isDragging: true,
+        isDropAnimating: false, // <-- NOT drop animating
+      };
+
+      expect(getStyle(style, snapshot)).not.toHaveProperty('transitionDuration');
+    });
+
+    it('returns a style with a transitionDuration when the snapshot is drop animating', () => {
+      const snapshot: DraggableStateSnapshot = {
+        isDragging: true,
+        isDropAnimating: true, // <-- it is drop animating
+      };
+
+      expect(getStyle(style, snapshot)).toHaveProperty('transitionDuration', '0.00000001s');
+    });
   });
 });

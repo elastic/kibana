@@ -10,7 +10,11 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 
-import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import {
+  Filter,
+  FilterManager,
+  IIndexPattern,
+} from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
 import {
@@ -29,6 +33,7 @@ import { SearchOrFilter } from './search_or_filter';
 
 interface OwnProps {
   browserFields: BrowserFields;
+  filterManager: FilterManager;
   indexPattern: IIndexPattern;
   timelineId: string;
 }
@@ -42,6 +47,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     dataProviders,
     eventType,
     filters,
+    filterManager,
     filterQuery,
     filterQueryDraft,
     from,
@@ -122,6 +128,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         dataProviders={dataProviders}
         eventType={eventType}
         filters={filters}
+        filterManager={filterManager}
         filterQuery={filterQuery}
         filterQueryDraft={filterQueryDraft}
         from={from}
@@ -146,6 +153,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
   (prevProps, nextProps) => {
     return (
       prevProps.eventType === nextProps.eventType &&
+      prevProps.filterManager === nextProps.filterManager &&
       prevProps.from === nextProps.from &&
       prevProps.fromStr === nextProps.fromStr &&
       prevProps.to === nextProps.to &&
