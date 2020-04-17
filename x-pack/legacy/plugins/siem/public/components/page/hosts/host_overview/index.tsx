@@ -10,8 +10,8 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 
-import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
-import { DescriptionList } from '../../../../../common/utility_types';
+import { DEFAULT_DARK_MODE } from '../../../../../../../../plugins/siem/common/constants';
+import { DescriptionList } from '../../../../../../../../plugins/siem/common/utility_types';
 import { useUiSetting$ } from '../../../../lib/kibana';
 import { getEmptyTagValue } from '../../../empty_value';
 import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';

@@ -7,6 +7,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import deepMerge from 'deepmerge';
 
+import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../../../../../plugins/siem/common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loadActionTypes } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/lib/action_connector_api';
 import { SelectField } from '../../../../../shared_imports';
@@ -16,7 +17,6 @@ import {
 } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertAction } from '../../../../../../../../../plugins/alerting/common';
 import { useKibana } from '../../../../../lib/kibana';
-import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../../common/constants';
 
 type ThrottleSelectField = typeof SelectField;
 
