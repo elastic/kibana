@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { SelectOption, SwitchOption } from '../../common';
+import { SelectOption, SwitchOption } from '../../../../../../../plugins/charts/public';
 import { BasicVislibParams, ValueAxis } from '../../../types';
 
 function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<BasicVislibParams>) {

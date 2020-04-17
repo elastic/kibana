@@ -137,6 +137,7 @@ export const savedObjectMappings = {
               dataset: { type: 'keyword' },
               processors: { type: 'keyword' },
               config: { type: 'flattened' },
+              pkg_stream: { type: 'flattened' },
             },
           },
         },
@@ -149,6 +150,10 @@ export const savedObjectMappings = {
       name: { type: 'keyword' },
       version: { type: 'keyword' },
       internal: { type: 'boolean' },
+      es_index_patterns: {
+        dynamic: false,
+        type: 'object',
+      },
       installed: {
         type: 'nested',
         properties: {

@@ -6,7 +6,6 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import {
   canCreateMLJobSelector,
   hasMLJobSelector,
@@ -24,8 +23,9 @@ import {
 import { MLFlyoutView } from './ml_flyout';
 import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
-import { useUrlParams } from '../../../hooks';
+import { useGetUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
+import { useMonitorId } from '../../../hooks/use_monitor';
 
 interface Props {
   onClose: () => void;
@@ -41,7 +41,9 @@ const showMLJobNotification = (
 ) => {
   if (success) {
     notifications.toasts.success({
-      title: <p>{labels.JOB_CREATED_SUCCESS_TITLE}</p>,
+      title: (
+        <p data-test-subj="uptimeMLJobSuccessfullyCreated">{labels.JOB_CREATED_SUCCESS_TITLE}</p>
+      ),
       body: (
         <p>
           {labels.JOB_CREATED_SUCCESS_MESSAGE}
@@ -54,7 +56,7 @@ const showMLJobNotification = (
     });
   } else {
     notifications.toasts.danger({
-      title: <p>{labels.JOB_CREATION_FAILED}</p>,
+      title: <p data-test-subj="uptimeMLJobCreationFailed">{labels.JOB_CREATION_FAILED}</p>,
       body: message ?? <p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>,
       toastLifeTimeMs: 10000,
     });
@@ -77,8 +79,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
 
   const { refreshApp } = useContext(UptimeRefreshContext);
 
-  let { monitorId } = useParams();
-  monitorId = atob(monitorId || '');
+  const monitorId = useMonitorId();
 
   const canCreateMLJob = useSelector(canCreateMLJobSelector) && heartbeatIndices !== '';
 
@@ -93,8 +94,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
 
   const [isCreatingJob, setIsCreatingJob] = useState(false);
 
-  const [getUrlParams] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd } = getUrlParams();
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   useEffect(() => {
     if (isCreatingJob && !isMLJobCreating) {

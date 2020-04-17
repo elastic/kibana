@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { isEqual } from 'lodash/fp';
 import {
   EuiFieldSearch,
@@ -25,6 +25,7 @@ interface CasesTableFiltersProps {
   countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
+  setFilterRefetch: (val: () => void) => void;
 }
 
 /**
@@ -41,20 +42,42 @@ const CasesTableFiltersComponent = ({
   countOpenCases,
   onFilterChanged,
   initial = defaultInitial,
+  setFilterRefetch,
 }: CasesTableFiltersProps) => {
-  const [selectedReporters, setselectedReporters] = useState(
+  const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map(r => r.full_name ?? r.username ?? '')
   );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [showOpenCases, setShowOpenCases] = useState(initial.status === 'open');
-  const { tags } = useGetTags();
-  const { reporters, respReporters } = useGetReporters();
+  const { tags, fetchTags } = useGetTags();
+  const { reporters, respReporters, fetchReporters } = useGetReporters();
+  const refetch = useCallback(() => {
+    fetchTags();
+    fetchReporters();
+  }, [fetchReporters, fetchTags]);
+  useEffect(() => {
+    if (setFilterRefetch != null) {
+      setFilterRefetch(refetch);
+    }
+  }, [refetch, setFilterRefetch]);
+  useEffect(() => {
+    if (selectedReporters.length) {
+      const newReporters = selectedReporters.filter(r => reporters.includes(r));
+      handleSelectedReporters(newReporters);
+    }
+  }, [reporters]);
+  useEffect(() => {
+    if (selectedTags.length) {
+      const newTags = selectedTags.filter(t => tags.includes(t));
+      handleSelectedTags(newTags);
+    }
+  }, [tags]);
 
   const handleSelectedReporters = useCallback(
     newReporters => {
       if (!isEqual(newReporters, selectedReporters)) {
-        setselectedReporters(newReporters);
+        setSelectedReporters(newReporters);
         const reportersObj = respReporters.filter(
           r => newReporters.includes(r.username) || newReporters.includes(r.full_name)
         );
@@ -97,6 +120,7 @@ const CasesTableFiltersComponent = ({
       <EuiFlexItem grow={true}>
         <EuiFieldSearch
           aria-label={i18n.SEARCH_CASES}
+          data-test-subj="search-cases"
           fullWidth
           incremental={false}
           placeholder={i18n.SEARCH_PLACEHOLDER}
@@ -107,6 +131,7 @@ const CasesTableFiltersComponent = ({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiFilterButton
+            data-test-subj="open-case-count"
             withNext
             hasActiveFilters={showOpenCases}
             onClick={handleToggleFilter.bind(null, true)}
@@ -115,6 +140,7 @@ const CasesTableFiltersComponent = ({
             {countOpenCases != null ? ` (${countOpenCases})` : ''}
           </EuiFilterButton>
           <EuiFilterButton
+            data-test-subj="closed-case-count"
             hasActiveFilters={!showOpenCases}
             onClick={handleToggleFilter.bind(null, false)}
           >

@@ -44,7 +44,7 @@ export const CloseButton = React.memo<{
 CloseButton.displayName = 'CloseButton';
 
 export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => {
-  const isLoading = useTimelineContext();
+  const { isLoading } = useTimelineContext();
   return (
     <>
       {sort.columnId === header.id && isLoading ? (
