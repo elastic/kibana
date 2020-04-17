@@ -4,14 +4,12 @@
 <titleabbrev>Get space</titleabbrev>
 ++++
 
-Retrieve a specified {kib} space.
-
-experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
+experimental[] Retrieve a specified {kib} space.
 
 [[spaces-api-get-request]]
 ==== Request
 
-`GET /api/spaces/space/marketing`
+`GET <kibana host>:<port>/api/spaces/space/marketing`
 
 [[spaces-api-get-response-codes]]
 ==== Response code
@@ -24,7 +22,7 @@ experimental["The underlying Spaces concepts are stable, but the APIs for managi
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "id": "marketing",
