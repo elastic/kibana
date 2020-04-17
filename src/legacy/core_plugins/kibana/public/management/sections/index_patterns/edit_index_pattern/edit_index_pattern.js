@@ -348,6 +348,7 @@ uiModules
 
         Promise.resolve($scope.indexPattern.destroy())
           .then(function() {
+            npStart.plugins.data.indexPatterns.clearCache();
             $location.url('/management/kibana/index_patterns');
           })
           .catch(fatalError);
