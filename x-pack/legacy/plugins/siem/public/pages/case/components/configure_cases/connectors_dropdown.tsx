@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiIcon, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { Connector } from '../../../../containers/case/configure/types';
@@ -24,15 +24,20 @@ const ICON_SIZE = 'm';
 
 const EuiIconExtended = styled(EuiIcon)`
   margin-right: 13px;
+  margin-bottom: 0 !important;
 `;
 
 const noConnectorOption = {
   value: 'none',
   inputDisplay: (
-    <>
-      <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
-      <span>{i18n.NO_CONNECTOR}</span>
-    </>
+    <EuiFlexGroup gutterSize="none" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <span>{i18n.NO_CONNECTOR}</span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   ),
   'data-test-subj': 'dropdown-connector-no-connector',
 };
@@ -52,13 +57,17 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
           {
             value: connector.id,
             inputDisplay: (
-              <>
-                <EuiIconExtended
-                  type={connectorsDefinition[connector.actionTypeId].logo}
-                  size={ICON_SIZE}
-                />
-                <span>{connector.name}</span>
-              </>
+              <EuiFlexGroup gutterSize="none" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiIconExtended
+                    type={connectorsDefinition[connector.actionTypeId].logo}
+                    size={ICON_SIZE}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <span>{connector.name}</span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ),
             'data-test-subj': `dropdown-connector-${connector.id}`,
           },

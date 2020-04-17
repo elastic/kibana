@@ -37,7 +37,4 @@ export const schema: FormSchema<CasePostRequest> = {
     ],
   },
   tags: schemaTags,
-  connector: {
-    label: i18n.SELECT_CONNECTOR,
-  },
 };

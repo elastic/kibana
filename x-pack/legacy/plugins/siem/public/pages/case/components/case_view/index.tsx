@@ -35,6 +35,8 @@ import { navTabs } from '../../../home/home_navigations';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 import { usePushToService } from '../use_push_to_service';
+import { EditConnector } from '../edit_connector';
+import { useConnectors } from '../../../../containers/case/configure/use_connectors';
 
 interface Props {
   caseId: string;
@@ -64,7 +66,6 @@ export interface CaseProps extends Props {
 
 export const CaseComponent = React.memo<CaseProps>(
   ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
-    console.log('caseData', caseData);
     const basePath = window.location.origin + useBasePath();
     const caseLink = `${basePath}/app/siem#/case/${caseId}`;
     const search = useGetUrlSearch(navTabs.case);
@@ -154,7 +155,11 @@ export const CaseComponent = React.memo<CaseProps>(
       updateCase: handleUpdateCase,
       userCanCrud,
     });
+    const { loading: isLoadingConnectors, connectors } = useConnectors();
 
+    const onSubmitConnector = useCallback(newConnector => {
+      console.log('newConnector', newConnector);
+    }, []);
     const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
     const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [
       onUpdateField,
@@ -300,6 +305,12 @@ export const CaseComponent = React.memo<CaseProps>(
                   tags={caseData.tags}
                   onSubmit={onSubmitTags}
                   isLoading={isLoading && updateKey === 'tags'}
+                />
+                <EditConnector
+                  isLoading={isLoadingConnectors}
+                  onSubmit={onSubmitConnector}
+                  connectors={connectors}
+                  selectedConnector={null}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

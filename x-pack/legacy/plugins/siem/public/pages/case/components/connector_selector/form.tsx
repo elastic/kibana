@@ -11,25 +11,27 @@ import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_i
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
 import { Connector } from '../../../../../../../../plugins/case/common/api/cases';
 
-interface IConnectorSelector {
+interface ConnectorSelectorProps {
   connectors: Connector[];
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
-  isDisabled: boolean;
-  onChange: (id: string) => void;
+  disabled: boolean;
+  isLoading: boolean;
 }
 export const ConnectorSelector = ({
   connectors,
   dataTestSubj,
   field,
   idAria,
-  isDisabled = false,
-}: IConnectorSelector) => {
+  disabled = false,
+  isLoading = false,
+}: ConnectorSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const handleContentChange = useCallback(
     (newContent: string) => {
+      console.log('newContent', newContent);
       field.setValue(newContent);
     },
     [field]
@@ -49,8 +51,8 @@ export const ConnectorSelector = ({
       <ConnectorsDropdown
         connectors={connectors}
         selectedConnector={field.value as string}
-        disabled={isDisabled}
-        isLoading={isDisabled}
+        disabled={disabled}
+        isLoading={isLoading}
         onChange={handleContentChange}
       />
     </EuiFormRow>

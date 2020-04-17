@@ -24,8 +24,6 @@ import { useInsertTimeline } from '../../../../components/timeline/insert_timeli
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
 import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
-import { useConnectors } from '../../../../containers/case/configure/use_connectors';
-import { ConnectorSelector } from '../connector_selector/form';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -51,12 +49,10 @@ const initialCaseValue: CasePostRequest = {
   description: '',
   tags: [],
   title: '',
-  connector: 'none',
 };
 
 export const Create = React.memo(() => {
   const { caseData, isLoading, postCase } = usePostCase();
-  const { loading: isLoadingConnectors, connectors } = useConnectors();
   const [isCancel, setIsCancel] = useState(false);
   const { form } = useForm<CasePostRequest>({
     defaultValue: initialCaseValue,
@@ -86,7 +82,6 @@ export const Create = React.memo(() => {
   if (isCancel) {
     return <Redirect to={`/${SiemPageName.case}`} />;
   }
-  console.log('connectors', connectors);
   return (
     <EuiPanel>
       {isLoading && <MySpinner data-test-subj="create-case-loading-spinner" size="xl" />}
@@ -135,19 +130,6 @@ export const Create = React.memo(() => {
             }}
           />
         </ContainerBig>
-        <Container>
-          <UseField
-            path="connector"
-            component={ConnectorSelector}
-            componentProps={{
-              connectors,
-              dataTestSubj: 'caseConnectors',
-              idAria: 'caseConnectors',
-              disabled: isLoading || isLoadingConnectors,
-              isLoading: isLoading || isLoadingConnectors,
-            }}
-          />
-        </Container>
       </Form>
       <Container>
         <EuiFlexGroup

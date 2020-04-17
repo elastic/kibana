@@ -199,3 +199,15 @@ export const GO_TO_DOCUMENTATION = i18n.translate(
     defaultMessage: 'View documentation',
   }
 );
+
+export const CONNECTORS = i18n.translate('xpack.siem.case.caseView.connectors', {
+  defaultMessage: 'Third-party incident management system',
+});
+
+export const EDIT_CONNECTOR = i18n.translate('xpack.siem.case.caseView.editConnector', {
+  defaultMessage: 'Change third-party incident management system',
+});
+
+export const NO_CONNECTOR = i18n.translate('xpack.siem.case.caseView.noConnector', {
+  defaultMessage: 'No connector selected',
+});
