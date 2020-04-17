@@ -101,7 +101,6 @@ describe('<MappingsEditor />', () => {
 
       // Update the dynamic templates editor value
       const updatedValueTemplates = [{ after: 'bar' }];
-
       await act(async () => {
         await updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
         await nextTick();
@@ -172,6 +171,133 @@ describe('<MappingsEditor />', () => {
       expect(isDynamicMappingsEnabled).toBe(false);
       isNumericDetectionVisible = exists('advancedConfiguration.numericDetection');
       expect(isNumericDetectionVisible).toBe(false);
+    });
+  });
+
+  describe('component props', () => {
+    const defaultMappings: any = {
+      dynamic: true,
+      numeric_detection: true,
+      date_detection: true,
+      properties: {},
+      dynamic_templates: [],
+      _source: {
+        enabled: true,
+        includes: [],
+        excludes: [],
+      },
+      _meta: {},
+      _routing: {
+        required: true,
+      },
+    };
+    const onUpdateHandler = jest.fn();
+
+    const getDataForwarded = async () => {
+      const mockCalls = onUpdateHandler.mock.calls;
+      if (mockCalls.length === 0) {
+        throw new Error(
+          `Can't access data forwarded as the onUpdate() prop handler hasn't been called.`
+        );
+      }
+
+      const [arg] = mockCalls[mockCalls.length - 1];
+      const { isValid, validate, getData } = arg;
+
+      let isMappingsValid: boolean = false;
+      let data: any;
+
+      await act(async () => {
+        isMappingsValid = isValid === undefined ? await validate() : isValid;
+        data = getData(isMappingsValid);
+      });
+
+      return {
+        isValid: isMappingsValid,
+        data,
+      };
+    };
+
+    const expectDataUpdated = async (expected: any) => {
+      const { data } = await getDataForwarded();
+      expect(data).toEqual(expected);
+    };
+
+    let testBed: MappingsEditorTestBed;
+
+    beforeEach(async () => {
+      testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
+    });
+
+    afterEach(() => {
+      onUpdateHandler.mockReset();
+    });
+
+    test('onUpdate() => should forward the changes to the consumer component', async () => {
+      let updatedMappings = { ...defaultMappings };
+
+      const {
+        actions: { addField, selectTab, updateJsonEditor },
+        component,
+        form,
+      } = testBed;
+
+      /**
+       * Mapped fields
+       */
+      const newField = { name: getRandomString(), type: 'text' };
+      updatedMappings = {
+        ...updatedMappings,
+        properties: { [newField.name]: { type: 'text' } },
+      };
+
+      await act(async () => {
+        await addField(newField.name, newField.type);
+      });
+      await expectDataUpdated(updatedMappings);
+
+      /**
+       * Dynamic templates
+       */
+      await act(async () => {
+        await selectTab('templates');
+      });
+
+      const updatedTemplatesValue = [{ someTemplateProp: 'updated' }];
+      updatedMappings = {
+        ...updatedMappings,
+        dynamic_templates: updatedTemplatesValue,
+      };
+
+      await act(async () => {
+        await updateJsonEditor('dynamicTemplatesEditor', updatedTemplatesValue);
+        await nextTick();
+        component.update();
+      });
+      await expectDataUpdated(updatedMappings);
+
+      /**
+       * Advanced settings
+       */
+      await act(async () => {
+        await selectTab('advanced');
+      });
+
+      // Disbable dynamic mappings
+      await act(async () => {
+        form.toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
+      });
+
+      // When we disable dynamic mappings, we set it to "strict" and remove date and numeric detections
+      updatedMappings = {
+        ...updatedMappings,
+        dynamic: 'strict',
+      };
+      delete updatedMappings.date_detection;
+      delete updatedMappings.dynamic_date_formats;
+      delete updatedMappings.numeric_detection;
+
+      await expectDataUpdated(updatedMappings);
     });
   });
 });
