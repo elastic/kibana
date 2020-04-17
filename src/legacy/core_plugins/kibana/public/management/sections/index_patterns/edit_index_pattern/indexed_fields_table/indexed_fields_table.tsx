@@ -30,7 +30,7 @@ interface IndexedFieldsTableProps {
   fieldFilter?: string;
   indexedFieldTypeFilter?: string;
   helpers: {
-    redirectToRoute: (obj: any) => void;
+    redirectToRoute: (obj: any, route: string) => void;
     getFieldInfo: (indexPattern: IIndexPattern, field: string) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
