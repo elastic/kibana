@@ -7,6 +7,7 @@
 import { Timeline } from '../../saved_object';
 import { FrameworkRequest } from '../../../framework';
 import { SavedTimeline } from '../../types';
+import { TimelineType } from '../../../detection_engine/routes/__mocks__';
 
 const timelineLib = new Timeline();
 
@@ -14,15 +15,15 @@ export const saveTemplateTimelines = async (
   frameworkRequest: FrameworkRequest,
   templateTimeline: SavedTimeline,
   timelineId?: string | null,
-  timelineVersion?: string | null,
-  templateTimelineId?: string | null
+  timelineVersion?: string | null
 ) => {
+  console.log('-------');
   const newTimelineRes = await timelineLib.persistTimeline(
     frameworkRequest,
     timelineId ?? null,
     timelineVersion ?? null,
     templateTimeline,
-    templateTimelineId ?? null
+    TimelineType.template
   );
 
   return {
@@ -35,15 +36,13 @@ export const createTemplateTimelines = async (
   frameworkRequest: FrameworkRequest,
   templateTimeline: SavedTimeline,
   timelineId?: string | null,
-  timelineVersion?: string | null,
-  templateTimelineId?: string | null
+  timelineVersion?: string | null
 ) => {
   const { newTemplateTimelineId } = await saveTemplateTimelines(
     frameworkRequest,
     templateTimeline,
     timelineId,
-    timelineVersion,
-    templateTimelineId
+    timelineVersion
   );
 
   return newTemplateTimelineId;

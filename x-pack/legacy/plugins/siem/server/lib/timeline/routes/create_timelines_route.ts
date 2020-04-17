@@ -18,6 +18,11 @@ import { createTemplateTimelines } from './utils/create_template_timelines';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { TimelineType } from '../../../graphql/types';
 
+export const CREATE_TIMELINE_ERROR_MESSAGE =
+  'UPDATE timeline with POST is not allowed, please use PATCH instead';
+export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
+  'UPDATE template timeline with POST is not allowed, please use PATCH instead';
+
 export const createTimelinesRoute = (
   router: IRouter,
   config: LegacyServices['config'],
@@ -45,7 +50,7 @@ export const createTimelinesRoute = (
         let existTemplateTimeline = null;
         let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);
         frameworkRequest = set('user', user, frameworkRequest);
-
+        // console.log('-------Manipulate timeline: timelineId--------', request.body);
         if (!isNil(timelineId)) {
           existTimeline = await getTimeline(
             (frameworkRequest as unknown) as FrameworkRequest,
@@ -54,6 +59,7 @@ export const createTimelinesRoute = (
         }
 
         // Manipulate timeline
+
         if (!isHandlingTemplateTimeline) {
           if (existTimeline == null || isNil(timelineId)) {
             // Create timeline
@@ -76,7 +82,7 @@ export const createTimelinesRoute = (
           } else {
             // Try to Update timeline with POST
             return siemResponse.error({
-              body: 'UPDATE timeline with POST is not allowed, please use PATCH instead',
+              body: CREATE_TIMELINE_ERROR_MESSAGE,
               statusCode: 405,
             });
           }
@@ -90,11 +96,19 @@ export const createTimelinesRoute = (
           }
 
           if (existTemplateTimeline == null || isNil(timelineId) || isNil(templateTimelineId)) {
+            console.log(
+              '0000',
+              existTimeline,
+              existTemplateTimeline,
+              timelineId,
+              isHandlingTemplateTimeline
+            );
+
             // Create Template timeline
             const newTemplateTimeline = await createTemplateTimelines(
               (frameworkRequest as unknown) as FrameworkRequest,
               omit(timelineSavedObjectOmittedFields, timeline),
-              timelineId,
+              null,
               version
             );
             return response.ok({
@@ -110,7 +124,7 @@ export const createTimelinesRoute = (
           } else {
             // Try to Update Template timeline with POST
             return siemResponse.error({
-              body: 'UPDATE template timeline with POST is not allowed, please use PATCH instead',
+              body: CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
               statusCode: 405,
             });
           }

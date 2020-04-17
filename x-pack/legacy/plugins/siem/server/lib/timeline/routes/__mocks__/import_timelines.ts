@@ -5,6 +5,7 @@
  */
 
 import { omit } from 'lodash/fp';
+import { TimelineType } from '../../../../graphql/types';
 
 export const mockDuplicateIdErrors = [];
 
@@ -146,6 +147,12 @@ export const mockGetTimelineValue = {
   updatedBy: 'angela',
   noteIds: [],
   pinnedEventIds: ['k-gi8nABm-sIqJ_scOoS'],
+};
+
+export const mockGetTemplateTimelineValue = {
+  ...mockGetTimelineValue,
+  timelineType: TimelineType.template,
+  templateTimelineId: 'existing template timeline id',
 };
 
 export const mockParsedTimelineObject = omit(

@@ -149,7 +149,7 @@ export class Timeline {
     timelineId: string | null,
     version: string | null,
     timeline: SavedTimeline,
-    templateTimelineId?: string | null
+    timelineType?: TimelineType | null
   ): Promise<ResponseTimeline> {
     const savedObjectsClient = request.context.core.savedObjects.client;
     try {
@@ -158,7 +158,7 @@ export class Timeline {
         const newTimeline = convertSavedObjectToSavedTimeline(
           await savedObjectsClient.create(
             timelineSavedObjectType,
-            pickSavedTimeline(timelineId, timeline, request.user, templateTimelineId)
+            pickSavedTimeline(timelineId, timeline, request.user, timelineType)
           )
         );
         return {
@@ -171,7 +171,7 @@ export class Timeline {
       await savedObjectsClient.update(
         timelineSavedObjectType,
         timelineId,
-        pickSavedTimeline(timelineId, timeline, request.user, templateTimelineId),
+        pickSavedTimeline(timelineId, timeline, request.user, timelineType),
         {
           version: version || undefined,
         }
@@ -194,7 +194,6 @@ export class Timeline {
           ...timeline,
           savedObjectId: '',
           version: '',
-          timelineType: TimelineType.default,
         };
         return {
           code: 403,

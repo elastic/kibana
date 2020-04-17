@@ -9,7 +9,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { TimelineSavedObjectRuntimeType, TimelineSavedObject } from './types';
-import { TimelineType } from '../../graphql/types';
 
 export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
   const timeline = pipe(
@@ -18,7 +17,6 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
       return {
         savedObjectId: savedTimeline.id,
         version: savedTimeline.version,
-        timelineType: savedTimeline.timelineType ?? TimelineType.default,
         ...savedTimeline.attributes,
       };
     }),
