@@ -11,11 +11,15 @@ import { DEFAULT_FROM, DEFAULT_TO } from '../../../../../../../plugins/siem/comm
 import { mockBrowserFields } from '../../../containers/source/mock';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
 import { mockIndexPattern, TestProviders } from '../../../mock';
+import { createKibanaCoreStartMock } from '../../../mock/kibana_core';
 import { QueryBar } from '../../query_bar';
+import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
 
 import { QueryBarTimeline, QueryBarTimelineComponentProps, getDataProviderFilter } from './index';
+
+const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
 jest.mock('../../../lib/kibana');
 
@@ -58,6 +62,7 @@ describe('Timeline QueryBar ', () => {
           browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={0}
@@ -99,6 +104,7 @@ describe('Timeline QueryBar ', () => {
           browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={0}
@@ -145,6 +151,7 @@ describe('Timeline QueryBar ', () => {
           browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={0}
@@ -189,6 +196,7 @@ describe('Timeline QueryBar ', () => {
           browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={0}
@@ -235,6 +243,7 @@ describe('Timeline QueryBar ', () => {
           browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={0}
@@ -279,6 +288,7 @@ describe('Timeline QueryBar ', () => {
           browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={0}

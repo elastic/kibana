@@ -35,7 +35,7 @@ describe('get_filter', () => {
 
   describe('getQueryFilter', () => {
     test('it should work with an empty filter as kuery', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*']);
+      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
       expect(esQuery).toEqual({
         bool: {
           must: [],
@@ -60,7 +60,7 @@ describe('get_filter', () => {
     });
 
     test('it should work with an empty filter as lucene', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'lucene', [], ['auditbeat-*']);
+      const esQuery = getQueryFilter('host.name: linux', 'lucene', [], ['auditbeat-*'], []);
       expect(esQuery).toEqual({
         bool: {
           must: [
@@ -102,7 +102,8 @@ describe('get_filter', () => {
             },
           },
         ],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -145,7 +146,8 @@ describe('get_filter', () => {
             },
           },
         ],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -194,7 +196,8 @@ describe('get_filter', () => {
         'host.name: windows',
         'kuery',
         [query, exists],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -252,7 +255,8 @@ describe('get_filter', () => {
             },
           },
         ],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -300,7 +304,8 @@ describe('get_filter', () => {
             },
           },
         ],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -349,7 +354,8 @@ describe('get_filter', () => {
             },
           },
         ],
-        ['auditbeat-*']
+        ['auditbeat-*'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -368,6 +374,108 @@ describe('get_filter', () => {
         },
       });
     });
+
+    test('it should work with a list', () => {
+      const esQuery = getQueryFilter(
+        'host.name: linux',
+        'kuery',
+        [],
+        ['auditbeat-*'],
+        [
+          {
+            field: 'event.module',
+            values_operator: 'excluded',
+            values_type: 'match',
+            values: [
+              {
+                name: 'suricata',
+              },
+            ],
+          },
+        ]
+      );
+      expect(esQuery).toEqual({
+        bool: {
+          filter: [
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'host.name': 'linux',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'event.module': 'suricata',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
+    });
+
+    test('it should work with an empty list', () => {
+      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
+      expect(esQuery).toEqual({
+        bool: {
+          filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
+    });
+
+    test('it should work when lists has value null', () => {
+      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], null);
+      expect(esQuery).toEqual({
+        bool: {
+          filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
+    });
+
+    test('it should work when lists has value undefined', () => {
+      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], undefined);
+      expect(esQuery).toEqual({
+        bool: {
+          filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
+    });
   });
 
   describe('getFilter', () => {
@@ -380,6 +488,7 @@ describe('get_filter', () => {
         savedId: undefined,
         services: servicesMock,
         index: ['auditbeat-*'],
+        lists: undefined,
       });
       expect(filter).toEqual({
         bool: {
@@ -414,6 +523,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
+          lists: undefined,
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
@@ -428,6 +538,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
+          lists: undefined,
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
@@ -442,6 +553,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: undefined,
+          lists: undefined,
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
@@ -455,6 +567,7 @@ describe('get_filter', () => {
         savedId: 'some-id',
         services: servicesMock,
         index: ['auditbeat-*'],
+        lists: undefined,
       });
       expect(filter).toEqual({
         bool: {
@@ -478,6 +591,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
+          lists: undefined,
         })
       ).rejects.toThrow('savedId parameter should be defined');
     });
@@ -492,6 +606,7 @@ describe('get_filter', () => {
           savedId: 'some-id',
           services: servicesMock,
           index: undefined,
+          lists: undefined,
         })
       ).rejects.toThrow('savedId parameter should be defined');
     });
@@ -506,6 +621,7 @@ describe('get_filter', () => {
           savedId: 'some-id',
           services: servicesMock,
           index: undefined,
+          lists: undefined,
         })
       ).rejects.toThrow('Unsupported Rule of type "machine_learning" supplied to getFilter');
     });
@@ -515,7 +631,8 @@ describe('get_filter', () => {
         '(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610182 or 2610183 or 2610184 or 2610185 or 2610186 or 2610187)',
         'kuery',
         [],
-        ['my custom index']
+        ['my custom index'],
+        []
       );
       expect(esQuery).toEqual({
         bool: {
@@ -641,6 +758,69 @@ describe('get_filter', () => {
           ],
           should: [],
           must_not: [],
+        },
+      });
+    });
+
+    test('returns a query when given a list', async () => {
+      const filter = await getFilter({
+        type: 'query',
+        filters: undefined,
+        language: 'kuery',
+        query: 'host.name: siem',
+        savedId: undefined,
+        services: servicesMock,
+        index: ['auditbeat-*'],
+        lists: [
+          {
+            field: 'event.module',
+            values_operator: 'excluded',
+            values_type: 'match',
+            values: [
+              {
+                name: 'suricata',
+              },
+            ],
+          },
+        ],
+      });
+      expect(filter).toEqual({
+        bool: {
+          filter: [
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'host.name': 'siem',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'event.module': 'suricata',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
         },
       });
     });

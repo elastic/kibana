@@ -556,7 +556,9 @@ describe('create rules schema', () => {
 
   test('language does not validate with something made up', () => {
     expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+      createRulesSchema.validate<
+        Partial<Omit<RuleAlertParamsRest, 'language'> & { language: string }>
+      >({
         rule_id: 'rule-1',
         output_index: '.siem-signals',
         risk_score: 50,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle, EuiTitleSize } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
@@ -36,6 +36,7 @@ export interface HeaderSectionProps extends HeaderProps {
   split?: boolean;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
+  titleSize?: EuiTitleSize;
   tooltip?: string;
 }
 
@@ -46,6 +47,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   split,
   subtitle,
   title,
+  titleSize = 'm',
   tooltip,
 }) => (
   <Header border={border}>
@@ -53,7 +55,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center" responsive={false}>
           <EuiFlexItem>
-            <EuiTitle>
+            <EuiTitle size={titleSize}>
               <h2 data-test-subj="header-section-title">
                 {title}
                 {tooltip && (
@@ -65,7 +67,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
               </h2>
             </EuiTitle>
 
-            {subtitle && <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />}
+            <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
           </EuiFlexItem>
 
           {id && (
