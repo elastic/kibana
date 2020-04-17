@@ -273,15 +273,17 @@ export const getDefaultFieldsFromJobCaps = (
 
   const featureImportanceFields = [];
 
-  if ((numTopFeatureImportanceValues ?? 0) > 0) {
-    featureImportanceFields.push({
-      id: `${resultsField}.feature_importance`,
-      name: `${resultsField}.feature_importance`,
-      type: KBN_FIELD_TYPES.NUMBER,
-    });
+  if ((numTopFeatureImportanceValues ?? 0) > 0 && needsDestIndexFields === true) {
+    featureImportanceFields.push(
+      ...fields.map(d => ({
+        id: `${resultsField}.feature_importance.${d.id}`,
+        name: `${resultsField}.feature_importance.${d.name}`,
+        type: KBN_FIELD_TYPES.NUMBER,
+      }))
+    );
   }
 
-  let allFields: any = [];
+  const allFields: any = [];
   // Only need to add these fields if we didn't use dest index pattern to get the fields
   if (needsDestIndexFields === true) {
     allFields.push(
@@ -299,9 +301,9 @@ export const getDefaultFieldsFromJobCaps = (
     sortRegressionResultsFields(a, b, jobConfig)
   );
   // Remove feature_importance fields provided by dest index since feature_importance is an array the path is not valid
-  if (needsDestIndexFields === false) {
-    allFields = allFields.filter((field: any) => !field.name.includes('.feature_importance.'));
-  }
+  // if (needsDestIndexFields === false) {
+  //   allFields = allFields.filter((field: any) => !field.name.includes('.feature_importance.'));
+  // }
 
   let selectedFields = allFields.filter(
     (field: any) => field.name === predictedField || !field.name.includes('.keyword')

@@ -28,6 +28,7 @@ export {
   EsSorting,
   RenderCellValue,
   SearchResponse7,
+  UseDataGridReturnType,
   UseIndexDataReturnType,
   INDEX_STATUS,
 } from '../../ml/public/application/components/data_grid';

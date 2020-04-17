@@ -8,8 +8,6 @@ import { useEffect } from 'react';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
-import { getErrorMessage } from '../../../../../../../common/util/errors';
-
 import {
   useColorRange,
   COLOR_RANGE,
@@ -20,15 +18,11 @@ import {
   getFieldsFromKibanaIndexPattern,
   useDataGrid,
   useRenderCellValue,
-  EsSorting,
-  SearchResponse7,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { ml } from '../../../../../services/ml_api_service';
 
-import { DataFrameAnalyticsConfig, INDEX_STATUS } from '../../../../common';
-import { isKeywordAndTextType } from '../../../../common/fields';
+import { getIndexData, DataFrameAnalyticsConfig } from '../../../../common';
 
 import {
   getFeatureCount,
@@ -64,84 +58,38 @@ export const useOutlierData = (
     );
   }
 
-  const dataGrid = useDataGrid(columns, 25);
-
-  const {
-    pagination,
-    setErrorMessage,
-    setRowCount,
-    setSortingColumns,
-    setStatus,
-    setTableItems,
-    sortingColumns,
-    tableItems,
-  } = dataGrid;
+  const dataGrid = useDataGrid(
+    columns,
+    25,
+    // reduce default selected rows from 20 to 8 for performance reasons.
+    8,
+    // by default, hide feature-influence columns and the doc id copy
+    d => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== 'ml__id_copy'
+  );
 
   // initialize sorting: reverse sort on outlier score column
   useEffect(() => {
     if (jobConfig !== undefined) {
-      setSortingColumns([{ id: getOutlierScoreFieldName(jobConfig), direction: 'desc' }]);
+      dataGrid.setSortingColumns([{ id: getOutlierScoreFieldName(jobConfig), direction: 'desc' }]);
     }
   }, [jobConfig && jobConfig.id]);
 
-  // update data grid data
-  const getIndexData = async () => {
-    if (jobConfig !== undefined) {
-      setErrorMessage('');
-      setStatus(INDEX_STATUS.LOADING);
-
-      try {
-        const sort: EsSorting = sortingColumns
-          .map(column => {
-            const { id } = column;
-            column.id = isKeywordAndTextType(id) ? `${id}.keyword` : id;
-            return column;
-          })
-          .reduce((s, column) => {
-            s[column.id] = { order: column.direction };
-            return s;
-          }, {} as EsSorting);
-
-        const { pageIndex, pageSize } = pagination;
-        const resp: SearchResponse7 = await ml.esSearch({
-          index: jobConfig.dest.index,
-          body: {
-            query: searchQuery,
-            from: pageIndex * pageSize,
-            size: pageSize,
-            ...(Object.keys(sort).length > 0 ? { sort } : {}),
-          },
-        });
-
-        setRowCount(resp.hits.total.value);
-
-        const docs = resp.hits.hits.map(d => d._source);
-
-        setTableItems(docs);
-        setStatus(INDEX_STATUS.LOADED);
-      } catch (e) {
-        setErrorMessage(getErrorMessage(e));
-        setStatus(INDEX_STATUS.ERROR);
-      }
-    }
-  };
-
   useEffect(() => {
-    getIndexData();
+    getIndexData(jobConfig, dataGrid, searchQuery);
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobConfig && jobConfig.id, pagination, searchQuery, sortingColumns]);
+  }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const colorRange = useColorRange(
     COLOR_RANGE.BLUE,
     COLOR_RANGE_SCALE.INFLUENCER,
-    jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, tableItems) : 1
+    jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, dataGrid.tableItems) : 1
   );
 
   const renderCellValue = useRenderCellValue(
     indexPattern,
-    pagination,
-    tableItems,
+    dataGrid.pagination,
+    dataGrid.tableItems,
     (columnId, cellValue, fullItem, setCellProps) => {
       const resultsField = jobConfig?.dest.results_field ?? '';
 

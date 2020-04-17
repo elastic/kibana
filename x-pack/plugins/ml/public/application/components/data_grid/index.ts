@@ -17,6 +17,7 @@ export {
   EsSorting,
   RenderCellValue,
   SearchResponse7,
+  UseDataGridReturnType,
   UseIndexDataReturnType,
   INDEX_STATUS,
 } from './types';

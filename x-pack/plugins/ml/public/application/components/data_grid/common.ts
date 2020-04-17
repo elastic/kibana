@@ -21,6 +21,8 @@ import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
+export const FEATURE_IMPORTANCE = 'feature_importance';
+export const FEATURE_INFLUENCE = 'feature_influence';
 export const INIT_MAX_COLUMNS = 20;
 
 export const euiDataGridStyle: EuiDataGridStyle = {
@@ -121,9 +123,19 @@ export const useRenderCellValue = (
         format = mlFieldFormatService.getFieldFormatFromIndexPattern(indexPattern, columnId, '');
       }
 
-      const cellValue = tableItems.hasOwnProperty(adjustedRowIndex)
-        ? getNestedProperty(tableItems[adjustedRowIndex], columnId, null)
-        : null;
+      function getCellValue(cId: string) {
+        if (cId.includes(`.${FEATURE_IMPORTANCE}.`)) {
+          const results = getNestedProperty(tableItems[adjustedRowIndex], 'ml', null);
+          const featureImportanceField = cId.replace('ml.', '');
+          return results[featureImportanceField];
+        }
+
+        return tableItems.hasOwnProperty(adjustedRowIndex)
+          ? getNestedProperty(tableItems[adjustedRowIndex], cId, null)
+          : null;
+      }
+
+      const cellValue = getCellValue(columnId);
 
       if (typeof cellValue === 'object' && cellValue !== null) {
         return JSON.stringify(cellValue);

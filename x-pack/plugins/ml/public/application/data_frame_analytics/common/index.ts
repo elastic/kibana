@@ -48,3 +48,5 @@ export {
 } from './fields';
 
 export { euiDataGridStyle, euiDataGridToolbarSettings } from './data_grid';
+
+export { getIndexData } from './get_index_data';

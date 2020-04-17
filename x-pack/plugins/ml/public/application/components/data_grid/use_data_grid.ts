@@ -16,10 +16,16 @@ import {
   OnChangeItemsPerPage,
   OnChangePage,
   OnSort,
+  UseDataGridReturnType,
   INDEX_STATUS,
 } from './types';
 
-export const useDataGrid = (columns: EuiDataGridColumn[], defaultPageSize = 5) => {
+export const useDataGrid = (
+  columns: EuiDataGridColumn[],
+  defaultPageSize = 5,
+  defaultVisibleColumnsCount = INIT_MAX_COLUMNS,
+  defaultVisibleColumnsFilter?: (id: string) => boolean
+): UseDataGridReturnType => {
   const defaultPagination: IndexPagination = { pageIndex: 0, pageSize: defaultPageSize };
 
   const [noDataMessage, setNoDataMessage] = useState('');
@@ -48,7 +54,11 @@ export const useDataGrid = (columns: EuiDataGridColumn[], defaultPageSize = 5) =
   const [visibleColumns, setVisibleColumns] = useState<ColumnId[]>([]);
 
   const columnIds = columns.map(c => c.id);
-  const defaultVisibleColumns = columnIds.splice(0, INIT_MAX_COLUMNS);
+  const filteredColumnIds =
+    defaultVisibleColumnsFilter !== undefined
+      ? columnIds.filter(defaultVisibleColumnsFilter)
+      : columnIds;
+  const defaultVisibleColumns = filteredColumnIds.splice(0, defaultVisibleColumnsCount);
 
   useEffect(() => {
     setVisibleColumns(defaultVisibleColumns);
@@ -85,7 +95,6 @@ export const useDataGrid = (columns: EuiDataGridColumn[], defaultPageSize = 5) =
     pagination,
     resetPagination,
     rowCount,
-    status,
     setErrorMessage,
     setNoDataMessage,
     setPagination,
@@ -95,6 +104,7 @@ export const useDataGrid = (columns: EuiDataGridColumn[], defaultPageSize = 5) =
     setTableItems,
     setVisibleColumns,
     sortingColumns,
+    status,
     tableItems,
     visibleColumns,
   };

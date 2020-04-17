@@ -74,3 +74,27 @@ export interface UseIndexDataReturnType {
   tableItems: DataGridItem[];
   visibleColumns: ColumnId[];
 }
+
+export interface UseDataGridReturnType {
+  errorMessage: string;
+  invalidSortingColumnns: ColumnId[];
+  noDataMessage: string;
+  onChangeItemsPerPage: OnChangeItemsPerPage;
+  onChangePage: OnChangePage;
+  onSort: OnSort;
+  pagination: IndexPagination;
+  resetPagination: () => void;
+  rowCount: number;
+  setErrorMessage: Dispatch<SetStateAction<string>>;
+  setNoDataMessage: Dispatch<SetStateAction<string>>;
+  setPagination: Dispatch<SetStateAction<IndexPagination>>;
+  setRowCount: Dispatch<SetStateAction<number>>;
+  setSortingColumns: Dispatch<SetStateAction<EuiDataGridSorting['columns']>>;
+  setStatus: Dispatch<SetStateAction<INDEX_STATUS>>;
+  setTableItems: Dispatch<SetStateAction<DataGridItem[]>>;
+  setVisibleColumns: Dispatch<SetStateAction<ColumnId[]>>;
+  sortingColumns: EuiDataGridSorting['columns'];
+  status: INDEX_STATUS;
+  tableItems: DataGridItem[];
+  visibleColumns: ColumnId[];
+}

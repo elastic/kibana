@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect } from 'react';
+import React, { Fragment, FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,12 +19,6 @@ import {
 } from '@elastic/eui';
 
 import {
-  BASIC_NUMERICAL_TYPES,
-  EXTENDED_NUMERICAL_TYPES,
-  sortRegressionResultsFields,
-} from '../../../../common/fields';
-
-import {
   DataFrameAnalyticsConfig,
   MAX_COLUMNS,
   INDEX_STATUS,
@@ -35,10 +29,14 @@ import { getTaskStateBadge } from '../../../analytics_management/components/anal
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
-import { useExploreData } from './use_explore_data';
-import { ExplorationTitle } from './regression_exploration';
-import { RegressionExplorationDataGrid } from './regression_exploration_data_grid';
+import { DataGrid } from '../../../../../components/data_grid';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
+
 import { ExplorationQueryBar } from '../exploration_query_bar';
+
+import { ExplorationTitle } from './regression_exploration';
+import { useRegressionData } from './use_regression_data';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
@@ -64,67 +62,17 @@ interface Props {
 
 export const ResultsTable: FC<Props> = React.memo(
   ({ indexPattern, jobConfig, jobStatus, setEvaluateSearchQuery }) => {
-    const needsDestIndexFields = indexPattern && indexPattern.title === jobConfig.source.index[0];
-    const resultsField = jobConfig.dest.results_field;
-    const {
-      errorMessage,
-      fieldTypes,
-      pagination,
-      searchQuery,
-      selectedFields,
-      rowCount,
-      setPagination,
-      setSearchQuery,
-      setSelectedFields,
-      setSortingColumns,
-      sortingColumns,
-      status,
-      tableFields,
-      tableItems,
-    } = useExploreData(jobConfig, needsDestIndexFields);
+    const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
 
     useEffect(() => {
       setEvaluateSearchQuery(searchQuery);
     }, [JSON.stringify(searchQuery)]);
 
-    const columns = tableFields
-      .sort((a: any, b: any) => sortRegressionResultsFields(a, b, jobConfig))
-      .map((field: any) => {
-        // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
-        // To fall back to the default string schema it needs to be undefined.
-        let schema;
-        let isSortable = true;
-        const type = fieldTypes[field];
-        const isNumber =
-          type !== undefined &&
-          (BASIC_NUMERICAL_TYPES.has(type) || EXTENDED_NUMERICAL_TYPES.has(type));
+    const regressionData = useRegressionData(indexPattern, jobConfig, searchQuery);
+    const docFieldsCount = regressionData.columns.length;
+    const { columns, errorMessage, status, tableItems, visibleColumns } = regressionData;
 
-        if (isNumber) {
-          schema = 'numeric';
-        }
-
-        switch (type) {
-          case 'date':
-            schema = 'datetime';
-            break;
-          case 'geo_point':
-            schema = 'json';
-            break;
-          case 'boolean':
-            schema = 'boolean';
-            break;
-        }
-
-        if (field === `${resultsField}.feature_importance`) {
-          isSortable = false;
-        }
-
-        return { id: field, schema, isSortable };
-      });
-
-    const docFieldsCount = tableFields.length;
-
-    if (jobConfig === undefined) {
+    if (jobConfig === undefined || regressionData === undefined) {
       return null;
     }
     // if it's a searchBar syntax error leave the table visible so they can try again
@@ -179,7 +127,7 @@ export const ResultsTable: FC<Props> = React.memo(
                       {
                         defaultMessage:
                           '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
-                        values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
+                        values: { selectedFieldsLength: visibleColumns.length, docFieldsCount },
                       }
                     )}
                   </EuiText>
@@ -211,18 +159,10 @@ export const ResultsTable: FC<Props> = React.memo(
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RegressionExplorationDataGrid
-                columns={columns}
-                indexPattern={indexPattern}
-                pagination={pagination}
-                resultsField={jobConfig.dest.results_field}
-                rowCount={rowCount}
-                selectedFields={selectedFields}
-                setPagination={setPagination}
-                setSelectedFields={setSelectedFields}
-                setSortingColumns={setSortingColumns}
-                sortingColumns={sortingColumns}
-                tableItems={tableItems}
+              <DataGrid
+                {...regressionData}
+                dataTestSubj="mlExplorationDataGrid"
+                toastNotifications={getToastNotifications()}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
