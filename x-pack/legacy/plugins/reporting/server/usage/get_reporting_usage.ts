@@ -75,6 +75,7 @@ function getAggStats(aggs: AggregationResultBuckets): RangeStats {
     statusTypes = getKeyCount(statusBuckets);
   }
 
+  // FIXME
   const statusByApp = {
     completed: {
       canvas: 10,
