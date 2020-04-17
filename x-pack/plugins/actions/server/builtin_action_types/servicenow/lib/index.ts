@@ -147,7 +147,14 @@ class ServiceNow {
     comments: Comment[],
     field: string
   ): Promise<CommentResponse[]> {
-    const res = await Promise.all(comments.map(c => this.createComment(incidentId, c, field)));
+    // Create comments sequentially.
+    const promises = comments.reduce(async (prevPromise, currentComment) => {
+      const totalComments = await prevPromise;
+      const res = await this.createComment(incidentId, currentComment, field);
+      return [...totalComments, res];
+    }, Promise.resolve([] as CommentResponse[]));
+
+    const res = await promises;
     return res;
   }
 
