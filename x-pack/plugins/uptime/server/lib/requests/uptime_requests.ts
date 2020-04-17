@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GetCertsParams } from './get_certs';
 import { UMElasticsearchQueryFn } from '../adapters';
 import {
   HistogramResult,
   Ping,
   PingsResponse as PingResults,
+  GetCertsParams,
   GetPingsParams,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import {

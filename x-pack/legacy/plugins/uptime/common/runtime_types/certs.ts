@@ -6,6 +6,20 @@
 
 import * as t from 'io-ts';
 
+export const GetCertsParamsType = t.intersection([
+  t.type({
+    from: t.string,
+    to: t.string,
+    index: t.number,
+    size: t.number,
+  }),
+  t.partial({
+    search: t.string,
+  }),
+]);
+
+export type GetCertsParams = t.TypeOf<typeof GetCertsParamsType>;
+
 export const CertType = t.intersection([
   t.type({
     monitors: t.array(
