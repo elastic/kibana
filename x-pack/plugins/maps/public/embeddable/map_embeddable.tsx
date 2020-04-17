@@ -26,9 +26,7 @@ import {
   Query,
   RefreshInterval,
 } from '../../../../../src/plugins/data/public';
-
 import { GisMap } from '../connected_components/gis_map';
-
 import { createMapStore, MapStore } from '../reducers/store';
 import {
   setGotoWithCenter,
@@ -53,10 +51,8 @@ import {
 } from '../reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-
 import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
-
-import { getUiActions } from '../kibana_services';
+import { getUiActions, getCoreI18n } from '../kibana_services';
 
 interface MapEmbeddableConfig {
   editUrl?: string;
@@ -244,12 +240,16 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
 
     this._domNode = domNode;
 
+    const I18nContext = getCoreI18n().Context;
+
     render(
       <Provider store={this._store}>
-        <GisMap
-          addFilters={this.input.hideFilterActions ? null : this.addFilters}
-          renderTooltipContent={this._renderTooltipContent}
-        />
+        <I18nContext>
+          <GisMap
+            addFilters={this.input.hideFilterActions ? null : this.addFilters}
+            renderTooltipContent={this._renderTooltipContent}
+          />
+        </I18nContext>
       </Provider>,
       this._domNode
     );
