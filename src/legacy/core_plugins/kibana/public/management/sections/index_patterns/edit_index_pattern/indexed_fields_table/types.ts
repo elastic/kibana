@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IndexPatternField } from '../../../../../../../../../plugins/data/public';
+import { IFieldType } from '../../../../../../../../../plugins/data/public';
 
-export interface IndexedFieldItem extends IndexPatternField {
+export interface IndexedFieldItem extends IFieldType {
   info: string[];
   excluded: boolean;
 }
