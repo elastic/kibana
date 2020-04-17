@@ -24,7 +24,9 @@ import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { VisParams } from './timelion_vis_fn';
 import { TimelionInterval, TimelionExpressionInput } from './components';
 
-function TimelionOptions({ stateParams, setValue, setValidity }: VisOptionsProps<VisParams>) {
+export type TimelionOptionsProps = VisOptionsProps<VisParams>;
+
+function TimelionOptions({ stateParams, setValue, setValidity }: TimelionOptionsProps) {
   const setInterval = useCallback((value: VisParams['interval']) => setValue('interval', value), [
     setValue,
   ]);

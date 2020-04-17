@@ -44,6 +44,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
+import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
 import { setupMock as renderingServiceMock } from '../rendering/__mocks__/rendering_service';
 import { uuidServiceMock } from '../uuid/uuid_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
@@ -89,23 +90,11 @@ beforeEach(() => {
           getAuthHeaders: () => undefined,
         } as any,
       },
+      httpResources: httpResourcesMock.createSetupContract(),
       savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       plugins: {
         initialized: true,
         contracts: new Map([['plugin-id', 'plugin-value']]),
-        uiPlugins: {
-          public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
-          internal: new Map([
-            [
-              'plugin-id',
-              {
-                publicTargetDir: 'path/to/target/public',
-                publicAssetsDir: '/plugins/name/assets/',
-              },
-            ],
-          ]),
-          browserConfigs: new Map(),
-        },
       },
       rendering: renderingServiceMock,
       metrics: metricsServiceMock.createInternalSetupContract(),
@@ -113,6 +102,19 @@ beforeEach(() => {
       status: statusServiceMock.createInternalSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
+    uiPlugins: {
+      public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
+      internal: new Map([
+        [
+          'plugin-id',
+          {
+            publicTargetDir: 'path/to/target/public',
+            publicAssetsDir: '/plugins/name/assets/',
+          },
+        ],
+      ]),
+      browserConfigs: new Map(),
+    },
   };
 
   startDeps = {

@@ -155,7 +155,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const query = this.queryService.start(savedObjects);
     setQueryService(query);
 
-    const search = this.searchService.start(core, indexPatterns);
+    const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));

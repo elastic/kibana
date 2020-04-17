@@ -43,7 +43,7 @@ interface UserActionTitleProps {
   linkId?: string | null;
   fullName?: string | null;
   updatedAt?: string | null;
-  username: string;
+  username?: string | null;
   onEdit?: (id: string) => void;
   onQuote?: (id: string) => void;
   outlineComment?: (id: string) => void;
@@ -63,7 +63,7 @@ export const UserActionTitle = ({
   onQuote,
   outlineComment,
   updatedAt,
-  username,
+  username = i18n.UNKNOWN,
 }: UserActionTitleProps) => {
   const { detailName: caseId } = useParams();
   const urlSearch = useGetUrlSearch(navTabs.case);

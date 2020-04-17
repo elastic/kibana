@@ -632,7 +632,9 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
-    http: HttpServiceSetup;
+    http: HttpServiceSetup & {
+        resources: HttpResources;
+    };
     // (undocumented)
     metrics: MetricsServiceSetup;
     // (undocumented)
@@ -862,6 +864,30 @@ export type Headers = {
 };
 
 // @public
+export interface HttpResources {
+    register: <P, Q, B>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B>) => void;
+}
+
+// @public
+export interface HttpResourcesRenderOptions {
+    headers?: ResponseHeaders;
+}
+
+// @public
+export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown> = RequestHandler<P, Q, B, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
+
+// @public
+export type HttpResourcesResponseOptions = HttpResponseOptions;
+
+// @public
+export interface HttpResourcesServiceToolkit {
+    renderAnonymousCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
+    renderCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
+    renderHtml: (options: HttpResourcesResponseOptions) => IKibanaResponse;
+    renderJs: (options: HttpResourcesResponseOptions) => IKibanaResponse;
+}
+
+// @public
 export interface HttpResponseOptions {
     body?: HttpResponsePayload;
     headers?: ResponseHeaders;
@@ -989,7 +1015,7 @@ export interface IRouter {
     //
     // @internal
     getRoutes: () => RouterRoute[];
-    handleLegacyErrors: <P, Q, B>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+    handleLegacyErrors: RequestHandlerWrapper;
     patch: RouteRegistrar<'patch'>;
     post: RouteRegistrar<'post'>;
     put: RouteRegistrar<'put'>;
@@ -1007,11 +1033,6 @@ export type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerTy
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-
-// @public (undocumented)
-export interface IScopedRenderingClient {
-    render(options?: Pick<IRenderOptions, 'includeUserSettings'>): Promise<string>;
-}
 
 // @public
 export interface IUiSettingsClient {
@@ -1150,6 +1171,10 @@ export interface LegacyServiceSetupDeps {
     core: LegacyCoreSetup;
     // (undocumented)
     plugins: Record<string, unknown>;
+    // Warning: (ae-forgotten-export) The symbol "UiPlugins" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    uiPlugins: UiPlugins;
 }
 
 // @public @deprecated (undocumented)
@@ -1466,12 +1491,6 @@ export type PluginOpaqueId = symbol;
 export interface PluginsServiceSetup {
     contracts: Map<PluginName, unknown>;
     initialized: boolean;
-    // (undocumented)
-    uiPlugins: {
-        internal: Map<PluginName, InternalPluginInfo>;
-        public: Map<PluginName, DiscoveredPlugin>;
-        browserConfigs: Map<PluginName, Observable<unknown>>;
-    };
 }
 
 // @internal (undocumented)
@@ -1496,19 +1515,13 @@ export type RedirectResponseOptions = HttpResponseOptions & {
     };
 };
 
-// @internal (undocumented)
-export interface RenderingServiceSetup {
-    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: IRenderOptions): Promise<string>;
-}
-
 // @public
-export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<P, Q, B, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: RequestHandlerContext, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
     // (undocumented)
     core: {
-        rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
             typeRegistry: ISavedObjectTypeRegistry;
@@ -1530,6 +1543,9 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
 export type RequestHandlerContextProvider<TContextName extends keyof RequestHandlerContext> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
 
 // @public
+export type RequestHandlerWrapper = <P, Q, B, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Method, ResponseFactory>) => RequestHandler<P, Q, B, Method, ResponseFactory>;
+
+// @public
 export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 
 // @public
@@ -1542,11 +1558,7 @@ export type ResponseError = string | Error | {
 export type ResponseErrorAttributes = Record<string, any>;
 
 // @public
-export type ResponseHeaders = {
-    [header in KnownHeaders]?: string | string[];
-} & {
-    [header: string]: string | string[];
-};
+export type ResponseHeaders = Record<KnownHeaders, string | string[]> | Record<string, string | string[]>;
 
 // @public
 export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
@@ -2251,9 +2263,7 @@ export interface SavedObjectsType {
     mappings: SavedObjectsTypeMappingDefinition;
     migrations?: SavedObjectMigrationMap;
     name: string;
-    // @deprecated
-    namespaceAgnostic?: boolean;
-    namespaceType?: SavedObjectsNamespaceType;
+    namespaceType: SavedObjectsNamespaceType;
 }
 
 // @public

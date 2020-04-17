@@ -3,22 +3,36 @@
 exports[`AddFilterToGlobalSearchBar Component Rendering 1`] = `
 <WithHoverActions
   hoverContent={
-    <ForwardRef(Styled(EuiPanel))
+    <div
       data-test-subj="hover-actions-container"
-      paddingSize="none"
     >
       <EuiToolTip
         content="Filter for value"
         delay="regular"
         position="top"
       >
-        <EuiIcon
+        <EuiButtonIcon
+          aria-label="Filter for value"
+          color="text"
           data-test-subj="add-to-filter"
+          iconType="magnifyWithPlus"
           onClick={[Function]}
-          type="filter"
         />
       </EuiToolTip>
-    </ForwardRef(Styled(EuiPanel))>
+      <EuiToolTip
+        content="Filter out value"
+        delay="regular"
+        position="top"
+      >
+        <EuiButtonIcon
+          aria-label="Filter out value"
+          color="text"
+          data-test-subj="filter-out-value"
+          iconType="magnifyWithMinus"
+          onClick={[Function]}
+        />
+      </EuiToolTip>
+    </div>
   }
   render={[Function]}
 />
