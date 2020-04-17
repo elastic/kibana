@@ -21,7 +21,7 @@ import { join } from 'path';
 import typeDetect from 'type-detect';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { Type } from '@kbn/config-schema';
+import { isConfigSchema } from '@kbn/config-schema';
 
 import { Logger } from '../logging';
 import {
@@ -150,7 +150,7 @@ export class PluginWrapper<
     }
 
     const configDescriptor = pluginDefinition.config;
-    if (!(configDescriptor.schema instanceof Type)) {
+    if (!isConfigSchema(configDescriptor.schema)) {
       throw new Error('Configuration schema expected to be an instance of Type');
     }
     return configDescriptor;

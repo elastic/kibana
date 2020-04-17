@@ -43,6 +43,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./certs'));
       loadTestFile(require.resolve('./dynamic_settings'));
       loadTestFile(require.resolve('./snapshot'));
+      loadTestFile(require.resolve('./monitor_states_generated'));
       loadTestFile(require.resolve('./telemetry_collectors'));
     });
     describe('with real-world data', () => {
@@ -53,6 +54,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./ping_list'));
       loadTestFile(require.resolve('./monitor_duration'));
       loadTestFile(require.resolve('./doc_count'));
+      loadTestFile(require.resolve('./monitor_states_real_data'));
     });
   });
 }

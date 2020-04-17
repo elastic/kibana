@@ -13,6 +13,7 @@ import { createGetSnapshotCount } from './snapshot';
 import { UMRestApiRouteFactory } from './types';
 import {
   createGetMonitorDetailsRoute,
+  createMonitorListRoute,
   createGetMonitorLocationsRoute,
   createGetStatusBarRoute,
 } from './monitors';
@@ -32,6 +33,7 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createPostDynamicSettingsRoute,
   createGetMonitorDetailsRoute,
   createGetMonitorLocationsRoute,
+  createMonitorListRoute,
   createGetStatusBarRoute,
   createGetSnapshotCount,
   createLogPageViewRoute,

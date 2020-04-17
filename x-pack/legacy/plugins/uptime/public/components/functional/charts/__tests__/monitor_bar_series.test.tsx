@@ -7,14 +7,13 @@
 import React from 'react';
 import { MonitorBarSeries, MonitorBarSeriesProps } from '../monitor_bar_series';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
-import { SummaryHistogramPoint } from '../../../../../common/graphql/types';
+import { HistogramPoint } from '../../../../../common/runtime_types';
 
 describe('MonitorBarSeries component', () => {
   let props: MonitorBarSeriesProps;
-  let histogramSeries: SummaryHistogramPoint[];
+  let histogramSeries: HistogramPoint[];
   beforeEach(() => {
     props = {
-      dangerColor: 'A danger color',
       histogramSeries: [
         {
           timestamp: 124,
@@ -193,16 +192,12 @@ describe('MonitorBarSeries component', () => {
   });
 
   it('shallow renders nothing if the data series is null', () => {
-    const component = shallowWithRouter(
-      <MonitorBarSeries dangerColor="danger" histogramSeries={null} />
-    );
+    const component = shallowWithRouter(<MonitorBarSeries histogramSeries={null} />);
     expect(component).toEqual({});
   });
 
   it('renders if the data series is present', () => {
-    const component = renderWithRouter(
-      <MonitorBarSeries dangerColor="danger" histogramSeries={histogramSeries} />
-    );
+    const component = renderWithRouter(<MonitorBarSeries histogramSeries={histogramSeries} />);
     expect(component).toMatchSnapshot();
   });
 });
