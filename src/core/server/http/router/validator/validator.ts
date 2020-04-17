@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ValidationError, Type, schema, ObjectType } from '@kbn/config-schema';
+import { ValidationError, Type, schema, ObjectType, TypeOf } from '@kbn/config-schema';
 import { Stream } from 'stream';
 import { RouteValidationError } from './validator_error';
 
@@ -85,7 +85,7 @@ type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> =
   T extends RouteValidationFunction<any>
     ? ReturnType<T>['value']
     : T extends Type<any>
-    ? ReturnType<T['validate']>
+    ? TypeOf<T>
     : undefined
 >;
 
