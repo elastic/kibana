@@ -5,15 +5,25 @@
  */
 
 import React, { createContext, memo, useContext, useEffect, useState } from 'react';
+
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
+
 import { TimelineAction } from './body/actions';
 
-const initTimelineContext = false;
-export const TimelineContext = createContext<boolean>(initTimelineContext);
+interface TimelineContextState {
+  filterManager: FilterManager | undefined;
+  isLoading: boolean;
+}
+
+const initTimelineContext: TimelineContextState = { filterManager: undefined, isLoading: false };
+export const TimelineContext = createContext<TimelineContextState>(initTimelineContext);
 export const useTimelineContext = () => useContext(TimelineContext);
 
 export interface TimelineTypeContextProps {
   documentType?: string;
   footerText?: string;
+  id?: string;
+  indexToAdd?: string[] | null;
   loadingText?: string;
   queryFields?: string[];
   selectAll?: boolean;
@@ -24,6 +34,8 @@ export interface TimelineTypeContextProps {
 const initTimelineType: TimelineTypeContextProps = {
   documentType: undefined,
   footerText: undefined,
+  id: undefined,
+  indexToAdd: undefined,
   loadingText: undefined,
   queryFields: [],
   selectAll: false,
@@ -36,6 +48,8 @@ export const useTimelineTypeContext = () => useContext(TimelineTypeContext);
 
 interface ManageTimelineContextProps {
   children: React.ReactNode;
+  filterManager: FilterManager;
+  indexToAdd?: string[] | null;
   loading: boolean;
   type?: TimelineTypeContextProps;
 }
@@ -44,22 +58,27 @@ interface ManageTimelineContextProps {
 // to avoid so many Context, at least the separation of code is there now
 const ManageTimelineContextComponent: React.FC<ManageTimelineContextProps> = ({
   children,
+  filterManager,
+  indexToAdd,
   loading,
-  type = initTimelineType,
+  type = { ...initTimelineType, indexToAdd },
 }) => {
-  const [myLoading, setLoading] = useState(initTimelineContext);
-  const [myType, setType] = useState(initTimelineType);
+  const [myContextState, setMyContextState] = useState<TimelineContextState>({
+    filterManager,
+    isLoading: false,
+  });
+  const [myType, setType] = useState<TimelineTypeContextProps>(type);
 
   useEffect(() => {
-    setLoading(loading);
-  }, [loading]);
+    setMyContextState({ filterManager, isLoading: loading });
+  }, [setMyContextState, filterManager, loading]);
 
   useEffect(() => {
-    setType(type);
-  }, [type]);
+    setType({ ...type, indexToAdd });
+  }, [type, indexToAdd]);
 
   return (
-    <TimelineContext.Provider value={myLoading}>
+    <TimelineContext.Provider value={myContextState}>
       <TimelineTypeContext.Provider value={myType}>{children}</TimelineTypeContext.Provider>
     </TimelineContext.Provider>
   );
