@@ -16241,7 +16241,6 @@
     "xpack.uptime.emptyStateError.notAuthorized": "アップタイムデータの表示が承認されていません。システム管理者にお問い合わせください。",
     "xpack.uptime.emptyStateError.notFoundPage": "ページが見つかりません",
     "xpack.uptime.emptyStateError.title": "エラー",
-    "xpack.uptime.errorMessage": "エラー: {message}",
     "xpack.uptime.featureCatalogueDescription": "エンドポイントヘルスチェックとアップタイム監視を行います。",
     "xpack.uptime.featureRegistry.uptimeFeatureName": "アップタイム",
     "xpack.uptime.filterBar.ariaLabel": "概要ページのインプットフィルター基準",
