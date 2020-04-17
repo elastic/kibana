@@ -84,7 +84,10 @@ pipeline {
             sleep 20
             dir("${E2E_DIR}") {
               sh 'rm cypress/test-results/*.* || true'
-              sh 'yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true'
+              sh '''
+                source src/dev/ci_setup/setup_env.sh true
+                yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
+              '''
             }
           }
         }
