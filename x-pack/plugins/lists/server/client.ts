@@ -7,18 +7,20 @@
 import { KibanaRequest, ScopedClusterClient } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
-import { deleteTemplate } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/delete_template';
-import { deletePolicy } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/delete_policy';
-import { deleteAllIndex } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/delete_all_index';
-import { setPolicy } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/set_policy';
-import { setTemplate } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/set_template';
-import { getTemplateExists } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/get_template_exists';
-import { getPolicyExists } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/get_policy_exists';
-import { createBootstrapIndex } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/create_bootstrap_index';
-import { getIndexExists } from '../../../legacy/plugins/siem/server/lib/detection_engine/index/get_index_exists';
 import { SpacesServiceSetup } from '../../spaces/server';
 import { ListsSchema, ListsItemsSchema } from '../common/schemas';
 
+import {
+  deleteTemplate,
+  deletePolicy,
+  deleteAllIndex,
+  setPolicy,
+  setTemplate,
+  getTemplateExists,
+  getPolicyExists,
+  createBootstrapIndex,
+  getIndexExists,
+} from './siem_server_deps';
 import listsItemsPolicy from './items/lists_items_policy.json';
 import listsPolicy from './lists/lists_policy.json';
 import { ConfigType } from './config';

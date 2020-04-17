@@ -6,10 +6,7 @@
 
 import { IRouter } from 'kibana/server';
 
-import {
-  transformError,
-  buildSiemResponse,
-} from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
+import { transformError, buildSiemResponse } from '../siem_server_deps';
 import { LIST_INDEX } from '../../common/constants';
 
 import { getListClient } from '.';

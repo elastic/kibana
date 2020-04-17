@@ -7,11 +7,7 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import {
-  transformError,
-  buildSiemResponse,
-  buildRouteValidationIoTS,
-} from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
+import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../siem_server_deps';
 import { DeleteListsItemsSchema, deleteListsItemsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';

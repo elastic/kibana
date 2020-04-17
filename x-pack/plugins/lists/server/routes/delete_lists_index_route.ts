@@ -7,10 +7,7 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_INDEX } from '../../common/constants';
-import {
-  transformError,
-  buildSiemResponse,
-} from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
+import { transformError, buildSiemResponse } from '../siem_server_deps';
 
 import { getListClient } from '.';
 

@@ -7,11 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import {
-  getPaths,
-  foldLeftRight,
-} from '../../../../../legacy/plugins/siem/server/lib/detection_engine/routes/schemas/response/__mocks__/utils';
-import { exactCheck } from '../../../../../legacy/plugins/siem/server/lib/detection_engine/routes/schemas/response/exact_check';
+import { getPaths, foldLeftRight, exactCheck } from '../../siem_common_deps';
 
 import { getListRequest } from './__mocks__/utils';
 import { createListsSchema } from './create_lists_schema';
