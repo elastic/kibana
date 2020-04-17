@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash/fp';
+
 import {
+  allowTopN,
   destinationIsTimelineButton,
   destinationIsTimelineColumns,
   destinationIsTimelineProviders,
@@ -715,6 +718,98 @@ describe('helpers', () => {
     test('it should NOT escape a string when the field name has no !!!DOT!!! escape characters', () => {
       const escaped = unEscapeFieldId('hello.how.are.you?');
       expect(escaped).toEqual('hello.how.are.you?');
+    });
+  });
+
+  describe('#allowTopN', () => {
+    const aggregatableAllowedType = {
+      category: 'cloud',
+      description:
+        'The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.',
+      example: '666777888999',
+      indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+      name: 'cloud.account.id',
+      searchable: true,
+      type: 'string',
+      aggregatable: true,
+      format: '',
+    };
+
+    test('it returns true for an aggregatable field that is an allowed type', () => {
+      expect(
+        allowTopN({
+          browserField: aggregatableAllowedType,
+          fieldName: aggregatableAllowedType.name,
+        })
+      ).toBe(true);
+    });
+
+    test('it returns true for a whitelisted non-BrowserField', () => {
+      expect(
+        allowTopN({
+          browserField: undefined,
+          fieldName: 'signal.rule.name',
+        })
+      ).toBe(true);
+    });
+
+    test('it returns false for a NON-aggregatable field that is an allowed type', () => {
+      const nonAggregatableAllowedType = {
+        ...aggregatableAllowedType,
+        aggregatable: false,
+      };
+
+      expect(
+        allowTopN({
+          browserField: nonAggregatableAllowedType,
+          fieldName: nonAggregatableAllowedType.name,
+        })
+      ).toBe(false);
+    });
+
+    test('it returns false for a aggregatable field that is NOT an allowed type', () => {
+      const aggregatableNotAllowedType = {
+        ...aggregatableAllowedType,
+        type: 'not-an-allowed-type',
+      };
+
+      expect(
+        allowTopN({
+          browserField: aggregatableNotAllowedType,
+          fieldName: aggregatableNotAllowedType.name,
+        })
+      ).toBe(false);
+    });
+
+    test('it returns false if the BrowserField is missing the aggregatable property', () => {
+      const missingAggregatable = omit('aggregatable', aggregatableAllowedType);
+
+      expect(
+        allowTopN({
+          browserField: missingAggregatable,
+          fieldName: missingAggregatable.name,
+        })
+      ).toBe(false);
+    });
+
+    test('it returns false if the BrowserField is missing the type property', () => {
+      const missingType = omit('type', aggregatableAllowedType);
+
+      expect(
+        allowTopN({
+          browserField: missingType,
+          fieldName: missingType.name,
+        })
+      ).toBe(false);
+    });
+
+    test('it returns false for a non-whitelisted field when a BrowserField is not provided', () => {
+      expect(
+        allowTopN({
+          browserField: undefined,
+          fieldName: 'non-whitelisted',
+        })
+      ).toBe(false);
     });
   });
 });

@@ -10,20 +10,41 @@ export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
+  const changeInputField = async (text: string, field: string) => {
+    const input = await testSubjects.find(field, 5000);
+    await input.clearValueWithKeyboard();
+    await input.type(text);
+  };
+
   return {
     go: async () => {
       await testSubjects.click('settings-page-link', 5000);
     },
+
     changeHeartbeatIndicesInput: async (text: string) => {
-      const input = await testSubjects.find('heartbeat-indices-input-loaded', 5000);
-      await input.clearValueWithKeyboard();
-      await input.type(text);
+      await changeInputField(text, 'heartbeat-indices-input-loaded');
+    },
+    changeErrorThresholdInput: async (text: string) => {
+      await changeInputField(text, 'error-state-threshold-input-loaded');
+    },
+    changeWarningThresholdInput: async (text: string) => {
+      await changeInputField(text, 'warning-state-threshold-input-loaded');
     },
     loadFields: async () => {
-      const input = await testSubjects.find('heartbeat-indices-input-loaded', 5000);
-      const heartbeatIndices = await input.getAttribute('value');
+      const indInput = await testSubjects.find('heartbeat-indices-input-loaded', 5000);
+      const errorInput = await testSubjects.find('error-state-threshold-input-loaded', 5000);
+      const warningInput = await testSubjects.find('warning-state-threshold-input-loaded', 5000);
+      const heartbeatIndices = await indInput.getAttribute('value');
+      const errorThreshold = await errorInput.getAttribute('value');
+      const warningThreshold = await warningInput.getAttribute('value');
 
-      return { heartbeatIndices };
+      return {
+        heartbeatIndices,
+        certificatesThresholds: {
+          errorState: errorThreshold,
+          warningState: warningThreshold,
+        },
+      };
     },
     applyButtonIsDisabled: async () => {
       return !!(await (await testSubjects.find('apply-settings-button')).getAttribute('disabled'));
