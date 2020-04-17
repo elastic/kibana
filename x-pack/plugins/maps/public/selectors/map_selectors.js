@@ -20,6 +20,8 @@ import { BlendedVectorLayer } from '../layers/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+import { TiledVectorLayer } from '../layers/tiled_vector_layer';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
   copyPersistentState,
   TRACKED_LAYER_DESCRIPTOR,
@@ -51,6 +53,8 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
       return new HeatmapLayer({ layerDescriptor, source });
     case BlendedVectorLayer.type:
       return new BlendedVectorLayer({ layerDescriptor, source });
+    case TiledVectorLayer.type:
+      return new TiledVectorLayer({ layerDescriptor, source });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
