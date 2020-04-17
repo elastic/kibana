@@ -393,17 +393,15 @@ export class ListsClient {
   };
 
   public updateListItem = async ({
-    listId,
+    id,
     value,
-    type,
   }: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
     const { dataClient, security, request } = this;
     const user = getUser({ security, request });
     const listsItemsIndex = this.getListItemIndex();
     return updateListItem({
       user,
-      listId,
-      type,
+      id,
       value,
       dataClient,
       listsItemsIndex,

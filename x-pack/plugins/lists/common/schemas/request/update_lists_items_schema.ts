@@ -10,13 +10,14 @@ import * as t from 'io-ts';
 
 import { id, meta, value } from '../common/schemas';
 
-export const patchListsItemsSchema = t.intersection([
+export const updateListsItemsSchema = t.intersection([
   t.exact(
     t.type({
       id,
+      value,
     })
   ),
-  t.exact(t.partial({ meta, value })),
+  t.exact(t.partial({ meta })), // TODO: Move this into the required section
 ]);
 
-export type PatchListsItemsSchema = t.TypeOf<typeof patchListsItemsSchema>;
+export type UpdateListsItemsSchema = t.TypeOf<typeof updateListsItemsSchema>;

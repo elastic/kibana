@@ -6,24 +6,22 @@
 
 import { IRouter } from 'kibana/server';
 
-import { LIST_ITEM_URL } from '../../common/constants';
+import { LIST_URL } from '../../common/constants';
 import {
   transformError,
   buildSiemResponse,
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
-import { patchListsItemsSchema, PatchListsItemsSchema } from '../../common/schemas';
+import { updateListsSchema, UpdateListsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-// TODO: Make sure you write updateListItemRoute and update_list_item.sh routes
-
-export const patchListsItemsRoute = (router: IRouter): void => {
-  router.patch(
+export const updateListsRoute = (router: IRouter): void => {
+  router.put(
     {
-      path: LIST_ITEM_URL,
+      path: LIST_URL,
       validate: {
-        body: buildRouteValidationIoTS<PatchListsItemsSchema>(patchListsItemsSchema),
+        body: buildRouteValidationIoTS<UpdateListsSchema>(updateListsSchema),
       },
       options: {
         tags: ['access:list'],
@@ -32,21 +30,17 @@ export const patchListsItemsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { value, id } = request.body;
+        const { name, description, id } = request.body;
         const lists = getListClient(context);
-        const listItem = await lists.updateListItem({
-          id,
-          value,
-          // TODO: Add the meta object here
-        });
-        if (listItem == null) {
+        const list = await lists.updateList({ id, name, description });
+        if (list == null) {
           return siemResponse.error({
             statusCode: 404,
-            body: `list item id: "${id}" not found`,
+            body: `list id: "${id}" found found`,
           });
         } else {
           // TODO: Transform and check the list on exit as well as validate it
-          return response.ok({ body: listItem });
+          return response.ok({ body: list });
         }
       } catch (err) {
         const error = transformError(err);

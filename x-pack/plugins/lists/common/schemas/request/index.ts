@@ -15,3 +15,5 @@ export * from './patch_lists_schema';
 export * from './read_lists_items_schema';
 export * from './read_lists_schema';
 export * from './import_lists_items_query_schema';
+export * from './update_lists_schema';
+export * from './update_lists_items_schema';

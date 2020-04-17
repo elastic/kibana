@@ -6,44 +6,36 @@
 
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ListsItemsSchema, Type } from '../../common/schemas';
+import { ListsItemsSchema } from '../../common/schemas';
 import { transformListItemsToElasticQuery } from '../utils';
 import { DataClient, ElasticListItemUpdateInputType } from '../types';
 
-import { getListItemByValue } from '.';
+import { getListItem } from './get_list_item';
 
 interface UpdateListItemOptions {
-  listId: string;
-  type: Type;
-  value: string;
+  id: string;
+  value: string | null | undefined;
   dataClient: DataClient;
   listsItemsIndex: string;
   user: string;
 }
 
 export const updateListItem = async ({
-  listId,
-  type,
+  id,
   value,
   dataClient,
   listsItemsIndex,
   user,
 }: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
   const updatedAt = new Date().toISOString();
-  const listItem = await getListItemByValue({
-    listId,
-    type,
-    value,
-    listsItemsIndex,
-    dataClient,
-  });
+  const listItem = await getListItem({ id, dataClient, listsItemsIndex });
   if (listItem == null) {
     return null;
   } else {
     const doc: ElasticListItemUpdateInputType = {
       updated_at: updatedAt,
       updated_by: user,
-      ...transformListItemsToElasticQuery({ type, value }),
+      ...transformListItemsToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
     };
 
     // There isn't a UpdateDocumentResponse so I'm using CreateDocumentResponse here as a type
@@ -56,9 +48,9 @@ export const updateListItem = async ({
     });
     return {
       id: response._id,
-      list_id: listId,
-      type,
-      value,
+      list_id: listItem.list_id,
+      type: listItem.type,
+      value: value ?? listItem.value,
       created_at: listItem.created_at,
       updated_at: updatedAt,
       created_by: listItem.created_by,

@@ -12,18 +12,16 @@ import {
   buildSiemResponse,
   buildRouteValidationIoTS,
 } from '../../../../legacy/plugins/siem/server/lib/detection_engine/routes/utils';
-import { patchListsItemsSchema, PatchListsItemsSchema } from '../../common/schemas';
+import { updateListsItemsSchema, UpdateListsItemsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-// TODO: Make sure you write updateListItemRoute and update_list_item.sh routes
-
-export const patchListsItemsRoute = (router: IRouter): void => {
-  router.patch(
+export const updateListsItemsRoute = (router: IRouter): void => {
+  router.put(
     {
       path: LIST_ITEM_URL,
       validate: {
-        body: buildRouteValidationIoTS<PatchListsItemsSchema>(patchListsItemsSchema),
+        body: buildRouteValidationIoTS<UpdateListsItemsSchema>(updateListsItemsSchema),
       },
       options: {
         tags: ['access:list'],

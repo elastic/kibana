@@ -81,9 +81,8 @@ export interface CreateListItemOptions {
 }
 
 export interface UpdateListItemOptions {
-  listId: string;
-  type: Type;
-  value: string;
+  id: string;
+  value: string | null | undefined;
 }
 
 export interface UpdateListOptions {

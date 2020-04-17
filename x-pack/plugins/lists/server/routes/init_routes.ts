@@ -6,6 +6,9 @@
 
 import { IRouter } from 'kibana/server';
 
+import { updateListsRoute } from './update_lists_route';
+import { updateListsItemsRoute } from './update_list_items_route';
+
 import {
   createListsIndexRoute,
   createListsItemsRoute,
@@ -26,14 +29,14 @@ export const initRoutes = (router: IRouter): void => {
   // lists
   createListsRoute(router);
   readListsRoute(router);
-  // TODO: updateListsRoute(router, config);
+  updateListsRoute(router);
   deleteListsRoute(router);
   patchListsRoute(router);
 
   // lists items
   createListsItemsRoute(router);
   readListsItemsRoute(router);
-  // TODO: updateListsItemsRoute(router, config);
+  updateListsItemsRoute(router);
   deleteListsItemsRoute(router);
   patchListsItemsRoute(router);
   exportListsItemsRoute(router);
