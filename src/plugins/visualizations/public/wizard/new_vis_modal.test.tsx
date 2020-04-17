@@ -115,7 +115,7 @@ describe('NewVisModal', () => {
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('#/visualize/create?type=vis');
+      expect(window.location.assign).toBeCalledWith('app/#/visualize/create?type=vis');
     });
 
     it('passes through editor params to the editor URL', () => {

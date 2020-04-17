@@ -78,6 +78,7 @@ import {
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
+import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -109,6 +110,10 @@ interface StartDependencies {
 export type Setup = void;
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
+  addEmbeddableToDashboard: (options: {
+    embeddableId: string;
+    embeddableType: string;
+  }) => void | undefined;
 }
 
 declare module '../../../plugins/ui_actions/public' {
@@ -124,6 +129,7 @@ export class DashboardPlugin
 
   private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
+  private getActiveUrl: (() => string) | undefined = undefined;
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
@@ -174,16 +180,9 @@ export class DashboardPlugin
     embeddable.registerEmbeddableFactory(factory.type, factory);
 
     // TODO this doesn't work yet because the new platform doesn't allow it: https://github.com/elastic/kibana/issues/56027
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
-      baseUrl: core.http.basePath.prepend('/app/kibana'),
+    const { appMounted, appUnMounted, stop: stopUrlTracker, getActiveUrl } = createKbnUrlTracker({
+      baseUrl: core.http.basePath.prepend('/app/dashboards'),
       defaultSubUrl: `#${DashboardConstants.LANDING_PAGE_PATH}`,
-      shouldTrackUrlUpdate: pathname => {
-        const targetAppName = pathname.split('/')[1];
-        return (
-          targetAppName === DashboardConstants.DASHBOARDS_ID ||
-          targetAppName === DashboardConstants.DASHBOARD_ID
-        );
-      },
       storageKey: `lastUrl:${core.http.basePath.get()}:dashboard`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
@@ -203,6 +202,7 @@ export class DashboardPlugin
       ],
     });
 
+    this.getActiveUrl = getActiveUrl;
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
@@ -302,6 +302,23 @@ export class DashboardPlugin
     }
   }
 
+  private addEmbeddableToDashboard(
+    core: CoreStart,
+    { embeddableId, embeddableType }: { embeddableId: string; embeddableType: string }
+  ) {
+    if (!this.getActiveUrl) {
+      throw new Error('dashboard is not ready yet.');
+    }
+
+    const lastDashboardUrl = this.getActiveUrl();
+    const dashboardUrl = addEmbeddableToDashboardUrl(
+      lastDashboardUrl,
+      embeddableId,
+      embeddableType
+    );
+    core.application.navigateToApp('dashboards', { path: dashboardUrl });
+  }
+
   public start(core: CoreStart, plugins: StartDependencies): DashboardStart {
     const { notifications } = core;
     const {
@@ -328,6 +345,7 @@ export class DashboardPlugin
     });
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
+      addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
     };
   }
 

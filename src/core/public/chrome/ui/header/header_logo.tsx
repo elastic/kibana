@@ -41,7 +41,8 @@ function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
 function onClick(
   event: React.MouseEvent<HTMLAnchorElement>,
   forceNavigation: boolean,
-  navLinks: NavLink[]
+  navLinks: NavLink[],
+  navigateToApp: (appId: string) => void
 ) {
   const anchor = findClosestAnchor((event as any).nativeEvent.target);
   if (!anchor) {
@@ -50,6 +51,12 @@ function onClick(
 
   const navLink = navLinks.find(item => item.href === anchor.href);
   if (navLink && navLink.isDisabled) {
+    event.preventDefault();
+    return;
+  }
+
+  if (!forceNavigation && !event.altKey && !event.metaKey && !event.ctrlKey) {
+    navigateToApp('home');
     event.preventDefault();
     return;
   }
@@ -87,14 +94,15 @@ interface Props {
   href: string;
   navLinks: NavLink[];
   forceNavigation: boolean;
+  navigateToApp: (appId: string) => void;
 }
 
-export function HeaderLogo({ href, forceNavigation, navLinks }: Props) {
+export function HeaderLogo({ href, forceNavigation, navLinks, navigateToApp }: Props) {
   return (
     <EuiHeaderLogo
       data-test-subj="logo"
       iconType="logoKibana"
-      onClick={e => onClick(e, forceNavigation, navLinks)}
+      onClick={e => onClick(e, forceNavigation, navLinks, navigateToApp)}
       href={href}
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Go to home page',

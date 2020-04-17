@@ -28,7 +28,7 @@ describe('NewVisHelp', () => {
         <NewVisHelp
           promotedTypes={[
             {
-              aliasUrl: '/my/fancy/new/thing',
+              aliasPath: '/my/fancy/new/thing',
               description: 'Some desc',
               highlighted: false,
               icon: 'whatever',

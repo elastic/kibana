@@ -36,7 +36,7 @@ function getMapsAppBaseUrl(visualizations: VisualizationsStart) {
   const mapsAppVisAlias = visualizations.getAliases().find(({ name }) => {
     return name === 'maps';
   });
-  return mapsAppVisAlias ? mapsAppVisAlias.aliasUrl : null;
+  return mapsAppVisAlias ? mapsAppVisAlias.aliasPath : null;
 }
 
 export function isMapsAppRegistered(visualizations: VisualizationsStart) {
@@ -184,5 +184,5 @@ export function getVisualizeUrl(
     },
   };
 
-  return `#/visualize/create?${stringify(linkUrlParams)}`;
+  return `/app/visualize#/create?${stringify(linkUrlParams)}`;
 }

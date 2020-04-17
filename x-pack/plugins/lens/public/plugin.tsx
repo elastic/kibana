@@ -8,8 +8,6 @@ import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
-import rison, { RisonObject, RisonValue } from 'rison-node';
-import { isObject } from 'lodash';
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
@@ -18,7 +16,7 @@ import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/publ
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
-import { DashboardConstants } from '../../../../src/plugins/dashboard/public';
+import { DashboardConstants, DashboardStart } from '../../../../src/plugins/dashboard/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { EditorFrameService } from './editor_frame_service';
 import { IndexPatternDatasource } from './indexpattern_datasource';
@@ -36,8 +34,7 @@ import {
 } from './lens_ui_telemetry';
 
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
-import { addEmbeddableToDashboardUrl, getUrlVars } from './helpers';
+import { LENS_EMBEDDABLE_TYPE, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 
@@ -57,11 +54,9 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
+  dashboard: DashboardStart;
 }
 
-export const isRisonObject = (value: RisonValue): value is RisonObject => {
-  return isObject(value);
-};
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;
@@ -102,8 +97,9 @@ export class LensPlugin {
 
     visualizations.registerAlias(getLensAliasConfig());
 
-    kibanaLegacy.registerLegacyApp({
+    core.application.register({
       id: 'lens',
+      navLinkStatus: 3, // TODO should be fetched by enum
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startDependencies] = await core.getStartServices();
@@ -119,34 +115,21 @@ export class LensPlugin {
             http: core.http,
           })
         );
-        const updateUrlTime = (urlVars: Record<string, string>): void => {
-          const decoded = rison.decode(urlVars._g);
-          if (!isRisonObject(decoded)) {
-            return;
-          }
-          // @ts-ignore
-          decoded.time = dataStart.query.timefilter.timefilter.getTime();
-          urlVars._g = rison.encode(decoded);
-        };
         const redirectTo = (
           routeProps: RouteComponentProps<{ id?: string }>,
           addToDashboardMode: boolean,
           id?: string
         ) => {
           if (!id) {
-            routeProps.history.push('/lens');
+            routeProps.history.push('/');
           } else if (!addToDashboardMode) {
-            routeProps.history.push(`/lens/edit/${id}`);
+            routeProps.history.push(`/edit/${id}`);
           } else if (addToDashboardMode && id) {
-            routeProps.history.push(`/lens/edit/${id}`);
-            const lastDashboardLink = coreStart.chrome.navLinks.get('kibana:dashboard');
-            if (!lastDashboardLink || !lastDashboardLink.url) {
-              throw new Error('Cannot get last dashboard url');
-            }
-            const urlVars = getUrlVars(lastDashboardLink.url);
-            updateUrlTime(urlVars); // we need to pass in timerange in query params directly
-            const dashboardUrl = addEmbeddableToDashboardUrl(lastDashboardLink.url, id, urlVars);
-            window.history.pushState({}, '', dashboardUrl);
+            routeProps.history.push(`/edit/${id}`);
+            startDependencies.dashboard.addEmbeddableToDashboard({
+              embeddableId: id,
+              embeddableType: LENS_EMBEDDABLE_TYPE,
+            });
           }
         };
 
@@ -177,13 +160,14 @@ export class LensPlugin {
           return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
         }
 
+        params.element.classList.add('lnsAppWrapper');
         render(
           <I18nProvider>
             <HashRouter>
               <Switch>
-                <Route exact path="/lens/edit/:id" render={renderEditor} />
-                <Route exact path="/lens" render={renderEditor} />
-                <Route path="/lens" component={NotFound} />
+                <Route exact path="/edit/:id" render={renderEditor} />
+                <Route exact path="/" render={renderEditor} />
+                <Route component={NotFound} />
               </Switch>
             </HashRouter>
           </I18nProvider>,
@@ -194,6 +178,11 @@ export class LensPlugin {
           unmountComponentAtNode(params.element);
         };
       },
+    });
+
+    kibanaLegacy.forwardApp('lens', 'lens', path => {
+      const newPath = path.replace(/\/lens/, '');
+      return `#${newPath}`;
     });
   }
 

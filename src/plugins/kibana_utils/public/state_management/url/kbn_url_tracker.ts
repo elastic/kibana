@@ -37,6 +37,7 @@ export interface KbnUrlTracker {
    */
   stop: () => void;
   setActiveUrl: (newUrl: string) => void;
+  getActiveUrl: () => string;
 }
 
 /**
@@ -58,11 +59,8 @@ export function createKbnUrlTracker({
   toastNotifications,
   history,
   storage,
-  shouldTrackUrlUpdate = pathname => {
-    const currentAppName = defaultSubUrl.slice(2); // cut hash and slash symbols
-    const targetAppName = pathname.split('/')[1];
-
-    return currentAppName === targetAppName;
+  shouldTrackUrlUpdate = () => {
+    return true;
   },
 }: {
   /**
@@ -209,5 +207,8 @@ export function createKbnUrlTracker({
       unsubscribe();
     },
     setActiveUrl,
+    getActiveUrl() {
+      return activeUrl;
+    },
   };
 }

@@ -39,12 +39,14 @@ import { VisualizeConstants } from './application/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import { DefaultEditorController } from '../../vis_default_editor/public';
+import { DashboardStart } from '../../dashboard/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
   navigation: NavigationStart;
   share?: SharePluginStart;
   visualizations: VisualizationsStart;
+  dashboard: DashboardStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -90,11 +92,19 @@ export class VisualizePlugin
       stopUrlTracker();
     };
 
-    kibanaLegacy.registerLegacyApp({
+    core.application.register({
       id: 'visualize',
       title: 'Visualize',
+      order: -1002,
+      euiIconType: 'visualizeApp',
+      category: {
+        label: i18n.translate('core.ui.analyzeNavList.label', {
+          defaultMessage: 'Analyze',
+        }),
+        order: 1000,
+      },
       updater$: this.appStateUpdater.asObservable(),
-      navLinkId: 'kibana:visualize',
+      // remove all references to kibana:visualize
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
 
@@ -120,16 +130,23 @@ export class VisualizePlugin
           DefaultVisualizationEditor: DefaultEditorController,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
+          dashboard: pluginsStart.dashboard,
         };
         setServices(deps);
 
         const { renderApp } = await import('./application/application');
+        params.element.classList.add('visAppWrapper');
         const unmount = renderApp(params.element, params.appBasePath, deps);
         return () => {
           unmount();
           appUnMounted();
         };
       },
+    });
+
+    kibanaLegacy.forwardApp('visualize', 'visualize', path => {
+      const newPath = path.replace(/\/visualize/, '');
+      return `#${newPath}`;
     });
 
     if (home) {
@@ -141,7 +158,7 @@ export class VisualizePlugin
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',
         }),
         icon: 'visualizeApp',
-        path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
+        path: `/app/visualize#${VisualizeConstants.LANDING_PAGE_PATH}`,
         showOnHomePage: true,
         category: FeatureCatalogueCategory.DATA,
       });

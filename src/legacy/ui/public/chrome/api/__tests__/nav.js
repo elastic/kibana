@@ -124,8 +124,8 @@ describe('chrome nav apis', function() {
         },
         {
           id: 'kibana:visualize',
-          baseUrl: `${baseUrl}/app/kibana#visualize`,
-          subUrlBase: '/app/kibana#visualize',
+          baseUrl: `${baseUrl}/app/visualize#`,
+          subUrlBase: '/app/visualize#',
           legacy: true,
         },
         {
@@ -142,7 +142,7 @@ describe('chrome nav apis', function() {
       expect(fakedLinks[0].url).to.be(`${baseUrl}/app/kibana#discover?_g=globalstate`);
       expect(fakedLinks[0].active).to.be(false);
 
-      expect(fakedLinks[1].url).to.be(`${baseUrl}/app/kibana#visualize?_g=globalstate`);
+      expect(fakedLinks[1].url).to.be(`${baseUrl}/app/visualize#?_g=globalstate`);
       expect(fakedLinks[1].active).to.be(false);
 
       expect(fakedLinks[2].url).to.be(`${baseUrl}/app/kibana#dashboard?_g=globalstate`);
@@ -156,22 +156,22 @@ describe('chrome nav apis', function() {
       fakedLinks = [
         {
           id: 'kibana:visualize',
-          baseUrl: `${baseUrl}/app/kibana#visualize`,
-          url: `${baseUrl}/app/kibana#visualize`,
-          subUrlBase: '/app/kibana#visualize',
+          baseUrl: `${baseUrl}/app/visualize#`,
+          url: `${baseUrl}/app/visualize#`,
+          subUrlBase: '/app/visualize#',
           legacy: true,
         },
       ];
 
       const { chrome } = init({ appUrlStore });
       const kibanaParsedUrl = absoluteToParsedUrl(
-        `${baseUrl}/xyz/app/kibana#visualize/1234?_g=globalstate`,
+        `${baseUrl}/xyz/app/visualize#/1234?_g=globalstate`,
         '/xyz'
       );
       chrome.trackSubUrlForApp('kibana:visualize', kibanaParsedUrl);
       expect(
         coreNavLinks.update.calledWith('kibana:visualize', {
-          url: `${baseUrl}/xyz/app/kibana#visualize/1234?_g=globalstate`,
+          url: `${baseUrl}/xyz/app/visualize#/1234?_g=globalstate`,
         })
       ).to.be(true);
     });

@@ -59,7 +59,7 @@ describe('Relationships', () => {
             editUrl: '/management/kibana/objects/savedVisualizations/2',
             icon: 'visualizeApp',
             inAppUrl: {
-              path: '/app/kibana#/visualize/edit/2',
+              path: '/app/visualize#/edit/2',
               uiCapabilitiesPath: 'visualize.show',
             },
             title: 'My Visualization Title',
@@ -126,7 +126,7 @@ describe('Relationships', () => {
             editUrl: '/management/kibana/objects/savedVisualizations/2',
             icon: 'visualizeApp',
             inAppUrl: {
-              path: '/app/kibana#/visualize/edit/2',
+              path: '/app/visualize#/edit/2',
               uiCapabilitiesPath: 'visualize.show',
             },
             title: 'My Visualization Title',
@@ -210,7 +210,7 @@ describe('Relationships', () => {
           icon: 'visualizeApp',
           editUrl: '#/management/kibana/objects/savedVisualizations/1',
           inAppUrl: {
-            path: '/visualize/edit/1',
+            path: '/edit/1',
             uiCapabilitiesPath: 'visualize.show',
           },
         },
@@ -246,7 +246,7 @@ describe('Relationships', () => {
             editUrl: '/management/kibana/objects/savedVisualizations/1',
             icon: 'visualizeApp',
             inAppUrl: {
-              path: '/app/kibana#/visualize/edit/1',
+              path: '/app/visualize#/edit/1',
               uiCapabilitiesPath: 'visualize.show',
             },
             title: 'My Visualization Title 1',
@@ -260,7 +260,7 @@ describe('Relationships', () => {
             editUrl: '/management/kibana/objects/savedVisualizations/2',
             icon: 'visualizeApp',
             inAppUrl: {
-              path: '/app/kibana#/visualize/edit/2',
+              path: '/app/visualize#/edit/2',
               uiCapabilitiesPath: 'visualize.show',
             },
             title: 'My Visualization Title 2',

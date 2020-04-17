@@ -37,7 +37,7 @@ export default function({ getService, getPageObjects }) {
     it('clicking on console on homepage should take you to console app', async () => {
       await PageObjects.home.clickSynopsis('console');
       const url = await browser.getCurrentUrl();
-      expect(url.includes('/app/kibana#/dev_tools/console')).to.be(true);
+      expect(url.includes('/app/dev_tools#/console')).to.be(true);
     });
   });
 }

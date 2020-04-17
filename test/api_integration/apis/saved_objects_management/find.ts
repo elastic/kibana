@@ -62,7 +62,7 @@ export default function({ getService }: FtrProviderContext) {
                       '/management/kibana/objects/savedVisualizations/dd7caf20-9efd-11e7-acb3-3dab96693fab',
                     icon: 'visualizeApp',
                     inAppUrl: {
-                      path: '/app/kibana#/visualize/edit/dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                      path: '/app/visualize#/edit/dd7caf20-9efd-11e7-acb3-3dab96693fab',
                       uiCapabilitiesPath: 'visualize.show',
                     },
                     title: 'Count of requests',
@@ -256,7 +256,7 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
             });
@@ -266,7 +266,7 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
+                path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
             });

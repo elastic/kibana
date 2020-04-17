@@ -93,7 +93,7 @@ exports[`Relationships should render dashboards normally 1`] = `
                 "editUrl": "/management/kibana/objects/savedVisualizations/1",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
-                  "path": "/app/kibana#/visualize/edit/1",
+                  "path": "/app/visualize#/edit/1",
                   "uiCapabilitiesPath": "visualize.show",
                 },
                 "title": "My Visualization Title 1",
@@ -107,7 +107,7 @@ exports[`Relationships should render dashboards normally 1`] = `
                 "editUrl": "/management/kibana/objects/savedVisualizations/2",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
-                  "path": "/app/kibana#/visualize/edit/2",
+                  "path": "/app/visualize#/edit/2",
                   "uiCapabilitiesPath": "visualize.show",
                 },
                 "title": "My Visualization Title 2",
@@ -320,7 +320,7 @@ exports[`Relationships should render index patterns normally 1`] = `
                 "editUrl": "/management/kibana/objects/savedVisualizations/2",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
-                  "path": "/app/kibana#/visualize/edit/2",
+                  "path": "/app/visualize#/edit/2",
                   "uiCapabilitiesPath": "visualize.show",
                 },
                 "title": "My Visualization Title",
@@ -489,7 +489,7 @@ exports[`Relationships should render searches normally 1`] = `
                 "editUrl": "/management/kibana/objects/savedVisualizations/2",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
-                  "path": "/app/kibana#/visualize/edit/2",
+                  "path": "/app/visualize#/edit/2",
                   "uiCapabilitiesPath": "visualize.show",
                 },
                 "title": "My Visualization Title",

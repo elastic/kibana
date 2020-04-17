@@ -68,7 +68,7 @@ function DevToolsWrapper({
               isSelected={currentDevTool === activeDevTool}
               onClick={() => {
                 if (!currentDevTool.disabled) {
-                  updateRoute(`/dev_tools/${currentDevTool.id}`);
+                  updateRoute(`/${currentDevTool.id}`);
                 }
               }}
             >
@@ -115,7 +115,7 @@ function DevToolsWrapper({
 
 function redirectOnMissingCapabilities(appMountContext: AppMountContext) {
   if (!appMountContext.core.application.capabilities.dev_tools.show) {
-    window.location.hash = '/home';
+    appMountContext.core.application.navigateToApp('home');
     return true;
   }
   return false;
@@ -142,7 +142,7 @@ function setBreadcrumbs(appMountContext: AppMountContext) {
       text: i18n.translate('devTools.k7BreadcrumbsDevToolsLabel', {
         defaultMessage: 'Dev Tools',
       }),
-      href: '#/dev_tools',
+      href: '#/',
     },
   ]);
 }
@@ -165,7 +165,7 @@ export function renderApp(
           {devTools.map(devTool => (
             <Route
               key={devTool.id}
-              path={`/dev_tools/${devTool.id}`}
+              path={`/${devTool.id}`}
               exact={!devTool.enableRouting}
               render={props => (
                 <DevToolsWrapper
@@ -177,8 +177,8 @@ export function renderApp(
               )}
             />
           ))}
-          <Route path="/dev_tools">
-            <Redirect to={`/dev_tools/${devTools[0].id}`} />
+          <Route path="/">
+            <Redirect to={`/${devTools[0].id}`} />
           </Route>
         </Switch>
       </Router>

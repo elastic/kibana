@@ -74,28 +74,9 @@ export default function(kibana) {
           disableSubUrlTracking: true,
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
-        {
-          id: 'kibana:visualize',
-          title: i18n.translate('kbn.visualizeTitle', {
-            defaultMessage: 'Visualize',
-          }),
-          order: -1002,
-          url: `${kbnBaseUrl}#/visualize`,
-          euiIconType: 'visualizeApp',
-          disableSubUrlTracking: true,
-          category: DEFAULT_APP_CATEGORIES.analyze,
-        },
+        // TODO get rid of kibana:visualize references
         // TODO get rid of kibana:dashboard references
-        {
-          id: 'kibana:dev_tools',
-          title: i18n.translate('kbn.devToolsTitle', {
-            defaultMessage: 'Dev Tools',
-          }),
-          order: 9001,
-          url: '/app/kibana#/dev_tools',
-          euiIconType: 'devToolsApp',
-          category: DEFAULT_APP_CATEGORIES.management,
-        },
+        // TODO get rid of kibana:dev_tools references
         {
           id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {

@@ -210,6 +210,7 @@ export class Header extends Component<HeaderProps, State> {
                 href={this.props.homeHref}
                 forceNavigation={this.state.forceNavigation}
                 navLinks={navLinks}
+                navigateToApp={this.props.application.navigateToApp}
               />
             </EuiHeaderSectionItem>
 

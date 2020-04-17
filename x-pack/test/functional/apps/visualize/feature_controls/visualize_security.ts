@@ -92,7 +92,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('kibana', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -102,7 +102,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('can save existing Visualization', async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('kibana', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -216,7 +216,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -226,7 +226,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can't save existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -329,7 +329,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -337,7 +337,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can't save existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -430,7 +430,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`edit page redirects to home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });

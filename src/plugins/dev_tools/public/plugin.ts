@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { App, CoreSetup, Plugin } from 'kibana/public';
 import { sortBy } from 'lodash';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
@@ -97,14 +98,25 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
   }
 
   public setup(core: CoreSetup, { kibanaLegacy }: { kibanaLegacy: KibanaLegacySetup }) {
-    kibanaLegacy.registerLegacyApp({
+    core.application.register({
       id: 'dev_tools',
-      title: 'Dev Tools',
+      title: i18n.translate('kbn.devToolsTitle', {
+        defaultMessage: 'Dev Tools',
+      }),
+      euiIconType: 'devToolsApp',
+      order: 9001,
+      category: {
+        label: i18n.translate('core.ui.managementNavList.label', {
+          defaultMessage: 'Management',
+        }),
+        euiIconType: 'managementApp',
+      },
       mount: async (appMountContext, params) => {
         if (!this.getSortedDevTools) {
           throw new Error('not started yet');
         }
         const { renderApp } = await import('./application');
+        params.element.classList.add('devAppWrapper');
         return renderApp(
           params.element,
           appMountContext,

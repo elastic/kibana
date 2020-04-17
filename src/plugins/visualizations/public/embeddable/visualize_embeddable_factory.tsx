@@ -113,6 +113,7 @@ export class VisualizeEmbeddableFactory
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     showNewVisModal({
       editorParams: ['addToDashboard'],
+      outsideVisualizeApp: true,
     });
     return undefined;
   }

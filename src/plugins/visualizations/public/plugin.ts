@@ -23,6 +23,7 @@ import {
   setUISettings,
   setTypes,
   setI18n,
+  setApplication,
   setCapabilities,
   setHttp,
   setIndexPatterns,
@@ -137,6 +138,7 @@ export class VisualizationsPlugin
     const types = this.types.start();
     setI18n(core.i18n);
     setTypes(types);
+    setApplication(core.application);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
     setSavedObjects(core.savedObjects);

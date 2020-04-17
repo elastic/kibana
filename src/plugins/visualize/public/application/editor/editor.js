@@ -26,7 +26,7 @@ import { EventEmitter } from 'events';
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { makeStateful, useVisualizeAppState, addEmbeddableToDashboardUrl } from './lib';
+import { makeStateful, useVisualizeAppState } from './lib';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
@@ -46,6 +46,7 @@ import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
 
 import { getServices } from '../../kibana_services';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../visualizations/public';
 
 export function initEditorDirective(app, deps) {
   app.directive('visualizeApp', function() {
@@ -72,6 +73,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     I18nContext,
     setActiveUrl,
     visualizations,
+    dashboard,
   } = getServices();
 
   const {
@@ -632,9 +634,10 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               history.replace(appPath);
               setActiveUrl(appPath);
 
-              const lastDashboardUrl = chrome.navLinks.get('kibana:dashboard').url;
-              const dashboardUrl = addEmbeddableToDashboardUrl(lastDashboardUrl, savedVis.id);
-              history.push(dashboardUrl);
+              dashboard.addEmbeddableToDashboard({
+                embeddableId: savedVis.id,
+                embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
+              });
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));

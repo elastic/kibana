@@ -821,7 +821,7 @@
       "actions": [
         {
           "label": "Reindex in Console",
-          "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter.json"
+          "url": "/app/dev_tools#/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter.json"
         }
       ],
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade.html"
@@ -841,7 +841,7 @@
       "actions": [
         {
           "label": "Reindex in Console",
-          "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2F.reindex-status.json"
+          "url": "/app/dev_tools#/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2F.reindex-status.json"
         }
       ],
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade.html"
@@ -854,7 +854,7 @@
       "actions": [
         {
           "label": "Reindex in Console",
-          "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter2.json"
+          "url": "/app/dev_tools#/console?load_from=%2Fapi%2Fupgrade_assistant%2Freindex%2Fconsole_template%2Ftwitter2.json"
         }
       ],
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade.html"
