@@ -36,7 +36,10 @@ const InteractiveDemo: React.FC = () => {
   );
 };
 
-storiesOf('components/DashboardDrilldownConfig', module)
+storiesOf(
+  'services/drilldowns/dashboard_to_dashboard_drilldown/components/dashboard_drilldown_config',
+  module
+)
   .add('default', () => (
     <DashboardDrilldownConfig
       activeDashboardId={'dashboard2'}
