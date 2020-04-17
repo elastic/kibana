@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiText,
   EuiHorizontalRule,
@@ -17,12 +17,12 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
+import { isEqual } from 'lodash/fp';
 import * as i18n from './translations';
-import { Form, useForm } from '../../../../shared_imports';
+import { Form, FormDataProvider, useForm } from '../../../../shared_imports';
 import { schema } from './schema';
 import { CommonUseField } from '../create';
 import { useGetTags } from '../../../../containers/case/use_get_tags';
-import { ComboBoxField } from './form';
 
 interface TagListProps {
   disabled?: boolean;
@@ -57,13 +57,22 @@ export const TagList = React.memo(
       }
     }, [form, onSubmit]);
     const { tags: tagOptions } = useGetTags();
-    const options = useMemo(
-      () =>
-        tagOptions.map(label => ({
-          label,
-        })),
-      [tagOptions]
+    const [options, setOptions] = useState(
+      tagOptions.map(label => ({
+        label,
+      }))
     );
+
+    useEffect(
+      () =>
+        setOptions(
+          tagOptions.map(label => ({
+            label,
+          }))
+        ),
+      [tagOptions.length]
+    );
+
     return (
       <EuiText>
         <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -84,7 +93,7 @@ export const TagList = React.memo(
           )}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-        <MyFlexGroup gutterSize="xs" data-test-subj="grr">
+        <MyFlexGroup gutterSize="xs" data-test-subj="grr" wrap>
           {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
           {tags.length > 0 &&
             !isEditTags &&
@@ -101,7 +110,6 @@ export const TagList = React.memo(
                 <Form form={form}>
                   <CommonUseField
                     path="tags"
-                    // component={ComboBoxField}
                     componentProps={{
                       idAria: 'caseTags',
                       'data-test-subj': 'caseTags',
@@ -113,6 +121,25 @@ export const TagList = React.memo(
                       },
                     }}
                   />
+                  <FormDataProvider pathsToWatch="tags">
+                    {({ tags: anotherTags }) => {
+                      const current: string[] = options.map(opt => opt.label);
+                      const newOptions = anotherTags.reduce((acc: string[], item: string) => {
+                        if (!acc.includes(item)) {
+                          return [...acc, item];
+                        }
+                        return acc;
+                      }, current);
+                      if (!isEqual(current, newOptions)) {
+                        setOptions(
+                          newOptions.map((label: string) => ({
+                            label,
+                          }))
+                        );
+                      }
+                      return null;
+                    }}
+                  </FormDataProvider>
                 </Form>
               </EuiFlexItem>
               <EuiFlexItem>
