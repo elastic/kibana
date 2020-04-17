@@ -28,7 +28,6 @@ import {
 
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { Storage } from '../../kibana_utils/public';
-import { EmbeddableStart } from '../../embeddable/public';
 import { SharePluginStart } from '../../share/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { VisualizationsStart } from '../../visualizations/public';
@@ -42,7 +41,6 @@ export interface VisualizeKibanaServices {
   chrome: ChromeStart;
   core: CoreStart;
   data: DataPublicPluginStart;
-  embeddable: EmbeddableStart;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;

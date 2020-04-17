@@ -31,7 +31,6 @@ import {
 
 import { Storage, createKbnUrlTracker } from '../../kibana_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { EmbeddableStart } from '../../embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart } from '../../share/public';
 import { KibanaLegacySetup, AngularRenderedAppUpdater } from '../../kibana_legacy/public';
@@ -43,7 +42,6 @@ import { DefaultEditorController } from '../../vis_default_editor/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
-  embeddable: EmbeddableStart;
   navigation: NavigationStart;
   share?: SharePluginStart;
   visualizations: VisualizationsStart;
@@ -109,7 +107,6 @@ export class VisualizePlugin
           config: kibanaLegacy.config,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
-          embeddable: pluginsStart.embeddable,
           localStorage: new Storage(localStorage),
           navigation: pluginsStart.navigation,
           savedObjectsClient: coreStart.savedObjects.client,

@@ -35,7 +35,7 @@ const leftJoin = new InnerJoin(
   },
   mockSource
 );
-const COUNT_PROPERTY_NAME = '__kbnjoin__count_groupby_kibana_sample_data_logs.geo.dest';
+const COUNT_PROPERTY_NAME = '__kbnjoin__count__d3625663-5b34-4d50-a784-0d743f676a0c';
 
 describe('joinPropertiesToFeature', () => {
   it('Should add join property to features in feature collection', () => {

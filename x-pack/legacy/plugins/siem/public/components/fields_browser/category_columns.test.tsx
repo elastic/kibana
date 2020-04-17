@@ -68,30 +68,6 @@ describe('getCategoryColumns', () => {
     });
   });
 
-  test('it renders a hover actions panel for the category name', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <CategoriesPane
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          width={CATEGORY_PANE_WIDTH}
-          onCategorySelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
-      </ThemeProvider>
-    );
-    expect(
-      wrapper
-        .find('[data-test-subj="category-link"]')
-        .first()
-        .find('[data-test-subj="hover-actions-panel-container"]')
-        .first()
-        .exists()
-    ).toBe(true);
-  });
-
   test('it renders the selected category with bold text', () => {
     const selectedCategoryId = 'auditd';
 
