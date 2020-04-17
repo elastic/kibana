@@ -111,7 +111,7 @@ export default function({ getService }: FtrProviderContext) {
           .get(uri)
           .set('kbn-xsrf', 'foo')
           .expect(200);
-        expect(result.body.data.length).to.be.above(1);
+        expect(result.body.data.length).to.be.eql(1);
       });
     });
   });
