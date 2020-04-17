@@ -113,11 +113,11 @@ describe('Table Vis - Controller', () => {
       (cfg: any) => cfg,
       'time',
       stubFields,
-      coreMock.createStart()
+      coreMock.createSetup()
     );
   });
   const tableVisTypeDefinition = getTableVisTypeDefinition(
-    coreMock.createStart(),
+    coreMock.createSetup(),
     coreMock.createPluginInitializerContext()
   );
 
