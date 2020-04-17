@@ -33,89 +33,77 @@ export const updateTimelinesRoute = (
         tags: ['access:siem'],
       },
     },
+    // eslint-disable-next-line complexity
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
         const savedObjectsClient = context.core.savedObjects.client;
         const user = await security?.authc.getCurrentUser(request);
-        const { timelineId, templateTimelineId, timeline, timelineType, version } = request.body;
-        const isHandlingTemplateTimeline = timelineType === TimelineType.template;
-        let existTimeline = null;
-        let existTemplateTimeline = null;
         let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);
         frameworkRequest = set('user', user, frameworkRequest);
 
-        if (!isNil(timelineId)) {
-          existTimeline = await getTimeline(
+        const {
+          timelineId,
+          templateTimelineId,
+          templateTimelineVersion,
+          timeline,
+          timelineType,
+          version,
+        } = request.body;
+        const isHandlingTemplateTimeline = timeline.timelineType === TimelineType.template;
+
+        const existTimeline =
+          timeline.savedObjectId != null
+            ? await getTimeline((frameworkRequest as unknown) as FrameworkRequest, timelineId)
+            : null;
+        const existTemplateTimeline =
+          templateTimelineId != null ? await getTemplateTimeline() : null;
+
+        if (!isHandlingTemplateTimeline && existTimeline == null) {
+          // Throw error to create timeline in patch
+        } else if (isHandlingTemplateTimeline && existTemplateTimeline == null) {
+          // Throw error to create template timeline in patch
+        } else if (
+          isHandlingTemplateTimeline &&
+          existTimeline != null &&
+          existTemplateTimeline != null &&
+          existTimeline.savedObjectId !== existTemplateTimeline.savedObjectId
+        ) {
+          // Throw error you can not have a no matching between your timeline and your template timeline during an update
+        } else if (!isHandlingTemplateTimeline && existTimeline?.version !== version) {
+          // throw error 409 conflict timeline
+        } else if (
+          isHandlingTemplateTimeline &&
+          existTemplateTimeline.templateTimelineVersion == null &&
+          existTemplateTimeline.version !== version
+        ) {
+          // throw error 409 conflict timeline
+        } else if (
+          isHandlingTemplateTimeline &&
+          existTemplateTimeline.templateTimelineVersion != null &&
+          existTemplateTimeline.templateTimelineVersion < templateTimelineVersion
+        ) {
+          // Throw error you can not update a template timeline version with an old version
+        }
+
+          await createTimelines(
             (frameworkRequest as unknown) as FrameworkRequest,
-            timelineId
+            timeline,
+            timelineId,
+            version,
+            isHandlingTemplateTimeline: { templateTimelineId, templateTimelineVersion} : null
           );
-        }
-
-        // Manipulate timeline
-        if (!isHandlingTemplateTimeline) {
-          if (existTimeline == null || isNil(timelineId)) {
-            // Try to Create timeline with PATCH
-            return siemResponse.error({
-              body: 'CREATE timeline with PATCH is not allowed, please use POST instead',
-              statusCode: 405,
-            });
-          } else {
-            // Update timeline
-            await createTimelines(
-              (frameworkRequest as unknown) as FrameworkRequest,
-              omit(timelineSavedObjectOmittedFields, timeline),
-              timelineId,
-              version
-            );
-            return response.ok({
-              body: {
-                data: {
-                  persistTimeline: {
-                    message: 'success',
-                    timeline,
-                  },
+          return response.ok({
+            body: {
+              data: {
+                persistTimeline: {
+                  message: 'success',
+                  timeline,
                 },
               },
-            });
-          }
-        } else {
-          // Manipulate template timeline
-          if (
-            !isNil(templateTimelineId) &&
-            existTimeline?.templateTimelineId === templateTimelineId
-          ) {
-            existTemplateTimeline = existTimeline;
-          }
-
-          if (existTemplateTimeline == null || isNil(timelineId) || isNil(templateTimelineId)) {
-            // Try to Create template timeline with PATCH
-            return siemResponse.error({
-              body: 'CREATE template timeline with PATCH is not allowed, please use POST instead',
-              statusCode: 405,
-            });
-          } else {
-            // Update Template timeline
-            const newTemplateTimeline = await createTemplateTimelines(
-              (frameworkRequest as unknown) as FrameworkRequest,
-              omit(timelineSavedObjectOmittedFields, timeline),
-              timelineId,
-              version,
-              templateTimelineId
-            );
-            return response.ok({
-              body: {
-                data: {
-                  persistTimeline: {
-                    message: 'success',
-                    timeline: newTemplateTimeline,
-                  },
-                },
-              },
-            });
-          }
-        }
+            },
+          });
       } catch (err) {
         const error = transformError(err);
 

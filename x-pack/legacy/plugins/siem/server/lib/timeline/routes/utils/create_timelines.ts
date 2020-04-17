@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { isEmpty } from 'lodash/fp';
 import { Timeline } from '../../saved_object';
 import { PinnedEvent } from '../../../pinned_event/saved_object';
 import { Note } from '../../../note/saved_object';
@@ -10,10 +11,12 @@ import { FrameworkRequest } from '../../../framework';
 import { SavedTimeline } from '../../types';
 import { NoteResult } from '../../../../../public/graphql/types';
 import { SavedNote } from '../../../note/types';
+import { ResponseNote } from '../../../../graphql/types';
 
 const pinnedEventLib = new PinnedEvent();
 const timelineLib = new Timeline();
 const noteLib = new Note();
+
 export const saveTimelines = async (
   frameworkRequest: FrameworkRequest,
   timeline: SavedTimeline,
@@ -36,19 +39,18 @@ export const saveTimelines = async (
 export const savePinnedEvents = (
   frameworkRequest: FrameworkRequest,
   timelineSavedObjectId: string,
-  pinnedEventIds?: string[] | null
-) => {
-  return (
-    pinnedEventIds?.map(eventId => {
-      return pinnedEventLib.persistPinnedEventOnTimeline(
+  pinnedEventIds: string[]
+) =>
+  Promise.all(
+    pinnedEventIds.map(eventId =>
+      pinnedEventLib.persistPinnedEventOnTimeline(
         frameworkRequest,
         null, // pinnedEventSavedObjectId
         eventId,
         timelineSavedObjectId
-      );
-    }) ?? []
+      )
+    )
   );
-};
 
 export const saveNotes = (
   frameworkRequest: FrameworkRequest,
@@ -90,20 +92,34 @@ export const createTimelines = async (
     timelineSavedObjectId,
     timelineVersion
   );
-  await Promise.all([
-    savePinnedEvents(
-      frameworkRequest,
-      timelineSavedObjectId ?? newTimelineSavedObjectId,
-      pinnedEventIds
-    ),
-    saveNotes(
-      frameworkRequest,
-      timelineSavedObjectId ?? newTimelineSavedObjectId,
-      newTimelineVersion,
-      existingNoteIds,
-      notes
-    ),
-  ]);
+
+  let myPromises: unknown[] = [];
+  if (pinnedEventIds != null && !isEmpty(pinnedEventIds)) {
+    myPromises = [
+      ...myPromises,
+      savePinnedEvents(
+        frameworkRequest,
+        timelineSavedObjectId ?? newTimelineSavedObjectId,
+        pinnedEventIds
+      ),
+    ];
+  }
+  if (!isEmpty(notes)) {
+    myPromises = [
+      ...myPromises,
+      saveNotes(
+        frameworkRequest,
+        timelineSavedObjectId ?? newTimelineSavedObjectId,
+        newTimelineVersion,
+        existingNoteIds,
+        notes
+      ),
+    ];
+  }
+
+  if (myPromises.length > 0) {
+    await Promise.all(myPromises);
+  }
 
   return newTimelineSavedObjectId;
 };

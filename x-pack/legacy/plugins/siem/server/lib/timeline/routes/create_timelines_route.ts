@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { set, omit, isNil } from 'lodash/fp';
+import { set, omit } from 'lodash/fp';
 import { TIMELINE_URL } from '../../../../common/constants';
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 import { FrameworkRequest } from '../../framework';
@@ -44,91 +44,48 @@ export const createTimelinesRoute = (
       try {
         const savedObjectsClient = context.core.savedObjects.client;
         const user = await security?.authc.getCurrentUser(request);
-        const { timelineId, templateTimelineId, timeline, timelineType, version } = request.body;
-        const isHandlingTemplateTimeline = timelineType === TimelineType.template;
-        let existTimeline = null;
-        let existTemplateTimeline = null;
         let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);
         frameworkRequest = set('user', user, frameworkRequest);
-        // console.log('-------Manipulate timeline: timelineId--------', request.body);
-        if (!isNil(timelineId)) {
-          existTimeline = await getTimeline(
-            (frameworkRequest as unknown) as FrameworkRequest,
-            timelineId
-          );
+
+        const { timelineId, templateTimelineId, timeline, timelineType, version } = request.body;
+        const isHandlingTemplateTimeline = timelineType === TimelineType.template;
+
+        const existTimeline =
+          timelineId != null
+            ? await getTimeline((frameworkRequest as unknown) as FrameworkRequest, timelineId)
+            : null;
+        const existTemplateTimeline =
+          templateTimelineId != null ? await getTemplateTimeline() : null;
+
+        if (
+          (!isHandlingTemplateTimeline && existTimeline != null) ||
+          (isHandlingTemplateTimeline && (existTemplateTimeline != null || existTimeline != null))
+        ) {
+          return siemResponse.error({
+            body: isHandlingTemplateTimeline
+              ? CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE
+              : CREATE_TIMELINE_ERROR_MESSAGE,
+            statusCode: 405,
+          });
         }
 
-        // Manipulate timeline
-
-        if (!isHandlingTemplateTimeline) {
-          if (existTimeline == null || isNil(timelineId)) {
-            // Create timeline
-            const newTimeline = await createTimelines(
-              (frameworkRequest as unknown) as FrameworkRequest,
-              omit(timelineSavedObjectOmittedFields, timeline),
-              timelineId,
-              version
-            );
-            return response.ok({
-              body: {
-                data: {
-                  persistTimeline: {
-                    message: 'success',
-                    timeline: newTimeline,
-                  },
-                },
+        // Create timeline
+        const newTimeline = await createTimelines(
+          (frameworkRequest as unknown) as FrameworkRequest,
+          timeline,
+          null,
+          version
+        );
+        return response.ok({
+          body: {
+            data: {
+              persistTimeline: {
+                message: 'success',
+                timeline: newTimeline,
               },
-            });
-          } else {
-            // Try to Update timeline with POST
-            return siemResponse.error({
-              body: CREATE_TIMELINE_ERROR_MESSAGE,
-              statusCode: 405,
-            });
-          }
-        } else {
-          // Manipulate template timeline
-          if (
-            !isNil(templateTimelineId) &&
-            existTimeline?.templateTimelineId === templateTimelineId
-          ) {
-            existTemplateTimeline = existTimeline;
-          }
-
-          if (existTemplateTimeline == null || isNil(timelineId) || isNil(templateTimelineId)) {
-            console.log(
-              '0000',
-              existTimeline,
-              existTemplateTimeline,
-              timelineId,
-              isHandlingTemplateTimeline
-            );
-
-            // Create Template timeline
-            const newTemplateTimeline = await createTemplateTimelines(
-              (frameworkRequest as unknown) as FrameworkRequest,
-              omit(timelineSavedObjectOmittedFields, timeline),
-              null,
-              version
-            );
-            return response.ok({
-              body: {
-                data: {
-                  persistTimeline: {
-                    message: 'success',
-                    timeline: newTemplateTimeline,
-                  },
-                },
-              },
-            });
-          } else {
-            // Try to Update Template timeline with POST
-            return siemResponse.error({
-              body: CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
-              statusCode: 405,
-            });
-          }
-        }
+            },
+          },
+        });
       } catch (err) {
         const error = transformError(err);
 
