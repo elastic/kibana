@@ -120,6 +120,12 @@ export const MonitorListComponent = (props: Props) => {
     },
     {
       align: 'center' as const,
+      field: 'state.tls',
+      name: labels.HISTORY_COLUMN_LABEL,
+      render: () => <div>TLS Certificate Expires Soon</div>,
+    },
+    {
+      align: 'center' as const,
       field: 'histogram.points',
       name: labels.HISTORY_COLUMN_LABEL,
       mobileOptions: {
