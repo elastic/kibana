@@ -189,12 +189,17 @@ function DatatableComponent(
         columns={props.args.columns.columnIds
           .map((field, index) => {
             const col = firstTable.columns.find(c => c.id === field);
+            // todo: get the list of unsupported operations from operations
+            const nonFilterable =
+              !col?.meta?.type ||
+              ['sum', 'cardinality', 'max', 'min', 'avg', 'count'].includes(col.meta.type);
+
             return {
               field,
               name: (col && col.name) || '',
               render: (value: unknown) => {
                 const formattedValue = formatters[field].convert(value);
-                if (props.args.columns.filterable[index]) {
+                if (!nonFilterable && value) {
                   return (
                     <EuiFlexGroup justifyContent="spaceBetween" className="lnsDataTable__cell">
                       <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>

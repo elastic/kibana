@@ -204,7 +204,6 @@ export const datatableVisualization: Visualization<
                     function: 'lens_datatable_columns',
                     arguments: {
                       columnIds: operations.map(o => o.columnId),
-                      filterable: operations.map(o => o.operation.isBucketed),
                     },
                   },
                 ],
