@@ -38,7 +38,7 @@ import {
 } from './components';
 import { ChartTooltip } from '../components/chart_tooltip';
 import { ExplorerSwimlane } from './explorer_swimlane';
-import { TimeBuckets } from '../util/time_buckets';
+import { getTimeBucketsFromCache } from '../util/time_buckets';
 import { InfluencersList } from '../components/influencers_list';
 import {
   ALLOW_CELL_RANGE_SELECTION,
@@ -179,6 +179,8 @@ export class Explorer extends React.Component {
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
     this.resizeChecker.on('resize', this.resizeHandler);
+
+    this.timeBuckets = getTimeBucketsFromCache();
   }
 
   componentWillUnmount() {
@@ -422,7 +424,7 @@ export class Explorer extends React.Component {
                   chartWidth={swimlaneContainerWidth}
                   filterActive={filterActive}
                   maskAll={maskAll}
-                  TimeBuckets={TimeBuckets}
+                  timeBuckets={this.timeBuckets}
                   swimlaneCellClick={this.swimlaneCellClick}
                   swimlaneData={overallSwimlaneData}
                   swimlaneType={SWIMLANE_TYPE.OVERALL}
@@ -498,7 +500,7 @@ export class Explorer extends React.Component {
                         chartWidth={swimlaneContainerWidth}
                         filterActive={filterActive}
                         maskAll={maskAll}
-                        TimeBuckets={TimeBuckets}
+                        timeBuckets={this.timeBuckets}
                         swimlaneCellClick={this.swimlaneCellClick}
                         swimlaneData={viewBySwimlaneData}
                         swimlaneType={SWIMLANE_TYPE.VIEW_BY}

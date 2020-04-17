@@ -17,8 +17,15 @@ export declare interface TimeBucketsInterval {
   expression: string;
 }
 
+export interface TimeBucketsConfig {
+  'histogram:maxBars': number;
+  'histogram:barTarget': number;
+  dateFormat: string;
+  'dateFormat:scaled': string[][];
+}
+
 export declare class TimeBuckets {
-  constructor();
+  constructor(timeBucketsConfig: TimeBucketsConfig);
   public setBarTarget(barTarget: number): void;
   public setMaxBars(maxBars: number): void;
   public setInterval(interval: string): void;
@@ -27,3 +34,5 @@ export declare class TimeBuckets {
   public getInterval(): TimeBucketsInterval;
   public getScaledDateFormat(): string;
 }
+
+export declare function getTimeBucketsFromCache(): InstanceType<typeof TimeBuckets>;

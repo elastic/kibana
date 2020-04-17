@@ -33,7 +33,7 @@ import {
   showMultiBucketAnomalyTooltip,
 } from '../../../util/chart_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
-import { TimeBuckets } from '../../../util/time_buckets';
+import { getTimeBucketsFromCache } from '../../../util/time_buckets';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
@@ -691,7 +691,7 @@ class TimeseriesChartIntl extends Component {
     }
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = new TimeBuckets();
+    const timeBuckets = getTimeBucketsFromCache();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
@@ -1019,7 +1019,7 @@ class TimeseriesChartIntl extends Component {
       .attr('y2', cxtChartHeight + swlHeight);
 
     // Add x axis.
-    const timeBuckets = new TimeBuckets();
+    const timeBuckets = getTimeBucketsFromCache();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();

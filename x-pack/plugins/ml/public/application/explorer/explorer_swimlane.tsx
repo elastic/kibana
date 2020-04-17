@@ -54,7 +54,7 @@ interface ExplorerSwimlaneProps {
   chartWidth: number;
   filterActive?: boolean;
   maskAll?: boolean;
-  TimeBuckets: typeof TimeBucketsClass;
+  timeBuckets: InstanceType<typeof TimeBucketsClass>;
   swimlaneCellClick: Function;
   swimlaneData: {
     laneLabels: any[];
@@ -78,7 +78,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     chartWidth: PropTypes.number.isRequired,
     filterActive: PropTypes.bool,
     maskAll: PropTypes.bool,
-    TimeBuckets: PropTypes.func.isRequired,
+    timeBuckets: PropTypes.object.isRequired,
     swimlaneCellClick: PropTypes.func.isRequired,
     swimlaneData: PropTypes.shape({
       laneLabels: PropTypes.array.isRequired,
@@ -306,7 +306,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       chartWidth,
       filterActive,
       maskAll,
-      TimeBuckets,
+      timeBuckets,
       swimlaneCellClick,
       swimlaneData,
       swimlaneType,
@@ -343,7 +343,6 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       .range([0, xAxisWidth]);
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = new TimeBuckets();
     timeBuckets.setInterval(`${stepSecs}s`);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
