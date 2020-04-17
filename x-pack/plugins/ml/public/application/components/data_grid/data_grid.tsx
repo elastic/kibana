@@ -19,13 +19,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { CoreSetup } from 'src/core/public';
 
 import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
-import { DataGridTitle } from './data_grid_title';
 import { INDEX_STATUS, UseIndexDataReturnType } from './types';
+
+export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
+  <EuiTitle size="xs">
+    <span>{title}</span>
+  </EuiTitle>
+);
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
   dataTestSubj: string;
@@ -81,7 +87,7 @@ export const DataGrid: FC<Props> = props => {
   if (status === INDEX_STATUS.LOADED && data.length === 0) {
     return (
       <div data-test-subj={`${dataTestSubj} empty`}>
-        {isWithHeader(props) && <DataGridTitle dataGridTitle={props.title} />}
+        {isWithHeader(props) && <DataGridTitle title={props.title} />}
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataGrid.IndexNoDataCalloutTitle', {
             defaultMessage: 'Empty index query result.',
@@ -102,7 +108,7 @@ export const DataGrid: FC<Props> = props => {
   if (noDataMessage !== '') {
     return (
       <div data-test-subj={`${dataTestSubj} empty`}>
-        {isWithHeader(props) && <DataGridTitle dataGridTitle={props.title} />}
+        {isWithHeader(props) && <DataGridTitle title={props.title} />}
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataGrid.dataGridNoDataCalloutTitle', {
             defaultMessage: 'Index preview not available',
@@ -120,7 +126,7 @@ export const DataGrid: FC<Props> = props => {
       {isWithHeader(props) && (
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem>
-            <DataGridTitle dataGridTitle={props.title} />
+            <DataGridTitle title={props.title} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiCopy

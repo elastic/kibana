@@ -18,25 +18,20 @@ import {
   getDefaultStepDefineState,
 } from '../../../create_transform/components/step_define/';
 
-interface Props {
+interface ExpandedRowPreviewPaneProps {
   transformConfig: TransformPivotConfig;
 }
 
-export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
+export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {
   const toastNotifications = useToastNotifications();
-  const previewConfig = applyTransformConfigToDefineState(
+  const { aggList, groupByList, searchQuery } = applyTransformConfigToDefineState(
     getDefaultStepDefineState({} as SearchItems),
     transformConfig
   );
-
-  const { aggList, groupByList, searchQuery } = previewConfig;
-
   const pivotQuery = getPivotQuery(searchQuery);
-
   const indexPatternTitle = Array.isArray(transformConfig.source.index)
     ? transformConfig.source.index.join(',')
     : transformConfig.source.index;
-
   const pivotPreviewProps = usePivotData(indexPatternTitle, pivotQuery, aggList, groupByList);
 
   return (
