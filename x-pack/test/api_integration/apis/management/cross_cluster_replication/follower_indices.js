@@ -21,6 +21,7 @@ export default function({ getService }) {
     loadFollowerIndices,
     getFollowerIndex,
     createFollowerIndex,
+    updateFollowerIndex,
     unfollowAll,
   } = registerFollowerIndicesnHelpers(supertest);
 
@@ -89,6 +90,31 @@ export default function({ getService }) {
 
         expect(body.leaderIndex).to.eql(leaderIndex);
         expect(body.remoteCluster).to.eql(payload.remoteCluster);
+      });
+    });
+
+    describe('update()', () => {
+      it('should update a follower index advanced settings', async () => {
+        // Create a follower index
+        const leaderIndex = await createIndex();
+        const followerIndex = getRandomString();
+        const initialValue = 1234;
+        const payload = getFollowerIndexPayload(leaderIndex, undefined, {
+          maxReadRequestOperationCount: initialValue,
+        });
+        await createFollowerIndex(followerIndex, payload);
+
+        // Verify that its advanced settings are correctly set
+        const { body } = await getFollowerIndex(followerIndex, true);
+        expect(body.maxReadRequestOperationCount).to.be(initialValue);
+
+        // Update the follower index
+        const updatedValue = 7777;
+        await updateFollowerIndex(followerIndex, { maxReadRequestOperationCount: updatedValue });
+
+        // Verify that the advanced settings are updated
+        const { body: updatedBody } = await getFollowerIndex(followerIndex, true);
+        expect(updatedBody.maxReadRequestOperationCount).to.be(updatedValue);
       });
     });
 
