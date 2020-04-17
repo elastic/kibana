@@ -3,8 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { showAllOthersBucket } from '../../../common/constants';
 import { createQueryFilterClauses, calculateTimeSeriesInterval } from '../../utils/build_query';
 import { MatrixHistogramRequestOptions } from '../framework';
+
+import * as i18n from './translations';
 
 export const buildEventsOverTimeQuery = ({
   filterQuery,
@@ -41,11 +45,19 @@ export const buildEventsOverTimeQuery = ({
         },
       },
     };
+
+    const missing =
+      stackByField != null && showAllOthersBucket.includes(stackByField)
+        ? {
+            missing: stackByField?.endsWith('.ip') ? '0.0.0.0' : i18n.ALL_OTHERS,
+          }
+        : {};
+
     return {
       eventActionGroup: {
         terms: {
           field: stackByField,
-          missing: 'All others',
+          ...missing,
           order: {
             _count: 'desc',
           },
