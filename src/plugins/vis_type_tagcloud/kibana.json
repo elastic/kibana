@@ -1,5 +1,5 @@
 {
-  "id": "tagcloud",
+  "id": "visTypeTagcloud",
   "version": "kibana",
   "ui": true,
   "requiredPlugins": ["data", "expressions", "visualizations", "charts"]

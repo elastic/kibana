@@ -26,6 +26,7 @@ import { createTagCloudFn } from './tag_cloud_fn';
 import { createTagCloudVisTypeDefinition } from './tag_cloud_type';
 import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService } from './services';
+import './index.scss';
 
 /** @internal */
 export interface TagCloudPluginSetupDependencies {
