@@ -3,12 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 import { i18n } from '@kbn/i18n';
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
@@ -56,28 +50,30 @@ export enum SORT_ORDER {
   DESC = 'desc',
 }
 
-export const EMS_TMS = 'EMS_TMS';
-export const EMS_FILE = 'EMS_FILE';
-export const ES_GEO_GRID = 'ES_GEO_GRID';
-export const ES_SEARCH = 'ES_SEARCH';
-export const ES_PEW_PEW = 'ES_PEW_PEW';
-export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
-export const WMS = 'WMS';
-export const KIBANA_TILEMAP = 'KIBANA_TILEMAP';
-export const REGIONMAP_FILE = 'REGIONMAP_FILE';
+export enum SOURCE_TYPES {
+  EMS_TMS = 'EMS_TMS',
+  EMS_FILE = 'EMS_FILE',
+  ES_GEO_GRID = 'ES_GEO_GRID',
+  ES_SEARCH = 'ES_SEARCH',
+  ES_PEW_PEW = 'ES_PEW_PEW',
+  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. Name is a little unfortunate.
+  WMS = 'WMS',
+  KIBANA_TILEMAP = 'KIBANA_TILEMAP',
+  REGIONMAP_FILE = 'REGIONMAP_FILE',
+  GEOJSON_FILE = 'GEOJSON_FILE',
+}
 
 export enum FIELD_ORIGIN {
   SOURCE = 'source',
   JOIN = 'join',
 }
+export const JOIN_FIELD_NAME_PREFIX = '__kbnjoin__';
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 export const META_ID_ORIGIN_SUFFIX = 'meta';
 export const SOURCE_META_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${META_ID_ORIGIN_SUFFIX}`;
 export const FORMATTERS_ID_ORIGIN_SUFFIX = 'formatters';
 export const SOURCE_FORMATTERS_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${FORMATTERS_ID_ORIGIN_SUFFIX}`;
-
-export const GEOJSON_FILE = 'GEOJSON_FILE';
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
@@ -129,6 +125,7 @@ export enum DRAW_TYPE {
   POLYGON = 'POLYGON',
 }
 
+export const AGG_DELIMITER = '_of_';
 export enum AGG_TYPE {
   AVG = 'avg',
   COUNT = 'count',

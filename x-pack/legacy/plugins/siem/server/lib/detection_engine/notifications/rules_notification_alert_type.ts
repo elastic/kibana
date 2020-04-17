@@ -45,7 +45,9 @@ export const rulesNotificationAlertType = ({
     const ruleParams = { ...ruleAlertParams, name: ruleName, id: ruleAlertSavedObject.id };
 
     const fromInMs = parseScheduleDates(
-      previousStartedAt ? previousStartedAt.toISOString() : `now-${ruleParams.interval}`
+      previousStartedAt
+        ? previousStartedAt.toISOString()
+        : `now-${ruleAlertSavedObject.attributes.schedule.interval}`
     )?.format('x');
     const toInMs = parseScheduleDates(startedAt.toISOString())?.format('x');
 

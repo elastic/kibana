@@ -6,7 +6,7 @@
 
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams } from '../types';
+import { RuleTypeParams, RefreshTypes } from '../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -30,6 +30,7 @@ interface SearchAfterAndBulkCreateParams {
   enabled: boolean;
   pageSize: number;
   filter: unknown;
+  refresh: RefreshTypes;
   tags: string[];
   throttle: string;
 }
@@ -61,6 +62,7 @@ export const searchAfterAndBulkCreate = async ({
   interval,
   enabled,
   pageSize,
+  refresh,
   tags,
   throttle,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
@@ -92,6 +94,7 @@ export const searchAfterAndBulkCreate = async ({
     updatedBy,
     interval,
     enabled,
+    refresh,
     tags,
     throttle,
   });
@@ -179,6 +182,7 @@ export const searchAfterAndBulkCreate = async ({
         updatedBy,
         interval,
         enabled,
+        refresh,
         tags,
         throttle,
       });

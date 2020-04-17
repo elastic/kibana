@@ -10,7 +10,7 @@ import { SearchResponse } from 'elasticsearch';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams } from '../types';
+import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 
@@ -29,6 +29,7 @@ interface BulkCreateMlSignalsParams {
   updatedBy: string;
   interval: string;
   enabled: boolean;
+  refresh: RefreshTypes;
   tags: string[];
   throttle: string;
 }

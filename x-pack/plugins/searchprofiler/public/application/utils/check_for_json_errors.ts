@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { collapseLiteralStrings } from '../../../../../../src/plugins/es_ui_shared/console_lang/lib';
+import { collapseLiteralStrings } from '../../../../../../src/plugins/es_ui_shared/public';
 
 export function checkForParseErrors(json: string) {
   const sanitizedJson = collapseLiteralStrings(json);

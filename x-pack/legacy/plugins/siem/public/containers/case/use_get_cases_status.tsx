@@ -23,7 +23,7 @@ const initialData: CasesStatusState = {
   isError: false,
 };
 
-interface UseGetCasesStatus extends CasesStatusState {
+export interface UseGetCasesStatus extends CasesStatusState {
   fetchCasesStatus: () => void;
 }
 

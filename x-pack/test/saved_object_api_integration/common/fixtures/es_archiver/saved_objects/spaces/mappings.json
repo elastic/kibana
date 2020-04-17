@@ -84,7 +84,7 @@
           },
           "globaltype": {
             "properties": {
-              "name": {
+              "title": {
                 "fields": {
                   "keyword": {
                     "ignore_above": 2048,
@@ -149,7 +149,39 @@
               }
             }
           },
+          "isolatedtype": {
+            "properties": {
+              "description": {
+                "type": "text"
+              },
+              "kibanaSavedObjectMeta": {
+                "properties": {
+                  "searchSourceJSON": {
+                    "type": "text"
+                  }
+                }
+              },
+              "savedSearchId": {
+                "type": "keyword"
+              },
+              "title": {
+                "type": "text"
+              },
+              "uiStateJSON": {
+                "type": "text"
+              },
+              "version": {
+                "type": "integer"
+              },
+              "visState": {
+                "type": "text"
+              }
+            }
+          },
           "namespace": {
+            "type": "keyword"
+          },
+          "namespaces": {
             "type": "keyword"
           },
           "search": {
@@ -185,6 +217,19 @@
             "properties": {
               "uuid": {
                 "type": "keyword"
+              }
+            }
+          },
+          "sharedtype": {
+            "properties": {
+              "title": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 2048
+                  }
+                }
               }
             }
           },
@@ -281,35 +326,6 @@
                     "type": "keyword"
                   }
                 },
-                "type": "text"
-              }
-            }
-          },
-          "visualization": {
-            "properties": {
-              "description": {
-                "type": "text"
-              },
-              "kibanaSavedObjectMeta": {
-                "properties": {
-                  "searchSourceJSON": {
-                    "type": "text"
-                  }
-                }
-              },
-              "savedSearchId": {
-                "type": "keyword"
-              },
-              "title": {
-                "type": "text"
-              },
-              "uiStateJSON": {
-                "type": "text"
-              },
-              "version": {
-                "type": "integer"
-              },
-              "visState": {
                 "type": "text"
               }
             }

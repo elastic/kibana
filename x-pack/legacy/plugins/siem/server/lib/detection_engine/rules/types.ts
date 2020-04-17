@@ -142,12 +142,12 @@ export interface Clients {
   actionsClient: ActionsClient;
 }
 
-export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'actions' | 'throttle'>> & {
+export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'throttle'>> & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
 
-export type UpdateRuleParams = Omit<RuleAlertParams, 'immutable' | 'actions' | 'throttle'> & {
+export type UpdateRuleParams = Omit<RuleAlertParams, 'immutable' | 'throttle'> & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
@@ -157,7 +157,7 @@ export type DeleteRuleParams = Clients & {
   ruleId: string | undefined | null;
 };
 
-export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId' | 'actions' | 'throttle'> & {
+export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId' | 'throttle'> & {
   ruleId: string;
 } & Clients;
 

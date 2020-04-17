@@ -83,6 +83,7 @@ export const installPrepackagedRules = (
         note,
         version,
         lists,
+        actions: [], // At this time there is no pre-packaged actions
       }),
     ];
   }, []);

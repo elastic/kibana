@@ -65,8 +65,6 @@ export const INTERNAL_IDENTIFIER = '__internal';
 export const INTERNAL_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_id`;
 export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id`;
 export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable`;
-export const INTERNAL_NOTIFICATION_ID_KEY = `${INTERNAL_IDENTIFIER}_notification_id`;
-export const INTERNAL_NOTIFICATION_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_notification_rule_id`;
 
 /**
  * Detection engine routes
@@ -113,3 +111,20 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
 ];
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
+
+/**
+ * Histograms for fields named in this list should be displayed with an
+ * "All others" bucket, to count events that don't specify a value for
+ * the field being counted
+ */
+export const showAllOthersBucket: string[] = [
+  'destination.ip',
+  'event.action',
+  'event.category',
+  'event.dataset',
+  'event.module',
+  'signal.rule.threat.tactic.name',
+  'source.ip',
+  'destination.ip',
+  'user.name',
+];

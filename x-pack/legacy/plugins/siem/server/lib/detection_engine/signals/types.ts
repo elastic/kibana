@@ -59,35 +59,35 @@ export interface SignalSource {
   };
 }
 
+export interface BulkItem {
+  create: {
+    _index: string;
+    _type?: string;
+    _id: string;
+    _version: number;
+    result?: string;
+    _shards?: {
+      total: number;
+      successful: number;
+      failed: number;
+    };
+    _seq_no?: number;
+    _primary_term?: number;
+    status: number;
+    error?: {
+      type: string;
+      reason: string;
+      index_uuid?: string;
+      shard: string;
+      index: string;
+    };
+  };
+}
+
 export interface BulkResponse {
   took: number;
   errors: boolean;
-  items: [
-    {
-      create: {
-        _index: string;
-        _type?: string;
-        _id: string;
-        _version: number;
-        result?: string;
-        _shards?: {
-          total: number;
-          successful: number;
-          failed: number;
-        };
-        _seq_no?: number;
-        _primary_term?: number;
-        status: number;
-        error?: {
-          type: string;
-          reason: string;
-          index_uuid?: string;
-          shard: string;
-          index: string;
-        };
-      };
-    }
-  ];
+  items: BulkItem[];
 }
 
 export interface MGetResponse {
@@ -162,5 +162,12 @@ export interface AlertAttributes {
 }
 
 export interface RuleAlertAttributes extends AlertAttributes {
-  params: Omit<RuleAlertParams, 'ruleId'> & { ruleId: string };
+  params: Omit<
+    RuleAlertParams,
+    'ruleId' | 'name' | 'enabled' | 'interval' | 'tags' | 'actions' | 'throttle'
+  > & {
+    ruleId: string;
+  };
 }
+
+export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;

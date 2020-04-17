@@ -255,7 +255,14 @@ describe('execute()', () => {
       services,
     };
     sendEmailMock.mockReset();
-    await actionType.executor(executorOptions);
+    const result = await actionType.executor(executorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
           Object {
             "content": Object {
@@ -280,6 +287,104 @@ describe('execute()', () => {
               "user": "bob",
             },
           }
+    `);
+  });
+
+  test('parameters are as expected with no auth', async () => {
+    const config: ActionTypeConfigType = {
+      service: null,
+      host: 'a host',
+      port: 42,
+      secure: true,
+      from: 'bob@example.com',
+    };
+    const secrets: ActionTypeSecretsType = {
+      user: null,
+      password: null,
+    };
+    const params: ActionParamsType = {
+      to: ['jim@example.com'],
+      cc: ['james@example.com'],
+      bcc: ['jimmy@example.com'],
+      subject: 'the subject',
+      message: 'a message to you',
+    };
+
+    const actionId = 'some-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
+    sendEmailMock.mockReset();
+    await actionType.executor(executorOptions);
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "message": "a message to you",
+          "subject": "the subject",
+        },
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "host": "a host",
+          "port": 42,
+          "secure": true,
+        },
+      }
+    `);
+  });
+
+  test('returns expected result when an error is thrown', async () => {
+    const config: ActionTypeConfigType = {
+      service: null,
+      host: 'a host',
+      port: 42,
+      secure: true,
+      from: 'bob@example.com',
+    };
+    const secrets: ActionTypeSecretsType = {
+      user: null,
+      password: null,
+    };
+    const params: ActionParamsType = {
+      to: ['jim@example.com'],
+      cc: ['james@example.com'],
+      bcc: ['jimmy@example.com'],
+      subject: 'the subject',
+      message: 'a message to you',
+    };
+
+    const actionId = 'some-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
+    sendEmailMock.mockReset();
+    sendEmailMock.mockRejectedValue(new Error('wops'));
+    const result = await actionType.executor(executorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "error sending email",
+        "serviceMessage": "wops",
+        "status": "error",
+      }
     `);
   });
 });

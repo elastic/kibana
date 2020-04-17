@@ -245,6 +245,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       getServices: this.getServicesFactory(core.savedObjects),
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       actionTypeRegistry: actionTypeRegistry!,
+      preconfiguredActions,
     });
 
     taskRunnerFactory!.initialize({
@@ -265,6 +266,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
         getBasePath: this.getBasePath,
         isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
+        preconfiguredActions,
       }),
       isActionTypeEnabled: id => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id);

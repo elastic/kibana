@@ -4,7 +4,7 @@
   "false_positives": [
     "Security audits may trigger this signal. Conditions that generate bursts of failed logins, such as misconfigured applications or account lockouts could trigger this signal."
   ],
-  "from": "now-16m",
+  "from": "now-45m",
   "interval": "15m",
   "machine_learning_job_id": "suspicious_login_activity_ecs",
   "name": "Unusual Login Activity",

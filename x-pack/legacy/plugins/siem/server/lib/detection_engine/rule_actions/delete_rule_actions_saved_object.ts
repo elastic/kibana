@@ -18,8 +18,9 @@ export const deleteRuleActionsSavedObject = async ({
   savedObjectsClient,
 }: DeleteRuleActionsSavedObject): Promise<{} | null> => {
   const ruleActions = await getRuleActionsSavedObject({ ruleAlertId, savedObjectsClient });
-
-  if (!ruleActions) return null;
-
-  return savedObjectsClient.delete(ruleActionsSavedObjectType, ruleActions.id);
+  if (ruleActions != null) {
+    return savedObjectsClient.delete(ruleActionsSavedObjectType, ruleActions.id);
+  } else {
+    return null;
+  }
 };

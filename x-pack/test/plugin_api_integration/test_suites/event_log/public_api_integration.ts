@@ -220,9 +220,9 @@ export default function({ getService }: FtrProviderContext) {
           duration: 1000000,
         },
         kibana: {
-          namespace: 'default',
           saved_objects: [
             {
+              namespace: 'default',
               type: 'event_log_test',
               id,
             },
