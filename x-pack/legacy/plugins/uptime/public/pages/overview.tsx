@@ -15,7 +15,7 @@ import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plug
 import { useUpdateKueryString } from '../hooks';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { MonitorList } from '../components/overview/monitor_list';
+import { MonitorList } from '../components/connected/monitor/monitor_list';
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
 
