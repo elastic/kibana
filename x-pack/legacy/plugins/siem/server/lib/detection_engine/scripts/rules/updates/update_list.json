@@ -6,7 +6,7 @@
   "severity": "high",
   "type": "query",
   "query": "user.name: root or user.name: admin",
-  "lists": [
+  "exceptions_list": [
     {
       "field": "source.ip",
       "values_operator": "excluded",
