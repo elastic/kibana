@@ -33,7 +33,6 @@ import {
 import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
-import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
@@ -264,7 +263,7 @@ export class AlertsClient {
     const removeResult = await this.savedObjectsClient.delete('alert', id);
 
     await Promise.all([
-      taskIdToRemove ? deleteTaskIfItExists(this.taskManager, taskIdToRemove) : null,
+      taskIdToRemove ? this.taskManager.remove(taskIdToRemove) : null,
       apiKeyToInvalidate ? this.invalidateApiKey({ apiKey: apiKeyToInvalidate }) : null,
     ]);
 
@@ -506,9 +505,7 @@ export class AlertsClient {
       );
 
       await Promise.all([
-        attributes.scheduledTaskId
-          ? deleteTaskIfItExists(this.taskManager, attributes.scheduledTaskId)
-          : null,
+        attributes.scheduledTaskId ? this.taskManager.remove(attributes.scheduledTaskId) : null,
         apiKeyToInvalidate ? this.invalidateApiKey({ apiKey: apiKeyToInvalidate }) : null,
       ]);
     }
