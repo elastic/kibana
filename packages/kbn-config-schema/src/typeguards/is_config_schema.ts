@@ -20,5 +20,5 @@
 import { Type } from '../types';
 
 export function isConfigSchema(obj: any): obj is Type<any> {
-  return obj?.__isKbnConfigSchemaType === true;
+  return obj ? obj.__isKbnConfigSchemaType === true : false;
 }
