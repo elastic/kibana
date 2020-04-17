@@ -24,7 +24,7 @@ import { KibanaContextProvider } from '../../kibana_react/public';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
 import { TimelionVisComponent, TimelionVisComponentProp } from './components';
-import { TimelionOptions } from './timelion_options';
+import { TimelionOptions, TimelionOptionsProps } from './timelion_options';
 import { TimelionVisDependencies } from './plugin';
 
 export const TIMELION_VIS_NAME = 'timelion';
@@ -53,7 +53,11 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
       ),
     },
     editorConfig: {
-      optionsTemplate: TimelionOptions,
+      optionsTemplate: (props: TimelionOptionsProps) => (
+        <KibanaContextProvider services={{ ...dependencies }}>
+          <TimelionOptions {...props} />
+        </KibanaContextProvider>
+      ),
       defaultSize: DefaultEditorSize.MEDIUM,
     },
     requestHandler: timelionRequestHandler,
