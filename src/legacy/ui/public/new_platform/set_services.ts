@@ -61,6 +61,7 @@ export function setStartServices(npStart: NpStart) {
   visualizationsServices.setTypes(
     pick(npStart.plugins.visualizations, ['get', 'all', 'getAliases'])
   );
+  visualizationsServices.setInjectedMetadata(npStart.core.injectedMetadata);
   visualizationsServices.setCapabilities(npStart.core.application.capabilities);
   visualizationsServices.setHttp(npStart.core.http);
   visualizationsServices.setSavedObjects(npStart.core.savedObjects);

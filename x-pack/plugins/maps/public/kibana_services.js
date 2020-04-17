@@ -62,7 +62,7 @@ export const getSearchService = () => dataSearchService;
 
 let injectedMetadata;
 export const setInjectedMetadata = injectedMetadataService =>
-  (dataSearchService = injectedMetadataService);
+  (injectedMetadata = injectedMetadataService);
 export const getInjectedMetadata = () => injectedMetadata;
 
 let toast;
