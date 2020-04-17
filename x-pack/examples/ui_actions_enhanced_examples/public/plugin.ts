@@ -7,17 +7,14 @@
 import { Plugin, CoreSetup, CoreStart } from '../../../../src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { DrilldownsSetup, DrilldownsStart } from '../../../../x-pack/plugins/drilldowns/public';
 
 export interface SetupDependencies {
   data: DataPublicPluginSetup;
-  drilldowns: DrilldownsSetup;
   uiActions: UiActionsSetup;
 }
 
 export interface StartDependencies {
   data: DataPublicPluginStart;
-  drilldowns: DrilldownsStart;
   uiActions: UiActionsStart;
 }
 
