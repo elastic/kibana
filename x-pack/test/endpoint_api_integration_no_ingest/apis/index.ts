@@ -4,20 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function endpointAPIIntegrationTests({
-  loadTestFile,
-  getService,
-}: FtrProviderContext) {
+export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('Endpoint plugin', function() {
-    const ingestManager = getService('ingestManager');
-    this.tags(['endpoint']);
-    before(async () => {
-      await ingestManager.setup();
-    });
+    this.tags('ciGroup7');
     loadTestFile(require.resolve('./index_pattern'));
-    loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./alerts'));
   });
