@@ -50,9 +50,7 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.startBasic();
       await scenario.waitForPluginToDetectLicenseUpdate();
 
-      const { body: legacyBasicLicense, header: legacyBasicLicenseHeaders } = await supertest
-        .get('/api/xpack/v1/info')
-        .expect(200);
+      const { body: legacyBasicLicense } = await supertest.get('/api/xpack/v1/info').expect(200);
       expect(legacyBasicLicense.license?.type).to.be('basic');
       expect(legacyBasicLicense.features).to.have.property('security');
 
