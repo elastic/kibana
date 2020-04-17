@@ -9,9 +9,9 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
 [[saved-objects-api-find-request]]
 ==== Request
 
-`GET /api/saved_objects/_find`
+`GET <kibana host>:<port>/api/saved_objects/_find`
 
-`GET /s/<space_id>/api/saved_objects/_find`
+`GET <kibana host>:<port>/s/<space_id>/api/saved_objects/_find`
 
 [[saved-objects-api-find-path-params]]
 ==== Path parameters
@@ -67,15 +67,15 @@ change. Use the find API for traditional paginated results, but avoid using it t
 
 Find index patterns with titles that start with `my`:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-GET api/saved_objects/_find?type=index-pattern&search_fields=title&search=my*
+$ curl -X GET "localhost:5601/api/saved_objects/_find?type=index-pattern&search_fields=title&search=my*"
 --------------------------------------------------
 // KIBANA
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "total": 1,
@@ -95,8 +95,8 @@ The API returns the following:
 For parameters that accept multiple values (e.g. `fields`), repeat the
 query parameter for each value:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-GET api/saved_objects/_find?fields=id&fields=title
+$ curl -X GET "localhost:5601/api/saved_objects/_find?fields=id&fields=title"
 --------------------------------------------------
 // KIBANA
