@@ -15,6 +15,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { IAppSearchProps } from '../../index';
+
 import EnginesIcon from '../../assets/engine.svg';
 import MetaEnginesIcon from '../../assets/meta_engine.svg';
 
@@ -24,12 +27,9 @@ import { EngineTable } from './engine_table';
 
 import './engine_overview.scss';
 
-interface IEngineOverviewProps {
-  appSearchUrl: string;
-  http();
-}
+export const EngineOverview: ReactFC<IAppSearchProps> = props => {
+  const { http, appSearchUrl } = props;
 
-export const EngineOverview: ReactFC<IEngineOverviewProps> = ({ http, ...props }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasNoAccount, setHasNoAccount] = useState(false);
   const [hasErrorConnecting, setHasErrorConnecting] = useState(false);
@@ -95,8 +95,10 @@ export const EngineOverview: ReactFC<IEngineOverviewProps> = ({ http, ...props }
 
   return (
     <EuiPage restrictWidth className="engine-overview">
+      <SetBreadcrumbs {...props} isRoot />
+
       <EuiPageBody>
-        <EngineOverviewHeader appSearchUrl={props.appSearchUrl} />
+        <EngineOverviewHeader appSearchUrl={appSearchUrl} />
 
         <EuiPageContent>
           <EuiPageContentHeader>
@@ -115,7 +117,7 @@ export const EngineOverview: ReactFC<IEngineOverviewProps> = ({ http, ...props }
                 pageIndex: enginesPage - 1,
                 onPaginate: setEnginesPage,
               }}
-              appSearchUrl={props.appSearchUrl}
+              appSearchUrl={appSearchUrl}
             />
           </EuiPageContentBody>
 
@@ -138,7 +140,7 @@ export const EngineOverview: ReactFC<IEngineOverviewProps> = ({ http, ...props }
                     pageIndex: metaEnginesPage - 1,
                     onPaginate: setMetaEnginesPage,
                   }}
-                  appSearchUrl={props.appSearchUrl}
+                  appSearchUrl={appSearchUrl}
                 />
               </EuiPageContentBody>
             </>

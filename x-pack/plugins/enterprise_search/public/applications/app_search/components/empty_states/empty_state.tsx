@@ -7,14 +7,18 @@
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
+import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { IAppSearchProps } from '../../index';
+
 import { EngineOverviewHeader } from '../engine_overview_header';
-import { IEmptyStatesProps } from './types';
 
 import './empty_states.scss';
 
-export const EmptyState: React.FC<IEmptyStatesProps> = ({ appSearchUrl }) => {
+export const EmptyState: React.FC<IAppSearchProps> = ({ appSearchUrl, setBreadcrumbs }) => {
   return (
     <EuiPage restrictWidth className="empty-state">
+      <SetBreadcrumbs setBreadcrumbs={setBreadcrumbs} isRoot />
+
       <EuiPageBody>
         <EngineOverviewHeader appSearchUrl={appSearchUrl} />
         <EuiPageContent>
