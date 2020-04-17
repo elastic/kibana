@@ -55,9 +55,6 @@ export default function(ftrContext: FtrProviderContext) {
         .expect(200);
       expect(legacyBasicLicense.license?.type).to.be('basic');
       expect(legacyBasicLicense.features).to.have.property('security');
-      expect(legacyBasicLicenseHeaders['kbn-xpack-sig']).to.not.be(
-        legacyInitialLicenseHeaders['kbn-xpack-sig']
-      );
 
       // banner shown only when license expired not just deleted
       await testSubjects.missingOrFail('licenseExpiredBanner');
