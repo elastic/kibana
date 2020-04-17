@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import 'jest';
-import { MonitorSummary, Check } from '../../../../../../common/graphql/types';
 import React from 'react';
 import { MonitorListDrawerComponent } from '../monitor_list_drawer';
-import { MonitorDetails } from '../../../../../../common/runtime_types';
+import { Check, MonitorDetails, MonitorSummary } from '../../../../../../common/runtime_types';
 import { shallowWithRouter } from '../../../../../lib';
 
 describe('MonitorListDrawer component', () => {
@@ -24,7 +23,7 @@ describe('MonitorListDrawer component', () => {
               ip: '127.0.0.1',
               status: 'up',
             },
-            timestamp: '121',
+            timestamp: 121,
           },
         ],
         summary: {
@@ -77,21 +76,21 @@ describe('MonitorListDrawer component', () => {
           ip: '127.0.0.1',
           status: 'up',
         },
-        timestamp: '121',
+        timestamp: 121,
       },
       {
         monitor: {
           ip: '127.0.0.2',
           status: 'down',
         },
-        timestamp: '123',
+        timestamp: 123,
       },
       {
         monitor: {
           ip: '127.0.0.3',
           status: 'up',
         },
-        timestamp: '125',
+        timestamp: 125,
       },
     ];
     summary.state.checks = checks;
