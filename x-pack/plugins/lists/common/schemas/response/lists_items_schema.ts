@@ -17,6 +17,8 @@ import {
   created_at,
   updated_at,
   tie_breaker_id,
+  updated_by,
+  created_by,
 } from '../common/schemas';
 
 export const listsItemsSchema = t.intersection([
@@ -25,6 +27,8 @@ export const listsItemsSchema = t.intersection([
     list_id,
     created_at,
     updated_at,
+    updated_by,
+    created_by,
     type,
     value,
     tie_breaker_id,

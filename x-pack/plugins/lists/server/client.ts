@@ -397,9 +397,11 @@ export class ListsClient {
     value,
     type,
   }: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
-    const { dataClient } = this;
+    const { dataClient, security, request } = this;
+    const user = getUser({ security, request });
     const listsItemsIndex = this.getListItemIndex();
     return updateListItem({
+      user,
       listId,
       type,
       value,

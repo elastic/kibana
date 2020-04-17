@@ -57,6 +57,12 @@ export type ElasticListItemsType =
       keyword: string;
     };
 
+export type ElasticListItemUpdateInputType = {
+  meta?: object | null | undefined; // TODO: Implement this in the code
+  updated_at: string;
+  updated_by: string;
+} & ElasticListItemsType;
+
 export type ElasticListItemsInputType = BaseElasticListItemType & ElasticListItemsType;
 
 export type DataClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;

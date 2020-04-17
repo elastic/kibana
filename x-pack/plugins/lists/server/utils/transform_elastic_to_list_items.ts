@@ -17,27 +17,42 @@ export const transformElasticToListsItems = ({
   type: Type;
 }): ListsItemsSchema[] => {
   return response.hits.hits.map(hit => {
+    const {
+      _id,
+      _source: {
+        created_at,
+        updated_at,
+        updated_by,
+        created_by,
+        list_id,
+        tie_breaker_id,
+        ip,
+        keyword,
+      },
+    } = hit;
+
+    const baseTypes = {
+      id: _id,
+      created_at,
+      updated_at,
+      created_by,
+      updated_by,
+      list_id,
+      tie_breaker_id,
+      type,
+    };
+
     switch (type) {
       case 'ip': {
         return {
-          id: hit._id,
-          created_at: hit._source.created_at,
-          updated_at: hit._source.updated_at,
-          list_id: hit._source.list_id,
-          tie_breaker_id: hit._source.tie_breaker_id,
-          type,
-          value: hit._source.ip ?? '', // TODO: Something better here than empty string
+          ...baseTypes,
+          value: ip ?? '', // TODO: Something better here than empty string
         };
       }
       case 'keyword': {
         return {
-          id: hit._id,
-          created_at: hit._source.created_at,
-          updated_at: hit._source.updated_at,
-          list_id: hit._source.list_id,
-          tie_breaker_id: hit._source.tie_breaker_id,
-          type,
-          value: hit._source.keyword ?? 'invalid value', // TODO: Something better here than empty string
+          ...baseTypes,
+          value: keyword ?? '', // TODO: Something better here than empty string
         };
       }
     }

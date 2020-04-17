@@ -8,7 +8,7 @@ import { CreateDocumentResponse } from 'elasticsearch';
 
 import { ListsItemsSchema, Type } from '../../common/schemas';
 import { transformListItemsToElasticQuery } from '../utils';
-import { DataClient } from '../types';
+import { DataClient, ElasticListItemUpdateInputType } from '../types';
 
 import { getListItemByValue } from '.';
 
@@ -18,6 +18,7 @@ interface UpdateListItemOptions {
   value: string;
   dataClient: DataClient;
   listsItemsIndex: string;
+  user: string;
 }
 
 export const updateListItem = async ({
@@ -26,8 +27,8 @@ export const updateListItem = async ({
   value,
   dataClient,
   listsItemsIndex,
-}: // TODO: Add user here
-UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
+  user,
+}: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
   const updatedAt = new Date().toISOString();
   const listItem = await getListItemByValue({
     listId,
@@ -39,13 +40,19 @@ UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
   if (listItem == null) {
     return null;
   } else {
+    const doc: ElasticListItemUpdateInputType = {
+      updated_at: updatedAt,
+      updated_by: user,
+      ...transformListItemsToElasticQuery({ type, value }),
+    };
+
     // There isn't a UpdateDocumentResponse so I'm using CreateDocumentResponse here as a type
     const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('update', {
       index: listsItemsIndex,
       id: listItem.id,
       body: {
-        doc: { updated_at: updatedAt, ...transformListItemsToElasticQuery({ type, value }) },
-      }, // TODO: Add strong types for the body
+        doc,
+      },
     });
     return {
       id: response._id,
@@ -54,8 +61,9 @@ UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
       value,
       created_at: listItem.created_at,
       updated_at: updatedAt,
+      created_by: listItem.created_by,
+      updated_by: listItem.updated_by,
       tie_breaker_id: listItem.tie_breaker_id,
-      // TODO: Add the rest of the elements
     };
   }
 };
