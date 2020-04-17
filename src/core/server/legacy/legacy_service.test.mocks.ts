@@ -30,6 +30,11 @@ export const findLegacyPluginSpecsMock = jest.fn().mockImplementation((settings:
   uiExports: {},
   navLinks: [],
 }));
-jest.doMock('./plugins/find_legacy_plugin_specs.ts', () => ({
+jest.doMock('./plugins/find_legacy_plugin_specs', () => ({
   findLegacyPluginSpecs: findLegacyPluginSpecsMock,
+}));
+
+export const logLegacyThirdPartyPluginDeprecationWarningMock = jest.fn();
+jest.doMock('./plugins/log_legacy_plugins_warning', () => ({
+  logLegacyThirdPartyPluginDeprecationWarning: logLegacyThirdPartyPluginDeprecationWarningMock,
 }));
