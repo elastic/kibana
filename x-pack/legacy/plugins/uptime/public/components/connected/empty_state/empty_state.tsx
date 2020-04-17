@@ -34,6 +34,10 @@ export const EmptyState: React.FC = ({ children }) => {
     dispatch(indexStatusAction.get());
   }, [dispatch, heartbeatIndices]);
 
+  useEffect(() => {
+    dispatch(getDynamicSettings());
+  }, [dispatch]);
+
   return (
     <EmptyStateComponent
       statesIndexStatus={data}
