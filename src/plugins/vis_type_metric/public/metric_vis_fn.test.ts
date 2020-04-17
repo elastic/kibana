@@ -18,10 +18,7 @@
  */
 
 import { createMetricVisFn } from './metric_vis_fn';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
-
-jest.mock('ui/new_platform');
+import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(createMetricVisFn());

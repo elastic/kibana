@@ -17,15 +17,16 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createMetricVisFn } from './metric_vis_fn';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
-import { ChartsPluginSetup } from '../../../../plugins/charts/public';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { ChartsPluginSetup } from '../../charts/public';
+import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService } from './services';
+import { ConfigSchema } from '../config';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
@@ -41,9 +42,9 @@ export interface MetricVisPluginStartDependencies {
 
 /** @internal */
 export class MetricVisPlugin implements Plugin<void, void> {
-  initializerContext: PluginInitializerContext;
+  initializerContext: PluginInitializerContext<ConfigSchema>;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 

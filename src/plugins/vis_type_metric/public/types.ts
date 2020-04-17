@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Range } from '../../../../plugins/expressions/public';
-import { SchemaConfig } from '../../../../plugins/visualizations/public';
-import { ColorModes, ColorSchemas, Labels, Style } from '../../../../plugins/charts/public';
+import { Range } from '../../expressions/public';
+import { SchemaConfig } from '../../visualizations/public';
+import { ColorModes, Labels, Style, ColorSchemas } from '../../charts/public';
 
 export const visType = 'metric';
 
