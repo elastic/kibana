@@ -159,6 +159,23 @@ describe('hitsToGeoJson', () => {
     });
   });
 
+  it('Should convert epoch_millis value from string to integer', () => {
+    const hits = [
+      {
+        _id: 'doc1',
+        _index: 'index1',
+        _source: {
+          [geoFieldName]: '20,100',
+          myDateField: '1587156257081',
+        },
+      },
+    ];
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', ['myDateField']);
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBe(1);
+    expect(geojson.features[0].properties.myDateField).toBe(1587156257081);
+  });
+
   describe('dot in geoFieldName', () => {
     const indexPatternMock = {
       fields: {
