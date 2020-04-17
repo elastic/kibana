@@ -34,6 +34,7 @@ import {
   setSearchService,
   setInjectedMetadata,
 } from './kibana_services';
+import { registerLayerWizards } from './layers/load_layer_wizards';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -75,6 +76,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setUiActions(plugins.uiActions);
   setNavigation(plugins.navigation);
   setCoreI18n(core.i18n);
+  registerLayerWizards();
 };
 
 /**
