@@ -6,7 +6,7 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { FilterManager, IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
 
 import { DataProviders } from '../data_providers';
@@ -27,6 +27,7 @@ import * as i18n from './translations';
 interface Props {
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
+  filterManager: FilterManager;
   id: string;
   indexPattern: IIndexPattern;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
@@ -44,6 +45,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   id,
   indexPattern,
   dataProviders,
+  filterManager,
   onChangeDataProviderKqlQuery,
   onChangeDroppableAndProvider,
   onDataProviderEdited,
@@ -77,6 +79,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
     />
     <StatefulSearchOrFilter
       browserFields={browserFields}
+      filterManager={filterManager}
       indexPattern={indexPattern}
       timelineId={id}
     />
@@ -90,6 +93,7 @@ export const TimelineHeader = React.memo(
     prevProps.id === nextProps.id &&
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+    prevProps.filterManager === nextProps.filterManager &&
     prevProps.onChangeDataProviderKqlQuery === nextProps.onChangeDataProviderKqlQuery &&
     prevProps.onChangeDroppableAndProvider === nextProps.onChangeDroppableAndProvider &&
     prevProps.onDataProviderEdited === nextProps.onDataProviderEdited &&

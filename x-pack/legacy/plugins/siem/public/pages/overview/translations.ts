@@ -38,6 +38,12 @@ export const SIGNAL_COUNT = i18n.translate('xpack.siem.overview.signalCountTitle
   defaultMessage: 'Signal count',
 });
 
+export const TOP = (fieldName: string) =>
+  i18n.translate('xpack.siem.overview.topNLabel', {
+    values: { fieldName },
+    defaultMessage: `Top {fieldName}`,
+  });
+
 export const VIEW_ALERTS = i18n.translate('xpack.siem.overview.viewAlertsButtonLabel', {
   defaultMessage: 'View alerts',
 });

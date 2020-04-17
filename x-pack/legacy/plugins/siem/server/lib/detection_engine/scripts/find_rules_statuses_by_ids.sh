@@ -10,8 +10,12 @@ set -e
 ./check_env_variables.sh
 
 
-# Example: ./find_rules_statuses_by_ids.sh '["12345","6789abc"]'
+# Example: ./find_rules_statuses_by_ids.sh [\"12345\",\"6789abc\"]
 curl -g -k \
+  -s \
+  -H 'Content-Type: application/json' \
+  -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X GET "${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_find_statuses?ids=$1" \
+ -X POST "${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_find_statuses" \
+ -d "{\"ids\": $1}" \
  | jq .

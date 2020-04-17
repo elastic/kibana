@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, MiddlewareAPI } from 'redux';
+import { Dispatch, MiddlewareAPI, Action as ReduxAction, AnyAction as ReduxAnyAction } from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
   HostMetadata,
@@ -13,13 +13,14 @@ import {
   Immutable,
   ImmutableArray,
   AlertDetails,
+  MalwareFields,
+  UIPolicyConfig,
+  PolicyData,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
-  Datasource,
-  NewDatasource,
   GetAgentStatusResponse,
   GetDatasourcesResponse,
   GetOneDatasourceResponse,
@@ -51,6 +52,7 @@ export interface HostListPagination {
 }
 export interface HostIndexUIQueryParams {
   selected_host?: string;
+  show?: string;
 }
 
 export interface ServerApiError {
@@ -58,29 +60,6 @@ export interface ServerApiError {
   error: string;
   message: string;
 }
-
-/**
- * New policy data. Used when updating the policy record via ingest APIs
- */
-export type NewPolicyData = NewDatasource & {
-  inputs: [
-    {
-      type: 'endpoint';
-      enabled: boolean;
-      streams: [];
-      config: {
-        policy: {
-          value: PolicyConfig;
-        };
-      };
-    }
-  ];
-};
-
-/**
- * Endpoint Policy data, which extends Ingest's `Datasource` type
- */
-export type PolicyData = Datasource & NewPolicyData;
 
 /**
  * Policy list store state
@@ -192,30 +171,6 @@ interface PolicyConfigAdvancedOptions {
   };
 }
 
-/**
- * Windows-specific policy configuration that is supported via the UI
- */
-type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'events' | 'malware'>;
-
-/**
- * Mac-specific policy configuration that is supported via the UI
- */
-type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
-
-/**
- * Linux-specific policy configuration that is supported via the UI
- */
-type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
-
-/**
- * The set of Policy configuration settings that are show/edited via the UI
- */
-export interface UIPolicyConfig {
-  windows: WindowsPolicyConfig;
-  mac: MacPolicyConfig;
-  linux: LinuxPolicyConfig;
-}
-
 /** OS used in Policy */
 export enum OS {
   windows = 'windows',
@@ -246,20 +201,7 @@ export type KeysByValueCriteria<O, Criteria> = {
 }[keyof O];
 
 /** Returns an array of the policy OSes that have a malware protection field */
-
 export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
-/** Policy: Malware protection fields */
-export interface MalwareFields {
-  mode: ProtectionModes;
-}
-
-/** Policy protection mode options */
-export enum ProtectionModes {
-  detect = 'detect',
-  prevent = 'prevent',
-  preventNotify = 'preventNotify',
-  off = 'off',
-}
 
 export interface GlobalState {
   readonly hostList: HostListState;
@@ -349,3 +291,28 @@ export interface GetPolicyResponse extends GetOneDatasourceResponse {
 export interface UpdatePolicyResponse extends UpdateDatasourceResponse {
   item: PolicyData;
 }
+
+/**
+ * Like `Reducer` from `redux` but it accepts immutable versions of `state` and `action`.
+ * Use this type for all Reducers in order to help enforce our pattern of immutable state.
+ */
+export type ImmutableReducer<State, Action> = (
+  state: Immutable<State> | undefined,
+  action: Immutable<Action>
+) => State | Immutable<State>;
+
+/**
+ * A alternate interface for `redux`'s `combineReducers`. Will work with the same underlying implementation,
+ * but will enforce that `Immutable` versions of `state` and `action` are received.
+ */
+export type ImmutableCombineReducers = <S, A extends ReduxAction = ReduxAnyAction>(
+  reducers: ImmutableReducersMapObject<S, A>
+) => ImmutableReducer<S, A>;
+
+/**
+ * Like `redux`'s `ReducersMapObject` (which is used by `combineReducers`) but enforces that
+ * the `state` and `action` received are `Immutable` versions.
+ */
+type ImmutableReducersMapObject<S, A extends ReduxAction = ReduxAction> = {
+  [K in keyof S]: ImmutableReducer<S[K], A>;
+};
