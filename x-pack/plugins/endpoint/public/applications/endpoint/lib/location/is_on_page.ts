@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointAppLocation } from '../types';
+import { EndpointAppLocation } from '../../types';
 
 let currentLocation: EndpointAppLocation;
 let fromLocation: EndpointAppLocation;
@@ -21,16 +21,35 @@ export const isOnPage = (pageRoute: EndpointAppLocation['pathname']) => {
   return currentLocation.pathname === pageRoute;
 };
 
-const wasPreviouslyOnPage = (pageRoute: EndpointAppLocation['pathname']) => {
+export const isOnDetailsPage = (pageBaseRoute: EndpointAppLocation['pathname']) => {
+  if (!currentLocation) {
+    throw new Error('EndpointAppLocation has not been captured yet');
+  }
+  const pathnameParts = currentLocation.pathname.split('/');
+  return pathnameParts[1] === pageBaseRoute.split('/')[1] && pathnameParts[2];
+};
+
+export const wasPreviouslyOnPage = (pageRoute: EndpointAppLocation['pathname']) => {
   if (!fromLocation) {
     throw new Error('EndpointAppLocation has not been captured yet');
   }
   return fromLocation.pathname === pageRoute;
 };
 
-export const isOnPolicyPage = () => isOnPage('/policy');
+export const wasPreviouslyOnDetailsPage = (pageBaseRoute: EndpointAppLocation['pathname']) => {
+  if (!fromLocation) {
+    throw new Error('EndpointAppLocation has not been captured yet');
+  }
+  const pathnameParts = fromLocation.pathname.split('/');
+  return pathnameParts[1] === pageBaseRoute.split('/')[1] && pathnameParts[2];
+};
 
-export const wasPreviouslyOnPolicyPage = () => wasPreviouslyOnPage('/policy');
+export const detailsIdFromParams = () => {
+  if (currentLocation) {
+    return currentLocation.pathname.split('/')[2];
+  }
+  return '';
+};
 
 export const isOnHostPage = () => isOnPage('/hosts');
 

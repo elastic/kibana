@@ -8,7 +8,7 @@ import React, { memo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { EndpointAppLocation, AppAction } from '../types';
-import { storeCurrentLocation } from '../lib/is_on_page';
+import { storeCurrentLocation } from '../lib/location/is_on_page';
 
 /**
  * This component should be used above all routes, but below the Provider.

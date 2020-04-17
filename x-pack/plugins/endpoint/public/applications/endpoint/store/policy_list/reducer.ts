@@ -7,7 +7,7 @@
 import { PolicyListState, ImmutableReducer } from '../../types';
 import { AppAction } from '../action';
 import { Immutable } from '../../../../../common/types';
-import { isOnPolicyPage, wasPreviouslyOnPolicyPage } from '../../lib/is_on_page';
+import { isOnPolicyPage, wasPreviouslyOnPolicyPage } from '../../lib/location/policy';
 
 const initialPolicyListState = (): PolicyListState => {
   return {

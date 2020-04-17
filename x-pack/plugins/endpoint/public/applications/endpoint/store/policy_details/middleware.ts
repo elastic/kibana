@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ImmutableMiddlewareFactory, PolicyDetailsState, UpdatePolicyResponse } from '../../types';
-import { policyIdFromParams, isOnPolicyDetailsPage, policyDetails } from './selectors';
+import { MiddlewareFactory, PolicyDetailsState, UpdatePolicyResponse } from '../../types';
+import { policyDetails } from './selectors';
+import { detailsIdFromParams } from '../../lib/location/is_on_page';
+import { isOnPolicyDetailsPage } from '../../lib/location/policy';
 import {
   sendGetDatasource,
   sendGetFleetAgentStatusForConfig,
@@ -21,8 +23,8 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
     next(action);
     const state = getState();
 
-    if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
-      const id = policyIdFromParams(state);
+    if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage()) {
+      const id = detailsIdFromParams();
       let policyItem: PolicyData;
 
       try {

@@ -7,7 +7,7 @@
 import { GetPolicyListResponse, ImmutableMiddlewareFactory, PolicyListState } from '../../types';
 import { sendGetEndpointSpecificDatasources } from './services/ingest';
 import { urlSearchParams } from './selectors';
-import { isOnPolicyPage } from '../../lib/is_on_page';
+import { isOnPolicyPage } from '../../lib/location/policy';
 
 export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListState> = coreStart => {
   const http = coreStart.http;

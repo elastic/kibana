@@ -5,7 +5,8 @@
  */
 
 import { AppAction } from '../action';
-import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
+import { fullPolicy } from './selectors';
+import { isOnPolicyDetailsPage, wasPreviouslyOnPolicyDetailsPage } from '../../lib/location/policy';
 import { PolicyDetailsState, ImmutableReducer } from '../../types';
 import { Immutable, PolicyConfig, UIPolicyConfig } from '../../../../../common/types';
 
@@ -72,13 +73,12 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
   if (action.type === 'userChangedUrl') {
     const newState: Immutable<PolicyDetailsState> = {
       ...state,
-      location: action.payload,
     };
-    const isCurrentlyOnDetailsPage = isOnPolicyDetailsPage(newState);
-    const wasPreviouslyOnDetailsPage = isOnPolicyDetailsPage(state);
+    const isCurrentlyOnDetailsPage = isOnPolicyDetailsPage();
+    const wasOnDetailsPage = wasPreviouslyOnPolicyDetailsPage();
 
     // Did user just enter the Detail page? if so, then set the loading indicator and return new state
-    if (isCurrentlyOnDetailsPage && !wasPreviouslyOnDetailsPage) {
+    if (isCurrentlyOnDetailsPage && !wasOnDetailsPage) {
       return {
         ...newState,
         isLoading: true,
@@ -86,7 +86,6 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     }
     return {
       ...initialPolicyDetailsState(),
-      location: action.payload,
     };
   }
 
