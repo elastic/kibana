@@ -1,123 +1,25 @@
 
 # Convert Code Coverage Json Summary and Send to ES
 
-## Setup
-Run converage using json-summary, put the index, create the index pattern,
-and run the converter to post docs to the index.  
+
+## How it works 
+
+It starts with this jenkins pipeline file:
+
+.ci/Jenkinsfile_coverage#L60
+
 ```
-PUT kibana_coverage
-{
-  "mappings": {
-      "properties": {
-        "@timestamp": {
-          "type": "date"
-        },
-        "branches": {
-          "properties": {
-            "covered": {
-              "type": "long"
-            },
-            "pct": {
-              "type": "long"
-            },
-            "skipped": {
-              "type": "long"
-            },
-            "total": {
-              "type": "long"
-            }
-          }
-        },
-        "functions": {
-          "properties": {
-            "covered": {
-              "type": "long"
-            },
-            "pct": {
-              "type": "long"
-            },
-            "skipped": {
-              "type": "long"
-            },
-            "total": {
-              "type": "long"
-            }
-          }
-        },
-        "lines": {
-          "properties": {
-            "covered": {
-              "type": "long"
-            },
-            "pct": {
-              "type": "long"
-            },
-            "skipped": {
-              "type": "long"
-            },
-            "total": {
-              "type": "long"
-            }
-          }
-        },
-        "path": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
-        },
-        "statements": {
-          "properties": {
-            "covered": {
-              "type": "long"
-            },
-            "pct": {
-              "type": "long"
-            },
-            "skipped": {
-              "type": "long"
-            },
-            "total": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    }
-}
+src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
 ```
 
-## Examples  
-Run with custom delay
-   
-Mocha  
-`DELAY=500 node scripts/ingest_coverage.js --path target/kibana-coverage/mocha/coverage-summary.json --verbose`  
+The above line depends on a number of things happenning before this will run properly.
+But, once that line runs, the ingestion system is hard coded to look for 3 coverage summary files...all json.
 
-Jest  
-`DELAY=500 node scripts/ingest_coverage.js --path target/kibana-coverage/jest/coverage-summary.json --verbose`  
+From there, an event stream is created, that massages the data to an output format in json that is ingested.
 
-Functional  
-```javascript
-// First, run the tests with coverage turned on
-CODE_COVERAGE=1 node scripts/functional_tests.js --debug
+## Configuration
 
-// Then, merge the coverage (more than one report is generated in CI)
-nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report/functional --reporter=json-summary
-// or simply 
-yarn cover:functional:merge
-
-// Finally, index all the coverage into ES
-// merged functional tests coverage
-DELAY=40 node scripts/ingest_coverage.js --verbose --path target/coverage/report/functional/coverage-summary.json
-// jest
-DELAY=10 node scripts/ingest_coverage.js --path target/kibana-coverage/jest/coverage-summary.json --verbose
-// mocha
-DELAY=0 node scripts/ingest_coverage.js --path target/kibana-coverage/mocha/coverage-summary.json --verbose
-```
-
-Run with TIME_STAMP and DISTRO from cli
- - OSS: `time TIME_STAMP=$(node -pe "require('moment')().format()") DELAY=0 node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/mocha/coverage-summary.json` _mocha_
- - X-PACK: `time TIME_STAMP=$(node -pe "require('moment')().format()") DISTRO=x-pack DELAY=0 node scripts/ingest_coverage.js --verbose --path target/coverage/report/functional/coverage-summary.json` _functional_
+There is really only one config step.  
+The index [mapping](src/dev/code_coverage/ingest_coverage/index_mapping.md) for one of
+of the indexes has to be manually created.  
+Currently, we just add it using Kibana's Dev Tools.
