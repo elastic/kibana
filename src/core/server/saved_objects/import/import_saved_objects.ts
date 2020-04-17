@@ -25,7 +25,6 @@ import {
   SavedObjectsImportOptions,
 } from './types';
 import { validateReferences } from './validate_references';
-import { createSavedObjects } from './create_saved_objects';
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -69,13 +68,18 @@ export async function importSavedObjectsFromStream({
   }
 
   // Create objects in bulk
-  const bulkCreateOptions = { savedObjectsClient, typeRegistry, overwrite, namespace };
-  const bulkCreateResult = await createSavedObjects(filteredObjects, bulkCreateOptions);
-  errorAccumulator = [...errorAccumulator, ...extractErrors(bulkCreateResult, filteredObjects)];
+  const bulkCreateResult = await savedObjectsClient.bulkCreate(filteredObjects, {
+    overwrite,
+    namespace,
+  });
+  errorAccumulator = [
+    ...errorAccumulator,
+    ...extractErrors(bulkCreateResult.saved_objects, filteredObjects),
+  ];
 
   return {
     success: errorAccumulator.length === 0,
-    successCount: bulkCreateResult.filter(obj => !obj.error).length,
+    successCount: bulkCreateResult.saved_objects.filter(obj => !obj.error).length,
     ...(errorAccumulator.length ? { errors: errorAccumulator } : {}),
   };
 }
