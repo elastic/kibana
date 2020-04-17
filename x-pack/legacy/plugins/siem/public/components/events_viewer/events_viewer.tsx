@@ -95,6 +95,7 @@ const EventsViewerComponent: React.FC<Props> = ({
 }) => {
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
+  const { filterManager } = useKibana().services.data.query;
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     dataProviders,
@@ -168,7 +169,11 @@ const EventsViewerComponent: React.FC<Props> = ({
                   {utilityBar?.(refetch, totalCountMinusDeleted)}
 
                   <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
-                    <ManageTimelineContext loading={loading} type={timelineTypeContext}>
+                    <ManageTimelineContext
+                      filterManager={filterManager}
+                      loading={loading}
+                      type={timelineTypeContext}
+                    >
                       <TimelineRefetch
                         id={id}
                         inputId="global"
