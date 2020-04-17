@@ -187,10 +187,13 @@ const SavedObjectsTablePage = ({
       actionRegistry={actionRegistry}
       savedObjectsClient={coreStart.savedObjects.client}
       indexPatterns={dataStart.indexPatterns}
+      search={dataStart.search}
       http={coreStart.http}
       overlays={coreStart.overlays}
       notifications={coreStart.notifications}
       applications={coreStart.application}
+      uiSettings={coreStart.uiSettings}
+      injectedMetadata={coreStart.injectedMetadata}
       perPageConfig={itemsPerPage}
       goInspectObject={savedObject => {
         const { editUrl } = savedObject.meta;

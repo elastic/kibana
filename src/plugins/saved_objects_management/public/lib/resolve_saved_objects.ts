@@ -19,13 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
-import { OverlayStart, SavedObjectReference } from 'src/core/public';
+import { CoreStart, OverlayStart, SavedObjectReference } from 'src/core/public';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
-import { getSearchService, getInjectedMetadata, getUiSettings } from '../kibana_services';
 import {
   IndexPatternsContract,
   IIndexPattern,
   createSearchSourceFactory,
+  DataPublicPluginStart,
 } from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
@@ -167,7 +167,12 @@ export async function resolveIndexPatternConflicts(
   resolutions: Array<{ oldId: string; newId: string }>,
   conflictedIndexPatterns: any[],
   overwriteAll: boolean,
-  indexPatterns: IndexPatternsContract
+  indexPatterns: IndexPatternsContract,
+  dependencies: {
+    injectedMetadata: CoreStart['injectedMetadata'];
+    uiSettings: CoreStart['uiSettings'];
+    search: DataPublicPluginStart['search'];
+  }
 ) {
   let importCount = 0;
 
@@ -217,11 +222,7 @@ export async function resolveIndexPatternConflicts(
       JSON.stringify(serializedSearchSource),
       replacedReferences,
       indexPatterns,
-      {
-        search: getSearchService(),
-        injectedMetadata: getInjectedMetadata(),
-        uiSettings: getUiSettings(),
-      }
+      dependencies
     );
     if (await saveObject(obj, overwriteAll)) {
       importCount++;

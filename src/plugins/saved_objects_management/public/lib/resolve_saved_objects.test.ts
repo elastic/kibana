@@ -25,7 +25,6 @@ import {
 } from './resolve_saved_objects';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
 import { IndexPatternsContract } from '../../../data/public';
-import { setSearchService, setInjectedMetadata, setUiSettings } from '../kibana_services';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { coreMock } from '../../../../core/public/mocks';
 
@@ -48,15 +47,6 @@ const createObj = (props: Partial<SavedObject>): SavedObject =>
   } as SavedObject);
 
 describe('resolveSavedObjects', () => {
-  beforeEach(() => {
-    const search = dataPluginMock.createStartContract().search;
-    const { uiSettings, injectedMetadata } = coreMock.createStart();
-
-    setSearchService(search);
-    setUiSettings(uiSettings);
-    setInjectedMetadata(injectedMetadata);
-  });
-
   describe('resolveSavedObjects', () => {
     it('should take in saved objects and spit out conflicts', async () => {
       const savedObjects = [
@@ -245,6 +235,19 @@ describe('resolveSavedObjects', () => {
   });
 
   describe('resolveIndexPatternConflicts', () => {
+    let dependencies: Parameters<typeof resolveIndexPatternConflicts>[4];
+
+    beforeEach(() => {
+      const search = dataPluginMock.createStartContract().search;
+      const { uiSettings, injectedMetadata } = coreMock.createStart();
+
+      dependencies = {
+        search,
+        uiSettings,
+        injectedMetadata,
+      };
+    });
+
     it('should resave resolutions', async () => {
       const save = jest.fn();
 
@@ -296,9 +299,15 @@ describe('resolveSavedObjects', () => {
 
       const overwriteAll = false;
 
-      await resolveIndexPatternConflicts(resolutions, conflictedIndexPatterns, overwriteAll, ({
-        get: (id: string) => Promise.resolve({ id }),
-      } as unknown) as IndexPatternsContract);
+      await resolveIndexPatternConflicts(
+        resolutions,
+        conflictedIndexPatterns,
+        overwriteAll,
+        ({
+          get: (id: string) => Promise.resolve({ id }),
+        } as unknown) as IndexPatternsContract,
+        dependencies
+      );
 
       expect(save.mock.calls.length).toBe(2);
       expect(save).toHaveBeenCalledWith({ confirmOverwrite: !overwriteAll });
@@ -356,9 +365,15 @@ describe('resolveSavedObjects', () => {
 
       const overwriteAll = false;
 
-      await resolveIndexPatternConflicts(resolutions, conflictedIndexPatterns, overwriteAll, ({
-        get: (id: string) => Promise.resolve({ id }),
-      } as unknown) as IndexPatternsContract);
+      await resolveIndexPatternConflicts(
+        resolutions,
+        conflictedIndexPatterns,
+        overwriteAll,
+        ({
+          get: (id: string) => Promise.resolve({ id }),
+        } as unknown) as IndexPatternsContract,
+        dependencies
+      );
 
       expect(save.mock.calls.length).toBe(2);
     });
