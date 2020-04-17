@@ -17,7 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
-import { createHashHistory, History } from 'history';
+import { History } from 'history';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
@@ -71,9 +71,9 @@ interface GetStateParams {
    */
   storeInSessionStorage?: boolean;
   /**
-   * Browser history used for testing
+   * History instance to use
    */
-  history?: History;
+  history: History;
 }
 
 interface GetStateReturn {
@@ -126,7 +126,7 @@ export function getState({
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
-    history: history ? history : createHashHistory(),
+    history,
   });
 
   const globalStateInitial = stateStorage.get(GLOBAL_STATE_URL_KEY) as GlobalState;

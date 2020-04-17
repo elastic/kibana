@@ -58,7 +58,7 @@ const {
   chrome,
   data,
   docTitle,
-  history,
+  history: getHistory,
   indexPatterns,
   filterManager,
   share,
@@ -117,6 +117,7 @@ app.config($routeProvider => {
     reloadOnSearch: false,
     resolve: {
       savedObjects: function($route, Promise) {
+        const history = getHistory();
         const savedSearchId = $route.current.params.id;
         return ensureDefaultIndexPattern(core, data, history).then(() => {
           const { appStateContainer } = getState({ history });
@@ -204,6 +205,8 @@ function discoverController(
   const getTimeField = () => {
     return isDefaultType($scope.indexPattern) ? $scope.indexPattern.timeFieldName : undefined;
   };
+
+  const history = getHistory();
 
   const {
     appStateContainer,
