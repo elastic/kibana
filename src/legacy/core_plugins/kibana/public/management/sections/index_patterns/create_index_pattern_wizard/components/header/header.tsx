@@ -17,74 +17,80 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 
-import {
-  EuiBetaBadge,
-  EuiSpacer,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTextColor,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiBetaBadge, EuiSpacer, EuiTitle, EuiText, EuiLink, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiIcon } from '@elastic/eui';
+import { CreateIndexPatternHelp } from '../../../create_index_pattern_help';
 
-export const Header = ({
-  prompt,
-  indexPatternName,
-  showSystemIndices = false,
-  isIncludingSystemIndices,
-  onChangeIncludingSystemIndices,
-  isBeta = false,
-}: {
+interface Props {
   prompt?: React.ReactNode;
   indexPatternName: string;
   showSystemIndices?: boolean;
   isIncludingSystemIndices: boolean;
   onChangeIncludingSystemIndices: () => void;
   isBeta?: boolean;
-}) => (
-  <div>
-    <EuiTitle>
-      <h1>
-        <FormattedMessage
-          id="kbn.management.createIndexPatternHeader"
-          defaultMessage="Create {indexPatternName}"
-          values={{
-            indexPatternName,
-          }}
-        />
-        {isBeta ? (
-          <Fragment>
-            {' '}
-            <EuiBetaBadge
-              label={i18n.translate('kbn.management.createIndexPattern.betaLabel', {
-                defaultMessage: 'Beta',
-              })}
-            />
-          </Fragment>
-        ) : null}
-      </h1>
-    </EuiTitle>
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <p>
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="kbn.management.createIndexPatternLabel"
-                defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
+}
+
+export const Header: React.FunctionComponent<Props> = ({
+  prompt,
+  indexPatternName,
+  showSystemIndices = false,
+  isIncludingSystemIndices,
+  onChangeIncludingSystemIndices,
+  isBeta = false,
+}) => {
+  const [showFlyout, setShowFlyout] = useState(false);
+
+  return (
+    <div>
+      <EuiTitle>
+        <h1>
+          <FormattedMessage
+            id="kbn.management.createIndexPatternHeader"
+            defaultMessage="Create {indexPatternName}"
+            values={{
+              indexPatternName,
+            }}
+          />
+          {isBeta ? (
+            <Fragment>
+              {' '}
+              <EuiBetaBadge
+                label={i18n.translate('kbn.management.createIndexPattern.betaLabel', {
+                  defaultMessage: 'Beta',
+                })}
               />
-            </EuiTextColor>
-          </p>
-        </EuiText>
-      </EuiFlexItem>
+            </Fragment>
+          ) : null}
+        </h1>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="kbn.management.createIndexPatternLabel"
+            defaultMessage="Kibana uses {helpLink} to retrieve data from Elasticsearch indices for things like visualizations."
+            values={{
+              helpLink: (
+                <EuiLink onClick={() => setShowFlyout(!showFlyout)}>
+                  <FormattedMessage
+                    id="kbn.management.createIndexPattern.emptyStateLabel.indexPatternText"
+                    defaultMessage="index patterns"
+                  />
+                  <EuiIcon type="questionInCircle" size="s" className="eui-alignTop" />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </EuiText>
       {showSystemIndices ? (
-        <EuiFlexItem grow={false}>
+        <>
+          <EuiSpacer />
           <EuiSwitch
             label={
               <FormattedMessage
@@ -96,15 +102,16 @@ export const Header = ({
             checked={isIncludingSystemIndices}
             onChange={onChangeIncludingSystemIndices}
           />
-        </EuiFlexItem>
+        </>
       ) : null}
-    </EuiFlexGroup>
-    {prompt ? (
-      <Fragment>
-        <EuiSpacer size="s" />
-        {prompt}
-      </Fragment>
-    ) : null}
-    <EuiSpacer size="m" />
-  </div>
-);
+      {prompt ? (
+        <Fragment>
+          <EuiSpacer size="m" />
+          {prompt}
+        </Fragment>
+      ) : null}
+
+      {showFlyout && <CreateIndexPatternHelp onClose={() => setShowFlyout(false)} />}
+    </div>
+  );
+};

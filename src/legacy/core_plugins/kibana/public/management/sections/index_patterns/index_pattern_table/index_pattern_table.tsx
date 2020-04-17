@@ -20,14 +20,15 @@
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore
   EuiInMemoryTable,
-  EuiPanel,
+  EuiPageContent,
   EuiSpacer,
   EuiText,
+  EuiTitle,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
@@ -89,63 +90,57 @@ interface Props {
   indexPatternCreationOptions: IndexPatternCreationOption[];
 }
 
-interface State {
-  showFlyout: boolean;
-}
-
-export class IndexPatternTable extends React.Component<Props, State> {
-  public readonly state = {
-    showFlyout: this.props.indexPatterns.length === 0,
-    showEmptyPrompt: this.props.indexPatterns.length === 0,
-  };
-
-  public render() {
-    return (
-      <EuiPanel paddingSize="l" data-test-subj="indexPatternTable">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false} className="euiIEFlexWrapFix">
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <h2>
-                    <FormattedMessage
-                      id="kbn.management.indexPatternTable.title"
-                      defaultMessage="Index patterns"
-                    />
-                  </h2>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconSize="l"
-                  iconType="questionInCircle"
-                  onClick={() => this.setState({ showFlyout: true })}
-                  aria-label="Help"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <CreateButton options={this.props.indexPatternCreationOptions}>
-              <FormattedMessage
-                id="kbn.management.indexPatternTable.createBtn"
-                defaultMessage="Create index pattern"
-              />
-            </CreateButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiInMemoryTable
-          allowNeutralSort={false}
-          itemId="id"
-          isSelectable={false}
-          items={this.props.indexPatterns}
-          columns={columns}
-          pagination={pagination}
-          sorting={sorting}
-          search={search}
-        />
-      </EuiPanel>
-    );
-  }
-}
+export const IndexPatternTable: React.FunctionComponent<Props> = ({
+  indexPatterns,
+  indexPatternCreationOptions,
+}) => {
+  return (
+    <EuiPageContent data-test-subj="indexPatternTable">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false} className="euiIEFlexWrapFix">
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h2>
+                  <FormattedMessage
+                    id="kbn.management.indexPatternTable.title"
+                    defaultMessage="Index patterns"
+                  />
+                </h2>
+              </EuiTitle>
+              <EuiText size="s" grow={false}>
+                <p>
+                  Kibana requires an index pattern to identify which indices you want to explore. An
+                  index pattern can point to a specific index, for example, your log data from
+                  yesterday, or all indices that contain your log data.{' '}
+                  <EuiLink>
+                    Read documentation <EuiIcon type="popout" size="s" />
+                  </EuiLink>
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CreateButton options={indexPatternCreationOptions}>
+            <FormattedMessage
+              id="kbn.management.indexPatternTable.createBtn"
+              defaultMessage="Create index pattern"
+            />
+          </CreateButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiInMemoryTable
+        allowNeutralSort={false}
+        itemId="id"
+        isSelectable={false}
+        items={indexPatterns}
+        columns={columns}
+        pagination={pagination}
+        sorting={sorting}
+        search={search}
+      />
+    </EuiPageContent>
+  );
+};

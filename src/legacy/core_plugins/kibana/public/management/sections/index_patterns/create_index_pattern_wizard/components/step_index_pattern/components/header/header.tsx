@@ -63,10 +63,11 @@ export const Header: React.FC<HeaderProps> = ({
       </h2>
     </EuiTitle>
     <EuiSpacer size="m" />
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiForm isInvalid={isInputInvalid}>
           <EuiFormRow
+            fullWidth
             label={
               <FormattedMessage
                 id="kbn.management.createIndexPattern.step.indexPatternLabel"
@@ -76,25 +77,22 @@ export const Header: React.FC<HeaderProps> = ({
             isInvalid={isInputInvalid}
             error={errors}
             helpText={
-              <div>
-                <p>
-                  <FormattedMessage
-                    id="kbn.management.createIndexPattern.step.indexPattern.allowLabel"
-                    defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                    values={{ asterisk: <strong>*</strong> }}
-                  />
-                </p>
-                <p>
-                  <FormattedMessage
-                    id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
-                    defaultMessage="You can't use spaces or the characters {characterList}."
-                    values={{ characterList: <strong>{characterList}</strong> }}
-                  />
-                </p>
-              </div>
+              <>
+                <FormattedMessage
+                  id="kbn.management.createIndexPattern.step.indexPattern.allowLabel"
+                  defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
+                  values={{ asterisk: <strong>*</strong> }}
+                />{' '}
+                <FormattedMessage
+                  id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
+                  defaultMessage="You can't use spaces or the characters {characterList}."
+                  values={{ characterList: <strong>{characterList}</strong> }}
+                />
+              </>
             }
           >
             <EuiFieldText
+              fullWidth
               name="indexPattern"
               placeholder={i18n.translate(
                 'kbn.management.createIndexPattern.step.indexPatternPlaceholder',
@@ -111,17 +109,21 @@ export const Header: React.FC<HeaderProps> = ({
         </EuiForm>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          iconType="arrowRight"
-          onClick={() => goToNextStep(query)}
-          isDisabled={isNextStepDisabled}
-          data-test-subj="createIndexPatternGoToStep2Button"
-        >
-          <FormattedMessage
-            id="kbn.management.createIndexPattern.step.nextStepButton"
-            defaultMessage="Next step"
-          />
-        </EuiButton>
+        <EuiFormRow hasEmptyLabelSpace>
+          <EuiButton
+            fill
+            iconSide="right"
+            iconType="arrowRight"
+            onClick={() => goToNextStep(query)}
+            isDisabled={isNextStepDisabled}
+            data-test-subj="createIndexPatternGoToStep2Button"
+          >
+            <FormattedMessage
+              id="kbn.management.createIndexPattern.step.nextStepButton"
+              defaultMessage="Next step"
+            />
+          </EuiButton>
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   </div>

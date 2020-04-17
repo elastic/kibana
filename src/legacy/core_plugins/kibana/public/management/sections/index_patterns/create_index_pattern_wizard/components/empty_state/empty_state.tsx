@@ -31,11 +31,11 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexItem } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { EuiDescriptionList } from '@elastic/eui';
 import { EuiFlexGrid } from '@elastic/eui';
 import { EuiCard } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 
 export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
   <EuiPageContent grow={false} horizontalPosition="center">
@@ -77,93 +77,42 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="xxl" />
-      <dl className="inpEmptyState__footer">
+      <div className="inpEmptyState__footer">
         <EuiFlexGroup responsive={false} wrap>
           <EuiFlexItem>
-            <EuiText>
-              <dt>Want to learn more?</dt>
-              <dd>
-                <EuiButtonEmpty iconType="popout" iconSide="right" flush="left">
-                  Read documentation
-                </EuiButtonEmpty>
-              </dd>
-            </EuiText>
+            <EuiDescriptionList
+              listItems={[
+                {
+                  title: 'Want to learn more?',
+                  description: (
+                    <EuiLink>
+                      Read documentation <EuiIcon type="popout" size="s" />
+                    </EuiLink>
+                  ),
+                },
+              ]}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText>
-              <dt>Pretty sure you have data?</dt>
-              <dd>
-                <EuiButtonEmpty
-                  iconType="refresh"
-                  iconSide="right"
-                  flush="left"
-                  onClick={onRefresh}
-                  data-test-subj="refreshIndicesButton"
-                >
-                  <FormattedMessage
-                    id="kbn.management.createIndexPattern.emptyState.checkDataButton"
-                    defaultMessage="Check for new data"
-                  />
-                </EuiButtonEmpty>
-              </dd>
-            </EuiText>
+            <EuiDescriptionList
+              listItems={[
+                {
+                  title: 'Pretty sure you have data?',
+                  description: (
+                    <EuiLink onClick={onRefresh} data-test-subj="refreshIndicesButton">
+                      <FormattedMessage
+                        id="kbn.management.createIndexPattern.emptyState.checkDataButton"
+                        defaultMessage="Check for new data"
+                      />{' '}
+                      <EuiIcon type="refresh" size="s" />
+                    </EuiLink>
+                  ),
+                },
+              ]}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </dl>
+      </div>
     </EuiPageContentBody>
-    {/* <EuiCallOut
-      color="warning"
-      title={
-        <FormattedMessage
-          id="kbn.management.createIndexPattern.emptyStateHeader"
-          defaultMessage="Couldn't find any Elasticsearch data"
-        />
-      }
-    >
-      <dd>
-        <FormattedMessage
-          id="kbn.management.createIndexPattern.emptyStateLabel.emptyStateDetail"
-          defaultMessage="{needToIndex} {learnHowLink} or {getStartedLink}"
-          values={{
-            needToIndex: (
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="kbn.management.createIndexPattern.emptyStateLabel.needToIndexLabel"
-                  defaultMessage="You'll need to index some data into Elasticsearch before you can create an index pattern."
-                />
-              </EuiTextColor>
-            ),
-            learnHowLink: (
-              <EuiLink href="#/home/tutorial_directory">
-                <FormattedMessage
-                  id="kbn.management.createIndexPattern.emptyStateLabel.learnHowLink"
-                  defaultMessage="Learn how"
-                />
-              </EuiLink>
-            ),
-            getStartedLink: (
-              <EuiLink href="#/home/tutorial_directory/sampleData">
-                <FormattedMessage
-                  id="kbn.management.createIndexPattern.emptyStateLabel.getStartedLink"
-                  defaultMessage="get started with some sample data sets."
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </dd>
-
-      <EuiButton
-        iconType="refresh"
-        onClick={onRefresh}
-        data-test-subj="refreshIndicesButton"
-        color="warning"
-      >
-        <FormattedMessage
-          id="kbn.management.createIndexPattern.emptyState.checkDataButton"
-          defaultMessage="Check for new data"
-        />
-      </EuiButton>
-    </EuiCallOut> */}
   </EuiPageContent>
 );

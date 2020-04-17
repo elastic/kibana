@@ -19,34 +19,31 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiLoadingSpinner } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const LoadingIndices = ({ ...rest }) => (
-  <EuiFlexGroup justifyContent="center" alignItems="center" {...rest}>
+  <EuiFlexGroup
+    justifyContent="center"
+    alignItems="center"
+    direction="column"
+    gutterSize="s"
+    {...rest}
+  >
     <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="m" />
-    </EuiFlexItem>
-
-    <EuiFlexItem grow={false}>
-      <EuiText>
-        <EuiTextColor color="subdued">
+      <EuiTitle size="s">
+        <h3 style={{ textAlign: 'center' }}>
           <FormattedMessage
             id="kbn.management.createIndexPattern.step.loadingHeader"
             defaultMessage="Looking for matching indices…"
           />
-        </EuiTextColor>
-      </EuiText>
+        </h3>
+      </EuiTitle>
+    </EuiFlexItem>
 
-      <EuiText size="s" style={{ textAlign: 'center' }}>
-        <EuiTextColor color="subdued">
-          <FormattedMessage
-            id="kbn.management.createIndexPattern.step.loadingLabel"
-            defaultMessage="Just a sec…"
-          />
-        </EuiTextColor>
-      </EuiText>
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="l" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

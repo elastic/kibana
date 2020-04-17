@@ -23,6 +23,7 @@ import { EuiGlobalToastList, EuiGlobalToastListToast, EuiPageContent } from '@el
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
+import { EuiHorizontalRule } from '@elastic/eui';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
@@ -245,6 +246,7 @@ export class CreateIndexPatternWizard extends Component<
       return (
         <EuiPageContent>
           {header}
+          <EuiHorizontalRule />
           <StepIndexPattern
             allIndices={allIndices}
             initialQuery={indexPattern || initialQuery}
@@ -264,6 +266,7 @@ export class CreateIndexPatternWizard extends Component<
       return (
         <EuiPageContent>
           {header}
+          <EuiHorizontalRule />
           <StepTimeField
             indexPattern={indexPattern}
             indexPatternsService={services.indexPatterns}

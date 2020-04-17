@@ -69,11 +69,11 @@ export function IndexHeader({
   deleteIndexPattern,
 }: IndexHeaderProps) {
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           {defaultIndex === indexPattern.id && (
-            <EuiFlexItem grow={false} style={{ marginRight: 0 }}>
+            <EuiFlexItem grow={false}>
               <EuiIcon size="xl" type="starFilled" />
             </EuiFlexItem>
           )}
@@ -85,7 +85,7 @@ export function IndexHeader({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false}>
           {setDefault && (
             <EuiFlexItem>
               <EuiToolTip content={setDefaultTooltip}>

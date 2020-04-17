@@ -19,9 +19,10 @@
 
 import React from 'react';
 
-import { EuiText, EuiTextColor, EuiIcon } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { MatchedIndex } from '../../../../types';
 
 interface StatusMessageProps {
@@ -41,15 +42,15 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   query,
   showSystemIndices,
 }) => {
-  let statusIcon;
+  let statusIcon: EuiIconType | undefined;
   let statusMessage;
-  let statusColor: 'default' | 'secondary' | undefined;
+  let statusColor: 'primary' | 'success' | undefined;
 
   const allIndicesLength = allIndices.length;
 
   if (query.length === 0) {
-    statusIcon = null;
-    statusColor = 'default';
+    statusIcon = undefined;
+    statusColor = 'primary';
 
     if (allIndicesLength > 1) {
       statusMessage = (
@@ -66,8 +67,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="kbn.management.createIndexPattern.step.status.noSystemIndicesWithPromptLabel"
-            defaultMessage="No Elasticsearch indices match your pattern. To view the matching system indices, toggle the switch in
-            the upper right."
+            defaultMessage="No Elasticsearch indices match your pattern. To view the matching system indices, toggle the switch above."
           />
         </span>
       );
@@ -83,7 +83,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
     }
   } else if (exactMatchedIndices.length) {
     statusIcon = 'check';
-    statusColor = 'secondary';
+    statusColor = 'success';
     statusMessage = (
       <span>
         &nbsp;
@@ -113,8 +113,8 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       </span>
     );
   } else if (partialMatchedIndices.length) {
-    statusIcon = null;
-    statusColor = 'default';
+    statusIcon = undefined;
+    statusColor = 'primary';
     statusMessage = (
       <span>
         <FormattedMessage
@@ -137,8 +137,8 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       </span>
     );
   } else if (allIndicesLength) {
-    statusIcon = null;
-    statusColor = 'default';
+    statusIcon = undefined;
+    statusColor = 'primary';
     statusMessage = (
       <span>
         <FormattedMessage
@@ -163,11 +163,12 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   }
 
   return (
-    <EuiText size="s" data-test-subj="createIndexPatternStatusMessage">
-      <EuiTextColor color={statusColor}>
-        {statusIcon ? <EuiIcon type={statusIcon} /> : null}
-        {statusMessage}
-      </EuiTextColor>
-    </EuiText>
+    <EuiCallOut
+      size="s"
+      color={statusColor}
+      data-test-subj="createIndexPatternStatusMessage"
+      iconType={statusIcon}
+      title={statusMessage}
+    />
   );
 };
