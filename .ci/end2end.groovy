@@ -78,7 +78,15 @@ pipeline {
       steps{
         notifyStatus('Running smoke tests', 'PENDING')
         dir("${BASE_DIR}"){
-          sh "${E2E_DIR}/run-e2e.sh"
+          sh "${E2E_DIR}/run-e2e.sh || true"
+          // As long as Kibana takes ages let's try a few times though
+          retry(10) {
+            sleep 20
+            dir("${E2E_DIR}") {
+              sh 'rm x-pack/legacy/plugins/apm/e2e/cypress/test-results/*.*'
+              sh 'yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true'
+            }
+          }
         }
       }
       post {
