@@ -111,7 +111,7 @@ describe('SuiteTracker', () => {
       config: MOCK_CONFIG_PATH,
       file: MOCK_TEST_PATH,
       tag: MOCK_TEST_PATH,
-      leafSuite: true,
+      hasTests: true,
       success: true,
     });
   });
@@ -128,7 +128,7 @@ describe('SuiteTracker', () => {
   });
 
   it('respects TEST_METADATA_PATH env var for metadata target override', async () => {
-    process.env.TEST_METADATA_PATH = '/dev/null/fake-test-path';
+    process.env.TEST_METADATA_PATH = resolve(REPO_ROOT, '../fake-test-path');
     const { lifecycle } = await runLifecycleWithMocks([MOCKS.WITH_TESTS]);
     await lifecycle.cleanup.trigger();
 
@@ -149,8 +149,8 @@ describe('SuiteTracker', () => {
     const finishedWithTests = suites.find(s => s.title !== 'root');
 
     expect(finishedRoot).toBeTruthy();
-    expect(finishedRoot?.leafSuite).toBeFalsy();
-    expect(finishedWithTests?.leafSuite).toBe(true);
+    expect(finishedRoot?.hasTests).toBeFalsy();
+    expect(finishedWithTests?.hasTests).toBe(true);
   });
 
   describe('with a failing suite', () => {

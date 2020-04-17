@@ -38,7 +38,7 @@ export interface SuiteWithMetadata {
   endTime: Date;
   duration: number;
   success: boolean;
-  leafSuite: boolean;
+  hasTests: boolean;
 }
 
 const getTestMetadataPath = () => {
@@ -117,10 +117,11 @@ export class SuiteTracker {
         file,
         tag: suite.suiteTag,
         title: suite.title,
-        leafSuite: !!(
+        hasTests: !!(
           (suite.tests && suite.tests.length) ||
+          // The below statement is so that `hasTests` will bubble up nested describes in the same file
           (this.finishedSuitesByConfig[config][file] &&
-            this.finishedSuitesByConfig[config][file].leafSuite)
+            this.finishedSuitesByConfig[config][file].hasTests)
         ),
       } as SuiteWithMetadata;
     });
