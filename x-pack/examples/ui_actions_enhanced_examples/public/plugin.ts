@@ -20,7 +20,7 @@ export interface StartDependencies {
 
 export class UiActionsEnhancedExamplesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { uiActions, drilldowns }: SetupDependencies) {
+  public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
     // eslint-disable-next-line
     console.log('ui_actions_enhanced_examples');
   }
