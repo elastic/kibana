@@ -33,6 +33,7 @@ export const register = (deps: RouteDependencies): void => {
         const cluster = clustersByName[clusterName];
         const isTransient = transientClusterNames.includes(clusterName);
         const isPersistent = persistentClusterNames.includes(clusterName);
+        const { config } = deps;
 
         // If the cluster hasn't been stored in the cluster state, then it's defined by the
         // node's config file.
@@ -46,7 +47,12 @@ export const register = (deps: RouteDependencies): void => {
           : undefined;
 
         return {
-          ...deserializeCluster(clusterName, cluster, deprecatedProxyAddress),
+          ...deserializeCluster(
+            clusterName,
+            cluster,
+            deprecatedProxyAddress,
+            config.isCloudEnabled
+          ),
           isConfiguredByNode,
         };
       });

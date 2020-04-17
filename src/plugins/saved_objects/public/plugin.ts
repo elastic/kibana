@@ -17,11 +17,32 @@
  * under the License.
  */
 
-import { Plugin } from 'src/core/public';
+import { CoreStart, Plugin } from 'src/core/public';
 
 import './index.scss';
+import { createSavedObjectClass } from './saved_object';
+import { DataPublicPluginStart } from '../../data/public';
 
-export class SavedObjectsPublicPlugin implements Plugin {
+export interface SavedObjectsStart {
+  SavedObjectClass: any;
+}
+
+export interface SavedObjectsStartDeps {
+  data: DataPublicPluginStart;
+}
+
+export class SavedObjectsPublicPlugin
+  implements Plugin<void, SavedObjectsStart, object, SavedObjectsStartDeps> {
   public setup() {}
-  public start() {}
+  public start(core: CoreStart, { data }: SavedObjectsStartDeps) {
+    return {
+      SavedObjectClass: createSavedObjectClass({
+        indexPatterns: data.indexPatterns,
+        savedObjectsClient: core.savedObjects.client,
+        search: data.search,
+        chrome: core.chrome,
+        overlays: core.overlays,
+      }),
+    };
+  }
 }

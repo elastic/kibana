@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import '../../../../plugins/maps/public/kibana_services';
 
 // import the uiExports that we want to "use"
 import 'uiExports/inspectorViews';
@@ -25,3 +26,10 @@ import { MapsPlugin } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new MapsPlugin();
 };
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export {
+  RenderTooltipContentParams,
+  ITooltipProperty,
+} from '../../../../plugins/maps/public/layers/tooltips/tooltip_property';
+export { MapEmbeddable, MapEmbeddableInput } from './embeddable';

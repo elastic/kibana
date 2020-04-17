@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  RuleAlertAction,
+  RuleType,
+} from '../../../../../../../plugins/siem/common/detection_engine/types';
 import { AlertAction } from '../../../../../../../plugins/alerting/common';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
-import { RuleType } from '../../../containers/detection_engine/rules/types';
 import { FieldValueQueryBar } from './components/query_bar';
 import { FormData, FormHook } from '../../../shared_imports';
 import { FieldValueTimeline } from './components/pick_timeline';

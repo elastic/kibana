@@ -35,7 +35,6 @@ export async function enroll(
     user_provided_metadata: JSON.stringify(metadata?.userProvided ?? {}),
     local_metadata: JSON.stringify(metadata?.local ?? {}),
     current_error_events: undefined,
-    actions: [],
     access_api_key_id: undefined,
     last_checkin: undefined,
     default_api_key: undefined,

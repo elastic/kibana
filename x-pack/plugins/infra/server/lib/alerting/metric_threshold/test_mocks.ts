@@ -26,6 +26,17 @@ const bucketsB = [
   },
 ];
 
+const bucketsC = [
+  {
+    doc_count: 2,
+    aggregatedValue: { value: 0.5 },
+  },
+  {
+    doc_count: 3,
+    aggregatedValue: { value: 16.0 },
+  },
+];
+
 export const basicMetricResponse = {
   aggregations: {
     aggregatedIntervals: {
@@ -107,4 +118,12 @@ export const alternateCompositeResponse = {
 export const compositeEndResponse = {
   aggregations: {},
   hits: { total: { value: 0 } },
+};
+
+export const changedSourceIdResponse = {
+  aggregations: {
+    aggregatedIntervals: {
+      buckets: bucketsC,
+    },
+  },
 };

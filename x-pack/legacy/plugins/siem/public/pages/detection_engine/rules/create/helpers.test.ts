@@ -515,10 +515,9 @@ describe('helpers', () => {
         actions: [],
         enabled: false,
         meta: {
-          throttle: 'no_actions',
-          kibanaSiemAppUrl: 'http://localhost:5601/app/siem',
+          kibana_siem_app_url: 'http://localhost:5601/app/siem',
         },
-        throttle: null,
+        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);
@@ -534,10 +533,9 @@ describe('helpers', () => {
         actions: [],
         enabled: false,
         meta: {
-          throttle: mockStepData.throttle,
-          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
-        throttle: null,
+        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);
@@ -568,10 +566,9 @@ describe('helpers', () => {
         ],
         enabled: false,
         meta: {
-          throttle: mockStepData.throttle,
-          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
-        throttle: null,
+        throttle: 'rule',
       };
 
       expect(result).toEqual(expected);
@@ -602,8 +599,7 @@ describe('helpers', () => {
         ],
         enabled: false,
         meta: {
-          throttle: mockStepData.throttle,
-          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
         throttle: mockStepData.throttle,
       };
@@ -635,10 +631,9 @@ describe('helpers', () => {
         ],
         enabled: false,
         meta: {
-          throttle: null,
-          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
-        throttle: null,
+        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);

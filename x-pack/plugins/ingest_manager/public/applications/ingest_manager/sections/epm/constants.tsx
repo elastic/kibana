@@ -24,6 +24,7 @@ export const AssetTitleMap: Record<AssetType, string> = {
   search: 'Saved Search',
   visualization: 'Visualization',
   input: 'Agent input',
+  map: 'Map',
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {
@@ -36,6 +37,7 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   'index-pattern': 'indexPatternApp',
   search: 'searchProfilerApp',
   visualization: 'visualizeApp',
+  map: 'mapApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {

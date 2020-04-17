@@ -16,13 +16,16 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SingleFieldSelect } from '../../../../components/single_field_select';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SingleFieldSelect } from '../../../../../../../../plugins/maps/public/components/single_field_select';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getTermsFields } from '../../../../index_pattern_util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getTermsFields } from '../../../../../../../../plugins/maps/public/index_pattern_util';
 import {
   getIndexPatternService,
   getIndexPatternSelectComponent,
-} from '../../../../kibana_services';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../plugins/maps/public/kibana_services';
 
 export class JoinExpression extends Component {
   state = {

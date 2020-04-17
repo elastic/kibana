@@ -56,7 +56,12 @@ export type MainType =
   | 'date_nanos'
   | 'geo_point'
   | 'geo_shape'
-  | 'token_count';
+  | 'token_count'
+  /**
+   * 'other' is a special type that only exists inside of MappingsEditor as a placeholder
+   * for undocumented field types.
+   */
+  | 'other';
 
 export type SubType = NumericType | RangeType;
 
@@ -156,6 +161,10 @@ interface FieldBasic {
   subType?: SubType;
   properties?: { [key: string]: Omit<Field, 'name'> };
   fields?: { [key: string]: Omit<Field, 'name'> };
+
+  // other* exist together as a holder of types that the mappings editor does not yet know about but
+  // enables the user to create mappings with them.
+  otherTypeJson?: GenericObject;
 }
 
 type FieldParams = {

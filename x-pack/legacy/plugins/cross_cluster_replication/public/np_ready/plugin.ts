@@ -11,7 +11,7 @@ import {
   DocLinksStart,
 } from 'src/core/public';
 
-import { IndexMgmtSetup } from '../../../../../plugins/index_management/public';
+import { IndexManagementPluginSetup } from '../../../../../plugins/index_management/public';
 
 // @ts-ignore;
 import { setHttpClient } from './app/services/api';
@@ -21,7 +21,7 @@ import { setNotifications } from './app/services/notifications';
 import { extendIndexManagement } from './extend_index_management';
 
 interface PluginDependencies {
-  indexManagement: IndexMgmtSetup;
+  indexManagement: IndexManagementPluginSetup;
   __LEGACY: {
     chrome: any;
     MANAGEMENT_BREADCRUMB: ChromeBreadcrumb;

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Reducer } from 'redux';
-import { HostListState } from '../../types';
+import { HostListState, ImmutableReducer } from '../../types';
 import { AppAction } from '../action';
 
 const initialState = (): HostListState => {
@@ -21,7 +20,7 @@ const initialState = (): HostListState => {
   };
 };
 
-export const hostListReducer: Reducer<HostListState, AppAction> = (
+export const hostListReducer: ImmutableReducer<HostListState, AppAction> = (
   state = initialState(),
   action
 ) => {
@@ -34,7 +33,7 @@ export const hostListReducer: Reducer<HostListState, AppAction> = (
     } = action.payload;
     return {
       ...state,
-      hosts,
+      hosts: hosts.map(hostInfo => hostInfo.metadata),
       total,
       pageSize,
       pageIndex,
@@ -43,7 +42,7 @@ export const hostListReducer: Reducer<HostListState, AppAction> = (
   } else if (action.type === 'serverReturnedHostDetails') {
     return {
       ...state,
-      details: action.payload,
+      details: action.payload.metadata,
     };
   } else if (action.type === 'serverFailedToReturnHostDetails') {
     return {

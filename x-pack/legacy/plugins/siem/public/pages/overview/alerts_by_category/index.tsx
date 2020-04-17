@@ -7,9 +7,9 @@
 import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo } from 'react';
-
 import { Position } from '@elastic/charts';
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../../../plugins/siem/common/constants';
 import { SHOWING, UNIT } from '../../../components/alerts_viewer/translations';
 import { getDetectionEngineAlertUrl } from '../../../components/link_to/redirect_to_detection_engine';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
@@ -78,7 +78,11 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   const urlSearch = useGetUrlSearch(navTabs.detections);
 
   const alertsCountViewAlertsButton = useMemo(
-    () => <EuiButton href={getDetectionEngineAlertUrl(urlSearch)}>{i18n.VIEW_ALERTS}</EuiButton>,
+    () => (
+      <EuiButton data-test-subj="view-alerts" href={getDetectionEngineAlertUrl(urlSearch)}>
+        {i18n.VIEW_ALERTS}
+      </EuiButton>
+    ),
     [urlSearch]
   );
 
@@ -87,7 +91,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
       ...histogramConfigs,
       defaultStackByOption:
         alertsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? alertsStackByOptions[0],
-      getSubtitle: (totalCount: number) =>
+      subtitle: (totalCount: number) =>
         `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
       legendPosition: Position.Right,
     }),

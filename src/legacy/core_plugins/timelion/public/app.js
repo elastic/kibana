@@ -27,10 +27,11 @@ import { fatalError, toastNotifications } from 'ui/notify';
 import { timefilter } from 'ui/timefilter';
 import { npStart } from 'ui/new_platform';
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
-import { getTimezone } from '../../vis_type_timelion/public';
+import { getTimezone } from '../../../../plugins/vis_type_timelion/public';
 
 import 'uiExports/savedObjectTypes';
 
+require('ui/i18n');
 require('ui/autoload/all');
 
 // TODO: remove ui imports completely (move to plugins)
@@ -41,7 +42,6 @@ import './directives/saved_object_save_as_checkbox';
 import './services/saved_sheet_register';
 
 import rootTemplate from 'plugins/timelion/index.html';
-import { start as visualizations } from '../../visualizations/public/np_ready/public/legacy';
 
 import { loadKbnTopNavDirectives } from '../../../../plugins/kibana_legacy/public';
 loadKbnTopNavDirectives(npStart.plugins.navigation.ui);
@@ -58,7 +58,7 @@ require('plugins/timelion/directives/timelion_options_sheet');
 
 document.title = 'Timelion - Kibana';
 
-const app = require('ui/modules').get('apps/timelion', []);
+const app = require('ui/modules').get('apps/timelion', ['i18n', 'ngSanitize']);
 
 require('ui/routes').enable();
 
@@ -125,7 +125,7 @@ app.controller('timelion', function(
   timefilter.enableAutoRefreshSelector();
   timefilter.enableTimeRangeSelector();
 
-  const savedVisualizations = visualizations.savedVisualizationsLoader;
+  const savedVisualizations = npStart.plugins.visualizations.savedVisualizationsLoader;
   const timezone = getTimezone(config);
 
   const defaultExpression = '.es(*)';

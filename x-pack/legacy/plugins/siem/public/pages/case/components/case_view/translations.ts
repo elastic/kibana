@@ -34,6 +34,14 @@ export const REMOVED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabe
   defaultMessage: 'removed',
 });
 
+export const VIEW_INCIDENT = (incidentNumber: string) =>
+  i18n.translate('xpack.siem.case.caseView.actionLabel.viewIncident', {
+    defaultMessage: 'View {incidentNumber}',
+    values: {
+      incidentNumber,
+    },
+  });
+
 export const PUSHED_NEW_INCIDENT = i18n.translate(
   'xpack.siem.case.caseView.actionLabel.pushedNewIncident',
   {
@@ -57,6 +65,10 @@ export const ADDED_DESCRIPTION = i18n.translate(
 
 export const EDIT_DESCRIPTION = i18n.translate('xpack.siem.case.caseView.edit.description', {
   defaultMessage: 'Edit description',
+});
+
+export const QUOTE = i18n.translate('xpack.siem.case.caseView.edit.quote', {
+  defaultMessage: 'Quote',
 });
 
 export const EDIT_COMMENT = i18n.translate('xpack.siem.case.caseView.edit.comment', {
@@ -91,6 +103,10 @@ export const CASE_CLOSED = i18n.translate('xpack.siem.case.caseView.caseClosed',
   defaultMessage: 'Case closed',
 });
 
+export const CASE_REFRESH = i18n.translate('xpack.siem.case.caseView.caseRefresh', {
+  defaultMessage: 'Refresh case',
+});
+
 export const EMAIL_SUBJECT = (caseTitle: string) =>
   i18n.translate('xpack.siem.case.caseView.emailSubject', {
     values: { caseTitle },
@@ -102,56 +118,6 @@ export const EMAIL_BODY = (caseUrl: string) =>
     values: { caseUrl },
     defaultMessage: 'Case reference: {caseUrl}',
   });
-
-export const PUSH_SERVICENOW = i18n.translate('xpack.siem.case.caseView.pushAsServicenowIncident', {
-  defaultMessage: 'Push as ServiceNow incident',
+export const UNKNOWN = i18n.translate('xpack.siem.case.caseView.unknown', {
+  defaultMessage: 'Unknown',
 });
-
-export const UPDATE_PUSH_SERVICENOW = i18n.translate(
-  'xpack.siem.case.caseView.updatePushAsServicenowIncident',
-  {
-    defaultMessage: 'Update ServiceNow incident',
-  }
-);
-
-export const PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE = i18n.translate(
-  'xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigTitle',
-  {
-    defaultMessage: 'Configure external connector',
-  }
-);
-
-export const PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE = i18n.translate(
-  'xpack.siem.case.caseView.pushToServiceDisableBecauseCaseClosedTitle',
-  {
-    defaultMessage: 'Reopen the case',
-  }
-);
-
-export const PUSH_DISABLE_BY_KIBANA_CONFIG_TITLE = i18n.translate(
-  'xpack.siem.case.caseView.pushToServiceDisableByConfigTitle',
-  {
-    defaultMessage: 'Enable ServiceNow in Kibana configuration file',
-  }
-);
-
-export const PUSH_DISABLE_BY_LICENSE_TITLE = i18n.translate(
-  'xpack.siem.case.caseView.pushToServiceDisableByLicenseTitle',
-  {
-    defaultMessage: 'Upgrade to Elastic Platinum',
-  }
-);
-
-export const LINK_CLOUD_DEPLOYMENT = i18n.translate(
-  'xpack.siem.case.caseView.cloudDeploymentLink',
-  {
-    defaultMessage: 'cloud deployment',
-  }
-);
-
-export const LINK_CONNECTOR_CONFIGURE = i18n.translate(
-  'xpack.siem.case.caseView.connectorConfigureLink',
-  {
-    defaultMessage: 'connector',
-  }
-);

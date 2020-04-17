@@ -22,7 +22,9 @@ import { IScope } from 'angular';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
+import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { DashboardStart } from '../../../../plugins/dashboard/public';
+import { setSetupServices, setStartServices } from './set_services';
 import {
   LegacyCoreSetup,
   LegacyCoreStart,
@@ -31,18 +33,6 @@ import {
   ScopedHistory,
 } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
-import {
-  setFieldFormats,
-  setIndexPatterns,
-  setInjectedMetadata,
-  setHttp,
-  setNotifications,
-  setOverlays,
-  setQueryService,
-  setSearchService,
-  setUiSettings,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../plugins/data/public/services';
 import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
 import {
   Setup as InspectorSetup,
@@ -58,6 +48,10 @@ import {
   AdvancedSettingsStart,
 } from '../../../../plugins/advanced_settings/public';
 import { ManagementSetup, ManagementStart } from '../../../../plugins/management/public';
+import {
+  IndexPatternManagementSetup,
+  IndexPatternManagementStart,
+} from '../../../../plugins/index_pattern_management/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 import { TelemetryPluginSetup, TelemetryPluginStart } from '../../../../plugins/telemetry/public';
@@ -67,6 +61,16 @@ import {
 } from '../../../../plugins/navigation/public';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
+import {
+  SavedObjectsManagementPluginSetup,
+  SavedObjectsManagementPluginStart,
+} from '../../../../plugins/saved_objects_management/public';
+import {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../../plugins/visualizations/public';
+import { VisTypeTimelionPluginStart } from '../../../../plugins/vis_type_timelion/public';
+import { MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -86,7 +90,12 @@ export interface PluginsSetup {
   management: ManagementSetup;
   visTypeVega: VisTypeVegaSetup;
   discover: DiscoverSetup;
+  visualizations: VisualizationsSetup;
   telemetry?: TelemetryPluginSetup;
+  savedObjectsManagement: SavedObjectsManagementPluginSetup;
+  mapsLegacy: MapsLegacyPluginSetup;
+  indexPatternManagement: IndexPatternManagementSetup;
+  visTypeXy?: VisTypeXyPluginSetup;
 }
 
 export interface PluginsStart {
@@ -104,8 +113,12 @@ export interface PluginsStart {
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
   discover: DiscoverStart;
+  visualizations: VisualizationsStart;
   telemetry?: TelemetryPluginStart;
   dashboard: DashboardStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  visTypeTimelion: VisTypeTimelionPluginStart;
+  indexPatternManagement: IndexPatternManagementStart;
 }
 
 export const npSetup = {
@@ -137,25 +150,18 @@ export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
   // Setup compatibility layer for AppService in legacy platform
   npSetup.core.application.register = legacyAppRegister;
 
-  // Services that need to be set in the legacy platform since the legacy data plugin
-  // which previously provided them has been removed.
-  setInjectedMetadata(npSetup.core.injectedMetadata);
+  // Services that need to be set in the legacy platform since the legacy data
+  // & vis plugins which previously provided them have been removed.
+  setSetupServices(npSetup);
 }
 
 export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
 
-  // Services that need to be set in the legacy platform since the legacy data plugin
-  // which previously provided them has been removed.
-  setHttp(npStart.core.http);
-  setNotifications(npStart.core.notifications);
-  setOverlays(npStart.core.overlays);
-  setUiSettings(npStart.core.uiSettings);
-  setFieldFormats(npStart.plugins.data.fieldFormats);
-  setIndexPatterns(npStart.plugins.data.indexPatterns);
-  setQueryService(npStart.plugins.data.query);
-  setSearchService(npStart.plugins.data.search);
+  // Services that need to be set in the legacy platform since the legacy data
+  // & vis plugins which previously provided them have been removed.
+  setStartServices(npStart);
 }
 
 /** Flag used to ensure `legacyAppRegister` is only called once. */

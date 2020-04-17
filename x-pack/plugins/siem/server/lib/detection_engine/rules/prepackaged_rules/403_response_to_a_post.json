@@ -1,0 +1,24 @@
+{
+  "description": "A POST request to web application returned a 403 response, which indicates the web application declined to process the request because the action requested was not allowed",
+  "false_positives": [
+    "Security scans and tests may result in these errors. Misconfigured or buggy applications may produce large numbers of these errors. If the source is unexpected, the user unauthorized, or the request unusual, these may indicate suspicious or malicious activity."
+  ],
+  "index": [
+    "apm-*-transaction*"
+  ],
+  "language": "kuery",
+  "name": "Web Application Suspicious Activity: POST Request Declined",
+  "query": "http.response.status_code:403 and http.request.method:post",
+  "references": [
+    "https://en.wikipedia.org/wiki/HTTP_403"
+  ],
+  "risk_score": 47,
+  "rule_id": "a87a4e42-1d82-44bd-b0bf-d9b7f91fb89e",
+  "severity": "medium",
+  "tags": [
+    "APM",
+    "Elastic"
+  ],
+  "type": "query",
+  "version": 2
+}

@@ -34,7 +34,7 @@ import { Header } from './components/header';
 import { TimeField } from './components/time_field';
 import { AdvancedOptions } from './components/advanced_options';
 import { ActionButtons } from './components/action_buttons';
-import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
+import { IndexPatternCreationConfig } from '../../../../../../../../../../plugins/index_pattern_management/public';
 import { DataPublicPluginStart } from '../../../../../../../../../../plugins/data/public';
 
 interface StepTimeFieldProps {

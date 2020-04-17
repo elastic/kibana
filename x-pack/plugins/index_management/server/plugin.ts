@@ -12,13 +12,13 @@ import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';
 import { isEsError } from './lib/is_es_error';
 
-export interface IndexMgmtSetup {
+export interface IndexManagementPluginSetup {
   indexDataEnricher: {
     add: IndexDataEnricher['add'];
   };
 }
 
-export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, any> {
+export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
   private readonly logger: Logger;
@@ -31,7 +31,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, 
     this.indexDataEnricher = new IndexDataEnricher();
   }
 
-  setup({ http }: CoreSetup, { licensing }: Dependencies): IndexMgmtSetup {
+  setup({ http }: CoreSetup, { licensing }: Dependencies): IndexManagementPluginSetup {
     const router = http.createRouter();
 
     this.license.setup(

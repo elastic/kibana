@@ -7,7 +7,6 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
-import { LICENSE_CHECK_STATE } from '../../licensing/common/types';
 
 import { PLUGIN } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';
@@ -30,17 +29,14 @@ export class RemoteClustersServerPlugin implements Plugin<void, void, any, any> 
     this.licenseStatus = { valid: false };
   }
 
-  async setup(
-    { http, elasticsearch: elasticsearchService }: CoreSetup,
-    { licensing }: Dependencies
-  ) {
-    const elasticsearch = await elasticsearchService.adminClient;
+  async setup({ http }: CoreSetup, { licensing, cloud }: Dependencies) {
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
-      elasticsearch,
-      elasticsearchService,
       router,
       getLicenseStatus: () => this.licenseStatus,
+      config: {
+        isCloudEnabled: Boolean(cloud?.isCloudEnabled),
+      },
     };
 
     // Register routes
@@ -51,7 +47,7 @@ export class RemoteClustersServerPlugin implements Plugin<void, void, any, any> 
 
     licensing.license$.subscribe(license => {
       const { state, message } = license.check(PLUGIN.getI18nName(), PLUGIN.minimumLicenseType);
-      const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
+      const hasRequiredLicense = state === 'valid';
       if (hasRequiredLicense) {
         this.licenseStatus = { valid: true };
       } else {

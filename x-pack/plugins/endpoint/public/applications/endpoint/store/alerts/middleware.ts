@@ -5,27 +5,33 @@
  */
 
 import { IIndexPattern } from 'src/plugins/data/public';
-import { AlertResultList, AlertData } from '../../../../../common/types';
-import { AppAction } from '../action';
-import { MiddlewareFactory, AlertListState } from '../../types';
+import { AlertResultList, AlertDetails } from '../../../../../common/types';
+import { ImmutableMiddlewareFactory, AlertListState } from '../../types';
 import { isOnAlertPage, apiQueryParams, hasSelectedAlert, uiQueryParams } from './selectors';
 import { cloneHttpFetchQuery } from '../../../../common/clone_http_fetch_query';
 import { EndpointAppConstants } from '../../../../../common/types';
 
-export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreStart, depsStart) => {
+export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> = (
+  coreStart,
+  depsStart
+) => {
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
-    const indexName = EndpointAppConstants.ALERT_INDEX_NAME;
-    const fields = await indexPatterns.getFieldsForWildcard({ pattern: indexName });
+    const eventsPattern: { indexPattern: string } = await coreStart.http.get(
+      `${EndpointAppConstants.INDEX_PATTERN_ROUTE}/${EndpointAppConstants.EVENT_DATASET}`
+    );
+    const fields = await indexPatterns.getFieldsForWildcard({
+      pattern: eventsPattern.indexPattern,
+    });
     const indexPattern: IIndexPattern = {
-      title: indexName,
+      title: eventsPattern.indexPattern,
       fields,
     };
 
     return [indexPattern];
   }
 
-  return api => next => async (action: AppAction) => {
+  return api => next => async action => {
     next(action);
     const state = api.getState();
     if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {
@@ -40,7 +46,7 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
 
     if (action.type === 'userChangedUrl' && isOnAlertPage(state) && hasSelectedAlert(state)) {
       const uiParams = uiQueryParams(state);
-      const response: AlertData = await coreStart.http.get(
+      const response: AlertDetails = await coreStart.http.get(
         `/api/endpoint/alerts/${uiParams.selected_alert}`
       );
       api.dispatch({ type: 'serverReturnedAlertDetailsData', payload: response });

@@ -38,6 +38,7 @@ export {
   EmbeddableChildPanel,
   EmbeddableChildPanelProps,
   EmbeddableContext,
+  EmbeddableFactoryDefinition,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactoryRenderer,
@@ -60,6 +61,8 @@ export {
   PropertySpec,
   ViewMode,
   withEmbeddableSubscription,
+  SavedObjectEmbeddableInput,
+  isSavedObjectEmbeddableInput,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {

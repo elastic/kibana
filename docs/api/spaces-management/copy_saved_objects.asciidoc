@@ -26,6 +26,7 @@ You can request to overwrite any objects that already exist in the target space 
 `space_id`::
 (Optional, string) The ID of the space that contains the saved objects you want to copy. When `space_id` is unspecified in the URL, the default space is used.
 
+[role="child_attributes"]
 [[spaces-api-copy-saved-objects-request-body]]
 ==== {api-request-body-title}
 
@@ -34,10 +35,16 @@ You can request to overwrite any objects that already exist in the target space 
 
 `objects`::
   (Required, object array) The saved objects to copy.
++
+.Properties of `objects`
+[%collapsible%open]
+=====
   `type`:::
     (Required, string) The saved object type.
+
   `id`:::
     (Required, string) The saved object ID.
+=====
 
 `includeReferences`::
   (Optional, boolean) When set to `true`, all saved objects related to the specified saved objects will also be copied into the target spaces. The default value is `false`.
@@ -45,27 +52,43 @@ You can request to overwrite any objects that already exist in the target space 
 `overwrite`::
   (Optional, boolean) When set to `true`, all conflicts are automatically overidden. When a saved object with a matching `type` and `id` exists in the target space, that version is replaced with the version from the source space. The default value is `false`.
 
-
+[role="child_attributes"]
 [[spaces-api-copy-saved-objects-response-body]]
 ==== {api-response-body-title}
 
 `<space_id>`::
   (object) An object that describes the result of the copy operation for the space. Includes the dynamic keys in the response.
++
+.Properties of `<space_id>`
+[%collapsible%open]
+=====
   `success`:::
     (boolean) The copy operation was successful. When set to `false`, some objects may have been copied. For additional information, refer to the `successCount` and `errors` properties.
+
   `successCount`:::
     (number) The number of objects that successfully copied.
+
   `errors`:::
-    (Optional, array) The errors that occurred during the copy operation. When errors are reported, the `success` flag is set to `false`.v
+    (Optional, array) The errors that occurred during the copy operation. When errors are reported, the `success` flag is set to `false`.
++
+.Properties of `errors`
+[%collapsible%open]
+======
     `id`::::
       (string) The saved object ID that failed to copy.
     `type`::::
       (string) The type of saved object that failed to copy.
     `error`::::
       (object) The error that caused the copy operation to fail.
++
+.Properties of `error`
+[%collapsible%open]
+=======
       `type`:::::
         (string) The type of error. For example, `unsupported_type`, `missing_references`, or `unknown`. Errors marked as `conflict` may be resolved by using the <<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects conflicts API>>.
-
+=======
+======
+=====
 [[spaces-api-copy-saved-objects-example]]
 ==== {api-examples-title}
 

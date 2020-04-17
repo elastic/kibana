@@ -66,7 +66,7 @@ const analyzer = {
   ],
 };
 const defaultRequestBody = {
-  indexPatternTitle: 'categorization_functional_test',
+  indexPatternTitle: 'ft_categorization',
   query: { bool: { must: [{ match_all: {} }] } },
   size: 5,
   timeField: '@timestamp',
@@ -79,7 +79,7 @@ const defaultRequestBody = {
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
-  const mlSecurity = getService('mlSecurity');
+  const ml = getService('ml');
 
   const testDataList = [
     {
@@ -289,18 +289,15 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Categorization example endpoint - ', function() {
     before(async () => {
-      await esArchiver.load('ml/categorization');
-    });
-
-    after(async () => {
-      await esArchiver.unload('ml/categorization');
+      await esArchiver.loadIfNeeded('ml/categorization');
+      await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     for (const testData of testDataList) {
       it(testData.title, async () => {
         const { body } = await supertest
           .post('/api/ml/jobs/categorization_field_examples')
-          .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
+          .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);

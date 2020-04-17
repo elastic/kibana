@@ -22,13 +22,13 @@ export const REQUIRED_UPDATE_TO_SERVICE = i18n.translate(
   }
 );
 
-export const COPY_LINK_COMMENT = i18n.translate('xpack.siem.case.caseView.copyCommentLinkAria', {
-  defaultMessage: 'click to copy comment link',
+export const COPY_REFERENCE_LINK = i18n.translate('xpack.siem.case.caseView.copyCommentLinkAria', {
+  defaultMessage: 'Copy reference link',
 });
 
 export const MOVE_TO_ORIGINAL_COMMENT = i18n.translate(
   'xpack.siem.case.caseView.moveToCommentAria',
   {
-    defaultMessage: 'click to highlight the reference comment',
+    defaultMessage: 'Highlight the referenced comment',
   }
 );

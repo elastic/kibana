@@ -22,6 +22,10 @@ export interface MonitorIdParam {
   monitorId: string;
 }
 
+export interface HeartbeatIndicesParam {
+  heartbeatIndices: string;
+}
+
 export interface QueryParams {
   monitorId: string;
   dateStart: string;

@@ -27,6 +27,8 @@ import { schema } from '../step_about_rule/schema';
 import { ListItems } from './types';
 import { AboutStepRule } from '../../types';
 
+jest.mock('../../../../../lib/kibana');
+
 describe('description_step', () => {
   const setupMock = coreMock.createSetup();
   const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
@@ -41,13 +43,6 @@ describe('description_step', () => {
   let mockAboutStep: AboutStepRule;
 
   beforeEach(() => {
-    // jest carries state between mocked implementations when using
-    // spyOn. So now we're doing all three of these.
-    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
-
     setupMock.uiSettings.get.mockImplementation(uiSettingsMock(true));
     mockFilterManager = new FilterManager(setupMock.uiSettings);
     mockAboutStep = mockAboutStepRule();
@@ -466,12 +461,12 @@ describe('description_step', () => {
       test('returns default "note" description', () => {
         const result: ListItems[] = getDescriptionItem(
           'note',
-          'Investigation notes',
+          'Investigation guide',
           mockAboutStep,
           mockFilterManager
         );
 
-        expect(result[0].title).toEqual('Investigation notes');
+        expect(result[0].title).toEqual('Investigation guide');
         expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
     });

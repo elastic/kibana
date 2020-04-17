@@ -26,7 +26,6 @@ export interface ReturnPrePackagedRules {
 interface UsePrePackagedRuleProps {
   canUserCRUD: boolean | null;
   hasIndexWrite: boolean | null;
-  hasManageApiKey: boolean | null;
   isAuthenticated: boolean | null;
   hasEncryptionKey: boolean | null;
   isSignalIndexExists: boolean | null;
@@ -36,7 +35,6 @@ interface UsePrePackagedRuleProps {
  * Hook for using to get status about pre-packaged Rules from the Detection Engine API
  *
  * @param hasIndexWrite boolean
- * @param hasManageApiKey boolean
  * @param isAuthenticated boolean
  * @param hasEncryptionKey boolean
  * @param isSignalIndexExists boolean
@@ -45,7 +43,6 @@ interface UsePrePackagedRuleProps {
 export const usePrePackagedRules = ({
   canUserCRUD,
   hasIndexWrite,
-  hasManageApiKey,
   isAuthenticated,
   hasEncryptionKey,
   isSignalIndexExists,
@@ -117,7 +114,6 @@ export const usePrePackagedRules = ({
           if (
             canUserCRUD &&
             hasIndexWrite &&
-            hasManageApiKey &&
             isAuthenticated &&
             hasEncryptionKey &&
             isSignalIndexExists
@@ -185,14 +181,7 @@ export const usePrePackagedRules = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [
-    canUserCRUD,
-    hasIndexWrite,
-    hasManageApiKey,
-    isAuthenticated,
-    hasEncryptionKey,
-    isSignalIndexExists,
-  ]);
+  }, [canUserCRUD, hasIndexWrite, isAuthenticated, hasEncryptionKey, isSignalIndexExists]);
 
   return {
     loading,

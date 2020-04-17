@@ -7,6 +7,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   ESSearchResponse,
@@ -46,7 +47,19 @@ export function registerErrorRateAlertType({
     validate: {
       params: paramsSchema
     },
-
+    actionVariables: {
+      context: [
+        {
+          description: i18n.translate(
+            'xpack.apm.registerErrorRateAlertType.variables.serviceName',
+            {
+              defaultMessage: 'Service name'
+            }
+          ),
+          name: 'serviceName'
+        }
+      ]
+    },
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
 
@@ -99,7 +112,9 @@ export function registerErrorRateAlertType({
         const alertInstance = services.alertInstanceFactory(
           AlertType.ErrorRate
         );
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId);
+        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+          serviceName: alertParams.serviceName
+        });
       }
 
       return {};

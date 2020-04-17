@@ -158,6 +158,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
                 footer={
                   <EuiButton
                     className="homAddData__button"
+                    data-test-subj="logsData"
                     href="#/home/tutorial_directory/logging"
                     aria-describedby={loggingData.ariaDescribedby}
                   >

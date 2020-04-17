@@ -70,7 +70,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
           ),
         });
 
-        return response.ok({ body: 'true' });
+        return response.noContent();
       } catch (error) {
         return response.customError(wrapError(error));
       }

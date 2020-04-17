@@ -11,6 +11,8 @@ import numeral from '@elastic/numeral';
 import { isEmpty } from 'lodash';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
+import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
+
 import { Action, ACTION } from './actions';
 import { getInitialState, getJobConfigFromFormState, State } from './state';
 import {
@@ -29,9 +31,14 @@ import {
 } from '../../../../../../../common/constants/validation';
 import {
   getDependentVar,
+  getNumTopFeatureImportanceValues,
+  getTrainingPercent,
   isRegressionAnalysis,
   isClassificationAnalysis,
   ANALYSIS_CONFIG_TYPE,
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
+  TRAINING_PERCENT_MIN,
+  TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { indexPatterns } from '../../../../../../../../../../src/plugins/data/public';
 
@@ -95,6 +102,19 @@ const getSourceIndexString = (state: State) => {
   return '';
 };
 
+/**
+ * Validates num_top_feature_importance_values. Must be an integer >= 0.
+ */
+export const validateNumTopFeatureImportanceValues = (
+  numTopFeatureImportanceValues: any
+): boolean => {
+  return (
+    typeof numTopFeatureImportanceValues === 'number' &&
+    numTopFeatureImportanceValues >= NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN &&
+    Number.isInteger(numTopFeatureImportanceValues)
+  );
+};
+
 export const validateAdvancedEditor = (state: State): State => {
   const {
     jobIdEmpty,
@@ -141,6 +161,8 @@ export const validateAdvancedEditor = (state: State): State => {
 
   let dependentVariableEmpty = false;
   let excludesValid = true;
+  let trainingPercentValid = true;
+  let numTopFeatureImportanceValuesValid = true;
 
   if (
     jobConfig.analysis === undefined &&
@@ -168,6 +190,53 @@ export const validateAdvancedEditor = (state: State): State => {
         ),
         message: '',
       });
+    }
+
+    const trainingPercent = getTrainingPercent(jobConfig.analysis);
+    if (
+      trainingPercent !== undefined &&
+      (isNaN(trainingPercent) ||
+        typeof trainingPercent !== 'number' ||
+        trainingPercent < TRAINING_PERCENT_MIN ||
+        trainingPercent > TRAINING_PERCENT_MAX)
+    ) {
+      trainingPercentValid = false;
+
+      state.advancedEditorMessages.push({
+        error: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.advancedEditorMessage.trainingPercentInvalid',
+          {
+            defaultMessage: 'The training percent must be a number between {min} and {max}.',
+            values: {
+              min: TRAINING_PERCENT_MIN,
+              max: TRAINING_PERCENT_MAX,
+            },
+          }
+        ),
+        message: '',
+      });
+    }
+
+    const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
+    if (numTopFeatureImportanceValues !== undefined) {
+      numTopFeatureImportanceValuesValid = validateNumTopFeatureImportanceValues(
+        numTopFeatureImportanceValues
+      );
+      if (numTopFeatureImportanceValuesValid === false) {
+        state.advancedEditorMessages.push({
+          error: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.advancedEditorMessage.numTopFeatureImportanceValuesInvalid',
+            {
+              defaultMessage:
+                'The value for num_top_feature_importance_values must be an integer of {min} or higher.',
+              values: {
+                min: 0,
+              },
+            }
+          ),
+          message: '',
+        });
+      }
     }
   }
 
@@ -199,6 +268,17 @@ export const validateAdvancedEditor = (state: State): State => {
         'xpack.ml.dataframe.analytics.create.advancedEditorMessage.destinationIndexNameEmpty',
         {
           defaultMessage: 'The destination index name must not be empty.',
+        }
+      ),
+      message: '',
+    });
+  } else if (destinationIndexPatternTitleExists && !createIndexPattern) {
+    state.advancedEditorMessages.push({
+      error: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.destinationIndexNameExistsWarn',
+        {
+          defaultMessage:
+            'An index with this destination index name already exists. Be aware that running this analytics job will modify this destination index.',
         }
       ),
       message: '',
@@ -246,9 +326,12 @@ export const validateAdvancedEditor = (state: State): State => {
     });
   }
 
+  state.form.destinationIndexPatternTitleExists = destinationIndexPatternTitleExists;
+
   state.isValid =
     maxDistinctValuesError === undefined &&
     excludesValid &&
+    trainingPercentValid &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
     jobIdValid &&
@@ -259,6 +342,7 @@ export const validateAdvancedEditor = (state: State): State => {
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
     !modelMemoryLimitEmpty &&
+    numTopFeatureImportanceValuesValid &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -312,6 +396,7 @@ const validateForm = (state: State): State => {
     dependentVariable,
     maxDistinctValuesError,
     modelMemoryLimit,
+    numTopFeatureImportanceValuesValid,
   } = state.form;
   const { estimatedModelMemoryLimit } = state;
 
@@ -337,6 +422,7 @@ const validateForm = (state: State): State => {
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
+    numTopFeatureImportanceValuesValid &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -365,7 +451,23 @@ export function reducer(state: State, action: Action): State {
       return getInitialState();
 
     case ACTION.SET_ADVANCED_EDITOR_RAW_STRING:
-      return { ...state, advancedEditorRawString: action.advancedEditorRawString };
+      let resultJobConfig;
+      try {
+        resultJobConfig = JSON.parse(collapseLiteralStrings(action.advancedEditorRawString));
+      } catch (e) {
+        return {
+          ...state,
+          advancedEditorRawString: action.advancedEditorRawString,
+          isAdvancedEditorValidJson: false,
+          advancedEditorMessages: [],
+        };
+      }
+
+      return {
+        ...validateAdvancedEditor({ ...state, jobConfig: resultJobConfig }),
+        advancedEditorRawString: action.advancedEditorRawString,
+        isAdvancedEditorValidJson: true,
+      };
 
     case ACTION.SET_FORM_STATE:
       const newFormState = { ...state.form, ...action.payload };
@@ -394,6 +496,12 @@ export function reducer(state: State, action: Action): State {
         newFormState.sourceIndexNameEmpty = newFormState.sourceIndex === '';
         const validationMessages = indexPatterns.validate(newFormState.sourceIndex);
         newFormState.sourceIndexNameValid = Object.keys(validationMessages).length === 0;
+      }
+
+      if (action.payload.numTopFeatureImportanceValues !== undefined) {
+        newFormState.numTopFeatureImportanceValuesValid = validateNumTopFeatureImportanceValues(
+          newFormState?.numTopFeatureImportanceValues
+        );
       }
 
       return state.isAdvancedEditorEnabled

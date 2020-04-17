@@ -8,7 +8,10 @@ import moment from 'moment-timezone';
 
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
+import {
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+} from '../../../../../../plugins/siem/common/constants';
 import { useUiSetting, useKibana } from './kibana_react';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
@@ -53,9 +56,24 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
     let didCancel = false;
     const fetchData = async () => {
       try {
-        const response = await security.authc.getCurrentUser();
-        if (!didCancel) {
-          setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
+        if (security != null) {
+          const response = await security.authc.getCurrentUser();
+          if (!didCancel) {
+            setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
+          }
+        } else {
+          setUser({
+            username: i18n.translate('xpack.siem.getCurrentUser.unknownUser', {
+              defaultMessage: 'Unknown',
+            }),
+            email: '',
+            fullName: '',
+            roles: [],
+            enabled: false,
+            authenticationRealm: { name: '', type: '' },
+            lookupRealm: { name: '', type: '' },
+            authenticationProvider: '',
+          });
         }
       } catch (error) {
         if (!didCancel) {
@@ -80,4 +98,30 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
     fetchUser();
   }, []);
   return user;
+};
+
+export interface UseGetUserSavedObjectPermissions {
+  crud: boolean;
+  read: boolean;
+}
+
+export const useGetUserSavedObjectPermissions = () => {
+  const [
+    savedObjectsPermissions,
+    setSavedObjectsPermissions,
+  ] = useState<UseGetUserSavedObjectPermissions | null>(null);
+  const uiCapabilities = useKibana().services.application.capabilities;
+
+  useEffect(() => {
+    const capabilitiesCanUserCRUD: boolean =
+      typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
+    const capabilitiesCanUserRead: boolean =
+      typeof uiCapabilities.siem.show === 'boolean' ? uiCapabilities.siem.show : false;
+    setSavedObjectsPermissions({
+      crud: capabilitiesCanUserCRUD,
+      read: capabilitiesCanUserRead,
+    });
+  }, [uiCapabilities]);
+
+  return savedObjectsPermissions;
 };

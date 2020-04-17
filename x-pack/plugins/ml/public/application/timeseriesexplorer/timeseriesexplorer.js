@@ -78,6 +78,7 @@ import {
   processRecordScoreResults,
   getFocusData,
 } from './timeseriesexplorer_utils';
+import { EMPTY_FIELD_VALUE_LABEL } from './components/entity_control/entity_control';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -94,7 +95,7 @@ function getEntityControlOptions(fieldValues) {
   fieldValues.sort();
 
   return fieldValues.map(value => {
-    return { label: value };
+    return { label: value === '' ? EMPTY_FIELD_VALUE_LABEL : value, value };
   });
 }
 
@@ -192,7 +193,7 @@ export class TimeSeriesExplorer extends React.Component {
   getFieldNamesWithEmptyValues = () => {
     const latestEntityControls = this.getControlsForDetector();
     return latestEntityControls
-      .filter(({ fieldValue }) => !fieldValue)
+      .filter(({ fieldValue }) => fieldValue === null)
       .map(({ fieldName }) => fieldName);
   };
 
@@ -249,7 +250,7 @@ export class TimeSeriesExplorer extends React.Component {
     if (operator === '+' && entity.fieldValue !== value) {
       resultValue = value;
     } else if (operator === '-' && entity.fieldValue === value) {
-      resultValue = '';
+      resultValue = null;
     } else {
       return;
     }
@@ -302,7 +303,7 @@ export class TimeSeriesExplorer extends React.Component {
       focusAggregationInterval,
       selectedForecastId,
       modelPlotEnabled,
-      entityControls.filter(entity => entity.fieldValue.length > 0),
+      entityControls.filter(entity => entity.fieldValue !== null),
       searchBounds,
       selectedJob,
       TIME_FIELD_NAME
@@ -576,7 +577,7 @@ export class TimeSeriesExplorer extends React.Component {
         };
 
         const nonBlankEntities = entityControls.filter(entity => {
-          return entity.fieldValue.length > 0;
+          return entity.fieldValue !== null;
         });
 
         if (
@@ -739,7 +740,7 @@ export class TimeSeriesExplorer extends React.Component {
     const overFieldName = get(detector, 'over_field_name');
     const byFieldName = get(detector, 'by_field_name');
     if (partitionFieldName !== undefined) {
-      const partitionFieldValue = get(entitiesState, partitionFieldName, '');
+      const partitionFieldValue = get(entitiesState, partitionFieldName, null);
       entities.push({
         fieldType: 'partition_field',
         fieldName: partitionFieldName,
@@ -747,7 +748,7 @@ export class TimeSeriesExplorer extends React.Component {
       });
     }
     if (overFieldName !== undefined) {
-      const overFieldValue = get(entitiesState, overFieldName, '');
+      const overFieldValue = get(entitiesState, overFieldName, null);
       entities.push({
         fieldType: 'over_field',
         fieldName: overFieldName,
@@ -761,7 +762,7 @@ export class TimeSeriesExplorer extends React.Component {
     // TODO - metric data can be filtered by this field, so should only exclude
     // from filter for the anomaly records.
     if (byFieldName !== undefined && overFieldName === undefined) {
-      const byFieldValue = get(entitiesState, byFieldName, '');
+      const byFieldValue = get(entitiesState, byFieldName, null);
       entities.push({ fieldType: 'by_field', fieldName: byFieldName, fieldValue: byFieldValue });
     }
 
@@ -775,7 +776,7 @@ export class TimeSeriesExplorer extends React.Component {
    */
   getCriteriaFields(detectorIndex, entities) {
     // Only filter on the entity if the field has a value.
-    const nonBlankEntities = entities.filter(entity => entity.fieldValue.length > 0);
+    const nonBlankEntities = entities.filter(entity => entity.fieldValue !== null);
     return [
       {
         fieldName: 'detector_index',
@@ -1150,7 +1151,7 @@ export class TimeSeriesExplorer extends React.Component {
             </EuiFlexItem>
             {entityControls.map(entity => {
               const entityKey = `${entity.fieldName}`;
-              const forceSelection = !hasEmptyFieldValues && !entity.fieldValue;
+              const forceSelection = !hasEmptyFieldValues && entity.fieldValue === null;
               hasEmptyFieldValues = !hasEmptyFieldValues && forceSelection;
               return (
                 <EntityControl

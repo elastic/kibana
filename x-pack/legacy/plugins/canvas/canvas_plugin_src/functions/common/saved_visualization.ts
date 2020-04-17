@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
-import { VisualizeInput } from 'src/legacy/core_plugins/visualizations/public';
+import { VisualizeInput } from 'src/plugins/visualizations/public';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,

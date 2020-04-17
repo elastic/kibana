@@ -7,7 +7,10 @@
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPopover, EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
 
+import * as i18n from './translations';
+
 export interface PropertyActionButtonProps {
+  disabled?: boolean;
   onClick: () => void;
   iconType: string;
   label: string;
@@ -16,13 +19,14 @@ export interface PropertyActionButtonProps {
 const ComponentId = 'property-actions';
 
 const PropertyActionButton = React.memo<PropertyActionButtonProps>(
-  ({ onClick, iconType, label }) => (
+  ({ disabled = false, onClick, iconType, label }) => (
     <EuiButtonEmpty
       data-test-subj={`${ComponentId}-${iconType}`}
       aria-label={label}
       color="text"
       iconSide="left"
       iconType={iconType}
+      isDisabled={disabled}
       onClick={onClick}
     >
       {label}
@@ -45,7 +49,7 @@ export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActio
 
   const onClosePopover = useCallback((cb?: () => void) => {
     setShowActions(false);
-    if (cb) {
+    if (cb != null) {
       cb();
     }
   }, []);
@@ -55,10 +59,11 @@ export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActio
       <EuiFlexItem grow={false}>
         <EuiPopover
           anchorPosition="downRight"
+          ownFocus
           button={
             <EuiButtonIcon
               data-test-subj={`${ComponentId}-ellipses`}
-              aria-label="Actions"
+              aria-label={i18n.ACTIONS_ARIA}
               iconType="boxesHorizontal"
               onClick={onButtonClick}
             />
@@ -76,6 +81,7 @@ export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActio
             {propertyActions.map((action, key) => (
               <EuiFlexItem grow={false} key={`${action.label}${key}`}>
                 <PropertyActionButton
+                  disabled={action.disabled}
                   iconType={action.iconType}
                   label={action.label}
                   onClick={() => onClosePopover(action.onClick)}

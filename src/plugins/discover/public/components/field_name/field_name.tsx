@@ -17,51 +17,36 @@
  * under the License.
  */
 import React from 'react';
-import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import { FieldIcon, FieldIconProps } from '../../../../kibana_react/public';
 import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './field_type_name';
 
-// property field is provided at discover's field chooser
 // properties fieldType and fieldName are provided in kbn_doc_view
 // this should be changed when both components are deangularized
 interface Props {
-  field?: {
-    type: string;
-    name: string;
-    rowCount?: number;
-    scripted?: boolean;
-  };
-  fieldName?: string;
-  fieldType?: string;
+  fieldName: string;
+  fieldType: string;
   useShortDots?: boolean;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
+  scripted?: boolean;
 }
 
-export function FieldName({ field, fieldName, fieldType, useShortDots, fieldIconProps }: Props) {
-  const type = field ? String(field.type) : String(fieldType);
-  const typeName = getFieldTypeName(type);
-
-  const name = field ? String(field.name) : String(fieldName);
-  const displayName = useShortDots ? shortenDottedString(name) : name;
-
-  const noResults = field ? !field.rowCount && !field.scripted : false;
-
-  const className = classNames('dscFieldName', {
-    'dscFieldName--noResults': noResults,
-  });
+export function FieldName({
+  fieldName,
+  fieldType,
+  useShortDots,
+  fieldIconProps,
+  scripted = false,
+}: Props) {
+  const typeName = getFieldTypeName(fieldType);
+  const displayName = useShortDots ? shortenDottedString(fieldName) : fieldName;
 
   return (
-    <EuiFlexGroup className={className} alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <FieldIcon
-          type={type}
-          label={typeName}
-          scripted={field ? field.scripted : false}
-          {...fieldIconProps}
-        />
+        <FieldIcon type={fieldType} label={typeName} scripted={scripted} {...fieldIconProps} />
       </EuiFlexItem>
       <EuiFlexItem className="eui-textTruncate">
         <EuiToolTip

@@ -226,7 +226,11 @@ describe('execute()', () => {
     const executorOptions: ActionTypeExecutorOptions = {
       actionId,
       config: mockOptions.config,
-      params: { ...mockOptions.params, executorAction: 'updateIncident' },
+      params: {
+        ...mockOptions.params,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { fullName: 'Another User', username: 'anotherUser' },
+      },
       secrets: mockOptions.secrets,
       services,
     };
@@ -244,7 +248,11 @@ describe('execute()', () => {
     const executorOptions: ActionTypeExecutorOptions = {
       actionId,
       config: mockOptions.config,
-      params: { ...mockOptions.params, executorAction: 'updateIncident' },
+      params: {
+        ...mockOptions.params,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { fullName: 'Another User', username: 'anotherUser' },
+      },
       secrets: mockOptions.secrets,
       services,
     };

@@ -5,8 +5,8 @@
  */
 
 export const AGENT_SAVED_OBJECT_TYPE = 'agents';
-
 export const AGENT_EVENT_SAVED_OBJECT_TYPE = 'agent_events';
+export const AGENT_ACTION_SAVED_OBJECT_TYPE = 'agent_actions';
 
 export const AGENT_TYPE_PERMANENT = 'PERMANENT';
 export const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';

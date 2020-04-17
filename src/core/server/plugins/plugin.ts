@@ -21,7 +21,7 @@ import { join } from 'path';
 import typeDetect from 'type-detect';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { Type } from '@kbn/config-schema';
+import { isConfigSchema } from '@kbn/config-schema';
 
 import { Logger } from '../logging';
 import {
@@ -61,7 +61,7 @@ export class PluginWrapper<
 
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
-  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart]>();
+  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
 
   constructor(
@@ -115,7 +115,7 @@ export class PluginWrapper<
     this.log.debug('Starting plugin');
 
     const startContract = await this.instance.start(startContext, plugins);
-    this.startDependencies$.next([startContext, plugins]);
+    this.startDependencies$.next([startContext, plugins, startContract]);
     return startContract;
   }
 
@@ -150,7 +150,7 @@ export class PluginWrapper<
     }
 
     const configDescriptor = pluginDefinition.config;
-    if (!(configDescriptor.schema instanceof Type)) {
+    if (!isConfigSchema(configDescriptor.schema)) {
       throw new Error('Configuration schema expected to be an instance of Type');
     }
     return configDescriptor;

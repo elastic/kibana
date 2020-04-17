@@ -8,12 +8,11 @@ import React, { Fragment } from 'react';
 
 import { EuiTitle, EuiPanel, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
 
-import { ValidatedRange } from '../../../components/validated_range';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ValidatedRange } from '../../../../../../../plugins/maps/public/components/validated_range';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ValidatedDualRange } from '../../../../../../../../src/plugins/kibana_react/public';
-import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
-
 export function LayerSettings(props) {
   const onLabelChange = event => {
     const label = event.target.value;
@@ -21,8 +20,8 @@ export function LayerSettings(props) {
   };
 
   const onZoomChange = ([min, max]) => {
-    props.updateMinZoom(props.layerId, Math.max(MIN_ZOOM, parseInt(min, 10)));
-    props.updateMaxZoom(props.layerId, Math.min(MAX_ZOOM, parseInt(max, 10)));
+    props.updateMinZoom(props.layerId, Math.max(props.minVisibilityZoom, parseInt(min, 10)));
+    props.updateMaxZoom(props.layerId, Math.min(props.maxVisibilityZoom, parseInt(max, 10)));
   };
 
   const onAlphaChange = alpha => {
@@ -37,8 +36,8 @@ export function LayerSettings(props) {
           defaultMessage: 'Visibility',
         })}
         formRowDisplay="columnCompressed"
-        min={MIN_ZOOM}
-        max={MAX_ZOOM}
+        min={props.minVisibilityZoom}
+        max={props.maxVisibilityZoom}
         value={[props.minZoom, props.maxZoom]}
         showInput="inputWithPopover"
         showRange

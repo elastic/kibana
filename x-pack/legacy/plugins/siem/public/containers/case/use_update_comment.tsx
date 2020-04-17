@@ -4,38 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useReducer, useCallback, Dispatch } from 'react';
+import { useReducer, useCallback } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 
 import { patchComment } from './api';
 import * as i18n from './translations';
-import { Comment } from './types';
+import { Case } from './types';
 
 interface CommentUpdateState {
-  comments: Comment[];
   isLoadingIds: string[];
   isError: boolean;
 }
-
 interface CommentUpdate {
-  update: Partial<Comment>;
   commentId: string;
 }
 
 type Action =
-  | { type: 'APPEND_COMMENT'; payload: Comment }
   | { type: 'FETCH_INIT'; payload: string }
   | { type: 'FETCH_SUCCESS'; payload: CommentUpdate }
   | { type: 'FETCH_FAILURE'; payload: string };
 
 const dataFetchReducer = (state: CommentUpdateState, action: Action): CommentUpdateState => {
   switch (action.type) {
-    case 'APPEND_COMMENT':
-      return {
-        ...state,
-        comments: [...state.comments, action.payload],
-      };
     case 'FETCH_INIT':
       return {
         ...state,
@@ -44,20 +35,10 @@ const dataFetchReducer = (state: CommentUpdateState, action: Action): CommentUpd
       };
 
     case 'FETCH_SUCCESS':
-      const updatePayload = action.payload;
-      const foundIndex = state.comments.findIndex(
-        comment => comment.id === updatePayload.commentId
-      );
-      const newComments = state.comments;
-      if (foundIndex !== -1) {
-        newComments[foundIndex] = { ...state.comments[foundIndex], ...updatePayload.update };
-      }
-
       return {
         ...state,
-        isLoadingIds: state.isLoadingIds.filter(id => updatePayload.commentId !== id),
+        isLoadingIds: state.isLoadingIds.filter(id => action.payload.commentId !== id),
         isError: false,
-        comments: newComments,
       };
     case 'FETCH_FAILURE':
       return {
@@ -75,38 +56,45 @@ interface UpdateComment {
   commentId: string;
   commentUpdate: string;
   fetchUserActions: () => void;
+  updateCase: (newCase: Case) => void;
+  version: string;
 }
 
-interface UseUpdateComment extends CommentUpdateState {
-  updateComment: ({ caseId, commentId, commentUpdate, fetchUserActions }: UpdateComment) => void;
-  addPostedComment: Dispatch<Comment>;
+export interface UseUpdateComment extends CommentUpdateState {
+  patchComment: ({ caseId, commentId, commentUpdate, fetchUserActions }: UpdateComment) => void;
 }
 
-export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
+export const useUpdateComment = (): UseUpdateComment => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoadingIds: [],
     isError: false,
-    comments,
   });
   const [, dispatchToaster] = useStateToaster();
 
   const dispatchUpdateComment = useCallback(
-    async ({ caseId, commentId, commentUpdate, fetchUserActions }: UpdateComment) => {
+    async ({
+      caseId,
+      commentId,
+      commentUpdate,
+      fetchUserActions,
+      updateCase,
+      version,
+    }: UpdateComment) => {
       let cancel = false;
+      const abortCtrl = new AbortController();
       try {
         dispatch({ type: 'FETCH_INIT', payload: commentId });
-        const currentComment = state.comments.find(comment => comment.id === commentId) ?? {
-          version: '',
-        };
         const response = await patchComment(
           caseId,
           commentId,
           commentUpdate,
-          currentComment.version
+          version,
+          abortCtrl.signal
         );
         if (!cancel) {
+          updateCase(response);
           fetchUserActions();
-          dispatch({ type: 'FETCH_SUCCESS', payload: { update: response, commentId } });
+          dispatch({ type: 'FETCH_SUCCESS', payload: { commentId } });
         }
       } catch (error) {
         if (!cancel) {
@@ -120,14 +108,11 @@ export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
       }
       return () => {
         cancel = true;
+        abortCtrl.abort();
       };
     },
-    [state]
-  );
-  const addPostedComment = useCallback(
-    (comment: Comment) => dispatch({ type: 'APPEND_COMMENT', payload: comment }),
     []
   );
 
-  return { ...state, updateComment: dispatchUpdateComment, addPostedComment };
+  return { ...state, patchComment: dispatchUpdateComment };
 };

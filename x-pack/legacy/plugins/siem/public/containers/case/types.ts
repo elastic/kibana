@@ -31,7 +31,7 @@ export interface CaseUserActions {
 
 export interface CaseExternalService {
   pushedAt: string;
-  pushedBy: string;
+  pushedBy: ElasticUser;
   connectorId: string;
   connectorName: string;
   externalId: string;
@@ -90,10 +90,10 @@ export enum SortFieldCase {
 export interface ElasticUser {
   readonly email?: string | null;
   readonly fullName?: string | null;
-  readonly username: string;
+  readonly username?: string | null;
 }
 
-export interface FetchCasesProps {
+export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
 }
@@ -113,4 +113,9 @@ export interface ActionLicense {
   enabled: boolean;
   enabledInConfig: boolean;
   enabledInLicense: boolean;
+}
+
+export interface DeleteCase {
+  id: string;
+  title?: string;
 }

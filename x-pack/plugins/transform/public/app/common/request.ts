@@ -81,7 +81,7 @@ export function getPreviewRequestBody(
     },
   };
 
-  if (!isDefaultQuery(query)) {
+  if (!isDefaultQuery(query) && !isMatchAllQuery(query)) {
     request.source.query = query;
   }
 

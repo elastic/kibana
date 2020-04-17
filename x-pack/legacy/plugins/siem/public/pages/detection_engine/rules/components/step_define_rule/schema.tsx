@@ -9,6 +9,7 @@ import { EuiText } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
+import { isMlRule } from '../../../../../../../../../plugins/siem/common/detection_engine/ml_helpers';
 import { esKuery } from '../../../../../../../../../../src/plugins/data/public';
 import { FieldValueQueryBar } from '../query_bar';
 import {
@@ -19,7 +20,6 @@ import {
   ValidationFunc,
 } from '../../../../../shared_imports';
 import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY, INDEX_HELPER_TEXT } from './translations';
-import { isMlRule } from '../../helpers';
 
 export const schema: FormSchema = {
   index: {

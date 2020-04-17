@@ -17,6 +17,7 @@ import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCoreSetup } from '../../adapters';
 import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 
 /**
  * The alert takes some dependencies as parameters; these are things like
@@ -44,18 +45,31 @@ const bootstrapDependencies = (customRequests?: any) => {
  */
 const mockOptions = (
   params = { numTimes: 5, locations: [], timerange: { from: 'now-15m', to: 'now' } },
-  services = { callCluster: 'mockESFunction', savedObjectsClient: mockSavedObjectsClient },
+  services = alertsMock.createAlertServices(),
   state = {}
-): any => ({
-  params,
-  services,
-  state,
-});
-
-const mockSavedObjectsClient = { get: jest.fn() };
-mockSavedObjectsClient.get.mockReturnValue(defaultDynamicSettings);
+): any => {
+  services.savedObjectsClient.get.mockResolvedValue({
+    id: '',
+    type: '',
+    references: [],
+    attributes: defaultDynamicSettings,
+  });
+  return {
+    params,
+    services,
+    state,
+  };
+};
 
 describe('status check alert', () => {
+  let toISOStringSpy: jest.SpyInstance<string, []>;
+  beforeEach(() => {
+    toISOStringSpy = jest.spyOn(Date.prototype, 'toISOString');
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   describe('executor', () => {
     it('does not trigger when there are no monitors down', async () => {
       expect.assertions(4);
@@ -72,8 +86,14 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": "mockESFunction",
-            "dynamicSettings": undefined,
+            "callES": [MockFunction],
+            "dynamicSettings": Object {
+              "certificatesThresholds": Object {
+                "errorState": 7,
+                "warningState": 30,
+              },
+              "heartbeatIndices": "heartbeat-8*",
+            },
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {
@@ -86,6 +106,7 @@ describe('status check alert', () => {
     });
 
     it('triggers when monitors are down and provides expected state', async () => {
+      toISOStringSpy.mockImplementation(() => 'foo date string');
       const mockGetter = jest.fn();
       mockGetter.mockReturnValue([
         {
@@ -103,27 +124,23 @@ describe('status check alert', () => {
       ]);
       const { server, libs } = bootstrapDependencies({ getMonitorStatus: mockGetter });
       const alert = statusCheckAlertFactory(server, libs);
-      const mockInstanceFactory = jest.fn();
-      const mockReplaceState = jest.fn();
-      const mockScheduleActions = jest.fn();
-      mockInstanceFactory.mockReturnValue({
-        replaceState: mockReplaceState,
-        scheduleActions: mockScheduleActions,
-      });
       const options = mockOptions();
-      options.services = {
-        ...options.services,
-        alertInstanceFactory: mockInstanceFactory,
-      };
+      const alertServices: AlertServicesMock = options.services;
       // @ts-ignore the executor can return `void`, but ours never does
       const state: Record<string, any> = await alert.executor(options);
       expect(mockGetter).toHaveBeenCalledTimes(1);
-      expect(mockInstanceFactory).toHaveBeenCalledTimes(1);
+      expect(alertServices.alertInstanceFactory).toHaveBeenCalledTimes(1);
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": "mockESFunction",
-            "dynamicSettings": undefined,
+            "callES": [MockFunction],
+            "dynamicSettings": Object {
+              "certificatesThresholds": Object {
+                "errorState": 7,
+                "warningState": 30,
+              },
+              "heartbeatIndices": "heartbeat-8*",
+            },
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {
@@ -133,10 +150,18 @@ describe('status check alert', () => {
           },
         ]
       `);
-      expect(mockReplaceState).toHaveBeenCalledTimes(1);
-      expect(mockReplaceState.mock.calls[0]).toMatchInlineSnapshot(`
+      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(1);
+      expect(alertInstanceMock.replaceState.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
+            "currentTriggerStarted": "foo date string",
+            "firstCheckedAt": "foo date string",
+            "firstTriggeredAt": "foo date string",
+            "isTriggered": true,
+            "lastCheckedAt": "foo date string",
+            "lastResolvedAt": undefined,
+            "lastTriggeredAt": "foo date string",
             "monitors": Array [
               Object {
                 "count": 234,
@@ -154,16 +179,13 @@ describe('status check alert', () => {
           },
         ]
       `);
-      expect(mockScheduleActions).toHaveBeenCalledTimes(1);
-      expect(mockScheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(1);
+      expect(alertInstanceMock.scheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
-            "completeIdList": "first from fairbanks; first from harrisburg; ",
+            "downMonitorsWithGeo": "first from fairbanks; first from harrisburg; ",
             "message": "Down monitor: first",
-            "server": Object {
-              "route": Object {},
-            },
           },
         ]
       `);
@@ -302,7 +324,7 @@ describe('status check alert', () => {
 
     it('contains the expected static fields like id, name, etc.', () => {
       expect(alert.id).toBe('xpack.uptime.alerts.monitorStatus');
-      expect(alert.name).toBe('Uptime Monitor Status');
+      expect(alert.name).toBe('Uptime monitor status');
       expect(alert.defaultActionGroupId).toBe('xpack.uptime.alerts.actionGroups.monitorStatus');
       expect(alert.actionGroups).toMatchInlineSnapshot(`
         Array [
@@ -555,7 +577,7 @@ describe('status check alert', () => {
       ];
     });
 
-    it('creates a set of unique IDs from a list of composite-unique objects', () => {
+    it('creates a set of unique IDs from a list of composite unique objects', () => {
       expect(uniqueMonitorIds(items)).toEqual(
         new Set<string>(['first', 'second', 'third', 'fourth', 'fifth'])
       );

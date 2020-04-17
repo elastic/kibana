@@ -13,6 +13,7 @@ import {
   AlertSearchRequest,
   AlertSearchRequestWrapper,
   AlertSort,
+  UndefinedResultPosition,
 } from '../types';
 
 export { Pagination } from './pagination';
@@ -68,6 +69,8 @@ function buildSort(query: AlertSearchQuery): AlertSort {
     {
       [query.sort]: {
         order: query.order,
+        missing:
+          query.order === 'asc' ? UndefinedResultPosition.last : UndefinedResultPosition.first,
       },
     },
     // Secondary sort for tie-breaking
@@ -82,6 +85,8 @@ function buildSort(query: AlertSearchQuery): AlertSort {
     // Reverse sort order for search_before functionality
     const newDirection = reverseSortDirection(query.order);
     sort[0][query.sort].order = newDirection;
+    sort[0][query.sort].missing =
+      newDirection === 'asc' ? UndefinedResultPosition.last : UndefinedResultPosition.first;
     sort[1]['event.id'].order = newDirection;
   }
 
@@ -92,7 +97,8 @@ function buildSort(query: AlertSearchQuery): AlertSort {
  * Builds a request body for Elasticsearch, given a set of query params.
  **/
 const buildAlertSearchQuery = async (
-  query: AlertSearchQuery
+  query: AlertSearchQuery,
+  indexPattern: string
 ): Promise<AlertSearchRequestWrapper> => {
   let totalHitsMin: number = EndpointAppConstants.DEFAULT_TOTAL_HITS;
 
@@ -120,7 +126,7 @@ const buildAlertSearchQuery = async (
 
   const reqWrapper: AlertSearchRequestWrapper = {
     size: query.pageSize,
-    index: EndpointAppConstants.ALERT_INDEX_NAME,
+    index: indexPattern,
     body: reqBody,
   };
 
@@ -136,9 +142,10 @@ const buildAlertSearchQuery = async (
  **/
 export const searchESForAlerts = async (
   dataClient: IScopedClusterClient,
-  query: AlertSearchQuery
+  query: AlertSearchQuery,
+  indexPattern: string
 ): Promise<SearchResponse<AlertEvent>> => {
-  const reqWrapper = await buildAlertSearchQuery(query);
+  const reqWrapper = await buildAlertSearchQuery(query, indexPattern);
   const response = (await dataClient.callAsCurrentUser('search', reqWrapper)) as SearchResponse<
     AlertEvent
   >;

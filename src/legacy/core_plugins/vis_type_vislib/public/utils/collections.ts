@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
 
-import { colorSchemas } from '../../../../../plugins/charts/public';
+import { colorSchemas, Rotates } from '../../../../../plugins/charts/public';
 
 export const Positions = Object.freeze({
   RIGHT: 'right' as 'right',
@@ -203,13 +203,6 @@ const getAxisModes = () => [
   },
 ];
 
-export const Rotates = Object.freeze({
-  HORIZONTAL: 0,
-  VERTICAL: 90,
-  ANGLED: 75,
-});
-export type Rotates = $Values<typeof Rotates>;
-
 export const ThresholdLineStyles = Object.freeze({
   FULL: 'full' as 'full',
   DASHED: 'dashed' as 'dashed',
@@ -264,13 +257,6 @@ export const GaugeTypes = Object.freeze({
   CIRCLE: 'Circle' as 'Circle',
 });
 export type GaugeTypes = $Values<typeof GaugeTypes>;
-
-export const ColorModes = Object.freeze({
-  BACKGROUND: 'Background' as 'Background',
-  LABELS: 'Labels' as 'Labels',
-  NONE: 'None' as 'None',
-});
-export type ColorModes = $Values<typeof ColorModes>;
 
 const getGaugeTypes = () => [
   {

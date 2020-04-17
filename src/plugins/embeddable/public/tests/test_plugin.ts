@@ -18,9 +18,11 @@
  */
 
 import { CoreSetup, CoreStart } from 'src/core/public';
+import { UiActionsStart } from '../../../ui_actions/public';
 // eslint-disable-next-line
-import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
+// eslint-disable-next-line
+import { inspectorPluginMock } from '../../../inspector/public/mocks';
 import { coreMock } from '../../../../core/public/mocks';
 import { EmbeddablePublicPlugin, EmbeddableSetup, EmbeddableStart } from '../plugin';
 
@@ -48,7 +50,10 @@ export const testPlugin = (
     coreStart,
     setup,
     doStart: (anotherCoreStart: CoreStart = coreStart) => {
-      const start = plugin.start(anotherCoreStart);
+      const start = plugin.start(anotherCoreStart, {
+        uiActions: uiActionsPluginMock.createStartContract(),
+        inspector: inspectorPluginMock.createStartContract(),
+      });
       return start;
     },
     uiActions: uiActions.doStart(coreStart),

@@ -50,8 +50,45 @@ const defaultPanelWidth = 500;
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus: DATA_FRAME_TASK_STATE;
+  jobStatus?: DATA_FRAME_TASK_STATE;
   searchQuery: ResultsSearchQuery;
+}
+
+enum SUBSET_TITLE {
+  TRAINING = 'training',
+  TESTING = 'testing',
+  ENTIRE = 'entire',
+}
+
+const entireDatasetHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixEntireHelpText',
+  {
+    defaultMessage: 'Normalized confusion matrix for entire dataset',
+  }
+);
+
+const testingDatasetHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTestingHelpText',
+  {
+    defaultMessage: 'Normalized confusion matrix for testing dataset',
+  }
+);
+
+const trainingDatasetHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTrainingHelpText',
+  {
+    defaultMessage: 'Normalized confusion matrix for training dataset',
+  }
+);
+
+function getHelpText(dataSubsetTitle: string) {
+  let helpText = entireDatasetHelpText;
+  if (dataSubsetTitle === SUBSET_TITLE.TESTING) {
+    helpText = testingDatasetHelpText;
+  } else if (dataSubsetTitle === SUBSET_TITLE.TRAINING) {
+    helpText = trainingDatasetHelpText;
+  }
+  return helpText;
 }
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
@@ -66,6 +103,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const [popoverContents, setPopoverContents] = useState<any>([]);
   const [docsCount, setDocsCount] = useState<null | number>(null);
   const [error, setError] = useState<null | string>(null);
+  const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
   const [panelWidth, setPanelWidth] = useState<number>(defaultPanelWidth);
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(() =>
@@ -197,6 +235,18 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       hasIsTrainingClause[0] &&
       hasIsTrainingClause[0].match[`${resultsField}.is_training`];
 
+    const noTrainingQuery = isTrainingClause === false || isTrainingClause === undefined;
+
+    if (noTrainingQuery) {
+      setDataSubsetTitle(SUBSET_TITLE.ENTIRE);
+    } else {
+      setDataSubsetTitle(
+        isTrainingClause && isTrainingClause.query === 'true'
+          ? SUBSET_TITLE.TRAINING
+          : SUBSET_TITLE.TESTING
+      );
+    }
+
     loadData({ isTrainingClause });
   }, [JSON.stringify(searchQuery)]);
 
@@ -268,9 +318,11 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                 </span>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span>{getTaskStateBadge(jobStatus)}</span>
-            </EuiFlexItem>
+            {jobStatus !== undefined && (
+              <EuiFlexItem grow={false}>
+                <span>{getTaskStateBadge(jobStatus)}</span>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiSpacer />
             </EuiFlexItem>
@@ -302,14 +354,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs">
                 <EuiTitle size="xxs">
-                  <span>
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixHelpText',
-                      {
-                        defaultMessage: 'Normalized confusion matrix',
-                      }
-                    )}
-                  </span>
+                  <span>{getHelpText(dataSubsetTitle)}</span>
                 </EuiTitle>
                 <EuiFlexItem grow={false}>
                   <EuiIconTip

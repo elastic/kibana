@@ -88,7 +88,7 @@ export function dedupeConnections(response: ServiceMapResponse) {
       serviceName = node[SERVICE_NAME];
     }
 
-    const matchedServiceNodes = services.filter(
+    const matchedServiceNodes = serviceNodes.filter(
       serviceNode => serviceNode[SERVICE_NAME] === serviceName
     );
 

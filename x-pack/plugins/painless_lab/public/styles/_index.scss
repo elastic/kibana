@@ -5,10 +5,15 @@
  * This is a very brittle way of preventing the editor and other content from disappearing
  * behind the bottom bar.
  */
-$bottomBarHeight:  calc(#{$euiSize} * 3);
+$bottomBarHeight: calc(#{$euiSize} * 3);
 
 .painlessLabBottomBarPlaceholder {
   height: $bottomBarHeight
+}
+
+.painlessLabLeftPane {
+  padding-top: $euiSizeM;
+  background-color: $euiColorEmptyShade;
 }
 
 .painlessLabRightPane {
@@ -25,7 +30,7 @@ $bottomBarHeight:  calc(#{$euiSize} * 3);
   flex-direction: column;
   height: 100%;
 
-  [role="tabpanel"] {
+  [role='tabpanel'] {
     height: 100%;
     overflow-y: auto;
   }

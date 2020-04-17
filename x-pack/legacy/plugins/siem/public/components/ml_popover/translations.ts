@@ -6,17 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ANOMALY_DETECTION = i18n.translate(
-  'xpack.siem.components.mlPopup.anomalyDetectionButtonLabel',
+export const ML_JOB_SETTINGS = i18n.translate(
+  'xpack.siem.components.mlPopup.mlJobSettingsButtonLabel',
   {
-    defaultMessage: 'Anomaly detection',
-  }
-);
-
-export const ANOMALY_DETECTION_TITLE = i18n.translate(
-  'xpack.siem.components.mlPopup.anomalyDetectionTitle',
-  {
-    defaultMessage: 'Anomaly detection settings',
+    defaultMessage: 'ML job settings',
   }
 );
 

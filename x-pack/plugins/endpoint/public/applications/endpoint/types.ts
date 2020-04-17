@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, MiddlewareAPI } from 'redux';
+import {
+  Dispatch,
+  Action as ReduxAction,
+  AnyAction as ReduxAnyAction,
+  Action,
+  Middleware,
+} from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
   HostMetadata,
@@ -12,19 +18,75 @@ import {
   AlertResultList,
   Immutable,
   ImmutableArray,
+  AlertDetails,
+  MalwareFields,
+  UIPolicyConfig,
+  PolicyData,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
-import { Datasource } from '../../../../ingest_manager/common/types/models';
+import {
+  GetAgentStatusResponse,
+  GetDatasourcesResponse,
+  GetOneDatasourceResponse,
+  UpdateDatasourceResponse,
+} from '../../../../ingest_manager/common';
 
 export { AppAction };
-export type MiddlewareFactory<S = GlobalState> = (
+
+/**
+ * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of
+ * state and `dispatch` accepts `Immutable` versions of actions.
+ */
+export interface ImmutableMiddlewareAPI<S, A extends Action> {
+  dispatch: Dispatch<A | Immutable<A>>;
+  getState(): Immutable<S>;
+}
+
+/**
+ * Like redux's `Middleware` but without the ability to mutate actions or state.
+ * Differences:
+ *   * `getState` returns an `Immutable` version of state
+ *   * `dispatch` accepts `Immutable` versions of actions
+ *   * `action`s received will be `Immutable`
+ */
+export type ImmutableMiddleware<S, A extends Action> = (
+  api: ImmutableMiddlewareAPI<S, A>
+) => (next: Dispatch<A | Immutable<A>>) => (action: Immutable<A>) => unknown;
+
+/**
+ * Takes application-standard middleware dependencies
+ * and returns a redux middleware.
+ * Middleware will be of the `ImmutableMiddleware` variety. Not able to directly
+ * change actions or state.
+ */
+export type ImmutableMiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart,
   depsStart: EndpointPluginStartDependencies
-) => (
-  api: MiddlewareAPI<Dispatch<AppAction>, S>
-) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
+) => ImmutableMiddleware<S, AppAction>;
+
+/**
+ * Simple type for a redux selector.
+ */
+type Selector<S, R> = (state: S) => R;
+
+/**
+ * Takes a selector and an `ImmutableMiddleware`. The
+ * middleware's version of `getState` will receive
+ * the result of the selector instead of the global state.
+ *
+ * This allows middleware to have knowledge of only a subsection of state.
+ *
+ * `selector` returns an `Immutable` version of the substate.
+ * `middleware` must be an `ImmutableMiddleware`.
+ *
+ * Returns a regular middleware, meant to be used with `applyMiddleware`.
+ */
+export type SubstateMiddlewareFactory = <Substate>(
+  selector: Selector<GlobalState, Immutable<Substate>>,
+  middleware: ImmutableMiddleware<Substate, AppAction>
+) => Middleware<{}, GlobalState, Dispatch<AppAction | Immutable<AppAction>>>;
 
 export interface HostListState {
   hosts: HostMetadata[];
@@ -43,6 +105,7 @@ export interface HostListPagination {
 }
 export interface HostIndexUIQueryParams {
   selected_host?: string;
+  show?: string;
 }
 
 export interface ServerApiError {
@@ -50,11 +113,6 @@ export interface ServerApiError {
   error: string;
   message: string;
 }
-
-/**
- * An Endpoint Policy.
- */
-export type PolicyData = Datasource;
 
 /**
  * Policy list store state
@@ -72,19 +130,131 @@ export interface PolicyListState {
   pageIndex: number;
   /** data is being retrieved from server */
   isLoading: boolean;
+  /** current location information */
+  location?: Immutable<EndpointAppLocation>;
 }
 
 /**
- * Policy list store state
+ * Policy details store state
  */
 export interface PolicyDetailsState {
   /** A single policy item  */
-  policyItem: PolicyData | undefined;
-  /** data is being retrieved from server */
+  policyItem?: PolicyData;
+  /** API error if loading data failed */
+  apiError?: ServerApiError;
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<EndpointAppLocation>;
+  /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
+  agentStatusSummary: GetAgentStatusResponse['results'];
+  /** Status of an update to the policy  */
+  updateStatus?: {
+    success: boolean;
+    error?: ServerApiError;
+  };
 }
+
+/**
+ * The URL search params that are supported by the Policy List page view
+ */
+export interface PolicyListUrlSearchParams {
+  page_index: number;
+  page_size: number;
+}
+
+/**
+ * Endpoint Policy configuration
+ */
+export interface PolicyConfig {
+  windows: {
+    events: {
+      dll_and_driver_load: boolean;
+      dns: boolean;
+      file: boolean;
+      network: boolean;
+      process: boolean;
+      registry: boolean;
+      security: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  mac: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  linux: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+}
+
+interface PolicyConfigAdvancedOptions {
+  elasticsearch: {
+    indices: {
+      control: string;
+      event: string;
+      logging: string;
+    };
+    kernel: {
+      connect: boolean;
+      process: boolean;
+    };
+  };
+}
+
+/** OS used in Policy */
+export enum OS {
+  windows = 'windows',
+  mac = 'mac',
+  linux = 'linux',
+}
+
+/**
+ * Returns the keys of an object whose values meet a criteria.
+ *  Ex) interface largeNestedObject = {
+ *         a: {
+ *           food: Foods;
+ *           toiletPaper: true;
+ *         };
+ *         b: {
+ *           food: Foods;
+ *           streamingServices: Streams;
+ *         };
+ *         c: {};
+ *    }
+ *
+ *    type hasFoods = KeysByValueCriteria<largeNestedObject, { food: Foods }>;
+ *    The above type will be: [a, b] only, and will not include c.
+ *
+ */
+export type KeysByValueCriteria<O, Criteria> = {
+  [K in keyof O]: O[K] extends Criteria ? K : never;
+}[keyof O];
+
+/** Returns an array of the policy OSes that have a malware protection field */
+export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
 
 export interface GlobalState {
   readonly hostList: HostListState;
@@ -136,7 +306,7 @@ export interface AlertListState {
   readonly location?: Immutable<EndpointAppLocation>;
 
   /** Specific Alert data to be shown in the details view */
-  readonly alertDetails?: Immutable<AlertData>;
+  readonly alertDetails?: Immutable<AlertDetails>;
 
   /** Search bar state including indexPatterns */
   readonly searchBar: AlertsSearchBarState;
@@ -162,3 +332,40 @@ export interface AlertingIndexUIQueryParams {
   date_range?: string;
   filters?: string;
 }
+
+export interface GetPolicyListResponse extends GetDatasourcesResponse {
+  items: PolicyData[];
+}
+
+export interface GetPolicyResponse extends GetOneDatasourceResponse {
+  item: PolicyData;
+}
+
+export interface UpdatePolicyResponse extends UpdateDatasourceResponse {
+  item: PolicyData;
+}
+
+/**
+ * Like `Reducer` from `redux` but it accepts immutable versions of `state` and `action`.
+ * Use this type for all Reducers in order to help enforce our pattern of immutable state.
+ */
+export type ImmutableReducer<State, Action> = (
+  state: Immutable<State> | undefined,
+  action: Immutable<Action>
+) => State | Immutable<State>;
+
+/**
+ * A alternate interface for `redux`'s `combineReducers`. Will work with the same underlying implementation,
+ * but will enforce that `Immutable` versions of `state` and `action` are received.
+ */
+export type ImmutableCombineReducers = <S, A extends ReduxAction = ReduxAnyAction>(
+  reducers: ImmutableReducersMapObject<S, A>
+) => ImmutableReducer<S, A>;
+
+/**
+ * Like `redux`'s `ReducersMapObject` (which is used by `combineReducers`) but enforces that
+ * the `state` and `action` received are `Immutable` versions.
+ */
+type ImmutableReducersMapObject<S, A extends ReduxAction = ReduxAction> = {
+  [K in keyof S]: ImmutableReducer<S[K], A>;
+};

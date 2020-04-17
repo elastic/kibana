@@ -20,7 +20,7 @@
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Boom from 'boom';
 
-import { Type } from '@kbn/config-schema';
+import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';
 import { KibanaRequest } from './request';
 import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
@@ -98,7 +98,7 @@ export interface IRouter {
    * Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
    * @param handler {@link RequestHandler} - a route handler to wrap
    */
-  handleLegacyErrors: <P, Q, B>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+  handleLegacyErrors: RequestHandlerWrapper;
 
   /**
    * Returns all routes registered with this router.
@@ -139,7 +139,7 @@ function routeSchemasFromRouteConfig<P, Q, B>(
 
   if (route.validate !== false) {
     Object.entries(route.validate).forEach(([key, schema]) => {
-      if (!(schema instanceof Type || typeof schema === 'function')) {
+      if (!(isConfigSchema(schema) || typeof schema === 'function')) {
         throw new Error(
           `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
         );
@@ -237,9 +237,7 @@ export class Router implements IRouter {
     return [...this.routes];
   }
 
-  public handleLegacyErrors<P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> {
-    return wrapErrors(handler);
-  }
+  public handleLegacyErrors = wrapErrors;
 
   private async handle<P, Q, B>({
     routeSchemas,
@@ -316,9 +314,33 @@ export type RequestHandler<
   P = unknown,
   Q = unknown,
   B = unknown,
-  Method extends RouteMethod = any
+  Method extends RouteMethod = any,
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
 > = (
   context: RequestHandlerContext,
   request: KibanaRequest<P, Q, B, Method>,
-  response: KibanaResponseFactory
+  response: ResponseFactory
 ) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+
+/**
+ * Type-safe wrapper for {@link RequestHandler} function.
+ * @example
+ * ```typescript
+ * export const wrapper: RequestHandlerWrapper = handler => {
+ *   return async (context, request, response) => {
+ *     // do some logic
+ *     ...
+ *   };
+ * }
+ * ```
+ * @public
+ */
+export type RequestHandlerWrapper = <
+  P,
+  Q,
+  B,
+  Method extends RouteMethod = any,
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+>(
+  handler: RequestHandler<P, Q, B, Method, ResponseFactory>
+) => RequestHandler<P, Q, B, Method, ResponseFactory>;

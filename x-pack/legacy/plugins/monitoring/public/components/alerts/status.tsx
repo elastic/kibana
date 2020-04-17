@@ -142,7 +142,7 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
       );
     }
 
-    const allMigrated = kibanaAlerts.length === NUMBER_OF_MIGRATED_ALERTS;
+    const allMigrated = kibanaAlerts.length >= NUMBER_OF_MIGRATED_ALERTS;
     if (allMigrated) {
       if (setupModeEnabled) {
         return (

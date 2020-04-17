@@ -49,7 +49,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         }),
       },
       {
-        toastLifeTimeMs: Infinity,
+        toastLifeTimeMs: 1000000,
       }
     );
   };

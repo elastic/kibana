@@ -4,29 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('ui/new_platform');
+import { act } from 'react-dom/test-utils';
+
 import { RemoteClusterForm } from '../../public/application/sections/components/remote_cluster_form';
-// import { pageHelpers, setupEnvironment, nextTick } from './helpers';
-import { pageHelpers, nextTick } from './helpers';
+import { pageHelpers, setupEnvironment } from './helpers';
 import { REMOTE_CLUSTER_EDIT, REMOTE_CLUSTER_EDIT_NAME } from './helpers/constants';
 
-// const { setup } = pageHelpers.remoteClustersEdit;
+const { setup } = pageHelpers.remoteClustersEdit;
 const { setup: setupRemoteClustersAdd } = pageHelpers.remoteClustersAdd;
 
-// FLAKY: https://github.com/elastic/kibana/issues/57762
-// FLAKY: https://github.com/elastic/kibana/issues/57997
-// FLAKY: https://github.com/elastic/kibana/issues/57998
-describe.skip('Edit Remote cluster', () => {
-  // let server;
-  // let httpRequestsMockHelpers;
+describe('Edit Remote cluster', () => {
+  let server;
+  let httpRequestsMockHelpers;
   let component;
   let find;
   let exists;
-
-  /**
-   *
-   * commented out due to hooks being called regardless of skip
-   * https://github.com/facebook/jest/issues/8379
+  let waitFor;
 
   beforeAll(() => {
     ({ server, httpRequestsMockHelpers } = setupEnvironment());
@@ -39,12 +32,11 @@ describe.skip('Edit Remote cluster', () => {
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadRemoteClustersResponse([REMOTE_CLUSTER_EDIT]);
 
-    ({ component, find, exists } = setup());
-    await nextTick(100); // We need to wait next tick for the mock server response to kick in
-    component.update();
+    await act(async () => {
+      ({ component, find, exists, waitFor } = setup());
+      await waitFor('remoteClusterForm');
+    });
   });
-
-  */
 
   test('should have the title of the page set correctly', () => {
     expect(exists('remoteClusterPageTitle')).toBe(true);
@@ -60,14 +52,16 @@ describe.skip('Edit Remote cluster', () => {
    * the "create" remote cluster, we won't test it again but simply make sure that
    * the form component is indeed shared between the 2 app sections.
    */
-  test('should use the same Form component as the "<RemoteClusterEdit />" component', async () => {
-    const { component: addRemoteClusterComponent } = setupRemoteClustersAdd();
+  test('should use the same Form component as the "<RemoteClusterAdd />" component', async () => {
+    let addRemoteClusterTestBed;
 
-    await nextTick();
-    addRemoteClusterComponent.update();
+    await act(async () => {
+      addRemoteClusterTestBed = setupRemoteClustersAdd();
+      addRemoteClusterTestBed.waitFor('remoteClusterAddPage');
+    });
 
     const formEdit = component.find(RemoteClusterForm);
-    const formAdd = addRemoteClusterComponent.find(RemoteClusterForm);
+    const formAdd = addRemoteClusterTestBed.component.find(RemoteClusterForm);
 
     expect(formEdit.length).toBe(1);
     expect(formAdd.length).toBe(1);

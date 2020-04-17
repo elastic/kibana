@@ -15,13 +15,17 @@ See the Kibana docs for [how to set up your dev environment](https://github.com/
 
 
 One common development workflow is:
+ - Bootstrap Kibana
+     ```
+    yarn kbn bootstrap
+    ```
  - Start Elasticsearch in one shell
     ```
     yarn es snapshot -E xpack.security.authc.api_key.enabled=true
     ```
  - Start Kibana in another shell
     ```
-    yarn start --xpack.ingestManager.enabled=true --xpack.ingestManager.epm.enabled=true --xpack.ingestManager.fleet.enabled=true
+    yarn start --xpack.ingestManager.enabled=true --xpack.ingestManager.epm.enabled=true --xpack.ingestManager.fleet.enabled=true --no-base-path --xpack.endpoint.enabled=true
     ```
 
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide

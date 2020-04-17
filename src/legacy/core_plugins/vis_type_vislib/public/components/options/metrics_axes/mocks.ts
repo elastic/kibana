@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { Axis, ValueAxis, SeriesParam, Style } from '../../../types';
+import { Vis } from '../../../../../../../plugins/visualizations/public';
+import { Axis, ValueAxis, SeriesParam } from '../../../types';
 import {
   ChartTypes,
   ChartModes,
@@ -31,6 +31,7 @@ import {
   getPositions,
   getInterpolationModes,
 } from '../../../utils/collections';
+import { Style } from '../../../../../../../plugins/charts/public';
 
 const defaultValueAxisId = 'ValueAxis-1';
 

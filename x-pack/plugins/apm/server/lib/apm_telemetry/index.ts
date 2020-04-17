@@ -87,7 +87,8 @@ export async function createApmTelemetry({
         return {
           run: async () => {
             await collectAndStore();
-          }
+          },
+          cancel: async () => {}
         };
       }
     }
@@ -96,14 +97,22 @@ export async function createApmTelemetry({
   const collector = usageCollector.makeUsageCollector({
     type: 'apm',
     fetch: async () => {
-      const data = (
-        await savedObjectsClient.get(
-          APM_TELEMETRY_SAVED_OBJECT_TYPE,
-          APM_TELEMETRY_SAVED_OBJECT_ID
-        )
-      ).attributes;
+      try {
+        const data = (
+          await savedObjectsClient.get(
+            APM_TELEMETRY_SAVED_OBJECT_TYPE,
+            APM_TELEMETRY_SAVED_OBJECT_ID
+          )
+        ).attributes;
 
-      return data;
+        return data;
+      } catch (err) {
+        if (err.output?.statusCode === 404) {
+          // task has not run yet, so no saved object to return
+          return {};
+        }
+        throw err;
+      }
     },
     isReady: () => true
   });

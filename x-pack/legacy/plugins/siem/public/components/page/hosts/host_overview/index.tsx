@@ -8,10 +8,10 @@ import { EuiFlexItem } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
-import React, { useContext } from 'react';
+import React from 'react';
 
-import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
-import { DescriptionList } from '../../../../../common/utility_types';
+import { DEFAULT_DARK_MODE } from '../../../../../../../../plugins/siem/common/constants';
+import { DescriptionList } from '../../../../../../../../plugins/siem/common/utility_types';
 import { useUiSetting$ } from '../../../../lib/kibana';
 import { getEmptyTagValue } from '../../../empty_value';
 import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';
@@ -19,8 +19,8 @@ import { InspectButton, InspectButtonContainer } from '../../../inspect';
 import { HostItem } from '../../../../graphql/types';
 import { Loader } from '../../../loader';
 import { IPDetailsLink } from '../../../links';
-import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
 import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
+import { useMlCapabilities } from '../../../ml_popover/hooks/use_ml_capabilities';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../index';
@@ -56,7 +56,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     anomaliesData,
     narrowDateRange,
   }) => {
-    const capabilities = useContext(MlCapabilitiesContext);
+    const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
 

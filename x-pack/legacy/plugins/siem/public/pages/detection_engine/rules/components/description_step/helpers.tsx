@@ -19,6 +19,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { RuleType } from '../../../../../../../../../plugins/siem/common/detection_engine/types';
 import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
 
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
@@ -27,6 +28,7 @@ import * as i18n from './translations';
 import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
+import { assertUnreachable } from '../../../../../lib/helpers';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -265,4 +267,28 @@ export const buildNoteDescription = (label: string, note: string): ListItems[] =
     ];
   }
   return [];
+};
+
+export const buildRuleTypeDescription = (label: string, ruleType: RuleType): ListItems[] => {
+  switch (ruleType) {
+    case 'machine_learning': {
+      return [
+        {
+          title: label,
+          description: i18n.ML_TYPE_DESCRIPTION,
+        },
+      ];
+    }
+    case 'query':
+    case 'saved_query': {
+      return [
+        {
+          title: label,
+          description: i18n.QUERY_TYPE_DESCRIPTION,
+        },
+      ];
+    }
+    default:
+      return assertUnreachable(ruleType);
+  }
 };

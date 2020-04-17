@@ -64,7 +64,7 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
           ],
         });
 
-        return response.ok({ body: 'true' });
+        return response.noContent();
       } catch (error) {
         return response.customError(wrapError(error));
       }

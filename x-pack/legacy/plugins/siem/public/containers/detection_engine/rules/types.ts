@@ -6,12 +6,7 @@
 
 import * as t from 'io-ts';
 
-export const RuleTypeSchema = t.keyof({
-  query: null,
-  saved_query: null,
-  machine_learning: null,
-});
-export type RuleType = t.TypeOf<typeof RuleTypeSchema>;
+import { RuleTypeSchema } from '../../../../../../../plugins/siem/common/detection_engine/types';
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
@@ -75,7 +70,7 @@ const MetaRule = t.intersection([
   }),
   t.partial({
     throttle: t.string,
-    kibanaSiemAppUrl: t.string,
+    kibana_siem_app_url: t.string,
   }),
 ]);
 
@@ -194,7 +189,7 @@ export interface BasicFetchProps {
   signal: AbortSignal;
 }
 
-export interface ImportRulesProps {
+export interface ImportDataProps {
   fileToImport: File;
   overwrite?: boolean;
   signal: AbortSignal;
@@ -208,7 +203,7 @@ export interface ImportRulesResponseError {
   };
 }
 
-export interface ImportRulesResponse {
+export interface ImportDataResponse {
   success: boolean;
   success_count: number;
   errors: ImportRulesResponseError[];
@@ -235,6 +230,10 @@ export interface RuleInfoStatus {
   last_success_at: string | null;
   last_failure_message: string | null;
   last_success_message: string | null;
+  last_look_back_date: string | null | undefined;
+  gap: string | null | undefined;
+  bulk_create_time_durations: string[] | null | undefined;
+  search_after_time_durations: string[] | null | undefined;
 }
 
 export type RuleStatusResponse = Record<string, RuleStatus>;

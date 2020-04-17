@@ -34,6 +34,9 @@ describe('ADD remote clusters', () => {
         getLicenseStatus: () => licenseCheckResult,
         elasticsearchService: elasticsearchServiceMock.createInternalSetup(),
         elasticsearch: elasticsearchMock,
+        config: {
+          isCloudEnabled: false,
+        },
       };
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();

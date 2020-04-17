@@ -25,6 +25,10 @@ import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
+import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { createSearchSource } from './search_source';
+import { QuerySetup } from '../query/query_service';
+import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
@@ -39,6 +43,19 @@ import {
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
 } from './aggs';
+
+import { FieldFormatsStart } from '../field_formats';
+
+interface SearchServiceSetupDependencies {
+  packageInfo: PackageInfo;
+  query: QuerySetup;
+  getInternalStartServices: GetInternalStartServicesFn;
+}
+
+interface SearchStartDependencies {
+  fieldFormats: FieldFormatsStart;
+  indexPatterns: IndexPatternsContract;
+}
 
 /**
  * The search plugin exposes two registration methods for other plugins:
@@ -73,13 +90,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return strategyProvider;
   };
 
-  public setup(core: CoreSetup, packageInfo: PackageInfo): ISearchSetup {
+  public setup(
+    core: CoreSetup,
+    { packageInfo, query, getInternalStartServices }: SearchServiceSetupDependencies
+  ): ISearchSetup {
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
     this.registerSearchStrategyProvider(SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider);
     this.registerSearchStrategyProvider(ES_SEARCH_STRATEGY, esSearchStrategyProvider);
 
     const aggTypesSetup = this.aggTypesRegistry.setup();
-    const aggTypes = getAggTypes({ uiSettings: core.uiSettings });
+    const aggTypes = getAggTypes({
+      query,
+      uiSettings: core.uiSettings,
+      getInternalStartServices,
+    });
+
     aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));
     aggTypes.metrics.forEach(m => aggTypesSetup.registerMetric(m));
 
@@ -92,7 +117,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
 
-  public start(core: CoreStart): ISearchStart {
+  public start(
+    core: CoreStart,
+    { fieldFormats, indexPatterns }: SearchStartDependencies
+  ): ISearchStart {
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -113,6 +141,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
             typesRegistry: aggTypesStart,
+            fieldFormats,
           });
         },
         types: aggTypesStart,
@@ -129,6 +158,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         // TODO: should an intercepror have a destroy method?
         this.searchInterceptor = searchInterceptor;
       },
+      createSearchSource: createSearchSource(indexPatterns),
       __LEGACY: {
         esClient: this.esClient!,
         AggConfig,

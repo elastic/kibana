@@ -22,7 +22,6 @@ import { newJobCapsService } from '../../../../../services/new_job_capabilities_
 import { Field } from '../../../../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
-  LoadExploreDataArg,
   defaultSearchQuery,
   ResultsSearchQuery,
   isResultsSearchBoolQuery,
@@ -37,12 +36,23 @@ import {
   SEARCH_SIZE,
   SearchQuery,
 } from '../../../../common';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
+
+interface LoadClassificationExploreDataArg {
+  direction: SortDirection;
+  filterByIsTraining?: boolean;
+  field: string;
+  searchQuery: SavedSearchQuery;
+  requiresKeyword?: boolean;
+  pageIndex?: number;
+  pageSize?: number;
+}
 
 export type TableItem = Record<string, any>;
 
 export interface UseExploreDataReturnType {
   errorMessage: string;
-  loadExploreData: (arg: LoadExploreDataArg) => void;
+  loadExploreData: (arg: LoadClassificationExploreDataArg) => void;
   sortField: EsFieldName;
   sortDirection: SortDirection;
   status: INDEX_STATUS;
@@ -51,6 +61,7 @@ export interface UseExploreDataReturnType {
 
 export const useExploreData = (
   jobConfig: DataFrameAnalyticsConfig | undefined,
+  needsDestIndexFields: boolean,
   selectedFields: Field[],
   setSelectedFields: React.Dispatch<React.SetStateAction<Field[]>>,
   setDocFields: React.Dispatch<React.SetStateAction<Field[]>>,
@@ -70,7 +81,7 @@ export const useExploreData = (
         selectedFields: defaultSelected,
         docFields,
         depVarType,
-      } = getDefaultFieldsFromJobCaps(fields, jobConfig);
+      } = getDefaultFieldsFromJobCaps(fields, jobConfig, needsDestIndexFields);
 
       setDepVarType(depVarType);
       setSelectedFields(defaultSelected);
@@ -83,7 +94,7 @@ export const useExploreData = (
     direction,
     searchQuery,
     requiresKeyword,
-  }: LoadExploreDataArg) => {
+  }: LoadClassificationExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);

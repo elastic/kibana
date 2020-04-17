@@ -14,6 +14,44 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
+        "preconfigured": Array [],
+        "whitelistedHosts": Array [
+          "*",
+        ],
+      }
+    `);
+  });
+
+  test('action with preconfigured actions', () => {
+    const config: Record<string, any> = {
+      preconfigured: [
+        {
+          id: 'my-slack1',
+          actionTypeId: '.slack',
+          name: 'Slack #xyz',
+          config: {
+            webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+          },
+        },
+      ],
+    };
+    expect(configSchema.validate(config)).toMatchInlineSnapshot(`
+      Object {
+        "enabled": true,
+        "enabledActionTypes": Array [
+          "*",
+        ],
+        "preconfigured": Array [
+          Object {
+            "actionTypeId": ".slack",
+            "config": Object {
+              "webhookUrl": "https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz",
+            },
+            "id": "my-slack1",
+            "name": "Slack #xyz",
+            "secrets": Object {},
+          },
+        ],
         "whitelistedHosts": Array [
           "*",
         ],

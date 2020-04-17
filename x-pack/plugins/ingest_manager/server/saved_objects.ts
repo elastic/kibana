@@ -10,6 +10,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
+  AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 } from './constants';
 
@@ -38,17 +39,16 @@ export const savedObjectMappings = {
       default_api_key: { type: 'keyword' },
       updated_at: { type: 'date' },
       current_error_events: { type: 'text' },
+    },
+  },
+  [AGENT_ACTION_SAVED_OBJECT_TYPE]: {
+    properties: {
+      agent_id: { type: 'keyword' },
+      type: { type: 'keyword' },
       // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
-      actions: {
-        type: 'nested',
-        properties: {
-          id: { type: 'keyword' },
-          type: { type: 'keyword' },
-          data: { type: 'text' },
-          sent_at: { type: 'date' },
-          created_at: { type: 'date' },
-        },
-      },
+      data: { type: 'flattened' },
+      sent_at: { type: 'date' },
+      created_at: { type: 'date' },
     },
   },
   [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
@@ -137,6 +137,7 @@ export const savedObjectMappings = {
               dataset: { type: 'keyword' },
               processors: { type: 'keyword' },
               config: { type: 'flattened' },
+              pkg_stream: { type: 'flattened' },
             },
           },
         },
@@ -148,6 +149,11 @@ export const savedObjectMappings = {
     properties: {
       name: { type: 'keyword' },
       version: { type: 'keyword' },
+      internal: { type: 'boolean' },
+      es_index_patterns: {
+        dynamic: false,
+        type: 'object',
+      },
       installed: {
         type: 'nested',
         properties: {

@@ -112,7 +112,7 @@ export default function({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
-          .send({ filter: 'not host.ip:10.100.170.247' })
+          .send({ filter: 'not host.ip:10.46.229.234' })
           .expect(200);
         expect(body.total).to.eql(2);
         expect(body.hosts.length).to.eql(2);
@@ -121,7 +121,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('metadata api should return page based on filters and paging passed.', async () => {
-        const notIncludedIp = '10.100.170.247';
+        const notIncludedIp = '10.46.229.234';
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
@@ -139,15 +139,13 @@ export default function({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.total).to.eql(2);
         const resultIps: string[] = [].concat(
-          ...body.hosts.map((metadata: Record<string, any>) => metadata.host.ip)
+          ...body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.ip)
         );
         expect(resultIps).to.eql([
-          '10.48.181.222',
-          '10.116.62.62',
-          '10.102.83.30',
-          '10.198.70.21',
-          '10.252.10.66',
-          '10.128.235.38',
+          '10.192.213.130',
+          '10.70.28.129',
+          '10.101.149.26',
+          '2606:a000:ffc0:39:11ef:37b9:3371:578c',
         ]);
         expect(resultIps).not.include.eql(notIncludedIp);
         expect(body.hosts.length).to.eql(2);
@@ -161,21 +159,21 @@ export default function({ getService }: FtrProviderContext) {
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `host.os.variant.keyword:${variantValue}`,
+            filter: `host.os.variant:${variantValue}`,
           })
           .expect(200);
-        expect(body.total).to.eql(1);
+        expect(body.total).to.eql(2);
         const resultOsVariantValue: Set<string> = new Set(
-          body.hosts.map((metadata: Record<string, any>) => metadata.host.os.variant)
+          body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.os.variant)
         );
         expect(Array.from(resultOsVariantValue)).to.eql([variantValue]);
-        expect(body.hosts.length).to.eql(1);
+        expect(body.hosts.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
 
       it('metadata api should return the latest event for all the events for an endpoint', async () => {
-        const targetEndpointIp = '10.100.170.247';
+        const targetEndpointIp = '10.46.229.234';
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
@@ -184,11 +182,33 @@ export default function({ getService }: FtrProviderContext) {
           })
           .expect(200);
         expect(body.total).to.eql(1);
-        const resultIp: string = body.hosts[0].host.ip.filter(
+        const resultIp: string = body.hosts[0].metadata.host.ip.filter(
           (ip: string) => ip === targetEndpointIp
         );
         expect(resultIp).to.eql([targetEndpointIp]);
-        expect(body.hosts[0].event.created).to.eql(1584044335459);
+        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
+        expect(body.hosts.length).to.eql(1);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
+      });
+
+      it('metadata api should return the endpoint based on the elastic agent id, and status should be error', async () => {
+        const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
+        const targetElasticAgentId = '023fa40c-411d-4188-a941-4147bfadd095';
+        const { body } = await supertest
+          .post('/api/endpoint/metadata')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: `elastic.agent.id:${targetElasticAgentId}`,
+          })
+          .expect(200);
+        expect(body.total).to.eql(1);
+        const resultHostId: string = body.hosts[0].metadata.host.id;
+        const resultElasticAgentId: string = body.hosts[0].metadata.elastic.agent.id;
+        expect(resultHostId).to.eql(targetEndpointId);
+        expect(resultElasticAgentId).to.eql(targetElasticAgentId);
+        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
+        expect(body.hosts[0].host_status).to.eql('error');
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);

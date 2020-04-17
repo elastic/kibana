@@ -31,7 +31,7 @@ import { FieldName } from '../field_name/field_name';
 export interface Props {
   field: string;
   fieldMapping?: FieldMapping;
-  fieldType?: string;
+  fieldType: string;
   displayNoMappingWarning: boolean;
   displayUnderscoreWarning: boolean;
   isCollapsible: boolean;
@@ -88,10 +88,10 @@ export function DocViewTableRow({
       )}
       <td className="kbnDocViewer__field">
         <FieldName
-          field={fieldMapping}
           fieldName={field}
           fieldType={fieldType}
           fieldIconProps={{ fill: 'none', color: 'gray' }}
+          scripted={Boolean(fieldMapping?.scripted)}
         />
       </td>
       <td>

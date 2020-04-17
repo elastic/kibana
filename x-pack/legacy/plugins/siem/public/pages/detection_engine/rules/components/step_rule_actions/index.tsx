@@ -141,6 +141,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
               />
             </>
           )}
+          <UseField path="enabled" defaultValue={myStepData.enabled} component={GhostFormField} />
         </Form>
       </StepContentWrapper>
 

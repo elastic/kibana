@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { PluginInitializer } from 'kibana/public';
 export {
   HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddable,
@@ -30,5 +29,4 @@ import { EmbeddableExamplesPlugin } from './plugin';
 
 export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
 export { MULTI_TASK_TODO_EMBEDDABLE } from './multi_task_todo';
-
-export const plugin: PluginInitializer<void, void> = () => new EmbeddableExamplesPlugin();
+export const plugin = () => new EmbeddableExamplesPlugin();

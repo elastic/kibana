@@ -105,10 +105,17 @@ export const apm: LegacyPluginInitializer = kibana => {
         privileges: {
           all: {
             app: ['apm', 'kibana'],
-            api: ['apm', 'apm_write', 'actions-read', 'alerting-read'],
+            api: [
+              'apm',
+              'apm_write',
+              'actions-read',
+              'actions-all',
+              'alerting-read',
+              'alerting-all'
+            ],
             catalogue: ['apm'],
             savedObject: {
-              all: ['action', 'action_task_params'],
+              all: ['alert', 'action', 'action_task_params'],
               read: []
             },
             ui: [
@@ -124,13 +131,27 @@ export const apm: LegacyPluginInitializer = kibana => {
           },
           read: {
             app: ['apm', 'kibana'],
-            api: ['apm', 'actions-read', 'alerting-read'],
+            api: [
+              'apm',
+              'actions-read',
+              'actions-all',
+              'alerting-read',
+              'alerting-all'
+            ],
             catalogue: ['apm'],
             savedObject: {
-              all: ['action', 'action_task_params'],
+              all: ['alert', 'action', 'action_task_params'],
               read: []
             },
-            ui: ['show', 'alerting:show', 'actions:show']
+            ui: [
+              'show',
+              'alerting:show',
+              'actions:show',
+              'alerting:save',
+              'actions:save',
+              'alerting:delete',
+              'actions:delete'
+            ]
           }
         }
       });

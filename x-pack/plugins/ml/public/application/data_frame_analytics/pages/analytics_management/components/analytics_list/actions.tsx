@@ -33,13 +33,12 @@ export const AnalyticsViewAction = {
   isPrimary: true,
   render: (item: DataFrameAnalyticsListRow) => {
     const analysisType = getAnalysisType(item.config.analysis);
-    const jobStatus = item.stats.state;
     const isDisabled =
       !isRegressionAnalysis(item.config.analysis) &&
       !isOutlierAnalysis(item.config.analysis) &&
       !isClassificationAnalysis(item.config.analysis);
 
-    const url = getResultsUrl(item.id, analysisType, jobStatus);
+    const url = getResultsUrl(item.id, analysisType);
     return (
       <EuiButtonEmpty
         isDisabled={isDisabled}

@@ -22,6 +22,7 @@ import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createMetricbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -295,13 +296,7 @@ export const createMetricbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.osxTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     DEB: {
       title: i18n.translate('home.tutorials.common.metricbeatCloudInstructions.config.debTitle', {
@@ -317,13 +312,7 @@ export const createMetricbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.debTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     RPM: {
       title: i18n.translate('home.tutorials.common.metricbeatCloudInstructions.config.rpmTitle', {
@@ -339,13 +328,7 @@ export const createMetricbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.rpmTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     WINDOWS: {
       title: i18n.translate(
@@ -364,13 +347,7 @@ export const createMetricbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.windowsTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
   },
 });

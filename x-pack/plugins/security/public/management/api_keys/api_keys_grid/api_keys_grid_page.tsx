@@ -28,8 +28,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 import _ from 'lodash';
 import { NotificationsStart } from 'src/core/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public/components/section_loading';
+import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { APIKeysAPIClient } from '../api_keys_api_client';
 import { DocumentationLinksService } from '../documentation_links';

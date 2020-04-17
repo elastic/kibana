@@ -9,6 +9,7 @@ export interface ErrorResponse {
     statusCode: number;
     error: string;
     message: string;
+    attributes?: any;
   };
   name: string;
 }

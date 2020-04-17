@@ -13,3 +13,5 @@ export * from './mock_detail_item';
 export * from './netflow';
 export * from './test_providers';
 export * from './utils';
+export * from './mock_ecs';
+export * from './timeline_results';

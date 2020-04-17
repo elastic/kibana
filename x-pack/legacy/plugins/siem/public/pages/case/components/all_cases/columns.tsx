@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiBadge,
   EuiTableFieldDataColumnType,
   EuiTableComputedColumnType,
   EuiTableActionsColumnType,
   EuiAvatar,
+  EuiLink,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
@@ -45,7 +46,9 @@ export const getCasesColumns = (
     render: (theCase: Case) => {
       if (theCase.id != null && theCase.title != null) {
         const caseDetailsLinkComponent = (
-          <CaseDetailsLink detailName={theCase.id}>{theCase.title}</CaseDetailsLink>
+          <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+            {theCase.title}
+          </CaseDetailsLink>
         );
         return theCase.status === 'open' ? (
           caseDetailsLinkComponent
@@ -60,7 +63,6 @@ export const getCasesColumns = (
       }
       return getEmptyTagValue();
     },
-    width: '25%',
   },
   {
     field: 'createdBy',
@@ -71,11 +73,11 @@ export const getCasesColumns = (
           <>
             <EuiAvatar
               className="userAction__circle"
-              name={createdBy.fullName ? createdBy.fullName : createdBy.username}
+              name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
               size="s"
             />
             <Spacer data-test-subj="case-table-column-createdBy">
-              {createdBy.fullName ?? createdBy.username ?? 'N/A'}
+              {createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
             </Spacer>
           </>
         );
@@ -105,7 +107,6 @@ export const getCasesColumns = (
       return getEmptyTagValue();
     },
     truncateText: true,
-    width: '20%',
   },
   {
     align: 'right',
@@ -113,7 +114,9 @@ export const getCasesColumns = (
     name: i18n.COMMENTS,
     sortable: true,
     render: (totalComment: Case['totalComment']) =>
-      renderStringField(`${totalComment}`, `case-table-column-commentCount`),
+      totalComment != null
+        ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
+        : getEmptyTagValue(),
   },
   filterStatus === 'open'
     ? {
@@ -149,7 +152,54 @@ export const getCasesColumns = (
         },
       },
   {
-    name: 'Actions',
+    name: i18n.SERVICENOW_INCIDENT,
+    render: (theCase: Case) => {
+      if (theCase.id != null) {
+        return <ServiceNowColumn theCase={theCase} />;
+      }
+      return getEmptyTagValue();
+    },
+  },
+  {
+    name: i18n.ACTIONS,
     actions,
   },
 ];
+
+interface Props {
+  theCase: Case;
+}
+
+export const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
+  const handleRenderDataToPush = useCallback(() => {
+    const lastCaseUpdate = theCase.updatedAt != null ? new Date(theCase.updatedAt) : null;
+    const lastCasePush =
+      theCase.externalService?.pushedAt != null
+        ? new Date(theCase.externalService?.pushedAt)
+        : null;
+    const hasDataToPush =
+      lastCasePush === null ||
+      (lastCasePush != null &&
+        lastCaseUpdate != null &&
+        lastCasePush.getTime() < lastCaseUpdate?.getTime());
+    return (
+      <p>
+        <EuiLink
+          data-test-subj={`case-table-column-external`}
+          href={theCase.externalService?.externalUrl}
+          target="_blank"
+          aria-label={i18n.SERVICENOW_LINK_ARIA}
+        >
+          {theCase.externalService?.externalTitle}
+        </EuiLink>
+        {hasDataToPush
+          ? renderStringField(i18n.REQUIRES_UPDATE, `case-table-column-external-requiresUpdate`)
+          : renderStringField(i18n.UP_TO_DATE, `case-table-column-external-upToDate`)}
+      </p>
+    );
+  }, [theCase]);
+  if (theCase.externalService !== null) {
+    return handleRenderDataToPush();
+  }
+  return renderStringField(i18n.NOT_PUSHED, `case-table-column-external-notPushed`);
+};

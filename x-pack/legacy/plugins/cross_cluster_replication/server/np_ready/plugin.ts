@@ -6,7 +6,7 @@
 
 import { Plugin, PluginInitializerContext, CoreSetup } from 'src/core/server';
 
-import { IndexMgmtSetup } from '../../../../../plugins/index_management/server';
+import { IndexManagementPluginSetup } from '../../../../../plugins/index_management/server';
 
 // @ts-ignore
 import { registerLicenseChecker } from './lib/register_license_checker';
@@ -15,7 +15,7 @@ import { registerRoutes } from './routes/register_routes';
 import { ccrDataEnricher } from './cross_cluster_replication_data';
 
 interface PluginDependencies {
-  indexManagement: IndexMgmtSetup;
+  indexManagement: IndexManagementPluginSetup;
   __LEGACY: {
     server: any;
     ccrUIEnabled: boolean;

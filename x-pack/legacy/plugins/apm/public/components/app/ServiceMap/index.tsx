@@ -33,10 +33,16 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   const license = useLicense();
   const { urlParams } = useUrlParams();
 
-  const { data } = useFetcher(() => {
+  const { data = { elements: [] } } = useFetcher(() => {
+    // When we don't have a license or a valid license, don't make the request.
+    if (!license || !isValidPlatinumLicense(license)) {
+      return;
+    }
+
     const { start, end, environment } = urlParams;
     if (start && end) {
       return callApmApi({
+        isCachable: false,
         pathname: '/api/apm/service-map',
         params: {
           query: {
@@ -48,7 +54,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         }
       });
     }
-  }, [serviceName, urlParams]);
+  }, [license, serviceName, urlParams]);
 
   const { ref, height, width } = useRefDimensions();
 
