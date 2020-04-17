@@ -51,8 +51,9 @@ window.canvasInitErrorHandler = () => {
     // It is thrown during workpad loading due to layout thrashing
     // https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
     // https://github.com/elastic/eui/issues/3346
+    console.log(message);
     const isKnownError =
-      message === 'ResizeObserver loop limit exceeded' ||
+      message.includes('ResizeObserver loop') ||
       Object.keys(knownErrors).find(errorName => {
         return err.constructor.name === errorName || message.indexOf(errorName) >= 0;
       });
