@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './index_header';
+export { IndexHeader } from './index_header';
