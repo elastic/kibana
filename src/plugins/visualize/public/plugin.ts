@@ -124,7 +124,7 @@ export class VisualizePlugin
         setServices(deps);
 
         // make sure the index pattern list is up to date
-        await dataStart.indexPatterns.clearCache();
+        await pluginsStart.data.indexPatterns.clearCache();
         const { renderApp } = await import('./application/application');
         const unmount = renderApp(params.element, params.appBasePath, deps);
         return () => {
