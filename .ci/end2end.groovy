@@ -82,13 +82,12 @@ pipeline {
           // As long as Kibana takes ages let's try a few times though
           retry(10) {
             sleep 20
-            dir("${E2E_DIR}") {
-              sh 'rm cypress/test-results/*.* || true'
-              sh '''
-                source src/dev/ci_setup/setup_env.sh true
-                yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
-              '''
-            }
+            sh '''
+              source src/dev/ci_setup/setup_env.sh true
+              cd ${E2E_DIR}
+              rm cypress/test-results/*.* || true
+              yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
+            '''
           }
         }
       }
