@@ -269,7 +269,7 @@ describe('waterfall_helpers', () => {
       expect(waterfall.errorItems.length).toBe(0);
       expect(waterfall.errorsCount).toEqual(0);
     });
-    it('shouldnt reparent spans when child id isnt found', () => {
+    it("shouldn't reparent spans when child id isn't found", () => {
       const traceItems = [
         {
           processor: { event: 'transaction' },
