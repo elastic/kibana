@@ -16,6 +16,7 @@ import {
 } from './actions';
 
 import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldown';
+import { createStartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public/';
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -40,16 +41,16 @@ export class DashboardDrilldownsService {
   }
 
   setupDrilldowns(core: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
-    const overlays = async () => (await core.getStartServices())[0].overlays;
-    const drilldowns = async () => (await core.getStartServices())[1].drilldowns;
-    const getSavedObjectsClient = async () =>
-      (await core.getStartServices())[0].savedObjects.client;
-    const getApplicationService = async () => (await core.getStartServices())[0].application;
+    const getStartServices = createStartServicesGetter<StartDependencies, unknown>(
+      core.getStartServices
+    );
 
-    const getGetUrlGenerator = async () =>
-      (await core.getStartServices())[1].share.urlGenerators.getUrlGenerator;
-
-    const getDataPluginActions = async () => (await core.getStartServices())[1].data.actions;
+    const overlays = () => getStartServices().core.overlays;
+    const drilldowns = () => getStartServices().plugins.drilldowns;
+    const getSavedObjectsClient = () => getStartServices().core.savedObjects.client;
+    const getApplicationService = () => getStartServices().core.application;
+    const getGetUrlGenerator = () => getStartServices().plugins.share.urlGenerators.getUrlGenerator;
+    const getDataPluginActions = () => getStartServices().plugins.data.actions;
 
     const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ overlays, drilldowns });
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);

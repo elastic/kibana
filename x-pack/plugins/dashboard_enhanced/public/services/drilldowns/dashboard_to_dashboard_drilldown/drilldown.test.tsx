@@ -83,27 +83,23 @@ describe('.execute() & getHref', () => {
     const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
 
     const drilldown = new DashboardToDashboardDrilldown({
-      getApplicationService: () =>
-        Promise.resolve({
-          navigateToApp,
-          getUrlForApp,
-        }),
-      getGetUrlGenerator: () =>
-        Promise.resolve(
-          () =>
-            createDirectAccessDashboardLinkGenerator(() =>
-              Promise.resolve({ appBasePath: 'test', useHashedUrl: false })
-            ) as UrlGeneratorContract<string>
-        ),
-      getDataPluginActions: () => Promise.resolve(dataPluginActions),
-      getSavedObjectsClient: () => Promise.resolve(savedObjectsClient),
+      getApplicationService: () => ({
+        navigateToApp,
+        getUrlForApp,
+      }),
+      getGetUrlGenerator: () => () =>
+        createDirectAccessDashboardLinkGenerator(() =>
+          Promise.resolve({ appBasePath: 'test', useHashedUrl: false })
+        ) as UrlGeneratorContract<string>,
+      getDataPluginActions: () => dataPluginActions,
+      getSavedObjectsClient: () => savedObjectsClient,
     });
     const selectRangeFiltersSpy = jest
       .spyOn(dataPluginActions, 'createFiltersFromRangeSelectAction')
-      .mockImplementation(() => Promise.resolve(filtersFromEvent));
+      .mockImplementation(() => filtersFromEvent);
     const valueClickFiltersSpy = jest
       .spyOn(dataPluginActions, 'createFiltersFromValueClickAction')
-      .mockImplementation(() => Promise.resolve(filtersFromEvent));
+      .mockImplementation(() => filtersFromEvent);
 
     const completeConfig: Config = {
       dashboardId: 'id',

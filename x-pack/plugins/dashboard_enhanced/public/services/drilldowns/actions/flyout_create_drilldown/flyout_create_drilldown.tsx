@@ -16,8 +16,8 @@ import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddabl
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
 export interface OpenFlyoutAddDrilldownParams {
-  overlays: () => Promise<CoreStart['overlays']>;
-  drilldowns: () => Promise<DrilldownsStart>;
+  overlays: () => CoreStart['overlays'];
+  drilldowns: () => DrilldownsStart;
 }
 
 export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {
@@ -50,8 +50,8 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
   }
 
   public async execute(context: EmbeddableContext) {
-    const overlays = await this.params.overlays();
-    const drilldowns = await this.params.drilldowns();
+    const overlays = this.params.overlays();
+    const drilldowns = this.params.drilldowns();
     const { embeddable } = context;
 
     if (!isEnhancedEmbeddable(embeddable)) {

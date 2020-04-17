@@ -18,12 +18,10 @@ import { DataPublicPluginStart, esFilters } from '../../../../../../../src/plugi
 import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/visualizations/public';
 
 export interface Params {
-  getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
-  getApplicationService: () => Promise<
-    Pick<CoreStart['application'], 'getUrlForApp' | 'navigateToApp'>
-  >;
-  getGetUrlGenerator: () => Promise<SharePluginStart['urlGenerators']['getUrlGenerator']>;
-  getDataPluginActions: () => Promise<DataPublicPluginStart['actions']>;
+  getSavedObjectsClient: () => CoreStart['savedObjects']['client'];
+  getApplicationService: () => Pick<CoreStart['application'], 'getUrlForApp' | 'navigateToApp'>;
+  getGetUrlGenerator: () => SharePluginStart['urlGenerators']['getUrlGenerator'];
+  getDataPluginActions: () => DataPublicPluginStart['actions'];
 }
 
 export class DashboardToDashboardDrilldown
