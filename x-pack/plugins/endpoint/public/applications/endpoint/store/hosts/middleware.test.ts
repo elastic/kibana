@@ -56,7 +56,7 @@ describe('host list middleware', () => {
     await sleep();
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({
-        paging_properties: [{ page_index: 0 }, { page_size: 10 }],
+        paging_properties: [{ page_index: '0' }, { page_size: '10' }],
       }),
     });
     expect(listData(getState())).toEqual(apiResponse.hosts.map(hostInfo => hostInfo.metadata));

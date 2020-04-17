@@ -12,6 +12,11 @@ interface ServerReturnedHostList {
   payload: HostResultList;
 }
 
+interface ServerFailedToReturnHostList {
+  type: 'serverFailedToReturnHostList';
+  payload: ServerApiError;
+}
+
 interface ServerReturnedHostDetails {
   type: 'serverReturnedHostDetails';
   payload: HostInfo;
@@ -24,5 +29,6 @@ interface ServerFailedToReturnHostDetails {
 
 export type HostAction =
   | ServerReturnedHostList
+  | ServerFailedToReturnHostList
   | ServerReturnedHostDetails
   | ServerFailedToReturnHostDetails;
