@@ -65,7 +65,7 @@ export default function({ getService }: FtrProviderContext) {
         esArchiver.unload('uptime/blank');
       });
 
-      it('pause so I can check stuff', async () => {
+      it('retrieves expected cert data', async () => {
         const apiResponse = await supertest.get(API_URLS.CERTS);
         const { body } = apiResponse;
 
