@@ -91,6 +91,8 @@ export const selectDurationLines = ({ monitorDuration }: AppState) => {
 export const selectAlertFlyoutVisibility = ({ ui: { alertFlyoutVisible } }: AppState) =>
   alertFlyoutVisible;
 
+export const selectAlertFlyoutType = ({ ui: { alertFlyoutType } }: AppState) => alertFlyoutType;
+
 export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: AppState) => ({
   filters: ui.esKuery,
   indexPattern: indexPattern.index_pattern,

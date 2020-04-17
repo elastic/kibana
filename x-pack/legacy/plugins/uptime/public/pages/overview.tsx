@@ -11,21 +11,21 @@ import { i18n } from '@kbn/i18n';
 import { useUptimeTelemetry, UptimePage, useGetUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
-import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { useUpdateKueryString } from '../hooks';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
+import { OverviewPageProps } from '../components/overview/overview_container';
 
-interface OverviewPageProps {
-  autocomplete: DataPublicPluginSetup['autocomplete'];
+interface Props extends OverviewPageProps {
   indexPattern: IIndexPattern | null;
   setEsKueryFilters: (esFilters: string) => void;
+  currentAlertType: string;
+  setAlertType: (alertType: string) => void;
 }
-
-type Props = OverviewPageProps;
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
@@ -36,7 +36,13 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFilters }: Props) => {
+export const OverviewPageComponent = ({
+  autocomplete,
+  currentAlertType,
+  indexPattern,
+  setAlertType,
+  setEsKueryFilters,
+}: Props) => {
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
   const { search, filters: urlFilters } = params;
 

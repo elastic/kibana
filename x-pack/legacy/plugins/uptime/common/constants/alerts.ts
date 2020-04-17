@@ -21,3 +21,8 @@ export const ACTION_GROUP_DEFINITIONS: ActionGroupDefinitions = {
     name: 'Uptime TLS Alert',
   },
 };
+
+export const CLIENT_ALERT_TYPES = {
+  MONITOR_STATUS: 'xpack.uptime.alerts.monitorStatus',
+  TLS: 'xpack.uptime.alerts.tls',
+};

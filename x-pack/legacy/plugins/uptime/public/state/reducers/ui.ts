@@ -12,11 +12,15 @@ import {
   setEsKueryString,
   triggerAppRefresh,
   UiPayload,
+  setAlertFlyoutType,
   setAlertFlyoutVisible,
 } from '../actions';
 
+import { CLIENT_ALERT_TYPES } from '../../../common/constants';
+
 export interface UiState {
   alertFlyoutVisible: boolean;
+  alertFlyoutType: string;
   basePath: string;
   esKuery: string;
   integrationsPopoverOpen: PopoverState | null;
@@ -25,6 +29,7 @@ export interface UiState {
 
 const initialState: UiState = {
   alertFlyoutVisible: false,
+  alertFlyoutType: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   basePath: '',
   esKuery: '',
   integrationsPopoverOpen: null,
@@ -56,6 +61,11 @@ export const uiReducer = handleActions<UiState, UiPayload>(
     [String(setEsKueryString)]: (state, action: Action<string>) => ({
       ...state,
       esKuery: action.payload as string,
+    }),
+
+    [String(setAlertFlyoutType)]: (state, action: Action<string>) => ({
+      ...state,
+      alertFlyoutType: action.payload,
     }),
   },
   initialState

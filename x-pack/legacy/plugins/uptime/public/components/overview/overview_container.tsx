@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback } from 'react';
+import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { OverviewPageComponent } from '../../pages/overview';
 import { selectIndexPattern } from '../../state/selectors';
-import { AppState } from '../../state';
 import { setEsKueryString } from '../../state/actions';
 
-interface DispatchProps {
-  setEsKueryFilters: typeof setEsKueryString;
+export interface OverviewPageProps {
+  autocomplete: DataPublicPluginSetup['autocomplete'];
 }
 
-const mapDispatchToProps = (dispatch: any): DispatchProps => ({
-  setEsKueryFilters: (esFilters: string) => dispatch(setEsKueryString(esFilters)),
-});
-
-const mapStateToProps = (state: AppState) => ({ ...selectIndexPattern(state) });
-
-export const OverviewPage = connect(mapStateToProps, mapDispatchToProps)(OverviewPageComponent);
+export const OverviewPage: React.FC<OverviewPageProps> = props => {
+  const dispatch = useDispatch();
+  const setEsKueryFilters = useCallback(
+    (esFilters: string) => dispatch(setEsKueryString(esFilters)),
+    [dispatch]
+  );
+  const indexPattern = useSelector(selectIndexPattern);
+  return (
+    <OverviewPageComponent setEsKueryFilters={setEsKueryFilters} {...indexPattern} {...props} />
+  );
+};
