@@ -7,4 +7,4 @@
 // Need to wait for https://github.com/elastic/eui/pull/3173/
 // to unit test this component
 // basic interaction is covered in end-to-end tests
-test.skip('<DashboardDrilldownConfig/>');
+test.todo('<DashboardDrilldownConfig/>');
