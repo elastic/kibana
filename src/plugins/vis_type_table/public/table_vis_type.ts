@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreStart, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, PluginInitializerContext } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
@@ -27,7 +27,7 @@ import tableVisTemplate from './table_vis.html';
 import { TableOptions } from './components/table_vis_options';
 import { getTableVisualizationControllerClass } from './vis_controller';
 
-export function getTableVisTypeDefinition(core: CoreStart, context: PluginInitializerContext) {
+export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitializerContext) {
   return {
     type: 'table',
     name: 'table',

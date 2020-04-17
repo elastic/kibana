@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreStart, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, PluginInitializerContext } from 'kibana/public';
 import angular, { IModule, auto, IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
 
@@ -27,7 +27,7 @@ import { initTableVisLegacyModule } from './table_vis_legacy_module';
 const innerAngularName = 'kibana/table_vis';
 
 export function getTableVisualizationControllerClass(
-  core: CoreStart,
+  core: CoreSetup,
   context: PluginInitializerContext
 ) {
   return class TableVisualizationController {
@@ -55,15 +55,16 @@ export function getTableVisualizationControllerClass(
       return this.injector;
     }
 
-    initLocalAngular() {
+    async initLocalAngular() {
       if (!this.tableVisModule) {
-        this.tableVisModule = getAngularModule(innerAngularName, core, context);
+        const [coreStart] = await core.getStartServices();
+        this.tableVisModule = getAngularModule(innerAngularName, coreStart, context);
         initTableVisLegacyModule(this.tableVisModule);
       }
     }
 
     async render(esResponse: object, visParams: VisParams) {
-      this.initLocalAngular();
+      await this.initLocalAngular();
 
       return new Promise(async (resolve, reject) => {
         if (!this.$rootScope) {

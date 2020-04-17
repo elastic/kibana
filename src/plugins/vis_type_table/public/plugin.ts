@@ -51,15 +51,12 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
     { expressions, visualizations }: TablePluginSetupDependencies
   ) {
     expressions.registerFunction(createTableVisFn);
-    this.createBaseVisualization = (coreStart: CoreStart) => {
-      visualizations.createBaseVisualization(
-        getTableVisTypeDefinition(coreStart, this.initializerContext)
-      );
-    };
+    visualizations.createBaseVisualization(
+      getTableVisTypeDefinition(core, this.initializerContext)
+    );
   }
 
   public start(core: CoreStart, { data, visualizations }: TablePluginStartDependencies) {
-    this.createBaseVisualization(core);
     setFormatService(data.fieldFormats);
   }
 }
