@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import chrome from 'ui/chrome';
-
-const uiSettings = chrome.getUiSettingsClient();
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getUiSettings } from '../../../../../plugins/maps/public/kibana_services';
 
 export function getInitialRefreshConfig({ mapStateJSON, globalState = {} }) {
+  const uiSettings = getUiSettings();
+
   if (mapStateJSON) {
     const mapState = JSON.parse(mapStateJSON);
     if (mapState.refreshConfig) {
