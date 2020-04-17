@@ -187,8 +187,10 @@ function DatatableComponent(
         data-test-subj="lnsDataTable"
         tableLayout="auto"
         columns={props.args.columns.columnIds
-          .map((field, index) => {
+          .map(field => {
             const col = firstTable.columns.find(c => c.id === field);
+            const colIndex = firstTable.columns.findIndex(c => c.id === field);
+
             // todo: get the list of unsupported operations from operations
             const nonFilterable =
               !col?.meta?.type ||
@@ -207,7 +209,7 @@ function DatatableComponent(
                         <EuiFlexGroup className="lnsDataTable__filterGroup">
                           <EuiFlexItem
                             className="lnsDataTable__filter"
-                            onClick={() => handleFilterClick(field, value, index)}
+                            onClick={() => handleFilterClick(field, value, colIndex)}
                             data-test-subj="lensFilterForCellValue"
                           >
                             <EuiIconTip
@@ -225,7 +227,7 @@ function DatatableComponent(
                           </EuiFlexItem>
                           <EuiFlexItem
                             className="lnsDataTable__filter"
-                            onClick={() => handleFilterClick(field, value, index, true)}
+                            onClick={() => handleFilterClick(field, value, colIndex, true)}
                             data-test-subj="lensFilterOutCellValue"
                           >
                             <EuiIconTip
