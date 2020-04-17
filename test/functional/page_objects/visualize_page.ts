@@ -18,7 +18,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/public/visualize/np_ready/visualize_constants';
+import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
 
 export function VisualizePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

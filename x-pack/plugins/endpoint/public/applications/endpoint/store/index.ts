@@ -19,7 +19,7 @@ import { alertMiddlewareFactory } from './alerts/middleware';
 import { hostMiddlewareFactory } from './hosts';
 import { policyListMiddlewareFactory } from './policy_list';
 import { policyDetailsMiddlewareFactory } from './policy_details';
-import { GlobalState } from '../types';
+import { GlobalState, MiddlewareFactory } from '../types';
 import { AppAction } from './action';
 import { EndpointPluginStartDependencies } from '../../../plugin';
 
@@ -62,10 +62,15 @@ export const appStoreFactory: (middlewareDeps?: {
    * Give middleware access to plugin start dependencies.
    */
   depsStart: EndpointPluginStartDependencies;
+  /**
+   * Any additional Redux Middlewares
+   * (should only be used for testing - example: to inject the action spy middleware)
+   */
+  additionalMiddleware?: Array<ReturnType<MiddlewareFactory>>;
 }) => Store = middlewareDeps => {
   let middleware;
   if (middlewareDeps) {
-    const { coreStart, depsStart } = middlewareDeps;
+    const { coreStart, depsStart, additionalMiddleware = [] } = middlewareDeps;
     middleware = composeWithReduxDevTools(
       applyMiddleware(
         substateMiddlewareFactory(
@@ -83,7 +88,9 @@ export const appStoreFactory: (middlewareDeps?: {
         substateMiddlewareFactory(
           globalState => globalState.alertList,
           alertMiddlewareFactory(coreStart, depsStart)
-        )
+        ),
+        // Additional Middleware should go last
+        ...additionalMiddleware
       )
     );
   } else {
