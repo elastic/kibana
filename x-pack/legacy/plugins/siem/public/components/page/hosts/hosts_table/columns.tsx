@@ -46,9 +46,7 @@ export const getHostsColumns = (): HostsTableColumns => [
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <AddFilterToGlobalSearchBar filter={createFilter('host.name', hostName[0])}>
-                  <HostDetailsLink hostName={hostName[0]} />
-                </AddFilterToGlobalSearchBar>
+                <HostDetailsLink hostName={hostName[0]} />
               )
             }
           />

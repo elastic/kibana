@@ -17,7 +17,8 @@ describe('View routes', () => {
 
     defineViewRoutes(routeParamsMock);
 
-    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
+    expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
+      .toMatchInlineSnapshot(`
       Array [
         "/security/account",
         "/security/logged_out",
@@ -25,6 +26,9 @@ describe('View routes', () => {
         "/security/overwritten_session",
       ]
     `);
+    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(
+      `Array []`
+    );
   });
 
   it('registers Login routes if `basic` provider is enabled', () => {
@@ -35,14 +39,19 @@ describe('View routes', () => {
 
     defineViewRoutes(routeParamsMock);
 
-    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
+    expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
+      .toMatchInlineSnapshot(`
       Array [
         "/login",
-        "/internal/security/login_state",
         "/security/account",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+      ]
+    `);
+    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
+      Array [
+        "/internal/security/login_state",
       ]
     `);
   });
@@ -55,14 +64,19 @@ describe('View routes', () => {
 
     defineViewRoutes(routeParamsMock);
 
-    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
+    expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
+      .toMatchInlineSnapshot(`
       Array [
         "/login",
-        "/internal/security/login_state",
         "/security/account",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+      ]
+    `);
+    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
+      Array [
+        "/internal/security/login_state",
       ]
     `);
   });
@@ -75,14 +89,19 @@ describe('View routes', () => {
 
     defineViewRoutes(routeParamsMock);
 
-    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
+    expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
+      .toMatchInlineSnapshot(`
       Array [
         "/login",
-        "/internal/security/login_state",
         "/security/account",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+      ]
+    `);
+    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
+      Array [
+        "/internal/security/login_state",
       ]
     `);
   });
