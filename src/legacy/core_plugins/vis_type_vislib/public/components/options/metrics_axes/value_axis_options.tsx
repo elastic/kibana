@@ -24,7 +24,11 @@ import { EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { Vis } from '../../../../../../../plugins/visualizations/public';
 import { ValueAxis } from '../../../types';
 import { Positions } from '../../../utils/collections';
-import { SelectOption, SwitchOption, TextInputOption } from '../../common';
+import {
+  SelectOption,
+  SwitchOption,
+  TextInputOption,
+} from '../../../../../../../plugins/charts/public';
 import { LabelOptions, SetAxisLabel } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
 import { isAxisHorizontal } from './utils';

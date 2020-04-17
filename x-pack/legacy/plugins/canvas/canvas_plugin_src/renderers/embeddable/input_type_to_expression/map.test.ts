@@ -5,7 +5,7 @@
  */
 
 import { toExpression } from './map';
-import { SavedMapInput } from '../../../functions/common/saved_map';
+import { MapEmbeddableInput } from '../../../../../maps/public';
 import { fromExpression, Ast } from '@kbn/interpreter/common';
 
 const baseSavedMapInput = {
@@ -13,15 +13,15 @@ const baseSavedMapInput = {
   filters: [],
   isLayerTOCOpen: false,
   refreshConfig: {
-    isPaused: true,
-    interval: 0,
+    pause: true,
+    value: 0,
   },
   hideFilterActions: true as true,
 };
 
 describe('toExpression', () => {
   it('converts to a savedMap expression', () => {
-    const input: SavedMapInput = {
+    const input: MapEmbeddableInput = {
       ...baseSavedMapInput,
     };
 
@@ -39,7 +39,7 @@ describe('toExpression', () => {
   });
 
   it('includes optional input values', () => {
-    const input: SavedMapInput = {
+    const input: MapEmbeddableInput = {
       ...baseSavedMapInput,
       mapCenter: {
         lat: 1,

@@ -13,14 +13,21 @@ import {
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 import { Authorization } from '../authorization';
 import { SecurityAuditLogger } from '../audit';
+import { SpacesService } from '../plugin';
 
 interface SetupSavedObjectsParams {
   auditLogger: SecurityAuditLogger;
   authz: Pick<Authorization, 'mode' | 'actions' | 'checkSavedObjectsPrivilegesWithRequest'>;
   savedObjects: CoreSetup['savedObjects'];
+  getSpacesService(): SpacesService | undefined;
 }
 
-export function setupSavedObjects({ auditLogger, authz, savedObjects }: SetupSavedObjectsParams) {
+export function setupSavedObjects({
+  auditLogger,
+  authz,
+  savedObjects,
+  getSpacesService,
+}: SetupSavedObjectsParams) {
   const getKibanaRequest = (request: KibanaRequest | LegacyRequest) =>
     request instanceof KibanaRequest ? request : KibanaRequest.from(request);
 
@@ -44,6 +51,7 @@ export function setupSavedObjects({ auditLogger, authz, savedObjects }: SetupSav
             kibanaRequest
           ),
           errors: SavedObjectsClient.errors,
+          getSpacesService,
         })
       : client;
   });

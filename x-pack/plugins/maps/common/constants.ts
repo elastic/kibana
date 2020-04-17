@@ -46,9 +46,10 @@ export function createMapPath(id: string) {
 export enum LAYER_TYPE {
   TILE = 'TILE',
   VECTOR = 'VECTOR',
-  VECTOR_TILE = 'VECTOR_TILE',
+  VECTOR_TILE = 'VECTOR_TILE', // for static display of mvt vector tiles with a mapbox stylesheet. Does not support any ad-hoc configurations. Used for consuming EMS vector tiles.
   HEATMAP = 'HEATMAP',
   BLENDED_VECTOR = 'BLENDED_VECTOR',
+  TILED_VECTOR = 'TILED_VECTOR', // similar to a regular vector-layer, but it consumes the data as .mvt tilea iso GeoJson. It supports similar ad-hoc configurations like a regular vector layer (E.g. using IVectorStyle), although there is some loss of functionality  e.g. does not support term joining
 }
 
 export enum SORT_ORDER {
@@ -56,15 +57,19 @@ export enum SORT_ORDER {
   DESC = 'desc',
 }
 
-export const EMS_TMS = 'EMS_TMS';
-export const EMS_FILE = 'EMS_FILE';
-export const ES_GEO_GRID = 'ES_GEO_GRID';
-export const ES_SEARCH = 'ES_SEARCH';
-export const ES_PEW_PEW = 'ES_PEW_PEW';
-export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
-export const WMS = 'WMS';
-export const KIBANA_TILEMAP = 'KIBANA_TILEMAP';
-export const REGIONMAP_FILE = 'REGIONMAP_FILE';
+export enum SOURCE_TYPES {
+  EMS_TMS = 'EMS_TMS',
+  EMS_FILE = 'EMS_FILE',
+  ES_GEO_GRID = 'ES_GEO_GRID',
+  ES_SEARCH = 'ES_SEARCH',
+  ES_PEW_PEW = 'ES_PEW_PEW',
+  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. Name is a little unfortunate.
+  WMS = 'WMS',
+  KIBANA_TILEMAP = 'KIBANA_TILEMAP',
+  REGIONMAP_FILE = 'REGIONMAP_FILE',
+  GEOJSON_FILE = 'GEOJSON_FILE',
+  MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
+}
 
 export enum FIELD_ORIGIN {
   SOURCE = 'source',
@@ -76,8 +81,6 @@ export const META_ID_ORIGIN_SUFFIX = 'meta';
 export const SOURCE_META_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${META_ID_ORIGIN_SUFFIX}`;
 export const FORMATTERS_ID_ORIGIN_SUFFIX = 'formatters';
 export const SOURCE_FORMATTERS_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${FORMATTERS_ID_ORIGIN_SUFFIX}`;
-
-export const GEOJSON_FILE = 'GEOJSON_FILE';
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
