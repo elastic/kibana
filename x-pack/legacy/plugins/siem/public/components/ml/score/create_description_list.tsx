@@ -7,11 +7,12 @@
 import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+
+import { DescriptionList } from '../../../../../../../plugins/siem/common/utility_types';
 import { Anomaly, NarrowDateRange } from '../types';
 import { getScoreString } from './score_health';
 import { PreferenceFormattedDate } from '../../formatted_date';
 import { createInfluencers } from './../influencers/create_influencers';
-import { DescriptionList } from '../../../../common/utility_types';
 import * as i18n from './translations';
 import { createExplorerLink } from '../links/create_explorer_link';
 

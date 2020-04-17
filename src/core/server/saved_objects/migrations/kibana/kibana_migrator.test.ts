@@ -28,8 +28,8 @@ const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   types.forEach(type =>
     registry.registerType({
       name: 'unknown',
-      namespaceAgnostic: false,
       hidden: false,
+      namespaceType: 'single',
       mappings: { properties: {} },
       migrations: {},
       ...type,
@@ -120,7 +120,7 @@ function mockOptions(): KibanaMigratorOptions {
       {
         name: 'testtype',
         hidden: false,
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         mappings: {
           properties: {
             name: { type: 'keyword' },
@@ -131,7 +131,7 @@ function mockOptions(): KibanaMigratorOptions {
       {
         name: 'testtype2',
         hidden: false,
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         indexPattern: 'other-index',
         mappings: {
           properties: {

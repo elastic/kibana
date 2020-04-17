@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { ValidatedDualRange } from './validated_dual_range';
+export { ValidatedDualRange, Value } from './validated_dual_range';
