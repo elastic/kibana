@@ -37,7 +37,7 @@ const dashboardSavedObjectToMenuItem = (
 
 interface CollectConfigProps extends UiActionsCollectConfigProps<Config> {
   deps: {
-    getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
+    getSavedObjectsClient: () => CoreStart['savedObjects']['client'];
   };
   context: DrilldownFactoryContext<{
     embeddable: IEmbeddable;
@@ -117,7 +117,7 @@ export class CollectConfigContainer extends React.Component<
   private async loadSelectedDashboard() {
     const { config } = this.props;
     if (!config.dashboardId) return;
-    const savedObjectsClient = await this.props.deps.getSavedObjectsClient();
+    const savedObjectsClient = this.props.deps.getSavedObjectsClient();
     const savedObject = await savedObjectsClient.get<{ title: string }>(
       'dashboard',
       config.dashboardId
@@ -150,7 +150,7 @@ export class CollectConfigContainer extends React.Component<
   private async loadDashboards(searchString?: string) {
     const currentDashboardId = this.props.context.placeContext.embeddable?.parent?.id;
     this.setState({ searchString, isLoading: true });
-    const savedObjectsClient = await this.props.deps.getSavedObjectsClient();
+    const savedObjectsClient = this.props.deps.getSavedObjectsClient();
     const { savedObjects } = await savedObjectsClient.find<{ title: string }>({
       type: 'dashboard',
       search: searchString ? `${searchString}*` : undefined,
