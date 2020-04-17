@@ -27,6 +27,9 @@ import {
   draggableIsField,
 } from './helpers';
 
+// @ts-ignore
+window['__react-beautiful-dnd-disable-dev-warnings'] = true;
+
 interface Props {
   browserFields: BrowserFields;
   children: React.ReactNode;
