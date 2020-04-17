@@ -30,6 +30,7 @@ import { VALUE_CLICK_TRIGGER, ActionByType } from '../../../../../src/plugins/ui
 /* eslint-disable */
 import { ACTION_VALUE_CLICK } from '../../../../../src/plugins/data/public/actions/value_click_action';
 /* eslint-enable */
+import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
@@ -130,6 +131,10 @@ export const initializeCanvas = async (
 
     startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, action.id);
     startPlugins.uiActions.attachAction(VALUE_CLICK_TRIGGER, emptyAction);
+  }
+
+  if (setupPlugins.usageCollection) {
+    initStatsReporter(setupPlugins.usageCollection.reportUiStats);
   }
 
   return canvasStore;
