@@ -27,3 +27,8 @@ export {
   ReplacePanelActionContext,
   ACTION_REPLACE_PANEL,
 } from './replace_panel_action';
+export {
+  ClonePanelAction,
+  ClonePanelActionContext,
+  ACTION_CLONE_PANEL,
+} from './clone_panel_action';

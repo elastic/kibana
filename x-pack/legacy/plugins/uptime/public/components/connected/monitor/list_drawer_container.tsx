@@ -12,8 +12,7 @@ import { MonitorDetailsActionPayload } from '../../../state/actions/types';
 import { getMonitorDetailsAction } from '../../../state/actions/monitor';
 import { MonitorListDrawerComponent } from '../../functional/monitor_list/monitor_list_drawer/monitor_list_drawer';
 import { useGetUrlParams } from '../../../hooks';
-import { MonitorSummary } from '../../../../common/graphql/types';
-import { MonitorDetails } from '../../../../common/runtime_types/monitor';
+import { MonitorDetails, MonitorSummary } from '../../../../common/runtime_types';
 
 interface ContainerProps {
   summary: MonitorSummary;
