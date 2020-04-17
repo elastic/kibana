@@ -37,6 +37,7 @@ export function registerTasks({
       createTaskRunner({ taskInstance }: { taskInstance: TaskInstance }) {
         return {
           run: visualizationsTaskRunner(taskInstance, config, elasticsearch),
+          cancel: async () => {},
         };
       },
     },
