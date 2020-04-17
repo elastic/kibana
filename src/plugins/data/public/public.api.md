@@ -953,6 +953,8 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     format: any;
     // (undocumented)
+    indexPattern?: IndexPattern;
+    // (undocumented)
     lang?: string;
     // (undocumented)
     name: string;
