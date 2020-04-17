@@ -155,7 +155,7 @@ export class ScriptedFieldsTable extends Component<
         <Table
           indexPattern={indexPattern}
           items={items}
-          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+          editField={field => this.props.helpers.redirectToRoute(field)}
           deleteField={this.startDeleteField}
         />
 

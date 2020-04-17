@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { getUserAction } from '../__mock__/case_data';
+import { getUserAction } from '../../../../containers/case/mock';
 import { getLabelTitle } from './helpers';
 import * as i18n from '../case_view/translations';
 import { mount } from 'enzyme';
