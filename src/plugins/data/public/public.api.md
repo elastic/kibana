@@ -1647,7 +1647,7 @@ export class SearchSource {
     getFields(): {
         type?: string | undefined;
         query?: import("../..").Query | undefined;
-        filter?: import("../..").Filter | import("../..").Filter[] | (() => import("../..").Filter | import("../..").Filter[] | undefined) | undefined;
+        filter?: Filter | Filter[] | (() => Filter | Filter[] | undefined) | undefined;
         sort?: Record<string, import("./types").SortDirection | import("./types").SortDirectionNumeric> | Record<string, import("./types").SortDirection | import("./types").SortDirectionNumeric>[] | undefined;
         highlight?: any;
         highlightAll?: boolean | undefined;
