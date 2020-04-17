@@ -20,7 +20,6 @@
 import {
   SavedObjectsImportResponse,
   SavedObjectsImportConflictError,
-  SavedObjectsImportUnresolvableConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
@@ -31,7 +30,6 @@ export interface FailedImport {
   obj: Pick<SavedObjectsImportError, 'id' | 'type' | 'title'>;
   error:
     | SavedObjectsImportConflictError
-    | SavedObjectsImportUnresolvableConflictError
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError;
@@ -49,9 +47,6 @@ export interface ProcessedImportResponse {
   conflictedSavedObjectsLinkedToSavedSearches: undefined;
   conflictedSearchDocs: undefined;
 }
-
-const isConflict = ({ type }: FailedImport['error']) =>
-  type === 'conflict' || type === 'unresolvable_conflict';
 
 export function processImportResponse(
   response: SavedObjectsImportResponse
@@ -85,7 +80,8 @@ export function processImportResponse(
     // Import won't be successful in the scenario unmatched references exist, import API returned errors of type unknown or import API
     // returned errors of type missing_references.
     status:
-      unmatchedReferences.size === 0 && !failedImports.some(issue => isConflict(issue.error))
+      unmatchedReferences.size === 0 &&
+      !failedImports.some(issue => issue.error.type === 'conflict')
         ? 'success'
         : 'idle',
     importCount: response.successCount,

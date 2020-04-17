@@ -90,7 +90,6 @@ export interface SavedObject<T = unknown> {
     error: string;
     message: string;
     statusCode: number;
-    metadata?: Record<string, unknown>;
   };
   /** {@inheritdoc SavedObjectAttributes} */
   attributes: T;

@@ -56,18 +56,6 @@ describe('extractErrors()', () => {
         references: [],
         error: SavedObjectsErrorHelpers.createBadRequestError().output.payload,
       },
-      {
-        id: '4',
-        type: 'dashboard',
-        attributes: {
-          title: 'My Dashboard 4',
-        },
-        references: [],
-        error: {
-          ...SavedObjectsErrorHelpers.createConflictError('dashboard', '4').output.payload,
-          metadata: { isNotOverwritable: true },
-        },
-      },
     ];
     const result = extractErrors(savedObjects, savedObjects);
     expect(result).toMatchInlineSnapshot(`
@@ -89,14 +77,6 @@ Array [
     },
     "id": "3",
     "title": "My Dashboard 3",
-    "type": "dashboard",
-  },
-  Object {
-    "error": Object {
-      "type": "unresolvable_conflict",
-    },
-    "id": "4",
-    "title": "My Dashboard 4",
     "type": "dashboard",
   },
 ]

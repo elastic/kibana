@@ -25,7 +25,6 @@ import { PropertyValidators } from './validation';
 export {
   SavedObjectsImportResponse,
   SavedObjectsImportConflictError,
-  SavedObjectsImportUnresolvableConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,

@@ -11,6 +11,5 @@ error?: {
         error: string;
         message: string;
         statusCode: number;
-        metadata?: Record<string, unknown>;
     };
 ```

@@ -24,7 +24,6 @@ export {
   SavedObjectsImportError,
   SavedObjectsImportOptions,
   SavedObjectsImportConflictError,
-  SavedObjectsImportUnresolvableConflictError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,

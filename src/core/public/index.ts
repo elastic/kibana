@@ -133,7 +133,6 @@ export {
   SimpleSavedObject,
   SavedObjectsImportResponse,
   SavedObjectsImportConflictError,
-  SavedObjectsImportUnresolvableConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,

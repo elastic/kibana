@@ -307,7 +307,8 @@ export class SavedObjectsRepository {
       }
 
       const method = object.id && overwrite ? 'index' : 'create';
-      const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
+      const requiresNamespacesCheck =
+        method === 'index' && this._registry.isMultiNamespace(object.type);
 
       return {
         tag: 'Right' as 'Right',
@@ -357,10 +358,7 @@ export class SavedObjectsRepository {
             error: {
               id,
               type,
-              error: {
-                ...SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
-                metadata: { isNotOverwritable: true },
-              },
+              error: SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
             },
           };
         }

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-error: SavedObjectsImportConflictError | SavedObjectsImportUnresolvableConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
+error: SavedObjectsImportConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
 ```
