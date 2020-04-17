@@ -82,7 +82,7 @@ pipeline {
           // As long as Kibana takes ages let's try a few times though
           retry(10) {
             sleep 20
-            sh '''
+            sh '''#!/usr/bin/env bash
               source src/dev/ci_setup/setup_env.sh true
               cd ${E2E_DIR}
               rm cypress/test-results/*.* || true
