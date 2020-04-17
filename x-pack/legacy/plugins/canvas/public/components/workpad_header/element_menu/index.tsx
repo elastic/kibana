@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { Dispatch } from 'redux';
@@ -15,6 +16,7 @@ import { ElementMenu as Component, Props as ComponentProps } from './element_men
 // @ts-ignore Untyped local
 import { addElement } from '../../../state/actions/elements';
 import { getSelectedPage } from '../../../state/selectors/workpad';
+import { AddEmbeddablePanel } from '../../embeddable_flyout';
 
 interface StateProps {
   pageId: string;
@@ -36,12 +38,12 @@ const mergeProps = (stateProps: StateProps, dispatchProps: DispatchProps) => ({
   ...stateProps,
   ...dispatchProps,
   addElement: dispatchProps.addElement(stateProps.pageId),
+  // Moved this section out of the main component to enable stories
+  renderEmbedPanel: (onClose: () => void) => <AddEmbeddablePanel onClose={onClose} />,
 });
 
 export const ElementMenu = compose<ComponentProps, {}>(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withKibana,
-  withProps(() => {
-    return { elements: elementsRegistry.toJS() };
-  })
+  withProps(() => ({ elements: elementsRegistry.toJS() }))
 )(Component);

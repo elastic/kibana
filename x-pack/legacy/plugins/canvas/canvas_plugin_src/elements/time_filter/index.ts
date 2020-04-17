@@ -7,7 +7,7 @@
 import { ElementFactory } from '../../../types';
 
 export const timeFilter: ElementFactory = () => ({
-  name: 'time_filter',
+  name: 'timeFilter',
   displayName: 'Time filter',
   type: 'filter',
   help: 'Set a time window',

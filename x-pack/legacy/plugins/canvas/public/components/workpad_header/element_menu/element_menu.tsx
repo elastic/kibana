@@ -18,7 +18,6 @@ import { ComponentStrings } from '../../../../i18n/components';
 import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { getId } from '../../../lib/get_id';
-import { AddEmbeddablePanel } from '../../embeddable_flyout';
 import { Popover, ClosePopoverFn } from '../../popover';
 // @ts-ignore Untyped local
 import { AssetManager } from '../../asset_manager';
@@ -32,7 +31,7 @@ interface ElementTypeMeta {
   [key: string]: { name: string; icon: string };
 }
 
-const { WorkpadHeaderElementMenu: strings } = ComponentStrings;
+export const { WorkpadHeaderElementMenu: strings } = ComponentStrings;
 
 // label and icon for the context menu item for each element type
 const elementTypeMeta: ElementTypeMeta = {
@@ -46,7 +45,9 @@ const elementTypeMeta: ElementTypeMeta = {
 };
 
 const getElementType = (element: ElementSpec): string =>
-  element.type && Object.keys(elementTypeMeta).includes(element.type) ? element.type : 'other';
+  element && element.type && Object.keys(elementTypeMeta).includes(element.type)
+    ? element.type
+    : 'other';
 
 const categorizeElementsByType = (elements: ElementSpec[]): { [key: string]: ElementSpec[] } => {
   elements = sortBy(elements, 'displayName');
@@ -67,19 +68,33 @@ const categorizeElementsByType = (elements: ElementSpec[]): { [key: string]: Ele
 };
 
 export interface Props {
+  /**
+   * Dictionary of elements from elements registry
+   */
   elements: { [key: string]: ElementSpec };
+  /**
+   * Handler for adding a selected element to the workpad
+   */
   addElement: (element: ElementSpec) => void;
+  /**
+   * Renders embeddable flyout
+   */
+  renderEmbedPanel: (onClose: () => void) => JSX.Element;
 }
 
-export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) => {
+export const ElementMenu: FunctionComponent<Props> = ({
+  elements,
+  addElement,
+  renderEmbedPanel,
+}) => {
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isEmbedPanelVisible, setEmbedPanelVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
 
   const hideAssetModal = () => setAssetModalVisible(false);
   const showAssetModal = () => setAssetModalVisible(true);
-  const hideEmbeddablePanel = () => setEmbedPanelVisible(false);
-  const showEmbeddablePanel = () => setEmbedPanelVisible(true);
+  const showEmbedPanel = () => setEmbedPanelVisible(false);
+  const hideEmbedPanel = () => setEmbedPanelVisible(false);
   const hideSavedElementsModal = () => setSavedElementsModalVisible(false);
   const showSavedElementsModal = () => setSavedElementsModalVisible(true);
 
@@ -156,7 +171,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
           className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
           icon: <EuiIcon type="logoKibana" size="m" />,
           onClick: () => {
-            showEmbeddablePanel();
+            showEmbedPanel();
             closePopover();
           },
         },
@@ -189,7 +204,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
         )}
       </Popover>
       {isAssetModalVisible ? <AssetManager onClose={hideAssetModal} /> : null}
-      {isEmbedPanelVisible ? <AddEmbeddablePanel onClose={hideEmbeddablePanel} /> : null}
+      {isEmbedPanelVisible ? renderEmbedPanel(hideEmbedPanel) : null}
       {isSavedElementsModalVisible ? <SavedElementsModal onClose={hideSavedElementsModal} /> : null}
     </Fragment>
   );

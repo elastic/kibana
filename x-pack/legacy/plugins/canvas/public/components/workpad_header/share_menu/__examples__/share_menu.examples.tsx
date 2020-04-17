@@ -8,7 +8,7 @@ import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ShareMenu } from '../share_menu';
 
-storiesOf('components/WorkpadHeader/ShareMenu', module).add('enabled', () => (
+storiesOf('components/WorkpadHeader/ShareMenu', module).add('default', () => (
   <ShareMenu
     onCopy={action('onCopy')}
     onExport={action('onExport')}

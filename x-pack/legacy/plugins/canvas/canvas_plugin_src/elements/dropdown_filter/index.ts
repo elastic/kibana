@@ -7,7 +7,7 @@
 import { ElementFactory } from '../../../types';
 
 export const dropdownFilter: ElementFactory = () => ({
-  name: 'dropdown_filter',
+  name: 'dropdownFilter',
   displayName: 'Dropdown select',
   type: 'filter',
   help: 'A dropdown from which you can select values for an "exactly" filter',
