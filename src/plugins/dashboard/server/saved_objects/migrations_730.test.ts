@@ -95,8 +95,8 @@ test('dashboard migration 7.3.0 migrates filters to query on search source when 
     },
   };
 
-  const doc700: DashboardDoc700To720 = migrations.dashboard['7.0.0'](doc, mockContext);
-  const newDoc = migrations.dashboard['7.3.0'](doc700, mockContext);
+  const doc700: DashboardDoc700To720 = migrations['7.0.0'](doc);
+  const newDoc = migrations['7.3.0'](doc700, mockContext);
 
   const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
   expect(parsedSearchSource.filter.length).toBe(0);
@@ -127,8 +127,8 @@ test('dashboard migration works when panelsJSON is missing panelIndex', () => {
     },
   };
 
-  const doc700: DashboardDoc700To720 = migrations.dashboard['7.0.0'](doc, mockContext);
-  const newDoc = migrations.dashboard['7.3.0'](doc700, mockContext);
+  const doc700: DashboardDoc700To720 = migrations['7.0.0'](doc);
+  const newDoc = migrations['7.3.0'](doc700, mockContext);
 
   const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
   expect(parsedSearchSource.filter.length).toBe(0);

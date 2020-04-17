@@ -18,13 +18,13 @@
  */
 
 import { inspect } from 'util';
-import { SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationContext } from 'kibana/server';
 import { DashboardDoc730ToLatest } from '../../common';
 import { isDashboardDoc } from './is_dashboard_doc';
 import { moveFiltersToQuery } from './move_filters_to_query';
-import { migratePanelsTo730 } from '../../common/migrate_to_730_panels';
+import { migratePanelsTo730, DashboardDoc700To720 } from '../../common';
 
-export const migrations730: SavedObjectMigrationFn = (doc, { log }) => {
+export const migrations730 = (doc: DashboardDoc700To720, { log }: SavedObjectMigrationContext) => {
   if (!isDashboardDoc(doc)) {
     // NOTE: we should probably throw an error here... but for now following suit and in the
     // case of errors, just returning the same document.

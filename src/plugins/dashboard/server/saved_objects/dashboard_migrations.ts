@@ -19,25 +19,26 @@
 
 import { get, flow } from 'lodash';
 
-import { SavedObjectMigrationFn } from 'kibana/server';
+import {
+  SavedObjectMigrationFn,
+  SavedObjectUnsanitizedDoc,
+  SavedObjectMigrationContext,
+} from 'kibana/server';
 import { migrations730 } from './migrations_730';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
+import { DashboardDoc700To720 } from '../../common';
 
-const migrations700: SavedObjectMigrationFn = doc => {
-  // Set new "references" attribute
-  doc.references = doc.references || [];
-
-  // Migrate index pattern
+function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
-    return doc;
+    return;
   }
   let searchSource;
   try {
     searchSource = JSON.parse(searchSourceJSON);
   } catch (e) {
     // Let it go, the data is invalid and we'll leave it as is
-    return doc;
+    return;
   }
   if (searchSource.index) {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
@@ -63,28 +64,35 @@ const migrations700: SavedObjectMigrationFn = doc => {
     });
   }
   doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+}
 
+const migrations700: SavedObjectMigrationFn = (doc): DashboardDoc700To720 => {
+  // Set new "references" attribute
+  doc.references = doc.references || [];
+
+  // Migrate index pattern
+  migrateIndexPattern(doc as DashboardDoc700To720);
   // Migrate panels
   const panelsJSON = get(doc, 'attributes.panelsJSON');
   if (typeof panelsJSON !== 'string') {
-    return doc;
+    return doc as DashboardDoc700To720;
   }
   let panels;
   try {
     panels = JSON.parse(panelsJSON);
   } catch (e) {
     // Let it go, the data is invalid and we'll leave it as is
-    return doc;
+    return doc as DashboardDoc700To720;
   }
   if (!Array.isArray(panels)) {
-    return doc;
+    return doc as DashboardDoc700To720;
   }
   panels.forEach((panel, i) => {
     if (!panel.type || !panel.id) {
       return;
     }
     panel.panelRefName = `panel_${i}`;
-    doc.references.push({
+    doc.references!.push({
       name: `panel_${i}`,
       type: panel.type,
       id: panel.id,
@@ -93,7 +101,7 @@ const migrations700: SavedObjectMigrationFn = doc => {
     delete panel.id;
   });
   doc.attributes.panelsJSON = JSON.stringify(panels);
-  return doc;
+  return doc as DashboardDoc700To720;
 };
 
 export const dashboardSavedObjectTypeMigrations = {
@@ -108,6 +116,11 @@ export const dashboardSavedObjectTypeMigrations = {
    * only contained the 6.7.2 migration and not the 7.0.1 migration.
    */
   '6.7.2': flow<SavedObjectMigrationFn>(migrateMatchAllQuery),
-  '7.0.0': flow<SavedObjectMigrationFn>(migrations700),
-  '7.3.0': flow<SavedObjectMigrationFn>(migrations730),
+  '7.0.0': flow<(doc: SavedObjectUnsanitizedDoc) => DashboardDoc700To720>(migrations700),
+  '7.3.0': flow<
+    (
+      doc: SavedObjectUnsanitizedDoc,
+      context: SavedObjectMigrationContext
+    ) => SavedObjectUnsanitizedDoc
+  >(migrations730),
 };

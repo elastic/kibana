@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { dashboardSavedObjectTypeMigrations as migrations } from './dashboard_migrations';
 
 describe('dashboard', () => {
@@ -24,7 +25,7 @@ describe('dashboard', () => {
     const migration = migrations['7.0.0'];
 
     test('skips error on empty object', () => {
-      expect(migration({})).toMatchInlineSnapshot(`
+      expect(migration({} as SavedObjectUnsanitizedDoc)).toMatchInlineSnapshot(`
 Object {
   "references": Array [],
 }
@@ -329,7 +330,7 @@ Object {
         attributes: {
           panelsJSON: 123,
         },
-      };
+      } as SavedObjectUnsanitizedDoc;
       expect(migration(doc)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -347,7 +348,7 @@ Object {
         attributes: {
           panelsJSON: '{123abc}',
         },
-      };
+      } as SavedObjectUnsanitizedDoc;
       expect(migration(doc)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -365,7 +366,7 @@ Object {
         attributes: {
           panelsJSON: '{}',
         },
-      };
+      } as SavedObjectUnsanitizedDoc;
       expect(migration(doc)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -383,7 +384,7 @@ Object {
         attributes: {
           panelsJSON: '[{"id":"123"}]',
         },
-      };
+      } as SavedObjectUnsanitizedDoc;
       expect(migration(doc)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -401,7 +402,7 @@ Object {
         attributes: {
           panelsJSON: '[{"type":"visualization"}]',
         },
-      };
+      } as SavedObjectUnsanitizedDoc;
       expect(migration(doc)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -420,7 +421,7 @@ Object {
           panelsJSON:
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
-      };
+      } as SavedObjectUnsanitizedDoc;
       const migratedDoc = migration(doc);
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
