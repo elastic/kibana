@@ -252,7 +252,11 @@ export class WorkpadLoader extends React.PureComponent {
 
     return (
       <Fragment>
-        <WorkpadDropzone onUpload={this.onUpload} disabled={createPending || !canUserWrite}>
+        <WorkpadDropzone
+          onUpload={this.onUpload}
+          disabled={createPending || !canUserWrite}
+          notify={this.props.notify}
+        >
           <EuiBasicTable
             items={rows}
             itemId="id"
@@ -330,7 +334,7 @@ export class WorkpadLoader extends React.PureComponent {
         compressed
         className="canvasWorkpad__upload--compressed"
         initialPromptText={strings.getFilePickerPlaceholder()}
-        onChange={([file]) => uploadWorkpad(file, this.onUpload)}
+        onChange={([file]) => uploadWorkpad(file, this.onUpload, this.props.notify)}
         accept="application/json"
         disabled={createPending || !canUserWrite}
       />

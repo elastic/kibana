@@ -22,7 +22,7 @@ import { AssetModal } from './asset_modal';
 
 const { AssetManager: strings } = ComponentStrings;
 
-interface Props {
+export interface Props {
   /** A list of assets, if available */
   assetValues: AssetType[];
   /** Function to invoke when an asset is selected to be added as an element to the workpad */

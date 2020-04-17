@@ -6,14 +6,14 @@
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { compose, withState, getContext, withHandlers } from 'recompose';
+import { compose, withState, getContext, withHandlers, withProps } from 'recompose';
 import * as workpadService from '../../lib/workpad_service';
-import { notify } from '../../lib/notify';
 import { canUserWrite } from '../../state/selectors/app';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { getId } from '../../lib/get_id';
 import { downloadWorkpad } from '../../lib/download_workpad';
 import { ComponentStrings, ErrorStrings } from '../../../i18n';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public/';
 import { WorkpadLoader as Component } from './workpad_loader';
 
 const { WorkpadLoader: strings } = ComponentStrings;
@@ -30,7 +30,11 @@ export const WorkpadLoader = compose(
   }),
   connect(mapStateToProps),
   withState('workpads', 'setWorkpads', null),
-  withHandlers({
+  withKibana,
+  withProps(({ kibana }) => ({
+    notify: kibana.services.canvas.notify,
+  })),
+  withHandlers(({ kibana }) => ({
     // Workpad creation via navigation
     createWorkpad: props => async workpad => {
       // workpad data uploaded, create and load it
@@ -39,7 +43,9 @@ export const WorkpadLoader = compose(
           await workpadService.create(workpad);
           props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
         } catch (err) {
-          notify.error(err, { title: errors.getUploadFailureErrorMessage() });
+          kibana.services.canvas.notify.error(err, {
+            title: errors.getUploadFailureErrorMessage(),
+          });
         }
         return;
       }
@@ -53,7 +59,7 @@ export const WorkpadLoader = compose(
         const workpads = await workpadService.find(text);
         setWorkpads(workpads);
       } catch (err) {
-        notify.error(err, { title: errors.getFindFailureErrorMessage() });
+        kibana.services.canvas.notify.error(err, { title: errors.getFindFailureErrorMessage() });
       }
     },
 
@@ -69,7 +75,7 @@ export const WorkpadLoader = compose(
         await workpadService.create(workpad);
         props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
       } catch (err) {
-        notify.error(err, { title: errors.getCloneFailureErrorMessage() });
+        kibana.services.canvas.notify.error(err, { title: errors.getCloneFailureErrorMessage() });
       }
     },
 
@@ -90,7 +96,7 @@ export const WorkpadLoader = compose(
       return Promise.all(removeWorkpads).then(results => {
         let redirectHome = false;
 
-        const [passes, errors] = results.reduce(
+        const [passes, errored] = results.reduce(
           ([passes, errors], result) => {
             if (result.id === loadedWorkpad && !result.err) {
               redirectHome = true;
@@ -114,8 +120,8 @@ export const WorkpadLoader = compose(
           workpads: remainingWorkpads,
         };
 
-        if (errors.length > 0) {
-          notify.error(errors.getDeleteFailureErrorMessage());
+        if (errored.length > 0) {
+          kibana.services.canvas.notify.error(errors.getDeleteFailureErrorMessage());
         }
 
         setWorkpads(workpadState);
@@ -124,8 +130,8 @@ export const WorkpadLoader = compose(
           props.router.navigateTo('home');
         }
 
-        return errors.map(({ id }) => id);
+        return errored.map(({ id }) => id);
       });
     },
-  })
+  }))
 )(Component);
