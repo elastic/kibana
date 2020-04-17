@@ -23,8 +23,8 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
 };
 
 /** Returns the policyId from the url */
-export const policyIdFromParams: (state: PolicyDetailsState) => string = createSelector(
-  (state: PolicyDetailsState) => state.location,
+export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => string = createSelector(
+  state => state.location,
   (location: PolicyDetailsState['location']) => {
     if (location) {
       return location.pathname.split('/')[2];
