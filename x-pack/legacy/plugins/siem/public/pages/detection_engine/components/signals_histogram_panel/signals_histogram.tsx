@@ -12,11 +12,14 @@ import {
   Settings,
   ChartSizeArray,
 } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { EuiProgress } from '@elastic/eui';
 
 import { useTheme } from '../../../../components/charts/common';
 import { histogramDateTimeFormatter } from '../../../../components/utils';
+import { DraggableLegend } from '../../../../components/charts/draggable_legend';
+import { LegendItem } from '../../../../components/charts/draggable_legend_item';
+
 import { HistogramData } from './types';
 
 const DEFAULT_CHART_HEIGHT = 174;
@@ -24,18 +27,19 @@ const DEFAULT_CHART_HEIGHT = 174;
 interface HistogramSignalsProps {
   chartHeight?: number;
   from: number;
+  legendItems: LegendItem[];
   legendPosition?: Position;
   loading: boolean;
   to: number;
   data: HistogramData[];
   updateDateRange: (min: number, max: number) => void;
 }
-
 export const SignalsHistogram = React.memo<HistogramSignalsProps>(
   ({
     chartHeight = DEFAULT_CHART_HEIGHT,
     data,
     from,
+    legendItems,
     legendPosition = 'right',
     loading,
     to,
@@ -62,29 +66,38 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
           />
         )}
 
-        <Chart size={chartSize}>
-          <Settings
-            legendPosition={legendPosition}
-            onBrushEnd={updateDateRange}
-            showLegend
-            showLegendExtra
-            theme={theme}
-          />
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={true}>
+            <Chart size={chartSize}>
+              <Settings
+                legendPosition={legendPosition}
+                onBrushEnd={updateDateRange}
+                showLegend={legendItems.length === 0}
+                showLegendExtra
+                theme={theme}
+              />
 
-          <Axis id={xAxisId} position="bottom" tickFormat={tickFormat} />
+              <Axis id={xAxisId} position="bottom" tickFormat={tickFormat} />
 
-          <Axis id={yAxisId} position="left" />
+              <Axis id={yAxisId} position="left" />
 
-          <HistogramBarSeries
-            id={id}
-            xScaleType="time"
-            yScaleType="linear"
-            xAccessor="x"
-            yAccessors={yAccessors}
-            splitSeriesAccessors={splitSeriesAccessors}
-            data={data}
-          />
-        </Chart>
+              <HistogramBarSeries
+                id={id}
+                xScaleType="time"
+                yScaleType="linear"
+                xAccessor="x"
+                yAccessors={yAccessors}
+                splitSeriesAccessors={splitSeriesAccessors}
+                data={data}
+              />
+            </Chart>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {legendItems.length > 0 && (
+              <DraggableLegend legendItems={legendItems} height={chartHeight} />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </>
     );
   }

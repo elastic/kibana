@@ -3,7 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useEffect, useState, useRef } from 'react';
+import { isEmpty } from 'lodash/fp';
+import { useEffect, useMemo, useState, useRef } from 'react';
+
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
@@ -19,11 +21,19 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   errorMessage,
   filterQuery,
   histogramType,
+  indexToAdd,
   isInspected,
   stackByField,
   startDate,
 }: MatrixHistogramQueryProps) => {
-  const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const defaultIndex = useMemo<string[]>(() => {
+    if (indexToAdd != null && !isEmpty(indexToAdd)) {
+      return [...configIndex, ...indexToAdd];
+    }
+    return configIndex;
+  }, [configIndex, indexToAdd]);
+
   const [, dispatchToaster] = useStateToaster();
   const refetch = useRef<inputsModel.Refetch>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -96,6 +106,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
     errorMessage,
     filterQuery,
     histogramType,
+    indexToAdd,
     isInspected,
     stackByField,
     startDate,
