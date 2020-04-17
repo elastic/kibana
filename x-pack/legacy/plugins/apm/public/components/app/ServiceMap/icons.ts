@@ -12,6 +12,8 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE
 } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+import awsIcon from './icons/aws.svg';
+import cassandraIcon from './icons/cassandra.svg';
 import databaseIcon from './icons/database.svg';
 import defaultIconImport from './icons/default.svg';
 import documentsIcon from './icons/documents.svg';
@@ -19,12 +21,21 @@ import dotNetIcon from './icons/dot-net.svg';
 import elasticsearchIcon from './icons/elasticsearch.svg';
 import globeIcon from './icons/globe.svg';
 import goIcon from './icons/go.svg';
+import graphqlIcon from './icons/graphql.svg';
+import grpcIcon from './icons/grpc.svg';
+import handlebarsIcon from './icons/handlebars.svg';
 import javaIcon from './icons/java.svg';
+import kafkaIcon from './icons/kafka.svg';
+import mongodbIcon from './icons/mongodb.svg';
+import mysqlIcon from './icons/mysql.svg';
 import nodeJsIcon from './icons/nodejs.svg';
 import phpIcon from './icons/php.svg';
+import postgresqlIcon from './icons/postgresql.svg';
 import pythonIcon from './icons/python.svg';
+import redisIcon from './icons/redis.svg';
 import rubyIcon from './icons/ruby.svg';
 import rumJsIcon from './icons/rumjs.svg';
+import websocketIcon from './icons/websocket.svg';
 
 export const defaultIcon = defaultIconImport;
 
@@ -73,10 +84,70 @@ export function iconForNode(node: cytoscape.NodeSingular) {
   } else if (isIE11) {
     return defaultIcon;
   } else if (
+    node.data(SPAN_TYPE) === 'aws' &&
+    node.data(SPAN_SUBTYPE) === 'servicename'
+  ) {
+    return awsIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'db' &&
+    node.data(SPAN_SUBTYPE) === 'cassandra'
+  ) {
+    return cassandraIcon;
+  } else if (
     node.data(SPAN_TYPE) === 'db' &&
     node.data(SPAN_SUBTYPE) === 'elasticsearch'
   ) {
     return elasticsearchIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'external' &&
+    node.data(SPAN_SUBTYPE) === 'graphql'
+  ) {
+    return graphqlIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'external' &&
+    node.data(SPAN_SUBTYPE) === 'grpc'
+  ) {
+    return grpcIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'template' &&
+    node.data(SPAN_SUBTYPE) === 'handlebars'
+  ) {
+    return handlebarsIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'messaging' &&
+    node.data(SPAN_SUBTYPE) === 'kafka'
+  ) {
+    return kafkaIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'messaging' &&
+    node.data(SPAN_SUBTYPE) === 'jms'
+  ) {
+    return javaIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'db' &&
+    node.data(SPAN_SUBTYPE) === 'mongodb'
+  ) {
+    return mongodbIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'db' &&
+    node.data(SPAN_SUBTYPE) === 'mysql'
+  ) {
+    return mysqlIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'db' &&
+    node.data(SPAN_SUBTYPE) === 'postgresql'
+  ) {
+    return postgresqlIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'db' &&
+    node.data(SPAN_SUBTYPE) === 'redis'
+  ) {
+    return redisIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'external' &&
+    node.data(SPAN_SUBTYPE) === 'websocket'
+  ) {
+    return websocketIcon;
   } else if (icons[type]) {
     return icons[type];
   } else {
