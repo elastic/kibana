@@ -12,8 +12,11 @@ import { npSetup, npStart } from 'ui/new_platform';
 import {
   bindSetupCoreAndPlugins,
   bindStartCoreAndPlugins,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/plugin';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../plugins/maps/common/constants';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MapEmbeddableFactory } from '../../../../../plugins/maps/public/embeddable';
 
 bindSetupCoreAndPlugins(npSetup.core, npSetup.plugins);

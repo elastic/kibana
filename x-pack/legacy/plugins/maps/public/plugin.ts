@@ -10,7 +10,7 @@ import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 // @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
-import { MapListing } from '../../../../plugins/maps/public/components/map_listing';
+import { MapListing } from '../../../../plugins/maps/public/components/map_listing'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 // @ts-ignore
 import {
   bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,

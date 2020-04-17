@@ -6,7 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import routes from 'ui/routes';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import listingTemplate from '../../../../plugins/maps/public/angular/listing_ng_wrapper.html';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import mapTemplate from '../../../../plugins/maps/public/angular/map.html';
 import {
   getSavedObjectsClient,
@@ -14,6 +16,7 @@ import {
   getMapsCapabilities,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/maps/public/kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getMapsSavedObjectLoader } from '../../../../plugins/maps/public/angular/services/gis_map_saved_object_loader';
 
 routes.enable();
