@@ -34,16 +34,18 @@ a| <<webhook-action-type, Webhook>>
 
 [NOTE]
 ==============================================
-Some action types are paid commercial features, while others are free. 
-For a comparison of the Elastic subscription levels, 
-see https://www.elastic.co/subscriptions[the subscription page]. 
+Some action types are paid commercial features, while others are free.
+For a comparison of the Elastic subscription levels,
+see https://www.elastic.co/subscriptions[the subscription page].
 ==============================================
 
+[float]
 [[create-connectors]]
-=== Create connectors
+=== Connectors
 
-Connectors for actions could be created in the UI or via API.
-For out-of-the-box and standardized connectors there is the ability to <<pre-configured-connectors, pre-configure connectors>>, before {kib} has even started.
+You can create connectors for actions in <<managing-alerts-and-actions, Alerts and Actions>> or via the action API.
+For out-of-the-box and standardized connectors, you can <<pre-configured-connectors, preconfigure connectors>>
+before {kib} starts.
 
 include::action-types/email.asciidoc[]
 include::action-types/index.asciidoc[]
