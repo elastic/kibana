@@ -43,7 +43,6 @@ export function createSearchSourceStub(hits, timeField) {
       [searchSourceStub._stubTimeField]: timestamp,
       sort: [timestamp, tiebreaker],
     }),
-    _restore: sinon.fake(),
   };
 
   searchSourceStub.setParent = sinon.spy(() => searchSourceStub);
