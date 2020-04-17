@@ -6,22 +6,6 @@
 
 import * as t from 'io-ts';
 
-export const StatusCheckAlertStateType = t.intersection([
-  t.partial({
-    currentTriggerStarted: t.string,
-    firstTriggeredAt: t.string,
-    lastTriggeredAt: t.string,
-    lastResolvedAt: t.string,
-  }),
-  t.type({
-    firstCheckedAt: t.string,
-    lastCheckedAt: t.string,
-    isTriggered: t.boolean,
-  }),
-]);
-
-export type StatusCheckAlertState = t.TypeOf<typeof StatusCheckAlertStateType>;
-
 export const StatusCheckExecutorParamsType = t.intersection([
   t.partial({
     filters: t.string,

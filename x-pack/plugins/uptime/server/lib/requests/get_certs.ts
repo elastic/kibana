@@ -13,8 +13,10 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   index,
   from,
   to,
-  search,
   size,
+  search,
+  notValidBefore,
+  notValidAfter,
 }) => {
   const searchWrapper = `*${search}*`;
   const params: any = {
@@ -98,6 +100,26 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
         },
       },
     ];
+  }
+
+  if (notValidBefore) {
+    params.body.query.bool.filter.push({
+      range: {
+        'tls.certificate_not_valid_before': {
+          lte: notValidBefore,
+        },
+      },
+    });
+  }
+
+  if (notValidAfter) {
+    params.body.query.bool.filter.push({
+      range: {
+        'tls.certificate_not_valid_after': {
+          lte: notValidAfter,
+        },
+      },
+    });
   }
 
   const result = await callES('search', params);

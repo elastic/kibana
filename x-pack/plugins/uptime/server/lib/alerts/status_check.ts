@@ -12,12 +12,9 @@ import { AlertExecutorOptions } from '../../../../alerting/server';
 import { ACTION_GROUP_DEFINITIONS } from '../../../../../legacy/plugins/uptime/common/constants';
 import { UptimeAlertTypeFactory } from './types';
 import { GetMonitorStatusResult } from '../requests';
-import {
-  StatusCheckExecutorParamsType,
-  StatusCheckAlertStateType,
-  StatusCheckAlertState,
-} from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { StatusCheckExecutorParamsType } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import { savedObjectsAdapter } from '../saved_objects';
+import { updateState } from './common';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -122,58 +119,11 @@ export const fullListByIdAndLocation = (
   );
 };
 
-export const updateState = (
-  state: Record<string, any>,
-  isTriggeredNow: boolean
-): StatusCheckAlertState => {
-  const now = new Date().toISOString();
-  const decoded = StatusCheckAlertStateType.decode(state);
-  if (!isRight(decoded)) {
-    const triggerVal = isTriggeredNow ? now : undefined;
-    return {
-      currentTriggerStarted: triggerVal,
-      firstCheckedAt: now,
-      firstTriggeredAt: triggerVal,
-      isTriggered: isTriggeredNow,
-      lastTriggeredAt: triggerVal,
-      lastCheckedAt: now,
-      lastResolvedAt: undefined,
-    };
-  }
-  const {
-    currentTriggerStarted,
-    firstCheckedAt,
-    firstTriggeredAt,
-    lastTriggeredAt,
-    // this is the stale trigger status, we're naming it `wasTriggered`
-    // to differentiate it from the `isTriggeredNow` param
-    isTriggered: wasTriggered,
-    lastResolvedAt,
-  } = decoded.right;
-
-  let cts: string | undefined;
-  if (isTriggeredNow && !currentTriggerStarted) {
-    cts = now;
-  } else if (isTriggeredNow) {
-    cts = currentTriggerStarted;
-  }
-
-  return {
-    currentTriggerStarted: cts,
-    firstCheckedAt: firstCheckedAt ?? now,
-    firstTriggeredAt: isTriggeredNow && !firstTriggeredAt ? now : firstTriggeredAt,
-    lastCheckedAt: now,
-    lastTriggeredAt: isTriggeredNow ? now : lastTriggeredAt,
-    lastResolvedAt: !isTriggeredNow && wasTriggered ? now : lastResolvedAt,
-    isTriggered: isTriggeredNow,
-  };
-};
-
 // Right now the maximum number of monitors shown in the message is hardcoded here.
 // we might want to make this a parameter in the future
 const DEFAULT_MAX_MESSAGE_ROWS = 3;
 
-export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
+export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
   id: 'xpack.uptime.alerts.monitorStatus',
   name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
     defaultMessage: 'Uptime monitor status',
