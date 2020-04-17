@@ -10,7 +10,7 @@ import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src
 jest.mock('../lib/../../../../package.json', () => ({
   version: '1.2.3',
 }));
-type EsClusterClient = Pick<jest.Mocked<ClusterClient>, 'callAsInternalUser' | 'asScoped'>;
+export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
 let logger: Logger;
 let clusterClient: EsClusterClient;
@@ -24,7 +24,7 @@ describe('createEsContext', () => {
   test('should return is ready state as falsy if not initialized', () => {
     const context = createEsContext({
       logger,
-      clusterClientPromise: Promise.resolve(clusterClient),
+      clusterClient,
       indexNameRoot: 'test0',
     });
 
@@ -37,7 +37,7 @@ describe('createEsContext', () => {
   test('should return esNames', () => {
     const context = createEsContext({
       logger,
-      clusterClientPromise: Promise.resolve(clusterClient),
+      clusterClient,
       indexNameRoot: 'test-index',
     });
 
@@ -56,7 +56,7 @@ describe('createEsContext', () => {
   test('should return exist false for esAdapter ilm policy, index template and alias before initialize', async () => {
     const context = createEsContext({
       logger,
-      clusterClientPromise: Promise.resolve(clusterClient),
+      clusterClient,
       indexNameRoot: 'test1',
     });
     clusterClient.callAsInternalUser.mockResolvedValue(false);
@@ -73,7 +73,7 @@ describe('createEsContext', () => {
   test('should return exist true for esAdapter ilm policy, index template and alias after initialize', async () => {
     const context = createEsContext({
       logger,
-      clusterClientPromise: Promise.resolve(clusterClient),
+      clusterClient,
       indexNameRoot: 'test2',
     });
     clusterClient.callAsInternalUser.mockResolvedValue(true);
