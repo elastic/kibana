@@ -29,7 +29,8 @@ export class AlertDetailsPagination extends Pagination<
     config: EndpointConfigType,
     requestContext: RequestHandlerContext,
     state: AlertDetailsRequestParams,
-    data: GetResponse<AlertEvent>
+    data: GetResponse<AlertEvent>,
+    private readonly indexPattern: string
   ) {
     super(config, requestContext, state, data);
   }
@@ -54,7 +55,8 @@ export class AlertDetailsPagination extends Pagination<
 
     const response = await searchESForAlerts(
       this.requestContext.core.elasticsearch.dataClient,
-      reqData
+      reqData,
+      this.indexPattern
     );
     return response;
   }
