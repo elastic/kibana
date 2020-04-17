@@ -21,7 +21,6 @@ import {
 
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
-import { useKibana } from '../../../lib/kibana';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode } from '../../../store/timeline/model';
 import { useSavedQueryServices } from '../../../utils/saved_query_services';
@@ -35,6 +34,7 @@ export interface QueryBarTimelineComponentProps {
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
   filters: Filter[];
+  filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
   from: number;
@@ -61,6 +61,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     browserFields,
     dataProviders,
     filters,
+    filterManager,
     filterQuery,
     filterQueryDraft,
     from,
@@ -94,9 +95,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
-    const kibana = useKibana();
-    const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
-
     const savedQueryServices = useSavedQueryServices();
 
     useEffect(() => {
