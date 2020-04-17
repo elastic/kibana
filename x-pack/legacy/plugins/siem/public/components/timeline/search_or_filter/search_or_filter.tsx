@@ -8,7 +8,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/
 import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
-import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import {
+  Filter,
+  FilterManager,
+  IIndexPattern,
+} from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode, EventType } from '../../../store/timeline/model';
@@ -44,6 +48,7 @@ interface Props {
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
   eventType: EventType;
+  filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
   from: number;
@@ -95,6 +100,7 @@ export const SearchOrFilter = React.memo<Props>(
     indexPattern,
     isRefreshPaused,
     filters,
+    filterManager,
     filterQuery,
     filterQueryDraft,
     from,
@@ -135,6 +141,7 @@ export const SearchOrFilter = React.memo<Props>(
               browserFields={browserFields}
               dataProviders={dataProviders}
               filters={filters}
+              filterManager={filterManager}
               filterQuery={filterQuery}
               filterQueryDraft={filterQueryDraft}
               from={from}
