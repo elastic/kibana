@@ -13,4 +13,83 @@ Explore the new features in Kibana 7.7.
 
 coming::[7.7.0]
 
+[cols="50, 50"]
+|===
+
+a| *New alerting framework*
+
+Alerting allows you to detect complex conditions in
+{kib} apps and trigger actions when those conditions are met.
+Alerting is integrated with <<xpack-apm,APM>>, <<xpack-infra,Metrics>>,
+<<xpack-siem,SIEM>>, and <<xpack-uptime,Uptime>> and is
+centrally managed from <<management, Management>>.
+Alerting has built-in <<action-types, actions>> and
+<<alert-types, alerts>> for you to use.
+
+| image:user/alerting/images/alerting-overview.png[Alerts and actions UI]
+
+a| *Canvas with your visualizations*
+
+Visualizations that you created in Lens, Visualize, and
+TSVB can now be part of your Canvas workpad. This makes it easier for you
+to create a branded version of your dashboard
+to present to your peers.
+
+| image:release-notes/images/7-7-canvas-and-lens.png[Embedded maps in Canvas]
+
+a| *Lens filtering in dashboards*
+
+To make dashboards even more interactive,
+you can now filter Lens visualizations with a single click.
+This gets you to the answers you're looking for, faster.
+
+| image:release-notes/images/7-7-lens-filter-in-dashboard.png[Filter Lens visualizations in dashboard]
+
+a| *Value formatting in Lens*
+
+Lens helps you more accurately display the data you
+are analyzing by enabling you to format values. You can
+format numbers as percentage and bytes and include a decimal point.
+
+| image:release-notes/images/7-7-lens-format-values.png[Formatted values in Lens]
+
+a| *Distance filters in Elastic Maps*
+
+You can now filter points in your map by selecting a
+center location and then drawing a distance radius with your mouse.  This
+addresses a common use case&mdash;using the map tiles underneath a data layer
+as a visual reference for what location points to keep.
+
+| image:release-notes/images/7-6-maps-category.png[Nested field]
+
+a| *Blended layers in Elastic Maps*
+
+Blended layers are good for working with large amounts of data.
+Toggle a setting, and your map will show an
+aggregated cluster of data points when your viewing
+area has more than 10,000 discrete points.  This is useful anytime you map data
+points are in both dense urban areas and more rural locations.
+
+| image:release-notes/images/7-6-maps-category.png[Nested field]
+
+
+
+|===
+
+[float]
+=== Learn more
+
+Get more details on these features in the https://www.elastic.co/blog/kibana-7-7-0-released[{kib} 7.7 release blog].
+For a complete list of enhancements and other changes, check out the
+{kibana-ref}/release-notes-7.7.0.html[{kib} 7.7 release notes].
+
 // end::notable-highlights[]
+
+[float]
+=== Give 7.6 a try
+
+Try 7.7 now by deploying {es} and {kib} on
+https://www.elastic.co/cloud/elasticsearch-service/signup[Elastic Cloud] or
+by https://www.elastic.co/start[downloading them].
+Let us know what you think on Twitter https://twitter.com/elastic[(@elastic)]
+or in our https://discuss.elastic.co/c/elasticsearch[forum].
