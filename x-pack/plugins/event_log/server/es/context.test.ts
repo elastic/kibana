@@ -59,7 +59,7 @@ describe('createEsContext', () => {
       clusterClient,
       indexNameRoot: 'test1',
     });
-    clusterClient.callAsInternalUser.mockResolvedValue(false);
+    (clusterClient.callAsInternalUser as jest.Mock).mockResolvedValue(false);
 
     const doesAliasExist = await context.esAdapter.doesAliasExist(context.esNames.alias);
     expect(doesAliasExist).toBeFalsy();
@@ -76,7 +76,7 @@ describe('createEsContext', () => {
       clusterClient,
       indexNameRoot: 'test2',
     });
-    clusterClient.callAsInternalUser.mockResolvedValue(true);
+    (clusterClient.callAsInternalUser as jest.Mock).mockResolvedValue(true);
     context.initialize();
 
     const doesIlmPolicyExist = await context.esAdapter.doesIlmPolicyExist(
