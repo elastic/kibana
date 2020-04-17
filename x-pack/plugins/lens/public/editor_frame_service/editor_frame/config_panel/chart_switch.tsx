@@ -15,10 +15,10 @@ import {
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Visualization, FramePublicAPI, Datasource } from '../../types';
-import { Action } from './state_management';
-import { getSuggestions, switchToSuggestion, Suggestion } from './suggestion_helpers';
-import { trackUiEvent } from '../../lens_ui_telemetry';
+import { Visualization, FramePublicAPI, Datasource } from '../../../types';
+import { Action } from '../state_management';
+import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
+import { trackUiEvent } from '../../../lens_ui_telemetry';
 
 interface VisualizationSelection {
   visualizationId: string;
