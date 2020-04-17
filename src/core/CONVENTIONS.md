@@ -1,6 +1,6 @@
-# Kibana Conventions
-
-- [Kibana Conventions](#kibana-conventions)
+- [Organisational Conventions](#organisational-conventions)
+  - [Definition of done](#definition-of-done)
+- [Technical Conventions](#technical-conventions)
   - [Plugin Structure](#plugin-structure)
     - [The PluginInitializer](#the-plugininitializer)
     - [The Plugin class](#the-plugin-class)
@@ -8,8 +8,34 @@
     - [Services](#services)
     - [Usage Collection](#usage-collection)
     - [Saved Objects Types](#saved-objects-types)
+  - [Naming conventions](#naming-conventions)
 
-## Plugin Structure
+## Organisational Conventions
+### Definition of done
+Definition of done for a feature:
+- has a dedicated Github issue describing problem space
+- an umbrella task closed/updated with follow-ups
+- all code review comments are resolved
+- has been verified manually by at least one reviewer
+- can be used by first & third party plugins
+- there is no contradiction between client and server API
+- works for OSS version
+   - works with and without a `server.basePath` configured
+   - cannot crash the Kibana server when it fails
+- works for the commercial version with a license
+   - for a logged-in user
+   - for anonymous user
+   - compatible with Spaces
+- has unit & integration tests for public contracts
+- has functional tests for user scenarios
+- uses standard tooling:
+    - code - `TypeScript`
+    - UI - `React`
+    - tests - `jest` & `FTR`
+- has documentation for the public contract, provides a usage example
+
+## Technical Conventions
+### Plugin Structure
 
 All Kibana plugins built at Elastic should follow the same structure.
 
@@ -60,7 +86,7 @@ my_plugin/
   - More should be fleshed out here...
 - Usage collectors for Telemetry should be defined in a separate `server/collectors/` directory.
 
-### The PluginInitializer
+#### The PluginInitializer
 
 ```ts
 // my_plugin/public/index.ts
@@ -75,7 +101,7 @@ export {
 }
 ```
 
-### The Plugin class
+#### The Plugin class
 
 ```ts
 // my_plugin/public/plugin.ts
@@ -130,7 +156,7 @@ Difference between `setup` and `start`:
 
 The bulk of your plugin logic will most likely live inside _handlers_ registered during `setup`.
 
-### Applications
+#### Applications
 
 It's important that UI code is not included in the main bundle for your plugin. Our webpack configuration supports
 dynamic async imports to split out imports into a separate bundle. Every app's rendering logic and UI code should
@@ -175,7 +201,7 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-### Services
+#### Services
 
 Service structure should mirror the plugin lifecycle to make reasoning about how the service is executed more clear.
 
@@ -226,7 +252,7 @@ export class Plugin {
 }
 ```
 
-### Usage Collection
+#### Usage Collection
 
 For creating and registering a Usage Collector. Collectors should be defined in a separate directory `server/collectors/`. You can read more about usage collectors on `src/plugins/usage_collection/README.md`.
 
@@ -263,7 +289,7 @@ export function registerMyPluginUsageCollector(usageCollection?: UsageCollection
 }
 ```
 
-### Saved Objects Types
+#### Saved Objects Types
 
 Saved object type definitions should be defined in their own `server/saved_objects` directory.
 

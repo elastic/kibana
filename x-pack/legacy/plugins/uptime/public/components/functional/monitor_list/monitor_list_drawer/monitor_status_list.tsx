@@ -8,9 +8,9 @@ import React from 'react';
 import { get, capitalize } from 'lodash';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Check } from '../../../../../common/graphql/types';
 import { LocationLink } from './location_link';
 import { MonitorStatusRow } from './monitor_status_row';
+import { Check } from '../../../../../common/runtime_types';
 import { STATUS, UNNAMED_LOCATION } from '../../../../../common/constants';
 
 interface MonitorStatusListProps {
