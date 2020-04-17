@@ -7,7 +7,7 @@ echo "1/2 Install dependencies ..."
 source src/dev/ci_setup/setup_env.sh true
 yarn kbn clean && yarn kbn bootstrap
 
-echo "2/2 Start Kibana ..."
+echo "2/2 Start Kibana (production mode) ..."
 ## Might help to avoid FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
 export NODE_OPTIONS="--max-old-space-size=4096"
-nohup node ./scripts/kibana --no-base-path --no-watch --dev --no-dev-config --config ${E2E_DIR}/ci/kibana.e2e.yml > ${E2E_DIR}/kibana.log 2>&1 &
+nohup node ./scripts/kibana --no-base-path --no-watch --config ${E2E_DIR}/ci/kibana.e2e.yml > ${E2E_DIR}/kibana.log 2>&1 &
