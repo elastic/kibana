@@ -19,7 +19,7 @@
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { get } from 'lodash';
-import { DEFAULT_QUERY_LANGUAGE } from '../../../../../../plugins/data/common';
+import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 export const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
   const searchSourceJSON = get<string>(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');

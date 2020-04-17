@@ -17,20 +17,18 @@
  * under the License.
  */
 
-import { migrations } from '../../../migrations';
+import { dashboardSavedObjectTypeMigrations as migrations } from './dashboard_migrations';
 import { migrations730 } from './migrations_730';
-import {
-  DashboardDoc700To720,
-  DashboardDoc730ToLatest,
-  RawSavedDashboardPanel730ToLatest,
-  DashboardDocPre700,
-} from '../../../../../../plugins/dashboard/public';
+import { DashboardDoc700To720, DashboardDoc730ToLatest, DashboardDocPre700 } from '../../common';
+import { RawSavedDashboardPanel730ToLatest } from '../../common';
 
-const mockLogger = {
-  warning: () => {},
-  warn: () => {},
-  debug: () => {},
-  info: () => {},
+const mockContext = {
+  log: {
+    warning: () => {},
+    warn: () => {},
+    debug: () => {},
+    info: () => {},
+  },
 };
 
 test('dashboard migration 7.3.0 migrates filters to query on search source', () => {
@@ -53,7 +51,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
         '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
     },
   };
-  const newDoc = migrations730(doc, mockLogger);
+  const newDoc = migrations730(doc, mockContext);
 
   expect(newDoc).toMatchInlineSnapshot(`
     Object {
@@ -97,8 +95,8 @@ test('dashboard migration 7.3.0 migrates filters to query on search source when 
     },
   };
 
-  const doc700: DashboardDoc700To720 = migrations.dashboard['7.0.0'](doc, mockLogger);
-  const newDoc = migrations.dashboard['7.3.0'](doc700, mockLogger);
+  const doc700: DashboardDoc700To720 = migrations.dashboard['7.0.0'](doc, mockContext);
+  const newDoc = migrations.dashboard['7.3.0'](doc700, mockContext);
 
   const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
   expect(parsedSearchSource.filter.length).toBe(0);
@@ -129,8 +127,8 @@ test('dashboard migration works when panelsJSON is missing panelIndex', () => {
     },
   };
 
-  const doc700: DashboardDoc700To720 = migrations.dashboard['7.0.0'](doc, mockLogger);
-  const newDoc = migrations.dashboard['7.3.0'](doc700, mockLogger);
+  const doc700: DashboardDoc700To720 = migrations.dashboard['7.0.0'](doc, mockContext);
+  const newDoc = migrations.dashboard['7.3.0'](doc700, mockContext);
 
   const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
   expect(parsedSearchSource.filter.length).toBe(0);
@@ -159,7 +157,7 @@ test('dashboard migration 7.3.0 migrates panels', () => {
     },
   };
 
-  const newDoc = migrations730(doc, mockLogger) as DashboardDoc730ToLatest;
+  const newDoc = migrations730(doc, mockContext) as DashboardDoc730ToLatest;
 
   const newPanels = JSON.parse(newDoc.attributes.panelsJSON) as RawSavedDashboardPanel730ToLatest[];
 

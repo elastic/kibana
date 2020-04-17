@@ -32,12 +32,12 @@ export const dashboardSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
+      return `/management/kibana/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/visualize/edit/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'visualize.show',
+        path: `/app/kibana#/dashboard/${encodeURIComponent(obj.id)}`,
+        uiCapabilitiesPath: 'dashboard.show',
       };
     },
   },

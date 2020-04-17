@@ -17,24 +17,20 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectReference } from '../../../../core/server';
+export { GridData } from './embeddable/types';
+export {
+  RawSavedDashboardPanel730ToLatest,
+  DashboardDoc730ToLatest,
+  DashboardDoc700To720,
+  DashboardDocPre700,
+} from './bwc/types';
+export {
+  SavedDashboardPanelTo60,
+  SavedDashboardPanel610,
+  SavedDashboardPanel620,
+  SavedDashboardPanel630,
+  SavedDashboardPanel640To720,
+  SavedDashboardPanel730ToLatest,
+} from './types';
 
-export interface SavedObjectAttributes {
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: string;
-  };
-}
-
-export interface Doc<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
-  references: SavedObjectReference[];
-  attributes: Attributes;
-  id: string;
-  type: string;
-}
-
-export interface DocPre700<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
-  attributes: Attributes;
-  id: string;
-  type: string;
-}
+export { migratePanelsTo730 } from './migrate_to_730_panels';

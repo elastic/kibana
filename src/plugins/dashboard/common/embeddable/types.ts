@@ -17,15 +17,10 @@
  * under the License.
  */
 
-import { Doc } from './types';
-
-export function isDoc(doc: { [key: string]: unknown } | Doc): doc is Doc {
-  return (
-    typeof doc.id === 'string' &&
-    typeof doc.type === 'string' &&
-    doc.attributes !== null &&
-    typeof doc.attributes === 'object' &&
-    doc.references !== null &&
-    typeof doc.references === 'object'
-  );
+export interface GridData {
+  w: number;
+  h: number;
+  x: number;
+  y: number;
+  i: string;
 }
