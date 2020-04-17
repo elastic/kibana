@@ -7,10 +7,16 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-import { list_and as listAnd } from '../response/schemas';
+import {
+  list_and as listAnd,
+  list_values as listValues,
+  list_values_operator as listOperator,
+} from '../response/schemas';
 
 export type ListsDefaultArrayC = t.Type<List[], List[], unknown>;
-type List = t.TypeOf<typeof listAnd>;
+export type List = t.TypeOf<typeof listAnd>;
+export type ListValues = t.TypeOf<typeof listValues>;
+export type ListOperator = t.TypeOf<typeof listOperator>;
 
 /**
  * Types the ListsDefaultArray as:
