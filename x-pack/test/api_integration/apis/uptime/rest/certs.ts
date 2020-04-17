@@ -8,9 +8,9 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { makeChecksWithStatus } from '../graphql/helpers/make_checks';
 import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants';
 import { CertType } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -58,7 +58,7 @@ export default function({ getService }: FtrProviderContext) {
             },
           },
           'up',
-          d => d
+          (d: any) => d
         );
       });
       after('unload test docs', () => {
