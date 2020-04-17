@@ -39,7 +39,7 @@ describe('isConfigSchema', () => {
     expect(isConfigSchema(schema.stream())).toBe(true);
   });
 
-  it('returns false for every primitive types', () => {
+  it('returns false for every javascript data type', () => {
     expect(isConfigSchema('foo')).toBe(false);
     expect(isConfigSchema(42)).toBe(false);
     expect(isConfigSchema(new Date())).toBe(false);
