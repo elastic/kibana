@@ -22,6 +22,7 @@ import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer, now } from '../../../kibana_utils/common';
+import { toPromise } from '../../../data/common/utils/abort_utils';
 import { RequestAdapter, DataAdapter } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
@@ -36,8 +37,6 @@ import { getType, ExpressionValue } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
-
-const ABORT_ERROR = Object.freeze(new Error('The expression was aborted.'));
 
 const createAbortErrorValue = () =>
   createError({
@@ -101,9 +100,7 @@ export class Execution<
   /**
    * Promise that rejects if/when abort controller sends "abort" signal.
    */
-  private readonly abortRejection = new Promise<never>((resolve, reject) => {
-    this.abortController.signal.addEventListener('abort', () => reject(ABORT_ERROR));
-  });
+  private readonly abortRejection = toPromise(this.abortController.signal, true);
 
   /**
    * Races a given promise against the "abort" event of `abortController`.
@@ -197,7 +194,7 @@ export class Execution<
     const chainPromise = this.invokeChain(this.state.get().ast.chain, input);
 
     this.race(chainPromise).then(resolve, error => {
-      if (error === ABORT_ERROR) resolve(createAbortErrorValue());
+      if (this.abortController.signal.aborted) resolve(createAbortErrorValue());
       else reject(error);
     });
 
