@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send(getSimpleRule())
         .expect(200);
 
-      await new Promise(resolve => setTimeout(resolve, 1000)).then(async () => {
+      await new Promise(resolve => setTimeout(resolve, 5000)).then(async () => {
         // query the single rule from _find
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
