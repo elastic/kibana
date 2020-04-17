@@ -75,7 +75,7 @@ interface Arguments {
   partialRows: boolean;
   includeFormatHints: boolean;
   aggConfigs: string;
-  timeField: string[];
+  timeField?: string[];
 }
 
 const handleCourierRequest = async ({
