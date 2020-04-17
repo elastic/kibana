@@ -72,7 +72,7 @@ cluster.
 1. Set the Kibana config:
   ```
   % cat config/kibana.dev.yml
-  xpack.monitoring.elasticsearch:
+  monitoring.ui.elasticsearch:
     url: "http://localhost:9210"
     username: "kibana"
     password: "changeme"
