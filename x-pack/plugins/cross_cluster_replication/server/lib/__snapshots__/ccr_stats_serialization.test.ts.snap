@@ -19,6 +19,7 @@ Object {
         "type": "exception",
       },
       "leaderIndex": "pattern-1:kibana_sample_1",
+      "timestamp": 1587081600021,
     },
     Object {
       "autoFollowException": Object {
@@ -26,6 +27,7 @@ Object {
         "type": "exception",
       },
       "leaderIndex": "pattern-2:kibana_sample_1",
+      "timestamp": 1587081600021,
     },
   ],
 }

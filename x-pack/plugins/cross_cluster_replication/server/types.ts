@@ -8,7 +8,6 @@ import { IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { IndexManagementPluginSetup } from '../../index_management/server';
 import { RemoteClustersPluginSetup } from '../../remote_clusters/server';
-import { SecurityPluginSetup } from '../../security/server';
 import { License } from './services';
 import { isEsError } from './lib/is_es_error';
 import { formatEsError } from './lib/format_es_error';
@@ -17,13 +16,11 @@ export interface Dependencies {
   licensing: LicensingPluginSetup;
   indexManagement: IndexManagementPluginSetup;
   remoteClusters: RemoteClustersPluginSetup;
-  security?: SecurityPluginSetup;
 }
 
 export interface RouteDependencies {
   router: IRouter;
   license: License;
-  security?: SecurityPluginSetup;
   lib: {
     isEsError: typeof isEsError;
     formatEsError: typeof formatEsError;

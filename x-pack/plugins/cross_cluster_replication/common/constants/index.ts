@@ -11,7 +11,7 @@ import { LicenseType } from '../../../licensing/common/types';
 const platinumLicense: LicenseType = 'platinum';
 
 export const PLUGIN = {
-  ID: 'cross_cluster_replication',
+  ID: 'crossClusterReplication',
   TITLE: i18n.translate('xpack.crossClusterReplication.appTitle', {
     defaultMessage: 'Cross-Cluster Replication',
   }),
@@ -23,7 +23,8 @@ export const APPS = {
   REMOTE_CLUSTER_APP: 'remote_cluster',
 };
 
-export const BASE_PATH = '/management/elasticsearch/cross_cluster_replication';
+export const MANAGEMENT_ID = 'cross_cluster_replication';
+export const BASE_PATH = `/management/elasticsearch/${MANAGEMENT_ID}`;
 export const BASE_PATH_REMOTE_CLUSTERS = '/management/elasticsearch/remote_clusters';
 export const API_BASE_PATH = '/api/cross_cluster_replication';
 export const API_REMOTE_CLUSTERS_BASE_PATH = '/api/remote_clusters';

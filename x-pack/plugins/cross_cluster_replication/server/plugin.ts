@@ -78,7 +78,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
 
   async setup(
     { http, elasticsearch }: CoreSetup,
-    { licensing, indexManagement, remoteClusters, security }: Dependencies
+    { licensing, indexManagement, remoteClusters }: Dependencies
   ): Promise<void> {
     const router = http.createRouter();
     const config = await this.config$.pipe(first()).toPromise();
@@ -109,7 +109,6 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     registerApiRoutes({
       router,
       license: this.license,
-      security,
       lib: {
         isEsError,
         formatEsError,

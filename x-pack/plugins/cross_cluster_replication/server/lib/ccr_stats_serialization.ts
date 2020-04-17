@@ -14,9 +14,11 @@ import {
 } from '../../common/types';
 
 export const deserializeRecentAutoFollowErrors = ({
+  timestamp,
   leader_index,
   auto_follow_exception: { type, reason },
 }: RecentAutoFollowErrorFromEs): RecentAutoFollowError => ({
+  timestamp,
   leaderIndex: leader_index,
   autoFollowException: {
     type,

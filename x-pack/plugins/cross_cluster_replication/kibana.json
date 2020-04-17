@@ -11,8 +11,7 @@
     "indexManagement"
   ],
   "optionalPlugins": [
-    "usageCollection",
-    "security"
+    "usageCollection"
   ],
   "configPath": ["xpack", "ccr"]
 }

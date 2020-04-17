@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
-import { PLUGIN } from '../common/constants';
+import { PLUGIN, MANAGEMENT_ID } from '../common/constants';
 import { init as initUiMetric } from './app/services/track_ui_metric';
 import { init as initNotification } from './app/services/notifications';
 import { PluginDependencies, ClientConfigType } from './types';
@@ -27,8 +27,8 @@ export class CrossClusterReplicationPlugin implements Plugin {
       .pipe(first())
       .toPromise()
       .then(license => {
-        const isLicenseOk = license.isAvailable && license.isActive;
-
+        const licenseStatus = license.check(PLUGIN.ID, PLUGIN.minimumLicenseType);
+        const isLicenseOk = licenseStatus.state === 'valid';
         const config = this.initializerContext.config.get<ClientConfigType>();
 
         // The UI is also dependent upon the Remote Clusters UI.
@@ -48,7 +48,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
           initNotification(toasts, fatalErrors);
 
           management.sections.getSection('elasticsearch')!.registerApp({
-            id: PLUGIN.ID,
+            id: MANAGEMENT_ID,
             title: PLUGIN.TITLE,
             order: 4,
             mount: async ({ element, setBreadcrumbs }) => {

@@ -7,6 +7,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
+import moment from 'moment';
+
 import { getIndexListUri } from '../../../../../../../../../plugins/index_management/public';
 
 import {
@@ -247,6 +249,7 @@ export class DetailPanel extends Component {
           <ul>
             {autoFollowPattern.errors.map((error, i) => (
               <li key={i} data-test-subj="recentError">
+                <strong>{moment(error.timestamp).format('MMMM Do, YYYY h:mm:ss A')}</strong>:{' '}
                 {error.autoFollowException.reason}
               </li>
             ))}

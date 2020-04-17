@@ -9,11 +9,12 @@ export const parseAutoFollowError = error => {
     return null;
   }
 
-  const { leaderIndex, autoFollowException } = error;
+  const { leaderIndex, autoFollowException, timestamp } = error;
   const id = leaderIndex.substring(0, leaderIndex.lastIndexOf(':'));
 
   return {
     id,
+    timestamp,
     leaderIndex,
     autoFollowException,
   };

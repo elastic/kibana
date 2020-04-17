@@ -31,6 +31,8 @@ export class License {
     message: 'Invalid License',
   };
 
+  private _isEsSecurityEnabled: boolean = false;
+
   setup(
     { pluginId, minimumLicenseType, defaultErrorMessage }: SetupSettings,
     { licensing, logger }: { licensing: LicensingPluginSetup; logger: Logger }
@@ -38,6 +40,10 @@ export class License {
     licensing.license$.subscribe(license => {
       const { state, message } = license.check(pluginId, minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
+
+      // Retrieving security checks the results of GET /_xpack as well as license state,
+      // so we're also checking whether the security is disabled in elasticsearch.yml.
+      this._isEsSecurityEnabled = license.getFeature('security').isEnabled;
 
       if (hasRequiredLicense) {
         this.licenseStatus = { isValid: true };
@@ -78,5 +84,10 @@ export class License {
 
   getStatus() {
     return this.licenseStatus;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
+  get isEsSecurityEnabled() {
+    return this._isEsSecurityEnabled;
   }
 }

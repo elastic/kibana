@@ -15,6 +15,7 @@ describe('[CCR] auto-follow stats serialization', () => {
       recent_auto_follow_errors: [
         {
           leader_index: 'pattern-1:kibana_sample_1',
+          timestamp: 1587081600021,
           auto_follow_exception: {
             type: 'exception',
             reason:
@@ -23,6 +24,7 @@ describe('[CCR] auto-follow stats serialization', () => {
         },
         {
           leader_index: 'pattern-2:kibana_sample_1',
+          timestamp: 1587081600021,
           auto_follow_exception: {
             type: 'exception',
             reason:

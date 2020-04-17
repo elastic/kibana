@@ -42,7 +42,7 @@ export async function mountApp({
   I18nContext: I18nStart['Context'];
   ELASTIC_WEBSITE_URL: string;
   DOC_LINK_VERSION: string;
-}): UnmountCallback {
+}): Promise<UnmountCallback> {
   // Initialize additional services.
   initBreadcrumbs(setBreadcrumbs);
   initDocumentation(`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`);

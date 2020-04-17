@@ -302,10 +302,12 @@ describe('<AutoFollowPatternList />', () => {
         const message = 'bar';
         const recentAutoFollowErrors = [
           {
+            timestamp: 1587081600021,
             leaderIndex: `${autoFollowPattern1.name}:my-leader-test`,
             autoFollowException: { type: 'exception', reason: message },
           },
           {
+            timestamp: 1587081600021,
             leaderIndex: `${autoFollowPattern2.name}:my-leader-test`,
             autoFollowException: { type: 'exception', reason: message },
           },
@@ -324,7 +326,7 @@ describe('<AutoFollowPatternList />', () => {
         expect(exists('autoFollowPatternDetail.errors')).toBe(true);
         expect(exists('autoFollowPatternDetail.titleErrors')).toBe(true);
         expect(find('autoFollowPatternDetail.recentError').map(error => error.text())).toEqual([
-          message,
+          'April 16th, 2020 8:00:00 PM: bar',
         ]);
       });
     });

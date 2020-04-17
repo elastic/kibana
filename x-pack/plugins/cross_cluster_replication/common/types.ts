@@ -140,6 +140,7 @@ export interface FollowerIndexAdvancedSettingsToEs {
 }
 
 export interface RecentAutoFollowError {
+  timestamp: number;
   leaderIndex: string;
   autoFollowException: {
     type: string;
@@ -148,6 +149,7 @@ export interface RecentAutoFollowError {
 }
 
 export interface RecentAutoFollowErrorFromEs {
+  timestamp: number;
   leader_index: string;
   auto_follow_exception: {
     type: string;
