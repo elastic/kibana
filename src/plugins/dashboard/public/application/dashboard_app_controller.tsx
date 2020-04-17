@@ -253,33 +253,6 @@ export class DashboardAppController {
     const showFilterBar = () =>
       $scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode();
 
-    const getNavBarProps = () => {
-      const isFullScreenMode = dashboardStateManager.getFullScreenMode();
-      const screenTitle = dashboardStateManager.getTitle();
-      return {
-        appName: 'dashboard',
-        config: $scope.isVisible ? $scope.topNavMenu : undefined,
-        className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
-        screenTitle,
-        showSearchBar,
-        showQueryBar,
-        showFilterBar: showFilterBar(),
-        indexPatterns: $scope.indexPatterns,
-        showSaveQuery: $scope.showSaveQuery,
-        query: $scope.model.query,
-        savedQuery: $scope.savedQuery,
-        useDefaultBehaviors: true,
-        onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }): void => {
-          if (!payload.query) {
-            $scope.updateQueryAndFetch({ query: $scope.model.query, dateRange: payload.dateRange });
-          } else {
-            $scope.updateQueryAndFetch({ query: payload.query, dateRange: payload.dateRange });
-          }
-        },
-      };
-    };
-    const dashboardNavBar = document.getElementById('dashboardChrome');
-
     const getEmptyScreenProps = (
       shouldShowEditHelp: boolean,
       isEmptyInReadOnlyMode: boolean
@@ -349,12 +322,7 @@ export class DashboardAppController {
       $scope.panels = dashboardStateManager.getPanels();
     };
 
-    const updateNavBar = () => {
-      ReactDOM.render(<navigation.ui.TopNavMenu {...getNavBarProps()} />, dashboardNavBar);
-    };
-
     updateState();
-    updateNavBar();
 
     let dashboardContainer: DashboardContainer | undefined;
     let inputSubscription: Subscription | undefined;
@@ -556,16 +524,8 @@ export class DashboardAppController {
       }
     };
 
-    $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
-      timefilter.setRefreshInterval({
-        pause: isPaused,
-        value: refreshInterval ? refreshInterval : $scope.model.refreshInterval.value,
-      });
-    };
-
     $scope.onQuerySaved = (savedQuery: SavedQuery) => {
       $scope.savedQuery = savedQuery;
-      updateNavBar();
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
@@ -627,6 +587,36 @@ export class DashboardAppController {
         $scope.showSaveQuery = newCapability as boolean;
       }
     );
+
+    const getNavBarProps = () => {
+      const isFullScreenMode = dashboardStateManager.getFullScreenMode();
+      const screenTitle = dashboardStateManager.getTitle();
+      return {
+        appName: 'dashboard',
+        config: $scope.isVisible ? $scope.topNavMenu : undefined,
+        className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
+        screenTitle,
+        showSearchBar,
+        showQueryBar,
+        showFilterBar: showFilterBar(),
+        indexPatterns: $scope.indexPatterns,
+        showSaveQuery: $scope.showSaveQuery,
+        query: $scope.model.query,
+        savedQuery: $scope.savedQuery,
+        useDefaultBehaviors: true,
+        onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }): void => {
+          if (!payload.query) {
+            $scope.updateQueryAndFetch({ query: $scope.model.query, dateRange: payload.dateRange });
+          } else {
+            $scope.updateQueryAndFetch({ query: payload.query, dateRange: payload.dateRange });
+          }
+        },
+      };
+    };
+    const dashboardNavBar = document.getElementById('dashboardChrome');
+    const updateNavBar = () => {
+      ReactDOM.render(<navigation.ui.TopNavMenu {...getNavBarProps()} />, dashboardNavBar);
+    };
 
     $scope.timefilterSubscriptions$ = new Subscription();
 
@@ -774,9 +764,6 @@ export class DashboardAppController {
           return { error };
         });
     }
-
-    $scope.showFilterBar = () =>
-      $scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode();
 
     $scope.showAddPanel = () => {
       dashboardStateManager.setFullScreenMode(false);
