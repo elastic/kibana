@@ -12,6 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
   const globalNav = getService('globalNav');
   const config = getService('config');
+  const log = getService('log');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -185,9 +186,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.sleep(500);
         await setDiscoverTimeRange();
         await retry.try(async () => {
           const hitCount = await PageObjects.discover.getHitCount();
+          log.debug('doesnt show visualize button: hit count', hitCount);
           expect(parseInt(hitCount, 10)).to.be.greaterThan(0);
           await PageObjects.discover.clickFieldListItem('bytes');
           await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
@@ -278,9 +281,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.sleep(500);
         await setDiscoverTimeRange();
         await retry.try(async () => {
           const hitCount = await PageObjects.discover.getHitCount();
+          log.debug('doesnt show visualize button: hit count', hitCount);
           expect(parseInt(hitCount, 10)).to.be.greaterThan(0);
           await PageObjects.discover.clickFieldListItem('bytes');
           await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
