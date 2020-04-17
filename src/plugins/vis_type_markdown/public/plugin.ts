@@ -17,12 +17,15 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { markdownVisDefinition } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
+import { ConfigSchema } from '../config';
+
+import './index.scss';
 
 /** @internal */
 export interface MarkdownPluginSetupDependencies {
@@ -32,9 +35,9 @@ export interface MarkdownPluginSetupDependencies {
 
 /** @internal */
 export class MarkdownPlugin implements Plugin<void, void> {
-  initializerContext: PluginInitializerContext;
+  initializerContext: PluginInitializerContext<ConfigSchema>;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
