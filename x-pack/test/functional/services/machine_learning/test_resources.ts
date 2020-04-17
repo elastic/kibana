@@ -64,7 +64,6 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
         }
       }
       log.debug(` > Not found`);
-      return undefined;
     },
 
     async getIndexPatternId(title: string): Promise<string | undefined> {
