@@ -23,8 +23,7 @@ export function getAlertType(): AlertTypeModel {
     defaultActionMessage: i18n.translate(
       'xpack.infra.logs.alerting.threshold.defaultActionMessage',
       {
-        defaultMessage:
-          'This should be a default message for a logs alert, including example use of context variables',
+        defaultMessage: `\\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}`,
       }
     ),
   };

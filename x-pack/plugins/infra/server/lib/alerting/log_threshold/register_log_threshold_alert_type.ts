@@ -11,13 +11,19 @@ import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_execu
 import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
 
-// const sampleActionVariableDescription = i18n.translate(
-//   'xpack.infra.logs.alerting.threshold.sampleActionVariableDescription',
-//   {
-//     defaultMessage:
-//       'Action variables are whatever values you want to make available to messages that this alert sends. This one would replace in an action message.',
-//   }
-// );
+const documentCountActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.documentCountActionVariableDescription',
+  {
+    defaultMessage: 'The number of log entries that matched the conditions provided',
+  }
+);
+
+const conditionsActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.conditionsActionVariableDescription',
+  {
+    defaultMessage: 'The conditions that log entries needed to fulfill',
+  }
+);
 
 const countSchema = schema.object({
   value: schema.number(),
@@ -71,8 +77,11 @@ export async function registerLogThresholdAlertType(
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
     executor: createLogThresholdExecutor(alertUUID, libs),
-    // actionVariables: {
-    //   context: [{ name: 'sample', description: sampleActionVariableDescription }],
-    // },
+    actionVariables: {
+      context: [
+        { name: 'matchingDocuments', description: documentCountActionVariableDescription },
+        { name: 'conditions', description: conditionsActionVariableDescription },
+      ],
+    },
   });
 }
