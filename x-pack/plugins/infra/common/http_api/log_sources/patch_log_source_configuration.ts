@@ -7,7 +7,7 @@
 import * as rt from 'io-ts';
 import { badRequestErrorRT, forbiddenErrorRT } from '../shared';
 import { getLogSourceConfigurationSuccessResponsePayloadRT } from './get_log_source_configuration';
-import { logSourceConfigurationRT } from './log_source_configuration';
+import { logSourceConfigurationPropertiesRT } from './log_source_configuration';
 
 /**
  * request
@@ -23,7 +23,7 @@ export type PatchLogSourceConfigurationRequestParams = rt.TypeOf<
 >;
 
 export const patchLogSourceConfigurationRequestBodyRT = rt.type({
-  data: rt.partial(logSourceConfigurationRT.type.props),
+  data: rt.partial(logSourceConfigurationPropertiesRT.type.props),
 });
 
 export type PatchLogSourceConfigurationRequestBody = rt.TypeOf<

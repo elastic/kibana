@@ -51,12 +51,28 @@ const logSourceColumnConfigurationRT = rt.union([
   logSourceFieldColumnConfigurationRT,
 ]);
 
-export const logSourceConfigurationRT = rt.strict({
+export const logSourceConfigurationPropertiesRT = rt.strict({
   name: rt.string,
   description: rt.string,
   logAlias: rt.string,
   fields: logSourceFieldsConfigurationRT,
   logColumns: rt.array(logSourceColumnConfigurationRT),
 });
+
+export type LogSourceConfigurationProperties = rt.TypeOf<typeof logSourceConfigurationPropertiesRT>;
+
+export const logSourceConfigurationRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      id: rt.string,
+      origin: logSourceConfigurationOriginRT,
+      configuration: logSourceConfigurationPropertiesRT,
+    }),
+    rt.partial({
+      updatedAt: rt.number,
+      version: rt.string,
+    }),
+  ])
+);
 
 export type LogSourceConfiguration = rt.TypeOf<typeof logSourceConfigurationRT>;

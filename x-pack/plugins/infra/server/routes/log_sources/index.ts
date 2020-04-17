@@ -5,3 +5,4 @@
  */
 
 export * from './configuration';
+export * from './status';

@@ -6,10 +6,7 @@
 
 import * as rt from 'io-ts';
 import { badRequestErrorRT, forbiddenErrorRT, routeTimingMetadataRT } from '../shared';
-import {
-  logSourceConfigurationOriginRT,
-  logSourceConfigurationRT,
-} from './log_source_configuration';
+import { logSourceConfigurationRT } from './log_source_configuration';
 
 /**
  * request
@@ -30,19 +27,7 @@ export type GetLogSourceConfigurationRequestParams = rt.TypeOf<
 
 export const getLogSourceConfigurationSuccessResponsePayloadRT = rt.intersection([
   rt.type({
-    data: rt.exact(
-      rt.intersection([
-        rt.type({
-          id: rt.string,
-          origin: logSourceConfigurationOriginRT,
-          configuration: logSourceConfigurationRT,
-        }),
-        rt.partial({
-          updatedAt: rt.number,
-          version: rt.string,
-        }),
-      ])
-    ),
+    data: logSourceConfigurationRT,
   }),
   rt.partial({
     timing: routeTimingMetadataRT,
@@ -53,10 +38,18 @@ export type GetLogSourceConfigurationSuccessResponsePayload = rt.TypeOf<
   typeof getLogSourceConfigurationSuccessResponsePayloadRT
 >;
 
-export const getLogSourceConfigurationResponsePayloadRT = rt.union([
-  getLogSourceConfigurationSuccessResponsePayloadRT,
+export const getLogSourceConfigurationErrorResponsePayloadRT = rt.union([
   badRequestErrorRT,
   forbiddenErrorRT,
+]);
+
+export type GetLogSourceConfigurationErrorReponsePayload = rt.TypeOf<
+  typeof getLogSourceConfigurationErrorResponsePayloadRT
+>;
+
+export const getLogSourceConfigurationResponsePayloadRT = rt.union([
+  getLogSourceConfigurationSuccessResponsePayloadRT,
+  getLogSourceConfigurationErrorResponsePayloadRT,
 ]);
 
 export type GetLogSourceConfigurationReponsePayload = rt.TypeOf<
