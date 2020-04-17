@@ -22,9 +22,9 @@ By integrating PagerDuty with Elastic Alerts, you can:
 [[pagerduty-how-it-works]]
 ==== How it works
 
-{kib} allows you to create threshold alerts to notify you of a significant move
-in your datasets. You can create alerts of a generic type that you can use for all your indices.
-You can also create specific alerts for Observability and SIEM.
+{kib} allows you to create alerts to notify you of a significant move
+in your dataset.
+You can create alerts for all your Observability, Security, and Elastic Stack use cases.
 Elastic Alerts triggers a new incident on the corresponding PagerDuty service.
 
 [float]
@@ -94,7 +94,7 @@ section of the alert configuration and selecting *Add new*.
 * Alternatively, create a connector by navigating to *Management* from the {kib} navbar and selecting
 *Alerts and Actions*. Then, select the *Connectors* tab, click the *Create connector* button, and select the PagerDuty option.
 
-. Configure the connector by giving it a name and entering the API URL and Routing Key.
+. Configure the connector by giving it a name and entering and using the default or optional API URL and Routing Key.
 +
 See <<pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and key information from PagerDuty and
 <<pagerduty-connector-configuration, Connector configuration>> for additional details.
