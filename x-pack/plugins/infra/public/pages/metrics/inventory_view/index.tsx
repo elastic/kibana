@@ -20,7 +20,7 @@ import { ViewSourceConfigurationButton } from '../../../components/source_config
 import { Source } from '../../../containers/source';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Layout } from './compontents/layout';
+import { Layout } from './components/layout';
 import { useLinkProps } from '../../../hooks/use_link_props';
 
 export const SnapshotPage = () => {

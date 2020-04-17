@@ -7,16 +7,16 @@
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/compontents/toolbars/toolbar';
+import { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { WaffleMetricControls } from '../../../../public/pages/metrics/inventory_view/compontents/waffle/metric_control';
+import { WaffleMetricControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/metric_control';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { WaffleGroupByControls } from '../../../../public/pages/metrics/inventory_view/compontents/waffle/waffle_group_by_controls';
+import { WaffleGroupByControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_group_by_controls';
 import {
   toGroupByOpt,
   toMetricOpt,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../public/pages/metrics/inventory_view/compontents/toolbars/toolbar_wrapper';
+} from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar_wrapper';
 import { SnapshotMetricType } from '../../types';
 
 interface Props extends ToolbarProps {

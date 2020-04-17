@@ -8,9 +8,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { Toolbar } from '../../../components/eui/toolbar';
-import { WaffleTimeControls } from './compontents/waffle/waffle_time_controls';
-import { WaffleInventorySwitcher } from './compontents/waffle/waffle_inventory_switcher';
-import { SearchBar } from './compontents/search_bar';
+import { WaffleTimeControls } from './components/waffle/waffle_time_controls';
+import { WaffleInventorySwitcher } from './components/waffle/waffle_inventory_switcher';
+import { SearchBar } from './components/search_bar';
 
 export const SnapshotToolbar = () => (
   <Toolbar>
