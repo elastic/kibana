@@ -8,15 +8,17 @@ import { createSelector } from 'reselect';
 import { Immutable } from '../../../../../common/types';
 import { HostListState, HostIndexUIQueryParams } from '../../types';
 
+const PAGE_SIZES = Object.freeze([10, 20, 50]);
+
 export const listData = (state: Immutable<HostListState>) => state.hosts;
 
-export const pageIndex = (state: Immutable<HostListState>) => state.pageIndex;
+export const pageIndex = (state: Immutable<HostListState>): number => state.pageIndex;
 
-export const pageSize = (state: Immutable<HostListState>) => state.pageSize;
+export const pageSize = (state: Immutable<HostListState>): number => state.pageSize;
 
-export const totalHits = (state: Immutable<HostListState>) => state.total;
+export const totalHits = (state: Immutable<HostListState>): number => state.total;
 
-export const isLoading = (state: Immutable<HostListState>) => state.loading;
+export const isLoading = (state: Immutable<HostListState>): boolean => state.loading;
 
 export const detailsError = (state: Immutable<HostListState>) => state.detailsError;
 
@@ -32,7 +34,7 @@ export const uiQueryParams: (
 ) => Immutable<HostIndexUIQueryParams> = createSelector(
   (state: Immutable<HostListState>) => state.location,
   (location: Immutable<HostListState>['location']) => {
-    const data: HostIndexUIQueryParams = {};
+    const data: HostIndexUIQueryParams = { page_index: '0', page_size: '10' };
     if (location) {
       // Removes the `?` from the beginning of query string if it exists
       const query = querystring.parse(location.search.slice(1));
@@ -50,6 +52,17 @@ export const uiQueryParams: (
         } else if (Array.isArray(value)) {
           data[key] = value[value.length - 1];
         }
+      }
+
+      // Check if page size is an expected size, otherwise default to 10
+      if (!PAGE_SIZES.includes(Number(data.page_size))) {
+        data.page_size = '10';
+      }
+
+      // Check if page index is a valid positive integer, otherwise default to 0
+      const pageIndexAsNumber = Number(data.page_index);
+      if (!Number.isFinite(pageIndexAsNumber) || pageIndexAsNumber < 0) {
+        data.page_index = '0';
       }
     }
     return data;

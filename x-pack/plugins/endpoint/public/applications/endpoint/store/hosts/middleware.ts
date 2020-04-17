@@ -24,7 +24,7 @@ export const hostMiddlewareFactory: MiddlewareFactory<HostListState> = coreStart
           paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
         }),
       });
-      response.request_page_index = pageIndex;
+      response.request_page_index = Number(pageIndex);
       dispatch({
         type: 'serverReturnedHostList',
         payload: response,
