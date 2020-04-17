@@ -69,6 +69,19 @@ export const getBarchartConfigs = ({
   customHeight: chartHeight ?? DEFAULT_CHART_HEIGHT,
 });
 
+export const defaultLegendColors = [
+  '#1EA593',
+  '#2B70F7',
+  '#CE0060',
+  '#38007E',
+  '#FCA5D3',
+  '#F37020',
+  '#E49E29',
+  '#B0916F',
+  '#7B000B',
+  '#34130C',
+];
+
 export const formatToChartDataItem = ([key, value]: [
   string,
   MatrixOverTimeHistogramData[]

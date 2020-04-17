@@ -40,6 +40,10 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
         const theComments = await caseService.getAllCaseComments({
           client,
           caseId: request.params.case_id,
+          options: {
+            sortField: 'created_at',
+            sortOrder: 'asc',
+          },
         });
 
         return response.ok({
