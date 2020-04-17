@@ -26,7 +26,9 @@ export interface Params {
 
 export class DashboardToDashboardDrilldown
   implements Drilldown<Config, PlaceContext, ActionContext<VisualizeEmbeddableContract>> {
-  constructor(protected readonly params: Params) {}
+  constructor(protected readonly params: Params) {
+    this.getDestinationUrl = this.getDestinationUrl.bind(this);
+  }
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
 
@@ -53,12 +55,30 @@ export class DashboardToDashboardDrilldown
     return true;
   };
 
+  public readonly getHref = async (
+    config: Config,
+    context: ActionContext<VisualizeEmbeddableContract>
+  ): Promise<string> => {
+    return await this.getDestinationUrl(config, context);
+  };
+
   public readonly execute = async (
     config: Config,
     context: ActionContext<VisualizeEmbeddableContract>
   ) => {
-    const getUrlGenerator = await this.params.getGetUrlGenerator();
     const navigateToApp = await this.params.getNavigateToApp();
+    const dashboardPath = await this.getDestinationUrl(config, context);
+    const dashboardHash = dashboardPath.split('#')[1];
+    await navigateToApp('kibana', {
+      path: `#${dashboardHash}`,
+    });
+  };
+
+  private async getDestinationUrl(
+    config: Config,
+    context: ActionContext<VisualizeEmbeddableContract>
+  ): Promise<string> {
+    const getUrlGenerator = await this.params.getGetUrlGenerator();
 
     const {
       createFiltersFromRangeSelectAction,
@@ -106,17 +126,11 @@ export class DashboardToDashboardDrilldown
       }
     }
 
-    const dashboardPath = await getUrlGenerator(DASHBOARD_APP_URL_GENERATOR).createUrl({
+    return getUrlGenerator(DASHBOARD_APP_URL_GENERATOR).createUrl({
       dashboardId: config.dashboardId,
       query: config.useCurrentFilters ? query : undefined,
       timeRange,
       filters: [...existingFilters, ...filtersFromEvent],
     });
-
-    const dashboardHash = dashboardPath.split('#')[1];
-
-    await navigateToApp('kibana', {
-      path: `#${dashboardHash}`,
-    });
-  };
+  }
 }
