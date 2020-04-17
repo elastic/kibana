@@ -6,7 +6,7 @@
 
 export function getMlPrefix(serviceName: string, transactionType?: string) {
   const maybeTransactionType = transactionType ? `${transactionType}-` : '';
-  return `${serviceName}-${maybeTransactionType}`.toLowerCase();
+  return encodeForMlApi(`${serviceName}-${maybeTransactionType}`);
 }
 
 export function getMlJobId(serviceName: string, transactionType?: string) {
@@ -15,4 +15,8 @@ export function getMlJobId(serviceName: string, transactionType?: string) {
 
 export function getMlIndex(serviceName: string, transactionType?: string) {
   return `.ml-anomalies-${getMlJobId(serviceName, transactionType)}`;
+}
+
+export function encodeForMlApi(value: string) {
+  return value.replace(/\s+/g, '_').toLowerCase();
 }
