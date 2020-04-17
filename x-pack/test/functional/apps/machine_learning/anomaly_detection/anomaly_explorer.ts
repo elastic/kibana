@@ -29,7 +29,7 @@ const JOB_CONFIG: Job = {
 
 const DATAFEED_CONFIG: Datafeed = {
   datafeed_id: 'datafeed-fq_multi_1_se',
-  indices: ['farequote'],
+  indices: ['ft_farequote'],
   job_id: 'fq_multi_1_ae',
   query: { bool: { must: [{ match_all: {} }] } },
 };
@@ -59,12 +59,11 @@ export default function({ getService }: FtrProviderContext) {
   describe('anomaly explorer', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
-      await esArchiver.load('ml/farequote');
-      await ml.securityUI.loginAsMlPowerUser();
-    });
+      await esArchiver.loadIfNeeded('ml/farequote');
+      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.setKibanaTimeZoneToUTC();
 
-    after(async () => {
-      await esArchiver.unload('ml/farequote');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     for (const testData of testDataList) {
