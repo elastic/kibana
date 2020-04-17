@@ -58,15 +58,6 @@ let dataTimeFilter;
 export const setTimeFilter = timeFilter => (dataTimeFilter = timeFilter);
 export const getTimeFilter = () => dataTimeFilter;
 
-let dataSearchService;
-export const setSearchService = searchService => (dataSearchService = searchService);
-export const getSearchService = () => dataSearchService;
-
-let injectedMetadata;
-export const setInjectedMetadata = injectedMetadataService =>
-  (injectedMetadata = injectedMetadataService);
-export const getInjectedMetadata = () => injectedMetadata;
-
 let toast;
 export const setToasts = notificationToast => (toast = notificationToast);
 export const getToasts = () => toast;
@@ -144,6 +135,13 @@ export const getNavigation = () => navigation;
 let coreI18n;
 export const setCoreI18n = kibanaCoreI18n => (coreI18n = kibanaCoreI18n);
 export const getCoreI18n = () => coreI18n;
+
+let dataSearchService;
+export const setSearchService = searchService => (dataSearchService = searchService);
+
+let injectedMetadata;
+export const setInjectedMetadata = injectedMetadataService =>
+  (injectedMetadata = injectedMetadataService);
 
 export const getSearchSource = () => {
   return getSearchSourceType({
