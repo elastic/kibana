@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
@@ -24,7 +23,7 @@ describe('ML - query utils', () => {
     };
 
     test('returns correct criteria for time range', () => {
-      expect(buildBaseFilterCriteria('timestamp', earliestMs, latestMs)).to.eql([
+      expect(buildBaseFilterCriteria('timestamp', earliestMs, latestMs)).toEqual([
         {
           range: {
             timestamp: {
@@ -38,7 +37,7 @@ describe('ML - query utils', () => {
     });
 
     test('returns correct criteria for time range and query', () => {
-      expect(buildBaseFilterCriteria('timestamp', earliestMs, latestMs, query)).to.eql([
+      expect(buildBaseFilterCriteria('timestamp', earliestMs, latestMs, query)).toEqual([
         {
           range: {
             timestamp: {
@@ -61,7 +60,7 @@ describe('ML - query utils', () => {
     };
 
     test('returns wrapped sampler aggregation for sampler shard size of 1000', () => {
-      expect(buildSamplerAggregation(testAggs, 1000)).to.eql({
+      expect(buildSamplerAggregation(testAggs, 1000)).toEqual({
         sample: {
           sampler: {
             shard_size: 1000,
@@ -72,17 +71,17 @@ describe('ML - query utils', () => {
     });
 
     test('returns un-sampled aggregation as-is for sampler shard size of 0', () => {
-      expect(buildSamplerAggregation(testAggs, 0)).to.eql(testAggs);
+      expect(buildSamplerAggregation(testAggs, 0)).toEqual(testAggs);
     });
   });
 
   describe('getSamplerAggregationsResponsePath', () => {
     test('returns correct path for sampler shard size of 1000', () => {
-      expect(getSamplerAggregationsResponsePath(1000)).to.eql(['sample']);
+      expect(getSamplerAggregationsResponsePath(1000)).toEqual(['sample']);
     });
 
     test('returns correct path for sampler shard size of 0', () => {
-      expect(getSamplerAggregationsResponsePath(0)).to.eql([]);
+      expect(getSamplerAggregationsResponsePath(0)).toEqual([]);
     });
   });
 });
