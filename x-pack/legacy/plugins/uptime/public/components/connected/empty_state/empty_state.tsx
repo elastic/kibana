@@ -15,17 +15,24 @@ import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 export const EmptyState: React.FC = ({ children }) => {
   const { data, loading, error } = useSelector(indexStatusSelector);
   const { lastRefresh } = useContext(UptimeRefreshContext);
+
   const { settings } = useSelector(selectDynamicSettings);
+
+  const heartbeatIndices = settings?.heartbeatIndices || '';
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getDynamicSettings());
-  }, [dispatch]);
+    if (!data || data?.docCount === 0 || data?.indexExists === false) {
+      dispatch(indexStatusAction.get());
+    }
+    // Don't add data , it will create endless loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, lastRefresh]);
 
   useEffect(() => {
     dispatch(indexStatusAction.get());
-  }, [dispatch, lastRefresh]);
+  }, [dispatch, heartbeatIndices]);
 
   return (
     <EmptyStateComponent
