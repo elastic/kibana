@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants';
-import { makeChecksWithStatus } from '../graphql/helpers/make_checks';
+import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

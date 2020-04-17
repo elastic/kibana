@@ -23,12 +23,14 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { HostDetailsFlyout } from './details';
 import * as selectors from '../../store/hosts/selectors';
 import { HostAction } from '../../store/hosts/action';
 import { useHostListSelector } from './hooks';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
+import { HostMetadata, Immutable } from '../../../../../common/types';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const HostList = () => {
@@ -65,7 +67,7 @@ export const HostList = () => {
     [dispatch]
   );
 
-  const columns = useMemo(() => {
+  const columns: Array<EuiBasicTableColumn<Immutable<HostMetadata>>> = useMemo(() => {
     return [
       {
         field: '',
@@ -174,7 +176,7 @@ export const HostList = () => {
             <EuiHorizontalRule margin="xs" />
             <EuiBasicTable
               data-test-subj="hostListTable"
-              items={listData}
+              items={useMemo(() => [...listData], [listData])}
               columns={columns}
               loading={isLoading}
               pagination={paginationSetup}

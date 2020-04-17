@@ -41,6 +41,11 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
   };
 };
 
+export const selectPingList = ({ pingList, ui: { lastRefresh } }: AppState) => ({
+  pings: pingList,
+  lastRefresh,
+});
+
 const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
 
 export const hasMLFeatureAvailable = createSelector(
@@ -87,3 +92,8 @@ export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: 
 export const indexStatusSelector = ({ indexStatus }: AppState) => {
   return indexStatus.indexStatus;
 };
+
+export const monitorListSelector = ({ monitorList, ui: { lastRefresh } }: AppState) => ({
+  monitorList,
+  lastRefresh,
+});

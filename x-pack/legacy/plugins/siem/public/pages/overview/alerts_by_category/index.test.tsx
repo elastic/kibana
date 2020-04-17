@@ -66,8 +66,8 @@ describe('Alerts by category', () => {
       );
     });
 
-    test('it does NOT render the subtitle', () => {
-      expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').exists()).toBe(false);
+    test('it renders the subtitle (to prevent layout thrashing)', () => {
+      expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').exists()).toBe(true);
     });
 
     test('it renders the expected filter fields', () => {
