@@ -81,12 +81,13 @@ export function getAlertType(service: ESQueryServices): AlertType {
       'es'
     )) as IEsSearchResponse;
 
-    // hits.map(hit => {
-    //   services
-    //     .alertInstanceFactory(hit._id)
-    //     .replaceState(hit)
-    //     .scheduleActions('default');
-    // });
+    hits.map(hit => {
+      services
+        .alertInstanceFactory(hit._id)
+        .replaceState(hit)
+        .scheduleActions('default');
+    });
+
     return {
       totalLastRun: total,
     };

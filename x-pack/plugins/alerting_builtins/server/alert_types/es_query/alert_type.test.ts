@@ -7,7 +7,7 @@
 import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { getAlertType } from './alert_type';
-import { pick } from 'lodash';
+import { pick, times } from 'lodash';
 import { alertsMock } from '../../../../alerting/server/mocks';
 import { Params } from './alert_type_params';
 import { FilterStateStore } from '../../../../../../src/plugins/data/common';
@@ -194,6 +194,80 @@ describe('alertType', () => {
 
       expect(searchOptions).toMatchObject({});
       expect(searchStrategy).toEqual('es');
+    });
+
+    it('should trigger an instance of each found doc', async () => {
+      const services = createMockServicesWithEmptyResponses();
+
+      services.indexPattern.getById.mockResolvedValue(mockIndexPattern);
+
+      const params: Params = {
+        query: { query: 'dayOfWeek : * ', language: 'kuery' },
+        filters: [
+          {
+            meta: {
+              index: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+              alias: null,
+              negate: true,
+              disabled: false,
+              type: 'phrase',
+              key: 'Carrier',
+              params: { query: 'JetBeats' },
+              controlledBy: undefined,
+              value: undefined,
+            },
+            query: { match_phrase: { Carrier: 'JetBeats' } },
+            $state: { store: FilterStateStore.APP_STATE },
+          },
+        ],
+        timefilter: { from: 'now-15m', to: 'now', mode: undefined },
+      };
+
+      const [firstDoc, secondDoc] = times(2, () => ({
+        _index: uuid.v4(),
+        _type: uuid.v4(),
+        _id: uuid.v4(),
+        _source: {},
+      }));
+      services.search.mockResolvedValue({
+        rawResponse: {
+          hits: {
+            total: 2,
+            hits: [firstDoc, secondDoc],
+          },
+        },
+      });
+
+      expect(
+        await executor({
+          alertId: uuid.v4(),
+          startedAt: new Date(),
+          previousStartedAt: null,
+          services,
+          params: params as Record<string, any>,
+          state: {},
+          spaceId: uuid.v4(),
+          name: 'name',
+          tags: [],
+          createdBy: null,
+          updatedBy: null,
+        })
+      ).toMatchObject({
+        totalLastRun: 2,
+      });
+
+      const [
+        { value: firstAlertInstanceFactory },
+        { value: secondAlertInstanceFactory },
+      ] = services.alertInstanceFactory.mock.results;
+
+      expect(services.alertInstanceFactory).toHaveBeenCalledWith(firstDoc._id);
+      expect(firstAlertInstanceFactory.replaceState).toHaveBeenCalledWith(firstDoc);
+      expect(firstAlertInstanceFactory.scheduleActions).toHaveBeenCalledWith('default');
+
+      expect(services.alertInstanceFactory).toHaveBeenCalledWith(secondDoc._id);
+      expect(secondAlertInstanceFactory.replaceState).toHaveBeenCalledWith(secondDoc);
+      expect(secondAlertInstanceFactory.scheduleActions).toHaveBeenCalledWith('default');
     });
   });
 });
