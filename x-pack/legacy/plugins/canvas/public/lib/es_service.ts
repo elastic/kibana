@@ -11,21 +11,21 @@ import { API_ROUTE } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
 import { ErrorStrings } from '../../i18n';
 import { notifyService } from '../services';
-import { getCoreStart } from '../legacy';
+import { platformService } from '../services';
 
 const { esService: strings } = ErrorStrings;
 
 const getApiPath = function() {
-  const basePath = getCoreStart().http.basePath.get();
+  const basePath = platformService.getService().coreStart.http.basePath.get();
   return basePath + API_ROUTE;
 };
 
 const getSavedObjectsClient = function() {
-  return getCoreStart().savedObjects.client;
+  return platformService.getService().coreStart.savedObjects.client;
 };
 
 const getAdvancedSettings = function() {
-  return getCoreStart().uiSettings;
+  return platformService.getService().coreStart.uiSettings;
 };
 
 export const getFields = (index = '_all') => {
