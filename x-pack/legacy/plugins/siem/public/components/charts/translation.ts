@@ -13,3 +13,7 @@ export const ALL_VALUES_ZEROS_TITLE = i18n.translate('xpack.siem.chart.dataAllVa
 export const DATA_NOT_AVAILABLE_TITLE = i18n.translate('xpack.siem.chart.dataNotAvailableTitle', {
   defaultMessage: 'Chart Data Not Available',
 });
+
+export const ALL_OTHERS = i18n.translate('xpack.siem.chart.allOthersGroupingLabel', {
+  defaultMessage: 'All others',
+});

@@ -52,6 +52,7 @@ export interface HostListPagination {
 }
 export interface HostIndexUIQueryParams {
   selected_host?: string;
+  show?: string;
 }
 
 export interface ServerApiError {

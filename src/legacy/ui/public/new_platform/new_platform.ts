@@ -69,6 +69,7 @@ import {
   VisualizationsSetup,
   VisualizationsStart,
 } from '../../../../plugins/visualizations/public';
+import { VisTypeTimelionPluginStart } from '../../../../plugins/vis_type_timelion/public';
 import { MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 export interface PluginsSetup {
@@ -116,6 +117,7 @@ export interface PluginsStart {
   telemetry?: TelemetryPluginStart;
   dashboard: DashboardStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  visTypeTimelion: VisTypeTimelionPluginStart;
   indexPatternManagement: IndexPatternManagementStart;
 }
 

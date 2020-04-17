@@ -125,7 +125,7 @@ export class TelemetryPlugin implements Plugin {
     registerType({
       name: 'telemetry',
       hidden: false,
-      namespaceAgnostic: true,
+      namespaceType: 'agnostic',
       mappings: {
         properties: {
           enabled: {
