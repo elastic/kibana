@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { AppState } from '../../../state';
 import { monitorDetailsSelector } from '../../../state/selectors';
 import { MonitorDetailsActionPayload } from '../../../state/actions/types';
@@ -14,6 +14,7 @@ import { MonitorListDrawerComponent } from '../../functional/monitor_list/monito
 import { useGetUrlParams } from '../../../hooks';
 import { MonitorSummary } from '../../../../common/graphql/types';
 import { MonitorDetails } from '../../../../common/runtime_types/monitor';
+import { getRedirectsAction } from '../../../state/actions';
 
 interface ContainerProps {
   summary: MonitorSummary;
@@ -26,13 +27,16 @@ const Container: React.FC<ContainerProps> = ({ summary, loadMonitorDetails, moni
 
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
     loadMonitorDetails({
       dateStart,
       dateEnd,
       monitorId,
     });
-  }, [dateStart, dateEnd, monitorId, loadMonitorDetails]);
+    dispatch(getRedirectsAction.get({ dateStart, dateEnd, monitorId }));
+  }, [dateStart, dateEnd, monitorId, loadMonitorDetails, dispatch]);
   return <MonitorListDrawerComponent monitorDetails={monitorDetails} summary={summary} />;
 };
 

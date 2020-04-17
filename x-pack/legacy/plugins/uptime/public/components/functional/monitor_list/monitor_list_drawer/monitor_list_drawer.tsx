@@ -12,6 +12,7 @@ import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails } from '../../../../../common/runtime_types';
 import { MonitorListActionsPopover } from '../../../connected';
+import { Redirects } from './redirects';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -61,6 +62,7 @@ export function MonitorListDrawerComponent({ summary, monitorDetails }: MonitorL
           timestamp={monitorDetails.timestamp}
         />
       )}
+      <Redirects />
     </ContainerDiv>
   ) : null;
 }

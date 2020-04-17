@@ -13,6 +13,7 @@ import { UMRestApiRouteFactory } from './types';
 import {
   createGetMonitorDetailsRoute,
   createGetMonitorLocationsRoute,
+  createGetMonitorRedirectsRoute,
   createGetStatusBarRoute,
 } from './monitors';
 import { createGetMonitorDurationRoute } from './monitors/monitors_durations';
@@ -35,4 +36,5 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createLogPageViewRoute,
   createGetPingHistogramRoute,
   createGetMonitorDurationRoute,
+  // createGetMonitorRedirectsRoute,
 ];
