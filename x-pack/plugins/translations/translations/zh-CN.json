@@ -16049,7 +16049,6 @@
     "xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle": "静音",
     "xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle": "取消静音",
     "xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.deleteTitle": "删除",
-    "xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.enableTitle": "启用",
     "xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteTitle": "静音",
     "xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.popoverButtonTitle": "操作",
     "xpack.triggersActionsUI.components.emptyPrompt.emptyButton": "创建告警",
