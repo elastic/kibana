@@ -5,6 +5,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 const CREATE_DRILLDOWN_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN';
 const MANAGE_DRILLDOWNS_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN';
@@ -53,12 +54,23 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
 
     async clickActionByText(text: string) {
       log.debug(`clickActionByText: "${text}"`);
+      (await this.getActionWebElementByText(text)).click();
+    }
+
+    async getActionHrefByText(text: string) {
+      log.debug(`getActionHref: "${text}"`);
+      const item = await this.getActionWebElementByText(text);
+      return item.getAttribute('href');
+    }
+
+    async getActionWebElementByText(text: string): Promise<WebElementWrapper> {
+      log.debug(`getActionWebElement: "${text}"`);
       const menu = await testSubjects.find('multipleActionsContextMenu');
       const items = await menu.findAllByCssSelector('[data-test-subj*="embeddablePanelAction-"]');
       for (const item of items) {
         const currentText = await item.getVisibleText();
         if (currentText === text) {
-          return await item.click();
+          return item;
         }
       }
 

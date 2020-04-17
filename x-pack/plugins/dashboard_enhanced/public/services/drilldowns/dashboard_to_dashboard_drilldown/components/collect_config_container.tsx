@@ -11,7 +11,6 @@ import { CoreStart, SimpleSavedObject } from '../../../../../../../../src/core/p
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
 import { UiActionsCollectConfigProps } from '../../../../../../../../src/plugins/ui_actions/public';
-import { SharePluginStart } from '../../../../../../../../src/plugins/share/public';
 import { DrilldownFactoryContext } from '../../../../../../drilldowns/public';
 import { Config } from '../types';
 import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public';
@@ -39,8 +38,6 @@ const dashboardSavedObjectToMenuItem = (
 interface CollectConfigProps extends UiActionsCollectConfigProps<Config> {
   deps: {
     getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
-    getNavigateToApp: () => Promise<CoreStart['application']['navigateToApp']>;
-    getGetUrlGenerator: () => Promise<SharePluginStart['urlGenerators']['getUrlGenerator']>;
   };
   context: DrilldownFactoryContext<{
     embeddable: IEmbeddable;

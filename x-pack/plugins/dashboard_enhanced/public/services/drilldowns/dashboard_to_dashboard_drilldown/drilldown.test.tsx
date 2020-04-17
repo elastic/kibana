@@ -58,7 +58,12 @@ test('initial config: switches are ON', () => {
   expect(useCurrentFilters).toBe(true);
 });
 
-describe('.execute()', () => {
+test('getHref is defined', () => {
+  const drilldown = new DashboardToDashboardDrilldown({} as any);
+  expect(drilldown.getHref).toBeDefined();
+});
+
+describe('.execute() & getHref', () => {
   /**
    * A convenience test setup helper
    * Beware: `dataPluginMock.createStartContract().actions` and extracting filters from event is mocked!
@@ -73,11 +78,16 @@ describe('.execute()', () => {
     useRangeEvent = false
   ) {
     const navigateToApp = jest.fn();
+    const getUrlForApp = jest.fn((app, opt) => `${app}/${opt.path}`);
     const dataPluginActions = dataPluginMock.createStartContract().actions;
     const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
 
     const drilldown = new DashboardToDashboardDrilldown({
-      getNavigateToApp: () => Promise.resolve(navigateToApp),
+      getApplicationService: () =>
+        Promise.resolve({
+          navigateToApp,
+          getUrlForApp,
+        }),
       getGetUrlGenerator: () =>
         Promise.resolve(
           () =>
@@ -90,33 +100,34 @@ describe('.execute()', () => {
     });
     const selectRangeFiltersSpy = jest
       .spyOn(dataPluginActions, 'createFiltersFromRangeSelectAction')
-      .mockImplementationOnce(() => Promise.resolve(filtersFromEvent));
+      .mockImplementation(() => Promise.resolve(filtersFromEvent));
     const valueClickFiltersSpy = jest
       .spyOn(dataPluginActions, 'createFiltersFromValueClickAction')
-      .mockImplementationOnce(() => Promise.resolve(filtersFromEvent));
+      .mockImplementation(() => Promise.resolve(filtersFromEvent));
 
-    await drilldown.execute(
-      {
-        dashboardId: 'id',
-        useCurrentFilters: false,
-        useCurrentDateRange: false,
-        ...config,
+    const completeConfig: Config = {
+      dashboardId: 'id',
+      useCurrentFilters: false,
+      useCurrentDateRange: false,
+      ...config,
+    };
+
+    const context = ({
+      data: {
+        range: useRangeEvent ? {} : undefined,
       },
-      ({
-        data: {
-          range: useRangeEvent ? {} : undefined,
-        },
-        timeFieldName: 'order_date',
-        embeddable: {
-          getInput: () => ({
-            filters: [],
-            timeRange: { from: 'now-15m', to: 'now' },
-            query: { query: 'test', language: 'kuery' },
-            ...embeddableInput,
-          }),
-        },
-      } as unknown) as ActionContext<VisualizeEmbeddableContract>
-    );
+      timeFieldName: 'order_date',
+      embeddable: {
+        getInput: () => ({
+          filters: [],
+          timeRange: { from: 'now-15m', to: 'now' },
+          query: { query: 'test', language: 'kuery' },
+          ...embeddableInput,
+        }),
+      },
+    } as unknown) as ActionContext<VisualizeEmbeddableContract>;
+
+    await drilldown.execute(completeConfig, context);
 
     if (useRangeEvent) {
       expect(selectRangeFiltersSpy).toBeCalledTimes(1);
@@ -129,14 +140,19 @@ describe('.execute()', () => {
     expect(navigateToApp).toBeCalledTimes(1);
     expect(navigateToApp.mock.calls[0][0]).toBe('kibana');
 
+    const executeNavigatedPath = navigateToApp.mock.calls[0][1]?.path;
+    const href = await drilldown.getHref(completeConfig, context);
+
+    expect(href.includes(executeNavigatedPath)).toBe(true);
+
     return {
-      navigatedPath: navigateToApp.mock.calls[0][1]?.path,
+      href,
     };
   }
 
   test('navigates to correct dashboard', async () => {
     const testDashboardId = 'dashboardId';
-    const { navigatedPath } = await setupTestBed(
+    const { href } = await setupTestBed(
       {
         dashboardId: testDashboardId,
       },
@@ -145,13 +161,13 @@ describe('.execute()', () => {
       false
     );
 
-    expect(navigatedPath).toEqual(expect.stringContaining(`dashboard/${testDashboardId}`));
+    expect(href).toEqual(expect.stringContaining(`dashboard/${testDashboardId}`));
   });
 
   test('query is removed with query if filters are disabled', async () => {
     const queryString = 'querystring';
     const queryLanguage = 'kuery';
-    const { navigatedPath } = await setupTestBed(
+    const { href } = await setupTestBed(
       {
         useCurrentFilters: false,
       },
@@ -161,14 +177,14 @@ describe('.execute()', () => {
       []
     );
 
-    expect(navigatedPath).toEqual(expect.not.stringContaining(queryString));
-    expect(navigatedPath).toEqual(expect.not.stringContaining(queryLanguage));
+    expect(href).toEqual(expect.not.stringContaining(queryString));
+    expect(href).toEqual(expect.not.stringContaining(queryLanguage));
   });
 
   test('navigates with query if filters are enabled', async () => {
     const queryString = 'querystring';
     const queryLanguage = 'kuery';
-    const { navigatedPath } = await setupTestBed(
+    const { href } = await setupTestBed(
       {
         useCurrentFilters: true,
       },
@@ -178,8 +194,8 @@ describe('.execute()', () => {
       []
     );
 
-    expect(navigatedPath).toEqual(expect.stringContaining(queryString));
-    expect(navigatedPath).toEqual(expect.stringContaining(queryLanguage));
+    expect(href).toEqual(expect.stringContaining(queryString));
+    expect(href).toEqual(expect.stringContaining(queryLanguage));
   });
 
   test('when user chooses to keep current filters, current filters are set on destination dashboard', async () => {
@@ -187,20 +203,19 @@ describe('.execute()', () => {
     const existingGlobalFilterKey = 'existingGlobalFilter';
     const newAppliedFilterKey = 'newAppliedFilter';
 
-    const { navigatedPath } = await setupTestBed(
+    const { href } = await setupTestBed(
       {
         useCurrentFilters: true,
       },
       {
         filters: [getFilter(false, existingAppFilterKey), getFilter(true, existingGlobalFilterKey)],
       },
-      [getFilter(false, newAppliedFilterKey)],
-      false
+      [getFilter(false, newAppliedFilterKey)]
     );
 
-    expect(navigatedPath).toEqual(expect.stringContaining(existingAppFilterKey));
-    expect(navigatedPath).toEqual(expect.stringContaining(existingGlobalFilterKey));
-    expect(navigatedPath).toEqual(expect.stringContaining(newAppliedFilterKey));
+    expect(href).toEqual(expect.stringContaining(existingAppFilterKey));
+    expect(href).toEqual(expect.stringContaining(existingGlobalFilterKey));
+    expect(href).toEqual(expect.stringContaining(newAppliedFilterKey));
   });
 
   test('when user chooses to remove current filters, current app filters are remove on destination dashboard', async () => {
@@ -208,24 +223,23 @@ describe('.execute()', () => {
     const existingGlobalFilterKey = 'existingGlobalFilter';
     const newAppliedFilterKey = 'newAppliedFilter';
 
-    const { navigatedPath } = await setupTestBed(
+    const { href } = await setupTestBed(
       {
         useCurrentFilters: false,
       },
       {
         filters: [getFilter(false, existingAppFilterKey), getFilter(true, existingGlobalFilterKey)],
       },
-      [getFilter(false, newAppliedFilterKey)],
-      false
+      [getFilter(false, newAppliedFilterKey)]
     );
 
-    expect(navigatedPath).not.toEqual(expect.stringContaining(existingAppFilterKey));
-    expect(navigatedPath).toEqual(expect.stringContaining(existingGlobalFilterKey));
-    expect(navigatedPath).toEqual(expect.stringContaining(newAppliedFilterKey));
+    expect(href).not.toEqual(expect.stringContaining(existingAppFilterKey));
+    expect(href).toEqual(expect.stringContaining(existingGlobalFilterKey));
+    expect(href).toEqual(expect.stringContaining(newAppliedFilterKey));
   });
 
   test('when user chooses to keep current time range, current time range is passed in url', async () => {
-    const { navigatedPath } = await setupTestBed(
+    const { href } = await setupTestBed(
       {
         useCurrentDateRange: true,
       },
@@ -235,15 +249,14 @@ describe('.execute()', () => {
           to: 'now',
         },
       },
-      [],
-      false
+      []
     );
 
-    expect(navigatedPath).toEqual(expect.stringContaining('now-300m'));
+    expect(href).toEqual(expect.stringContaining('now-300m'));
   });
 
   test('when user chooses to not keep current time range, no current time range is passed in url', async () => {
-    const { navigatedPath } = await setupTestBed(
+    const { href } = await setupTestBed(
       {
         useCurrentDateRange: false,
       },
@@ -257,11 +270,11 @@ describe('.execute()', () => {
       false
     );
 
-    expect(navigatedPath).not.toEqual(expect.stringContaining('now-300m'));
+    expect(href).not.toEqual(expect.stringContaining('now-300m'));
   });
 
   test('if range filter contains date, then it is passed as time', async () => {
-    const { navigatedPath } = await setupTestBed(
+    const { href } = await setupTestBed(
       {
         useCurrentDateRange: true,
       },
@@ -275,8 +288,8 @@ describe('.execute()', () => {
       true
     );
 
-    expect(navigatedPath).not.toEqual(expect.stringContaining('now-300m'));
-    expect(navigatedPath).toEqual(expect.stringContaining('2020-03-23'));
+    expect(href).not.toEqual(expect.stringContaining('now-300m'));
+    expect(href).toEqual(expect.stringContaining('2020-03-23'));
   });
 });
 

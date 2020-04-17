@@ -19,7 +19,9 @@ import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/vi
 
 export interface Params {
   getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
-  getNavigateToApp: () => Promise<CoreStart['application']['navigateToApp']>;
+  getApplicationService: () => Promise<
+    Pick<CoreStart['application'], 'getUrlForApp' | 'navigateToApp'>
+  >;
   getGetUrlGenerator: () => Promise<SharePluginStart['urlGenerators']['getUrlGenerator']>;
   getDataPluginActions: () => Promise<DataPublicPluginStart['actions']>;
 }
@@ -59,15 +61,24 @@ export class DashboardToDashboardDrilldown
     config: Config,
     context: ActionContext<VisualizeEmbeddableContract>
   ): Promise<string> => {
-    return await this.getDestinationUrl(config, context);
+    const { getUrlForApp } = await this.params.getApplicationService();
+    const dashboardPath = await this.getDestinationUrl(config, context);
+    // note: extracting hash and using 'kibana' as appId will be redundant,
+    // when dashboard move to np urls. (urlGenerator generates np url, which is not supported yet)
+    const dashboardHash = dashboardPath.split('#')[1];
+    return getUrlForApp('kibana', {
+      path: `#${dashboardHash}`,
+    });
   };
 
   public readonly execute = async (
     config: Config,
     context: ActionContext<VisualizeEmbeddableContract>
   ) => {
-    const navigateToApp = await this.params.getNavigateToApp();
+    const { navigateToApp } = await this.params.getApplicationService();
     const dashboardPath = await this.getDestinationUrl(config, context);
+    // note: extracting hash and using 'kibana' as appId will be redundant,
+    // when dashboard move to np urls. (urlGenerator generates np url, which is not supported yet)
     const dashboardHash = dashboardPath.split('#')[1];
     await navigateToApp('kibana', {
       path: `#${dashboardHash}`,

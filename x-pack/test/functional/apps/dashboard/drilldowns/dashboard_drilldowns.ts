@@ -68,9 +68,18 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       // trigger drilldown action by clicking on a pie and picking drilldown action by it's name
       await pieChart.filterOnPieSlice('40,000');
       await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
+
+      const href = await dashboardDrilldownPanelActions.getActionHrefByText(
+        DRILLDOWN_TO_AREA_CHART_NAME
+      );
+      expect(typeof href).to.be('string'); // checking that action has a href
+      const dashboardIdFromHref = PageObjects.dashboard.getDashboardIdFromUrl(href);
+
       await navigateWithinDashboard(async () => {
         await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_AREA_CHART_NAME);
       });
+      // checking that href is at least pointing to the same dashboard that we are navigated to by regular click
+      expect(dashboardIdFromHref).to.be(await PageObjects.dashboard.getDashboardIdFromCurrentUrl());
 
       // check that we drilled-down with filter from pie chart
       expect(await filterBar.getFilterCount()).to.be(1);
@@ -80,6 +89,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       // brush area chart and drilldown back to pie chat dashboard
       await brushAreaChart();
       await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
+
       await navigateWithinDashboard(async () => {
         await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_PIE_CHART_NAME);
       });

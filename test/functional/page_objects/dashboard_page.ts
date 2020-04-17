@@ -104,13 +104,18 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async getDashboardIdFromCurrentUrl() {
       const currentUrl = await browser.getCurrentUrl();
-      const urlSubstring = 'kibana#/dashboard/';
-      const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
-      const endIndex = currentUrl.indexOf('?');
-      const id = currentUrl.substring(startOfIdIndex, endIndex < 0 ? currentUrl.length : endIndex);
+      const id = this.getDashboardIdFromUrl(currentUrl);
 
       log.debug(`Dashboard id extracted from ${currentUrl} is ${id}`);
 
+      return id;
+    }
+
+    public getDashboardIdFromUrl(url: string) {
+      const urlSubstring = 'kibana#/dashboard/';
+      const startOfIdIndex = url.indexOf(urlSubstring) + urlSubstring.length;
+      const endIndex = url.indexOf('?');
+      const id = url.substring(startOfIdIndex, endIndex < 0 ? url.length : endIndex);
       return id;
     }
 

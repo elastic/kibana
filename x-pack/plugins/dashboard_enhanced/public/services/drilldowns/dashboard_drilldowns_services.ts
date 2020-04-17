@@ -44,8 +44,7 @@ export class DashboardDrilldownsService {
     const drilldowns = async () => (await core.getStartServices())[1].drilldowns;
     const getSavedObjectsClient = async () =>
       (await core.getStartServices())[0].savedObjects.client;
-    const getNavigateToApp = async () =>
-      (await core.getStartServices())[0].application.navigateToApp;
+    const getApplicationService = async () => (await core.getStartServices())[0].application;
 
     const getGetUrlGenerator = async () =>
       (await core.getStartServices())[1].share.urlGenerators.getUrlGenerator;
@@ -61,7 +60,7 @@ export class DashboardDrilldownsService {
     const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({
       getSavedObjectsClient,
       getGetUrlGenerator,
-      getNavigateToApp,
+      getApplicationService,
       getDataPluginActions,
     });
     plugins.drilldowns.registerDrilldown(dashboardToDashboardDrilldown);

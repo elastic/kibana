@@ -77,9 +77,7 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       const drilldowns = await testSubjects.findAll('listManageDrilldownsItem');
 
       for (const drilldown of drilldowns) {
-        const nameColumn = await drilldown.findByCssSelector(
-          '[data-test-subj="drilldownListItemName"]'
-        );
+        const nameColumn = await drilldown.findByTestSubject('drilldownListItemName');
         const name = await nameColumn.getVisibleText();
         if (titles.includes(name)) {
           const checkbox = await drilldown.findByTagName('input');
