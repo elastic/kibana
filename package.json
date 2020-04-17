@@ -119,7 +119,7 @@
   "dependencies": {
     "@babel/core": "^7.9.0",
     "@babel/register": "^7.9.0",
-    "@elastic/apm-rum": "^4.6.0",
+    "@elastic/apm-rum": "^5.1.1",
     "@elastic/charts": "18.3.0",
     "@elastic/datemath": "5.0.3",
     "@elastic/ems-client": "7.8.0",

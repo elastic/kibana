@@ -572,7 +572,9 @@ describe('patch rules schema', () => {
 
   test('language does not validate with something made up', () => {
     expect(
-      patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
+      patchRulesSchema.validate<
+        Partial<Omit<PatchRuleAlertParamsRest, 'language'> & { language: string }>
+      >({
         id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
