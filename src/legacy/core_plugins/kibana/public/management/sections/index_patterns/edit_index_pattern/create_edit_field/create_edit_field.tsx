@@ -27,7 +27,7 @@ import { IndexHeader } from '../index_header';
 import { IndexPattern, IndexPatternField } from '../../../../../../../../../plugins/data/public';
 import { ChromeDocTitle, NotificationsStart } from '../../../../../../../../../core/public';
 
-type CreateEditFieldProps = RouteComponentProps & {
+interface CreateEditFieldProps extends RouteComponentProps {
   indexPattern: IndexPattern;
   mode?: string;
   fieldName?: string;
@@ -38,7 +38,14 @@ type CreateEditFieldProps = RouteComponentProps & {
     docTitle: ChromeDocTitle;
     http: Function;
   };
-};
+}
+
+const newFieldPlaceholder = i18n.translate(
+  'kbn.management.editIndexPattern.scripted.newFieldPlaceholder',
+  {
+    defaultMessage: 'New Scripted Field',
+  }
+);
 
 export const CreateEditField = withRouter(
   ({
@@ -50,13 +57,15 @@ export const CreateEditField = withRouter(
     servises,
     history,
   }: CreateEditFieldProps) => {
-    const field: IndexPatternField | undefined =
+    const field =
       mode === 'edit' && fieldName
         ? indexPattern.fields.getByName(fieldName)
         : new IndexPatternField(indexPattern, {
             scripted: true,
             type: 'number',
           });
+
+    const url = `/management/kibana/index_patterns/${indexPattern.id}`;
 
     if (mode === 'edit') {
       if (!field) {
@@ -66,26 +75,16 @@ export const CreateEditField = withRouter(
           values: { indexPatternTitle: indexPattern.title, fieldName },
         });
         servises.notifications.toasts.addWarning(message);
-        history.push(`/management/kibana/index_patterns/${indexPattern.id}`);
+        history.push(url);
       }
     }
 
-    const docFieldName =
-      field?.name ||
-      i18n.translate('kbn.management.editIndexPattern.scripted.newFieldPlaceholder', {
-        defaultMessage: 'New Scripted Field',
-      });
+    const docFieldName = field?.name || newFieldPlaceholder;
 
     servises.docTitle.change([docFieldName, indexPattern.title]);
 
     const redirectAway = () => {
-      setTimeout(() => {
-        history.push(
-          `/management/kibana/index_patterns/${indexPattern.id}?_a=(tab:${
-            field?.scripted ? 'scriptedFields' : 'indexedFields'
-          })`
-        );
-      });
+      history.push(`${url}?_a=(tab:${field?.scripted ? 'scriptedFields' : 'indexedFields'})`);
     };
 
     return (
