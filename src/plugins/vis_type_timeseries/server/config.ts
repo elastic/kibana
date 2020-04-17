@@ -17,24 +17,15 @@
  * under the License.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export const todoSavedObject: SavedObjectsType = {
-  name: 'todo',
-  hidden: false,
-  namespaceType: 'agnostic',
-  mappings: {
-    properties: {
-      title: {
-        type: 'keyword',
-      },
-      task: {
-        type: 'text',
-      },
-      icon: {
-        type: 'keyword',
-      },
-    },
-  },
-  migrations: {},
-};
+export const config = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+
+  /** @deprecated **/
+  chartResolution: schema.number({ defaultValue: 150 }),
+  /** @deprecated **/
+  minimumBucketSize: schema.number({ defaultValue: 10 }),
+});
+
+export type VisTypeTimeseriesConfig = TypeOf<typeof config>;
