@@ -20,11 +20,12 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../inspector/public';
-import { ExpressionRenderHandler } from './render';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
-import { getInspector, getExpressionsService } from './services';
 import { ExecutionContract } from '../common/execution/execution_contract';
+
+import { ExpressionRenderHandler } from './render';
+import { getInspector, getExpressionsService } from './services';
 
 type Data = any;
 
