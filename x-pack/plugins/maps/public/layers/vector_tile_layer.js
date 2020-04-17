@@ -161,19 +161,7 @@ export class VectorTileLayer extends TileLayer {
       return;
     }
 
-    if (this._requiresPrevSourceCleanup(mbMap)) {
-      const mbStyle = mbMap.getStyle();
-      mbStyle.layers.forEach(mbLayer => {
-        if (this.ownsMbLayerId(mbLayer.id)) {
-          mbMap.removeLayer(mbLayer.id);
-        }
-      });
-      Object.keys(mbStyle.sources).some(mbSourceId => {
-        if (this.ownsMbSourceId(mbSourceId)) {
-          mbMap.removeSource(mbSourceId);
-        }
-      });
-    }
+    this._removeStaleMbSourcesAndLayers(mbMap);
 
     let initialBootstrapCompleted = false;
     const sourceIds = Object.keys(vectorStyle.sources);

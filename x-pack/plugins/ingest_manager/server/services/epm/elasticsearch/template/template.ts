@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Field } from '../../fields/field';
+import { Field, Fields } from '../../fields/field';
 import { Dataset, IndexTemplate } from '../../../../types';
 import { getDatasetAssetBaseName } from '../index';
 
@@ -13,6 +13,14 @@ interface Properties {
 }
 interface Mappings {
   properties: any;
+}
+
+interface Mapping {
+  [key: string]: any;
+}
+
+interface MultiFields {
+  [key: string]: object;
 }
 
 const DEFAULT_SCALING_FACTOR = 1000;
@@ -67,23 +75,19 @@ export function generateMappings(fields: Field[]): Mappings {
           fieldProps.scaling_factor = field.scaling_factor || DEFAULT_SCALING_FACTOR;
           break;
         case 'text':
-          fieldProps.type = 'text';
-          if (field.analyzer) {
-            fieldProps.analyzer = field.analyzer;
-          }
-          if (field.search_analyzer) {
-            fieldProps.search_analyzer = field.search_analyzer;
+          const textMapping = generateTextMapping(field);
+          fieldProps = { ...fieldProps, ...textMapping, type: 'text' };
+          if (field.multi_fields) {
+            fieldProps.fields = generateMultiFields(field.multi_fields);
           }
           break;
         case 'keyword':
-          fieldProps.type = 'keyword';
-          if (field.ignore_above) {
-            fieldProps.ignore_above = field.ignore_above;
-          } else {
-            fieldProps.ignore_above = DEFAULT_IGNORE_ABOVE;
+          const keywordMapping = generateKeywordMapping(field);
+          fieldProps = { ...fieldProps, ...keywordMapping, type: 'keyword' };
+          if (field.multi_fields) {
+            fieldProps.fields = generateMultiFields(field.multi_fields);
           }
           break;
-        // TODO move handling of multi_fields here?
         case 'object':
           // TODO improve
           fieldProps.type = 'object';
@@ -113,6 +117,45 @@ export function generateMappings(fields: Field[]): Mappings {
   return { properties: props };
 }
 
+function generateMultiFields(fields: Fields): MultiFields {
+  const multiFields: MultiFields = {};
+  if (fields) {
+    fields.forEach((f: Field) => {
+      const type = f.type;
+      switch (type) {
+        case 'text':
+          multiFields[f.name] = { ...generateTextMapping(f), type: f.type };
+          break;
+        case 'keyword':
+          multiFields[f.name] = { ...generateKeywordMapping(f), type: f.type };
+          break;
+      }
+    });
+  }
+  return multiFields;
+}
+
+function generateKeywordMapping(field: Field): Mapping {
+  const mapping: Mapping = {
+    ignore_above: DEFAULT_IGNORE_ABOVE,
+  };
+  if (field.ignore_above) {
+    mapping.ignore_above = field.ignore_above;
+  }
+  return mapping;
+}
+
+function generateTextMapping(field: Field): Mapping {
+  const mapping: Mapping = {};
+  if (field.analyzer) {
+    mapping.analyzer = field.analyzer;
+  }
+  if (field.search_analyzer) {
+    mapping.search_analyzer = field.search_analyzer;
+  }
+  return mapping;
+}
+
 function getDefaultProperties(field: Field): Properties {
   const properties: Properties = {};
 
@@ -134,6 +177,22 @@ function getDefaultProperties(field: Field): Properties {
  */
 export function generateTemplateName(dataset: Dataset): string {
   return getDatasetAssetBaseName(dataset);
+}
+
+/**
+ * Returns a map of the dataset path fields to elasticsearch index pattern.
+ * @param datasets an array of Dataset objects
+ */
+export function generateESIndexPatterns(datasets: Dataset[] | undefined): Record<string, string> {
+  if (!datasets) {
+    return {};
+  }
+
+  const patterns: Record<string, string> = {};
+  for (const dataset of datasets) {
+    patterns[dataset.path] = generateTemplateName(dataset) + '-*';
+  }
+  return patterns;
 }
 
 function getBaseTemplate(type: string, templateName: string, mappings: Mappings): IndexTemplate {
