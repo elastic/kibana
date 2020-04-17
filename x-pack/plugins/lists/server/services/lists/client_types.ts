@@ -8,12 +8,11 @@ import { PassThrough, Readable } from 'stream';
 
 import { KibanaRequest } from 'src/core/server';
 
-import { SecurityPluginSetup } from '../../security/server';
-import { SpacesServiceSetup } from '../../spaces/server';
-import { Type } from '../common/schemas';
-
-import { ConfigType } from './config';
-import { DataClient } from './types';
+import { SecurityPluginSetup } from '../../../../security/server';
+import { SpacesServiceSetup } from '../../../../spaces/server';
+import { Type } from '../../../common/schemas';
+import { ConfigType } from '../../config';
+import { DataClient } from '../../types';
 
 export interface ConstructorOptions {
   config: ConfigType;

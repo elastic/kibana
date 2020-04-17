@@ -6,8 +6,8 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ElasticListItemReturnType } from '../types';
-import { Type, ListsItemsSchema } from '../../common/schemas';
+import { ElasticListItemReturnType } from '../../types';
+import { Type, ListsItemsSchema } from '../../../common/schemas';
 
 export const transformElasticToListsItems = ({
   response,

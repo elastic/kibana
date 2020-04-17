@@ -6,8 +6,8 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ListsItemsSchema, Type } from '../../common/schemas';
-import { ElasticListItemReturnType, DataClient } from '../types';
+import { ListsItemsSchema, Type } from '../../../common/schemas';
+import { ElasticListItemReturnType, DataClient } from '../../types';
 import { transformElasticToListsItems, getQueryFilterFromTypeValue } from '../utils';
 
 interface GetListItemsByValuesOptions {
@@ -37,7 +37,7 @@ export const getListItemsByValues = async ({
           },
         },
       },
-      size: value.length,
+      size: value.length, // This has a limit on the number which is 10k
     }
   );
   return transformElasticToListsItems({ response, type });

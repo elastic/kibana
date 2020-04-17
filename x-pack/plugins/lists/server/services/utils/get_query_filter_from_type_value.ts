@@ -4,28 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticListItemsType } from '../types';
-import { Type } from '../../common/schemas';
+import { Type } from '../../../common/schemas';
 
-export const transformListItemsToElasticQuery = ({
+export type QueryFilterType = Array<
+  { term: { list_id: string } } | { terms: { ip: string[] } } | { terms: { keyword: string[] } }
+>;
+
+export const getQueryFilterFromTypeValue = ({
   type,
   value,
+  listId,
 }: {
   type: Type;
-  value: string;
+  value: string[];
+  listId: string;
   // We disable the consistent return since we want to use typescript for exhaustive type checks
   // eslint-disable-next-line consistent-return
-}): ElasticListItemsType => {
+}): QueryFilterType => {
+  const filter: QueryFilterType = [{ term: { list_id: listId } }];
   switch (type) {
     case 'ip': {
-      return {
-        ip: value,
-      };
+      return [...filter, ...[{ terms: { ip: value } }]];
     }
     case 'keyword': {
-      return {
-        keyword: value,
-      };
+      return [...filter, ...[{ terms: { keyword: value } }]];
     }
   }
 };

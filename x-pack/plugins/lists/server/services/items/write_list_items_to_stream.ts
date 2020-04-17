@@ -8,7 +8,7 @@ import { PassThrough } from 'stream';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ElasticListItemReturnType, DataClient } from '../types';
+import { ElasticListItemReturnType, DataClient } from '../../types';
 
 /**
  * How many results to page through from the network at a time

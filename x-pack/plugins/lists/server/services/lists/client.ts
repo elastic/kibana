@@ -6,24 +6,10 @@
 
 import { KibanaRequest, ScopedClusterClient } from 'src/core/server';
 
-import { SecurityPluginSetup } from '../../security/server';
-import { SpacesServiceSetup } from '../../spaces/server';
-import { ListsSchema, ListsItemsSchema } from '../common/schemas';
-
-import {
-  deleteTemplate,
-  deletePolicy,
-  deleteAllIndex,
-  setPolicy,
-  setTemplate,
-  getTemplateExists,
-  getPolicyExists,
-  createBootstrapIndex,
-  getIndexExists,
-} from './siem_server_deps';
-import listsItemsPolicy from './items/lists_items_policy.json';
-import listsPolicy from './lists/lists_policy.json';
-import { ConfigType } from './config';
+import { SecurityPluginSetup } from '../../../../security/server';
+import { SpacesServiceSetup } from '../../../../spaces/server';
+import { ListsSchema, ListsItemsSchema } from '../../../common/schemas';
+import { ConfigType } from '../../config';
 import {
   getListIndex,
   getList,
@@ -31,7 +17,7 @@ import {
   getListsTemplate,
   deleteList,
   updateList,
-} from './lists';
+} from '../../services/lists';
 import {
   getListItemIndex,
   getListsItemsTemplate,
@@ -44,7 +30,22 @@ import {
   updateListItem,
   getListItem,
   getListItemsByValues,
-} from './items';
+} from '../../services/items';
+import { getUser } from '../../services/utils';
+import {
+  deleteTemplate,
+  deletePolicy,
+  deleteAllIndex,
+  setPolicy,
+  setTemplate,
+  getTemplateExists,
+  getPolicyExists,
+  createBootstrapIndex,
+  getIndexExists,
+} from '../../siem_server_deps';
+
+import listsItemsPolicy from './items/lists_items_policy.json';
+import listsPolicy from './lists/lists_policy.json';
 import {
   ConstructorOptions,
   CreateListOptions,
@@ -62,8 +63,8 @@ import {
   GetListItemOptions,
   GetListItemsByValueOptions,
 } from './client_types';
-import { getUser } from './utils';
 
+// TODO: Consider an interface and a factory
 export class ListsClient {
   private readonly spaces: SpacesServiceSetup | undefined | null;
   private readonly config: ConfigType;

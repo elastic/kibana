@@ -13,7 +13,7 @@ import { SpacesServiceSetup } from '../../spaces/server';
 
 import { ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';
-import { ListsClient } from './client';
+import { ListsClient } from './services/lists/client';
 import { ContextProvider, ContextProviderReturn, PluginsSetup } from './types';
 import { createConfig$ } from './create_config';
 
@@ -66,6 +66,7 @@ export class ListsPlugin {
       } else if (elasticsearch == null) {
         throw new TypeError('Elastic Search is required for this plugin to operate');
       } else if (security == null) {
+        // TODO: This might be null, test authentication being turned off.
         throw new TypeError('Security plugin is required for this plugin to operate');
       } else {
         return {

@@ -6,8 +6,8 @@
 
 import { Readable } from 'stream';
 
-import { Type } from '../../common/schemas';
-import { DataClient } from '../types';
+import { Type } from '../../../common/schemas';
+import { DataClient } from '../../types';
 
 import { createListItemsBulk, getListItemsByValues, BufferLines } from '.';
 

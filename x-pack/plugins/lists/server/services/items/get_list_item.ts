@@ -6,21 +6,21 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ListsSchema } from '../../common/schemas';
-import { DataClient } from '../types';
+import { ListsItemsSchema } from '../../../common/schemas';
+import { DataClient } from '../../types';
 
-interface GetListOptions {
+interface GetListItemOptions {
   id: string;
   dataClient: DataClient;
-  listsIndex: string;
+  listsItemsIndex: string;
 }
 
-export const getList = async ({
+export const getListItem = async ({
   id,
   dataClient,
-  listsIndex,
-}: GetListOptions): Promise<ListsSchema | null> => {
-  const result: SearchResponse<Omit<ListsSchema, 'id'>> = await dataClient.callAsCurrentUser(
+  listsItemsIndex,
+}: GetListItemOptions): Promise<ListsItemsSchema | null> => {
+  const result: SearchResponse<Omit<ListsItemsSchema, 'id'>> = await dataClient.callAsCurrentUser(
     'search',
     {
       body: {
@@ -30,10 +30,11 @@ export const getList = async ({
           },
         },
       },
-      index: listsIndex,
+      index: listsItemsIndex,
       ignoreUnavailable: true,
     }
   );
+
   if (result.hits.hits.length) {
     return {
       id: result.hits.hits[0]._id,

@@ -9,7 +9,9 @@ import { Type } from '../common/schemas';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { SecurityPluginSetup } from '../../security/server';
 
-import { ListsClient } from './client';
+import { ListsClient } from './services/lists/client';
+
+// TODO: Change this to io-ts under common/schemas
 
 export interface BaseElasticListType {
   name: string;

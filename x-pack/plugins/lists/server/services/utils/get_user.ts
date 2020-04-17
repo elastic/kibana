@@ -6,7 +6,7 @@
 
 import { KibanaRequest } from 'kibana/server';
 
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginSetup } from '../../../../security/server';
 
 interface GetUserOptions {
   security: SecurityPluginSetup;

@@ -6,9 +6,9 @@
 
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ListsItemsSchema } from '../../common/schemas';
+import { ListsItemsSchema } from '../../../common/schemas';
 import { transformListItemsToElasticQuery } from '../utils';
-import { DataClient, ElasticListItemUpdateInputType } from '../types';
+import { DataClient, ElasticListItemUpdateInputType } from '../../types';
 
 import { getListItem } from './get_list_item';
 

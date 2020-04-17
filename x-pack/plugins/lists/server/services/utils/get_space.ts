@@ -6,7 +6,7 @@
 
 import { KibanaRequest } from 'kibana/server';
 
-import { SpacesServiceSetup } from '../../../spaces/server';
+import { SpacesServiceSetup } from '../../../../spaces/server';
 
 export const getSpace = ({
   spaces,

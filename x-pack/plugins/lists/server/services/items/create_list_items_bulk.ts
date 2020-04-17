@@ -7,8 +7,8 @@
 import uuid from 'uuid';
 
 import { transformListItemsToElasticQuery } from '../utils';
-import { ElasticListItemsInputType, DataClient } from '../types';
-import { Type } from '../../common/schemas';
+import { ElasticListItemsInputType, DataClient } from '../../types';
+import { Type } from '../../../common/schemas';
 
 export interface CreateBulkType {
   create: { _index: string };

@@ -7,8 +7,8 @@
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ListsItemsSchema, Type } from '../../common/schemas';
-import { ElasticListItemsInputType, DataClient } from '../types';
+import { ListsItemsSchema, Type } from '../../../common/schemas';
+import { ElasticListItemsInputType, DataClient } from '../../types';
 import { transformListItemsToElasticQuery } from '../utils';
 
 interface CreateListItemOptions {

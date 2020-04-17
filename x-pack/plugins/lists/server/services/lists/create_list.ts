@@ -7,8 +7,8 @@
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ElasticListInputType, DataClient } from '../types';
-import { ListsSchema, Type } from '../../common/schemas';
+import { ElasticListInputType, DataClient } from '../../types';
+import { ListsSchema, Type } from '../../../common/schemas';
 
 interface CreateListOptions {
   id: string | null | undefined;

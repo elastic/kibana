@@ -6,8 +6,8 @@
 
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ListsSchema } from '../../common/schemas';
-import { DataClient, ElasticListUpdateInputType } from '../types';
+import { ListsSchema } from '../../../common/schemas';
+import { DataClient, ElasticListUpdateInputType } from '../../types';
 
 import { getList } from '.';
 

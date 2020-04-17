@@ -6,7 +6,7 @@
 
 import { RequestHandlerContext } from 'kibana/server';
 
-import { ListsClient } from '../../client';
+import { ListsClient } from '../../services/lists/client';
 
 class ErrorWithStatusCode extends Error {
   private readonly statusCode: number;

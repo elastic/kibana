@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListsSchema } from '../../common/schemas';
-import { DataClient } from '../types';
+import { ListsSchema } from '../../../common/schemas';
+import { DataClient } from '../../types';
 
 import { getList } from '.';
 
