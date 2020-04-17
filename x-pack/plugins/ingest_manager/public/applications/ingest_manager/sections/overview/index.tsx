@@ -24,7 +24,9 @@ import { useLink, useGetAgentConfigs } from '../../hooks';
 import { AgentEnrollmentFlyout } from '../fleet/agent_list_page/components';
 import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from '../../constants';
 
-const OverviewPanel = styled(EuiPanel)`
+const OverviewPanel = styled(EuiPanel).attrs(props => ({
+  paddingSize: 'm',
+}))`
   header {
     display: flex;
     align-items: center;
@@ -40,11 +42,11 @@ const OverviewPanel = styled(EuiPanel)`
   }
 `;
 
-OverviewPanel.defaultProps = {
-  paddingSize: 'm',
-};
-
-const OverviewStats = styled(EuiDescriptionList)`
+const OverviewStats = styled(EuiDescriptionList).attrs(props => ({
+  compressed: true,
+  textStyle: 'reverse',
+  type: 'column',
+}))`
   & > * {
     margin-top: ${props => props.theme.eui.paddingSizes.s} !important;
 
@@ -54,12 +56,6 @@ const OverviewStats = styled(EuiDescriptionList)`
     }
   }
 `;
-
-OverviewStats.defaultProps = {
-  compressed: true,
-  textStyle: 'reverse',
-  type: 'column',
-};
 
 export const IngestManagerOverview: React.FunctionComponent = () => {
   // Agent enrollment flyout state
