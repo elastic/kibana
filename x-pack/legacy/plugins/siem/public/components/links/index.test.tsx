@@ -24,6 +24,8 @@ import {
   ExternalLink,
 } from '.';
 
+jest.mock('../../pages/overview/events_by_dataset');
+
 jest.mock('../../lib/kibana', () => {
   return {
     useUiSetting$: jest.fn(),

@@ -10,7 +10,7 @@ import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { SignalSearchResponse, BulkResponse } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
-import { generateId, makeFloatString } from './utils';
+import { generateId, makeFloatString, errorAggregator } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../../src/core/server';
 
@@ -134,17 +134,10 @@ export const singleBulkCreate = async ({
   logger.debug(`took property says bulk took: ${response.took} milliseconds`);
 
   if (response.errors) {
-    const itemsWithErrors = response.items.filter(item => item.create.error);
-    const errorCountsByStatus = countBy(itemsWithErrors, item => item.create.status);
-    delete errorCountsByStatus['409']; // Duplicate signals are expected
-
-    if (!isEmpty(errorCountsByStatus)) {
+    const errorCountByMessage = errorAggregator(response, [409]);
+    if (!isEmpty(errorCountByMessage)) {
       logger.error(
-        `[-] bulkResponse had errors with response statuses:counts of...\n${JSON.stringify(
-          errorCountsByStatus,
-          null,
-          2
-        )}`
+        `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
       );
     }
   }
