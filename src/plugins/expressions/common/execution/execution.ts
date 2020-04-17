@@ -37,7 +37,7 @@ import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 
-const ABORT_SENTINEL = Symbol();
+const ABORT_ERROR = Object.freeze(new Error('The expression was aborted.'));
 
 const createAbortErrorValue = () =>
   createError({
@@ -102,7 +102,7 @@ export class Execution<
    * Promise that rejects if/when abort controller sends "abort" signal.
    */
   private readonly abortRejection = new Promise<never>((resolve, reject) => {
-    this.abortController.signal.addEventListener('abort', () => reject(ABORT_SENTINEL));
+    this.abortController.signal.addEventListener('abort', () => reject(ABORT_ERROR));
   });
 
   /**
@@ -197,7 +197,7 @@ export class Execution<
     const chainPromise = this.invokeChain(this.state.get().ast.chain, input);
 
     this.race(chainPromise).then(resolve, error => {
-      if (error === ABORT_SENTINEL) resolve(createAbortErrorValue());
+      if (error === ABORT_ERROR) resolve(createAbortErrorValue());
       else reject(error);
     });
 
