@@ -87,6 +87,7 @@ Lens and visualizations::
 * Median aggregation labels now show "Median" instead of "50th percentile of" in Visualize. Custom labels are also used {pull}58521[#58521]
 * Adds positive_rate as a new aggregation to TSVB {pull}59843[#59843]
 * Makes linked saved search work when user navigates back using browser back button {pull}59690[#59690]
+* Visualization editor UI has been updated to the new styles, consistent with the rest of the platform and a more logical left-to-right flow of creating content {pull}49864[#49864]
 Logs::
 * Uses the Super date picker in the log stream {pull}54280[#54280]
 * Adds expandable rows with category examples {pull}54586[#54586]
