@@ -11,7 +11,7 @@ import {
   useRequest as _useRequest,
 } from '../../../shared_imports';
 
-import { Error as CustomError } from '../../components/section_error';
+import { Error as CustomError } from '../../../../../../../src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error';
 
 import { httpService } from './index';
 

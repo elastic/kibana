@@ -17,7 +17,7 @@ import {
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryType } from '../../../../../../common/types';
-import { Error } from '../../../../components/section_error';
+import { Error } from '../../../../../../../../../src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error';
 import { RepositoryDeleteProvider } from '../../../../components';
 import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';

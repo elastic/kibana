@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HttpSetup } from 'kibana/public';
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+
+import { API_BASE_PATH } from '../../common/constants';
+
+import { AuthorizationProvider } from '../shared_imports';
 
 import { App } from './app';
 import { DocumentationService, UiMetricService, ApiService, BreadcrumbService } from './services';
@@ -18,17 +24,27 @@ export interface AppServices {
   api: ApiService;
 }
 
+export interface CoreServices {
+  http: HttpSetup;
+}
+
 export const renderApp = (
   element: HTMLElement,
   I18nContext: ({ children }: { children: ReactNode }) => JSX.Element,
-  services: AppServices
+  services: AppServices,
+  coreServices: CoreServices
 ) => {
   render(
-    <I18nContext>
-      <KibanaContextProvider services={services}>
-        <App />
-      </KibanaContextProvider>
-    </I18nContext>,
+    <AuthorizationProvider
+      privilegesEndpoint={`${API_BASE_PATH}/privileges`}
+      httpClient={coreServices.http}
+    >
+      <I18nContext>
+        <KibanaContextProvider services={services}>
+          <App />
+        </KibanaContextProvider>
+      </I18nContext>
+    </AuthorizationProvider>,
     element
   );
 

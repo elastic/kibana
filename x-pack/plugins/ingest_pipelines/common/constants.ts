@@ -14,3 +14,5 @@ export const PLUGIN_MIN_LICENSE_TYPE = basicLicense;
 export const BASE_PATH = '/management/elasticsearch/ingest_pipelines';
 
 export const API_BASE_PATH = '/api/ingest_pipelines';
+
+export const APP_REQUIRED_PRIVILEGE = 'manage_pipeline';

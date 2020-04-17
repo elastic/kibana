@@ -28,7 +28,7 @@ import {
   PolicyExecuteProvider,
   PolicyDeleteProvider,
 } from '../../../../components';
-import { Error } from '../../../../components/section_error';
+import { Error } from '../../../../../../../../../src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
 import { SendRequestResponse } from '../../../../../shared_imports';
 

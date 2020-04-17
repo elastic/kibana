@@ -20,7 +20,7 @@ import { SnapshotDetails } from '../../../../../../common/types';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
-import { Error } from '../../../../components/section_error';
+import { Error } from '../../../../../../../../../src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
