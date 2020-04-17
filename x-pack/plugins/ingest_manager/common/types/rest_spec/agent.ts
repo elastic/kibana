@@ -109,6 +109,20 @@ export interface PostAgentUnenrollResponse {
   success: boolean;
 }
 
+export interface PutAgentReassignRequest {
+  body: { kuery: string; config_id: string } | { ids: string[]; config_id: string };
+}
+
+export interface PutAgentReassignResponse {
+  results: Array<{
+    success: boolean;
+    error?: any;
+    id: string;
+    action: string;
+  }>;
+  success: boolean;
+}
+
 export interface GetOneAgentEventsRequest {
   params: {
     agentId: string;

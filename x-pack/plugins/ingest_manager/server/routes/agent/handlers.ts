@@ -14,6 +14,7 @@ import {
   PostAgentEnrollResponse,
   PostAgentUnenrollResponse,
   GetAgentStatusResponse,
+  PutAgentReassignResponse,
 } from '../../../common/types';
 import {
   GetAgentsRequestSchema,
@@ -25,6 +26,7 @@ import {
   PostAgentEnrollRequestSchema,
   PostAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
+  PutAgentReassignRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
@@ -345,6 +347,66 @@ export const postAgentsUnenrollHandler: RequestHandler<
     );
 
     const body: PostAgentUnenrollResponse = {
+      results,
+      success: results.every(result => result.success),
+    };
+    return response.ok({ body });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const putAgentsReassignHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PutAgentReassignRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    const kuery = (request.body as { kuery: string }).kuery;
+    let toReassignIds: string[] = (request.body as { ids: string[] }).ids || [];
+
+    if (kuery) {
+      let hasMore = true;
+      let page = 1;
+      while (hasMore) {
+        const { agents } = await AgentService.listAgents(soClient, {
+          page: page++,
+          perPage: 100,
+          kuery,
+          showInactive: true,
+        });
+        if (agents.length === 0) {
+          hasMore = false;
+        }
+        const agentIds = agents.filter(a => a.active).map(a => a.id);
+        toReassignIds = toReassignIds.concat(agentIds);
+      }
+    }
+    const results = (
+      await AgentService.reassignAgents(soClient, toReassignIds, request.body.config_id)
+    ).map(({ success, id, error }): {
+      success: boolean;
+      id: string;
+      action: 'reassigned';
+      error?: {
+        message: string;
+      };
+    } => {
+      return {
+        success,
+        id,
+        action: 'reassigned',
+        error: error && {
+          message: error.message,
+        },
+      };
+    });
+
+    const body: PutAgentReassignResponse = {
       results,
       success: results.every(result => result.success),
     };

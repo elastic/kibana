@@ -25,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { CSSProperties } from 'styled-components';
-import { AgentEnrollmentFlyout } from './components';
+import { AgentEnrollmentFlyout, AgentReassignConfigFlyout } from './components';
 import { Agent } from '../../../types';
 import {
   usePagination,
@@ -71,61 +71,76 @@ const statusFilters = [
   },
 ] as Array<{ label: string; status: string }>;
 
-const RowActions = React.memo<{ agent: Agent; refresh: () => void }>(({ agent, refresh }) => {
-  const hasWriteCapabilites = useCapabilities().write;
-  const DETAILS_URI = useLink(FLEET_AGENT_DETAIL_PATH);
-  const [isOpen, setIsOpen] = useState(false);
-  const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
-  const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refresh: () => void }>(
+  ({ agent, refresh, onReassignClick }) => {
+    const hasWriteCapabilites = useCapabilities().write;
+    const DETAILS_URI = useLink(FLEET_AGENT_DETAIL_PATH);
+    const [isOpen, setIsOpen] = useState(false);
+    const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
+    const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
 
-  return (
-    <EuiPopover
-      anchorPosition="downRight"
-      panelPaddingSize="none"
-      button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          onClick={handleToggleMenu}
-          aria-label={i18n.translate('xpack.ingestManager.agentList.actionsMenuText', {
-            defaultMessage: 'Open',
-          })}
+    return (
+      <EuiPopover
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+        button={
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            onClick={handleToggleMenu}
+            aria-label={i18n.translate('xpack.ingestManager.agentList.actionsMenuText', {
+              defaultMessage: 'Open',
+            })}
+          />
+        }
+        isOpen={isOpen}
+        closePopover={handleCloseMenu}
+      >
+        <EuiContextMenuPanel
+          items={[
+            <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${agent.id}`} key="viewConfig">
+              <FormattedMessage
+                id="xpack.ingestManager.agentList.viewActionText"
+                defaultMessage="View Agent"
+              />
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              icon="pencil"
+              onClick={() => {
+                handleCloseMenu();
+                onReassignClick();
+              }}
+              key="reassignConfig"
+            >
+              <FormattedMessage
+                id="xpack.ingestManager.agentList.reassignActionText"
+                defaultMessage="Assign new agent config"
+              />
+            </EuiContextMenuItem>,
+
+            <AgentUnenrollProvider>
+              {unenrollAgentsPrompt => (
+                <EuiContextMenuItem
+                  disabled={!hasWriteCapabilites}
+                  icon="cross"
+                  onClick={() => {
+                    unenrollAgentsPrompt([agent.id], 1, () => {
+                      refresh();
+                    });
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.unenrollOneButton"
+                    defaultMessage="Unenroll"
+                  />
+                </EuiContextMenuItem>
+              )}
+            </AgentUnenrollProvider>,
+          ]}
         />
-      }
-      isOpen={isOpen}
-      closePopover={handleCloseMenu}
-    >
-      <EuiContextMenuPanel
-        items={[
-          <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${agent.id}`} key="viewConfig">
-            <FormattedMessage
-              id="xpack.ingestManager.agentList.viewActionText"
-              defaultMessage="View Agent"
-            />
-          </EuiContextMenuItem>,
-
-          <AgentUnenrollProvider>
-            {unenrollAgentsPrompt => (
-              <EuiContextMenuItem
-                disabled={!hasWriteCapabilites}
-                icon="cross"
-                onClick={() => {
-                  unenrollAgentsPrompt([agent.id], 1, () => {
-                    refresh();
-                  });
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.ingestManager.agentList.unenrollOneButton"
-                  defaultMessage="Unenroll"
-                />
-              </EuiContextMenuItem>
-            )}
-          </AgentUnenrollProvider>,
-        ]}
-      />
-    </EuiPopover>
-  );
-});
+      </EuiPopover>
+    );
+  }
+);
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
@@ -158,6 +173,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   // Agent enrollment flyout state
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
+
+  // Agent reassignment flyout state
+  const [agentToReassignId, setAgentToReassignId] = useState<string | undefined>(undefined);
 
   let kuery = search.trim();
   if (selectedConfigs.length) {
@@ -350,7 +368,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       actions: [
         {
           render: (agent: Agent) => {
-            return <RowActions agent={agent} refresh={() => agentsRequest.sendRequest()} />;
+            return (
+              <RowActions
+                agent={agent}
+                refresh={() => agentsRequest.sendRequest()}
+                onReassignClick={() => setAgentToReassignId(agent.id)}
+              />
+            );
           },
         },
       ],
@@ -389,6 +413,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           onClose={() => setIsEnrollmentFlyoutOpen(false)}
         />
       ) : null}
+      {agentToReassignId && (
+        <AgentReassignConfigFlyout
+          agentId={agentToReassignId}
+          agentConfigs={agentConfigs}
+          onClose={() => {
+            setAgentToReassignId(undefined);
+            agentsRequest.sendRequest();
+          }}
+        />
+      )}
       <EuiFlexGroup alignItems={'center'}>
         {selectedAgents.length ? (
           <EuiFlexItem>
