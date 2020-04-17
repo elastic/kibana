@@ -31,7 +31,7 @@ Elastic Alerts triggers a new incident on the corresponding PagerDuty service.
 ==== Requirements
 
 In the kibana.yml configuration file, you must add the <<general-alert-action-settings, saved objects encryption setting>>.
-This is required to encrypt parameters the must be secured, for example, PagerDuty’s integration key.
+This is required to encrypt parameters that must be secured, for example, PagerDuty’s integration key.
 
 If you have security enabled:
 
