@@ -26,6 +26,8 @@ import { createTagCloudFn } from './tag_cloud_fn';
 import { createTagCloudVisTypeDefinition } from './tag_cloud_type';
 import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService } from './services';
+import { ConfigSchema } from '../config';
+
 import './index.scss';
 
 /** @internal */
@@ -47,9 +49,9 @@ export interface TagCloudVisPluginStartDependencies {
 
 /** @internal */
 export class TagCloudPlugin implements Plugin<void, void> {
-  initializerContext: PluginInitializerContext;
+  initializerContext: PluginInitializerContext<ConfigSchema>;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 

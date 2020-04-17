@@ -2,5 +2,6 @@
   "id": "visTypeTagcloud",
   "version": "kibana",
   "ui": true,
+  "server": true,
   "requiredPlugins": ["data", "expressions", "visualizations", "charts"]
 }
