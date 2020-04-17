@@ -81,7 +81,7 @@ export const Create = React.memo(() => {
           label,
         }))
       ),
-    [tagOptions.length]
+    [tagOptions]
   );
   const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CasePostRequest>(
     form,

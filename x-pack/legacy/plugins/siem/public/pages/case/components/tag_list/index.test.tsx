@@ -53,7 +53,7 @@ describe('TagList ', () => {
     (useForm as jest.Mock).mockImplementation(() => ({ form: formHookMock }));
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
-      tags: [...sampleTags],
+      tags: sampleTags,
       fetchTags,
     }));
   });

@@ -83,7 +83,7 @@ describe('Create case', () => {
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     (useGetTags as jest.Mock).mockImplementation(() => ({
-      tags: [...sampleTags],
+      tags: sampleTags,
       fetchTags,
     }));
   });

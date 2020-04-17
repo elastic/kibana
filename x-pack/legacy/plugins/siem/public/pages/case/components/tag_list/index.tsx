@@ -70,7 +70,7 @@ export const TagList = React.memo(
             label,
           }))
         ),
-      [tagOptions.length]
+      [tagOptions]
     );
 
     return (
