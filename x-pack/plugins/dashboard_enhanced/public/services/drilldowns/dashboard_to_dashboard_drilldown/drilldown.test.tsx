@@ -96,10 +96,10 @@ describe('.execute() & getHref', () => {
     });
     const selectRangeFiltersSpy = jest
       .spyOn(dataPluginActions, 'createFiltersFromRangeSelectAction')
-      .mockImplementation(() => filtersFromEvent);
+      .mockImplementation(() => Promise.resolve(filtersFromEvent));
     const valueClickFiltersSpy = jest
       .spyOn(dataPluginActions, 'createFiltersFromValueClickAction')
-      .mockImplementation(() => filtersFromEvent);
+      .mockImplementation(() => Promise.resolve(filtersFromEvent));
 
     const completeConfig: Config = {
       dashboardId: 'id',
