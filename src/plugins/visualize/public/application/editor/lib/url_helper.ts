@@ -18,7 +18,8 @@
  */
 
 import { parseUrl, stringify } from 'query-string';
-import { DashboardConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../../../legacy_imports';
+import { DashboardConstants } from '../../../../../dashboard/public';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../visualizations/public';
 
 /** *
  * Returns relative dashboard URL with added embeddableType and embeddableId query params

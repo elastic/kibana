@@ -21,7 +21,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { TableListView } from '../../../../../../../plugins/kibana_react/public';
+import { TableListView } from '../../../../kibana_react/public';
 
 import { EuiIcon, EuiBetaBadge, EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
@@ -33,7 +33,7 @@ class VisualizeListingTable extends Component {
   }
 
   render() {
-    const { visualizeCapabilities, uiSettings, toastNotifications } = getServices();
+    const { visualizeCapabilities, core, toastNotifications } = getServices();
     return (
       <TableListView
         headingId="visualizeListingHeading"
@@ -48,17 +48,17 @@ class VisualizeListingTable extends Component {
         selectable={item => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
-        entityName={i18n.translate('kbn.visualize.listing.table.entityName', {
+        entityName={i18n.translate('visualize.listing.table.entityName', {
           defaultMessage: 'visualization',
         })}
-        entityNamePlural={i18n.translate('kbn.visualize.listing.table.entityNamePlural', {
+        entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
           defaultMessage: 'visualizations',
         })}
-        tableListTitle={i18n.translate('kbn.visualize.listing.table.listTitle', {
+        tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
           defaultMessage: 'Visualizations',
         })}
         toastNotifications={toastNotifications}
-        uiSettings={uiSettings}
+        uiSettings={core.uiSettings}
       />
     );
   }
@@ -67,7 +67,7 @@ class VisualizeListingTable extends Component {
     const tableColumns = [
       {
         field: 'title',
-        name: i18n.translate('kbn.visualize.listing.table.titleColumnName', {
+        name: i18n.translate('visualize.listing.table.titleColumnName', {
           defaultMessage: 'Title',
         }),
         sortable: true,
@@ -82,7 +82,7 @@ class VisualizeListingTable extends Component {
       },
       {
         field: 'typeTitle',
-        name: i18n.translate('kbn.visualize.listing.table.typeColumnName', {
+        name: i18n.translate('visualize.listing.table.typeColumnName', {
           defaultMessage: 'Type',
         }),
         sortable: true,
@@ -96,7 +96,7 @@ class VisualizeListingTable extends Component {
       },
       {
         field: 'description',
-        name: i18n.translate('kbn.dashboard.listing.table.descriptionColumnName', {
+        name: i18n.translate('visualize.listing.table.descriptionColumnName', {
           defaultMessage: 'Description',
         }),
         sortable: true,
@@ -116,7 +116,7 @@ class VisualizeListingTable extends Component {
             title={
               <h1 id="visualizeListingHeading">
                 <FormattedMessage
-                  id="kbn.visualize.listing.noItemsMessage"
+                  id="visualize.listing.noItemsMessage"
                   defaultMessage="Looks like you don't have any visualizations."
                 />
               </h1>
@@ -133,7 +133,7 @@ class VisualizeListingTable extends Component {
           title={
             <h1 id="visualizeListingHeading">
               <FormattedMessage
-                id="kbn.visualize.listing.createNew.title"
+                id="visualize.listing.createNew.title"
                 defaultMessage="Create your first visualization"
               />
             </h1>
@@ -142,7 +142,7 @@ class VisualizeListingTable extends Component {
             <Fragment>
               <p>
                 <FormattedMessage
-                  id="kbn.visualize.listing.createNew.description"
+                  id="visualize.listing.createNew.description"
                   defaultMessage="You can create different visualizations, based on your data."
                 />
               </p>
@@ -156,7 +156,7 @@ class VisualizeListingTable extends Component {
               data-test-subj="createVisualizationPromptButton"
             >
               <FormattedMessage
-                id="kbn.visualize.listing.createNew.createButtonLabel"
+                id="visualize.listing.createNew.createButtonLabel"
                 defaultMessage="Create new visualization"
               />
             </EuiButton>
@@ -192,10 +192,10 @@ class VisualizeListingTable extends Component {
         <EuiBetaBadge
           className="visListingTable__betaIcon"
           label="B"
-          title={i18n.translate('kbn.visualize.listing.betaTitle', {
+          title={i18n.translate('visualize.listing.betaTitle', {
             defaultMessage: 'Beta',
           })}
-          tooltipContent={i18n.translate('kbn.visualize.listing.betaTooltip', {
+          tooltipContent={i18n.translate('visualize.listing.betaTooltip', {
             defaultMessage:
               'This visualization is in beta and is subject to change. The design and code is less mature than official GA ' +
               'features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA ' +
@@ -208,10 +208,10 @@ class VisualizeListingTable extends Component {
         <EuiBetaBadge
           className="visListingTable__experimentalIcon"
           label="E"
-          title={i18n.translate('kbn.visualize.listing.experimentalTitle', {
+          title={i18n.translate('visualize.listing.experimentalTitle', {
             defaultMessage: 'Experimental',
           })}
-          tooltipContent={i18n.translate('kbn.visualize.listing.experimentalTooltip', {
+          tooltipContent={i18n.translate('visualize.listing.experimentalTooltip', {
             defaultMessage:
               'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
           })}
