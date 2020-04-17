@@ -9,16 +9,20 @@ import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
+import uuid from 'uuid';
 
+import { LegendItem } from '../../../../components/charts/draggable_legend_item';
+import { escapeDataProviderId } from '../../../../components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../components/header_section';
-
 import { Filter, esQuery, Query } from '../../../../../../../../../src/plugins/data/public';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { useQuerySignals } from '../../../../containers/detection_engine/signals/use_query';
 import { getDetectionEngineUrl } from '../../../../components/link_to';
+import { defaultLegendColors } from '../../../../components/matrix_histogram/utils';
 import { InspectButtonContainer } from '../../../../components/inspect';
 import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { MatrixLoader } from '../../../../components/matrix_histogram/matrix_loader';
+import { MatrixHistogramOption } from '../../../../components/matrix_histogram/types';
 import { useKibana, useUiSetting$ } from '../../../../lib/kibana';
 import { navTabs } from '../../../home/home_navigations';
 import { signalsHistogramOptions } from './config';
@@ -53,6 +57,9 @@ interface SignalsHistogramPanelProps {
   deleteQuery?: ({ id }: { id: string }) => void;
   filters?: Filter[];
   from: number;
+  headerChildren?: React.ReactNode;
+  /** Override all defaults, and only display this field */
+  onlyField?: string;
   query?: Query;
   legendPosition?: Position;
   panelHeight?: number;
@@ -66,12 +73,21 @@ interface SignalsHistogramPanelProps {
   updateDateRange: (min: number, max: number) => void;
 }
 
+const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
+  text: fieldName,
+  value: fieldName,
+});
+
+const NO_LEGEND_DATA: LegendItem[] = [];
+
 export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
   ({
     chartHeight,
     defaultStackByOption = signalsHistogramOptions[0],
     deleteQuery,
     filters,
+    headerChildren,
+    onlyField,
     query,
     from,
     legendPosition = 'right',
@@ -85,11 +101,13 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
     title = i18n.HISTOGRAM_HEADER,
     updateDateRange,
   }) => {
+    // create a unique, but stable (across re-renders) query id
+    const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
     const [totalSignalsObj, setTotalSignalsObj] = useState<SignalsTotal>(defaultTotalSignalsObj);
     const [selectedStackByOption, setSelectedStackByOption] = useState<SignalsHistogramOption>(
-      defaultStackByOption
+      onlyField == null ? defaultStackByOption : getHistogramOption(onlyField)
     );
     const {
       loading: isLoadingSignals,
@@ -123,6 +141,21 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
 
     const formattedSignalsData = useMemo(() => formatSignalsData(signalsData), [signalsData]);
 
+    const legendItems: LegendItem[] = useMemo(
+      () =>
+        signalsData?.aggregations?.signalsByGrouping?.buckets != null
+          ? signalsData.aggregations.signalsByGrouping.buckets.map((bucket, i) => ({
+              color: i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
+              dataProviderId: escapeDataProviderId(
+                `draggable-legend-item-${uuid.v4()}-${selectedStackByOption.value}-${bucket.key}`
+              ),
+              field: selectedStackByOption.value,
+              value: bucket.key,
+            }))
+          : NO_LEGEND_DATA,
+      [signalsData, selectedStackByOption.value]
+    );
+
     useEffect(() => {
       let canceled = false;
 
@@ -138,7 +171,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
     useEffect(() => {
       return () => {
         if (deleteQuery) {
-          deleteQuery({ id: DETECTIONS_HISTOGRAM_ID });
+          deleteQuery({ id: uniqueQueryId });
         }
       };
     }, []);
@@ -146,7 +179,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
     useEffect(() => {
       if (refetch != null && setQuery != null) {
         setQuery({
-          id: DETECTIONS_HISTOGRAM_ID,
+          id: uniqueQueryId,
           inspect: {
             dsl: [request],
             response: [response],
@@ -197,46 +230,49 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
       }
     }, [showLinkToSignals, urlSearch]);
 
-    return (
-      <InspectButtonContainer show={!isInitialLoading}>
-        <StyledEuiPanel height={panelHeight}>
-          {isInitialLoading ? (
-            <>
-              <HeaderSection id={DETECTIONS_HISTOGRAM_ID} title={title} />
-              <MatrixLoader />
-            </>
-          ) : (
-            <>
-              <HeaderSection
-                id={DETECTIONS_HISTOGRAM_ID}
-                title={title}
-                subtitle={showTotalSignalsCount && totalSignals}
-              >
-                <EuiFlexGroup alignItems="center" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    {stackByOptions && (
-                      <EuiSelect
-                        onChange={setSelectedOptionCallback}
-                        options={stackByOptions}
-                        prepend={i18n.STACK_BY_LABEL}
-                        value={selectedStackByOption.value}
-                      />
-                    )}
-                  </EuiFlexItem>
-                  {linkButton}
-                </EuiFlexGroup>
-              </HeaderSection>
+    const titleText = useMemo(() => (onlyField == null ? title : i18n.TOP(onlyField)), [
+      onlyField,
+      title,
+    ]);
 
-              <SignalsHistogram
-                chartHeight={chartHeight}
-                data={formattedSignalsData}
-                from={from}
-                legendPosition={legendPosition}
-                loading={isLoadingSignals}
-                to={to}
-                updateDateRange={updateDateRange}
-              />
-            </>
+    return (
+      <InspectButtonContainer data-test-subj="signals-histogram-panel" show={!isInitialLoading}>
+        <StyledEuiPanel height={panelHeight}>
+          <HeaderSection
+            id={uniqueQueryId}
+            title={titleText}
+            titleSize={onlyField == null ? 'm' : 's'}
+            subtitle={!isInitialLoading && showTotalSignalsCount && totalSignals}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                {stackByOptions && (
+                  <EuiSelect
+                    onChange={setSelectedOptionCallback}
+                    options={stackByOptions}
+                    prepend={i18n.STACK_BY_LABEL}
+                    value={selectedStackByOption.value}
+                  />
+                )}
+                {headerChildren != null && headerChildren}
+              </EuiFlexItem>
+              {linkButton}
+            </EuiFlexGroup>
+          </HeaderSection>
+
+          {isInitialLoading ? (
+            <MatrixLoader />
+          ) : (
+            <SignalsHistogram
+              chartHeight={chartHeight}
+              data={formattedSignalsData}
+              from={from}
+              legendItems={legendItems}
+              legendPosition={legendPosition}
+              loading={isLoadingSignals}
+              to={to}
+              updateDateRange={updateDateRange}
+            />
           )}
         </StyledEuiPanel>
       </InspectButtonContainer>
