@@ -16,13 +16,13 @@ export const txtChooseDestinationDashboard = i18n.translate(
 export const txtUseCurrentFilters = i18n.translate(
   'xpack.dashboard.components.DashboardDrilldownConfig.useCurrentFilters',
   {
-    defaultMessage: "Use current dashboard's filters",
+    defaultMessage: "Use origin dashboard's filters and query",
   }
 );
 
 export const txtUseCurrentDateRange = i18n.translate(
   'xpack.dashboard.components.DashboardDrilldownConfig.useCurrentDateRange',
   {
-    defaultMessage: "Use current dashboard's date range",
+    defaultMessage: "Use origin dashboard's date range",
   }
 );
