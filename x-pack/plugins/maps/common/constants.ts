@@ -3,12 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 import { i18n } from '@kbn/i18n';
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
@@ -73,6 +67,7 @@ export enum FIELD_ORIGIN {
   SOURCE = 'source',
   JOIN = 'join',
 }
+export const JOIN_FIELD_NAME_PREFIX = '__kbnjoin__';
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 export const META_ID_ORIGIN_SUFFIX = 'meta';
@@ -130,6 +125,7 @@ export enum DRAW_TYPE {
   POLYGON = 'POLYGON',
 }
 
+export const AGG_DELIMITER = '_of_';
 export enum AGG_TYPE {
   AVG = 'avg',
   COUNT = 'count',
