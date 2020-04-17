@@ -16,8 +16,6 @@ import { patchListsItemsSchema, PatchListsItemsSchema } from '../../common/schem
 
 import { getListClient } from '.';
 
-// TODO: Make sure you write updateListItemRoute and update_list_item.sh routes
-
 export const patchListsItemsRoute = (router: IRouter): void => {
   router.patch(
     {
