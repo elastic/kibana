@@ -11,7 +11,7 @@ import { DataClient } from '../types';
 
 import { createListItemsBulk, getListItemsByValues, BufferLines } from '.';
 
-interface WriteLinesToBulkListItemsOptions {
+interface ImportListItemsToStreamOptions {
   listId: string;
   stream: Readable;
   dataClient: DataClient;
@@ -20,14 +20,14 @@ interface WriteLinesToBulkListItemsOptions {
   user: string;
 }
 
-export const writeLinesToBulkListItems = ({
+export const importListItemsToStream = ({
   listId,
   stream,
   dataClient,
   listsItemsIndex,
   type,
   user,
-}: WriteLinesToBulkListItemsOptions): Promise<void> => {
+}: ImportListItemsToStreamOptions): Promise<void> => {
   return new Promise<void>(resolve => {
     const readBuffer = new BufferLines({ input: stream });
     readBuffer.on('lines', async (lines: string[]) => {

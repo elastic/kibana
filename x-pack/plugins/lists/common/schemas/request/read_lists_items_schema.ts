@@ -10,7 +10,6 @@ import * as t from 'io-ts';
 
 import { list_id, id, value } from '../common/schemas';
 
-// TODO: Type Dependent check where there has to be at least ip or another field present?
 export const readListsItemsSchema = t.exact(t.partial({ id, list_id, value }));
 
 export type ReadListsItemsSchema = t.TypeOf<typeof readListsItemsSchema>;

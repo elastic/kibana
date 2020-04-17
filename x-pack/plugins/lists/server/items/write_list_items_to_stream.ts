@@ -16,7 +16,7 @@ import { ElasticListItemReturnType, DataClient } from '../types';
  */
 export const SIZE = 100;
 
-interface WriteListItemsToStreamOptions {
+interface ExportListItemsToStreamOptions {
   listId: string;
   dataClient: DataClient;
   listsItemsIndex: string;
@@ -24,13 +24,13 @@ interface WriteListItemsToStreamOptions {
   stringToAppend: string | null | undefined;
 }
 
-export const writeListItemsToStream = ({
+export const exportListItemsToStream = ({
   listId,
   dataClient,
   stream,
   listsItemsIndex,
   stringToAppend,
-}: WriteListItemsToStreamOptions): void => {
+}: ExportListItemsToStreamOptions): void => {
   // Use a timeout to start the reading process on the next tick.
   // and prevent the async await from bubbling up to the caller
   setTimeout(async () => {

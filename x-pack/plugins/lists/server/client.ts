@@ -35,10 +35,10 @@ import {
   getListsItemsTemplate,
   deleteListItem,
   deleteListItemByValue,
-  writeListItemsToStream,
+  exportListItemsToStream,
   getListItemByValue,
   createListItem,
-  writeLinesToBulkListItems,
+  importListItemsToStream,
   updateListItem,
   getListItem,
   getListItemsByValues,
@@ -52,8 +52,8 @@ import {
   DeleteListItemOptions,
   GetListItemByValueOptions,
   CreateListItemOptions,
-  WriteLinesToBulkListItemsOptions,
-  WriteListItemsToStreamOptions,
+  ImportListItemsToStreamOptions,
+  ExportListItemsToStreamOptions,
   CreateListIfItDoesNotExistOptions,
   UpdateListItemOptions,
   UpdateListOptions,
@@ -322,15 +322,14 @@ export class ListsClient {
     });
   };
 
-  // TODO: Rename this to exportListItemsToStream
-  public writeListItemsToStream = ({
+  public exportListItemsToStream = ({
     stringToAppend,
     listId,
     stream,
-  }: WriteListItemsToStreamOptions): void => {
+  }: ExportListItemsToStreamOptions): void => {
     const { dataClient } = this;
     const listsItemsIndex = this.getListItemIndex();
-    writeListItemsToStream({
+    exportListItemsToStream({
       listId,
       stream,
       dataClient,
@@ -339,16 +338,15 @@ export class ListsClient {
     });
   };
 
-  // TODO: Rename this to importListItemsToStream
-  public writeLinesToBulkListItems = async ({
+  public importListItemsToStream = async ({
     type,
     listId,
     stream,
-  }: WriteLinesToBulkListItemsOptions): Promise<void> => {
+  }: ImportListItemsToStreamOptions): Promise<void> => {
     const { dataClient, security, request } = this;
     const listsItemsIndex = this.getListItemIndex();
     const user = getUser({ security, request });
-    return writeLinesToBulkListItems({
+    return importListItemsToStream({
       listId,
       type,
       stream,

@@ -61,15 +61,13 @@ export interface GetListItemByValueOptions {
   type: Type;
 }
 
-// TODO: Rename this to ExportListItemsToStreamOptions
-export interface WriteListItemsToStreamOptions {
+export interface ExportListItemsToStreamOptions {
   stringToAppend: string | null | undefined;
   listId: string;
   stream: PassThrough;
 }
 
-// TODO: Rename this to ImportListItemsToStreamOptions
-export interface WriteLinesToBulkListItemsOptions {
+export interface ImportListItemsToStreamOptions {
   listId: string;
   type: Type;
   stream: Readable;

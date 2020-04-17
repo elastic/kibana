@@ -46,7 +46,7 @@ export const exportListsItemsRoute = (router: IRouter): void => {
           const fileName = list.name;
 
           const stream = new Stream.PassThrough();
-          lists.writeListItemsToStream({ listId, stream, stringToAppend: '\n' });
+          lists.exportListItemsToStream({ listId, stream, stringToAppend: '\n' });
           return response.ok({
             headers: {
               'Content-Disposition': `attachment; filename="${fileName}"`,

@@ -26,7 +26,8 @@ export const updateListItem = async ({
   value,
   dataClient,
   listsItemsIndex,
-}: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
+}: // TODO: Add user here
+UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
   const updatedAt = new Date().toISOString();
   const listItem = await getListItemByValue({
     listId,

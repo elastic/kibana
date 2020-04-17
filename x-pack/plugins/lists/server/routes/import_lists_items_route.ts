@@ -49,7 +49,7 @@ export const importListsItemsRoute = (router: IRouter): void => {
               body: `list id: "${listId}" does not exist`,
             });
           }
-          await lists.writeLinesToBulkListItems({
+          await lists.importListItemsToStream({
             listId,
             stream: request.body.file,
             type: list.type,
@@ -69,7 +69,7 @@ export const importListsItemsRoute = (router: IRouter): void => {
             description: `File uploaded from file system of ${filename}`,
             type,
           });
-          await lists.writeLinesToBulkListItems({
+          await lists.importListItemsToStream({
             listId: list.id,
             stream: request.body.file,
             type: list.type,
