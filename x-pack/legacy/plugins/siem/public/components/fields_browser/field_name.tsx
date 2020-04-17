@@ -4,26 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonIcon,
-  EuiHighlight,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
-import React, { useContext } from 'react';
+import { EuiButtonIcon, EuiHighlight, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import React, { useCallback, useContext, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { OnUpdateColumns } from '../timeline/events';
 import { TimelineContext } from '../timeline/timeline_context';
 import { WithHoverActions } from '../with_hover_actions';
 import { LoadingSpinner } from './helpers';
 import * as i18n from './translations';
+import { DraggableWrapperHoverContent } from '../drag_and_drop/draggable_wrapper_hover_content';
 
 /**
  * The name of a (draggable) field
@@ -82,22 +73,6 @@ export const FieldNameContainer = styled.span`
 
 FieldNameContainer.displayName = 'FieldNameContainer';
 
-const HoverActionsContainer = styled(EuiPanel)`
-  cursor: default;
-  left: 5px;
-  padding: 4px;
-  position: absolute;
-  top: -6px;
-`;
-
-HoverActionsContainer.displayName = 'HoverActionsContainer';
-
-const HoverActionsFlexGroup = styled(EuiFlexGroup)`
-  cursor: pointer;
-`;
-
-HoverActionsFlexGroup.displayName = 'HoverActionsFlexGroup';
-
 const ViewCategoryIcon = styled(EuiIcon)`
   margin-left: 5px;
 `;
@@ -112,7 +87,7 @@ interface ToolTipProps {
 
 const ViewCategory = React.memo<ToolTipProps>(
   ({ categoryId, onUpdateColumns, categoryColumns }) => {
-    const isLoading = useContext(TimelineContext);
+    const { isLoading } = useContext(TimelineContext);
     return (
       <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
         {!isLoading ? (
@@ -142,48 +117,33 @@ export const FieldName = React.memo<{
   fieldId: string;
   highlight?: string;
   onUpdateColumns: OnUpdateColumns;
-}>(({ categoryId, categoryColumns, fieldId, highlight = '', onUpdateColumns }) => (
-  <WithHoverActions
-    hoverContent={
-      <HoverActionsContainer data-test-subj="hover-actions-container" paddingSize="none">
-        <HoverActionsFlexGroup
-          alignItems="center"
-          direction="row"
-          gutterSize="none"
-          justifyContent="spaceBetween"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-              <WithCopyToClipboard
-                data-test-subj="copy-to-clipboard"
-                text={fieldId}
-                titleSummary={i18n.FIELD}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
+}>(({ fieldId, highlight = '' }) => {
+  const [showTopN, setShowTopN] = useState<boolean>(false);
+  const toggleTopN = useCallback(() => {
+    setShowTopN(!showTopN);
+  }, [setShowTopN, showTopN]);
 
-          {categoryColumns.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <ViewCategory
-                categoryId={categoryId}
-                categoryColumns={categoryColumns}
-                onUpdateColumns={onUpdateColumns}
-              />
-            </EuiFlexItem>
-          )}
-        </HoverActionsFlexGroup>
-      </HoverActionsContainer>
-    }
-    render={() => (
-      <FieldNameContainer>
-        <EuiText size="xs">
+  const hoverContent = useMemo(
+    () => (
+      <DraggableWrapperHoverContent field={fieldId} showTopN={showTopN} toggleTopN={toggleTopN} />
+    ),
+    [fieldId, showTopN, toggleTopN]
+  );
+
+  const render = useCallback(
+    () => (
+      <EuiText size="xs">
+        <FieldNameContainer>
           <EuiHighlight data-test-subj={`field-name-${fieldId}`} search={highlight}>
             {fieldId}
           </EuiHighlight>
-        </EuiText>
-      </FieldNameContainer>
-    )}
-  />
-));
+        </FieldNameContainer>
+      </EuiText>
+    ),
+    [fieldId, highlight]
+  );
+
+  return <WithHoverActions hoverContent={hoverContent} render={render} />;
+});
 
 FieldName.displayName = 'FieldName';
