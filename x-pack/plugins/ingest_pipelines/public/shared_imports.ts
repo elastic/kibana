@@ -53,7 +53,7 @@ export {
   SectionError,
   Error,
   useAuthorizationContext,
-  NotAuthorizedSection
+  NotAuthorizedSection,
 } from '../../../../src/plugins/es_ui_shared/public';
 
 export const useKibana = () => _useKibana<AppServices>();
