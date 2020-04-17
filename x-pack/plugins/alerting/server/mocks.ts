@@ -59,7 +59,7 @@ const createAlertServicesMock = () => {
       .mockReturnValue(alertInstanceFactoryMock),
     callCluster,
     savedObjectsClient: savedObjectsClientMock.create(),
-    search: searchSetupMock.createScopedSearchApi(callCluster).search,
+    search: searchSetupMock.create().createScopedSearchApi(callCluster).search,
     indexPattern: {
       getById: jest.fn(),
     },

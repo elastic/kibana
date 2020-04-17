@@ -23,10 +23,14 @@ export const routeHandlerSearchContextMock = () => ({
 });
 
 export const searchSetupMock = {
-  registerSearchStrategyContext: jest.fn(),
-  registerSearchStrategyProvider: jest.fn(),
-  createScopedSearchApi: jest.fn().mockImplementation(routeHandlerSearchContextMock),
-  __LEGACY: {
-    search: jest.fn(),
+  create() {
+    return {
+      registerSearchStrategyContext: jest.fn(),
+      registerSearchStrategyProvider: jest.fn(),
+      createScopedSearchApi: jest.fn().mockImplementation(routeHandlerSearchContextMock),
+      __LEGACY: {
+        search: jest.fn(),
+      },
+    };
   },
 };
