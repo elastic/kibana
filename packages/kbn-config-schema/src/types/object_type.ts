@@ -26,9 +26,26 @@ export type Props = Record<string, Type<any>>;
 
 export type TypeOf<RT extends Type<any>> = RT['type'];
 
+type OptionalProperties<Base extends Props> = Pick<
+  Base,
+  {
+    [Key in keyof Base]: undefined extends TypeOf<Base[Key]> ? Key : never;
+  }[keyof Base]
+>;
+
+type RequiredProperties<Base extends Props> = Pick<
+  Base,
+  {
+    [Key in keyof Base]: undefined extends TypeOf<Base[Key]> ? never : Key;
+  }[keyof Base]
+>;
+
 // Because of https://github.com/Microsoft/TypeScript/issues/14041
 // this might not have perfect _rendering_ output, but it will be typed.
-export type ObjectResultType<P extends Props> = Readonly<{ [K in keyof P]: TypeOf<P[K]> }>;
+export type ObjectResultType<P extends Props> = Readonly<
+  { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } &
+    { [K in keyof RequiredProperties<P>]: TypeOf<P[K]> }
+>;
 
 interface UnknownOptions {
   /**
@@ -41,7 +58,8 @@ interface UnknownOptions {
 }
 
 export type ObjectTypeOptions<P extends Props = any> = TypeOptions<
-  { [K in keyof P]: TypeOf<P[K]> }
+  { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } &
+    { [K in keyof RequiredProperties<P>]: TypeOf<P[K]> }
 > &
   UnknownOptions;
 
