@@ -17,8 +17,6 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getSearchService } from '../../data/public/services';
 import { Filter, esQuery, TimeRange, Query } from '../../data/public';
 
 // @ts-ignore
@@ -30,6 +28,7 @@ import { TimeCache } from './data_model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
 import { VisParams } from './vega_fn';
+import { getData } from './services';
 
 interface VegaRequestHandlerParams {
   query: Query;
@@ -43,7 +42,7 @@ export function createVegaRequestHandler({
   core: { uiSettings },
   serviceSettings,
 }: VegaVisualizationDependencies) {
-  const { esClient } = getSearchService().__LEGACY;
+  const { esClient } = getData().search.__LEGACY;
   const searchCache = new SearchCache(esClient, { max: 10, maxAge: 4 * 1000 });
   const { timefilter } = data.query.timefilter;
   const timeCache = new TimeCache(timefilter, 3 * 1000);

@@ -21,7 +21,6 @@ import { PluginInitializerContext } from 'kibana/public';
 import { ConfigSchema } from '../config';
 import { VegaPlugin as Plugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema>) =>
-  new Plugin(initializerContext);
-
-export type VisTypeVegaSetup = ReturnType<ReturnType<typeof plugin>['setup']>;
+export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  return new Plugin(initializerContext);
+}

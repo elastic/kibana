@@ -30,7 +30,6 @@ import {
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { VisTypeVegaSetup } from '.';
 import { IServiceSettings } from '../../maps_legacy/public';
 import { ConfigSchema } from '../config';
 
@@ -50,7 +49,6 @@ export interface VegaPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   data: ReturnType<DataPublicPlugin['setup']>;
-  visTypeVega: VisTypeVegaSetup;
   mapsLegacy: any;
 }
 
