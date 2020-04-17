@@ -366,7 +366,7 @@ describe('<MappingsEditor />', () => {
       // When we disable dynamic mappings, we set it to "strict" and remove date and numeric detections
       updatedMappings = {
         ...updatedMappings,
-        dynamic: 'strict',
+        dynamic: false,
         date_detection: undefined,
         dynamic_date_formats: undefined,
         numeric_detection: undefined,

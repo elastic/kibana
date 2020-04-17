@@ -67,6 +67,7 @@ export const DynamicMappingSection = () => (
           return (
             <>
               <UseField
+                key="numericDetectionToggle"
                 path="dynamicMapping.numeric_detection"
                 componentProps={{ 'data-test-subj': 'numericDetection' }}
               />
@@ -87,6 +88,7 @@ export const DynamicMappingSection = () => (
         } else {
           return (
             <UseField
+              key="throwErrorsCheckBox"
               path="dynamicMapping.throwErrorsForUnmappedFields"
               component={CheckBoxField}
             />
