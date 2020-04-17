@@ -18,8 +18,9 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { IIndexPattern } from '../..';
-import { TimeRange, IFieldType, buildRangeFilter } from '../../../common';
+import { IIndexPattern, IFieldType } from '../index_patterns';
+import { TimeRange } from './types';
+import { buildRangeFilter } from '../es_query/filters/range_filter';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;

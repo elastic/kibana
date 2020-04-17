@@ -6,6 +6,7 @@
 
 import { Service, IRouter, AlertingSetup } from '../types';
 import { register as registerIndexThreshold } from './index_threshold';
+import { register as registerESQuery } from './es_query';
 
 interface RegisterBuiltInAlertTypesParams {
   service: Service;
@@ -16,4 +17,5 @@ interface RegisterBuiltInAlertTypesParams {
 
 export function registerBuiltInAlertTypes(params: RegisterBuiltInAlertTypesParams) {
   registerIndexThreshold(params);
+  registerESQuery(params);
 }

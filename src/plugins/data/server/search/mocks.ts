@@ -17,9 +17,15 @@
  * under the License.
  */
 
+export const routeHandlerSearchContextMock = () => ({
+  search: jest.fn(),
+  cancel: jest.fn(),
+});
+
 export const searchSetupMock = {
   registerSearchStrategyContext: jest.fn(),
   registerSearchStrategyProvider: jest.fn(),
+  createScopedSearchApi: jest.fn().mockImplementation(routeHandlerSearchContextMock),
   __LEGACY: {
     search: jest.fn(),
   },

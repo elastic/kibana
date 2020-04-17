@@ -17,24 +17,12 @@
  * under the License.
  */
 
-import { RefreshInterval, TimeRange, Query, Filter } from '../..';
+import { RefreshInterval, TimeRange, SavedQuery, SavedQueryAttributes } from '../..';
+export { SavedQuery, SavedQueryAttributes } from '../..';
 
 export type SavedQueryTimeFilter = TimeRange & {
   refreshInterval: RefreshInterval;
 };
-
-export interface SavedQuery {
-  id: string;
-  attributes: SavedQueryAttributes;
-}
-
-export interface SavedQueryAttributes {
-  title: string;
-  description: string;
-  query: Query;
-  filters?: Filter[];
-  timefilter?: SavedQueryTimeFilter;
-}
 
 export interface SavedQueryService {
   saveQuery: (

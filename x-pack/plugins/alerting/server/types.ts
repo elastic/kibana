@@ -11,6 +11,7 @@ import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../s
 import { Alert, AlertActionParams, ActionGroup } from '../common';
 import { AlertsClient } from './alerts_client';
 import { ISearchGeneric } from '../../../../src/plugins/data/server';
+import { IIndexPattern } from '../../../../src/plugins/data/common';
 export * from '../common';
 
 export type State = Record<string, any>;
@@ -33,6 +34,9 @@ export interface Services {
   callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
   search: ISearchGeneric;
+  indexPattern: {
+    getById(id: string): Promise<IIndexPattern | undefined>;
+  };
 }
 
 export interface AlertServices extends Services {

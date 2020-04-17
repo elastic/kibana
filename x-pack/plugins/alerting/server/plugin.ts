@@ -268,13 +268,19 @@ export class AlertingPlugin {
     savedObjects: SavedObjectsServiceStart,
     elasticsearch: ElasticsearchServiceStart
   ): (request: KibanaRequest) => Services {
-    const { adminClient } = this;
     return request => {
-      const caller = adminClient!.asScoped(request).callAsCurrentUser;
+      const caller = elasticsearch.legacy.client.asScoped(request).callAsCurrentUser;
       return {
         callCluster: caller,
         savedObjectsClient: savedObjects.getScopedClient(request),
         search: this.data!.search.createScopedSearchApi(caller).search,
+        indexPattern: {
+          async getById(id: string) {
+            // not implemented, we need changes in the data plugin
+            // this is just to express what we'd hbroadly need access to
+            return undefined;
+          },
+        },
       };
     };
   }

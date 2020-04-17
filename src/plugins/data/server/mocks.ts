@@ -16,26 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { RefreshInterval, TimeRange, Filter } from '../';
 
-export interface Query {
-  query: string | { [key: string]: any };
-  language: string;
-}
-
-export type SavedQueryTimeFilter = TimeRange & {
-  refreshInterval: RefreshInterval;
-};
-
-export interface SavedQuery {
-  id: string;
-  attributes: SavedQueryAttributes;
-}
-
-export interface SavedQueryAttributes {
-  title: string;
-  description: string;
-  query: Query;
-  filters?: Filter[];
-  timefilter?: SavedQueryTimeFilter;
-}
+export * from './search/mocks';

@@ -22,9 +22,8 @@ import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import { parseQueryString } from './lib/parse_querystring';
-import { calculateBounds, getTime } from './get_time';
 import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
-import { RefreshInterval, TimeRange } from '../../../common';
+import { RefreshInterval, TimeRange, calculateBounds, getTime } from '../../../common';
 import { TimeHistoryContract } from './time_history';
 import { IndexPattern } from '../../index_patterns';
 

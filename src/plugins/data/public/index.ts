@@ -428,18 +428,24 @@ export {
  * Types to be shared externally
  * @public
  */
-export { Filter, Query, RefreshInterval, TimeRange } from '../common';
+export {
+  Filter,
+  Query,
+  RefreshInterval,
+  TimeRange,
+  SavedQuery,
+  SavedQueryAttributes,
+  getTime,
+} from '../common';
 
 export {
   createSavedQueryService,
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
-  getTime,
   getQueryLog,
   getDefaultQuery,
   FilterManager,
-  SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
   InputTimeRange,
