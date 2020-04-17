@@ -22,7 +22,11 @@ export const renderApp = (core: CoreStart, params: AppMountParams, config: Clien
         <Redirect to="/app_search" />
       </Route>
       <Route path="/app_search">
-        <AppSearch http={core.http} appSearchUrl={config.host} />
+        <AppSearch
+          http={core.http}
+          appSearchUrl={config.host}
+          setBreadcrumbs={core.chrome.setBreadcrumbs}
+        />
       </Route>
     </BrowserRouter>,
     params.element
