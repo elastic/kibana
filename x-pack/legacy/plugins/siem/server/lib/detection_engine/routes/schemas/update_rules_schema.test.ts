@@ -1536,8 +1536,8 @@ describe('create rules schema', () => {
   // on demand. Since they are per module, we have a an issue where the ENV variables do not take effect. It is better we change all the
   // schema's to be function calls to avoid global side effects or just wait until the feature is available. If you want to test this early,
   // you can remove the .skip and set your env variable of export ELASTIC_XPACK_SIEM_LISTS_FEATURE=true locally
-  describe.skip('lists', () => {
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and lists] does validate', () => {
+  describe.skip('exceptions_list', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and exceptions_list] does validate', () => {
       expect(
         updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -1551,7 +1551,7 @@ describe('create rules schema', () => {
           type: 'query',
           risk_score: 50,
           note: '# some markdown',
-          lists: [
+          exceptions_list: [
             {
               field: 'source.ip',
               values_operator: 'included',
@@ -1584,7 +1584,7 @@ describe('create rules schema', () => {
       ).toBeFalsy();
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty lists] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
       expect(
         updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -1598,14 +1598,14 @@ describe('create rules schema', () => {
           type: 'query',
           risk_score: 50,
           note: '# some markdown',
-          lists: [],
+          exceptions_list: [],
         }).error
       ).toBeFalsy();
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and invalid lists] does NOT validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and invalid exceptions_list] does NOT validate', () => {
       expect(
-        updateRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'lists'>>>({
+        updateRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'exceptions_list'>>>({
           rule_id: 'rule-1',
           description: 'some description',
           from: 'now-5m',
@@ -1617,16 +1617,16 @@ describe('create rules schema', () => {
           type: 'query',
           risk_score: 50,
           note: '# some markdown',
-          lists: [{ invalid_value: 'invalid value' }],
+          exceptions_list: [{ invalid_value: 'invalid value' }],
         }).error.message
       ).toEqual(
-        'child "lists" fails because ["lists" at position 0 fails because [child "field" fails because ["field" is required]]]'
+        'child "exceptions_list" fails because ["exceptions_list" at position 0 fails because [child "field" fails because ["field" is required]]]'
       );
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and non-existent lists] does validate with empty lists', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
       expect(
-        updateRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'lists'>>>({
+        updateRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'exceptions_list'>>>({
           rule_id: 'rule-1',
           description: 'some description',
           from: 'now-5m',
@@ -1638,7 +1638,7 @@ describe('create rules schema', () => {
           type: 'query',
           risk_score: 50,
           note: '# some markdown',
-        }).value.lists
+        }).value.exceptions_list
       ).toEqual([]);
     });
   });

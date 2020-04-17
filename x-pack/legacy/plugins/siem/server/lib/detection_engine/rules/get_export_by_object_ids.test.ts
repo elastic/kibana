@@ -87,7 +87,7 @@ describe('get_export_by_object_ids', () => {
           throttle: 'no_actions',
           note: '# Investigative notes',
           version: 1,
-          lists: [
+          exceptions_list: [
             {
               field: 'source.ip',
               values_operator: 'included',
@@ -215,7 +215,7 @@ describe('get_export_by_object_ids', () => {
             throttle: 'no_actions',
             note: '# Investigative notes',
             version: 1,
-            lists: [
+            exceptions_list: [
               {
                 field: 'source.ip',
                 values_operator: 'included',

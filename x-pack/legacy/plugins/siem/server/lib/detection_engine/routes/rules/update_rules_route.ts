@@ -67,7 +67,7 @@ export const updateRulesRoute = (router: IRouter) => {
         references,
         note,
         version,
-        lists,
+        exceptions_list,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
 
@@ -117,7 +117,7 @@ export const updateRulesRoute = (router: IRouter) => {
           references,
           note,
           version,
-          lists,
+          exceptions_list,
           actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is rule, otherwise we are a notification and should not enable it
         });
 

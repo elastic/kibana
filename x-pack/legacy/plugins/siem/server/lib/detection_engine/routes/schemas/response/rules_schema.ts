@@ -87,7 +87,7 @@ export const requiredRulesSchema = t.type({
   updated_at,
   created_by,
   version,
-  lists: ListsDefaultArray,
+  exceptions_list: ListsDefaultArray,
 });
 
 export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
@@ -172,7 +172,7 @@ export const removeList = (
 ): Either<t.Errors, RequiredRulesSchema> => {
   const onLeft = (errors: t.Errors): Either<t.Errors, RequiredRulesSchema> => left(errors);
   const onRight = (decodedValue: RequiredRulesSchema): Either<t.Errors, RequiredRulesSchema> => {
-    delete decodedValue.lists;
+    delete decodedValue.exceptions_list;
     return right(decodedValue);
   };
   const folded = fold(onLeft, onRight);

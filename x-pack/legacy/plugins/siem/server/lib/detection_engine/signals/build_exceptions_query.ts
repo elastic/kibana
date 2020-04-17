@@ -185,7 +185,7 @@ export const buildQueryExceptions = ({
 }: {
   query: string;
   language: Language;
-  lists: RuleAlertParams['lists'];
+  lists: RuleAlertParams['exceptions_list'];
 }): Query[] => {
   if (lists && lists !== null) {
     const exceptions = buildExceptions({ lists, language, query });

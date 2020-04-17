@@ -44,7 +44,7 @@ export const sampleRuleAlertParams = (
   meta: undefined,
   threat: undefined,
   version: 1,
-  lists: [
+  exceptions_list: [
     {
       field: 'source.ip',
       values_operator: 'included',
