@@ -517,7 +517,6 @@ export class DashboardAppController {
         // query is the same, and in that case, we have to explicitly ask for
         // a reload, since no state changes will cause it.
         lastReloadRequestTime = new Date().getTime();
-        refreshDashboardContainer();
       } else {
         $scope.model.query = query;
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
