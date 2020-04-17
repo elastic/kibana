@@ -1,3 +1,17 @@
 .lnsDataTable {
   align-self: flex-start;
 }
+
+.lnsDataTable__filterGroup {
+  visibility: hidden;
+}
+
+.lnsDataTable__filter {
+  cursor: pointer;
+}
+
+.lnsDataTable__cell:hover  {
+  .lnsDataTable__filterGroup {
+    visibility: visible;
+  }
+}

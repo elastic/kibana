@@ -8,6 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
+import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
 import { FormatFactory, LensMultiTable } from '../types';
 import {
   ExpressionFunctionDefinition,
@@ -15,9 +16,14 @@ import {
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions/public';
 import { VisualizationContainer } from '../visualization_container';
+import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { getExecuteTriggerActions } from '../services';
 
 export interface DatatableColumns {
   columnIds: string[];
+  filterable: boolean[];
 }
 
 interface Args {
@@ -91,6 +97,11 @@ export const datatableColumns: ExpressionFunctionDefinition<
       multi: true,
       help: '',
     },
+    filterable: {
+      types: ['boolean'],
+      multi: true,
+      help: '',
+    },
   },
   fn: function fn(input: unknown, args: DatatableColumns) {
     return {
@@ -116,8 +127,13 @@ export const getDatatableRenderer = (
     handlers: IInterpreterRenderHandlers
   ) => {
     const resolvedFormatFactory = await formatFactory;
+    const executeTriggerActions = getExecuteTriggerActions();
     ReactDOM.render(
-      <DatatableComponent {...config} formatFactory={resolvedFormatFactory} />,
+      <DatatableComponent
+        {...config}
+        formatFactory={resolvedFormatFactory}
+        executeTriggerActions={executeTriggerActions}
+      />,
       domNode,
       () => {
         handlers.done();
@@ -127,13 +143,42 @@ export const getDatatableRenderer = (
   },
 });
 
-function DatatableComponent(props: DatatableProps & { formatFactory: FormatFactory }) {
+function DatatableComponent(
+  props: DatatableProps & {
+    formatFactory: FormatFactory;
+    executeTriggerActions: UiActionsStart['executeTriggerActions'];
+  }
+) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
   firstTable.columns.forEach(column => {
     formatters[column.id] = props.formatFactory(column.formatHint);
   });
+
+  const handleFilterClick = (field: string, value: unknown, index: number, negate = false) => {
+    const timeFieldName = negate
+      ? undefined
+      : firstTable.columns.find(col => col?.meta?.type === 'date_histogram')?.meta?.aggConfigParams
+          ?.field;
+    const rowIndex = firstTable.rows.findIndex(row => row[field] === value);
+
+    const context: ValueClickTriggerContext = {
+      data: {
+        negate,
+        data: [
+          {
+            row: rowIndex,
+            column: index,
+            value,
+            table: firstTable,
+          },
+        ],
+      },
+      timeFieldName,
+    };
+    props.executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
+  };
 
   return (
     <VisualizationContainer>
@@ -142,25 +187,66 @@ function DatatableComponent(props: DatatableProps & { formatFactory: FormatFacto
         data-test-subj="lnsDataTable"
         tableLayout="auto"
         columns={props.args.columns.columnIds
-          .map(field => {
+          .map((field, index) => {
             const col = firstTable.columns.find(c => c.id === field);
             return {
               field,
               name: (col && col.name) || '',
+              render: (value: unknown) => {
+                const formattedValue = formatters[field].convert(value);
+                if (props.args.columns.filterable[index]) {
+                  return (
+                    <EuiFlexGroup justifyContent="spaceBetween" className="lnsDataTable__cell">
+                      <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup className="lnsDataTable__filterGroup">
+                          <EuiFlexItem
+                            className="lnsDataTable__filter"
+                            onClick={() => handleFilterClick(field, value, index)}
+                            data-test-subj="lensFilterForCellValue"
+                          >
+                            <EuiIconTip
+                              type="magnifyWithPlus"
+                              content={i18n.translate(
+                                'visTypeTable.directives.tableCellFilter.filterForValueTooltip',
+                                {
+                                  defaultMessage: 'Filter for value',
+                                }
+                              )}
+                              iconProps={{
+                                className: 'eui-alignTop',
+                              }}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            className="lnsDataTable__filter"
+                            onClick={() => handleFilterClick(field, value, index, true)}
+                            data-test-subj="lensFilterOutCellValue"
+                          >
+                            <EuiIconTip
+                              type="magnifyWithMinus"
+                              content={i18n.translate(
+                                'visTypeTable.directives.tableCellFilter.filterOutValueTooltip',
+                                {
+                                  defaultMessage: 'Filter out value',
+                                }
+                              )}
+                              iconProps={{
+                                className: 'eui-alignTop',
+                              }}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  );
+                }
+                return formattedValue;
+              },
             };
           })
           .filter(({ field }) => !!field)}
-        items={
-          firstTable
-            ? firstTable.rows.map(row => {
-                const formattedRow: Record<string, unknown> = {};
-                Object.entries(formatters).forEach(([columnId, formatter]) => {
-                  formattedRow[columnId] = formatter.convert(row[columnId]);
-                });
-                return formattedRow;
-              })
-            : []
-        }
+        items={firstTable ? firstTable.rows : []}
       />
     </VisualizationContainer>
   );
