@@ -15,8 +15,6 @@ import {
   isIndexingEntriesRoute,
   isEventLogServiceLoggingEntriesRoute,
   isEventLogServiceEnabledRoute,
-  startTimingEventLoggerRoute,
-  stopTimingEventLoggerRoute,
 } from './init_routes';
 
 // this plugin's dependendencies
