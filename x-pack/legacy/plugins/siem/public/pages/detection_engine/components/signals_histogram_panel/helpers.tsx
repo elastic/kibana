@@ -5,6 +5,7 @@
  */
 
 import { HistogramData, SignalsAggregation, SignalsBucket, SignalsGroupBucket } from './types';
+import { showAllOthersBucket } from '../../../../../common/constants';
 import { SignalSearchResponse } from '../../../../containers/detection_engine/signals/types';
 import * as i18n from './translations';
 
@@ -34,48 +35,56 @@ export const getSignalsHistogramQuery = (
   additionalFilters: Array<{
     bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
   }>
-) => ({
-  aggs: {
-    signalsByGrouping: {
-      terms: {
-        field: stackByField,
+) => {
+  const missing = showAllOthersBucket.includes(stackByField)
+    ? {
         missing: stackByField.endsWith('.ip') ? '0.0.0.0' : i18n.ALL_OTHERS,
-        order: {
-          _count: 'desc',
+      }
+    : {};
+
+  return {
+    aggs: {
+      signalsByGrouping: {
+        terms: {
+          field: stackByField,
+          ...missing,
+          order: {
+            _count: 'desc',
+          },
+          size: 10,
         },
-        size: 10,
-      },
-      aggs: {
-        signals: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: `${Math.floor((to - from) / 32)}ms`,
-            min_doc_count: 0,
-            extended_bounds: {
-              min: from,
-              max: to,
+        aggs: {
+          signals: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: `${Math.floor((to - from) / 32)}ms`,
+              min_doc_count: 0,
+              extended_bounds: {
+                min: from,
+                max: to,
+              },
             },
           },
         },
       },
     },
-  },
-  query: {
-    bool: {
-      filter: [
-        ...additionalFilters,
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
+    query: {
+      bool: {
+        filter: [
+          ...additionalFilters,
+          {
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: to,
+              },
             },
           },
-        },
-      ],
+        ],
+      },
     },
-  },
-});
+  };
+};
 
 /**
  * Returns `true` when the signals histogram initial loading spinner should be shown
