@@ -78,7 +78,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             disabled={!canSave}
             compressed
             checked={!item.enabled}
-            data-test-subj="enableSwitch"
+            data-test-subj="disableSwitch"
             onChange={async () => {
               if (item.enabled) {
                 await disableAlert(item);
