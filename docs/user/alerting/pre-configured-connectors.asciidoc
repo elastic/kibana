@@ -1,22 +1,22 @@
 [role="xpack"]
 [[pre-configured-connectors]]
+
 == Pre-configured connectors
 
 Action connectors, which have all the information they need prior to startup, can be pre-configured with Kibana.yml.
-Sensitive configuration like credentials can use either kibana.yml or the Kibana keystore.
+Sensitive configuration like credentials can use the {kib} keystore.
 
 [float]
 [[pre-configured-features]]
-=== Features
+=== Features:
 
-+
 - Require zero setup. Configuration and secrets/credentials needed to execute an action are pre-defined, including the connector name and id.
 - Appear in all spaces, because they are not saved objects.
 - Cannot be edited or deleted in the API or in the UI.
 
 The following example shows a valid configuration 2 out of the box connectors.
-+
----
+
+--
   xpack.actions.preconfigured:
     - id: 'my-slack1'
       actionTypeId: .slack
@@ -35,7 +35,7 @@ The following example shows a valid configuration 2 out of the box connectors.
       secrets:
         user: elastic
         password: changeme
----
+--
 
 id::      Action connector identifier.
 actionTypeId::      Action type identifier.

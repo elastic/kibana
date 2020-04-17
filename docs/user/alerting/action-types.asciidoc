@@ -39,14 +39,11 @@ For a comparison of the Elastic subscription levels,
 see https://www.elastic.co/subscriptions[the subscription page]. 
 ==============================================
 
-[float]
 [[create-connectors]]
 === Create connectors
 
 Connectors for actions could be created in the UI or via API.
 For out-of-the-box and standardized connectors there is the ability to <<pre-configured-connectors, pre-configure connectors>>, before {kib} has even started.
-
---
 
 include::action-types/email.asciidoc[]
 include::action-types/index.asciidoc[]
