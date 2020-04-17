@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ESTermQuery } from '../../../../../../../plugins/siem/common/typed_json';
 import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { NarrowDateRange } from '../../../components/ml/types';
-import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
 
 import { HostsTableType, HostsType } from '../../../store/hosts/model';
