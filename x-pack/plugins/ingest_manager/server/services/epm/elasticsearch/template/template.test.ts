@@ -63,3 +63,101 @@ test('tests loading system.yml', () => {
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
 });
+
+test('tests processing text field with multi fields', () => {
+  const textWithMultiFieldsLiteralYml = `
+- name: textWithMultiFields
+  type: text
+  multi_fields:
+    - name: raw
+      type: keyword
+    - name: indexed
+      type: text
+`;
+  const textWithMultiFieldsMapping = {
+    properties: {
+      textWithMultiFields: {
+        type: 'text',
+        fields: {
+          raw: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          indexed: {
+            type: 'text',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(textWithMultiFieldsLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(textWithMultiFieldsMapping));
+});
+
+test('tests processing keyword field with multi fields', () => {
+  const keywordWithMultiFieldsLiteralYml = `
+- name: keywordWithMultiFields
+  type: keyword
+  multi_fields:
+    - name: raw
+      type: keyword
+    - name: indexed
+      type: text
+`;
+
+  const keywordWithMultiFieldsMapping = {
+    properties: {
+      keywordWithMultiFields: {
+        ignore_above: 1024,
+        type: 'keyword',
+        fields: {
+          raw: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          indexed: {
+            type: 'text',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(keywordWithMultiFieldsMapping));
+});
+
+test('tests processing keyword field with multi fields with analyzed text field', () => {
+  const keywordWithAnalyzedMultiFieldsLiteralYml = `
+  - name: keywordWithAnalyzedMultiField
+    type: keyword
+    multi_fields:
+      - name: analyzed
+        type: text
+        analyzer: autocomplete
+        search_analyzer: standard
+  `;
+
+  const keywordWithAnalyzedMultiFieldsMapping = {
+    properties: {
+      keywordWithAnalyzedMultiField: {
+        ignore_above: 1024,
+        type: 'keyword',
+        fields: {
+          analyzed: {
+            analyzer: 'autocomplete',
+            search_analyzer: 'standard',
+            type: 'text',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(keywordWithAnalyzedMultiFieldsLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(keywordWithAnalyzedMultiFieldsMapping));
+});
