@@ -9,7 +9,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getMonitorList } from '../../../state/actions';
 import { FetchMonitorStatesQueryArgs } from '../../../../common/runtime_types';
 import { monitorListSelector } from '../../../state/selectors';
-import { MonitorListComponent } from '../../overview/monitor_list';
+import { MonitorListComponent } from './index';
 
 export interface MonitorListProps {
   filters?: string;

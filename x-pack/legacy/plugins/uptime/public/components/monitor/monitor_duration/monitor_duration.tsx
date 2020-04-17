@@ -32,37 +32,35 @@ export const MonitorDurationComponent = ({
   hasMLJob,
 }: DurationChartProps) => {
   return (
-    <>
-      <EuiPanel paddingSize="m">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h4>
-                {hasMLJob ? (
-                  <FormattedMessage
-                    id="xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly"
-                    defaultMessage="Monitor duration (Anomalies: {noOfAnomalies})"
-                    values={{ noOfAnomalies: anomalies?.anomalies?.length ?? 0 }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-                    defaultMessage="Monitor duration"
-                  />
-                )}
-              </h4>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <MLIntegrationComponent />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <DurationChartComponent
-          locationDurationLines={locationDurationLines}
-          loading={loading}
-          anomalies={anomalies}
-        />
-      </EuiPanel>
-    </>
+    <EuiPanel paddingSize="m">
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>
+              {hasMLJob ? (
+                <FormattedMessage
+                  id="xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly"
+                  defaultMessage="Monitor duration (Anomalies: {noOfAnomalies})"
+                  values={{ noOfAnomalies: anomalies?.anomalies?.length ?? 0 }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+                  defaultMessage="Monitor duration"
+                />
+              )}
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <MLIntegrationComponent />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <DurationChartComponent
+        locationDurationLines={locationDurationLines}
+        loading={loading}
+        anomalies={anomalies}
+      />
+    </EuiPanel>
   );
 };

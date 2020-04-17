@@ -31,8 +31,6 @@ interface DurationChartProps {
    */
   loading: boolean;
 
-  hasMLJob: boolean;
-
   anomalies: AnomalyRecords | null;
 }
 
@@ -46,7 +44,6 @@ export const DurationChartComponent = ({
   locationDurationLines,
   anomalies,
   loading,
-  hasMLJob,
 }: DurationChartProps) => {
   const hasLines = locationDurationLines.length > 0;
   const [getUrlParams, updateUrlParams] = useUrlParams();

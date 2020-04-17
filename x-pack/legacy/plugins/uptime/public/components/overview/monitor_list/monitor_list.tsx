@@ -28,7 +28,7 @@ import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
-import { MonitorListProps } from '../../connected/monitor/monitor_list';
+import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
 import { useUrlParams } from '../../../hooks';
 
