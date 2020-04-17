@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
-} from '../query_utils';
+} from './query_utils';
 
 describe('ML - query utils', () => {
   describe('buildBaseFilterCriteria', () => {
@@ -23,8 +22,8 @@ describe('ML - query utils', () => {
       },
     };
 
-    it('returns correct criteria for time range', () => {
-      expect(buildBaseFilterCriteria('timestamp', earliestMs, latestMs)).to.eql([
+    test('returns correct criteria for time range', () => {
+      expect(buildBaseFilterCriteria('timestamp', earliestMs, latestMs)).toEqual([
         {
           range: {
             timestamp: {
@@ -37,8 +36,8 @@ describe('ML - query utils', () => {
       ]);
     });
 
-    it('returns correct criteria for time range and query', () => {
-      expect(buildBaseFilterCriteria('timestamp', earliestMs, latestMs, query)).to.eql([
+    test('returns correct criteria for time range and query', () => {
+      expect(buildBaseFilterCriteria('timestamp', earliestMs, latestMs, query)).toEqual([
         {
           range: {
             timestamp: {
@@ -60,8 +59,8 @@ describe('ML - query utils', () => {
       },
     };
 
-    it('returns wrapped sampler aggregation for sampler shard size of 1000', () => {
-      expect(buildSamplerAggregation(testAggs, 1000)).to.eql({
+    test('returns wrapped sampler aggregation for sampler shard size of 1000', () => {
+      expect(buildSamplerAggregation(testAggs, 1000)).toEqual({
         sample: {
           sampler: {
             shard_size: 1000,
@@ -71,18 +70,18 @@ describe('ML - query utils', () => {
       });
     });
 
-    it('returns un-sampled aggregation as-is for sampler shard size of 0', () => {
-      expect(buildSamplerAggregation(testAggs, 0)).to.eql(testAggs);
+    test('returns un-sampled aggregation as-is for sampler shard size of 0', () => {
+      expect(buildSamplerAggregation(testAggs, 0)).toEqual(testAggs);
     });
   });
 
   describe('getSamplerAggregationsResponsePath', () => {
-    it('returns correct path for sampler shard size of 1000', () => {
-      expect(getSamplerAggregationsResponsePath(1000)).to.eql(['sample']);
+    test('returns correct path for sampler shard size of 1000', () => {
+      expect(getSamplerAggregationsResponsePath(1000)).toEqual(['sample']);
     });
 
-    it('returns correct path for sampler shard size of 0', () => {
-      expect(getSamplerAggregationsResponsePath(0)).to.eql([]);
+    test('returns correct path for sampler shard size of 0', () => {
+      expect(getSamplerAggregationsResponsePath(0)).toEqual([]);
     });
   });
 });
