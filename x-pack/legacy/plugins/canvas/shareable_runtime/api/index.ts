@@ -5,6 +5,7 @@
  */
 
 import 'whatwg-fetch';
+import 'regenerator-runtime/runtime';
 import 'core-js/stable';
 
 export * from './shareable';
