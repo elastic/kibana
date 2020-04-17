@@ -36,5 +36,5 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createLogPageViewRoute,
   createGetPingHistogramRoute,
   createGetMonitorDurationRoute,
-  // createGetMonitorRedirectsRoute,
+  createGetMonitorRedirectsRoute,
 ];

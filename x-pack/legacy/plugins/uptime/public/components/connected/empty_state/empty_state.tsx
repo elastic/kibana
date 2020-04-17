@@ -7,19 +7,32 @@
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { indexStatusAction } from '../../../state/actions';
-import { indexStatusSelector } from '../../../state/selectors';
+import { indexStatusSelector, selectDynamicSettings } from '../../../state/selectors';
 import { EmptyStateComponent } from '../../functional/empty_state/empty_state';
 import { UptimeRefreshContext } from '../../../contexts';
+import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 
 export const EmptyState: React.FC = ({ children }) => {
   const { data, loading, error } = useSelector(indexStatusSelector);
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
+  const { settings } = useSelector(selectDynamicSettings);
+
+  const heartbeatIndices = settings?.heartbeatIndices || '';
+
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(indexStatusAction.get());
+    if (!data || data?.docCount === 0 || data?.indexExists === false) {
+      dispatch(indexStatusAction.get());
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, lastRefresh]);
+
+  useEffect(() => {
+    dispatch(indexStatusAction.get());
+  }, [dispatch, heartbeatIndices]);
 
   return (
     <EmptyStateComponent

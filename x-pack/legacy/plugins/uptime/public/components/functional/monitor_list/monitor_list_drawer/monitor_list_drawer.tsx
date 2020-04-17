@@ -62,7 +62,7 @@ export function MonitorListDrawerComponent({ summary, monitorDetails }: MonitorL
           timestamp={monitorDetails.timestamp}
         />
       )}
-      <Redirects />
+      <Redirects monitorUrl={monitorUrl} />
     </ContainerDiv>
   ) : null;
 }
