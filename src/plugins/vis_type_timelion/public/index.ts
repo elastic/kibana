@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import { IndexPatternsContract } from 'src/plugins/data/public';
-import { SavedObjectsClientContract } from 'kibana/public';
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
+import { PluginInitializerContext } from 'kibana/public';
+import { TimelionVisPlugin as Plugin } from './plugin';
 
-export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
-  'IndexPatterns'
-);
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}
 
-export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<
-  SavedObjectsClientContract
->('SavedObjectsClient');
+export { getTimezone } from './helpers/get_timezone';
+
+export { VisTypeTimelionPluginStart } from './plugin';

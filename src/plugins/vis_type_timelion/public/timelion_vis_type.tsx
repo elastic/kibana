@@ -20,8 +20,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaContextProvider } from '../../../../plugins/kibana_react/public';
-import { DefaultEditorSize } from '../../../../plugins/vis_default_editor/public';
+import { KibanaContextProvider } from '../../kibana_react/public';
+import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
 import { TimelionVisComponent, TimelionVisComponentProp } from './components';
 import { TimelionOptions, TimelionOptionsProps } from './timelion_options';

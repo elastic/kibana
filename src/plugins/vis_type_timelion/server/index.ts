@@ -17,16 +17,23 @@
  * under the License.
  */
 
-module.exports = {
-  kuery: {
-    src: 'src/plugins/data/common/es_query/kuery/ast/kuery.peg',
-    dest: 'src/plugins/data/common/es_query/kuery/ast/_generated_/kuery.js',
-    options: {
-      allowedStartRules: ['start', 'Literal'],
-    },
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
+import { configSchema, ConfigSchema } from '../config';
+import { Plugin } from './plugin';
+
+export { PluginSetupContract } from './plugin';
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    ui: true,
   },
-  timelion_chain: {
-    src: 'src/plugins/vis_type_timelion/public/chain.peg',
-    dest: 'src/plugins/vis_type_timelion/public/_generated_/chain.js',
-  },
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('timelion_vis.enabled', 'vis_type_timelion.enabled'),
+    renameFromRoot('timelion.enabled', 'vis_type_timelion.enabled'),
+    renameFromRoot('timelion.graphiteUrls', 'vis_type_timelion.graphiteUrls'),
+    renameFromRoot('timelion.ui.enabled', 'vis_type_timelion.ui.enabled'),
+  ],
 };
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new Plugin(initializerContext);
