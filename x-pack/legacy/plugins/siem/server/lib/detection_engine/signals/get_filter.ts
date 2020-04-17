@@ -22,7 +22,7 @@ export const getQueryFilter = (
   language: Language,
   filters: PartialFilter[],
   index: string[],
-  lists: RuleAlertParams['lists']
+  lists: RuleAlertParams['exceptions_list']
 ) => {
   const indexPattern = {
     fields: [],
@@ -53,7 +53,7 @@ interface GetFilterArgs {
   savedId: string | undefined | null;
   services: AlertServices;
   index: string[] | undefined | null;
-  lists: RuleAlertParams['lists'];
+  lists: RuleAlertParams['exceptions_list'];
 }
 
 interface QueryAttributes {
