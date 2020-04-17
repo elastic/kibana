@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
-import { startDatafeedSchema, datafeedConfigSchema } from './schemas/datafeeds_schema';
+import {
+  startDatafeedSchema,
+  datafeedConfigSchema,
+  datafeedIdSchema,
+  deleteDatafeedQuerySchema,
+} from './schemas/datafeeds_schema';
 
 /**
  * Routes for datafeed service
@@ -44,12 +48,14 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {get} /api/ml/datafeeds/:datafeedId Get datafeed for given datafeed id
    * @apiName GetDatafeed
    * @apiDescription Retrieves configuration information for datafeed
+   *
+   * @apiSchema (params) datafeedIdSchema
    */
   router.get(
     {
       path: '/api/ml/datafeeds/{datafeedId}',
       validate: {
-        params: schema.object({ datafeedId: schema.string() }),
+        params: datafeedIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -97,12 +103,14 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {get} /api/ml/datafeeds/:datafeedId/_stats Get datafeed stats for given datafeed id
    * @apiName GetDatafeedStats
    * @apiDescription Retrieves usage information for datafeed
+   *
+   * @apiSchema (params) datafeedIdSchema
    */
   router.get(
     {
       path: '/api/ml/datafeeds/{datafeedId}/_stats',
       validate: {
-        params: schema.object({ datafeedId: schema.string() }),
+        params: datafeedIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -127,12 +135,15 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {put} /api/ml/datafeeds/:datafeedId Creates datafeed
    * @apiName CreateDatafeed
    * @apiDescription Instantiates a datafeed
+   *
+   * @apiSchema (params) datafeedIdSchema
+   * @apiSchema (body) datafeedConfigSchema
    */
   router.put(
     {
       path: '/api/ml/datafeeds/{datafeedId}',
       validate: {
-        params: schema.object({ datafeedId: schema.string() }),
+        params: datafeedIdSchema,
         body: datafeedConfigSchema,
       },
     },
@@ -159,12 +170,15 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/datafeeds/:datafeedId/_update Updates datafeed for given datafeed id
    * @apiName UpdateDatafeed
    * @apiDescription Updates certain properties of a datafeed
+   *
+   * @apiSchema (params) datafeedIdSchema
+   * @apiSchema (body) datafeedConfigSchema
    */
   router.post(
     {
       path: '/api/ml/datafeeds/{datafeedId}/_update',
       validate: {
-        params: schema.object({ datafeedId: schema.string() }),
+        params: datafeedIdSchema,
         body: datafeedConfigSchema,
       },
     },
@@ -191,13 +205,16 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {delete} /api/ml/datafeeds/:datafeedId Deletes datafeed
    * @apiName DeleteDatafeed
    * @apiDescription Deletes an existing datafeed
+   *
+   * @apiSchema (params) datafeedIdSchema
+   * @apiSchema (query) deleteDatafeedQuerySchema
    */
   router.delete(
     {
       path: '/api/ml/datafeeds/{datafeedId}',
       validate: {
-        params: schema.object({ datafeedId: schema.string() }),
-        query: schema.maybe(schema.object({ force: schema.maybe(schema.any()) })),
+        params: datafeedIdSchema,
+        query: deleteDatafeedQuerySchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -227,12 +244,15 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/datafeeds/:datafeedId/_start Starts datafeed for given datafeed id(s)
    * @apiName StartDatafeed
    * @apiDescription Starts one or more datafeeds
+   *
+   * @apiSchema (params) datafeedIdSchema
+   * @apiSchema (body) startDatafeedSchema
    */
   router.post(
     {
       path: '/api/ml/datafeeds/{datafeedId}/_start',
       validate: {
-        params: schema.object({ datafeedId: schema.string() }),
+        params: datafeedIdSchema,
         body: startDatafeedSchema,
       },
     },
@@ -262,12 +282,14 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/datafeeds/:datafeedId/_stop Stops datafeed for given datafeed id(s)
    * @apiName StopDatafeed
    * @apiDescription Stops one or more datafeeds
+   *
+   * @apiSchema (params) datafeedIdSchema
    */
   router.post(
     {
       path: '/api/ml/datafeeds/{datafeedId}/_stop',
       validate: {
-        params: schema.object({ datafeedId: schema.string() }),
+        params: datafeedIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -293,12 +315,14 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {get} /api/ml/datafeeds/:datafeedId/_preview Preview datafeed for given datafeed id
    * @apiName PreviewDatafeed
    * @apiDescription Previews a datafeed
+   *
+   * @apiSchema (params) datafeedIdSchema
    */
   router.get(
     {
       path: '/api/ml/datafeeds/{datafeedId}/_preview',
       validate: {
-        params: schema.object({ datafeedId: schema.string() }),
+        params: datafeedIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

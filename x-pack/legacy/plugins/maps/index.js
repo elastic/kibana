@@ -38,6 +38,7 @@ export function maps(kibana) {
         return {
           showMapVisualizationTypes: serverConfig.get('xpack.maps.showMapVisualizationTypes'),
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
+          enableVectorTiles: serverConfig.get('xpack.maps.enableVectorTiles'),
           preserveDrawingBuffer: serverConfig.get('xpack.maps.preserveDrawingBuffer'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
           emsFontLibraryUrl: mapConfig.emsFontLibraryUrl,
@@ -85,6 +86,7 @@ export function maps(kibana) {
         showMapVisualizationTypes: Joi.boolean().default(false),
         showMapsInspectorAdapter: Joi.boolean().default(false), // flag used in functional testing
         preserveDrawingBuffer: Joi.boolean().default(false), // flag used in functional testing
+        enableVectorTiles: Joi.boolean().default(false), // flag used to enable/disable vector-tiles
       }).default();
     },
 
