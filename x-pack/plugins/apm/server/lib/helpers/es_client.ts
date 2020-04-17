@@ -7,10 +7,10 @@
 /* eslint-disable no-console */
 import {
   IndexDocumentParams,
-  IndicesDeleteParams,
   SearchParams,
   IndicesCreateParams,
-  DeleteDocumentResponse
+  DeleteDocumentResponse,
+  DeleteDocumentParams
 } from 'elasticsearch';
 import { cloneDeep, isString, merge } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
@@ -205,7 +205,9 @@ export function getESClient(
     index: <Body>(params: APMIndexDocumentParams<Body>) => {
       return callEs('index', params);
     },
-    delete: (params: IndicesDeleteParams): Promise<DeleteDocumentResponse> => {
+    delete: (
+      params: Omit<DeleteDocumentParams, 'type'>
+    ): Promise<DeleteDocumentResponse> => {
       return callEs('delete', params);
     },
     indicesCreate: (params: IndicesCreateParams) => {

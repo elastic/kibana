@@ -41,7 +41,8 @@ const getCoreMock = () => {
       logger: ({
         error: jest.fn()
       } as unknown) as Logger,
-      __LEGACY: {} as LegacySetup
+      __LEGACY: {} as LegacySetup,
+      plugins: {}
     }
   };
 };

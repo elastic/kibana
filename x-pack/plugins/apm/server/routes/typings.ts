@@ -14,6 +14,7 @@ import {
 import { PickByValue, Optional } from 'utility-types';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
+import { ObservabilityPluginSetup } from '../../../observability/server';
 import { FetchOptions } from '../../../../legacy/plugins/apm/public/services/rest/callApi';
 import { APMConfig } from '..';
 
@@ -61,6 +62,9 @@ export type APMRequestHandlerContext<
   params: { query: { _debug: boolean } } & TDecodedParams;
   config: APMConfig;
   logger: Logger;
+  plugins: {
+    observability?: ObservabilityPluginSetup;
+  };
   __LEGACY: {
     server: APMLegacyServer;
   };
@@ -107,6 +111,9 @@ export interface ServerAPI<TRouteState extends RouteState> {
     context: {
       config$: Observable<APMConfig>;
       logger: Logger;
+      plugins: {
+        observability?: ObservabilityPluginSetup;
+      };
       __LEGACY: { server: Server };
     }
   ) => void;

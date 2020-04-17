@@ -14,6 +14,7 @@ import { Observable, combineLatest, AsyncSubject } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { Server } from 'hapi';
 import { once } from 'lodash';
+import { ObservabilityPluginSetup } from '../../observability/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
 import { AlertingPlugin } from '../../alerting/server';
@@ -62,6 +63,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       taskManager?: TaskManagerSetupContract;
       alerting?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
+      observability?: ObservabilityPluginSetup;
     }
   ) {
     this.logger = this.initContext.logger.get();
@@ -82,6 +84,9 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       createApmApi().init(core, {
         config$: mergedConfig$,
         logger: this.logger!,
+        plugins: {
+          observability: plugins.observability
+        },
         __LEGACY
       });
     });
