@@ -4,7 +4,7 @@
   "requiredPlugins": [
     "home",
     "index_management",
-    "metrics",
+    "visTypeTimeseries",
     "indexPatternManagement"
   ],
   "optionalPlugins": [

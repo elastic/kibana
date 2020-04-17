@@ -66,6 +66,7 @@ export const signalRulesAlertType = ({
         query,
         to,
         type,
+        lists,
       } = params;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
@@ -200,6 +201,7 @@ export const signalRulesAlertType = ({
             savedId,
             services,
             index: inputIndex,
+            lists,
           });
 
           const noReIndex = buildEventsSearchQuery({

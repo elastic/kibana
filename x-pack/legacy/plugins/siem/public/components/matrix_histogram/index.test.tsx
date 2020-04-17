@@ -87,6 +87,17 @@ describe('Matrix Histogram Component', () => {
     });
   });
 
+  describe('spacer', () => {
+    test('it renders a spacer by default', () => {
+      expect(wrapper.find('[data-test-subj="spacer"]').exists()).toBe(true);
+    });
+
+    test('it does NOT render a spacer when showSpacer is false', () => {
+      wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} showSpacer={false} />);
+      expect(wrapper.find('[data-test-subj="spacer"]').exists()).toBe(false);
+    });
+  });
+
   describe('not initial load', () => {
     beforeAll(() => {
       (useQuery as jest.Mock).mockReturnValue({
