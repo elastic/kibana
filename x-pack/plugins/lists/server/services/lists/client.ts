@@ -43,9 +43,9 @@ import {
   createBootstrapIndex,
   getIndexExists,
 } from '../../siem_server_deps';
+import listsItemsPolicy from '../items/lists_items_policy.json';
 
-import listsItemsPolicy from './items/lists_items_policy.json';
-import listsPolicy from './lists/lists_policy.json';
+import listsPolicy from './lists_policy.json';
 import {
   ConstructorOptions,
   CreateListOptions,
