@@ -248,7 +248,7 @@ export class KibanaFramework {
     timerange: { min: number; max: number },
     filters: any[]
   ): Promise<InfraTSVBResponse> {
-    const { getVisData } = this.plugins.metrics;
+    const { getVisData } = this.plugins.visTypeTimeseries;
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');
     }

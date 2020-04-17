@@ -4,24 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { createSavedGisMapClass } from './saved_gis_map';
-import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
-import { npStart } from '../../../../../../../src/legacy/ui/public/new_platform';
+import {
+  getCoreChrome,
+  getSavedObjectsClient,
+  getIndexPatternService,
+  getCoreOverlays,
+  getData,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/maps/public/kibana_services';
 
-const module = uiModules.get('app/maps');
-
-// This is the only thing that gets injected into controllers
-module.service('gisMapSavedObjectLoader', function() {
-  const savedObjectsClient = npStart.core.savedObjects.client;
+export const getMapsSavedObjectLoader = _.once(function() {
   const services = {
-    savedObjectsClient,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    search: npStart.plugins.data.search,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
+    savedObjectsClient: getSavedObjectsClient(),
+    indexPatterns: getIndexPatternService(),
+    search: getData().search,
+    chrome: getCoreChrome(),
+    overlays: getCoreOverlays(),
   };
   const SavedGisMap = createSavedGisMapClass(services);
 
-  return new SavedObjectLoader(SavedGisMap, npStart.core.savedObjects.client, npStart.core.chrome);
+  return new SavedObjectLoader(SavedGisMap, getSavedObjectsClient(), getCoreChrome());
 });

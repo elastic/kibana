@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import * as rt from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
-import { ids, exclude_export_details, file_name } from './schemas';
-/* eslint-disable @typescript-eslint/camelcase */
+export const exportTimelinesQuerySchema = rt.type({
+  file_name: rt.string,
+  exclude_export_details: rt.union([rt.literal('true'), rt.literal('false')]),
+});
 
-export const exportTimelinesSchema = Joi.object({
-  ids,
-}).min(1);
-
-export const exportTimelinesQuerySchema = Joi.object({
-  file_name: file_name.default('export.ndjson'),
-  exclude_export_details: exclude_export_details.default(false),
+export const exportTimelinesRequestBodySchema = rt.type({
+  ids: rt.array(rt.string),
 });

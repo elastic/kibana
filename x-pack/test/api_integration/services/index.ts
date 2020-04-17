@@ -23,6 +23,7 @@ import { SiemGraphQLClientProvider, SiemGraphQLClientFactoryProvider } from './s
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
 import { InfraLogSourceConfigurationProvider } from './infra_log_source_configuration';
 import { MachineLearningProvider } from './ml';
+import { IngestManagerProvider } from './ingest_manager';
 
 export const services = {
   ...commonServices,
@@ -41,4 +42,5 @@ export const services = {
   supertestWithoutAuth: SupertestWithoutAuthProvider,
   usageAPI: UsageAPIProvider,
   ml: MachineLearningProvider,
+  ingestManager: IngestManagerProvider,
 };
