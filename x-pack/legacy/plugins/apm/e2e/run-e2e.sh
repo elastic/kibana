@@ -21,13 +21,6 @@ E2E_DIR="${0%/*}"
 TMP_DIR="./tmp"
 APM_IT_DIR="./tmp/apm-integration-testing"
 
-### When running in the CI let's add some verbose output and install the required dependencies
-if [ -n "${JENKINS_URL}" ] ; then
-  # shellcheck disable=SC1091
-  source src/dev/ci_setup/setup_env.sh true
-  set -x
-fi
-
 cd ${E2E_DIR}
 
 #
@@ -121,22 +114,6 @@ fi
 echo "\n${bold}Waiting for Kibana to start...${normal}"
 echo "Note: you need to start Kibana manually. Find the instructions at the top."
 yarn wait-on -i 500 -w 500 http://localhost:${KIBANA_PORT}/status > /dev/null
-if [ -n "${JENKINS_URL}" ] ; then
-  n=0
-  until [ $n -ge 20 ]
-  do
-    ## for debugging purposes only
-    curl --user admin:changeme \
-        "http://localhost:${KIBANA_PORT}/app/apm#/services?rangeFrom=2020-03-04T12:30:00.000Z&rangeTo=2020-03-04T13:00:00.000Z"
-
-    curl --silent --user admin:changeme \
-          "localhost:${KIBANA_PORT}/api/status" | \
-            jq .status.overall.state | \
-            grep 'green' && break
-    n=$[$n+1]
-    sleep 30
-  done
-fi
 echo "\n✅ Setup completed successfully. Running tests...\n"
 
 #

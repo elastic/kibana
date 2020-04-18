@@ -58,7 +58,7 @@ pipeline {
       steps {
         notifyStatus('Preparing kibana', 'PENDING')
         dir("${BASE_DIR}"){
-          sh script: "${E2E_DIR}/ci/prepare-kibana.sh"
+          sh "${E2E_DIR}/ci/prepare-kibana.sh"
         }
       }
       post {
@@ -78,16 +78,13 @@ pipeline {
       steps{
         notifyStatus('Running smoke tests', 'PENDING')
         dir("${BASE_DIR}"){
-          sh "${E2E_DIR}/run-e2e.sh || true"
-          // As long as Kibana takes ages let's try a few times though
-          retry(10) {
-            sleep 20
-            sh '''#!/usr/bin/env bash
-              source src/dev/ci_setup/setup_env.sh true
-              cd ${E2E_DIR}
-              rm cypress/test-results/*.* || true
-              yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
-            '''
+          // As long as the kibana in dev mode is not reliable we need to run the tests
+          // a few times.
+          // TODO: APM-UI to provide the kibana run command that works at first.
+          sh "${E2E_DIR}/ci/run-e2e.sh || true"
+          retry(5) {
+            sleep 30
+            sh "${E2E_DIR}/ci/rerun-e2e.sh"
           }
         }
       }
