@@ -66,7 +66,7 @@ const analyzer = {
   ],
 };
 const defaultRequestBody = {
-  indexPatternTitle: 'categorization_functional_test',
+  indexPatternTitle: 'ft_categorization',
   query: { bool: { must: [{ match_all: {} }] } },
   size: 5,
   timeField: '@timestamp',
@@ -289,11 +289,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Categorization example endpoint - ', function() {
     before(async () => {
-      await esArchiver.load('ml/categorization');
-    });
-
-    after(async () => {
-      await esArchiver.unload('ml/categorization');
+      await esArchiver.loadIfNeeded('ml/categorization');
+      await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     for (const testData of testDataList) {

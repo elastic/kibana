@@ -145,9 +145,35 @@ export const updateFollowerIndex = (id, followerIndex) => {
   if (isUsingAdvancedSettings) {
     uiMetrics.push(UIM_FOLLOWER_INDEX_USE_ADVANCED_OPTIONS);
   }
+
+  const {
+    maxReadRequestOperationCount,
+    maxOutstandingReadRequests,
+    maxReadRequestSize,
+    maxWriteRequestOperationCount,
+    maxWriteRequestSize,
+    maxOutstandingWriteRequests,
+    maxWriteBufferCount,
+    maxWriteBufferSize,
+    maxRetryDelay,
+    readPollTimeout,
+  } = followerIndex;
+
   const request = httpClient.put(`${API_BASE_PATH}/follower_indices/${encodeURIComponent(id)}`, {
-    body: JSON.stringify(followerIndex),
+    body: JSON.stringify({
+      maxReadRequestOperationCount,
+      maxOutstandingReadRequests,
+      maxReadRequestSize,
+      maxWriteRequestOperationCount,
+      maxWriteRequestSize,
+      maxOutstandingWriteRequests,
+      maxWriteBufferCount,
+      maxWriteBufferSize,
+      maxRetryDelay,
+      readPollTimeout,
+    }),
   });
+
   return trackUserRequest(request, uiMetrics);
 };
 

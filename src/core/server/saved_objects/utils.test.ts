@@ -421,14 +421,6 @@ describe('convertTypesToLegacySchema', () => {
         namespaceType: 'multiple',
         mappings: { properties: {} },
       },
-      // deprecated test case
-      {
-        name: 'typeD',
-        hidden: false,
-        namespaceAgnostic: true,
-        namespaceType: 'multiple', // if namespaceAgnostic and namespaceType are both set, namespaceAgnostic takes precedence
-        mappings: { properties: {} },
-      },
     ];
     expect(convertTypesToLegacySchema(types)).toEqual({
       typeA: {
@@ -447,12 +439,6 @@ describe('convertTypesToLegacySchema', () => {
         hidden: false,
         isNamespaceAgnostic: false,
         multiNamespace: true,
-      },
-      // deprecated test case
-      typeD: {
-        hidden: false,
-        isNamespaceAgnostic: true,
-        multiNamespace: false,
       },
     });
   });

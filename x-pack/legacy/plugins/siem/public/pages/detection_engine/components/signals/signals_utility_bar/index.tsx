@@ -7,6 +7,8 @@
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import numeral from '@elastic/numeral';
+
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../../../../../plugins/siem/common/constants';
 import {
   UtilityBar,
   UtilityBarAction,
@@ -16,7 +18,6 @@ import {
 } from '../../../../../components/utility_bar';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../../../lib/kibana';
-import { DEFAULT_NUMBER_FORMAT } from '../../../../../../common/constants';
 import { TimelineNonEcsData } from '../../../../../graphql/types';
 import { UpdateSignalsStatus } from '../types';
 import { FILTER_CLOSED, FILTER_OPEN } from '../signals_filter_group';

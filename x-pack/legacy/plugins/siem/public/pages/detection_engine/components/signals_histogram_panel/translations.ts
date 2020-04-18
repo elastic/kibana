@@ -83,6 +83,12 @@ export const STACK_BY_USERS = i18n.translate(
   }
 );
 
+export const TOP = (fieldName: string) =>
+  i18n.translate('xpack.siem.detectionEngine.signals.histogram.topNLabel', {
+    values: { fieldName },
+    defaultMessage: `Top {fieldName}`,
+  });
+
 export const HISTOGRAM_HEADER = i18n.translate(
   'xpack.siem.detectionEngine.signals.histogram.headerTitle',
   {
