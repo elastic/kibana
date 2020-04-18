@@ -19,18 +19,10 @@
 
 .dshEmptyWidget {
   border: $euiBorderThin;
-  border-style:  dashed;
+  border-style: dashed;
   border-radius: $euiBorderRadius;
   padding: $euiSizeXXL * 2;
   max-width: 400px;
   margin-left: $euiSizeS;
-  text-align: center;
-}
-
-.dshEmptyWidget {
-  border: 2px dashed $euiColorLightShade;
-  padding: 4 * $euiSize;
-  max-width: 20em;
-  margin-left: 10px;
   text-align: center;
 }

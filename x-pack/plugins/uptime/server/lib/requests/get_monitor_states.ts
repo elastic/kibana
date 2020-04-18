@@ -8,10 +8,11 @@ import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/co
 import { fetchPage } from './search';
 import { UMElasticsearchQueryFn } from '../adapters';
 import {
-  MonitorSummary,
   SortOrder,
   CursorDirection,
-} from '../../../../../legacy/plugins/uptime/common/graphql/types';
+  MonitorSummary,
+} from '../../../../../legacy/plugins/uptime/common/runtime_types';
+
 import { QueryContext } from './search';
 
 export interface CursorPagination {
