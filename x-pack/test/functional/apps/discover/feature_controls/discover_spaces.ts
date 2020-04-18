@@ -10,7 +10,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const config = getService('config');
   const spacesService = getService('spaces');
-  const retry = getService('retry');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -69,12 +68,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         await setDiscoverTimeRange();
-        await retry.try(async () => {
-          const hitCount = await PageObjects.discover.getHitCount();
-          expect(parseInt(hitCount, 10)).to.be.greaterThan(0);
-          await PageObjects.discover.clickFieldListItem('bytes');
-          await PageObjects.discover.expectFieldListItemVisualize('bytes');
-        });
+        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.discover.expectFieldListItemVisualize('bytes');
       });
     });
 
@@ -139,12 +134,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         await setDiscoverTimeRange();
-        await retry.try(async () => {
-          const hitCount = await PageObjects.discover.getHitCount();
-          expect(parseInt(hitCount, 10)).to.be.greaterThan(0);
-          await PageObjects.discover.clickFieldListItem('bytes');
-          await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
-        });
+        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
     });
 
