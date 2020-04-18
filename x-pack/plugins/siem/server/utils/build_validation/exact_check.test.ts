@@ -5,22 +5,13 @@
  */
 
 import * as t from 'io-ts';
-import { left, right } from 'fp-ts/lib/Either';
+import { left, right, Either } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { foldLeftRight, getPaths } from './__mocks__/utils';
 import { exactCheck, findDifferencesRecursive } from './exact_check';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 
 describe('exact_check', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   test('it returns an error if given extra object properties', () => {
     const someType = t.exact(
       t.type({
@@ -36,14 +27,22 @@ describe('exact_check', () => {
   });
 
   test('it returns an error if the data type is not as expected', () => {
+    type UnsafeCastForTest = Either<
+      t.Errors,
+      {
+        a: number;
+      }
+    >;
+
     const someType = t.exact(
       t.type({
         a: t.string,
       })
     );
+
     const payload = { a: 1 };
     const decoded = someType.decode(payload);
-    const checked = exactCheck(payload, decoded);
+    const checked = exactCheck(payload, decoded as UnsafeCastForTest);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "1" supplied to "a"']);
     expect(message.schema).toEqual({});
