@@ -57,8 +57,8 @@ export const SettingsPageComponent = ({
   useUptimeTelemetry(UptimePage.Settings);
 
   useEffect(() => {
-    dispatchGetDynamicSettings({});
-  }, [dispatchGetDynamicSettings]);
+    dispatch(getDynamicSettings());
+  }, [dispatch]);
 
   const [formFields, setFormFields] = useState<DynamicSettings | null>(dss.settings || null);
 
