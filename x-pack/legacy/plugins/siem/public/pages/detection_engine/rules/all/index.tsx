@@ -302,6 +302,7 @@ export const AllRules = React.memo<AllRulesProps>(
         <EuiTabs>
           {allRulesTabs.map(tab => (
             <EuiTab
+              data-test-subj={`allRulesTableTab-${tab.id}`}
               onClick={() => setAllRulesTab(tab.id)}
               isSelected={tab.id === allRulesTab}
               disabled={tab.disabled}
