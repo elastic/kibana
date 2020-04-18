@@ -26,7 +26,7 @@ export default function(providerContext: FtrProviderContext) {
 
   describe('test metadata api status', () => {
     describe('/api/endpoint/metadata when index is not empty', () => {
-      before(async () => {
+      beforeEach(async () => {
         await esArchiver.load('endpoint/metadata/endpoint_status_feature');
         const { body: apiKeyBody } = await esClient.security.createApiKey({
           body: {
@@ -53,7 +53,8 @@ export default function(providerContext: FtrProviderContext) {
         });
       });
 
-      after(async () => await esArchiver.unload('endpoint/metadata/endpoint_status_feature'));
+      afterEach(async () => await esArchiver.unload('endpoint/metadata/endpoint_status_feature'));
+
       it('should return single metadata with status error when agent status is error', async () => {
         const { body: metadataResponse } = await supertest
           .get(`/api/endpoint/metadata/${enrolledHostId}`)
@@ -121,7 +122,6 @@ export default function(providerContext: FtrProviderContext) {
       });
 
       it('should return single metadata with status online when agent status is online', async () => {
-        await inactivity();
         const { body: checkInResponse } = await supertestWithoutAuth
           .post(`/api/ingest_manager/fleet/agents/${enrolledAgentId}/checkin`)
           .set('kbn-xsrf', 'xx')
@@ -146,8 +146,4 @@ export default function(providerContext: FtrProviderContext) {
       });
     });
   });
-}
-
-function inactivity() {
-  return new Promise(resolve => setTimeout(resolve, 35000));
 }
