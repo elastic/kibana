@@ -25,6 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix: 'for sample logs dataset with prefix and startDatafeed false',
       sourceDataArchive: 'ml/sample_logs',
+      indexPattern: { name: 'kibana_sample_data_logs', timeField: '@timestamp' },
       module: 'sample_data_weblogs',
       user: USER.ML_POWERUSER,
       requestBody: {
@@ -58,7 +59,6 @@ export default ({ getService }: FtrProviderContext) => {
   const testDataListNegative = [
     {
       testTitleSuffix: 'for non existent index pattern',
-      sourceDataArchive: 'empty_kibana',
       module: 'sample_data_weblogs',
       user: USER.ML_POWERUSER,
       requestBody: {
@@ -75,6 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix: 'for unauthorized user',
       sourceDataArchive: 'ml/sample_logs',
+      indexPattern: { name: 'kibana_sample_data_logs', timeField: '@timestamp' },
       module: 'sample_data_weblogs',
       user: USER.ML_UNAUTHORIZED,
       requestBody: {
@@ -118,14 +119,21 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('module setup', function() {
+    before(async () => {
+      await ml.testResources.setKibanaTimeZoneToUTC();
+    });
+
     for (const testData of testDataListPositive) {
       describe('sets up module data', function() {
         before(async () => {
-          await esArchiver.load(testData.sourceDataArchive);
+          await esArchiver.loadIfNeeded(testData.sourceDataArchive);
+          await ml.testResources.createIndexPatternIfNeeded(
+            testData.indexPattern.name,
+            testData.indexPattern.timeField
+          );
         });
 
         after(async () => {
-          await esArchiver.unload(testData.sourceDataArchive);
           await ml.api.cleanMlIndices();
         });
 
@@ -199,11 +207,18 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataListNegative) {
       describe('rejects request', function() {
         before(async () => {
-          await esArchiver.load(testData.sourceDataArchive);
+          if (testData.hasOwnProperty('sourceDataArchive')) {
+            await esArchiver.loadIfNeeded(testData.sourceDataArchive!);
+          }
+          if (testData.hasOwnProperty('indexPattern')) {
+            await ml.testResources.createIndexPatternIfNeeded(
+              testData.indexPattern!.name as string,
+              testData.indexPattern!.timeField as string
+            );
+          }
         });
 
         after(async () => {
-          await esArchiver.unload(testData.sourceDataArchive);
           await ml.api.cleanMlIndices();
         });
 

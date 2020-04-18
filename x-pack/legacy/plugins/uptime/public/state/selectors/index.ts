@@ -93,6 +93,11 @@ export const indexStatusSelector = ({ indexStatus }: AppState) => {
   return indexStatus.indexStatus;
 };
 
+export const monitorListSelector = ({ monitorList, ui: { lastRefresh } }: AppState) => ({
+  monitorList,
+  lastRefresh,
+});
+
 export const redirectsSelector = ({ redirects }: AppState) => {
   return redirects.redirects.data;
 };

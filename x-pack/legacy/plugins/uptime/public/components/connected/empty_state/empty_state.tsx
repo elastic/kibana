@@ -26,7 +26,7 @@ export const EmptyState: React.FC = ({ children }) => {
     if (!data || data?.docCount === 0 || data?.indexExists === false) {
       dispatch(indexStatusAction.get());
     }
-
+    // Don't add data , it will create endless loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, lastRefresh]);
 
@@ -34,12 +34,17 @@ export const EmptyState: React.FC = ({ children }) => {
     dispatch(indexStatusAction.get());
   }, [dispatch, heartbeatIndices]);
 
+  useEffect(() => {
+    dispatch(getDynamicSettings());
+  }, [dispatch]);
+
   return (
     <EmptyStateComponent
       statesIndexStatus={data}
       loading={loading}
       errors={error ? [error] : undefined}
       children={children as React.ReactElement}
+      settings={settings}
     />
   );
 };

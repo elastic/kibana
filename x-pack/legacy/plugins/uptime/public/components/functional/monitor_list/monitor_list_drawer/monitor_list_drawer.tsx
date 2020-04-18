@@ -7,10 +7,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { MonitorSummary } from '../../../../../common/graphql/types';
 import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
-import { MonitorDetails } from '../../../../../common/runtime_types';
+import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
 import { MonitorListActionsPopover } from '../../../connected';
 import { Redirects } from './redirects';
 

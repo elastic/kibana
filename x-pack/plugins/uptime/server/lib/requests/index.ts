@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { getCerts } from './get_certs';
 export { getFilterBar, GetFilterBarParams } from './get_filter_bar';
 export { getUptimeIndexPattern as getIndexPattern } from './get_index_pattern';
 export { getLatestMonitor, GetLatestMonitorParams } from './get_latest_monitor';
