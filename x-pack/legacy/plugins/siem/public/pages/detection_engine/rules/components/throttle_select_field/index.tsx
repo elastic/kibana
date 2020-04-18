@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import {
   NOTIFICATION_THROTTLE_RULE,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
-} from '../../../../../../common/constants';
+} from '../../../../../../../../../plugins/siem/common/constants';
 import { SelectField } from '../../../../../shared_imports';
 
 export const THROTTLE_OPTIONS = [
