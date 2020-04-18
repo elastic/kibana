@@ -1,7 +1,7 @@
 {
   "nodeVersion": "system",
   "baseUrl": "http://localhost:5701",
-  "video": false,
+  "video": true,
   "trashAssetsBeforeRuns": false,
   "fileServerFolder": "../",
   "fixturesFolder": "./cypress/fixtures",
