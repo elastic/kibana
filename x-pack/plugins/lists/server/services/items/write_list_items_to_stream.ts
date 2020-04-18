@@ -8,7 +8,9 @@ import { PassThrough } from 'stream';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ElasticListItemReturnType, DataClient } from '../../types';
+import { SearchEsListsItemsSchema } from '../../../common/schemas';
+import { DataClient } from '../../types';
+import { ErrorWithStatusCode } from '../../error_with_status_code';
 
 /**
  * How many results to page through from the network at a time
@@ -110,7 +112,7 @@ export const getResponse = async ({
   listId,
   listsItemsIndex,
   size = SIZE,
-}: GetResponseOptions): Promise<SearchResponse<ElasticListItemReturnType>> => {
+}: GetResponseOptions): Promise<SearchResponse<SearchEsListsItemsSchema>> => {
   return dataClient.callAsCurrentUser('search', {
     index: listsItemsIndex,
     ignoreUnavailable: true,
@@ -128,7 +130,7 @@ export const getResponse = async ({
 };
 
 interface WriteResponseHitsToStreamOptions {
-  response: SearchResponse<ElasticListItemReturnType>;
+  response: SearchResponse<SearchEsListsItemsSchema>;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
 }
@@ -144,8 +146,10 @@ export const writeResponseHitsToStream = ({
     } else if (hit._source.keyword != null) {
       stream.push(hit._source.keyword);
     } else {
-      // this is an error
-      // TODO: Should we do something here?
+      throw new ErrorWithStatusCode(
+        `Encountered an error where hit._source was an unexpected type: ${hit._source}`,
+        400
+      );
     }
     if (stringToAppend != null) {
       stream.push(stringToAppend);

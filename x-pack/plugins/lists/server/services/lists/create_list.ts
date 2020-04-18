@@ -7,8 +7,8 @@
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ElasticListInputType, DataClient } from '../../types';
-import { ListsSchema, Type } from '../../../common/schemas';
+import { DataClient } from '../../types';
+import { ListsSchema, Type, IndexEsListsSchema } from '../../../common/schemas';
 
 interface CreateListOptions {
   id: string | null | undefined;
@@ -30,7 +30,7 @@ export const createList = async ({
   user,
 }: CreateListOptions): Promise<ListsSchema> => {
   const createdAt = new Date().toISOString();
-  const body: ElasticListInputType = {
+  const body: IndexEsListsSchema = {
     name,
     description,
     type,
@@ -45,6 +45,7 @@ export const createList = async ({
     id,
     body,
   });
+  // TODO: Check to ensure through io-ts that we have a valid response._id from Elastic
   return {
     id: response._id,
     ...body,

@@ -7,8 +7,8 @@
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ListsItemsSchema, Type } from '../../../common/schemas';
-import { ElasticListItemsInputType, DataClient } from '../../types';
+import { ListsItemsSchema, Type, CreateEsListsItemsSchema } from '../../../common/schemas';
+import { DataClient } from '../../types';
 import { transformListItemsToElasticQuery } from '../utils';
 
 interface CreateListItemOptions {
@@ -32,7 +32,7 @@ export const createListItem = async ({
 }: CreateListItemOptions): Promise<ListsItemsSchema> => {
   const createdAt = new Date().toISOString();
   const tieBreakerId = uuid.v4();
-  const body: ElasticListItemsInputType = {
+  const body: CreateEsListsItemsSchema = {
     list_id: listId,
     created_at: createdAt,
     tie_breaker_id: tieBreakerId,

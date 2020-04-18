@@ -6,8 +6,8 @@
 
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ListsSchema } from '../../../common/schemas';
-import { DataClient, ElasticListUpdateInputType } from '../../types';
+import { ListsSchema, UpdateEsListsSchema } from '../../../common/schemas';
+import { DataClient } from '../../types';
 
 import { getList } from '.';
 
@@ -33,7 +33,7 @@ export const updateList = async ({
   if (list == null) {
     return null;
   } else {
-    const doc: ElasticListUpdateInputType = {
+    const doc: UpdateEsListsSchema = {
       name,
       description,
       updated_at: updatedAt,
@@ -46,7 +46,7 @@ export const updateList = async ({
       body: { doc },
     });
     return {
-      id: response._id,
+      id: response._id, // TODO: Check if the response has at least an _id through io.ts decode
       name: name ?? list.name,
       description: description ?? list.description,
       created_at: list.created_at,

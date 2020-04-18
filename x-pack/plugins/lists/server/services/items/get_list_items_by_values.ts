@@ -6,8 +6,8 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ListsItemsSchema, Type } from '../../../common/schemas';
-import { ElasticListItemReturnType, DataClient } from '../../types';
+import { ListsItemsSchema, Type, SearchEsListsItemsSchema } from '../../../common/schemas';
+import { DataClient } from '../../types';
 import { transformElasticToListsItems, getQueryFilterFromTypeValue } from '../utils';
 
 interface GetListItemsByValuesOptions {
@@ -25,7 +25,7 @@ export const getListItemsByValues = async ({
   type,
   value,
 }: GetListItemsByValuesOptions): Promise<ListsItemsSchema[]> => {
-  const response: SearchResponse<ElasticListItemReturnType> = await dataClient.callAsCurrentUser(
+  const response: SearchResponse<SearchEsListsItemsSchema> = await dataClient.callAsCurrentUser(
     'search',
     {
       index: listsItemsIndex,
@@ -40,5 +40,6 @@ export const getListItemsByValues = async ({
       size: value.length, // This has a limit on the number which is 10k
     }
   );
+  // TODO: Check that the response is what you would expect?
   return transformElasticToListsItems({ response, type });
 };

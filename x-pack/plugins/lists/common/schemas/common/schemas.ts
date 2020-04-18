@@ -21,8 +21,13 @@ export const updated_by = t.string;
 export const created_by = t.string;
 export const file = t.object;
 export const id = NonEmptyString;
+export const ip = t.string;
+export const keyword = t.string;
 export const value = t.string;
 export const tie_breaker_id = t.string; // TODO: Use UUID for this instead of a string for validation
-
+export const _index = t.string;
 export const type = t.keyof({ ip: null, keyword: null }); // TODO: Add the other data types here
 export type Type = t.TypeOf<typeof type>;
+
+export const esDataTypeUnion = t.union([t.type({ ip }), t.type({ keyword })]);
+export type EsDataTypeUnion = t.TypeOf<typeof esDataTypeUnion>;

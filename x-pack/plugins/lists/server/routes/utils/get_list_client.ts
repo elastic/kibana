@@ -7,17 +7,7 @@
 import { RequestHandlerContext } from 'kibana/server';
 
 import { ListsClient } from '../../services/lists/client';
-
-class ErrorWithStatusCode extends Error {
-  private readonly statusCode: number;
-
-  constructor(message: string, statusCode: number) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-
-  public getStatusCode = (): number => this.statusCode;
-}
+import { ErrorWithStatusCode } from '../../error_with_status_code';
 
 export const getListClient = (context: RequestHandlerContext): ListsClient => {
   const lists = context.lists?.getListsClient();

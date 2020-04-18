@@ -6,9 +6,9 @@
 
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ListsItemsSchema } from '../../../common/schemas';
+import { ListsItemsSchema, UpdateEsListsItemsSchema } from '../../../common/schemas';
 import { transformListItemsToElasticQuery } from '../utils';
-import { DataClient, ElasticListItemUpdateInputType } from '../../types';
+import { DataClient } from '../../types';
 
 import { getListItem } from './get_list_item';
 
@@ -32,7 +32,7 @@ export const updateListItem = async ({
   if (listItem == null) {
     return null;
   } else {
-    const doc: ElasticListItemUpdateInputType = {
+    const doc: UpdateEsListsItemsSchema = {
       updated_at: updatedAt,
       updated_by: user,
       ...transformListItemsToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
@@ -47,6 +47,7 @@ export const updateListItem = async ({
       },
     });
     return {
+      // TODO: validate the response being returned through io-ts
       id: response._id,
       list_id: listItem.list_id,
       type: listItem.type,

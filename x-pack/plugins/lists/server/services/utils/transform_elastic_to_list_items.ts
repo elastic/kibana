@@ -6,14 +6,14 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ElasticListItemReturnType } from '../../types';
-import { Type, ListsItemsSchema } from '../../../common/schemas';
+import { Type, ListsItemsSchema, SearchEsListsItemsSchema } from '../../../common/schemas';
+import { ErrorWithStatusCode } from '../../error_with_status_code';
 
 export const transformElasticToListsItems = ({
   response,
   type,
 }: {
-  response: SearchResponse<ElasticListItemReturnType>;
+  response: SearchResponse<SearchEsListsItemsSchema>;
   type: Type;
 }): ListsItemsSchema[] => {
   return response.hits.hits.map(hit => {
@@ -44,15 +44,21 @@ export const transformElasticToListsItems = ({
 
     switch (type) {
       case 'ip': {
+        if (ip == null) {
+          throw new ErrorWithStatusCode('Was expecting ip to not be null/undefined', 400);
+        }
         return {
           ...baseTypes,
-          value: ip ?? '', // TODO: Something better here than empty string
+          value: ip,
         };
       }
       case 'keyword': {
+        if (keyword == null) {
+          throw new ErrorWithStatusCode('Was expecting keyword to not be null/undefined', 400);
+        }
         return {
           ...baseTypes,
-          value: keyword ?? '', // TODO: Something better here than empty string
+          value: keyword,
         };
       }
     }

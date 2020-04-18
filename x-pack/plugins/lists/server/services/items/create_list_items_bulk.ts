@@ -7,12 +7,8 @@
 import uuid from 'uuid';
 
 import { transformListItemsToElasticQuery } from '../utils';
-import { ElasticListItemsInputType, DataClient } from '../../types';
-import { Type } from '../../../common/schemas';
-
-export interface CreateBulkType {
-  create: { _index: string };
-}
+import { DataClient } from '../../types';
+import { Type, CreateEsListsItemsSchema, CreateEsBulkTypeSchema } from '../../../common/schemas';
 
 interface CreateListItemsBulkOptions {
   listId: string;
@@ -35,12 +31,12 @@ export const createListItemsBulk = async ({
   if (!value.length) {
     return;
   }
-  const body = value.reduce<Array<ElasticListItemsInputType | CreateBulkType>>(
+  const body = value.reduce<Array<CreateEsListsItemsSchema | CreateEsBulkTypeSchema>>(
     (accum, singleValue) => {
       // TODO: Pull this body out and the create_list_item body out into a separate function
       const createdAt = new Date().toISOString();
       const tieBreakerId = uuid.v4();
-      const elasticBody: ElasticListItemsInputType = {
+      const elasticBody: CreateEsListsItemsSchema = {
         list_id: listId,
         created_at: createdAt,
         tie_breaker_id: tieBreakerId,
@@ -49,7 +45,7 @@ export const createListItemsBulk = async ({
         created_by: user,
         ...transformListItemsToElasticQuery({ type, value: singleValue }),
       };
-      const createBody: CreateBulkType = { create: { _index: listsItemsIndex } };
+      const createBody: CreateEsBulkTypeSchema = { create: { _index: listsItemsIndex } };
       return [...accum, createBody, elasticBody];
     },
     []

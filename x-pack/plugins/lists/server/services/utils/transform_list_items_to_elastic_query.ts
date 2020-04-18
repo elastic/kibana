@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticListItemsType } from '../../types';
-import { Type } from '../../../common/schemas';
+import { Type, EsDataTypeUnion } from '../../../common/schemas';
 
 export const transformListItemsToElasticQuery = ({
   type,
@@ -15,7 +14,7 @@ export const transformListItemsToElasticQuery = ({
   value: string;
   // We disable the consistent return since we want to use typescript for exhaustive type checks
   // eslint-disable-next-line consistent-return
-}): ElasticListItemsType => {
+}): EsDataTypeUnion => {
   switch (type) {
     case 'ip': {
       return {
