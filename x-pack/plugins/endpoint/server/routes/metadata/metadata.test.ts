@@ -25,7 +25,9 @@ import { SearchResponse } from 'elasticsearch';
 import { registerEndpointRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
 import * as data from '../../test_data/all_metadata_data.json';
-import { createMockMetadataIndexPatternRetriever } from '../../mocks';
+import { createMockAgentService, createMockMetadataIndexPatternRetriever } from '../../mocks';
+import { AgentService } from '../../../../ingest_manager/common/types';
+import Boom from 'boom';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -35,6 +37,7 @@ describe('test endpoint route', () => {
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let routeHandler: RequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
+  let mockAgentService: jest.Mocked<AgentService>;
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient() as jest.Mocked<
@@ -45,8 +48,10 @@ describe('test endpoint route', () => {
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
+    mockAgentService = createMockAgentService();
     registerEndpointRoutes(routerMock, {
       indexPatternRetriever: createMockMetadataIndexPatternRetriever(),
+      agentService: mockAgentService,
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });
@@ -83,7 +88,7 @@ describe('test endpoint route', () => {
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/metadata')
     )!;
-
+    mockAgentService.getAgentStatus = jest.fn().mockReturnValue('error');
     await routeHandler(
       createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
       mockRequest,
@@ -113,6 +118,8 @@ describe('test endpoint route', () => {
         ],
       },
     });
+
+    mockAgentService.getAgentStatus = jest.fn().mockReturnValue('error');
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
       Promise.resolve((data as unknown) as SearchResponse<HostMetadata>)
     );
@@ -154,6 +161,8 @@ describe('test endpoint route', () => {
         filter: 'not host.ip:10.140.73.246',
       },
     });
+
+    mockAgentService.getAgentStatus = jest.fn().mockReturnValue('error');
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
       Promise.resolve((data as unknown) as SearchResponse<HostMetadata>)
     );
@@ -216,10 +225,10 @@ describe('test endpoint route', () => {
           },
         })
       );
+      mockAgentService.getAgentStatus = jest.fn().mockReturnValue('error');
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
         path.startsWith('/api/endpoint/metadata')
       )!;
-
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,
@@ -233,13 +242,14 @@ describe('test endpoint route', () => {
       expect(message).toEqual('Endpoint Not Found');
     });
 
-    it('should return a single endpoint with status error', async () => {
+    it('should return a single endpoint with status online', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: (data as any).hits.hits[0]._id },
       });
       const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
         HostMetadata
       >;
+      mockAgentService.getAgentStatus = jest.fn().mockReturnValue('online');
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
         path.startsWith('/api/endpoint/metadata')
@@ -256,6 +266,60 @@ describe('test endpoint route', () => {
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result).toHaveProperty('metadata.endpoint');
+      expect(result.host_status).toEqual(HostStatus.ONLINE);
+    });
+
+    it('should return a single endpoint with status error when AgentService throw 404', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: (data as any).hits.hits[0]._id },
+      });
+      const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
+        HostMetadata
+      >;
+      mockAgentService.getAgentStatus = jest.fn().mockImplementation(() => {
+        throw Boom.notFound('Agent not found');
+      });
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
+      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+        path.startsWith('/api/endpoint/metadata')
+      )!;
+
+      await routeHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockScopedClient.callAsCurrentUser).toBeCalled();
+      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(mockResponse.ok).toBeCalled();
+      const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
+      expect(result.host_status).toEqual(HostStatus.ERROR);
+    });
+
+    it('should return a single endpoint with status error when status is not offline or online', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: (data as any).hits.hits[0]._id },
+      });
+      const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
+        HostMetadata
+      >;
+      mockAgentService.getAgentStatus = jest.fn().mockReturnValue('warning');
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
+      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+        path.startsWith('/api/endpoint/metadata')
+      )!;
+
+      await routeHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockScopedClient.callAsCurrentUser).toBeCalled();
+      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(mockResponse.ok).toBeCalled();
+      const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result.host_status).toEqual(HostStatus.ERROR);
     });
   });
