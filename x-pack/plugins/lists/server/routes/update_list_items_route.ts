@@ -20,7 +20,7 @@ export const updateListsItemsRoute = (router: IRouter): void => {
         body: buildRouteValidationIoTS<UpdateListsItemsSchema>(updateListsItemsSchema),
       },
       options: {
-        tags: ['access:list'],
+        tags: ['access:lists'],
       },
     },
     async (context, request, response) => {

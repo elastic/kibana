@@ -26,7 +26,7 @@ export const importListsItemsRoute = (router: IRouter): void => {
         body: buildRouteValidationIoTS<ImportListsItemsSchema>(importListsItemsSchema),
       },
       options: {
-        tags: ['access:list'],
+        tags: ['access:lists'],
         body: {
           output: 'stream',
         },

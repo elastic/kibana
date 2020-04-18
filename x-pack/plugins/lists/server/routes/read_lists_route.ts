@@ -20,7 +20,7 @@ export const readListsRoute = (router: IRouter): void => {
         query: buildRouteValidationIoTS<ReadListsSchema>(readListsSchema),
       },
       options: {
-        tags: ['access:list'],
+        tags: ['access:lists'],
       },
     },
     async (context, request, response) => {

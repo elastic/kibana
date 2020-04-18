@@ -20,7 +20,7 @@ export const createListsItemsRoute = (router: IRouter): void => {
         body: buildRouteValidationIoTS<CreateListsItemsSchema>(createListsItemsSchema),
       },
       options: {
-        tags: ['access:list'],
+        tags: ['access:lists'],
       },
     },
     async (context, request, response) => {

@@ -17,7 +17,7 @@ export const readListsIndexRoute = (router: IRouter): void => {
       path: LIST_INDEX,
       validate: false,
       options: {
-        tags: ['access:list'],
+        tags: ['access:lists'],
       },
     },
     async (context, _, response) => {
