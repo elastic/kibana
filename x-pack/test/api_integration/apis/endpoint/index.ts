@@ -19,6 +19,7 @@ export default function endpointAPIIntegrationTests({
     loadTestFile(require.resolve('./index_pattern'));
     loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./metadata'));
+    loadTestFile(require.resolve('./metadata_status'));
     loadTestFile(require.resolve('./alerts'));
   });
 }
