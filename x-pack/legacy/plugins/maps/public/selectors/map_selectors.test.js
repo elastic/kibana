@@ -5,6 +5,7 @@
  */
 
 jest.mock('../../../../../plugins/maps/public/layers/vector_layer', () => {});
+jest.mock('../../../../../plugins/maps/public/layers/tiled_vector_layer', () => {});
 jest.mock('../../../../../plugins/maps/public/layers/blended_vector_layer', () => {});
 jest.mock('../../../../../plugins/maps/public/layers/heatmap_layer', () => {});
 jest.mock('../../../../../plugins/maps/public/layers/vector_tile_layer', () => {});
@@ -14,7 +15,7 @@ jest.mock('../../../../../plugins/maps/public/reducers/non_serializable_instance
     return {};
   },
 }));
-jest.mock('../kibana_services', () => ({
+jest.mock('../../../../../plugins/maps/public/kibana_services', () => ({
   getTimeFilter: () => ({
     getTime: () => {
       return {

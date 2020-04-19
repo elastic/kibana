@@ -9,7 +9,6 @@ import { graph } from './legacy/plugins/graph';
 import { monitoring } from './legacy/plugins/monitoring';
 import { reporting } from './legacy/plugins/reporting';
 import { security } from './legacy/plugins/security';
-import { tilemap } from './legacy/plugins/tilemap';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { beats } from './legacy/plugins/beats_management';
 import { apm } from './legacy/plugins/apm';
@@ -28,7 +27,6 @@ import { uptime } from './legacy/plugins/uptime';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
-import { lens } from './legacy/plugins/lens';
 import { ingestManager } from './legacy/plugins/ingest_manager';
 import { triggersActionsUI } from './legacy/plugins/triggers_actions_ui';
 
@@ -40,7 +38,6 @@ module.exports = function(kibana) {
     reporting(kibana),
     spaces(kibana),
     security(kibana),
-    tilemap(kibana),
     dashboardMode(kibana),
     beats(kibana),
     apm(kibana),
@@ -56,7 +53,6 @@ module.exports = function(kibana) {
     upgradeAssistant(kibana),
     uptime(kibana),
     encryptedSavedObjects(kibana),
-    lens(kibana),
     actions(kibana),
     alerting(kibana),
     ingestManager(kibana),

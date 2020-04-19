@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  MiddlewareFactory,
-  PolicyData,
-  PolicyDetailsState,
-  UpdatePolicyResponse,
-} from '../../types';
+import { ImmutableMiddlewareFactory, PolicyDetailsState, UpdatePolicyResponse } from '../../types';
 import { policyIdFromParams, isOnPolicyDetailsPage, policyDetails } from './selectors';
-import { generatePolicy } from '../../models/policy';
 import {
   sendGetDatasource,
   sendGetFleetAgentStatusForConfig,
   sendPutDatasource,
 } from '../policy_list/services/ingest';
+import { PolicyData } from '../../../../../common/types';
+import { factory as policyConfigFactory } from '../../../../../common/models/policy_config';
 
-export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
+export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = coreStart => {
   const http = coreStart.http;
 
   return ({ getState, dispatch }) => next => async action => {
@@ -49,7 +45,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
             streams: [],
             config: {
               policy: {
-                value: generatePolicy(),
+                value: policyConfigFactory(),
               },
             },
           },

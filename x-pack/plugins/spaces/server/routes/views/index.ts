@@ -4,26 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import { HttpResources } from 'src/core/server';
 
 export interface ViewRouteDeps {
-  viewRouter: IRouter;
-  cspHeader: string;
+  httpResources: HttpResources;
 }
 
 export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
-  deps.viewRouter.get(
-    {
-      path: '/spaces/space_selector',
-      validate: false,
-    },
-    async (context, request, response) => {
-      return response.ok({
-        headers: {
-          'Content-Security-Policy': deps.cspHeader,
-        },
-        body: await context.core.rendering.render({ includeUserSettings: true }),
-      });
-    }
+  deps.httpResources.register(
+    { path: '/spaces/space_selector', validate: false },
+    (context, request, response) => response.renderCoreApp()
   );
 }
