@@ -19,9 +19,9 @@
 
 import { fetchSoon } from './fetch_soon';
 import { callClient } from './call_client';
-import { IUiSettingsClient } from '../../../../../core/public';
-import { FetchHandlers, FetchOptions } from './types';
-import { SearchRequest, SearchResponse } from '..';
+import { IUiSettingsClient } from 'kibana/public';
+import { FetchHandlers, FetchOptions } from '../fetch/types';
+import { SearchRequest, SearchResponse } from '../index';
 
 function getConfigStub(config: any = {}) {
   return {

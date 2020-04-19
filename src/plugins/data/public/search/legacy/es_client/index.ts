@@ -18,4 +18,4 @@
  */
 
 export { getEsClient } from './get_es_client';
-export { SearchRequest, SearchResponse, LegacyApiCaller } from './types';
+export { LegacyApiCaller } from './types';
