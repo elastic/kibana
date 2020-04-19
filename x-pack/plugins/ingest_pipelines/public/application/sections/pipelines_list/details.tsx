@@ -12,6 +12,8 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
   EuiSpacer,
   EuiFlyoutFooter,
   EuiFlexGroup,
@@ -35,24 +37,6 @@ export const PipelineDetails: FunctionComponent<Props> = ({
   onEditClick,
   onDeleteClick,
 }) => {
-  const descriptionListItems = [
-    {
-      title: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.descriptionTitle', {
-        defaultMessage: 'Description',
-      }),
-      description: pipeline.description ?? '',
-    },
-  ];
-
-  if (pipeline.version) {
-    descriptionListItems.push({
-      title: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.versionTitle', {
-        defaultMessage: 'Version',
-      }),
-      description: String(pipeline.version),
-    });
-  }
-
   return (
     <EuiFlyout
       onClose={onClose}
@@ -67,35 +51,58 @@ export const PipelineDetails: FunctionComponent<Props> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiDescriptionList listItems={descriptionListItems} />
+        <EuiDescriptionList>
+          {/* Pipeline description */}
+          <EuiDescriptionListTitle>
+            {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.descriptionTitle', {
+              defaultMessage: 'Description',
+            })}
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            {pipeline.description ?? ''}
+          </EuiDescriptionListDescription>
 
-        <EuiSpacer size="m" />
+          {/* Pipeline version */}
+          {pipeline.version && (
+            <>
+              <EuiDescriptionListTitle>
+                {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.versionTitle', {
+                  defaultMessage: 'Version',
+                })}
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {String(pipeline.version)}
+              </EuiDescriptionListDescription>
+            </>
+          )}
 
-        <PipelineDetailsJsonBlock
-          htmlForId="pipelineDetailsProcessorsJson"
-          label={i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
-            defaultMessage: 'Processors JSON',
-          })}
-          json={pipeline.processors}
-        />
+          {/* Processors JSON */}
+          <EuiDescriptionListTitle>
+            {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
+              defaultMessage: 'Processors JSON',
+            })}
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            <PipelineDetailsJsonBlock json={pipeline.processors} />
+          </EuiDescriptionListDescription>
 
-        {/* On Failure Processor JSON */}
-        {pipeline.on_failure?.length && (
-          <>
-            <EuiSpacer size="m" />
-            <PipelineDetailsJsonBlock
-              htmlForId="pipelineDetailsOnFailureProcessorsJson"
-              label={i18n.translate(
-                'xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle',
-                {
-                  defaultMessage: 'On failure processors JSON',
-                }
-              )}
-              json={pipeline.on_failure}
-            />
-          </>
-        )}
-        {/* End On Failure Processor JSON */}
+          {/* On Failure Processor JSON */}
+          {pipeline.on_failure?.length && (
+            <>
+              <EuiDescriptionListTitle>
+                {i18n.translate(
+                  'xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle',
+                  {
+                    defaultMessage: 'On failure processors JSON',
+                  }
+                )}
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <PipelineDetailsJsonBlock json={pipeline.on_failure} />
+              </EuiDescriptionListDescription>
+            </>
+          )}
+        </EuiDescriptionList>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
