@@ -8,7 +8,12 @@ import uuid from 'uuid';
 
 import { transformListItemsToElasticQuery } from '../utils';
 import { DataClient } from '../../types';
-import { Type, CreateEsListsItemsSchema, CreateEsBulkTypeSchema } from '../../../common/schemas';
+import {
+  Type,
+  CreateEsListsItemsSchema,
+  CreateEsBulkTypeSchema,
+  MetaOrUndefined,
+} from '../../../common/schemas';
 
 interface CreateListItemsBulkOptions {
   listId: string;
@@ -17,6 +22,7 @@ interface CreateListItemsBulkOptions {
   dataClient: DataClient;
   listsItemsIndex: string;
   user: string;
+  meta: MetaOrUndefined;
 }
 
 export const createListItemsBulk = async ({
@@ -26,6 +32,7 @@ export const createListItemsBulk = async ({
   dataClient,
   listsItemsIndex,
   user,
+  meta,
 }: CreateListItemsBulkOptions): Promise<void> => {
   // It causes errors if you try to add items to bulk that do not exist within ES
   if (!value.length) {
@@ -33,10 +40,10 @@ export const createListItemsBulk = async ({
   }
   const body = value.reduce<Array<CreateEsListsItemsSchema | CreateEsBulkTypeSchema>>(
     (accum, singleValue) => {
-      // TODO: Pull this body out and the create_list_item body out into a separate function
       const createdAt = new Date().toISOString();
       const tieBreakerId = uuid.v4();
       const elasticBody: CreateEsListsItemsSchema = {
+        meta,
         list_id: listId,
         created_at: createdAt,
         tie_breaker_id: tieBreakerId,

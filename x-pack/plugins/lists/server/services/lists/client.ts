@@ -112,11 +112,12 @@ export class ListsClient {
     name,
     description,
     type,
+    meta,
   }: CreateListOptions): Promise<ListsSchema> => {
     const { dataClient, security, request } = this;
     const listsIndex = this.getListIndex();
     const user = getUser({ security, request });
-    return createList({ name, description, id, dataClient, listsIndex, user, type });
+    return createList({ name, description, id, dataClient, listsIndex, user, type, meta });
   };
 
   public createListIfItDoesNotExist = async ({
@@ -124,10 +125,11 @@ export class ListsClient {
     name,
     description,
     type,
+    meta,
   }: CreateListIfItDoesNotExistOptions): Promise<ListsSchema> => {
     const list = await this.getList({ id });
     if (list == null) {
-      return this.createList({ id, name, description, type });
+      return this.createList({ id, name, description, type, meta });
     } else {
       return list;
     }
@@ -345,6 +347,7 @@ export class ListsClient {
     type,
     listId,
     stream,
+    meta,
   }: ImportListItemsToStreamOptions): Promise<void> => {
     const { dataClient, security, request } = this;
     const listsItemsIndex = this.getListItemIndex();
@@ -356,6 +359,7 @@ export class ListsClient {
       dataClient,
       listsItemsIndex,
       user,
+      meta,
     });
   };
 
@@ -380,6 +384,7 @@ export class ListsClient {
     listId,
     value,
     type,
+    meta,
   }: CreateListItemOptions): Promise<ListsItemsSchema> => {
     const { dataClient, security, request } = this;
     const listsItemsIndex = this.getListItemIndex();
@@ -392,12 +397,14 @@ export class ListsClient {
       dataClient,
       listsItemsIndex,
       user,
+      meta,
     });
   };
 
   public updateListItem = async ({
     id,
     value,
+    meta,
   }: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
     const { dataClient, security, request } = this;
     const user = getUser({ security, request });
@@ -408,6 +415,7 @@ export class ListsClient {
       value,
       dataClient,
       listsItemsIndex,
+      meta,
     });
   };
 
@@ -415,6 +423,7 @@ export class ListsClient {
     id,
     name,
     description,
+    meta,
   }: UpdateListOptions): Promise<ListsSchema | null> => {
     const { dataClient, security, request } = this;
     const user = getUser({ security, request });
@@ -426,6 +435,7 @@ export class ListsClient {
       dataClient,
       listsIndex,
       user,
+      meta,
     });
   };
 

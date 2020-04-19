@@ -8,17 +8,17 @@
 
 import * as t from 'io-ts';
 
-import { meta, updated_at, updated_by, esDataTypeUnion } from '../common/schemas';
+import { metaOrUndefined, updated_at, updated_by, esDataTypeUnion } from '../common/schemas';
 
 export const updateEsListsItemsSchema = t.intersection([
   t.exact(
     t.type({
       updated_at,
       updated_by,
+      meta: metaOrUndefined,
     })
   ),
   esDataTypeUnion,
-  t.exact(t.partial({ meta })),
 ]);
 
 export type UpdateEsListsItemsSchema = t.TypeOf<typeof updateEsListsItemsSchema>;

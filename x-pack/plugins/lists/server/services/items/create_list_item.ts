@@ -7,18 +7,25 @@
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ListsItemsSchema, Type, CreateEsListsItemsSchema } from '../../../common/schemas';
+import {
+  ListsItemsSchema,
+  Type,
+  CreateEsListsItemsSchema,
+  IdOrUndefined,
+  MetaOrUndefined,
+} from '../../../common/schemas';
 import { DataClient } from '../../types';
 import { transformListItemsToElasticQuery } from '../utils';
 
 interface CreateListItemOptions {
-  id: string | undefined | null;
+  id: IdOrUndefined;
   listId: string;
   type: Type;
   value: string;
   dataClient: DataClient;
   listsItemsIndex: string;
   user: string;
+  meta: MetaOrUndefined;
 }
 
 export const createListItem = async ({
@@ -29,6 +36,7 @@ export const createListItem = async ({
   dataClient,
   listsItemsIndex,
   user,
+  meta,
 }: CreateListItemOptions): Promise<ListsItemsSchema> => {
   const createdAt = new Date().toISOString();
   const tieBreakerId = uuid.v4();
@@ -39,6 +47,7 @@ export const createListItem = async ({
     updated_at: createdAt,
     updated_by: user,
     created_by: user,
+    meta,
   };
   const body: CreateEsListsItemsSchema = {
     ...baseBody,

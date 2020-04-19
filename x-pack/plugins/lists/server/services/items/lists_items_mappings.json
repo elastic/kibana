@@ -14,7 +14,8 @@
       "type": "keyword"
     },
     "meta": {
-      "type": "keyword"
+      "dynamic": "false",
+      "type": "object"
     },
     "created_at": {
       "type": "date"

@@ -56,6 +56,7 @@ export const importListsItemsRoute = (router: IRouter): void => {
             listId,
             stream: request.body.file,
             type: list.type,
+            meta: undefined,
           });
 
           return response.accepted({
@@ -71,11 +72,13 @@ export const importListsItemsRoute = (router: IRouter): void => {
             id: filename,
             description: `File uploaded from file system of ${filename}`,
             type,
+            meta: undefined,
           });
           await lists.importListItemsToStream({
             listId: list.id,
             stream: request.body.file,
             type: list.type,
+            meta: undefined,
           });
           const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
           if (errors != null) {

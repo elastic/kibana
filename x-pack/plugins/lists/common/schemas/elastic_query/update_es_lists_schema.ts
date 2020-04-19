@@ -8,19 +8,22 @@
 
 import * as t from 'io-ts';
 
-import { name, description, meta, updated_at, updated_by } from '../common/schemas';
+import {
+  nameOrUndefined,
+  metaOrUndefined,
+  updated_at,
+  updated_by,
+  descriptionOrUndefined,
+} from '../common/schemas';
 
-const NullableName = t.union([name, t.null]);
-const NullableDescription = t.union([description, t.null]);
-
-export const updateEsListsSchema = t.intersection([
-  t.exact(
-    t.type({
-      updated_at,
-      updated_by,
-    })
-  ),
-  t.exact(t.partial({ meta, name: NullableName, description: NullableDescription })),
-]);
+export const updateEsListsSchema = t.exact(
+  t.type({
+    updated_at,
+    updated_by,
+    name: nameOrUndefined,
+    description: descriptionOrUndefined,
+    meta: metaOrUndefined,
+  })
+);
 
 export type UpdateEsListsSchema = t.TypeOf<typeof updateEsListsSchema>;

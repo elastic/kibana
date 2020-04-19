@@ -8,16 +8,25 @@ import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
 
 import { DataClient } from '../../types';
-import { ListsSchema, Type, IndexEsListsSchema } from '../../../common/schemas';
+import {
+  ListsSchema,
+  Type,
+  IndexEsListsSchema,
+  MetaOrUndefined,
+  Description,
+  Name,
+  IdOrUndefined,
+} from '../../../common/schemas';
 
 interface CreateListOptions {
-  id: string | null | undefined;
+  id: IdOrUndefined;
   type: Type;
-  name: string;
-  description: string;
+  name: Name;
+  description: Description;
   dataClient: DataClient;
   listsIndex: string;
   user: string;
+  meta: MetaOrUndefined;
 }
 
 export const createList = async ({
@@ -28,6 +37,7 @@ export const createList = async ({
   dataClient,
   listsIndex,
   user,
+  meta,
 }: CreateListOptions): Promise<ListsSchema> => {
   const createdAt = new Date().toISOString();
   const body: IndexEsListsSchema = {
@@ -39,6 +49,7 @@ export const createList = async ({
     created_at: createdAt,
     created_by: user,
     updated_by: user,
+    meta,
   };
   const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('index', {
     index: listsIndex,
@@ -48,5 +59,6 @@ export const createList = async ({
   return {
     id: response._id,
     ...body,
+    meta: body.meta ?? undefined,
   };
 };

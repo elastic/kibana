@@ -11,7 +11,7 @@ import * as t from 'io-ts';
 import {
   name,
   description,
-  meta,
+  metaOrUndefined,
   updated_at,
   updated_by,
   type,
@@ -20,20 +20,18 @@ import {
   created_by,
 } from '../common/schemas';
 
-export const indexEsListsSchema = t.intersection([
-  t.exact(
-    t.type({
-      name,
-      description,
-      type,
-      tie_breaker_id,
-      updated_at,
-      created_at,
-      created_by,
-      updated_by,
-    })
-  ),
-  t.exact(t.partial({ meta })), // TODO: Make meta required
-]);
+export const indexEsListsSchema = t.exact(
+  t.type({
+    name,
+    description,
+    type,
+    tie_breaker_id,
+    updated_at,
+    created_at,
+    created_by,
+    updated_by,
+    meta: metaOrUndefined,
+  })
+);
 
 export type IndexEsListsSchema = t.TypeOf<typeof indexEsListsSchema>;

@@ -6,18 +6,24 @@
 
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ListsItemsSchema, UpdateEsListsItemsSchema } from '../../../common/schemas';
+import {
+  ListsItemsSchema,
+  UpdateEsListsItemsSchema,
+  Id,
+  MetaOrUndefined,
+} from '../../../common/schemas';
 import { transformListItemsToElasticQuery } from '../utils';
 import { DataClient } from '../../types';
 
 import { getListItem } from './get_list_item';
 
 interface UpdateListItemOptions {
-  id: string;
+  id: Id;
   value: string | null | undefined;
   dataClient: DataClient;
   listsItemsIndex: string;
   user: string;
+  meta: MetaOrUndefined;
 }
 
 export const updateListItem = async ({
@@ -26,6 +32,7 @@ export const updateListItem = async ({
   dataClient,
   listsItemsIndex,
   user,
+  meta,
 }: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
   const updatedAt = new Date().toISOString();
   const listItem = await getListItem({ id, dataClient, listsItemsIndex });
@@ -35,10 +42,10 @@ export const updateListItem = async ({
     const doc: UpdateEsListsItemsSchema = {
       updated_at: updatedAt,
       updated_by: user,
+      meta,
       ...transformListItemsToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
     };
 
-    // There isn't a UpdateDocumentResponse so I'm using CreateDocumentResponse here as a type
     const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('update', {
       index: listsItemsIndex,
       id: listItem.id,
@@ -56,6 +63,7 @@ export const updateListItem = async ({
       created_by: listItem.created_by,
       updated_by: listItem.updated_by,
       tie_breaker_id: listItem.tie_breaker_id,
+      meta: meta ?? listItem.meta,
     };
   }
 };

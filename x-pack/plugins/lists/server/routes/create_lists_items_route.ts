@@ -31,7 +31,7 @@ export const createListsItemsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { id, list_id: listId, value } = request.body;
+        const { id, list_id: listId, value, meta } = request.body;
         const lists = getListClient(context);
         const list = await lists.getList({ id: listId });
         if (list == null) {
@@ -52,6 +52,7 @@ export const createListsItemsRoute = (router: IRouter): void => {
               listId,
               type: list.type,
               value,
+              meta,
             });
             const [validated, errors] = validate(createdListItem, listsItemsSchema);
             if (errors != null) {

@@ -6,18 +6,26 @@
 
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { ListsSchema, UpdateEsListsSchema } from '../../../common/schemas';
+import {
+  ListsSchema,
+  UpdateEsListsSchema,
+  MetaOrUndefined,
+  NameOrUndefined,
+  DescriptionOrUndefined,
+  Id,
+} from '../../../common/schemas';
 import { DataClient } from '../../types';
 
 import { getList } from '.';
 
 interface UpdateListOptions {
-  id: string;
-  name: string | null | undefined;
-  description: string | null | undefined;
+  id: Id;
   dataClient: DataClient;
   listsIndex: string;
   user: string;
+  name: NameOrUndefined;
+  description: DescriptionOrUndefined;
+  meta: MetaOrUndefined;
 }
 
 export const updateList = async ({
@@ -27,6 +35,7 @@ export const updateList = async ({
   dataClient,
   listsIndex,
   user,
+  meta,
 }: UpdateListOptions): Promise<ListsSchema | null> => {
   const updatedAt = new Date().toISOString();
   const list = await getList({ id, dataClient, listsIndex });
@@ -38,8 +47,8 @@ export const updateList = async ({
       description,
       updated_at: updatedAt,
       updated_by: user,
+      meta,
     };
-    // There isn't a UpdateDocumentResponse so I am using a CreateDocumentResponse here for the type
     const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('update', {
       index: listsIndex,
       id,
@@ -55,6 +64,7 @@ export const updateList = async ({
       type: list.type,
       updated_by: user,
       created_by: list.created_by,
+      meta,
     };
   }
 };

@@ -8,15 +8,15 @@
 
 import * as t from 'io-ts';
 
-import { name, description, id, meta } from '../common/schemas';
+import { nameOrUndefined, descriptionOrUndefined, id, metaOrUndefined } from '../common/schemas';
 
-export const patchListsSchema = t.intersection([
-  t.exact(
-    t.type({
-      id,
-    })
-  ),
-  t.exact(t.partial({ meta, name, description })),
-]);
+export const patchListsSchema = t.exact(
+  t.type({
+    id,
+    name: nameOrUndefined,
+    description: descriptionOrUndefined,
+    meta: metaOrUndefined,
+  })
+);
 
 export type PatchListsSchema = t.TypeOf<typeof patchListsSchema>;

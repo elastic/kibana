@@ -6,12 +6,12 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ListsItemsSchema, SearchEsListsItemsSchema } from '../../../common/schemas';
+import { ListsItemsSchema, SearchEsListsItemsSchema, Id } from '../../../common/schemas';
 import { DataClient } from '../../types';
 import { deriveTypeFromItem, transformElasticToListsItems } from '../utils';
 
 interface GetListItemOptions {
-  id: string;
+  id: Id;
   dataClient: DataClient;
   listsItemsIndex: string;
 }

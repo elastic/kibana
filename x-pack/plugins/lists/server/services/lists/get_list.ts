@@ -6,11 +6,11 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ListsSchema, SearchEsListsSchema } from '../../../common/schemas';
+import { ListsSchema, SearchEsListsSchema, Id } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
 interface GetListOptions {
-  id: string;
+  id: Id;
   dataClient: DataClient;
   listsIndex: string;
 }

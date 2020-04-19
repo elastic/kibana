@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListsItemsSchema } from '../../../common/schemas';
+import { ListsItemsSchema, Id } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
 import { getListItem } from '.';
 
 interface DeleteListItemOptions {
-  id: string;
+  id: Id;
   dataClient: DataClient;
   listsItemsIndex: string;
 }

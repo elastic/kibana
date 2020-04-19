@@ -31,9 +31,9 @@ export const patchListsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { name, description, id } = request.body;
+        const { name, description, id, meta } = request.body;
         const lists = getListClient(context);
-        const list = await lists.updateList({ id, name, description });
+        const list = await lists.updateList({ id, name, description, meta });
         if (list == null) {
           return siemResponse.error({
             statusCode: 404,

@@ -31,7 +31,7 @@ export const createListsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { name, description, id, type } = request.body;
+        const { name, description, id, type, meta } = request.body;
         const lists = getListClient(context);
         const listExists = await lists.getListIndexExists();
         if (!listExists) {
@@ -49,7 +49,7 @@ export const createListsRoute = (router: IRouter): void => {
               });
             }
           }
-          const list = await lists.createList({ id, name, description, type });
+          const list = await lists.createList({ id, name, description, type, meta });
           const [validated, errors] = validate(list, listsSchema);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });

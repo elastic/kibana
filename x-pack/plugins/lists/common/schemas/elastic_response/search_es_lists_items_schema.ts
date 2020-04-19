@@ -15,7 +15,6 @@
 import * as t from 'io-ts';
 
 import {
-  meta,
   updated_at,
   updated_by,
   esDataTypeUnion,
@@ -23,8 +22,9 @@ import {
   created_at,
   created_by,
   tie_breaker_id,
-  ip,
-  keyword,
+  ipOrUndefined,
+  keywordOrUndefined,
+  metaOrUndefined,
 } from '../common/schemas';
 
 export const searchEsListsItemsSchema = t.intersection([
@@ -36,10 +36,12 @@ export const searchEsListsItemsSchema = t.intersection([
       updated_by,
       created_by,
       tie_breaker_id,
+      meta: metaOrUndefined,
+      ip: ipOrUndefined,
+      keyword: keywordOrUndefined,
     })
   ),
   esDataTypeUnion,
-  t.exact(t.partial({ meta, ip, keyword })),
 ]);
 
 export type SearchEsListsItemsSchema = t.TypeOf<typeof searchEsListsItemsSchema>;

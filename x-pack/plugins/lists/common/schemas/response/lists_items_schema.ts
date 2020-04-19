@@ -12,7 +12,7 @@ import {
   list_id,
   value,
   id,
-  meta,
+  metaOrUndefined,
   type,
   created_at,
   updated_at,
@@ -21,7 +21,7 @@ import {
   created_by,
 } from '../common/schemas';
 
-export const listsItemsSchema = t.intersection([
+export const listsItemsSchema = t.exact(
   t.type({
     id,
     list_id,
@@ -32,9 +32,10 @@ export const listsItemsSchema = t.intersection([
     type,
     value,
     tie_breaker_id,
-  }),
-  t.exact(t.partial({ meta })),
-]);
+    meta: metaOrUndefined,
+  })
+);
+
 export type ListsItemsSchema = t.TypeOf<typeof listsItemsSchema>;
 
 export const listsItemsArraySchema = t.array(listsItemsSchema);

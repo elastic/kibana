@@ -8,17 +8,16 @@
 
 import * as t from 'io-ts';
 
-import { name, description, id, meta, type } from '../common/schemas';
+import { name, description, idOrUndefined, metaOrUndefined, type } from '../common/schemas';
 
-export const createListsSchema = t.intersection([
-  t.exact(
-    t.type({
-      name,
-      description,
-      type,
-    })
-  ),
-  t.exact(t.partial({ id, meta })),
-]);
+export const createListsSchema = t.exact(
+  t.type({
+    name,
+    description,
+    type,
+    meta: metaOrUndefined,
+    id: idOrUndefined,
+  })
+);
 
 export type CreateListsSchema = t.TypeOf<typeof createListsSchema>;

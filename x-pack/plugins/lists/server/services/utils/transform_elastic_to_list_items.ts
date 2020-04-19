@@ -28,6 +28,7 @@ export const transformElasticToListsItems = ({
         tie_breaker_id,
         ip,
         keyword,
+        meta,
       },
     } = hit;
 
@@ -40,6 +41,7 @@ export const transformElasticToListsItems = ({
       list_id,
       tie_breaker_id,
       type,
+      meta,
     };
 
     switch (type) {

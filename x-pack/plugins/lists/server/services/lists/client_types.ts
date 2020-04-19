@@ -10,7 +10,16 @@ import { KibanaRequest } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../../../security/server';
 import { SpacesServiceSetup } from '../../../../spaces/server';
-import { Type } from '../../../common/schemas';
+import {
+  Type,
+  MetaOrUndefined,
+  NameOrUndefined,
+  DescriptionOrUndefined,
+  Name,
+  Description,
+  Id,
+  IdOrUndefined,
+} from '../../../common/schemas';
 import { ConfigType } from '../../config';
 import { DataClient } from '../../types';
 
@@ -23,29 +32,31 @@ export interface ConstructorOptions {
 }
 
 export interface GetListOptions {
-  id: string;
+  id: Id;
 }
 
 export interface DeleteListOptions {
-  id: string;
+  id: Id;
 }
 
 export interface DeleteListItemOptions {
-  id: string;
+  id: Id;
 }
 
 export interface CreateListOptions {
-  id: string | undefined | null;
-  name: string;
-  description: string;
+  id: IdOrUndefined;
+  name: Name;
+  description: Description;
   type: Type;
+  meta: MetaOrUndefined;
 }
 
 export interface CreateListIfItDoesNotExistOptions {
-  id: string;
-  name: string;
-  description: string;
+  id: Id;
+  name: Name;
+  description: Description;
   type: Type;
+  meta: MetaOrUndefined;
 }
 
 export interface DeleteListItemByValueOptions {
@@ -70,28 +81,32 @@ export interface ImportListItemsToStreamOptions {
   listId: string;
   type: Type;
   stream: Readable;
+  meta: MetaOrUndefined;
 }
 
 export interface CreateListItemOptions {
-  id: string | null | undefined;
+  id: IdOrUndefined;
   listId: string;
   type: Type;
   value: string;
+  meta: MetaOrUndefined;
 }
 
 export interface UpdateListItemOptions {
-  id: string;
+  id: Id;
   value: string | null | undefined;
+  meta: MetaOrUndefined;
 }
 
 export interface UpdateListOptions {
-  id: string;
-  name: string | undefined | null;
-  description: string | undefined | null;
+  id: Id;
+  name: NameOrUndefined;
+  description: DescriptionOrUndefined;
+  meta: MetaOrUndefined;
 }
 
 export interface GetListItemOptions {
-  id: string;
+  id: Id;
 }
 
 export interface GetListItemsByValueOptions {

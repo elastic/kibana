@@ -31,12 +31,12 @@ export const updateListsItemsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { value, id } = request.body;
+        const { value, id, meta } = request.body;
         const lists = getListClient(context);
         const listItem = await lists.updateListItem({
           id,
           value,
-          // TODO: Add the meta object here
+          meta,
         });
         if (listItem == null) {
           return siemResponse.error({

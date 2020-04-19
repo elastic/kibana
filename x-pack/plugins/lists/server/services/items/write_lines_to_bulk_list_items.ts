@@ -6,7 +6,7 @@
 
 import { Readable } from 'stream';
 
-import { Type } from '../../../common/schemas';
+import { Type, MetaOrUndefined } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
 import { createListItemsBulk, getListItemsByValues, BufferLines } from '.';
@@ -18,6 +18,7 @@ interface ImportListItemsToStreamOptions {
   listsItemsIndex: string;
   type: Type;
   user: string;
+  meta: MetaOrUndefined;
 }
 
 export const importListItemsToStream = ({
@@ -27,6 +28,7 @@ export const importListItemsToStream = ({
   listsItemsIndex,
   type,
   user,
+  meta,
 }: ImportListItemsToStreamOptions): Promise<void> => {
   return new Promise<void>(resolve => {
     const readBuffer = new BufferLines({ input: stream });
@@ -38,6 +40,7 @@ export const importListItemsToStream = ({
         listsItemsIndex,
         type,
         user,
+        meta,
       });
     });
 
@@ -54,6 +57,7 @@ interface WriteBufferToItemsOptions {
   buffer: string[];
   type: Type;
   user: string;
+  meta: MetaOrUndefined;
 }
 
 interface LinesResult {
@@ -68,6 +72,7 @@ export const writeBufferToItems = async ({
   buffer,
   type,
   user,
+  meta,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
   const items = await getListItemsByValues({
     listId,
@@ -88,6 +93,7 @@ export const writeBufferToItems = async ({
     dataClient,
     listsItemsIndex,
     user,
+    meta,
   });
   return { linesProcessed, duplicatesFound };
 };

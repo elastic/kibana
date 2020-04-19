@@ -9,7 +9,7 @@
 import * as t from 'io-ts';
 
 import {
-  meta,
+  metaOrUndefined,
   updated_at,
   updated_by,
   list_id,
@@ -28,10 +28,10 @@ export const createEsListsItemsSchema = t.intersection([
       updated_at,
       updated_by,
       tie_breaker_id,
+      meta: metaOrUndefined,
     })
   ),
   esDataTypeUnion,
-  t.exact(t.partial({ meta })),
 ]);
 
 export type CreateEsListsItemsSchema = t.TypeOf<typeof createEsListsItemsSchema>;
