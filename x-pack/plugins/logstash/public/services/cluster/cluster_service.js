@@ -10,11 +10,10 @@ import { Cluster } from '../../models/cluster';
 export class ClusterService {
   constructor(http) {
     this.http = http;
-    this.basePath = http.basePath.prepend(ROUTES.API_ROOT);
   }
 
   loadCluster() {
-    return this.http.get(`${this.basePath}/cluster`).then(response => {
+    return this.http.get(`${ROUTES.API_ROOT}/cluster`).then(response => {
       if (!response) {
         return;
       }

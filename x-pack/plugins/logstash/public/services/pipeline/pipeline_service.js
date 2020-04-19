@@ -11,18 +11,17 @@ export class PipelineService {
   constructor(http, pipelinesService) {
     this.http = http;
     this.pipelinesService = pipelinesService;
-    this.basePath = http.basePath.prepend(ROUTES.API_ROOT);
   }
 
   loadPipeline(id) {
-    return this.http.get(`${this.basePath}/pipeline/${id}`).then(response => {
+    return this.http.get(`${ROUTES.API_ROOT}/pipeline/${id}`).then(response => {
       return Pipeline.fromUpstreamJSON(response);
     });
   }
 
   savePipeline(pipelineModel) {
     return this.http
-      .put(`${this.basePath}/pipeline/${pipelineModel.id}`, {
+      .put(`${ROUTES.API_ROOT}/pipeline/${pipelineModel.id}`, {
         body: JSON.stringify(pipelineModel.upstreamJSON),
       })
       .catch(e => {
@@ -32,7 +31,7 @@ export class PipelineService {
 
   deletePipeline(id) {
     return this.http
-      .delete(`${this.basePath}/pipeline/${id}`)
+      .delete(`${ROUTES.API_ROOT}/pipeline/${id}`)
       .then(() => this.pipelinesService.addToRecentlyDeleted(id))
       .catch(e => {
         throw e.message;

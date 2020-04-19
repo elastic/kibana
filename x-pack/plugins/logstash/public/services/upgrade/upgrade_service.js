@@ -9,12 +9,11 @@ import { ROUTES } from '../../../common/constants';
 export class UpgradeService {
   constructor(http) {
     this.http = http;
-    this.basePath = http.basePath.prepend(ROUTES.API_ROOT);
   }
 
   executeUpgrade() {
     return this.http
-      .post(`${this.basePath}/upgrade`)
+      .post(`${ROUTES.API_ROOT}/upgrade`)
       .then(response => response.is_upgraded)
       .catch(e => {
         throw e.message;

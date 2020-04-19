@@ -13,7 +13,6 @@ export class MonitoringService {
     this.http = http;
     this.monitoringUiEnabled = monitoringUiEnabled;
     this.clusterService = clusterService;
-    this.basePath = http.basePath.prepend(ROUTES.MONITORING_API_ROOT);
   }
 
   isMonitoringEnabled() {
@@ -28,7 +27,7 @@ export class MonitoringService {
     return this.clusterService
       .loadCluster()
       .then(cluster => {
-        const url = `${this.basePath}/v1/clusters/${cluster.uuid}/logstash/pipeline_ids`;
+        const url = `${ROUTES.MONITORING_API_ROOT}/v1/clusters/${cluster.uuid}/logstash/pipeline_ids`;
         const now = moment.utc();
         const body = JSON.stringify({
           timeRange: {

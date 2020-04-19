@@ -5,8 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { MarkdownSimple } from '../../../../../../src/plugins/kibana_react/public';
 
 export class LogstashLicenseService {
   constructor(license, navigateToApp, toasts) {
@@ -35,16 +33,9 @@ export class LogstashLicenseService {
     return this.license.getFeature(`security`).isEnabled;
   }
 
-  notifyAndRedirect() {
-    this.toasts.addDanger({
-      title: <MarkdownSimple>{this.calculated.message}</MarkdownSimple>,
-    });
-    this.navigateToApp('kibana', '#/management');
-  }
-
   /**
    * Checks if the license is valid or the license can perform downgraded UI tasks.
-   * Otherwise, notifies and redirects.
+   * Rejects if the plugin is not available due to license.
    */
   checkValidity() {
     return new Promise((resolve, reject) => {
@@ -52,7 +43,6 @@ export class LogstashLicenseService {
         return resolve();
       }
 
-      this.notifyAndRedirect();
       return reject();
     });
   }

@@ -13,7 +13,6 @@ export class PipelinesService {
   constructor(http, monitoringService) {
     this.http = http;
     this.monitoringService = monitoringService;
-    this.basePath = http.basePath.prepend(ROUTES.API_ROOT);
   }
 
   getPipelineList() {
@@ -57,7 +56,7 @@ export class PipelinesService {
   }
 
   getManagementPipelineList() {
-    return this.http.get(`${this.basePath}/pipelines`).then(response => {
+    return this.http.get(`${ROUTES.API_ROOT}/pipelines`).then(response => {
       return response.pipelines.map(pipeline => PipelineListItem.fromUpstreamJSON(pipeline));
     });
   }
@@ -76,7 +75,7 @@ export class PipelinesService {
     const body = JSON.stringify({
       pipelineIds,
     });
-    return this.http.post(`${this.basePath}/pipelines/delete`, { body }).then(response => {
+    return this.http.post(`${ROUTES.API_ROOT}/pipelines/delete`, { body }).then(response => {
       this.addToRecentlyDeleted(...pipelineIds);
       return response.results;
     });
