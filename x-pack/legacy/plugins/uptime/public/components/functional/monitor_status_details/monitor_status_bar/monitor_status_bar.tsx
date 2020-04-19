@@ -19,6 +19,7 @@ import * as labels from './translations';
 import { StatusByLocations } from './status_by_location';
 import { Ping } from '../../../../../common/runtime_types';
 import { MonitorLocations } from '../../../../../common/runtime_types';
+import { MonitorRedirects } from './monitor_redirects';
 
 interface MonitorStatusBarProps {
   monitorId: string;
@@ -45,12 +46,15 @@ export const MonitorStatusBarComponent: React.FC<MonitorStatusBarProps> = ({
           </EuiLink>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <EuiTextColor color="subdued">
             <h1 data-test-subj="monitor-page-title">{monitorId}</h1>
           </EuiTextColor>
         </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <MonitorRedirects monitorStatus={monitorStatus} />
       </EuiFlexItem>
       <EuiSpacer />
       <EuiFlexItem grow={false}>
