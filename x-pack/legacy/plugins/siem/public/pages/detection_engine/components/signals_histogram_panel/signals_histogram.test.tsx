@@ -14,7 +14,14 @@ jest.mock('../../../../lib/kibana');
 describe('SignalsHistogram', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
-      <SignalsHistogram loading={false} data={[]} from={0} to={1} updateDateRange={jest.fn()} />
+      <SignalsHistogram
+        legendItems={[]}
+        loading={false}
+        data={[]}
+        from={0}
+        to={1}
+        updateDateRange={jest.fn()}
+      />
     );
 
     expect(wrapper.find('Chart')).toBeTruthy();
