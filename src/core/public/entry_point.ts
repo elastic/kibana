@@ -22,6 +22,7 @@
  * that lives in the Kibana Platform.
  */
 
+import './index.scss';
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from './core_system';
 

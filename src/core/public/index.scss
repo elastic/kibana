@@ -7,5 +7,52 @@
 // Mixins provide generic code expansion through helpers
 @import '@elastic/eui/src/global_styling/mixins/index';
 
+$kbnGlobalNavClosedWidth: 53px;
+$kbnGlobalNavOpenWidth: 180px;
+$kbnGlobalNavLogoHeight: 70px;
+$kbnGlobalNavAppIconHeight: $euiSizeXXL + $euiSizeXS;
+
+#kibana-body {
+  overflow-x: hidden;
+  min-height: 100%;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-flow: column nowrap;
+  position: absolute;
+  left: $kbnGlobalNavClosedWidth;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  margin: 0 auto;
+
+  /**
+   * 1. Dirty, but we need to override the .kbnGlobalNav-isOpen state
+   *    when we're looking at the log-in screen.
+   */
+  &.hidden-chrome {
+    left: 0 !important; /* 1 */
+  }
+
+  .navbar-right {
+    margin-right: 0;
+  }
+}
+
+.app-wrapper-panel {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: auto;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+
 @import './chrome/index';
 @import './overlays/index';

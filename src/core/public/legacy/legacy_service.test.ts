@@ -124,6 +124,21 @@ describe('#setup()', () => {
       expect(mockUiNewPlatformSetup).toHaveBeenCalledTimes(1);
       expect(mockUiNewPlatformSetup).toHaveBeenCalledWith(expect.any(Object), {});
     });
+
+    it('throws error if requireNewPlatformShimModule is undefined', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+        requireNewPlatformShimModule: undefined,
+      });
+
+      expect(() => {
+        legacyPlatform.setup(defaultSetupDeps);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"requireNewPlatformShimModule must be specified when rendering a legacy application"`
+      );
+
+      expect(mockUiNewPlatformSetup).not.toHaveBeenCalled();
+    });
   });
 });
 
@@ -155,6 +170,21 @@ describe('#start()', () => {
 
     expect(mockUiNewPlatformStart).toHaveBeenCalledTimes(1);
     expect(mockUiNewPlatformStart).toHaveBeenCalledWith(expect.any(Object), {});
+  });
+
+  it('throws error if requireNewPlatformShimeModule is undefined', () => {
+    const legacyPlatform = new LegacyPlatformService({
+      ...defaultParams,
+      requireNewPlatformShimModule: undefined,
+    });
+
+    expect(() => {
+      legacyPlatform.start(defaultStartDeps);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"requireNewPlatformShimModule must be specified when rendering a legacy application"`
+    );
+
+    expect(mockUiNewPlatformStart).not.toHaveBeenCalled();
   });
 
   it('resolves getStartServices with core and plugin APIs', async () => {
@@ -194,7 +224,12 @@ describe('#start()', () => {
       legacyPlatform.setup(defaultSetupDeps);
       legacyPlatform.start(defaultStartDeps);
 
-      expect(mockLoadOrder).toMatchSnapshot();
+      expect(mockLoadOrder).toMatchInlineSnapshot(`
+        Array [
+          "ui/chrome",
+          "legacy files",
+        ]
+      `);
     });
   });
 });
@@ -211,7 +246,17 @@ describe('#stop()', () => {
     });
 
     legacyPlatform.stop();
-    expect(targetDomElement).toMatchSnapshot();
+    expect(targetDomElement).toMatchInlineSnapshot(`
+      <div>
+        
+            
+        <h1>
+          this should not be removed
+        </h1>
+        
+          
+      </div>
+    `);
   });
 
   it('destroys the angular scope and empties the targetDomElement if angular is bootstrapped to targetDomElement', async () => {
@@ -240,7 +285,11 @@ describe('#stop()', () => {
     legacyPlatform.start({ ...defaultStartDeps, targetDomElement });
     legacyPlatform.stop();
 
-    expect(targetDomElement).toMatchSnapshot();
+    expect(targetDomElement).toMatchInlineSnapshot(`
+      <div
+        class="ng-scope"
+      />
+    `);
     expect(scopeDestroySpy).toHaveBeenCalledTimes(1);
   });
 });

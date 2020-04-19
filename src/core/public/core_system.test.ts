@@ -103,7 +103,7 @@ describe('constructor', () => {
     });
   });
 
-  it('passes requireLegacyFiles, requireNewPlatformShimModule, requireLegacyBootstrapModule and a dom element to LegacyPlatformService', () => {
+  it('passes required params to LegacyPlatformService', () => {
     const requireLegacyFiles = { requireLegacyFiles: true };
     const requireLegacyBootstrapModule = { requireLegacyBootstrapModule: true };
     const requireNewPlatformShimModule = { requireNewPlatformShimModule: true };

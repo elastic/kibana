@@ -30,7 +30,7 @@ export function getBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
     entry: './public/entry_point',
     sourceRoot: repoRoot,
     contextDir: Path.resolve(repoRoot, 'src/core'),
-    outputDir: Path.resolve(repoRoot, 'src/core/public/target/public'),
+    outputDir: Path.resolve(repoRoot, 'src/core/target/public'),
   });
 
   const pluginBundles = plugins
