@@ -87,9 +87,12 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
       {
         pluginId: PLUGIN.ID,
         minimumLicenseType: PLUGIN.minimumLicenseType,
-        defaultErrorMessage: i18n.translate('xpack.indexLifecycleMgmt.licenseCheckErrorMessage', {
-          defaultMessage: 'License check failed',
-        }),
+        defaultErrorMessage: i18n.translate(
+          'xpack.crossClusterReplication.licenseCheckErrorMessage',
+          {
+            defaultMessage: 'License check failed',
+          }
+        ),
       },
       {
         licensing,
