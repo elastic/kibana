@@ -116,11 +116,11 @@ export function uiRenderMixin(kbnServer, server, config) {
                 `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
               ]),
+          `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
+          `${regularBundlePath}/commons.style.css`,
           ...(isCore
             ? []
             : [
-                `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
-                `${regularBundlePath}/commons.style.css`,
                 `${regularBundlePath}/${app.getId()}.style.css`,
                 ...kbnServer.uiExports.styleSheetPaths
                   .filter(
