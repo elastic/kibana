@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { showAllOthersBucket } from '../../../../../../../../plugins/siem/common/constants';
 import { HistogramData, SignalsAggregation, SignalsBucket, SignalsGroupBucket } from './types';
-import { showAllOthersBucket } from '../../../../../common/constants';
 import { SignalSearchResponse } from '../../../../containers/detection_engine/signals/types';
 import * as i18n from './translations';
 
