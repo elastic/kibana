@@ -9,22 +9,16 @@ import Joi from 'joi';
 import { has, snakeCase } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 
-import * as t from 'io-ts';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
-  RouteValidationError,
 } from '../../../../../../../src/core/server';
 import { ILicense } from '../../../../../licensing/server';
 import { MINIMUM_ML_LICENSE } from '../../../../common/constants';
 import { RuleType } from '../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../common/detection_engine/ml_helpers';
 import { BadRequestError } from '../errors/bad_request_error';
-import { exactCheck } from './schemas/response/exact_check';
-import { formatErrors } from './schemas/response/utils';
 
 export interface OutputError {
   message: string;
