@@ -5,7 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { first, map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { once } from 'lodash';
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
@@ -18,30 +19,29 @@ import { ManagementSetup } from '../../../../src/plugins/management/public';
 
 // @ts-ignore
 import { PLUGIN } from '../common/constants';
-import {
-  LogstashLicenseService,
-  // @ts-ignore
-} from './services';
 // @ts-ignore
-import { registerEditSection } from './sections/pipeline_edit';
-// @ts-ignore
-import { registerListSection } from './sections/pipeline_list';
-import { SecurityPluginSetup } from '../../security/public';
+import { LogstashLicenseService } from './services';
 
 interface SetupDeps {
   licensing: LicensingPluginSetup;
   management: ManagementSetup;
 
   home?: HomePublicPluginSetup;
-  security?: SecurityPluginSetup;
 }
 
 export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
+  private licenseSubscription?: Subscription;
+
   public setup(core: CoreSetup, plugins: SetupDeps) {
     const logstashLicense$ = plugins.licensing.license$.pipe(
       map(license => new LogstashLicenseService(license))
     );
-    const section = plugins.management.sections.getSection('logstash')!;
+    const section = plugins.management.sections.register({
+      id: 'logstash',
+      title: 'Logstash',
+      order: 30,
+      euiIconType: 'logoLogstash',
+    });
     const managementApp = section.registerApp({
       id: 'pipelines',
       title: i18n.translate('xpack.logstash.managementSection.pipelinesTitle', {
@@ -50,47 +50,45 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
       order: 10,
       mount: async params => {
         const [coreStart] = await core.getStartServices();
-        const { renderApp } = await import('./sections');
+        const { renderApp } = await import('./application');
 
-        return renderApp(coreStart, params, logstashLicense$, plugins.security);
+        return renderApp(coreStart, params, logstashLicense$);
       },
     });
 
-    logstashLicense$
-      .pipe(first())
-      .toPromise()
-      .then((license: any) => {
-        if (license.enableLinks) {
-          managementApp.enable();
-        } else {
-          managementApp.disable();
-        }
+    this.licenseSubscription = logstashLicense$.subscribe((license: any) => {
+      if (license.enableLinks) {
+        managementApp.enable();
+      } else {
+        managementApp.disable();
+      }
 
-        if (plugins.home && license.enableLinks) {
-          // Ensure that we don't register the feature more than once
-          once(() => {
-            plugins.home!.featureCatalogue.register({
-              id: 'management_logstash',
-              title: i18n.translate('xpack.logstash.homeFeature.logstashPipelinesTitle', {
-                defaultMessage: 'Logstash Pipelines',
-              }),
-              description: i18n.translate(
-                'xpack.logstash.homeFeature.logstashPipelinesDescription',
-                {
-                  defaultMessage: 'Create, delete, update, and clone data ingestion pipelines.',
-                }
-              ),
-              icon: 'pipelineApp',
-              path: '/app/kibana#/management/logstash/pipelines',
-              showOnHomePage: true,
-              category: FeatureCatalogueCategory.ADMIN,
-            });
+      if (plugins.home && license.enableLinks) {
+        // Ensure that we don't register the feature more than once
+        once(() => {
+          plugins.home!.featureCatalogue.register({
+            id: 'management_logstash',
+            title: i18n.translate('xpack.logstash.homeFeature.logstashPipelinesTitle', {
+              defaultMessage: 'Logstash Pipelines',
+            }),
+            description: i18n.translate('xpack.logstash.homeFeature.logstashPipelinesDescription', {
+              defaultMessage: 'Create, delete, update, and clone data ingestion pipelines.',
+            }),
+            icon: 'pipelineApp',
+            path: '/app/kibana#/management/logstash/pipelines',
+            showOnHomePage: true,
+            category: FeatureCatalogueCategory.ADMIN,
           });
-        }
-      });
+        });
+      }
+    });
   }
 
   public start(core: CoreStart) {}
 
-  public stop() {}
+  public stop() {
+    if (this.licenseSubscription) {
+      this.licenseSubscription.unsubscribe();
+    }
+  }
 }

@@ -12,12 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { ToastsStart } from 'src/core/public';
 
 // @ts-ignore
-import { UpgradeFailure } from '../components/upgrade_failure';
+import { UpgradeFailure } from './components/upgrade_failure';
 // @ts-ignore
-import { PipelineEditor } from '../components/pipeline_editor';
+import { PipelineEditor } from './components/pipeline_editor';
 // @ts-ignore
 import { Pipeline } from '../models/pipeline';
-import { SecurityPluginSetup, AuthenticatedUser } from '../../../security/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 // @ts-ignore
 import * as Breadcrumbs from './breadcrumbs';
@@ -26,7 +25,7 @@ const usePipeline = (
   pipelineService: any,
   logstashLicenseService: any,
   toasts: ToastsStart,
-  clone: boolean,
+  shouldClone: boolean,
   id?: string
 ) => {
   const mounted = usePromise();
@@ -40,7 +39,7 @@ const usePipeline = (
 
       try {
         const result = await mounted(pipelineService.loadPipeline(id) as Promise<any>);
-        setPipeline(clone ? result.clone : result);
+        setPipeline(shouldClone ? result.clone : result);
       } catch (e) {
         await logstashLicenseService.checkValidity();
         if (e.status !== 403) {
@@ -55,7 +54,7 @@ const usePipeline = (
         }
       }
     })();
-  }, [pipelineService, id, mounted, clone, logstashLicenseService, toasts]);
+  }, [pipelineService, id, mounted, shouldClone, logstashLicenseService, toasts]);
 
   return pipeline;
 };
@@ -73,24 +72,10 @@ const useIsUpgraded = (upgradeService: any) => {
   return isUpgraded;
 };
 
-const useCurrentUser = (security?: SecurityPluginSetup) => {
-  const [currentUser, setCurrentUser] = useState<null | AuthenticatedUser>(null);
-  const mounted = usePromise();
-
-  useLayoutEffect(() => {
-    if (security) {
-      mounted(security.authc.getCurrentUser()).then(result => setCurrentUser(result));
-    }
-  }, [mounted, security]);
-
-  return currentUser;
-};
-
 interface EditProps {
   pipelineService: any;
   logstashLicenseService: any;
   upgradeService: any;
-  security?: SecurityPluginSetup;
   toasts: ToastsStart;
   history: History;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -103,19 +88,17 @@ export const PipelineEditView: React.FC<EditProps> = ({
   pipelineService,
   logstashLicenseService,
   upgradeService,
-  security,
   toasts,
   history,
   setBreadcrumbs,
   id,
 }) => {
   const params = new URLSearchParams(history.location.search);
-  const retry = params.get('retry') === 'true';
-  const clone = params.get('clone') === '';
+  const shouldRetry = params.get('retry') === 'true';
+  const shouldClone = params.get('clone') === '';
 
-  const pipeline = usePipeline(pipelineService, logstashLicenseService, toasts, clone, id);
+  const pipeline = usePipeline(pipelineService, logstashLicenseService, toasts, shouldClone, id);
   const isUpgraded = useIsUpgraded(upgradeService);
-  const currentUser = useCurrentUser(security);
 
   const onRetry = useCallback(() => {
     const newParams = new URLSearchParams(history.location.search);
@@ -147,7 +130,7 @@ export const PipelineEditView: React.FC<EditProps> = ({
     return (
       <UpgradeFailure
         isNewPipeline={isNewPipeline}
-        isManualUpgrade={!!retry}
+        isManualUpgrade={!!shouldRetry}
         onRetry={onRetry}
         onClose={close}
       />
@@ -157,11 +140,10 @@ export const PipelineEditView: React.FC<EditProps> = ({
   return (
     <PipelineEditor
       id={id}
-      clone={clone}
+      clone={shouldClone}
       close={close}
       open={open}
       isNewPipeline={isNewPipeline}
-      username={currentUser ? currentUser.username : null}
       pipeline={pipeline}
       pipelineService={pipelineService}
       toastNotifications={toasts}

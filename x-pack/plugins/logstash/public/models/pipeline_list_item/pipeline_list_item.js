@@ -25,7 +25,7 @@ export class PipelineListItem {
     this.username = props.username;
 
     if (props.lastModified) {
-      this.lastModified = getMoment(props.lastModified);
+      this.lastModified = getMomentDate(props.lastModified);
       this.lastModifiedHumanized = capitalize(this.lastModified.fromNow());
     }
   }
@@ -52,7 +52,7 @@ export class PipelineListItem {
   }
 }
 
-function getMoment(date) {
+function getMomentDate(date) {
   if (!date) {
     return null;
   }

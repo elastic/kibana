@@ -21,21 +21,19 @@ import {
   // @ts-ignore
 } from '../services';
 // @ts-ignore
-import { PipelineList } from '../components/pipeline_list';
+import { PipelineList } from './components/pipeline_list';
 import { PipelineEditView } from './pipeline_edit_view';
 // @ts-ignore
 import { Pipeline } from '../models/pipeline';
-import { SecurityPluginSetup } from '../../../security/public';
 // @ts-ignore
 import * as Breadcrumbs from './breadcrumbs';
 
 export const renderApp = async (
   core: CoreStart,
   { basePath, element, setBreadcrumbs }: ManagementAppMountParams,
-  license$: Observable<any>,
-  security?: SecurityPluginSetup
+  licenseService$: Observable<any>
 ) => {
-  const logstashLicenseService = await license$.pipe(first()).toPromise();
+  const logstashLicenseService = await licenseService$.pipe(first()).toPromise();
   const clusterService = new ClusterService(core.http);
   const monitoringService = new MonitoringService(
     core.http,
@@ -82,7 +80,6 @@ export const renderApp = async (
                 setBreadcrumbs={setBreadcrumbs}
                 logstashLicenseService={logstashLicenseService}
                 pipelineService={pipelineService}
-                security={security}
                 toasts={core.notifications.toasts}
                 upgradeService={upgradeService}
               />
@@ -102,7 +99,6 @@ export const renderApp = async (
                 setBreadcrumbs={setBreadcrumbs}
                 logstashLicenseService={logstashLicenseService}
                 pipelineService={pipelineService}
-                security={security}
                 toasts={core.notifications.toasts}
                 upgradeService={upgradeService}
                 id={match.params.id}

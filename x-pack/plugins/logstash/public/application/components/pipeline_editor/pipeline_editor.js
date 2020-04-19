@@ -13,7 +13,7 @@ import 'brace/mode/plain_text';
 import 'brace/theme/github';
 
 import { isEmpty } from 'lodash';
-import { TOOLTIPS } from '../../../common/constants/tooltips';
+import { TOOLTIPS } from '../../../../common/constants/tooltips';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -40,7 +40,6 @@ class PipelineEditorUi extends React.Component {
 
     const {
       pipeline: { id, description, pipeline, settings },
-      username,
     } = this.props;
 
     const pipelineWorkersSet = typeof settings['pipeline.workers'] === 'number';
@@ -60,7 +59,6 @@ class PipelineEditorUi extends React.Component {
           'queue.max_bytes': settings['queue.max_bytes.number'] + settings['queue.max_bytes.units'],
           'queue.type': settings['queue.type'],
         },
-        username,
       },
       pipelineIdErrors: [],
       pipelineIdPattern: /^[A-Za-z\_][A-Za-z0-9\-\_]*$/,
@@ -526,7 +524,6 @@ PipelineEditorUi.propTypes = {
     addSuccess: PropTypes.func.isRequired,
     addError: PropTypes.func.isRequired,
   }).isRequired,
-  username: PropTypes.string,
 };
 
 export const PipelineEditor = injectI18n(PipelineEditorUi);
