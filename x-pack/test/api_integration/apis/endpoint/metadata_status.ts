@@ -7,13 +7,11 @@
 import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getSupertestWithoutAuth } from '../fleet/agents/services';
 
 export default function(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   const esClient = getService('es');
   // agent that is enrolled and know to fleet
   const enrolledAgentId = '94e689c0-81bd-11ea-a4eb-77680821cd3b';
