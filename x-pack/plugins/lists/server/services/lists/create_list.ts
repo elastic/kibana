@@ -45,7 +45,6 @@ export const createList = async ({
     id,
     body,
   });
-  // TODO: Check to ensure through io-ts that we have a valid response._id from Elastic
   return {
     id: response._id,
     ...body,

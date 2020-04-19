@@ -47,7 +47,6 @@ export const updateListItem = async ({
       },
     });
     return {
-      // TODO: validate the response being returned through io-ts
       id: response._id,
       list_id: listItem.list_id,
       type: listItem.type,

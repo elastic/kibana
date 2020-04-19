@@ -5,3 +5,4 @@
  */
 
 export * from './search_es_lists_items_schema';
+export * from './search_es_lists_schema';

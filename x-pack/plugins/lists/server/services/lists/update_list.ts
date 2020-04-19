@@ -46,7 +46,7 @@ export const updateList = async ({
       body: { doc },
     });
     return {
-      id: response._id, // TODO: Check if the response has at least an _id through io.ts decode
+      id: response._id,
       name: name ?? list.name,
       description: description ?? list.description,
       created_at: list.created_at,

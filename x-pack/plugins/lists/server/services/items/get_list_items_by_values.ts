@@ -40,6 +40,5 @@ export const getListItemsByValues = async ({
       size: value.length, // This has a limit on the number which is 10k
     }
   );
-  // TODO: Check that the response is what you would expect?
   return transformElasticToListsItems({ response, type });
 };

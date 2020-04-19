@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ListsSchema } from '../../../common/schemas';
+import { ListsSchema, SearchEsListsSchema } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
 interface GetListOptions {
@@ -20,21 +20,17 @@ export const getList = async ({
   dataClient,
   listsIndex,
 }: GetListOptions): Promise<ListsSchema | null> => {
-  const result: SearchResponse<Omit<ListsSchema, 'id'>> = await dataClient.callAsCurrentUser(
-    'search',
-    {
-      body: {
-        query: {
-          term: {
-            _id: id,
-          },
+  const result: SearchResponse<SearchEsListsSchema> = await dataClient.callAsCurrentUser('search', {
+    body: {
+      query: {
+        term: {
+          _id: id,
         },
       },
-      index: listsIndex,
-      ignoreUnavailable: true,
-    }
-  );
-  // TODO: Check against ListsSchema.decode() to see if this type is correct?
+    },
+    index: listsIndex,
+    ignoreUnavailable: true,
+  });
   if (result.hits.hits.length) {
     return {
       id: result.hits.hits[0]._id,
