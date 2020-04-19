@@ -51,7 +51,7 @@ it('returns a bundle for core and each plugin', () => {
         "contextDir": <absolute path>/src/core,
         "entry": "./public/entry_point",
         "id": "core",
-        "outputDir": <absolute path>/src/core/public/target/public,
+        "outputDir": <absolute path>/src/core/target/public,
         "sourceRoot": <absolute path>,
         "type": "entry",
       },

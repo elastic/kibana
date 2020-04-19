@@ -7,13 +7,13 @@ OptimizerConfig {
   "bundles": Array [
     Bundle {
       "cache": BundleCache {
-        "path": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/target/public/.kbn-optimizer-cache,
+        "path": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/target/public/.kbn-optimizer-cache,
         "state": undefined,
       },
       "contextDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core,
       "entry": "./public/entry_point",
       "id": "core",
-      "outputDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/target/public,
+      "outputDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/target/public,
       "sourceRoot": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo,
       "type": "entry",
     },
