@@ -124,16 +124,6 @@ export interface ImportRegular {
 
 export type ImportRuleResponse = ImportRegular | BulkError;
 
-export type RouteValidationFunctionReturn<T> =
-  | {
-      value: T;
-      error?: undefined;
-    }
-  | {
-      value?: undefined;
-      error: RouteValidationError;
-    };
-
 export const isBulkError = (
   importRuleResponse: ImportRuleResponse
 ): importRuleResponse is BulkError => {
@@ -250,21 +240,6 @@ export const buildRouteValidation = <T>(schema: Joi.Schema): RouteValidationFunc
     return badRequest(error.message);
   }
   return ok(value);
-};
-
-export const buildRouteValidationIoTS = <T>(schema: t.Mixed): RouteValidationFunction<T> => (
-  payload: object,
-  { ok, badRequest }
-) => {
-  const decoded = schema.decode(payload);
-  const checked = exactCheck(payload, decoded);
-  const left = (errors: t.Errors): RouteValidationFunctionReturn<T> => {
-    return badRequest(formatErrors(errors).join(','));
-  };
-  const right = (output: T): RouteValidationFunctionReturn<T> => {
-    return ok(output);
-  };
-  return pipe(checked, fold(left, right));
 };
 
 const statusToErrorMessage = (statusCode: number) => {

@@ -7,8 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_URL } from '../../common/constants';
-import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../siem_server_deps';
-import { deleteListsSchema, DeleteListsSchema } from '../../common/schemas';
+import { transformError, buildSiemResponse, buildRouteValidation } from '../siem_server_deps';
+import { deleteListsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -17,7 +17,7 @@ export const deleteListsRoute = (router: IRouter): void => {
     {
       path: LIST_URL,
       validate: {
-        query: buildRouteValidationIoTS<DeleteListsSchema>(deleteListsSchema),
+        query: buildRouteValidation(deleteListsSchema),
       },
       options: {
         tags: ['access:lists'],

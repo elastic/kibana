@@ -7,8 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_URL } from '../../common/constants';
-import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../siem_server_deps';
-import { patchListsSchema, PatchListsSchema } from '../../common/schemas';
+import { transformError, buildSiemResponse, buildRouteValidation } from '../siem_server_deps';
+import { patchListsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -17,7 +17,7 @@ export const patchListsRoute = (router: IRouter): void => {
     {
       path: LIST_URL,
       validate: {
-        body: buildRouteValidationIoTS<PatchListsSchema>(patchListsSchema),
+        body: buildRouteValidation(patchListsSchema),
       },
       options: {
         tags: ['access:lists'],
