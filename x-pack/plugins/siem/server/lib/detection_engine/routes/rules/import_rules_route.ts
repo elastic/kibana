@@ -138,7 +138,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                     timeline_id: timelineId,
                     timeline_title: timelineTitle,
                     version,
-                    lists,
+                    exceptions_list,
                   } = parsedRule;
 
                   try {
@@ -195,7 +195,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                         references,
                         note,
                         version,
-                        lists,
+                        exceptions_list,
                         actions: [], // Actions are not imported nor exported at this time
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
@@ -232,7 +232,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                         references,
                         note,
                         version,
-                        lists,
+                        exceptions_list,
                         anomalyThreshold,
                         machineLearningJobId,
                       });

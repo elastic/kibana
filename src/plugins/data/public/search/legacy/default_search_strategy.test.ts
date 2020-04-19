@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from '../../../../../core/public';
-import { SearchStrategySearchParams } from './types';
+import { IUiSettingsClient } from 'kibana/public';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { searchStartMock } from '../mocks';
+import { SearchStrategySearchParams } from './types';
 
 const { search } = defaultSearchStrategy;
 
@@ -38,12 +38,6 @@ const searchMockResponse: any = Promise.resolve([]);
 searchMockResponse.abort = jest.fn();
 const searchMock = jest.fn().mockReturnValue(searchMockResponse);
 
-const newSearchMockResponse: any = Promise.resolve([]);
-newSearchMockResponse.abort = jest.fn();
-const newSearchMock = jest.fn().mockReturnValue({
-  toPromise: () => searchMockResponse,
-});
-
 describe('defaultSearchStrategy', function() {
   describe('search', function() {
     let searchArgs: MockedKeys<Omit<SearchStrategySearchParams, 'config'>>;
@@ -58,7 +52,6 @@ describe('defaultSearchStrategy', function() {
 
       const searchService = searchStartMock;
       searchService.aggs.calculateAutoTimeExpression = jest.fn().mockReturnValue('1d');
-      searchService.search = newSearchMock;
       searchService.__LEGACY.esClient.search = searchMock;
       searchService.__LEGACY.esClient.msearch = msearchMock;
 
@@ -111,19 +104,6 @@ describe('defaultSearchStrategy', function() {
       });
       search({ ...searchArgs, config }).abort();
       expect(msearchMockResponse.abort).toHaveBeenCalled();
-    });
-
-    test('should call new search service', () => {
-      const config = getConfigStub();
-      search({ ...searchArgs, config });
-      expect(newSearchMock).toHaveBeenCalledTimes(1);
-    });
-
-    test('should properly abort with new search service', async () => {
-      const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
-      const config = getConfigStub({});
-      search({ ...searchArgs, config }).abort();
-      expect(abortSpy).toHaveBeenCalled();
     });
   });
 });

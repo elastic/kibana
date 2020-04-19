@@ -207,7 +207,7 @@ describe('rules_schema', () => {
   });
 
   // TODO: (LIST-FEATURE) Remove this test once the feature flag is deployed
-  test('it should remove lists when we need it to be removed because the feature is off but there exists a list in the data', () => {
+  test('it should remove exceptions_list when we need it to be removed because the feature is off but there exists a list in the data', () => {
     const payload = getBaseResponsePayload();
     const decoded = rulesSchema.decode(payload);
     const listRemoved = removeList(decoded);
@@ -246,9 +246,9 @@ describe('rules_schema', () => {
     });
   });
 
-  test('it should work with lists that are not there and not cause invalidation or errors', () => {
+  test('it should work with exceptions_list that are not there and not cause invalidation or errors', () => {
     const payload = getBaseResponsePayload();
-    const { lists, ...payloadWithoutLists } = payload;
+    const { exceptions_list, ...payloadWithoutLists } = payload;
     const decoded = rulesSchema.decode(payloadWithoutLists);
     const listRemoved = removeList(decoded);
     const message = pipe(listRemoved, foldLeftRight);
