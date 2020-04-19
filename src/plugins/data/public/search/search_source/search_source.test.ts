@@ -16,13 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { Observable } from 'rxjs';
 import { getSearchSourceType, SearchSourceType } from './search_source';
 import { IndexPattern, SortDirection } from '../..';
+import { fetchSoon } from '../legacy';
+import { IUiSettingsClient } from '../../../../../core/public';
+import { dataPluginMock } from '../../../../data/public/mocks';
 import { coreMock } from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../mocks';
 
-jest.mock('../fetch', () => ({
+jest.mock('../legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
 }));
 
@@ -49,13 +51,28 @@ const indexPattern2 = ({
 
 describe('SearchSource', () => {
   let SearchSource: SearchSourceType;
+  let mockSearchMethod: any;
 
   beforeEach(() => {
     const core = coreMock.createStart();
     const data = dataPluginMock.createStartContract();
 
+    mockSearchMethod = jest.fn(() => {
+      return new Observable(subscriber => {
+        setTimeout(() => {
+          subscriber.next({
+            rawResponse: '',
+          });
+          subscriber.complete();
+        }, 100);
+      });
+    });
+
     SearchSource = getSearchSourceType({
-      search: data.search,
+      search: {
+        ...data.search,
+        search: mockSearchMethod,
+      },
       uiSettings: core.uiSettings,
       injectedMetadata: core.injectedMetadata,
     });
@@ -161,6 +178,41 @@ describe('SearchSource', () => {
 
       expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).toBeCalledWith(searchSource, options);
+    });
+  });
+
+  describe('#legacy fetch()', () => {
+    beforeEach(() => {
+      const core = coreMock.createStart();
+      const data = dataPluginMock.createStartContract();
+
+      SearchSource = getSearchSourceType({
+        search: data.search,
+        uiSettings: {
+          ...core.uiSettings,
+          get: jest.fn(() => {
+            return true; // batchSearches = true
+          }),
+        } as IUiSettingsClient,
+        injectedMetadata: core.injectedMetadata,
+      });
+    });
+
+    test('should call msearch', async () => {
+      const searchSource = new SearchSource({ index: indexPattern });
+      const options = {};
+      await searchSource.fetch(options);
+      expect(fetchSoon).toBeCalledTimes(1);
+    });
+  });
+
+  describe('#search service fetch()', () => {
+    test('should call msearch', async () => {
+      const searchSource = new SearchSource({ index: indexPattern });
+      const options = {};
+
+      await searchSource.fetch(options);
+      expect(mockSearchMethod).toBeCalledTimes(1);
     });
   });
 

@@ -21,7 +21,7 @@ import { CoreStart } from 'kibana/public';
 import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
-import { LegacyApiCaller } from './es_client';
+import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor } from './search_interceptor';
 
 export interface ISearchContext {
@@ -36,15 +36,6 @@ export interface ISearchContext {
 export interface ISearchStrategy<T extends TStrategyTypes> {
   search: ISearch<T>;
 }
-
-/**
- * Search strategy provider creates an instance of a search strategy with the request
- * handler context bound to it. This way every search strategy can use
- * whatever information they require from the request context.
- */
-export type TSearchStrategyProviderEnhanced<T extends TStrategyTypes> = (
-  search: ISearchGeneric
-) => Promise<ISearchStrategy<T>>;
 
 export type TSearchStrategiesMap = {
   [K in TStrategyTypes]?: TSearchStrategyProvider<any>;

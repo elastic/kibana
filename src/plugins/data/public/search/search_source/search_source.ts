@@ -71,15 +71,19 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { uniqueId, uniq, extend, pick, difference, set, omit, keys, isFunction } from 'lodash';
+import { map } from 'rxjs/operators';
 import { CoreStart, SavedObjectReference } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { DataPublicPluginStart, IIndexPattern, SearchRequest } from '../..';
+import { IIndexPattern, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
+import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';
+import { DataPublicPluginStart } from '../../../../data/public';
+
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
+import { fetchSoon } from '../legacy';
 
 export interface SearchSourceDependencies {
   uiSettings: CoreStart['uiSettings'];
@@ -194,19 +198,31 @@ export class SearchSource {
   }
 
   /**
-   * Fetch this source and reject the returned Promise on error
-   *
-   * @async
+   * Run a search using the search service
+   * @return {Observable<SearchResponse<unknown>>}
    */
-  async fetch(options: FetchOptions = {}) {
-    await this.requestIsStarting(options);
+  private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
+    const { search, injectedMetadata, uiSettings } = this.dependencies;
+    const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
+    const searchParams = getSearchParams(uiSettings, esShardTimeout);
+    const params = {
+      index: searchRequest.index.title || searchRequest.index,
+      body: searchRequest.body,
+      ...searchParams,
+    };
+    return search
+      .search({ params, indexType: searchRequest.indexType }, { signal })
+      .pipe(map(({ rawResponse }) => handleResponse(searchRequest, rawResponse)));
+  }
 
-    const searchRequest = await this.flatten();
-    this.history = [searchRequest];
-
+  /**
+   * Run a search using the search service
+   * @return {Promise<SearchResponse<unknown>>}
+   */
+  private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
     const { injectedMetadata, search, uiSettings } = this.dependencies;
     const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
-    const response = await fetchSoon(
+    return await fetchSoon(
       searchRequest,
       {
         ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
@@ -218,6 +234,25 @@ export class SearchSource {
         esShardTimeout,
       }
     );
+  }
+  /**
+   * Fetch this source and reject the returned Promise on error
+   *
+   * @async
+   */
+  async fetch(options: FetchOptions = {}) {
+    const { uiSettings } = this.dependencies;
+    await this.requestIsStarting(options);
+
+    const searchRequest = await this.flatten();
+    this.history = [searchRequest];
+
+    let response;
+    if (uiSettings.get('courier:batchSearches')) {
+      response = await this.legacyFetch(searchRequest, options);
+    } else {
+      response = this.fetch$(searchRequest, options.abortSignal).toPromise();
+    }
 
     if (response.error) {
       throw new RequestFailure(null, response);
@@ -256,7 +291,6 @@ export class SearchSource {
 
   /**
    *  Called by requests of this search source when they are started
-   *  @param  {Courier.Request} request
    *  @param options
    *  @return {Promise<undefined>}
    */
@@ -444,7 +478,6 @@ export class SearchSource {
    * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
    *
    * Using `createSearchSource`, the instance can be re-created.
-   * @param searchSource The search source to serialize
    * @public */
   public serialize() {
     const references: SavedObjectReference[] = [];

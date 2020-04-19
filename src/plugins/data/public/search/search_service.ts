@@ -22,11 +22,11 @@ import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/publ
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
 import { ISearchSetup, ISearchStart, TSearchStrategyProvider, TSearchStrategiesMap } from './types';
 import { TStrategyTypes } from './strategy_types';
-import { getEsClient, LegacyApiCaller } from './es_client';
+import { getEsClient, LegacyApiCaller } from './legacy';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
-import { esSearchStrategyProvider } from './es_search/es_search_strategy';
+import { esSearchStrategyProvider } from './es_search';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
-import { QuerySetup } from '../query/query_service';
+import { QuerySetup } from '../query';
 import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
 import {

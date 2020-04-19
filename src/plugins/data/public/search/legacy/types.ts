@@ -17,14 +17,20 @@
  * under the License.
  */
 
-export type SearchRequest = any;
-export type SearchResponse = any;
+import { FetchHandlers } from '../fetch';
+import { SearchRequest, SearchResponse } from '..';
 
-export interface LegacyApiCaller {
-  search: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
-  msearch: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
+export interface SearchStrategySearchParams extends FetchHandlers {
+  searchRequests: SearchRequest[];
 }
 
-interface LegacyApiCallerResponse extends Promise<SearchResponse> {
+// @deprecated
+export interface SearchStrategyProvider {
+  id: string;
+  search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
+}
+
+export interface SearchStrategyResponse {
+  searching: Promise<SearchResponse[]>;
   abort: () => void;
 }

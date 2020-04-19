@@ -87,7 +87,6 @@
 |  [SavedQuery](./kibana-plugin-plugins-data-public.savedquery.md) |  |
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) |  |
-|  [SearchStrategyProvider](./kibana-plugin-plugins-data-public.searchstrategyprovider.md) |  |
 |  [TabbedAggColumn](./kibana-plugin-plugins-data-public.tabbedaggcolumn.md) | \* |
 |  [TabbedTable](./kibana-plugin-plugins-data-public.tabbedtable.md) | \* |
 |  [TimeRange](./kibana-plugin-plugins-data-public.timerange.md) |  |
