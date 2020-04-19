@@ -18,6 +18,7 @@ import * as Registry from '../registry';
 import { getObject } from './get_objects';
 import { getInstallation } from './index';
 import { installTemplates } from '../elasticsearch/template/install';
+import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 
@@ -117,17 +118,18 @@ export async function installPackage(options: {
     installTemplatePromises,
   ]);
 
-  const toSave = res.flat();
+  const toSaveAssetRefs: AssetReference[] = res.flat();
+  const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
   // Save those references in the package manager's state saved object
-  await saveInstallationReferences({
+  return await saveInstallationReferences({
     savedObjectsClient,
     pkgkey,
     pkgName,
     pkgVersion,
     internal,
-    toSave,
+    toSaveAssetRefs,
+    toSaveESIndexPatterns,
   });
-  return toSave;
 }
 
 // TODO: make it an exhaustive list
@@ -156,25 +158,44 @@ export async function saveInstallationReferences(options: {
   pkgName: string;
   pkgVersion: string;
   internal: boolean;
-  toSave: AssetReference[];
+  toSaveAssetRefs: AssetReference[];
+  toSaveESIndexPatterns: Record<string, string>;
 }) {
-  const { savedObjectsClient, pkgName, pkgVersion, internal, toSave } = options;
+  const {
+    savedObjectsClient,
+    pkgName,
+    pkgVersion,
+    internal,
+    toSaveAssetRefs,
+    toSaveESIndexPatterns,
+  } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  const savedRefs = installation?.installed || [];
+  const savedAssetRefs = installation?.installed || [];
+  const toInstallESIndexPatterns = Object.assign(
+    installation?.es_index_patterns || {},
+    toSaveESIndexPatterns
+  );
+
   const mergeRefsReducer = (current: AssetReference[], pending: AssetReference) => {
     const hasRef = current.find(c => c.id === pending.id && c.type === pending.type);
     if (!hasRef) current.push(pending);
     return current;
   };
 
-  const toInstall = toSave.reduce(mergeRefsReducer, savedRefs);
+  const toInstallAssetsRefs = toSaveAssetRefs.reduce(mergeRefsReducer, savedAssetRefs);
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
-    { installed: toInstall, name: pkgName, version: pkgVersion, internal },
+    {
+      installed: toInstallAssetsRefs,
+      es_index_patterns: toInstallESIndexPatterns,
+      name: pkgName,
+      version: pkgVersion,
+      internal,
+    },
     { id: pkgName, overwrite: true }
   );
 
-  return toInstall;
+  return toInstallAssetsRefs;
 }
 
 async function installKibanaSavedObjects({
