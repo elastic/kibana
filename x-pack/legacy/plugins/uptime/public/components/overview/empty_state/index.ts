@@ -4,7 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DataMissing } from './data_missing';
 export { EmptyStateComponent } from './empty_state';
-export { EmptyIndex } from './empty_index';
 export { EmptyState } from './empty_state_container';
