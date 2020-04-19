@@ -8,7 +8,7 @@ import { KibanaRequest, ScopedClusterClient } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../../../security/server';
 import { SpacesServiceSetup } from '../../../../spaces/server';
-import { ListsSchema, ListsItemsSchema } from '../../../common/schemas';
+import { ListsSchema, ListsItemsSchema, ListsItemsArraySchema } from '../../../common/schemas';
 import { ConfigType } from '../../config';
 import {
   getListIndex,
@@ -301,7 +301,7 @@ export class ListsClient {
     listId,
     value,
     type,
-  }: DeleteListItemByValueOptions): Promise<ListsItemsSchema[]> => {
+  }: DeleteListItemByValueOptions): Promise<ListsItemsArraySchema> => {
     const { dataClient } = this;
     const listsItemsIndex = this.getListItemIndex();
     return deleteListItemByValue({
@@ -363,7 +363,7 @@ export class ListsClient {
     listId,
     value,
     type,
-  }: GetListItemByValueOptions): Promise<ListsItemsSchema | null> => {
+  }: GetListItemByValueOptions): Promise<ListsItemsArraySchema> => {
     const { dataClient } = this;
     const listsItemsIndex = this.getListItemIndex();
     return getListItemByValue({
@@ -443,7 +443,7 @@ export class ListsClient {
     type,
     listId,
     value,
-  }: GetListItemsByValueOptions): Promise<ListsItemsSchema[]> => {
+  }: GetListItemsByValueOptions): Promise<ListsItemsArraySchema> => {
     const { dataClient } = this;
     const listsItemsIndex = this.getListItemIndex();
     return getListItemsByValues({

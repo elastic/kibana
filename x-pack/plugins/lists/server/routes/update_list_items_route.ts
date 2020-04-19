@@ -7,8 +7,13 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import { transformError, buildSiemResponse, buildRouteValidation } from '../siem_server_deps';
-import { updateListsItemsSchema } from '../../common/schemas';
+import {
+  transformError,
+  buildSiemResponse,
+  buildRouteValidation,
+  validate,
+} from '../siem_server_deps';
+import { updateListsItemsSchema, listsItemsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -39,8 +44,12 @@ export const updateListsItemsRoute = (router: IRouter): void => {
             body: `list item id: "${id}" not found`,
           });
         } else {
-          // TODO: Transform and check the list on exit as well as validate it
-          return response.ok({ body: listItem });
+          const [validated, errors] = validate(listItem, listsItemsSchema);
+          if (errors != null) {
+            return siemResponse.error({ statusCode: 500, body: errors });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
         }
       } catch (err) {
         const error = transformError(err);

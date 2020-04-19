@@ -34,6 +34,7 @@ export const getList = async ({
       ignoreUnavailable: true,
     }
   );
+  // TODO: Check against ListsSchema.decode() to see if this type is correct?
   if (result.hits.hits.length) {
     return {
       id: result.hits.hits[0]._id,

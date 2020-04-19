@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { Type, ListsItemsSchema, SearchEsListsItemsSchema } from '../../../common/schemas';
+import { Type, SearchEsListsItemsSchema, ListsItemsArraySchema } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
 export const transformElasticToListsItems = ({
@@ -15,7 +15,7 @@ export const transformElasticToListsItems = ({
 }: {
   response: SearchResponse<SearchEsListsItemsSchema>;
   type: Type;
-}): ListsItemsSchema[] => {
+}): ListsItemsArraySchema => {
   return response.hits.hits.map(hit => {
     const {
       _id,

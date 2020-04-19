@@ -7,8 +7,17 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import { transformError, buildSiemResponse, buildRouteValidation } from '../siem_server_deps';
-import { readListsItemsSchema } from '../../common/schemas';
+import {
+  transformError,
+  buildSiemResponse,
+  buildRouteValidation,
+  validate,
+} from '../siem_server_deps';
+import {
+  readListsItemsSchema,
+  listsItemsSchema,
+  listsItemsArraySchema,
+} from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -36,8 +45,12 @@ export const readListsItemsRoute = (router: IRouter): void => {
               body: `list item id: "${id}" does not exist`,
             });
           } else {
-            // TODO: outbound validation
-            return response.ok({ body: listItem });
+            const [validated, errors] = validate(listItem, listsItemsSchema);
+            if (errors != null) {
+              return siemResponse.error({ statusCode: 500, body: errors });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           }
         } else if (listId != null && value != null) {
           const list = await lists.getList({ id: listId });
@@ -52,14 +65,18 @@ export const readListsItemsRoute = (router: IRouter): void => {
               listId,
               value,
             });
-            if (!listItem) {
+            if (listItem.length === 0) {
               return siemResponse.error({
                 statusCode: 404,
                 body: `list_id: "${listId}" item of ${value} does not exist`,
               });
             } else {
-              // TODO: outbound validation
-              return response.ok({ body: listItem });
+              const [validated, errors] = validate(listItem, listsItemsArraySchema);
+              if (errors != null) {
+                return siemResponse.error({ statusCode: 500, body: errors });
+              } else {
+                return response.ok({ body: validated ?? {} });
+              }
             }
           }
         } else {

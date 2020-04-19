@@ -32,13 +32,16 @@ export const createListItem = async ({
 }: CreateListItemOptions): Promise<ListsItemsSchema> => {
   const createdAt = new Date().toISOString();
   const tieBreakerId = uuid.v4();
-  const body: CreateEsListsItemsSchema = {
+  const baseBody = {
     list_id: listId,
     created_at: createdAt,
     tie_breaker_id: tieBreakerId,
     updated_at: createdAt,
     updated_by: user,
     created_by: user,
+  };
+  const body: CreateEsListsItemsSchema = {
+    ...baseBody,
     ...transformListItemsToElasticQuery({ type, value }),
   };
 
@@ -52,6 +55,6 @@ export const createListItem = async ({
     id: response._id,
     type,
     value,
-    ...body,
+    ...baseBody,
   };
 };

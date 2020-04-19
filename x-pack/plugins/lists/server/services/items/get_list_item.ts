@@ -6,8 +6,9 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ListsItemsSchema } from '../../../common/schemas';
+import { ListsItemsSchema, SearchEsListsItemsSchema } from '../../../common/schemas';
 import { DataClient } from '../../types';
+import { deriveTypeFromItem, transformElasticToListsItems } from '../utils';
 
 interface GetListItemOptions {
   id: string;
@@ -20,7 +21,7 @@ export const getListItem = async ({
   dataClient,
   listsItemsIndex,
 }: GetListItemOptions): Promise<ListsItemsSchema | null> => {
-  const result: SearchResponse<Omit<ListsItemsSchema, 'id'>> = await dataClient.callAsCurrentUser(
+  const listItemES: SearchResponse<SearchEsListsItemsSchema> = await dataClient.callAsCurrentUser(
     'search',
     {
       body: {
@@ -35,11 +36,10 @@ export const getListItem = async ({
     }
   );
 
-  if (result.hits.hits.length) {
-    return {
-      id: result.hits.hits[0]._id,
-      ...result.hits.hits[0]._source,
-    };
+  if (listItemES.hits.hits.length) {
+    const type = deriveTypeFromItem({ item: listItemES.hits.hits[0]._source });
+    const listItems = transformElasticToListsItems({ response: listItemES, type });
+    return listItems[0];
   } else {
     return null;
   }

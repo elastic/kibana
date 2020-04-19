@@ -7,8 +7,13 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_URL } from '../../common/constants';
-import { transformError, buildSiemResponse, buildRouteValidation } from '../siem_server_deps';
-import { readListsSchema } from '../../common/schemas';
+import {
+  transformError,
+  buildSiemResponse,
+  buildRouteValidation,
+  validate,
+} from '../siem_server_deps';
+import { readListsSchema, listsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -35,8 +40,12 @@ export const readListsRoute = (router: IRouter): void => {
             body: `list id: "${id}" does not exist`,
           });
         } else {
-          // TODO: outbound validation
-          return response.ok({ body: list });
+          const [validated, errors] = validate(list, listsSchema);
+          if (errors != null) {
+            return siemResponse.error({ statusCode: 500, body: errors });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
         }
       } catch (err) {
         const error = transformError(err);

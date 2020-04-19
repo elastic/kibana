@@ -7,7 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_INDEX } from '../../common/constants';
-import { transformError, buildSiemResponse } from '../siem_server_deps';
+import { transformError, buildSiemResponse, validate } from '../siem_server_deps';
+import { listsItemsIndexExistSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -29,9 +30,15 @@ export const readListsIndexRoute = (router: IRouter): void => {
         const listsItemsIndexExists = await lists.getListItemIndexExists();
 
         if (listsIndexExists || listsItemsIndexExists) {
-          return response.ok({
-            body: { lists_index: listsIndexExists, lists_items_index: listsItemsIndexExists },
-          });
+          const [validated, errors] = validate(
+            { lists_index: listsIndexExists, lists_items_index: listsItemsIndexExists },
+            listsItemsIndexExistSchema
+          );
+          if (errors != null) {
+            return siemResponse.error({ statusCode: 500, body: errors });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
         } else if (!listsIndexExists && listsItemsIndexExists) {
           return siemResponse.error({
             statusCode: 404,

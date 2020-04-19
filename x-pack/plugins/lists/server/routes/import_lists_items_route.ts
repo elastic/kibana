@@ -7,11 +7,17 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import { transformError, buildSiemResponse, buildRouteValidation } from '../siem_server_deps';
+import {
+  transformError,
+  buildSiemResponse,
+  buildRouteValidation,
+  validate,
+} from '../siem_server_deps';
 import {
   importListsItemsSchema,
   ImportListsItemsSchema,
   importListsItemsQuerySchema,
+  acknowledgeSchema,
 } from '../../common/schemas';
 
 import { getListClient } from '.';
@@ -71,11 +77,12 @@ export const importListsItemsRoute = (router: IRouter): void => {
             stream: request.body.file,
             type: list.type,
           });
-          return response.accepted({
-            body: {
-              acknowledged: true,
-            },
-          });
+          const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
+          if (errors != null) {
+            return siemResponse.error({ statusCode: 500, body: errors });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
         } else {
           return siemResponse.error({
             body: 'Either type or list_id need to be defined in the query',

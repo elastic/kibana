@@ -7,8 +7,13 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_URL } from '../../common/constants';
-import { transformError, buildSiemResponse, buildRouteValidation } from '../siem_server_deps';
-import { createListsSchema } from '../../common/schemas';
+import {
+  transformError,
+  buildSiemResponse,
+  buildRouteValidation,
+  validate,
+} from '../siem_server_deps';
+import { createListsSchema, listsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -45,8 +50,12 @@ export const createListsRoute = (router: IRouter): void => {
             }
           }
           const list = await lists.createList({ id, name, description, type });
-          // TODO: outbound validation
-          return response.ok({ body: list });
+          const [validated, errors] = validate(list, listsSchema);
+          if (errors != null) {
+            return siemResponse.error({ statusCode: 500, body: errors });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
         }
       } catch (err) {
         const error = transformError(err);

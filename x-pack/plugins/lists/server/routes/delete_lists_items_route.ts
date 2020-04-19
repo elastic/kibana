@@ -7,8 +7,17 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import { transformError, buildSiemResponse, buildRouteValidation } from '../siem_server_deps';
-import { deleteListsItemsSchema } from '../../common/schemas';
+import {
+  transformError,
+  buildSiemResponse,
+  buildRouteValidation,
+  validate,
+} from '../siem_server_deps';
+import {
+  deleteListsItemsSchema,
+  listsItemsSchema,
+  listsItemsArraySchema,
+} from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -36,8 +45,12 @@ export const deleteListsItemsRoute = (router: IRouter): void => {
               body: `list item with id: "${id}" item not found`,
             });
           } else {
-            // TODO: outbound validation
-            return response.ok({ body: deleted });
+            const [validated, errors] = validate(deleted, listsItemsSchema);
+            if (errors != null) {
+              return siemResponse.error({ statusCode: 500, body: errors });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           }
         } else if (listId != null && value != null) {
           const list = await lists.getList({ id: listId });
@@ -48,14 +61,18 @@ export const deleteListsItemsRoute = (router: IRouter): void => {
             });
           } else {
             const deleted = await lists.deleteListItemByValue({ type: list.type, listId, value });
-            if (deleted == null) {
+            if (deleted == null || deleted.length === 0) {
               return siemResponse.error({
                 statusCode: 404,
                 body: `list_id: "${listId}" with ${value} was not found`,
               });
             } else {
-              // TODO: outbound validation
-              return response.ok({ body: deleted });
+              const [validated, errors] = validate(deleted, listsItemsArraySchema);
+              if (errors != null) {
+                return siemResponse.error({ statusCode: 500, body: errors });
+              } else {
+                return response.ok({ body: validated ?? {} });
+              }
             }
           }
         } else {

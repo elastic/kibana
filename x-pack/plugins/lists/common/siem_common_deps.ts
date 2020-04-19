@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: Change these whenever they move from server side to common within SIEM
-export * from '../../siem/server/lib/detection_engine/routes/schemas/response/__mocks__/utils';
-export * from '../../siem/server/lib/detection_engine/routes/schemas/response/exact_check';
+export {
+  getPaths,
+  foldLeftRight,
+} from '../../siem/server/lib/detection_engine/routes/schemas/response/__mocks__/utils';
+export { exactCheck } from '../../siem/server/lib/detection_engine/routes/schemas/response/exact_check';

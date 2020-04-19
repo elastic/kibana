@@ -7,8 +7,13 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import { transformError, buildSiemResponse, buildRouteValidation } from '../siem_server_deps';
-import { createListsItemsSchema } from '../../common/schemas';
+import {
+  transformError,
+  buildSiemResponse,
+  buildRouteValidation,
+  validate,
+} from '../siem_server_deps';
+import { createListsItemsSchema, listsItemsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -36,7 +41,7 @@ export const createListsItemsRoute = (router: IRouter): void => {
           });
         } else {
           const listItem = await lists.getListItemByValue({ listId, type: list.type, value });
-          if (listItem != null) {
+          if (listItem.length !== 0) {
             return siemResponse.error({
               statusCode: 409,
               body: `list_id: "${listId}" already contains the given value: ${value}`,
@@ -48,8 +53,12 @@ export const createListsItemsRoute = (router: IRouter): void => {
               type: list.type,
               value,
             });
-            // TODO: Transform and return this result set
-            return response.ok({ body: createdListItem });
+            const [validated, errors] = validate(createdListItem, listsItemsSchema);
+            if (errors != null) {
+              return siemResponse.error({ statusCode: 500, body: errors });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           }
         }
       } catch (err) {

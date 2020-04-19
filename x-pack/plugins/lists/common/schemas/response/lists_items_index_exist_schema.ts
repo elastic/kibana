@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './get_query_filter_from_type_value';
-export * from './transform_elastic_to_list_items';
-export * from './transform_list_items_to_elastic_query';
-export * from './get_user';
-export * from './derive_type_from_es_type';
+import * as t from 'io-ts';
+
+export const listsItemsIndexExistSchema = t.type({
+  lists_index: t.boolean,
+  lists_items_index: t.boolean,
+});
+
+export type ListsItemsIndexExistSchema = t.TypeOf<typeof listsItemsIndexExistSchema>;

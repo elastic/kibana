@@ -35,5 +35,7 @@ export const listsItemsSchema = t.intersection([
   }),
   t.exact(t.partial({ meta })),
 ]);
-
 export type ListsItemsSchema = t.TypeOf<typeof listsItemsSchema>;
+
+export const listsItemsArraySchema = t.array(listsItemsSchema);
+export type ListsItemsArraySchema = t.TypeOf<typeof listsItemsArraySchema>;
