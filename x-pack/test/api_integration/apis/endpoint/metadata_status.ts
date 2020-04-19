@@ -85,63 +85,6 @@ export default function(providerContext: FtrProviderContext) {
         expect(enrolledHost.host_status === 'error');
         expect(notEnrolledHost.host_status === 'error');
       });
-
-      it('should return single metadata with status online when agent status is online', async () => {
-        const { body: checkInResponse } = await supertestWithoutAuth
-          .post(`/api/ingest_manager/fleet/agents/${enrolledAgentId}/checkin`)
-          .set('kbn-xsrf', 'xx')
-          .set(
-            'Authorization',
-            `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
-          )
-          .send({
-            events: [],
-            local_metadata: {},
-          })
-          .expect(200);
-
-        expect(checkInResponse.action).to.be('checkin');
-        expect(checkInResponse.success).to.be(true);
-
-        const { body: metadataResponse } = await supertest
-          .get(`/api/endpoint/metadata/${enrolledHostId}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(metadataResponse.host_status).to.be('online');
-      });
-
-      it('should return metadata list with status only when agent is checked in', async () => {
-        const { body: checkInResponse } = await supertestWithoutAuth
-          .post(`/api/ingest_manager/fleet/agents/${enrolledAgentId}/checkin`)
-          .set('kbn-xsrf', 'xx')
-          .set(
-            'Authorization',
-            `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
-          )
-          .send({
-            events: [],
-            local_metadata: {},
-          })
-          .expect(200);
-
-        expect(checkInResponse.action).to.be('checkin');
-        expect(checkInResponse.success).to.be(true);
-
-        const { body } = await supertest
-          .post('/api/endpoint/metadata')
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.total).to.eql(2);
-        expect(body.hosts.length).to.eql(2);
-        const enrolledHost = body.hosts.filter(
-          (hostInfo: Record<string, any>) => hostInfo.metadata.host.id === enrolledHostId
-        );
-        const notEnrolledHost = body.hosts.filter(
-          (hostInfo: Record<string, any>) => hostInfo.metadata.host.id === notEnrolledHostId
-        );
-        expect(enrolledHost.host_status === 'online');
-        expect(notEnrolledHost.host_status === 'error');
-      });
     });
   });
 }
