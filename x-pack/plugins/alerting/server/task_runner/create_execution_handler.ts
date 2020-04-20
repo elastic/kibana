@@ -87,16 +87,17 @@ export function createExecutionHandler({
         apiKey,
       });
 
+      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
+
       const event: IEvent = {
         event: { action: EVENT_LOG_ACTIONS.executeAction },
         kibana: {
           alerting: {
             instance_id: alertInstanceId,
           },
-          namespace: spaceId,
           saved_objects: [
-            { type: 'alert', id: alertId },
-            { type: 'action', id: action.id },
+            { type: 'alert', id: alertId, ...namespace },
+            { type: 'action', id: action.id, ...namespace },
           ],
         },
       };

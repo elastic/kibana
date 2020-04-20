@@ -7,11 +7,15 @@
 // Can not use public Layer classes to extract references since this logic must run in both client and server.
 
 import _ from 'lodash';
-import { ES_GEO_GRID, ES_SEARCH, ES_PEW_PEW } from '../constants';
+import { SOURCE_TYPES } from '../constants';
 
 function doesSourceUseIndexPattern(layerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
-  return sourceType === ES_GEO_GRID || sourceType === ES_SEARCH || sourceType === ES_PEW_PEW;
+  return (
+    sourceType === SOURCE_TYPES.ES_GEO_GRID ||
+    sourceType === SOURCE_TYPES.ES_SEARCH ||
+    sourceType === SOURCE_TYPES.ES_PEW_PEW
+  );
 }
 
 export function extractReferences({ attributes, references = [] }) {

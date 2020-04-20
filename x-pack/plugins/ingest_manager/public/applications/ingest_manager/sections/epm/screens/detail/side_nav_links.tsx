@@ -17,6 +17,7 @@ export type NavLinkProps = Pick<PackageInfo, 'name' | 'version'> & {
 const PanelDisplayNames: Record<DetailViewPanelName, string> = {
   overview: 'Overview',
   'data-sources': 'Data Sources',
+  settings: 'Settings',
 };
 
 export function SideNavLinks({ name, version, active }: NavLinkProps) {
