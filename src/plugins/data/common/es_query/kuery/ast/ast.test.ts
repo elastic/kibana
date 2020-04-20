@@ -279,6 +279,9 @@ describe('kuery AST API', () => {
       expect(fromLiteralExpression('false')).toEqual(booleanFalseLiteral);
       expect(fromLiteralExpression('42')).toEqual(numberLiteral);
 
+      expect(fromLiteralExpression('.3').value).toEqual(0.3);
+      expect(fromLiteralExpression('.36').value).toEqual(0.36);
+      expect(fromLiteralExpression('.00001').value).toEqual(0.00001);
       expect(fromLiteralExpression('3').value).toEqual(3);
       expect(fromLiteralExpression('-4').value).toEqual(-4);
       expect(fromLiteralExpression('0').value).toEqual(0);
@@ -289,13 +292,14 @@ describe('kuery AST API', () => {
       expect(fromLiteralExpression('0.0001').value).toEqual(0.0001);
       expect(fromLiteralExpression('96565646732345').value).toEqual(96565646732345);
 
+      expect(fromLiteralExpression('..4').value).toEqual('..4');
+      expect(fromLiteralExpression('.3text').value).toEqual('.3text');
       expect(fromLiteralExpression('text').value).toEqual('text');
       expect(fromLiteralExpression('.').value).toEqual('.');
       expect(fromLiteralExpression('-').value).toEqual('-');
       expect(fromLiteralExpression('001').value).toEqual('001');
       expect(fromLiteralExpression('00.2').value).toEqual('00.2');
       expect(fromLiteralExpression('0.0.1').value).toEqual('0.0.1');
-      expect(fromLiteralExpression('.3').value).toEqual('.3');
       expect(fromLiteralExpression('3.').value).toEqual('3.');
       expect(fromLiteralExpression('--4').value).toEqual('--4');
       expect(fromLiteralExpression('-.4').value).toEqual('-.4');
