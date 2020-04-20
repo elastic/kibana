@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { addBasePath } from './add_base_path';
-import { MonitorSummary } from '../../../../common/graphql/types';
+import { MonitorSummary } from '../../../../common/runtime_types';
 
 export const getApmHref = (
   summary: MonitorSummary,

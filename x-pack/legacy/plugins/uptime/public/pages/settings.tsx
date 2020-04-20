@@ -67,7 +67,7 @@ export const SettingsPage = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getDynamicSettings({}));
+    dispatch(getDynamicSettings());
   }, [dispatch]);
 
   const [formFields, setFormFields] = useState<DynamicSettings | null>(dss.settings || null);
