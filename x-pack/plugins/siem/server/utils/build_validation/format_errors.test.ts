@@ -5,18 +5,9 @@
  */
 
 import * as t from 'io-ts';
-import { formatErrors } from './utils';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
+import { formatErrors } from './format_errors';
 
 describe('utils', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   test('returns an empty error message string if there are no errors', () => {
     const errors: t.Errors = [];
     const output = formatErrors(errors);
