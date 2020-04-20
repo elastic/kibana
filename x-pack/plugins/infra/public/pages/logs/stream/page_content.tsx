@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { useMount } from 'react-use';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { LogsPageLogsContent } from './page_logs_content';
@@ -15,17 +14,12 @@ import { useLogSourceContext } from '../../../containers/logs/log_source';
 export const StreamPageContent: React.FunctionComponent = () => {
   const {
     hasFailedLoadingSource,
-    initialize,
     isLoading,
     isUninitialized,
     loadSource,
     loadSourceFailureMessage,
     logIndicesExist,
   } = useLogSourceContext();
-
-  useMount(() => {
-    initialize();
-  });
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;

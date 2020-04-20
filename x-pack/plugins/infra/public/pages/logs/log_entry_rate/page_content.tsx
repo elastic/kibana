@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { useMount } from 'react-use';
 import { isSetupStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -26,7 +25,6 @@ import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
 export const LogEntryRatePageContent = () => {
   const {
     hasFailedLoadingSource,
-    initialize,
     isLoading,
     isUninitialized,
     loadSource,
@@ -40,10 +38,6 @@ export const LogEntryRatePageContent = () => {
   } = useLogAnalysisCapabilitiesContext();
 
   const { fetchJobStatus, setupStatus } = useLogEntryRateModuleContext();
-
-  useMount(() => {
-    initialize();
-  });
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {

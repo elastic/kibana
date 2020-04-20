@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
+import { useMount } from 'react-use';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { DocumentTitle } from '../../components/document_title';
@@ -16,6 +17,7 @@ import { AppNavigation } from '../../components/navigation/app_navigation';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
 import { useLogAnalysisCapabilitiesContext } from '../../containers/logs/log_analysis';
+import { useLogSourceContext } from '../../containers/logs/log_source';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
@@ -25,6 +27,12 @@ import { StreamPage } from './stream';
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const logAnalysisCapabilities = useLogAnalysisCapabilitiesContext();
+
+  const { initialize } = useLogSourceContext();
+
+  useMount(() => {
+    initialize();
+  });
 
   const streamTab = {
     app: 'logs',
