@@ -40,7 +40,8 @@
     },
     "types": [
       "node",
-      "jest"
+      "jest",
+      "flot"
     ]
   }
 }
