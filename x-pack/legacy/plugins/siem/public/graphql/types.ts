@@ -4051,6 +4051,8 @@ export namespace GetAllTimeline {
 
     templateTimelineId: Maybe<string>;
 
+    templateTimelineVersion: Maybe<number>;
+
     created: Maybe<number>;
 
     createdBy: Maybe<string>;

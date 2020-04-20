@@ -64,8 +64,7 @@ export const updateTimelinesRoute = (
           (frameworkRequest as unknown) as FrameworkRequest,
           timeline,
           timelineId,
-          version,
-          isHandlingTemplateTimeline ? TimelineType.template : TimelineType.default
+          version
         );
         return response.ok({
           body: {

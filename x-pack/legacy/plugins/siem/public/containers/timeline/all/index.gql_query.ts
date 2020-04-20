@@ -57,6 +57,7 @@ export const allTimelinesQuery = gql`
         title
         timelineType
         templateTimelineId
+        templateTimelineVersion
         created
         createdBy
         updated

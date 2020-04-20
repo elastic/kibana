@@ -122,7 +122,6 @@ export const importTimelinesRoute = (
                       pinnedEventIds,
                       globalNotes,
                       eventNotes,
-                      timelineType,
                     } = parsedTimeline;
                     const parsedTimelineObject = omit(
                       timelineSavedObjectOmittedFields,
@@ -141,7 +140,6 @@ export const importTimelinesRoute = (
                           parsedTimelineObject,
                           null, // timelineSavedObjectId
                           null, // timelineVersion
-                          timelineType,
                           pinnedEventIds,
                           [...globalNotes, ...eventNotes],
                           [] // existing note ids

@@ -189,8 +189,7 @@ export const persistTimeline = async (
   request: FrameworkRequest,
   timelineId: string | null,
   version: string | null,
-  timeline: SavedTimeline,
-  timelineType?: TimelineType | null
+  timeline: SavedTimeline
 ): Promise<ResponseTimeline> => {
   const savedObjectsClient = request.context.core.savedObjects.client;
   try {
@@ -199,7 +198,7 @@ export const persistTimeline = async (
       const newTimeline = convertSavedObjectToSavedTimeline(
         await savedObjectsClient.create(
           timelineSavedObjectType,
-          pickSavedTimeline(timelineId, timeline, request.user, timelineType)
+          pickSavedTimeline(timelineId, timeline, request.user)
         )
       );
       return {
@@ -212,7 +211,7 @@ export const persistTimeline = async (
     await savedObjectsClient.update(
       timelineSavedObjectType,
       timelineId,
-      pickSavedTimeline(timelineId, timeline, request.user, timelineType),
+      pickSavedTimeline(timelineId, timeline, request.user),
       {
         version: version || undefined,
       }

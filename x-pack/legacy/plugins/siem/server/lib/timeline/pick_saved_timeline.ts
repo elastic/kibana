@@ -12,8 +12,7 @@ import { TimelineType } from '../../../public/graphql/types';
 export const pickSavedTimeline = (
   timelineId: string | null,
   savedTimeline: SavedTimeline,
-  userInfo: AuthenticatedUser | null,
-  timelineType?: TimelineType | null
+  userInfo: AuthenticatedUser | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any => {
   const dateNow = new Date().valueOf();
@@ -27,7 +26,7 @@ export const pickSavedTimeline = (
     savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
 
-  if (timelineType === TimelineType.template) {
+  if (savedTimeline.timelineType === TimelineType.template) {
     savedTimeline.timelineType = TimelineType.template;
     if (savedTimeline.templateTimelineId === null) {
       savedTimeline.templateTimelineId = uuid.v4();

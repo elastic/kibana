@@ -11,7 +11,6 @@ import { FrameworkRequest } from '../../../framework';
 import { SavedTimeline } from '../../types';
 import { NoteResult } from '../../../../../public/graphql/types';
 import { SavedNote } from '../../../note/types';
-import { TimelineType } from '../../../../graphql/types';
 
 export const CREATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE timeline with POST is not allowed, please use PATCH instead';
@@ -22,15 +21,13 @@ export const saveTimelines = async (
   frameworkRequest: FrameworkRequest,
   timeline: SavedTimeline,
   timelineSavedObjectId?: string | null,
-  timelineVersion?: string | null,
-  timelineType?: TimelineType | null
+  timelineVersion?: string | null
 ) => {
   const newTimelineRes = await timelineLib.persistTimeline(
     frameworkRequest,
     timelineSavedObjectId ?? null,
     timelineVersion ?? null,
-    timeline,
-    timelineType === TimelineType.template ? TimelineType.template : TimelineType.default
+    timeline
   );
 
   return {
@@ -85,7 +82,6 @@ export const createTimelines = async (
   timeline: SavedTimeline,
   timelineSavedObjectId?: string | null,
   timelineVersion?: string | null,
-  timelineType?: TimelineType | null,
   pinnedEventIds?: string[] | null,
   notes?: NoteResult[],
   existingNoteIds?: string[]
@@ -94,8 +90,7 @@ export const createTimelines = async (
     frameworkRequest,
     timeline,
     timelineSavedObjectId,
-    timelineVersion,
-    timelineType
+    timelineVersion
   );
 
   let myPromises: unknown[] = [];
