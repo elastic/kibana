@@ -72,13 +72,15 @@ function validateParams(paramsObject: any): string | void {
   const params: ActionParamsType = paramsObject;
   const { timestamp } = params;
   if (timestamp != null) {
+    let date;
     try {
-      const date = Date.parse(timestamp.trim());
-      if (isNaN(date)) {
-        return `error parsing timestamp "${timestamp}"`;
-      }
+      date = Date.parse(timestamp);
     } catch (err) {
       return `error parsing timestamp "${timestamp}": ${err.message}`;
+    }
+
+    if (isNaN(date)) {
+      return `error parsing timestamp "${timestamp}"`;
     }
   }
 }
@@ -227,9 +229,7 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): any 
     severity: params.severity || 'info',
   };
 
-  if (params.timestamp?.trim()) {
-    data.payload.timestamp = params.timestamp.trim();
-  }
+  if (params.timestamp != null) data.payload.timestamp = params.timestamp;
   if (params.component != null) data.payload.component = params.component;
   if (params.group != null) data.payload.group = params.group;
   if (params.class != null) data.payload.class = params.class;
