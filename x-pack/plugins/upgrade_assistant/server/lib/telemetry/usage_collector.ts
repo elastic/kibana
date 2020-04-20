@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { has, set } from 'lodash';
 import {
   APICaller,
   ElasticsearchServiceStart,
@@ -85,11 +85,8 @@ export async function fetchUpgradeAssistantMetrics(
     }
 
     const telemetryObj = defaultTelemetrySavedObject;
-    Object.keys(defaultTelemetrySavedObject).forEach((key: string) => {
-      if (
-        !upgradeAssistantTelemetrySavedObjectAttrs.hasOwnProperty(key) ||
-        !upgradeAssistantTelemetrySavedObjectAttrs[key]
-      ) {
+    Object.keys(upgradeAssistantTelemetrySavedObjectAttrs).forEach((key: string) => {
+      if (!has(defaultTelemetrySavedObject, key)) {
         return;
       }
 
