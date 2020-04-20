@@ -43,6 +43,14 @@ This section summarizes the changes in each release.
 See <<breaking-changes-7.7,breaking changes in 7.7>>.
 
 [float]
+[[known-issues-7.7.0]]
+=== Known issues
+
+SIEM::
+* When you deactivate an action within a rule, the rule fails {issue}620[#620]
+* When you add a timestamp to the PagerDuty action, the rule fails {issue}607[#607]
+
+[float]
 [[enhancement-7.7.0]]
 === Enhancements
 Alerting::
