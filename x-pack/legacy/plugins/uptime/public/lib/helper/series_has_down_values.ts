@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SummaryHistogramPoint } from '../../../common/graphql/types';
+import { HistogramPoint } from '../../../common/runtime_types';
 
-export const seriesHasDownValues = (series: SummaryHistogramPoint[] | null): boolean => {
+export const seriesHasDownValues = (series: HistogramPoint[] | null): boolean => {
   return series ? series.some(point => !!point.down) : false;
 };

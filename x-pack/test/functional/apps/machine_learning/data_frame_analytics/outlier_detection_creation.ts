@@ -14,13 +14,15 @@ export default function({ getService }: FtrProviderContext) {
   describe('outlier detection creation', function() {
     this.tags(['smoke']);
     before(async () => {
-      await esArchiver.load('ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('ml/ihp_outlier');
+      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await esArchiver.unload('ml/ihp_outlier');
     });
 
     const testDataList = [
@@ -29,7 +31,7 @@ export default function({ getService }: FtrProviderContext) {
         jobType: 'outlier_detection',
         jobId: `ihp_1_${Date.now()}`,
         jobDescription: 'This is the job description',
-        source: 'ihp_outlier',
+        source: 'ft_ihp_outlier',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
@@ -49,6 +51,7 @@ export default function({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function() {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
+          await ml.testResources.deleteIndexPattern(testData.destinationIndex);
         });
 
         it('loads the data frame analytics page', async () => {
