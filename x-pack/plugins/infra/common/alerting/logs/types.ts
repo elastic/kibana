@@ -26,9 +26,20 @@ export enum AlertStates {
   ERROR,
 }
 
-export interface LogThresholdAlertParams {
-  threshold: number;
+export interface DocumentCount {
   comparator: Comparator;
+  value: number;
+}
+
+export interface Criterion {
+  field: string;
+  comparator: Comparator;
+  value: string | number;
+}
+
+export interface LogDocumentCountAlertParams {
+  count: DocumentCount;
+  criteria: Criterion[];
   timeUnit: 's' | 'm' | 'h' | 'd';
   timeSize: number;
 }

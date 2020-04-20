@@ -5,16 +5,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertExecutorOptions, AlertServices } from '../../../../../alerting/server';
 import {
   AlertStates,
   Comparator,
-  LogThresholdAlertParams,
+  LogDocumentCountAlertParams,
+  Criterion,
 } from '../../../../common/alerting/logs/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { InfraSource } from '../../../../common/http_api/source_api';
 
-const checkValueAgainstComparatorMap = {
+const checkValueAgainstComparatorMap: {
+  [key: string]: (a: number, b: number) => boolean;
+} = {
   [Comparator.GT]: (a: number, b: number) => a > b,
   [Comparator.GT_OR_EQ]: (a: number, b: number) => a >= b,
   [Comparator.LT]: (a: number, b: number) => a < b,
@@ -23,7 +27,7 @@ const checkValueAgainstComparatorMap = {
 
 export const createLogThresholdExecutor = (alertUUID: string, libs: InfraBackendLibs) =>
   async function({ services, params }: AlertExecutorOptions) {
-    const { timeSize, timeUnit, count, criteria } = params as LogThresholdAlertParams;
+    const { count, criteria } = params as LogDocumentCountAlertParams;
     const { alertInstanceFactory, savedObjectsClient, callCluster } = services;
     const { sources } = libs;
 
@@ -33,7 +37,10 @@ export const createLogThresholdExecutor = (alertUUID: string, libs: InfraBackend
     const alertInstance = alertInstanceFactory(alertUUID);
 
     try {
-      const query = getESQuery(params, sourceConfiguration.configuration);
+      const query = getESQuery(
+        params as LogDocumentCountAlertParams,
+        sourceConfiguration.configuration
+      );
       const result = await getResults(query, indexPattern, callCluster);
 
       if (checkValueAgainstComparatorMap[count.comparator](result.count, count.value)) {
@@ -57,8 +64,11 @@ export const createLogThresholdExecutor = (alertUUID: string, libs: InfraBackend
     }
   };
 
-const getESQuery = (params, sourceConfiguration) => {
-  const { timeSize, timeUnit, count, criteria } = params as LogThresholdAlertParams;
+const getESQuery = (
+  params: LogDocumentCountAlertParams,
+  sourceConfiguration: InfraSource['configuration']
+): object => {
+  const { timeSize, timeUnit, criteria } = params;
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const to = Date.now();
@@ -102,16 +112,24 @@ const getESQuery = (params, sourceConfiguration) => {
   return query;
 };
 
-const buildFiltersForCriteria = criteria => {
-  let filters = [];
+type SupportedESQueryTypes = 'term' | 'match' | 'match_phrase' | 'range';
+type Filter = {
+  [key in SupportedESQueryTypes]?: object;
+};
+
+const buildFiltersForCriteria = (criteria: LogDocumentCountAlertParams['criteria']) => {
+  let filters: Filter[] = [];
+
   criteria.forEach(criterion => {
     const criterionQuery = buildCriterionQuery(criterion);
-    filters = [...filters, criterionQuery];
+    if (criterionQuery) {
+      filters = [...filters, criterionQuery];
+    }
   });
   return filters;
 };
 
-const buildCriterionQuery = criterion => {
+const buildCriterionQuery = (criterion: Criterion): Filter | undefined => {
   const { field, value, comparator } = criterion;
 
   const queryType = getQueryMappingForComparator(comparator);
@@ -141,7 +159,9 @@ const buildCriterionQuery = criterion => {
       };
     }
     case 'range': {
-      const comparatorToRangePropertyMapping = {
+      const comparatorToRangePropertyMapping: {
+        [key: string]: string;
+      } = {
         [Comparator.LT]: 'lt',
         [Comparator.LT_OR_EQ]: 'lte',
         [Comparator.GT]: 'gt',
@@ -157,6 +177,9 @@ const buildCriterionQuery = criterion => {
           },
         },
       };
+    }
+    default: {
+      return undefined;
     }
   }
 };
@@ -177,7 +200,9 @@ const getNegativeComparators = () => {
   return [Comparator.NOT_EQ, Comparator.NOT_MATCH, Comparator.NOT_MATCH_PHRASE];
 };
 
-const queryMappings = {
+const queryMappings: {
+  [key: string]: string;
+} = {
   [Comparator.GT]: 'range',
   [Comparator.GT_OR_EQ]: 'range',
   [Comparator.LT]: 'range',
@@ -190,18 +215,22 @@ const queryMappings = {
   [Comparator.NOT_MATCH_PHRASE]: 'match_phrase',
 };
 
-const getQueryMappingForComparator = comparator => {
+const getQueryMappingForComparator = (comparator: Comparator) => {
   return queryMappings[comparator];
 };
 
-const getResults = async (query, index, callCluster) => {
+const getResults = async (
+  query: object,
+  index: string,
+  callCluster: AlertServices['callCluster']
+) => {
   return await callCluster('count', {
     body: query,
     index,
   });
 };
 
-const createConditionsMessage = criteria => {
+const createConditionsMessage = (criteria: LogDocumentCountAlertParams['criteria']) => {
   const parts = criteria.map((criterion, index) => {
     const { field, comparator, value } = criterion;
     return `${index === 0 ? '' : 'and'} ${field} ${comparator} ${value}`;
