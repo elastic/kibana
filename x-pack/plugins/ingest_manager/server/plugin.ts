@@ -111,6 +111,39 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
         'active',
       ]),
     });
+    deps.encryptedSavedObjects.registerType({
+      type: OUTPUT_SAVED_OBJECT_TYPE,
+      attributesToEncrypt: new Set(['fleet_enroll_username', 'fleet_enroll_password']),
+      attributesToExcludeFromAAD: new Set([
+        'name',
+        'type',
+        'is_default',
+        'hosts',
+        'ca_sha256',
+        'config',
+      ]),
+    });
+    deps.encryptedSavedObjects.registerType({
+      type: AGENT_SAVED_OBJECT_TYPE,
+      attributesToEncrypt: new Set(['default_api_key']),
+      attributesToExcludeFromAAD: new Set([
+        'shared_id',
+        'type',
+        'active',
+        'enrolled_at',
+        'access_api_key_id',
+        'version',
+        'user_provided_metadata',
+        'local_metadata',
+        'config_id',
+        'last_updated',
+        'last_checkin',
+        'config_revision',
+        'config_newest_revision',
+        'updated_at',
+        'current_error_events',
+      ]),
+    });
 
     // Register feature
     // TODO: Flesh out privileges

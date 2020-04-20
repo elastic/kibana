@@ -17,6 +17,7 @@ import { agentConfigService } from '../agent_config';
 import * as APIKeysService from '../api_keys';
 import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { getAgentActionsForCheckin, createAgentAction } from './actions';
+import { appContextService } from '../app_context';
 
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,
@@ -38,11 +39,17 @@ export async function agentCheckin(
 
   // Generate new agent config if config is updated
   if (agent.config_id && shouldCreateConfigAction(agent, actions)) {
+    const {
+      attributes: { default_api_key: defaultApiKey },
+    } = await appContextService
+      .getEncryptedSavedObjects()
+      .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id);
+
     const config = await agentConfigService.getFullConfig(soClient, agent.config_id);
     if (config) {
       // Assign output API keys
       // We currently only support default ouput
-      if (!agent.default_api_key) {
+      if (!defaultApiKey) {
         updateData.default_api_key = await APIKeysService.generateOutputApiKey(
           soClient,
           'default',
@@ -50,7 +57,7 @@ export async function agentCheckin(
         );
       }
       // Mutate the config to set the api token for this agent
-      config.outputs.default.api_key = agent.default_api_key || updateData.default_api_key;
+      config.outputs.default.api_key = defaultApiKey || updateData.default_api_key;
 
       const configChangeAction = await createAgentAction(soClient, {
         agent_id: agent.id,
