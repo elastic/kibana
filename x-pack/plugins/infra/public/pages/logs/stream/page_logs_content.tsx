@@ -23,15 +23,12 @@ import {
 import { LogPositionState } from '../../../containers/logs/log_position';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
 import { WithStreamItems } from '../../../containers/logs/with_stream_items';
-import { Source } from '../../../containers/source';
-
 import { LogsToolbar } from './page_toolbar';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { sourceConfiguration: source, sourceId } = useLogSourceContext();
-  // const { source, sourceId, version } = useContext(Source.Context);
+  const { sourceConfiguration, sourceId } = useLogSourceContext();
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
@@ -75,7 +72,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           loading={isLoading}
         />
       ) : null}
-      <PageContent key={`${sourceId}-${source?.version}`}>
+      <PageContent key={`${sourceId}-${sourceConfiguration?.version}`}>
         <WithStreamItems>
           {({
             currentHighlightKey,
@@ -89,7 +86,9 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             checkForNewEntries,
           }) => (
             <ScrollableLogTextStreamView
-              columnConfigurations={(source && source.configuration.logColumns) || []}
+              columnConfigurations={
+                (sourceConfiguration && sourceConfiguration.configuration.logColumns) || []
+              }
               hasMoreAfterEnd={hasMoreAfterEnd}
               hasMoreBeforeStart={hasMoreBeforeStart}
               isLoadingMore={isLoadingMore}
