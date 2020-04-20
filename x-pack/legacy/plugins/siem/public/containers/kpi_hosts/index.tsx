@@ -9,7 +9,7 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import { DEFAULT_INDEX_KEY } from '../../../../../../plugins/siem/common/constants';
 import { GetKpiHostsQuery, KpiHostsData } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { useUiSetting } from '../../lib/kibana';

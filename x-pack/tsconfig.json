@@ -11,7 +11,7 @@
   ],
   "exclude": [
     "test/**/*",
-    "legacy/plugins/siem/cypress/**/*",
+    "plugins/siem/cypress/**/*",
     "legacy/plugins/apm/e2e/cypress/**/*",
     "**/typespec_tests.ts"
   ],
@@ -40,7 +40,8 @@
     },
     "types": [
       "node",
-      "jest"
+      "jest",
+      "flot"
     ]
   }
 }
