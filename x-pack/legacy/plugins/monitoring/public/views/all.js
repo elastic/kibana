@@ -11,7 +11,6 @@ import './alerts';
 import './license';
 import './cluster/listing';
 import './cluster/overview';
-import './cluster/route';
 import './elasticsearch/overview';
 import './elasticsearch/indices';
 import './elasticsearch/index';
