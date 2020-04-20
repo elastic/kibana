@@ -20,26 +20,8 @@
 import { SearchSource } from './search_source';
 import { IndexPattern, SortDirection } from '../..';
 import { mockDataServices } from '../aggs/test_helpers';
-import { setSearchService } from '../../services';
-import { searchStartMock } from '../mocks';
-import { fetchSoon } from '../legacy';
-import { CoreStart } from 'kibana/public';
-import { Observable } from 'rxjs';
 
-// Setup search service mock
-searchStartMock.search = jest.fn(() => {
-  return new Observable(subscriber => {
-    setTimeout(() => {
-      subscriber.next({
-        rawResponse: '',
-      });
-      subscriber.complete();
-    }, 100);
-  });
-}) as any;
-setSearchService(searchStartMock);
-
-jest.mock('../legacy', () => ({
+jest.mock('../fetch', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
 }));
 
@@ -62,11 +44,8 @@ const indexPattern2 = ({
 } as unknown) as IndexPattern;
 
 describe('SearchSource', function() {
-  let uiSettingsMock: jest.Mocked<CoreStart['uiSettings']>;
   beforeEach(() => {
-    const { core } = mockDataServices();
-    uiSettingsMock = core.uiSettings;
-    jest.clearAllMocks();
+    mockDataServices();
   });
 
   describe('#setField()', function() {
@@ -169,36 +148,6 @@ describe('SearchSource', function() {
 
       expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).toBeCalledWith(searchSource, options);
-    });
-  });
-
-  describe('#legacy fetch()', () => {
-    beforeEach(() => {
-      uiSettingsMock.get.mockImplementation(() => {
-        return true; // batchSearches = true
-      });
-    });
-
-    afterEach(() => {
-      uiSettingsMock.get.mockImplementation(() => {
-        return false; // batchSearches = false
-      });
-    });
-
-    it('should call msearch', async () => {
-      const searchSource = new SearchSource({ index: indexPattern });
-      const options = {};
-      await searchSource.fetch(options);
-      expect(fetchSoon).toBeCalledTimes(1);
-    });
-  });
-
-  describe('#search service fetch()', () => {
-    it('should call msearch', async () => {
-      const searchSource = new SearchSource({ index: indexPattern });
-      const options = {};
-      await searchSource.fetch(options);
-      expect(searchStartMock.search).toBeCalledTimes(1);
     });
   });
 
