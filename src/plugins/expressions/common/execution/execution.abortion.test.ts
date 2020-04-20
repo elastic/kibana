@@ -21,12 +21,6 @@ import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
 
-jest.useFakeTimers();
-
-beforeEach(() => {
-  jest.clearAllTimers();
-});
-
 const createExecution = (
   expression: string = 'foo bar=123',
   context: Record<string, unknown> = {},
