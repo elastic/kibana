@@ -7,6 +7,9 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { IngestManagerPlugin } from './plugin';
 
+export { ESIndexPatternService } from './services';
+export { IngestManagerSetupContract } from './plugin';
+
 export const config = {
   exposeToBrowser: {
     epm: true,

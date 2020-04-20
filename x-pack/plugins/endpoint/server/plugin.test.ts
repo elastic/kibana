@@ -7,6 +7,7 @@
 import { EndpointPlugin, EndpointPluginSetupDependencies } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
 import { PluginSetupContract } from '../../features/server';
+import { createMockIndexPatternService } from './mocks';
 
 describe('test endpoint plugin', () => {
   let plugin: EndpointPlugin;
@@ -28,7 +29,10 @@ describe('test endpoint plugin', () => {
       getFeaturesUICapabilities: jest.fn(),
       registerLegacyAPI: jest.fn(),
     };
-    mockedEndpointPluginSetupDependencies = { features: mockedPluginSetupContract };
+    mockedEndpointPluginSetupDependencies = {
+      features: mockedPluginSetupContract,
+      ingestManager: createMockIndexPatternService(''),
+    };
   });
 
   it('test properly setup plugin', async () => {

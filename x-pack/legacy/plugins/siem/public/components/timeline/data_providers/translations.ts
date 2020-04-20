@@ -10,6 +10,10 @@ export const AND = i18n.translate('xpack.siem.dataProviders.and', {
   defaultMessage: 'AND',
 });
 
+export const COPY_TO_CLIPBOARD = i18n.translate('xpack.siem.dataProviders.copyToClipboardTooltip', {
+  defaultMessage: 'Copy to Clipboard',
+});
+
 export const DELETE_DATA_PROVIDER = i18n.translate('xpack.siem.dataProviders.deleteDataProvider', {
   defaultMessage: 'Delete',
 });
@@ -23,6 +27,10 @@ export const DROP_HERE = i18n.translate('xpack.siem.dataProviders.dropHere', {
 
 export const DROP_ANYTHING = i18n.translate('xpack.siem.dataProviders.dropAnything', {
   defaultMessage: 'Drop anything',
+});
+
+export const EDIT = i18n.translate('xpack.siem.dataProviders.edit', {
+  defaultMessage: 'Edit',
 });
 
 export const EDIT_MENU_ITEM = i18n.translate('xpack.siem.dataProviders.editMenuItem', {
@@ -42,6 +50,10 @@ export const EXCLUDE_DATA_PROVIDER = i18n.translate(
 
 export const EXISTS_LABEL = i18n.translate('xpack.siem.dataProviders.existsLabel', {
   defaultMessage: 'exists',
+});
+
+export const FIELD = i18n.translate('xpack.siem.dataProviders.fieldLabel', {
+  defaultMessage: 'Field',
 });
 
 export const FILTER_FOR_FIELD_PRESENT = i18n.translate(

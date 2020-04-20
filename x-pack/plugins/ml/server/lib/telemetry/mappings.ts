@@ -10,7 +10,7 @@ import { TELEMETRY_DOC_ID } from './telemetry';
 export const mlTelemetryMappingsType: SavedObjectsType = {
   name: TELEMETRY_DOC_ID,
   hidden: false,
-  namespaceAgnostic: true,
+  namespaceType: 'agnostic',
   mappings: {
     properties: {
       file_data_visualizer: {

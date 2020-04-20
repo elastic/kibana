@@ -9,13 +9,13 @@ import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
+import { RuleType } from '../../../../../../../../../plugins/siem/common/detection_engine/types';
 import {
   IIndexPattern,
   Filter,
   esFilters,
   FilterManager,
 } from '../../../../../../../../../../src/plugins/data/public';
-import { RuleType } from '../../../../../../common/detection_engine/types';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 import { useKibana } from '../../../../../lib/kibana';
 import { IMitreEnterpriseAttack } from '../../types';
