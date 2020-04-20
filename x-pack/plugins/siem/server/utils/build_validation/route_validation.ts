@@ -35,7 +35,7 @@ export const buildRouteValidation = <T extends rt.Mixed, A = rt.TypeOf<T>>(
     schema.decode(inputValue),
     decoded => exactCheck(inputValue, decoded),
     fold<rt.Errors, A, RequestValidationResult<A>>(
-      (errors: rt.Errors) => validationResult.badRequest(formatErrors(errors).join(',')),
+      (errors: rt.Errors) => validationResult.badRequest(formatErrors(errors).join()),
       (validatedInput: A) => validationResult.ok(validatedInput)
     )
   );
