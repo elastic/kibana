@@ -14,7 +14,7 @@ import {
   SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 import uuid from 'uuid/v4';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { copyPersistentState } from '../reducers/util.js';
 import { i18n } from '@kbn/i18n';
 
