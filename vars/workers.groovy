@@ -146,7 +146,9 @@ def parallelProcesses(Map params) {
           sleep(delay)
         }
 
-        processClosure(processNumber)
+        withEnv(["CI_PARALLEL_PROCESS_NUMBER=${processNumber}"]) {
+          processClosure()
+        }
       }
     }
 

@@ -14,3 +14,7 @@ trap 'post_work' EXIT
 export TEST_BROWSER_HEADLESS=1
 
 source src/dev/ci_setup/setup_env.sh
+
+if [[ ! -d .es && -d "$WORKSPACE/kibana/.es" ]]; then
+  cp -R $WORKSPACE/kibana/.es ./
+fi

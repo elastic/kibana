@@ -302,6 +302,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async refresh() {
       await driver.navigate().refresh();
+
+      // If an alert pops up, accept it
+      const alert = await this.getAlert();
+      await alert?.accept();
     }
 
     /**

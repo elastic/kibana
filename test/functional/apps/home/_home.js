@@ -26,6 +26,11 @@ export default function({ getService, getPageObjects }) {
 
   describe('Kibana takes you home', function describeIndexTests() {
     this.tags('smoke');
+    // this.tags('testing');
+
+    // it('is flaky', async () => {
+    //   expect(process.env.JOB.endsWith('retry')).to.be(true);
+    // });
 
     it('clicking on kibana logo should take you to home page', async () => {
       await PageObjects.common.navigateToApp('settings');

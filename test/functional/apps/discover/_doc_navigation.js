@@ -35,6 +35,7 @@ export default function({ getService, getPageObjects }) {
   describe.skip('doc link in discover', function contextSize() {
     this.tags('smoke');
     before(async function() {
+      await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();

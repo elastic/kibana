@@ -17,9 +17,23 @@
  * under the License.
  */
 
-var ALL_CONFIGS = require('../test/all_configs.js');
+const alwaysImportedTests = [
+  require.resolve('./functional/config.js'),
+  require.resolve('./plugin_functional/config.js'),
+  require.resolve('./ui_capabilities/newsfeed_err/config.ts'),
+];
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  process.env.CODE_COVERAGE ? ALL_CONFIGS.FOR_COVERAGE : ALL_CONFIGS.ALL,
-]);
+const onlyNotInCoverageTests = [
+  require.resolve('./api_integration/config.js'),
+  require.resolve('./interpreter_functional/config.ts'),
+  require.resolve('./examples/config.js'),
+];
+
+module.exports = {
+  ALL: [...alwaysImportedTests, ...onlyNotInCoverageTests],
+  FOR_COVERAGE: alwaysImportedTests,
+  CI: [
+    require.resolve('./functional/config.js'),
+    require.resolve('./ui_capabilities/newsfeed_err/config.ts'),
+  ],
+};

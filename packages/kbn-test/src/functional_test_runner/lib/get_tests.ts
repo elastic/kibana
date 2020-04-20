@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ToolingLog } from '@kbn/dev-utils';
 
-var ALL_CONFIGS = require('../test/all_configs.js');
+import { FunctionalTestRunner } from '../';
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  process.env.CODE_COVERAGE ? ALL_CONFIGS.FOR_COVERAGE : ALL_CONFIGS.ALL,
-]);
+export function getTests(config: string, overrides = {}) {
+  const functionalTestRunner = new FunctionalTestRunner(new ToolingLog(), config, overrides);
+  return functionalTestRunner.getTestSuites();
+}

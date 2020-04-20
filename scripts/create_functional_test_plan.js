@@ -17,9 +17,5 @@
  * under the License.
  */
 
-var ALL_CONFIGS = require('../test/all_configs.js');
-
 require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  process.env.CODE_COVERAGE ? ALL_CONFIGS.FOR_COVERAGE : ALL_CONFIGS.ALL,
-]);
+require('../src/dev/ci_setup/create_functional_test_plan');
