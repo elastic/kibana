@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
+import uuid from 'uuid';
+import styled from 'styled-components';
 
-import { useThrottledResizeObserver } from '../utils';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { useTimeZone } from '../../lib/kibana';
+import { defaultLegendColors } from '../matrix_histogram/utils';
+import { useThrottledResizeObserver } from '../utils';
+
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
   chartDefaultSettings,
@@ -22,6 +28,12 @@ import {
   WrappedByAutoSizer,
   useTheme,
 } from './common';
+import { DraggableLegend } from './draggable_legend';
+import { LegendItem } from './draggable_legend_item';
+
+const LegendFlexItem = styled(EuiFlexItem)`
+  overview: hidden;
+`;
 
 const checkIfAllTheDataInTheSeriesAreValid = (series: ChartSeriesData): series is ChartSeriesData =>
   series != null &&
@@ -38,12 +50,14 @@ const checkIfAnyValidSeriesExist = (
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = ({
   data,
+  forceHiddenLegend = false,
   ...chartConfigs
 }: {
   data: ChartSeriesData[];
   width: string | null | undefined;
   height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
+  forceHiddenLegend?: boolean;
 }) => {
   const theme = useTheme();
   const timeZone = useTimeZone();
@@ -59,10 +73,10 @@ export const BarChartBaseComponent = ({
 
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings {...settings} />
+      <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
       {data.map(series => {
         const barSeriesKey = series.key;
-        return checkIfAllTheDataInTheSeriesAreValid ? (
+        return checkIfAllTheDataInTheSeriesAreValid(series) ? (
           <BarSeries
             id={barSeriesKey}
             key={barSeriesKey}
@@ -102,19 +116,54 @@ BarChartBase.displayName = 'BarChartBase';
 interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
+  stackByField?: string;
 }
 
-export const BarChartComponent: React.FC<BarChartComponentProps> = ({ barChart, configs }) => {
+const NO_LEGEND_DATA: LegendItem[] = [];
+
+export const BarChartComponent: React.FC<BarChartComponentProps> = ({
+  barChart,
+  configs,
+  stackByField,
+}) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
+  const legendItems: LegendItem[] = useMemo(
+    () =>
+      barChart != null && stackByField != null
+        ? barChart.map((d, i) => ({
+            color: d.color ?? i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
+            dataProviderId: escapeDataProviderId(
+              `draggable-legend-item-${uuid.v4()}-${stackByField}-${d.key}`
+            ),
+            field: stackByField,
+            value: d.key,
+          }))
+        : NO_LEGEND_DATA,
+    [barChart, stackByField]
+  );
+
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);
   const chartWidth = getChartWidth(customWidth, width);
 
   return checkIfAnyValidSeriesExist(barChart) ? (
-    <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
-      <BarChartBase height={chartHeight} width={chartHeight} data={barChart} configs={configs} />
-    </WrappedByAutoSizer>
+    <EuiFlexGroup gutterSize="none">
+      <EuiFlexItem grow={true}>
+        <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
+          <BarChartBase
+            configs={configs}
+            data={barChart}
+            forceHiddenLegend={stackByField != null}
+            height={chartHeight}
+            width={chartHeight}
+          />
+        </WrappedByAutoSizer>
+      </EuiFlexItem>
+      <LegendFlexItem grow={false}>
+        <DraggableLegend legendItems={legendItems} height={height} />
+      </LegendFlexItem>
+    </EuiFlexGroup>
   ) : (
     <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
   );

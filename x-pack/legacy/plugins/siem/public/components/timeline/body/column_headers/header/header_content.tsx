@@ -32,7 +32,7 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
   onClick,
   sort,
 }) => {
-  const isLoading = useTimelineContext();
+  const { isLoading } = useTimelineContext();
 
   return (
     <EventsHeading data-test-subj="header" isLoading={isLoading}>

@@ -38,7 +38,9 @@ export const getFileUploadComponent = () => {
 };
 
 let getInjectedVar;
-export const setInjectedVarFunc = getInjectedVarFunc => (getInjectedVar = getInjectedVarFunc);
+export const setInjectedVarFunc = getInjectedVarFunc => {
+  getInjectedVar = getInjectedVarFunc;
+};
 export const getInjectedVarFunc = () => getInjectedVar;
 
 let uiSettings;
