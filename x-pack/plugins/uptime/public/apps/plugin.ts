@@ -68,14 +68,13 @@ export class UptimePlugin implements Plugin {
       title: PLUGIN.TITLE,
       // description: PLUGIN.DESCRIPTION,
       async mount(params: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, b] = await core.getStartServices();
         const { element } = params;
-        // console.log('plugins from mount', plugins);
         const libs: UMFrontendLibs = {
-          framework: getKibanaFrameworkAdapter(coreStart, plugins),
+          framework: getKibanaFrameworkAdapter(coreStart, plugins, b),
         };
         // console.log(libs);
-        // console.log('corestart from mount', coreStart);
+        console.log('corestart from mount', coreStart);
         libs.framework.render(element);
         return () => {};
         // console.log('value after setting el', this.el);

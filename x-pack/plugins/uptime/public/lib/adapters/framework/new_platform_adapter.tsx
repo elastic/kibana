@@ -22,7 +22,8 @@ import { UMFrameworkAdapter } from '../../lib';
 
 export const getKibanaFrameworkAdapter = (
   core: CoreStart,
-  plugins: PluginsSetup
+  plugins: PluginsSetup,
+  startServices: object
 ): UMFrameworkAdapter => {
   const {
     application: { capabilities },
@@ -38,6 +39,9 @@ export const getKibanaFrameworkAdapter = (
     // @ts-ignore we don't control this type
     triggers_actions_ui,
   } = plugins;
+
+  const { embeddable } = startServices;
+  console.log('em', embeddable);
 
   alertTypeInitializers.forEach(init => {
     const alertInitializer = init({ autocomplete });
@@ -63,6 +67,7 @@ export const getKibanaFrameworkAdapter = (
     canSave,
     core,
     darkMode: core.uiSettings.get(DEFAULT_DARK_MODE),
+    embeddable,
     commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
     i18n,
     isApmAvailable: apm,

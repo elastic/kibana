@@ -17,6 +17,8 @@ import {
   UptimeRefreshContextProvider,
   UptimeSettingsContextProvider,
   UptimeThemeContextProvider,
+  UptimeStartupPluginsContext,
+  UptimeStartupPluginsContextProvider,
 } from './contexts';
 import { CommonlyUsedRange } from './components/common/uptime_date_picker';
 import { store } from './state';
@@ -42,6 +44,7 @@ export interface UptimeAppProps {
   canSave: boolean;
   core: CoreStart;
   darkMode: boolean;
+  embeddable: any;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
@@ -61,6 +64,7 @@ const Application = (props: UptimeAppProps) => {
     canSave,
     core,
     darkMode,
+    embeddable,
     i18n: i18nCore,
     plugins,
     renderGlobalHelpControls,
@@ -90,6 +94,8 @@ const Application = (props: UptimeAppProps) => {
   // @ts-ignore
   store.dispatch(setBasePath(basePath));
 
+  console.log('embeddable from app bootstrap', embeddable);
+
   return (
     <EuiErrorBoundary>
       <i18nCore.Context>
@@ -99,17 +105,19 @@ const Application = (props: UptimeAppProps) => {
               <UptimeRefreshContextProvider>
                 <UptimeSettingsContextProvider {...props}>
                   <UptimeThemeContextProvider darkMode={darkMode}>
-                    <UptimeAlertsContextProvider>
-                      <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                        <main>
-                          <UptimeAlertsFlyoutWrapper
-                            alertTypeId="xpack.uptime.alerts.monitorStatus"
-                            canChangeTrigger={false}
-                          />
-                          <PageRouter autocomplete={plugins.data.autocomplete} />
-                        </main>
-                      </EuiPage>
-                    </UptimeAlertsContextProvider>
+                    <UptimeStartupPluginsContextProvider embeddable={embeddable}>
+                      <UptimeAlertsContextProvider>
+                        <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                          <main>
+                            <UptimeAlertsFlyoutWrapper
+                              alertTypeId="xpack.uptime.alerts.monitorStatus"
+                              canChangeTrigger={false}
+                            />
+                            <PageRouter autocomplete={plugins.data.autocomplete} />
+                          </main>
+                        </EuiPage>
+                      </UptimeAlertsContextProvider>
+                    </UptimeStartupPluginsContextProvider>
                   </UptimeThemeContextProvider>
                 </UptimeSettingsContextProvider>
               </UptimeRefreshContextProvider>

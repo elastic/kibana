@@ -11,3 +11,7 @@ export {
   UptimeSettingsContextProvider,
 } from './uptime_settings_context';
 export { UptimeThemeContextProvider, UptimeThemeContext } from './uptime_theme_context';
+export {
+  UptimeStartupPluginsContext,
+  UptimeStartupPluginsContextProvider,
+} from './uptime_startup_plugins_context';

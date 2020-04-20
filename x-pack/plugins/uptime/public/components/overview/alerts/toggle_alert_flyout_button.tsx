@@ -17,6 +17,7 @@ interface Props {
 export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const kibana = useKibana();
+  console.log('kibana hook output', kibana);
 
   return (
     <EuiPopover
