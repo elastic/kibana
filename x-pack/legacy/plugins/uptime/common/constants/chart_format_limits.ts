@@ -11,7 +11,7 @@ const WEEK = DAY * 7;
 const MONTH = WEEK * 4;
 
 /**
- * These contsants are used by the charting code to determine
+ * These constants are used by the charting code to determine
  * what label should be applied to chart axes so as to help users
  * understand the timeseries data they're being shown.
  */

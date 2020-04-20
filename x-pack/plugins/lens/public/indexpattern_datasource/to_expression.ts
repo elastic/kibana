@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState } from './types';
@@ -14,7 +15,7 @@ function getExpressionForLayer(
   indexPattern: IndexPattern,
   columns: Record<string, IndexPatternColumn>,
   columnOrder: string[]
-) {
+): Ast | null {
   if (columnOrder.length === 0) {
     return null;
   }
@@ -58,29 +59,70 @@ function getExpressionForLayer(
       };
     }, {} as Record<string, OriginalColumn>);
 
-    const formatterOverrides = columnEntries
-      .map(([id, col]) => {
-        const format = col.params && 'format' in col.params ? col.params.format : undefined;
-        if (!format) {
-          return null;
-        }
-        const base = `| lens_format_column format="${format.id}" columnId="${id}"`;
-        if (typeof format.params?.decimals === 'number') {
-          return base + ` decimals=${format.params.decimals}`;
-        }
-        return base;
-      })
-      .filter(expr => !!expr)
-      .join(' ');
+    type FormattedColumn = Required<Extract<IndexPatternColumn, { params?: { format: unknown } }>>;
 
-    return `esaggs
-      index="${indexPattern.id}"
-      metricsAtAllLevels=true
-      partialRows=true
-      includeFormatHints=true
-      aggConfigs={lens_auto_date aggConfigs='${JSON.stringify(
-        aggs
-      )}'} | lens_rename_columns idMap='${JSON.stringify(idMap)}' ${formatterOverrides}`;
+    const columnsWithFormatters = columnEntries.filter(
+      ([, col]) => col.params && 'format' in col.params && col.params.format
+    ) as Array<[string, FormattedColumn]>;
+    const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(([id, col]) => {
+      const format = (col as FormattedColumn).params!.format;
+      const base: ExpressionFunctionAST = {
+        type: 'function',
+        function: 'lens_format_column',
+        arguments: {
+          format: [format.id],
+          columnId: [id],
+        },
+      };
+      if (typeof format.params?.decimals === 'number') {
+        return {
+          ...base,
+          arguments: {
+            ...base.arguments,
+            decimals: [format.params.decimals],
+          },
+        };
+      }
+      return base;
+    });
+
+    return {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'esaggs',
+          arguments: {
+            index: [indexPattern.id],
+            metricsAtAllLevels: [true],
+            partialRows: [true],
+            includeFormatHints: [true],
+            aggConfigs: [
+              {
+                type: 'expression',
+                chain: [
+                  {
+                    type: 'function',
+                    function: 'lens_auto_date',
+                    arguments: {
+                      aggConfigs: [JSON.stringify(aggs)],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        {
+          type: 'function',
+          function: 'lens_rename_columns',
+          arguments: {
+            idMap: [JSON.stringify(idMap)],
+          },
+        },
+        ...formatterOverrides,
+      ],
+    };
   }
 
   return null;

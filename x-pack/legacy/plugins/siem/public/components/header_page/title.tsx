@@ -51,7 +51,9 @@ const TitleComponent: React.FC<Props> = ({ draggableArguments, title, badgeOptio
               tooltipPosition="bottom"
             />
           ) : (
-            <Badge color="hollow">{badgeOptions.text}</Badge>
+            <Badge color="hollow" title="">
+              {badgeOptions.text}
+            </Badge>
           )}
         </>
       )}

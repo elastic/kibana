@@ -11,7 +11,7 @@ export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
 export const caseUserActionSavedObjectType: SavedObjectsType = {
   name: CASE_USER_ACTION_SAVED_OBJECT,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       action_field: {

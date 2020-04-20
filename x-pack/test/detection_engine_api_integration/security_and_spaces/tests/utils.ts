@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OutputRuleAlertRest } from '../../../../legacy/plugins/siem/server/lib/detection_engine/types';
-import { DETECTION_ENGINE_INDEX_URL } from '../../../../legacy/plugins/siem/common/constants';
+import { OutputRuleAlertRest } from '../../../../plugins/siem/server/lib/detection_engine/types';
+import { DETECTION_ENGINE_INDEX_URL } from '../../../../plugins/siem/common/constants';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -154,7 +154,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   type: 'query',
   threat: [],
   throttle: 'no_actions',
-  lists: [],
+  exceptions_list: [],
   version: 1,
 });
 
@@ -191,6 +191,19 @@ export const deleteAllAlerts = async (es: any): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:alert',
+    waitForCompletion: true,
+    refresh: 'wait_for',
+  });
+};
+
+/**
+ * Remove all rules statuses from the .kibana index
+ * @param es The ElasticSearch handle
+ */
+export const deleteAllRulesStatuses = async (es: any): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:siem-detection-engine-rule-status',
     waitForCompletion: true,
     refresh: 'wait_for',
   });
@@ -413,5 +426,5 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
   note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',
-  lists: [],
+  exceptions_list: [],
 });
