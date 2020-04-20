@@ -6,9 +6,10 @@
 
 import { EuiLink, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-
 import { isNil } from 'lodash/fp';
 import styled from 'styled-components';
+
+import { IP_REPUTATION_LINKS_SETTING } from '../../../../../../plugins/siem/common/constants';
 import {
   DefaultFieldRendererOverflow,
   DEFAULT_MORE_MAX_HEIGHT,
@@ -22,7 +23,6 @@ import {
 } from '../link_to';
 import { FlowTarget, FlowTargetSourceDest } from '../../graphql/types';
 import { useUiSetting$ } from '../../lib/kibana';
-import { IP_REPUTATION_LINKS_SETTING } from '../../../common/constants';
 import { isUrlInvalid } from '../../pages/detection_engine/rules/components/step_about_rule/helpers';
 import { ExternalLinkIcon } from '../external_link_icon';
 import { navTabs } from '../../pages/home/home_navigations';
