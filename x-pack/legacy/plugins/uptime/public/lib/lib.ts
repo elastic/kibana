@@ -5,15 +5,12 @@
  */
 
 import { ReactElement } from 'react';
-import { ChromeBreadcrumb } from 'src/core/public';
 import { UMBadge } from '../badge';
 import { UptimeAppProps } from '../uptime_app';
 
 export interface UMFrontendLibs {
   framework: UMFrameworkAdapter;
 }
-
-export type UMUpdateBreadcrumbs = (breadcrumbs: ChromeBreadcrumb[]) => void;
 
 export type UMUpdateBadge = (badge: UMBadge) => void;
 
