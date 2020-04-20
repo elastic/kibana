@@ -21,6 +21,7 @@ export interface AppDependencies {
   savedObjects: CoreStart['savedObjects'];
   storage: Storage;
   overlays: CoreStart['overlays'];
+  injectedMetadata: CoreStart['injectedMetadata'];
 }
 
 export const useAppDependencies = () => {

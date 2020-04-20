@@ -47,8 +47,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { OverlayStart, HttpStart } from 'src/core/public';
-import { IndexPatternsContract, IIndexPattern } from '../../../../../data/public';
+import { OverlayStart, HttpStart, CoreStart } from 'src/core/public';
+import {
+  IndexPatternsContract,
+  IIndexPattern,
+  DataPublicPluginStart,
+} from '../../../../../data/public';
 import {
   importFile,
   importLegacyFile,
@@ -75,6 +79,9 @@ export interface FlyoutProps {
   indexPatterns: IndexPatternsContract;
   overlays: OverlayStart;
   http: HttpStart;
+  injectedMetadata: CoreStart['injectedMetadata'];
+  uiSettings: CoreStart['uiSettings'];
+  search: DataPublicPluginStart['search'];
 }
 
 export interface FlyoutState {
@@ -362,7 +369,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       failedImports,
     } = this.state;
 
-    const { serviceRegistry, indexPatterns } = this.props;
+    const { serviceRegistry, indexPatterns, search, uiSettings, injectedMetadata } = this.props;
 
     this.setState({
       error: undefined,
@@ -388,7 +395,12 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             resolutions,
             conflictedIndexPatterns!,
             isOverwriteAllChecked,
-            indexPatterns
+            indexPatterns,
+            {
+              search,
+              uiSettings,
+              injectedMetadata,
+            }
           );
         }
         this.setState({

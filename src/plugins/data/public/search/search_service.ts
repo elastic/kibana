@@ -22,12 +22,11 @@ import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/publ
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
 import { ISearchSetup, ISearchStart, TSearchStrategyProvider, TSearchStrategiesMap } from './types';
 import { TStrategyTypes } from './strategy_types';
-import { getEsClient, LegacyApiCaller } from './es_client';
+import { getEsClient, LegacyApiCaller } from './legacy';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
-import { esSearchStrategyProvider } from './es_search/es_search_strategy';
+import { esSearchStrategyProvider } from './es_search';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
-import { createSearchSource } from './search_source';
-import { QuerySetup } from '../query/query_service';
+import { QuerySetup } from '../query';
 import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
 import {
@@ -43,7 +42,6 @@ import {
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
 } from './aggs';
-
 import { FieldFormatsStart } from '../field_formats';
 
 interface SearchServiceSetupDependencies {
@@ -52,9 +50,9 @@ interface SearchServiceSetupDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
-interface SearchStartDependencies {
-  fieldFormats: FieldFormatsStart;
+interface SearchServiceStartDependencies {
   indexPatterns: IndexPatternsContract;
+  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -117,10 +115,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
 
-  public start(
-    core: CoreStart,
-    { fieldFormats, indexPatterns }: SearchStartDependencies
-  ): ISearchStart {
+  public start(core: CoreStart, dependencies: SearchServiceStartDependencies): ISearchStart {
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -140,8 +135,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
+            fieldFormats: dependencies.fieldFormats,
             typesRegistry: aggTypesStart,
-            fieldFormats,
           });
         },
         types: aggTypesStart,
@@ -158,7 +153,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         // TODO: should an intercepror have a destroy method?
         this.searchInterceptor = searchInterceptor;
       },
-      createSearchSource: createSearchSource(indexPatterns),
       __LEGACY: {
         esClient: this.esClient!,
         AggConfig,

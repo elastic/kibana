@@ -42,6 +42,8 @@ export class SavedObjectsPublicPlugin
         search: data.search,
         chrome: core.chrome,
         overlays: core.overlays,
+        uiSettings: core.uiSettings,
+        injectedMetadata: core.injectedMetadata,
       }),
     };
   }

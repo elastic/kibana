@@ -20,13 +20,16 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { SearchSource as SearchSourceClass } from '../legacy_imports';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';
-import { IFieldType, TimefilterContract } from '../.../../../../../../plugins/data/public';
+import {
+  IFieldType,
+  TimefilterContract,
+  SearchSourceType,
+} from '../.../../../../../../plugins/data/public';
 
 const minMaxAgg = (field?: IFieldType) => {
   const aggBody: any = {};
@@ -61,7 +64,7 @@ export class RangeControl extends Control<RangeFilterManager> {
     controlParams: ControlParams,
     filterManager: RangeFilterManager,
     useTimeFilter: boolean,
-    SearchSource: SearchSourceClass,
+    SearchSource: SearchSourceType,
     deps: InputControlVisDependencies
   ) {
     super(controlParams, filterManager, useTimeFilter, SearchSource);
@@ -129,7 +132,7 @@ export class RangeControl extends Control<RangeFilterManager> {
 export async function rangeControlFactory(
   controlParams: ControlParams,
   useTimeFilter: boolean,
-  SearchSource: SearchSourceClass,
+  SearchSource: SearchSourceType,
   deps: InputControlVisDependencies
 ): Promise<RangeControl> {
   const [, { data: dataPluginStart }] = await deps.core.getStartServices();

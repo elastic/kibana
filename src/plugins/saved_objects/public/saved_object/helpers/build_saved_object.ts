@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
-import { SearchSource } from '../../../../data/public';
+import { once } from 'lodash';
 import { hydrateIndexPattern } from './hydrate_index_pattern';
 import { intializeSavedObject } from './initialize_saved_object';
 import { serializeSavedObject } from './serialize_saved_object';
@@ -31,6 +30,7 @@ import {
 } from '../../types';
 import { applyESResp } from './apply_es_resp';
 import { saveSavedObject } from './save_saved_object';
+import { getSearchSourceType } from '../../../../data/public';
 
 export function buildSavedObject(
   savedObject: SavedObject,
@@ -55,7 +55,13 @@ export function buildSavedObject(
   savedObject.isSaving = false;
   savedObject.defaults = config.defaults || {};
   // optional search source which this object configures
-  savedObject.searchSource = config.searchSource ? new SearchSource() : undefined;
+  savedObject.searchSource = config.searchSource
+    ? new (getSearchSourceType({
+        uiSettings: services.uiSettings,
+        injectedMetadata: services.injectedMetadata,
+        search: services.search,
+      }))()
+    : undefined;
   // the id of the document
   savedObject.id = config.id || void 0;
   // the migration version of the document, should only be set on imports
@@ -79,10 +85,9 @@ export function buildSavedObject(
    * @return {Promise}
    * @resolved {SavedObject}
    */
-  savedObject.init = _.once(() => intializeSavedObject(savedObject, savedObjectsClient, config));
+  savedObject.init = once(() => intializeSavedObject(savedObject, savedObjectsClient, config));
 
-  savedObject.applyESResp = (resp: EsResponse) =>
-    applyESResp(resp, savedObject, config, services.search.createSearchSource);
+  savedObject.applyESResp = (resp: EsResponse) => applyESResp(resp, savedObject, config, services);
 
   /**
    * Serialize this object

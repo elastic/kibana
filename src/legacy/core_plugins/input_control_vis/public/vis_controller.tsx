@@ -21,8 +21,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nStart } from 'kibana/public';
-import { SearchSource } from './legacy_imports';
-
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
@@ -30,7 +28,7 @@ import { ControlParams } from './editor_utils';
 import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
-import { FilterManager, Filter } from '../../../../plugins/data/public';
+import { FilterManager, Filter, getSearchSourceType } from '../../../../plugins/data/public';
 import { VisParams, Vis } from '../../../../plugins/visualizations/public';
 
 export const createInputControlVisController = (deps: InputControlVisDependencies) => {
@@ -100,8 +98,16 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
         }
       );
 
+      const [core, { data }] = await deps.core.getStartServices();
+      const SearchSource = getSearchSourceType({
+        uiSettings: core.uiSettings,
+        injectedMetadata: core.injectedMetadata,
+        search: data.search,
+      });
+
       const controlFactoryPromises = controlParamsList.map(controlParams => {
         const factory = getControlFactory(controlParams);
+
         return factory(controlParams, this.visParams?.useTimeFilter, SearchSource, deps);
       });
       const controls = await Promise.all<RangeControl | ListControl>(controlFactoryPromises);

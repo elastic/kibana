@@ -33,6 +33,7 @@ import { coreMock } from '../../../../../../core/public/mocks';
 import { serviceRegistryMock } from '../../../services/service_registry.mock';
 import { Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';
+import { dataPluginMock } from '../../../../../data/public/mocks';
 
 const mockFile = ({
   name: 'foo.ndjson',
@@ -55,7 +56,8 @@ describe('Flyout', () => {
   };
 
   beforeEach(() => {
-    const { http, overlays } = coreMock.createStart();
+    const { http, overlays, uiSettings, injectedMetadata } = coreMock.createStart();
+    const search = dataPluginMock.createStartContract().search;
 
     defaultProps = {
       close: jest.fn(),
@@ -68,6 +70,9 @@ describe('Flyout', () => {
       http,
       allowedTypes: ['search', 'index-pattern', 'visualization'],
       serviceRegistry: serviceRegistryMock.create(),
+      uiSettings,
+      injectedMetadata,
+      search,
     };
   });
 
@@ -499,7 +504,12 @@ describe('Flyout', () => {
         component.instance().resolutions,
         mockConflictedIndexPatterns,
         true,
-        defaultProps.indexPatterns
+        defaultProps.indexPatterns,
+        {
+          injectedMetadata: defaultProps.injectedMetadata,
+          uiSettings: defaultProps.uiSettings,
+          search: defaultProps.search,
+        }
       );
       expect(saveObjectsMock).toHaveBeenCalledWith(
         mockConflictedSavedObjectsLinkedToSavedSearches,

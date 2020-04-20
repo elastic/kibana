@@ -19,9 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
-import { OverlayStart, SavedObjectReference } from 'src/core/public';
+import { CoreStart, OverlayStart, SavedObjectReference } from 'src/core/public';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
-import { IndexPatternsContract, IIndexPattern, createSearchSource } from '../../../data/public';
+import {
+  IndexPatternsContract,
+  IIndexPattern,
+  createSearchSourceFactory,
+  DataPublicPluginStart,
+} from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
 
@@ -162,7 +167,12 @@ export async function resolveIndexPatternConflicts(
   resolutions: Array<{ oldId: string; newId: string }>,
   conflictedIndexPatterns: any[],
   overwriteAll: boolean,
-  indexPatterns: IndexPatternsContract
+  indexPatterns: IndexPatternsContract,
+  dependencies: {
+    injectedMetadata: CoreStart['injectedMetadata'];
+    uiSettings: CoreStart['uiSettings'];
+    search: DataPublicPluginStart['search'];
+  }
 ) {
   let importCount = 0;
 
@@ -208,9 +218,11 @@ export async function resolveIndexPatternConflicts(
       // The user decided to skip this conflict so do nothing
       return;
     }
-    obj.searchSource = await createSearchSource(indexPatterns)(
+    obj.searchSource = await createSearchSourceFactory(
       JSON.stringify(serializedSearchSource),
-      replacedReferences
+      replacedReferences,
+      indexPatterns,
+      dependencies
     );
     if (await saveObject(obj, overwriteAll)) {
       importCount++;

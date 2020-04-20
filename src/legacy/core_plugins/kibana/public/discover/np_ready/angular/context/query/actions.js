@@ -20,16 +20,18 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { getServices, SearchSource } from '../../../../kibana_services';
+import { getServices } from '../../../../kibana_services';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
 import { MarkdownSimple } from '../../../../../../../../../plugins/kibana_react/public';
+import { getSearchSourceType } from '../../../../../../../../../plugins/data/public';
 
 export function QueryActionsProvider(Promise) {
-  const { filterManager, indexPatterns } = getServices();
+  const { filterManager, indexPatterns, uiSettings, search, injectedMetadata } = getServices();
+  const SearchSource = getSearchSourceType({ uiSettings, search, injectedMetadata });
   const fetchAnchor = fetchAnchorProvider(indexPatterns, new SearchSource());
   const { fetchSurroundingDocs } = fetchContextProvider(indexPatterns);
   const { setPredecessorCount, setQueryParameters, setSuccessorCount } = getQueryParameterActions(
