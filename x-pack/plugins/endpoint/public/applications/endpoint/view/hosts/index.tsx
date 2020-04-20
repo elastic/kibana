@@ -183,7 +183,7 @@ export const HostList = () => {
               items={useMemo(() => [...listData], [listData])}
               columns={columns}
               loading={loading}
-              error={listError}
+              error={listError?.message}
               pagination={paginationSetup}
               onChange={onTableChange}
             />

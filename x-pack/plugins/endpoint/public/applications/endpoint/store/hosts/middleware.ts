@@ -33,7 +33,7 @@ export const hostMiddlewareFactory: MiddlewareFactory<HostState> = coreStart => 
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnHostList',
-          payload: error.message,
+          payload: error,
         });
       }
     }
