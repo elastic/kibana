@@ -21,7 +21,7 @@ import { esKuery } from '../../../../../plugins/data/server';
 
 import { validateFilterKueryNode, validateConvertFilterToKueryNode } from './filter_utils';
 
-const mockMappings = {
+export const mockMappings = {
   properties: {
     updatedAt: {
       type: 'date',
