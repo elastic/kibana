@@ -14,7 +14,8 @@ import {
   urlParams,
   simpleTrace,
   traceWithErrors,
-  traceChildStartBeforeParent
+  traceChildStartBeforeParent,
+  inferredSpans
 } from './waterfallContainer.stories.data';
 import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 
@@ -62,6 +63,25 @@ storiesOf('app/TransactionDetails/Waterfall', module).add(
     const waterfall = getWaterfall(
       traceChildStartBeforeParent as TraceAPIResponse,
       '975c8d5bfd1dd20b'
+    );
+    return (
+      <WaterfallContainer
+        location={location}
+        urlParams={urlParams}
+        waterfall={waterfall}
+        exceedsMax={false}
+      />
+    );
+  },
+  { info: { source: false } }
+);
+
+storiesOf('app/TransactionDetails/Waterfall', module).add(
+  'inferred spans',
+  () => {
+    const waterfall = getWaterfall(
+      inferredSpans as TraceAPIResponse,
+      'f2387d37260d00bd'
     );
     return (
       <WaterfallContainer

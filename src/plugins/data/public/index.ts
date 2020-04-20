@@ -363,7 +363,6 @@ export {
   SearchRequest,
   SearchResponse,
   SearchError,
-  SearchStrategyProvider,
   ISearchSource,
   SearchSource,
   createSearchSource,
