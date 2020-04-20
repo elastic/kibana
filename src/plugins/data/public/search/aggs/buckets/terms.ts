@@ -26,7 +26,7 @@ import {
   isStringOrNumberType,
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
-import { AggConfigJson, IAggConfigs } from '../types';
+import { AggConfigSerialized, IAggConfigs } from '../types';
 
 import { Adapters } from '../../../../../inspector/public';
 import { ISearchSource } from '../../search_source';
@@ -67,7 +67,7 @@ export interface AggParamsTerms {
   field: string;
   order: 'asc' | 'desc';
   orderBy: string;
-  orderAgg?: AggConfigJson;
+  orderAgg?: AggConfigSerialized;
   size?: number;
   missingBucket?: boolean;
   missingBucketLabel?: string;
@@ -169,7 +169,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           type: 'agg',
           allowedAggs: termsAggFilter,
           default: null,
-          makeAgg(termsAgg, state: AggConfigJson) {
+          makeAgg(termsAgg, state: AggConfigSerialized) {
             state = state || {};
             state.schema = 'orderAgg';
             const orderAgg = termsAgg.aggConfigs.createAggConfig<IBucketAggConfig>(state, {

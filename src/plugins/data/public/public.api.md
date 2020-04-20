@@ -59,11 +59,11 @@ import { Unit } from '@elastic/datemath';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues } from 'src/core/server/types';
 
-// Warning: (ae-forgotten-export) The symbol "AggConfigJson" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "AggConfigSerialized" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "AggConfigOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type AggConfigOptions = Assign<AggConfigJson, {
+export type AggConfigOptions = Assign<AggConfigSerialized, {
     type: IAggType;
 }>;
 

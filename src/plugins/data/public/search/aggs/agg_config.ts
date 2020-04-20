@@ -28,7 +28,7 @@ import { ISearchSource } from '../search_source';
 import { FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../common';
 import { FieldFormatsStart } from '../../field_formats';
 
-export interface AggConfigJson {
+export interface AggConfigSerialized {
   type: string;
   enabled?: boolean;
   id?: string;
@@ -40,7 +40,7 @@ export interface AggConfigDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
-export type AggConfigOptions = Assign<AggConfigJson, { type: IAggType }>;
+export type AggConfigOptions = Assign<AggConfigSerialized, { type: IAggType }>;
 
 /**
  * @name AggConfig
@@ -260,7 +260,7 @@ export class AggConfig {
     return configDsl;
   }
 
-  toJSON(): AggConfigJson {
+  toJSON(): AggConfigSerialized {
     const params = this.params;
 
     const outParams = _.transform(

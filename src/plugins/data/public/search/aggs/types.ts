@@ -20,7 +20,7 @@
 import { IndexPattern } from '../../index_patterns';
 import {
   AggConfig,
-  AggConfigJson,
+  AggConfigSerialized,
   AggConfigs,
   AggParamsTerms,
   AggType,
@@ -35,7 +35,7 @@ import {
   siblingPipelineAggHelper,
 } from './';
 
-export { IAggConfig, AggConfigJson } from './agg_config';
+export { IAggConfig, AggConfigSerialized } from './agg_config';
 export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
 export { IAggType } from './agg_type';
 export { AggParam, AggParamOption } from './agg_params';
@@ -82,7 +82,7 @@ export interface AggExpressionType {
 /** @internal */
 export type AggExpressionFunctionArgs<
   Name extends keyof AggParamsMapping
-> = AggParamsMapping[Name] & Pick<AggConfigJson, 'id' | 'enabled' | 'schema'>;
+> = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
 
 /**
  * A global list of the param interfaces for each agg type.
