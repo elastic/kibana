@@ -2245,7 +2245,6 @@
     "kbn.management.editIndexPattern.scripted.table.nameHeader": "名称",
     "kbn.management.editIndexPattern.scripted.table.scriptDescription": "字段的脚本",
     "kbn.management.editIndexPattern.scripted.table.scriptHeader": "脚本",
-    "kbn.management.editIndexPattern.scripted.unknownModeErrorMessage": "未知 fieldSettings 模式 {mode}",
     "kbn.management.editIndexPattern.scriptedHeader": "脚本字段",
     "kbn.management.editIndexPattern.scriptedLabel": "可以在可视化中使用脚本字段，并在您的文档中显示它们。但是，您不能搜索脚本字段。",
     "kbn.management.editIndexPattern.setDefaultAria": "设置为默认索引",
