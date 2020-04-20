@@ -16,7 +16,6 @@ import { postPagerduty } from './lib/post_pagerduty';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
 import { actionsConfigMock } from '../actions_config.mock';
-import { repeat, random } from 'lodash';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
