@@ -18,4 +18,3 @@
  */
 export * from './toasts';
 export * from './lib';
-export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';

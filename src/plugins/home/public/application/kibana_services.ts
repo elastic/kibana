@@ -25,6 +25,7 @@ import {
   OverlayStart,
   SavedObjectsClientContract,
   IUiSettingsClient,
+  ApplicationStart,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
 import { TelemetryPluginStart } from '../../../telemetry/public';
@@ -38,6 +39,7 @@ export interface HomeKibanaServices {
   indexPatternService: any;
   kibanaVersion: string;
   chrome: ChromeStart;
+  application: ApplicationStart;
   uiSettings: IUiSettingsClient;
   config: KibanaLegacySetup['config'];
   homeConfig: ConfigSchema;

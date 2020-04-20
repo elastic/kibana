@@ -81,6 +81,7 @@ export class HomePublicPlugin
           docLinks: coreStart.docLinks,
           savedObjectsClient: coreStart.savedObjects.client,
           chrome: coreStart.chrome,
+          application: coreStart.application,
           telemetry,
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,

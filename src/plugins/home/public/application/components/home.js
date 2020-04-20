@@ -44,6 +44,17 @@ import { FeatureCatalogueCategory } from '../../services';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
+const createAppNavigationHandler = targetUrl => event => {
+  if (event.altKey || event.metaKey || event.ctrlKey) {
+    return;
+  }
+  if (targetUrl.startsWith('/app/')) {
+    const [, appId, path] = /\/app\/(.*?)((\/|\?|#|$).*)/.exec(targetUrl);
+    event.preventDefault();
+    getServices().application.navigateToApp(appId, { path });
+  }
+};
+
 export class Home extends Component {
   constructor(props) {
     super(props);
@@ -125,6 +136,7 @@ export class Home extends Component {
         return (
           <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
             <Synopsis
+              onClick={createAppNavigationHandler(directory.path)}
               description={directory.description}
               iconType={directory.icon}
               title={directory.title}

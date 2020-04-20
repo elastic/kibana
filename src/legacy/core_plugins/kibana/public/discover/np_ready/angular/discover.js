@@ -155,6 +155,7 @@ app.config($routeProvider => {
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: core.application.navigateToApp,
                   mapping: {
                     search: '/discover',
                     'index-pattern':

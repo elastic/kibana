@@ -181,6 +181,7 @@ export function initDashboardApp(app, deps) {
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: deps.core.application.navigateToApp,
                   mapping: {
                     dashboard: DashboardConstants.LANDING_PAGE_PATH,
                   },
@@ -238,6 +239,7 @@ export function initDashboardApp(app, deps) {
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: deps.core.application.navigateToApp,
                   mapping: {
                     dashboard: DashboardConstants.LANDING_PAGE_PATH,
                   },

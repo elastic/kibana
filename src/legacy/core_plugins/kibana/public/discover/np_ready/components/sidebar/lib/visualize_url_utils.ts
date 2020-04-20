@@ -32,13 +32,6 @@ import {
   VisTypeAlias,
 } from '../../../../../../../../../plugins/visualizations/public';
 
-function getMapsAppBaseUrl(visualizations: VisualizationsStart) {
-  const mapsAppVisAlias = visualizations.getAliases().find(({ name }) => {
-    return name === 'maps';
-  });
-  return mapsAppVisAlias ? mapsAppVisAlias.aliasPath : null;
-}
-
 export function isMapsAppRegistered(visualizations: VisualizationsStart) {
   return visualizations.getAliases().some(({ name }: VisTypeAlias) => {
     return name === 'maps';
@@ -112,9 +105,10 @@ export function getMapsAppUrl(
     ])
   );
 
-  return services.addBasePath(
-    `${getMapsAppBaseUrl(services.visualizations)}?${mapAppParams.toString()}`
-  );
+  return {
+    app: 'maps',
+    path: `#/map?${mapAppParams.toString()}`,
+  };
 }
 
 export function getVisualizeUrl(
@@ -184,5 +178,8 @@ export function getVisualizeUrl(
     },
   };
 
-  return `/app/visualize#/create?${stringify(linkUrlParams)}`;
+  return {
+    app: 'visualize',
+    path: `#/create?${stringify(linkUrlParams)}`,
+  };
 }

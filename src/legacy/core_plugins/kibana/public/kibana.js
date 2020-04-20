@@ -21,7 +21,6 @@
 
 // preloading (for faster webpack builds)
 import routes from 'ui/routes';
-import { uiModules } from 'ui/modules';
 import { npSetup } from 'ui/new_platform';
 
 // import the uiExports that we want to "use"
@@ -45,7 +44,6 @@ import 'ui/autoload/all';
 import './discover/legacy';
 import './management';
 import './dev_tools';
-import { showAppRedirectNotification } from '../../../../plugins/kibana_legacy/public';
 import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
@@ -59,7 +57,3 @@ const { config } = npSetup.plugins.kibanaLegacy;
 routes.otherwise({
   redirectTo: `/${config.defaultAppId || 'discover'}`,
 });
-
-uiModules
-  .get('kibana')
-  .run($location => showAppRedirectNotification($location, npSetup.core.notifications.toasts));
