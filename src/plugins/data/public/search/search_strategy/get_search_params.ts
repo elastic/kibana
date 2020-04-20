@@ -17,9 +17,17 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '../../../../../core/public';
 
 const sessionId = Date.now();
+
+export function getMSearchParams(config: IUiSettingsClient) {
+  return {
+    rest_total_hits_as_int: true,
+    ignore_throttled: getIgnoreThrottled(config),
+    max_concurrent_shard_requests: getMaxConcurrentShardRequests(config),
+  };
+}
 
 export function getSearchParams(config: IUiSettingsClient, esShardTimeout: number = 0) {
   return {
@@ -32,11 +40,11 @@ export function getSearchParams(config: IUiSettingsClient, esShardTimeout: numbe
   };
 }
 
-export function getIgnoreThrottled(config: IUiSettingsClient) {
+function getIgnoreThrottled(config: IUiSettingsClient) {
   return !config.get('search:includeFrozen');
 }
 
-export function getMaxConcurrentShardRequests(config: IUiSettingsClient) {
+function getMaxConcurrentShardRequests(config: IUiSettingsClient) {
   const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
   return maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 }
