@@ -14,7 +14,6 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiSpacer,
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
