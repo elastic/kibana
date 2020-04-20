@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, MiddlewareAPI, Action as ReduxAction, AnyAction as ReduxAnyAction } from 'redux';
+import {
+  Dispatch,
+  Action as ReduxAction,
+  AnyAction as ReduxAnyAction,
+  Action,
+  Middleware,
+} from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
   HostMetadata,
@@ -28,12 +34,59 @@ import {
 } from '../../../../ingest_manager/common';
 
 export { AppAction };
-export type MiddlewareFactory<S = GlobalState> = (
+
+/**
+ * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of
+ * state and `dispatch` accepts `Immutable` versions of actions.
+ */
+export interface ImmutableMiddlewareAPI<S, A extends Action> {
+  dispatch: Dispatch<A | Immutable<A>>;
+  getState(): Immutable<S>;
+}
+
+/**
+ * Like redux's `Middleware` but without the ability to mutate actions or state.
+ * Differences:
+ *   * `getState` returns an `Immutable` version of state
+ *   * `dispatch` accepts `Immutable` versions of actions
+ *   * `action`s received will be `Immutable`
+ */
+export type ImmutableMiddleware<S, A extends Action> = (
+  api: ImmutableMiddlewareAPI<S, A>
+) => (next: Dispatch<A | Immutable<A>>) => (action: Immutable<A>) => unknown;
+
+/**
+ * Takes application-standard middleware dependencies
+ * and returns a redux middleware.
+ * Middleware will be of the `ImmutableMiddleware` variety. Not able to directly
+ * change actions or state.
+ */
+export type ImmutableMiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart,
   depsStart: EndpointPluginStartDependencies
-) => (
-  api: MiddlewareAPI<Dispatch<AppAction>, S>
-) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
+) => ImmutableMiddleware<S, AppAction>;
+
+/**
+ * Simple type for a redux selector.
+ */
+type Selector<S, R> = (state: S) => R;
+
+/**
+ * Takes a selector and an `ImmutableMiddleware`. The
+ * middleware's version of `getState` will receive
+ * the result of the selector instead of the global state.
+ *
+ * This allows middleware to have knowledge of only a subsection of state.
+ *
+ * `selector` returns an `Immutable` version of the substate.
+ * `middleware` must be an `ImmutableMiddleware`.
+ *
+ * Returns a regular middleware, meant to be used with `applyMiddleware`.
+ */
+export type SubstateMiddlewareFactory = <Substate>(
+  selector: Selector<GlobalState, Immutable<Substate>>,
+  middleware: ImmutableMiddleware<Substate, AppAction>
+) => Middleware<{}, GlobalState, Dispatch<AppAction | Immutable<AppAction>>>;
 
 export interface HostListState {
   hosts: HostMetadata[];
