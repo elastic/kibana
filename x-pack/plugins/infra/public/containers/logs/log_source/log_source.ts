@@ -77,6 +77,19 @@ export const useLogSource = ({ sourceId }: { sourceId: string }) => {
     [loadSourceConfigurationRequest.state, loadSourceStatusRequest.state]
   );
 
+  const hasFailedLoadingSource = useMemo(
+    () => loadSourceConfigurationRequest.state === 'rejected',
+    [loadSourceConfigurationRequest.state]
+  );
+
+  const loadSourceFailureMessage = useMemo(
+    () =>
+      loadSourceConfigurationRequest.state === 'rejected'
+        ? `${loadSourceConfigurationRequest.value}`
+        : undefined,
+    [loadSourceConfigurationRequest]
+  );
+
   const loadSource = useCallback(() => {
     return Promise.all([loadSourceConfiguration(), loadSourceStatus()]);
   }, [loadSourceConfiguration, loadSourceStatus]);
@@ -91,12 +104,14 @@ export const useLogSource = ({ sourceId }: { sourceId: string }) => {
 
   return {
     derivedIndexPattern,
+    hasFailedLoadingSource,
     initialize,
     isLoading,
     isLoadingSourceConfiguration,
     isLoadingSourceStatus,
     isUninitialized,
     loadSource,
+    loadSourceFailureMessage,
     loadSourceConfiguration,
     loadSourceStatus,
     logIndicesExist,
