@@ -13,12 +13,18 @@ import { FrameworkRequest } from '../../../framework';
 export const buildFrameworkRequest = async (
   context: RequestHandlerContext,
   security: SetupPlugins['security'],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest
-): FrameworkRequest => {
+): Promise<FrameworkRequest> => {
   const savedObjectsClient = context.core.savedObjects.client;
   const user = await security?.authc.getCurrentUser(request);
-  let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);
-  frameworkRequest = set('user', user, frameworkRequest);
-  return frameworkRequest;
+
+  return set<FrameworkRequest>(
+    'user',
+    user,
+    set<KibanaRequest & { context: RequestHandlerContext }>(
+      'context.core.savedObjects.client',
+      savedObjectsClient,
+      request
+    )
+  );
 };

@@ -37,7 +37,7 @@ export const updateTimelinesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const frameworkRequest = buildFrameworkRequest(context, security, request);
+        const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const { timelineId, timeline, version } = request.body;
         const { templateTimelineId, templateTimelineVersion, timelineType } = timeline;
         const isHandlingTemplateTimeline = timelineType === TimelineType.template;

@@ -41,7 +41,7 @@ export const createTimelinesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const frameworkRequest = buildFrameworkRequest(context, security, request);
+        const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
         const { timelineId, timeline, timelineType, version } = request.body;
         const { templateTimelineId } = timeline;
