@@ -113,6 +113,50 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
+    describe('panel cloning', function() {
+      before(async () => {
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.timePicker.setHistoricalDataRange();
+        await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
+      });
+
+      after(async function() {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+      });
+
+      it('clones a panel', async () => {
+        const initialPanelTitles = await PageObjects.dashboard.getPanelTitles();
+        await dashboardPanelActions.clonePanelByTitle(PIE_CHART_VIS_NAME);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        const postPanelTitles = await PageObjects.dashboard.getPanelTitles();
+        expect(postPanelTitles.length).to.equal(initialPanelTitles.length + 1);
+      });
+
+      it('appends a clone title tag', async () => {
+        const panelTitles = await PageObjects.dashboard.getPanelTitles();
+        expect(panelTitles[1]).to.equal(PIE_CHART_VIS_NAME + ' (copy)');
+      });
+
+      it('retains original panel dimensions', async () => {
+        const panelDimensions = await PageObjects.dashboard.getPanelDimensions();
+        expect(panelDimensions[0]).to.eql(panelDimensions[1]);
+      });
+
+      it('gives a correct title to the clone of a clone', async () => {
+        const initialPanelTitles = await PageObjects.dashboard.getPanelTitles();
+        const clonedPanelName = initialPanelTitles[initialPanelTitles.length - 1];
+        await dashboardPanelActions.clonePanelByTitle(clonedPanelName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        const postPanelTitles = await PageObjects.dashboard.getPanelTitles();
+        expect(postPanelTitles.length).to.equal(initialPanelTitles.length + 1);
+        expect(postPanelTitles[postPanelTitles.length - 1]).to.equal(
+          PIE_CHART_VIS_NAME + ' (copy 1)'
+        );
+      });
+    });
+
     describe('panel edit controls', function() {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
@@ -137,6 +181,7 @@ export default function({ getService, getPageObjects }) {
 
         await dashboardPanelActions.expectExistsEditPanelAction();
         await dashboardPanelActions.expectExistsReplacePanelAction();
+        await dashboardPanelActions.expectExistsDuplicatePanelAction();
         await dashboardPanelActions.expectExistsRemovePanelAction();
       });
 
@@ -151,6 +196,7 @@ export default function({ getService, getPageObjects }) {
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.expectExistsEditPanelAction();
         await dashboardPanelActions.expectExistsReplacePanelAction();
+        await dashboardPanelActions.expectExistsDuplicatePanelAction();
         await dashboardPanelActions.expectExistsRemovePanelAction();
 
         // Get rid of the timestamp in the url.
@@ -166,6 +212,7 @@ export default function({ getService, getPageObjects }) {
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.expectMissingEditPanelAction();
           await dashboardPanelActions.expectMissingReplacePanelAction();
+          await dashboardPanelActions.expectMissingDuplicatePanelAction();
           await dashboardPanelActions.expectMissingRemovePanelAction();
         });
 
@@ -174,6 +221,7 @@ export default function({ getService, getPageObjects }) {
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.expectExistsEditPanelAction();
           await dashboardPanelActions.expectExistsReplacePanelAction();
+          await dashboardPanelActions.expectExistsDuplicatePanelAction();
           await dashboardPanelActions.expectMissingRemovePanelAction();
           await dashboardPanelActions.clickExpandPanelToggle();
         });

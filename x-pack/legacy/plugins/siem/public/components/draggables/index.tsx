@@ -8,7 +8,6 @@ import { EuiBadge, EuiToolTip, IconType } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { Omit } from '../../../common/utility_types';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getEmptyStringTag } from '../empty_value';

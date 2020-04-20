@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MiddlewareFactory } from '../../types';
+import { ImmutableMiddlewareFactory } from '../../types';
 import { pageIndex, pageSize, isOnHostPage, hasSelectedHost, uiQueryParams } from './selectors';
 import { HostListState } from '../../types';
-import { AppAction } from '../action';
 
-export const hostMiddlewareFactory: MiddlewareFactory<HostListState> = coreStart => {
-  return ({ getState, dispatch }) => next => async (action: AppAction) => {
+export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostListState> = coreStart => {
+  return ({ getState, dispatch }) => next => async action => {
     next(action);
     const state = getState();
     if (
