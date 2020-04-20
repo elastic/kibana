@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import {
   MetricExpressionParams,
   Comparator,
+  Aggregators,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../server/lib/alerting/metric_threshold/types';
 import { euiStyled } from '../../../../../observability/public';
@@ -30,6 +31,8 @@ import {
   ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { builtInComparators } from '../../../../../triggers_actions_ui/public/common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -64,23 +67,24 @@ type MetricExpression = Omit<MetricExpressionParams, 'metric'> & {
   metric?: string;
 };
 
-enum AGGREGATION_TYPES {
-  COUNT = 'count',
-  AVERAGE = 'avg',
-  SUM = 'sum',
-  MIN = 'min',
-  MAX = 'max',
-  RATE = 'rate',
-  CARDINALITY = 'cardinality',
-}
-
 const defaultExpression = {
-  aggType: AGGREGATION_TYPES.AVERAGE,
+  aggType: Aggregators.AVERAGE,
   comparator: Comparator.GT,
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
 } as MetricExpression;
+
+const customComparators = {
+  ...builtInComparators,
+  [Comparator.OUTSIDE_RANGE]: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.outsideRangeLabel', {
+      defaultMessage: 'Is not between',
+    }),
+    value: Comparator.OUTSIDE_RANGE,
+    requiredValues: 2,
+  },
+};
 
 export const Expressions: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
@@ -339,7 +343,7 @@ const StyledExpression = euiStyled.div`
 export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
   const { setAlertParams, expression, errors, expressionId, remove, fields, canDelete } = props;
   const {
-    aggType = AGGREGATION_TYPES.MAX,
+    aggType = Aggregators.MAX,
     metric,
     comparator = Comparator.GT,
     threshold = [],
@@ -410,6 +414,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
               <ThresholdExpression
                 thresholdComparator={comparator || Comparator.GT}
                 threshold={threshold}
+                customComparators={customComparators}
                 onChangeSelectedThresholdComparator={updateComparator}
                 onChangeSelectedThreshold={updateThreshold}
                 errors={errors}
@@ -442,7 +447,7 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: true,
     validNormalizedTypes: ['number'],
-    value: AGGREGATION_TYPES.AVERAGE,
+    value: Aggregators.AVERAGE,
   },
   max: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.max', {
@@ -450,7 +455,7 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date'],
-    value: AGGREGATION_TYPES.MAX,
+    value: Aggregators.MAX,
   },
   min: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.min', {
@@ -458,14 +463,14 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date'],
-    value: AGGREGATION_TYPES.MIN,
+    value: Aggregators.MIN,
   },
   cardinality: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.cardinality', {
       defaultMessage: 'Cardinality',
     }),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.CARDINALITY,
+    value: Aggregators.CARDINALITY,
     validNormalizedTypes: ['number'],
   },
   rate: {
@@ -473,7 +478,7 @@ export const aggregationType: { [key: string]: any } = {
       defaultMessage: 'Rate',
     }),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.RATE,
+    value: Aggregators.RATE,
     validNormalizedTypes: ['number'],
   },
   count: {
@@ -481,7 +486,7 @@ export const aggregationType: { [key: string]: any } = {
       defaultMessage: 'Document count',
     }),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.COUNT,
+    value: Aggregators.COUNT,
     validNormalizedTypes: ['number'],
   },
 };
