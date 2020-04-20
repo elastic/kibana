@@ -113,7 +113,6 @@ export class Tree {
   public addAncestor(id: string, ...events: ResolverEvent[]): void {
     events.forEach(event => {
       const ancestorID = entityId(event);
-      console.log(ancestorID, 'ancestor');
       if (!this.cache[ancestorID]) {
         const newParent = createNode(ancestorID);
         this.cache[ancestorID] = newParent;

@@ -17,13 +17,13 @@ type MiddlewareFactory<S = ResolverState> = (
   api: MiddlewareAPI<Dispatch<ResolverAction>, S>
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
 
-function descendants(children: Node[], events: ResolverEvent[] = []): ResolverEvent[] {
+function flattenEvents(children: Node[], events: ResolverEvent[] = []): ResolverEvent[] {
   return children.reduce((flattenedEvents, currentNode) => {
     if (currentNode.lifecycle && currentNode.lifecycle.length > 0) {
       flattenedEvents.push(...currentNode.lifecycle);
     }
     if (currentNode.children && currentNode.children.length > 0) {
-      return descendants(currentNode.children, events);
+      return flattenEvents(currentNode.children, events);
     } else {
       return flattenedEvents;
     }
@@ -42,24 +42,26 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
         try {
           let lifecycle: ResolverEvent[];
           let children: Node[];
-          let ancestor: any;
+          let ancestors: Node[];
           if (event.isLegacyEvent(action.payload.selectedEvent)) {
             const entityId = action.payload.selectedEvent?.endgame?.unique_pid;
             const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
-            [{ lifecycle, children }] = await Promise.all([
+            [{ lifecycle, children, ancestors }] = await Promise.all([
               context.services.http.get(`/api/endpoint/resolver/${entityId}`, {
                 query: { legacyEndpointID },
               }),
             ]);
           } else {
             const entityId = action.payload.selectedEvent.process.entity_id;
-            [{ lifecycle, children }, ancestor] = await Promise.all([
+            [{ lifecycle, children, ancestors }] = await Promise.all([
               context.services.http.get(`/api/endpoint/resolver/${entityId}`),
-              context.services.http.get(`/api/endpoint/resolver/${entityId}/ancestry`),
             ]);
           }
-          console.log(ancestor);
-          const response: ResolverEvent[] = [...lifecycle, ...descendants(children)];
+          const response: ResolverEvent[] = [
+            ...lifecycle,
+            ...flattenEvents(children),
+            ...flattenEvents(ancestors),
+          ];
           api.dispatch({
             type: 'serverReturnedResolverData',
             payload: { data: { result: { search_results: response } } },

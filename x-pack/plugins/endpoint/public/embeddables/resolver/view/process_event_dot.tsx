@@ -11,7 +11,7 @@ import { htmlIdGenerator, EuiKeyboardAccessible } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
-import { SymbolIds, NamedColors } from './defs';
+import { SymbolIds, NamedColors, PaintServerIds } from './defs';
 import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../../common/models/event';
@@ -21,7 +21,7 @@ import * as selectors from '../store/selectors';
 const nodeAssets = {
   runningProcessCube: {
     cubeSymbol: `#${SymbolIds.runningProcessCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelFill: `url(#${PaintServerIds.runningProcess})`,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningProcess', {
       defaultMessage: 'Running Process',
@@ -29,7 +29,7 @@ const nodeAssets = {
   },
   runningTriggerCube: {
     cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelFill: `url(#${PaintServerIds.runningTrigger})`,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningTrigger', {
       defaultMessage: 'Running Trigger',
@@ -37,7 +37,7 @@ const nodeAssets = {
   },
   terminatedProcessCube: {
     cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelFill: NamedColors.fullLabelBackground,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedProcess', {
       defaultMessage: 'Terminated Process',
@@ -45,7 +45,7 @@ const nodeAssets = {
   },
   terminatedTriggerCube: {
     cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelFill: NamedColors.fullLabelBackground,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedTrigger', {
       defaultMessage: 'Terminated Trigger',
@@ -91,100 +91,36 @@ export const ProcessEventDot = styled(
        */
       const [left, top] = applyMatrix3(position, projectionMatrix);
 
-      /** The scale of the projection in the x-axis. Used to determine to overall scale of the process event node. */
-      const [xScale] = projectionMatrix;
-
-      /** The scale to render the process node at. */
-      const scale = 4 * xScale;
+      const [magFactorX] = projectionMatrix;
 
       const selfId = adjacentNodeMap.self;
 
       const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
       const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
-      /** Dimensions of the SVG viewbox for the process event node. */
-      const viewBoxWidth = 60;
-      const viewBoxHeight = 15;
-      const viewBoxMinX = -7.5;
-      const viewBoxMinY = -7.5;
-      const viewBox = `${viewBoxMinX} ${viewBoxMinY} ${viewBoxWidth} ${viewBoxHeight}`;
-
-      /** The width (and height) of the cube icon used to represent a process */
-      const cubeIconSideLength = 15;
-
-      /** The x position of the cube icon. TODO: Why is this value choosen? */
-      const cubeIconX = -cubeIconSideLength / 2;
-      /** TODO, why? */
-      const cubeIconY = cubeIconX;
-
-      /**
-       * The cube icon shows a cube in an non-orthographic perspective. This is the ratio of the side length
-       * to the length of the right side (as seen by the viewer)
-       * TODO, consider rendering the cube in the same perspective (isometric) that is used to layout the nodes
-       * on the graph.
-       * TODO, this number is just a guess, calculate it using some tool
-       */
-      const rightSideOfIsometricCubeLengthRatio = 1 / 1.8847;
-
-      /** The Y position of the background for the process name text element */
-      const labelBackgroundY = cubeIconY + 0.25 * cubeIconSideLength;
-
-      const labelYHeight = cubeIconSideLength * rightSideOfIsometricCubeLengthRatio;
-
-      /** The height of the background of the process name text element */
-      const labelBackgroundHeight = cubeIconSideLength * rightSideOfIsometricCubeLengthRatio;
-
-      /** The width of the background of the process name text element.
-       * Note: this is not dynamic based on the text.
-       * TODO, this label needs ellipsis logic.
-       */
-      const labelBackgroundWidth = labelBackgroundHeight * 5;
-
-      /** The font-size (unitless) of the description text */
-      const descriptionTextFontSize = 2.67;
-
-      /** The description (e.g. TERMINATED PROCESS) text x position */
-      const descriptionTextX = cubeIconX + cubeIconSideLength;
-      /**
-       * The description (e.g. TERMINATED PROCESS) text y position
-       * The bottom of the description text should be aligned roughly with the top of the label background.
-       * The text is vertically centered on the y coordinate, so we subtract half its height from the
-       * labelBackgroundY.
-       **/
-      const descriptionTextY = labelBackgroundY - descriptionTextFontSize / 2;
-
-      /** TODO why? */
-      const labelX = cubeIconX + 0.7 * cubeIconSideLength + 50 / 2;
-      /** The y position for the process name text element */
-      const labelY = labelBackgroundY + labelYHeight / 2;
 
       const nodeViewportStyle = useMemo(
         () => ({
           left: `${left}px`,
           top: `${top}px`,
-          width: `${viewBoxWidth * scale}px`,
-          height: `${viewBoxHeight * scale}px`,
-          /** Adjust it up and to the left, so that the cube is centered */
-          transform: `translateX(${cubeIconSideLength *
-            scale *
-            -0.5}px) translateY(${cubeIconSideLength * scale * -0.75}px)`,
+          // Width of symbol viewport scaled to fit
+          width: `${360 * magFactorX}px`,
+          // Height according to symbol viewbox AR
+          height: `${120 * magFactorX}px`,
+          // Adjusted to position/scale with camera
+          transform: `translateX(-${0.172413 * 360 * magFactorX + 10}px) translateY(-${0.73684 *
+            120 *
+            magFactorX}px)`,
         }),
-        [left, scale, top]
+        [left, magFactorX, top]
       );
-
-      /**
-       * Type in non-SVG components scales as follows:
-       *  (These values were adjusted to match the proportions in the comps provided by UX/Design)
-       *  18.75 : The smallest readable font size at which labels/descriptions can be read. Font size will not scale below this.
-       *  12.5 : A 'slope' at which the font size will scale w.r.t. to zoom level otherwise
-       */
-      const minimumFontSize = 18.75;
-      const slopeOfFontScale = 12.5;
-      const fontSizeAdjustmentForScale = left > 1 ? slopeOfFontScale * (left - 1) : 0;
-      const scaledTypeSize = minimumFontSize + fontSizeAdjustmentForScale;
 
       const markerBaseSize = 15;
       const markerSize = markerBaseSize;
       const markerPositionOffset = -markerBaseSize / 2;
+
+      const labelYOffset = markerPositionOffset + 0.25 * markerSize - 0.5;
+
+      const labelYHeight = markerSize / 1.7647;
 
       /**
        * An element that should be animated when the node is clicked.
@@ -200,7 +136,9 @@ export const ProcessEventDot = styled(
             })
           | null;
       } = React.createRef();
-      const { cubeSymbol, labelBackground, descriptionText } = nodeAssets[nodeType(event)];
+      const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[
+        nodeType(event)
+      ];
       const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
       const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
@@ -216,7 +154,7 @@ export const ProcessEventDot = styled(
       const dispatch = useResolverDispatch();
 
       const handleFocus = useCallback(
-        (focusEvent: React.FocusEvent<HTMLDivElement>) => {
+        (focusEvent: React.FocusEvent<SVGSVGElement>) => {
           dispatch({
             type: 'userFocusedOnResolverNode',
             payload: {
@@ -228,7 +166,7 @@ export const ProcessEventDot = styled(
       );
 
       const handleClick = useCallback(
-        (clickEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        (clickEvent: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
           if (animationTarget.current !== null) {
             (animationTarget.current as any).beginElement();
           }
@@ -241,15 +179,14 @@ export const ProcessEventDot = styled(
         },
         [animationTarget, dispatch, nodeId]
       );
-      /* eslint-disable jsx-a11y/click-events-have-key-events */
-      /**
-       * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
-       */
+
       return (
         <EuiKeyboardAccessible>
-          <div
+          <svg
             data-test-subj={'resolverNode'}
             className={className + ' kbn-resetFocusState'}
+            viewBox="-15 -15 90 30"
+            preserveAspectRatio="xMidYMid meet"
             role="treeitem"
             aria-level={adjacentNodeMap.level}
             aria-flowto={
@@ -266,109 +203,92 @@ export const ProcessEventDot = styled(
             onFocus={handleFocus}
             tabIndex={-1}
           >
-            <svg
-              viewBox="-15 -15 90 30"
-              preserveAspectRatio="xMidYMid meet"
-              style={{
-                display: 'block',
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                top: '0',
-                left: '0',
-              }}
-            >
-              <g>
-                <use
-                  xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
-                  x={-11.35}
-                  y={-11.35}
-                  width={markerSize * 1.5}
-                  height={markerSize * 1.5}
-                  className="backing"
-                />
-                <use
-                  role="presentation"
-                  xlinkHref={cubeSymbol}
-                  x={markerPositionOffset}
-                  y={markerPositionOffset}
-                  width={markerSize}
-                  height={markerSize}
-                  opacity="1"
-                  className="cube"
-                >
-                  <animateTransform
-                    attributeType="XML"
-                    attributeName="transform"
-                    type="scale"
-                    values="1 1; 1 .83; 1 .8; 1 .83; 1 1"
-                    dur="0.2s"
-                    begin="click"
-                    repeatCount="1"
-                    className="squish"
-                    ref={animationTarget}
-                  />
-                </use>
-              </g>
-            </svg>
-            <div
-              style={{
-                left: '25%',
-                top: '30%',
-                position: 'absolute',
-                width: '50%',
-                color: 'white',
-                fontSize: `${scaledTypeSize}px`,
-                lineHeight: '140%',
-              }}
-            >
-              <div
-                id={descriptionId}
-                style={{
-                  textTransform: 'uppercase',
-                  letterSpacing: '-0.01px',
-                  backgroundColor: NamedColors.resolverBackground,
-                  lineHeight: '1.2',
-                  fontWeight: 'bold',
-                  fontSize: '.5em',
-                  width: '100%',
-                  margin: '0 0 .05em 0',
-                  textAlign: 'left',
-                  padding: '0',
-                }}
+            <g>
+              <use
+                xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
+                x={-11.35}
+                y={-11.35}
+                width={markerSize * 1.5}
+                height={markerSize * 1.5}
+                className="backing"
+              />
+              <rect x="7" y="-12.75" width="15" height="10" fill={NamedColors.resolverBackground} />
+              <use
+                role="presentation"
+                xlinkHref={cubeSymbol}
+                x={markerPositionOffset}
+                y={markerPositionOffset}
+                width={markerSize}
+                height={markerSize}
+                opacity="1"
+                className="cube"
               >
-                {descriptionText}
-              </div>
-              <div
-                data-test-subject="nodeLabel"
+                <animateTransform
+                  attributeType="XML"
+                  attributeName="transform"
+                  type="scale"
+                  values="1 1; 1 .83; 1 .8; 1 .83; 1 1"
+                  dur="0.2s"
+                  begin="click"
+                  repeatCount="1"
+                  className="squish"
+                  ref={animationTarget}
+                />
+              </use>
+              <use
+                role="presentation"
+                xlinkHref={`#${SymbolIds.processNodeLabel}`}
+                x={markerPositionOffset + markerSize - 0.5}
+                y={labelYOffset}
+                width={(markerSize / 1.7647) * 5}
+                height={markerSize / 1.7647}
+                opacity="1"
+                fill={labelFill}
+              />
+              <text
+                x={markerPositionOffset + 0.7 * markerSize + 50 / 2}
+                y={labelYOffset + labelYHeight / 2}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="3.75"
+                fontWeight="bold"
+                fill={NamedColors.empty}
+                paintOrder="stroke"
+                tabIndex={-1}
+                style={{ letterSpacing: '-0.02px' }}
                 id={labelId}
-                style={{
-                  backgroundColor: labelBackground,
-                  padding: '.15em 0',
-                  textAlign: 'center',
-                  maxWidth: '100%',
-                  overflow: 'hidden',
-                  whiteSpace: 'nowrap',
-                  textOverflow: 'ellipsis',
-                  contain: 'content',
-                }}
               >
                 {eventModel.eventName(event)}
-              </div>
-            </div>
-          </div>
+              </text>
+              <text
+                x={markerPositionOffset + markerSize}
+                y={labelYOffset - 1}
+                textAnchor="start"
+                dominantBaseline="middle"
+                fontSize="2.67"
+                fill={descriptionFill}
+                id={descriptionId}
+                paintOrder="stroke"
+                fontWeight="bold"
+                style={{ textTransform: 'uppercase', letterSpacing: '-0.01px' }}
+              >
+                {descriptionText}
+              </text>
+            </g>
+          </svg>
         </EuiKeyboardAccessible>
       );
-      /* eslint-enable jsx-a11y/click-events-have-key-events */
     }
   )
 )`
   position: absolute;
+  display: block;
   text-align: left;
   font-size: 10px;
   user-select: none;
   box-sizing: border-box;
   border-radius: 10%;
+  padding: 4px;
   white-space: nowrap;
   will-change: left, top, width, height;
   contain: strict;

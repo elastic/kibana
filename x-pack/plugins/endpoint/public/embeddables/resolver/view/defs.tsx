@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from 'react';
-import { saturate } from 'polished';
+import { saturate, lighten } from 'polished';
 
 import {
   htmlIdGenerator,
@@ -79,6 +79,8 @@ const idGenerator = htmlIdGenerator();
  * Ids of paint servers to be referenced by fill and stroke attributes
  */
 export const PaintServerIds = {
+  runningProcess: idGenerator('psRunningProcess'),
+  runningTrigger: idGenerator('psRunningTrigger'),
   runningProcessCube: idGenerator('psRunningProcessCube'),
   runningTriggerCube: idGenerator('psRunningTriggerCube'),
   terminatedProcessCube: idGenerator('psTerminatedProcessCube'),
@@ -91,6 +93,46 @@ export const PaintServerIds = {
  */
 const PaintServers = memo(() => (
   <>
+    <linearGradient
+      id={PaintServerIds.runningProcess}
+      x1="0"
+      y1="0"
+      x2="1"
+      y2="0"
+      spreadMethod="reflect"
+      gradientUnits="objectBoundingBox"
+    >
+      <stop
+        offset="0%"
+        stopColor={saturate(0.7, lighten(0.05, NamedColors.runningProcessStart))}
+        stopOpacity="1"
+      />
+      <stop
+        offset="100%"
+        stopColor={saturate(0.7, lighten(0.05, NamedColors.runningProcessEnd))}
+        stopOpacity="1"
+      />
+    </linearGradient>
+    <linearGradient
+      id={PaintServerIds.runningTrigger}
+      x1="0"
+      y1="0"
+      x2="1"
+      y2="0"
+      spreadMethod="reflect"
+      gradientUnits="objectBoundingBox"
+    >
+      <stop
+        offset="0%"
+        stopColor={saturate(0.7, lighten(0.05, NamedColors.runningTriggerStart))}
+        stopOpacity="1"
+      />
+      <stop
+        offset="100%"
+        stopColor={saturate(0.7, lighten(0.05, NamedColors.runningTriggerEnd))}
+        stopOpacity="1"
+      />
+    </linearGradient>
     <linearGradient
       id={PaintServerIds.terminatedProcessCube}
       x1="-381.23752"
@@ -159,8 +201,20 @@ export const SymbolIds = {
  */
 const SymbolsAndShapes = memo(() => (
   <>
-    <symbol id={SymbolIds.processNodeLabel} viewBox="0 0 1 1" preserveAspectRatio="none">
-      <rect x="0" y="0" width="1" height="1" fill="inherit" strokeWidth="0" paintOrder="normal" />
+    <symbol
+      id={SymbolIds.processNodeLabel}
+      viewBox="0 0 144 25"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <rect
+        x="1"
+        y="1"
+        width="142"
+        height="23"
+        fill="inherit"
+        strokeWidth="0"
+        paintOrder="normal"
+      />
     </symbol>
     <symbol id={SymbolIds.runningProcessCube} viewBox="0 0 88 100">
       <title>Running Process</title>
