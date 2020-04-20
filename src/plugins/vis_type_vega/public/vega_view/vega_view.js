@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { View, parse } from 'vega-lib';
+import * as vega from 'vega-lib';
 import { VegaBaseView } from './vega_base_view';
 
 export class VegaView extends VegaBaseView {
@@ -25,7 +25,7 @@ export class VegaView extends VegaBaseView {
     // In some cases, Vega may be initialized twice... TBD
     if (!this._$container) return;
 
-    const view = new View(parse(this._parser.spec), this._vegaViewConfig);
+    const view = new vega.View(vega.parse(this._parser.spec), this._vegaViewConfig);
     this.setDebugValues(view, this._parser.spec, this._parser.vlspec);
 
     view.warn = this.onWarn.bind(this);

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../../../../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../../../../plugins/data/public';
+import { createGetterSetter } from '../../../kibana_utils/public';
+import { DataPublicPluginStart } from '../../../data/public';
 import { IUiSettingsClient, NotificationsStart, SavedObjectsStart } from 'kibana/public';
-import { dataPluginMock } from '../../../../../../../plugins/data/public/mocks';
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { dataPluginMock } from '../../../data/public/mocks';
+import { coreMock } from '../../../../core/public/mocks';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 setData(dataPluginMock.createStartContract());
