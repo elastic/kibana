@@ -23,7 +23,7 @@ import { dashboardSavedObjectTypeMigrations } from './dashboard_migrations';
 export const dashboardSavedObjectType: SavedObjectsType = {
   name: 'dashboard',
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   management: {
     icon: 'dashboardApp',
     defaultSearchField: 'title',
