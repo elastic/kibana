@@ -15,7 +15,10 @@ import {
 } from 'kibana/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
+import {
+  EncryptedSavedObjectsPluginStart,
+  EncryptedSavedObjectsPluginSetup,
+} from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import {
@@ -57,6 +60,7 @@ export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface IngestManagerAppContext {
@@ -91,6 +95,22 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
     if (deps.security) {
       this.security = deps.security;
     }
+
+    // Encrypted saved objects
+    deps.encryptedSavedObjects.registerType({
+      type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+      attributesToEncrypt: new Set(['api_key']),
+      attributesToExcludeFromAAD: new Set([
+        'name',
+        'type',
+        'api_key_id',
+        'config_id',
+        'created_at',
+        'updated_at',
+        'expire_at',
+        'active',
+      ]),
+    });
 
     // Register feature
     // TODO: Flesh out privileges
