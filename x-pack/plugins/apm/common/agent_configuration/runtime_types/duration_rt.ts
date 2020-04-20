@@ -8,18 +8,38 @@ import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 import { amountAndUnitToObject } from '../amount_and_unit';
 
+type DurationUnit = 'ms' | 's' | 'm';
 export const DURATION_UNITS = ['ms', 's', 'm'];
 
-export function getDurationRt({ min }: { min: number }) {
+interface Criteria {
+  min?: number;
+  max?: number;
+  unit?: DurationUnit;
+}
+
+function validateDuration(inputAsString: string, { min, max, unit }: Criteria) {
+  const { amount, unit: inputUnit } = amountAndUnitToObject(inputAsString);
+  const amountAsInt = parseInt(amount, 10);
+  const isValidUnit =
+    DURATION_UNITS.includes(inputUnit) && (unit ? unit === inputUnit : true);
+
+  const isValidAmount =
+    (min ? amountAsInt >= min : true) && (max ? amountAsInt <= max : true);
+
+  return isValidUnit && isValidAmount;
+}
+
+export function getDurationRt(criteria: Criteria | Criteria[]) {
   return new t.Type<string, string, unknown>(
     'durationRt',
     t.string.is,
     (input, context) => {
       return either.chain(t.string.validate(input, context), inputAsString => {
-        const { amount, unit } = amountAndUnitToObject(inputAsString);
-        const amountAsInt = parseInt(amount, 10);
-        const isValidUnit = DURATION_UNITS.includes(unit);
-        const isValid = amountAsInt >= min && isValidUnit;
+        const isValid = Array.isArray(criteria)
+          ? criteria
+              .map(_criteria => validateDuration(inputAsString, _criteria))
+              .some(result => result)
+          : validateDuration(inputAsString, criteria);
 
         return isValid
           ? t.success(inputAsString)

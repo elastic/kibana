@@ -101,7 +101,7 @@ Array [
       "s",
       "m",
     ],
-    "validationError": "Please specify an integer and a unit",
+    "validationError": "Must be between '1ms' and '1s'",
     "validationName": "durationRt",
   },
   Object {
@@ -146,7 +146,7 @@ Array [
       "s",
       "m",
     ],
-    "validationError": "Please specify an integer and a unit",
+    "validationError": "Must be at least '1m'",
     "validationName": "durationRt",
   },
   Object {
