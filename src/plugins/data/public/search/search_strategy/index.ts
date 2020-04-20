@@ -17,13 +17,8 @@
  * under the License.
  */
 
-import { SearchRequest, SearchResponse } from '../../fetch';
+export { SearchError, getSearchErrorType } from './search_error';
 
-export interface LegacyApiCaller {
-  search: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
-  msearch: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
-}
+export { SearchStrategyProvider, SearchStrategySearchParams } from './types';
 
-interface LegacyApiCallerResponse extends Promise<SearchResponse> {
-  abort: () => void;
-}
+export { defaultSearchStrategy } from './default_search_strategy';

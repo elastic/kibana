@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { FetchOptions, FetchHandlers, handleResponse } from '../fetch';
-import { defaultSearchStrategy } from './default_search_strategy';
-import { SearchRequest } from '../index';
+import { handleResponse } from './handle_response';
+import { FetchOptions, FetchHandlers } from './types';
+import { defaultSearchStrategy } from '../search_strategy';
+import { SearchRequest } from '..';
 
 export function callClient(
   searchRequests: SearchRequest[],
