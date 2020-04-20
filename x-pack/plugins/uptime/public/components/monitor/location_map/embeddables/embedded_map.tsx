@@ -24,7 +24,16 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../legacy/plugins/maps/
 import { Location } from '../../../../../common/runtime_types';
 
 import { getLayerList } from './map_config';
-import { UptimeThemeContext } from '../../../../contexts';
+import { UptimeThemeContext, UptimeStartupPluginsContext } from '../../../../contexts';
+import { MapEmbeddable, MapEmbeddableInput } from 'x-pack/legacy/plugins/maps/public';
+// import {
+//   ErrorEmbeddable,
+//   EmbeddableOutput,
+//   ViewMode,
+//   isErrorEmbeddable,
+// } from 'src/plugins/embeddable/public';
+// import { npStart } from 'ui/new_platform';
+import { isErrorEmbeddable, ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
 
 export interface EmbeddedMapProps {
   upPoints: LocationPoint[];
@@ -51,86 +60,88 @@ const EmbeddedPanel = styled.div`
   }
 `;
 
-// export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProps) => {
-//   const { colors } = useContext(UptimeThemeContext);
-//   const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
-//   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
-//   const factory = npStart.plugins.embeddable.getEmbeddableFactory<
-//     MapEmbeddableInput,
-//     EmbeddableOutput,
-//     MapEmbeddable
-//   >(MAP_SAVED_OBJECT_TYPE);
+export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProps) => {
+  const { colors } = useContext(UptimeThemeContext);
+  const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
+  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+  const { embeddable: embeddablePlugin } = useContext(UptimeStartupPluginsContext);
+  const factory = embeddablePlugin.getEmbeddableFactory('map');
+  // const factory = npStart.plugins.embeddable.getEmbeddableFactory<
+  //   MapEmbeddableInput,
+  //   EmbeddableOutput,
+  //   MapEmbeddable
+  // >(MAP_SAVED_OBJECT_TYPE);
 
-//   const input: MapEmbeddableInput = {
-//     id: uuid.v4(),
-//     filters: [],
-//     hidePanelTitles: true,
-//     refreshConfig: {
-//       value: 0,
-//       pause: false,
-//     },
-//     viewMode: ViewMode.VIEW,
-//     isLayerTOCOpen: false,
-//     hideFilterActions: true,
-//     // Zoom Lat/Lon values are set to make sure map is in center in the panel
-//     // It wil also omit Greenland/Antarctica etc
-//     mapCenter: {
-//       lon: 11,
-//       lat: 20,
-//       zoom: 0,
-//     },
-//     disableInteractive: true,
-//     disableTooltipControl: true,
-//     hideToolbarOverlay: true,
-//     hideLayerControl: true,
-//     hideViewControl: true,
-//   };
+  const input: MapEmbeddableInput = {
+    id: uuid.v4(),
+    filters: [],
+    hidePanelTitles: true,
+    refreshConfig: {
+      value: 0,
+      pause: false,
+    },
+    viewMode: ViewMode.VIEW,
+    isLayerTOCOpen: false,
+    hideFilterActions: true,
+    // Zoom Lat/Lon values are set to make sure map is in center in the panel
+    // It wil also omit Greenland/Antarctica etc
+    mapCenter: {
+      lon: 11,
+      lat: 20,
+      zoom: 0,
+    },
+    disableInteractive: true,
+    disableTooltipControl: true,
+    hideToolbarOverlay: true,
+    hideLayerControl: true,
+    hideViewControl: true,
+  };
 
-//   useEffect(() => {
-//     async function setupEmbeddable() {
-//       if (!factory) {
-//         throw new Error('Map embeddable not found.');
-//       }
-//       const embeddableObject = await factory.create({
-//         ...input,
-//         title: i18n.MAP_TITLE,
-//       });
+  useEffect(() => {
+    async function setupEmbeddable() {
+      if (!factory) {
+        throw new Error('Map embeddable not found.');
+      }
+      const embeddableObject = await factory.create({
+        ...input,
+        title: i18n.MAP_TITLE,
+      });
 
-//       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
-//         embeddableObject.setLayerList(getLayerList(upPoints, downPoints, colors));
-//       }
+      if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
+        embeddableObject.setLayerList(getLayerList(upPoints, downPoints, colors));
+      }
 
-//       setEmbeddable(embeddableObject);
-//     }
-//     setupEmbeddable();
+      setEmbeddable(embeddableObject);
+    }
+    setupEmbeddable();
 
-//     // we want this effect to execute exactly once after the component mounts
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, []);
+    // we want this effect to execute exactly once after the component mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-//   // update map layers based on points
-//   useEffect(() => {
-//     if (embeddable && !isErrorEmbeddable(embeddable)) {
-//       embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
-//     }
-//   }, [upPoints, downPoints, embeddable, colors]);
+  // update map layers based on points
+  useEffect(() => {
+    if (embeddable && !isErrorEmbeddable(embeddable)) {
+      embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
+    }
+  }, [upPoints, downPoints, embeddable, colors]);
 
-//   // We can only render after embeddable has already initialized
-//   useEffect(() => {
-//     if (embeddableRoot.current && embeddable) {
-//       embeddable.render(embeddableRoot.current);
-//     }
-//   }, [embeddable, embeddableRoot]);
+  // We can only render after embeddable has already initialized
+  useEffect(() => {
+    if (embeddableRoot.current && embeddable) {
+      embeddable.render(embeddableRoot.current);
+    }
+  }, [embeddable, embeddableRoot]);
 
-//   return (
-//     <EmbeddedPanel>
-//       <div
-//         data-test-subj="xpack.uptime.locationMap.embeddedPanel"
-//         className="embPanel__content"
-//         ref={embeddableRoot}
-//       />
-//     </EmbeddedPanel>
-//   );
-// });
+  return (
+    <EmbeddedPanel>
+      <div
+        data-test-subj="xpack.uptime.locationMap.embeddedPanel"
+        className="embPanel__content"
+        ref={embeddableRoot}
+      />
+    </EmbeddedPanel>
+  );
+});
 
-// EmbeddedMap.displayName = 'EmbeddedMap';
+EmbeddedMap.displayName = 'EmbeddedMap';

@@ -7,7 +7,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
-// import { LocationMap } from '../location_map';
+import { LocationMap } from '../location_map';
 import { UptimeRefreshContext } from '../../../contexts';
 import { MonitorLocations } from '../../../../common/runtime_types';
 import { MonitorStatusBar } from './monitor_status_bar';
@@ -55,9 +55,9 @@ export const MonitorStatusDetailsComponent = ({
         <EuiFlexItem grow={true}>
           <MonitorStatusBar monitorId={monitorId} />
         </EuiFlexItem>
-        {/* <WrapFlexItem grow={false}>
+        <WrapFlexItem grow={false}>
           <LocationMap monitorLocations={monitorLocations} />
-        </WrapFlexItem> */}
+        </WrapFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
