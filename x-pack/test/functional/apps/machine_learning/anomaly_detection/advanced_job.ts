@@ -110,13 +110,13 @@ export default function({ getService }: FtrProviderContext) {
   const testDataList = [
     {
       suiteTitle: 'with multiple metric detectors and custom datafeed settings',
-      jobSource: 'ecommerce',
+      jobSource: 'ft_ecommerce',
       jobId: `ec_advanced_1_${Date.now()}`,
       get jobIdClone(): string {
         return `${this.jobId}_clone`;
       },
       jobDescription:
-        'Create advanced job from ecommerce dataset with multiple metric detectors and custom datafeed settings',
+        'Create advanced job from ft_ecommerce dataset with multiple metric detectors and custom datafeed settings',
       jobGroups: ['automated', 'ecommerce', 'advanced'],
       get jobGroupsClone(): string[] {
         return [...this.jobGroups, 'clone'];
@@ -207,13 +207,13 @@ export default function({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'with categorization detector and default datafeed settings',
-      jobSource: 'ecommerce',
+      jobSource: 'ft_ecommerce',
       jobId: `ec_advanced_2_${Date.now()}`,
       get jobIdClone(): string {
         return `${this.jobId}_clone`;
       },
       jobDescription:
-        'Create advanced job from ecommerce dataset with a categorization detector and default datafeed settings',
+        'Create advanced job from ft_ecommerce dataset with a categorization detector and default datafeed settings',
       jobGroups: ['automated', 'ecommerce', 'advanced'],
       get jobGroupsClone(): string[] {
         return [...this.jobGroups, 'clone'];
@@ -274,16 +274,20 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
+  const calendarId = `wizard-test-calendar_${Date.now()}`;
+
   describe('advanced job', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
-      await esArchiver.load('ml/ecommerce');
-      await ml.api.createCalendar('wizard-test-calendar');
+      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
+      await ml.api.createCalendar(calendarId);
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/ecommerce');
       await ml.api.cleanMlIndices();
     });
 
@@ -475,7 +479,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job creation assigns calendars', async () => {
-          await ml.jobWizardCommon.addCalendar('wizard-test-calendar');
+          await ml.jobWizardCommon.addCalendar(calendarId);
         });
 
         it('job creation displays the model plot switch', async () => {
@@ -734,7 +738,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job cloning persists assigned calendars', async () => {
-          await ml.jobWizardCommon.assertCalendarsSelection(['wizard-test-calendar']);
+          await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);
         });
 
         it('job cloning pre-fills the model plot switch', async () => {
