@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SettingDefinition } from '../../../../../../../../../../plugins/apm/common/agent_configuration/setting_definitions/types';
-import { isValid } from '../../../../../../../../../../plugins/apm/common/agent_configuration/setting_definitions';
+import { validateSetting } from '../../../../../../../../../../plugins/apm/common/agent_configuration/setting_definitions';
 import {
   amountAndUnitToString,
   amountAndUnitToObject
@@ -93,7 +93,8 @@ function FormRow({
             <EuiFieldNumber
               placeholder={setting.placeholder}
               value={(amount as unknown) as number}
-              min={'min' in setting ? setting.min : 1}
+              min={setting.min}
+              max={setting.max}
               onChange={e =>
                 onChange(
                   setting.key,
@@ -137,7 +138,8 @@ export function SettingFormRow({
   value?: string;
   onChange: (key: string, value: string) => void;
 }) {
-  const isInvalid = value != null && value !== '' && !isValid(setting, value);
+  const { isValid, message } = validateSetting(setting, value);
+  const isInvalid = value != null && value !== '' && !isValid;
 
   return (
     <EuiDescribedFormGroup
@@ -170,11 +172,7 @@ export function SettingFormRow({
         </>
       }
     >
-      <EuiFormRow
-        label={setting.key}
-        error={setting.validationError}
-        isInvalid={isInvalid}
-      >
+      <EuiFormRow label={setting.key} error={message} isInvalid={isInvalid}>
         <FormRow onChange={onChange} setting={setting} value={value} />
       </EuiFormRow>
     </EuiDescribedFormGroup>

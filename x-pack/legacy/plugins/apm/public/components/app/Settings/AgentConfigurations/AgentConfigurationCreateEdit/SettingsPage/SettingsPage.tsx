@@ -29,7 +29,7 @@ import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/
 import {
   filterByAgent,
   settingDefinitions,
-  isValid
+  validateSetting
 } from '../../../../../../../../../../plugins/apm/common/agent_configuration/setting_definitions';
 import { saveConfig } from './saveConfig';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
@@ -79,7 +79,7 @@ export function SettingsPage({
         // every setting must be valid for the form to be valid
         .every(def => {
           const value = newConfig.settings[def.key];
-          return isValid(def, value);
+          return validateSetting(def, value).isValid;
         })
     );
   }, [newConfig.settings]);
