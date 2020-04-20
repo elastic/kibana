@@ -101,7 +101,6 @@ export interface ESLicense {
 
 export interface StatsCollectionContext {
   logger: Logger;
-  isDev: boolean;
   version: string;
 }
 
