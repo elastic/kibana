@@ -207,117 +207,32 @@ describe('data modeling', () => {
               buckets: {
                 all: {
                   doc_count: 54,
-                  layoutTypes: {
-                    doc_count: 23,
-                    pdf: {
-                      doc_count_error_upper_bound: 0,
-                      sum_other_doc_count: 0,
-                      buckets: [
-                        { key: 'preserve_layout', doc_count: 13 },
-                        { key: 'print', doc_count: 10 },
-                      ],
-                    },
-                  },
-                  objectTypes: {
-                    doc_count: 23,
-                    pdf: {
-                      doc_count_error_upper_bound: 0,
-                      sum_other_doc_count: 0,
-                      buckets: [{ key: 'dashboard', doc_count: 23 }],
-                    },
-                  },
-                  statusTypes: {
-                    doc_count_error_upper_bound: 0,
-                    sum_other_doc_count: 0,
-                    buckets: [
-                      { key: 'pending', doc_count: 33 },
-                      { key: 'completed', doc_count: 20 },
-                      { key: 'processing', doc_count: 1 },
-                    ],
-                  },
-                  jobTypes: {
-                    doc_count_error_upper_bound: 0,
-                    sum_other_doc_count: 0,
-                    buckets: [
-                      { key: 'csv', doc_count: 27 },
-                      { key: 'printable_pdf', doc_count: 23 },
-                      { key: 'PNG', doc_count: 4 },
-                    ],
-                  },
+                  layoutTypes: { doc_count: 23, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'preserve_layout', doc_count: 13 }, { key: 'print', doc_count: 10 }, ], }, },
+                  objectTypes: { doc_count: 23, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'dashboard', doc_count: 23 }], }, },
+                  statusTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'pending', doc_count: 33 }, { key: 'completed', doc_count: 20 }, { key: 'processing', doc_count: 1 }, ], },
+                  jobTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'csv', doc_count: 27 }, { key: 'printable_pdf', doc_count: 23 }, { key: 'PNG', doc_count: 4 }, ], },
+                  statusByApp: {},
                 },
                 lastDay: {
                   doc_count: 11,
-                  layoutTypes: {
-                    doc_count: 2,
-                    pdf: {
-                      doc_count_error_upper_bound: 0,
-                      sum_other_doc_count: 0,
-                      buckets: [{ key: 'print', doc_count: 2 }],
-                    },
-                  },
-                  objectTypes: {
-                    doc_count: 2,
-                    pdf: {
-                      doc_count_error_upper_bound: 0,
-                      sum_other_doc_count: 0,
-                      buckets: [{ key: 'dashboard', doc_count: 2 }],
-                    },
-                  },
-                  statusTypes: {
-                    doc_count_error_upper_bound: 0,
-                    sum_other_doc_count: 0,
-                    buckets: [{ key: 'pending', doc_count: 11 }],
-                  },
-                  jobTypes: {
-                    doc_count_error_upper_bound: 0,
-                    sum_other_doc_count: 0,
-                    buckets: [
-                      { key: 'csv', doc_count: 5 },
-                      { key: 'PNG', doc_count: 4 },
-                      { key: 'printable_pdf', doc_count: 2 },
-                    ],
-                  },
+                  layoutTypes: { doc_count: 2, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'print', doc_count: 2 }], }, },
+                  objectTypes: { doc_count: 2, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'dashboard', doc_count: 2 }], }, },
+                  statusTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'pending', doc_count: 11 }], },
+                  jobTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'csv', doc_count: 5 }, { key: 'PNG', doc_count: 4 }, { key: 'printable_pdf', doc_count: 2 }, ], },
+                  statusByApp: {},
                 },
                 last7Days: {
                   doc_count: 27,
-                  layoutTypes: {
-                    doc_count: 13,
-                    pdf: {
-                      doc_count_error_upper_bound: 0,
-                      sum_other_doc_count: 0,
-                      buckets: [
-                        { key: 'print', doc_count: 10 },
-                        { key: 'preserve_layout', doc_count: 3 },
-                      ],
-                    },
-                  },
-                  objectTypes: {
-                    doc_count: 13,
-                    pdf: {
-                      doc_count_error_upper_bound: 0,
-                      sum_other_doc_count: 0,
-                      buckets: [{ key: 'dashboard', doc_count: 13 }],
-                    },
-                  },
-                  statusTypes: {
-                    doc_count_error_upper_bound: 0,
-                    sum_other_doc_count: 0,
-                    buckets: [{ key: 'pending', doc_count: 27 }],
-                  },
-                  jobTypes: {
-                    doc_count_error_upper_bound: 0,
-                    sum_other_doc_count: 0,
-                    buckets: [
-                      { key: 'printable_pdf', doc_count: 13 },
-                      { key: 'csv', doc_count: 10 },
-                      { key: 'PNG', doc_count: 4 },
-                    ],
-                  },
+                  layoutTypes: { doc_count: 13, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'print', doc_count: 10 }, { key: 'preserve_layout', doc_count: 3 }, ], }, },
+                  objectTypes: { doc_count: 13, pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'dashboard', doc_count: 13 }], }, },
+                  statusTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [{ key: 'pending', doc_count: 27 }], },
+                  jobTypes: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [ { key: 'printable_pdf', doc_count: 13 }, { key: 'csv', doc_count: 10 }, { key: 'PNG', doc_count: 4 }, ], },
+                  statusByApp: {},
                 },
               },
             },
           },
-        })
+        } as SearchResponse) // prettier-ignore
       )
     );
 
