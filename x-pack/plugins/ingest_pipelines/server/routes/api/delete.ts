@@ -9,21 +9,21 @@ import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 
 const paramsSchema = schema.object({
-  nameOrNames: schema.string(),
+  names: schema.string(),
 });
 
 export const registerDeleteRoute = ({ router, license }: RouteDependencies): void => {
   router.delete(
     {
-      path: `${API_BASE_PATH}/{nameOrNames}`,
+      path: `${API_BASE_PATH}/{names}`,
       validate: {
         params: paramsSchema,
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
-      const { nameOrNames } = req.params;
-      const pipelineNames = nameOrNames.split(',');
+      const { names } = req.params;
+      const pipelineNames = names.split(',');
 
       const response: { itemsDeleted: string[]; errors: any[] } = {
         itemsDeleted: [],
