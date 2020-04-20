@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import moment from 'moment';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -82,10 +83,9 @@ export function getActionType(): ActionTypeModel {
             i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.invalidTimestamp',
               {
-                defaultMessage: 'Timestamp must be formatted as a date, such as {now}.',
-                values: {
-                  now: new Date().toISOString(),
-                },
+                defaultMessage:
+                  'Timestamp must be a valid date, such as {nowShortFormat} or {nowLongFormat}.',
+                values: getValidTimestampExamples(),
               }
             )
           );
@@ -556,3 +556,11 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     </Fragment>
   );
 };
+
+function getValidTimestampExamples() {
+  const now = moment();
+  return {
+    nowShortFormat: now.format('YYYY-MM-DD'),
+    nowLongFormat: now.format('YYYY-MM-DD h:mm:ss'),
+  };
+}
