@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  TIMELINE_IMPORT_URL,
+  TIMELINE_EXPORT_URL,
+} from '../../../../../../../plugins/siem/common/constants';
 import { ImportDataProps, ImportDataResponse } from '../../detection_engine/rules';
 import { KibanaServices } from '../../../lib/kibana';
-import { TIMELINE_IMPORT_URL, TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { ExportSelectedData } from '../../../components/generic_downloader';
 
 export const importTimelines = async ({

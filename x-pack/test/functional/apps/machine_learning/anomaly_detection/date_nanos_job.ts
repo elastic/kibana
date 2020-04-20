@@ -104,7 +104,7 @@ export default function({ getService }: FtrProviderContext) {
   const testDataList = [
     {
       suiteTitle: 'with count detector and model plot disabled',
-      jobSource: 'event_rate_gen_trend_nanos',
+      jobSource: 'ft_event_rate_gen_trend_nanos',
       jobId: `event_rate_nanos_count_1_${Date.now()}`,
       jobDescription:
         'Create advanced job based on the event rate dataset with a date_nanos time field, 30m bucketspan and count',
@@ -168,12 +168,18 @@ export default function({ getService }: FtrProviderContext) {
   describe('job on data set with date_nanos time field', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
-      await esArchiver.load('ml/event_rate_nanos');
+      await esArchiver.loadIfNeeded('ml/event_rate_nanos');
+      await ml.testResources.createIndexPatternIfNeeded(
+        'ft_event_rate_gen_trend_nanos',
+        '@timestamp'
+      );
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
+      await esArchiver.loadIfNeeded('ml/event_rate_nanos');
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/event_rate_nanos');
       await ml.api.cleanMlIndices();
     });
 

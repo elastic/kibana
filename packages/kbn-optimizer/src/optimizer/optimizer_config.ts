@@ -91,14 +91,14 @@ export class OptimizerConfig {
 
     /**
      * BEWARE: this needs to stay roughly synchronized with
-     * `src/core/server/config/env.ts` which determins which paths
+     * `src/core/server/config/env.ts` which determines which paths
      * should be searched for plugins to load
      */
     const pluginScanDirs = options.pluginScanDirs || [
       Path.resolve(repoRoot, 'src/plugins'),
       ...(oss ? [] : [Path.resolve(repoRoot, 'x-pack/plugins')]),
       Path.resolve(repoRoot, 'plugins'),
-      ...(examples ? [Path.resolve('examples')] : []),
+      ...(examples ? [Path.resolve('examples'), Path.resolve('x-pack/examples')] : []),
       Path.resolve(repoRoot, '../kibana-extra'),
     ];
     if (!pluginScanDirs.every(p => Path.isAbsolute(p))) {
