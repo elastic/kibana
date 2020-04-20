@@ -17,7 +17,9 @@ interface PageHeaderProps {
   extraLinks?: boolean;
   datePicker?: boolean;
 }
-
+const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
+  defaultMessage: 'Settings',
+});
 export const PageHeader = React.memo(
   ({ headingText, extraLinks = false, datePicker = true }: PageHeaderProps) => {
     const datePickerComponent = datePicker ? (
@@ -26,9 +28,6 @@ export const PageHeader = React.memo(
       </EuiFlexItem>
     ) : null;
 
-    const settingsLinkText = i18n.translate('xpack.uptime.page_header.settingsLink', {
-      defaultMessage: 'Settings',
-    });
     const extraLinkComponents = !extraLinks ? null : (
       <EuiFlexGroup alignItems="flexEnd">
         <EuiFlexItem grow={false}>
@@ -37,7 +36,7 @@ export const PageHeader = React.memo(
         <EuiFlexItem grow={false}>
           <Link to={SETTINGS_ROUTE}>
             <EuiButtonEmpty data-test-subj="settings-page-link" iconType="gear">
-              {settingsLinkText}
+              {SETTINGS_LINK_TEXT}
             </EuiButtonEmpty>
           </Link>
         </EuiFlexItem>
