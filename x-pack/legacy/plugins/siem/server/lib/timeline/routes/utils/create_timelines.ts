@@ -4,30 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEmpty } from 'lodash/fp';
-import { Timeline } from '../../saved_object';
-import { PinnedEvent } from '../../../pinned_event/saved_object';
-import { Note } from '../../../note/saved_object';
+import * as timelineLib from '../../saved_object';
+import * as pinnedEventLib from '../../../pinned_event/saved_object';
+import * as noteLib from '../../../note/saved_object';
 import { FrameworkRequest } from '../../../framework';
 import { SavedTimeline } from '../../types';
 import { NoteResult } from '../../../../../public/graphql/types';
 import { SavedNote } from '../../../note/types';
-import { ResponseNote } from '../../../../graphql/types';
+import { TimelineType } from '../../../../graphql/types';
 
-const pinnedEventLib = new PinnedEvent();
-const timelineLib = new Timeline();
-const noteLib = new Note();
+export const CREATE_TIMELINE_ERROR_MESSAGE =
+  'UPDATE timeline with POST is not allowed, please use PATCH instead';
+export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
+  'UPDATE template timeline with POST is not allowed, please use PATCH instead';
 
 export const saveTimelines = async (
   frameworkRequest: FrameworkRequest,
   timeline: SavedTimeline,
   timelineSavedObjectId?: string | null,
-  timelineVersion?: string | null
+  timelineVersion?: string | null,
+  timelineType?: TimelineType | null
 ) => {
   const newTimelineRes = await timelineLib.persistTimeline(
     frameworkRequest,
     timelineSavedObjectId ?? null,
     timelineVersion ?? null,
-    timeline
+    timeline,
+    timelineType === TimelineType.template ? TimelineType.template : TimelineType.default
   );
 
   return {
@@ -82,6 +85,7 @@ export const createTimelines = async (
   timeline: SavedTimeline,
   timelineSavedObjectId?: string | null,
   timelineVersion?: string | null,
+  timelineType?: TimelineType | null,
   pinnedEventIds?: string[] | null,
   notes?: NoteResult[],
   existingNoteIds?: string[]
@@ -90,7 +94,8 @@ export const createTimelines = async (
     frameworkRequest,
     timeline,
     timelineSavedObjectId,
-    timelineVersion
+    timelineVersion,
+    timelineType
   );
 
   let myPromises: unknown[] = [];
@@ -131,4 +136,21 @@ export const getTimeline = async (frameworkRequest: FrameworkRequest, savedObjec
     // eslint-disable-next-line no-empty
   } catch (e) {}
   return timeline;
+};
+
+export const getTemplateTimeline = async (
+  frameworkRequest: FrameworkRequest,
+  templateTimelineId: string
+) => {
+  let templateTimeline = null;
+  try {
+    templateTimeline = await timelineLib.getTimelineByTemplateTimelineId(
+      frameworkRequest,
+      templateTimelineId
+    );
+    // eslint-disable-next-line no-empty
+  } catch (e) {
+    return null;
+  }
+  return templateTimeline.timeline[0];
 };

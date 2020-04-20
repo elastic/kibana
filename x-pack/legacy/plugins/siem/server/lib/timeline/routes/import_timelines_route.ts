@@ -38,8 +38,6 @@ import { LegacyServices } from '../../../types';
 import { validate } from '../../detection_engine/routes/rules/validate';
 import { FrameworkRequest } from '../../framework';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { createTemplateTimelines } from './utils/create_template_timelines';
-import { TimelineType } from '../../../graphql/types';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
@@ -138,22 +136,16 @@ export const importTimelinesRoute = (
                       );
 
                       if (timeline == null) {
-                        if (timelineType === TimelineType.template) {
-                          newTimelineSavedObjectId = await createTemplateTimelines(
-                            (frameworkRequest as unknown) as FrameworkRequest,
-                            parsedTimelineObject
-                          );
-                        } else {
-                          newTimelineSavedObjectId = await createTimelines(
-                            (frameworkRequest as unknown) as FrameworkRequest,
-                            parsedTimelineObject,
-                            null, // timelineSavedObjectId
-                            null, // timelineVersion
-                            pinnedEventIds,
-                            [...globalNotes, ...eventNotes],
-                            [] // existing note ids
-                          );
-                        }
+                        newTimelineSavedObjectId = await createTimelines(
+                          (frameworkRequest as unknown) as FrameworkRequest,
+                          parsedTimelineObject,
+                          null, // timelineSavedObjectId
+                          null, // timelineVersion
+                          timelineType,
+                          pinnedEventIds,
+                          [...globalNotes, ...eventNotes],
+                          [] // existing note ids
+                        );
 
                         resolve({
                           timeline_id: newTimelineSavedObjectId,

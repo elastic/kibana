@@ -8,7 +8,6 @@ import { unionWithNullType } from '../../../framework';
 import { SavedTimelineRuntimeType, TimelineTypeLiteralRt } from '../../types';
 
 export const createTimelineSchema = rt.type({
-  templateTimelineId: unionWithNullType(rt.string),
   timeline: SavedTimelineRuntimeType,
   timelineId: unionWithNullType(rt.string),
   version: unionWithNullType(rt.string),

@@ -154,6 +154,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   kqlQuery: unionWithNullType(SavedFilterQueryQueryRuntimeType),
   title: unionWithNullType(runtimeTypes.string),
   templateTimelineId: unionWithNullType(runtimeTypes.string),
+  templateTimelineVersion: unionWithNullType(runtimeTypes.number),
   timelineType: unionWithNullType(TimelineTypeLiteralRt),
   dateRange: unionWithNullType(SavedDateRangePickerRuntimeType),
   savedQueryId: unionWithNullType(runtimeTypes.string),

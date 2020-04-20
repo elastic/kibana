@@ -3,20 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { set, omit, isNil } from 'lodash/fp';
 import { TIMELINE_URL } from '../../../../common/constants';
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
-import { createTimelines, getTimeline } from './utils/create_timelines';
+import { createTimelines, getTimeline, getTemplateTimeline } from './utils/create_timelines';
 import { FrameworkRequest } from '../../framework';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
 import { SetupPlugins } from '../../../plugin';
 
-import { timelineSavedObjectOmittedFields } from './utils/import_timelines';
 import { updateTimelineSchema } from './schemas/update_timelines_schema';
-import { createTemplateTimelines } from './utils/create_template_timelines';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { TimelineType } from '../../../graphql/types';
+import { buildFrameworkRequest } from './utils/common';
+import { checkIsFailureCases } from './utils/update_timelines';
 
 export const updateTimelinesRoute = (
   router: IRouter,
@@ -38,75 +37,48 @@ export const updateTimelinesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const savedObjectsClient = context.core.savedObjects.client;
-        const user = await security?.authc.getCurrentUser(request);
-        let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);
-        frameworkRequest = set('user', user, frameworkRequest);
-
-        const {
-          timelineId,
-          templateTimelineId,
-          templateTimelineVersion,
-          timeline,
-          timelineType,
-          version,
-        } = request.body;
-        const isHandlingTemplateTimeline = timeline.timelineType === TimelineType.template;
+        const frameworkRequest = buildFrameworkRequest(context, security, request);
+        const { timelineId, timeline, version } = request.body;
+        const { templateTimelineId, templateTimelineVersion, timelineType } = timeline;
+        const isHandlingTemplateTimeline = timelineType === TimelineType.template;
 
         const existTimeline =
-          timeline.savedObjectId != null
-            ? await getTimeline((frameworkRequest as unknown) as FrameworkRequest, timelineId)
-            : null;
+          timelineId != null ? await getTimeline(frameworkRequest, timelineId) : null;
         const existTemplateTimeline =
-          templateTimelineId != null ? await getTemplateTimeline() : null;
+          templateTimelineId != null
+            ? await getTemplateTimeline(frameworkRequest, templateTimelineId)
+            : null;
 
-        if (!isHandlingTemplateTimeline && existTimeline == null) {
-          // Throw error to create timeline in patch
-        } else if (isHandlingTemplateTimeline && existTemplateTimeline == null) {
-          // Throw error to create template timeline in patch
-        } else if (
-          isHandlingTemplateTimeline &&
-          existTimeline != null &&
-          existTemplateTimeline != null &&
-          existTimeline.savedObjectId !== existTemplateTimeline.savedObjectId
-        ) {
-          // Throw error you can not have a no matching between your timeline and your template timeline during an update
-        } else if (!isHandlingTemplateTimeline && existTimeline?.version !== version) {
-          // throw error 409 conflict timeline
-        } else if (
-          isHandlingTemplateTimeline &&
-          existTemplateTimeline.templateTimelineVersion == null &&
-          existTemplateTimeline.version !== version
-        ) {
-          // throw error 409 conflict timeline
-        } else if (
-          isHandlingTemplateTimeline &&
-          existTemplateTimeline.templateTimelineVersion != null &&
-          existTemplateTimeline.templateTimelineVersion < templateTimelineVersion
-        ) {
-          // Throw error you can not update a template timeline version with an old version
+        const errorObj = checkIsFailureCases(
+          isHandlingTemplateTimeline,
+          version,
+          templateTimelineVersion ?? null,
+          existTimeline,
+          existTemplateTimeline
+        );
+        if (errorObj != null) {
+          return siemResponse.error(errorObj);
         }
 
-          await createTimelines(
-            (frameworkRequest as unknown) as FrameworkRequest,
-            timeline,
-            timelineId,
-            version,
-            isHandlingTemplateTimeline: { templateTimelineId, templateTimelineVersion} : null
-          );
-          return response.ok({
-            body: {
-              data: {
-                persistTimeline: {
-                  message: 'success',
-                  timeline,
-                },
+        await createTimelines(
+          (frameworkRequest as unknown) as FrameworkRequest,
+          timeline,
+          timelineId,
+          version,
+          isHandlingTemplateTimeline ? TimelineType.template : TimelineType.default
+        );
+        return response.ok({
+          body: {
+            data: {
+              persistTimeline: {
+                message: 'success',
+                timeline,
               },
             },
-          });
+          },
+        });
       } catch (err) {
         const error = transformError(err);
-
         return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,

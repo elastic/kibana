@@ -6,13 +6,11 @@
 
 import * as rt from 'io-ts';
 import { unionWithNullType } from '../../../framework';
-import { SavedTimelineRuntimeType, TimelineTypeLiteralRt } from '../../types';
+import { SavedTimelineRuntimeType } from '../../types';
 
 export const updateTimelineSchema = rt.type({
-  templateTimelineId: unionWithNullType(rt.string),
   timeline: SavedTimelineRuntimeType,
   timelineId: unionWithNullType(rt.string),
   version: unionWithNullType(rt.string),
-  timelineType: TimelineTypeLiteralRt,
   pinndedEventIds: rt.array(unionWithNullType(rt.string)),
 });

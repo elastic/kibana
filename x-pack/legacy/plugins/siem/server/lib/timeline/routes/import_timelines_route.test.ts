@@ -86,34 +86,22 @@ describe('import timelines', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
-          Timeline: jest.fn().mockImplementation(() => {
-            return {
-              getTimeline: mockGetTimeline.mockReturnValue(null),
-              persistTimeline: mockPersistTimeline.mockReturnValue({
-                timeline: { savedObjectId: newTimelineSavedObjectId, version: newTimelineVersion },
-              }),
-            };
+          getTimeline: mockGetTimeline.mockReturnValue(null),
+          persistTimeline: mockPersistTimeline.mockReturnValue({
+            timeline: { savedObjectId: newTimelineSavedObjectId, version: newTimelineVersion },
           }),
         };
       });
 
       jest.doMock('../../pinned_event/saved_object', () => {
         return {
-          PinnedEvent: jest.fn().mockImplementation(() => {
-            return {
-              persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
-            };
-          }),
+          persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
         };
       });
 
       jest.doMock('../../note/saved_object', () => {
         return {
-          Note: jest.fn().mockImplementation(() => {
-            return {
-              persistNote: mockPersistNote,
-            };
-          }),
+          persistNote: mockPersistNote,
         };
       });
 
@@ -232,32 +220,20 @@ describe('import timelines', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
-          Timeline: jest.fn().mockImplementation(() => {
-            return {
-              getTimeline: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
-              persistTimeline: mockPersistTimeline,
-            };
-          }),
+          getTimeline: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
+          persistTimeline: mockPersistTimeline,
         };
       });
 
       jest.doMock('../../pinned_event/saved_object', () => {
         return {
-          PinnedEvent: jest.fn().mockImplementation(() => {
-            return {
-              persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
-            };
-          }),
+          persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
         };
       });
 
       jest.doMock('../../note/saved_object', () => {
         return {
-          Note: jest.fn().mockImplementation(() => {
-            return {
-              persistNote: mockPersistNote,
-            };
-          }),
+          persistNote: mockPersistNote,
         };
       });
 
@@ -288,36 +264,24 @@ describe('import timelines', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
-          Timeline: jest.fn().mockImplementation(() => {
-            return {
-              getTimeline: mockGetTimeline.mockReturnValue(null),
-              persistTimeline: mockPersistTimeline.mockReturnValue({
-                timeline: { savedObjectId: '79deb4c0-6bc1-11ea-9999-f5341fb7a189' },
-              }),
-            };
+          getTimeline: mockGetTimeline.mockReturnValue(null),
+          persistTimeline: mockPersistTimeline.mockReturnValue({
+            timeline: { savedObjectId: '79deb4c0-6bc1-11ea-9999-f5341fb7a189' },
           }),
         };
       });
 
       jest.doMock('../../pinned_event/saved_object', () => {
         return {
-          PinnedEvent: jest.fn().mockImplementation(() => {
-            return {
-              persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline.mockReturnValue(
-                new Error('Test error')
-              ),
-            };
-          }),
+          persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline.mockReturnValue(
+            new Error('Test error')
+          ),
         };
       });
 
       jest.doMock('../../note/saved_object', () => {
         return {
-          Note: jest.fn().mockImplementation(() => {
-            return {
-              persistNote: mockPersistNote,
-            };
-          }),
+          persistNote: mockPersistNote,
         };
       });
     });

@@ -13,11 +13,7 @@ import {
   inputTemplateTimeline,
   createTemplateTimelineWithTimelineId,
 } from './__mocks__/request_responses';
-import {
-  serverMock,
-  requestContextMock,
-  requestMock,
-} from '../../detection_engine/routes/__mocks__';
+import { serverMock, requestContextMock } from '../../detection_engine/routes/__mocks__';
 import { SecurityPluginSetup } from '../../../../../../../plugins/security/server';
 
 import {
@@ -30,6 +26,10 @@ import { IRouter } from '../../../../../../../../src/core/server/http/router';
 import { LegacyServices } from '../../../types';
 import { SetupPlugins } from '../../../plugin';
 import { TimelineType } from '../../../../public/graphql/types';
+import {
+  CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
+  CREATE_TIMELINE_ERROR_MESSAGE,
+} from './utils/create_timelines';
 
 describe('create timelines', () => {
   let config: jest.Mock;
@@ -81,37 +81,25 @@ describe('create timelines', () => {
       beforeEach(async () => {
         jest.doMock('../saved_object', () => {
           return {
-            Timeline: jest.fn().mockImplementation(() => {
-              return {
-                getTimeline: mockGetTimeline.mockReturnValue(null),
-                persistTimeline: mockPersistTimeline.mockReturnValue({
-                  timeline: {
-                    savedObjectId: newTimelineSavedObjectId,
-                    version: newTimelineVersion,
-                  },
-                }),
-              };
+            getTimeline: mockGetTimeline.mockReturnValue(null),
+            persistTimeline: mockPersistTimeline.mockReturnValue({
+              timeline: {
+                savedObjectId: newTimelineSavedObjectId,
+                version: newTimelineVersion,
+              },
             }),
           };
         });
 
         jest.doMock('../../pinned_event/saved_object', () => {
           return {
-            PinnedEvent: jest.fn().mockImplementation(() => {
-              return {
-                persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
-              };
-            }),
+            persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
         jest.doMock('../../note/saved_object', () => {
           return {
-            Note: jest.fn().mockImplementation(() => {
-              return {
-                persistNote: mockPersistNote,
-              };
-            }),
+            persistNote: mockPersistNote,
           };
         });
 
@@ -159,32 +147,20 @@ describe('create timelines', () => {
       beforeEach(() => {
         jest.doMock('../saved_object', () => {
           return {
-            Timeline: jest.fn().mockImplementation(() => {
-              return {
-                getTimeline: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
-                persistTimeline: mockPersistTimeline,
-              };
-            }),
+            getTimeline: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
+            persistTimeline: mockPersistTimeline,
           };
         });
 
         jest.doMock('../../pinned_event/saved_object', () => {
           return {
-            PinnedEvent: jest.fn().mockImplementation(() => {
-              return {
-                persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
-              };
-            }),
+            persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
         jest.doMock('../../note/saved_object', () => {
           return {
-            Note: jest.fn().mockImplementation(() => {
-              return {
-                persistNote: mockPersistNote,
-              };
-            }),
+            persistNote: mockPersistNote,
           };
         });
 
@@ -198,7 +174,7 @@ describe('create timelines', () => {
           context
         );
         expect(response.body).toEqual({
-          message: createTimelinesRoute.CREATE_TIMELINE_ERROR_MESSAGE,
+          message: CREATE_TIMELINE_ERROR_MESSAGE,
           status_code: 405,
         });
       });
@@ -206,44 +182,32 @@ describe('create timelines', () => {
   });
 
   describe('Manipulate template timeline', () => {
-    describe.only('Create a new template timeline', () => {
+    describe('Create a new template timeline', () => {
       beforeEach(async () => {
         jest.doMock('../saved_object', () => {
           return {
-            Timeline: jest.fn().mockImplementation(() => {
-              return {
-                getTimeline: mockGetTimeline.mockReturnValue(null),
-                persistTimeline: mockPersistTimeline.mockReturnValue({
-                  code: 200,
-                  message: 'success',
-                  timeline: {
-                    ...inputTimeline,
-                    timelineType: TimelineType.template,
-                    templateTimelineId: 'new template timeline id',
-                  },
-                }),
-              };
+            getTimeline: mockGetTimeline.mockReturnValue(null),
+            persistTimeline: mockPersistTimeline.mockReturnValue({
+              code: 200,
+              message: 'success',
+              timeline: {
+                ...inputTimeline,
+                timelineType: TimelineType.template,
+                templateTimelineId: 'new template timeline id',
+              },
             }),
           };
         });
 
         jest.doMock('../../pinned_event/saved_object', () => {
           return {
-            PinnedEvent: jest.fn().mockImplementation(() => {
-              return {
-                persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
-              };
-            }),
+            persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
         jest.doMock('../../note/saved_object', () => {
           return {
-            Note: jest.fn().mockImplementation(() => {
-              return {
-                persistNote: mockPersistNote,
-              };
-            }),
+            persistNote: mockPersistNote,
           };
         });
 
@@ -291,32 +255,20 @@ describe('create timelines', () => {
       beforeEach(() => {
         jest.doMock('../saved_object', () => {
           return {
-            Timeline: jest.fn().mockImplementation(() => {
-              return {
-                getTimeline: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
-                persistTimeline: mockPersistTimeline,
-              };
-            }),
+            getTimeline: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
+            persistTimeline: mockPersistTimeline,
           };
         });
 
         jest.doMock('../../pinned_event/saved_object', () => {
           return {
-            PinnedEvent: jest.fn().mockImplementation(() => {
-              return {
-                persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
-              };
-            }),
+            persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
         jest.doMock('../../note/saved_object', () => {
           return {
-            Note: jest.fn().mockImplementation(() => {
-              return {
-                persistNote: mockPersistNote,
-              };
-            }),
+            persistNote: mockPersistNote,
           };
         });
 
@@ -330,7 +282,7 @@ describe('create timelines', () => {
           context
         );
         expect(response.body).toEqual({
-          message: createTimelinesRoute.CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
+          message: CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
           status_code: 405,
         });
       });
