@@ -10,6 +10,8 @@ import { Header, HeaderProps } from '../components';
 
 const Page = styled(EuiPage)`
   background: ${props => props.theme.eui.euiColorEmptyShade};
+  flex: 1;
+  align-items: flex-start;
 `;
 
 interface Props extends HeaderProps {

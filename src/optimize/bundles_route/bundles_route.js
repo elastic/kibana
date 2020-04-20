@@ -80,8 +80,8 @@ export function createBundlesRoute({
     ),
     ...npUiPluginPublicDirs.map(({ id, path }) =>
       buildRouteForBundles(
-        `${basePublicPath}/bundles/plugin:${id}/`,
-        `/bundles/plugin:${id}/`,
+        `${basePublicPath}/bundles/plugin/${id}/`,
+        `/bundles/plugin/${id}/`,
         path,
         fileHashCache
       )
