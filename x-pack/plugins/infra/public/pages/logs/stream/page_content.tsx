@@ -8,31 +8,29 @@ import React from 'react';
 import { useMount } from 'react-use';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-// import { useSourceContext } from '../../../containers/source';
 import { LogsPageLogsContent } from './page_logs_content';
 import { LogsPageNoIndicesContent } from './page_no_indices_content';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 
 export const StreamPageContent: React.FunctionComponent = () => {
   const {
-    // hasFailedLoadingSource,
+    hasFailedLoadingSource,
     initialize,
-    isLoadingSourceConfiguration,
+    isLoading,
     isUninitialized,
-    // loadSource,
-    // loadSourceFailureMessage,
+    loadSource,
+    loadSourceFailureMessage,
     logIndicesExist,
   } = useLogSourceContext();
-  // } = useSourceContext();
 
   useMount(() => {
     initialize();
   });
 
-  if (isLoadingSourceConfiguration || isUninitialized) {
+  if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
-    // } else if (hasFailedLoadingSource) {
-    //   return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
+  } else if (hasFailedLoadingSource) {
+    return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
   } else if (logIndicesExist) {
     return <LogsPageLogsContent />;
   } else {

@@ -12,14 +12,10 @@ import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_
 import { LogPositionState, WithLogPositionUrlState } from '../../../containers/logs/log_position';
 import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/log_filter';
 import { LogEntriesState } from '../../../containers/logs/log_entries';
-
-import { Source } from '../../../containers/source';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 
 const LogFilterStateProvider: React.FC = ({ children }) => {
   const { derivedIndexPattern } = useLogSourceContext();
-  // const { createDerivedIndexPattern } = useContext(Source.Context);
-  // const derivedIndexPattern = createDerivedIndexPattern('logs');
   return (
     <LogFilterState.Provider indexPattern={derivedIndexPattern}>
       <WithLogFilterUrlState />
@@ -71,13 +67,13 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
 };
 
 const LogHighlightsStateProvider: React.FC = ({ children }) => {
-  const { sourceId, version } = useContext(Source.Context);
+  const { sourceId, sourceConfiguration } = useLogSourceContext();
   const [{ topCursor, bottomCursor, centerCursor, entries }] = useContext(LogEntriesState.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
 
   const highlightsProps = {
     sourceId,
-    sourceVersion: version,
+    sourceVersion: sourceConfiguration?.version,
     entriesStart: topCursor,
     entriesEnd: bottomCursor,
     centerCursor,
@@ -88,6 +84,13 @@ const LogHighlightsStateProvider: React.FC = ({ children }) => {
 };
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
+  const { logIndicesExist } = useLogSourceContext();
+
+  // The providers assume the source is loaded, so short-circuit them otherwise
+  if (!logIndicesExist) {
+    return <>{children}</>;
+  }
+
   return (
     <LogViewConfiguration.Provider>
       <LogFlyout.Provider>
