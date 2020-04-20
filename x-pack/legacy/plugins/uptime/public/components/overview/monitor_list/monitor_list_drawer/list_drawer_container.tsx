@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { AppState } from '../../../../state';
 import { monitorDetailsSelector } from '../../../../state/selectors';
 import { MonitorDetailsActionPayload } from '../../../../state/actions/types';
