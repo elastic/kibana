@@ -104,7 +104,7 @@ export const ConnectorEditFlyout = ({
           />
           &emsp;
           <EuiBetaBadge
-            label="Pre-configured"
+            label="Preconfigured"
             data-test-subj="preconfiguredBadge"
             tooltipContent={i18n.translate(
               'xpack.triggersActionsUI.sections.preconfiguredConnectorForm.tooltipContent',
@@ -197,7 +197,7 @@ export const ConnectorEditFlyout = ({
             <EuiLink href="https://www.elastic.co/guide" target="_blank">
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
-                defaultMessage="Learn more about pre-configured connectors."
+                defaultMessage="Learn more about preconfigured connectors."
               />
             </EuiLink>
           </Fragment>
