@@ -20,7 +20,6 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./get_all_pings'));
-    loadTestFile(require.resolve('./graphql'));
     loadTestFile(require.resolve('./rest'));
   });
 }
