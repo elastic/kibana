@@ -5,9 +5,9 @@
  */
 
 import { useSelector } from 'react-redux';
-import { GlobalState, HostListState } from '../../types';
+import { GlobalState, HostState } from '../../types';
 
-export function useHostListSelector<TSelected>(selector: (state: HostListState) => TSelected) {
+export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
   return useSelector(function(state: GlobalState) {
     return selector(state.hostList);
   });

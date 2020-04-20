@@ -9,7 +9,7 @@ import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
 import { hostListReducer, hostMiddlewareFactory } from './index';
 import { HostResultList, Immutable } from '../../../../../common/types';
-import { HostListState } from '../../types';
+import { HostState } from '../../types';
 import { AppAction } from '../action';
 import { listData } from './selectors';
 import { DepsStartMock, depsStartMock } from '../../mocks';
@@ -20,7 +20,7 @@ describe('host list middleware', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  type HostListStore = Store<Immutable<HostListState>, Immutable<AppAction>>;
+  type HostListStore = Store<Immutable<HostState>, Immutable<AppAction>>;
   let store: HostListStore;
   let getState: HostListStore['getState'];
   let dispatch: HostListStore['dispatch'];

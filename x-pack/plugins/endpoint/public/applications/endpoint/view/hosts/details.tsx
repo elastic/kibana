@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { HostMetadata } from '../../../../../common/types';
-import { useHostListSelector } from './hooks';
+import { useHostSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
 import { FormattedDateAndTime } from '../formatted_date_time';
 import { uiQueryParams, detailsData, detailsError } from './../../store/hosts/selectors';
@@ -137,10 +137,10 @@ const HostDetails = memo(({ details }: { details: HostMetadata }) => {
 export const HostDetailsFlyout = () => {
   const history = useHistory();
   const { notifications } = useKibana();
-  const queryParams = useHostListSelector(uiQueryParams);
+  const queryParams = useHostSelector(uiQueryParams);
   const { selected_host: selectedHost, ...queryParamsWithoutSelectedHost } = queryParams;
-  const details = useHostListSelector(detailsData);
-  const error = useHostListSelector(detailsError);
+  const details = useHostSelector(detailsData);
+  const error = useHostSelector(detailsError);
 
   const handleFlyoutClose = useCallback(() => {
     history.push(urlFromQueryParams(queryParamsWithoutSelectedHost));

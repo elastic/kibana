@@ -4,23 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostListState, ImmutableReducer } from '../../types';
+import { HostState, ImmutableReducer } from '../../types';
 import { AppAction } from '../action';
 
-const initialState = (): HostListState => {
+const initialState = (): HostState => {
   return {
     hosts: [],
     pageSize: 10,
     pageIndex: 0,
     total: 0,
     loading: false,
-    detailsError: undefined,
+    error: undefined,
     details: undefined,
+    detailsLoading: undefined,
+    detailsError: undefined,
     location: undefined,
   };
 };
 
-export const hostListReducer: ImmutableReducer<HostListState, AppAction> = (
+export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
   state = initialState(),
   action
 ) => {
@@ -38,21 +40,33 @@ export const hostListReducer: ImmutableReducer<HostListState, AppAction> = (
       pageSize,
       pageIndex,
       loading: false,
+      error: undefined,
+    };
+  } else if (action.type === 'serverFailedToReturnHostList') {
+    return {
+      ...state,
+      error: action.payload,
+      loading: false,
     };
   } else if (action.type === 'serverReturnedHostDetails') {
     return {
       ...state,
       details: action.payload.metadata,
+      detailsLoading: false,
+      loading: false,
     };
   } else if (action.type === 'serverFailedToReturnHostDetails') {
     return {
       ...state,
       detailsError: action.payload,
+      detailsLoading: false,
     };
   } else if (action.type === 'userChangedUrl') {
     return {
       ...state,
       location: action.payload,
+      loading: true,
+      detailsLoading: true,
       detailsError: undefined,
     };
   }

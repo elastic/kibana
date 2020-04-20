@@ -35,14 +35,26 @@ export type MiddlewareFactory<S = GlobalState> = (
   api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
-export interface HostListState {
+export interface HostState {
+  /** list of host **/
   hosts: HostMetadata[];
+  /** number of items per page */
   pageSize: number;
+  /** which page to show */
   pageIndex: number;
+  /** total number of hosts returned */
   total: number;
+  /** list page is retrieving data */
   loading: boolean;
-  detailsError?: ServerApiError;
+  /** api error from retrieving host list */
+  error?: ServerApiError;
+  /** details data for a specific host */
   details?: Immutable<HostMetadata>;
+  /** details page is retrieving data */
+  detailsLoading: boolean;
+  /** api error from retrieving host details */
+  detailsError?: ServerApiError;
+  /** current location info */
   location?: Immutable<EndpointAppLocation>;
 }
 
@@ -213,7 +225,7 @@ export type KeysByValueCriteria<O, Criteria> = {
 export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
 
 export interface GlobalState {
-  readonly hostList: HostListState;
+  readonly hostList: HostState;
   readonly alertList: AlertListState;
   readonly policyList: PolicyListState;
   readonly policyDetails: PolicyDetailsState;

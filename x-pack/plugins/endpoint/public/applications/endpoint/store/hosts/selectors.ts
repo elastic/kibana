@@ -6,34 +6,36 @@
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { Immutable } from '../../../../../common/types';
-import { HostListState, HostIndexUIQueryParams } from '../../types';
+import { HostState, HostIndexUIQueryParams } from '../../types';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
 
-export const listData = (state: Immutable<HostListState>) => state.hosts;
+export const listData = (state: Immutable<HostState>) => state.hosts;
 
-export const pageIndex = (state: Immutable<HostListState>): number => state.pageIndex;
+export const pageIndex = (state: Immutable<HostState>): number => state.pageIndex;
 
-export const pageSize = (state: Immutable<HostListState>): number => state.pageSize;
+export const pageSize = (state: Immutable<HostState>): number => state.pageSize;
 
-export const totalHits = (state: Immutable<HostListState>): number => state.total;
+export const totalHits = (state: Immutable<HostState>): number => state.total;
 
-export const isLoading = (state: Immutable<HostListState>): boolean => state.loading;
+export const listLoading = (state: Immutable<HostState>): boolean => state.loading;
 
-export const detailsError = (state: Immutable<HostListState>) => state.detailsError;
+export const listError = (state: Immutable<HostState>) => state.error;
 
-export const detailsData = (state: Immutable<HostListState>) => {
-  return state.details;
-};
+export const detailsData = (state: Immutable<HostState>) => state.details;
 
-export const isOnHostPage = (state: Immutable<HostListState>) =>
+export const detailsLoading = (state: Immutable<HostState>): boolean => state.detailsLoading;
+
+export const detailsError = (state: Immutable<HostState>) => state.detailsError;
+
+export const isOnHostPage = (state: Immutable<HostState>) =>
   state.location ? state.location.pathname === '/hosts' : false;
 
 export const uiQueryParams: (
-  state: Immutable<HostListState>
+  state: Immutable<HostState>
 ) => Immutable<HostIndexUIQueryParams> = createSelector(
-  (state: Immutable<HostListState>) => state.location,
-  (location: Immutable<HostListState>['location']) => {
+  (state: Immutable<HostState>) => state.location,
+  (location: Immutable<HostState>['location']) => {
     const data: HostIndexUIQueryParams = { page_index: '0', page_size: '10' };
     if (location) {
       // Removes the `?` from the beginning of query string if it exists
@@ -69,7 +71,7 @@ export const uiQueryParams: (
   }
 );
 
-export const hasSelectedHost: (state: Immutable<HostListState>) => boolean = createSelector(
+export const hasSelectedHost: (state: Immutable<HostState>) => boolean = createSelector(
   uiQueryParams,
   ({ selected_host: selectedHost }) => {
     return selectedHost !== undefined;

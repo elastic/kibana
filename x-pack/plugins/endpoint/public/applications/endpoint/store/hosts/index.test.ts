@@ -6,12 +6,12 @@
 
 import { createStore, Dispatch, Store } from 'redux';
 import { HostAction, hostListReducer } from './index';
-import { HostListState } from '../../types';
+import { HostState } from '../../types';
 import { listData } from './selectors';
 import { mockHostResultList } from './mock_host_result_list';
 
 describe('HostList store concerns', () => {
-  let store: Store<HostListState>;
+  let store: Store<HostState>;
   let dispatch: Dispatch<HostAction>;
   const createTestStore = () => {
     store = createStore(hostListReducer);

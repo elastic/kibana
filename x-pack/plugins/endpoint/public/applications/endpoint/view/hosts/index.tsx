@@ -25,7 +25,7 @@ import { createStructuredSelector } from 'reselect';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { HostDetailsFlyout } from './details';
 import * as selectors from '../../store/hosts/selectors';
-import { useHostListSelector } from './hooks';
+import { useHostSelector } from './hooks';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
 import { HostMetadata, Immutable } from '../../../../../common/types';
@@ -38,10 +38,10 @@ export const HostList = () => {
     pageIndex,
     pageSize,
     totalHits: totalItemCount,
-    isLoading,
+    listLoading: loading,
     uiQueryParams: queryParams,
     hasSelectedHost,
-  } = useHostListSelector(selector);
+  } = useHostSelector(selector);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -181,7 +181,7 @@ export const HostList = () => {
               data-test-subj="hostListTable"
               items={useMemo(() => [...listData], [listData])}
               columns={columns}
-              loading={isLoading}
+              loading={loading}
               pagination={paginationSetup}
               onChange={onTableChange}
             />

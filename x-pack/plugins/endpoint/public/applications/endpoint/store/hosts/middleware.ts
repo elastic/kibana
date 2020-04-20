@@ -6,10 +6,10 @@
 
 import { MiddlewareFactory } from '../../types';
 import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './selectors';
-import { HostListState } from '../../types';
+import { HostState } from '../../types';
 import { AppAction } from '../action';
 
-export const hostMiddlewareFactory: MiddlewareFactory<HostListState> = coreStart => {
+export const hostMiddlewareFactory: MiddlewareFactory<HostState> = coreStart => {
   return ({ getState, dispatch }) => next => async (action: AppAction) => {
     next(action);
     const state = getState();
