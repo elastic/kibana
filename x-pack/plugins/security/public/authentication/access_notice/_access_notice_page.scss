@@ -2,16 +2,16 @@
   max-width: 600px;
 }
 
-.secAccessNoticePage__container {
-  @include euiBottomShadowSmall;
-  animation: none;
+.secAccessNoticePage__textWrapper {
+  overflow-y: hidden;
 }
 
 .secAccessNoticePage__text {
+  @include euiYScrollWithShadows;
   max-height: 400px;
-  padding-top: $euiSize;
+  padding: $euiSize $euiSizeL 0;
 }
 
 .secAccessNoticePage__footer {
-  justify-content: flex-start;
+  padding: $euiSize $euiSizeL $euiSizeL;
 }
