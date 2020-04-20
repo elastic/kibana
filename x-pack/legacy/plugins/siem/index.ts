@@ -6,11 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-import { Server } from 'hapi';
 import { Root } from 'joi';
 
-import { plugin } from './server';
-import { savedObjectMappings } from './server/saved_objects';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { savedObjectMappings } from '../../../plugins/siem/server/saved_objects';
 
 import {
   APP_ID,
@@ -23,15 +22,13 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_FROM,
   DEFAULT_TO,
-  DEFAULT_SIGNALS_INDEX,
   ENABLE_NEWS_FEED_SETTING,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
-  SIGNALS_INDEX_KEY,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
-} from './common/constants';
-import { defaultIndexPattern } from './default_index_pattern';
+  DEFAULT_INDEX_PATTERN,
+} from '../../../plugins/siem/common/constants';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -102,7 +99,7 @@ export const siem = (kibana: any) => {
           name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
             defaultMessage: 'Elasticsearch indices',
           }),
-          value: defaultIndexPattern,
+          value: DEFAULT_INDEX_PATTERN,
           description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
             defaultMessage:
               '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',
@@ -162,31 +159,12 @@ export const siem = (kibana: any) => {
       },
       mappings: savedObjectMappings,
     },
-    init(server: Server) {
-      const { coreContext, env, setup, start } = server.newPlatform;
-      const initializerContext = { ...coreContext, env };
-      const __legacy = {
-        config: server.config,
-        route: server.route.bind(server),
-      };
-
-      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
-      const pluginInstance = plugin(initializerContext);
-      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
-      pluginInstance.setup(setup.core, setup.plugins, __legacy);
-      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
-      pluginInstance.start(start.core, start.plugins);
-    },
     config(Joi: Root) {
-      // See x-pack/plugins/siem/server/config.ts if you're adding another
-      // value where the configuration has to be duplicated at the moment.
-      // When we move over to the new platform completely this will be
-      // removed and only server/config.ts should be used.
       return Joi.object()
         .keys({
           enabled: Joi.boolean().default(true),
-          [SIGNALS_INDEX_KEY]: Joi.string().default(DEFAULT_SIGNALS_INDEX),
         })
+        .unknown(true)
         .default();
     },
   });
