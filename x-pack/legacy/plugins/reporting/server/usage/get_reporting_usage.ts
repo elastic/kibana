@@ -11,16 +11,26 @@ import { ReportingConfig } from '../types';
 import { decorateRangeStats } from './decorate_range_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import {
+  AggregationResultBuckets,
   FeatureAvailabilityMap,
   JobTypes,
   KeyCountBucket,
   RangeStats,
   ReportingUsage,
   SearchResponse,
-  AggregationResultBuckets,
+  StatusByAppBucket,
 } from './types';
 
 type XPackInfo = XPackMainPlugin['info'];
+
+type SearchAggregation = SearchResponse['aggregations']['ranges']['buckets'];
+
+type RangeStatSets = Partial<
+  RangeStats & {
+    lastDay: RangeStats;
+    last7Days: RangeStats;
+  }
+>;
 
 const JOB_TYPES_KEY = 'jobTypes';
 const JOB_TYPES_FIELD = 'jobtype';
@@ -39,8 +49,22 @@ const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
 const getKeyCount = (buckets: KeyCountBucket[]): { [key: string]: number } =>
   buckets.reduce((accum, { key, doc_count: count }) => ({ ...accum, [key]: count }), {});
 
+// indexes some key/count buckets by statusType > appName: statusCount
+const getAppStatuses = (buckets: StatusByAppBucket[]) =>
+  buckets.reduce((acc, cur) => {
+    return {
+      ...acc,
+      [cur.key]: cur.appNames.buckets.reduce((a, c) => {
+        return {
+          ...a,
+          [c.key]: c.doc_count,
+        };
+      }, {}),
+    };
+  }, {});
+
 function getAggStats(aggs: AggregationResultBuckets): RangeStats {
-  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY];
+  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
   const jobTypes: JobTypes = jobBuckets.reduce(
     (accum: JobTypes, { key, doc_count: count }: { key: string; doc_count: number }) => {
       return {
@@ -56,8 +80,8 @@ function getAggStats(aggs: AggregationResultBuckets): RangeStats {
   // merge pdf stats into pdf jobtype key
   const pdfJobs = jobTypes[PRINTABLE_PDF_JOBTYPE];
   if (pdfJobs) {
-    const pdfAppBuckets = get(aggs[OBJECT_TYPES_KEY], '.pdf.buckets', []);
-    const pdfLayoutBuckets = get(aggs[LAYOUT_TYPES_KEY], '.pdf.buckets', []);
+    const pdfAppBuckets = get<KeyCountBucket[]>(aggs[OBJECT_TYPES_KEY], '.pdf.buckets', []);
+    const pdfLayoutBuckets = get<KeyCountBucket[]>(aggs[LAYOUT_TYPES_KEY], '.pdf.buckets', []);
     pdfJobs.app = getKeyCount(pdfAppBuckets) as {
       visualization: number;
       dashboard: number;
@@ -70,30 +94,22 @@ function getAggStats(aggs: AggregationResultBuckets): RangeStats {
 
   const all = aggs.doc_count as number;
   let statusTypes = {};
-  const statusBuckets = get(aggs[STATUS_TYPES_KEY], 'buckets', []);
+  const statusBuckets = get<KeyCountBucket[]>(aggs[STATUS_TYPES_KEY], 'buckets', []);
   if (statusBuckets) {
     statusTypes = getKeyCount(statusBuckets);
   }
 
-  // FIXME
-  const statusByApp = {
-    completed: {
-      canvas: 10,
-    },
-  };
+  let statusByApp = {};
+  const statusAppBuckets = get<StatusByAppBucket[]>(aggs[STATUS_BY_APP_KEY], 'buckets', []);
+  if (statusAppBuckets) {
+    statusByApp = getAppStatuses(statusAppBuckets);
+  }
 
   return { _all: all, status: statusTypes, status_by_app: statusByApp, ...jobTypes };
 }
 
-type RangeStatSets = Partial<
-  RangeStats & {
-    lastDay: RangeStats;
-    last7Days: RangeStats;
-  }
->;
-
 async function handleResponse(response: SearchResponse): Promise<RangeStatSets> {
-  const buckets = get<SearchResponse['aggregations']['ranges']['buckets']>(response, 'aggregations.ranges.buckets'); // prettier-ignore
+  const buckets = get<SearchAggregation>(response, 'aggregations.ranges.buckets');
   if (!buckets) {
     return {};
   }
@@ -138,7 +154,7 @@ export async function getReportingUsage(
             [STATUS_BY_APP_KEY]: {
               terms: { field: 'status', size: DEFAULT_TERMS_SIZE },
               aggs: {
-                appName: {
+                appNames: {
                   terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE },
                   aggs: {
                     jobType: { terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },

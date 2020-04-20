@@ -9,38 +9,22 @@ export interface AvailableTotal {
   total: number;
 }
 
-interface StatusCounts {
-  [statusType: string]: number;
-}
-
-interface StatusByAppCounts {
-  [statusType: string]: {
-    [appType: string]: number;
-  };
-}
-
 export interface KeyCountBucket {
   key: string;
   doc_count: number;
 }
 
-export interface AggregationBuckets {
-  doc_count?: number;
-  doc_count_error_upper_bound?: number;
-  sum_other_doc_count?: number;
-  buckets?: any;
-  pdf?: {
-    doc_count_error_upper_bound?: number;
-    sum_other_doc_count?: number;
-    buckets: KeyCountBucket[];
-  };
+export interface StatusByAppBucket {
+  key: string;
+  appNames: { key: string; buckets: KeyCountBucket[] };
 }
 
-/*
- * Mapped Types and Intersection Types
- */
+export interface AggregationBuckets {
+  buckets?: Array<{ key: string; doc_count: number }>;
+}
 
 type AggregationKeys = 'jobTypes' | 'layoutTypes' | 'objectTypes' | 'statusTypes' | 'statusByApp';
+
 export type AggregationResultBuckets = { [K in AggregationKeys]: AggregationBuckets } & {
   doc_count: number;
 };
@@ -70,6 +54,16 @@ export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
     };
   };
 };
+
+interface StatusCounts {
+  [statusType: string]: number;
+}
+
+interface StatusByAppCounts {
+  [statusType: string]: {
+    [appType: string]: number;
+  };
+}
 
 export type RangeStats = JobTypes & {
   _all: number;

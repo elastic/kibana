@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`data modeling with normal looking usage data 1`] = `
+Object {
+  "PNG": Object {
+    "available": true,
+    "total": 4,
+  },
+  "_all": 54,
+  "available": true,
+  "browser_type": undefined,
+  "csv": Object {
+    "available": true,
+    "total": 27,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "available": true,
+      "total": 4,
+    },
+    "_all": 27,
+    "csv": Object {
+      "available": true,
+      "total": 10,
+    },
+    "printable_pdf": Object {
+      "app": Object {
+        "dashboard": 13,
+        "visualization": 0,
+      },
+      "available": true,
+      "layout": Object {
+        "preserve_layout": 3,
+        "print": 10,
+      },
+      "total": 13,
+    },
+    "status": Object {
+      "completed": 0,
+      "failed": 0,
+      "pending": 27,
+    },
+    "status_by_app": Object {},
+  },
+  "lastDay": Object {
+    "PNG": Object {
+      "available": true,
+      "total": 4,
+    },
+    "_all": 11,
+    "csv": Object {
+      "available": true,
+      "total": 5,
+    },
+    "printable_pdf": Object {
+      "app": Object {
+        "dashboard": 2,
+        "visualization": 0,
+      },
+      "available": true,
+      "layout": Object {
+        "preserve_layout": 0,
+        "print": 2,
+      },
+      "total": 2,
+    },
+    "status": Object {
+      "completed": 0,
+      "failed": 0,
+      "pending": 11,
+    },
+    "status_by_app": Object {},
+  },
+  "printable_pdf": Object {
+    "app": Object {
+      "dashboard": 23,
+      "visualization": 0,
+    },
+    "available": true,
+    "layout": Object {
+      "preserve_layout": 13,
+      "print": 10,
+    },
+    "total": 23,
+  },
+  "status": Object {
+    "completed": 20,
+    "failed": 0,
+    "pending": 33,
+    "processing": 1,
+  },
+  "status_by_app": Object {},
+}
+`;

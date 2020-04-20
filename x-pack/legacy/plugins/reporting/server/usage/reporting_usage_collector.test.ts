@@ -61,7 +61,7 @@ const getMockReportingConfig = () => ({
   get: () => {},
   kbnConfig: { get: () => '' },
 });
-const getResponseMock = (customization = {}) => customization;
+const getResponseMock = (base = {}) => base;
 
 describe('license checks', () => {
   let mockConfig: ReportingConfig;
@@ -322,96 +322,47 @@ describe('data modeling', () => {
     );
 
     const usageStats = await fetch(callClusterMock as any);
-    expect(usageStats).toMatchInlineSnapshot(`
-      Object {
-        "PNG": Object {
-          "available": true,
-          "total": 4,
-        },
-        "_all": 54,
-        "available": true,
-        "browser_type": undefined,
-        "csv": Object {
-          "available": true,
-          "total": 27,
-        },
-        "enabled": true,
-        "last7Days": Object {
-          "PNG": Object {
-            "available": true,
-            "total": 4,
-          },
-          "_all": 27,
-          "csv": Object {
-            "available": true,
-            "total": 10,
-          },
-          "printable_pdf": Object {
-            "app": Object {
-              "dashboard": 13,
-              "visualization": 0,
-            },
-            "available": true,
-            "layout": Object {
-              "preserve_layout": 3,
-              "print": 10,
-            },
-            "total": 13,
-          },
-          "status": Object {
-            "completed": 0,
-            "failed": 0,
-            "pending": 27,
-          },
-        },
-        "lastDay": Object {
-          "PNG": Object {
-            "available": true,
-            "total": 4,
-          },
-          "_all": 11,
-          "csv": Object {
-            "available": true,
-            "total": 5,
-          },
-          "printable_pdf": Object {
-            "app": Object {
-              "dashboard": 2,
-              "visualization": 0,
-            },
-            "available": true,
-            "layout": Object {
-              "preserve_layout": 0,
-              "print": 2,
-            },
-            "total": 2,
-          },
-          "status": Object {
-            "completed": 0,
-            "failed": 0,
-            "pending": 11,
-          },
-        },
-        "printable_pdf": Object {
-          "app": Object {
-            "dashboard": 23,
-            "visualization": 0,
-          },
-          "available": true,
-          "layout": Object {
-            "preserve_layout": 13,
-            "print": 10,
-          },
-          "total": 23,
-        },
-        "status": Object {
-          "completed": 20,
-          "failed": 0,
-          "pending": 33,
-          "processing": 1,
-        },
+    expect(usageStats).toMatchSnapshot();
+  });
+
+  test('status by app', async () => {
+    const mockConfig = getMockReportingConfig();
+    const plugins = getPluginsMock();
+    const { fetch } = getReportingUsageCollector(
+      mockConfig,
+      plugins.usageCollection,
+      plugins.__LEGACY.plugins.xpack_main.info,
+      exportTypesRegistry,
+      function isReady() {
+        return Promise.resolve(true);
       }
-    `);
+    );
+    const callClusterMock = jest.fn(() =>
+      Promise.resolve(
+        getResponseMock({
+          aggregations: {
+            ranges: {
+              buckets: {
+                all: {
+                  smashTypes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      { key: 'pending', doc_count: 33 },
+                      { key: 'completed', doc_count: 20 },
+                      { key: 'processing', doc_count: 1 },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        })
+      )
+    );
+
+    const usageStats = await fetch(callClusterMock as any);
+    expect(usageStats).toMatchSnapshot();
   });
 });
 
