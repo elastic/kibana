@@ -6,5 +6,4 @@
 
 export * from './constants';
 export * from './domain_types';
-export * from './graphql';
 export * from './runtime_types';
