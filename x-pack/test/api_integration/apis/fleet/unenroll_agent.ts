@@ -44,6 +44,7 @@ export default function(providerContext: FtrProviderContext) {
       });
       // @ts-ignore
       agentDoc.agents.access_api_key_id = accessAPIKeyId;
+      agentDoc.agents.default_api_key_id = outputAPIKeyBody.id;
       agentDoc.agents.default_api_key = Buffer.from(
         `${outputAPIKeyBody.id}:${outputAPIKeyBody.api_key}`
       ).toString('base64');

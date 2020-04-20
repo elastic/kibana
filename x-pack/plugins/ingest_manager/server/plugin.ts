@@ -42,7 +42,7 @@ import {
   registerInstallScriptRoutes,
 } from './routes';
 
-import { IngestManagerConfigType } from '../common';
+import { IngestManagerConfigType, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../common';
 import {
   appContextService,
   ESIndexPatternService,
@@ -143,6 +143,11 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
         'updated_at',
         'current_error_events',
       ]),
+    });
+    deps.encryptedSavedObjects.registerType({
+      type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+      attributesToEncrypt: new Set(['data']),
+      attributesToExcludeFromAAD: new Set(['agent_id', 'type', 'sent_at', 'created_at']),
     });
 
     // Register feature

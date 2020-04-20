@@ -45,8 +45,7 @@ export const savedObjectMappings = {
     properties: {
       agent_id: { type: 'keyword' },
       type: { type: 'keyword' },
-      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
-      data: { type: 'flattened' },
+      data: { type: 'binary' },
       sent_at: { type: 'date' },
       created_at: { type: 'date' },
     },

@@ -28,7 +28,6 @@ export async function agentCheckin(
   const updateData: {
     last_checkin: string;
     default_api_key?: string;
-    actions?: AgentAction[];
     local_metadata?: string;
     current_error_events?: string;
   } = {
@@ -68,9 +67,6 @@ export async function agentCheckin(
       });
       actions.push(configChangeAction);
     }
-  }
-  if (localMetadata) {
-    updateData.local_metadata = JSON.stringify(localMetadata);
   }
 
   const { updatedErrorEvents } = await processEventsForCheckin(soClient, agent, events);
@@ -175,7 +171,7 @@ export function shouldCreateConfigAction(agent: Agent, actions: AgentAction[]): 
       return false;
     }
 
-    const data = JSON.parse(action.data);
+    const { data } = action;
 
     return (
       data.config.id === agent.config_id && data.config.revision === agent.config_newest_revision

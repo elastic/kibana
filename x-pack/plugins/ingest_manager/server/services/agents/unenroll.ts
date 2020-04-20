@@ -41,11 +41,8 @@ async function unenrollAgent(soClient: SavedObjectsClientContract, agentId: stri
     agent.access_api_key_id
       ? APIKeyService.invalidateAPIKey(soClient, agent.access_api_key_id)
       : undefined,
-    agent.default_api_key
-      ? APIKeyService.invalidateAPIKey(
-          soClient,
-          APIKeyService.parseApiKey(agent.default_api_key).apiKeyId
-        )
+    agent.default_api_key_id
+      ? APIKeyService.invalidateAPIKey(soClient, agent.default_api_key_id)
       : undefined,
   ]);
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
