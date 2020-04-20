@@ -9,6 +9,7 @@ import {
   HistogramResult,
   Ping,
   PingsResponse as PingResults,
+  GetCertsParams,
   GetPingsParams,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import {
@@ -28,6 +29,7 @@ import {
   MonitorLocations,
   Snapshot,
   StatesIndexStatus,
+  Cert,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
@@ -37,6 +39,7 @@ import { GetCertificatesParams } from './get_certificates';
 type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 
 export interface UptimeRequests {
+  getCerts: ESQ<GetCertsParams, Cert[]>;
   getFilterBar: ESQ<GetFilterBarParams, OverviewFilters>;
   getIndexPattern: ESQ<{}, {}>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
