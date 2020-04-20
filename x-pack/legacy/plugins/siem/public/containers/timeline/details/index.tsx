@@ -9,7 +9,7 @@ import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY } from '../../../../../../../plugins/siem/common/constants';
 import { DetailItem, GetTimelineDetailsQuery } from '../../../graphql/types';
 import { useUiSetting } from '../../../lib/kibana';
 

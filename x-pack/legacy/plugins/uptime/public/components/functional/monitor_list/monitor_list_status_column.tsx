@@ -11,7 +11,7 @@ import { capitalize } from 'lodash';
 import styled from 'styled-components';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { parseTimestamp } from './parse_timestamp';
-import { Check } from '../../../../common/graphql/types';
+import { Check } from '../../../../common/runtime_types';
 import {
   STATUS,
   SHORT_TIMESPAN_LOCALE,

@@ -14,23 +14,20 @@ import {
   timeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useContext } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
-import { SummaryHistogramPoint } from '../../../../common/graphql/types';
+import { HistogramPoint } from '../../../../common/runtime_types';
 import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
 import { useUrlParams } from '../../../hooks';
+import { UptimeThemeContext } from '../../../contexts';
 
 export interface MonitorBarSeriesProps {
   /**
-   * The color to use for the display of down states.
-   */
-  dangerColor: string;
-  /**
    * The timeseries data to display.
    */
-  histogramSeries: SummaryHistogramPoint[] | null;
+  histogramSeries: HistogramPoint[] | null;
 }
 
 /**
@@ -38,7 +35,10 @@ export interface MonitorBarSeriesProps {
  * so we will only render the series component if there are down counts for the selected monitor.
  * @param props - the values for the monitor this chart visualizes
  */
-export const MonitorBarSeries = ({ dangerColor, histogramSeries }: MonitorBarSeriesProps) => {
+export const MonitorBarSeries = ({ histogramSeries }: MonitorBarSeriesProps) => {
+  const {
+    colors: { danger },
+  } = useContext(UptimeThemeContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
 
@@ -68,7 +68,7 @@ export const MonitorBarSeries = ({ dangerColor, histogramSeries }: MonitorBarSer
         />
         <BarSeries
           id={id}
-          color={dangerColor}
+          color={danger}
           data={(histogramSeries || []).map(({ timestamp, down }) => [timestamp, down])}
           name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
             defaultMessage: 'Down checks',
