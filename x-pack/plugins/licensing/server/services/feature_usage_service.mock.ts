@@ -22,7 +22,6 @@ const createStartMock = (): jest.Mocked<FeatureUsageServiceStart> => {
   const mock = {
     notifyUsage: jest.fn(),
     getLastUsages: jest.fn(),
-    clear: jest.fn(),
   };
 
   return mock;

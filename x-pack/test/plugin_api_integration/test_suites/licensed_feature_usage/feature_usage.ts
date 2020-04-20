@@ -15,17 +15,9 @@ export default function({ getService }: FtrProviderContext) {
     await supertest.get(`/api/feature_usage_test/hit?featureName=${featureName}&usedAt=${usedAt}`);
   };
 
-  const clearUsages = async () => {
-    await supertest.get(`/api/feature_usage_test/clear`);
-  };
-
   const toISO = (time: number) => new Date(time).toISOString();
 
   describe('/api/licensing/feature_usage', () => {
-    beforeEach(async () => {
-      await clearUsages();
-    });
-
     it('returns a map of last feature usages', async () => {
       const timeA = Date.now();
       await notifyUsage('test_feature_a', timeA);
@@ -34,10 +26,9 @@ export default function({ getService }: FtrProviderContext) {
       await notifyUsage('test_feature_b', timeB);
 
       const response = await supertest.get('/api/licensing/feature_usage').expect(200);
-      expect(response.body).to.eql({
-        test_feature_a: toISO(timeA),
-        test_feature_b: toISO(timeB),
-      });
+
+      expect(response.body.test_feature_a).to.eql(toISO(timeA));
+      expect(response.body.test_feature_b).to.eql(toISO(timeB));
     });
   });
 }

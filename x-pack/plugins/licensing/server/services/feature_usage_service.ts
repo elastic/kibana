@@ -24,10 +24,6 @@ export interface FeatureUsageServiceStart {
    * Features that were not used yet do not appear in the map.
    */
   getLastUsages(): ReadonlyMap<string, number>;
-  /**
-   * Clear all usage records from the service.
-   */
-  clear(): void;
 }
 
 export class FeatureUsageService {
@@ -55,9 +51,6 @@ export class FeatureUsageService {
         this.lastUsages.set(featureName, Math.max(usedAt, currentValue));
       },
       getLastUsages: () => new Map(this.lastUsages.entries()),
-      clear: () => {
-        this.lastUsages.clear();
-      },
     };
   }
 }

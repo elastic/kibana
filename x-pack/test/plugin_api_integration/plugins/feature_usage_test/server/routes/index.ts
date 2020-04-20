@@ -8,7 +8,6 @@ import { IRouter, StartServicesAccessor } from 'src/core/server';
 import { FeatureUsageTestStartDependencies, FeatureUsageTestPluginStart } from '../plugin';
 
 import { registerFeatureHitRoute } from './hit';
-import { registerFeatureClearRoute } from './clear';
 
 export function registerRoutes(
   router: IRouter,
@@ -18,5 +17,4 @@ export function registerRoutes(
   >
 ) {
   registerFeatureHitRoute(router, getStartServices);
-  registerFeatureClearRoute(router, getStartServices);
 }

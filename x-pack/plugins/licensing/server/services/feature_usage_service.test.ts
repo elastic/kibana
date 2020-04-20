@@ -102,23 +102,5 @@ describe('FeatureUsageService', () => {
         });
       });
     });
-
-    describe('#clear', () => {
-      it('clears the whole last usages map', () => {
-        const setup = service.setup();
-        setup.register('featureA');
-        setup.register('featureB');
-
-        const start = service.start();
-        start.notifyUsage('featureA');
-        start.notifyUsage('featureB');
-
-        expect([...start.getLastUsages().keys()]).toEqual(['featureA', 'featureB']);
-
-        start.clear();
-
-        expect([...start.getLastUsages().keys()]).toEqual([]);
-      });
-    });
   });
 });
