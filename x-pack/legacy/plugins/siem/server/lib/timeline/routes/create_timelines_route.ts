@@ -76,10 +76,7 @@ export const createTimelinesRoute = (
         return response.ok({
           body: {
             data: {
-              persistTimeline: {
-                message: 'success',
-                timeline: newTimeline,
-              },
+              persistTimeline: newTimeline,
             },
           },
         });

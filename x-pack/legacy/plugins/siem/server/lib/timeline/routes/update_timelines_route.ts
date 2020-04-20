@@ -60,7 +60,7 @@ export const updateTimelinesRoute = (
           return siemResponse.error(errorObj);
         }
 
-        await createTimelines(
+        const updatedTimeline = await createTimelines(
           (frameworkRequest as unknown) as FrameworkRequest,
           timeline,
           timelineId,
@@ -69,10 +69,7 @@ export const updateTimelinesRoute = (
         return response.ok({
           body: {
             data: {
-              persistTimeline: {
-                message: 'success',
-                timeline,
-              },
+              persistTimeline: updatedTimeline,
             },
           },
         });

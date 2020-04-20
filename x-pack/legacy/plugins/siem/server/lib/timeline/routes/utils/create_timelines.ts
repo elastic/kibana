@@ -23,6 +23,7 @@ export const saveTimelines = async (
   timelineSavedObjectId?: string | null,
   timelineVersion?: string | null
 ) => {
+  // TODO return the full timeline "newTimelineRes" that persist timeline is giving you and give a type to the function
   const newTimelineRes = await timelineLib.persistTimeline(
     frameworkRequest,
     timelineSavedObjectId ?? null,
@@ -77,6 +78,7 @@ export const saveNotes = (
   );
 };
 
+// TODO put a type here so we know what you return and you can fix it everywhere
 export const createTimelines = async (
   frameworkRequest: FrameworkRequest,
   timeline: SavedTimeline,

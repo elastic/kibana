@@ -90,8 +90,7 @@ export const getTimelineByTemplateTimelineId = async (
 }> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
-    search: templateTimelineId,
-    fields: ['templateTimelineId'],
+    filter: `siem-ui-timeline.attributes.templateTimelineId: ${templateTimelineId}`,
   };
   return getAllSavedTimeline(request, options);
 };
