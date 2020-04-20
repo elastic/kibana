@@ -21,7 +21,6 @@ export const deprecations = ({
   renameFromRoot,
 }: ConfigDeprecationFactory): ConfigDeprecation[] => {
   return [
-    renameFromRoot('xpack.monitoring', 'monitoring'),
     renameFromRoot('xpack.monitoring.max_bucket_size', 'monitoring.ui.max_bucket_size'),
     renameFromRoot('xpack.monitoring.min_interval_seconds', 'monitoring.ui.min_interval_seconds'),
     renameFromRoot(
@@ -42,6 +41,7 @@ export const deprecations = ({
       'xpack.monitoring.elasticsearch.logFetchCount',
       'monitoring.ui.elasticsearch.logFetchCount'
     ),
+    renameFromRoot('xpack.monitoring', 'monitoring'),
     (config, fromPath, logger) => {
       const clusterAlertsEnabled = get(config, 'cluster_alerts.enabled');
       const emailNotificationsEnabled =
