@@ -20,8 +20,8 @@ interface Props {
 
 export function NavigationPanel({ settings, updateMapSetting }: Props) {
   const onZoomChange = (value: Value) => {
-    updateMapSetting('minZoom', Math.max(MIN_ZOOM, parseInt(value[0], 10)));
-    updateMapSetting('maxZoom', Math.min(MAX_ZOOM, parseInt(value[1], 10)));
+    updateMapSetting('minZoom', Math.max(MIN_ZOOM, parseInt(value[0] as string, 10)));
+    updateMapSetting('maxZoom', Math.min(MAX_ZOOM, parseInt(value[1] as string, 10)));
   };
 
   return (
