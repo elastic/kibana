@@ -13,13 +13,12 @@ export default function endpointAPIIntegrationTests({
   describe('Endpoint plugin', function() {
     const ingestManager = getService('ingestManager');
     this.tags(['endpoint']);
-    beforeEach(async () => {
+    before(async () => {
       await ingestManager.setup();
     });
     loadTestFile(require.resolve('./index_pattern'));
     loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./metadata'));
-    loadTestFile(require.resolve('./metadata_status'));
     loadTestFile(require.resolve('./alerts'));
   });
 }
