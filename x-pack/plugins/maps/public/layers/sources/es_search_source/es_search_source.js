@@ -51,7 +51,7 @@ function getDocValueAndSourceFields(indexPattern, fieldNames) {
           lang: field.lang,
         },
       };
-    } else if (field.type !== ES_GEO_FIELD_TYPE.GEO_SHAPE && field.readFromDocValues) {
+    } else if (field.readFromDocValues) {
       const docValueField =
         field.type === 'date'
           ? {
