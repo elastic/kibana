@@ -67,6 +67,9 @@ export const MLIntegrationComponent = () => {
 
       refreshApp();
     }
+    return () => {
+      dispatch(resetMLState());
+    };
   }, [
     isMLJobDeleting,
     isConfirmDeleteJobOpen,
