@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo } from 'react';
 import uuid from 'uuid';
 
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../../../plugins/siem/common/constants';
 import { SHOWING, UNIT } from '../../../components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../components/link_to/redirect_to_hosts';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
