@@ -72,7 +72,9 @@ export const populateSeriesWithTSVBData = (
   );
 
   if (calculatedInterval) {
-    model.interval = `>=${calculatedInterval}s`;
+    model.interval = options.forceInterval
+      ? options.timerange.interval
+      : `>=${calculatedInterval}s`;
   }
 
   // Get TSVB results using the model, timerange and filters

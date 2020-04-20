@@ -26,6 +26,9 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     ['avg']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.avg', {
       defaultMessage: 'Average',
     }),
+    ['sum']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.sum', {
+      defaultMessage: 'Sum',
+    }),
     ['max']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.max', {
       defaultMessage: 'Max',
     }),

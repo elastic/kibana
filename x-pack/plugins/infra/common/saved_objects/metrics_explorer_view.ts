@@ -35,6 +35,9 @@ export const metricsExplorerViewSavedObjectMappings: {
       },
       options: {
         properties: {
+          forceInterval: {
+            type: 'boolean',
+          },
           metrics: {
             type: 'nested',
             properties: {

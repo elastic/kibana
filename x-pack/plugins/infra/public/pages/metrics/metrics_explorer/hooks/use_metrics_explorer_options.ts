@@ -40,6 +40,7 @@ export interface MetricsExplorerOptions {
   groupBy?: string;
   filterQuery?: string;
   aggregation: MetricsExplorerAggregation;
+  forceInterval?: boolean;
 }
 
 export interface MetricsExplorerTimeOptions {

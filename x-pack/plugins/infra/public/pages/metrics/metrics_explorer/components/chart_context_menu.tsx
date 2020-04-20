@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import DateMath from '@elastic/datemath';
 import { Capabilities } from 'src/core/public';
-import { AlertFlyout } from '../../../../components/alerting/metrics/alert_flyout';
+import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
