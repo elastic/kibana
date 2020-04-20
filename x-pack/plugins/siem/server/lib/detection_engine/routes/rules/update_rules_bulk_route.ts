@@ -81,7 +81,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             references,
             note,
             version,
-            lists,
+            exceptions_list,
           } = payloadRule;
           const finalIndex = outputIndex ?? siemClient.signalsIndex;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
@@ -121,7 +121,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               references,
               note,
               version,
-              lists,
+              exceptions_list,
               actions,
             });
             if (rule != null) {
