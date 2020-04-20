@@ -4,20 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { PropTypes } from 'prop-types';
+import React, { FC, MouseEventHandler } from 'react';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
-import { JobSelectorBadge } from '../job_selector_badge';
 import { i18n } from '@kbn/i18n';
+import { JobSelectorBadge } from '../job_selector_badge';
+import { JobSelectionMaps } from '../job_selector';
 
-export function NewSelectionIdBadges({
+interface NewSelectionIdBadgesProps {
+  limit: number;
+  maps: JobSelectionMaps;
+  newSelection: string[];
+  onDeleteClick?: Function;
+  onLinkClick?: MouseEventHandler<HTMLAnchorElement>;
+  showAllBadges?: boolean;
+}
+
+export const NewSelectionIdBadges: FC<NewSelectionIdBadgesProps> = ({
   limit,
   maps,
   newSelection,
   onDeleteClick,
   onLinkClick,
   showAllBadges,
-}) {
+}) => {
   const badges = [];
 
   for (let i = 0; i < newSelection.length; i++) {
@@ -60,16 +69,5 @@ export function NewSelectionIdBadges({
     );
   }
 
-  return badges;
-}
-NewSelectionIdBadges.propTypes = {
-  limit: PropTypes.number,
-  maps: PropTypes.shape({
-    jobsMap: PropTypes.object,
-    groupsMap: PropTypes.object,
-  }),
-  newSelection: PropTypes.array,
-  onDeleteClick: PropTypes.func,
-  onLinkClick: PropTypes.func,
-  showAllBadges: PropTypes.bool,
+  return <>{badges}</>;
 };

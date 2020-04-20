@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { StartServicesAccessor } from 'kibana/public';
 
+import moment from 'moment';
 import {
   IContainer,
   EmbeddableFactoryDefinition,
@@ -20,8 +21,9 @@ import {
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
 } from './anomaly_swimlane_embaddable';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
-import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import { MlStartDependencies } from '../../plugin';
+import { JobSelectorFlyout } from '../../application/components/job_selector/job_selector_flyout';
+import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
@@ -41,19 +43,34 @@ export class AnomalySwimlaneEmbeddableFactory
 
   public async getExplicitInput(): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
     return new Promise(async resolve => {
-      const { overlays } = (await this.getStartServices())[0];
+      const { overlays, uiSettings } = (await this.getStartServices())[0];
 
-      const modalSession = overlays.openModal(
+      const maps = {
+        groupsMap: getInitialGroupsMap([]),
+        jobsMap: {},
+      };
+
+      const tzConfig = uiSettings.get('dateFormat:tz');
+      const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
+
+      const flyoutSession = overlays.openFlyout(
         toMountPoint(
-          <AnomalySwimlaneInitializer
-            onCancel={() => {
-              modalSession.close();
+          <JobSelectorFlyout
+            dateFormatTz={dateFormatTz}
+            singleSelection={true}
+            timeseriesOnly={true}
+            onFlyoutClose={() => {
+              flyoutSession.close();
               resolve(undefined);
             }}
-            onCreate={(swimlaneProps: { jobId: string; viewBy: string }) => {
-              resolve(swimlaneProps);
-              modalSession.close();
+            onSelectionConfirmed={({ jobIds, groups }) => {
+              resolve({ jobIds });
+              flyoutSession.close();
             }}
+            onJobsFetched={r => {
+              console.log(r, '___r___');
+            }}
+            maps={maps}
           />
         ),
         {

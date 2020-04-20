@@ -17,21 +17,20 @@ import {
   ExplorerSwimlane,
   ExplorerSwimlaneProps,
 } from '../../application/explorer/explorer_swimlane';
-import { TimeBuckets, TimeBucketsConfig } from '../../application/util/time_buckets';
+import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
 
 export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
-  jobId: string;
+  jobIds: string[];
   viewBy: string;
-  timeBucketConfig: TimeBucketsConfig;
 }
 
 export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
 
 export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
-  jobId: string;
+  jobIds: string[];
   viewBy: string;
 }
 
@@ -50,21 +49,21 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     super(
       initialInput,
       {
-        jobId: initialInput.jobId,
+        jobIds: initialInput.jobIds,
         viewBy: initialInput.viewBy,
-        defaultTitle: `ML ${initialInput.jobId} anomaly swimlane`,
+        defaultTitle: `ML ${initialInput.jobIds} anomaly swimlane`,
       },
       parent
     );
 
     this.getInput$().subscribe(input => {
-      const jobId = input.jobId;
+      const jobIds = input.jobIds;
       const viewBy = input.viewBy;
 
       this.updateOutput({
-        jobId,
+        jobIds,
         viewBy,
-        defaultTitle: `ML ${jobId} anomaly swimlane`,
+        defaultTitle: `ML ${jobIds} anomaly swimlane`,
       });
     });
 
