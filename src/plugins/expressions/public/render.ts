@@ -21,9 +21,10 @@ import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { RenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
-import { getRenderersRegistry } from './services';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
 import { IInterpreterRenderHandlers, ExpressionAstExpression } from '../common';
+
+import { getRenderersRegistry } from './services';
 
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
