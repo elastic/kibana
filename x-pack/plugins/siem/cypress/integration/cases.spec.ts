@@ -7,10 +7,10 @@
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
-import { CASES } from '../urls/navigation';
 import { goToCreateNewCase } from '../tasks/all_cases';
 import { createNewCase } from '../tasks/create_new_case';
 import { case1 } from '../objects/case';
+import { CASES } from '../urls/navigation';
 
 describe('Cases', () => {
   before(() => {

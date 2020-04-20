@@ -22,6 +22,6 @@ const caseTimeline: Timeline = {
 export const case1: Case = {
   title: 'This is the title of the case',
   tags: ['Tag1', 'Tag2'],
-  description: 'This is the case description ',
+  description: 'This is the case description',
   timeline: caseTimeline,
 };
