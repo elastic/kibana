@@ -7,7 +7,7 @@
 import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 // @ts-ignore Untyped
-import { createThunk } from 'redux-thunks';
+import { createThunk } from 'redux-thunks/cjs';
 // @ts-ignore Untyped Local
 import { fetchRenderable } from './elements';
 import { State } from '../../../types';

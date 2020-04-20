@@ -5,24 +5,23 @@
  */
 
 //import { Chrome } from 'ui/chrome';
-import { CoreSetup, CoreStart, Plugin } from '../../../../../src/core/public';
-import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
-import { initLoadingIndicator } from './lib/loading_indicator';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
-import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
-import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
-import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
+import { CoreSetup, CoreStart, Plugin } from '../../../../src/core/public';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { initLoadingIndicator } from '../../../legacy/plugins/canvas/public/lib/loading_indicator';
+import { featureCatalogueEntry } from '../../../legacy/plugins/canvas/public/feature_catalogue_entry';
+import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
+import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
+import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 // @ts-ignore untyped local
-import { argTypeSpecs } from './expression_types/arg_types';
-import { transitions } from './transitions';
-import { legacyRegistries } from './legacy_plugin_support';
-import { getPluginApi, CanvasApi } from './plugin_api';
-import { initFunctions } from './functions';
-import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
-export { CoreStart, CoreSetup };
+import { argTypeSpecs } from '../../../legacy/plugins/canvas/public/expression_types/arg_types';
+import { transitions } from '../../../legacy/plugins/canvas/public/transitions';
+import { legacyRegistries } from '../../../legacy/plugins/canvas/public/legacy_plugin_support';
+import { getPluginApi, CanvasApi } from '../../../legacy/plugins/canvas/public/plugin_api';
+import { initFunctions } from '../../../legacy/plugins/canvas/public/functions';
+import { CanvasSrcPlugin } from '../../../legacy/plugins/canvas/canvas_plugin_src/plugin';
 
 /**
  * These are the private interfaces for the services your plugin depends on.
@@ -75,7 +74,9 @@ export class CanvasPlugin
       title: 'Canvas App',
       async mount(context, params) {
         // Load application bundle
-        const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
+        const { renderApp, initializeCanvas, teardownCanvas } = await import(
+          '../../../legacy/plugins/canvas/public/application'
+        );
 
         // Get start services
         const [coreStart, depsStart] = await core.getStartServices();

@@ -6,7 +6,7 @@
 
 import lzString from 'lz-string';
 import { createMemoryHistory, parsePath, createPath } from 'history';
-import createHashStateHistory from 'history-extra';
+import createHashStateHistory from 'history-extra/dist/createHashStateHistory';
 import { getWindow } from './get_window';
 
 function wrapHistoryInstance(history) {

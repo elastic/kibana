@@ -54,6 +54,7 @@ export const renderApp = (
   { element }: AppMountParameters,
   canvasStore: Store
 ) => {
+  console.log('mounting here', element);
   const canvasServices = Object.entries(services).reduce((reduction, [key, provider]) => {
     reduction[key] = provider.getService();
 

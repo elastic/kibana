@@ -5,7 +5,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import { createThunk } from 'redux-thunks';
+import { createThunk } from 'redux-thunks/cjs';
 import immutable from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';

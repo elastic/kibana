@@ -12,6 +12,7 @@ import { platformService } from '../../services';
 export function trackRouteChange() {
   const basePath = platformService.getService().coreStart.http.basePath.get();
 
+  /*
   platformService
     .getService()
     .startPlugins.__LEGACY.trackSubUrlForApp(
@@ -20,4 +21,6 @@ export function trackRouteChange() {
         .getService()
         .startPlugins.__LEGACY.absoluteToParsedUrl(get(getWindow(), 'location.href'), basePath)
     );
+
+    */
 }

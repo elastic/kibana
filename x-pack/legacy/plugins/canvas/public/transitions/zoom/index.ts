@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './zoom.css';
+import './zoom.scss';
 
 import { TransitionStrings } from '../../../i18n';
 
