@@ -6,7 +6,7 @@
 
 import { BaseParams } from './types';
 import { apiService } from './utils';
-import { API_URLS } from '../../../common/constants/rest_api';
+import { API_URLS } from '../../../common/constants';
 
 export const fetchMonitorDuration = async ({ monitorId, dateStart, dateEnd }: BaseParams) => {
   const queryParams = {
