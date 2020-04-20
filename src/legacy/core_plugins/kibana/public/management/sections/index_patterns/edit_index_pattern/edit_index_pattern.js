@@ -45,16 +45,13 @@ import {
   getEditFieldBreadcrumbs,
   getCreateFieldBreadcrumbs,
 } from '../breadcrumbs';
+import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from './constants';
 import { createEditIndexPatternPageStateContainer } from './edit_index_pattern_state_container';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
 const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
 const REACT_INDEX_HEADER_DOM_ELEMENT_ID = 'reactIndexHeader';
-
-const TAB_INDEXED_FIELDS = 'indexedFields';
-const TAB_SCRIPTED_FIELDS = 'scriptedFields';
-const TAB_SOURCE_FILTERS = 'sourceFilters';
 
 const EDIT_FIELD_PATH = '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}';
 
@@ -450,7 +447,7 @@ const renderCreateEditField = ($scope, $route, getConfig, $http, fieldFormatEdit
             fieldName={$route.current.params.fieldName}
             fieldFormatEditors={fieldFormatEditors}
             getConfig={getConfig}
-            servises={{
+            services={{
               http: $http,
               notifications: npStart.core.notifications,
               docTitle: npStart.core.chrome.docTitle,

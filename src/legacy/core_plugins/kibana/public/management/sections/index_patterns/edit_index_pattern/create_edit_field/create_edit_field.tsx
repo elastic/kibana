@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { IndexHeader } from '../index_header';
 import { IndexPattern, IndexPatternField } from '../../../../../../../../../plugins/data/public';
 import { ChromeDocTitle, NotificationsStart } from '../../../../../../../../../core/public';
+import { TAB_SCRIPTED_FIELDS, TAB_INDEXED_FIELDS } from '../constants';
 
 interface CreateEditFieldProps extends RouteComponentProps {
   indexPattern: IndexPattern;
@@ -33,7 +34,7 @@ interface CreateEditFieldProps extends RouteComponentProps {
   fieldName?: string;
   fieldFormatEditors: any;
   getConfig: (name: string) => any;
-  servises: {
+  services: {
     notifications: NotificationsStart;
     docTitle: ChromeDocTitle;
     http: Function;
@@ -54,7 +55,7 @@ export const CreateEditField = withRouter(
     fieldName,
     fieldFormatEditors,
     getConfig,
-    servises,
+    services,
     history,
   }: CreateEditFieldProps) => {
     const field =
@@ -74,17 +75,17 @@ export const CreateEditField = withRouter(
             "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
           values: { indexPatternTitle: indexPattern.title, fieldName },
         });
-        servises.notifications.toasts.addWarning(message);
+        services.notifications.toasts.addWarning(message);
         history.push(url);
       }
     }
 
     const docFieldName = field?.name || newFieldPlaceholder;
 
-    servises.docTitle.change([docFieldName, indexPattern.title]);
+    services.docTitle.change([docFieldName, indexPattern.title]);
 
     const redirectAway = () => {
-      history.push(`${url}?_a=(tab:${field?.scripted ? 'scriptedFields' : 'indexedFields'})`);
+      history.push(`${url}?_a=(tab:${field?.scripted ? TAB_SCRIPTED_FIELDS : TAB_INDEXED_FIELDS})`);
     };
 
     return (
@@ -98,7 +99,7 @@ export const CreateEditField = withRouter(
             field={field}
             helpers={{
               getConfig,
-              $http: servises.http,
+              $http: services.http,
               fieldFormatEditors,
               redirectAway,
             }}
