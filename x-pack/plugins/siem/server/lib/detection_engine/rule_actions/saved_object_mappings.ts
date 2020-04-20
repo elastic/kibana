@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsType } from '../../../../../../../src/core/server';
+
 export const ruleActionsSavedObjectType = 'siem-detection-engine-rule-actions';
 
 export const ruleActionsSavedObjectMappings = {
@@ -36,4 +38,11 @@ export const ruleActionsSavedObjectMappings = {
       },
     },
   },
+};
+
+export const type: SavedObjectsType = {
+  name: ruleActionsSavedObjectType,
+  hidden: false,
+  namespaceType: 'single',
+  mappings: ruleActionsSavedObjectMappings,
 };

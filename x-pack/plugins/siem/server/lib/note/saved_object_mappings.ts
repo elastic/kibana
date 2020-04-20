@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsType } from '../../../../../../src/core/server';
+
 export const noteSavedObjectType = 'siem-ui-timeline-note';
 
 export const noteSavedObjectMappings = {
@@ -30,4 +32,11 @@ export const noteSavedObjectMappings = {
       type: 'text',
     },
   },
+};
+
+export const type: SavedObjectsType = {
+  name: noteSavedObjectType,
+  hidden: false,
+  namespaceType: 'single',
+  mappings: noteSavedObjectMappings,
 };

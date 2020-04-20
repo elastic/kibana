@@ -6,65 +6,16 @@
 
 import { CoreSetup } from '../../../../src/core/server';
 
-import { noteSavedObjectType, noteSavedObjectMappings } from './lib/note/saved_object_mappings';
-import {
-  pinnedEventSavedObjectType,
-  pinnedEventSavedObjectMappings,
-} from './lib/pinned_event/saved_object_mappings';
-import {
-  timelineSavedObjectType,
-  timelineSavedObjectMappings,
-} from './lib/timeline/saved_object_mappings';
-import {
-  ruleStatusSavedObjectType,
-  ruleStatusSavedObjectMappings,
-} from './lib/detection_engine/rules/saved_object_mappings';
-import {
-  ruleActionsSavedObjectMappings,
-  ruleActionsSavedObjectType,
-} from './lib/detection_engine/rule_actions/saved_object_mappings';
+import { type as noteType } from './lib/note/saved_object_mappings';
+import { type as pinnedEventType } from './lib/pinned_event/saved_object_mappings';
+import { type as timelineType } from './lib/timeline/saved_object_mappings';
+import { type as ruleStatusType } from './lib/detection_engine/rules/saved_object_mappings';
+import { type as ruleActionsType } from './lib/detection_engine/rule_actions/saved_object_mappings';
 
-export {
-  noteSavedObjectType,
-  pinnedEventSavedObjectType,
-  ruleStatusSavedObjectType,
-  ruleActionsSavedObjectType,
-  timelineSavedObjectType,
-};
+const types = [noteType, pinnedEventType, ruleActionsType, ruleStatusType, timelineType];
+
+export const savedObjectTypes = types.map(type => type.name);
 
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
-  savedObjects.registerType({
-    name: pinnedEventSavedObjectType,
-    hidden: false,
-    namespaceType: 'single',
-    mappings: pinnedEventSavedObjectMappings,
-  });
-
-  savedObjects.registerType({
-    name: noteSavedObjectType,
-    hidden: false,
-    namespaceType: 'single',
-    mappings: noteSavedObjectMappings,
-  });
-
-  savedObjects.registerType({
-    name: ruleStatusSavedObjectType,
-    hidden: false,
-    namespaceType: 'single',
-    mappings: ruleStatusSavedObjectMappings,
-  });
-
-  savedObjects.registerType({
-    name: ruleActionsSavedObjectType,
-    hidden: false,
-    namespaceType: 'single',
-    mappings: ruleActionsSavedObjectMappings,
-  });
-
-  savedObjects.registerType({
-    name: timelineSavedObjectType,
-    hidden: false,
-    namespaceType: 'single',
-    mappings: timelineSavedObjectMappings,
-  });
+  types.forEach(type => savedObjects.registerType(type));
 };

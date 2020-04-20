@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsType } from '../../../../../../src/core/server';
+
 export const pinnedEventSavedObjectType = 'siem-ui-timeline-pinned-event';
 
 export const pinnedEventSavedObjectMappings = {
@@ -27,4 +29,11 @@ export const pinnedEventSavedObjectMappings = {
       type: 'text',
     },
   },
+};
+
+export const type: SavedObjectsType = {
+  name: pinnedEventSavedObjectType,
+  hidden: false,
+  namespaceType: 'single',
+  mappings: pinnedEventSavedObjectMappings,
 };
