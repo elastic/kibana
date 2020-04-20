@@ -9,7 +9,7 @@ import './_index.scss';
 import React, { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import ReactMarkdown from 'react-markdown';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
@@ -67,15 +67,16 @@ export function AccessNoticePage({ http, fatalErrors, notifications }: Props) {
       }
     >
       <form onSubmit={onAcknowledge}>
-        <EuiPanel>
-          <EuiFlexGroup justifyContent="spaceBetween" direction="column">
-            <EuiFlexItem className="secAccessNoticePage__text">
-              <EuiText textAlign="left">
-                <ReactMarkdown>{accessNotice}</ReactMarkdown>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem className="secAccessNoticePage__acknowledge">
-              <EuiSpacer size="s" />
+        <div className="euiModal secAccessNoticePage__container">
+          <div className="euiModal__flex">
+            <div className="euiModalBody euiModalBody__overflow secAccessNoticePage__text">
+              <div className="euiModalBody__overflow secAccessNoticePage__text">
+                <EuiText textAlign="left">
+                  <ReactMarkdown>{accessNotice}</ReactMarkdown>
+                </EuiText>
+              </div>
+            </div>
+            <div className="euiModalFooter secAccessNoticePage__footer">
               <EuiButton
                 fill
                 type="submit"
@@ -90,9 +91,9 @@ export function AccessNoticePage({ http, fatalErrors, notifications }: Props) {
                   defaultMessage="Acknowledge and continue"
                 />
               </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+            </div>
+          </div>
+        </div>
         <EuiSpacer size="xxl" />
       </form>
     </AuthenticationStatePage>
