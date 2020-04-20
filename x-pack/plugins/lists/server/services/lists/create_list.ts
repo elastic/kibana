@@ -18,7 +18,7 @@ import {
   Type,
 } from '../../../common/schemas';
 
-interface CreateListOptions {
+export interface CreateListOptions {
   id: IdOrUndefined;
   type: Type;
   name: Name;
@@ -63,6 +63,5 @@ export const createList = async ({
   return {
     id: response._id,
     ...body,
-    meta: body.meta ?? undefined,
   };
 };

@@ -7,9 +7,9 @@
 import { Id, ListsSchema } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
-import { getList } from '.';
+import { getList } from './get_list';
 
-interface DeleteOptions {
+export interface DeleteListOptions {
   id: Id;
   dataClient: DataClient;
   listsIndex: string;
@@ -21,7 +21,7 @@ export const deleteList = async ({
   dataClient,
   listsIndex,
   listsItemsIndex,
-}: DeleteOptions): Promise<ListsSchema | null> => {
+}: DeleteListOptions): Promise<ListsSchema | null> => {
   const list = await getList({ dataClient, id, listsIndex });
   if (list == null) {
     return null;
