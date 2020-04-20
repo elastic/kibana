@@ -57,8 +57,13 @@ const updateLayerInList = (state, layerId, attribute, newValue) => {
   if (!layerId) {
     return state;
   }
+
   const { layerList } = state;
   const layerIdx = getLayerIndex(layerList, layerId);
+  if (layerIdx === -1) {
+    return state;
+  }
+
   const updatedLayer = {
     ...layerList[layerIdx],
     // Update layer w/ new value. If no value provided, toggle boolean value

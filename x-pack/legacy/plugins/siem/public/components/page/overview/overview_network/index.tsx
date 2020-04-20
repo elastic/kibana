@@ -10,8 +10,8 @@ import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
-import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
-import { ESQuery } from '../../../../../common/typed_json';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../../../../plugins/siem/common/constants';
+import { ESQuery } from '../../../../../../../../plugins/siem/common/typed_json';
 import { HeaderSection } from '../../../header_section';
 import { useUiSetting$ } from '../../../../lib/kibana';
 import { manageQuery } from '../../../page/manage_query';
