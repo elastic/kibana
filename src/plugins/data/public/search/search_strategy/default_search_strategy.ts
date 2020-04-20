@@ -17,19 +17,23 @@
  * under the License.
  */
 
-import { getPreference, getTimeout } from '../fetch';
-import { getMSearchParams } from './get_msearch_params';
 import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
+import { isDefault } from '../../index_patterns';
+import { getSearchParams, getMSearchParams, getPreference, getTimeout } from './get_search_params';
 
-// @deprecated
 export const defaultSearchStrategy: SearchStrategyProvider = {
   id: 'default',
 
   search: params => {
-    return msearch(params);
+    return params.config.get('courier:batchSearches') ? msearch(params) : search(params);
+  },
+
+  isViable: indexPattern => {
+    return indexPattern && isDefault(indexPattern);
   },
 };
 
+// @deprecated
 function msearch({
   searchRequests,
   searchService,
@@ -59,5 +63,31 @@ function msearch({
   return {
     searching: searching.then(({ responses }: any) => responses),
     abort: searching.abort,
+  };
+}
+
+function search({
+  searchRequests,
+  searchService,
+  config,
+  esShardTimeout,
+}: SearchStrategySearchParams) {
+  const abortController = new AbortController();
+  const searchParams = getSearchParams(config, esShardTimeout);
+  const promises = searchRequests.map(({ index, indexType, body }) => {
+    const params = {
+      index: index.title || index,
+      body,
+      ...searchParams,
+    };
+    const { signal } = abortController;
+    return searchService
+      .search({ params, indexType }, { signal })
+      .toPromise()
+      .then(({ rawResponse }) => rawResponse);
+  });
+  return {
+    searching: Promise.all(promises),
+    abort: () => abortController.abort(),
   };
 }
