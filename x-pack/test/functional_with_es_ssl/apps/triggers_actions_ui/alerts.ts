@@ -343,15 +343,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
+      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
-      const enableSwitchAfterDisable = await testSubjects.find('enableSwitch');
-      const isChecked = await enableSwitchAfterDisable.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+      const disableSwitchAfterDisable = await testSubjects.find('disableSwitch');
+      const isChecked = await disableSwitchAfterDisable.getAttribute('aria-checked');
+      expect(isChecked).to.eql('true');
     });
 
     it('should re-enable single alert', async () => {
@@ -361,21 +361,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
+      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
+      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
-      const enableSwitchAfterReEnable = await testSubjects.find('enableSwitch');
-      const isChecked = await enableSwitchAfterReEnable.getAttribute('aria-checked');
-      expect(isChecked).to.eql('true');
+      const disableSwitchAfterReEnable = await testSubjects.find('disableSwitch');
+      const isChecked = await disableSwitchAfterReEnable.getAttribute('aria-checked');
+      expect(isChecked).to.eql('false');
     });
 
     it('should mute single alert', async () => {
@@ -507,9 +507,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      const enableSwitch = await testSubjects.find('enableSwitch');
-      const isChecked = await enableSwitch.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+      const disableSwitch = await testSubjects.find('disableSwitch');
+      const isChecked = await disableSwitch.getAttribute('aria-checked');
+      expect(isChecked).to.eql('true');
     });
 
     it('should enable all selection', async () => {
@@ -532,9 +532,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      const enableSwitch = await testSubjects.find('enableSwitch');
-      const isChecked = await enableSwitch.getAttribute('aria-checked');
-      expect(isChecked).to.eql('true');
+      const disableSwitch = await testSubjects.find('disableSwitch');
+      const isChecked = await disableSwitch.getAttribute('aria-checked');
+      expect(isChecked).to.eql('false');
     });
 
     it('should delete all selection', async () => {

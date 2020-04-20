@@ -98,5 +98,5 @@ export const createRulesSchema = Joi.object({
   version: version.default(1),
 
   // TODO: (LIST-FEATURE) Remove the hasListsFeatures once this is ready for release
-  lists: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
+  exceptions_list: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
 });

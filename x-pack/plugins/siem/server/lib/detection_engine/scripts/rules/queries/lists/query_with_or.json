@@ -7,7 +7,7 @@
   "type": "query",
   "query": "host.name: *",
   "interval": "30s",
-  "lists": [
+  "exceptions_list": [
     {
       "field": "event.module",
       "values_operator": "excluded",
