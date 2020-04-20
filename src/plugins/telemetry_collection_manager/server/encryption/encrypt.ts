@@ -20,12 +20,15 @@
 import { createRequestEncryptor } from '@elastic/request-crypto';
 import { telemetryJWKS } from './telemetry_jwks';
 
-export function getKID(isProd = false): string {
-  return isProd ? 'kibana' : 'kibana_dev';
+export function getKID(useProdKey = false): string {
+  return useProdKey ? 'kibana' : 'kibana_dev';
 }
 
-export async function encryptTelemetry(payload: any, { isProd = false } = {}): Promise<string[]> {
-  const kid = getKID(isProd);
+export async function encryptTelemetry(
+  payload: any,
+  { useProdKey = false } = {}
+): Promise<string[]> {
+  const kid = getKID(useProdKey);
   const encryptor = await createRequestEncryptor(telemetryJWKS);
   const clusters = [].concat(payload);
   return Promise.all(clusters.map((cluster: any) => encryptor.encrypt(kid, cluster)));

@@ -67,9 +67,12 @@ import {
   ExpandPanelActionContext,
   ReplacePanelAction,
   ReplacePanelActionContext,
+  ClonePanelAction,
+  ClonePanelActionContext,
   ACTION_EXPAND_PANEL,
   ACTION_REPLACE_PANEL,
   RenderDeps,
+  ACTION_CLONE_PANEL,
 } from './application';
 import {
   DashboardAppLinkGeneratorState,
@@ -79,6 +82,7 @@ import {
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
+import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -120,6 +124,7 @@ declare module '../../../plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
+    [ACTION_CLONE_PANEL]: ClonePanelActionContext;
   }
 }
 
@@ -178,6 +183,9 @@ export class DashboardPlugin
 
     const factory = new DashboardContainerFactory(getStartServices);
     embeddable.registerEmbeddableFactory(factory.type, factory);
+
+    const placeholderFactory = new PlaceholderEmbeddableFactory();
+    embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
 
     // TODO this doesn't work yet because the new platform doesn't allow it: https://github.com/elastic/kibana/issues/56027
     const { appMounted, appUnMounted, stop: stopUrlTracker, getActiveUrl } = createKbnUrlTracker({
@@ -336,6 +344,11 @@ export class DashboardPlugin
     );
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
+
+    const clonePanelAction = new ClonePanelAction(core);
+    uiActions.registerAction(clonePanelAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction);
+
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,
