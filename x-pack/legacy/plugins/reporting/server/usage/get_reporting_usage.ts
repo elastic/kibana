@@ -16,21 +16,11 @@ import {
   JobTypes,
   KeyCountBucket,
   RangeStats,
-  ReportingUsage,
   SearchResponse,
   StatusByAppBucket,
 } from './types';
 
 type XPackInfo = XPackMainPlugin['info'];
-
-type SearchAggregation = SearchResponse['aggregations']['ranges']['buckets'];
-
-type RangeStatSets = Partial<
-  RangeStats & {
-    lastDay: RangeStats;
-    last7Days: RangeStats;
-  }
->;
 
 const JOB_TYPES_KEY = 'jobTypes';
 const JOB_TYPES_FIELD = 'jobtype';
@@ -64,15 +54,10 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
   }, {});
 
 function getAggStats(aggs: AggregationResultBuckets): RangeStats {
-  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
-  const jobTypes: JobTypes = jobBuckets.reduce(
+  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY];
+  const jobTypes = jobBuckets.reduce(
     (accum: JobTypes, { key, doc_count: count }: { key: string; doc_count: number }) => {
-      return {
-        ...accum,
-        [key]: {
-          total: count,
-        },
-      };
+      return { ...accum, [key]: { total: count } };
     },
     {} as JobTypes
   );
@@ -108,11 +93,17 @@ function getAggStats(aggs: AggregationResultBuckets): RangeStats {
   return { _all: all, status: statusTypes, status_by_app: statusByApp, ...jobTypes };
 }
 
+type SearchAggregation = SearchResponse['aggregations']['ranges']['buckets'];
+
+type RangeStatSets = Partial<
+  RangeStats & {
+    lastDay: RangeStats;
+    last7Days: RangeStats;
+  }
+>;
+
 async function handleResponse(response: SearchResponse): Promise<RangeStatSets> {
   const buckets = get<SearchAggregation>(response, 'aggregations.ranges.buckets');
-  if (!buckets) {
-    return {};
-  }
   const { lastDay, last7Days, all } = buckets;
 
   const lastDayUsage = lastDay ? getAggStats(lastDay) : ({} as RangeStats);
@@ -131,7 +122,7 @@ export async function getReportingUsage(
   xpackMainInfo: XPackInfo,
   callCluster: ESCallCluster,
   exportTypesRegistry: ExportTypesRegistry
-): Promise<ReportingUsage> {
+) {
   const reportingIndex = config.get('index');
 
   const params = {

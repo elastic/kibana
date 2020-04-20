@@ -4,30 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface AvailableTotal {
-  available: boolean;
-  total: number;
-}
-
 export interface KeyCountBucket {
   key: string;
   doc_count: number;
 }
 
-export interface StatusByAppBucket {
-  key: string;
-  appNames: { key: string; buckets: KeyCountBucket[] };
-}
-
 export interface AggregationBuckets {
-  buckets?: Array<{ key: string; doc_count: number }>;
+  buckets: KeyCountBucket[];
 }
 
-type AggregationKeys = 'jobTypes' | 'layoutTypes' | 'objectTypes' | 'statusTypes' | 'statusByApp';
-
-export type AggregationResultBuckets = { [K in AggregationKeys]: AggregationBuckets } & {
+export interface AggregationResultBuckets {
+  jobTypes: AggregationBuckets;
+  layoutTypes: {
+    doc_count: number;
+    pdf: AggregationBuckets;
+  };
+  objectTypes: {
+    doc_count: number;
+    pdf: AggregationBuckets;
+  };
+  statusTypes: AggregationBuckets;
+  statusByApp: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      appNames: {
+        buckets: Array<{
+          doc_count: number;
+          key: string;
+          jobType: AggregationBuckets;
+        }>;
+      };
+    }>;
+  };
   doc_count: number;
-};
+}
 
 export interface SearchResponse {
   aggregations: {
@@ -39,6 +50,11 @@ export interface SearchResponse {
       };
     };
   };
+}
+
+export interface AvailableTotal {
+  available: boolean;
+  total: number;
 }
 
 type BaseJobTypeKeys = 'csv' | 'PNG';
@@ -74,13 +90,7 @@ export type RangeStats = JobTypes & {
 export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
 export type FeatureAvailabilityMap = { [F in ExportType]: boolean };
 
-export type ReportingUsage = {
-  available: boolean;
-  enabled: boolean;
-  browser_type: string;
-  csv: AvailableTotal;
-  PNG: AvailableTotal;
-  printable_pdf: AvailableTotal;
-  last7Days: RangeStats;
-  lastDay: RangeStats;
-} & RangeStats;
+export interface StatusByAppBucket {
+  key: string;
+  appNames: { key: string; buckets: KeyCountBucket[] };
+}
