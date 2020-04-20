@@ -193,7 +193,7 @@ export const SystemGenericFileLine = React.memo<Props>(
           <EuiSpacer size="xs" />
           <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
             <TokensFlexItem grow={false} component="span">
-              <Badge iconType="editorComment" color="hollow">
+              <Badge iconType="editorComment" color="hollow" title="">
                 <OverflowField value={message} />
               </Badge>
             </TokensFlexItem>

@@ -1,33 +1,62 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
-    "index": "endpoint-agent-1",
+    "aliases": {},
+    "index": "metrics-endpoint-default-1",
     "mappings": {
+      "_meta": {
+        "version": "1.5.0-dev"
+      },
+      "date_detection": false,
+      "dynamic_templates": [
+        {
+          "strings_as_keyword": {
+            "mapping": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "match_mapping_type": "string"
+          }
+        }
+      ],
       "properties": {
         "@timestamp": {
-          "type": "long"
+          "type": "date"
+        },
+        "elastic": {
+          "properties": {
+            "agent": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              },
+              "type": "object"
+            }
+          }
         },
         "agent": {
           "properties": {
             "id": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "version": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
@@ -36,109 +65,71 @@
             "policy": {
               "properties": {
                 "id": {
-                  "fields": {
-                    "keyword": {
-                      "ignore_above": 256,
-                      "type": "keyword"
-                    }
-                  },
-                  "type": "text"
-                },
-                "name": {
-                  "fields": {
-                    "keyword": {
-                      "ignore_above": 256,
-                      "type": "keyword"
-                    }
-                  },
-                  "type": "text"
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "object"
             }
           }
         },
         "event": {
           "properties": {
             "created": {
-              "type": "long"
+              "type": "date"
             }
           }
         },
         "host": {
           "properties": {
+            "architecture": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
             "hostname": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "id": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "ip": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
+              "type": "ip"
             },
             "mac": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "os": {
               "properties": {
                 "full": {
                   "fields": {
-                    "keyword": {
-                      "ignore_above": 256,
-                      "type": "keyword"
+                    "text": {
+                      "norms": false,
+                      "type": "text"
                     }
                   },
-                  "type": "text"
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "name": {
                   "fields": {
-                    "keyword": {
-                      "ignore_above": 256,
-                      "type": "keyword"
+                    "text": {
+                      "norms": false,
+                      "type": "text"
                     }
                   },
-                  "type": "text"
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "variant": {
-                  "fields": {
-                    "keyword": {
-                      "ignore_above": 256,
-                      "type": "keyword"
-                    }
-                  },
-                  "type": "text"
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "version": {
-                  "fields": {
-                    "keyword": {
-                      "ignore_above": 256,
-                      "type": "keyword"
-                    }
-                  },
-                  "type": "text"
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -146,10 +137,15 @@
         }
       }
     },
+    "order": 1,
     "settings": {
       "index": {
-        "number_of_replicas": "1",
-        "number_of_shards": "1"
+        "mapping": {
+          "total_fields": {
+            "limit": 10000
+          }
+        },
+        "refresh_interval": "5s"
       }
     }
   }
