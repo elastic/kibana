@@ -71,113 +71,116 @@ exports[`AccessNoticePage renders as expected when state is available 1`] = `
       <form
         onSubmit={[Function]}
       >
-        <EuiPanel>
+        <EuiPanel
+          paddingSize="none"
+        >
           <div
-            className="euiPanel euiPanel--paddingMedium"
+            className="euiPanel"
           >
             <EuiFlexGroup
               direction="column"
-              justifyContent="spaceBetween"
+              gutterSize="none"
             >
               <div
-                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                className="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
               >
                 <EuiFlexItem
-                  className="secAccessNoticePage__text"
+                  className="secAccessNoticePage__textWrapper"
                 >
                   <div
-                    className="euiFlexItem secAccessNoticePage__text"
+                    className="euiFlexItem secAccessNoticePage__textWrapper"
                   >
-                    <EuiText
-                      textAlign="left"
+                    <div
+                      className="secAccessNoticePage__text"
                     >
-                      <div
-                        className="euiText euiText--medium"
+                      <EuiText
+                        textAlign="left"
                       >
-                        <EuiTextAlign
-                          textAlign="left"
+                        <div
+                          className="euiText euiText--medium"
                         >
-                          <div
-                            className="euiTextAlign euiTextAlign--left"
+                          <EuiTextAlign
+                            textAlign="left"
                           >
-                            <ReactMarkdown
-                              astPlugins={Array []}
-                              escapeHtml={true}
-                              plugins={Array []}
-                              rawSourcePos={false}
-                              renderers={Object {}}
-                              skipHtml={false}
-                              sourcePos={false}
-                              transformLinkUri={[Function]}
+                            <div
+                              className="euiTextAlign euiTextAlign--left"
                             >
-                              <div
-                                key="root-1-1"
+                              <ReactMarkdown
+                                astPlugins={Array []}
+                                escapeHtml={true}
+                                plugins={Array []}
+                                rawSourcePos={false}
+                                renderers={Object {}}
+                                skipHtml={false}
+                                sourcePos={false}
+                                transformLinkUri={[Function]}
                               >
-                                <p
-                                  key="paragraph-1-1"
+                                <div
+                                  key="root-1-1"
                                 >
-                                  This is 
-                                  <a
-                                    href="../link"
-                                    key="link-1-9"
+                                  <p
+                                    key="paragraph-1-1"
                                   >
-                                    link
-                                  </a>
-                                </p>
-                              </div>
-                            </ReactMarkdown>
-                          </div>
-                        </EuiTextAlign>
-                      </div>
-                    </EuiText>
+                                    This is 
+                                    <a
+                                      href="../link"
+                                      key="link-1-9"
+                                    >
+                                      link
+                                    </a>
+                                  </p>
+                                </div>
+                              </ReactMarkdown>
+                            </div>
+                          </EuiTextAlign>
+                        </div>
+                      </EuiText>
+                    </div>
                   </div>
                 </EuiFlexItem>
                 <EuiFlexItem
-                  className="secAccessNoticePage__acknowledge"
+                  className="secAccessNoticePage__footer"
                 >
                   <div
-                    className="euiFlexItem secAccessNoticePage__acknowledge"
+                    className="euiFlexItem secAccessNoticePage__footer"
                   >
-                    <EuiSpacer
-                      size="s"
+                    <div
+                      className="secAccessNoticePage__footerInner"
                     >
-                      <div
-                        className="euiSpacer euiSpacer--s"
-                      />
-                    </EuiSpacer>
-                    <EuiButton
-                      color="primary"
-                      data-test-subj="accessNoticeAcknowledge"
-                      fill={true}
-                      isDisabled={false}
-                      isLoading={false}
-                      onClick={[Function]}
-                      type="submit"
-                    >
-                      <button
-                        className="euiButton euiButton--primary euiButton--fill"
+                      <EuiButton
+                        color="primary"
                         data-test-subj="accessNoticeAcknowledge"
-                        disabled={false}
+                        fill={true}
+                        isDisabled={false}
+                        isLoading={false}
                         onClick={[Function]}
                         type="submit"
                       >
-                        <span
-                          className="euiButton__content"
+                        <button
+                          className="euiButton euiButton--primary euiButton--fill"
+                          data-test-subj="accessNoticeAcknowledge"
+                          disabled={false}
+                          onClick={[Function]}
+                          type="submit"
                         >
                           <span
-                            className="euiButton__text"
+                            className="euiButton__content"
                           >
-                            <FormattedMessage
-                              defaultMessage="Acknowledge and continue"
-                              id="xpack.security.accessNotice.acknowledgeButtonText"
-                              values={Object {}}
+                            <span
+                              className="euiButton__text"
                             >
-                              Acknowledge and continue
-                            </FormattedMessage>
+                              <FormattedMessage
+                                defaultMessage="Acknowledge and continue"
+                                id="xpack.security.accessNotice.acknowledgeButtonText"
+                                values={Object {}}
+                              >
+                                Acknowledge and continue
+                              </FormattedMessage>
+                            </span>
                           </span>
-                        </span>
-                      </button>
-                    </EuiButton>
+                        </button>
+                      </EuiButton>
+                    </div>
                   </div>
                 </EuiFlexItem>
               </div>
