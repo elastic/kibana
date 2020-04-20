@@ -6,8 +6,7 @@
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../../triggers_actions_ui/public/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../server/lib/alerting/log_threshold/types';
+import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../common/alerting/logs/types';
 import { ExpressionEditor } from './expression_editor';
 import { validateExpression } from './validation';
 

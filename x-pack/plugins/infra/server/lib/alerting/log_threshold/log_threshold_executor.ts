@@ -6,7 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { AlertExecutorOptions } from '../../../../../alerting/server';
-import { AlertStates, Comparator, LogThresholdAlertParams } from './types';
+import {
+  AlertStates,
+  Comparator,
+  LogThresholdAlertParams,
+} from '../../../../common/alerting/logs/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 

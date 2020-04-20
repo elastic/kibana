@@ -28,7 +28,7 @@ import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useSource } from '../../../../containers/source';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Comparator, TimeUnit } from '../../../../../server/lib/alerting/log_threshold/types';
+import { Comparator, TimeUnit } from '../../../../../common/alerting/logs/types';
 import { DocumentCount } from './document_count';
 import { Criteria } from './criteria';
 

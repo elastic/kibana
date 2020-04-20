@@ -8,7 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { PluginSetupContract } from '../../../../../alerting/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
-import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID, Comparator } from './types';
+import {
+  LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+  Comparator,
+} from '../../../../common/alerting/logs/types';
 import { InfraBackendLibs } from '../../infra_types';
 
 const documentCountActionVariableDescription = i18n.translate(

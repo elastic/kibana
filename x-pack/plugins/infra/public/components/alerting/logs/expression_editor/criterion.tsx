@@ -18,8 +18,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Comparator } from '../../../../../server/lib/alerting/log_threshold/types';
+import { Comparator } from '../../../../../common/alerting/logs/types';
 
 const getCompatibleComparatorsForField = fieldInfo => {
   if (fieldInfo.type === 'number') {

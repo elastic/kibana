@@ -15,8 +15,7 @@ import {
   EuiExpression,
   EuiFormRow,
 } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Comparator } from '../../../../../server/lib/alerting/log_threshold/types';
+import { Comparator } from '../../../../../common/alerting/logs/types';
 
 const getComparatorOptions = () => {
   return [

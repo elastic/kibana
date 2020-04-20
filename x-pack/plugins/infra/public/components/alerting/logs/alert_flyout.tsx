@@ -8,8 +8,7 @@ import React, { useContext } from 'react';
 import { AlertsContextProvider, AlertAdd } from '../../../../../triggers_actions_ui/public';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../server/lib/alerting/log_threshold/types';
+import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../common/alerting/logs/types';
 
 interface Props {
   visible?: boolean;
