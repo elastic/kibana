@@ -12,8 +12,14 @@ import { EuiDataGridSorting, EuiDataGridStyle } from '@elastic/eui';
 import {
   IndexPattern,
   IFieldType,
+  ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
 } from '../../../../../../../src/plugins/data/public';
+
+import {
+  BASIC_NUMERICAL_TYPES,
+  EXTENDED_NUMERICAL_TYPES,
+} from '../../data_frame_analytics/common/fields';
 
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 import { getNestedProperty } from '../../util/object_utils';
@@ -23,6 +29,7 @@ import { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
 export const FEATURE_IMPORTANCE = 'feature_importance';
 export const FEATURE_INFLUENCE = 'feature_influence';
+export const OUTLIER_SCORE = 'outlier_score';
 export const INIT_MAX_COLUMNS = 20;
 
 export const euiDataGridStyle: EuiDataGridStyle = {
@@ -58,6 +65,48 @@ export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): str
   });
 
   return indexPatternFields;
+};
+
+export interface FieldTypes {
+  [key: string]: ES_FIELD_TYPES;
+}
+
+export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, resultsField: string) => {
+  return Object.keys(fieldTypes).map(field => {
+    // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
+    // To fall back to the default string schema it needs to be undefined.
+    let schema;
+    const isSortable = true;
+    const type = fieldTypes[field];
+
+    const isNumber =
+      type !== undefined && (BASIC_NUMERICAL_TYPES.has(type) || EXTENDED_NUMERICAL_TYPES.has(type));
+    if (isNumber) {
+      schema = 'numeric';
+    }
+
+    switch (type) {
+      case 'date':
+        schema = 'datetime';
+        break;
+      case 'geo_point':
+        schema = 'json';
+        break;
+      case 'boolean':
+        schema = 'boolean';
+        break;
+    }
+
+    if (
+      field === `${resultsField}.${OUTLIER_SCORE}` ||
+      field === `${resultsField}.${FEATURE_INFLUENCE}` ||
+      field === `${resultsField}.${FEATURE_IMPORTANCE}`
+    ) {
+      schema = 'numeric';
+    }
+
+    return { id: field, schema, isSortable };
+  });
 };
 
 export const getDataGridSchemaFromKibanaFieldType = (field: IFieldType | undefined) => {

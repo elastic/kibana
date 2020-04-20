@@ -8,29 +8,18 @@ import { useEffect } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
-import {
-  IndexPattern,
-  ES_FIELD_TYPES,
-} from '../../../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
+  getDataGridSchemasFromFieldTypes,
   useDataGrid,
   useRenderCellValue,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
-import {
-  getDefaultFieldsFromJobCaps,
-  getIndexData,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
-import {
-  sortRegressionResultsFields,
-  BASIC_NUMERICAL_TYPES,
-  EXTENDED_NUMERICAL_TYPES,
-} from '../../../../common/fields';
+import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
+import { sortRegressionResultsFields } from '../../../../common/fields';
 
 const FEATURE_IMPORTANCE = 'feature_importance';
 
@@ -42,76 +31,16 @@ export const useRegressionData = (
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
 
-  const getDefaultSelectedFields = () => {
-    const { fields } = newJobCapsService;
-    if (jobConfig !== undefined) {
-      const { selectedFields: defaultSelected, docFields } = getDefaultFieldsFromJobCaps(
-        fields,
-        jobConfig,
-        needsDestIndexFields
-      );
-
-      const types: { [key: string]: ES_FIELD_TYPES } = {};
-      const allFields: string[] = [];
-
-      docFields.forEach(field => {
-        types[field.id] = field.type;
-        allFields.push(field.id);
-      });
-
-      return {
-        defaultSelectedFields: defaultSelected.map(field => field.id),
-        fieldTypes: types,
-        tableFields: allFields,
-      };
-    } else {
-      return {
-        defaultSelectedFields: [],
-        fieldTypes: {},
-        tableFields: [],
-      };
-    }
-  };
-
-  let columns: EuiDataGridColumn[] = [];
+  const columns: EuiDataGridColumn[] = [];
 
   if (jobConfig !== undefined) {
     const resultsField = jobConfig.dest.results_field;
-    const { fieldTypes, tableFields } = getDefaultSelectedFields();
-    columns = tableFields
-      .sort((a: any, b: any) => sortRegressionResultsFields(a, b, jobConfig))
-      .map((field: any) => {
-        // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
-        // To fall back to the default string schema it needs to be undefined.
-        let schema;
-        let isSortable = true;
-        const type = fieldTypes[field];
-        const isNumber =
-          type !== undefined &&
-          (BASIC_NUMERICAL_TYPES.has(type) || EXTENDED_NUMERICAL_TYPES.has(type));
-
-        if (isNumber) {
-          schema = 'numeric';
-        }
-
-        switch (type) {
-          case 'date':
-            schema = 'datetime';
-            break;
-          case 'geo_point':
-            schema = 'json';
-            break;
-          case 'boolean':
-            schema = 'boolean';
-            break;
-        }
-
-        if (field === `${resultsField}.${FEATURE_IMPORTANCE}`) {
-          isSortable = false;
-        }
-
-        return { id: field, schema, isSortable };
-      });
+    const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
+    columns.push(
+      ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
+        sortRegressionResultsFields(a.id, b.id, jobConfig)
+      )
+    );
   }
 
   const dataGrid = useDataGrid(

@@ -300,10 +300,6 @@ export const getDefaultFieldsFromJobCaps = (
   allFields.sort(({ name: a }: { name: string }, { name: b }: { name: string }) =>
     sortRegressionResultsFields(a, b, jobConfig)
   );
-  // Remove feature_importance fields provided by dest index since feature_importance is an array the path is not valid
-  // if (needsDestIndexFields === false) {
-  //   allFields = allFields.filter((field: any) => !field.name.includes('.feature_importance.'));
-  // }
 
   let selectedFields = allFields.filter(
     (field: any) => field.name === predictedField || !field.name.includes('.keyword')

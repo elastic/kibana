@@ -6,6 +6,8 @@
 
 import { useEffect } from 'react';
 
+import { EuiDataGridColumn } from '@elastic/eui';
+
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
@@ -14,47 +16,37 @@ import {
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
 import {
-  getDataGridSchemaFromKibanaFieldType,
-  getFieldsFromKibanaIndexPattern,
+  getDataGridSchemasFromFieldTypes,
   useDataGrid,
   useRenderCellValue,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import { getIndexData, DataFrameAnalyticsConfig } from '../../../../common';
+import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 
-import {
-  getFeatureCount,
-  getOutlierScoreFieldName,
-  FEATURE_INFLUENCE,
-  OUTLIER_SCORE,
-} from './common';
+import { getFeatureCount, getOutlierScoreFieldName, FEATURE_INFLUENCE } from './common';
 
 export const useOutlierData = (
   indexPattern: IndexPattern | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: SavedSearchQuery
 ): UseIndexDataReturnType => {
-  // EuiDataGrid State
-  const columns = [];
+  const needsDestIndexFields =
+    indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
+
+  const columns: EuiDataGridColumn[] = [];
 
   if (jobConfig !== undefined && indexPattern !== undefined) {
-    const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
     const resultsField = jobConfig.dest.results_field;
-    const removePrefix = new RegExp(`^${resultsField}\.${FEATURE_INFLUENCE}\.`, 'g');
+    const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
     columns.push(
-      ...indexPatternFields.map(id => {
-        const idWithoutPrefix = id.replace(removePrefix, '');
-        const field = indexPattern.fields.getByName(idWithoutPrefix);
-        let schema = getDataGridSchemaFromKibanaFieldType(field);
-
-        if (id === `${resultsField}.${OUTLIER_SCORE}`) {
-          schema = 'numeric';
-        }
-
-        return { id, schema };
-      })
+      ...getDataGridSchemasFromFieldTypes(
+        fieldTypes,
+        resultsField
+      ) /* .sort((a: any, b: any) =>
+        sortRegressionResultsFields(a, b, jobConfig)
+      )*/
     );
   }
 

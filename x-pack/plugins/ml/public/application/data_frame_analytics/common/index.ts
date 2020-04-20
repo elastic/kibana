@@ -50,3 +50,6 @@ export {
 export { euiDataGridStyle, euiDataGridToolbarSettings } from './data_grid';
 
 export { getIndexData } from './get_index_data';
+export { getIndexFields } from './get_index_fields';
+
+export { useResultsViewConfig } from './use_results_view_config';

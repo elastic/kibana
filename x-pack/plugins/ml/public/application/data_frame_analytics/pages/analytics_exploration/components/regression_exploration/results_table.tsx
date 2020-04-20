@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
-  EuiProgress,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -136,10 +135,6 @@ export const ResultsTable: FC<Props> = React.memo(
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {status === INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-        {status !== INDEX_STATUS.LOADING && (
-          <EuiProgress size="xs" color="accent" max={1} value={0} />
-        )}
         {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
