@@ -78,5 +78,5 @@ export const patchRulesSchema = Joi.object({
   version,
 
   // TODO: (LIST-FEATURE) Remove the hasListsFeatures once this is ready for release
-  lists: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
+  exceptions_list: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
 }).xor('id', 'rule_id');
