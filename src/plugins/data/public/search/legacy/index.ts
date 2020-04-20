@@ -17,15 +17,5 @@
  * under the License.
  */
 
-export * from './types';
-export {
-  getSearchParams,
-  getPreference,
-  getTimeout,
-  getIgnoreThrottled,
-  getMaxConcurrentShardRequests,
-} from './get_search_params';
-
-export { SearchError, getSearchErrorType } from './search_error';
-export { RequestFailure } from './request_error';
-export { handleResponse } from './handle_response';
+export { fetchSoon } from './fetch_soon';
+export { getEsClient, LegacyApiCaller } from './es_client';
