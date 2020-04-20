@@ -36,6 +36,8 @@ import { BaseVisType } from '../../../../../../plugins/visualizations/public/vis
 import { createTagCloudVisTypeDefinition } from '../../../../../../plugins/vis_type_tagcloud/public/tag_cloud_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createTagCloudVisualization } from '../../../../../../plugins/vis_type_tagcloud/public/components/tag_cloud_visualization';
+import { npStart } from 'ui/new_platform';
+import { setFormatService } from '../../../../../../plugins/vis_type_tagcloud/public';
 
 const THRESHOLD = 0.65;
 const PIXEL_DIFF = 64;
@@ -68,6 +70,8 @@ describe('TagCloudVisualizationTest', function() {
       seedColors,
     },
   });
+
+  before(setFormatService(npStart.plugins.data.fieldFormats));
 
   beforeEach(ngMock.module('kibana'));
 
