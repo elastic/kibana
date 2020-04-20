@@ -6,7 +6,7 @@
 
 // TODO: after NP migration is complete we should be able to remove this lint ignore comment
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../../../plugins/triggers_actions_ui/public/types';
+import { AlertTypeModel } from '../../../../../../plugins/triggers_actions_ui/public';
 import { initMonitorStatusAlertType } from './monitor_status';
 
 export type AlertTypeInitializer = (dependenies: { autocomplete: any }) => AlertTypeModel;
