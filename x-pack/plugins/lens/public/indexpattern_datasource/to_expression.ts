@@ -73,7 +73,7 @@ function getExpressionForLayer(
       .map(column =>
         column.operationType === dateHistogramOperation.type ? column.sourceField : null
       )
-      .filter(field => Boolean(field));
+      .filter((field): field is string => Boolean(field));
 
     return {
       type: 'expression',
@@ -87,20 +87,7 @@ function getExpressionForLayer(
             partialRows: [false],
             includeFormatHints: [true],
             timeField: allDateHistogramFields,
-            aggConfigs: [
-              {
-                type: 'expression',
-                chain: [
-                  {
-                    type: 'function',
-                    function: 'lens_auto_date',
-                    arguments: {
-                      aggConfigs: [JSON.stringify(aggs)],
-                    },
-                  },
-                ],
-              },
-            ],
+            aggConfigs: [JSON.stringify(aggs)],
           },
         },
         {
