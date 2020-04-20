@@ -6,3 +6,4 @@
 
 export * from './details';
 export * from './locations';
+export * from './state';

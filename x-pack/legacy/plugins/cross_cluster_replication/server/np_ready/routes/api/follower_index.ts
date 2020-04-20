@@ -164,6 +164,18 @@ export const registerFollowerIndexRoutes = ({ router, __LEGACY }: RouteDependenc
       path: `${API_BASE_PATH}/follower_indices/{id}`,
       validate: {
         params: schema.object({ id: schema.string() }),
+        body: schema.object({
+          maxReadRequestOperationCount: schema.maybe(schema.number()),
+          maxOutstandingReadRequests: schema.maybe(schema.number()),
+          maxReadRequestSize: schema.maybe(schema.string()), // byte value
+          maxWriteRequestOperationCount: schema.maybe(schema.number()),
+          maxWriteRequestSize: schema.maybe(schema.string()), // byte value
+          maxOutstandingWriteRequests: schema.maybe(schema.number()),
+          maxWriteBufferCount: schema.maybe(schema.number()),
+          maxWriteBufferSize: schema.maybe(schema.string()), // byte value
+          maxRetryDelay: schema.maybe(schema.string()), // time value
+          readPollTimeout: schema.maybe(schema.string()), // time value
+        }),
       },
     },
     licensePreRoutingFactory({

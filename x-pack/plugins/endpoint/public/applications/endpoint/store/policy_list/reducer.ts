@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Reducer } from 'redux';
-import { PolicyListState } from '../../types';
+import { PolicyListState, ImmutableReducer } from '../../types';
 import { AppAction } from '../action';
 import { isOnPolicyListPage } from './selectors';
+import { Immutable } from '../../../../../common/types';
 
 const initialPolicyListState = (): PolicyListState => {
   return {
@@ -21,7 +21,7 @@ const initialPolicyListState = (): PolicyListState => {
   };
 };
 
-export const policyListReducer: Reducer<PolicyListState, AppAction> = (
+export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
   state = initialPolicyListState(),
   action
 ) => {
@@ -42,7 +42,7 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
   }
 
   if (action.type === 'userChangedUrl') {
-    const newState = {
+    const newState: Immutable<PolicyListState> = {
       ...state,
       location: action.payload,
     };
@@ -53,14 +53,15 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
     // Also adjust some state if user is just entering the policy list view
     if (isCurrentlyOnListPage) {
       if (!wasPreviouslyOnListPage) {
-        newState.apiError = undefined;
-        newState.isLoading = true;
+        return {
+          ...newState,
+          apiError: undefined,
+          isLoading: true,
+        };
       }
       return newState;
     }
-    return {
-      ...initialPolicyListState(),
-    };
+    return initialPolicyListState();
   }
 
   return state;

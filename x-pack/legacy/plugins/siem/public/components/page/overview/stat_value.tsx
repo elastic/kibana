@@ -9,7 +9,7 @@ import numeral from '@elastic/numeral';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../../../plugins/siem/common/constants';
 import { useUiSetting$ } from '../../../lib/kibana';
 
 const ProgressContainer = styled.div`

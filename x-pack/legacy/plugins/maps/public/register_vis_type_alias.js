@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-import { npSetup } from '../../../../../src/legacy/ui/public/new_platform';
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_BASE_URL } from '../common/constants';
+import {
+  getInjectedVarFunc,
+  getVisualizations,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/maps/public/kibana_services';
+import { npSetup } from 'ui/new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { bindSetupCoreAndPlugins } from '../../../../plugins/maps/public/plugin';
 
-const showMapVisualizationTypes = chrome.getInjected('showMapVisualizationTypes', false);
+bindSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
+
+const showMapVisualizationTypes = getInjectedVarFunc()('showMapVisualizationTypes', false);
 
 const description = i18n.translate('xpack.maps.visTypeAlias.description', {
   defaultMessage: 'Create and style maps with multiple layers and indices.',
@@ -23,7 +31,7 @@ The Maps app offers more functionality and is easier to use.`,
   }
 );
 
-npSetup.plugins.visualizations.registerAlias({
+getVisualizations().registerAlias({
   aliasUrl: MAP_BASE_URL,
   name: APP_ID,
   title: i18n.translate('xpack.maps.visTypeAlias.title', {
@@ -37,5 +45,5 @@ npSetup.plugins.visualizations.registerAlias({
 });
 
 if (!showMapVisualizationTypes) {
-  npSetup.plugins.visualizations.hideTypes(['region_map', 'tile_map']);
+  getVisualizations().hideTypes(['region_map', 'tile_map']);
 }

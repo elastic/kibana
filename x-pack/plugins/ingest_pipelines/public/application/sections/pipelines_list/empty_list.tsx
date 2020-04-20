@@ -14,12 +14,12 @@ export const EmptyList: FunctionComponent = () => (
     title={
       <h2>
         {i18n.translate('xpack.ingestPipelines.list.table.emptyPromptTitle', {
-          defaultMessage: 'Create your first pipeline',
+          defaultMessage: 'Start by creating a pipeline',
         })}
       </h2>
     }
     actions={
-      <EuiButton href={`#${BASE_PATH}/create`}>
+      <EuiButton href={`#${BASE_PATH}/create`} iconType="plusInCircle" fill>
         {i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel', {
           defaultMessage: 'Create a pipeline',
         })}
