@@ -17,6 +17,8 @@ import {
   TransformWizardProvider,
 } from './transform_ui';
 
+import { MachineLearningTestResourcesProvider } from './machine_learning';
+
 export function TransformProvider(context: FtrProviderContext) {
   const api = TransformAPIProvider(context);
   const management = TransformManagementProvider(context);
@@ -25,6 +27,7 @@ export function TransformProvider(context: FtrProviderContext) {
   const securityUI = TransformSecurityUIProvider(context, securityCommon);
   const sourceSelection = TransformSourceSelectionProvider(context);
   const table = TransformTableProvider(context);
+  const testResources = MachineLearningTestResourcesProvider(context);
   const wizard = TransformWizardProvider(context);
 
   return {
@@ -35,6 +38,7 @@ export function TransformProvider(context: FtrProviderContext) {
     securityUI,
     sourceSelection,
     table,
+    testResources,
     wizard,
   };
 }

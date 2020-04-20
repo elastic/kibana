@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { ValidationError, Type, schema, ObjectType, TypeOf } from '@kbn/config-schema';
+import {
+  ValidationError,
+  Type,
+  schema,
+  ObjectType,
+  TypeOf,
+  isConfigSchema,
+} from '@kbn/config-schema';
 import { Stream } from 'stream';
 import { RouteValidationError } from './validator_error';
 
@@ -236,7 +243,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     data?: unknown,
     namespace?: string
   ): RouteValidationResultType<typeof validationRule> {
-    if (validationRule instanceof Type) {
+    if (isConfigSchema(validationRule)) {
       return validationRule.validate(data, {}, namespace);
     } else if (typeof validationRule === 'function') {
       return this.validateFunction(validationRule, data, namespace);

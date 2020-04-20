@@ -166,6 +166,212 @@ describe('waterfall_helpers', () => {
       expect(waterfall.errorsCount).toEqual(0);
       expect(waterfall).toMatchSnapshot();
     });
+    it('should reparent spans', () => {
+      const traceItems = [
+        {
+          processor: { event: 'transaction' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-node' },
+          transaction: {
+            duration: { us: 49660 },
+            name: 'GET /api',
+            id: 'myTransactionId1'
+          },
+          timestamp: { us: 1549324795784006 }
+        } as Transaction,
+        {
+          parent: { id: 'mySpanIdD' },
+          processor: { event: 'span' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-ruby' },
+          transaction: { id: 'myTransactionId1' },
+          timestamp: { us: 1549324795825633 },
+          span: {
+            duration: { us: 481 },
+            name: 'SELECT FROM products',
+            id: 'mySpanIdB'
+          },
+          child_ids: ['mySpanIdA', 'mySpanIdC']
+        } as Span,
+        {
+          parent: { id: 'mySpanIdD' },
+          processor: { event: 'span' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-ruby' },
+          transaction: { id: 'myTransactionId1' },
+          span: {
+            duration: { us: 6161 },
+            name: 'Api::ProductsController#index',
+            id: 'mySpanIdA'
+          },
+          timestamp: { us: 1549324795824504 }
+        } as Span,
+        {
+          parent: { id: 'mySpanIdD' },
+          processor: { event: 'span' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-ruby' },
+          transaction: { id: 'myTransactionId1' },
+          span: {
+            duration: { us: 532 },
+            name: 'SELECT FROM product',
+            id: 'mySpanIdC'
+          },
+          timestamp: { us: 1549324795827905 }
+        } as Span,
+        {
+          parent: { id: 'myTransactionId1' },
+          processor: { event: 'span' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-node' },
+          transaction: { id: 'myTransactionId1' },
+          span: {
+            duration: { us: 47557 },
+            name: 'GET opbeans-ruby:3000/api/products',
+            id: 'mySpanIdD'
+          },
+          timestamp: { us: 1549324795785760 }
+        } as Span
+      ];
+      const entryTransactionId = 'myTransactionId1';
+      const waterfall = getWaterfall(
+        {
+          trace: { items: traceItems, errorDocs: [], exceedsMax: false },
+          errorsPerTransaction: {}
+        },
+        entryTransactionId
+      );
+      const getIdAndParentId = (item: IWaterfallItem) => ({
+        id: item.id,
+        parentId: item.parent?.id
+      });
+      expect(waterfall.items.length).toBe(5);
+      expect(getIdAndParentId(waterfall.items[0])).toEqual({
+        id: 'myTransactionId1',
+        parentId: undefined
+      });
+      expect(getIdAndParentId(waterfall.items[1])).toEqual({
+        id: 'mySpanIdD',
+        parentId: 'myTransactionId1'
+      });
+      expect(getIdAndParentId(waterfall.items[2])).toEqual({
+        id: 'mySpanIdB',
+        parentId: 'mySpanIdD'
+      });
+      expect(getIdAndParentId(waterfall.items[3])).toEqual({
+        id: 'mySpanIdA',
+        parentId: 'mySpanIdB'
+      });
+      expect(getIdAndParentId(waterfall.items[4])).toEqual({
+        id: 'mySpanIdC',
+        parentId: 'mySpanIdB'
+      });
+      expect(waterfall.errorItems.length).toBe(0);
+      expect(waterfall.errorsCount).toEqual(0);
+    });
+    it("shouldn't reparent spans when child id isn't found", () => {
+      const traceItems = [
+        {
+          processor: { event: 'transaction' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-node' },
+          transaction: {
+            duration: { us: 49660 },
+            name: 'GET /api',
+            id: 'myTransactionId1'
+          },
+          timestamp: { us: 1549324795784006 }
+        } as Transaction,
+        {
+          parent: { id: 'mySpanIdD' },
+          processor: { event: 'span' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-ruby' },
+          transaction: { id: 'myTransactionId1' },
+          timestamp: { us: 1549324795825633 },
+          span: {
+            duration: { us: 481 },
+            name: 'SELECT FROM products',
+            id: 'mySpanIdB'
+          },
+          child_ids: ['incorrectId', 'mySpanIdC']
+        } as Span,
+        {
+          parent: { id: 'mySpanIdD' },
+          processor: { event: 'span' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-ruby' },
+          transaction: { id: 'myTransactionId1' },
+          span: {
+            duration: { us: 6161 },
+            name: 'Api::ProductsController#index',
+            id: 'mySpanIdA'
+          },
+          timestamp: { us: 1549324795824504 }
+        } as Span,
+        {
+          parent: { id: 'mySpanIdD' },
+          processor: { event: 'span' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-ruby' },
+          transaction: { id: 'myTransactionId1' },
+          span: {
+            duration: { us: 532 },
+            name: 'SELECT FROM product',
+            id: 'mySpanIdC'
+          },
+          timestamp: { us: 1549324795827905 }
+        } as Span,
+        {
+          parent: { id: 'myTransactionId1' },
+          processor: { event: 'span' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-node' },
+          transaction: { id: 'myTransactionId1' },
+          span: {
+            duration: { us: 47557 },
+            name: 'GET opbeans-ruby:3000/api/products',
+            id: 'mySpanIdD'
+          },
+          timestamp: { us: 1549324795785760 }
+        } as Span
+      ];
+      const entryTransactionId = 'myTransactionId1';
+      const waterfall = getWaterfall(
+        {
+          trace: { items: traceItems, errorDocs: [], exceedsMax: false },
+          errorsPerTransaction: {}
+        },
+        entryTransactionId
+      );
+      const getIdAndParentId = (item: IWaterfallItem) => ({
+        id: item.id,
+        parentId: item.parent?.id
+      });
+      expect(waterfall.items.length).toBe(5);
+      expect(getIdAndParentId(waterfall.items[0])).toEqual({
+        id: 'myTransactionId1',
+        parentId: undefined
+      });
+      expect(getIdAndParentId(waterfall.items[1])).toEqual({
+        id: 'mySpanIdD',
+        parentId: 'myTransactionId1'
+      });
+      expect(getIdAndParentId(waterfall.items[2])).toEqual({
+        id: 'mySpanIdA',
+        parentId: 'mySpanIdD'
+      });
+      expect(getIdAndParentId(waterfall.items[3])).toEqual({
+        id: 'mySpanIdB',
+        parentId: 'mySpanIdD'
+      });
+      expect(getIdAndParentId(waterfall.items[4])).toEqual({
+        id: 'mySpanIdC',
+        parentId: 'mySpanIdB'
+      });
+      expect(waterfall.errorItems.length).toBe(0);
+      expect(waterfall.errorsCount).toEqual(0);
+    });
   });
 
   describe('getWaterfallItems', () => {

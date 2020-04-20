@@ -32,7 +32,6 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for non existent index pattern',
-      sourceDataArchive: 'empty_kibana',
       indexPattern: 'non-existent-index-pattern',
       user: USER.ML_POWERUSER,
       expected: {
@@ -53,14 +52,16 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('module recognizer', function() {
+    before(async () => {
+      await ml.testResources.setKibanaTimeZoneToUTC();
+    });
+
     for (const testData of testDataList) {
       describe('lists matching modules', function() {
         before(async () => {
-          await esArchiver.load(testData.sourceDataArchive);
-        });
-
-        after(async () => {
-          await esArchiver.unload(testData.sourceDataArchive);
+          if (testData.hasOwnProperty('sourceDataArchive')) {
+            await esArchiver.loadIfNeeded(testData.sourceDataArchive!);
+          }
         });
 
         it(testData.testTitleSuffix, async () => {

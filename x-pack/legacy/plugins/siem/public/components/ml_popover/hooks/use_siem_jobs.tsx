@@ -6,12 +6,12 @@
 
 import { useEffect, useState } from 'react';
 
+import { DEFAULT_INDEX_KEY } from '../../../../../../../plugins/siem/common/constants';
 import { checkRecognizer, getJobsSummary, getModules } from '../api';
 import { SiemJob } from '../types';
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';
 import { errorToToaster, useStateToaster } from '../../toasters';
 import { useUiSetting$ } from '../../../lib/kibana';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 
 import * as i18n from './translations';
 import { createSiemJobs } from './use_siem_jobs_helpers';

@@ -7,7 +7,7 @@
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY } from '../../../../../../../plugins/siem/common/constants';
 import { GetLastEventTimeQuery, LastEventIndexKey, LastTimeDetails } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
 import { QueryTemplateProps } from '../../query_template';
