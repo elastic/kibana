@@ -368,7 +368,7 @@ export const AllRules = React.memo<AllRulesProps>(
             )}
             {showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !initLoading && (
               <>
-                <UtilityBar border>
+                <UtilityBar>
                   <UtilityBarSection>
                     <UtilityBarGroup>
                       <UtilityBarText dataTestSubj="showingRules">
