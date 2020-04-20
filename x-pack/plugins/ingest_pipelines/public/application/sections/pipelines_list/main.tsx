@@ -29,11 +29,13 @@ import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
 import { PipelineDetails } from './details';
+import { PipelineDeleteModal } from './delete_modal';
 
 export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const { services } = useKibana();
 
   const [selectedPipeline, setSelectedPipeline] = useState<Pipeline | undefined>(undefined);
+  const [pipelinesToDelete, setPipelinesToDelete] = useState<string[]>([]);
 
   // Track component loaded
   useEffect(() => {
@@ -63,7 +65,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
       <PipelineTable
         onReloadClick={sendRequest}
         onEditPipelineClick={editPipeline}
-        onDeletePipelineClick={() => {}}
+        onDeletePipelineClick={setPipelinesToDelete}
         onViewPipelineClick={setSelectedPipeline}
         pipelines={data}
       />
@@ -128,10 +130,23 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
         <PipelineDetails
           pipeline={selectedPipeline}
           onClose={() => setSelectedPipeline(undefined)}
-          onDeleteClick={() => {}}
+          onDeleteClick={setPipelinesToDelete}
           onEditClick={editPipeline}
         />
       )}
+      {pipelinesToDelete?.length > 0 ? (
+        <PipelineDeleteModal
+          callback={deleteResponse => {
+            if (deleteResponse?.hasDeletedPipelines) {
+              // reload pipelines list
+              sendRequest();
+            }
+            setPipelinesToDelete([]);
+            setSelectedPipeline(undefined);
+          }}
+          pipelinesToDelete={pipelinesToDelete}
+        />
+      ) : null}
     </>
   );
 };

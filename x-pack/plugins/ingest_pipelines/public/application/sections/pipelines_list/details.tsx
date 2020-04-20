@@ -26,7 +26,7 @@ import { PipelineDetailsJsonBlock } from './details_json_block';
 export interface Props {
   pipeline: Pipeline;
   onEditClick: (pipelineName: string) => void;
-  onDeleteClick: () => void;
+  onDeleteClick: (pipelineName: string[]) => void;
   onClose: () => void;
 }
 
@@ -122,7 +122,7 @@ export const PipelineDetails: FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty color="danger" onClick={onDeleteClick}>
+              <EuiButtonEmpty color="danger" onClick={() => onDeleteClick([pipeline.name])}>
                 {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.deleteButtonLabel', {
                   defaultMessage: 'Delete',
                 })}

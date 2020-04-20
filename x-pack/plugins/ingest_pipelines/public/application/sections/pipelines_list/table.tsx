@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiLink, EuiButton } from '@elastic/eui';
 
 import { BASE_PATH } from '../../../../common/constants';
@@ -13,8 +14,8 @@ import { Pipeline } from '../../../../common/types';
 export interface Props {
   pipelines: Pipeline[];
   onReloadClick: () => void;
-  onEditPipelineClick: (pipeineName: string) => void;
-  onDeletePipelineClick: (pipeline: Pipeline) => void;
+  onEditPipelineClick: (pipelineName: string) => void;
+  onDeletePipelineClick: (pipelineName: string[]) => void;
   onViewPipelineClick: (pipeline: Pipeline) => void;
 }
 
@@ -25,9 +26,32 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onDeletePipelineClick,
   onViewPipelineClick,
 }) => {
+  const [selection, setSelection] = useState<Pipeline[]>([]);
+
   return (
     <EuiInMemoryTable
+      itemId="name"
+      isSelectable
+      selection={{
+        onSelectionChange: setSelection,
+      }}
       search={{
+        toolsLeft:
+          selection.length > 0 ? (
+            <EuiButton
+              data-test-subj="deletePipelinesButton"
+              onClick={() => onDeletePipelineClick(selection.map(pipeline => pipeline.name))}
+              color="danger"
+            >
+              <FormattedMessage
+                id="xpack.ingestPipelines.list.table.deletePipelinesButtonLabel"
+                defaultMessage="Delete {count, plural, one {pipeline} other {pipelines} }"
+                values={{ count: selection.length }}
+              />
+            </EuiButton>
+          ) : (
+            undefined
+          ),
         toolsRight: [
           <EuiButton
             key="reloadButton"
@@ -66,7 +90,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           name: i18n.translate('xpack.ingestPipelines.list.table.nameColumnTitle', {
             defaultMessage: 'Name',
           }),
-          render: (name: any, pipeline) => (
+          render: (name: string, pipeline) => (
             <EuiLink onClick={() => onViewPipelineClick(pipeline)}>{name}</EuiLink>
           ),
         },
@@ -98,7 +122,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
               type: 'icon',
               icon: 'trash',
               color: 'danger',
-              onClick: onDeletePipelineClick,
+              onClick: ({ name }) => onDeletePipelineClick([name]),
             },
           ],
         },
