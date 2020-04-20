@@ -359,7 +359,9 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 editAction('timestamp', e.target.value, index);
               }}
               onBlur={() => {
-                if (!timestamp) {
+                if (timestamp?.trim()) {
+                  editAction('timestamp', timestamp.trim(), index);
+                } else {
                   editAction('timestamp', '', index);
                 }
               }}
