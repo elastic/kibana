@@ -17,22 +17,30 @@
  * under the License.
  */
 
-import { fromNode as fcb } from 'bluebird';
 import execa from 'execa';
 // @ts-ignore
 import SimpleGit from 'simple-git';
-
 import { run } from '@kbn/dev-utils';
+import Util from 'util';
+
+import pkg from '../../package.json';
 import { REPO_ROOT } from './constants';
 import { File } from './file';
 import * as Eslint from './eslint';
 
 run(async function getChangedFiles({ log }) {
   const simpleGit = new SimpleGit(REPO_ROOT);
-  const currentBranch = await fcb(cb => simpleGit.revparse(['--abbrev-ref', 'HEAD'], cb));
-  const changedFileStatuses: string = await fcb(cb =>
-    simpleGit.diff(['--name-status', `master...${currentBranch}`], cb)
-  );
+
+  const revParse = Util.promisify(simpleGit.revparse.bind(simpleGit));
+  const currentBranch = await revParse(['--abbrev-ref', 'HEAD']);
+  const headBranch = pkg.branch;
+
+  const diff = Util.promisify(simpleGit.diff.bind(simpleGit));
+
+  const changedFileStatuses: string = await diff([
+    '--name-status',
+    `${headBranch}...${currentBranch}`,
+  ]);
 
   const changedFiles = changedFileStatuses
     .split('\n')
@@ -55,13 +63,9 @@ run(async function getChangedFiles({ log }) {
     })
     .filter((file): file is File => Boolean(file));
 
-  const filesToLint = Eslint.pickFilesToLint(log, changedFiles);
+  const pathsToLint = Eslint.pickFilesToLint(log, changedFiles).map(f => f.getAbsolutePath());
 
-  if (filesToLint.length > 0) {
-    const pathsToLint = filesToLint.map(f => f.getAbsolutePath());
-    for (const path of pathsToLint) {
-      await execa('npx', ['prettier@2.0.4', '--write', path]);
-      await fcb(cb => simpleGit.add([path], cb));
-    }
+  if (pathsToLint.length > 0) {
+    await execa('npx', ['prettier@2.0.4', '--write', ...pathsToLint]);
   }
 });
