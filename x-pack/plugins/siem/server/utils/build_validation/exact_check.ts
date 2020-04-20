@@ -25,10 +25,7 @@ import { isObject, get } from 'lodash/fp';
  * @param decoded The decoded either which has either an existing error or the
  * decoded object which could have additional keys stripped from it.
  */
-export const exactCheck = <T>(
-  original: object,
-  decoded: Either<t.Errors, T>
-): Either<t.Errors, T> => {
+export const exactCheck = <T>(original: T, decoded: Either<t.Errors, T>): Either<t.Errors, T> => {
   const onLeft = (errors: t.Errors): Either<t.Errors, T> => left(errors);
   const onRight = (decodedValue: T): Either<t.Errors, T> => {
     const differences = findDifferencesRecursive(original, decodedValue);
@@ -47,7 +44,7 @@ export const exactCheck = <T>(
   return pipe(decoded, fold(onLeft, onRight));
 };
 
-export const findDifferencesRecursive = <T>(original: object, decodedValue: T): string[] => {
+export const findDifferencesRecursive = <T>(original: T, decodedValue: T): string[] => {
   if (decodedValue == null) {
     try {
       // It is null and painful when the original contains an object or an array
@@ -56,29 +53,33 @@ export const findDifferencesRecursive = <T>(original: object, decodedValue: T): 
     } catch (err) {
       return ['circular reference'];
     }
+  } else if (typeof original !== 'object' || original == null) {
+    // We are not an object or null so do not report differences
+    return [];
+  } else {
+    const decodedKeys = Object.keys(decodedValue);
+    const differences = Object.keys(original).flatMap(originalKey => {
+      const foundKey = decodedKeys.some(key => key === originalKey);
+      const topLevelKey = foundKey ? [] : [originalKey];
+      // I use lodash to cheat and get an any (not going to lie ;-))
+      const valueObjectOrArrayOriginal = get(originalKey, original);
+      const valueObjectOrArrayDecoded = get(originalKey, decodedValue);
+      if (isObject(valueObjectOrArrayOriginal)) {
+        return [
+          ...topLevelKey,
+          ...findDifferencesRecursive(valueObjectOrArrayOriginal, valueObjectOrArrayDecoded),
+        ];
+      } else if (Array.isArray(valueObjectOrArrayOriginal)) {
+        return [
+          ...topLevelKey,
+          ...valueObjectOrArrayOriginal.flatMap((arrayElement, index) =>
+            findDifferencesRecursive(arrayElement, get(index, valueObjectOrArrayDecoded))
+          ),
+        ];
+      } else {
+        return topLevelKey;
+      }
+    });
+    return differences;
   }
-  const decodedKeys = Object.keys(decodedValue);
-  const differences = Object.keys(original).flatMap(originalKey => {
-    const foundKey = decodedKeys.some(key => key === originalKey);
-    const topLevelKey = foundKey ? [] : [originalKey];
-    // I use lodash to cheat and get an any (not going to lie ;-))
-    const valueObjectOrArrayOriginal = get(originalKey, original);
-    const valueObjectOrArrayDecoded = get(originalKey, decodedValue);
-    if (isObject(valueObjectOrArrayOriginal)) {
-      return [
-        ...topLevelKey,
-        ...findDifferencesRecursive(valueObjectOrArrayOriginal, valueObjectOrArrayDecoded),
-      ];
-    } else if (Array.isArray(valueObjectOrArrayOriginal)) {
-      return [
-        ...topLevelKey,
-        ...valueObjectOrArrayOriginal.flatMap((arrayElement, index) =>
-          findDifferencesRecursive(arrayElement, get(index, valueObjectOrArrayDecoded))
-        ),
-      ];
-    } else {
-      return topLevelKey;
-    }
-  });
-  return differences;
 };
