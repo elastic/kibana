@@ -262,20 +262,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "aggConfigs": Array [
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {
-                          "aggConfigs": Array [
-                            "[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]",
-                          ],
-                        },
-                        "function": "lens_auto_date",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
+                  "[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]",
                 ],
                 "includeFormatHints": Array [
                   true,
@@ -288,6 +275,9 @@ describe('IndexPattern Data Source', () => {
                 ],
                 "partialRows": Array [
                   false,
+                ],
+                "timeField": Array [
+                  "timestamp",
                 ],
               },
               "function": "esaggs",

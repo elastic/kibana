@@ -19,6 +19,7 @@
 
 import { TabifyBuckets } from './buckets';
 import { AggGroupNames } from '../aggs';
+import moment from 'moment';
 
 describe('Buckets wrapper', () => {
   const check = (aggResp: any, count: number, keys: string[]) => {
@@ -187,9 +188,9 @@ describe('Buckets wrapper', () => {
         },
       };
       const timeRange = {
-        gte: 150,
-        lte: 350,
-        name: 'date',
+        from: moment(150),
+        to: moment(350),
+        timeFields: ['date'],
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
 
@@ -204,9 +205,9 @@ describe('Buckets wrapper', () => {
         },
       };
       const timeRange = {
-        gte: 150,
-        lte: 350,
-        name: 'date',
+        from: moment(150),
+        to: moment(350),
+        timeFields: ['date'],
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
 
@@ -221,9 +222,9 @@ describe('Buckets wrapper', () => {
         },
       };
       const timeRange = {
-        gte: 100,
-        lte: 400,
-        name: 'date',
+        from: moment(100),
+        to: moment(400),
+        timeFields: ['date'],
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
 
@@ -238,13 +239,17 @@ describe('Buckets wrapper', () => {
         },
       };
       const timeRange = {
-        gte: 150,
-        lte: 350,
-        name: 'date',
+        from: moment(150),
+        to: moment(350),
+        timeFields: ['date'],
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
 
       expect(buckets).toHaveLength(4);
     });
+
+    test.todo('does drop bucket when multiple time fields specified');
+
+    test.todo('does drop all buckets with matchin time fields');
   });
 });
