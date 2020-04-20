@@ -23,12 +23,18 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ManagedTable } from '../../../shared/ManagedTable';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
+import { APMQueryParams } from '../../../shared/Links/url_helpers';
 
 const GroupIdLink = styled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
 `;
 
 const MessageAndCulpritCell = styled.div`
+  ${truncate('100%')};
+`;
+
+const ErrorLink = styled(ErrorOverviewLink)`
   ${truncate('100%')};
 `;
 
@@ -48,9 +54,8 @@ interface Props {
 
 const ErrorGroupList: React.FC<Props> = props => {
   const { items } = props;
-  const {
-    urlParams: { serviceName }
-  } = useUrlParams();
+  const { urlParams } = useUrlParams();
+  const { serviceName } = urlParams;
 
   if (!serviceName) {
     throw new Error('Service name is required');
@@ -70,6 +75,29 @@ const ErrorGroupList: React.FC<Props> = props => {
             <GroupIdLink serviceName={serviceName} errorGroupId={groupId}>
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
+          );
+        }
+      },
+      {
+        name: i18n.translate('xpack.apm.errorsTable.typeColumnLabel', {
+          defaultMessage: 'Type'
+        }),
+        field: 'type',
+        sortable: false,
+        render: (type: string, item: ErrorGroupListAPIResponse[0]) => {
+          return (
+            <ErrorLink
+              title={type}
+              serviceName={serviceName}
+              query={
+                {
+                  ...urlParams,
+                  kuery: `error.exception.type:${type}`
+                } as APMQueryParams
+              }
+            >
+              {type}
+            </ErrorLink>
           );
         }
       },
@@ -150,7 +178,7 @@ const ErrorGroupList: React.FC<Props> = props => {
           )
       }
     ],
-    [serviceName]
+    [serviceName, urlParams]
   );
 
   return (
