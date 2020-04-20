@@ -115,7 +115,7 @@ test('`loadPluginBundles` rejects if bundle does attach an initializer to window
   const fakeScriptTag1 = createdScriptTags[0];
 
   // Setup a fake initializer as if a plugin bundle had actually been loaded.
-  coreWindow.__kbnBundles__['plugin/plugin-a'] = undefined;
+  coreWindow.__kbnBundles__['plugin:plugin-a'] = undefined;
   // Call the onload callback
   fakeScriptTag1.onload();
 

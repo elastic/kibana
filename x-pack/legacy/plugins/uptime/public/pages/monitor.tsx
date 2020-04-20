@@ -8,12 +8,13 @@ import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
-import { MonitorStatusDetails, PingList } from '../components/connected';
 import { monitorStatusSelector } from '../state/selectors';
 import { PageHeader } from './page_header';
-import { MonitorCharts } from '../components/functional';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useMonitorId, useUptimeTelemetry, UptimePage } from '../hooks';
+import { MonitorCharts } from '../components/monitor';
+import { MonitorStatusDetails } from '../components/monitor';
+import { PingList } from '../components/monitor';
 
 export const MonitorPage: React.FC = () => {
   const monitorId = useMonitorId();
