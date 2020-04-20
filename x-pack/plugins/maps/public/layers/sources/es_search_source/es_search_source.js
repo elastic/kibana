@@ -387,11 +387,21 @@ export class ESSearchSource extends AbstractESSource {
       });
       return properties;
     };
+    const epochMillisFields = searchFilters.fieldNames.filter(fieldName => {
+      const field = getField(indexPattern, fieldName);
+      return field.readFromDocValues && field.type === 'date';
+    });
 
     let featureCollection;
     try {
       const geoField = await this._getGeoField();
-      featureCollection = hitsToGeoJson(hits, flattenHit, geoField.name, geoField.type);
+      featureCollection = hitsToGeoJson(
+        hits,
+        flattenHit,
+        geoField.name,
+        geoField.type,
+        epochMillisFields
+      );
     } catch (error) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.convertToGeoJsonErrorMsg', {
