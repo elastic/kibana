@@ -53,8 +53,12 @@ import { npStart } from 'ui/new_platform';
 import { BaseVisType } from '../../../../../../../plugins/visualizations/public/vis_types/base_vis_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExprVis } from '../../../../../../../plugins/visualizations/public/expressions/vis';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setInjectedVars } from '../../../../../../../plugins/vis_type_vega/public/services';
+
+import {
+  setInjectedVars,
+  setData,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../plugins/vis_type_vega/public/services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setInjectedVarFunc } from '../../../../../../../plugins/maps_legacy/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -78,6 +82,7 @@ describe('VegaVisualizations', () => {
   });
 
   beforeEach(ngMock.module('kibana'));
+  beforeEach(setData(npStart.plugins.data));
   beforeEach(
     ngMock.inject(() => {
       setInjectedVarFunc(injectedVar => {
@@ -116,9 +121,6 @@ describe('VegaVisualizations', () => {
               timefilter: {
                 timefilter: {},
               },
-            },
-            __LEGACY: {
-              esClient: npStart.plugins.data.search.__LEGACY.esClient,
             },
           },
         },
