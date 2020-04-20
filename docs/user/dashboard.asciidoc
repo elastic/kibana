@@ -106,6 +106,12 @@ In *Edit* mode, you can clone any panel on a dashboard.
 
 To clone an existing panel open the panel menu of the element you wish to clone and select *Clone panel*
 
+* Cloned panels appear beside the original, and will move other panels down to make room if necessary.
+
+* Clones Support all of the original panel's functionality, including re-naming, editing, and cloning.
+
+* All cloned visualizations will appear in the visualization list.
+
 [role="screenshot"]
 image:images/clone_panel.gif[clone panel]
 
