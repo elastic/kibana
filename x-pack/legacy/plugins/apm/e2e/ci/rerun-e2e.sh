@@ -12,6 +12,5 @@ E2E_DIR="${0%/*}/.."
 source src/dev/ci_setup/setup_env.sh true
 set -ex
 cd "${E2E_DIR}"
-rm cypress/test-results/*.* || true
-rm -rf cypress/screenshots/* || true
+mv cypress/videos/apm.feature.mp4 "cypress/videos/apm.feature-$(date +%s).mp4"
 yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
