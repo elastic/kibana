@@ -850,8 +850,6 @@
     "data.search.searchSource.indexPatternIdDescription": "{kibanaIndexPattern} インデックス内の ID です。",
     "data.search.searchSource.indexPatternIdLabel": "インデックスパターン ID",
     "data.search.searchSource.indexPatternLabel": "インデックスパターン",
-    "data.search.searchSource.noSearchStrategyRegisteredErrorMessageDescription": "検索リクエストの検索方法が見つかりませんでした",
-    "data.search.searchSource.noSearchStrategyRegisteredErrorMessageTitle": "検索方法が登録されていません",
     "data.search.searchSource.queryTimeDescription": "クエリの処理の所要時間です。リクエストの送信やブラウザでのパースの時間は含まれません。",
     "data.search.searchSource.queryTimeLabel": "クエリ時間",
     "data.search.searchSource.queryTimeValue": "{queryTime}ms",
