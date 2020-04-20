@@ -376,7 +376,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               value={timestamp || ''}
               isInvalid={errors.timestamp.length > 0 && timestamp !== undefined}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                editAction('timestamp', e.target.value.trim(), index);
+                editAction('timestamp', e.target.value, index);
               }}
               onBlur={() => {
                 if (timestamp?.trim()) {
