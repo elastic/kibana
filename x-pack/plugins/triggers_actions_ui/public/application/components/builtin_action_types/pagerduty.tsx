@@ -23,6 +23,7 @@ import {
 import { PagerDutyActionParams, PagerDutyActionConnector } from './types';
 import pagerDutySvg from './pagerduty.svg';
 import { AddMessageVariables } from '../add_message_variables';
+import { hasMustacheTokens } from '../../lib/has_mustache_tokens';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -62,6 +63,7 @@ export function getActionType(): ActionTypeModel {
       const validationResult = { errors: {} };
       const errors = {
         summary: new Array<string>(),
+        timestamp: new Array<string>(),
       };
       validationResult.errors = errors;
       if (!actionParams.summary?.length) {
@@ -73,6 +75,21 @@ export function getActionType(): ActionTypeModel {
             }
           )
         );
+      }
+      if (actionParams.timestamp && !hasMustacheTokens(actionParams.timestamp)) {
+        if (isNaN(Date.parse(actionParams.timestamp))) {
+          errors.timestamp.push(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.invalidTimestamp',
+              {
+                defaultMessage: 'Timestamp must be formatted as a date, such as {now}.',
+                values: {
+                  now: new Date().toISOString(),
+                },
+              }
+            )
+          );
+        }
       }
       return validationResult;
     },
@@ -334,6 +351,8 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
+            error={errors.timestamp}
+            isInvalid={errors.timestamp.length > 0 && timestamp !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.timestampTextFieldLabel',
               {
@@ -355,8 +374,9 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               name="timestamp"
               data-test-subj="timestampInput"
               value={timestamp || ''}
+              isInvalid={errors.timestamp.length > 0 && timestamp !== undefined}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                editAction('timestamp', e.target.value, index);
+                editAction('timestamp', e.target.value.trim(), index);
               }}
               onBlur={() => {
                 if (timestamp?.trim()) {
