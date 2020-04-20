@@ -502,10 +502,6 @@ fatal: No such remote: 'elastic'
 ",
   ],
   Array [
-    "[INFO] Pushing branch \\"sqren:backport/6.0/pr-85\\"",
-    undefined,
-  ],
-  Array [
     "[VERBOSE] exec success 'git push sqren backport/6.0/pr-85:backport/6.0/pr-85 --force':",
     "",
   ],
@@ -513,10 +509,6 @@ fatal: No such remote: 'elastic'
     "[VERBOSE] exec success 'git checkout master && git branch -D backport/6.0/pr-85':",
     "Deleted branch backport/6.0/pr-85 (was <COMMIT HASH>).
 ",
-  ],
-  Array [
-    "[INFO] Creating pull request",
-    undefined,
   ],
   Array [
     "[INFO] Creating PR with title: \\"[6.0] Add witch (#85)\\". sqren:backport/6.0/pr-85 -> 6.0",

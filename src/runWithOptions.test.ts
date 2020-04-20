@@ -27,6 +27,7 @@ describe('runWithOptions', () => {
       githubApiBaseUrlV4: 'https://api.github.com/graphql',
       author: 'sqren',
       backportCreatedLabels: [],
+      dryRun: false,
       targetBranches: [],
       targetBranchChoices: [
         { name: '6.x' },

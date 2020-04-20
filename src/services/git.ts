@@ -2,12 +2,14 @@ import { resolve as pathResolve } from 'path';
 import del from 'del';
 import isEmpty from 'lodash.isempty';
 import uniq from 'lodash.uniq';
+import ora from 'ora';
 import { BackportOptions } from '../options/options';
 import { CommitSelected } from '../types/Commit';
 import { HandledError } from './HandledError';
 import { execAsCallback, exec } from './child-process-promisified';
 import { getRepoOwnerPath, getRepoPath } from './env';
 import { stat } from './fs-promisified';
+import { getShortSha } from './github/commitFormatters';
 import { logger } from './logger';
 
 async function folderExists(path: string): Promise<boolean> {
@@ -114,9 +116,18 @@ export async function cherrypick(
     await exec(cmd, { cwd: getRepoPath(options) });
     return { needsResolving: false };
   } catch (e) {
+    // missing `mainline` option
     if (e.message.includes('is a merge but no -m option was given')) {
       throw new HandledError(
-        'Failed to cherrypick because the selected commit was a merge. Please try again by specifying the parent with the `mainline` argument:\n\n> backport --mainline\n\nor:\n\n> backport --mainline <parent-number>\n\nOr refer to the git documentation for more information: https://git-scm.com/docs/git-cherry-pick#Documentation/git-cherry-pick.txt---mainlineparent-number'
+        'Cherrypick failed because the selected commit was a merge commit. Please try again by specifying the parent with the `mainline` argument:\n\n> backport --mainline\n\nor:\n\n> backport --mainline <parent-number>\n\nOr refer to the git documentation for more information: https://git-scm.com/docs/git-cherry-pick#Documentation/git-cherry-pick.txt---mainlineparent-number'
+      );
+    }
+
+    // commit was already backported
+    if (e.message.includes('The previous cherry-pick is now empty')) {
+      const shortSha = getShortSha(commit.sha);
+      throw new HandledError(
+        `Cherrypick failed because the selected commit (${shortSha}) is empty. This is most likely caused by attemping to backporting a commit that was already backported`
       );
     }
 
@@ -163,7 +174,10 @@ export async function getFilesWithConflicts(options: BackportOptions) {
     if (isConflictError) {
       const files = (e.stdout as string)
         .split('\n')
-        .filter((line: string) => !!line.trim())
+        .filter(
+          (line: string) =>
+            !!line.trim() && !line.startsWith('+') && !line.startsWith('-')
+        )
         .map((line: string) => {
           const posSeparator = line.indexOf(':');
           const filename = line.slice(0, posSeparator).trim();
@@ -239,13 +253,30 @@ export function getRemoteName(options: BackportOptions) {
   return options.fork ? options.username : options.repoOwner;
 }
 
-export function pushFeatureBranch(
-  options: BackportOptions,
-  featureBranch: string
-) {
-  const remoteName = getRemoteName(options);
-  return exec(
-    `git push ${remoteName} ${featureBranch}:${featureBranch} --force`,
-    { cwd: getRepoPath(options) }
-  );
+export function pushFeatureBranch({
+  options,
+  featureBranch,
+  headBranchName,
+}: {
+  options: BackportOptions;
+  featureBranch: string;
+  headBranchName: string;
+}) {
+  const spinner = ora(`Pushing branch "${headBranchName}"`).start();
+
+  if (options.dryRun) {
+    spinner.succeed(`Dry run: Pushing branch "${headBranchName}"`);
+    return exec('true', { cwd: getRepoPath(options) });
+  }
+
+  try {
+    const remoteName = getRemoteName(options);
+    return exec(
+      `git push ${remoteName} ${featureBranch}:${featureBranch} --force`,
+      { cwd: getRepoPath(options) }
+    );
+  } catch (e) {
+    spinner.fail();
+    throw e;
+  }
 }

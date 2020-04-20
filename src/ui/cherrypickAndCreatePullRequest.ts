@@ -37,14 +37,7 @@ export async function cherrypickAndCreatePullRequest({
   targetBranch: string;
 }) {
   const featureBranch = getFeatureBranchName(targetBranch, commits);
-  const commitMessages = commits
-    .map((commit) => ` - ${commit.formattedMessage}`)
-    .join('\n');
-  consoleLog(
-    `\n${chalk.bold(
-      `Backporting the following commits to ${targetBranch}:`
-    )}\n${commitMessages}\n`
-  );
+  consoleLog(`\n${chalk.bold(`Backporting to ${targetBranch}:`)}`);
 
   await withSpinner({ text: 'Pulling latest changes' }, () =>
     createFeatureBranch(options, targetBranch, featureBranch)
@@ -61,23 +54,42 @@ export async function cherrypickAndCreatePullRequest({
 
   const headBranchName = getHeadBranchName(options, featureBranch);
 
-  await withSpinner({ text: `Pushing branch "${headBranchName}"` }, () =>
-    pushFeatureBranch(options, featureBranch)
-  );
-
+  await pushFeatureBranch({ options, featureBranch, headBranchName });
   await deleteFeatureBranch(options, featureBranch);
 
-  return withSpinner({ text: 'Creating pull request' }, async (spinner) => {
-    const payload = getPullRequestPayload(options, targetBranch, commits);
-    const pullRequest = await createPullRequest(options, payload);
+  const payload = getPullRequestPayload(options, targetBranch, commits);
+  const pullRequest = await createPullRequest(options, payload);
 
-    if (options.labels.length > 0) {
-      await addLabelsToPullRequest(options, pullRequest.number, options.labels);
-    }
+  // add targetPRLabels
+  if (options.labels.length > 0) {
+    await addLabelsToPullRequest(options, pullRequest.number, options.labels);
+  }
 
-    spinner.text = `Created pull request: ${pullRequest.html_url}`;
-    return pullRequest;
-  });
+  // add sourcePRLabels
+  if (options.backportCreatedLabels.length > 0) {
+    const promises = commits.map((commit) => {
+      if (commit.pullNumber) {
+        return addLabelsToPullRequest(
+          options,
+          commit.pullNumber,
+          options.backportCreatedLabels
+        );
+      }
+    });
+    await Promise.all(promises);
+  }
+
+  consoleLog(`View pull request: ${pullRequest.html_url}`);
+
+  // output PR summary in dry run mode
+  if (options.dryRun) {
+    consoleLog(chalk.bold('\nPull request summary:'));
+    consoleLog(`Branch: ${payload.head} -> ${payload.base}`);
+    consoleLog(`Title: ${payload.title}`);
+    consoleLog(`Body: ${payload.body}\n`);
+  }
+
+  return pullRequest;
 }
 
 function getFeatureBranchName(targetBranch: string, commits: CommitSelected[]) {
@@ -97,7 +109,7 @@ async function waitForCherrypick(
   commit: CommitSelected
 ) {
   const cherrypickSpinner = ora(
-    `Cherry-picking commit ${getShortSha(commit.sha)}`
+    `Cherry-picking: ${chalk.greenBright(commit.formattedMessage)}`
   ).start();
 
   try {
@@ -129,14 +141,14 @@ async function waitForCherrypick(
   await listUnstagedFiles(options);
 
   // Conflicts resolved and unstaged files will now be staged and committed
-  const stagingSpinner = ora(`Staging and committing files`).start();
+  const stagingSpinner = ora(`Finalizing cherrypick`).start();
   try {
     // add unstaged files
     await addUnstagedFiles(options);
 
     // Run `cherrypick --continue` (similar to `git commit`)
     await cherrypickContinue(options);
-    stagingSpinner.succeed();
+    stagingSpinner.stop();
   } catch (e) {
     stagingSpinner.fail();
     throw e;
@@ -161,7 +173,7 @@ async function listConflictingFiles(options: BackportOptions) {
           'You do not need to `git add` or `git commit` the files - simply fix the conflicts.'
         )}
 
-        Press ENTER to continue
+        Press ENTER when the conflicts are resolved
       `)
     );
     if (!res) {

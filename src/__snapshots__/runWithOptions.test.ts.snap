@@ -86,7 +86,7 @@ Array [
         "choices": Array [
           Object {
             "name": "1. Add 👻 (2e63475c) ",
-            "short": "Add 👻 (2e63475c)",
+            "short": "2e63475c",
             "value": Object {
               "existingBackports": Array [],
               "formattedMessage": "Add 👻 (2e63475c)",
@@ -98,7 +98,7 @@ Array [
           },
           Object {
             "name": "2. Add witch (#85) ",
-            "short": "Add witch (#85)",
+            "short": "#85 (f3b618b9)",
             "value": Object {
               "existingBackports": Array [],
               "formattedMessage": "Add witch (#85)",
@@ -110,7 +110,7 @@ Array [
           },
           Object {
             "name": "3. Add SF mention (#80) 6.3",
-            "short": "Add SF mention (#80)",
+            "short": "#80 (79cf1845)",
             "value": Object {
               "existingBackports": Array [
                 Object {
@@ -127,7 +127,7 @@ Array [
           },
           Object {
             "name": "4. Add backport config (3827bbba) ",
-            "short": "Add backport config (3827bbba)",
+            "short": "3827bbba",
             "value": Object {
               "existingBackports": Array [],
               "formattedMessage": "Add backport config (3827bbba)",
@@ -139,7 +139,7 @@ Array [
           },
           Object {
             "name": "5. Initial commit (5ea0da55) ",
-            "short": "Initial commit (5ea0da55)",
+            "short": "5ea0da55",
             "value": Object {
               "existingBackports": Array [],
               "formattedMessage": "Initial commit (5ea0da55)",

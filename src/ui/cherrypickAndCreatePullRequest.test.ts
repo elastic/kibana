@@ -52,6 +52,7 @@ describe('cherrypickAndCreatePullRequest', () => {
         repoOwner: 'elastic',
         username: 'sqren',
         sourceBranch: 'myDefaultSourceBranch',
+        backportCreatedLabels: [],
       } as BackportOptions;
 
       const commits: CommitSelected[] = [
@@ -89,16 +90,19 @@ describe('cherrypickAndCreatePullRequest', () => {
             "Pulling latest changes",
           ],
           Array [
-            "Cherry-picking commit mySha",
+            "Cherry-picking: myCommitMessage (#1000)",
           ],
           Array [
-            "Cherry-picking commit mySha2",
+            "Cherry-picking: myOtherCommitMessage (#2000)",
           ],
           Array [
             "Pushing branch \\"sqren:backport/6.x/pr-1000_pr-2000\\"",
           ],
           Array [
             "Creating pull request",
+          ],
+          Array [
+            "Adding labels to #1337: backport",
           ],
         ]
       `);
@@ -144,6 +148,7 @@ describe('cherrypickAndCreatePullRequest', () => {
         repoName: 'kibana',
         repoOwner: 'elastic',
         username: 'sqren',
+        backportCreatedLabels: [],
       } as BackportOptions;
 
       await cherrypickAndCreatePullRequest({
@@ -203,6 +208,7 @@ describe('cherrypickAndCreatePullRequest', () => {
         repoOwner: 'elastic',
         username: 'sqren',
         sourceBranch: 'myDefaultSourceBranch',
+        backportCreatedLabels: [],
       } as BackportOptions;
 
       const res = await runTimersUntilResolved(() =>
@@ -233,7 +239,7 @@ describe('cherrypickAndCreatePullRequest', () => {
 
         You do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.
 
-        Press ENTER to continue",
+        Press ENTER when the conflicts are resolved",
           ],
           Array [
             "The following files have conflicts:
@@ -241,7 +247,7 @@ describe('cherrypickAndCreatePullRequest', () => {
 
         You do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.
 
-        Press ENTER to continue",
+        Press ENTER when the conflicts are resolved",
           ],
           Array [
             "The following files are unstaged:
@@ -256,9 +262,7 @@ describe('cherrypickAndCreatePullRequest', () => {
         Array [
           Array [
             "
-        Backporting the following commits to 6.x:
-         - myCommitMessage
-        ",
+        Backporting to 6.x:",
           ],
           Array [
             "",
@@ -271,6 +275,9 @@ describe('cherrypickAndCreatePullRequest', () => {
           ],
           Array [
             "",
+          ],
+          Array [
+            "View pull request: myHtmlUrl",
           ],
         ]
       `);
@@ -280,16 +287,19 @@ describe('cherrypickAndCreatePullRequest', () => {
             "Pulling latest changes",
           ],
           Array [
-            "Cherry-picking commit mySha",
+            "Cherry-picking: myCommitMessage",
           ],
           Array [
-            "Staging and committing files",
+            "Finalizing cherrypick",
           ],
           Array [
             "Pushing branch \\"sqren:backport/6.x/commit-mySha\\"",
           ],
           Array [
             "Creating pull request",
+          ],
+          Array [
+            "Adding labels to #1337: backport",
           ],
         ]
       `);

@@ -46,6 +46,11 @@ export function getOptionsFromCliArgs(
       alias: 'count',
       type: 'number',
     })
+    .option('dryRun', {
+      default: false,
+      description: 'Perform backport without pushing to Github',
+      type: 'boolean',
+    })
     .option('editor', {
       default: configOptions.editor,
       description: 'Editor to be opened during conflict resolution',

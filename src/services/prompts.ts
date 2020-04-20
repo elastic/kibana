@@ -7,6 +7,7 @@ import inquirer, {
 import isEmpty from 'lodash.isempty';
 import { CommitChoice } from '../types/Commit';
 import { BranchChoice } from '../types/Config';
+import { getShortSha } from './github/commitFormatters';
 
 type Question = CheckboxQuestion | ListQuestion | ConfirmQuestion;
 
@@ -36,7 +37,9 @@ export async function promptForCommits({
 
     return {
       name: `${position} ${c.formattedMessage} ${backportTags}`,
-      short: c.formattedMessage,
+      short: c.pullNumber
+        ? `#${c.pullNumber} (${getShortSha(c.sha)})`
+        : getShortSha(c.sha),
       value: c,
     };
   });

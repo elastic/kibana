@@ -1,3 +1,4 @@
+import ora from 'ora';
 import { BackportOptions } from '../../../options/options';
 import { logger } from '../../logger';
 import { apiRequestV3 } from './apiRequestV3';
@@ -14,6 +15,7 @@ export async function createPullRequest(
     repoOwner,
     accessToken,
     username,
+    dryRun,
   }: BackportOptions,
   payload: {
     title: string;
@@ -25,18 +27,33 @@ export async function createPullRequest(
   logger.info(
     `Creating PR with title: "${payload.title}". ${payload.head} -> ${payload.base}`
   );
-  const res = await apiRequestV3<GithubIssue>({
-    method: 'post',
-    url: `${githubApiBaseUrlV3}/repos/${repoOwner}/${repoName}/pulls`,
-    data: payload,
-    auth: {
-      username: username,
-      password: accessToken,
-    },
-  });
 
-  return {
-    html_url: res.html_url,
-    number: res.number,
-  };
+  const spinner = ora(`Creating pull request`).start();
+
+  if (dryRun) {
+    spinner.succeed(`Dry run: Creating pull request #1337`);
+    return { html_url: 'example_url', number: 1337 };
+  }
+
+  try {
+    const res = await apiRequestV3<GithubIssue>({
+      method: 'post',
+      url: `${githubApiBaseUrlV3}/repos/${repoOwner}/${repoName}/pulls`,
+      data: payload,
+      auth: {
+        username: username,
+        password: accessToken,
+      },
+    });
+
+    spinner.succeed(`Created pull request #${res.number}`);
+
+    return {
+      html_url: res.html_url,
+      number: res.number,
+    };
+  } catch (e) {
+    spinner.fail();
+    throw e;
+  }
 }

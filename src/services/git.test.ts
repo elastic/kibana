@@ -246,7 +246,7 @@ describe('cherrypick', () => {
       );
 
     await expect(cherrypick(options, commit)).rejects
-      .toThrowError(`Failed to cherrypick because the selected commit was a merge. Please try again by specifying the parent with the \`mainline\` argument:
+      .toThrowError(`Cherrypick failed because the selected commit was a merge commit. Please try again by specifying the parent with the \`mainline\` argument:
 
 > backport --mainline
 
@@ -255,6 +255,32 @@ or:
 > backport --mainline <parent-number>
 
 Or refer to the git documentation for more information: https://git-scm.com/docs/git-cherry-pick#Documentation/git-cherry-pick.txt---mainlineparent-number`);
+  });
+
+  it('it should gracefully handle empty commits', async () => {
+    jest
+      .spyOn(childProcess, 'exec')
+
+      // mock git fetch
+      .mockResolvedValueOnce({ stderr: '', stdout: '' })
+
+      // mock cherry pick command
+      .mockRejectedValueOnce(
+        new ExecError({
+          killed: false,
+          code: 1,
+          signal: null,
+          cmd: 'git cherry-pick fe6b13b83cc010f722548cd5a0a8c2d5341a20dd',
+          stdout:
+            'On branch backport/7.x/pr-58692\nYou are currently cherry-picking commit fe6b13b83cc.\n\nnothing to commit, working tree clean\n',
+          stderr:
+            "The previous cherry-pick is now empty, possibly due to conflict resolution.\nIf you wish to commit it anyway, use:\n\n    git commit --allow-empty\n\nOtherwise, please use 'git cherry-pick --skip'\n",
+        })
+      );
+
+    await expect(cherrypick(options, commit)).rejects.toThrowError(
+      `Cherrypick failed because the selected commit (abcd) is empty. This is most likely caused by attemping to backporting a commit that was already backported`
+    );
   });
 
   it('should re-throw non-cherrypick errors', async () => {

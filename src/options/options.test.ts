@@ -78,6 +78,7 @@ describe('getOptions', () => {
       githubApiBaseUrlV4: 'https://api.github.com/graphql',
       author: 'sqren',
       backportCreatedLabels: [],
+      dryRun: false,
       targetBranchChoices: [
         { checked: false, name: '6.0' },
         { checked: false, name: '5.9' },
@@ -109,6 +110,7 @@ describe('validateRequiredOptions', () => {
     githubApiBaseUrlV4: 'https://api.github.com/graphql',
     author: undefined,
     backportCreatedLabels: [],
+    dryRun: false,
     targetBranchChoices: [],
     targetBranches: ['branchA'],
     commitsCount: 10,
