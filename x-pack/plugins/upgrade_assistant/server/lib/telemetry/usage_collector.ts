@@ -84,12 +84,15 @@ export async function fetchUpgradeAssistantMetrics(
       return defaultTelemetrySavedObject;
     }
 
-    const upgradeAssistantTelemetrySOAttrsKeys = Object.keys(
-      upgradeAssistantTelemetrySavedObjectAttrs
-    );
     const telemetryObj = defaultTelemetrySavedObject;
+    defaultTelemetrySavedObject.forEach((key: string) => {
+      if (
+        !upgradeAssistantTelemetrySavedObjectAttrs.hasOwnProperty(key) ||
+        !upgradeAssistantTelemetrySavedObjectAttrs[key]
+      ) {
+        return;
+      }
 
-    upgradeAssistantTelemetrySOAttrsKeys.forEach((key: string) => {
       set(telemetryObj, key, upgradeAssistantTelemetrySavedObjectAttrs[key]);
     });
 
