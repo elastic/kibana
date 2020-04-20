@@ -14,7 +14,7 @@ import {
   EmbeddablePanel,
   ErrorEmbeddable,
 } from '../../../../../../../src/plugins/embeddable/public';
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import { DEFAULT_INDEX_KEY } from '../../../../../../plugins/siem/common/constants';
 import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 import { useIndexPatterns } from '../../hooks/use_index_patterns';
 import { Loader } from '../loader';

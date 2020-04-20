@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import {
   EuiBasicTable,
   EuiBasicTableProps,
@@ -21,6 +22,7 @@ import { noop } from 'lodash/fp';
 import React, { FC, memo, useState, useEffect, ComponentType } from 'react';
 import styled from 'styled-components';
 
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../plugins/siem/common/constants';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
@@ -39,7 +41,6 @@ import { UsersColumns } from '../page/network/users_table/columns';
 import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
 import { useStateToaster } from '../toasters';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import * as i18n from './translations';
 import { Panel } from '../panel';
@@ -246,21 +247,16 @@ const PaginatedTableComponent: FC<SiemTables> = ({
           <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
         ) : (
           <>
-            {
-              // @ts-ignore avoid some type mismatches
-            }
             <BasicTable
-              // @ts-ignore `Columns` interface differs from EUI's `column` type and is used all over this plugin, so ignore the differences instead of refactoring a lot of code
               columns={columns}
               compressed
               items={pageOfItems}
               onChange={onChange}
-              // @ts-ignore TS complains sorting.field is type `never`
               sorting={
                 sorting
                   ? {
                       sort: {
-                        field: sorting.field as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+                        field: sorting.field,
                         direction: sorting.direction,
                       },
                     }
@@ -305,9 +301,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
 export const PaginatedTable = memo(PaginatedTableComponent);
 
 type BasicTableType = ComponentType<EuiBasicTableProps<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
-const BasicTable: typeof EuiBasicTable & { displayName: string } = styled(
-  EuiBasicTable as BasicTableType
-)`
+const BasicTable = styled(EuiBasicTable as BasicTableType)`
   tbody {
     th,
     td {

@@ -8,11 +8,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
+import { isJobStarted } from '../../../../../../../../../plugins/siem/common/detection_engine/ml_helpers';
 import { useKibana } from '../../../../../lib/kibana';
 import { SiemJob } from '../../../../../components/ml_popover/types';
 import { ListItems } from './types';
 import { ML_JOB_STARTED, ML_JOB_STOPPED } from './translations';
-import { isJobStarted } from '../../../../../../common/detection_engine/ml_helpers';
 
 enum MessageLevels {
   info = 'info',

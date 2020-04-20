@@ -46,4 +46,5 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/licensing_plugin/config.legacy'),
   require.resolve('../test/functional_endpoint_ingest_failure/config.ts'),
   require.resolve('../test/functional_endpoint/config.ts'),
+  require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
 ]);
