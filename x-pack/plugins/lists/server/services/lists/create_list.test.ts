@@ -5,9 +5,10 @@
  */
 
 import { IndexEsListsSchema, ListsSchema } from '../../../common/schemas';
-import { getListInputMock } from '../__mocks__/get_list_input_mock';
+import { LISTS_INDEX, LIST_ID, getCreateListOptionsMock, getListResponseMock } from '../mocks';
+import { getIndexESListsMock } from '../mocks/get_index_es_lists_mock';
 
-import { CreateListOptions, createList } from './create_list';
+import { createList } from './create_list';
 
 describe('crete_list', () => {
   beforeEach(() => {
@@ -18,80 +19,32 @@ describe('crete_list', () => {
     jest.clearAllMocks();
   });
 
-  test('It returns a list as expected', async () => {
-    const options = getListInputMock();
+  test('it returns a list as expected with the id changed out for the elastic id', async () => {
+    const options = getCreateListOptionsMock();
     const list = await createList(options);
-    const { dateNow, user, description, meta, name, tieBreaker, type } = options as Required<
-      CreateListOptions
-    >;
-    const expected: ListsSchema = {
-      created_at: dateNow,
-      created_by: user,
-      description,
-      id: 'elastic-id-123',
-      meta,
-      name,
-      tie_breaker_id: tieBreaker,
-      type,
-      updated_at: dateNow,
-      updated_by: user,
-    };
+    const expected: ListsSchema = getListResponseMock();
+    expected.id = 'elastic-id-123';
     expect(list).toEqual(expected);
   });
 
   test('It calls "callAsCurrentUser" with body, index, and listsIndex', async () => {
-    const options = getListInputMock();
+    const options = getCreateListOptionsMock();
     await createList(options);
-    const {
-      id,
-      dateNow,
-      user,
-      description,
-      meta,
-      name,
-      tieBreaker,
-      type,
-      dataClient,
-      listsIndex,
-    } = options as Required<CreateListOptions>;
-    const body: IndexEsListsSchema = {
-      created_at: dateNow,
-      created_by: user,
-      description,
-      meta,
-      name,
-      tie_breaker_id: tieBreaker,
-      type,
-      updated_at: dateNow,
-      updated_by: user,
-    };
+    const body: IndexEsListsSchema = getIndexESListsMock();
     const expected = {
       body,
-      id,
-      index: listsIndex,
+      id: LIST_ID,
+      index: LISTS_INDEX,
     };
-    expect(dataClient.callAsCurrentUser).toBeCalledWith('index', expected);
+    expect(options.dataClient.callAsCurrentUser).toBeCalledWith('index', expected);
   });
 
   test('It returns an auto-generated id if id is sent in undefined', async () => {
-    const options = getListInputMock();
+    const options = getCreateListOptionsMock();
     options.id = undefined;
     const list = await createList(options);
-    const { dateNow, user, description, meta, name, tieBreaker, type } = options as Required<
-      CreateListOptions
-    >;
-    const expected: ListsSchema = {
-      created_at: dateNow,
-      created_by: user,
-      description,
-      id: 'elastic-id-123',
-      meta,
-      name,
-      tie_breaker_id: tieBreaker,
-      type,
-      updated_at: dateNow,
-      updated_by: user,
-    };
+    const expected: ListsSchema = getListResponseMock();
+    expected.id = 'elastic-id-123';
     expect(list).toEqual(expected);
   });
 });

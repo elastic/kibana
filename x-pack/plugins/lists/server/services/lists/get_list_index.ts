@@ -7,7 +7,7 @@
 import { KibanaRequest } from 'kibana/server';
 
 import { SpacesServiceSetup } from '../../../../spaces/server';
-import { getSpace } from '../utils/get_space';
+import { getSpace } from '../utils';
 
 interface GetListIndexOptions {
   spaces: SpacesServiceSetup | undefined | null;

@@ -6,7 +6,7 @@
 
 import { PassThrough, Readable } from 'stream';
 
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from 'kibana/server';
 
 import { SecurityPluginSetup } from '../../../../security/server';
 import { SpacesServiceSetup } from '../../../../spaces/server';

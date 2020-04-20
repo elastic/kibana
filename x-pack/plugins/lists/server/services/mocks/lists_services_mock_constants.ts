@@ -10,3 +10,6 @@ export const LISTS_ITEMS_INDEX = '.items';
 export const NAME = 'some name';
 export const DESCRIPTION = 'some description';
 export const LIST_ID = 'some-list-id';
+export const TIE_BREAKER = '6a76b69d-80df-4ab2-8c3e-85f466b06a0e';
+export const META = {};
+export const TYPE = 'ip';

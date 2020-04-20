@@ -5,13 +5,13 @@
  */
 
 import { ListsSchema } from '../../../common/schemas';
-import { getDeleteListInputMock } from '../__mocks__/get_delete_list_input_mock';
-import { getListsResponseMock } from '../__mocks__/get_lists_reponse_mock';
 import {
   LISTS_INDEX,
   LISTS_ITEMS_INDEX,
   LIST_ID,
-} from '../__mocks__/lists_services_mock_constants';
+  getDeleteListOptionsMock,
+  getListResponseMock,
+} from '../mocks';
 
 import { getList } from './get_list';
 import { deleteList } from './delete_list';
@@ -31,23 +31,23 @@ describe('delete_list', () => {
 
   test('Delete returns a null if the list is also null', async () => {
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(null);
-    const options = getDeleteListInputMock();
+    const options = getDeleteListOptionsMock();
     const deletedList = await deleteList(options);
     expect(deletedList).toEqual(null);
   });
 
   test('Delete returns the list if a list is returned from getList', async () => {
-    const list: ListsSchema = getListsResponseMock();
+    const list: ListsSchema = getListResponseMock();
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
-    const options = getDeleteListInputMock();
+    const options = getDeleteListOptionsMock();
     const deletedList = await deleteList(options);
     expect(deletedList).toEqual(list);
   });
 
   test('Delete calls "deleteByQuery" and "delete" if a list is returned from getList', async () => {
-    const list: ListsSchema = getListsResponseMock();
+    const list: ListsSchema = getListResponseMock();
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
-    const options = getDeleteListInputMock();
+    const options = getDeleteListOptionsMock();
     await deleteList(options);
     const deleteByQuery = {
       body: { query: { term: { list_id: LIST_ID } } },
@@ -57,9 +57,9 @@ describe('delete_list', () => {
   });
 
   test('Delete calls "delete" second if a list is returned from getList', async () => {
-    const list: ListsSchema = getListsResponseMock();
+    const list: ListsSchema = getListResponseMock();
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
-    const options = getDeleteListInputMock();
+    const options = getDeleteListOptionsMock();
     await deleteList(options);
     const deleteQuery = {
       id: LIST_ID,
@@ -70,7 +70,7 @@ describe('delete_list', () => {
 
   test('Delete does not call data client if the list returns null', async () => {
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(null);
-    const options = getDeleteListInputMock();
+    const options = getDeleteListOptionsMock();
     await deleteList(options);
     expect(options.dataClient.callAsCurrentUser).not.toHaveBeenCalled();
   });

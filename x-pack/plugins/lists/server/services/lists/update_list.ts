@@ -18,7 +18,7 @@ import { DataClient } from '../../types';
 
 import { getList } from '.';
 
-interface UpdateListOptions {
+export interface UpdateListOptions {
   id: Id;
   dataClient: DataClient;
   listsIndex: string;
@@ -26,6 +26,7 @@ interface UpdateListOptions {
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
+  dateNow?: string;
 }
 
 export const updateList = async ({
@@ -36,8 +37,9 @@ export const updateList = async ({
   listsIndex,
   user,
   meta,
+  dateNow,
 }: UpdateListOptions): Promise<ListsSchema | null> => {
-  const updatedAt = new Date().toISOString();
+  const updatedAt = dateNow ?? new Date().toISOString();
   const list = await getList({ dataClient, id, listsIndex });
   if (list == null) {
     return null;

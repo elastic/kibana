@@ -8,7 +8,7 @@ import { ListsSchema } from '../../../common/schemas';
 
 import { DATE_NOW, DESCRIPTION, LIST_ID, NAME, USER } from './lists_services_mock_constants';
 
-export const getListsResponseMock = (): ListsSchema => ({
+export const getListResponseMock = (): ListsSchema => ({
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,

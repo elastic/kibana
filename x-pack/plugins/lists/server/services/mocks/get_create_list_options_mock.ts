@@ -12,19 +12,22 @@ import {
   DESCRIPTION,
   LISTS_INDEX,
   LIST_ID,
+  META,
   NAME,
+  TIE_BREAKER,
+  TYPE,
   USER,
 } from './lists_services_mock_constants';
 
-export const getListInputMock = (): CreateListOptions => ({
+export const getCreateListOptionsMock = (): CreateListOptions => ({
   dataClient: getDataClientMock(),
   dateNow: DATE_NOW,
   description: DESCRIPTION,
   id: LIST_ID,
   listsIndex: LISTS_INDEX,
-  meta: {},
+  meta: META,
   name: NAME,
-  tieBreaker: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
-  type: 'ip',
+  tieBreaker: TIE_BREAKER,
+  type: TYPE,
   user: USER,
 });
