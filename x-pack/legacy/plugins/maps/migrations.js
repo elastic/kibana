@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { extractReferences } from './common/migrations/references';
-import { emsRasterTileToEmsVectorTile } from './common/migrations/ems_raster_tile_to_ems_vector_tile';
-import { topHitsTimeToSort } from './common/migrations/top_hits_time_to_sort';
-import { moveApplyGlobalQueryToSources } from './common/migrations/move_apply_global_query';
-import { addFieldMetaOptions } from './common/migrations/add_field_meta_options';
-import { migrateSymbolStyleDescriptor } from './common/migrations/migrate_symbol_style_descriptor';
-import { migrateUseTopHitsToScalingType } from './common/migrations/scaling_type';
-import { migrateJoinAggKey } from './common/migrations/join_agg_key';
+import { extractReferences } from '../../../plugins/maps/common/migrations/references';
+import { emsRasterTileToEmsVectorTile } from '../../../plugins/maps/common/migrations/ems_raster_tile_to_ems_vector_tile';
+import { topHitsTimeToSort } from '../../../plugins/maps/common/migrations/top_hits_time_to_sort';
+import { moveApplyGlobalQueryToSources } from '../../../plugins/maps/common/migrations/move_apply_global_query';
+import { addFieldMetaOptions } from '../../../plugins/maps/common/migrations/add_field_meta_options';
+import { migrateSymbolStyleDescriptor } from '../../../plugins/maps/common/migrations/migrate_symbol_style_descriptor';
+import { migrateUseTopHitsToScalingType } from '../../../plugins/maps/common/migrations/scaling_type';
+import { migrateJoinAggKey } from '../../../plugins/maps/common/migrations/join_agg_key';
 
 export const migrations = {
   map: {
