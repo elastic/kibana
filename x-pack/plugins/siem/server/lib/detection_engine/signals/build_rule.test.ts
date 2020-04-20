@@ -79,7 +79,7 @@ describe('buildRule', () => {
           query: 'host.name: Braden',
         },
       ],
-      lists: [
+      exceptions_list: [
         {
           field: 'source.ip',
           values_operator: 'included',
@@ -162,7 +162,7 @@ describe('buildRule', () => {
       updated_at: rule.updated_at,
       created_at: rule.created_at,
       throttle: 'no_actions',
-      lists: [
+      exceptions_list: [
         {
           field: 'source.ip',
           values_operator: 'included',
@@ -244,7 +244,7 @@ describe('buildRule', () => {
       updated_at: rule.updated_at,
       created_at: rule.created_at,
       throttle: 'no_actions',
-      lists: [
+      exceptions_list: [
         {
           field: 'source.ip',
           values_operator: 'included',
