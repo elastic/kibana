@@ -851,6 +851,8 @@
     "data.search.searchSource.indexPatternIdDescription": "{kibanaIndexPattern} 索引中的 ID。",
     "data.search.searchSource.indexPatternIdLabel": "索引模式 ID",
     "data.search.searchSource.indexPatternLabel": "索引模式",
+    "data.search.searchSource.noSearchStrategyRegisteredErrorMessageDescription": "无法为该搜索请求找到搜索策略",
+    "data.search.searchSource.noSearchStrategyRegisteredErrorMessageTitle": "未注册任何搜索策略",
     "data.search.searchSource.queryTimeDescription": "处理查询所花费的时间。不包括发送请求或在浏览器中解析它的时间。",
     "data.search.searchSource.queryTimeLabel": "查询时间",
     "data.search.searchSource.queryTimeValue": "{queryTime}ms",
