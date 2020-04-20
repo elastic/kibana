@@ -19,8 +19,8 @@ import {
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import { DEFAULT_DARK_MODE } from '../../../../../../plugins/siem/common/constants';
 import { useUiSetting } from '../../lib/kibana';
-import { DEFAULT_DARK_MODE } from '../../../common/constants';
 
 export const defaultChartHeight = '100%';
 export const defaultChartWidth = '100%';

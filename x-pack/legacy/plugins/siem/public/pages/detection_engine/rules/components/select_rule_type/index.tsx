@@ -16,8 +16,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
-import { RuleType } from '../../../../../../common/detection_engine/types';
+import { isMlRule } from '../../../../../../../../../plugins/siem/common/detection_engine/ml_helpers';
+import { RuleType } from '../../../../../../../../../plugins/siem/common/detection_engine/types';
 import { FieldHook } from '../../../../../shared_imports';
 import { useKibana } from '../../../../../lib/kibana';
 import * as i18n from './translations';
