@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConfigType } from '..';
+import { ConfigType } from '../config';
 
 export class SiemClient {
   public readonly signalsIndex: string;
