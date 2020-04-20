@@ -48,7 +48,7 @@ describe('HeaderSection', () => {
     ).toBe(true);
   });
 
-  test('it DOES NOT render the subtitle when not provided', () => {
+  test('renders the subtitle when not provided (to prevent layout thrash)', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderSection title="Test title" />
@@ -60,7 +60,7 @@ describe('HeaderSection', () => {
         .find('[data-test-subj="header-section-subtitle"]')
         .first()
         .exists()
-    ).toBe(false);
+    ).toBe(true);
   });
 
   test('it renders supplements when children provided', () => {
