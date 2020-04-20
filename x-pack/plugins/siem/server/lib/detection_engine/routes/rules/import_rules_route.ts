@@ -147,7 +147,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                       ruleType: type,
                     });
 
-                    const signalsIndex = siemClient.signalsIndex;
+                    const signalsIndex = siemClient.getSignalsIndex();
                     const indexExists = await getIndexExists(
                       clusterClient.callAsCurrentUser,
                       signalsIndex

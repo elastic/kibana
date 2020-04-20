@@ -7,11 +7,13 @@
 import { ConfigType } from '../config';
 
 export class SiemClient {
-  public readonly signalsIndex: string;
+  private readonly signalsIndex: string;
 
   constructor(private spaceId: string, private config: ConfigType) {
     const configuredSignalsIndex = this.config.signalsIndex;
 
     this.signalsIndex = `${configuredSignalsIndex}-${this.spaceId}`;
   }
+
+  public getSignalsIndex = (): string => this.signalsIndex;
 }
