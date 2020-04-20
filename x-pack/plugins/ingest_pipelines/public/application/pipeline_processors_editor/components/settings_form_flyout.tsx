@@ -10,7 +10,7 @@ import React, { FunctionComponent } from 'react';
 
 import { PipelineEditorProcessor } from '../types';
 
-import { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from './processor_settings_form';
+import { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from '.';
 
 export interface Props {
   processor: PipelineEditorProcessor | undefined;
@@ -18,9 +18,9 @@ export interface Props {
   onClose: () => void;
 }
 
-export const FormFlyout: FunctionComponent<Props> = ({ onClose, processor, onSubmit }) => {
+export const SettingsFormFlyout: FunctionComponent<Props> = ({ onClose, processor, onSubmit }) => {
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="flyoutComplicatedTitle">
+    <EuiFlyout onClose={onClose}>
       <EuiFlyoutBody>
         <ProcessorSettingsForm processor={processor as any} onSubmit={onSubmit} />
       </EuiFlyoutBody>

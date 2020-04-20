@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -25,12 +25,13 @@ import {
   FormConfig,
   JsonEditorField,
   useKibana,
+  FormDataProvider,
 } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
 
 import { SectionError, PipelineRequestFlyout } from '../';
 import { pipelineFormSchema } from './schema';
-import { PipelineProcessorsEditor } from '../../pipeline_processors_editor';
+import { PipelineProcessorsEditor, StateReader } from '../../pipeline_processors_editor';
 
 interface Props {
   onSave: (pipeline: Pipeline) => void;
@@ -60,7 +61,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
 }) => {
   const { services } = useKibana();
 
-  const [processorStateReaderRef, setProcessorStateReaderRef] = useState<any>();
+  const processorStateReaderRef = useRef<StateReader>(undefined as any);
   const [showJsonProcessorsEditor, setShowJsonProcessorsEditor] = useState(false);
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(Boolean(defaultValue.version));
   const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(
@@ -71,7 +72,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
   const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
     if (isValid) {
       if (!showJsonProcessorsEditor) {
-        const { processors } = processorStateReaderRef.current();
+        const { processors } = processorStateReaderRef.current.read();
         onSave({ ...formData, processors } as Pipeline);
       } else {
         onSave(formData as Pipeline);
@@ -131,21 +132,25 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
       );
     }
 
-    const formProcessorValue = form.getFields().processors?.value ?? defaultValue?.processors;
-
-    const processors =
-      typeof formProcessorValue === 'string' && formProcessorValue
-        ? JSON.parse(formProcessorValue)
-        : defaultValue?.processors ?? [];
-
     return (
-      <>
-        <PipelineProcessorsEditor
-          stateReaderRef={ref => setProcessorStateReaderRef(ref)}
-          processors={processors}
-        />
-        <EuiSpacer size="l" />
-      </>
+      <FormDataProvider pathsToWatch="processors">
+        {({ processors }) => {
+          const processorProp =
+            typeof processors === 'string' && processors
+              ? JSON.parse(processors)
+              : defaultValue?.processors ?? [];
+
+          return (
+            <>
+              <PipelineProcessorsEditor
+                stateReaderRef={reader => (processorStateReaderRef.current = reader)}
+                processors={processorProp}
+              />
+              <EuiSpacer size="l" />
+            </>
+          );
+        }}
+      </FormDataProvider>
     );
   };
 

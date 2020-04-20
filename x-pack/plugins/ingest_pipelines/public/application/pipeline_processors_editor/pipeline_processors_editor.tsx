@@ -5,14 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, {
-  FunctionComponent,
-  useState,
-  useMemo,
-  useRef,
-  useEffect,
-  MutableRefObject,
-} from 'react';
+import React, { FunctionComponent, useState, useMemo, useRef, useEffect } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -21,15 +14,13 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiIcon,
-  EuiTitle,
-  EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { Processor } from '../../../common/types';
 
-import { FormFlyout } from './components';
+import { SettingsFormFlyout } from './components';
 import { prepareDataIn } from './data_in';
 import { prepareDataOut, DataOutResult } from './data_out';
 import { useEditorState } from './reducer';
@@ -37,14 +28,30 @@ import { PipelineEditorProcessor } from './types';
 
 export interface Props {
   processors: Processor[];
-  stateReaderRef: (state: MutableRefObject<() => DataOutResult>) => void;
+  /**
+   * This follows the pattern of other components that wish to expose
+   * a state without emitting state updates to parents, e.g.:
+   *
+   * <input ref={myInputRef => ... } />
+   *
+   * In this case we share a well defined API that contains the latest
+   * state reader. Callers can create a ref of their own to point to
+   * this reader, e.g., useRef<{@link StateReader}>() so they can
+   * imperatively choose when to read state.
+   */
+  stateReaderRef: (stateReader: { read: () => DataOutResult }) => void;
   onFailure?: Processor[];
+}
+
+export interface StateReader {
+  read: () => DataOutResult;
 }
 
 export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   processors: originalProcessors,
   stateReaderRef,
 }) => {
+  const internalStateReaderRef = useRef<StateReader>({ read: undefined as any });
   const dataInResult = useMemo(() => prepareDataIn({ processors: originalProcessors }), [
     originalProcessors,
   ]);
@@ -54,14 +61,14 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
     undefined
   );
   const [isAddingNewProcessor, setIsAddingNewProcessor] = useState<boolean>(false);
-  const stateGetterRef = useRef(() => prepareDataOut(state));
 
   useEffect(() => {
-    stateGetterRef.current = () => prepareDataOut(state);
+    internalStateReaderRef.current.read = () => prepareDataOut(state);
   }, [state]);
 
   useEffect(() => {
-    stateReaderRef(stateGetterRef);
+    // Share our state reader instance with callers, do this once only
+    stateReaderRef(internalStateReaderRef.current);
   });
 
   const dismissFlyout = () => {
@@ -71,10 +78,6 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
 
   return (
     <>
-      <EuiTitle>
-        <h1>Pipeline Editor</h1>
-      </EuiTitle>
-      <EuiSpacer size="m" />
       <EuiPanel>
         <EuiDragDropContext
           onDragEnd={({ source, destination }) => {
@@ -137,7 +140,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
         <EuiButton onClick={() => setIsAddingNewProcessor(true)}>Add a processor</EuiButton>
       </EuiPanel>
       {selectedProcessor || isAddingNewProcessor ? (
-        <FormFlyout
+        <SettingsFormFlyout
           processor={selectedProcessor}
           onClose={() => {
             dismissFlyout();

@@ -34,11 +34,11 @@ const reducer: Reducer<State, Action> = (state, action) => {
 
   if (action.type === 'removeProcessor') {
     const idx = findProcessorIdx(state.processors, action.payload.processor);
-    const copyProcessors = state.processors.slice();
-    copyProcessors.splice(idx, 1);
+    const processorsCopy = state.processors.slice();
+    processorsCopy.splice(idx, 1);
     return {
       ...state,
-      processors: copyProcessors,
+      processors: processorsCopy,
     };
   }
 
@@ -55,11 +55,11 @@ const reducer: Reducer<State, Action> = (state, action) => {
   if (action.type === 'updateProcessor') {
     const { processor } = action.payload;
     const idx = findProcessorIdx(state.processors, processor);
-    const copyProcessors = state.processors.slice();
-    copyProcessors.splice(idx, 1, processor);
+    const processorsCopy = state.processors.slice();
+    processorsCopy.splice(idx, 1, processor);
     return {
       ...state,
-      processors: copyProcessors,
+      processors: processorsCopy,
     };
   }
 

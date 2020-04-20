@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PipelineProcessorsEditor } from './pipeline_processors_editor';
+export { PipelineProcessorsEditor, StateReader } from './pipeline_processors_editor';

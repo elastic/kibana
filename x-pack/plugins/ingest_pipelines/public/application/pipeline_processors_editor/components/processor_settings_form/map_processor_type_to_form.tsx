@@ -18,6 +18,6 @@ export const types = Object.keys(mapProcessorTypeToForm);
 
 export type ProcessorType = keyof typeof mapProcessorTypeToForm;
 
-export const getProcessorFormDescriptor = (type: string): FunctionComponent => {
+export const getProcessorForm = (type: string): FunctionComponent => {
   return mapProcessorTypeToForm[type as ProcessorType];
 };
