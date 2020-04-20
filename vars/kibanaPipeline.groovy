@@ -38,9 +38,10 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
           publishJunit()
         }
 
-        catchError {
-          runErrorReporter()
-        }
+        // disabled in 6.8
+        // catchError {
+        //   runErrorReporter()
+        // }
       }
     }
   }
