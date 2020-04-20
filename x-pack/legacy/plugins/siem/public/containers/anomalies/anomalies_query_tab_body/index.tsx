@@ -5,11 +5,12 @@
  */
 
 import React, { useEffect } from 'react';
+
+import { DEFAULT_ANOMALY_SCORE } from '../../../../../../../plugins/siem/common/constants';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
-import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { histogramConfigs } from './histogram_configs';
 const ID = 'anomaliesOverTimeQuery';
