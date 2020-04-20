@@ -6,13 +6,15 @@
 
 import { IIndexPattern } from 'src/plugins/data/public';
 import { AlertResultList, AlertDetails } from '../../../../../common/types';
-import { AppAction } from '../action';
-import { MiddlewareFactory, AlertListState } from '../../types';
+import { ImmutableMiddlewareFactory, AlertListState } from '../../types';
 import { isOnAlertPage, apiQueryParams, hasSelectedAlert, uiQueryParams } from './selectors';
 import { cloneHttpFetchQuery } from '../../../../common/clone_http_fetch_query';
 import { EndpointAppConstants } from '../../../../../common/types';
 
-export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreStart, depsStart) => {
+export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> = (
+  coreStart,
+  depsStart
+) => {
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
     const eventsPattern: { indexPattern: string } = await coreStart.http.get(
@@ -29,7 +31,7 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
     return [indexPattern];
   }
 
-  return api => next => async (action: AppAction) => {
+  return api => next => async action => {
     next(action);
     const state = api.getState();
     if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {

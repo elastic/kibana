@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaServices } from '../../../lib/kibana';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
-} from '../../../../common/constants';
+} from '../../../../../../../plugins/siem/common/constants';
+import { KibanaServices } from '../../../lib/kibana';
 import {
   BasicSignals,
   Privilege,

@@ -10,7 +10,7 @@ import {
   defaultDynamicSettings,
   DynamicSettings,
 } from '../../../../legacy/plugins/uptime/common/runtime_types';
-import { makeChecks } from '../../../api_integration/apis/uptime/graphql/helpers/make_checks';
+import { makeChecks } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime: uptimePage } = getPageObjects(['uptime']);
