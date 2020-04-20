@@ -10,6 +10,7 @@ exports[`draggables rendering it renders the default Badge 1`] = `
   <Badge
     color="hollow"
     iconType="number"
+    title=""
   >
     <span>
       A child of this

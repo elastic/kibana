@@ -61,6 +61,19 @@ describe('useGetReporters', () => {
     });
   });
 
+  it('refetch reporters', async () => {
+    const spyOnGetReporters = jest.spyOn(api, 'getReporters');
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
+        useGetReporters()
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      result.current.fetchReporters();
+      expect(spyOnGetReporters).toHaveBeenCalledTimes(2);
+    });
+  });
+
   it('unhappy path', async () => {
     const spyOnGetReporters = jest.spyOn(api, 'getReporters');
     spyOnGetReporters.mockImplementation(() => {

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GetOverviewFiltersPayload } from '../actions/overview_filters';
+import { GetOverviewFiltersPayload } from '../actions';
 import { OverviewFiltersType } from '../../../common/runtime_types';
 import { apiService } from './utils';
-import { API_URLS } from '../../../common/constants/rest_api';
+import { API_URLS } from '../../../common/constants';
 
 export const fetchOverviewFilters = async ({
   dateRangeStart,
