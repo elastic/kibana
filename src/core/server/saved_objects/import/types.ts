@@ -45,6 +45,14 @@ export interface SavedObjectsImportConflictError {
 }
 
 /**
+ * Represents a failure to import due to a conflict, which can be resolved in different ways with an overwrite.
+ * @public
+ */
+export interface SavedObjectsImportAmbiguousConflictError {
+  type: 'ambiguous_conflict';
+}
+
+/**
  * Represents a failure to import due to having an unsupported saved object type.
  * @public
  */
@@ -88,6 +96,7 @@ export interface SavedObjectsImportError {
   title?: string;
   error:
     | SavedObjectsImportConflictError
+    | SavedObjectsImportAmbiguousConflictError
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError;

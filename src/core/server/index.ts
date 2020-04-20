@@ -219,6 +219,7 @@ export {
   SavedObjectsExportResultDetails,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportOptions,

@@ -159,6 +159,7 @@ describe('resolveImportErrors()', () => {
             ],
             Object {
               "namespace": undefined,
+              "overwrite": undefined,
             },
           ],
         ],
@@ -294,6 +295,7 @@ describe('resolveImportErrors()', () => {
             ],
             Object {
               "namespace": undefined,
+              "overwrite": undefined,
             },
           ],
         ],

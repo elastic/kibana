@@ -1999,6 +1999,12 @@ export interface SavedObjectsFindResponse<T = unknown> {
 }
 
 // @public
+export interface SavedObjectsImportAmbiguousConflictError {
+    // (undocumented)
+    type: 'ambiguous_conflict';
+}
+
+// @public
 export interface SavedObjectsImportConflictError {
     // (undocumented)
     type: 'conflict';
@@ -2007,7 +2013,7 @@ export interface SavedObjectsImportConflictError {
 // @public
 export interface SavedObjectsImportError {
     // (undocumented)
-    error: SavedObjectsImportConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
+    error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
     id: string;
     // (undocumented)
