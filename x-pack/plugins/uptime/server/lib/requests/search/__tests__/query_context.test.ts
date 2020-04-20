@@ -9,7 +9,7 @@ import { CursorPagination } from '../types';
 import {
   CursorDirection,
   SortOrder,
-} from '../../../../../../../legacy/plugins/uptime/common/graphql/types';
+} from '../../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 describe('QueryContext', () => {
   // 10 minute range

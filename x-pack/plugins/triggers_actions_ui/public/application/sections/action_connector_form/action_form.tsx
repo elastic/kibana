@@ -150,7 +150,7 @@ export const ActionForm = ({
   const preconfiguredMessage = i18n.translate(
     'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
     {
-      defaultMessage: '(pre-configured)',
+      defaultMessage: '(preconfigured)',
     }
   );
   const getSelectedOptions = (actionItemId: string) => {

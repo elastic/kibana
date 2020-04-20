@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 
 import styled from 'styled-components';
+import { isJobStarted } from '../../../../../../../../../plugins/siem/common/detection_engine/ml_helpers';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
 import { useSiemJobs } from '../../../../../components/ml_popover/hooks/use_siem_jobs';
 import { useKibana } from '../../../../../lib/kibana';
@@ -24,7 +25,6 @@ import {
   ML_JOB_SELECT_PLACEHOLDER_TEXT,
   ENABLE_ML_JOB_WARNING,
 } from '../step_define_rule/translations';
-import { isJobStarted } from '../../../../../../common/detection_engine/ml_helpers';
 
 const HelpTextWarningContainer = styled.div`
   margin-top: 10px;
