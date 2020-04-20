@@ -7,13 +7,13 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../plugins/siem/common/constants';
 import { Direction } from '../../graphql/types';
 
 import { BasicTableProps, PaginatedTable } from './index';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 import { ThemeProvider } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
