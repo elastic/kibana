@@ -7,7 +7,8 @@
 import React, { useRef } from 'react';
 import { shallow } from 'enzyme';
 
-import { AllRulesTables, AllRulesTabs } from './index';
+import { AllRulesTables } from './index';
+import { AllRulesTabs } from '../../all';
 
 describe('AllRulesTables', () => {
   it('renders correctly', () => {

@@ -82,7 +82,7 @@ interface AllRulesProps {
   setRefreshRulesData: (refreshRule: (refreshPrePackagedRule?: boolean) => void) => void;
 }
 
-enum AllRulesTabs {
+export enum AllRulesTabs {
   rules = 'rules',
   monitoring = 'monitoring',
 }

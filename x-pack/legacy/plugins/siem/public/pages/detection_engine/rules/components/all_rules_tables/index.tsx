@@ -21,11 +21,7 @@ import {
   RuleStatusRowItemType,
 } from '../../../../../pages/detection_engine/rules/all/columns';
 import { Rule, Rules } from '../../../../../containers/detection_engine/rules';
-
-export enum AllRulesTabs {
-  rules = 'rules',
-  monitoring = 'monitoring',
-}
+import { AllRulesTabs } from '../../all';
 
 // EuiBasicTable give me a hardtime with adding the ref attributes so I went the easy way
 // after few hours of fight with typescript !!!! I lost :(
