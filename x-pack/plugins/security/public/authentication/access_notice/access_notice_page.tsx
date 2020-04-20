@@ -9,7 +9,7 @@ import './_index.scss';
 import React, { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import ReactMarkdown from 'react-markdown';
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
@@ -67,33 +67,35 @@ export function AccessNoticePage({ http, fatalErrors, notifications }: Props) {
       }
     >
       <form onSubmit={onAcknowledge}>
-        <div className="euiModal secAccessNoticePage__container">
-          <div className="euiModal__flex">
-            <div className="euiModalBody euiModalBody__overflow secAccessNoticePage__text">
-              <div className="euiModalBody__overflow secAccessNoticePage__text">
+        <EuiPanel paddingSize="none">
+          <EuiFlexGroup gutterSize="none" direction="column">
+            <EuiFlexItem className="secAccessNoticePage__textWrapper">
+              <div className="secAccessNoticePage__text">
                 <EuiText textAlign="left">
                   <ReactMarkdown>{accessNotice}</ReactMarkdown>
                 </EuiText>
               </div>
-            </div>
-            <div className="euiModalFooter secAccessNoticePage__footer">
-              <EuiButton
-                fill
-                type="submit"
-                color="primary"
-                onClick={onAcknowledge}
-                isDisabled={isLoading}
-                isLoading={isLoading}
-                data-test-subj="accessNoticeAcknowledge"
-              >
-                <FormattedMessage
-                  id="xpack.security.accessNotice.acknowledgeButtonText"
-                  defaultMessage="Acknowledge and continue"
-                />
-              </EuiButton>
-            </div>
-          </div>
-        </div>
+            </EuiFlexItem>
+            <EuiFlexItem className="secAccessNoticePage__footer">
+              <div className="secAccessNoticePage__footerInner">
+                <EuiButton
+                  fill
+                  type="submit"
+                  color="primary"
+                  onClick={onAcknowledge}
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  data-test-subj="accessNoticeAcknowledge"
+                >
+                  <FormattedMessage
+                    id="xpack.security.accessNotice.acknowledgeButtonText"
+                    defaultMessage="Acknowledge and continue"
+                  />
+                </EuiButton>
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
         <EuiSpacer size="xxl" />
       </form>
     </AuthenticationStatePage>
