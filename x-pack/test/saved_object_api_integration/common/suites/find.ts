@@ -32,6 +32,7 @@ export interface FindTestCase {
     total?: number;
   };
   failure?: 400 | 403;
+  typeUseInQueryField?: string;
 }
 
 export const getTestCases = (spaceId?: string): Record<string, FindTestCase> => ({
@@ -79,19 +80,61 @@ export const getTestCases = (spaceId?: string): Record<string, FindTestCase> => 
     title: 'filter with namespace-agnostic type',
     query: 'type=globaltype&filter=globaltype.attributes.title:*global*',
     successResult: { savedObjects: CASES.NAMESPACE_AGNOSTIC },
+    typeUseInQueryField: 'globaltype',
   },
   filterWithHiddenType: {
     title: 'filter with hidden type',
     query: `type=hiddentype&fields=name&filter=hiddentype.attributes.title:'hello'`,
+    typeUseInQueryField: 'hiddentype',
   },
   filterWithUnknownType: {
     title: 'filter with unknown type',
     query: `type=wigwags&filter=wigwags.attributes.title:'unknown'`,
+    typeUseInQueryField: 'wigwags',
   },
   filterWithDisallowedType: {
     title: 'filter with disallowed type',
     query: `type=globaltype&filter=dashboard.title:'Requests'`,
     failure: 400,
+    typeUseInQueryField: 'dashboard',
+  },
+  aggsWithNamespaceAgnosticType: {
+    title: 'aggs with namespace-agnostic type',
+    query: `type=globaltype&aggs=${encodeURIComponent(
+      JSON.stringify({
+        type_count: { max: { field: 'globaltype.attributes.version' } },
+      })
+    )}`,
+    successResult: { savedObjects: CASES.NAMESPACE_AGNOSTIC },
+    typeUseInQueryField: 'globaltype',
+  },
+  aggsWithHiddenType: {
+    title: 'aggs with hidden type',
+    query: `type=hiddentype&fields=name&aggs=${encodeURIComponent(
+      JSON.stringify({
+        type_count: { max: { field: 'hiddentype.attributes.title' } },
+      })
+    )}`,
+    typeUseInQueryField: 'hiddentype',
+  },
+  aggsWithUnknownType: {
+    title: 'aggs with unknown type',
+    query: `type=wigwags&aggs=${encodeURIComponent(
+      JSON.stringify({
+        type_count: { max: { field: 'wigwags.attributes.version' } },
+      })
+    )}`,
+    typeUseInQueryField: 'wigwags',
+  },
+  aggsWithDisallowedType: {
+    title: 'aggs with disallowed type',
+    query: `type=globaltype&aggs=${encodeURIComponent(
+      JSON.stringify({
+        type_count: { max: { field: 'dashboard.attributes.version' } },
+      })
+    )}`,
+    failure: 400,
+    typeUseInQueryField: 'dashboard',
   },
 });
 export const createRequest = ({ query }: FindTestCase) => ({ query });
@@ -116,7 +159,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
       const type = parsedQuery.type;
       await expectForbidden(type)(response);
     } else if (failure === 400) {
-      const type = (parsedQuery.filter as string).split('.')[0];
+      const type = testCase.typeUseInQueryField ?? 'unknown type';
       expect(response.body.error).to.eql('Bad Request');
       expect(response.body.statusCode).to.eql(failure);
       expect(response.body.message).to.eql(`This type ${type} is not allowed: Bad Request`);

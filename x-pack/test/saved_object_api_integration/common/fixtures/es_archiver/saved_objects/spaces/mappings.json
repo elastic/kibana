@@ -90,6 +90,9 @@
                 }
               },
               "type": "text"
+            },
+            "version": {
+              "type": "integer"
             }
           }
         },

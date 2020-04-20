@@ -9,6 +9,9 @@
             "ignore_above": 2048
           }
         }
+      },
+      "version": {
+        "type": "integer"
       }
     }
   }

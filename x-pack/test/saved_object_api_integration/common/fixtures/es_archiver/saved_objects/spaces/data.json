@@ -338,7 +338,8 @@
     "index": ".kibana",
     "source": {
       "globaltype": {
-        "title": "My favorite global object"
+        "title": "My favorite global object",
+        "version": 1
       },
       "type": "globaltype",
       "updated_at": "2017-09-21T18:59:16.270Z"

@@ -19,12 +19,16 @@ const createTestCases = (spaceId: string) => {
     cases.unknownSearchField,
     cases.filterWithNamespaceAgnosticType,
     cases.filterWithDisallowedType,
+    cases.aggsWithNamespaceAgnosticType,
+    cases.aggsWithDisallowedType,
   ];
   const hiddenAndUnknownTypes = [
     cases.hiddenType,
     cases.unknownType,
     cases.filterWithHiddenType,
     cases.filterWithUnknownType,
+    cases.aggsWithHiddenType,
+    cases.aggsWithUnknownType,
   ];
   const allTypes = normalTypes.concat(hiddenAndUnknownTypes);
   return { normalTypes, hiddenAndUnknownTypes, allTypes };
