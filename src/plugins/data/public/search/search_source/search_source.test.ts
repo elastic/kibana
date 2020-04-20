@@ -16,28 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { SearchSource } from './search_source';
-import { IndexPattern, SortDirection } from '../..';
-import { mockDataServices } from '../aggs/test_helpers';
-import { setSearchService } from '../../services';
-import { searchStartMock } from '../mocks';
-import { fetchSoon } from '../legacy';
-import { CoreStart } from 'kibana/public';
 import { Observable } from 'rxjs';
-
-// Setup search service mock
-searchStartMock.search = jest.fn(() => {
-  return new Observable(subscriber => {
-    setTimeout(() => {
-      subscriber.next({
-        rawResponse: '',
-      });
-      subscriber.complete();
-    }, 100);
-  });
-}) as any;
-setSearchService(searchStartMock);
+import { getSearchSourceType, SearchSourceType } from './search_source';
+import { IndexPattern, SortDirection } from '../..';
+import { fetchSoon } from '../legacy';
+import { IUiSettingsClient } from '../../../../../core/public';
+import { dataPluginMock } from '../../../../data/public/mocks';
+import { coreMock } from '../../../../../core/public/mocks';
 
 jest.mock('../legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
@@ -48,47 +33,71 @@ const getComputedFields = () => ({
   scriptFields: [],
   docvalueFields: [],
 });
+
 const mockSource = { excludes: ['foo-*'] };
 const mockSource2 = { excludes: ['bar-*'] };
+
 const indexPattern = ({
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource,
 } as unknown) as IndexPattern;
+
 const indexPattern2 = ({
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource2,
 } as unknown) as IndexPattern;
 
-describe('SearchSource', function() {
-  let uiSettingsMock: jest.Mocked<CoreStart['uiSettings']>;
+describe('SearchSource', () => {
+  let SearchSource: SearchSourceType;
+  let mockSearchMethod: any;
+
   beforeEach(() => {
-    const { core } = mockDataServices();
-    uiSettingsMock = core.uiSettings;
-    jest.clearAllMocks();
+    const core = coreMock.createStart();
+    const data = dataPluginMock.createStartContract();
+
+    mockSearchMethod = jest.fn(() => {
+      return new Observable(subscriber => {
+        setTimeout(() => {
+          subscriber.next({
+            rawResponse: '',
+          });
+          subscriber.complete();
+        }, 100);
+      });
+    });
+
+    SearchSource = getSearchSourceType({
+      search: {
+        ...data.search,
+        search: mockSearchMethod,
+      },
+      uiSettings: core.uiSettings,
+      injectedMetadata: core.injectedMetadata,
+    });
   });
 
-  describe('#setField()', function() {
-    it('sets the value for the property', function() {
+  describe('#setField()', () => {
+    test('sets the value for the property', () => {
       const searchSource = new SearchSource();
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
     });
   });
 
-  describe('#getField()', function() {
-    it('gets the value for the property', function() {
+  describe('#getField()', () => {
+    test('gets the value for the property', () => {
       const searchSource = new SearchSource();
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
     });
   });
 
-  describe(`#setField('index')`, function() {
-    describe('auto-sourceFiltering', function() {
-      describe('new index pattern assigned', function() {
-        it('generates a searchSource filter', async function() {
+  describe(`#setField('index')`, () => {
+    describe('auto-sourceFiltering', () => {
+      describe('new index pattern assigned', () => {
+        test('generates a searchSource filter', async () => {
           const searchSource = new SearchSource();
           expect(searchSource.getField('index')).toBe(undefined);
           expect(searchSource.getField('source')).toBe(undefined);
@@ -98,7 +107,7 @@ describe('SearchSource', function() {
           expect(request._source).toBe(mockSource);
         });
 
-        it('removes created searchSource filter on removal', async function() {
+        test('removes created searchSource filter on removal', async () => {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', undefined);
@@ -107,8 +116,8 @@ describe('SearchSource', function() {
         });
       });
 
-      describe('new index pattern assigned over another', function() {
-        it('replaces searchSource filter with new', async function() {
+      describe('new index pattern assigned over another', () => {
+        test('replaces searchSource filter with new', async () => {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', indexPattern2);
@@ -117,7 +126,7 @@ describe('SearchSource', function() {
           expect(request._source).toBe(mockSource2);
         });
 
-        it('removes created searchSource filter on removal', async function() {
+        test('removes created searchSource filter on removal', async () => {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', indexPattern2);
@@ -130,7 +139,7 @@ describe('SearchSource', function() {
   });
 
   describe('#onRequestStart()', () => {
-    it('should be called when starting a request', async () => {
+    test('should be called when starting a request', async () => {
       const searchSource = new SearchSource({ index: indexPattern });
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
@@ -139,7 +148,7 @@ describe('SearchSource', function() {
       expect(fn).toBeCalledWith(searchSource, options);
     });
 
-    it('should not be called on parent searchSource', async () => {
+    test('should not be called on parent searchSource', async () => {
       const parent = new SearchSource();
       const searchSource = new SearchSource({ index: indexPattern });
 
@@ -154,7 +163,7 @@ describe('SearchSource', function() {
       expect(parentFn).not.toBeCalled();
     });
 
-    it('should be called on parent searchSource if callParentStartHandlers is true', async () => {
+    test('should be called on parent searchSource if callParentStartHandlers is true', async () => {
       const parent = new SearchSource();
       const searchSource = new SearchSource({ index: indexPattern }).setParent(parent, {
         callParentStartHandlers: true,
@@ -174,18 +183,22 @@ describe('SearchSource', function() {
 
   describe('#legacy fetch()', () => {
     beforeEach(() => {
-      uiSettingsMock.get.mockImplementation(() => {
-        return true; // batchSearches = true
+      const core = coreMock.createStart();
+      const data = dataPluginMock.createStartContract();
+
+      SearchSource = getSearchSourceType({
+        search: data.search,
+        uiSettings: {
+          ...core.uiSettings,
+          get: jest.fn(() => {
+            return true; // batchSearches = true
+          }),
+        } as IUiSettingsClient,
+        injectedMetadata: core.injectedMetadata,
       });
     });
 
-    afterEach(() => {
-      uiSettingsMock.get.mockImplementation(() => {
-        return false; // batchSearches = false
-      });
-    });
-
-    it('should call msearch', async () => {
+    test('should call msearch', async () => {
       const searchSource = new SearchSource({ index: indexPattern });
       const options = {};
       await searchSource.fetch(options);
@@ -194,16 +207,17 @@ describe('SearchSource', function() {
   });
 
   describe('#search service fetch()', () => {
-    it('should call msearch', async () => {
+    test('should call msearch', async () => {
       const searchSource = new SearchSource({ index: indexPattern });
       const options = {};
+
       await searchSource.fetch(options);
-      expect(searchStartMock.search).toBeCalledTimes(1);
+      expect(mockSearchMethod).toBeCalledTimes(1);
     });
   });
 
-  describe('#serialize', function() {
-    it('should reference index patterns', () => {
+  describe('#serialize', () => {
+    test('should reference index patterns', () => {
       const indexPattern123 = { id: '123' } as IndexPattern;
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern123);
@@ -213,7 +227,7 @@ describe('SearchSource', function() {
       expect(JSON.parse(searchSourceJSON).indexRefName).toEqual(references[0].name);
     });
 
-    it('should add other fields', () => {
+    test('should add other fields', () => {
       const searchSource = new SearchSource();
       searchSource.setField('highlightAll', true);
       searchSource.setField('from', 123456);
@@ -222,7 +236,7 @@ describe('SearchSource', function() {
       expect(JSON.parse(searchSourceJSON).from).toEqual(123456);
     });
 
-    it('should omit sort and size', () => {
+    test('should omit sort and size', () => {
       const searchSource = new SearchSource();
       searchSource.setField('highlightAll', true);
       searchSource.setField('from', 123456);
@@ -232,7 +246,7 @@ describe('SearchSource', function() {
       expect(Object.keys(JSON.parse(searchSourceJSON))).toEqual(['highlightAll', 'from']);
     });
 
-    it('should serialize filters', () => {
+    test('should serialize filters', () => {
       const searchSource = new SearchSource();
       const filter = [
         {
@@ -249,7 +263,7 @@ describe('SearchSource', function() {
       expect(JSON.parse(searchSourceJSON).filter).toEqual(filter);
     });
 
-    it('should reference index patterns in filters separately from index field', () => {
+    test('should reference index patterns in filters separately from index field', () => {
       const searchSource = new SearchSource();
       const indexPattern123 = { id: '123' } as IndexPattern;
       searchSource.setField('index', indexPattern123);

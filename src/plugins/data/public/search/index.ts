@@ -54,11 +54,12 @@ export {
 
 export {
   ISearchSource,
-  SearchSource,
+  SearchSourceType,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
-  createSearchSource,
+  getSearchSourceType,
+  createSearchSourceFactory,
 } from './search_source';
 
 export { SearchInterceptor } from './search_interceptor';

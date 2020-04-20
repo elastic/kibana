@@ -364,8 +364,7 @@ export {
   SearchResponse,
   SearchError,
   ISearchSource,
-  SearchSource,
-  createSearchSource,
+  SearchSourceType,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
@@ -376,6 +375,8 @@ export {
   TabbedTable,
   SearchInterceptor,
   RequestTimeoutError,
+  getSearchSourceType,
+  createSearchSourceFactory,
 } from './search';
 
 // Search namespace

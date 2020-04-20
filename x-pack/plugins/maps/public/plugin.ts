@@ -31,12 +31,22 @@ import {
   setUiActions,
   setUiSettings,
   setVisualizations,
-  // @ts-ignore
+  setSearchService,
+  setInjectedMetadata,
 } from './kibana_services';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
+// @ts-ignore
+import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { registerLayerWizards } from './layers/load_layer_wizards';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { MapEmbeddableFactory } from './embeddable';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
+  home: HomePublicPluginSetup;
+  visualizations: VisualizationsSetup;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
@@ -61,6 +71,8 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setFileUpload(fileUpload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
+  setSearchService(data.search);
+  setInjectedMetadata(core.injectedMetadata);
   setIndexPatternService(data.indexPatterns);
   setAutocompleteService(data.autocomplete);
   setCore(core);
@@ -94,8 +106,16 @@ export class MapsPlugin
       MapsPluginStartDependencies
     > {
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
-    plugins.inspector.registerView(MapView);
+    const { inspector, home, visualizations, embeddable } = plugins;
+    bindSetupCoreAndPlugins(core, plugins);
+
+    inspector.registerView(MapView);
+    home.featureCatalogue.register(featureCatalogueEntry);
+    visualizations.registerAlias(getMapsVisTypeAlias());
+    embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
   }
 
-  public start(core: CoreStart, plugins: any) {}
+  public start(core: CoreStart, plugins: any) {
+    bindStartCoreAndPlugins(core, plugins);
+  }
 }

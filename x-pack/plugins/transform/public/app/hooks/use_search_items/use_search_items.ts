@@ -32,6 +32,8 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     search: appDeps.data.search,
     chrome: appDeps.chrome,
     overlays: appDeps.overlays,
+    uiSettings: appDeps.uiSettings,
+    injectedMetadata: appDeps.injectedMetadata,
   });
 
   const [searchItems, setSearchItems] = useState<SearchItems | undefined>(undefined);

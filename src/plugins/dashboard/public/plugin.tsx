@@ -316,6 +316,8 @@ export class DashboardPlugin
       search,
       chrome: core.chrome,
       overlays: core.overlays,
+      uiSettings: core.uiSettings,
+      injectedMetadata: core.injectedMetadata,
     });
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,

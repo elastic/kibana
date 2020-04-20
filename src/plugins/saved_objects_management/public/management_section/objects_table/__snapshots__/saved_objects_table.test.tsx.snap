@@ -242,6 +242,21 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
       "make": [Function],
     }
   }
+  injectedMetadata={
+    Object {
+      "getBasePath": [MockFunction],
+      "getCspConfig": [MockFunction],
+      "getInjectedVar": [MockFunction],
+      "getInjectedVars": [MockFunction],
+      "getKibanaBranch": [MockFunction],
+      "getKibanaBuildNumber": [MockFunction],
+      "getKibanaVersion": [MockFunction],
+      "getLegacyMetadata": [MockFunction],
+      "getLegacyMode": [MockFunction],
+      "getPlugins": [MockFunction],
+      "getServerBasePath": [MockFunction],
+    }
+  }
   overlays={
     Object {
       "banners": Object {
@@ -256,11 +271,59 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
       "openModal": [MockFunction],
     }
   }
+  search={
+    Object {
+      "__LEGACY": Object {
+        "AggConfig": [MockFunction],
+        "AggType": [MockFunction],
+        "FieldParamType": [MockFunction],
+        "MetricAggType": [MockFunction],
+        "aggTypeFieldFilters": AggTypeFieldFilters {
+          "filters": Set {},
+        },
+        "esClient": Object {
+          "msearch": [MockFunction],
+          "search": [MockFunction],
+        },
+        "parentPipelineAggHelper": [MockFunction],
+        "siblingPipelineAggHelper": [MockFunction],
+      },
+      "aggs": Object {
+        "calculateAutoTimeExpression": [Function],
+        "createAggConfigs": [MockFunction],
+        "types": Object {
+          "get": [Function],
+          "getAll": [Function],
+          "getBuckets": [Function],
+          "getMetrics": [Function],
+        },
+      },
+      "search": [MockFunction],
+      "setInterceptor": [MockFunction],
+    }
+  }
   serviceRegistry={
     Object {
       "all": [MockFunction],
       "get": [MockFunction],
       "register": [MockFunction],
+    }
+  }
+  uiSettings={
+    Object {
+      "get": [MockFunction],
+      "get$": [MockFunction],
+      "getAll": [MockFunction],
+      "getSaved$": [MockFunction],
+      "getUpdate$": [MockFunction],
+      "getUpdateErrors$": [MockFunction],
+      "isCustom": [MockFunction],
+      "isDeclared": [MockFunction],
+      "isDefault": [MockFunction],
+      "isOverridden": [MockFunction],
+      "overrideLocalDefault": [MockFunction],
+      "remove": [MockFunction],
+      "set": [MockFunction],
     }
   }
 />

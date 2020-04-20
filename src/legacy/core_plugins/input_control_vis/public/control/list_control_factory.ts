@@ -19,14 +19,17 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-
-import { SearchSource as SearchSourceClass, SearchSourceFields } from '../legacy_imports';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';
-import { IFieldType, TimefilterContract } from '../../../../../plugins/data/public';
+import {
+  IFieldType,
+  TimefilterContract,
+  SearchSourceType,
+  SearchSourceFields,
+} from '../../../../../plugins/data/public';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
@@ -86,7 +89,7 @@ export class ListControl extends Control<PhraseFilterManager> {
     controlParams: ControlParams,
     filterManager: PhraseFilterManager,
     useTimeFilter: boolean,
-    SearchSource: SearchSourceClass,
+    SearchSource: SearchSourceType,
     deps: InputControlVisDependencies
   ) {
     super(controlParams, filterManager, useTimeFilter, SearchSource);
@@ -202,7 +205,7 @@ export class ListControl extends Control<PhraseFilterManager> {
 export async function listControlFactory(
   controlParams: ControlParams,
   useTimeFilter: boolean,
-  SearchSource: SearchSourceClass,
+  SearchSource: SearchSourceType,
   deps: InputControlVisDependencies
 ) {
   const [, { data: dataPluginStart }] = await deps.core.getStartServices();

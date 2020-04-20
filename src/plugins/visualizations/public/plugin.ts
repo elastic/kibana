@@ -37,6 +37,7 @@ import {
   setAggs,
   setChrome,
   setOverlays,
+  setInjectedMetadata,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -126,6 +127,7 @@ export class VisualizationsPlugin
 
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
+    setInjectedMetadata(core.injectedMetadata);
 
     expressions.registerFunction(visualizationFunction);
     expressions.registerRenderer(visualizationRenderer);
@@ -166,6 +168,8 @@ export class VisualizationsPlugin
       chrome: core.chrome,
       overlays: core.overlays,
       visualizationTypes: types,
+      injectedMetadata: core.injectedMetadata,
+      uiSettings: core.uiSettings,
     });
     setSavedVisualizationsLoader(savedVisualizationsLoader);
 

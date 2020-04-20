@@ -61,6 +61,7 @@ export function setStartServices(npStart: NpStart) {
   visualizationsServices.setTypes(
     pick(npStart.plugins.visualizations, ['get', 'all', 'getAliases'])
   );
+  visualizationsServices.setInjectedMetadata(npStart.core.injectedMetadata);
   visualizationsServices.setCapabilities(npStart.core.application.capabilities);
   visualizationsServices.setHttp(npStart.core.http);
   visualizationsServices.setSavedObjects(npStart.core.savedObjects);
@@ -80,6 +81,8 @@ export function setStartServices(npStart: NpStart) {
     chrome: npStart.core.chrome,
     overlays: npStart.core.overlays,
     visualizationTypes: visualizationsServices.getTypes(),
+    uiSettings: npStart.core.uiSettings,
+    injectedMetadata: npStart.core.injectedMetadata,
   });
   visualizationsServices.setSavedVisualizationsLoader(savedVisualizationsLoader);
 }
