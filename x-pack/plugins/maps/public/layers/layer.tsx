@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
@@ -25,7 +26,6 @@ import {
   LayerDescriptor,
   MapExtent,
   MapFilters,
-  Query,
   StyleDescriptor,
 } from '../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty, ISource } from './sources/source';

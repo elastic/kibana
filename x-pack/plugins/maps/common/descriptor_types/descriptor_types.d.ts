@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Query } from 'src/plugins/data/public';
 import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
 import { StyleDescriptor, VectorStyleDescriptor } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
@@ -76,12 +77,11 @@ export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {
   name: string;
 };
 
-export type KibanaTilemapSourceDescriptor = AbstractSourceDescriptor & {
-  type: string;
-};
+// This is for symmetry with other sources only.
+// It takes no additional configuration since  all params are in the .yml.
+export type KibanaTilemapSourceDescriptor = AbstractSourceDescriptor;
 
 export type WMSSourceDescriptor = AbstractSourceDescriptor & {
-  type: string;
   serviceUrl: string;
   layers: string;
   styles: string;
@@ -126,11 +126,6 @@ export type SourceDescriptor =
   | TiledSingleLayerVectorSourceDescriptor
   | EMSTMSSourceDescriptor
   | EMSFileSourceDescriptor;
-
-export type Query = {
-  query: string;
-  language: string;
-};
 
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
