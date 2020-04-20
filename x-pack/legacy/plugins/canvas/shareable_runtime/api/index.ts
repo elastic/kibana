@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'whatwg-fetch';
-import 'regenerator-runtime/runtime';
 import 'core-js/stable';
+import 'regenerator-runtime/runtime';
+import 'whatwg-fetch';
 
 export * from './shareable';
