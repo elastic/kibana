@@ -17,7 +17,7 @@ import {
   ALERT_GUARD_RAIL_TYPE_CPU_USAGE,
 } from '../../../common/constants';
 import { mapSeverity } from './map_severity';
-import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
+import { FormattedAlert } from 'plugins/monitoring/components/cluster_alerts/formatted_alert';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

@@ -8,6 +8,7 @@ import './loading';
 import './no_data';
 import './access_denied';
 import './alerts';
+import './cluster_alerts';
 import './alert';
 import './license';
 import './cluster/listing';

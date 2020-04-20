@@ -218,7 +218,7 @@ export const Alert: React.FC<AlertProps> = (props: AlertProps) => {
       render: (instance: AlertStateInstancesUi) => {
         if (instance.muted) {
           return (
-            <EuiBadge iconType="bellSlash" color="hollow">
+            <EuiBadge iconType="bellSlash" color="danger">
               Muted
             </EuiBadge>
           );

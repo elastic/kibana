@@ -5,8 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
-import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
+import { FormattedAlert } from 'plugins/monitoring/components/cluster_alerts/formatted_alert';
+import { mapSeverity } from 'plugins/monitoring/components/cluster_alerts/map_severity';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import {
   CALCULATE_DURATION_SINCE,

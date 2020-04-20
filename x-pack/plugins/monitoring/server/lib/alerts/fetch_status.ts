@@ -26,7 +26,7 @@ export async function fetchStatus(
             },
           });
           if (alerts.total === 0) {
-            return resolve(false);
+            return resolve({ type, exists: false });
           }
 
           if (alerts.total !== 1) {
@@ -40,7 +40,7 @@ export async function fetchStatus(
           if (!states || !states.alertTypeState) {
             // console.log(JSON.stringify(states, null, 2))
             // log.warn(`No alert states found for type ${type} which is unexpected.`);
-            return resolve(false);
+            return resolve({ type, stateless: true });
           }
 
           const state = Object.values(states.alertTypeState)[0] as AlertCommonPerClusterState;
@@ -48,13 +48,14 @@ export async function fetchStatus(
           if (state.ui.isFiring || isInBetween) {
             return resolve({
               type,
-              ...state.ui,
+              firing: true,
+              state,
             });
           }
-          return resolve(false);
+          return resolve({ type, firing: false, state });
         })
     )
   );
 
-  return statuses.filter(Boolean);
+  return statuses;
 }

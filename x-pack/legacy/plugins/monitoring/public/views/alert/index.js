@@ -20,14 +20,12 @@ import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
 function getPageData($injector) {
   const $route = $injector.get('$route');
-  const globalState = $injector.get('globalState');
   const $http = $injector.get('$http');
   const Private = $injector.get('Private');
   const url = `../api/monitoring/v1/alert/${$route.current.params.id}`;
 
   const timeBounds = timefilter.getBounds();
   const data = {
-    ccs: globalState.ccs,
     timeRange: {
       min: timeBounds.min.toISOString(),
       max: timeBounds.max.toISOString(),

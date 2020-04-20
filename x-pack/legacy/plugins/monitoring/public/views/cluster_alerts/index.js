@@ -14,15 +14,19 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { I18nContext } from 'ui/i18n';
 import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
-import { Alerts } from '../../components/alerts';
+import { Alerts } from '../../components/cluster_alerts';
 import { MonitoringViewBaseEuiTableController } from '../base_eui_table_controller';
-import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink } from '@elastic/eui';
 import { CODE_PATH_ALERTS, KIBANA_CLUSTER_ALERTS_ENABLED } from '../../../common/constants';
 
 function getPageData($injector) {
+  const globalState = $injector.get('globalState');
   const $http = $injector.get('$http');
   const Private = $injector.get('Private');
-  const url = `../api/monitoring/v1/alert_status`;
+  const url = KIBANA_CLUSTER_ALERTS_ENABLED
+    ? `../api/monitoring/v1/alert_status`
+    : `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/legacy_alerts`;
 
   const timeBounds = timefilter.getBounds();
   const data = {
@@ -31,6 +35,10 @@ function getPageData($injector) {
       max: timeBounds.max.toISOString(),
     },
   };
+
+  if (!KIBANA_CLUSTER_ALERTS_ENABLED) {
+    data.ccs = globalState.ccs;
+  }
 
   return $http
     .post(url, data)
@@ -47,7 +55,7 @@ function getPageData($injector) {
     });
 }
 
-uiRoutes.when('/alerts', {
+uiRoutes.when('/cluster_alerts', {
   template,
   resolve: {
     clusters(Private) {
@@ -61,6 +69,7 @@ uiRoutes.when('/alerts', {
     constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
+      const kbnUrl = $injector.get('kbnUrl');
 
       // breadcrumbs + page title
       $scope.cluster = find($route.current.locals.clusters, {
@@ -68,13 +77,13 @@ uiRoutes.when('/alerts', {
       });
 
       super({
-        title: i18n.translate('xpack.monitoring.alerts.alertsTitle', {
-          defaultMessage: 'Alerts',
+        title: i18n.translate('xpack.monitoring.alerts.clusterAlertsTitle', {
+          defaultMessage: 'Cluster Alerts',
         }),
         getPageData,
         $scope,
         $injector,
-        storageKey: 'alertsTable',
+        storageKey: 'clusterAlertsTable',
         reactNodeId: 'monitoringAlertsApp',
       });
 
@@ -85,7 +94,8 @@ uiRoutes.when('/alerts', {
           <p>{data.message}</p>
         ) : (
           <Alerts
-            alerts={data.alerts}
+            alerts={data}
+            angular={{ kbnUrl, scope: $scope }}
             sorting={this.sorting}
             pagination={this.pagination}
             onTableChange={this.onTableChange}
@@ -96,7 +106,16 @@ uiRoutes.when('/alerts', {
           <I18nContext>
             <EuiPage>
               <EuiPageBody>
-                <EuiPageContent>{app}</EuiPageContent>
+                <EuiPageContent>
+                  {app}
+                  <EuiSpacer size="m" />
+                  <EuiLink href="#/overview">
+                    <FormattedMessage
+                      id="xpack.monitoring.alerts.clusterOverviewLinkLabel"
+                      defaultMessage="« Cluster Overview"
+                    />
+                  </EuiLink>
+                </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
           </I18nContext>,

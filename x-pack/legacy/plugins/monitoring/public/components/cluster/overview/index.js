@@ -13,7 +13,7 @@ import { BeatsPanel } from './beats_panel';
 import { EuiPage, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
 import { ApmPanel } from './apm_panel';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AlertsStatus } from '../../alerts/status';
+import { AlertsStatus } from '../../cluster_alerts/status';
 import {
   STANDALONE_CLUSTER_CLUSTER_UUID,
   KIBANA_CLUSTER_ALERTS_ENABLED,
