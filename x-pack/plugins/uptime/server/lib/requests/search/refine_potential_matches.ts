@@ -5,7 +5,7 @@
  */
 
 import { QueryContext } from './query_context';
-import { CursorDirection } from '../../../../common/graphql/types';
+import { CursorDirection } from '../../../../common';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 
 /**

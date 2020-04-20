@@ -7,8 +7,7 @@
 import { flatten } from 'lodash';
 import { CursorPagination } from './types';
 import { QueryContext } from './query_context';
-import { QUERY } from '../../../../common/constants';
-import { CursorDirection, MonitorSummary, SortOrder } from '../../../../common/graphql/types';
+import { CursorDirection, MonitorSummary, SortOrder, QUERY } from '../../../../common';
 import { enrichMonitorGroups } from './enrich_monitor_groups';
 import { MonitorGroupIterator } from './monitor_group_iterator';
 

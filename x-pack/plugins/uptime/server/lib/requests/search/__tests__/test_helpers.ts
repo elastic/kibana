@@ -5,7 +5,7 @@
  */
 
 import { CursorPagination } from '../types';
-import { CursorDirection, SortOrder } from '../../../../../common/graphql/types';
+import { CursorDirection, SortOrder } from '../../../../../common';
 import { QueryContext } from '../query_context';
 
 export const prevPagination = (key: any): CursorPagination => {

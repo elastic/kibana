@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { NEWS_FEED_URL_SETTING_DEFAULT } from '../../../../../../plugins/siem/common/constants';
 import { KibanaServices } from '../../lib/kibana';
-import { NEWS_FEED_URL_SETTING_DEFAULT } from '../../../common/constants';
 import { rawNewsApiResponse } from '../../mock/news';
 import { rawNewsJSON } from '../../mock/raw_news';
 

@@ -6,7 +6,7 @@
 
 import { QueryContext } from './query_context';
 import { fetchChunk } from './fetch_chunk';
-import { CursorDirection } from '../../../../common/graphql/types';
+import { CursorDirection } from '../../../../common';
 import { MonitorGroups } from './fetch_page';
 import { CursorPagination } from './types';
 

@@ -19,7 +19,6 @@ import {
   DEFAULT_TIMEPICKER_QUICK_RANGES,
 } from '../../../../common/constants';
 import { UMFrameworkAdapter } from '../../lib';
-import { createApolloClient } from './apollo_client_adapter';
 
 export const getKibanaFrameworkAdapter = (
   core: CoreStart,
@@ -62,7 +61,6 @@ export const getKibanaFrameworkAdapter = (
   const props: UptimeAppProps = {
     basePath: basePath.get(),
     canSave,
-    client: createApolloClient(`${basePath.get()}/api/uptime/graphql`, 'true'),
     core,
     darkMode: core.uiSettings.get(DEFAULT_DARK_MODE),
     commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),

@@ -9,7 +9,8 @@ import numeral from '@elastic/numeral';
 import { ml } from '../../../../services/ml_api_service';
 import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
 import {
-  ABSOLUTE_MAX_BYTES,
+  MAX_FILE_SIZE_BYTES,
+  ABSOLUTE_MAX_FILE_SIZE_BYTES,
   FILE_SIZE_DISPLAY_FORMAT,
 } from '../../../../../../common/constants/file_datavisualizer';
 import { getMlConfig } from '../../../../util/dependency_cache';
@@ -61,8 +62,13 @@ export function readFile(file: File) {
 }
 
 export function getMaxBytes() {
-  const maxBytes = getMlConfig().file_data_visualizer.max_file_size_bytes;
-  return maxBytes < ABSOLUTE_MAX_BYTES ? maxBytes : ABSOLUTE_MAX_BYTES;
+  const maxFileSize = getMlConfig().file_data_visualizer.max_file_size;
+  // @ts-ignore
+  const maxBytes = numeral(maxFileSize.toUpperCase()).value();
+  if (maxBytes < MAX_FILE_SIZE_BYTES) {
+    return MAX_FILE_SIZE_BYTES;
+  }
+  return maxBytes < ABSOLUTE_MAX_FILE_SIZE_BYTES ? maxBytes : ABSOLUTE_MAX_FILE_SIZE_BYTES;
 }
 
 export function getMaxBytesFormatted() {

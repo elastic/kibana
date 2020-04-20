@@ -4,16 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  DynamicSettings,
-  defaultDynamicSettings,
-} from '../../common/runtime_types/dynamic_settings';
+import { DynamicSettings, defaultDynamicSettings } from '../../common';
 import { SavedObjectsType, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { UMSavedObjectsQueryFn } from './adapters';
-
-export interface UMDynamicSettingsType {
-  heartbeatIndices: string;
-}
 
 export interface UMSavedObjectsAdapter {
   getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettings>;
@@ -26,11 +19,21 @@ export const settingsObjectId = 'uptime-dynamic-settings-singleton';
 export const umDynamicSettings: SavedObjectsType = {
   name: settingsObjectType,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       heartbeatIndices: {
         type: 'keyword',
+      },
+      certificatesThresholds: {
+        properties: {
+          errorState: {
+            type: 'long',
+          },
+          warningState: {
+            type: 'long',
+          },
+        },
       },
     },
   },

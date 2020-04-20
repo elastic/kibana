@@ -7,7 +7,7 @@
 import { CONTEXT_DEFAULTS } from '../../../common/constants';
 import { fetchPage } from './search';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { MonitorSummary, SortOrder, CursorDirection } from '../../../common/graphql/types';
+import { MonitorSummary, SortOrder, CursorDirection } from '../../../common';
 import { QueryContext } from './search';
 
 export interface CursorPagination {
