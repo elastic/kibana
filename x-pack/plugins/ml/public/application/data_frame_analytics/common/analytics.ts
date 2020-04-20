@@ -52,7 +52,7 @@ export interface ClassificationAnalysis {
   classification: Classification;
 }
 
-export interface LoadRegressionExploreDataArg {
+export interface LoadExploreDataArg {
   filterByIsTraining?: boolean;
   searchQuery: SavedSearchQuery;
 }
@@ -409,11 +409,11 @@ export function getEvalQueryBody({
   ignoreDefaultQuery,
 }: {
   resultsField: string;
-  isTraining: boolean;
+  isTraining?: boolean;
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
 }) {
-  let query;
+  let query: any;
 
   const trainingQuery: ResultsSearchQuery = {
     term: { [`${resultsField}.is_training`]: { value: isTraining } },
@@ -426,19 +426,25 @@ export function getEvalQueryBody({
       searchQueryClone.bool.must = [];
     }
 
-    searchQueryClone.bool.must.push(trainingQuery);
+    if (isTraining !== undefined) {
+      searchQueryClone.bool.must.push(trainingQuery);
+    }
+
     query = searchQueryClone;
   } else if (isQueryStringQuery(searchQueryClone)) {
     query = {
       bool: {
-        must: [searchQueryClone, trainingQuery],
+        must: [searchQueryClone],
       },
     };
+    if (isTraining !== undefined) {
+      query.bool.must.push(trainingQuery);
+    }
   } else {
     // Not a bool or string query so we need to create it so can add the trainingQuery
     query = {
       bool: {
-        must: [trainingQuery],
+        must: isTraining !== undefined ? [trainingQuery] : [],
       },
     };
   }
@@ -456,7 +462,7 @@ interface EvaluateMetrics {
 }
 
 interface LoadEvalDataConfig {
-  isTraining: boolean;
+  isTraining?: boolean;
   index: string;
   dependentVariable: string;
   resultsField: string;
@@ -535,7 +541,7 @@ interface TrackTotalHitsSearchResponse {
 
 interface LoadDocsCountConfig {
   ignoreDefaultQuery?: boolean;
-  isTraining: boolean;
+  isTraining?: boolean;
   searchQuery: SavedSearchQuery;
   resultsField: string;
   destIndex: string;
