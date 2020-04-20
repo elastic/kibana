@@ -32,11 +32,10 @@ export const initLogSourceStatusRoutes = ({
 
       try {
         const logIndexNames = await sourceStatus.getLogIndexNames(requestContext, sourceId);
-        const logIndexFields = await fields.getFields(
-          requestContext,
-          sourceId,
-          InfraIndexType.LOGS
-        );
+        const logIndexFields =
+          logIndexNames.length > 0
+            ? await fields.getFields(requestContext, sourceId, InfraIndexType.LOGS)
+            : [];
 
         return response.ok({
           body: getLogSourceStatusSuccessResponsePayloadRT.encode({
