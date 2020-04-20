@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
 
-import { getListRequest } from './__mocks__/utils';
+import { getListRequest } from './mocks/utils';
 import { createListsSchema } from './create_lists_schema';
 
 describe('lists', () => {
