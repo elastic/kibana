@@ -10,6 +10,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import ApolloClient from 'apollo-client';
 
+jest.mock('../../pages/overview/events_by_dataset');
+
 jest.mock('../../lib/kibana', () => {
   return {
     useKibana: jest.fn(),

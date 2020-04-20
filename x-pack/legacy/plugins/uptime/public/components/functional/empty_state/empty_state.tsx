@@ -5,11 +5,11 @@
  */
 
 import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EmptyStateError } from './empty_state_error';
 import { EmptyStateLoading } from './empty_state_loading';
-import { DataMissing } from './data_missing';
-import { StatesIndexStatus } from '../../../../common/runtime_types';
+import { DataOrIndexMissing } from './data_or_index_missing';
+import { DynamicSettings, StatesIndexStatus } from '../../../../common/runtime_types';
 import { IHttpFetchError } from '../../../../../../../../target/types/core/public/http';
 
 interface EmptyStateProps {
@@ -17,6 +17,7 @@ interface EmptyStateProps {
   statesIndexStatus: StatesIndexStatus | null;
   loading: boolean;
   errors?: IHttpFetchError[];
+  settings?: DynamicSettings;
 }
 
 export const EmptyStateComponent = ({
@@ -24,6 +25,7 @@ export const EmptyStateComponent = ({
   statesIndexStatus,
   loading,
   errors,
+  settings,
 }: EmptyStateProps) => {
   if (errors?.length) {
     return <EmptyStateError errors={errors} />;
@@ -32,18 +34,28 @@ export const EmptyStateComponent = ({
     const { indexExists, docCount } = statesIndexStatus;
     if (!indexExists) {
       return (
-        <DataMissing
-          headingMessage={i18n.translate('xpack.uptime.emptyState.noIndexTitle', {
-            defaultMessage: 'Uptime index not found',
-          })}
+        <DataOrIndexMissing
+          settings={settings}
+          headingMessage={
+            <FormattedMessage
+              id="xpack.uptime.emptyState.noIndexTitle"
+              defaultMessage="No indices found matching pattern {indexName}"
+              values={{ indexName: <em>{settings?.heartbeatIndices}</em> }}
+            />
+          }
         />
       );
     } else if (indexExists && docCount === 0) {
       return (
-        <DataMissing
-          headingMessage={i18n.translate('xpack.uptime.emptyState.noDataMessage', {
-            defaultMessage: 'No uptime data found',
-          })}
+        <DataOrIndexMissing
+          settings={settings}
+          headingMessage={
+            <FormattedMessage
+              id="xpack.uptime.emptyState.noDataMessage"
+              defaultMessage="No uptime data found in index {indexName}"
+              values={{ indexName: <em>{settings?.heartbeatIndices}</em> }}
+            />
+          }
         />
       );
     }
