@@ -65,14 +65,14 @@ export const App: FunctionComponent = () => {
               <NotAuthorizedSection
                 title={
                   <FormattedMessage
-                    id="xpack.snapshotRestore.app.deniedPrivilegeTitle"
+                    id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
                     defaultMessage="You're missing cluster privileges"
                   />
                 }
                 message={
                   <FormattedMessage
-                    id="xpack.snapshotRestore.app.deniedPrivilegeDescription"
-                    defaultMessage="To use Snapshot and Restore, you must have {privilegesCount,
+                    id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
+                    defaultMessage="To use Ingest Pipelines, you must have {privilegesCount,
                     plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
                     values={{
                       missingPrivileges: privilegesMissing.cluster!.join(', '),

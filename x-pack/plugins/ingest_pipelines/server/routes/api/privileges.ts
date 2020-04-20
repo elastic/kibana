@@ -24,7 +24,6 @@ export const registerPrivilegesRoute = ({ license, router }: RouteDependencies) 
         hasAllPrivileges: true,
         missingPrivileges: {
           cluster: [],
-          index: [],
         },
       };
 
