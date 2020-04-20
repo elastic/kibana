@@ -70,18 +70,17 @@ const ParamsSchema = schema.object(
 
 function validateParams(paramsObject: any): string | void {
   const params: ActionParamsType = paramsObject;
-
   const { timestamp } = params;
   if (timestamp != null) {
     let date;
     try {
       date = Date.parse(timestamp);
     } catch (err) {
-      return 'error parsing timestamp: ${err.message}';
+      return `error parsing timestamp "${timestamp}": ${err.message}`;
     }
 
     if (isNaN(date)) {
-      return 'error parsing timestamp';
+      return `error parsing timestamp "${timestamp}"`;
     }
   }
 }
