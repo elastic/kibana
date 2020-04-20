@@ -17,7 +17,7 @@ import { loadActionTypes } from '../../../../../../../../../plugins/triggers_act
 import { SelectField } from '../../../../../shared_imports';
 import {
   ActionForm,
-  ActionType
+  ActionType,
 } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertAction } from '../../../../../../../../../plugins/alerting/common';
 import { useKibana } from '../../../../../lib/kibana';
