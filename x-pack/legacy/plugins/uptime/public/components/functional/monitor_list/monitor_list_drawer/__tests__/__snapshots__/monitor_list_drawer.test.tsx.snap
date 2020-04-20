@@ -71,21 +71,21 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
                 "ip": "127.0.0.1",
                 "status": "up",
               },
-              "timestamp": "121",
+              "timestamp": 121,
             },
             Object {
               "monitor": Object {
                 "ip": "127.0.0.2",
                 "status": "down",
               },
-              "timestamp": "123",
+              "timestamp": 123,
             },
             Object {
               "monitor": Object {
                 "ip": "127.0.0.3",
                 "status": "up",
               },
-              "timestamp": "125",
+              "timestamp": 125,
             },
           ],
           "summary": Object {
@@ -175,7 +175,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
                 "ip": "127.0.0.1",
                 "status": "up",
               },
-              "timestamp": "121",
+              "timestamp": 121,
             },
           ],
           "summary": Object {
