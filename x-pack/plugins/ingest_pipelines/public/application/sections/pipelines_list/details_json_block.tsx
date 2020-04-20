@@ -4,24 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
-import { EuiCodeBlock, EuiText } from '@elastic/eui';
+import React, { FunctionComponent, useRef } from 'react';
+import { EuiCodeBlock } from '@elastic/eui';
 
 export interface Props {
-  htmlForId: string;
-  label: string;
   json: Record<string, any>;
 }
 
-export const PipelineDetailsJsonBlock: FunctionComponent<Props> = ({ label, htmlForId, json }) => (
-  <>
-    <EuiText size="s">
-      <label htmlFor={htmlForId}>
-        <b>{label}</b>
-      </label>
-    </EuiText>
-    <EuiCodeBlock paddingSize="s" id={htmlForId} language="json" overflowHeight={200} isCopyable>
+export const PipelineDetailsJsonBlock: FunctionComponent<Props> = ({ json }) => {
+  // Hack so copied-to-clipboard value updates as content changes
+  // Related issue: https://github.com/elastic/eui/issues/3321
+  const uuid = useRef(0);
+  uuid.current++;
+
+  return (
+    <EuiCodeBlock
+      paddingSize="s"
+      language="json"
+      overflowHeight={json.length > 0 ? 300 : undefined}
+      isCopyable
+      key={uuid.current}
+    >
       {JSON.stringify(json, null, 2)}
     </EuiCodeBlock>
-  </>
-);
+  );
+};
