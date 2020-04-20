@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isDate } from 'lodash';
+
 /** @public */
 export interface FeatureUsageServiceSetup {
   /**
@@ -16,9 +18,11 @@ export interface FeatureUsageServiceSetup {
 export interface FeatureUsageServiceStart {
   /**
    * Notify of a registered feature usage at given time.
-   * If `usedAt` is not specified, it will use the current time instead.
+   *
+   * @param featureName - the name of the feature to notify usage of
+   * @param usedAt - Either a `Date` or an unix timestamp with ms. If not specified, it will be set to the current time.
    */
-  notifyUsage(featureName: string, usedAt?: number): void;
+  notifyUsage(featureName: string, usedAt?: Date | number): void;
   /**
    * Return a map containing last usage timestamp for all features.
    * Features that were not used yet do not appear in the map.
@@ -46,6 +50,9 @@ export class FeatureUsageService {
       notifyUsage: (featureName, usedAt = Date.now()) => {
         if (!this.features.includes(featureName)) {
           throw new Error(`Feature '${featureName}' is not registered.`);
+        }
+        if (isDate(usedAt)) {
+          usedAt = usedAt.getTime();
         }
         const currentValue = this.lastUsages.get(featureName) ?? 0;
         this.lastUsages.set(featureName, Math.max(usedAt, currentValue));

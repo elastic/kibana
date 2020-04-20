@@ -43,6 +43,16 @@ describe('FeatureUsageService', () => {
         expect(start.getLastUsages().get('feature')).toBe(127001);
       });
 
+      it('can receive a Date object', () => {
+        const setup = service.setup();
+        setup.register('feature');
+        const start = service.start();
+
+        const usageTime = new Date(2015, 9, 21, 17, 54, 12);
+        start.notifyUsage('feature', usageTime);
+        expect(start.getLastUsages().get('feature')).toBe(usageTime.getTime());
+      });
+
       it('uses the current time when `usedAt` is unspecified', () => {
         jest.spyOn(Date, 'now').mockReturnValue(42);
 
