@@ -59,13 +59,13 @@ const nodeAssets = {
   },
 };
 
-const ChildEventsButton = () => {
+const ChildEventsButton = React.memo(() => {
   return (
     <EuiButton
-      onClick={(clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         clickEvent.preventDefault();
         clickEvent.stopPropagation();
-      }}
+      }, [])}
       color="ghost"
       size="s"
       iconType="arrowDown"
@@ -77,15 +77,15 @@ const ChildEventsButton = () => {
       })}
     </EuiButton>
   );
-};
+});
 
-const RelatedAlertsButton = () => {
+const RelatedAlertsButton = React.memo(() => {
   return (
     <EuiButton
-      onClick={(clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         clickEvent.preventDefault();
         clickEvent.stopPropagation();
-      }}
+      }, [])}
       color="ghost"
       size="s"
       tabIndex={-1}
@@ -95,7 +95,7 @@ const RelatedAlertsButton = () => {
       })}
     </EuiButton>
   );
-};
+});
 
 /**
  * An artefact that represents a process node.
