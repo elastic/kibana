@@ -103,7 +103,11 @@ export async function installPackage(options: {
   // delete the previous version's installation's SO kibana assets before installing new ones
   // in case some assets were removed in the new version
   if (installedPkg) {
-    await deleteKibanaSavedObjectsAssets(savedObjectsClient, installedPkg.attributes.installed);
+    try {
+      await deleteKibanaSavedObjectsAssets(savedObjectsClient, installedPkg.attributes.installed);
+    } catch (err) {
+      // some assets may not exist if deleting during a failed update
+    }
   }
 
   const [installedKibanaAssets, installedPipelines] = await Promise.all([
@@ -207,25 +211,12 @@ export async function saveInstallationReferences(options: {
     toSaveAssetRefs,
     toSaveESIndexPatterns,
   } = options;
-  const installation = await getInstallation({ savedObjectsClient, pkgName });
-  const savedAssetRefs = installation?.installed || [];
-  const toInstallESIndexPatterns = Object.assign(
-    installation?.es_index_patterns || {},
-    toSaveESIndexPatterns
-  );
 
-  const mergeRefsReducer = (current: AssetReference[], pending: AssetReference) => {
-    const hasRef = current.find(c => c.id === pending.id && c.type === pending.type);
-    if (!hasRef) current.push(pending);
-    return current;
-  };
-
-  const toInstallAssetsRefs = toSaveAssetRefs.reduce(mergeRefsReducer, savedAssetRefs);
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
-      installed: toInstallAssetsRefs,
-      es_index_patterns: toInstallESIndexPatterns,
+      installed: toSaveAssetRefs,
+      es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,
       internal,
@@ -233,7 +224,7 @@ export async function saveInstallationReferences(options: {
     { id: pkgName, overwrite: true }
   );
 
-  return toInstallAssetsRefs;
+  return toSaveAssetRefs;
 }
 
 async function installKibanaSavedObjects({
