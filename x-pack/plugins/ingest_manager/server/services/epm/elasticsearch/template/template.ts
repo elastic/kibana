@@ -5,7 +5,13 @@
  */
 
 import { Field, Fields } from '../../fields/field';
-import { Dataset, IndexTemplate } from '../../../../types';
+import {
+  Dataset,
+  IndexTemplate,
+  CallESAsCurrentUser,
+  TemplateRef,
+  CurrentIndex,
+} from '../../../../types';
 import { getDatasetAssetBaseName } from '../index';
 
 interface Properties {
@@ -235,9 +241,10 @@ function getBaseTemplate(type: string, templateName: string, mappings: Mappings)
     },
     mappings: {
       // To be filled with interesting information about this specific index
+      /*
       _meta: {
         package: 'foo',
-      },
+      },*/
       // All the dynamic field mappings
       dynamic_templates: [
         // This makes sure all mappings are keywords by default
@@ -261,3 +268,94 @@ function getBaseTemplate(type: string, templateName: string, mappings: Mappings)
     aliases: {},
   };
 }
+
+export const updateCurrentWriteIndices = async (
+  callCluster: CallESAsCurrentUser,
+  templates: TemplateRef[]
+): Promise<void> => {
+  if (!templates) return;
+
+  const allIndices = await queryIndicesFromTemplates(callCluster, templates);
+  return updateAllIndices(allIndices, callCluster);
+};
+
+const queryIndicesFromTemplates = async (
+  callCluster: CallESAsCurrentUser,
+  templates: TemplateRef[]
+): Promise<CurrentIndex[]> => {
+  const indexPromises = templates.map(template => {
+    return createIndexFromNamespace(callCluster, template);
+  });
+  const indexObjects = await Promise.all(indexPromises);
+  return indexObjects.filter(item => item !== undefined).flat();
+};
+
+const createIndexFromNamespace = async (
+  callCluster: CallESAsCurrentUser,
+  template: TemplateRef
+): Promise<CurrentIndex[] | undefined> => {
+  const { templateName, indexTemplate } = template;
+  const res = await callCluster('search', getIndexByNamespaceQuery(templateName));
+  const namespaces: any[] = res?.aggregations?.streams.buckets;
+  if (namespaces) {
+    return namespaces.map(namespace => ({
+      indexName: `${templateName}-${namespace.key}`,
+      indexTemplate,
+    }));
+  }
+};
+
+const updateAllIndices = async (
+  indexNameWithTemplates: CurrentIndex[],
+  callCluster: CallESAsCurrentUser
+): Promise<void> => {
+  const updateIndexPromises = indexNameWithTemplates.map(({ indexName, indexTemplate }) => {
+    return updateExistingIndex({ indexName, callCluster, indexTemplate });
+  });
+  await Promise.all(updateIndexPromises);
+};
+const updateExistingIndex = async ({
+  indexName,
+  callCluster,
+  indexTemplate,
+}: {
+  indexName: string;
+  callCluster: CallESAsCurrentUser;
+  indexTemplate: IndexTemplate;
+}) => {
+  const { settings, mappings } = indexTemplate;
+  // try to update the mappings first
+  // for now we assume updates are compatible
+  try {
+    await callCluster('indices.putMapping', {
+      index: indexName,
+      body: mappings,
+    });
+  } catch (err) {
+    throw new Error('incompatible mappings update');
+  }
+  // update settings after mappings was successful to ensure
+  // pointing to theme new pipeline is safe
+  // for now, only update the pipeline
+  if (!settings.index.default_pipeline) return;
+  try {
+    await callCluster('indices.putSettings', {
+      index: indexName,
+      body: { index: { default_pipeline: settings.index.default_pipeline } },
+    });
+  } catch (err) {
+    throw new Error('incompatible settings update');
+  }
+};
+
+const getIndexByNamespaceQuery = (templateName: string) => ({
+  index: `${templateName}-*`,
+  size: 1,
+  body: {
+    aggs: {
+      streams: {
+        terms: { field: 'fields.stream.namespace' },
+      },
+    },
+  },
+});
