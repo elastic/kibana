@@ -99,6 +99,18 @@ to the new dimensions.
 dashboard does *not* delete the saved visualization or search.
 
 [float]
+[[cloning-a-panel]]
+=== Clone dashboard elements
+
+In *Edit* mode, you can clone any panel on a dashboard.
+
+To clone an existing panel open the panel menu of the element you wish to clone and select *Clone panel*
+
+[role="screenshot"]
+image:images/clone_panel.gif[clone panel]
+
+
+[float]
 [[viewing-detailed-information]]
 === Inspect and edit elements
 
