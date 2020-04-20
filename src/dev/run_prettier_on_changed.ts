@@ -21,6 +21,7 @@ import execa from 'execa';
 // @ts-ignore
 import SimpleGit from 'simple-git';
 import { run } from '@kbn/dev-utils';
+import dedent from 'dedent';
 import Util from 'util';
 
 import pkg from '../../package.json';
@@ -30,6 +31,17 @@ import * as Eslint from './eslint';
 
 run(async function getChangedFiles({ log }) {
   const simpleGit = new SimpleGit(REPO_ROOT);
+
+  const getStatus = Util.promisify(simpleGit.status.bind(simpleGit));
+  const gitStatus = await getStatus();
+
+  if (gitStatus.files.length > 0) {
+    throw new Error(
+      dedent(`You should run prettier formatter on a clean branch.
+        Found not committed changes to:
+        ${gitStatus.files.map((f: { path: string }) => f.path).join('\n')}`)
+    );
+  }
 
   const revParse = Util.promisify(simpleGit.revparse.bind(simpleGit));
   const currentBranch = await revParse(['--abbrev-ref', 'HEAD']);
