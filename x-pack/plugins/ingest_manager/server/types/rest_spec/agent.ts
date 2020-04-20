@@ -62,27 +62,18 @@ export const PostNewAgentActionRequestSchema = {
 };
 
 export const PostAgentUnenrollRequestSchema = {
-  body: schema.oneOf([
-    schema.object({
-      kuery: schema.string(),
-    }),
-    schema.object({
-      ids: schema.arrayOf(schema.string()),
-    }),
-  ]),
+  params: schema.object({
+    agentId: schema.string(),
+  }),
 };
 
 export const PutAgentReassignRequestSchema = {
-  body: schema.oneOf([
-    schema.object({
-      kuery: schema.string(),
-      config_id: schema.string(),
-    }),
-    schema.object({
-      ids: schema.arrayOf(schema.string()),
-      config_id: schema.string(),
-    }),
-  ]),
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+  body: schema.object({
+    config_id: schema.string(),
+  }),
 };
 
 export const GetOneAgentEventsRequestSchema = {

@@ -10,9 +10,9 @@ import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes } from '../../types';
 import { agentConfigService } from '../agent_config';
 
-export async function reassignAgents(
+export async function reassignAgent(
   soClient: SavedObjectsClientContract,
-  toUnenrollIds: string[],
+  agentId: string,
   newConfigId: string
 ) {
   const config = await agentConfigService.get(soClient, newConfigId);
@@ -20,21 +20,9 @@ export async function reassignAgents(
     throw Boom.notFound(`Agent Configuration not found: ${newConfigId}`);
   }
 
-  const results = await soClient.bulkUpdate<AgentSOAttributes>(
-    toUnenrollIds.map(id => ({
-      type: AGENT_SAVED_OBJECT_TYPE,
-      id,
-      attributes: {
-        config_id: newConfigId,
-        config_revision: null,
-        config_newest_revision: config.revision,
-      },
-    }))
-  );
-
-  return results.saved_objects.map(result => ({
-    id: result.id,
-    success: !result.error,
-    error: result.error,
-  }));
+  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
+    config_id: newConfigId,
+    config_revision: null,
+    config_newest_revision: config.revision,
+  });
 }

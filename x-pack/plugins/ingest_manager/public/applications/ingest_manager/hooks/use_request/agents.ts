@@ -63,12 +63,13 @@ export function sendGetAgentStatus(
 }
 
 export function sendPutAgentReassign(
+  agentId: string,
   body: PutAgentReassignRequest['body'],
   options?: RequestOptions
 ) {
   return sendRequest<PutAgentReassignResponse>({
     method: 'put',
-    path: agentRouteService.getReassignPath(),
+    path: agentRouteService.getReassignPath(agentId),
     body,
     ...options,
   });

@@ -51,8 +51,7 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({
       if (!selectedAgentConfigId) {
         throw new Error('No selected config id');
       }
-      const res = await sendPutAgentReassign({
-        ids: [agentId],
+      const res = await sendPutAgentReassign(agentId, {
         config_id: selectedAgentConfigId,
       });
       if (res.error) {
