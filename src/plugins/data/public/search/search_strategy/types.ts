@@ -17,13 +17,21 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
-import { getIgnoreThrottled, getMaxConcurrentShardRequests } from '../fetch';
+import { IndexPattern } from '../..';
+import { FetchHandlers } from '../fetch/types';
+import { SearchRequest, SearchResponse } from '..';
 
-export function getMSearchParams(config: IUiSettingsClient) {
-  return {
-    rest_total_hits_as_int: true,
-    ignore_throttled: getIgnoreThrottled(config),
-    max_concurrent_shard_requests: getMaxConcurrentShardRequests(config),
-  };
+export interface SearchStrategyProvider {
+  id: string;
+  search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
+  isViable: (indexPattern: IndexPattern) => boolean;
+}
+
+export interface SearchStrategyResponse {
+  searching: Promise<SearchResponse[]>;
+  abort: () => void;
+}
+
+export interface SearchStrategySearchParams extends FetchHandlers {
+  searchRequests: SearchRequest[];
 }
