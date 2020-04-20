@@ -119,7 +119,7 @@ export interface FieldEdiorProps {
   indexPattern: IndexPattern;
   field: Field;
   helpers: {
-    getConfig: () => any;
+    getConfig: (key: string) => any;
     getHttpStart: () => HttpStart;
     fieldFormatEditors: any;
     redirectAway: () => void;

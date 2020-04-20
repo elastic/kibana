@@ -46,12 +46,20 @@ interface TestScriptProps {
   lang: string;
   name?: string;
   script?: string;
-  executeScript: (params: ExecuteScriptParams) => void;
+  executeScript: (
+    params: ExecuteScriptParams
+  ) => { status: number; hits: { hits: any[] }; error?: any }; // todo
+}
+
+interface AdditionalField {
+  value: string;
+  label: string;
 }
 
 interface TestScriptState {
   isLoading: boolean;
-  additionalFields: any[];
+  additionalFields: AdditionalField[];
+  previewData?: any;
 }
 
 export class TestScript extends Component<TestScriptProps, TestScriptState> {
@@ -62,6 +70,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
   state = {
     isLoading: false,
     additionalFields: [],
+    previewData: undefined,
   };
 
   componentDidMount() {
@@ -88,20 +97,18 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
       query = esQuery.buildEsQuery(
         this.props.indexPattern,
         searchContext.query,
-        null,
+        [],
         esQueryConfigs
       );
     }
 
     const scriptResponse = await executeScript({
-      name,
+      name: name as string,
       lang,
       script,
       indexPatternTitle: indexPattern.title,
       query,
-      additionalFields: this.state.additionalFields.map(option => {
-        return option.value;
-      }),
+      additionalFields: this.state.additionalFields.map((option: AdditionalField) => option.value),
     });
 
     if (scriptResponse.status !== 200) {
@@ -122,15 +129,14 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     });
   };
 
-  onAdditionalFieldsChange = selectedOptions => {
+  onAdditionalFieldsChange = (selectedOptions: AdditionalField[]) => {
     this.setState({
       additionalFields: selectedOptions,
     });
   };
 
-  renderPreview() {
-    const { previewData } = this.state;
-
+  // todo
+  renderPreview(previewData: { error: any } | undefined) {
     if (!previewData) {
       return null;
     }
@@ -225,7 +231,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
             })}
             options={fields}
             selectedOptions={this.state.additionalFields}
-            onChange={this.onAdditionalFieldsChange}
+            onChange={selected => this.onAdditionalFieldsChange(selected as AdditionalField[])}
             data-test-subj="additionalFieldsSelect"
             fullWidth
           />
@@ -281,7 +287,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
         <EuiSpacer />
         {this.renderToolbar()}
         <EuiSpacer />
-        {this.renderPreview()}
+        {this.renderPreview(this.state.previewData)}
       </Fragment>
     );
   }

@@ -30,7 +30,7 @@ export interface ExecuteScriptParams {
   lang: string;
   script: string;
   indexPatternTitle: string;
-  query?: string;
+  query?: any; // todo
   additionalFields?: string[];
 }
 
