@@ -17,7 +17,7 @@ export const AppGlobalStyle = createGlobalStyle`
     position: static;
   }
   /* end of dirty hack to fix draggables with tooltip on FF */
-  
+
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }
@@ -28,12 +28,13 @@ export const AppGlobalStyle = createGlobalStyle`
 
   .euiPopover__panel.euiPopover__panel-isOpen {
     z-index: 9900 !important;
+    min-width: 24px;
   }
   .euiToolTip {
     z-index: 9950 !important;
   }
 
-  /* 
+  /*
     overrides the default styling of euiComboBoxOptionsList because it's implemented
     as a popover, so it's not selectable as a child of the styled component
   */
@@ -45,6 +46,17 @@ export const AppGlobalStyle = createGlobalStyle`
   .euiPanel-loading-hide-border {
     border: none;
   }
+
+  /* hide open popovers when a modal is being displayed to prevent them from covering the modal */
+  body.euiBody-hasOverlayMask .euiPopover__panel-isOpen {
+    visibility: hidden !important;
+  }
+
+  /* ensure elastic charts tooltips appear above open euiPopovers */
+  .echTooltip {
+    z-index: 9950;
+  }
+
 `;
 
 export const DescriptionListStyled = styled(EuiDescriptionList)`

@@ -8,11 +8,15 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { mockIndexPattern } from '../../../mock';
+import { createKibanaCoreStartMock } from '../../../mock/kibana_core';
 import { TestProviders } from '../../../mock/test_providers';
+import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
 import { TimelineHeader } from '.';
+
+const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
 jest.mock('../../../lib/kibana');
 
@@ -26,6 +30,7 @@ describe('Header', () => {
         <TimelineHeader
           browserFields={{}}
           dataProviders={mockDataProviders}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           id="foo"
           indexPattern={indexPattern}
           onChangeDataProviderKqlQuery={jest.fn()}
@@ -47,6 +52,7 @@ describe('Header', () => {
           <TimelineHeader
             browserFields={{}}
             dataProviders={mockDataProviders}
+            filterManager={new FilterManager(mockUiSettingsForFilterManager)}
             id="foo"
             indexPattern={indexPattern}
             onChangeDataProviderKqlQuery={jest.fn()}
@@ -70,6 +76,7 @@ describe('Header', () => {
           <TimelineHeader
             browserFields={{}}
             dataProviders={mockDataProviders}
+            filterManager={new FilterManager(mockUiSettingsForFilterManager)}
             id="foo"
             indexPattern={indexPattern}
             onChangeDataProviderKqlQuery={jest.fn()}

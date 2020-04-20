@@ -44,7 +44,7 @@ export const Tokens = React.memo<{ tokens: string[] }>(({ tokens }) => (
   <>
     {tokens.map(token => (
       <TokensFlexItem key={token} grow={false}>
-        <EuiBadge iconType="tag" color="hollow">
+        <EuiBadge iconType="tag" color="hollow" title="">
           {token}
         </EuiBadge>
       </TokensFlexItem>
@@ -81,7 +81,7 @@ export const DraggableSignatureId = React.memo<{ id: string; signatureId: number
               data-test-subj="signature-id-tooltip"
               content={SURICATA_SIGNATURE_ID_FIELD_NAME}
             >
-              <Badge iconType="number" color="hollow">
+              <Badge iconType="number" color="hollow" title="">
                 {signatureId}
               </Badge>
             </EuiToolTip>

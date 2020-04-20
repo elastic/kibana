@@ -19,9 +19,9 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { RuleType } from '../../../../../../../../../plugins/siem/common/detection_engine/types';
 import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
 
-import { RuleType } from '../../../../../../common/detection_engine/types';
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 
 import * as i18n from './translations';

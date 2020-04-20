@@ -92,7 +92,7 @@ export const DraggableZeekElement = React.memo<{
             </DragEffects>
           ) : (
             <EuiToolTip data-test-subj="badge-tooltip" content={field}>
-              <Badge iconType="tag" color="hollow">
+              <Badge iconType="tag" color="hollow" title="">
                 {stringRenderer(value)}
               </Badge>
             </EuiToolTip>
