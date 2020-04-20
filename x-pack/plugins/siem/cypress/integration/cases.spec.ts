@@ -4,12 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { case1 } from '../objects/case';
+
+import {
+  ALL_CASES_CLOSE_ACTION,
+  ALL_CASES_CLOSED_CASES_COUNT,
+  ALL_CASES_CLOSED_CASES_STATS,
+  ALL_CASES_COUNT,
+  ALL_CASES_DELETE_ACTION,
+  ALL_CASES_NAME,
+  ALL_CASES_OPEN_CASES_COUNT,
+  ALL_CASES_OPEN_CASES_STATS,
+  ALL_CASES_OPENED_ON,
+  ALL_CASES_PAGE_TITLE,
+  ALL_CASES_REPORTER,
+  ALL_CASES_REPORTERS_COUNT,
+  ALL_CASES_SERVICE_NOW_INCIDENT,
+  ALL_CASES_TAGS,
+  ALL_CASES_TAGS_COUNT,
+} from '../screens/all_cases';
+import {
+  ACTION,
+  CASE_DETAILS_DESCRIPTION,
+  CASE_DETAILS_PAGE_TITLE,
+  CASE_DETAILS_PUSH_AS_SERVICE_NOW_BTN,
+  CASE_DETAILS_STATUS,
+  CASE_DETAILS_TAGS,
+  CASE_DETAILS_TIMELINE_MARKDOWN,
+  CASE_DETAILS_USER_ACTION,
+  CASE_DETAILS_USERNAMES,
+  PARTICIPANTS,
+  REPORTER,
+  USER,
+} from '../screens/case_details';
+import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../screens/timeline';
+
+import { goToCaseDetails, goToCreateNewCase } from '../tasks/all_cases';
+import { openCaseTimeline } from '../tasks/case_details';
+import { backToCases, createNewCase } from '../tasks/create_new_case';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
-import { goToCreateNewCase } from '../tasks/all_cases';
-import { createNewCase } from '../tasks/create_new_case';
-import { case1 } from '../objects/case';
 import { CASES } from '../urls/navigation';
 
 describe('Cases', () => {
@@ -25,115 +60,56 @@ describe('Cases', () => {
     loginAndWaitForPageWithoutDateRange(CASES);
     goToCreateNewCase();
     createNewCase(case1);
+    backToCases();
 
-    /*
-    cy.get(
-      '[data-test-subj="caseTitle"] [data-test-subj="input"]'
-    ).type('This is the title of the case', { force: true });
-    cy.get(
-      '[data-test-subj="caseTags"] [data-test-subj="comboBoxSearchInput"]'
-    ).type('Tag1{enter}Tag2{enter}', { force: true });
-    cy.get(
-      '[data-test-subj="caseDescription"] [data-test-subj="textAreaInput"]'
-    ).type('This is the case description ', { force: true });
-    cy.get('[data-test-subj="insert-timeline-button"]').click({ force: true });
-    cy.get('[data-test-subj="timeline-super-select-search-box"]').type('SIEM test{enter}');
-    cy.get('[data-test-subj="timeline"]').should('be.visible');
-    cy.get('[data-test-subj="timeline"]')
-      .eq(1)
-      .click({ force: true });
-    cy.get('[data-test-subj="create-case-submit"]').click({ force: true });
-    cy.get('[data-test-subj="create-case-loading-spinner"]').should('exist');
-    cy.get('[data-test-subj="create-case-loading-spinner"]').should('not.exist'); */
+    cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases Beta');
+    cy.get(ALL_CASES_OPEN_CASES_STATS).should('have.text', 'Open cases1');
+    cy.get(ALL_CASES_CLOSED_CASES_STATS).should('have.text', 'Closed cases0');
+    cy.get(ALL_CASES_OPEN_CASES_COUNT).should('have.text', 'Open cases (1)');
+    cy.get(ALL_CASES_CLOSED_CASES_COUNT).should('have.text', 'Closed cases (0)');
+    cy.get(ALL_CASES_REPORTERS_COUNT).should('have.text', 'Reporter1');
+    cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
+    cy.get(ALL_CASES_NAME).should('have.text', case1.name);
+    cy.get(ALL_CASES_REPORTER).should('have.text', case1.reporter);
+    case1.tags.forEach((tag, index) => {
+      cy.get(ALL_CASES_TAGS(index)).should('have.text', tag);
+    });
+    cy.get(ALL_CASES_COUNT).should('have.text', '0');
+    cy.get(ALL_CASES_OPENED_ON).should('include.text', 'ago');
+    cy.get(ALL_CASES_SERVICE_NOW_INCIDENT).should('have.text', 'Not pushed');
+    cy.get(ALL_CASES_DELETE_ACTION).should('exist');
+    cy.get(ALL_CASES_CLOSE_ACTION).should('exist');
 
-    cy.get('[data-test-subj="backToCases"]').click({ force: true });
+    goToCaseDetails();
 
-    cy.get('[data-test-subj="header-page-title"]')
-      .invoke('text')
-      .should('eql', 'Cases Beta');
-    cy.get('[data-test-subj="openStatsHeader"]')
-      .invoke('text')
-      .should('eql', 'Open cases1');
-    cy.get('[data-test-subj="closedStatsHeader"]')
-      .invoke('text')
-      .should('eql', 'Closed cases0');
-    cy.get('[data-test-subj="open-case-count"]')
-      .invoke('text')
-      .should('eql', 'Open cases (1)');
-    cy.get('[data-test-subj="closed-case-count"]')
-      .invoke('text')
-      .should('eql', 'Closed cases (0)');
-    cy.get('[data-test-subj="options-filter-popover-button-Reporter"]')
-      .invoke('text')
-      .should('eql', 'Reporter1');
-    cy.get('[data-test-subj="options-filter-popover-button-Tags"]')
-      .invoke('text')
-      .should('eql', 'Tags2');
-    cy.get('[data-test-subj="case-details-link"]')
-      .invoke('text')
-      .should('eql', 'This is the title of the case');
-    cy.get('[data-test-subj="case-table-column-createdBy"]')
-      .invoke('text')
-      .should('eql', 'elastic');
-    cy.get('[data-test-subj="case-table-column-tags-0"]')
-      .invoke('text')
-      .should('eql', 'Tag1');
-    cy.get('[data-test-subj="case-table-column-tags-1"]')
-      .invoke('text')
-      .should('eql', 'Tag2');
-    cy.get('[data-test-subj="case-table-column-commentCount"]')
-      .invoke('text')
-      .should('eql', '0');
-    cy.get('[data-test-subj="case-table-column-createdAt"]')
-      .invoke('text')
-      .should('include', 'ago');
-    cy.get('[data-test-subj="case-table-column-external-notPushed"]')
-      .invoke('text')
-      .should('eql', 'Not pushed');
-    cy.get('[data-test-subj="action-delete"]').should('exist');
-    cy.get('[data-test-subj="action-close"]').should('exist');
-
-    cy.get('[data-test-subj="case-details-link"]').click({ force: true });
-
-    cy.get('[data-test-subj="header-page-title"]')
-      .invoke('text')
-      .should('eql', 'This is the title of the case');
-    cy.get('[data-test-subj="case-view-status"]')
-      .invoke('text')
-      .should('eql', 'open');
-    cy.get('[data-test-subj="user-action-title"] .euiFlexItem')
-      .eq(1)
-      .invoke('text')
-      .should('eql', 'elastic');
-    cy.get('[data-test-subj="user-action-title"] .euiFlexItem')
-      .eq(2)
-      .invoke('text')
-      .should('eql', 'added description');
-    cy.get('[data-test-subj="markdown-root"]')
-      .invoke('text')
-      .should('eql', 'This is the case description SIEM test');
-    cy.get('[data-test-subj="case-view-username"]')
-      .eq(0)
-      .invoke('text')
-      .should('eql', 'elastic');
-    cy.get('[data-test-subj="case-view-username"]')
-      .eq(1)
-      .invoke('text')
-      .should('eql', 'elastic');
-    cy.get('[data-test-subj="case-tags"]')
-      .invoke('text')
-      .should('eql', 'Tag1Tag2');
-    cy.get('[data-test-subj="push-to-service-now"]').should('have.attr', 'disabled');
-
-    cy.get('[data-test-subj="markdown-link"]').then($element => {
+    const expectedTags = case1.tags.join('');
+    cy.get(CASE_DETAILS_PAGE_TITLE).should('have.text', case1.name);
+    cy.get(CASE_DETAILS_STATUS).should('have.text', 'open');
+    cy.get(CASE_DETAILS_USER_ACTION)
+      .eq(USER)
+      .should('have.text', case1.reporter);
+    cy.get(CASE_DETAILS_USER_ACTION)
+      .eq(ACTION)
+      .should('have.text', 'added description');
+    cy.get(CASE_DETAILS_DESCRIPTION).should(
+      'have.text',
+      `${case1.description} ${case1.timeline.title}`
+    );
+    cy.get(CASE_DETAILS_USERNAMES)
+      .eq(REPORTER)
+      .should('have.text', case1.reporter);
+    cy.get(CASE_DETAILS_USERNAMES)
+      .eq(PARTICIPANTS)
+      .should('have.text', case1.reporter);
+    cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
+    cy.get(CASE_DETAILS_PUSH_AS_SERVICE_NOW_BTN).should('have.attr', 'disabled');
+    cy.get(CASE_DETAILS_TIMELINE_MARKDOWN).then($element => {
       const timelineLink = $element.prop('href').match(/http(s?):\/\/\w*:\w*(\S*)/)[0];
-      cy.visit('/app/kibana');
-      cy.visit(timelineLink);
-      cy.contains('a', 'SIEM');
-      cy.get('[data-test-subj="timeline-title"]').should('exist');
-      cy.get('[data-test-subj="timeline-title"]').should('have.attr', 'value', 'SIEM test');
-      cy.get('[data-test-subj="timeline-description"]').should('have.attr', 'value', 'description');
-      cy.get('[data-test-subj="timelineQueryInput"]').should('have.attr', 'value', 'host.name:*');
+      openCaseTimeline(timelineLink);
+
+      cy.get(TIMELINE_TITLE).should('have.attr', 'value', case1.timeline.title);
+      cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', case1.timeline.description);
+      cy.get(TIMELINE_QUERY).should('have.attr', 'value', case1.timeline.query);
     });
   });
 });

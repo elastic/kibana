@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CREATE_NEW_CASE_BTN } from '../screens/all_cases';
+import { ALL_CASES_NAME, ALL_CASES_CREATE_NEW_CASE_BTN } from '../screens/all_cases';
 
 export const goToCreateNewCase = () => {
-  cy.get(CREATE_NEW_CASE_BTN).click({ force: true });
+  cy.get(ALL_CASES_CREATE_NEW_CASE_BTN).click({ force: true });
+};
+
+export const goToCaseDetails = () => {
+  cy.get(ALL_CASES_NAME).click({ force: true });
 };

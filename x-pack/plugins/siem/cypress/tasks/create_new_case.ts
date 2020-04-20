@@ -5,21 +5,38 @@
  */
 
 import { Case } from '../objects/case';
-import { TITLE_INPUT, TAGS_INPUT, DESCRIPTION_INPUT } from '../screens/create_new_case';
+
+import {
+  BACK_TO_CASES_BTN,
+  DESCRIPTION_INPUT,
+  SUBMIT_BTN,
+  INSERT_TIMELINE_BTN,
+  LOADING_SPINNER,
+  TAGS_INPUT,
+  TIMELINE,
+  TIMELINE_SEARCHBOX,
+  TITLE_INPUT,
+} from '../screens/create_new_case';
+
+export const backToCases = () => {
+  cy.get(BACK_TO_CASES_BTN).click({ force: true });
+};
 
 export const createNewCase = (newCase: Case) => {
-  cy.get(TITLE_INPUT).type(newCase.title, { force: true });
+  cy.get(TITLE_INPUT).type(newCase.name, { force: true });
   newCase.tags.forEach(tag => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
   });
   cy.get(DESCRIPTION_INPUT).type(`${newCase.description} `, { force: true });
-  cy.get('[data-test-subj="insert-timeline-button"]').click({ force: true });
-  cy.get('[data-test-subj="timeline-super-select-search-box"]').type('SIEM test{enter}');
-  cy.get('[data-test-subj="timeline"]').should('be.visible');
-  cy.get('[data-test-subj="timeline"]')
+
+  cy.get(INSERT_TIMELINE_BTN).click({ force: true });
+  cy.get(TIMELINE_SEARCHBOX).type(`${newCase.timeline.title}{enter}`);
+  cy.get(TIMELINE).should('be.visible');
+  cy.get(TIMELINE)
     .eq(1)
     .click({ force: true });
-  cy.get('[data-test-subj="create-case-submit"]').click({ force: true });
-  cy.get('[data-test-subj="create-case-loading-spinner"]').should('exist');
-  cy.get('[data-test-subj="create-case-loading-spinner"]').should('not.exist');
+
+  cy.get(SUBMIT_BTN).click({ force: true });
+  cy.get(LOADING_SPINNER).should('exist');
+  cy.get(LOADING_SPINNER).should('not.exist');
 };
