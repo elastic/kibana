@@ -4,43 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
-import { i18n } from '@kbn/i18n';
 import { PluginInitializerContext } from 'src/core/server';
 import { RollupSetup } from '../../../plugins/rollup/server';
-import { PLUGIN, CONFIG_ROLLUPS } from './common';
+import { PLUGIN } from './common';
 import { plugin } from './server';
 
 export function rollup(kibana: any) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     configPrefix: 'xpack.rollup',
-    publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      managementSections: ['plugins/rollup/legacy'],
-      uiSettingDefaults: {
-        [CONFIG_ROLLUPS]: {
-          name: i18n.translate('xpack.rollupJobs.rollupIndexPatternsTitle', {
-            defaultMessage: 'Enable rollup index patterns',
-          }),
-          value: true,
-          description: i18n.translate('xpack.rollupJobs.rollupIndexPatternsDescription', {
-            defaultMessage: `Enable the creation of index patterns which capture rollup indices,
-              which in turn enable visualizations based on rollup data. Refresh
-              the page to apply the changes.`,
-          }),
-          category: ['rollups'],
-        },
-      },
-      indexManagement: ['plugins/rollup/legacy'],
-      visualize: ['plugins/rollup/legacy'],
-      search: ['plugins/rollup/legacy'],
-    },
     init(server: any) {
       const { core: coreSetup, plugins } = server.newPlatform.setup;
-      const { usageCollection, metrics, indexManagement } = plugins;
+      const { usageCollection, visTypeTimeseries, indexManagement } = plugins;
 
       const rollupSetup = (plugins.rollup as unknown) as RollupSetup;
 
@@ -53,7 +29,7 @@ export function rollup(kibana: any) {
 
       rollupPluginInstance.setup(coreSetup, {
         usageCollection,
-        metrics,
+        visTypeTimeseries,
         indexManagement,
         __LEGACY: {
           plugins: {

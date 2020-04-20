@@ -27,6 +27,7 @@ export interface Field {
   ignore_above?: number;
   object_type?: string;
   scaling_factor?: number;
+  dynamic?: 'strict' | boolean;
 
   // Kibana specific
   analyzed?: boolean;
