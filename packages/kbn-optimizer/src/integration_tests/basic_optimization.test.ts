@@ -125,10 +125,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
 
   expect(
-    Fs.readFileSync(
-      Path.resolve(MOCK_REPO_DIR, 'src/core/public/target/public/core.entry.js'),
-      'utf8'
-    )
+    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'src/core/target/public/core.entry.js'), 'utf8')
   ).toMatchSnapshot('core bundle');
 
   expect(
