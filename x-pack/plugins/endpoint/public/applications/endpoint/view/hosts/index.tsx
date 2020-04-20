@@ -39,6 +39,7 @@ export const HostList = () => {
     pageSize,
     totalHits: totalItemCount,
     listLoading: loading,
+    listError,
     uiQueryParams: queryParams,
     hasSelectedHost,
   } = useHostSelector(selector);
@@ -182,6 +183,7 @@ export const HostList = () => {
               items={useMemo(() => [...listData], [listData])}
               columns={columns}
               loading={loading}
+              error={listError}
               pagination={paginationSetup}
               onChange={onTableChange}
             />
