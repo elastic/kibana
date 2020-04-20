@@ -18,8 +18,8 @@
  */
 
 import { callClient } from './call_client';
-import { FetchHandlers, FetchOptions } from '../fetch/types';
-import { SearchRequest, SearchResponse } from '../index';
+import { FetchHandlers, FetchOptions } from './types';
+import { SearchRequest, SearchResponse } from '..';
 
 /**
  * This function introduces a slight delay in the request process to allow multiple requests to queue
