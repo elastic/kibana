@@ -22,7 +22,7 @@ import {
   DEFAULT_TO,
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
-} from '../../common/constants';
+} from '../../../../../plugins/siem/common/constants';
 
 export const mockGlobalState: State = {
   app: {
