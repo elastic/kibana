@@ -242,6 +242,7 @@ export const npSetup = {
     },
     kibanaLegacy: {
       registerLegacyApp: () => {},
+      registerLegacyAppAlias: () => {},
       forwardApp: () => {},
       config: {
         defaultAppId: 'home',
@@ -362,6 +363,7 @@ export const npStart = {
     kibanaLegacy: {
       getApps: () => [],
       getForwards: () => [],
+      getLegacyAppAliases: () => [],
       config: {
         defaultAppId: 'home',
       },
@@ -453,6 +455,7 @@ export const npStart = {
           createAggConfigs: (indexPattern, configStates = []) => {
             return new AggConfigs(indexPattern, configStates, {
               typesRegistry: aggTypesRegistry.start(),
+              fieldFormats: getFieldFormatsRegistry(mockCoreStart),
             });
           },
           types: aggTypesRegistry.start(),

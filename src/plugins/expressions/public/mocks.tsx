@@ -22,7 +22,6 @@ import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from 
 
 /* eslint-disable */
 import { coreMock } from '../../../core/public/mocks';
-import { inspectorPluginMock } from '../../inspector/public/mocks';
 import { bfetchPluginMock } from '../../bfetch/public/mocks';
 /* eslint-enable */
 
@@ -89,7 +88,6 @@ const createPlugin = async () => {
   const plugin = pluginInitializer(pluginInitializerContext);
   const setup = await plugin.setup(coreSetup, {
     bfetch: bfetchPluginMock.createSetupContract(),
-    inspector: inspectorPluginMock.createSetupContract(),
   });
 
   return {
@@ -101,7 +99,6 @@ const createPlugin = async () => {
     doStart: async () =>
       await plugin.start(coreStart, {
         bfetch: bfetchPluginMock.createStartContract(),
-        inspector: inspectorPluginMock.createStartContract(),
       }),
   };
 };

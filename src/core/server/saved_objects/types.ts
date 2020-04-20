@@ -204,14 +204,9 @@ export interface SavedObjectsType {
    */
   hidden: boolean;
   /**
-   * Is the type global (true), or not (false).
-   * @deprecated Use `namespaceType` instead.
-   */
-  namespaceAgnostic?: boolean;
-  /**
    * The {@link SavedObjectsNamespaceType | namespace type} for the type.
    */
-  namespaceType?: SavedObjectsNamespaceType;
+  namespaceType: SavedObjectsNamespaceType;
   /**
    * If defined, the type instances will be stored in the given index instead of the default one.
    */

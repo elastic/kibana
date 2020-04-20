@@ -29,10 +29,11 @@ import { notificationServiceMock } from '../../../../../../../core/public/mocks'
 
 describe('AggConfig Filters', () => {
   describe('IP range', () => {
+    const fieldFormats = fieldFormatsServiceMock.createStartContract();
     const typesRegistry = mockAggTypesRegistry([
       getIpRangeBucketAgg({
         getInternalStartServices: () => ({
-          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          fieldFormats,
           notifications: notificationServiceMock.createStartContract(),
         }),
       }),
@@ -52,7 +53,7 @@ describe('AggConfig Filters', () => {
         },
       } as any;
 
-      return new AggConfigs(indexPattern, aggs, { typesRegistry });
+      return new AggConfigs(indexPattern, aggs, { typesRegistry, fieldFormats });
     };
 
     test('should return a range filter for ip_range agg', () => {
