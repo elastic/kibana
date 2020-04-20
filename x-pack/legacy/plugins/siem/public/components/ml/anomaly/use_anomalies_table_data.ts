@@ -5,6 +5,8 @@
  */
 
 import { useState, useEffect } from 'react';
+
+import { DEFAULT_ANOMALY_SCORE } from '../../../../../../../plugins/siem/common/constants';
 import { anomaliesTableData } from '../api/anomalies_table_data';
 import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
@@ -14,7 +16,6 @@ import { useStateToaster, errorToToaster } from '../../toasters';
 
 import * as i18n from './translations';
 import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
-import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 
 interface Args {
   influencers?: InfluencerInput[];

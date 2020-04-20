@@ -7,8 +7,10 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { createKibanaCoreStartMock } from '../../../mock/kibana_core';
 import { TestProviders } from '../../../mock/test_providers';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
+import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { TimelineContext } from '../timeline_context';
 
 import { mockDataProviders } from './mock/mock_data_providers';
@@ -16,9 +18,12 @@ import { getDraggableId, Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
+const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+
 describe('Providers', () => {
-  const mockTimelineContext: boolean = true;
+  const isLoading: boolean = true;
   const mount = useMountAppended();
+  const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
@@ -96,7 +101,7 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={mockTimelineContext}>
+          <TimelineContext.Provider value={{ filterManager, isLoading }}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -159,7 +164,7 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={mockTimelineContext}>
+          <TimelineContext.Provider value={{ filterManager, isLoading }}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -241,7 +246,7 @@ describe('Providers', () => {
       const mockOnToggleDataProviderEnabled = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={mockTimelineContext}>
+          <TimelineContext.Provider value={{ filterManager, isLoading }}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -319,7 +324,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={mockTimelineContext}>
+          <TimelineContext.Provider value={{ filterManager, isLoading }}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -428,7 +433,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={mockTimelineContext}>
+          <TimelineContext.Provider value={{ filterManager, isLoading }}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -509,7 +514,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={mockTimelineContext}>
+          <TimelineContext.Provider value={{ filterManager, isLoading }}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -595,7 +600,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={mockTimelineContext}>
+          <TimelineContext.Provider value={{ filterManager, isLoading }}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}

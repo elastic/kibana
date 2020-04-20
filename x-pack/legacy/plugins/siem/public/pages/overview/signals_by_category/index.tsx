@@ -12,6 +12,7 @@ import { useSignalIndex } from '../../../containers/detection_engine/signals/use
 import { SetAbsoluteRangeDatePicker } from '../../network/types';
 import { Filter, IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../store';
+import { InputsModelId } from '../../../store/inputs/constants';
 import * as i18n from '../translations';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
@@ -22,9 +23,13 @@ interface Props {
   deleteQuery?: ({ id }: { id: string }) => void;
   filters?: Filter[];
   from: number;
+  headerChildren?: React.ReactNode;
   indexPattern: IIndexPattern;
+  /** Override all defaults, and only display this field */
+  onlyField?: string;
   query?: Query;
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
+  setAbsoluteRangeDatePickerTarget?: InputsModelId;
   setQuery: (params: {
     id: string;
     inspect: inputsModel.InspectQuery | null;
@@ -38,15 +43,18 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   deleteQuery,
   filters = NO_FILTERS,
   from,
+  headerChildren,
+  onlyField,
   query = DEFAULT_QUERY,
   setAbsoluteRangeDatePicker,
+  setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
   to,
 }) => {
   const { signalIndexName } = useSignalIndex();
   const updateDateRangeCallback = useCallback(
     (min: number, max: number) => {
-      setAbsoluteRangeDatePicker!({ id: 'global', from: min, to: max });
+      setAbsoluteRangeDatePicker({ id: setAbsoluteRangeDatePickerTarget, from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]
   );
@@ -60,12 +68,14 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       defaultStackByOption={defaultStackByOption}
       filters={filters}
       from={from}
+      headerChildren={headerChildren}
+      onlyField={onlyField}
       query={query}
       signalIndexName={signalIndexName}
       setQuery={setQuery}
       showTotalSignalsCount={true}
-      showLinkToSignals={true}
-      stackByOptions={signalsHistogramOptions}
+      showLinkToSignals={onlyField == null ? true : false}
+      stackByOptions={onlyField == null ? signalsHistogramOptions : undefined}
       legendPosition={'right'}
       to={to}
       title={i18n.SIGNAL_COUNT}

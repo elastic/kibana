@@ -6,15 +6,7 @@
 
 /* eslint-disable react/display-name */
 
-import {
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
@@ -34,22 +26,6 @@ const CategoryName = styled.span<{ bold: boolean }>`
 `;
 
 CategoryName.displayName = 'CategoryName';
-
-const HoverActionsContainer = styled(EuiPanel)`
-  cursor: default;
-  left: 5px;
-  padding: 8px;
-  position: absolute;
-  top: -8px;
-`;
-
-HoverActionsContainer.displayName = 'HoverActionsContainer';
-
-const HoverActionsFlexGroup = styled(EuiFlexGroup)`
-  cursor: pointer;
-`;
-
-HoverActionsFlexGroup.displayName = 'HoverActionsFlexGroup';
 
 const LinkContainer = styled.div`
   width: 100%;
@@ -71,7 +47,7 @@ interface ToolTipProps {
 }
 
 const ToolTip = React.memo<ToolTipProps>(({ categoryId, browserFields, onUpdateColumns }) => {
-  const isLoading = useContext(TimelineContext);
+  const { isLoading } = useContext(TimelineContext);
   return (
     <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
       {!isLoading ? (
@@ -127,25 +103,11 @@ export const getCategoryColumns = ({
             <EuiFlexItem grow={false}>
               <WithHoverActions
                 hoverContent={
-                  <HoverActionsContainer
-                    data-test-subj="hover-actions-container"
-                    paddingSize="none"
-                  >
-                    <HoverActionsFlexGroup
-                      alignItems="center"
-                      direction="row"
-                      gutterSize="none"
-                      justifyContent="spaceBetween"
-                    >
-                      <EuiFlexItem grow={false}>
-                        <ToolTip
-                          categoryId={categoryId}
-                          browserFields={browserFields}
-                          onUpdateColumns={onUpdateColumns}
-                        />
-                      </EuiFlexItem>
-                    </HoverActionsFlexGroup>
-                  </HoverActionsContainer>
+                  <ToolTip
+                    categoryId={categoryId}
+                    browserFields={browserFields}
+                    onUpdateColumns={onUpdateColumns}
+                  />
                 }
                 render={() => (
                   <CategoryName
