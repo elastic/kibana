@@ -31,7 +31,7 @@ import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_obj
 
 export interface Note {
   deleteNote: (request: FrameworkRequest, noteIds: string[]) => Promise<void>;
-  deleteNoteByTimelineId: (request: FrameworkRequest, noteIds: string[]) => Promise<void>;
+  deleteNoteByTimelineId: (request: FrameworkRequest, noteIds: string) => Promise<void>;
   getNote: (request: FrameworkRequest, noteId: string) => Promise<NoteSavedObject>;
   getNotesByEventId: (request: FrameworkRequest, noteId: string) => Promise<NoteSavedObject[]>;
   getNotesByTimelineId: (request: FrameworkRequest, noteId: string) => Promise<NoteSavedObject[]>;

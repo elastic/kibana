@@ -136,6 +136,8 @@ export interface TimelineInput {
 
   templateTimelineId?: Maybe<string>;
 
+  templateTimelineVersion?: Maybe<number>;
+
   timelineType?: Maybe<TimelineType>;
 
   dateRange?: Maybe<DateRangePickerInput>;
@@ -1956,6 +1958,8 @@ export interface TimelineResult {
   title?: Maybe<string>;
 
   templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
 
   timelineType?: Maybe<TimelineType>;
 
@@ -8038,6 +8042,8 @@ export namespace TimelineResultResolvers {
 
     templateTimelineId?: TemplateTimelineIdResolver<Maybe<string>, TypeParent, TContext>;
 
+    templateTimelineVersion?: TemplateTimelineVersionResolver<Maybe<number>, TypeParent, TContext>;
+
     timelineType?: TimelineTypeResolver<Maybe<TimelineType>, TypeParent, TContext>;
 
     updated?: UpdatedResolver<Maybe<number>, TypeParent, TContext>;
@@ -8149,6 +8155,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type TemplateTimelineIdResolver<
     R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineVersionResolver<
+    R = Maybe<number>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

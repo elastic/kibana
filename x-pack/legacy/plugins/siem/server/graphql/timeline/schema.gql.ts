@@ -140,6 +140,7 @@ export const timelineSchema = gql`
     kqlQuery: SerializedFilterQueryInput
     title: String
     templateTimelineId: String
+    templateTimelineVersion: Int
     timelineType: TimelineType
     dateRange: DateRangePickerInput
     savedQueryId: String
@@ -245,6 +246,7 @@ export const timelineSchema = gql`
     sort: SortTimelineResult
     title: String
     templateTimelineId: String
+    templateTimelineVersion: Int
     timelineType: TimelineType
     updated: Float
     updatedBy: String

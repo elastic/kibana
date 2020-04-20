@@ -32,6 +32,10 @@ export const pickSavedTimeline = (
     if (savedTimeline.templateTimelineId === null) {
       savedTimeline.templateTimelineId = uuid.v4();
     }
+
+    if (savedTimeline.templateTimelineVersion === null) {
+      savedTimeline.templateTimelineVersion = 1;
+    }
   } else {
     savedTimeline.timelineType = TimelineType.default;
   }

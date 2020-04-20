@@ -134,6 +134,8 @@ export interface TimelineInput {
 
   templateTimelineId?: Maybe<string>;
 
+  templateTimelineVersion?: Maybe<number>;
+
   timelineType?: Maybe<TimelineType>;
 
   dateRange?: Maybe<DateRangePickerInput>;
@@ -1954,6 +1956,8 @@ export interface TimelineResult {
   title?: Maybe<string>;
 
   templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
 
   timelineType?: Maybe<TimelineType>;
 

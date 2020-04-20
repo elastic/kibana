@@ -43,14 +43,6 @@ export interface ResponseTemplateTimeline {
 export interface Timeline {
   getTimeline: (request: FrameworkRequest, timelineId: string) => Promise<TimelineSavedObject>;
 
-  getTemplateTimeline: (
-    request: FrameworkRequest,
-    templateTimelineId: string
-  ) => Promise<{
-    totalCount: number;
-    timeline: TimelineSavedObject[];
-  }>;
-
   getAllTimeline: (
     request: FrameworkRequest,
     onlyUserFavorite: boolean | null,
