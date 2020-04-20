@@ -64,13 +64,7 @@ function ensureGeometryType(type, expectedTypes) {
  * @param {string} geoFieldType Geometry field type ["geo_point", "geo_shape"]
  * @returns {number}
  */
-export function hitsToGeoJson(
-  hits,
-  flattenHit,
-  geoFieldName,
-  geoFieldType,
-  epochMillisFields = []
-) {
+export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType, epochMillisFields) {
   const features = [];
   const tmpGeometriesAccumulator = [];
 
@@ -89,11 +83,12 @@ export function hitsToGeoJson(
     // There is a bug in Elasticsearch API where epoch_millis are returned as a string instead of a number
     // https://github.com/elastic/elasticsearch/issues/50622
     // Convert these field values to integers.
-    epochMillisFields.forEach(fieldName => {
+    for (let i = 0; i < epochMillisFields.length; i++) {
+      const fieldName = epochMillisFields[i];
       if (typeof properties[fieldName] === 'string') {
         properties[fieldName] = parseInt(properties[fieldName]);
       }
-    });
+    }
 
     // don't include geometry field value in properties
     delete properties[geoFieldName];

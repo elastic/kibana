@@ -66,7 +66,7 @@ describe('hitsToGeoJson', () => {
         },
       },
     ];
-    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', []);
     expect(geojson.type).toBe('FeatureCollection');
     expect(geojson.features.length).toBe(2);
     expect(geojson.features[0]).toEqual({
@@ -94,7 +94,7 @@ describe('hitsToGeoJson', () => {
         _source: {},
       },
     ];
-    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', []);
     expect(geojson.type).toBe('FeatureCollection');
     expect(geojson.features.length).toBe(1);
   });
@@ -111,7 +111,7 @@ describe('hitsToGeoJson', () => {
         },
       },
     ];
-    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', []);
     expect(geojson.features.length).toBe(1);
     const feature = geojson.features[0];
     expect(feature.properties.myField).toBe(8);
@@ -128,7 +128,7 @@ describe('hitsToGeoJson', () => {
         },
       },
     ];
-    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', []);
     expect(geojson.type).toBe('FeatureCollection');
     expect(geojson.features.length).toBe(2);
     expect(geojson.features[0]).toEqual({
@@ -201,7 +201,7 @@ describe('hitsToGeoJson', () => {
           },
         },
       ];
-      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
+      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point', []);
       expect(geojson.features[0].geometry).toEqual({
         coordinates: [100, 20],
         type: 'Point',
@@ -216,7 +216,7 @@ describe('hitsToGeoJson', () => {
           },
         },
       ];
-      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
+      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point', []);
       expect(geojson.features[0].geometry).toEqual({
         coordinates: [100, 20],
         type: 'Point',
