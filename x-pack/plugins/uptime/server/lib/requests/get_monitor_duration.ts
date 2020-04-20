@@ -20,26 +20,6 @@ export interface GetMonitorChartsParams {
   dateEnd: string;
 }
 
-const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
-  let up = null;
-  let down = null;
-
-  buckets.forEach((bucket: any) => {
-    if (bucket.key === 'up') {
-      up = bucket.doc_count;
-    } else if (bucket.key === 'down') {
-      down = bucket.doc_count;
-    }
-  });
-
-  return {
-    x: time,
-    up,
-    down,
-    total: docCount,
-  };
-};
-
 /**
  * Fetches data used to populate monitor charts
  */
@@ -55,7 +35,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
           filter: [
             { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
             { term: { 'monitor.id': monitorId } },
-            { term: { 'monitor.status': 'up' } },
+            { range: { 'monitor.duration.us': { gt: 0 } } },
           ],
         },
       },
@@ -74,7 +54,6 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
                 missing: 'N/A',
               },
               aggs: {
-                status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
                 duration: { stats: { field: 'monitor.duration.us' } },
               },
             },
@@ -95,15 +74,10 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
    *
    * The third list is for an area chart expressing a range, and it requires an (x,y,y0) structure,
    * where y0 is the min value for the point and y is the max.
-   *
-   * Additionally, we supply the maximum value for duration and status, so the corresponding charts know
-   * what the domain size should be.
    */
+
   const monitorChartsData: MonitorDurationResult = {
     locationDurationLines: [],
-    status: [],
-    durationMaxValue: 0,
-    statusMaxCount: 0,
   };
 
   /**
@@ -120,9 +94,9 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
   // a set of all the locations found for this result
   const resultLocations = new Set<string>();
   const linesByLocation: { [key: string]: LocationDurationLine } = {};
+
   dateHistogramBuckets.forEach(dateHistogramBucket => {
     const x = dateHistogramBucket.key;
-    const docCount = dateHistogramBucket?.doc_count ?? 0;
     // a set of all the locations for the current bucket
     const bucketLocations = new Set<string>();
 
@@ -162,10 +136,6 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
         }
       });
     }
-
-    monitorChartsData.status.push(
-      formatStatusBuckets(x, dateHistogramBucket?.status?.buckets ?? [], docCount)
-    );
   });
 
   return monitorChartsData;

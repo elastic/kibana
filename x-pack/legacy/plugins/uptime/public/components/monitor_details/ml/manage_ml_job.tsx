@@ -9,7 +9,11 @@ import React, { useContext, useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { canDeleteMLJobSelector } from '../../../state/selectors';
+import {
+  canDeleteMLJobSelector,
+  hasMLJobSelector,
+  isMLJobCreatingSelector,
+} from '../../../state/selectors';
 import { UptimeSettingsContext } from '../../../contexts';
 import * as labels from './translations';
 import { getMLJobLinkHref } from './ml_job_link';
@@ -28,6 +32,10 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
 
   const canDeleteMLJob = useSelector(canDeleteMLJobSelector);
 
+  const isMLJobCreating = useSelector(isMLJobCreatingSelector);
+
+  const { loading: isMLJobLoading } = useSelector(hasMLJobSelector);
+
   const [getUrlParams] = useUrlParams();
   const { dateRangeStart, dateRangeEnd } = getUrlParams();
 
@@ -40,6 +48,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       iconSide={hasMLJob ? 'right' : 'left'}
       onClick={hasMLJob ? () => setIsPopOverOpen(true) : onEnableJob}
       disabled={hasMLJob && !canDeleteMLJob}
+      isLoading={isMLJobCreating || isMLJobLoading}
     >
       {hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION}
     </EuiButtonEmpty>
