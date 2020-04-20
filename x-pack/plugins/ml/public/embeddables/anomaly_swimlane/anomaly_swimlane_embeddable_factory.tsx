@@ -7,11 +7,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { CoreStart } from 'kibana/public';
+import { StartServicesAccessor } from 'kibana/public';
 
 import {
   IContainer,
   EmbeddableFactoryDefinition,
+  ErrorEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
 import {
   AnomalySwimlaneEmbeddable,
@@ -20,18 +21,13 @@ import {
 } from './anomaly_swimlane_embaddable';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
+import { MlStartDependencies } from '../../plugin';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
   public readonly type = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
-  private overlays: CoreStart['overlays'] | undefined = undefined;
-
-  constructor() {}
-
-  public setDependencies(overlays: CoreStart['overlays']) {
-    this.overlays = overlays;
-  }
+  constructor(private getStartServices: StartServicesAccessor<MlStartDependencies>) {}
 
   public async isEditable() {
     return true;
@@ -44,12 +40,10 @@ export class AnomalySwimlaneEmbeddableFactory
   }
 
   public async getExplicitInput(): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-    return new Promise(resolve => {
-      if (this.overlays === undefined) {
-        throw new Error('overlays service is not initialized');
-      }
+    return new Promise(async resolve => {
+      const { overlays } = (await this.getStartServices())[0];
 
-      const modalSession = this.overlays.openModal(
+      const modalSession = overlays.openModal(
         toMountPoint(
           <AnomalySwimlaneInitializer
             onCancel={() => {
@@ -57,8 +51,8 @@ export class AnomalySwimlaneEmbeddableFactory
               resolve(undefined);
             }}
             onCreate={(swimlaneProps: { jobId: string; viewBy: string }) => {
-              modalSession.close();
               resolve(swimlaneProps);
+              modalSession.close();
             }}
           />
         ),
@@ -69,7 +63,11 @@ export class AnomalySwimlaneEmbeddableFactory
     });
   }
 
-  public async create(initialInput: AnomalySwimlaneEmbeddableInput, parent?: IContainer) {
-    return new AnomalySwimlaneEmbeddable(initialInput, parent);
+  public async create(
+    initialInput: AnomalySwimlaneEmbeddableInput,
+    parent?: IContainer
+  ): Promise<AnomalySwimlaneEmbeddable | ErrorEmbeddable> {
+    const [coreStart, pluginsStart] = await this.getStartServices();
+    return new AnomalySwimlaneEmbeddable(initialInput, [coreStart, pluginsStart], parent);
   }
 }

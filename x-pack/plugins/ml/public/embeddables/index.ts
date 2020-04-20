@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'kibana/public';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalySwimlaneEmbeddableFactory,
-} from './anomaly_swimlane';
-import { MlSetupDependencies } from '../plugin';
+import { CoreSetup } from 'kibana/public';
+import { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane';
+import { MlPluginStart, MlStartDependencies } from '../plugin';
+import { EmbeddableSetup } from '../../../../../src/plugins/embeddable/public';
 
-export function registerEmbeddables(pluginsSetup: MlSetupDependencies) {
-  const anomalySwimlaneEmbeddableFactory = new AnomalySwimlaneEmbeddableFactory();
-  pluginsSetup.embeddable.registerEmbeddableFactory(
-    ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+export function registerEmbeddables(
+  embeddable: EmbeddableSetup,
+  core: CoreSetup<MlStartDependencies, MlPluginStart>
+) {
+  const anomalySwimlaneEmbeddableFactory = new AnomalySwimlaneEmbeddableFactory(
+    core.getStartServices
+  );
+  embeddable.registerEmbeddableFactory(
+    anomalySwimlaneEmbeddableFactory.type,
     anomalySwimlaneEmbeddableFactory
   );
-  return (overlays: CoreStart['overlays']) => {
-    anomalySwimlaneEmbeddableFactory.setDependencies(overlays);
-  };
 }

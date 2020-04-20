@@ -89,10 +89,7 @@ export class MlPlugin
 
     initManagementSection(pluginsSetup, core);
 
-    const registerEmbeddablesDeps = registerEmbeddables(pluginsSetup);
-    core.getStartServices().then(([coreStart]) => {
-      registerEmbeddablesDeps(coreStart.overlays);
-    });
+    registerEmbeddables(pluginsSetup.embeddable, core);
 
     return {};
   }

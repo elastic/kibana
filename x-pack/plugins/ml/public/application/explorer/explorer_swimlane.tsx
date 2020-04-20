@@ -8,7 +8,6 @@
  * React component for rendering Explorer dashboard swimlanes.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import _ from 'lodash';
@@ -50,7 +49,7 @@ interface SelectedData {
   times: number[];
 }
 
-interface ExplorerSwimlaneProps {
+export interface ExplorerSwimlaneProps {
   chartWidth: number;
   filterActive?: boolean;
   maskAll?: boolean;
@@ -74,20 +73,6 @@ interface ExplorerSwimlaneProps {
 }
 
 export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
-  static propTypes = {
-    chartWidth: PropTypes.number.isRequired,
-    filterActive: PropTypes.bool,
-    maskAll: PropTypes.bool,
-    timeBuckets: PropTypes.object.isRequired,
-    swimlaneCellClick: PropTypes.func.isRequired,
-    swimlaneData: PropTypes.shape({
-      laneLabels: PropTypes.array.isRequired,
-    }).isRequired,
-    swimlaneType: PropTypes.string.isRequired,
-    selection: PropTypes.object,
-    swimlaneRenderDoneListener: PropTypes.func.isRequired,
-  };
-
   // Since this component is mostly rendered using d3 and cellMouseoverActive is only
   // relevant for d3 based interaction, we don't manage this using React's state
   // and intentionally circumvent the component lifecycle when updating it.
@@ -98,6 +83,8 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
   rootNode = React.createRef<HTMLDivElement>();
 
   componentDidMount() {
+    console.log(this.props, '___this.props___');
+
     // property for data comparison to be able to filter
     // consecutive click events with the same data.
     let previousSelectedData: any = null;
@@ -345,6 +332,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     // Get the scaled date format to use for x axis tick labels.
     timeBuckets.setInterval(`${stepSecs}s`);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
+    console.log(xAxisTickFormat, '___xAxisTickFormat___');
 
     function cellMouseOverFactory(time: number, i: number) {
       // Don't use an arrow function here because we need access to `this`,
