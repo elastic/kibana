@@ -15,14 +15,20 @@ export async function runWithArgs(args: string[]) {
     if (e instanceof HandledError) {
       consoleLog(e.message);
     } else {
+      // output
       consoleLog('\n');
-      consoleLog(chalk.bold('⚠️  An unknown error occurred  ⚠️'));
-      consoleLog(e.message);
+      consoleLog(chalk.bold('⚠️  Ouch! An unknown error occured 😿'));
+      consoleLog(`Error message: ${e.message}`);
+
       consoleLog(
-        chalk.italic(
-          `Please check the logs for addtional details: ${getLogfilePath()}`
-        )
+        'Please open an issue in https://github.com/sqren/backport/issues or contact me directly on https://twitter.com/sorenlouv'
       );
+
+      consoleLog(
+        chalk.italic(`For additional details see the logs: ${getLogfilePath()}`)
+      );
+
+      // log file
       logger.info('Unknown error:', e);
     }
 
