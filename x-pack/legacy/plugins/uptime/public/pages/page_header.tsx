@@ -8,9 +8,9 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Link } from 'react-router-dom';
-import { UptimeDatePicker } from '../components/functional/uptime_date_picker';
+import { UptimeDatePicker } from '../components/common/uptime_date_picker';
 import { SETTINGS_ROUTE } from '../../common/constants';
-import { ToggleAlertFlyoutButton } from '../components/connected';
+import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
 
 interface PageHeaderProps {
   headingText: string;

@@ -16283,7 +16283,6 @@
     "xpack.uptime.locationName.helpLinkAnnotation": "場所を追加",
     "xpack.uptime.ml.durationChart.exploreInMlApp": "ML アプリで探索",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.anomalyDetectionTitle": "異常検知",
-    "xpack.uptime.ml.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText": "既存のジョブを表示",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.createMLJobDescription": "ここでは稼働状況監視の応答時間について異常スコアを計算する機械学習ジョブを作成できます。\n    有効にすると、詳細ページの監視期間チャートに予想範囲が表示され、グラフに異常の注釈が付きます。\n    地理的な地域にわたって遅延が増える期間を特定することもできます。",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.createNewJobButtonLabel": "新規ジョブを作成",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.disableAnomalyDetectionTitle": "異常検知を無効にする",
