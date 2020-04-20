@@ -11,7 +11,7 @@ import * as t from 'io-ts';
 import { list_idOrUndefined, typeOrUndefined } from '../common/schemas';
 
 export const importListsItemsQuerySchema = t.exact(
-  t.type({ type: typeOrUndefined, list_id: list_idOrUndefined })
+  t.type({ list_id: list_idOrUndefined, type: typeOrUndefined })
 );
 
 export type ImportListsItemsQuerySchema = t.TypeOf<typeof importListsItemsQuerySchema>;

@@ -20,12 +20,12 @@ import { getListClient } from '.';
 export const readListsRoute = (router: IRouter): void => {
   router.get(
     {
+      options: {
+        tags: ['access:lists'],
+      },
       path: LIST_URL,
       validate: {
         query: buildRouteValidation(readListsSchema),
-      },
-      options: {
-        tags: ['access:lists'],
       },
     },
     async (context, request, response) => {
@@ -36,13 +36,13 @@ export const readListsRoute = (router: IRouter): void => {
         const list = await lists.getList({ id });
         if (list == null) {
           return siemResponse.error({
-            statusCode: 404,
             body: `list id: "${id}" does not exist`,
+            statusCode: 404,
           });
         } else {
           const [validated, errors] = validate(list, listsSchema);
           if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
+            return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
             return response.ok({ body: validated ?? {} });
           }

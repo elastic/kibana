@@ -20,13 +20,13 @@ export const deleteListItem = async ({
   dataClient,
   listsItemsIndex,
 }: DeleteListItemOptions): Promise<ListsItemsSchema | null> => {
-  const listItem = await getListItem({ id, dataClient, listsItemsIndex });
+  const listItem = await getListItem({ dataClient, id, listsItemsIndex });
   if (listItem == null) {
     return null;
   } else {
     await dataClient.callAsCurrentUser('delete', {
-      index: listsItemsIndex,
       id,
+      index: listsItemsIndex,
     });
   }
   return listItem;

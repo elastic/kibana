@@ -38,33 +38,33 @@ export const updateList = async ({
   meta,
 }: UpdateListOptions): Promise<ListsSchema | null> => {
   const updatedAt = new Date().toISOString();
-  const list = await getList({ id, dataClient, listsIndex });
+  const list = await getList({ dataClient, id, listsIndex });
   if (list == null) {
     return null;
   } else {
     const doc: UpdateEsListsSchema = {
-      name,
       description,
+      meta,
+      name,
       updated_at: updatedAt,
       updated_by: user,
-      meta,
     };
     const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('update', {
-      index: listsIndex,
-      id,
       body: { doc },
+      id,
+      index: listsIndex,
     });
     return {
-      id: response._id,
-      name: name ?? list.name,
-      description: description ?? list.description,
       created_at: list.created_at,
-      updated_at: updatedAt,
+      created_by: list.created_by,
+      description: description ?? list.description,
+      id: response._id,
+      meta,
+      name: name ?? list.name,
       tie_breaker_id: list.tie_breaker_id,
       type: list.type,
+      updated_at: updatedAt,
       updated_by: user,
-      created_by: list.created_by,
-      meta,
     };
   }
 };

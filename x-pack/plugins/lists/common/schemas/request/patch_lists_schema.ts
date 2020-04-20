@@ -12,10 +12,10 @@ import { nameOrUndefined, descriptionOrUndefined, id, metaOrUndefined } from '..
 
 export const patchListsSchema = t.exact(
   t.type({
-    id,
-    name: nameOrUndefined,
     description: descriptionOrUndefined,
+    id,
     meta: metaOrUndefined,
+    name: nameOrUndefined,
   })
 );
 

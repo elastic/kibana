@@ -23,16 +23,16 @@ import {
 
 export const listsItemsSchema = t.exact(
   t.type({
+    created_at,
+    created_by,
     id,
     list_id,
-    created_at,
+    meta: metaOrUndefined,
+    tie_breaker_id,
+    type,
     updated_at,
     updated_by,
-    created_by,
-    type,
     value,
-    tie_breaker_id,
-    meta: metaOrUndefined,
   })
 );
 

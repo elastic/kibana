@@ -12,10 +12,10 @@ import { idOrUndefined, list_id, metaOrUndefined, value } from '../common/schema
 
 export const createListsItemsSchema = t.exact(
   t.type({
-    list_id,
-    value,
     id: idOrUndefined,
+    list_id,
     meta: metaOrUndefined,
+    value,
   })
 );
 

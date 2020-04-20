@@ -26,20 +26,19 @@ export const deleteListItemByValue = async ({
   listsItemsIndex,
 }: DeleteListItemByValueOptions): Promise<ListsItemsArraySchema> => {
   const listItems = await getListItemsByValues({
+    dataClient,
+    listId,
+    listsItemsIndex,
     type,
     value: [value],
-    listId,
-    dataClient,
-    listsItemsIndex,
   });
   const values = listItems.map(listItem => listItem.value);
   const filter = getQueryFilterFromTypeValue({
+    listId,
     type,
     value: values,
-    listId,
   });
   await dataClient.callAsCurrentUser('deleteByQuery', {
-    index: listsItemsIndex,
     body: {
       query: {
         bool: {
@@ -47,6 +46,7 @@ export const deleteListItemByValue = async ({
         },
       },
     },
+    index: listsItemsIndex,
   });
   return listItems;
 };

@@ -34,13 +34,13 @@ export const importListItemsToStream = ({
     const readBuffer = new BufferLines({ input: stream });
     readBuffer.on('lines', async (lines: string[]) => {
       await writeBufferToItems({
-        listId,
-        dataClient,
         buffer: lines,
+        dataClient,
+        listId,
         listsItemsIndex,
+        meta,
         type,
         user,
-        meta,
       });
     });
 
@@ -75,8 +75,8 @@ export const writeBufferToItems = async ({
   meta,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
   const items = await getListItemsByValues({
-    listId,
     dataClient,
+    listId,
     listsItemsIndex,
     type,
     value: buffer,
@@ -87,13 +87,13 @@ export const writeBufferToItems = async ({
   const linesProcessed = duplicatesRemoved.length;
   const duplicatesFound = buffer.length - duplicatesRemoved.length;
   await createListItemsBulk({
-    listId,
-    type,
-    value: duplicatesRemoved,
     dataClient,
+    listId,
     listsItemsIndex,
-    user,
     meta,
+    type,
+    user,
+    value: duplicatesRemoved,
   });
-  return { linesProcessed, duplicatesFound };
+  return { duplicatesFound, linesProcessed };
 };

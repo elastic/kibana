@@ -815,6 +815,7 @@ module.exports = {
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-unused-vars': 'error',
         'no-template-curly-in-string': 'error',
+        'sort-keys': 'error',
       },
     },
 

@@ -37,20 +37,20 @@ export const exportListItemsToStream = ({
   // and prevent the async await from bubbling up to the caller
   setTimeout(async () => {
     let searchAfter = await writeNextResponse({
-      listId,
       dataClient,
-      stream,
+      listId,
       listsItemsIndex,
       searchAfter: undefined,
+      stream,
       stringToAppend,
     });
     while (searchAfter != null) {
       searchAfter = await writeNextResponse({
-        listId,
         dataClient,
-        stream,
+        listId,
         listsItemsIndex,
         searchAfter,
+        stream,
         stringToAppend,
       });
     }
@@ -77,9 +77,9 @@ export const writeNextResponse = async ({
 }: WriteNextResponseOptions): Promise<string[] | undefined> => {
   const response = await getResponse({
     dataClient,
-    searchAfter,
     listId,
     listsItemsIndex,
+    searchAfter,
   });
 
   if (response.hits.hits.length) {
@@ -114,17 +114,17 @@ export const getResponse = async ({
   size = SIZE,
 }: GetResponseOptions): Promise<SearchResponse<SearchEsListsItemsSchema>> => {
   return dataClient.callAsCurrentUser('search', {
-    index: listsItemsIndex,
-    ignoreUnavailable: true,
     body: {
       query: {
         term: {
           list_id: listId,
         },
       },
-      sort: [{ tie_breaker_id: 'asc' }],
       search_after: searchAfter,
+      sort: [{ tie_breaker_id: 'asc' }],
     },
+    ignoreUnavailable: true,
+    index: listsItemsIndex,
     size,
   });
 };

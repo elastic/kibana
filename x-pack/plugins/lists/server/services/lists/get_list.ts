@@ -28,8 +28,8 @@ export const getList = async ({
         },
       },
     },
-    index: listsIndex,
     ignoreUnavailable: true,
+    index: listsIndex,
   });
   if (result.hits.hits.length) {
     return {

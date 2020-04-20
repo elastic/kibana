@@ -20,12 +20,12 @@ import { getListClient } from '.';
 export const updateListsItemsRoute = (router: IRouter): void => {
   router.put(
     {
+      options: {
+        tags: ['access:lists'],
+      },
       path: LIST_ITEM_URL,
       validate: {
         body: buildRouteValidation(updateListsItemsSchema),
-      },
-      options: {
-        tags: ['access:lists'],
       },
     },
     async (context, request, response) => {
@@ -35,18 +35,18 @@ export const updateListsItemsRoute = (router: IRouter): void => {
         const lists = getListClient(context);
         const listItem = await lists.updateListItem({
           id,
-          value,
           meta,
+          value,
         });
         if (listItem == null) {
           return siemResponse.error({
-            statusCode: 404,
             body: `list item id: "${id}" not found`,
+            statusCode: 404,
           });
         } else {
           const [validated, errors] = validate(listItem, listsItemsSchema);
           if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
+            return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
             return response.ok({ body: validated ?? {} });
           }

@@ -22,15 +22,15 @@ import {
 
 export const indexEsListsSchema = t.exact(
   t.type({
-    name,
-    description,
-    type,
-    tie_breaker_id,
-    updated_at,
     created_at,
     created_by,
-    updated_by,
+    description,
     meta: metaOrUndefined,
+    name,
+    tie_breaker_id,
+    type,
+    updated_at,
+    updated_by,
   })
 );
 

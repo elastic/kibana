@@ -35,35 +35,35 @@ export const updateListItem = async ({
   meta,
 }: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
   const updatedAt = new Date().toISOString();
-  const listItem = await getListItem({ id, dataClient, listsItemsIndex });
+  const listItem = await getListItem({ dataClient, id, listsItemsIndex });
   if (listItem == null) {
     return null;
   } else {
     const doc: UpdateEsListsItemsSchema = {
+      meta,
       updated_at: updatedAt,
       updated_by: user,
-      meta,
       ...transformListItemsToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
     };
 
     const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('update', {
-      index: listsItemsIndex,
-      id: listItem.id,
       body: {
         doc,
       },
+      id: listItem.id,
+      index: listsItemsIndex,
     });
     return {
+      created_at: listItem.created_at,
+      created_by: listItem.created_by,
       id: response._id,
       list_id: listItem.list_id,
-      type: listItem.type,
-      value: value ?? listItem.value,
-      created_at: listItem.created_at,
-      updated_at: updatedAt,
-      created_by: listItem.created_by,
-      updated_by: listItem.updated_by,
-      tie_breaker_id: listItem.tie_breaker_id,
       meta: meta ?? listItem.meta,
+      tie_breaker_id: listItem.tie_breaker_id,
+      type: listItem.type,
+      updated_at: updatedAt,
+      updated_by: listItem.updated_by,
+      value: value ?? listItem.value,
     };
   }
 };

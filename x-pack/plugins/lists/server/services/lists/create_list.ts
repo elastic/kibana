@@ -27,6 +27,8 @@ interface CreateListOptions {
   listsIndex: string;
   user: string;
   meta: MetaOrUndefined;
+  dateNow?: string;
+  tieBreaker?: string;
 }
 
 export const createList = async ({
@@ -38,23 +40,25 @@ export const createList = async ({
   listsIndex,
   user,
   meta,
+  dateNow,
+  tieBreaker,
 }: CreateListOptions): Promise<ListsSchema> => {
-  const createdAt = new Date().toISOString();
+  const createdAt = dateNow ?? new Date().toISOString();
   const body: IndexEsListsSchema = {
-    name,
-    description,
-    type,
-    tie_breaker_id: uuid.v4(),
-    updated_at: createdAt,
     created_at: createdAt,
     created_by: user,
-    updated_by: user,
+    description,
     meta,
+    name,
+    tie_breaker_id: tieBreaker ?? uuid.v4(),
+    type,
+    updated_at: createdAt,
+    updated_by: user,
   };
   const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('index', {
-    index: listsIndex,
-    id,
     body,
+    id,
+    index: listsIndex,
   });
   return {
     id: response._id,

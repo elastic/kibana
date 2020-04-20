@@ -23,16 +23,16 @@ import {
 
 export const listsSchema = t.exact(
   t.type({
-    id,
-    name,
-    type,
-    description,
     created_at,
-    updated_at,
-    tie_breaker_id,
-    updated_by,
     created_by,
+    description,
+    id,
     meta: metaOrUndefined,
+    name,
+    tie_breaker_id,
+    type,
+    updated_at,
+    updated_by,
   })
 );
 

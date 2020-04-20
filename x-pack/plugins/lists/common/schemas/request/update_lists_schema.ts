@@ -12,10 +12,10 @@ import { name, description, id, metaOrUndefined } from '../common/schemas';
 
 export const updateListsSchema = t.exact(
   t.type({
-    id,
-    name,
     description,
+    id,
     meta: metaOrUndefined,
+    name,
   })
 );
 

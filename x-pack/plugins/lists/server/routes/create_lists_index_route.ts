@@ -15,11 +15,11 @@ import { getListClient } from '.';
 export const createListsIndexRoute = (router: IRouter): void => {
   router.post(
     {
-      path: LIST_INDEX,
-      validate: false,
       options: {
         tags: ['access:lists'],
       },
+      path: LIST_INDEX,
+      validate: false,
     },
     async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
@@ -31,8 +31,8 @@ export const createListsIndexRoute = (router: IRouter): void => {
 
         if (listsIndexExists && listsItemsIndexExists) {
           return siemResponse.error({
-            statusCode: 409,
             body: `index: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" already exists`,
+            statusCode: 409,
           });
         } else {
           const policyExists = await lists.getListPolicyExists();
@@ -65,7 +65,7 @@ export const createListsIndexRoute = (router: IRouter): void => {
 
           const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
           if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
+            return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
             return response.ok({ body: validated ?? {} });
           }

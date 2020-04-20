@@ -8,6 +8,8 @@ import listsItemsMappings from './lists_items_mappings.json';
 
 export const getListsItemsTemplate = (index: string): Record<string, unknown> => {
   const template = {
+    index_patterns: [`${index}-*`],
+    mappings: listsItemsMappings,
     settings: {
       index: {
         lifecycle: {
@@ -16,8 +18,6 @@ export const getListsItemsTemplate = (index: string): Record<string, unknown> =>
         },
       },
     },
-    index_patterns: [`${index}-*`],
-    mappings: listsItemsMappings,
   };
   return template;
 };

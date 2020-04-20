@@ -72,11 +72,11 @@ export class ListsPlugin {
         return {
           getListsClient: (): ListsClient =>
             new ListsClient({
-              request,
-              spaces,
               config,
               dataClient,
+              request,
               security,
+              spaces,
             }),
         };
       }

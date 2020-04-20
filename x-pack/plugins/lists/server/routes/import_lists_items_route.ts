@@ -25,18 +25,18 @@ import { getListClient } from '.';
 export const importListsItemsRoute = (router: IRouter): void => {
   router.post(
     {
-      path: `${LIST_ITEM_URL}/_import`,
-      validate: {
-        query: buildRouteValidation(importListsItemsQuerySchema),
-        body: buildRouteValidation<typeof importListsItemsSchema, ImportListsItemsSchema>(
-          importListsItemsSchema
-        ),
-      },
       options: {
-        tags: ['access:lists'],
         body: {
           output: 'stream',
         },
+        tags: ['access:lists'],
+      },
+      path: `${LIST_ITEM_URL}/_import`,
+      validate: {
+        body: buildRouteValidation<typeof importListsItemsSchema, ImportListsItemsSchema>(
+          importListsItemsSchema
+        ),
+        query: buildRouteValidation(importListsItemsQuerySchema),
       },
     },
     async (context, request, response) => {
@@ -48,15 +48,15 @@ export const importListsItemsRoute = (router: IRouter): void => {
           const list = await lists.getList({ id: listId });
           if (list == null) {
             return siemResponse.error({
-              statusCode: 409,
               body: `list id: "${listId}" does not exist`,
+              statusCode: 409,
             });
           }
           await lists.importListItemsToStream({
             listId,
+            meta: undefined,
             stream: request.body.file,
             type: list.type,
-            meta: undefined,
           });
 
           return response.accepted({
@@ -68,21 +68,21 @@ export const importListsItemsRoute = (router: IRouter): void => {
           const { filename } = request.body.file.hapi;
           // TODO: Should we prevent the same file from being uploaded multiple times?
           const list = await lists.createListIfItDoesNotExist({
-            name: filename,
-            id: filename,
             description: `File uploaded from file system of ${filename}`,
-            type,
+            id: filename,
             meta: undefined,
+            name: filename,
+            type,
           });
           await lists.importListItemsToStream({
             listId: list.id,
+            meta: undefined,
             stream: request.body.file,
             type: list.type,
-            meta: undefined,
           });
           const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
           if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
+            return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
             return response.ok({ body: validated ?? {} });
           }

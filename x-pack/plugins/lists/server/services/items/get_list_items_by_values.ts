@@ -28,8 +28,6 @@ export const getListItemsByValues = async ({
   const response: SearchResponse<SearchEsListsItemsSchema> = await dataClient.callAsCurrentUser(
     'search',
     {
-      index: listsItemsIndex,
-      ignoreUnavailable: true,
       body: {
         query: {
           bool: {
@@ -37,6 +35,8 @@ export const getListItemsByValues = async ({
           },
         },
       },
+      ignoreUnavailable: true,
+      index: listsItemsIndex,
       size: value.length, // This has a limit on the number which is 10k
     }
   );

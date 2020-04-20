@@ -20,12 +20,12 @@ import { getListClient } from '.';
 export const deleteListsRoute = (router: IRouter): void => {
   router.delete(
     {
+      options: {
+        tags: ['access:lists'],
+      },
       path: LIST_URL,
       validate: {
         query: buildRouteValidation(deleteListsSchema),
-      },
-      options: {
-        tags: ['access:lists'],
       },
     },
     async (context, request, response) => {
@@ -36,13 +36,13 @@ export const deleteListsRoute = (router: IRouter): void => {
         const deleted = await lists.deleteList({ id });
         if (deleted == null) {
           return siemResponse.error({
-            statusCode: 404,
             body: `list id: "${id}" was not found`,
+            statusCode: 404,
           });
         } else {
           const [validated, errors] = validate(deleted, listsSchema);
           if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
+            return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
             return response.ok({ body: validated ?? {} });
           }

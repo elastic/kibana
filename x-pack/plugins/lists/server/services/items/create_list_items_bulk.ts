@@ -43,13 +43,13 @@ export const createListItemsBulk = async ({
       const createdAt = new Date().toISOString();
       const tieBreakerId = uuid.v4();
       const elasticBody: CreateEsListsItemsSchema = {
-        meta,
-        list_id: listId,
         created_at: createdAt,
+        created_by: user,
+        list_id: listId,
+        meta,
         tie_breaker_id: tieBreakerId,
         updated_at: createdAt,
         updated_by: user,
-        created_by: user,
         ...transformListItemsToElasticQuery({ type, value: singleValue }),
       };
       const createBody: CreateEsBulkTypeSchema = { create: { _index: listsItemsIndex } };

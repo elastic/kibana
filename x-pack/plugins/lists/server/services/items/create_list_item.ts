@@ -41,13 +41,13 @@ export const createListItem = async ({
   const createdAt = new Date().toISOString();
   const tieBreakerId = uuid.v4();
   const baseBody = {
-    list_id: listId,
     created_at: createdAt,
+    created_by: user,
+    list_id: listId,
+    meta,
     tie_breaker_id: tieBreakerId,
     updated_at: createdAt,
     updated_by: user,
-    created_by: user,
-    meta,
   };
   const body: CreateEsListsItemsSchema = {
     ...baseBody,
@@ -55,9 +55,9 @@ export const createListItem = async ({
   };
 
   const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('index', {
-    index: listsItemsIndex,
-    id,
     body,
+    id,
+    index: listsItemsIndex,
   });
 
   return {

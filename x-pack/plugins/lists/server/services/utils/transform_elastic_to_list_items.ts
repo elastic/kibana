@@ -33,15 +33,15 @@ export const transformElasticToListsItems = ({
     } = hit;
 
     const baseTypes = {
-      id: _id,
       created_at,
-      updated_at,
       created_by,
-      updated_by,
+      id: _id,
       list_id,
+      meta,
       tie_breaker_id,
       type,
-      meta,
+      updated_at,
+      updated_by,
     };
 
     switch (type) {

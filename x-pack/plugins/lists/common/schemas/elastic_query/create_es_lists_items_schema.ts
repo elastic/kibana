@@ -22,13 +22,13 @@ import {
 export const createEsListsItemsSchema = t.intersection([
   t.exact(
     t.type({
-      list_id,
       created_at,
       created_by,
+      list_id,
+      meta: metaOrUndefined,
+      tie_breaker_id,
       updated_at,
       updated_by,
-      tie_breaker_id,
-      meta: metaOrUndefined,
     })
   ),
   esDataTypeUnion,

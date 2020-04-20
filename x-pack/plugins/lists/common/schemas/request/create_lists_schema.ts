@@ -12,11 +12,11 @@ import { name, description, idOrUndefined, metaOrUndefined, type } from '../comm
 
 export const createListsSchema = t.exact(
   t.type({
-    name,
     description,
-    type,
-    meta: metaOrUndefined,
     id: idOrUndefined,
+    meta: metaOrUndefined,
+    name,
+    type,
   })
 );
 

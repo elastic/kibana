@@ -20,12 +20,12 @@ import { getListClient } from '.';
 export const createListsRoute = (router: IRouter): void => {
   router.post(
     {
+      options: {
+        tags: ['access:lists'],
+      },
       path: LIST_URL,
       validate: {
         body: buildRouteValidation(createListsSchema),
-      },
-      options: {
-        tags: ['access:lists'],
       },
     },
     async (context, request, response) => {
@@ -36,23 +36,23 @@ export const createListsRoute = (router: IRouter): void => {
         const listExists = await lists.getListIndexExists();
         if (!listExists) {
           return siemResponse.error({
-            statusCode: 400,
             body: `To create a list, the index must exist first. Index "${lists.getListIndex()}" does not exist`,
+            statusCode: 400,
           });
         } else {
           if (id != null) {
             const list = await lists.getList({ id });
             if (list != null) {
               return siemResponse.error({
-                statusCode: 409,
                 body: `list id: "${id}" already exists`,
+                statusCode: 409,
               });
             }
           }
-          const list = await lists.createList({ id, name, description, type, meta });
+          const list = await lists.createList({ description, id, meta, name, type });
           const [validated, errors] = validate(list, listsSchema);
           if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
+            return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
             return response.ok({ body: validated ?? {} });
           }

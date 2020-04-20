@@ -24,12 +24,12 @@ import { getListClient } from '.';
 export const deleteListsItemsRoute = (router: IRouter): void => {
   router.delete(
     {
+      options: {
+        tags: ['access:lists'],
+      },
       path: LIST_ITEM_URL,
       validate: {
         query: buildRouteValidation(deleteListsItemsSchema),
-      },
-      options: {
-        tags: ['access:lists'],
       },
     },
     async (context, request, response) => {
@@ -41,13 +41,13 @@ export const deleteListsItemsRoute = (router: IRouter): void => {
           const deleted = await lists.deleteListItem({ id });
           if (deleted == null) {
             return siemResponse.error({
-              statusCode: 404,
               body: `list item with id: "${id}" item not found`,
+              statusCode: 404,
             });
           } else {
             const [validated, errors] = validate(deleted, listsItemsSchema);
             if (errors != null) {
-              return siemResponse.error({ statusCode: 500, body: errors });
+              return siemResponse.error({ body: errors, statusCode: 500 });
             } else {
               return response.ok({ body: validated ?? {} });
             }
@@ -56,20 +56,20 @@ export const deleteListsItemsRoute = (router: IRouter): void => {
           const list = await lists.getList({ id: listId });
           if (list == null) {
             return siemResponse.error({
-              statusCode: 404,
               body: `list_id: "${listId}" does not exist`,
+              statusCode: 404,
             });
           } else {
-            const deleted = await lists.deleteListItemByValue({ type: list.type, listId, value });
+            const deleted = await lists.deleteListItemByValue({ listId, type: list.type, value });
             if (deleted == null || deleted.length === 0) {
               return siemResponse.error({
-                statusCode: 404,
                 body: `list_id: "${listId}" with ${value} was not found`,
+                statusCode: 404,
               });
             } else {
               const [validated, errors] = validate(deleted, listsItemsArraySchema);
               if (errors != null) {
-                return siemResponse.error({ statusCode: 500, body: errors });
+                return siemResponse.error({ body: errors, statusCode: 500 });
               } else {
                 return response.ok({ body: validated ?? {} });
               }
@@ -77,8 +77,8 @@ export const deleteListsItemsRoute = (router: IRouter): void => {
           }
         } else {
           return siemResponse.error({
-            statusCode: 400,
             body: `Either "list_id" or "id" needs to be defined in the request`,
+            statusCode: 400,
           });
         }
       } catch (err) {

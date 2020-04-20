@@ -13,9 +13,9 @@ import { metaOrUndefined, updated_at, updated_by, esDataTypeUnion } from '../com
 export const updateEsListsItemsSchema = t.intersection([
   t.exact(
     t.type({
+      meta: metaOrUndefined,
       updated_at,
       updated_by,
-      meta: metaOrUndefined,
     })
   ),
   esDataTypeUnion,

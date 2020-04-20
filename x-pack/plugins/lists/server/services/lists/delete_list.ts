@@ -22,12 +22,11 @@ export const deleteList = async ({
   listsIndex,
   listsItemsIndex,
 }: DeleteOptions): Promise<ListsSchema | null> => {
-  const list = await getList({ id, dataClient, listsIndex });
+  const list = await getList({ dataClient, id, listsIndex });
   if (list == null) {
     return null;
   } else {
     await dataClient.callAsCurrentUser('deleteByQuery', {
-      index: listsItemsIndex,
       body: {
         query: {
           term: {
@@ -35,11 +34,12 @@ export const deleteList = async ({
           },
         },
       },
+      index: listsItemsIndex,
     });
 
     await dataClient.callAsCurrentUser('delete', {
-      index: listsIndex,
       id,
+      index: listsIndex,
     });
     return list;
   }

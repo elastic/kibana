@@ -17,13 +17,13 @@ import { getListClient } from '.';
 export const exportListsItemsRoute = (router: IRouter): void => {
   router.post(
     {
+      options: {
+        tags: ['access:lists'],
+      },
       path: `${LIST_ITEM_URL}/_export`,
       validate: {
         query: buildRouteValidation(exportListsItemsQuerySchema),
         // TODO: Do we want to add a body here like export_rules_route and allow a size limit?
-      },
-      options: {
-        tags: ['access:lists'],
       },
     },
     async (context, request, response) => {
@@ -34,8 +34,8 @@ export const exportListsItemsRoute = (router: IRouter): void => {
         const list = await lists.getList({ id: listId });
         if (list == null) {
           return siemResponse.error({
-            statusCode: 400,
             body: `list_id: ${listId} does not exist`,
+            statusCode: 400,
           });
         } else {
           // TODO: Allow the API to override the name of the file to export
@@ -44,11 +44,11 @@ export const exportListsItemsRoute = (router: IRouter): void => {
           const stream = new Stream.PassThrough();
           lists.exportListItemsToStream({ listId, stream, stringToAppend: '\n' });
           return response.ok({
+            body: stream,
             headers: {
               'Content-Disposition': `attachment; filename="${fileName}"`,
               'Content-Type': 'text/plain',
             },
-            body: stream,
           });
         }
       } catch (err) {

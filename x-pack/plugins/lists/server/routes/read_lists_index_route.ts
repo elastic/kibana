@@ -15,11 +15,11 @@ import { getListClient } from '.';
 export const readListsIndexRoute = (router: IRouter): void => {
   router.get(
     {
-      path: LIST_INDEX,
-      validate: false,
       options: {
         tags: ['access:lists'],
       },
+      path: LIST_INDEX,
+      validate: false,
     },
     async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
@@ -35,24 +35,24 @@ export const readListsIndexRoute = (router: IRouter): void => {
             listsItemsIndexExistSchema
           );
           if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
+            return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
             return response.ok({ body: validated ?? {} });
           }
         } else if (!listsIndexExists && listsItemsIndexExists) {
           return siemResponse.error({
-            statusCode: 404,
             body: `index ${lists.getListIndex()} does not exist`,
+            statusCode: 404,
           });
         } else if (!listsItemsIndexExists && listsIndexExists) {
           return siemResponse.error({
-            statusCode: 404,
             body: `index ${lists.getListItemIndex()} does not exist`,
+            statusCode: 404,
           });
         } else {
           return siemResponse.error({
-            statusCode: 404,
             body: `index ${lists.getListIndex()} and index ${lists.getListItemIndex()} does not exist`,
+            statusCode: 404,
           });
         }
       } catch (err) {

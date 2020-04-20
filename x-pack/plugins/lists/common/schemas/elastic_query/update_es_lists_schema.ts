@@ -18,11 +18,11 @@ import {
 
 export const updateEsListsSchema = t.exact(
   t.type({
-    updated_at,
-    updated_by,
-    name: nameOrUndefined,
     description: descriptionOrUndefined,
     meta: metaOrUndefined,
+    name: nameOrUndefined,
+    updated_at,
+    updated_by,
   })
 );
 

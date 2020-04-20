@@ -31,11 +31,11 @@ import { getListClient } from '.';
 export const deleteListsIndexRoute = (router: IRouter): void => {
   router.delete(
     {
-      path: LIST_INDEX,
-      validate: false,
       options: {
         tags: ['access:lists'],
       },
+      path: LIST_INDEX,
+      validate: false,
     },
     async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
@@ -47,8 +47,8 @@ export const deleteListsIndexRoute = (router: IRouter): void => {
 
         if (!listsIndexExists && !listsItemsIndexExists) {
           return siemResponse.error({
-            statusCode: 404,
             body: `index: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" does not exist`,
+            statusCode: 404,
           });
         } else {
           if (listsIndexExists) {
@@ -80,7 +80,7 @@ export const deleteListsIndexRoute = (router: IRouter): void => {
 
           const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
           if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
+            return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
             return response.ok({ body: validated ?? {} });
           }

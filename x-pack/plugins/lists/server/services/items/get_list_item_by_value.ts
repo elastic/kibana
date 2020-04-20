@@ -25,8 +25,8 @@ export const getListItemByValue = async ({
   value,
 }: GetListItemByValueOptions): Promise<ListsItemsArraySchema> => {
   return getListItemsByValues({
-    listId,
     dataClient,
+    listId,
     listsItemsIndex,
     type,
     value: [value],

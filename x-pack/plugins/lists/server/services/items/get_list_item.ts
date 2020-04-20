@@ -31,8 +31,8 @@ export const getListItem = async ({
           },
         },
       },
-      index: listsItemsIndex,
       ignoreUnavailable: true,
+      index: listsItemsIndex,
     }
   );
 

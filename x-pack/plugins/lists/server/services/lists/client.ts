@@ -89,7 +89,7 @@ export class ListsClient {
       request,
       config: { listsIndex: listsIndexName },
     } = this;
-    return getListIndex({ spaces, request, listsIndexName });
+    return getListIndex({ listsIndexName, request, spaces });
   };
 
   public getListItemIndex = (): string => {
@@ -98,13 +98,13 @@ export class ListsClient {
       request,
       config: { listsItemsIndex: listsItemsIndexName },
     } = this;
-    return getListItemIndex({ spaces, request, listsItemsIndexName });
+    return getListItemIndex({ listsItemsIndexName, request, spaces });
   };
 
   public getList = async ({ id }: GetListOptions): Promise<ListsSchema | null> => {
     const { dataClient } = this;
     const listsIndex = this.getListIndex();
-    return getList({ id, dataClient, listsIndex });
+    return getList({ dataClient, id, listsIndex });
   };
 
   public createList = async ({
@@ -116,8 +116,8 @@ export class ListsClient {
   }: CreateListOptions): Promise<ListsSchema> => {
     const { dataClient, security, request } = this;
     const listsIndex = this.getListIndex();
-    const user = getUser({ security, request });
-    return createList({ name, description, id, dataClient, listsIndex, user, type, meta });
+    const user = getUser({ request, security });
+    return createList({ dataClient, description, id, listsIndex, meta, name, type, user });
   };
 
   public createListIfItDoesNotExist = async ({
@@ -129,7 +129,7 @@ export class ListsClient {
   }: CreateListIfItDoesNotExistOptions): Promise<ListsSchema> => {
     const list = await this.getList({ id });
     if (list == null) {
-      return this.createList({ id, name, description, type, meta });
+      return this.createList({ description, id, meta, name, type });
     } else {
       return list;
     }
@@ -296,7 +296,7 @@ export class ListsClient {
   }: DeleteListItemOptions): Promise<ListsItemsSchema | null> => {
     const { dataClient } = this;
     const listsItemsIndex = this.getListItemIndex();
-    return deleteListItem({ id, dataClient, listsItemsIndex });
+    return deleteListItem({ dataClient, id, listsItemsIndex });
   };
 
   public deleteListItemByValue = async ({
@@ -307,11 +307,11 @@ export class ListsClient {
     const { dataClient } = this;
     const listsItemsIndex = this.getListItemIndex();
     return deleteListItemByValue({
-      type,
-      listId,
-      value,
       dataClient,
+      listId,
       listsItemsIndex,
+      type,
+      value,
     });
   };
 
@@ -320,9 +320,9 @@ export class ListsClient {
     const listsIndex = this.getListIndex();
     const listsItemsIndex = this.getListItemIndex();
     return deleteList({
+      dataClient,
       id,
       listsIndex,
-      dataClient,
       listsItemsIndex,
     });
   };
@@ -335,10 +335,10 @@ export class ListsClient {
     const { dataClient } = this;
     const listsItemsIndex = this.getListItemIndex();
     exportListItemsToStream({
-      listId,
-      stream,
       dataClient,
+      listId,
       listsItemsIndex,
+      stream,
       stringToAppend,
     });
   };
@@ -351,15 +351,15 @@ export class ListsClient {
   }: ImportListItemsToStreamOptions): Promise<void> => {
     const { dataClient, security, request } = this;
     const listsItemsIndex = this.getListItemIndex();
-    const user = getUser({ security, request });
+    const user = getUser({ request, security });
     return importListItemsToStream({
-      listId,
-      type,
-      stream,
       dataClient,
+      listId,
       listsItemsIndex,
-      user,
       meta,
+      stream,
+      type,
+      user,
     });
   };
 
@@ -371,11 +371,11 @@ export class ListsClient {
     const { dataClient } = this;
     const listsItemsIndex = this.getListItemIndex();
     return getListItemByValue({
-      type,
-      listId,
-      value,
       dataClient,
+      listId,
       listsItemsIndex,
+      type,
+      value,
     });
   };
 
@@ -388,16 +388,16 @@ export class ListsClient {
   }: CreateListItemOptions): Promise<ListsItemsSchema> => {
     const { dataClient, security, request } = this;
     const listsItemsIndex = this.getListItemIndex();
-    const user = getUser({ security, request });
+    const user = getUser({ request, security });
     return createListItem({
+      dataClient,
       id,
       listId,
-      type,
-      value,
-      dataClient,
       listsItemsIndex,
-      user,
       meta,
+      type,
+      user,
+      value,
     });
   };
 
@@ -407,15 +407,15 @@ export class ListsClient {
     meta,
   }: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
     const { dataClient, security, request } = this;
-    const user = getUser({ security, request });
+    const user = getUser({ request, security });
     const listsItemsIndex = this.getListItemIndex();
     return updateListItem({
-      user,
-      id,
-      value,
       dataClient,
+      id,
       listsItemsIndex,
       meta,
+      user,
+      value,
     });
   };
 
@@ -426,16 +426,16 @@ export class ListsClient {
     meta,
   }: UpdateListOptions): Promise<ListsSchema | null> => {
     const { dataClient, security, request } = this;
-    const user = getUser({ security, request });
+    const user = getUser({ request, security });
     const listsIndex = this.getListIndex();
     return updateList({
-      id,
-      name,
-      description,
       dataClient,
+      description,
+      id,
       listsIndex,
-      user,
       meta,
+      name,
+      user,
     });
   };
 
@@ -443,8 +443,8 @@ export class ListsClient {
     const { dataClient } = this;
     const listsItemsIndex = this.getListItemIndex();
     return getListItem({
-      id,
       dataClient,
+      id,
       listsItemsIndex,
     });
   };
@@ -457,11 +457,11 @@ export class ListsClient {
     const { dataClient } = this;
     const listsItemsIndex = this.getListItemIndex();
     return getListItemsByValues({
-      type,
-      listId,
-      value,
       dataClient,
+      listId,
       listsItemsIndex,
+      type,
+      value,
     });
   };
 }
