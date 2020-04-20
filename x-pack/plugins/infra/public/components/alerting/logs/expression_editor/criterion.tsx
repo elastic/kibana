@@ -18,10 +18,13 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Comparator } from '../../../../../common/alerting/logs/types';
+import { IFieldType } from 'src/plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
+import { Comparator, Criterion as CriterionType } from '../../../../../common/alerting/logs/types';
 
-const getCompatibleComparatorsForField = fieldInfo => {
-  if (fieldInfo.type === 'number') {
+const getCompatibleComparatorsForField = (fieldInfo: IFieldType | undefined) => {
+  if (fieldInfo?.type === 'number') {
     return [
       { value: Comparator.GT, text: Comparator.GT },
       { value: Comparator.GT_OR_EQ, text: Comparator.GT_OR_EQ },
@@ -30,7 +33,7 @@ const getCompatibleComparatorsForField = fieldInfo => {
       { value: Comparator.EQ, text: Comparator.EQ },
       { value: Comparator.NOT_EQ, text: Comparator.NOT_EQ },
     ];
-  } else if (fieldInfo.aggregatable) {
+  } else if (fieldInfo?.aggregatable) {
     return [
       { value: Comparator.EQ, text: Comparator.EQ },
       { value: Comparator.NOT_EQ, text: Comparator.NOT_EQ },
@@ -45,13 +48,23 @@ const getCompatibleComparatorsForField = fieldInfo => {
   }
 };
 
-const getFieldInfo = (fields, fieldName) => {
+const getFieldInfo = (fields: IFieldType[], fieldName: string): IFieldType | undefined => {
   return fields.find(field => {
     return field.name === fieldName;
   });
 };
 
-export const Criterion: React.FC = ({
+interface Props {
+  idx: number;
+  fields: IFieldType[];
+  criterion: CriterionType;
+  updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
+  removeCriterion: (idx: number) => void;
+  canDelete: boolean;
+  errors: IErrorObject;
+}
+
+export const Criterion: React.FC<Props> = ({
   idx,
   fields,
   criterion,
@@ -69,7 +82,7 @@ export const Criterion: React.FC = ({
     });
   }, [fields]);
 
-  const fieldInfo = useMemo(() => {
+  const fieldInfo: IFieldType | undefined = useMemo(() => {
     return getFieldInfo(fields, criterion.field);
   }, [fields, criterion]);
 
@@ -83,8 +96,10 @@ export const Criterion: React.FC = ({
       const nextFieldInfo = getFieldInfo(fields, fieldName);
       // If the field information we're dealing with has changed, reset the comparator and value.
       if (
-        fieldInfo.type !== nextFieldInfo.type ||
-        fieldInfo.aggregatable !== nextFieldInfo.aggregatable
+        fieldInfo &&
+        nextFieldInfo &&
+        (fieldInfo.type !== nextFieldInfo.type ||
+          fieldInfo.aggregatable !== nextFieldInfo.aggregatable)
       ) {
         const compatibleComparators = getCompatibleComparatorsForField(nextFieldInfo);
         updateCriterion(idx, {
@@ -96,7 +111,7 @@ export const Criterion: React.FC = ({
         updateCriterion(idx, { field: fieldName });
       }
     },
-    [fieldInfo.aggregatable, fieldInfo.type, fields, idx, updateCriterion]
+    [fieldInfo, fields, idx, updateCriterion]
   );
 
   return (
@@ -160,15 +175,15 @@ export const Criterion: React.FC = ({
               <EuiSelect
                 compressed
                 value={criterion.comparator}
-                onChange={e => updateCriterion(idx, { comparator: e.target.value })}
+                onChange={e => updateCriterion(idx, { comparator: e.target.value as Comparator })}
                 options={compatibleComparatorOptions}
               />
             </EuiFormRow>
             <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
-              {fieldInfo.type === 'number' ? (
+              {fieldInfo?.type === 'number' ? (
                 <EuiFieldNumber
                   compressed
-                  value={criterion.value}
+                  value={criterion.value as number}
                   onChange={e => {
                     const number = parseInt(e.target.value, 10);
                     updateCriterion(idx, { value: number ? number : undefined });

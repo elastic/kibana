@@ -15,9 +15,14 @@ import {
   EuiExpression,
   EuiFormRow,
 } from '@elastic/eui';
-import { Comparator } from '../../../../../common/alerting/logs/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
+import { Comparator, LogDocumentCountAlertParams } from '../../../../../common/alerting/logs/types';
 
-const getComparatorOptions = () => {
+const getComparatorOptions = (): Array<{
+  value: Comparator;
+  text: Comparator;
+}> => {
   return [
     { value: Comparator.LT, text: Comparator.LT },
     { value: Comparator.LT_OR_EQ, text: Comparator.LT_OR_EQ },
@@ -26,7 +31,14 @@ const getComparatorOptions = () => {
   ];
 };
 
-export const DocumentCount: React.FC = ({ comparator, value, updateCount, errors }) => {
+interface Props {
+  comparator?: Comparator;
+  value?: number;
+  updateCount: (params: Partial<LogDocumentCountAlertParams['count']>) => void;
+  errors: IErrorObject;
+}
+
+export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount, errors }) => {
   const [isComparatorPopoverOpen, setComparatorPopoverOpenState] = useState(false);
   const [isValuePopoverOpen, setIsValuePopoverOpen] = useState(false);
 
@@ -55,7 +67,7 @@ export const DocumentCount: React.FC = ({ comparator, value, updateCount, errors
             <EuiSelect
               compressed
               value={comparator}
-              onChange={e => updateCount({ comparator: e.target.value })}
+              onChange={e => updateCount({ comparator: e.target.value as Comparator })}
               options={getComparatorOptions()}
             />
           </div>

@@ -7,8 +7,14 @@
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
+import { LogDocumentCountAlertParams } from '../../../../common/alerting/logs/types';
 
-export function validateExpression({ count, criteria, timeSize, timeUnit }: any): ValidationResult {
+export function validateExpression({
+  count,
+  criteria,
+  timeSize,
+  timeUnit,
+}: Partial<LogDocumentCountAlertParams>): ValidationResult {
   const validationResult = { errors: {} };
 
   // NOTE: In the case of components provided by the Alerting framework the error property names
@@ -37,10 +43,8 @@ export function validateExpression({ count, criteria, timeSize, timeUnit }: any)
 
   validationResult.errors = errors;
 
-  if (!count && !criteria && !timeSize && !timeUnit) return validationResult;
-
   // Document count validation
-  if (!count?.value) {
+  if (typeof count?.value !== 'number') {
     errors.count.value.push(
       i18n.translate('xpack.infra.logs.alertFlyout.error.documentCountRequired', {
         defaultMessage: 'Document count is Required.',
