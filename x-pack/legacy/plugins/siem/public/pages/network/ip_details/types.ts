@@ -6,8 +6,8 @@
 
 import { IIndexPattern } from 'src/plugins/data/public';
 
+import { ESTermQuery } from '../../../../../../../plugins/siem/common/typed_json';
 import { NetworkType } from '../../../store/network/model';
-import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
 import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
 import { GlobalTimeArgs } from '../../../containers/global_time';

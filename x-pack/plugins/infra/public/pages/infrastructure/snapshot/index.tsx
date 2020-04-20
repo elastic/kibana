@@ -8,7 +8,6 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 
-import { SnapshotPageContent } from './page_content';
 import { SnapshotToolbar } from './toolbar';
 
 import { DocumentTitle } from '../../../components/document_title';
@@ -19,17 +18,14 @@ import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { ViewSourceConfigurationButton } from '../../../components/source_configuration';
 import { Source } from '../../../containers/source';
-import { WithWaffleFilterUrlState } from '../../../containers/waffle/with_waffle_filters';
-import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffle_options';
-import { WithWaffleTimeUrlState } from '../../../containers/waffle/with_waffle_time';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { Layout } from '../../../components/inventory/layout';
 import { useLinkProps } from '../../../hooks/use_link_props';
 
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const {
-    createDerivedIndexPattern,
     hasFailedLoadingSource,
     isLoading,
     loadSourceFailureMessage,
@@ -60,11 +56,8 @@ export const SnapshotPage = () => {
         <SourceLoadingPage />
       ) : metricIndicesExist ? (
         <>
-          <WithWaffleTimeUrlState />
-          <WithWaffleFilterUrlState indexPattern={createDerivedIndexPattern('metrics')} />
-          <WithWaffleOptionsUrlState />
           <SnapshotToolbar />
-          <SnapshotPageContent />
+          <Layout />
         </>
       ) : hasFailedLoadingSource ? (
         <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />

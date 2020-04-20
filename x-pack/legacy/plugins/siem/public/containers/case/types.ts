@@ -31,7 +31,7 @@ export interface CaseUserActions {
 
 export interface CaseExternalService {
   pushedAt: string;
-  pushedBy: string;
+  pushedBy: ElasticUser;
   connectorId: string;
   connectorName: string;
   externalId: string;

@@ -33,13 +33,13 @@ import {
   AxisTypes,
   ScaleTypes,
   AxisModes,
-  Rotates,
   ThresholdLineStyles,
   getConfigCollections,
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
+import { Rotates } from '../../../../plugins/charts/public';
 
 export const createAreaVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'area',

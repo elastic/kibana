@@ -57,26 +57,26 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     typeRegistry.getAllTypes.mockReturnValue([
       {
         name: 'dashboard',
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         hidden: false,
         mappings: { properties: {} },
       },
       {
         name: 'visualization',
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         hidden: false,
         mappings: { properties: {} },
       },
       {
         name: 'globaltype',
-        namespaceAgnostic: true,
+        namespaceType: 'agnostic',
         hidden: false,
         mappings: { properties: {} },
       },
     ]);
 
     typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
-      typeRegistry.getAllTypes().some(t => t.name === type && t.namespaceAgnostic)
+      typeRegistry.getAllTypes().some(t => t.name === type && t.namespaceType === 'agnostic')
     );
 
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
@@ -204,11 +204,13 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
               },
             ],
             "savedObjectsClient": Object {
+              "addToNamespaces": [MockFunction],
               "bulkCreate": [MockFunction],
               "bulkGet": [MockFunction],
               "bulkUpdate": [MockFunction],
               "create": [MockFunction],
               "delete": [MockFunction],
+              "deleteFromNamespaces": [MockFunction],
               "errors": [Function],
               "find": [MockFunction],
               "get": [MockFunction],
@@ -275,11 +277,13 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
               },
             ],
             "savedObjectsClient": Object {
+              "addToNamespaces": [MockFunction],
               "bulkCreate": [MockFunction],
               "bulkGet": [MockFunction],
               "bulkUpdate": [MockFunction],
               "create": [MockFunction],
               "delete": [MockFunction],
+              "deleteFromNamespaces": [MockFunction],
               "errors": [Function],
               "find": [MockFunction],
               "get": [MockFunction],
@@ -345,11 +349,13 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
               },
             ],
             "savedObjectsClient": Object {
+              "addToNamespaces": [MockFunction],
               "bulkCreate": [MockFunction],
               "bulkGet": [MockFunction],
               "bulkUpdate": [MockFunction],
               "create": [MockFunction],
               "delete": [MockFunction],
+              "deleteFromNamespaces": [MockFunction],
               "errors": [Function],
               "find": [MockFunction],
               "get": [MockFunction],

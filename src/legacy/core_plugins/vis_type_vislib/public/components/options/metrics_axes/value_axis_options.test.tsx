@@ -21,7 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
 import { ValueAxis } from '../../../types';
-import { TextInputOption } from '../../common';
+import { TextInputOption } from '../../../../../../../plugins/charts/public';
 import { LabelOptions } from './label_options';
 import { ScaleTypes, Positions } from '../../../utils/collections';
 import { valueAxis, vis } from './mocks';
