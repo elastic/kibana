@@ -182,11 +182,16 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         service: { name: 'myservice', environment: 'development' },
         settings: { transaction_sample_rate: '0.9' },
       };
+      const configProduction = {
+        service: { name: 'myservice', environment: 'production' },
+        settings: { transaction_sample_rate: '0.9' },
+      };
       let etag: string;
 
       before(async () => {
         log.debug('creating agent configuration');
         await createConfiguration(config);
+        await createConfiguration(configProduction);
       });
 
       after(async () => {
@@ -214,6 +219,26 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           const { body } = await searchConfigurations({
             service: { name: 'myservice', environment: 'development' },
             etag,
+          });
+
+          return body._source.applied_by_agent;
+        }
+
+        // wait until `applied_by_agent` has been updated in elasticsearch
+        expect(await waitFor(getAppliedByAgent)).to.be(true);
+      });
+      it(`should have 'applied_by_agent=false' before marking as applied`, async () => {
+        const res1 = await searchConfigurations({
+          service: { name: 'myservice', environment: 'production' },
+        });
+
+        expect(res1.body._source.applied_by_agent).to.be(false);
+      });
+      it(`should have 'applied_by_agent=true' when 'appliedByAgent' attribute is true`, async () => {
+        async function getAppliedByAgent() {
+          const { body } = await searchConfigurations({
+            service: { name: 'myservice', environment: 'production' },
+            appliedByAgent: true,
           });
 
           return body._source.applied_by_agent;
