@@ -28,7 +28,7 @@ import { DevConfig, DevConfigType, config as devConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
 import { PathConfigType } from '../path';
-import { findLegacyPluginSpecs } from './plugins';
+import { findLegacyPluginSpecs, logLegacyThirdPartyPluginDeprecationWarning } from './plugins';
 import { convertLegacyDeprecationProvider } from './config';
 import {
   ILegacyInternals,
@@ -132,6 +132,11 @@ export class LegacyService implements CoreService {
       this.coreContext.logger,
       this.coreContext.env.packageInfo
     );
+
+    logLegacyThirdPartyPluginDeprecationWarning({
+      specs: pluginSpecs,
+      log: this.log,
+    });
 
     this.legacyPlugins = {
       pluginSpecs,
@@ -269,6 +274,7 @@ export class LegacyService implements CoreService {
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };
 
+    const router = setupDeps.core.http.createRouter('', this.legacyId);
     const coreSetup: CoreSetup = {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
@@ -283,7 +289,8 @@ export class LegacyService implements CoreService {
           null,
           this.legacyId
         ),
-        createRouter: () => setupDeps.core.http.createRouter('', this.legacyId),
+        createRouter: () => router,
+        resources: setupDeps.core.httpResources.createRegistrar(router),
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
@@ -305,6 +312,9 @@ export class LegacyService implements CoreService {
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
         registerType: setupDeps.core.savedObjects.registerType,
         getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
+      },
+      status: {
+        core$: setupDeps.core.status.core$,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
@@ -339,7 +349,7 @@ export class LegacyService implements CoreService {
           },
           hapiServer: setupDeps.core.http.server,
           kibanaMigrator: startDeps.core.savedObjects.migrator,
-          uiPlugins: setupDeps.core.plugins.uiPlugins,
+          uiPlugins: setupDeps.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
           rendering: setupDeps.core.rendering,
           uiSettings: setupDeps.core.uiSettings,

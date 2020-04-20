@@ -23,9 +23,9 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { Axis } from '../../../types';
-import { SelectOption, SwitchOption } from '../../common';
+import { SelectOption, SwitchOption } from '../../../../../../../plugins/charts/public';
 import { LabelOptions, SetAxisLabel } from './label_options';
 import { Positions } from '../../../utils/collections';
 

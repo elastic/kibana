@@ -101,6 +101,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        isPreconfigured: false,
         name: 'A servicenow action',
         actionTypeId: '.servicenow',
         config: {
@@ -117,6 +118,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'A servicenow action',
         actionTypeId: '.servicenow',
         config: {

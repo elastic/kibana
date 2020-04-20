@@ -6,7 +6,7 @@
 
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
@@ -34,7 +34,12 @@ import { TimelineHeader } from './header';
 import { combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
 import { ManageTimelineContext } from './timeline_context';
-import { esQuery, Filter, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import {
+  esQuery,
+  Filter,
+  FilterManager,
+  IIndexPattern,
+} from '../../../../../../../src/plugins/data/public';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -143,6 +148,7 @@ export const TimelineComponent: React.FC<Props> = ({
   usersViewing,
 }) => {
   const kibana = useKibana();
+  const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     dataProviders,
@@ -178,6 +184,7 @@ export const TimelineComponent: React.FC<Props> = ({
             id={id}
             indexPattern={indexPattern}
             dataProviders={dataProviders}
+            filterManager={filterManager}
             onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
             onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onDataProviderEdited={onDataProviderEdited}
@@ -211,7 +218,12 @@ export const TimelineComponent: React.FC<Props> = ({
             getUpdatedAt,
             refetch,
           }) => (
-            <ManageTimelineContext loading={loading || loadingIndexName}>
+            <ManageTimelineContext
+              filterManager={filterManager}
+              indexToAdd={indexToAdd}
+              loading={loading || loadingIndexName}
+              type={{ id }}
+            >
               <TimelineRefetch
                 id={id}
                 inputId="timeline"

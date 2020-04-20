@@ -21,6 +21,7 @@ import * as i18n from './translations';
 
 interface UserActionItemProps {
   createdAt: string;
+  'data-test-subj'?: string;
   disabled: boolean;
   id: string;
   isEditable: boolean;
@@ -112,6 +113,7 @@ const PushedInfoContainer = styled.div`
 export const UserActionItem = ({
   createdAt,
   disabled,
+  'data-test-subj': dataTestSubj,
   id,
   idToOutline,
   isEditable,
@@ -130,7 +132,7 @@ export const UserActionItem = ({
   username,
   updatedAt,
 }: UserActionItemProps) => (
-  <UserActionItemContainer gutterSize={'none'} direction="column">
+  <UserActionItemContainer data-test-subj={dataTestSubj} gutterSize={'none'} direction="column">
     <EuiFlexItem>
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>
@@ -145,24 +147,25 @@ export const UserActionItem = ({
           {!isEditable && (
             <MyEuiPanel
               className="userAction__panel"
+              data-test-subj={`user-action-panel`}
               paddingSize="none"
               showoutline={id === idToOutline ? 'true' : 'false'}
             >
               <UserActionTitle
                 createdAt={createdAt}
                 disabled={disabled}
+                fullName={fullName}
                 id={id}
                 isLoading={isLoading}
                 labelEditAction={labelEditAction}
                 labelQuoteAction={labelQuoteAction}
                 labelTitle={labelTitle ?? <></>}
                 linkId={linkId}
-                fullName={fullName}
-                username={username}
-                updatedAt={updatedAt}
                 onEdit={onEdit}
                 onQuote={onQuote}
                 outlineComment={outlineComment}
+                updatedAt={updatedAt}
+                username={username}
               />
               {markdown}
             </MyEuiPanel>
@@ -171,7 +174,7 @@ export const UserActionItem = ({
       </EuiFlexGroup>
     </EuiFlexItem>
     {showTopFooter && (
-      <PushedContainer>
+      <PushedContainer data-test-subj="show-top-footer">
         <PushedInfoContainer>
           <EuiText size="xs" color="subdued">
             {i18n.ALREADY_PUSHED_TO_SERVICE}
@@ -179,7 +182,7 @@ export const UserActionItem = ({
         </PushedInfoContainer>
         <EuiHorizontalRule />
         {showBottomFooter && (
-          <PushedInfoContainer>
+          <PushedInfoContainer data-test-subj="show-bottom-footer">
             <EuiText size="xs" color="subdued">
               {i18n.REQUIRED_UPDATE_TO_SERVICE}
             </EuiText>

@@ -23,10 +23,10 @@ import { EuiColorPicker, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../../../vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { ValueAxis } from '../../../types';
 import { HeatmapVisParams } from '../../../heatmap';
-import { SwitchOption } from '../../common';
+import { SwitchOption } from '../../../../../../../plugins/charts/public';
 
 const VERTICAL_ROTATION = 270;
 

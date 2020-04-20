@@ -23,7 +23,7 @@ import { createInputControlVisController } from './vis_controller';
 import { getControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
 import { InputControlVisDependencies } from './plugin';
-import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/common';
+import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/public';
 
 export function createInputControlVisTypeDefinition(deps: InputControlVisDependencies) {
   const InputControlVisController = createInputControlVisController(deps);

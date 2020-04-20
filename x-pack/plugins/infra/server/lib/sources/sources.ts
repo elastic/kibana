@@ -20,7 +20,8 @@ import {
   pickSavedSourceConfiguration,
   SourceConfigurationSavedObjectRuntimeType,
   StaticSourceConfigurationRuntimeType,
-} from './types';
+  InfraSource,
+} from '../../../common/http_api/source_api';
 import { InfraConfig } from '../../../server';
 
 interface Libs {
@@ -35,7 +36,10 @@ export class InfraSources {
     this.libs = libs;
   }
 
-  public async getSourceConfiguration(requestContext: RequestHandlerContext, sourceId: string) {
+  public async getSourceConfiguration(
+    requestContext: RequestHandlerContext,
+    sourceId: string
+  ): Promise<InfraSource> {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
     const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
@@ -231,7 +235,7 @@ const mergeSourceConfiguration = (
     first
   );
 
-const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
+export const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
   pipe(
     SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
     map(savedSourceConfiguration => ({

@@ -40,29 +40,23 @@ export const FlyoutFooter = ({
             )}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
-            {customLinkId && (
-              <EuiFlexItem>
-                <DeleteButton customLinkId={customLinkId} onDelete={onDelete} />
-              </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ display: 'block' }}>
+          {customLinkId && (
+            <DeleteButton customLinkId={customLinkId} onDelete={onDelete} />
+          )}
+          <EuiButton
+            fill
+            type="submit"
+            isLoading={isSaving}
+            isDisabled={!isSaveButtonEnabled}
+          >
+            {i18n.translate(
+              'xpack.apm.settings.customizeUI.customLink.flyout.save',
+              {
+                defaultMessage: 'Save'
+              }
             )}
-            <EuiFlexItem>
-              <EuiButton
-                fill
-                type="submit"
-                isLoading={isSaving}
-                isDisabled={!isSaveButtonEnabled}
-              >
-                {i18n.translate(
-                  'xpack.apm.settings.customizeUI.customLink.flyout.save',
-                  {
-                    defaultMessage: 'Save'
-                  }
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

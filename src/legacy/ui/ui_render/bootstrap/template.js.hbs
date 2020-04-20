@@ -30,33 +30,27 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
     function loadStyleSheet(url, cb) {
       var dom = document.createElement('link');
+      dom.rel = 'stylesheet';
+      dom.type = 'text/css';
+      dom.href = url;
       dom.addEventListener('error', failure);
-      dom.setAttribute('rel', 'stylesheet');
-      dom.setAttribute('type', 'text/css');
-      dom.setAttribute('href', url);
       dom.addEventListener('load', cb);
       document.head.appendChild(dom);
     }
 
     function loadScript(url, cb) {
       var dom = document.createElement('script');
-      dom.setAttribute('async', '');
+      {{!-- NOTE: async = false is used to trigger async-download/ordered-execution as outlined here: https://www.html5rocks.com/en/tutorials/speed/script-loading/ --}}
+      dom.async = false;
+      dom.src = url;
       dom.addEventListener('error', failure);
-      dom.setAttribute('src', url);
       dom.addEventListener('load', cb);
       document.head.appendChild(dom);
     }
 
-    function load(urlSet, cb) {
-      if (urlSet.deps) {
-        load({ urls: urlSet.deps }, function () {
-          load({ urls: urlSet.urls }, cb);
-        });
-        return;
-      }
-
-      var pending = urlSet.urls.length;
-      urlSet.urls.forEach(function (url) {
+    function load(urls, cb) {
+      var pending = urls.length;
+      urls.forEach(function (url) {
         var innerCb = function () {
           pending = pending - 1;
           if (pending === 0 && typeof cb === 'function') {
@@ -74,36 +68,27 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       });
     }
 
-    load({
-      deps: [
+    load([
         {{#each sharedJsDepFilenames}}
           '{{../regularBundlePath}}/kbn-ui-shared-deps/{{this}}',
         {{/each}}
-      ],
-      urls: [
-        {
-          deps: [
-            '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedJsFilename}}',
-            {
-              deps: [
-                '{{dllBundlePath}}/vendors_runtime.bundle.dll.js'
-              ],
-              urls: [
-                {{#each dllJsChunks}}
-                  '{{this}}',
-                {{/each}}
-              ]
-            },
-            '{{regularBundlePath}}/commons.bundle.js',
-          ],
-          urls: [
-            '{{regularBundlePath}}/{{appId}}.bundle.js',
-            {{#each styleSheetPaths}}
-              '{{this}}',
-            {{/each}}
-          ]
-        }
-      ]
+        '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedJsFilename}}',
+        '{{dllBundlePath}}/vendors_runtime.bundle.dll.js',
+        {{#each dllJsChunks}}
+          '{{this}}',
+        {{/each}}
+        '{{regularBundlePath}}/commons.bundle.js',
+        {{!-- '{{regularBundlePath}}/plugin:data/data.plugin.js', --}}
+        '{{regularBundlePath}}/plugin:kibanaUtils/kibanaUtils.plugin.js',
+        '{{regularBundlePath}}/plugin:esUiShared/esUiShared.plugin.js',
+        '{{regularBundlePath}}/plugin:kibanaReact/kibanaReact.plugin.js'
+    ], function () {
+      load([
+        '{{regularBundlePath}}/{{appId}}.bundle.js',
+        {{#each styleSheetPaths}}
+          '{{this}}',
+        {{/each}}
+      ])
     });
   };
 }

@@ -12,7 +12,7 @@ import { fitToLayerExtent, updateSourceProp } from '../../actions/map_actions';
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
-    key: selectedLayer ? selectedLayer.getId() : '',
+    key: selectedLayer ? `${selectedLayer.getId()}${selectedLayer.isJoinable()}` : '',
     selectedLayer,
   };
 }

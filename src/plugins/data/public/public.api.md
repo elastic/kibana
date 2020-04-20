@@ -45,6 +45,7 @@ import * as React_2 from 'react';
 import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
 import { SavedObject as SavedObject_2 } from 'src/core/public';
+import { SavedObjectReference } from 'kibana/public';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { SearchParams } from 'elasticsearch';
 import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
@@ -208,6 +209,9 @@ export const connectToQueryState: <S extends QueryState>({ timefilter: { timefil
 //
 // @public (undocumented)
 export const createSavedQueryService: (savedObjectsClient: Pick<import("../../../../../core/public").SavedObjectsClient, "update" | "find" | "get" | "delete" | "create" | "bulkCreate" | "bulkGet" | "bulkUpdate">) => SavedQueryService;
+
+// @public
+export const createSearchSource: (indexPatterns: Pick<import("../../index_patterns/index_patterns").IndexPatternsService, "get" | "clearCache" | "getFieldsForTimePattern" | "getFieldsForWildcard" | "getIds" | "getTitles" | "getFields" | "getCache" | "getDefault" | "make">) => (searchSourceJson: string, references: SavedObjectReference[]) => Promise<SearchSource>;
 
 // Warning: (ae-missing-release-tag) "CustomFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -939,11 +943,11 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     format: any;
     // (undocumented)
+    indexPattern?: IndexPattern;
+    // (undocumented)
     lang?: string;
     // (undocumented)
     name: string;
-    // (undocumented)
-    routes: Record<string, string>;
     // (undocumented)
     script?: string;
     // (undocumented)
@@ -974,7 +978,7 @@ export class IndexPatternFieldList extends Array<IndexPatternField> implements I
     // (undocumented)
     remove: (field: IFieldType) => void;
     // (undocumented)
-    update: (field: IndexPatternField) => void;
+    update: (field: Record<string, any>) => void;
 }
 
 // Warning: (ae-missing-release-tag) "indexPatterns" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1667,6 +1671,10 @@ export class SearchSource {
     // (undocumented)
     history: SearchRequest[];
     onRequestStart(handler: (searchSource: ISearchSource, options?: FetchOptions) => Promise<unknown>): void;
+    serialize(): {
+        searchSourceJSON: string;
+        references: SavedObjectReference[];
+    };
     // (undocumented)
     setField<K extends keyof SearchSourceFields>(field: K, value: SearchSourceFields[K]): this;
     // (undocumented)
@@ -1714,21 +1722,6 @@ export interface SearchSourceFields {
     type?: string;
     // (undocumented)
     version?: boolean;
-}
-
-// Warning: (ae-missing-release-tag) "SearchStrategyProvider" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface SearchStrategyProvider {
-    // (undocumented)
-    id: string;
-    // (undocumented)
-    isViable: (indexPattern: IndexPattern) => boolean;
-    // Warning: (ae-forgotten-export) The symbol "SearchStrategySearchParams" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "SearchStrategyResponse" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
 }
 
 // Warning: (ae-missing-release-tag) "SortDirection" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

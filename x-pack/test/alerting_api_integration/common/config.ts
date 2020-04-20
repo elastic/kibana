@@ -77,6 +77,51 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.alerting.enabled=true',
           '--xpack.eventLog.logEntries=true',
+          `--xpack.actions.preconfigured=${JSON.stringify([
+            {
+              id: 'my-slack1',
+              actionTypeId: '.slack',
+              name: 'Slack#xyz',
+              config: {
+                webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+              },
+            },
+            {
+              id: 'custom-system-abc-connector',
+              actionTypeId: 'system-abc-action-type',
+              name: 'SystemABC',
+              config: {
+                xyzConfig1: 'value1',
+                xyzConfig2: 'value2',
+                listOfThings: ['a', 'b', 'c', 'd'],
+              },
+              secrets: {
+                xyzSecret1: 'credential1',
+                xyzSecret2: 'credential2',
+              },
+            },
+            {
+              id: 'preconfigured-es-index-action',
+              actionTypeId: '.index',
+              name: 'preconfigured_es_index_action',
+              config: {
+                index: 'functional-test-actions-index-preconfigured',
+                refresh: true,
+                executionTimeField: 'timestamp',
+              },
+            },
+            {
+              id: 'preconfigured.test.index-record',
+              actionTypeId: 'test.index-record',
+              name: 'Test:_Preconfigured_Index_Record',
+              config: {
+                unencrypted: 'ignored-but-required',
+              },
+              secrets: {
+                encrypted: 'this-is-also-ignored-and-also-required',
+              },
+            },
+          ])}`,
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,

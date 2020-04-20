@@ -268,10 +268,31 @@ describe('ScopedHistory', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
       const h = new ScopedHistory(gh, '/app/wow');
-      expect(h.createHref({ pathname: '' })).toEqual(`/`);
+      expect(h.createHref({ pathname: '' })).toEqual(`/app/wow`);
+      expect(h.createHref({})).toEqual(`/app/wow`);
       expect(h.createHref({ pathname: '/new-page', search: '?alpha=true' })).toEqual(
-        `/new-page?alpha=true`
+        `/app/wow/new-page?alpha=true`
       );
+    });
+
+    it('behave correctly with slash-ending basePath', () => {
+      const gh = createMemoryHistory();
+      gh.push('/app/wow/');
+      const h = new ScopedHistory(gh, '/app/wow/');
+      expect(h.createHref({ pathname: '' })).toEqual(`/app/wow/`);
+      expect(h.createHref({ pathname: '/new-page', search: '?alpha=true' })).toEqual(
+        `/app/wow/new-page?alpha=true`
+      );
+    });
+
+    it('skips the scoped history path when `prependBasePath` is false', () => {
+      const gh = createMemoryHistory();
+      gh.push('/app/wow');
+      const h = new ScopedHistory(gh, '/app/wow');
+      expect(h.createHref({ pathname: '' }, { prependBasePath: false })).toEqual(`/`);
+      expect(
+        h.createHref({ pathname: '/new-page', search: '?alpha=true' }, { prependBasePath: false })
+      ).toEqual(`/new-page?alpha=true`);
     });
   });
 

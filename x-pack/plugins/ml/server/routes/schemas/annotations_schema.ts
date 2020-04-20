@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const indexAnnotationSchema = {
+export const indexAnnotationSchema = schema.object({
   timestamp: schema.number(),
   end_timestamp: schema.number(),
   annotation: schema.string(),
@@ -16,15 +16,16 @@ export const indexAnnotationSchema = {
   create_username: schema.maybe(schema.string()),
   modified_time: schema.maybe(schema.number()),
   modified_username: schema.maybe(schema.string()),
+  /** Document id */
   _id: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
-};
+});
 
-export const getAnnotationsSchema = {
+export const getAnnotationsSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
   earliestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
   latestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
   maxAnnotations: schema.number(),
-};
+});
 
-export const deleteAnnotationSchema = { annotationId: schema.string() };
+export const deleteAnnotationSchema = schema.object({ annotationId: schema.string() });

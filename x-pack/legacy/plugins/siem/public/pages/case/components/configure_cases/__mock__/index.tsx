@@ -21,6 +21,7 @@ export const connectors: Connector[] = [
     id: '123',
     actionTypeId: '.servicenow',
     name: 'My Connector',
+    isPreconfigured: false,
     config: {
       apiUrl: 'https://instance1.service-now.com',
       casesConfiguration: {
@@ -48,6 +49,7 @@ export const connectors: Connector[] = [
     id: '456',
     actionTypeId: '.servicenow',
     name: 'My Connector 2',
+    isPreconfigured: false,
     config: {
       apiUrl: 'https://instance2.service-now.com',
       casesConfiguration: {

@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { ExperimentalBadge } from '../experimental_badge';
+import { getMaxBytesFormatted } from '../utils';
 
 export const WelcomeContent: FC = () => {
   const toolTipContent = i18n.translate(
@@ -27,6 +28,8 @@ export const WelcomeContent: FC = () => {
       defaultMessage: "Experimental feature. We'd love to hear your feedback.",
     }
   );
+
+  const maxFileSize = getMaxBytesFormatted();
 
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">
@@ -117,7 +120,8 @@ export const WelcomeContent: FC = () => {
           <p>
             <FormattedMessage
               id="xpack.ml.fileDatavisualizer.welcomeContent.uploadedFilesAllowedSizeDescription"
-              defaultMessage="You can upload files up to 100 MB."
+              defaultMessage="You can upload files up to {maxFileSize}."
+              values={{ maxFileSize }}
             />
           </p>
         </EuiText>
