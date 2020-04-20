@@ -29,7 +29,7 @@ const usePipeline = (
   id?: string
 ) => {
   const mounted = usePromise();
-  const [pipeline, setPipeline] = useState<any | null>(null);
+  const [pipeline, setPipeline] = useState<any>(null);
 
   useLayoutEffect(() => {
     (async () => {

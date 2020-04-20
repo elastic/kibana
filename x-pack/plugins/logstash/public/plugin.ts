@@ -18,8 +18,6 @@ import { LicensingPluginSetup } from '../../licensing/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 
 // @ts-ignore
-import { PLUGIN } from '../common/constants';
-// @ts-ignore
 import { LogstashLicenseService } from './services';
 
 interface SetupDeps {
