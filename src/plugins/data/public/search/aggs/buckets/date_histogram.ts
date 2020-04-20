@@ -45,7 +45,7 @@ const updateTimeBuckets = (
   customBuckets?: IBucketDateHistogramAggConfig['buckets']
 ) => {
   const bounds =
-    agg.params.timeRange && agg.fieldIsTimeField()
+    agg.params.timeRange && (agg.fieldIsTimeField() || agg.params.interval === 'auto')
       ? timefilter.calculateBounds(agg.params.timeRange)
       : undefined;
   const buckets = customBuckets || agg.buckets;
