@@ -58,7 +58,6 @@ export function LayerControl({
   openLayerTOC,
   layerList,
   isFlyoutOpen,
-  openMapSettings,
 }) {
   if (!isLayerTOCOpen) {
     const hasErrors = layerList.some(layer => {
@@ -81,12 +80,7 @@ export function LayerControl({
     );
   }
 
-  const openMapSettingsLabel = i18n.translate('xpack.maps.layerControl.openMapSettingsLabel', {
-    defaultMessage: 'Edit map settings',
-  });
-
   let addLayer;
-  let mapSettingsBtn;
   if (!isReadOnly) {
     addLayer = (
       <Fragment>
@@ -105,21 +99,6 @@ export function LayerControl({
           />
         </EuiButton>
       </Fragment>
-    );
-    mapSettingsBtn = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip delay="long" content={openMapSettingsLabel}>
-          <EuiButtonIcon
-            isDisabled={isFlyoutOpen}
-            className="mapLayerControl__openMapSettingsButton"
-            onClick={openMapSettings}
-            iconType="gear"
-            color="text"
-            aria-label={openMapSettingsLabel}
-            data-test-subj="mapOpenMapSettingsButton"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
     );
   }
 
@@ -147,7 +126,6 @@ export function LayerControl({
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            {mapSettingsBtn}
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 delay="long"

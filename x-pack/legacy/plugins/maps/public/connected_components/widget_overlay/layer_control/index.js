@@ -9,7 +9,7 @@ import { LayerControl } from './view';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FLYOUT_STATE } from '../../../../../../../plugins/maps/public/reducers/ui';
 import { updateFlyout, setIsLayerTOCOpen } from '../../../actions/ui_actions';
-import { setSelectedLayer, trackMapSettings } from '../../../actions/map_actions';
+import { setSelectedLayer } from '../../../actions/map_actions';
 import {
   getIsReadOnly,
   getIsLayerTOCOpen,
@@ -37,11 +37,6 @@ function mapDispatchToProps(dispatch) {
     },
     openLayerTOC: () => {
       dispatch(setIsLayerTOCOpen(true));
-    },
-    openMapSettings: async () => {
-      await dispatch(setSelectedLayer(null));
-      dispatch(trackMapSettings());
-      dispatch(updateFlyout(FLYOUT_STATE.MAP_SETTINGS_PANEL));
     },
   };
 }

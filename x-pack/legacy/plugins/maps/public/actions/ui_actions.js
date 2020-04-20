@@ -19,6 +19,10 @@ import {
 } from '../../../../../plugins/maps/public/actions/ui_actions';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export * from '../../../../../plugins/maps/public/actions/ui_actions';
+import { getFlyoutDisplay } from '../selectors/ui_selectors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FLYOUT_STATE } from '../../../../../plugins/maps/public/reducers/ui';
+import { setSelectedLayer, trackMapSettings } from './map_actions';
 
 export function exitFullScreen() {
   return {
@@ -31,6 +35,17 @@ export function updateFlyout(display) {
   return {
     type: UPDATE_FLYOUT,
     display,
+  };
+}
+export function openMapSettings() {
+  return (dispatch, getState) => {
+    const flyoutDisplay = getFlyoutDisplay(getState());
+    if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
+      return;
+    }
+    dispatch(setSelectedLayer(null));
+    dispatch(trackMapSettings());
+    dispatch(updateFlyout(FLYOUT_STATE.MAP_SETTINGS_PANEL));
   };
 }
 export function closeSetView() {

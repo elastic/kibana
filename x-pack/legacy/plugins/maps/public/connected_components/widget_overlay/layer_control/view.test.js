@@ -19,7 +19,6 @@ const defaultProps = {
   showAddLayerWizard: () => {},
   closeLayerTOC: () => {},
   openLayerTOC: () => {},
-  openMapSettings: () => {},
   isLayerTOCOpen: true,
   layerList: [],
   isFlyoutOpen: false,

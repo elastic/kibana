@@ -5,6 +5,7 @@
  */
 
 import { AnyAction } from 'redux';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FLYOUT_STATE } from '../../../../../plugins/maps/public/reducers/ui';
 
 export function updateFlyout(display: FLYOUT_STATE): AnyAction;

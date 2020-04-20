@@ -50,8 +50,9 @@ import {
   setReadOnly,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
+  openMapSettings,
 } from '../actions/ui_actions';
-import { getIsFullScreen } from '../selectors/ui_selectors';
+import { getIsFullScreen, getFlyoutDisplay } from '../selectors/ui_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util';
 import {
@@ -447,6 +448,7 @@ app.controller(
 
     $scope.isFullScreen = false;
     $scope.isSaveDisabled = false;
+    $scope.isOpenSettingsDisabled = false;
     function handleStoreChanges(store) {
       const nextIsFullScreen = getIsFullScreen(store.getState());
       if (nextIsFullScreen !== $scope.isFullScreen) {
@@ -466,6 +468,14 @@ app.controller(
       if (nextIsSaveDisabled !== $scope.isSaveDisabled) {
         $scope.$evalAsync(() => {
           $scope.isSaveDisabled = nextIsSaveDisabled;
+        });
+      }
+
+      const flyoutDisplay = getFlyoutDisplay(store.getState());
+      const nextIsOpenSettingsDisabled = flyoutDisplay !== FLYOUT_STATE.NONE;
+      if (nextIsOpenSettingsDisabled !== $scope.isOpenSettingsDisabled) {
+        $scope.$evalAsync(() => {
+          $scope.isOpenSettingsDisabled = nextIsOpenSettingsDisabled;
         });
       }
     }
@@ -645,6 +655,22 @@ app.controller(
             },
           ]
         : []),
+      {
+        id: 'mapSettings',
+        label: i18n.translate('xpack.maps.mapController.openSettingsButtonLabel', {
+          defaultMessage: `Settings`,
+        }),
+        description: i18n.translate('xpack.maps.mapController.openSettingsDescription', {
+          defaultMessage: `Open settings`,
+        }),
+        testId: 'openSettingsButton',
+        disableButton() {
+          return $scope.isOpenSettingsDisabled;
+        },
+        run() {
+          store.dispatch(openMapSettings());
+        },
+      },
     ];
   }
 );

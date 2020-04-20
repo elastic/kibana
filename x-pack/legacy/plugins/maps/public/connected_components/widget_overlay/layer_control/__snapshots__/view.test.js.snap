@@ -35,25 +35,6 @@ exports[`LayerControl is rendered 1`] = `
           grow={false}
         >
           <EuiToolTip
-            content="Edit map settings"
-            delay="long"
-            position="top"
-          >
-            <EuiButtonIcon
-              aria-label="Edit map settings"
-              className="mapLayerControl__openMapSettingsButton"
-              color="text"
-              data-test-subj="mapOpenMapSettingsButton"
-              iconType="gear"
-              isDisabled={false}
-              onClick={[Function]}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiToolTip
             content="Collapse layers panel"
             delay="long"
             position="top"
@@ -237,25 +218,6 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
               />
             </h2>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiToolTip
-            content="Edit map settings"
-            delay="long"
-            position="top"
-          >
-            <EuiButtonIcon
-              aria-label="Edit map settings"
-              className="mapLayerControl__openMapSettingsButton"
-              color="text"
-              data-test-subj="mapOpenMapSettingsButton"
-              iconType="gear"
-              isDisabled={true}
-              onClick={[Function]}
-            />
-          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}
