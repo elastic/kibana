@@ -20,7 +20,8 @@ import {
   pickSavedSourceConfiguration,
   SourceConfigurationSavedObjectRuntimeType,
   StaticSourceConfigurationRuntimeType,
-} from './types';
+  InfraSource,
+} from '../../../common/http_api/source_api';
 import { InfraConfig } from '../../../server';
 
 interface Libs {
@@ -38,7 +39,7 @@ export class InfraSources {
   public async getSourceConfiguration(
     savedObjectsClient: SavedObjectsClientContract,
     sourceId: string
-  ) {
+  ): Promise<InfraSource> {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
     const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)

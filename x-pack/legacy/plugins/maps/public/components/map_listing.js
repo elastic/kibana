@@ -7,7 +7,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import { toastNotifications } from 'ui/notify';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getToasts } from '../../../../../plugins/maps/public/kibana_services';
 import {
   EuiTitle,
   EuiFieldSearch,
@@ -27,7 +28,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
-import chrome from 'ui/chrome';
 
 export const EMPTY_FILTER = '';
 
@@ -55,7 +55,7 @@ export class MapListing extends React.Component {
 
   componentDidMount() {
     this.fetchItems();
-    addHelpMenuToAppChrome(chrome);
+    addHelpMenuToAppChrome();
   }
 
   debouncedFetch = _.debounce(async filter => {
@@ -91,7 +91,7 @@ export class MapListing extends React.Component {
     try {
       await this.props.delete(this.state.selectedIds);
     } catch (error) {
-      toastNotifications.addDanger({
+      getToasts().addDanger({
         title: i18n.translate('xpack.maps.mapListing.unableToDeleteToastTitle', {
           defaultMessage: `Unable to delete map(s)`,
         }),

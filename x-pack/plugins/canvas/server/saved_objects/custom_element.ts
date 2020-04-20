@@ -10,7 +10,7 @@ import { CUSTOM_ELEMENT_TYPE } from '../../../../legacy/plugins/canvas/common/li
 export const customElementType: SavedObjectsType = {
   name: CUSTOM_ELEMENT_TYPE,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     dynamic: false,
     properties: {
