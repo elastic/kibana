@@ -9,7 +9,7 @@ A migration function for a [saved object type](./kibana-plugin-core-server.saved
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;
+export declare type SavedObjectMigrationFn<InputProps = any, MigratedProps = any> = (doc: SavedObjectUnsanitizedDoc<InputProps>, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc<MigratedProps>;
 ```
 
 ## Example

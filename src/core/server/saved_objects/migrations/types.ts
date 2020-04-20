@@ -39,10 +39,10 @@ import { SavedObjectsMigrationLogger } from './core/migration_logger';
  *
  * @public
  */
-export type SavedObjectMigrationFn = (
-  doc: SavedObjectUnsanitizedDoc,
+export type SavedObjectMigrationFn<InputProps = any, MigratedProps = any> = (
+  doc: SavedObjectUnsanitizedDoc<InputProps>,
   context: SavedObjectMigrationContext
-) => SavedObjectUnsanitizedDoc;
+) => SavedObjectUnsanitizedDoc<MigratedProps>;
 
 /**
  * Migration context provided when invoking a {@link SavedObjectMigrationFn | migration handler}

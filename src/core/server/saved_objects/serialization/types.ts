@@ -50,8 +50,8 @@ export interface SavedObjectsRawDocSource {
  * that future props are likely to be added. Migrations support this
  * scenario out of the box.
  */
-interface SavedObjectDoc {
-  attributes: any;
+interface SavedObjectDoc<T = unknown> {
+  attributes: T;
   id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
   namespace?: string;
@@ -75,7 +75,7 @@ interface Referencable {
  *
  * @public
  */
-export type SavedObjectUnsanitizedDoc = SavedObjectDoc & Partial<Referencable>;
+export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial<Referencable>;
 
 /** @public */
-export type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
+export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;

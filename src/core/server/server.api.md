@@ -1682,7 +1682,7 @@ export interface SavedObjectMigrationContext {
 // Warning: (ae-forgotten-export) The symbol "SavedObjectUnsanitizedDoc" needs to be exported by the entry point index.d.ts
 //
 // @public
-export type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;
+export type SavedObjectMigrationFn<InputProps = any, MigratedProps = any> = (doc: SavedObjectUnsanitizedDoc<InputProps>, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc<MigratedProps>;
 
 // @public
 export interface SavedObjectMigrationMap {
@@ -1710,7 +1710,7 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
 // Warning: (ae-forgotten-export) The symbol "Referencable" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
+export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;
 
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
