@@ -42,8 +42,6 @@ export function createVegaRequestHandler({
   core: { uiSettings },
   serviceSettings,
 }: VegaVisualizationDependencies) {
-  const { esClient } = getData().search.__LEGACY;
-  const searchCache = new SearchCache(esClient, { max: 10, maxAge: 4 * 1000 });
   const { timefilter } = data.query.timefilter;
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
@@ -52,6 +50,10 @@ export function createVegaRequestHandler({
 
     const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
     const filtersDsl = esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs);
+    const searchCache = new SearchCache(getData().search.__LEGACY.esClient, {
+      max: 10,
+      maxAge: 4 * 1000,
+    });
     const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
 
     return vp.parseAsync();

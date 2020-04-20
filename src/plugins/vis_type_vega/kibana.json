@@ -3,5 +3,5 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["visualizations", "mapsLegacy", "expressions"]
+  "requiredPlugins": ["data", "visualizations", "mapsLegacy", "expressions"]
 }
