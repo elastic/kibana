@@ -1,8 +1,0 @@
-{
-  "id": "timelion",
-  "version": "8.0.0",
-  "kibanaVersion": "kibana",
-  "configPath": ["timelion"],
-  "server": true,
-  "ui": true
-}
