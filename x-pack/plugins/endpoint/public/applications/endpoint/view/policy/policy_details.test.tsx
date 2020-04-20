@@ -102,7 +102,6 @@ describe('Policy Details', () => {
       );
       expect(history.location.pathname).toEqual('/policy/1');
       backToListButton.simulate('click', { button: 0 });
-      await sleep();
       expect(history.location.pathname).toEqual('/policy');
     });
     it('should display agent stats', async () => {
