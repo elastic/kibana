@@ -43,6 +43,7 @@ export const metricsVisDefinition = {
           id: '61ca57f1-469d-11e7-af02-69e470af7417',
           color: '#68BC00',
           split_mode: 'everything',
+          split_color_mode: 'kibana',
           metrics: [
             {
               id: '61ca57f2-469d-11e7-af02-69e470af7417',

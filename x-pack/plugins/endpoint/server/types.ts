@@ -5,11 +5,13 @@
  */
 import { LoggerFactory } from 'kibana/server';
 import { EndpointConfigType } from './config';
+import { IndexPatternRetriever } from './index_pattern';
 
 /**
  * The context for Endpoint apps.
  */
 export interface EndpointAppContext {
+  indexPatternRetriever: IndexPatternRetriever;
   logFactory: LoggerFactory;
   config(): Promise<EndpointConfigType>;
 }
