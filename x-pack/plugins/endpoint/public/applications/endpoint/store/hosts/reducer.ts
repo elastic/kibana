@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Immutable } from '../../../../../common/types';
 import { HostState, ImmutableReducer } from '../../types';
 import { AppAction } from '../action';
+import { isOnHostPage, hasSelectedHost } from './selectors';
 
 const initialState = (): HostState => {
   return {
@@ -16,7 +18,7 @@ const initialState = (): HostState => {
     loading: false,
     error: undefined,
     details: undefined,
-    detailsLoading: undefined,
+    detailsLoading: false,
     detailsError: undefined,
     location: undefined,
   };
@@ -53,7 +55,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       ...state,
       details: action.payload.metadata,
       detailsLoading: false,
-      loading: false,
+      detailsError: undefined,
     };
   } else if (action.type === 'serverFailedToReturnHostDetails') {
     return {
@@ -62,14 +64,47 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       detailsLoading: false,
     };
   } else if (action.type === 'userChangedUrl') {
+    const newState: Immutable<HostState> = {
+      ...state,
+      location: action.payload,
+    };
+    const isCurrentlyOnListPage = isOnHostPage(newState) && !hasSelectedHost(newState);
+    const wasPreviouslyOnListPage = isOnHostPage(state) && !hasSelectedHost(state);
+    const isCurrentlyOnDetailsPage = isOnHostPage(newState) && hasSelectedHost(newState);
+    const wasPreviouslyOnDetailsPage = isOnHostPage(state) && hasSelectedHost(state);
+
+    // if on the host list page for the first time, return new location and load list
+    if (isCurrentlyOnListPage) {
+      if (!wasPreviouslyOnListPage) {
+        return {
+          ...state,
+          location: action.payload,
+          loading: true,
+        };
+      }
+    } else if (isCurrentlyOnDetailsPage) {
+      // if previous page was the list or another host details page, load host details only
+      if (wasPreviouslyOnDetailsPage || wasPreviouslyOnListPage) {
+        return {
+          ...state,
+          location: action.payload,
+          detailsLoading: true,
+        };
+      } else {
+        // if previous page was not host list or host details, load both list and details
+        return {
+          ...state,
+          location: action.payload,
+          loading: true,
+          detailsLoading: true,
+        };
+      }
+    }
+    // otherwise we are not on a host list or details page
     return {
       ...state,
       location: action.payload,
-      loading: true,
-      detailsLoading: true,
-      detailsError: undefined,
     };
   }
-
   return state;
 };
