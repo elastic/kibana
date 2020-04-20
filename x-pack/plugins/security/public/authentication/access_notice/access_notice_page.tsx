@@ -67,7 +67,7 @@ export function AccessNoticePage({ http, fatalErrors, notifications }: Props) {
       }
     >
       <form onSubmit={onAcknowledge}>
-        <EuiPanel paddingSize="none" className="secAccessNoticePage__container">
+        <EuiPanel paddingSize="none">
           <EuiFlexGroup gutterSize="none" direction="column">
             <EuiFlexItem className="secAccessNoticePage__textWrapper">
               <div className="secAccessNoticePage__text">
@@ -77,24 +77,22 @@ export function AccessNoticePage({ http, fatalErrors, notifications }: Props) {
               </div>
             </EuiFlexItem>
             <EuiFlexItem className="secAccessNoticePage__footer">
-              <EuiFlexGroup gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    type="submit"
-                    color="primary"
-                    onClick={onAcknowledge}
-                    isDisabled={isLoading}
-                    isLoading={isLoading}
-                    data-test-subj="accessNoticeAcknowledge"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.accessNotice.acknowledgeButtonText"
-                      defaultMessage="Acknowledge and continue"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <div className="secAccessNoticePage__footerInner">
+                <EuiButton
+                  fill
+                  type="submit"
+                  color="primary"
+                  onClick={onAcknowledge}
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  data-test-subj="accessNoticeAcknowledge"
+                >
+                  <FormattedMessage
+                    id="xpack.security.accessNotice.acknowledgeButtonText"
+                    defaultMessage="Acknowledge and continue"
+                  />
+                </EuiButton>
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
