@@ -11,9 +11,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
 
+import { DEFAULT_INDEX_KEY } from '../../../../../../plugins/siem/common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { IndexField, SourceQuery } from '../../graphql/types';
 
 import { sourceQuery } from './index.gql_query';

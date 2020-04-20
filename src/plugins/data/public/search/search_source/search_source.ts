@@ -70,17 +70,19 @@
  */
 
 import _ from 'lodash';
+import { map } from 'rxjs/operators';
 import { SavedObjectReference } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
 import { IIndexPattern, SearchRequest, Filter } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
+import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';
 
 import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
 import { getEsQueryConfig, buildEsQuery } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
+import { fetchSoon } from '../legacy';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
@@ -185,18 +187,29 @@ export class SearchSource {
   }
 
   /**
-   * Fetch this source and reject the returned Promise on error
-   *
-   * @async
+   * Run a search using the search service
+   * @return {Observable<SearchResponse<unknown>>}
    */
-  async fetch(options: FetchOptions = {}) {
-    await this.requestIsStarting(options);
-
-    const searchRequest = await this.flatten();
-    this.history = [searchRequest];
-
+  private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
     const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
-    const response = await fetchSoon(
+    const searchParams = getSearchParams(getUiSettings(), esShardTimeout);
+    const params = {
+      index: searchRequest.index.title || searchRequest.index,
+      body: searchRequest.body,
+      ...searchParams,
+    };
+    return getSearchService()
+      .search({ params, indexType: searchRequest.indexType }, { signal })
+      .pipe(map(({ rawResponse }) => handleResponse(searchRequest, rawResponse)));
+  }
+
+  /**
+   * Run a search using the search service
+   * @return {Promise<SearchResponse<unknown>>}
+   */
+  private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
+    const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
+    return await fetchSoon(
       searchRequest,
       {
         ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
@@ -208,6 +221,24 @@ export class SearchSource {
         esShardTimeout,
       }
     );
+  }
+  /**
+   * Fetch this source and reject the returned Promise on error
+   *
+   * @async
+   */
+  async fetch(options: FetchOptions = {}) {
+    await this.requestIsStarting(options);
+
+    const searchRequest = await this.flatten();
+    this.history = [searchRequest];
+
+    let response;
+    if (getUiSettings().get('courier:batchSearches')) {
+      response = await this.legacyFetch(searchRequest, options);
+    } else {
+      response = this.fetch$(searchRequest, options.abortSignal).toPromise();
+    }
 
     if (response.error) {
       throw new RequestFailure(null, response);
@@ -246,7 +277,6 @@ export class SearchSource {
 
   /**
    *  Called by requests of this search source when they are started
-   *  @param  {Courier.Request} request
    *  @param options
    *  @return {Promise<undefined>}
    */
@@ -410,7 +440,6 @@ export class SearchSource {
    * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
    *
    * Using `createSearchSource`, the instance can be re-created.
-   * @param searchSource The search source to serialize
    * @public */
   public serialize() {
     const references: SavedObjectReference[] = [];
