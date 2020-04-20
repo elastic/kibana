@@ -2244,7 +2244,6 @@
     "kbn.management.editIndexPattern.scripted.table.nameHeader": "名前",
     "kbn.management.editIndexPattern.scripted.table.scriptDescription": "フィールドのスクリプトです",
     "kbn.management.editIndexPattern.scripted.table.scriptHeader": "スクリプト",
-    "kbn.management.editIndexPattern.scripted.unknownModeErrorMessage": "不明なフィールド設定モード {mode}",
     "kbn.management.editIndexPattern.scriptedHeader": "スクリプトフィールド",
     "kbn.management.editIndexPattern.scriptedLabel": "ビジュアライゼーションにスクリプトフィールドを使用し、ドキュメントに表示させることができます。但し、スクリプトフィールドは検索できません。",
     "kbn.management.editIndexPattern.setDefaultAria": "デフォルトのインデックスに設定",

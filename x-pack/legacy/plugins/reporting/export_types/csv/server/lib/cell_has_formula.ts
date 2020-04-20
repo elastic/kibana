@@ -3,7 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { Loading } from './loading';
-export { Error } from './error';
-export { Header, HeaderProps } from './header';
-export { AlphaMessaging } from './alpha_messaging';
+
+import { startsWith } from 'lodash';
+import { CSV_FORMULA_CHARS } from '../../../../common/constants';
+
+export const cellHasFormulas = (val: string) =>
+  CSV_FORMULA_CHARS.some(formulaChar => startsWith(val, formulaChar));
