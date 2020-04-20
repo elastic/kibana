@@ -30,3 +30,4 @@ export { MachineLearningSecurityCommonProvider } from './security_common';
 export { MachineLearningSecurityUIProvider } from './security_ui';
 export { MachineLearningSettingsProvider } from './settings';
 export { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';
+export { MachineLearningTestResourcesProvider } from './test_resources';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESTermQuery } from '../../../../common/typed_json';
+import { ESTermQuery } from '../../../../../../../plugins/siem/common/typed_json';
 import { NarrowDateRange } from '../../../components/ml/types';
 import { UpdateDateRange } from '../../../components/charts/common';
 import { SetQuery } from '../../../pages/hosts/navigation/types';
