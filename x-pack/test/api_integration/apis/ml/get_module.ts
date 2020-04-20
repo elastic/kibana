@@ -50,6 +50,10 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('get_module', function() {
+    before(async () => {
+      await ml.testResources.setKibanaTimeZoneToUTC();
+    });
+
     it('lists all modules', async () => {
       const rspBody = await executeGetModuleRequest('', USER.ML_POWERUSER, 200);
       expect(rspBody).to.be.an(Array);

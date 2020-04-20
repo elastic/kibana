@@ -12,13 +12,10 @@ import { policyListMiddlewareFactory } from './middleware';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { isOnPolicyListPage, selectIsLoading, urlSearchParams } from './selectors';
 import { DepsStartMock, depsStartMock } from '../../mocks';
-import {
-  createSpyMiddleware,
-  MiddlewareActionSpyHelper,
-  setPolicyListApiMockImplementation,
-} from './test_mock_utils';
+import { setPolicyListApiMockImplementation } from './test_mock_utils';
 import { INGEST_API_DATASOURCES } from './services/ingest';
 import { Immutable } from '../../../../../common/types';
+import { createSpyMiddleware, MiddlewareActionSpyHelper } from '../test_utils';
 
 describe('policy list store concerns', () => {
   let fakeCoreStart: ReturnType<typeof coreMock.createStart>;
