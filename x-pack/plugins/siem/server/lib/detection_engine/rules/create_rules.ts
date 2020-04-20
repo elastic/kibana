@@ -42,11 +42,11 @@ export const createRules = async ({
   references,
   note,
   version,
-  lists,
+  exceptions_list,
   actions,
 }: CreateRuleParams): Promise<Alert> => {
-  // TODO: Remove this and use regular lists once the feature is stable for a release
-  const listsParam = hasListsFeature() ? { lists } : {};
+  // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
+  const exceptionsListParam = hasListsFeature() ? { exceptions_list } : {};
   return alertsClient.create({
     data: {
       name,
@@ -79,7 +79,7 @@ export const createRules = async ({
         references,
         note,
         version,
-        ...listsParam,
+        ...exceptionsListParam,
       },
       schedule: { interval },
       enabled,
