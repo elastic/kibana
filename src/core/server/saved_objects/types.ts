@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsClient, SavedObjectAggs } from './service/saved_objects_client';
+import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
 import { PropertyValidators } from './validation';

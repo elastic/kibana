@@ -47,7 +47,6 @@ import {
   SavedObjectsDeleteOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
-  SavedObjectAggs,
 } from '../saved_objects_client';
 import {
   SavedObject,

@@ -36,7 +36,7 @@ const validateGetAggFieldValue = (
   allowedTypes: string[],
   aggs: any,
   indexMapping: IndexMapping
-) => {
+): SavedObjectAggs => {
   return Object.keys(aggs).reduce((acc, key) => {
     if (key === 'field') {
       const error = hasFilterKeyError(aggs[key], allowedTypes, indexMapping);
