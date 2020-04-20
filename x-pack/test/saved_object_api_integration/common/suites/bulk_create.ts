@@ -39,7 +39,7 @@ export const TEST_CASES = Object.freeze({
 });
 
 export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('bulk_create');
+  const expectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody = (
     testCases: BulkCreateTestCase | BulkCreateTestCase[],
     statusCode: 200 | 403,

@@ -13,15 +13,23 @@ import { SpacesAuditLogger } from '../audit_logger';
 import { ConfigType } from '../../config';
 import { GetSpacePurpose } from '../../../common/model/types';
 
-const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = ['any', 'copySavedObjectsIntoSpace'];
+const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = [
+  'any',
+  'copySavedObjectsIntoSpace',
+  'findSavedObjects',
+];
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetSpacePurpose,
-  (authorization: SecurityPluginSetup['authz']) => string
+  (authorization: SecurityPluginSetup['authz']) => string[]
 > = {
-  any: (authorization) => authorization.actions.login,
-  copySavedObjectsIntoSpace: (authorization) =>
+  any: (authorization) => [authorization.actions.login],
+  copySavedObjectsIntoSpace: (authorization) => [
     authorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
+  ],
+  findSavedObjects: (authorization) => {
+    return [authorization.actions.savedObject.get('config', 'find')];
+  },
 };
 
 export class SpacesClient {
@@ -86,7 +94,7 @@ export class SpacesClient {
 
       if (authorized.length === 0) {
         this.debugLogger(
-          `SpacesClient.getAll(), using RBAC. returning 403/Forbidden. Not authorized for any spaces.`
+          `SpacesClient.getAll(), using RBAC. returning 403/Forbidden. Not authorized for any spaces for ${purpose} purpose.`
         );
         this.auditLogger.spacesAuthorizationFailure(username, 'getAll');
         throw Boom.forbidden();

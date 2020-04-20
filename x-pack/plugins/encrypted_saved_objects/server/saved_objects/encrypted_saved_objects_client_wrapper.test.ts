@@ -933,6 +933,7 @@ describe('#bulkGet', () => {
             attrNotSoSecret: 'not-so-secret',
             attrThree: 'three',
           },
+          namespaces: ['some-ns'],
           references: [],
         },
         {
@@ -944,6 +945,7 @@ describe('#bulkGet', () => {
             attrNotSoSecret: '*not-so-secret*',
             attrThree: 'three',
           },
+          namespaces: ['some-ns'],
           references: [],
         },
       ],
@@ -1009,6 +1011,7 @@ describe('#bulkGet', () => {
             attrNotSoSecret: 'not-so-secret',
             attrThree: 'three',
           },
+          namespaces: ['some-ns'],
           references: [],
         },
         {
@@ -1020,6 +1023,7 @@ describe('#bulkGet', () => {
             attrNotSoSecret: '*not-so-secret*',
             attrThree: 'three',
           },
+          namespaces: ['some-ns'],
           references: [],
         },
       ],

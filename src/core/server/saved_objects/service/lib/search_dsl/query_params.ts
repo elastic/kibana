@@ -63,25 +63,38 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  */
 function getClauseForType(
   registry: ISavedObjectTypeRegistry,
-  namespace: string | undefined,
+  namespaces: string[] | undefined = ['default'],
   type: string
 ) {
   if (registry.isMultiNamespace(type)) {
     return {
       bool: {
-        must: [{ term: { type } }, { term: { namespaces: namespace ?? 'default' } }],
+        must: [{ term: { type } }, { terms: { namespaces } }],
         must_not: [{ exists: { field: 'namespace' } }],
       },
     };
-  } else if (namespace && registry.isSingleNamespace(type)) {
+  } else if (registry.isSingleNamespace(type)) {
+    const should: Array<Record<string, any>> = [];
+    const eligibleNamespaces = namespaces.filter((namespace) => namespace !== 'default');
+    if (eligibleNamespaces.length > 0) {
+      should.push({ terms: { namespace: eligibleNamespaces } });
+    }
+    if (namespaces?.includes('default') ?? true) {
+      should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
+    }
+    if (should.length === 0) {
+      throw new Error('unhandled search conditions!!');
+    }
     return {
       bool: {
-        must: [{ term: { type } }, { term: { namespace } }],
+        must: [{ term: { type } }],
+        should,
+        minimum_should_match: 1,
         must_not: [{ exists: { field: 'namespaces' } }],
       },
     };
   }
-  // isSingleNamespace in the default namespace, or isNamespaceAgnostic
+  // isNamespaceAgnostic
   return {
     bool: {
       must: [{ term: { type } }],
@@ -98,7 +111,7 @@ interface HasReferenceQueryParams {
 interface QueryParams {
   mappings: IndexMapping;
   registry: ISavedObjectTypeRegistry;
-  namespace?: string;
+  namespaces?: string[];
   type?: string | string[];
   search?: string;
   searchFields?: string[];
@@ -113,7 +126,7 @@ interface QueryParams {
 export function getQueryParams({
   mappings,
   registry,
-  namespace,
+  namespaces,
   type,
   search,
   searchFields,
@@ -152,7 +165,7 @@ export function getQueryParams({
                 },
               ]
             : undefined,
-          should: types.map((shouldType) => getClauseForType(registry, namespace, shouldType)),
+          should: types.map((shouldType) => getClauseForType(registry, namespaces, shouldType)),
           minimum_should_match: 1,
         },
       },

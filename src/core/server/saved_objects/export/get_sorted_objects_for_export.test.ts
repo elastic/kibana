@@ -105,7 +105,7 @@ describe('getSortedObjectsForExport()', () => {
         "calls": Array [
           Array [
             Object {
-              "namespace": undefined,
+              "namespaces": undefined,
               "perPage": 500,
               "search": undefined,
               "type": Array [
@@ -251,7 +251,7 @@ describe('getSortedObjectsForExport()', () => {
         "calls": Array [
           Array [
             Object {
-              "namespace": undefined,
+              "namespaces": undefined,
               "perPage": 500,
               "search": "foo",
               "type": Array [
@@ -338,7 +338,9 @@ describe('getSortedObjectsForExport()', () => {
         "calls": Array [
           Array [
             Object {
-              "namespace": "foo",
+              "namespaces": Array [
+                "foo",
+              ],
               "perPage": 500,
               "search": undefined,
               "type": Array [

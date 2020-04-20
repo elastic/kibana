@@ -48,8 +48,12 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   ) {}
 
   // only include namespace in AAD descriptor if the specified type is single-namespace
-  private getDescriptorNamespace = (type: string, namespace?: string) =>
-    this.options.baseTypeRegistry.isSingleNamespace(type) ? namespace : undefined;
+  private getDescriptorNamespace = (type: string, namespace?: string) => {
+    const descriptorNamespace = this.options.baseTypeRegistry.isSingleNamespace(type)
+      ? namespace
+      : undefined;
+    return descriptorNamespace === 'default' ? undefined : descriptorNamespace;
+  };
 
   public async create<T>(
     type: string,
@@ -124,8 +128,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
     return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.bulkCreate<T>(encryptedObjects, options),
-      objects,
-      options?.namespace
+      objects
     );
   }
 
@@ -156,8 +159,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
     return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.bulkUpdate(encryptedObjects, options),
-      objects,
-      options?.namespace
+      objects
     );
   }
 
@@ -168,8 +170,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   public async find<T>(options: SavedObjectsFindOptions) {
     return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.find<T>(options),
-      undefined,
-      options.namespace
+      undefined
     );
   }
 
@@ -179,8 +180,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   ) {
     return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.bulkGet<T>(objects, options),
-      undefined,
-      options?.namespace
+      undefined
     );
   }
 
@@ -270,7 +270,6 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
    * response portion isn't registered, it is returned as is.
    * @param response Raw response returned by the underlying base client.
    * @param [objects] Optional list of saved objects with original attributes.
-   * @param [namespace] Optional namespace that was used for the saved objects operation.
    */
   private async handleEncryptedAttributesInBulkResponse<
     T,
@@ -279,12 +278,15 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       | SavedObjectsFindResponse<T>
       | SavedObjectsBulkUpdateResponse<T>,
     O extends Array<SavedObjectsBulkCreateObject<T>> | Array<SavedObjectsBulkUpdateObject<T>>
-  >(response: R, objects?: O, namespace?: string) {
+  >(response: R, objects?: O) {
     for (const [index, savedObject] of response.saved_objects.entries()) {
       await this.handleEncryptedAttributesInResponse(
         savedObject,
         objects?.[index].attributes ?? undefined,
-        this.getDescriptorNamespace(savedObject.type, namespace)
+        this.getDescriptorNamespace(
+          savedObject.type,
+          savedObject.namespaces ? savedObject.namespaces[0] : undefined
+        )
       );
     }
 

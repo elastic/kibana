@@ -26,6 +26,8 @@ exports[`#getAll useRbacForRequest is true with purpose='any' throws Boom.forbid
 
 exports[`#getAll useRbacForRequest is true with purpose='copySavedObjectsIntoSpace' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
 
+exports[`#getAll useRbacForRequest is true with purpose='findSavedObjects' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
+
 exports[`#getAll useRbacForRequest is true with purpose='undefined' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
 
 exports[`#update useRbacForRequest is true throws Boom.forbidden when user isn't authorized at space 1`] = `"Unauthorized to update spaces"`;

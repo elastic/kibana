@@ -196,19 +196,29 @@ describe('#getQueryParams', () => {
       });
     });
 
-    describe('`namespace` parameter', () => {
-      const createTypeClause = (type: string, namespace?: string) => {
+    describe('`namespaces` parameter', () => {
+      const createTypeClause = (type: string, namespaces?: string[]) => {
         if (registry.isMultiNamespace(type)) {
           return {
             bool: {
-              must: expect.arrayContaining([{ term: { namespaces: namespace ?? 'default' } }]),
+              must: expect.arrayContaining([{ terms: { namespaces: namespaces ?? ['default'] } }]),
               must_not: [{ exists: { field: 'namespace' } }],
             },
           };
-        } else if (namespace && registry.isSingleNamespace(type)) {
+        } else if (registry.isSingleNamespace(type)) {
+          const nonDefaultNamespaces = namespaces?.filter((n) => n !== 'default') ?? [];
+          const should: any = [];
+          if (nonDefaultNamespaces.length > 0) {
+            should.push({ terms: { namespace: nonDefaultNamespaces } });
+          }
+          if (namespaces?.includes('default')) {
+            should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
+          }
           return {
             bool: {
-              must: expect.arrayContaining([{ term: { namespace } }]),
+              must: [{ term: { type } }],
+              should: expect.arrayContaining(should),
+              minimum_should_match: 1,
               must_not: [{ exists: { field: 'namespaces' } }],
             },
           };
@@ -229,23 +239,27 @@ describe('#getQueryParams', () => {
         );
       };
 
-      const test = (namespace?: string) => {
+      const test = (namespaces?: string[]) => {
         for (const typeOrTypes of ALL_TYPE_SUBSETS) {
-          const result = getQueryParams({ mappings, registry, type: typeOrTypes, namespace });
+          const result = getQueryParams({ mappings, registry, type: typeOrTypes, namespaces });
           const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-          expectResult(result, ...types.map((x) => createTypeClause(x, namespace)));
+          expectResult(result, ...types.map((x) => createTypeClause(x, namespaces)));
         }
         // also test with no specified type/s
-        const result = getQueryParams({ mappings, registry, type: undefined, namespace });
-        expectResult(result, ...ALL_TYPES.map((x) => createTypeClause(x, namespace)));
+        const result = getQueryParams({ mappings, registry, type: undefined, namespaces });
+        expectResult(result, ...ALL_TYPES.map((x) => createTypeClause(x, namespaces)));
       };
 
-      it('filters results with "namespace" field when `namespace` is not specified', () => {
+      it('filters results with "namespace" field when `namespaces` is not specified', () => {
         test(undefined);
       });
 
       it('filters results for specified namespace for appropriate type/s', () => {
-        test('foo-namespace');
+        test(['foo-namespace']);
+      });
+
+      it('filters results for specified `default` namespace for appropriate type/s', () => {
+        test(['default']);
       });
     });
   });

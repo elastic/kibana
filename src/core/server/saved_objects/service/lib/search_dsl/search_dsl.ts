@@ -33,7 +33,7 @@ interface GetSearchDslOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
-  namespace?: string;
+  namespaces?: string[];
   hasReference?: {
     type: string;
     id: string;
@@ -53,7 +53,7 @@ export function getSearchDsl(
     searchFields,
     sortField,
     sortOrder,
-    namespace,
+    namespaces,
     hasReference,
     kueryNode,
   } = options;
@@ -66,11 +66,15 @@ export function getSearchDsl(
     throw Boom.notAcceptable('sortOrder requires a sortField');
   }
 
+  if (namespaces?.some((namespace) => namespace.indexOf('*') >= 0)) {
+    throw Boom.notAcceptable(`namespaces cannot contain wildcards ("*")`);
+  }
+
   return {
     ...getQueryParams({
       mappings,
       registry,
-      namespace,
+      namespaces,
       type,
       search,
       searchFields,
