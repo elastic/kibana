@@ -7,32 +7,31 @@
 export const ruleActionsSavedObjectType = 'siem-detection-engine-rule-actions';
 
 export const ruleActionsSavedObjectMappings = {
-  [ruleActionsSavedObjectType]: {
-    properties: {
-      alertThrottle: {
-        type: 'keyword',
-      },
-      ruleAlertId: {
-        type: 'keyword',
-      },
-      ruleThrottle: {
-        type: 'keyword',
-      },
-      actions: {
-        properties: {
-          group: {
-            type: 'keyword',
-          },
-          id: {
-            type: 'keyword',
-          },
-          action_type_id: {
-            type: 'keyword',
-          },
-          params: {
-            dynamic: true,
-            properties: {},
-          },
+  properties: {
+    alertThrottle: {
+      type: 'keyword',
+    },
+    ruleAlertId: {
+      type: 'keyword',
+    },
+    ruleThrottle: {
+      type: 'keyword',
+    },
+    actions: {
+      properties: {
+        group: {
+          type: 'keyword',
+        },
+        id: {
+          type: 'keyword',
+        },
+        action_type_id: {
+          type: 'keyword',
+        },
+        params: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          dynamic: true as any,
+          properties: {},
         },
       },
     },

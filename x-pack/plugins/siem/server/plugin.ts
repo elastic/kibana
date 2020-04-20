@@ -39,6 +39,7 @@ import {
   timelineSavedObjectType,
   ruleStatusSavedObjectType,
   ruleActionsSavedObjectType,
+  initSavedObjects,
 } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
@@ -85,6 +86,8 @@ export class Plugin {
         `You have activated the lists feature flag which is NOT currently supported for SIEM! You should turn this feature flag off immediately by un-setting the environment variable: ${listsEnvFeatureFlagName} and restarting Kibana`
       );
     }
+
+    initSavedObjects(core.savedObjects);
 
     const router = core.http.createRouter();
     core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({

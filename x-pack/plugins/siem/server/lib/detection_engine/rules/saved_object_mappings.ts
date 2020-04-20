@@ -7,41 +7,39 @@
 export const ruleStatusSavedObjectType = 'siem-detection-engine-rule-status';
 
 export const ruleStatusSavedObjectMappings = {
-  [ruleStatusSavedObjectType]: {
-    properties: {
-      alertId: {
-        type: 'keyword',
-      },
-      status: {
-        type: 'keyword',
-      },
-      statusDate: {
-        type: 'date',
-      },
-      lastFailureAt: {
-        type: 'date',
-      },
-      lastSuccessAt: {
-        type: 'date',
-      },
-      lastFailureMessage: {
-        type: 'text',
-      },
-      lastSuccessMessage: {
-        type: 'text',
-      },
-      lastLookBackDate: {
-        type: 'date',
-      },
-      gap: {
-        type: 'text',
-      },
-      bulkCreateTimeDurations: {
-        type: 'float',
-      },
-      searchAfterTimeDurations: {
-        type: 'float',
-      },
+  properties: {
+    alertId: {
+      type: 'keyword',
+    },
+    status: {
+      type: 'keyword',
+    },
+    statusDate: {
+      type: 'date',
+    },
+    lastFailureAt: {
+      type: 'date',
+    },
+    lastSuccessAt: {
+      type: 'date',
+    },
+    lastFailureMessage: {
+      type: 'text',
+    },
+    lastSuccessMessage: {
+      type: 'text',
+    },
+    lastLookBackDate: {
+      type: 'date',
+    },
+    gap: {
+      type: 'text',
+    },
+    bulkCreateTimeDurations: {
+      type: 'float',
+    },
+    searchAfterTimeDurations: {
+      type: 'float',
     },
   },
 };
