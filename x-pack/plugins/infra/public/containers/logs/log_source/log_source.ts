@@ -6,10 +6,23 @@
 
 import createContainer from 'constate';
 import { useState, useMemo, useCallback } from 'react';
-import { LogSourceConfiguration, LogSourceStatus } from '../../../../common/http_api/log_sources';
+import {
+  LogSourceConfiguration,
+  LogSourceStatus,
+  LogSourceConfigurationPropertiesPatch,
+  LogSourceConfigurationProperties,
+} from '../../../../common/http_api/log_sources';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callFetchLogSourceConfigurationAPI } from './api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from './api/fetch_log_source_status';
+import { callPatchLogSourceConfigurationAPI } from './api/patch_log_source_configuration';
+
+export {
+  LogSourceConfiguration,
+  LogSourceConfigurationProperties,
+  LogSourceConfigurationPropertiesPatch,
+  LogSourceStatus,
+};
 
 export const useLogSource = ({ sourceId }: { sourceId: string }) => {
   const [sourceConfiguration, setSourceConfiguration] = useState<
@@ -26,6 +39,20 @@ export const useLogSource = ({ sourceId }: { sourceId: string }) => {
       },
       onResolve: ({ data }) => {
         setSourceConfiguration(data);
+      },
+    },
+    [sourceId]
+  );
+
+  const [updateSourceConfigurationRequest, updateSourceConfiguration] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async (patchedProperties: LogSourceConfigurationPropertiesPatch) => {
+        return await callPatchLogSourceConfigurationAPI(sourceId, patchedProperties);
+      },
+      onResolve: ({ data }) => {
+        setSourceConfiguration(data);
+        loadSourceStatus();
       },
     },
     [sourceId]
@@ -61,14 +88,19 @@ export const useLogSource = ({ sourceId }: { sourceId: string }) => {
     [loadSourceConfigurationRequest.state]
   );
 
+  const isUpdatingSourceConfiguration = useMemo(
+    () => updateSourceConfigurationRequest.state === 'pending',
+    [updateSourceConfigurationRequest.state]
+  );
+
   const isLoadingSourceStatus = useMemo(() => loadSourceStatusRequest.state === 'pending', [
     loadSourceStatusRequest.state,
   ]);
 
-  const isLoading = useMemo(() => isLoadingSourceConfiguration || isLoadingSourceStatus, [
-    isLoadingSourceConfiguration,
-    isLoadingSourceStatus,
-  ]);
+  const isLoading = useMemo(
+    () => isLoadingSourceConfiguration || isLoadingSourceStatus || isUpdatingSourceConfiguration,
+    [isLoadingSourceConfiguration, isLoadingSourceStatus, isUpdatingSourceConfiguration]
+  );
 
   const isUninitialized = useMemo(
     () =>
@@ -118,7 +150,7 @@ export const useLogSource = ({ sourceId }: { sourceId: string }) => {
     sourceConfiguration,
     sourceId,
     sourceStatus,
-    updateSourceConfiguration: (..._args: any[]) => undefined,
+    updateSourceConfiguration,
   };
 };
 

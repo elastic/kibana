@@ -22,8 +22,17 @@ export type PatchLogSourceConfigurationRequestParams = rt.TypeOf<
   typeof patchLogSourceConfigurationRequestParamsRT
 >;
 
+const logSourceConfigurationProperiesPatchRT = rt.partial({
+  ...logSourceConfigurationPropertiesRT.type.props,
+  fields: rt.partial(logSourceConfigurationPropertiesRT.type.props.fields.type.props),
+});
+
+export type LogSourceConfigurationPropertiesPatch = rt.TypeOf<
+  typeof logSourceConfigurationProperiesPatchRT
+>;
+
 export const patchLogSourceConfigurationRequestBodyRT = rt.type({
-  data: rt.partial(logSourceConfigurationPropertiesRT.type.props),
+  data: logSourceConfigurationProperiesPatchRT,
 });
 
 export type PatchLogSourceConfigurationRequestBody = rt.TypeOf<
