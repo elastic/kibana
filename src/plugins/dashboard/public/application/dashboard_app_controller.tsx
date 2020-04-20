@@ -524,10 +524,6 @@ export class DashboardAppController {
       }
     };
 
-    $scope.onQuerySaved = (savedQuery: SavedQuery) => {
-      $scope.savedQuery = savedQuery;
-    };
-
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
       const allFilters = filterManager.getFilters();
       dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
@@ -588,6 +584,10 @@ export class DashboardAppController {
       }
     );
 
+    const onSavedQueryIdChange = (savedQueryId?: string) => {
+      dashboardStateManager.setSavedQueryId(savedQueryId);
+    };
+
     const getNavBarProps = () => {
       const isFullScreenMode = dashboardStateManager.getFullScreenMode();
       const screenTitle = dashboardStateManager.getTitle();
@@ -603,6 +603,8 @@ export class DashboardAppController {
         showSaveQuery: $scope.showSaveQuery,
         query: $scope.model.query,
         savedQuery: $scope.savedQuery,
+        onSavedQueryIdChange,
+        savedQueryId: dashboardStateManager.getSavedQueryId(),
         useDefaultBehaviors: true,
         onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }): void => {
           if (!payload.query) {

@@ -53,9 +53,6 @@ export interface DashboardAppScope extends ng.IScope {
   getShouldShowEditHelp: () => boolean;
   getShouldShowViewHelp: () => boolean;
   updateQueryAndFetch: ({ query, dateRange }: { query: Query; dateRange?: TimeRange }) => void;
-  onCancelApplyFilters: () => void;
-  onApplyFilters: (filters: Filter[]) => void;
-  onQuerySaved: (savedQuery: SavedQuery) => void;
   topNavMenu: any;
   showAddPanel: any;
   showSaveQuery: boolean;
