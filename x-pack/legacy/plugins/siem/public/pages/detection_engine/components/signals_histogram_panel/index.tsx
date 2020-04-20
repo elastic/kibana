@@ -11,11 +11,11 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../../../../plugins/siem/common/constants';
 import { LegendItem } from '../../../../components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../components/header_section';
 import { Filter, esQuery, Query } from '../../../../../../../../../src/plugins/data/public';
-import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { useQuerySignals } from '../../../../containers/detection_engine/signals/use_query';
 import { getDetectionEngineUrl } from '../../../../components/link_to';
 import { defaultLegendColors } from '../../../../components/matrix_histogram/utils';

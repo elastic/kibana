@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { takeLatest, put, call, select } from 'redux-saga/effects';
+import { takeLatest, put, call } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
 import { fetchEffectFactory } from './fetch_effect';
@@ -21,7 +21,6 @@ import {
   setDynamicSettings as setDynamicSettingsAPI,
 } from '../api';
 import { DynamicSettings } from '../../../common/runtime_types';
-import { getBasePath } from '../selectors';
 import { kibanaService } from '../kibana_service';
 
 export function* fetchDynamicSettingsEffect() {
@@ -46,8 +45,7 @@ export function* setDynamicSettingsEffect() {
         });
         return;
       }
-      const basePath = yield select(getBasePath);
-      yield call(setDynamicSettingsAPI, { settings: action.payload, basePath });
+      yield call(setDynamicSettingsAPI, { settings: action.payload });
       yield put(setDynamicSettingsSuccess(action.payload));
       kibanaService.core.notifications.toasts.addSuccess('Settings saved!');
     } catch (err) {
