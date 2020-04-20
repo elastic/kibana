@@ -16,6 +16,7 @@ import { postPagerduty } from './lib/post_pagerduty';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
 import { actionsConfigMock } from '../actions_config.mock';
+import { repeat, random } from 'lodash';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
@@ -141,6 +142,16 @@ describe('validateParams()', () => {
 - [eventAction.1]: expected value to equal [resolve]
 - [eventAction.2]: expected value to equal [acknowledge]"
 `);
+  });
+
+  test('should validate and throw error when timestamp is invalid', () => {
+    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
+    const timestamp = `${repeat(' ', random(0, 10))}${randoDate}${repeat(' ', random(0, 10))}`;
+    expect(() => {
+      validateParams(actionType, {
+        timestamp,
+      });
+    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
   });
 });
 
