@@ -26,16 +26,21 @@ import {
   HttpSetup,
 } from 'kibana/public';
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
-import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  TimefilterContract,
+} from 'src/plugins/data/public';
 
-import { PluginsStart } from './legacy_imports';
-import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
 import { setIndexPatterns, setSavedObjectsClient } from './helpers/plugin_services';
+import { ConfigSchema } from '../config';
 
-type TimelionVisCoreSetup = CoreSetup<TimelionVisSetupDependencies, void>;
+import './index.scss';
+import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
 
 /** @internal */
 export interface TimelionVisDependencies extends Partial<CoreStart> {
@@ -52,11 +57,28 @@ export interface TimelionVisSetupDependencies {
 }
 
 /** @internal */
-export class TimelionVisPlugin implements Plugin<void, void> {
-  constructor(public initializerContext: PluginInitializerContext) {}
+export interface TimelionVisStartDependencies {
+  data: DataPublicPluginStart;
+}
 
-  public async setup(
-    core: TimelionVisCoreSetup,
+/** @public */
+export interface VisTypeTimelionPluginStart {
+  getArgValueSuggestions: typeof getArgValueSuggestions;
+}
+
+/** @internal */
+export class TimelionVisPlugin
+  implements
+    Plugin<
+      void,
+      VisTypeTimelionPluginStart,
+      TimelionVisSetupDependencies,
+      TimelionVisStartDependencies
+    > {
+  constructor(public initializerContext: PluginInitializerContext<ConfigSchema>) {}
+
+  public setup(
+    core: CoreSetup,
     { expressions, visualizations, data }: TimelionVisSetupDependencies
   ) {
     const dependencies: TimelionVisDependencies = {
@@ -69,8 +91,15 @@ export class TimelionVisPlugin implements Plugin<void, void> {
     visualizations.createReactVisualization(getTimelionVisDefinition(dependencies));
   }
 
-  public start(core: CoreStart, plugins: PluginsStart) {
+  public start(core: CoreStart, plugins: TimelionVisStartDependencies) {
     setIndexPatterns(plugins.data.indexPatterns);
     setSavedObjectsClient(core.savedObjects.client);
+    if (this.initializerContext.config.get().ui.enabled === false) {
+      core.chrome.navLinks.update('timelion', { hidden: true });
+    }
+
+    return {
+      getArgValueSuggestions,
+    };
   }
 }

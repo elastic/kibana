@@ -19,8 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
-import { VisParams } from '../../../../../plugins/visualizations/public';
-import { TimeRange, Filter, esQuery, Query } from '../../../../../plugins/data/public';
+import { VisParams } from '../../../visualizations/public';
+import { TimeRange, Filter, esQuery, Query } from '../../../data/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 

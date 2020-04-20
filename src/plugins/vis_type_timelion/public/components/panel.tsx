@@ -22,9 +22,9 @@ import $ from 'jquery';
 import moment from 'moment-timezone';
 import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 
-import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { useKibana } from '../../../kibana_react/public';
 import '../flot';
-import { DEFAULT_TIME_FORMAT } from '../../../../../plugins/timelion/common/lib';
+import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
 import {
   buildSeriesData,

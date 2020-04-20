@@ -17,14 +17,26 @@
  * under the License.
  */
 
-import { CoreStart, PluginInitializerContext } from 'kibana/public';
-import { ConfigSchema } from '../config';
+const fn = require(`src/plugins/vis_type_timelion/server/lib/load_functions`);
 
-export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema>) => ({
-  setup() {},
-  start(core: CoreStart) {
-    if (initializerContext.config.get().ui.enabled === false) {
-      core.chrome.navLinks.update('timelion', { hidden: true });
-    }
-  },
+const expect = require('chai').expect;
+
+describe('load_functions.js', () => {
+  it('exports a function', () => {
+    expect(fn).to.be.a('function');
+  });
+
+  it('returns an object with keys named for the javascript files in the directory', () => {
+    const fnList = fn('series_functions');
+
+    expect(fnList).to.be.an('object');
+    expect(fnList.sum).to.be.a('object');
+  });
+
+  it('also includes index.js files in direct subdirectories, and names the keys for the directory', () => {
+    const fnList = fn('series_functions');
+
+    expect(fnList).to.be.an('object');
+    expect(fnList.es).to.be.a('object');
+  });
 });
