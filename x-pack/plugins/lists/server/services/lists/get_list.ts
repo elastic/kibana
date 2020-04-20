@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ListsSchema, SearchEsListsSchema, Id } from '../../../common/schemas';
+import { Id, ListsSchema, SearchEsListsSchema } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
 interface GetListOptions {

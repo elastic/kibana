@@ -6,7 +6,7 @@
 
 import { IRouter } from 'kibana/server';
 
-import { transformError, buildSiemResponse, validate } from '../siem_server_deps';
+import { buildSiemResponse, transformError, validate } from '../siem_server_deps';
 import { LIST_INDEX } from '../../common/constants';
 import { acknowledgeSchema } from '../../common/schemas';
 

@@ -9,15 +9,15 @@
 import * as t from 'io-ts';
 
 import {
-  name,
-  description,
-  metaOrUndefined,
-  updated_at,
-  updated_by,
-  type,
-  tie_breaker_id,
   created_at,
   created_by,
+  description,
+  metaOrUndefined,
+  name,
+  tie_breaker_id,
+  type,
+  updated_at,
+  updated_by,
 } from '../common/schemas';
 
 export const indexEsListsSchema = t.exact(

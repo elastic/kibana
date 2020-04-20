@@ -7,12 +7,12 @@
 import { CreateDocumentResponse } from 'elasticsearch';
 
 import {
-  ListsSchema,
-  UpdateEsListsSchema,
-  MetaOrUndefined,
-  NameOrUndefined,
   DescriptionOrUndefined,
   Id,
+  ListsSchema,
+  MetaOrUndefined,
+  NameOrUndefined,
+  UpdateEsListsSchema,
 } from '../../../common/schemas';
 import { DataClient } from '../../types';
 

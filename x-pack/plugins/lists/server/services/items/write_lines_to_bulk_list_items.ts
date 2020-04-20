@@ -6,10 +6,10 @@
 
 import { Readable } from 'stream';
 
-import { Type, MetaOrUndefined } from '../../../common/schemas';
+import { MetaOrUndefined, Type } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
-import { createListItemsBulk, getListItemsByValues, BufferLines } from '.';
+import { BufferLines, createListItemsBulk, getListItemsByValues } from '.';
 
 interface ImportListItemsToStreamOptions {
   listId: string;

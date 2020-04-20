@@ -9,10 +9,10 @@ import uuid from 'uuid';
 import { transformListItemsToElasticQuery } from '../utils';
 import { DataClient } from '../../types';
 import {
-  Type,
-  CreateEsListsItemsSchema,
   CreateEsBulkTypeSchema,
+  CreateEsListsItemsSchema,
   MetaOrUndefined,
+  Type,
 } from '../../../common/schemas';
 
 interface CreateListItemsBulkOptions {

@@ -8,15 +8,15 @@ import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
 import {
-  transformError,
-  buildSiemResponse,
   buildRouteValidation,
+  buildSiemResponse,
+  transformError,
   validate,
 } from '../siem_server_deps';
 import {
   deleteListsItemsSchema,
-  listsItemsSchema,
   listsItemsArraySchema,
+  listsItemsSchema,
 } from '../../common/schemas';
 
 import { getListClient } from '.';

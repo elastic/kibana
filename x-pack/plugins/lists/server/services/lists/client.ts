@@ -8,60 +8,60 @@ import { KibanaRequest, ScopedClusterClient } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../../../security/server';
 import { SpacesServiceSetup } from '../../../../spaces/server';
-import { ListsSchema, ListsItemsSchema, ListsItemsArraySchema } from '../../../common/schemas';
+import { ListsItemsArraySchema, ListsItemsSchema, ListsSchema } from '../../../common/schemas';
 import { ConfigType } from '../../config';
 import {
-  getListIndex,
-  getList,
   createList,
-  getListsTemplate,
   deleteList,
+  getList,
+  getListIndex,
+  getListsTemplate,
   updateList,
 } from '../../services/lists';
 import {
-  getListItemIndex,
-  getListsItemsTemplate,
+  createListItem,
   deleteListItem,
   deleteListItemByValue,
   exportListItemsToStream,
+  getListItem,
   getListItemByValue,
-  createListItem,
+  getListItemIndex,
+  getListItemsByValues,
+  getListsItemsTemplate,
   importListItemsToStream,
   updateListItem,
-  getListItem,
-  getListItemsByValues,
 } from '../../services/items';
 import { getUser } from '../../services/utils';
 import {
-  deleteTemplate,
-  deletePolicy,
+  createBootstrapIndex,
   deleteAllIndex,
+  deletePolicy,
+  deleteTemplate,
+  getIndexExists,
+  getPolicyExists,
+  getTemplateExists,
   setPolicy,
   setTemplate,
-  getTemplateExists,
-  getPolicyExists,
-  createBootstrapIndex,
-  getIndexExists,
 } from '../../siem_server_deps';
 import listsItemsPolicy from '../items/lists_items_policy.json';
 
 import listsPolicy from './lists_policy.json';
 import {
   ConstructorOptions,
-  CreateListOptions,
-  GetListOptions,
-  DeleteListItemByValueOptions,
-  DeleteListOptions,
-  DeleteListItemOptions,
-  GetListItemByValueOptions,
-  CreateListItemOptions,
-  ImportListItemsToStreamOptions,
-  ExportListItemsToStreamOptions,
   CreateListIfItDoesNotExistOptions,
-  UpdateListItemOptions,
-  UpdateListOptions,
+  CreateListItemOptions,
+  CreateListOptions,
+  DeleteListItemByValueOptions,
+  DeleteListItemOptions,
+  DeleteListOptions,
+  ExportListItemsToStreamOptions,
+  GetListItemByValueOptions,
   GetListItemOptions,
   GetListItemsByValueOptions,
+  GetListOptions,
+  ImportListItemsToStreamOptions,
+  UpdateListItemOptions,
+  UpdateListOptions,
 } from './client_types';
 
 // TODO: Consider an interface and a factory

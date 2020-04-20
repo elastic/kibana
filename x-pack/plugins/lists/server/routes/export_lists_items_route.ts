@@ -9,7 +9,7 @@ import { Stream } from 'stream';
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import { transformError, buildSiemResponse, buildRouteValidation } from '../siem_server_deps';
+import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { exportListsItemsQuerySchema } from '../../common/schemas';
 
 import { getListClient } from '.';

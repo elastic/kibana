@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Type, ListsItemsArraySchema } from '../../../common/schemas';
+import { ListsItemsArraySchema, Type } from '../../../common/schemas';
 import { getQueryFilterFromTypeValue } from '../utils';
 import { DataClient } from '../../types';
 

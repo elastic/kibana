@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ScopedClusterClient, IContextProvider, RequestHandler } from 'kibana/server';
 
-import { SpacesPluginSetup } from '../../spaces/server';
+import { IContextProvider, RequestHandler, ScopedClusterClient } from 'kibana/server';
+
 import { SecurityPluginSetup } from '../../security/server';
+import { SpacesPluginSetup } from '../../spaces/server';
 
 import { ListsClient } from './services/lists/client';
 

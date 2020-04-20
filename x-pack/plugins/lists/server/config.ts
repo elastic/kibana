@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),

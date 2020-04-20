@@ -9,11 +9,11 @@
 import * as t from 'io-ts';
 
 import {
-  nameOrUndefined,
+  descriptionOrUndefined,
   metaOrUndefined,
+  nameOrUndefined,
   updated_at,
   updated_by,
-  descriptionOrUndefined,
 } from '../common/schemas';
 
 export const updateEsListsSchema = t.exact(

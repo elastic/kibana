@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-import { nameOrUndefined, descriptionOrUndefined, id, metaOrUndefined } from '../common/schemas';
+import { descriptionOrUndefined, id, metaOrUndefined, nameOrUndefined } from '../common/schemas';
 
 export const patchListsSchema = t.exact(
   t.type({

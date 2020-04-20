@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-import { metaOrUndefined, updated_at, updated_by, esDataTypeUnion } from '../common/schemas';
+import { esDataTypeUnion, metaOrUndefined, updated_at, updated_by } from '../common/schemas';
 
 export const updateEsListsItemsSchema = t.intersection([
   t.exact(

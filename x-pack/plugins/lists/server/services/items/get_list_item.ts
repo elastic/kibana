@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ListsItemsSchema, SearchEsListsItemsSchema, Id } from '../../../common/schemas';
+import { Id, ListsItemsSchema, SearchEsListsItemsSchema } from '../../../common/schemas';
 import { DataClient } from '../../types';
 import { deriveTypeFromItem, transformElasticToListsItems } from '../utils';
 

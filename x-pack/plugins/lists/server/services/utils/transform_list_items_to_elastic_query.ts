@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Type, EsDataTypeUnion } from '../../../common/schemas';
+import { EsDataTypeUnion, Type } from '../../../common/schemas';
 
 export const transformListItemsToElasticQuery = ({
   type,

@@ -6,9 +6,9 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { Type, SearchEsListsItemsSchema, ListsItemsArraySchema } from '../../../common/schemas';
+import { ListsItemsArraySchema, SearchEsListsItemsSchema, Type } from '../../../common/schemas';
 import { DataClient } from '../../types';
-import { transformElasticToListsItems, getQueryFilterFromTypeValue } from '../utils';
+import { getQueryFilterFromTypeValue, transformElasticToListsItems } from '../utils';
 
 interface GetListItemsByValuesOptions {
   listId: string;

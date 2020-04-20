@@ -9,16 +9,16 @@
 import * as t from 'io-ts';
 
 import {
-  name,
+  created_at,
+  created_by,
   description,
   id,
-  type,
-  created_at,
-  updated_at,
-  tie_breaker_id,
-  updated_by,
-  created_by,
   metaOrUndefined,
+  name,
+  tie_breaker_id,
+  type,
+  updated_at,
+  updated_by,
 } from '../common/schemas';
 
 export const listsSchema = t.exact(

@@ -9,16 +9,16 @@ import * as t from 'io-ts';
 /* eslint-disable @typescript-eslint/camelcase */
 
 import {
-  list_id,
-  value,
-  id,
-  metaOrUndefined,
-  type,
   created_at,
-  updated_at,
-  tie_breaker_id,
-  updated_by,
   created_by,
+  id,
+  list_id,
+  metaOrUndefined,
+  tie_breaker_id,
+  type,
+  updated_at,
+  updated_by,
+  value,
 } from '../common/schemas';
 
 export const listsItemsSchema = t.exact(

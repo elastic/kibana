@@ -9,15 +9,15 @@
 import * as t from 'io-ts';
 
 import {
-  name,
+  created_at,
+  created_by,
   description,
   metaOrUndefined,
-  type,
-  created_at,
-  updated_at,
+  name,
   tie_breaker_id,
+  type,
+  updated_at,
   updated_by,
-  created_by,
 } from '../common/schemas';
 
 export const searchEsListsSchema = t.exact(

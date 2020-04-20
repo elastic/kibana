@@ -11,14 +11,14 @@ import { KibanaRequest } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../../security/server';
 import { SpacesServiceSetup } from '../../../../spaces/server';
 import {
-  Type,
-  MetaOrUndefined,
-  NameOrUndefined,
-  DescriptionOrUndefined,
-  Name,
   Description,
+  DescriptionOrUndefined,
   Id,
   IdOrUndefined,
+  MetaOrUndefined,
+  Name,
+  NameOrUndefined,
+  Type,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
 import { DataClient } from '../../types';

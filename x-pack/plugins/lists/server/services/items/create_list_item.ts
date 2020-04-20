@@ -8,11 +8,11 @@ import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
 
 import {
-  ListsItemsSchema,
-  Type,
   CreateEsListsItemsSchema,
   IdOrUndefined,
+  ListsItemsSchema,
   MetaOrUndefined,
+  Type,
 } from '../../../common/schemas';
 import { DataClient } from '../../types';
 import { transformListItemsToElasticQuery } from '../utils';

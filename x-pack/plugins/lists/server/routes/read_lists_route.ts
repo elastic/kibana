@@ -8,12 +8,12 @@ import { IRouter } from 'kibana/server';
 
 import { LIST_URL } from '../../common/constants';
 import {
-  transformError,
-  buildSiemResponse,
   buildRouteValidation,
+  buildSiemResponse,
+  transformError,
   validate,
 } from '../siem_server_deps';
-import { readListsSchema, listsSchema } from '../../common/schemas';
+import { listsSchema, readListsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 

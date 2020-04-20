@@ -9,13 +9,13 @@ import { CreateDocumentResponse } from 'elasticsearch';
 
 import { DataClient } from '../../types';
 import {
-  ListsSchema,
-  Type,
-  IndexEsListsSchema,
-  MetaOrUndefined,
   Description,
-  Name,
   IdOrUndefined,
+  IndexEsListsSchema,
+  ListsSchema,
+  MetaOrUndefined,
+  Name,
+  Type,
 } from '../../../common/schemas';
 
 interface CreateListOptions {

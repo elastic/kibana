@@ -755,6 +755,12 @@ module.exports = {
             'newlines-between': 'always',
           },
         ],
+        'sort-imports': [
+          'error',
+          {
+            ignoreDeclarationSort: true,
+          },
+        ],
         'node/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',

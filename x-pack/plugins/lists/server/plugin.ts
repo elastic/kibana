@@ -5,7 +5,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { Logger, PluginInitializerContext, ElasticsearchServiceSetup } from 'kibana/server';
+import { ElasticsearchServiceSetup, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';

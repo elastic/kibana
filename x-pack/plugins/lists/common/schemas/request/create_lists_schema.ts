@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-import { name, description, idOrUndefined, metaOrUndefined, type } from '../common/schemas';
+import { description, idOrUndefined, metaOrUndefined, name, type } from '../common/schemas';
 
 export const createListsSchema = t.exact(
   t.type({

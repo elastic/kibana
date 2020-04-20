@@ -9,14 +9,14 @@
 import * as t from 'io-ts';
 
 import {
-  metaOrUndefined,
-  updated_at,
-  updated_by,
-  list_id,
   created_at,
   created_by,
-  tie_breaker_id,
   esDataTypeUnion,
+  list_id,
+  metaOrUndefined,
+  tie_breaker_id,
+  updated_at,
+  updated_by,
 } from '../common/schemas';
 
 export const createEsListsItemsSchema = t.intersection([

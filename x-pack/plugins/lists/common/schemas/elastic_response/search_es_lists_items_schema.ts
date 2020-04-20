@@ -9,16 +9,16 @@
 import * as t from 'io-ts';
 
 import {
-  updated_at,
-  updated_by,
-  esDataTypeUnion,
-  list_id,
   created_at,
   created_by,
-  tie_breaker_id,
+  esDataTypeUnion,
   ipOrUndefined,
   keywordOrUndefined,
+  list_id,
   metaOrUndefined,
+  tie_breaker_id,
+  updated_at,
+  updated_by,
 } from '../common/schemas';
 
 export const searchEsListsItemsSchema = t.intersection([
