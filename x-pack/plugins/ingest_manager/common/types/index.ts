@@ -3,17 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { RequestHandlerContext } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { AgentStatus } from './models';
 
 export * from './models';
 export * from './rest_spec';
 
 export interface AgentService {
-  getAgentStatus(
-    requestHandlerContext: RequestHandlerContext,
-    agentId: string
-  ): Promise<AgentStatus>;
+  getAgentStatusById(soClient: SavedObjectsClientContract, agentId: string): Promise<AgentStatus>;
 }
 
 export interface IngestManagerConfigType {

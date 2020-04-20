@@ -45,7 +45,7 @@ import {
   ESIndexPatternService,
   ESIndexPatternSavedObjectService,
 } from './services';
-import { createAgentService } from './services/agent_service';
+import { getAgentStatusById } from './services/agents';
 
 /**
  * Describes public IngestManager plugin contract returned at the `setup` stage.
@@ -150,7 +150,9 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
     }
     return deepFreeze({
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
-      agentService: createAgentService(),
+      agentService: {
+        getAgentStatusById,
+      },
     });
   }
 

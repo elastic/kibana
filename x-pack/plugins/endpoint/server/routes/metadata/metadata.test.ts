@@ -88,7 +88,7 @@ describe('test endpoint route', () => {
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/metadata')
     )!;
-    mockAgentService.getAgentStatus = jest.fn().mockReturnValue('error');
+    mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
     await routeHandler(
       createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
       mockRequest,
@@ -119,7 +119,7 @@ describe('test endpoint route', () => {
       },
     });
 
-    mockAgentService.getAgentStatus = jest.fn().mockReturnValue('error');
+    mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
       Promise.resolve((data as unknown) as SearchResponse<HostMetadata>)
     );
@@ -162,7 +162,7 @@ describe('test endpoint route', () => {
       },
     });
 
-    mockAgentService.getAgentStatus = jest.fn().mockReturnValue('error');
+    mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
       Promise.resolve((data as unknown) as SearchResponse<HostMetadata>)
     );
@@ -225,7 +225,7 @@ describe('test endpoint route', () => {
           },
         })
       );
-      mockAgentService.getAgentStatus = jest.fn().mockReturnValue('error');
+      mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
         path.startsWith('/api/endpoint/metadata')
       )!;
@@ -249,7 +249,7 @@ describe('test endpoint route', () => {
       const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
         HostMetadata
       >;
-      mockAgentService.getAgentStatus = jest.fn().mockReturnValue('online');
+      mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('online');
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
         path.startsWith('/api/endpoint/metadata')
@@ -276,7 +276,7 @@ describe('test endpoint route', () => {
       const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
         HostMetadata
       >;
-      mockAgentService.getAgentStatus = jest.fn().mockImplementation(() => {
+      mockAgentService.getAgentStatusById = jest.fn().mockImplementation(() => {
         throw Boom.notFound('Agent not found');
       });
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
@@ -304,7 +304,7 @@ describe('test endpoint route', () => {
       const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
         HostMetadata
       >;
-      mockAgentService.getAgentStatus = jest.fn().mockReturnValue('warning');
+      mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('warning');
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
         path.startsWith('/api/endpoint/metadata')

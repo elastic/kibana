@@ -167,8 +167,8 @@ async function enrichHostMetadata(
 ): Promise<HostInfo> {
   let hostStatus = HostStatus.ERROR;
   try {
-    const status = await metadataRequestContext.endpointAppContext.agentService.getAgentStatus(
-      metadataRequestContext.requestHandlerContext,
+    const status = await metadataRequestContext.endpointAppContext.agentService.getAgentStatusById(
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client,
       hostMetadata.elastic.agent.id
     );
     hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;

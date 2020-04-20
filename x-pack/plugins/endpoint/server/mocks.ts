@@ -36,7 +36,7 @@ export const createMockMetadataIndexPatternRetriever = () => {
  */
 export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
-    getAgentStatus: jest.fn(),
+    getAgentStatusById: jest.fn(),
   };
 };
 
