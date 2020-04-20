@@ -7,12 +7,14 @@
 import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getSupertestWithoutAuth } from '../fleet/agents/services';
 
 export default function(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const esClient = getService('es');
+  const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   // agent that is enrolled and know to fleet
   const enrolledAgentId = '94e689c0-81bd-11ea-a4eb-77680821cd3b';
   // host that is connected to enrolledAgentId
@@ -25,7 +27,7 @@ export default function(providerContext: FtrProviderContext) {
   describe('test metadata api status', () => {
     describe('/api/endpoint/metadata when index is not empty', () => {
       beforeEach(async () => {
-        await esArchiver.load('endpoint/metadata/endpoint_status_feature');
+        await esArchiver.loadIfNeeded('endpoint/metadata/endpoint_status_feature');
         const { body: apiKeyBody } = await esClient.security.createApiKey({
           body: {
             name: `test access api key: ${uuid.v4()}`,
@@ -49,6 +51,13 @@ export default function(providerContext: FtrProviderContext) {
             doc: agentDoc,
           },
         });
+        await getService('supertest')
+          .post(`/api/ingest_manager/setup`)
+          .set('kbn-xsrf', 'xxx')
+          .send();
+        await getService('supertest')
+          .post(`/api/ingest_manager/fleet/setup`)
+          .set('kbn-xsrf', 'xxx');
       });
 
       afterEach(async () => await esArchiver.unload('endpoint/metadata/endpoint_status_feature'));
@@ -81,6 +90,63 @@ export default function(providerContext: FtrProviderContext) {
           (hostInfo: Record<string, any>) => hostInfo.metadata.host.id === notEnrolledHostId
         );
         expect(enrolledHost.host_status === 'error');
+        expect(notEnrolledHost.host_status === 'error');
+      });
+
+      it('should return single metadata with status online when agent status is online', async () => {
+        const { body: checkInResponse } = await supertestWithoutAuth
+          .post(`/api/ingest_manager/fleet/agents/${enrolledAgentId}/checkin`)
+          .set('kbn-xsrf', 'xx')
+          .set(
+            'Authorization',
+            `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+          )
+          .send({
+            events: [],
+            local_metadata: {},
+          })
+          .expect(200);
+
+        expect(checkInResponse.action).to.be('checkin');
+        expect(checkInResponse.success).to.be(true);
+
+        const { body: metadataResponse } = await supertest
+          .get(`/api/endpoint/metadata/${enrolledHostId}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(metadataResponse.host_status).to.be('online');
+      });
+
+      it('should return metadata list with status only when agent is checked in', async () => {
+        const { body: checkInResponse } = await supertestWithoutAuth
+          .post(`/api/ingest_manager/fleet/agents/${enrolledAgentId}/checkin`)
+          .set('kbn-xsrf', 'xx')
+          .set(
+            'Authorization',
+            `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+          )
+          .send({
+            events: [],
+            local_metadata: {},
+          })
+          .expect(200);
+
+        expect(checkInResponse.action).to.be('checkin');
+        expect(checkInResponse.success).to.be(true);
+
+        const { body } = await supertest
+          .post('/api/endpoint/metadata')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.total).to.eql(2);
+        expect(body.hosts.length).to.eql(2);
+        const enrolledHost = body.hosts.filter(
+          (hostInfo: Record<string, any>) => hostInfo.metadata.host.id === enrolledHostId
+        );
+        const notEnrolledHost = body.hosts.filter(
+          (hostInfo: Record<string, any>) => hostInfo.metadata.host.id === notEnrolledHostId
+        );
+        expect(enrolledHost.host_status === 'online');
         expect(notEnrolledHost.host_status === 'error');
       });
     });
