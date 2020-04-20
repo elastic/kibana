@@ -6,11 +6,11 @@
 import React, { useEffect, useCallback, useMemo } from 'react';
 import numeral from '@elastic/numeral';
 
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../../plugins/siem/common/constants';
 import { AlertsComponentsQueryProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../lib/kibana';
-import { DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 import { MatrixHistogramContainer } from '../matrix_histogram';
 import { histogramConfigs } from './histogram_configs';
 import { MatrixHisrogramConfigs } from '../matrix_histogram/types';

@@ -9,8 +9,8 @@ import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 
-import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
-import { DescriptionList } from '../../../../../common/utility_types';
+import { DEFAULT_DARK_MODE } from '../../../../../../../../plugins/siem/common/constants';
+import { DescriptionList } from '../../../../../../../../plugins/siem/common/utility_types';
 import { useUiSetting$ } from '../../../../lib/kibana';
 import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
