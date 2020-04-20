@@ -13,7 +13,7 @@ import {
   HistogramResult,
 } from '../../../common/runtime_types';
 import { apiService } from './utils';
-import { API_URLS } from '../../../common/constants/rest_api';
+import { API_URLS } from '../../../common/constants';
 
 export const fetchPings: APIFn<GetPingsParams, PingsResponse> = async ({
   dateRange: { from, to },
