@@ -5,7 +5,7 @@
  */
 
 import { extname } from 'path';
-import { chunk, omit, set } from 'lodash/fp';
+import { chunk, omit } from 'lodash/fp';
 
 import {
   buildSiemResponse,
@@ -36,8 +36,8 @@ import { importRulesSchema } from '../../detection_engine/routes/schemas/respons
 import { LegacyServices } from '../../../types';
 
 import { validate } from '../../detection_engine/routes/rules/validate';
-import { FrameworkRequest } from '../../framework';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { buildFrameworkRequest } from './utils/common';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
@@ -67,7 +67,7 @@ export const importTimelinesRoute = (
         if (!savedObjectsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-
+        const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const { file } = request.body;
         const { filename } = file.hapi;
 
@@ -93,10 +93,6 @@ export const importTimelinesRoute = (
         );
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
         let importTimelineResponse: ImportTimelineResponse[] = [];
-
-        const user = await security?.authc.getCurrentUser(request);
-        let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);
-        frameworkRequest = set('user', user, frameworkRequest);
 
         while (chunkParseObjects.length) {
           const batchParseObjects = chunkParseObjects.shift() ?? [];
@@ -127,16 +123,13 @@ export const importTimelinesRoute = (
                       timelineSavedObjectOmittedFields,
                       parsedTimeline
                     );
-                    let newTimelineSavedObjectId = null;
+                    let newTimeline = null;
                     try {
-                      const timeline = await getTimeline(
-                        (frameworkRequest as unknown) as FrameworkRequest,
-                        savedObjectId
-                      );
+                      const timeline = await getTimeline(frameworkRequest, savedObjectId);
 
                       if (timeline == null) {
-                        newTimelineSavedObjectId = await createTimelines(
-                          (frameworkRequest as unknown) as FrameworkRequest,
+                        newTimeline = await createTimelines(
+                          frameworkRequest,
                           parsedTimelineObject,
                           null, // timelineSavedObjectId
                           null, // timelineVersion
@@ -146,7 +139,7 @@ export const importTimelinesRoute = (
                         );
 
                         resolve({
-                          timeline_id: newTimelineSavedObjectId,
+                          timeline_id: newTimeline.timeline.savedObjectId,
                           status_code: 200,
                         });
                       } else {

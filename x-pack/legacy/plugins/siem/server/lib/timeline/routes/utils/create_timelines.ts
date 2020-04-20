@@ -8,8 +8,8 @@ import * as timelineLib from '../../saved_object';
 import * as pinnedEventLib from '../../../pinned_event/saved_object';
 import * as noteLib from '../../../note/saved_object';
 import { FrameworkRequest } from '../../../framework';
-import { SavedTimeline } from '../../types';
-import { NoteResult } from '../../../../../public/graphql/types';
+import { SavedTimeline, TimelineSavedObject } from '../../types';
+import { NoteResult, ResponseTimeline } from '../../../../../public/graphql/types';
 import { SavedNote } from '../../../note/types';
 
 export const CREATE_TIMELINE_ERROR_MESSAGE =
@@ -17,24 +17,18 @@ export const CREATE_TIMELINE_ERROR_MESSAGE =
 export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE template timeline with POST is not allowed, please use PATCH instead';
 
-export const saveTimelines = async (
+export const saveTimelines = (
   frameworkRequest: FrameworkRequest,
   timeline: SavedTimeline,
   timelineSavedObjectId?: string | null,
   timelineVersion?: string | null
-) => {
-  // TODO return the full timeline "newTimelineRes" that persist timeline is giving you and give a type to the function
-  const newTimelineRes = await timelineLib.persistTimeline(
+): Promise<ResponseTimeline> => {
+  return timelineLib.persistTimeline(
     frameworkRequest,
     timelineSavedObjectId ?? null,
     timelineVersion ?? null,
     timeline
   );
-
-  return {
-    newTimelineSavedObjectId: newTimelineRes?.timeline?.savedObjectId ?? null,
-    newTimelineVersion: newTimelineRes?.timeline?.version ?? null,
-  };
 };
 
 export const savePinnedEvents = (
@@ -78,7 +72,6 @@ export const saveNotes = (
   );
 };
 
-// TODO put a type here so we know what you return and you can fix it everywhere
 export const createTimelines = async (
   frameworkRequest: FrameworkRequest,
   timeline: SavedTimeline,
@@ -87,13 +80,15 @@ export const createTimelines = async (
   pinnedEventIds?: string[] | null,
   notes?: NoteResult[],
   existingNoteIds?: string[]
-) => {
-  const { newTimelineSavedObjectId, newTimelineVersion } = await saveTimelines(
+): Promise<ResponseTimeline> => {
+  const responseTimeline = await saveTimelines(
     frameworkRequest,
     timeline,
     timelineSavedObjectId,
     timelineVersion
   );
+  const newTimelineSavedObjectId = responseTimeline.timeline.savedObjectId;
+  const newTimelineVersion = responseTimeline.timeline.version;
 
   let myPromises: unknown[] = [];
   if (pinnedEventIds != null && !isEmpty(pinnedEventIds)) {
@@ -123,10 +118,13 @@ export const createTimelines = async (
     await Promise.all(myPromises);
   }
 
-  return newTimelineSavedObjectId;
+  return responseTimeline;
 };
 
-export const getTimeline = async (frameworkRequest: FrameworkRequest, savedObjectId: string) => {
+export const getTimeline = async (
+  frameworkRequest: FrameworkRequest,
+  savedObjectId: string
+): Promise<TimelineSavedObject | null> => {
   let timeline = null;
   try {
     timeline = await timelineLib.getTimeline(frameworkRequest, savedObjectId);
@@ -138,14 +136,13 @@ export const getTimeline = async (frameworkRequest: FrameworkRequest, savedObjec
 export const getTemplateTimeline = async (
   frameworkRequest: FrameworkRequest,
   templateTimelineId: string
-) => {
+): Promise<TimelineSavedObject | null> => {
   let templateTimeline = null;
   try {
     templateTimeline = await timelineLib.getTimelineByTemplateTimelineId(
       frameworkRequest,
       templateTimelineId
     );
-    // eslint-disable-next-line no-empty
   } catch (e) {
     return null;
   }

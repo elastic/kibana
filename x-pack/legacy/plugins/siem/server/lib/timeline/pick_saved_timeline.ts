@@ -28,11 +28,11 @@ export const pickSavedTimeline = (
 
   if (savedTimeline.timelineType === TimelineType.template) {
     savedTimeline.timelineType = TimelineType.template;
-    if (savedTimeline.templateTimelineId === null) {
+    if (savedTimeline.templateTimelineId == null) {
       savedTimeline.templateTimelineId = uuid.v4();
     }
 
-    if (savedTimeline.templateTimelineVersion === null) {
+    if (savedTimeline.templateTimelineVersion == null) {
       savedTimeline.templateTimelineVersion = 1;
     }
   } else {
