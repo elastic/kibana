@@ -185,7 +185,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResultsAfterDelete.length).to.eql(0);
     });
 
-    it('should not be able to delete a pre-configured connector', async () => {
+    it('should not be able to delete a preconfigured connector', async () => {
       const preconfiguredConnectorName = 'xyz';
       await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
 
@@ -196,7 +196,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
     });
 
-    it('should not be able to edit a pre-configured connector', async () => {
+    it('should not be able to edit a preconfigured connector', async () => {
       const preconfiguredConnectorName = 'xyz';
 
       await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
