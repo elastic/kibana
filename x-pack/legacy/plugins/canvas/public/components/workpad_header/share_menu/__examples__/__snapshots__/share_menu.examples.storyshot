@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/WorkpadHeader/ShareMenu enabled 1`] = `
+exports[`Storyshots components/WorkpadHeader/ShareMenu default 1`] = `
 <div>
   <div
     className="euiPopover euiPopover--anchorDownLeft"

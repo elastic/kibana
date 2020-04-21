@@ -25,6 +25,9 @@ moment.tz.setDefault('UTC');
 const testTime = new Date(Date.UTC(2019, 5, 1)); // June 1 2019
 Date.now = jest.fn(() => testTime);
 
+// Mock telemetry service 
+jest.mock('../public/lib/ui_metric', () => ({ trackCanvasUiMetric: () => { } }));
+
 // Mock EUI generated ids to be consistently predictable for snapshots.
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
@@ -33,7 +36,7 @@ jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `gene
 jest.mock('@elastic/eui/lib/components/code/code', () => {
   const React = require.requireActual('react');
   return {
-    EuiCode: ({children, className}) => (
+    EuiCode: ({ children, className }) => (
       <span>
         <code>{children}</code>
       </span>
