@@ -98,10 +98,10 @@ function getSpanIcon(type?: string, subtype?: string) {
   }
 
   const types = type ? typeIcons[type] : {};
-  if (subtype && subtype in types) {
+  if (subtype && types && subtype in types) {
     return types[subtype];
   }
-  return defaultTypeIcons[type];
+  return defaultTypeIcons[type] || defaultIcon;
 }
 
 // IE 11 does not properly load some SVGs, which causes a runtime error and the
