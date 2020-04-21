@@ -22,6 +22,7 @@ import * as i18n from './translations';
 export interface UsePushToService {
   caseId: string;
   caseStatus: string;
+  currentConnectorName: string;
   isNew: boolean;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
@@ -40,6 +41,7 @@ export interface ReturnUsePushToService {
 export const usePushToService = ({
   caseId,
   caseStatus,
+  currentConnectorName,
   isNew,
   updateCase,
   userCanCrud,
@@ -135,7 +137,7 @@ export const usePushToService = ({
         }
         isLoading={isLoading}
       >
-        {isNew ? i18n.PUSH_SERVICENOW : i18n.UPDATE_PUSH_SERVICENOW}
+        {isNew ? i18n.PUSH_THIRD(currentConnectorName) : i18n.UPDATE_THIRD(currentConnectorName)}
       </EuiButton>
     ),
     [

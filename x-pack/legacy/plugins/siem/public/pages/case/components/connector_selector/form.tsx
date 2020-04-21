@@ -5,7 +5,7 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
@@ -16,12 +16,14 @@ interface ConnectorSelectorProps {
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
+  defaultValue?: string;
   disabled: boolean;
   isLoading: boolean;
 }
 export const ConnectorSelector = ({
   connectors,
   dataTestSubj,
+  defaultValue,
   field,
   idAria,
   disabled = false,
@@ -29,9 +31,12 @@ export const ConnectorSelector = ({
 }: ConnectorSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
+  useEffect(() => {
+    field.setValue(defaultValue);
+  }, [defaultValue]);
+
   const handleContentChange = useCallback(
     (newContent: string) => {
-      console.log('newContent', newContent);
       field.setValue(newContent);
     },
     [field]

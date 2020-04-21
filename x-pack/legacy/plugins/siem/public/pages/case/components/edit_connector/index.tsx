@@ -28,7 +28,7 @@ interface EditConnectorProps {
   isLoading: boolean;
   onSubmit: (a: string[]) => void;
   connectors: Connector[];
-  selectedConnector: Connector | null;
+  selectedConnector: string | null;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -86,9 +86,6 @@ export const EditConnector = React.memo(
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="xs">
-          {/*{selectedConnector === null && !isEditConnector && (*/}
-          {/*  <p data-test-subj="no-connectors">{i18n.NO_CONNECTOR}</p>*/}
-          {/*)}*/}
           <EuiFlexGroup data-test-subj="edit-connectors" direction="column">
             <EuiFlexItem>
               <Form form={form}>
@@ -103,6 +100,7 @@ export const EditConnector = React.memo(
                         idAria: 'caseConnectors',
                         isLoading,
                         disabled: !isEditConnector,
+                        defaultValue: selectedConnector,
                       }}
                     />
                   </EuiFlexItem>

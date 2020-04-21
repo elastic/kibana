@@ -11,7 +11,7 @@ describe('Reducer', () => {
   let reducer: (state: State, action: Action) => State;
 
   beforeAll(() => {
-    reducer = configureCasesReducer();
+    reducer = configureCasesReducer;
   });
 
   test('it should set the correct configuration', () => {

@@ -39,7 +39,7 @@ export type Action =
       mapping: CasesConfigurationMapping[];
     };
 
-export const configureCasesReducer = () => (state: State, action: Action) => {
+export const configureCasesReducer = (state: State, action: Action) => {
   switch (action.type) {
     case 'setCurrentConfiguration': {
       return {

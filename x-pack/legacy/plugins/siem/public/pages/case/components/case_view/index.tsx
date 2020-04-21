@@ -12,7 +12,7 @@ import {
   EuiLoadingSpinner,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
@@ -37,6 +37,7 @@ import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_
 import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
+import { useCaseConfigure } from '../../../../containers/case/configure/use_configure_better';
 
 interface Props {
   caseId: string;
@@ -148,14 +149,16 @@ export const CaseComponent = React.memo<CaseProps>(
       [updateCase, fetchCaseUserActions]
     );
 
+    const { currentConfiguration, loading: isLoadingCaseConfigure } = useCaseConfigure();
+    const { loading: isLoadingConnectors, connectors } = useConnectors();
     const { pushButton, pushCallouts } = usePushToService({
       caseId: caseData.id,
       caseStatus: caseData.status,
       isNew: caseUserActions.filter(cua => cua.action === 'push-to-service').length === 0,
       updateCase: handleUpdateCase,
       userCanCrud,
+      currentConnectorName: currentConfiguration.connectorName,
     });
-    const { loading: isLoadingConnectors, connectors } = useConnectors();
 
     const onSubmitConnector = useCallback(newConnector => {
       console.log('newConnector', newConnector);
@@ -307,10 +310,10 @@ export const CaseComponent = React.memo<CaseProps>(
                   isLoading={isLoading && updateKey === 'tags'}
                 />
                 <EditConnector
-                  isLoading={isLoadingConnectors}
+                  isLoading={isLoadingConnectors || isLoadingCaseConfigure}
                   onSubmit={onSubmitConnector}
                   connectors={connectors}
-                  selectedConnector={null}
+                  selectedConnector={currentConfiguration.connectorId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
