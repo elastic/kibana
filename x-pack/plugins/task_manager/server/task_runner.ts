@@ -40,6 +40,7 @@ const EMPTY_RUN_RESULT: SuccessfulRunResult = {};
 export interface TaskRunner {
   isExpired: boolean;
   expiration: Date;
+  definition: TaskDefinition;
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;

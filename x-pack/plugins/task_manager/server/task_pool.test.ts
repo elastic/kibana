@@ -190,14 +190,16 @@ describe('TaskPool', () => {
   });
 
   test('run cancels expired tasks prior to running new tasks', async () => {
+    const logger = mockLogger();
     const pool = new TaskPool({
       maxWorkers: 2,
-      logger: mockLogger(),
+      logger,
     });
 
     const expired = resolvable();
     const shouldRun = sinon.spy(() => Promise.resolve());
     const shouldNotRun = sinon.spy(() => Promise.resolve());
+    const now = new Date();
     const result = await pool.run([
       {
         ...mockTask(),
@@ -206,6 +208,9 @@ describe('TaskPool', () => {
           expired.resolve();
           await sleep(10);
           return asOk({ state: {} });
+        },
+        get expiration() {
+          return now;
         },
         cancel: shouldRun,
       },
@@ -231,6 +236,10 @@ describe('TaskPool', () => {
 
     expect(pool.occupiedWorkers).toEqual(2);
     expect(pool.availableWorkers).toEqual(0);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Cancelling task TaskType "shooooo" as it expired at ${now} after running for 5m.`
+    );
   });
 
   test('logs if cancellation errors', async () => {
@@ -285,6 +294,17 @@ describe('TaskPool', () => {
       markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),
       toString: () => `TaskType "shooooo"`,
+      get expiration() {
+        return new Date();
+      },
+      get definition() {
+        return {
+          type: '',
+          title: '',
+          timeout: '5m',
+          createTaskRunner: jest.fn(),
+        };
+      },
     };
   }
 });
