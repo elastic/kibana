@@ -19,23 +19,17 @@
 
 import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
-import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 import { npStart } from 'ui/new_platform';
 import { getFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
 import { scaleBounds, geoContains } from '../../../../plugins/maps_legacy/public';
 
 export const createTileMapVisualization = ({
-  serviceSettings,
   $injector,
   getZoomPrecision,
   getPrecision,
-  notificationService,
+  BaseMapsVisualization,
 }) => {
-  const BaseMapsVisualization = new BaseMapsVisualizationProvider(
-    serviceSettings,
-    notificationService
-  );
   const tooltipFormatter = new TileMapTooltipFormatterProvider($injector);
 
   return class CoordinateMapsVisualization extends BaseMapsVisualization {

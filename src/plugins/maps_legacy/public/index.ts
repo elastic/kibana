@@ -38,6 +38,8 @@ import {
   TmsLayer,
   IServiceSettings,
 } from './map/service_settings';
+// @ts-ignore
+import { ServiceSettings } from './map/service_settings';
 
 export function plugin() {
   return new MapsLegacyPlugin();
@@ -51,7 +53,6 @@ export {
   colorUtil,
   convertToGeoJson,
   IServiceSettings,
-  KibanaMap,
   KibanaMapLayer,
   VectorLayer,
   FileLayerField,
@@ -63,13 +64,13 @@ export {
 // through a pipeline leveraging angular. For this reason, client plugins need to
 // init kibana map and the basemaps visualization directly rather than consume through
 // the usual plugin interface
-export function getKibanaMapFactory(core: CoreSetup) {
+export function getKibanaMapFactoryProvider(core: CoreSetup) {
   bindSetupCoreAndPlugins(core);
-  return (...args) => new KibanaMap(...args);
+  return (...args: any) => new KibanaMap(...args);
 }
 
 export function getBaseMapsVis(core: CoreSetup) {
-  const getKibanaMap = getKibanaMapFactory(core);
+  const getKibanaMap = getKibanaMapFactoryProvider(core);
   const serviceSettings = new ServiceSettings();
   return new BaseMapsVisualizationProvider(getKibanaMap, serviceSettings);
 }
