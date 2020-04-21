@@ -35,6 +35,12 @@ import { LIST_CONTAINER, ListContainerFactory } from './list_container';
 import { createSampleData } from './create_sample_data';
 import { TodoRefInput, TodoRefOutput, TODO_REF_EMBEDDABLE } from './todo/todo_ref_embeddable';
 import { TodoRefEmbeddableFactory } from './todo/todo_ref_embeddable_factory';
+import { TodoComboEmbeddableFactory } from './todo/combo/todo_combo_embeddable_factory';
+import {
+  TodoComboInput,
+  TodoComboOutput,
+  TODO_COMBO_EMBEDDABLE,
+} from './todo/combo/todo_combo_embeddable';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -94,6 +100,14 @@ export class EmbeddableExamplesPlugin
     deps.embeddable.registerEmbeddableFactory<TodoRefInput, TodoRefOutput>(
       TODO_REF_EMBEDDABLE,
       new TodoRefEmbeddableFactory(async () => ({
+        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+      }))
+    );
+
+    deps.embeddable.registerEmbeddableFactory<TodoComboInput, TodoComboOutput>(
+      TODO_COMBO_EMBEDDABLE,
+      new TodoComboEmbeddableFactory(async () => ({
         savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
         getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
       }))
