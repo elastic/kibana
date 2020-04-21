@@ -36,6 +36,7 @@ import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
+import { initUiSettings } from './ui_settings';
 
 export { CoreSetup, CoreStart };
 
@@ -81,6 +82,7 @@ export class Plugin {
     }
 
     initSavedObjects(core.savedObjects);
+    initUiSettings(core.uiSettings);
 
     const router = core.http.createRouter();
     core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({
