@@ -78,6 +78,10 @@ run(async function getChangedFiles({ log }) {
   const pathsToLint = Eslint.pickFilesToLint(log, changedFiles).map(f => f.getAbsolutePath());
 
   if (pathsToLint.length > 0) {
-    await execa('npx', ['prettier@2.0.4', '--write', ...pathsToLint]);
+    log.debug('[prettier] run on %j files: ', pathsToLint.length, pathsToLint);
+  }
+
+  while (pathsToLint.length > 0) {
+    await execa('npx', ['prettier@2.0.4', '--write', ...pathsToLint.splice(0, 100)]);
   }
 });
