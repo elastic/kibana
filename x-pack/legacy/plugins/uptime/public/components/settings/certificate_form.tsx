@@ -89,7 +89,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem grow={2}>
               <EuiFieldNumber
-                data-test-subj={`error-state-threshold-input-${dss.loading ? 'loading' : 'loaded'}`}
+                data-test-subj={`expiration-threshold-input-${dss.loading ? 'loading' : 'loaded'}`}
                 fullWidth
                 disabled={isDisabled}
                 isLoading={dss.loading}
@@ -97,7 +97,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
                 onChange={({ currentTarget: { value } }: any) =>
                   onChange({
                     certificatesThresholds: {
-                      expiration: value === '' ? undefined : Number(value),
+                      expiration: Number(value),
                     },
                   })
                 }
@@ -137,9 +137,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem grow={2}>
               <EuiFieldNumber
-                data-test-subj={`warning-state-threshold-input-${
-                  dss.loading ? 'loading' : 'loaded'
-                }`}
+                data-test-subj={`age-threshold-input-${dss.loading ? 'loading' : 'loaded'}`}
                 fullWidth
                 disabled={isDisabled}
                 isLoading={dss.loading}
