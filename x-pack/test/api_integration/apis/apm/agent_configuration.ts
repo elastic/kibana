@@ -238,7 +238,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         async function getAppliedByAgent() {
           const { body } = await searchConfigurations({
             service: { name: 'myservice', environment: 'production' },
-            appliedByAgent: true,
+            applied_by_agent: true,
           });
 
           return body._source.applied_by_agent;

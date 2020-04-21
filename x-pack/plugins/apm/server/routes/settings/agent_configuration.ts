@@ -143,11 +143,15 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
   params: {
     body: t.intersection([
       t.type({ service: serviceRt }),
-      t.partial({ etag: t.string, appliedByAgent: t.boolean })
+      t.partial({ etag: t.string, applied_by_agent: t.boolean })
     ])
   },
   handler: async ({ context, request }) => {
-    const { service, etag, appliedByAgent } = context.params.body;
+    const {
+      service,
+      etag,
+      applied_by_agent: appliedByAgent
+    } = context.params.body;
 
     const setup = await setupRequest(context, request);
     const config = await searchConfigurations({
