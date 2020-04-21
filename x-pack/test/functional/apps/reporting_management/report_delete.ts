@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'reporting']);
   const log = getService('log');
   const retry = getService('retry');
-  // const find = getService('find');
 
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
@@ -25,7 +23,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      // await pageObjects.common.sleep(30000);
       await esArchiver.unload('empty_kibana');
       await esArchiver.unload('reporting/archived_reports');
     });
@@ -37,7 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // const rows = await table.findAllByCssSelector('tbody tr');
       // log.debug(rows.length);
       await retry.try(async () => {
-        await testSubjects.click('checkboxSelectRow-k90jio0c105u66d68f0dox29');
+        await testSubjects.click('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3');
       });
       const deleteButton = await testSubjects.find('deleteReportButton');
       await retry.waitFor('delete button to become enabled', async () => {
@@ -47,7 +44,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.exists('confirmModalBodyText');
       await testSubjects.click('confirmModalConfirmButton');
       await retry.try(async () => {
-        await testSubjects.waitForDeleted('checkboxSelectRow-k90jio0c105u66d68f0dox29');
+        await testSubjects.waitForDeleted('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3');
       });
     });
   });

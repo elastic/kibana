@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": ".reporting-2020.04.12",
+    "index": ".reporting-2020.04.19",
     "mappings": {
       "properties": {
         "attempts": {
@@ -100,7 +100,8 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "number_of_replicas": "0",
-        "number_of_shards": "1"
+        "number_of_shards": "1",
+        "prefer_v2_templates": "false"
       }
     }
   }
