@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { act } from 'react-dom/test-utils';
+
 import { registerTestBed, TestBed, nextTick } from '../../../../../../../../../test_utils';
 import { MappingsEditor } from '../../../mappings_editor';
 
@@ -35,6 +37,44 @@ jest.mock('@elastic/eui', () => ({
 const createActions = (testBed: TestBed<TestSubjects>) => {
   const { find, exists, waitFor, form, component } = testBed;
 
+  const expandAllChildrenAt = async (path: string) => {
+    const pathToArray = path.split('.');
+
+    const proceed = async (index = 0): Promise<void> => {
+      const pathToField = pathToArray.slice(0, index + 1);
+      const testSubjectField = `${pathToField.join('')}Field`;
+
+      const expandButton = find(`${testSubjectField}.toggleExpandButton` as TestSubjects);
+
+      if (expandButton.length === 0) {
+        return;
+      }
+      const isExpanded = (expandButton.props()['aria-label'] as string).includes('Collapse');
+
+      if (!isExpanded) {
+        expandButton.simulate('click');
+      }
+
+      // Wait for the children FieldList to be there
+      await waitFor(`${testSubjectField}.fieldsList` as TestSubjects);
+
+      if (index < pathToArray.length - 1) {
+        return proceed(++index);
+      }
+    };
+
+    return proceed();
+  };
+
+  // Get a nested field in the rendered DOM tree
+  const getFieldAt = async (path: string) => {
+    // First make sure all the parents fields are expanded and all present in the DOM
+    await expandAllChildrenAt(path);
+
+    const testSubjectField = `${path.split('.').join('')}Field`;
+    return find(testSubjectField as TestSubjects);
+  };
+
   const addField = async (name: string, type: string) => {
     const currentCount = find('fieldsListItem').length;
 
@@ -58,6 +98,13 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     // We wait until there is one more field in the DOM
     await waitFor('fieldsListItem', currentCount + 1);
+  };
+
+  const editField = async (path: string) => {
+    const field = await getFieldAt(path);
+    find('editFieldButton', field).simulate('click');
+    // Wait until the details flyout is open
+    await waitFor('mappingsEditorFieldEdit');
   };
 
   const selectTab = async (tab: 'fields' | 'templates' | 'advanced') => {
@@ -103,7 +150,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
   return {
     selectTab,
+    getFieldAt,
     addField,
+    editField,
     updateJsonEditor,
     getJsonEditorValue,
     getComboBoxValue,
@@ -124,6 +173,45 @@ export const setup = async (props: any = { onUpdate() {} }): Promise<MappingsEdi
   };
 };
 
+export const expectDataUpdatedFactory = (onUpdateHandler: jest.MockedFunction<any>) => {
+  /**
+   * Helper to access the latest data sent to the onUpdate handler back to the consumer of the <MappingsEditor />.
+   * Read the latest call with its argument passed and build the mappings object from it.
+   */
+  const getDataForwarded = async () => {
+    const mockCalls = onUpdateHandler.mock.calls;
+
+    if (mockCalls.length === 0) {
+      throw new Error(
+        `Can't access data forwarded as the onUpdate() prop handler hasn't been called.`
+      );
+    }
+
+    const [arg] = mockCalls[mockCalls.length - 1];
+    const { isValid, validate, getData } = arg;
+
+    let isMappingsValid: boolean = false;
+    let data: any;
+
+    await act(async () => {
+      isMappingsValid = isValid === undefined ? await validate() : isValid;
+      data = getData(isMappingsValid);
+    });
+
+    return {
+      isValid: isMappingsValid,
+      data,
+    };
+  };
+
+  const expectDataUpdated = async (expected: any) => {
+    const { data } = await getDataForwarded();
+    expect(data).toEqual(expected);
+  };
+
+  return expectDataUpdated;
+};
+
 export type MappingsEditorTestBed = TestBed<TestSubjects> & {
   actions: ReturnType<typeof createActions>;
 };
@@ -131,6 +219,7 @@ export type MappingsEditorTestBed = TestBed<TestSubjects> & {
 export type TestSubjects =
   | 'formTab'
   | 'mappingsEditor'
+  | 'fieldsList'
   | 'fieldsListItem'
   | 'fieldsListItem.fieldName'
   | 'fieldName'
@@ -149,6 +238,9 @@ export type TestSubjects =
   | 'dynamicTemplatesEditor'
   | 'nameParameterInput'
   | 'addFieldButton'
+  | 'editFieldButton'
+  | 'toggleExpandButton'
   | 'createFieldForm'
   | 'createFieldForm.fieldType'
-  | 'createFieldForm.addButton';
+  | 'createFieldForm.addButton'
+  | 'mappingsEditorFieldEdit';

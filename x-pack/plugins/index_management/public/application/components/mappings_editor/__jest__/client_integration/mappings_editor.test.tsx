@@ -7,39 +7,9 @@ import { act } from 'react-dom/test-utils';
 
 import { componentHelpers, MappingsEditorTestBed, nextTick, getRandomString } from './helpers';
 
-const { setup } = componentHelpers.mappingsEditor;
+const { setup, expectDataUpdatedFactory } = componentHelpers.mappingsEditor;
 const onUpdateHandler = jest.fn();
-
-const getDataForwarded = async () => {
-  const mockCalls = onUpdateHandler.mock.calls;
-
-  if (mockCalls.length === 0) {
-    throw new Error(
-      `Can't access data forwarded as the onUpdate() prop handler hasn't been called.`
-    );
-  }
-
-  const [arg] = mockCalls[mockCalls.length - 1];
-  const { isValid, validate, getData } = arg;
-
-  let isMappingsValid: boolean = false;
-  let data: any;
-
-  await act(async () => {
-    isMappingsValid = isValid === undefined ? await validate() : isValid;
-    data = getData(isMappingsValid);
-  });
-
-  return {
-    isValid: isMappingsValid,
-    data,
-  };
-};
-
-const expectDataUpdated = async (expected: any) => {
-  const { data } = await getDataForwarded();
-  expect(data).toEqual(expected);
-};
+const expectDataUpdated = expectDataUpdatedFactory(onUpdateHandler);
 
 describe('<MappingsEditor />', () => {
   afterEach(() => {
@@ -363,7 +333,7 @@ describe('<MappingsEditor />', () => {
         form.toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
       });
 
-      // When we disable dynamic mappings, we set it to "strict" and remove date and numeric detections
+      // When we disable dynamic mappings, we set it to "false" and remove date and numeric detections
       updatedMappings = {
         ...updatedMappings,
         dynamic: false,

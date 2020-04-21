@@ -3,7 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { setup as mappingsEditorSetup, MappingsEditorTestBed } from './mappings_editor.helpers';
+import {
+  setup as mappingsEditorSetup,
+  MappingsEditorTestBed,
+  expectDataUpdatedFactory,
+} from './mappings_editor.helpers';
 
 export {
   nextTick,
@@ -13,7 +17,7 @@ export {
 } from '../../../../../../../../../test_utils';
 
 export const componentHelpers = {
-  mappingsEditor: { setup: mappingsEditorSetup },
+  mappingsEditor: { setup: mappingsEditorSetup, expectDataUpdatedFactory },
 };
 
 export { MappingsEditorTestBed };
