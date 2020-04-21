@@ -16,6 +16,10 @@ import { DrilldownDefinition as Drilldown } from '../../../../../drilldowns/publ
 import { txtGoToDashboard } from './i18n';
 import { DataPublicPluginStart, esFilters } from '../../../../../../../src/plugins/data/public';
 import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/visualizations/public';
+import {
+  isRangeSelectTriggerContext,
+  isValueClickTriggerContext,
+} from '../../../../../../../src/plugins/embeddable/public';
 
 export interface Params {
   getSavedObjectsClient: () => CoreStart['savedObjects']['client'];
@@ -111,15 +115,29 @@ export class DashboardToDashboardDrilldown
     // for brush event this time range would be overwritten
     let timeRange = config.useCurrentDateRange ? currentTimeRange : undefined;
     let filtersFromEvent = await (async () => {
-      // TODO: not sure what would be the best way to handle types here
-      // context.data is `unknown` and comes from `EmbeddableVisTriggerContext`
       try {
-        return (context.data as any).range
-          ? await createFiltersFromRangeSelectAction(context.data as any)
-          : await createFiltersFromValueClickAction(context.data as any);
+        if (isRangeSelectTriggerContext(context))
+          return await createFiltersFromRangeSelectAction(context.data);
+        if (isValueClickTriggerContext(context))
+          return await createFiltersFromValueClickAction(context.data);
+
+        // eslint-disable-next-line no-console
+        console.warn(
+          `
+          DashboardToDashboard drilldown: can't extract filters from action.
+          Is it not supported action?`,
+          context
+        );
+
+        return [];
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.warn("DashboardToDashboard drilldown: can't extract filters from event", e);
+        console.warn(
+          `
+          DashboardToDashboard drilldown: error extracting filters from action.
+          Continuing without applying filters from event`,
+          e
+        );
         return [];
       }
     })();

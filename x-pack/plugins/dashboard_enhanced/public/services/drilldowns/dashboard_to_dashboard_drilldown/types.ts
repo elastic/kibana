@@ -6,12 +6,15 @@
 
 import {
   EmbeddableContext,
-  EmbeddableVisTriggerContext,
+  ValueClickTriggerContext,
+  RangeSelectTriggerContext,
   IEmbeddable,
 } from '../../../../../../../src/plugins/embeddable/public';
 
 export type PlaceContext = EmbeddableContext;
-export type ActionContext<T extends IEmbeddable = IEmbeddable> = EmbeddableVisTriggerContext<T>;
+export type ActionContext<T extends IEmbeddable = IEmbeddable> =
+  | ValueClickTriggerContext<T>
+  | RangeSelectTriggerContext<T>;
 
 export interface Config {
   dashboardId?: string;

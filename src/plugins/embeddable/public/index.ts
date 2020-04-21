@@ -67,6 +67,8 @@ export {
   withEmbeddableSubscription,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
+  isRangeSelectTriggerContext,
+  isValueClickTriggerContext,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {

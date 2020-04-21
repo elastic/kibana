@@ -109,9 +109,7 @@ describe('.execute() & getHref', () => {
     };
 
     const context = ({
-      data: {
-        range: useRangeEvent ? {} : undefined,
-      },
+      data: useRangeEvent ? { range: {} } : { data: [] },
       timeFieldName: 'order_date',
       embeddable: {
         getInput: () => ({
