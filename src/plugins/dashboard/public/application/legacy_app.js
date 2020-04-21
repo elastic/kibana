@@ -137,7 +137,7 @@ export function initDashboardApp(app, deps) {
         },
         resolve: {
           dash: function($route, history) {
-            return deps.data.ui.ensureDefaultIndexPattern(history).then(() => {
+            return deps.data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
               const savedObjectsClient = deps.savedObjectsClient;
               const title = $route.current.params.title;
               if (title) {
@@ -172,7 +172,7 @@ export function initDashboardApp(app, deps) {
         requireUICapability: 'dashboard.createNew',
         resolve: {
           dash: history =>
-            deps.data.ui
+            deps.data.indexPatterns
               .ensureDefaultIndexPattern(history)
               .then(() => deps.savedDashboards.get())
               .catch(
@@ -194,7 +194,7 @@ export function initDashboardApp(app, deps) {
           dash: function($route, history) {
             const id = $route.current.params.id;
 
-            return deps.data.ui
+            return deps.data.indexPatterns
               .ensureDefaultIndexPattern(history)
               .then(() => deps.savedDashboards.get(id))
               .then(savedDashboard => {

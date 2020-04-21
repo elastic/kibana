@@ -70,7 +70,6 @@ import {
   ACTION_VALUE_CLICK,
   ValueClickActionContext,
 } from './actions/value_click_action';
-import { createEnsureDefaultIndexPattern } from './ui/ensure_default_index_pattern';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -150,7 +149,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(uiSettings, savedObjects.client, http);
+    const indexPatterns = new IndexPatternsService(core, savedObjects.client, http);
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);
@@ -183,7 +182,6 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       ui: {
         IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
         SearchBar,
-        ensureDefaultIndexPattern: createEnsureDefaultIndexPattern(core, indexPatterns),
       },
     };
   }

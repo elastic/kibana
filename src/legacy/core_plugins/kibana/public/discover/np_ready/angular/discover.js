@@ -116,7 +116,7 @@ app.config($routeProvider => {
     resolve: {
       savedObjects: function($route, Promise) {
         const savedSearchId = $route.current.params.id;
-        return data.ui.ensureDefaultIndexPattern(history).then(() => {
+        return data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
           const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({

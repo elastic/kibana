@@ -54,9 +54,9 @@ const createStartContract = (): Start => {
     ui: {
       IndexPatternSelect: jest.fn(),
       SearchBar: jest.fn(),
-      ensureDefaultIndexPattern: jest.fn(),
     },
     indexPatterns: ({
+      ensureDefaultIndexPattern: jest.fn(),
       make: () => ({
         fieldsFetcher: {
           fetchForWildcard: jest.fn(),

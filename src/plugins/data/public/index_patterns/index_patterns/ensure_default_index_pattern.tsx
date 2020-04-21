@@ -24,14 +24,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import { toMountPoint } from '../../../../kibana_react/public';
-import { IndexPatternsContract } from '../../index_patterns';
+import { IndexPatternsContract } from './index_patterns';
 
 export type EnsureDefaultIndexPattern = (history: History) => Promise<unknown> | undefined;
 
-export const createEnsureDefaultIndexPattern = (
-  core: CoreStart,
-  indexPatterns: IndexPatternsContract
-) => {
+export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
   let bannerId: string;
   let timeoutId: NodeJS.Timeout | undefined;
 
@@ -43,8 +40,8 @@ export const createEnsureDefaultIndexPattern = (
    * banner. In this case the promise returned from this function will never
    * resolve to wait for the URL change to happen.
    */
-  return async function ensureDefaultIndexPattern(history: History) {
-    const patterns = await indexPatterns.getIds();
+  return async function ensureDefaultIndexPattern(this: IndexPatternsContract, history: History) {
+    const patterns = await this.getIds();
     let defaultId = core.uiSettings.get('defaultIndex');
     let defined = !!defaultId;
     const exists = contains(patterns, defaultId);
@@ -78,7 +75,7 @@ export const createEnsureDefaultIndexPattern = (
           <EuiCallOut
             color="warning"
             iconType="iInCircle"
-            title={i18n.translate('data.ensureDefaultIndexPattern.bannerLabel', {
+            title={i18n.translate('data.indexPatterns.ensureDefaultIndexPattern.bannerLabel', {
               defaultMessage:
                 "In order to visualize and explore data in Kibana, you'll need to create an index pattern to retrieve data from Elasticsearch.",
             })}
