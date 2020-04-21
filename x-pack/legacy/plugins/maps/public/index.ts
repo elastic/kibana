@@ -15,15 +15,14 @@ import 'uiExports/embeddableActions';
 
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
-
-import './angular/services/gis_map_saved_object_loader';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import '../../../../plugins/maps/public/angular/services/gis_map_saved_object_loader';
 import './angular/map_controller';
 import './routes';
 // @ts-ignore
-import { PluginInitializerContext } from 'kibana/public';
 import { MapsPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) => {
+export const plugin = () => {
   return new MapsPlugin();
 };
 
@@ -32,4 +31,4 @@ export {
   RenderTooltipContentParams,
   ITooltipProperty,
 } from '../../../../plugins/maps/public/layers/tooltips/tooltip_property';
-export { MapEmbeddable, MapEmbeddableInput } from './embeddable';
+export { MapEmbeddable, MapEmbeddableInput } from '../../../../plugins/maps/public/embeddable';

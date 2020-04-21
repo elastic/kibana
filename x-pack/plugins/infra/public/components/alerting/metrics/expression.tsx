@@ -17,9 +17,6 @@ import {
 import { IFieldType } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiExpression } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
 import {
   MetricExpressionParams,
   Comparator,
@@ -38,11 +35,11 @@ import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MetricsExplorerOptions } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
-import { MetricsExplorerKueryBar } from '../../metrics_explorer/kuery_bar';
 import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
-import { useSource } from '../../../containers/source';
-import { MetricsExplorerGroupBy } from '../../metrics_explorer/group_by';
+import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
+import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
+import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 
 interface AlertContextMeta {
   currentOptions?: Partial<MetricsExplorerOptions>;
@@ -87,7 +84,12 @@ const defaultExpression = {
 
 export const Expressions: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
-  const { source, createDerivedIndexPattern } = useSource({ sourceId: 'default' });
+  const { source, createDerivedIndexPattern } = useSourceViaHttp({
+    sourceId: 'default',
+    type: 'metrics',
+    fetch: alertsContext.http.fetch,
+    toastWarning: alertsContext.toastNotifications.addWarning,
+  });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
 
@@ -208,39 +210,10 @@ export const Expressions: React.FC<Props> = props => {
         setAlertParams('groupBy', md.currentOptions.groupBy);
       }
       setAlertParams('sourceId', source?.id);
+    } else {
+      setAlertParams('criteria', [defaultExpression]);
     }
   }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // INFO: If there is metadata, you're in the metrics explorer context
-  const canAddConditions = !!alertsContext.metadata;
-
-  if (!canAddConditions && !alertParams.criteria) {
-    return (
-      <>
-        <EuiSpacer size={'m'} />
-        <EuiCallOut
-          title={
-            <>
-              <FormattedMessage
-                id="xpack.infra.metrics.alertFlyout.createAlertWarningBody"
-                defaultMessage="Create new metric threshold alerts from"
-              />{' '}
-              <EuiLink href={'../app/metrics/explorer'}>
-                <FormattedMessage
-                  id="xpack.infra.homePage.metricsExplorerTabTitle"
-                  defaultMessage="Metrics Explorer"
-                />
-              </EuiLink>
-              .
-            </>
-          }
-          color="warning"
-          iconType="help"
-        />
-        <EuiSpacer size={'m'} />
-      </>
-    );
-  }
 
   return (
     <>
@@ -258,7 +231,6 @@ export const Expressions: React.FC<Props> = props => {
         alertParams.criteria.map((e, idx) => {
           return (
             <ExpressionRow
-              canEditAggField={canAddConditions}
               canDelete={alertParams.criteria.length > 1}
               fields={derivedIndexPattern.fields}
               remove={removeExpression}
@@ -281,20 +253,18 @@ export const Expressions: React.FC<Props> = props => {
       />
 
       <div>
-        {canAddConditions && (
-          <EuiButtonEmpty
-            color={'primary'}
-            iconSide={'left'}
-            flush={'left'}
-            iconType={'plusInCircleFilled'}
-            onClick={addExpression}
-          >
-            <FormattedMessage
-              id="xpack.infra.metrics.alertFlyout.addCondition"
-              defaultMessage="Add condition"
-            />
-          </EuiButtonEmpty>
-        )}
+        <EuiButtonEmpty
+          color={'primary'}
+          iconSide={'left'}
+          flush={'left'}
+          iconType={'plusInCircleFilled'}
+          onClick={addExpression}
+        >
+          <FormattedMessage
+            id="xpack.infra.metrics.alertFlyout.addCondition"
+            defaultMessage="Add condition"
+          />
+        </EuiButtonEmpty>
       </div>
 
       <EuiSpacer size={'m'} />
@@ -347,7 +317,6 @@ export const Expressions: React.FC<Props> = props => {
 
 interface ExpressionRowProps {
   fields: IFieldType[];
-  canEditAggField: boolean;
   expressionId: number;
   expression: MetricExpression;
   errors: IErrorObject;
@@ -378,7 +347,11 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
 
   const updateAggType = useCallback(
     (at: string) => {
-      setAlertParams(expressionId, { ...expression, aggType: at as MetricExpression['aggType'] });
+      setAlertParams(expressionId, {
+        ...expression,
+        aggType: at as MetricExpression['aggType'],
+        metric: at === 'count' ? undefined : expression.metric,
+      });
     },
     [expressionId, expression, setAlertParams]
   );
@@ -420,20 +393,17 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
             </StyledExpression>
             {aggType !== 'count' && (
               <StyledExpression>
-                {!props.canEditAggField && <DisabledAggField text={metric || ''} />}
-                {props.canEditAggField && (
-                  <OfExpression
-                    customAggTypesOptions={aggregationType}
-                    aggField={metric}
-                    fields={fields.map(f => ({
-                      normalizedType: f.type,
-                      name: f.name,
-                    }))}
-                    aggType={aggType}
-                    errors={errors}
-                    onChangeSelectedAggField={updateMetric}
-                  />
-                )}
+                <OfExpression
+                  customAggTypesOptions={aggregationType}
+                  aggField={metric}
+                  fields={fields.map(f => ({
+                    normalizedType: f.type,
+                    name: f.name,
+                  }))}
+                  aggType={aggType}
+                  errors={errors}
+                  onChangeSelectedAggField={updateMetric}
+                />
               </StyledExpression>
             )}
             <StyledExpression>
@@ -462,19 +432,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
       </EuiFlexGroup>
       <EuiSpacer size={'s'} />
     </>
-  );
-};
-
-export const DisabledAggField = ({ text }: { text: string }) => {
-  return (
-    <EuiExpression
-      description={i18n.translate('xpack.infra.metrics.alertFlyout.of.buttonLabel', {
-        defaultMessage: 'of',
-      })}
-      value={text}
-      isActive={false}
-      color={'secondary'}
-    />
   );
 };
 

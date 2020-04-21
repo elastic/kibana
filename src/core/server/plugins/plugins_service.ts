@@ -39,23 +39,25 @@ export interface PluginsServiceSetup {
   initialized: boolean;
   /** Setup contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
-  uiPlugins: {
-    /**
-     * Paths to all discovered ui plugin entrypoints on the filesystem, even if
-     * disabled.
-     */
-    internal: Map<PluginName, InternalPluginInfo>;
+}
 
-    /**
-     * Information needed by client-side to load plugins and wire dependencies.
-     */
-    public: Map<PluginName, DiscoveredPlugin>;
+/** @internal */
+export interface UiPlugins {
+  /**
+   * Paths to all discovered ui plugin entrypoints on the filesystem, even if
+   * disabled.
+   */
+  internal: Map<PluginName, InternalPluginInfo>;
 
-    /**
-     * Configuration for plugins to be exposed to the client-side.
-     */
-    browserConfigs: Map<PluginName, Observable<unknown>>;
-  };
+  /**
+   * Information needed by client-side to load plugins and wire dependencies.
+   */
+  public: Map<PluginName, DiscoveredPlugin>;
+
+  /**
+   * Configuration for plugins to be exposed to the client-side.
+   */
+  browserConfigs: Map<PluginName, Observable<unknown>>;
 }
 
 /** @internal */
@@ -97,8 +99,17 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
 
-    // Return dependency tree
-    return this.pluginsSystem.getPluginDependencies();
+    const uiPlugins = this.pluginsSystem.uiPlugins();
+
+    return {
+      // Return dependency tree
+      pluginTree: this.pluginsSystem.getPluginDependencies(),
+      uiPlugins: {
+        internal: this.uiPluginInternalInfo,
+        public: uiPlugins,
+        browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
+      },
+    };
   }
 
   public async setup(deps: PluginsServiceSetupDeps) {
@@ -115,15 +126,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       this.log.info('Plugin initialization disabled.');
     }
 
-    const uiPlugins = this.pluginsSystem.uiPlugins();
     return {
       initialized: initialize,
       contracts,
-      uiPlugins: {
-        internal: this.uiPluginInternalInfo,
-        public: uiPlugins,
-        browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
-      },
     };
   }
 

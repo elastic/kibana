@@ -594,6 +594,42 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
             },
           ]
         }
+        filterManager={
+          FilterManager {
+            "fetch$": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+            "filters": Array [],
+            "uiSettings": Object {
+              "get": [Function],
+              "get$": [MockFunction],
+              "getAll": [MockFunction],
+              "getSaved$": [MockFunction],
+              "getUpdate$": [MockFunction],
+              "getUpdateErrors$": [MockFunction],
+              "isCustom": [MockFunction],
+              "isDeclared": [MockFunction],
+              "isDefault": [MockFunction],
+              "isOverridden": [MockFunction],
+              "overrideLocalDefault": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+            },
+            "updated$": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          }
+        }
         id="foo"
         indexPattern={
           Object {

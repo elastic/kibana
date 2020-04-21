@@ -6,6 +6,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService, loadTestFile }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('transform', function() {
@@ -19,6 +20,16 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     after(async () => {
       await transform.securityCommon.cleanTransformUsers();
       await transform.securityCommon.cleanTransformRoles();
+
+      await transform.testResources.deleteSavedSearches();
+
+      await transform.testResources.deleteIndexPattern('ft_farequote');
+      await transform.testResources.deleteIndexPattern('ft_ecommerce');
+
+      await esArchiver.unload('ml/farequote');
+      await esArchiver.unload('ml/ecommerce');
+
+      await transform.testResources.resetKibanaTimeZone();
     });
 
     loadTestFile(require.resolve('./creation_index_pattern'));
