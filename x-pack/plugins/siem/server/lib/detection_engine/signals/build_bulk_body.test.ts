@@ -90,7 +90,7 @@ describe('buildBulkBody', () => {
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
-          lists: [
+          exceptions_list: [
             {
               field: 'source.ip',
               values_operator: 'included',
@@ -216,7 +216,7 @@ describe('buildBulkBody', () => {
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           throttle: 'no_actions',
-          lists: [
+          exceptions_list: [
             {
               field: 'source.ip',
               values_operator: 'included',
@@ -340,7 +340,7 @@ describe('buildBulkBody', () => {
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           throttle: 'no_actions',
-          lists: [
+          exceptions_list: [
             {
               field: 'source.ip',
               values_operator: 'included',
@@ -457,7 +457,7 @@ describe('buildBulkBody', () => {
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           throttle: 'no_actions',
-          lists: [
+          exceptions_list: [
             {
               field: 'source.ip',
               values_operator: 'included',

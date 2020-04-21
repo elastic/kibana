@@ -154,7 +154,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   type: 'query',
   threat: [],
   throttle: 'no_actions',
-  lists: [],
+  exceptions_list: [],
   version: 1,
 });
 
@@ -426,5 +426,5 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
   note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',
-  lists: [],
+  exceptions_list: [],
 });

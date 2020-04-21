@@ -29,7 +29,7 @@ import { Dictionary } from '../../../../../../../common/types/common';
 import { isKeywordAndTextType } from '../../../../common/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
-  LoadRegressionExploreDataArg,
+  LoadExploreDataArg,
   defaultSearchQuery,
   ResultsSearchQuery,
   isResultsSearchBoolQuery,
@@ -120,7 +120,7 @@ export const useExploreData = (
   const loadExploreData = async ({
     filterByIsTraining: isTraining,
     searchQuery: incomingQuery,
-  }: LoadRegressionExploreDataArg) => {
+  }: LoadExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
