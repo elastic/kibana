@@ -45,7 +45,7 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'Just dumps the configuration of the element',
     }),
   },
-  dropdown_filter: {
+  dropdownFilter: {
     displayName: i18n.translate('xpack.canvas.elements.dropdownFilterDisplayName', {
       defaultMessage: 'Dropdown select',
     }),
@@ -189,7 +189,7 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'A scrollable grid for displaying data in a tabular format',
     }),
   },
-  time_filter: {
+  timeFilter: {
     displayName: i18n.translate('xpack.canvas.elements.timeFilterDisplayName', {
       defaultMessage: 'Time filter',
     }),

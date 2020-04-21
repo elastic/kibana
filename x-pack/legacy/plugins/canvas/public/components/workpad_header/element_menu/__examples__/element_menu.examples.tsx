@@ -7,8 +7,8 @@
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { ElementMenu } from '../element_menu';
 import { ElementSpec } from '../../../../../types';
+import { ElementMenu } from '../element_menu';
 
 const testElements: { [key: string]: ElementSpec } = {
   areaChart: {
