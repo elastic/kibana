@@ -9,4 +9,3 @@ export { PipelineForm } from './pipeline_form';
 export { SectionError } from './section_error';
 
 export { PipelineRequestFlyoutProvider as PipelineRequestFlyout } from './pipeline_request_flyout_provider';
-
