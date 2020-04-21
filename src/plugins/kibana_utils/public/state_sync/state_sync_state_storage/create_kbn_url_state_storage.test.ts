@@ -136,7 +136,7 @@ describe('KbnUrlStateStorage', () => {
 
   describe('ScopedHistory integration', () => {
     let urlStateStorage: IKbnUrlStateStorage;
-    let history: History;
+    let history: ScopedHistory;
     const getCurrentUrl = () => history.createHref(history.location);
     beforeEach(() => {
       const parentHistory = createBrowserHistory();
