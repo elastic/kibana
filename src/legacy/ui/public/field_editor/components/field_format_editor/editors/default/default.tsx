@@ -20,7 +20,7 @@
 import React, { PureComponent, ReactText } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Sample, ConverterType } from '../../../../types';
+import { Sample } from '../../../../types';
 
 export const convertSampleInput = (
   converter: (input: string | number | Array<string | number>) => string,
@@ -64,7 +64,7 @@ export interface FormatEditorProps<P> {
 
 export interface FormatEditorState {
   sampleInputs: ReactText[];
-  sampleConverterType?: ConverterType;
+  sampleConverterType?: string;
   error: any;
   samples: Sample[];
   sampleInputsByType: SampleInputs;
@@ -72,7 +72,7 @@ export interface FormatEditorState {
 
 export const defaultState = {
   sampleInputs: [] as ReactText[],
-  sampleConverterType: ConverterType.TEXT,
+  sampleConverterType: 'text',
   error: null,
   samples: [] as Sample[],
   sampleInputsByType: {},
@@ -91,9 +91,7 @@ export class DefaultFormatEditor<P = {}, S = {}> extends PureComponent<
     const converter = format.getConverterFor(sampleConverterType);
     const type = typeof sampleInputsByType === 'object' && formatParams.type;
     const inputs = type ? sampleInputsByType[formatParams.type as string] || [] : sampleInputs;
-    // console.log('inputs', inputs);
     const output = convertSampleInput(converter, inputs);
-    // console.log('getDerivedStateFromProps', nextProps, state);
     onError(output.error);
     return output;
   }

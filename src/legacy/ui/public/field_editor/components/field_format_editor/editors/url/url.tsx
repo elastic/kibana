@@ -37,8 +37,6 @@ import { LabelTemplateFlyout } from './label_template_flyout';
 
 import { UrlTemplateFlyout } from './url_template_flyout';
 
-import { ConverterType } from '../../../../types';
-
 import './icons';
 
 interface OnChangeParam {
@@ -84,7 +82,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
         img: ['go', 'stop', ['de', 'ne', 'us', 'ni'], 'cv'],
         audio: ['hello.mp3'],
       },
-      sampleConverterType: ConverterType.HTML,
+      sampleConverterType: 'html',
       showUrlTemplateHelp: false,
       showLabelTemplateHelp: false,
     };

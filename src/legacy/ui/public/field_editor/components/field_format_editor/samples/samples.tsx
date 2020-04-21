@@ -23,16 +23,16 @@ import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Sample, ConverterType } from '../../../types';
+import { Sample } from '../../../types';
 
 interface FormatEditorSamplesProps {
   samples: Sample[];
-  sampleType: ConverterType;
+  sampleType: string;
 }
 
 export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps> {
   static defaultProps = {
-    sampleType: ConverterType.TEXT,
+    sampleType: 'text',
   };
 
   render() {
@@ -54,7 +54,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
           defaultMessage: 'Output',
         }),
         render: (output: string) => {
-          return sampleType === ConverterType.HTML ? (
+          return sampleType === 'html' ? (
             <div
               /*
                * Justification for dangerouslySetInnerHTML:

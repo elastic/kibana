@@ -33,8 +33,3 @@ export interface ExecuteScriptParams {
   query?: any; // todo
   additionalFields?: string[];
 }
-
-export enum ConverterType {
-  TEXT,
-  HTML,
-}
