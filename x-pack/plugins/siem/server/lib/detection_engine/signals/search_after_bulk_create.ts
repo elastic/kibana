@@ -99,15 +99,14 @@ export const searchAfterAndBulkCreate = async ({
     throttle,
   });
 
-  if (createdItemsCount) {
-    toReturn.createdSignalsCount = createdItemsCount;
-  }
   if (createdItemsCount > 0) {
+    toReturn.createdSignalsCount = createdItemsCount;
     toReturn.lastLookBackDate =
       someResult.hits.hits.length > 0
         ? new Date(someResult.hits.hits[someResult.hits.hits.length - 1]?._source['@timestamp'])
         : null;
   }
+
   if (bulkCreateDuration) {
     toReturn.bulkCreateTimes.push(bulkCreateDuration);
   }
