@@ -36,7 +36,7 @@ import {
   DynamicStylePropertyOptions,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { IStyle } from './styles/abstract_style';
+import { IStyle } from './styles/style';
 import { IVectorSource } from './sources/vector_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';

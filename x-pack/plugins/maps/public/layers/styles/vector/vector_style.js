@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
-import { AbstractStyle } from '../abstract_style';
+import { AbstractStyle } from '../style';
 import {
   GEO_JSON_TYPE,
   FIELD_ORIGIN,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractStyle } from '../abstract_style';
+import { AbstractStyle } from '../style';
 import { LAYER_STYLE_TYPE } from '../../../../common/constants';
 
 export class TileStyle extends AbstractStyle {

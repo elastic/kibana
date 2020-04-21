@@ -30,7 +30,7 @@ import {
 } from '../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty, ISource } from './sources/source';
 import { SyncContext } from '../actions/map_actions';
-import { IStyle } from './styles/abstract_style';
+import { IStyle } from './styles/style';
 
 export interface ILayer {
   getBounds(mapFilters: MapFilters): Promise<MapExtent>;
