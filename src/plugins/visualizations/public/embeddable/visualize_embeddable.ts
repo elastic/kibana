@@ -42,6 +42,7 @@ import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
+import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -50,6 +51,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: IIndexPattern[];
   editUrl: string;
   editable: boolean;
+  deps: VisualizeEmbeddableFactoryDeps;
 }
 
 export interface VisualizeInput extends EmbeddableInput {
@@ -85,10 +87,11 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
+  private readonly deps: VisualizeEmbeddableFactoryDeps;
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editUrl, indexPatterns, editable }: VisualizeEmbeddableConfiguration,
+    { vis, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     parent?: IContainer
   ) {
@@ -103,6 +106,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       },
       parent
     );
+    this.deps = deps;
     this.timefilter = timefilter;
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
@@ -130,9 +134,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   };
 
   public openInspector = () => {
-    if (this.handler) {
-      return this.handler.openInspector(this.getTitle() || '');
-    }
+    if (!this.handler) return;
+
+    const adapters = this.handler.inspect();
+    if (!adapters) return;
+
+    this.deps.start().plugins.inspector.open(adapters, {
+      title: this.getTitle() || '',
+    });
   };
 
   /**

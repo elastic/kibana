@@ -55,10 +55,9 @@ export function DashboardEmptyScreen({
   const linkToVisualizeParagraph = (
     <p data-test-subj="linkToVisualizeParagraph">
       <EuiButton
-        iconSide="right"
+        iconSide="left"
         size="s"
-        fill
-        iconType="arrowDown"
+        iconType="plusInCircle"
         onClick={onVisualizeClick}
         data-test-subj="addVisualizationButton"
         aria-label={constants.createNewVisualizationButtonAriaLabel}
