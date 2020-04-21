@@ -33,7 +33,7 @@ export const Criteria: React.FC<Props> = ({
   if (!criteria) return null;
   return (
     <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow>
         {criteria.map((criterion, idx) => {
           return (
             <Criterion
