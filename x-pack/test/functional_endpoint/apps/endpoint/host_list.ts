@@ -12,7 +12,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/63621
   describe('host list', function() {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
