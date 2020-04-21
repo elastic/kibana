@@ -5,8 +5,9 @@
  */
 
 import deepmerge from 'deepmerge';
+
+import { ESTermQuery } from '../../../../../../../plugins/siem/common/typed_json';
 import { createFilter } from '../../helpers';
-import { ESTermQuery } from '../../../../common/typed_json';
 import { SiemJob } from '../../../components/ml_popover/types';
 import { FlowTarget } from '../../../graphql/types';
 
