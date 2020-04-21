@@ -15,6 +15,7 @@ import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions/public';
+import { BUCKET_TYPES } from '../../../../../src/plugins/data/public';
 import { VisualizationContainer } from '../visualization_container';
 import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
@@ -191,17 +192,15 @@ function DatatableComponent(
             const col = firstTable.columns.find(c => c.id === field);
             const colIndex = firstTable.columns.findIndex(c => c.id === field);
 
-            // todo: get the list of unsupported operations from operations
-            const nonFilterable =
-              !col?.meta?.type ||
-              ['sum', 'cardinality', 'max', 'min', 'avg', 'count'].includes(col.meta.type);
-
+            const filterable = Boolean(
+              Object.values(BUCKET_TYPES).find(bucketType => bucketType === col?.meta?.type)
+            );
             return {
               field,
               name: (col && col.name) || '',
               render: (value: unknown) => {
                 const formattedValue = formatters[field].convert(value);
-                if (!nonFilterable && value) {
+                if (filterable && value) {
                   return (
                     <EuiFlexGroup justifyContent="spaceBetween" className="lnsDataTable__cell">
                       <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
