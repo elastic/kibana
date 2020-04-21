@@ -33,7 +33,7 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
 import { eventBus, ACTIVE_CURSOR } from '../../lib/active_cursor';
-import { getUISettings } from '../../../../services';
+import { getUISettings, getChartsSetup } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
@@ -93,6 +93,12 @@ export const TimeSeries = ({
   const theme = getTheme(darkMode, backgroundColor);
   // apply legend style change if bgColor is configured
   const classes = classNames('tvbVisTimeSeries', getChartClasses(backgroundColor));
+
+  // If the color isn't configured by the user, use the color mapping service
+  // to assign a color from the Kibana palette. Colors will be shared across the
+  // session, including dashboards.
+  const { colors } = getChartsSetup();
+  colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -163,6 +169,8 @@ export const TimeSeries = ({
           const stackAccessors = getStackAccessors(stack);
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const key = `${id}-${label}`;
+          // Only use color mapping if there is no color from the server
+          const finalColor = color ?? colors.mappedColors.mapping[label];
 
           if (bars.show) {
             return (
@@ -174,7 +182,7 @@ export const TimeSeries = ({
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
-                color={color}
+                color={finalColor}
                 stackAccessors={stackAccessors}
                 stackAsPercentage={isPercentage}
                 xScaleType={xScaleType}
@@ -199,7 +207,7 @@ export const TimeSeries = ({
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}
-                color={color}
+                color={finalColor}
                 stackAccessors={stackAccessors}
                 stackAsPercentage={isPercentage}
                 points={points}

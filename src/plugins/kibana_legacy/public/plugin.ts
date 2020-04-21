@@ -123,6 +123,26 @@ export class KibanaLegacyPlugin {
        * @param newAppId The name of the new app that handles the URLs now
        * @param rewritePath Function to rewrite the legacy sub path of the app to the new path in the core app
        * path into the new path
+       *
+       * Example usage:
+       * ```
+       * kibanaLegacy.forwardApp(
+       *   'old',
+       *   'new',
+       *   path => {
+       *     const [, id] = /old/item\/(.*)$/.exec(path) || [];
+       *     if (!id) {
+       *       return '#/home';
+       *     }
+       *     return '#/items/${id}';
+       *  }
+       * );
+       * ```
+       * This will cause the following redirects:
+       *
+       * * app/kibana#/old/ -> app/new#/home
+       * * app/kibana#/old/item/123 -> app/new#/items/123
+       *
        */
       forwardApp: (
         legacyAppId: string,
