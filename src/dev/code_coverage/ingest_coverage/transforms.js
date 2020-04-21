@@ -49,9 +49,7 @@ export const addTimeStamp = ts => obj => ({
   '@timestamp': ts,
 });
 
-const captureAfterRootFolder = /.*kibana(.*$)/;
-const afterRootFolder = x => captureAfterRootFolder.exec(x)[1];
-const fixFront = x => afterRootFolder(x);
+const splitOnRoot = root => x => x.split(root)[1];
 const setTotal = x => obj => (obj.isTotal = x);
 const mutateTrue = setTotal(true);
 const mutateFalse = setTotal(false);
@@ -65,35 +63,42 @@ const prokForTotalsIndex = mutateTrue => urlRoot => obj =>
     .map(always(`${urlRoot}/index.html`))
     .fold(noop, id);
 
-const prokForCoverageIndex = mutateFalse => urlRoot => obj => siteUrl =>
+const prokForCoverageIndex = root => mutateFalse => urlRoot => obj => siteUrl =>
   right(siteUrl)
     .map(x => {
       mutateFalse(obj);
       return x;
     })
-    .map(fixFront)
+    .map(x => {
+      return splitOnRoot(root)(x);
+    })
     .map(x => `${urlRoot}${x}.html`)
     .fold(noop, id);
 
 export const staticSite = urlBase => obj => {
-  const { staticSiteUrl, testRunnerType } = obj;
+  const { staticSiteUrl, testRunnerType, COVERAGE_INGESTION_KIBANA_ROOT } = obj;
   const ts = obj['@timestamp'];
   const urlRoot = root(urlBase)(ts)(testRunnerType);
   const prokTotal = prokForTotalsIndex(mutateTrue)(urlRoot);
-  const prokCoverage = prokForCoverageIndex(mutateFalse)(urlRoot)(obj);
+  const prokCoverage = prokForCoverageIndex(COVERAGE_INGESTION_KIBANA_ROOT)(mutateFalse)(urlRoot)(
+    obj
+  );
   const prokForBoth = always(maybeTotal(staticSiteUrl).fold(always(prokTotal(obj)), prokCoverage));
 
   return { ...obj, staticSiteUrl: prokForBoth() };
 };
 
 export const coveredFilePath = obj => {
-  const { staticSiteUrl } = obj;
+  const { staticSiteUrl, COVERAGE_INGESTION_KIBANA_ROOT } = obj;
 
   const withoutCoveredFilePath = always(obj);
-  const dropFront = x => trimLeftFrom('/kibana/', x).replace(/(^\/kibana\/)/, '');
-
+  const leadingSlashRe = /^\//;
+  const maybeDropLeadingSlash = x => (leadingSlashRe.test(x) ? right(x) : left(x));
+  const dropLeadingSlash = x => x.replace(leadingSlashRe, '');
+  const dropRoot = root => x =>
+    maybeDropLeadingSlash(splitOnRoot(root)(x)).fold(id, dropLeadingSlash);
   return maybeTotal(staticSiteUrl)
-    .map(dropFront)
+    .map(dropRoot(COVERAGE_INGESTION_KIBANA_ROOT))
     .fold(withoutCoveredFilePath, coveredFilePath => ({ ...obj, coveredFilePath }));
 };
 

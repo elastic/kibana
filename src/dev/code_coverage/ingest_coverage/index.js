@@ -51,17 +51,9 @@ Note: You probably should create the index first.
 Two indexes are needed, see README.md.
 
 Examples:
-export BUILD_ID=JOB_NUMBER_FROM_CI
-export ES_HOST=https://SOME_ES_CLUSTER
 
-# *** Ingest Mocha Coverage Summary ***
-node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/mocha/coverage-summary.json
+See 'ingest_code_coverage_readme.md'
 
-# *** Ingest Jest Coverage Summary ***
-node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/jest/coverage-summary.json
-
-# *** Ingest Functional Coverage Summary ***
-node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/functional/coverage-summary.json
       `,
       flags,
     }

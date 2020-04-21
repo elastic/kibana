@@ -38,6 +38,7 @@ const env = {
   TIME_STAMP: '2020-03-02T21:11:47Z',
   ES_HOST: 'https://super:changeme@some.fake.host:9243',
   NODE_ENV: 'integration_test',
+  COVERAGE_INGESTION_KIBANA_ROOT: '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
 };
 const includesSiteUrlPredicate = x => x.includes(STATIC_SITE_URL_PROP_NAME);
 const siteUrlLines = specificLinesOnly(includesSiteUrlPredicate);
@@ -186,8 +187,21 @@ describe('Ingesting Coverage to Cluster', () => {
           });
         });
       });
-      describe(`when 'kibana' exists in the covered file path more than once`, () => {
+      describe(`when 'kibana'`, () => {
         const chunks = [];
+
+        const parseForCoveredFilePath = xs =>
+          xs
+            .filter(x => x.includes('coveredFilePath'))[0]
+            .split(',')
+            .filter(x => x.includes('coveredFilePath'))
+            .join('/')
+            .replace('"', '')
+            .replace('coveredFilePath":', '')
+            .trim()
+            .replace(/"/g, '');
+
+        let coveredFilePath;
 
         beforeAll(done => {
           const ingestAndMutateAsync = ingestAndMutate(done);
@@ -195,25 +209,26 @@ describe('Ingesting Coverage to Cluster', () => {
           const verboseIngestAndMutateAsyncWithPath = ingestAndMutateMoreThanOneKibana(verboseArgs);
           verboseIngestAndMutateAsyncWithPath(chunks);
         });
-        it(`should only truncate the first one`, () => {
-          const justUrl = text => x => x.split(text)[1].trim();
 
-          const splitFromText = justUrl('staticSiteUrl:');
-          const actual = siteUrlsSplitByNewLineWithoutBlanks(chunks)
-            .filter(x => x.includes('### staticSiteUrl'))
-            .map(splitFromText)
-            .map(x => {
-              const dropped =
-                'https://kibana-coverage.elastic.dev/2020-03-02T21:11:47Z/jest-combined/';
-              return x.replace(dropped, '');
-            });
+        beforeAll(function loseRaceOfChunksArray() {
+          // This 'should' run after the first beforeAll()
+          coveredFilePath = parseForCoveredFilePath(chunks);
+        });
 
-          console.log(`\n### actual: \n\t${actual}`);
+        describe(`exists in the 'covered file path' more than once`, () => {
+          it(`should only truncate the first one`, () => {
+            expect(coveredFilePath).to.be(
+              'src/legacy/core_plugins/kibana/public/discover/get_inner_angular.ts'
+            );
+          });
+        });
 
-          expect(actual).to.be(
-            'src/legacy/core_plugins/kibana/public/discover/get_inner_angular.ts'
-          );
-          // /var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/get_inner_angular.ts
+        describe(`exists in the 'static site url' more than once`, () => {
+          it(`should only truncate the first one`, () => {
+            expect(siteUrlsSplitByNewLineWithoutBlanks(chunks)[1]).to.contain(
+              'https://kibana-coverage.elastic.dev/2020-03-02T21:11:47Z/jest-combined/src/legacy/core_plugins/kibana/public/discover/get_inner_angular.ts.html'
+            );
+          });
         });
       });
     });

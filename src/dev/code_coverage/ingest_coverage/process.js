@@ -37,22 +37,24 @@ import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import readline from 'readline';
 
-const KIBANA_ROOT_PATH = '../../../..';
-const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
-
+const back4Directories = '../../../..';
+const COVERAGE_INGESTION_KIBANA_ROOT =
+  process.env.COVERAGE_INGESTION_KIBANA_ROOT || resolve(__dirname, back4Directories);
 const ms = process.env.DELAY || 0;
 const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || 'https://kibana-coverage.elastic.dev';
 const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
-const prokStatsTimeStampBuildId = pipe(statsAndstaticSiteUrl, buildId, addPrePopulatedTimeStamp);
+const preamble = pipe(statsAndstaticSiteUrl, rootDirAndOrigPath, buildId, addPrePopulatedTimeStamp);
 const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
 
 const transform = jsonSummaryPath => log => vcsInfo => {
   const objStream = jsonStream(jsonSummaryPath).on('done', noop);
   const itemizeVcsInfo = itemizeVcs(vcsInfo);
 
-  fromEventPattern(_ => objStream.on('node', '!.*', _))
+  const jsonSummary$ = _ => objStream.on('node', '!.*', _);
+
+  fromEventPattern(jsonSummary$)
     .pipe(
-      map(prokStatsTimeStampBuildId),
+      map(preamble),
       map(coveredFilePath),
       map(itemizeVcsInfo),
       map(ciRunUrl),
@@ -63,6 +65,14 @@ const transform = jsonSummaryPath => log => vcsInfo => {
     .subscribe(ingest(log));
 };
 
+function rootDirAndOrigPath(obj) {
+  return {
+    ...obj,
+    originalFilePath: obj.staticSiteUrl,
+    COVERAGE_INGESTION_KIBANA_ROOT,
+  };
+}
+
 const mutateVcsInfo = vcsInfo => x => vcsInfo.push(x.trimStart().trimEnd());
 const vcsInfoLines$ = vcsInfoFilePath => {
   const rl = readline.createInterface({ input: createReadStream(vcsInfoFilePath) });
@@ -70,7 +80,7 @@ const vcsInfoLines$ = vcsInfoFilePath => {
 };
 
 export const prok = ({ jsonSummaryPath, vcsInfoFilePath }, log) => {
-  validateRoot(KIBANA_ROOT, log);
+  validateRoot(COVERAGE_INGESTION_KIBANA_ROOT, log);
   logAll(jsonSummaryPath, log);
 
   const xformWithPath = transform(jsonSummaryPath)(log); // On complete
@@ -85,10 +95,10 @@ export const prok = ({ jsonSummaryPath, vcsInfoFilePath }, log) => {
 
 function logAll(jsonSummaryPath, log) {
   log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
-  log.debug(`### KIBANA_ROOT: \n\t${green(KIBANA_ROOT)}`);
+  log.debug(`### COVERAGE_INGESTION_KIBANA_ROOT: \n\t${green(COVERAGE_INGESTION_KIBANA_ROOT)}`);
   log.debug(`### Ingesting from summary json: \n\t[${green(jsonSummaryPath)}]`);
 }
 
 function validateRoot(x, log) {
-  return /kibana$/.test(x) ? noop() : log.warning(`!!! 'kibana' NOT FOUND in ROOT: ${x}\n`);
+  return /kibana$/.test(x) ? noop() : log.warning(`✖✖✖ 'kibana' NOT FOUND in ROOT: ${x}\n`);
 }
