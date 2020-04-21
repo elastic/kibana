@@ -14,6 +14,7 @@ import {
   mockCases,
 } from '../__fixtures__';
 import { initFindCasesApi } from './find_cases';
+import { CASES_URL } from '../../../../common/constants';
 
 describe('GET all cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -22,7 +23,7 @@ describe('GET all cases', () => {
   });
   it(`gets all the cases`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: `${CASES_URL}/_find`,
       method: 'get',
     });
 
