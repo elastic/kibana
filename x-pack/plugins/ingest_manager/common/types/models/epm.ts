@@ -256,32 +256,19 @@ export enum DefaultPackages {
   endpoint = 'endpoint',
 }
 
-export interface Mappings {
-  dynamic?: boolean | 'strict';
-  date_detection?: boolean;
-  dynamic_templates?: any[];
-  properties: Record<string, Mapping>;
-}
-
-interface Mapping {
-  type: string;
-  properties?: Record<string, Mapping>;
+export interface IndexTemplateMappings {
+  properties: any;
 }
 
 export interface IndexTemplate {
   order: number;
   index_patterns: string[];
   settings: any;
-  mappings: Mappings;
+  mappings: object;
   aliases: object;
 }
 
 export interface TemplateRef {
   templateName: string;
-  indexTemplate: IndexTemplate;
-}
-
-export interface CurrentIndex {
-  indexName: string;
   indexTemplate: IndexTemplate;
 }

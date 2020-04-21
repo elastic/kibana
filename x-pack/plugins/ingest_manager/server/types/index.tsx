@@ -48,7 +48,7 @@ export {
   RegistrySearchResult,
   DefaultPackages,
   TemplateRef,
-  CurrentIndex,
+  IndexTemplateMappings,
 } from '../../common';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
