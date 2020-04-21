@@ -8,9 +8,9 @@ import { IRouter, RequestHandlerContext } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
-import { HostMetadata, HostResultList } from '../../../common/types';
+import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
+import { HostInfo, HostMetadata, HostResultList, HostStatus } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
-import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 
 interface HitSource {
   _source: HostMetadata;
@@ -50,7 +50,14 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const queryParams = await kibanaRequestToMetadataListESQuery(req, endpointAppContext);
+        const index = await endpointAppContext.indexPatternRetriever.getMetadataIndexPattern(
+          context
+        );
+        const queryParams = await kibanaRequestToMetadataListESQuery(
+          req,
+          endpointAppContext,
+          index
+        );
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           queryParams
@@ -72,7 +79,11 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const doc = await getHostData(context, req.params.id);
+        const index = await endpointAppContext.indexPatternRetriever.getMetadataIndexPattern(
+          context
+        );
+
+        const doc = await getHostData(context, req.params.id, index);
         if (doc) {
           return res.ok({ body: doc });
         }
@@ -86,9 +97,10 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
 
 export async function getHostData(
   context: RequestHandlerContext,
-  id: string
-): Promise<HostMetadata | undefined> {
-  const query = getESQueryHostMetadataByID(id);
+  id: string,
+  index: string
+): Promise<HostInfo | undefined> {
+  const query = getESQueryHostMetadataByID(id, index);
   const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
     'search',
     query
@@ -98,7 +110,7 @@ export async function getHostData(
     return undefined;
   }
 
-  return response.hits.hits[0]._source;
+  return enrichHostMetadata(response.hits.hits[0]._source);
 }
 
 function mapToHostResultList(
@@ -113,7 +125,7 @@ function mapToHostResultList(
       hosts: searchResponse.hits.hits
         .map(response => response.inner_hits.most_recent.hits.hits)
         .flatMap(data => data as HitSource)
-        .map(entry => entry._source),
+        .map(entry => enrichHostMetadata(entry._source)),
       total: totalNumberOfHosts,
     };
   } else {
@@ -124,4 +136,11 @@ function mapToHostResultList(
       hosts: [],
     };
   }
+}
+
+function enrichHostMetadata(hostMetadata: HostMetadata): HostInfo {
+  return {
+    metadata: hostMetadata,
+    host_status: HostStatus.ERROR,
+  };
 }

@@ -149,6 +149,7 @@ export class Plugin {
       auditLogger: new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger),
       authz,
       savedObjects: core.savedObjects,
+      getSpacesService: this.getSpacesService,
     });
 
     core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);
@@ -156,12 +157,12 @@ export class Plugin {
     defineRoutes({
       router: core.http.createRouter(),
       basePath: core.http.basePath,
+      httpResources: core.http.resources,
       logger: this.initializerContext.logger.get('routes'),
       clusterClient: this.clusterClient,
       config,
       authc,
       authz,
-      csp: core.http.csp,
       license,
     });
 

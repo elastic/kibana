@@ -21,7 +21,7 @@ import { updateSourceMutation } from './update_source.gql_query';
 
 type Source = SourceQuery.Query['source'];
 
-const pickIndexPattern = (source: Source | undefined, type: 'logs' | 'metrics' | 'both') => {
+export const pickIndexPattern = (source: Source | undefined, type: 'logs' | 'metrics' | 'both') => {
   if (!source) {
     return 'unknown-index';
   }

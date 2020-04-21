@@ -20,4 +20,5 @@ export interface ActionResult {
   actionTypeId: string;
   name: string;
   config: Record<string, any>;
+  isPreconfigured: boolean;
 }

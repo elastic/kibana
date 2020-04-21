@@ -14,7 +14,7 @@ import { getMigrationStatusStep, getSecurityStep } from '../common_instructions'
 export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
   const securitySetup = getSecurityStep(
-    `${ELASTIC_WEBSITE_URL}guide/en/logstash/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`
+    `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}/monitoring-with-metricbeat.html`
   );
 
   const installMetricbeatStep = {

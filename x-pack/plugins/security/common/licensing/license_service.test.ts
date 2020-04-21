@@ -78,14 +78,14 @@ describe('license features', function() {
       expect(subscriptionHandler.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "allowLogin": false,
-            "allowRbac": false,
-            "allowRoleDocumentLevelSecurity": false,
-            "allowRoleFieldLevelSecurity": false,
-            "allowSubFeaturePrivileges": false,
-            "showLinks": false,
-            "showLogin": false,
-            "showRoleMappingsManagement": false,
+            "allowLogin": true,
+            "allowRbac": true,
+            "allowRoleDocumentLevelSecurity": true,
+            "allowRoleFieldLevelSecurity": true,
+            "allowSubFeaturePrivileges": true,
+            "showLinks": true,
+            "showLogin": true,
+            "showRoleMappingsManagement": true,
           },
         ]
       `);

@@ -5,10 +5,18 @@
  */
 
 import { isEqual } from 'lodash';
+import numeral from '@elastic/numeral';
 import { ml } from '../../../../services/ml_api_service';
 import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
+import {
+  MAX_FILE_SIZE_BYTES,
+  ABSOLUTE_MAX_FILE_SIZE_BYTES,
+  FILE_SIZE_DISPLAY_FORMAT,
+} from '../../../../../../common/constants/file_datavisualizer';
+import { getMlConfig } from '../../../../util/dependency_cache';
 
 const DEFAULT_LINES_TO_SAMPLE = 1000;
+const UPLOAD_SIZE_MB = 5;
 
 const overrideDefaults = {
   timestampFormat: undefined,
@@ -28,15 +36,22 @@ export function readFile(file: File) {
   return new Promise((resolve, reject) => {
     if (file && file.size) {
       const reader = new FileReader();
-      reader.readAsText(file);
+      reader.readAsArrayBuffer(file);
 
       reader.onload = (() => {
         return () => {
+          const decoder = new TextDecoder();
           const data = reader.result;
-          if (data === '') {
+          if (data === null || typeof data === 'string') {
+            return reject();
+          }
+          const size = UPLOAD_SIZE_MB * Math.pow(2, 20);
+          const fileContents = decoder.decode(data.slice(0, size));
+
+          if (fileContents === '') {
             reject();
           } else {
-            resolve({ data });
+            resolve({ fileContents, data });
           }
         };
       })();
@@ -46,12 +61,18 @@ export function readFile(file: File) {
   });
 }
 
-export function reduceData(data: string, mb: number) {
-  // assuming ascii characters in the file where 1 char is 1 byte
-  // TODO -  change this when other non UTF-8 formats are
-  // supported for the read data
-  const size = mb * Math.pow(2, 20);
-  return data.length >= size ? data.slice(0, size) : data;
+export function getMaxBytes() {
+  const maxFileSize = getMlConfig().file_data_visualizer.max_file_size;
+  // @ts-ignore
+  const maxBytes = numeral(maxFileSize.toUpperCase()).value();
+  if (maxBytes < MAX_FILE_SIZE_BYTES) {
+    return MAX_FILE_SIZE_BYTES;
+  }
+  return maxBytes < ABSOLUTE_MAX_FILE_SIZE_BYTES ? maxBytes : ABSOLUTE_MAX_FILE_SIZE_BYTES;
+}
+
+export function getMaxBytesFormatted() {
+  return numeral(getMaxBytes()).format(FILE_SIZE_DISPLAY_FORMAT);
 }
 
 export function createUrlOverrides(overrides: InputOverrides, originalSettings: InputOverrides) {

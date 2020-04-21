@@ -17,9 +17,9 @@
  * under the License.
  */
 import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { getAngularModule, wrapInI18nContext, getServices } from '../../../kibana_services';
+import { getAngularModule, getServices } from '../../../kibana_services';
 
 interface Props {
   fetchError: {
@@ -72,26 +72,28 @@ const DiscoverFetchError = ({ fetchError }: Props) => {
   }
 
   return (
-    <Fragment>
-      <EuiSpacer size="xl" />
+    <I18nProvider>
+      <Fragment>
+        <EuiSpacer size="xl" />
 
-      <EuiFlexGroup justifyContent="center" data-test-subj="discoverFetchError">
-        <EuiFlexItem grow={false} className="discoverFetchError">
-          <EuiCallOut title={fetchError.message} color="danger" iconType="cross">
-            {body}
+        <EuiFlexGroup justifyContent="center" data-test-subj="discoverFetchError">
+          <EuiFlexItem grow={false} className="discoverFetchError">
+            <EuiCallOut title={fetchError.message} color="danger" iconType="cross">
+              {body}
 
-            <EuiCodeBlock>{fetchError.error}</EuiCodeBlock>
-          </EuiCallOut>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              <EuiCodeBlock>{fetchError.error}</EuiCodeBlock>
+            </EuiCallOut>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-      <EuiSpacer size="xl" />
-    </Fragment>
+        <EuiSpacer size="xl" />
+      </Fragment>
+    </I18nProvider>
   );
 };
 
 export function createFetchErrorDirective(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DiscoverFetchError));
+  return reactDirective(DiscoverFetchError);
 }
 
 getAngularModule().directive('discoverFetchError', createFetchErrorDirective);

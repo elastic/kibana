@@ -71,7 +71,7 @@ test('`loadPluginBundles` creates a script tag and loads initializer', async () 
 
   // Setup a fake initializer as if a plugin bundle had actually been loaded.
   const fakeInitializer = jest.fn();
-  coreWindow.__kbnBundles__['plugin/plugin-a'] = fakeInitializer;
+  coreWindow.__kbnBundles__['plugin/plugin-a'] = { plugin: fakeInitializer };
   // Call the onload callback
   fakeScriptTag.onload();
   await expect(loadPromise).resolves.toEqual(fakeInitializer);

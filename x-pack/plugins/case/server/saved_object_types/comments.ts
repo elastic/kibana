@@ -11,7 +11,7 @@ export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
 export const caseCommentSavedObjectType: SavedObjectsType = {
   name: CASE_COMMENT_SAVED_OBJECT,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       comment: {

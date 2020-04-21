@@ -19,6 +19,7 @@
 
 import Path from 'path';
 
+import normalizePath from 'normalize-path';
 import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
 // @ts-ignore
@@ -35,6 +36,59 @@ const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+
+const STATIC_BUNDLE_PLUGINS = [
+  // { id: 'data', dirname: 'data' },
+  { id: 'kibanaReact', dirname: 'kibana_react' },
+  { id: 'kibanaUtils', dirname: 'kibana_utils' },
+  { id: 'esUiShared', dirname: 'es_ui_shared' },
+];
+
+/**
+ * Determine externals statements for require/import statements by looking
+ * for requests resolving to the primary public export of the data, kibanaReact,
+ * amd kibanaUtils plugins. If this module is being imported then rewrite
+ * the import to access the global `__kbnBundles__` variables and access
+ * the relavent properties from that global object.
+ *
+ * @param bundle
+ * @param context the directory containing the module which made `request`
+ * @param request the request for a module from a commonjs require() call or import statement
+ */
+function dynamicExternals(bundle: Bundle, context: string, request: string) {
+  // ignore imports that have loaders defined
+  if (request.includes('!')) {
+    return;
+  }
+
+  // don't allow any static bundle to rely on other static bundles
+  if (STATIC_BUNDLE_PLUGINS.some(p => bundle.id === p.id)) {
+    return;
+  }
+
+  // ignore requests that don't include a /data/public, /kibana_react/public, or
+  // /kibana_utils/public segment as a cheap way to avoid doing path resolution
+  // for paths that couldn't possibly resolve to what we're looking for
+  const reqToStaticBundle = STATIC_BUNDLE_PLUGINS.some(p =>
+    request.includes(`/${p.dirname}/public`)
+  );
+  if (!reqToStaticBundle) {
+    return;
+  }
+
+  // determine the most acurate resolution string we can without running full resolution
+  const rootRelative = normalizePath(
+    Path.relative(bundle.sourceRoot, Path.resolve(context, request))
+  );
+  for (const { id, dirname } of STATIC_BUNDLE_PLUGINS) {
+    if (rootRelative === `src/plugins/${dirname}/public`) {
+      return `__kbnBundles__['plugin/${id}']`;
+    }
+  }
+
+  // import doesn't match a root public import
+  return undefined;
+}
 
 export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
   const commonConfig: webpack.Configuration = {
@@ -63,7 +117,6 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
             // When the entry point is loaded, assign it's exported `plugin`
             // value to a key on the global `__kbnBundles__` object.
             library: ['__kbnBundles__', `plugin/${bundle.id}`],
-            libraryExport: 'plugin',
           }
         : {}),
     },
@@ -72,9 +125,16 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
       noEmitOnErrors: true,
     },
 
-    externals: {
-      ...UiSharedDeps.externals,
-    },
+    externals: [
+      UiSharedDeps.externals,
+      function(context, request, cb) {
+        try {
+          cb(undefined, dynamicExternals(bundle, context, request));
+        } catch (error) {
+          cb(error, undefined);
+        }
+      },
+    ],
 
     plugins: [new CleanWebpackPlugin(), new DisallowedSyntaxPlugin()],
 

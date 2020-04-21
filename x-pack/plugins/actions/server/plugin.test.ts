@@ -31,7 +31,34 @@ describe('Actions Plugin', () => {
     let pluginsSetup: jest.Mocked<ActionsPluginsSetup>;
 
     beforeEach(() => {
-      context = coreMock.createPluginInitializerContext();
+      context = coreMock.createPluginInitializerContext({
+        preconfigured: [
+          {
+            id: 'my-slack1',
+            actionTypeId: '.slack',
+            name: 'Slack #xyz',
+            description: 'Send a message to the #xyz channel',
+            config: {
+              webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+            },
+          },
+          {
+            id: 'custom-system-abc-connector',
+            actionTypeId: 'system-abc-action-type',
+            description: 'Send a notification to system ABC',
+            name: 'System ABC',
+            config: {
+              xyzConfig1: 'value1',
+              xyzConfig2: 'value2',
+              listOfThings: ['a', 'b', 'c', 'd'],
+            },
+            secrets: {
+              xyzSecret1: 'credential1',
+              xyzSecret2: 'credential2',
+            },
+          },
+        ],
+      });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
 
@@ -71,6 +98,9 @@ describe('Actions Plugin', () => {
             core: {
               savedObjects: {
                 client: {},
+              },
+              elasticsearch: {
+                adminClient: jest.fn(),
               },
             },
           } as any,
@@ -160,7 +190,9 @@ describe('Actions Plugin', () => {
     let pluginsStart: jest.Mocked<ActionsPluginsStart>;
 
     beforeEach(() => {
-      const context = coreMock.createPluginInitializerContext();
+      const context = coreMock.createPluginInitializerContext({
+        preconfigured: [],
+      });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
       coreStart = coreMock.createStart();

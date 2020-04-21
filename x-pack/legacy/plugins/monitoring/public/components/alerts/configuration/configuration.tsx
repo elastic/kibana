@@ -61,7 +61,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
   async function fetchEmailActions() {
     const kibanaActions = await Legacy.shims.kfetch({
       method: 'GET',
-      pathname: `/api/action/_find`,
+      pathname: `/api/action/_getAll`,
     });
 
     const actions = kibanaActions.data.filter(

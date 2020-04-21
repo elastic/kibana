@@ -9,3 +9,5 @@ import { MlServerPlugin } from './plugin';
 export { MlPluginSetup, MlPluginStart } from './plugin';
 
 export const plugin = (ctx: PluginInitializerContext) => new MlServerPlugin(ctx);
+
+export { config } from './config';

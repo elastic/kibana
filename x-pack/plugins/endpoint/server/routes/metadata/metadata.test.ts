@@ -11,24 +11,28 @@ import {
   RequestHandler,
   RequestHandlerContext,
   RouteConfig,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingServiceMock,
+  savedObjectsClientMock,
 } from '../../../../../../src/core/server/mocks';
-import { HostMetadata, HostResultList } from '../../../common/types';
+import { HostInfo, HostMetadata, HostResultList, HostStatus } from '../../../common/types';
 import { SearchResponse } from 'elasticsearch';
+import { registerEndpointRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
 import * as data from '../../test_data/all_metadata_data.json';
-import { registerEndpointRoutes } from './index';
+import { createMockMetadataIndexPatternRetriever } from '../../mocks';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockClusterClient: jest.Mocked<IClusterClient>;
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let routeHandler: RequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
 
@@ -37,14 +41,37 @@ describe('test endpoint route', () => {
       IClusterClient
     >;
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockSavedObjectClient = savedObjectsClientMock.create();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
     registerEndpointRoutes(routerMock, {
+      indexPatternRetriever: createMockMetadataIndexPatternRetriever(),
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });
   });
+
+  function createRouteHandlerContext(
+    dataClient: jest.Mocked<IScopedClusterClient>,
+    savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
+  ) {
+    return ({
+      core: {
+        elasticsearch: {
+          dataClient,
+        },
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+      /**
+       * Using unknown here because the object defined is not a full `RequestHandlerContext`. We don't
+       * need all of the fields required to run the tests, but the `routeHandler` function requires a
+       * `RequestHandlerContext`.
+       */
+    } as unknown) as RequestHandlerContext;
+  }
 
   it('test find the latest of all endpoints', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({});
@@ -58,13 +85,7 @@ describe('test endpoint route', () => {
     )!;
 
     await routeHandler(
-      ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext,
+      createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
       mockRequest,
       mockResponse
     );
@@ -100,13 +121,7 @@ describe('test endpoint route', () => {
     )!;
 
     await routeHandler(
-      ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext,
+      createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
       mockRequest,
       mockResponse
     );
@@ -147,13 +162,7 @@ describe('test endpoint route', () => {
     )!;
 
     await routeHandler(
-      ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext,
+      createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
       mockRequest,
       mockResponse
     );
@@ -212,13 +221,7 @@ describe('test endpoint route', () => {
       )!;
 
       await routeHandler(
-        ({
-          core: {
-            elasticsearch: {
-              dataClient: mockScopedClient,
-            },
-          },
-        } as unknown) as RequestHandlerContext,
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,
         mockResponse
       );
@@ -230,7 +233,7 @@ describe('test endpoint route', () => {
       expect(message).toEqual('Endpoint Not Found');
     });
 
-    it('should return a single endpoint', async () => {
+    it('should return a single endpoint with status error', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: (data as any).hits.hits[0]._id },
       });
@@ -243,13 +246,7 @@ describe('test endpoint route', () => {
       )!;
 
       await routeHandler(
-        ({
-          core: {
-            elasticsearch: {
-              dataClient: mockScopedClient,
-            },
-          },
-        } as unknown) as RequestHandlerContext,
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,
         mockResponse
       );
@@ -257,8 +254,9 @@ describe('test endpoint route', () => {
       expect(mockScopedClient.callAsCurrentUser).toBeCalled();
       expect(routeConfig.options).toEqual({ authRequired: true });
       expect(mockResponse.ok).toBeCalled();
-      const result = mockResponse.ok.mock.calls[0][0]?.body as HostMetadata;
-      expect(result).toHaveProperty('endpoint');
+      const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
+      expect(result).toHaveProperty('metadata.endpoint');
+      expect(result.host_status).toEqual(HostStatus.ERROR);
     });
   });
 });

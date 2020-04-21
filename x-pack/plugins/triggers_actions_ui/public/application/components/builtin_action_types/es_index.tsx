@@ -14,13 +14,10 @@ import {
   EuiSelect,
   EuiTitle,
   EuiIconTip,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { useXJsonMode } from '../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -35,7 +32,7 @@ import {
   getIndexOptions,
   getIndexPatterns,
 } from '../../../common/index_controls';
-import { useXJsonMode } from '../../lib/use_x_json_mode';
+import { AddMessageVariables } from '../add_message_variables';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -282,23 +279,13 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
   const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(
     documents && documents.length > 0 ? documents[0] : null
   );
-  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
-  const messageVariablesItems = messageVariables?.map((variable: string, i: number) => (
-    <EuiContextMenuItem
-      key={variable}
-      data-test-subj={`variableMenuButton-${i}`}
-      icon="empty"
-      onClick={() => {
-        const value = (xJson ?? '').concat(` {{${variable}}}`);
-        setXJson(value);
-        // Keep the documents in sync with the editor content
-        onDocumentsChange(convertToJson(value));
-        setIsVariablesPopoverOpen(false);
-      }}
-    >
-      {`{{${variable}}}`}
-    </EuiContextMenuItem>
-  ));
+  const onSelectMessageVariable = (variable: string) => {
+    const value = (xJson ?? '').concat(` {{${variable}}}`);
+    setXJson(value);
+    // Keep the documents in sync with the editor content
+    onDocumentsChange(convertToJson(value));
+  };
+
   function onDocumentsChange(updatedDocuments: string) {
     try {
       const documentsJSON = JSON.parse(updatedDocuments);
@@ -317,34 +304,11 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
           }
         )}
         labelAppend={
-          // TODO: replace this button with a proper Eui component, when it will be ready
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                data-test-subj="indexDocumentAddVariableButton"
-                onClick={() => setIsVariablesPopoverOpen(true)}
-                iconType="indexOpen"
-                title={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.addVariableTitle',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.addVariablePopoverButton',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-              />
-            }
-            isOpen={isVariablesPopoverOpen}
-            closePopover={() => setIsVariablesPopoverOpen(false)}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={messageVariablesItems} />
-          </EuiPopover>
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable(variable)}
+            paramsProperty="documents"
+          />
         }
       >
         <EuiCodeEditor

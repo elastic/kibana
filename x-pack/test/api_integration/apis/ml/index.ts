@@ -7,12 +7,10 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService, loadTestFile }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // ML tests need to be disabled in orde to get the ES snapshot with
-  // https://github.com/elastic/elasticsearch/pull/54713 promoted
-  // and should be re-enabled as part of https://github.com/elastic/kibana/pull/61980
-  describe.skip('Machine Learning', function() {
+  describe('Machine Learning', function() {
     this.tags(['mlqa']);
 
     before(async () => {
@@ -23,6 +21,14 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     after(async () => {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
+
+      await ml.testResources.deleteIndexPattern('kibana_sample_data_logs');
+
+      await esArchiver.unload('ml/ecommerce');
+      await esArchiver.unload('ml/categorization');
+      await esArchiver.unload('ml/sample_logs');
+
+      await ml.testResources.resetKibanaTimeZone();
     });
 
     loadTestFile(require.resolve('./bucket_span_estimator'));
