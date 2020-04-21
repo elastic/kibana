@@ -38,3 +38,23 @@ export const todoSavedObject: SavedObjectsType = {
   },
   migrations: {},
 };
+
+export const todoComboSavedObject: SavedObjectsType = {
+  name: 'todo_Combo',
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: {
+    properties: {
+      title: {
+        type: 'keyword',
+      },
+      task: {
+        type: 'text',
+      },
+      icon: {
+        type: 'keyword',
+      },
+    },
+  },
+  migrations: {},
+};

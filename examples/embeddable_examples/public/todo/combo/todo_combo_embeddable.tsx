@@ -30,7 +30,7 @@ import {
 import { TodoSavedObjectAttributes } from '../../../common';
 import { TodoComboEmbeddableComponent } from './todo_combo_component';
 
-export const TODO_COMBO_EMBEDDABLE = 'TODO_COMBO_EMBEDDABLE';
+export const TODO_COMBO_EMBEDDABLE = 'todo_Combo';
 
 export type TodoComboInput = TodoComboValInput | TodoComboRefInput;
 
@@ -91,7 +91,7 @@ export class TodoComboEmbeddable extends Embeddable<TodoComboInput, TodoComboOut
         if (this.savedObjectId !== this.input.savedObjectId) {
           this.savedObjectId = this.input.savedObjectId;
           const todoSavedObject = await this.savedObjectsClient.get<TodoSavedObjectAttributes>(
-            'todo',
+            this.type,
             this.input.savedObjectId
           );
           savedAttributes = todoSavedObject?.attributes;

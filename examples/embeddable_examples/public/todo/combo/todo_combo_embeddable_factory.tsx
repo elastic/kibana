@@ -103,7 +103,7 @@ export class TodoComboEmbeddableFactory
     };
     if (Math.random() > 0.5) {
       const { savedObjectsClient } = await this.getStartServices();
-      const savedObject = await savedObjectsClient.create('todo', attributes);
+      const savedObject = await savedObjectsClient.create(this.type, attributes);
       return {
         inputType: 'reference',
         savedObjectId: savedObject.id,
