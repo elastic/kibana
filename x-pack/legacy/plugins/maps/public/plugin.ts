@@ -4,13 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import '../../../../plugins/maps/public/layers/layer_wizard_registry';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import '../../../../plugins/maps/public/layers/sources/source_registry';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import '../../../../plugins/maps/public/layers/load_layer_wizards';
-
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';

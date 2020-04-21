@@ -141,7 +141,8 @@ export class AbstractLayer {
         defaultMessage: `Layer is hidden.`,
       });
     } else if (!this.showAtZoomLevel(zoomLevel)) {
-      const { minZoom, maxZoom } = this.getZoomConfig();
+      const minZoom = this.getMinZoom();
+      const maxZoom = this.getMaxZoom();
       icon = <EuiIcon size="m" type="expand" />;
       tooltipContent = i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
         defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
@@ -203,7 +204,7 @@ export class AbstractLayer {
   }
 
   showAtZoomLevel(zoom) {
-    return zoom >= this._descriptor.minZoom && zoom <= this._descriptor.maxZoom;
+    return zoom >= this.getMinZoom() && zoom <= this.getMaxZoom();
   }
 
   getMinZoom() {
@@ -214,19 +215,36 @@ export class AbstractLayer {
     return this._descriptor.maxZoom;
   }
 
+  getMinSourceZoom() {
+    return this._source.getMinZoom();
+  }
+
+  _requiresPrevSourceCleanup() {
+    return false;
+  }
+
+  _removeStaleMbSourcesAndLayers(mbMap) {
+    if (this._requiresPrevSourceCleanup(mbMap)) {
+      const mbStyle = mbMap.getStyle();
+      mbStyle.layers.forEach(mbLayer => {
+        if (this.ownsMbLayerId(mbLayer.id)) {
+          mbMap.removeLayer(mbLayer.id);
+        }
+      });
+      Object.keys(mbStyle.sources).some(mbSourceId => {
+        if (this.ownsMbSourceId(mbSourceId)) {
+          mbMap.removeSource(mbSourceId);
+        }
+      });
+    }
+  }
+
   getAlpha() {
     return this._descriptor.alpha;
   }
 
   getQuery() {
     return this._descriptor.query;
-  }
-
-  getZoomConfig() {
-    return {
-      minZoom: this._descriptor.minZoom,
-      maxZoom: this._descriptor.maxZoom,
-    };
   }
 
   getCurrentStyle() {

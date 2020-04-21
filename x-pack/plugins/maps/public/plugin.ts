@@ -38,6 +38,7 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
+import { registerLayerWizards } from './layers/load_layer_wizards';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -79,6 +80,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setUiActions(plugins.uiActions);
   setNavigation(plugins.navigation);
   setCoreI18n(core.i18n);
+  registerLayerWizards();
 };
 
 /**

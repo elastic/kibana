@@ -13,7 +13,12 @@ import {
   addSpritesheetToMap,
 } from './utils';
 import { getGlyphUrl, isRetina } from '../../../meta';
-import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
+import {
+  DECIMAL_DEGREES_PRECISION,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  ZOOM_PRECISION,
+} from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
@@ -127,6 +132,8 @@ export class MBMapContainer extends React.Component {
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: getInjectedVarFunc()('preserveDrawingBuffer', false),
         interactive: !this.props.disableInteractive,
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
       };
       const initialView = _.get(this.props.goto, 'center');
       if (initialView) {

@@ -30,7 +30,7 @@ interface IndexedFieldsTableProps {
   fieldFilter?: string;
   indexedFieldTypeFilter?: string;
   helpers: {
-    redirectToRoute: (obj: any, route: string) => void;
+    redirectToRoute: (field: IndexedFieldItem) => void;
     getFieldInfo: (indexPattern: IIndexPattern, field: string) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
@@ -73,7 +73,6 @@ export class IndexedFieldsTable extends Component<
           return {
             ...field,
             displayName: field.displayName,
-            routes: field.routes,
             indexPattern: field.indexPattern,
             format: getFieldFormat(indexPattern, field.name),
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
@@ -113,7 +112,7 @@ export class IndexedFieldsTable extends Component<
         <Table
           indexPattern={indexPattern}
           items={fields}
-          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+          editField={field => this.props.helpers.redirectToRoute(field)}
         />
       </div>
     );

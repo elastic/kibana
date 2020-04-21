@@ -12,6 +12,7 @@ import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
 import { BlendedVectorLayer } from '../layers/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
+import { TiledVectorLayer } from '../layers/tiled_vector_layer';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
 import { InnerJoin } from '../layers/joins/inner_join';
@@ -38,6 +39,8 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
       return new HeatmapLayer({ layerDescriptor, source });
     case BlendedVectorLayer.type:
       return new BlendedVectorLayer({ layerDescriptor, source });
+    case TiledVectorLayer.type:
+      return new TiledVectorLayer({ layerDescriptor, source });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
