@@ -6,10 +6,7 @@
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import {
-  IRuleSavedAttributesSavedObjectAttributes,
-  PatchRuleAlertParamsRest,
-} from '../../rules/types';
+import { PatchRuleAlertParamsRest } from '../../rules/types';
 import {
   transformBulkError,
   buildRouteValidation,
@@ -21,8 +18,8 @@ import { transformValidateBulkError, validate } from './validate';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
+import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
 export const patchRulesBulkRoute = (router: IRouter) => {
   router.patch(
@@ -46,6 +43,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
         return siemResponse.error({ statusCode: 404 });
       }
 
+      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async payloadRule => {
           const {
@@ -131,10 +129,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
                 throttle,
                 name: rule.name,
               });
-              const ruleStatuses = await savedObjectsClient.find<
-                IRuleSavedAttributesSavedObjectAttributes
-              >({
-                type: ruleStatusSavedObjectType,
+              const ruleStatuses = await ruleStatusClient.find({
                 perPage: 1,
                 sortField: 'statusDate',
                 sortOrder: 'desc',
