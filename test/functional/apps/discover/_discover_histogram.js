@@ -31,7 +31,8 @@ export default function({ getService, getPageObjects }) {
     'dateFormat:tz': 'Europe/Berlin',
   };
 
-  describe('discover histogram', function describeIndexTests() {
+  // https://github.com/elastic/kibana/issues/63928
+  describe.skip('discover histogram', function describeIndexTests() {
     before(async function() {
       log.debug('load kibana index with default index pattern');
       await PageObjects.common.navigateToApp('home');
@@ -58,8 +59,7 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.unload('discover');
     });
 
-    // https://github.com/elastic/kibana/issues/63928
-    it.skip('should visualize monthly data with different day intervals', async () => {
+    it('should visualize monthly data with different day intervals', async () => {
       //Nov 1, 2017 @ 01:00:00.000 - Mar 21, 2018 @ 02:00:00.000
       const fromTime = '2017-11-01 00:00:00.000';
       const toTime = '2018-03-21 00:00:00.000';
