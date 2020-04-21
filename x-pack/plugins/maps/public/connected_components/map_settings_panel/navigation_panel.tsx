@@ -9,7 +9,7 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MapSettings } from '../../reducers/map';
-import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kibana_react/public';
+import { ValidatedDualRange, Value } from '../../../../../../src/plugins/kibana_react/public';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 
 interface Props {
