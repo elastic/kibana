@@ -602,7 +602,39 @@ const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
       };
     }
   }
+  return doc;
+};
 
+// [TSVB] Default color palette is changing, keep the default for older viz
+const migrateTsvbDefaultColorPalettes: SavedObjectMigrationFn = doc => {
+  const visStateJSON = get<string>(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const series: any[] = get(visState, 'params.series') || [];
+
+      series.forEach(part => {
+        // The default value was not saved before
+        if (!part.split_color_mode) {
+          part.split_color_mode = 'gradient';
+        }
+      });
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
   return doc;
 };
 
@@ -639,4 +671,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.3.1': flow<SavedObjectMigrationFn>(migrateFiltersAggQueryStringQueries),
   '7.4.2': flow<SavedObjectMigrationFn>(transformSplitFiltersStringToQueryObject),
   '7.7.0': flow<SavedObjectMigrationFn>(migrateOperatorKeyTypo),
+  '7.8.0': flow<SavedObjectMigrationFn>(migrateTsvbDefaultColorPalettes),
 };

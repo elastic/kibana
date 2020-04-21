@@ -7,7 +7,7 @@
 import React, { createContext, useMemo } from 'react';
 import { UptimeAppProps } from '../uptime_app';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../common/constants';
-import { CommonlyUsedRange } from '../components/functional/uptime_date_picker';
+import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
 import { useGetUrlParams } from '../hooks';
 import { ILicense } from '../../../../../plugins/licensing/common/types';
 

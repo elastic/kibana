@@ -85,7 +85,7 @@ describe('export timelines', () => {
       const result = server.validate(request);
 
       expect(result.badRequest.mock.calls[0][0]).toEqual(
-        'Invalid value undefined supplied to : { ids: Array<string> }/ids: Array<string>'
+        'Invalid value "undefined" supplied to "ids"'
       );
     });
 
@@ -98,11 +98,7 @@ describe('export timelines', () => {
       const result = server.validate(request);
 
       expect(result.badRequest.mock.calls[1][0]).toEqual(
-        [
-          'Invalid value undefined supplied to : { file_name: string, exclude_export_details: ("true" | "false") }/file_name: string',
-          'Invalid value undefined supplied to : { file_name: string, exclude_export_details: ("true" | "false") }/exclude_export_details: ("true" | "false")/0: "true"',
-          'Invalid value undefined supplied to : { file_name: string, exclude_export_details: ("true" | "false") }/exclude_export_details: ("true" | "false")/1: "false"',
-        ].join('\n')
+        'Invalid value "undefined" supplied to "file_name",Invalid value "undefined" supplied to "exclude_export_details",Invalid value "undefined" supplied to "exclude_export_details"'
       );
     });
   });

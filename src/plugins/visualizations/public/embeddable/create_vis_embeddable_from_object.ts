@@ -29,8 +29,9 @@ import {
   getCapabilities,
   getUiActions,
 } from '../services';
+import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 
-export const createVisEmbeddableFromObject = async (
+export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
   input: Partial<VisualizeInput> & { id: string },
   parent?: IContainer
@@ -60,6 +61,7 @@ export const createVisEmbeddableFromObject = async (
         editUrl,
         editable,
         uiActions: getUiActions(),
+        deps,
       },
       input,
       parent
