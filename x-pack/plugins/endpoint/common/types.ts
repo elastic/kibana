@@ -573,3 +573,173 @@ export type NewPolicyData = NewDatasource & {
     }
   ];
 };
+
+/**
+ * the possible status for actions, configurations and overall Policy Response
+ */
+export enum PolicyResponseActionStatus {
+  success = 'success',
+  failure = 'failure',
+  warning = 'warning',
+}
+
+/**
+ * The details of a given action
+ */
+interface PolicyResponseActionDetails {
+  status: PolicyResponseActionStatus;
+  message: string;
+}
+
+/**
+ * A known list of possible Endpoint actions
+ */
+interface PolicyResponseActions {
+  download_model: PolicyResponseActionDetails;
+  ingest_events_config: PolicyResponseActionDetails;
+  workflow: PolicyResponseActionDetails;
+  configure_elasticsearch_connection: PolicyResponseActionDetails;
+  configure_kernel: PolicyResponseActionDetails;
+  configure_logging: PolicyResponseActionDetails;
+  configure_malware: PolicyResponseActionDetails;
+  connect_kernel: PolicyResponseActionDetails;
+  detect_file_open_events: PolicyResponseActionDetails;
+  detect_file_write_events: PolicyResponseActionDetails;
+  detect_image_load_events: PolicyResponseActionDetails;
+  detect_process_events: PolicyResponseActionDetails;
+  download_global_artifacts: PolicyResponseActionDetails;
+  load_config: PolicyResponseActionDetails;
+  load_malware_model: PolicyResponseActionDetails;
+  read_elasticsearch_config: PolicyResponseActionDetails;
+  read_events_config: PolicyResponseActionDetails;
+  read_kernel_config: PolicyResponseActionDetails;
+  read_logging_config: PolicyResponseActionDetails;
+  read_malware_config: PolicyResponseActionDetails;
+  // The list of possible Actions will change rapidly, so the below entry will allow
+  // them without us defining them here statically
+  [key: string]: PolicyResponseActionDetails;
+}
+
+interface PolicyResponseConfigurationStatus {
+  status: PolicyResponseActionStatus;
+  concerned_actions: Array<keyof PolicyResponseActions>;
+}
+
+/**
+ * Information about the applying of a policy to a given host
+ */
+export interface PolicyResponse {
+  '@timestamp': number;
+  elastic: {
+    agent: {
+      id: string;
+    };
+  };
+  ecs: {
+    version: string;
+  };
+  event: {
+    created: string;
+    kind: string;
+  };
+  agent: {
+    version: string;
+    id: string;
+  };
+  endpoint: {
+    artifacts: {};
+    policy: {
+      applied: {
+        version: string;
+        id: string;
+        status: PolicyResponseActionStatus;
+        response: {
+          configurations: {
+            malware: PolicyResponseConfigurationStatus;
+            events: PolicyResponseConfigurationStatus;
+            logging: PolicyResponseConfigurationStatus;
+            streaming: PolicyResponseConfigurationStatus;
+          };
+          actions: Partial<PolicyResponseActions>;
+        };
+      };
+    };
+  };
+}
+
+/*
+{
+  "@timestamp": "a formatted timestamp",
+  "elastic": {
+    "agent": {
+      "id": "c2a9093e-e289-4c0a-aa44-8c32a414fa7a" //Elastic Agent ID
+    }
+  },
+  "ecs": {
+    "version": "1.0.0"
+  },
+  "event": {
+    "created": "2015-01-01T12:10:30Z",
+    "kind": "policy_response" //Thoughts on this name?
+  },
+  "agent": { //Elastic Endpoint information
+    "version": "6.0.0-rc2",
+    "id": "8a4f500d",
+  },
+  "endpoint": {
+    "artifacts": {
+      "global-manifest": {
+        "version": "1.2.3",
+        "sha256": "abcdef"
+      },
+      "endpointpe-v4-windows": {
+        "version": "1.2.3",
+        "sha256": "abcdef",
+      },
+      "user-whitelist-windows": {
+        "version": "1.2.3",
+        "sha256": "abcdef",
+      },
+      "global-whitelist-windows": {
+        "version": "1.2.3",
+        "sha256": "abcdef",
+      },
+    },
+    "policy": {
+      "applied": {
+        "version": "1.0.0",
+        "id": "17d4b81d-9940-4b64-9de5-3e03ef1fb5cf",
+        "status": "failed",
+        "response": {
+          "configurations": {
+            "malware": {
+              "status": "success",
+              "concerned_actions": [ "download_model", "workflow",  ] //Contains all actions taken regardless of status
+            },
+            "eventing": {
+              "status": "failed",
+              "concerned_actions": [ "ingest_events_config", "workflow",  ] //Contains all actions taken regardless of status
+            }
+          },
+          "actions": {
+            "download_model": {
+              "status": "success",
+              "message": "model downloaded"
+            },
+            "ingest_events_config": {
+              "status": "failure",
+              "message": "no action taken"
+            },
+            "workflow": {
+              "status": "success",
+              "message": "the flow worked well"
+            },
+            // ...
+          }
+        }
+      }
+    }
+  }
+}
+
+ */

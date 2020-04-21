@@ -6,7 +6,16 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { AlertEvent, EndpointEvent, HostMetadata, OSFields, HostFields, PolicyData } from './types';
+import {
+  AlertEvent,
+  EndpointEvent,
+  HostFields,
+  HostMetadata,
+  OSFields,
+  PolicyData,
+  PolicyResponse,
+  PolicyResponseActionStatus,
+} from './types';
 import { factory as policyFactory } from './models/policy_config';
 
 export type Event = AlertEvent | EndpointEvent;
@@ -483,6 +492,93 @@ export class EndpointDocGenerator {
         version: '1.0.0',
       },
       revision: 1,
+    };
+  }
+
+  generatePolicyResponse(): PolicyResponse {
+    return {
+      '@timestamp': new Date().getTime(),
+      elastic: {
+        agent: {
+          id: 'c2a9093e-e289-4c0a-aa44-8c32a414fa7a',
+        },
+      },
+      ecs: {
+        version: '1.0.0',
+      },
+      event: {
+        created: '2015-01-01T12:10:30Z',
+        kind: 'policy_response',
+      },
+      agent: {
+        version: '6.0.0-rc2',
+        id: '8a4f500d',
+      },
+      endpoint: {
+        artifacts: {
+          'global-manifest': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+          'endpointpe-v4-windows': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+          'user-whitelist-windows': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+          'global-whitelist-windows': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+        },
+        policy: {
+          applied: {
+            version: '1.0.0',
+            id: '17d4b81d-9940-4b64-9de5-3e03ef1fb5cf',
+            status: PolicyResponseActionStatus.success,
+            response: {
+              configurations: {
+                malware: {
+                  status: PolicyResponseActionStatus.success,
+                  concerned_actions: ['download_model', 'workflow', 'a-custom-future-action'],
+                },
+                events: {
+                  status: PolicyResponseActionStatus.success,
+                  concerned_actions: ['ingest_events_config', 'workflow'],
+                },
+                logging: {
+                  status: PolicyResponseActionStatus.success,
+                  concerned_actions: ['configure_elasticsearch_connection'],
+                },
+                streaming: {
+                  status: PolicyResponseActionStatus.success,
+                  concerned_actions: [
+                    'detect_file_open_events',
+                    'download_global_artifacts',
+                    'my-custom-value',
+                  ],
+                },
+              },
+              actions: {
+                download_model: {
+                  status: PolicyResponseActionStatus.success,
+                  message: 'model downloaded',
+                },
+                ingest_events_config: {
+                  status: PolicyResponseActionStatus.success,
+                  message: 'no action taken',
+                },
+                workflow: {
+                  status: PolicyResponseActionStatus.success,
+                  message: 'the flow worked well',
+                },
+              },
+            },
+          },
+        },
+      },
     };
   }
 

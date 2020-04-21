@@ -73,6 +73,6 @@ export const showView: (state: HostListState) => 'policy_response' | 'details' =
 export const policyResponseStatus: (state: Immutable<HostListState>) => string = createSelector(
   state => state.policyResponse,
   policyResponse => {
-    return (policyResponse && policyResponse?.endpoint?.policy?.status) || '';
+    return (policyResponse && policyResponse?.endpoint?.policy?.applied?.status) || '';
   }
 );
