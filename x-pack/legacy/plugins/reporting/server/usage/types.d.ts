@@ -13,6 +13,18 @@ export interface AggregationBuckets {
   buckets: KeyCountBucket[];
 }
 
+export interface StatusByAppBucket {
+  key: string;
+  doc_count: number;
+  appNames: {
+    buckets: Array<{
+      doc_count: number;
+      key: string;
+      jobType: AggregationBuckets;
+    }>;
+  };
+}
+
 export interface AggregationResultBuckets {
   jobTypes: AggregationBuckets;
   layoutTypes: {
@@ -25,17 +37,7 @@ export interface AggregationResultBuckets {
   };
   statusTypes: AggregationBuckets;
   statusByApp: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-      appNames: {
-        buckets: Array<{
-          doc_count: number;
-          key: string;
-          jobType: AggregationBuckets;
-        }>;
-      };
-    }>;
+    buckets: StatusByAppBucket[];
   };
   doc_count: number;
 }
@@ -77,7 +79,9 @@ interface StatusCounts {
 
 interface StatusByAppCounts {
   [statusType: string]: {
-    [appType: string]: number;
+    [appType: string]: {
+      [jobType: string]: number;
+    };
   };
 }
 
@@ -89,8 +93,3 @@ export type RangeStats = JobTypes & {
 
 export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
 export type FeatureAvailabilityMap = { [F in ExportType]: boolean };
-
-export interface StatusByAppBucket {
-  key: string;
-  appNames: { key: string; buckets: KeyCountBucket[] };
-}
