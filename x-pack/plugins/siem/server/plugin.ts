@@ -42,6 +42,7 @@ import {
 } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
+import { initUiSettings } from './ui_settings';
 
 export { CoreSetup, CoreStart };
 
@@ -85,6 +86,8 @@ export class Plugin {
         `You have activated the lists feature flag which is NOT currently supported for SIEM! You should turn this feature flag off immediately by un-setting the environment variable: ${listsEnvFeatureFlagName} and restarting Kibana`
       );
     }
+
+    initUiSettings(core.uiSettings);
 
     const router = core.http.createRouter();
     core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({
