@@ -31,7 +31,6 @@ const kibana = {
 
 const getContext = () => ({
   version: '8675309-snapshot',
-  isDev: true,
   logger: coreMock.createPluginInitializerContext().logger.get('test'),
 });
 
