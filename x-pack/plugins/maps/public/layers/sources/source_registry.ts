@@ -10,7 +10,7 @@ import { ISource } from './source';
 type SourceRegistryEntry = {
   ConstructorFunction: new (
     sourceDescriptor: any, // this is the source-descriptor that corresponds specifically to the particular ISource instance
-    inspectorAdapters: unknown
+    inspectorAdapters?: object
   ) => ISource;
   type: string;
 };

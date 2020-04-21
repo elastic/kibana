@@ -21,20 +21,22 @@ import { isString, isObject } from 'lodash';
 import { IBucketAggConfig, BucketAggType, BucketAggParam } from './bucket_agg_type';
 import { IAggConfig } from '../agg_config';
 
-export const isType = (type: string) => {
+export const isType = (...types: string[]) => {
   return (agg: IAggConfig): boolean => {
     const field = agg.params.field;
 
-    return field && field.type === type;
+    return types.some(type => field && field.type === type);
   };
 };
 
+export const isNumberType = isType('number');
 export const isStringType = isType('string');
+export const isStringOrNumberType = isType('string', 'number');
 
 export const migrateIncludeExcludeFormat = {
   serialize(this: BucketAggParam<IBucketAggConfig>, value: any, agg: IBucketAggConfig) {
     if (this.shouldShow && !this.shouldShow(agg)) return;
-    if (!value || isString(value)) return value;
+    if (!value || isString(value) || Array.isArray(value)) return value;
     else return value.pattern;
   },
   write(
@@ -44,7 +46,12 @@ export const migrateIncludeExcludeFormat = {
   ) {
     const value = aggConfig.getParam(this.name);
 
-    if (isObject(value)) {
+    if (Array.isArray(value) && value.length > 0 && isNumberType(aggConfig)) {
+      const parsedValue = value.filter((val): val is number => Number.isFinite(val));
+      if (parsedValue.length) {
+        output.params[this.name] = parsedValue;
+      }
+    } else if (isObject(value)) {
       output.params[this.name] = value.pattern;
     } else if (value && isStringType(aggConfig)) {
       output.params[this.name] = value;

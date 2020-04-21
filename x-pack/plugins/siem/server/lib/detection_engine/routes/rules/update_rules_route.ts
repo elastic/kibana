@@ -67,7 +67,7 @@ export const updateRulesRoute = (router: IRouter) => {
         references,
         note,
         version,
-        lists,
+        exceptions_list,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
 
@@ -83,7 +83,7 @@ export const updateRulesRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const finalIndex = outputIndex ?? siemClient.signalsIndex;
+        const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
         const rule = await updateRules({
           alertsClient,
           actionsClient,
@@ -117,7 +117,7 @@ export const updateRulesRoute = (router: IRouter) => {
           references,
           note,
           version,
-          lists,
+          exceptions_list,
           actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is rule, otherwise we are a notification and should not enable it
         });
 

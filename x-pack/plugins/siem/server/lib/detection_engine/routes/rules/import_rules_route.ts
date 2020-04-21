@@ -10,7 +10,7 @@ import { extname } from 'path';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { ConfigType } from '../../../..';
+import { ConfigType } from '../../../../config';
 import { createRules } from '../../rules/create_rules';
 import { ImportRulesRequestParams } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
@@ -138,7 +138,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                     timeline_id: timelineId,
                     timeline_title: timelineTitle,
                     version,
-                    lists,
+                    exceptions_list,
                   } = parsedRule;
 
                   try {
@@ -147,7 +147,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                       ruleType: type,
                     });
 
-                    const signalsIndex = siemClient.signalsIndex;
+                    const signalsIndex = siemClient.getSignalsIndex();
                     const indexExists = await getIndexExists(
                       clusterClient.callAsCurrentUser,
                       signalsIndex
@@ -195,7 +195,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                         references,
                         note,
                         version,
-                        lists,
+                        exceptions_list,
                         actions: [], // Actions are not imported nor exported at this time
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
@@ -232,7 +232,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                         references,
                         note,
                         version,
-                        lists,
+                        exceptions_list,
                         anomalyThreshold,
                         machineLearningJobId,
                       });
