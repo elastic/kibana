@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { SavedViewsToolbarControls } from '../../../../../components/saved_views/toolbar_control';
-import { inventoryViewSavedObjectType } from '../../../../../../common/saved_objects/inventory_view';
-import { useWaffleViewState } from '../../hooks/use_waffle_view_state';
+import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
+import { inventoryViewSavedObjectType } from '../../../../../common/saved_objects/inventory_view';
+import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 
 export const SavedViews = () => {
   const { viewState, defaultViewState, onViewChange } = useWaffleViewState();

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../../../../components/autocomplete_field';
+import { isDisplayable } from '../../../../utils/is_displayable';
 import { esKuery, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 interface Props {
@@ -50,7 +51,7 @@ export const MetricsExplorerKueryBar = ({
 
   const filteredDerivedIndexPattern = {
     ...derivedIndexPattern,
-    fields: derivedIndexPattern.fields,
+    fields: derivedIndexPattern.fields.filter(field => isDisplayable(field)),
   };
 
   const defaultPlaceholder = i18n.translate(
