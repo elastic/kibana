@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { has, set } from 'lodash';
+import { set } from 'lodash';
+import has from 'lodash.has';
 import {
   APICaller,
   ElasticsearchServiceStart,
