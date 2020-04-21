@@ -56,7 +56,7 @@ export interface PersistableStateContract<Id extends string> {
  * @public
  * TODO: should be <S extends SerializableState>
  */
-export interface PersistableState<S extends SerializableState> {
+export interface PersistableState<S extends any> {
   state: S;
 }
 
@@ -77,7 +77,7 @@ export interface PersistableStates {
   // Fallback state for if someone forgets to use `declare module` to
   // add their state to this interface.
   // TODO: should be PersistableState<SerializableState>
-  [key: string]: PersistableState<SerializableState>;
+  [key: string]: PersistableState<any>;
 }
 
 /**
