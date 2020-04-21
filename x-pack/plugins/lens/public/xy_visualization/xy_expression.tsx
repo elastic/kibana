@@ -278,12 +278,14 @@ export function XYChart({
           const timeFieldName = xDomain && xAxisFieldName;
 
           const context: ValueClickTriggerContext = {
-            data: points.map(point => ({
-              row: point.row,
-              column: point.column,
-              value: point.value,
-              table,
-            })),
+            data: {
+              data: points.map(point => ({
+                row: point.row,
+                column: point.column,
+                value: point.value,
+                table,
+              })),
+            },
             timeFieldName,
           };
 
