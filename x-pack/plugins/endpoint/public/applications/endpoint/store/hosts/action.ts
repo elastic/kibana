@@ -22,6 +22,10 @@ interface ServerFailedToReturnHostDetails {
   payload: ServerApiError;
 }
 
+interface ServerReturnedHostPolicyResponse {
+  type: 'serverReturnedHostPolicyResponse';
+  payload: { [key: string]: any }; // FIXME: replace with API response type once implemented
+}
 interface UserPaginatedHostList {
   type: 'userPaginatedHostList';
   payload: HostListPagination;
@@ -31,4 +35,5 @@ export type HostAction =
   | ServerReturnedHostList
   | ServerReturnedHostDetails
   | ServerFailedToReturnHostDetails
+  | ServerReturnedHostPolicyResponse
   | UserPaginatedHostList;

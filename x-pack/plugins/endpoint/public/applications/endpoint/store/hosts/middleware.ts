@@ -39,6 +39,19 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostListState> = 
           type: 'serverReturnedHostDetails',
           payload: response,
         });
+        // FIXME: once we have the API implementation in place, we should call it parallel with the above api call and then dispatch this with the results of the second call
+        dispatch({
+          type: 'serverReturnedHostPolicyResponse',
+          payload: {
+            policy_response: {
+              endpoint: {
+                policy: {
+                  status: 'success',
+                },
+              },
+            },
+          },
+        });
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnHostDetails',

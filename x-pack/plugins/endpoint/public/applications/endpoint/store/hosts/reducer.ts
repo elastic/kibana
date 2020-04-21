@@ -50,6 +50,11 @@ export const hostListReducer: ImmutableReducer<HostListState, AppAction> = (
       ...state,
       detailsError: action.payload,
     };
+  } else if (action.type === 'serverReturnedHostPolicyResponse') {
+    return {
+      ...state,
+      policyResponse: action.payload.policy_response,
+    };
   } else if (action.type === 'userPaginatedHostList') {
     return {
       ...state,
