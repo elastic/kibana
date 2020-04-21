@@ -5,4 +5,3 @@
  */
 
 export type CreateDatasourceFrom = 'package' | 'config';
-export type CreateDatasourceStep = 'selectConfig' | 'selectPackage' | 'configure' | 'review';
