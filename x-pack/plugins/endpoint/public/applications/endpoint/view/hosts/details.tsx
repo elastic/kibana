@@ -28,7 +28,12 @@ import { HostMetadata } from '../../../../../common/types';
 import { useHostSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
 import { FormattedDateAndTime } from '../formatted_date_time';
-import { uiQueryParams, detailsData, detailsError } from './../../store/hosts/selectors';
+import {
+  uiQueryParams,
+  detailsData,
+  detailsError,
+  detailsLoading,
+} from './../../store/hosts/selectors';
 import { LinkToApp } from '../components/link_to_app';
 
 const HostIds = styled(EuiListGroupItem)`
@@ -140,6 +145,7 @@ export const HostDetailsFlyout = () => {
   const queryParams = useHostSelector(uiQueryParams);
   const { selected_host: selectedHost, ...queryParamsWithoutSelectedHost } = queryParams;
   const details = useHostSelector(detailsData);
+  const loading = useHostSelector(detailsLoading);
   const error = useHostSelector(detailsError);
 
   const handleFlyoutClose = useCallback(() => {
@@ -171,7 +177,7 @@ export const HostDetailsFlyout = () => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" className="eui-textBreakAll">
           <h2 data-test-subj="hostDetailsFlyoutTitle">
-            {details === undefined ? <EuiLoadingContent lines={1} /> : details.host.hostname}
+            {loading ? <EuiLoadingContent lines={1} /> : details?.host?.hostname}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
