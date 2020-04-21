@@ -69,6 +69,10 @@ export class ServiceSettings {
     return origin === ORIGIN.EMS && this._showZoomMessage;
   }
 
+  enableZoomMessage() {
+    this._showZoomMessage = true;
+  }
+
   disableZoomMessage() {
     this._showZoomMessage = false;
   }
@@ -148,11 +152,12 @@ export class ServiceSettings {
   }
 
   /**
-   * Add optional query-parameters to all requests
+   * Set optional query-parameters for all requests
    *
    * @param additionalQueryParams
    */
-  addQueryParams(additionalQueryParams) {
+  setQueryParams(additionalQueryParams) {
+    // Functions more as a "set" than an "add" in ems-client
     this._emsClient.addQueryParams(additionalQueryParams);
   }
 
