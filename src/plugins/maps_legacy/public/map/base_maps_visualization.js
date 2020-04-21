@@ -19,16 +19,15 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KibanaMap } from '../../../../plugins/maps_legacy/public';
+import { KibanaMap } from '../index';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
-import { toastNotifications } from 'ui/notify';
-import chrome from 'ui/chrome';
+import { getInjectedVarFunc, getUiSettings, getToasts } from '../kibana_services';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS
 
-export function BaseMapsVisualizationProvider(mapServiceSettings, notificationService) {
+export function BaseMapsVisualizationProvider(mapServiceSettings) {
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
    * @class BaseMapsVisualization
@@ -36,7 +35,7 @@ export function BaseMapsVisualizationProvider(mapServiceSettings, notificationSe
    */
 
   const serviceSettings = mapServiceSettings;
-  const toastService = notificationService;
+  const toastService = getToasts();
 
   return class BaseMapsVisualization {
     constructor(element, vis) {
@@ -131,7 +130,7 @@ export function BaseMapsVisualizationProvider(mapServiceSettings, notificationSe
     }
 
     async _updateBaseLayer() {
-      const emsTileLayerId = chrome.getInjected('emsTileLayerId', true);
+      const emsTileLayerId = getInjectedVarFunc()('emsTileLayerId', true);
 
       if (!this._kibanaMap) {
         return;
@@ -149,7 +148,7 @@ export function BaseMapsVisualizationProvider(mapServiceSettings, notificationSe
             this._setTmsLayer(initBasemapLayer);
           }
         } catch (e) {
-          toastNotifications.addWarning(e.message);
+          toastService.addWarning(e.message);
           return;
         }
         return;
@@ -176,7 +175,7 @@ export function BaseMapsVisualizationProvider(mapServiceSettings, notificationSe
           this._setTmsLayer(selectedTmsLayer);
         }
       } catch (tmsLoadingError) {
-        toastNotifications.addWarning(tmsLoadingError.message);
+        toastService.addWarning(tmsLoadingError.message);
       }
     }
 
@@ -190,7 +189,7 @@ export function BaseMapsVisualizationProvider(mapServiceSettings, notificationSe
       if (typeof isDesaturated !== 'boolean') {
         isDesaturated = true;
       }
-      const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+      const isDarkMode = getUiSettings().get('theme:darkMode');
       const meta = await serviceSettings.getAttributesForTMSLayer(
         tmsLayer,
         isDesaturated,
