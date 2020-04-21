@@ -280,14 +280,26 @@ export class MBMapContainer extends React.Component {
     });
   };
 
-  _syncSettings = () => {
+  _syncSettings() {
+    let zoomRangeChanged = false;
     if (this.props.settings.minZoom !== this.state.mbMap.getMinZoom()) {
       this.state.mbMap.setMinZoom(this.props.settings.minZoom);
+      zoomRangeChanged = true;
     }
     if (this.props.settings.maxZoom !== this.state.mbMap.getMaxZoom()) {
       this.state.mbMap.setMaxZoom(this.props.settings.maxZoom);
+      zoomRangeChanged = true;
     }
-  };
+
+    // 'moveend' event not fired when map moves from setMinZoom or setMaxZoom
+    // https://github.com/mapbox/mapbox-gl-js/issues/9610
+    // hack to update extent after zoom update finishes moving map.
+    if (zoomRangeChanged) {
+      setTimeout(() => {
+        this.props.extentChanged(this._getMapState());
+      }, 300);
+    }
+  }
 
   render() {
     let drawControl;

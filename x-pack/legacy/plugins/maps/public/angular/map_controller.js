@@ -56,8 +56,11 @@ import {
   openMapSettings,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/actions/ui_actions';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getIsFullScreen, getFlyoutDisplay } from '../../../../../plugins/maps/public/selectors/ui_selectors';
+import {
+  getIsFullScreen,
+  getFlyoutDisplay,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/selectors/ui_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util';
 import {
@@ -605,6 +608,22 @@ app.controller(
           getInspector().open(inspectorAdapters, {});
         },
       },
+      {
+        id: 'mapSettings',
+        label: i18n.translate('xpack.maps.mapController.openSettingsButtonLabel', {
+          defaultMessage: `Map settings`,
+        }),
+        description: i18n.translate('xpack.maps.mapController.openSettingsDescription', {
+          defaultMessage: `Open map settings`,
+        }),
+        testId: 'openSettingsButton',
+        disableButton() {
+          return $scope.isOpenSettingsDisabled;
+        },
+        run() {
+          store.dispatch(openMapSettings());
+        },
+      },
       ...(getMapsCapabilities().save
         ? [
             {
@@ -665,22 +684,6 @@ app.controller(
             },
           ]
         : []),
-      {
-        id: 'mapSettings',
-        label: i18n.translate('xpack.maps.mapController.openSettingsButtonLabel', {
-          defaultMessage: `Settings`,
-        }),
-        description: i18n.translate('xpack.maps.mapController.openSettingsDescription', {
-          defaultMessage: `Open settings`,
-        }),
-        testId: 'openSettingsButton',
-        disableButton() {
-          return $scope.isOpenSettingsDisabled;
-        },
-        run() {
-          store.dispatch(openMapSettings());
-        },
-      },
     ];
   }
 );
