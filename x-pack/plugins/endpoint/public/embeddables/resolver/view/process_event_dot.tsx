@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -59,43 +59,80 @@ const nodeAssets = {
   },
 };
 
-const ChildEventsButton = React.memo(() => {
-  return (
-    <EuiButton
-      onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        clickEvent.preventDefault();
-        clickEvent.stopPropagation();
-      }, [])}
-      color="ghost"
-      size="s"
-      iconType="arrowDown"
-      iconSide="right"
-      tabIndex={-1}
-    >
-      {i18n.translate('xpack.endpoint.resolver.relatedEvents', {
-        defaultMessage: 'Events',
-      })}
-    </EuiButton>
-  );
-});
+const subMenuAssets = {
+  relatedAlerts: {
+    title: i18n.translate('xpack.endpoint.resolver.relatedAlerts', {
+      defaultMessage: 'Related Alerts',
+    }),
+  },
+  relatedEvents: {
+    title: i18n.translate('xpack.endpoint.resolver.relatedEvents', {
+      defaultMessage: 'Events',
+    }),
+  },
+};
 
-const RelatedAlertsButton = React.memo(() => {
-  return (
-    <EuiButton
-      onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        clickEvent.preventDefault();
-        clickEvent.stopPropagation();
-      }, [])}
-      color="ghost"
-      size="s"
-      tabIndex={-1}
-    >
-      {i18n.translate('xpack.endpoint.resolver.relatedAlerts', {
-        defaultMessage: 'Related Alerts',
-      })}
-    </EuiButton>
-  );
-});
+const NodeSubMenu = React.memo(
+  ({
+    menuTitle,
+    menuAction,
+    optionsWithActions,
+  }: { menuTitle: string } & (
+    | {
+        menuAction?: undefined;
+        optionsWithActions: Array<{
+          optionTitle: string;
+          action: () => unknown;
+          prefix?: number | JSX.Element;
+        }>;
+      }
+    | { menuAction: () => unknown; optionsWithActions?: undefined }
+  )) => {
+    if (!optionsWithActions && typeof menuAction === 'function') {
+      /**
+       * When called with a `menuAction`
+       * Render without dropdown and call the supplied action when host button is clicked
+       */
+      return (
+        <EuiButton
+          onClick={useCallback(
+            (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+              clickEvent.preventDefault();
+              clickEvent.stopPropagation();
+              menuAction();
+            },
+            [menuAction]
+          )}
+          color="ghost"
+          size="s"
+          tabIndex={-1}
+        >
+          {menuTitle}
+        </EuiButton>
+      );
+    } else {
+      /**
+       * When called with a set of `optionsWithActions`:
+       * Render with a panel of options that appear when the menu host button is clicked
+       */
+      return (
+        <EuiButton
+          onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+            clickEvent.preventDefault();
+            clickEvent.stopPropagation();
+          }, [])}
+          color="ghost"
+          size="s"
+          iconType="arrowDown"
+          iconSide="right"
+          tabIndex={-1}
+        >
+          {menuTitle}
+        </EuiButton>
+      );
+    }
+  }
+);
 
 /**
  * An artefact that represents a process node.
@@ -357,10 +394,16 @@ export const ProcessEventDot = styled(
               {magFactorX >= 2 && (
                 <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <RelatedAlertsButton />
+                    <NodeSubMenu
+                      menuTitle={subMenuAssets.relatedEvents.title}
+                      optionsWithActions={[{ optionTitle: 'a', action: () => {} }]}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ChildEventsButton />
+                    <NodeSubMenu
+                      menuTitle={subMenuAssets.relatedAlerts.title}
+                      menuAction={() => {}}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}
