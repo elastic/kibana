@@ -6,6 +6,7 @@
 import React, { useMemo } from 'react';
 import {
   EuiBadge,
+  EuiButton,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -59,7 +60,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   const { pagination, pageSizeOptions } = usePagination();
 
   // Fetch agent configs
-  const { isLoading, data: dataStreamsData } = useGetDataStreams();
+  const { isLoading, data: dataStreamsData, sendRequest } = useGetDataStreams();
 
   // Some configs retrieved, set up table props
   const columns = useMemo(() => {
@@ -67,40 +68,45 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       EuiTableFieldDataColumnType<DataStream> | EuiTableActionsColumnType<DataStream>
     > = [
       {
-        field: 'index',
-        name: i18n.translate('xpack.ingestManager.dataStreamList.indexColumnTitle', {
-          defaultMessage: 'Index',
-        }),
-      },
-      {
         field: 'dataset',
+        sortable: true,
+        width: '25%',
+        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.datasetColumnTitle', {
           defaultMessage: 'Dataset',
         }),
       },
       {
         field: 'type',
+        sortable: true,
+        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.typeColumnTitle', {
           defaultMessage: 'Type',
         }),
       },
       {
         field: 'namespace',
+        sortable: true,
+        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.namespaceColumnTitle', {
           defaultMessage: 'Namespace',
         }),
-        render: (namespace: DataStream['namespace']) => {
-          return <EuiBadge color="hollow">{namespace}</EuiBadge>;
+        render: (namespace: string) => {
+          return namespace ? <EuiBadge color="hollow">{namespace}</EuiBadge> : '';
         },
       },
       {
         field: 'package',
+        sortable: true,
+        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.integrationColumnTitle', {
           defaultMessage: 'Integration',
         }),
       },
       {
         field: 'last_activity',
+        sortable: true,
+        width: '25%',
         dataType: 'date',
         name: i18n.translate('xpack.ingestManager.dataStreamList.lastActivityColumnTitle', {
           defaultMessage: 'Last activity',
@@ -116,6 +122,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       },
       {
         field: 'size_in_bytes',
+        sortable: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.sizeColumnTitle', {
           defaultMessage: 'Size',
         }),
@@ -186,7 +193,12 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
             />
           ) : dataStreamsData && !dataStreamsData.data_streams.length ? (
             emptyPrompt
-          ) : null
+          ) : (
+            <FormattedMessage
+              id="xpack.ingestManager.dataStreamList.noFilteredDataStreamsMessage"
+              defaultMessage="No matching data streams found"
+            />
+          )
         }
         items={dataStreamsData ? dataStreamsData.data_streams : []}
         itemId="index"
@@ -195,7 +207,16 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
           initialPageSize: pagination.pageSize,
           pageSizeOptions,
         }}
+        sorting={true}
         search={{
+          toolsRight: [
+            <EuiButton color="primary" iconType="refresh" onClick={() => sendRequest()}>
+              <FormattedMessage
+                id="xpack.ingestManager.dataStreamList.reloadDataStreamsButtonText"
+                defaultMessage="Reload"
+              />
+            </EuiButton>,
+          ],
           box: {
             placeholder: i18n.translate(
               'xpack.ingestManager.dataStreamList.searchPlaceholderTitle',
@@ -212,7 +233,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
               name: i18n.translate('xpack.ingestManager.dataStreamList.datasetColumnTitle', {
                 defaultMessage: 'Dataset',
               }),
-              multiSelect: true,
+              multiSelect: 'or',
               options: filterOptions.dataset.map(option => ({
                 value: option,
                 name: option,
@@ -224,7 +245,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
               name: i18n.translate('xpack.ingestManager.dataStreamList.typeColumnTitle', {
                 defaultMessage: 'Type',
               }),
-              multiSelect: true,
+              multiSelect: 'or',
               options: filterOptions.type.map(option => ({
                 value: option,
                 name: option,
@@ -236,7 +257,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
               name: i18n.translate('xpack.ingestManager.dataStreamList.namespaceColumnTitle', {
                 defaultMessage: 'Namespace',
               }),
-              multiSelect: true,
+              multiSelect: 'or',
               options: filterOptions.namespace.map(option => ({
                 value: option,
                 name: option,
@@ -248,7 +269,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
               name: i18n.translate('xpack.ingestManager.dataStreamList.integrationColumnTitle', {
                 defaultMessage: 'Integration',
               }),
-              multiSelect: true,
+              multiSelect: 'or',
               options: filterOptions.package.map(option => ({
                 value: option,
                 name: option,
