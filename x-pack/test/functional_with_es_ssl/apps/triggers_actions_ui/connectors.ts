@@ -223,12 +223,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
       await filterSelectItem.click();
 
-      const indexValueBeforeClear = await testSubjects.find('indexConnectorSelectSearchBox');
+      const indexValueBeforeClear = await find.byCssSelector('.euiComboBoxPill');
       expect(await indexValueBeforeClear.getAttribute('value')).to.be('.kibana');
 
       await testSubjects.click('comboBoxClearButton');
 
-      const indexValueAfterClear = await testSubjects.find('indexConnectorSelectSearchBox');
+      const indexValueAfterClear = await find.byCssSelector('.euiComboBoxPill');
       expect(await indexValueAfterClear.getAttribute('value')).to.be('');
     });
   });
