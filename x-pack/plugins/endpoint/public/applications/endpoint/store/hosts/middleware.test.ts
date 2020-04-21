@@ -41,7 +41,7 @@ describe('host list middleware', () => {
     dispatch = store.dispatch;
     history = createBrowserHistory();
   });
-  test('handles `userChangedUrl`', async () => {
+  it('handles `userChangedUrl`', async () => {
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
