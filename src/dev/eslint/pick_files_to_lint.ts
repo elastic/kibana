@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { CLIEngine } from 'eslint';
+
+import { ToolingLog } from '@kbn/dev-utils';
+import { File } from '../file';
 
 /**
  * Filters a list of files to only include lintable files.
@@ -26,8 +28,8 @@ import { CLIEngine } from 'eslint';
  * @param  {Array<File>} files
  * @return {Array<File>}
  */
-export function pickFilesToLint(log, files) {
-  const cli = new CLIEngine();
+export function pickFilesToLint(log: ToolingLog, files: File[]) {
+  const cli = new CLIEngine({});
 
   return files.filter(file => {
     if (!file.isJs() && !file.isTypescript()) {
