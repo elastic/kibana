@@ -79,13 +79,17 @@ export function getActionType(): ActionTypeModel {
       }
       if (actionParams.timestamp && !hasMustacheTokens(actionParams.timestamp)) {
         if (isNaN(Date.parse(actionParams.timestamp))) {
+          const { nowShortFormat, nowLongFormat } = getValidTimestampExamples();
           errors.timestamp.push(
             i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.invalidTimestamp',
               {
                 defaultMessage:
                   'Timestamp must be a valid date, such as {nowShortFormat} or {nowLongFormat}.',
-                values: getValidTimestampExamples(),
+                values: {
+                  nowShortFormat,
+                  nowLongFormat,
+                },
               }
             )
           );
