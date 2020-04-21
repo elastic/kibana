@@ -8,14 +8,14 @@ import { ListsItemsArraySchema, Type } from '../../../common/schemas';
 import { getQueryFilterFromTypeValue } from '../utils';
 import { DataClient } from '../../types';
 
-import { getListItemsByValues } from './get_list_items_by_values';
+import { getListItemByValues } from './get_list_item_by_values';
 
 interface DeleteListItemByValueOptions {
   listId: string;
   type: Type;
   value: string;
   dataClient: DataClient;
-  listsItemsIndex: string;
+  listItemIndex: string;
 }
 
 export const deleteListItemByValue = async ({
@@ -23,12 +23,12 @@ export const deleteListItemByValue = async ({
   value,
   type,
   dataClient,
-  listsItemsIndex,
+  listItemIndex,
 }: DeleteListItemByValueOptions): Promise<ListsItemsArraySchema> => {
-  const listItems = await getListItemsByValues({
+  const listItems = await getListItemByValues({
     dataClient,
     listId,
-    listsItemsIndex,
+    listItemIndex,
     type,
     value: [value],
   });
@@ -46,7 +46,7 @@ export const deleteListItemByValue = async ({
         },
       },
     },
-    index: listsItemsIndex,
+    index: listItemIndex,
   });
   return listItems;
 };

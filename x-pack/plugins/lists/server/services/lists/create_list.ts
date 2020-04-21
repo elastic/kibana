@@ -24,7 +24,7 @@ export interface CreateListOptions {
   name: Name;
   description: Description;
   dataClient: DataClient;
-  listsIndex: string;
+  listIndex: string;
   user: string;
   meta: MetaOrUndefined;
   dateNow?: string;
@@ -37,7 +37,7 @@ export const createList = async ({
   type,
   description,
   dataClient,
-  listsIndex,
+  listIndex,
   user,
   meta,
   dateNow,
@@ -58,7 +58,7 @@ export const createList = async ({
   const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('index', {
     body,
     id,
-    index: listsIndex,
+    index: listIndex,
   });
   return {
     id: response._id,

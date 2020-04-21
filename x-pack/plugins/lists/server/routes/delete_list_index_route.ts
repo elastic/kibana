@@ -28,7 +28,7 @@ import { getListClient } from '.';
  *
  * And ensuring they're all gone
  */
-export const deleteListsIndexRoute = (router: IRouter): void => {
+export const deleteListIndexRoute = (router: IRouter): void => {
   router.delete(
     {
       options: {

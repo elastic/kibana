@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import listsMappings from './lists_mappings.json';
+import listMappings from './list_mappings.json';
 
-export const getListsTemplate = (index: string): Record<string, unknown> => ({
+export const getListTemplate = (index: string): Record<string, unknown> => ({
   index_patterns: [`${index}-*`],
-  mappings: listsMappings,
+  mappings: listMappings,
   settings: {
     index: {
       lifecycle: {

@@ -14,22 +14,22 @@ import {
   validate,
 } from '../siem_server_deps';
 import {
+  deleteListsItemsSchema,
   listsItemsArraySchema,
   listsItemsSchema,
-  readListsItemsSchema,
 } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-export const readListsItemsRoute = (router: IRouter): void => {
-  router.get(
+export const deleteListItemRoute = (router: IRouter): void => {
+  router.delete(
     {
       options: {
         tags: ['access:lists'],
       },
       path: LIST_ITEM_URL,
       validate: {
-        query: buildRouteValidation(readListsItemsSchema),
+        query: buildRouteValidation(deleteListsItemsSchema),
       },
     },
     async (context, request, response) => {
@@ -38,14 +38,14 @@ export const readListsItemsRoute = (router: IRouter): void => {
         const { id, list_id: listId, value } = request.query;
         const lists = getListClient(context);
         if (id != null) {
-          const listItem = await lists.getListItem({ id });
-          if (listItem == null) {
+          const deleted = await lists.deleteListItem({ id });
+          if (deleted == null) {
             return siemResponse.error({
-              body: `list item id: "${id}" does not exist`,
+              body: `list item with id: "${id}" item not found`,
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(listItem, listsItemsSchema);
+            const [validated, errors] = validate(deleted, listsItemsSchema);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {
@@ -56,22 +56,18 @@ export const readListsItemsRoute = (router: IRouter): void => {
           const list = await lists.getList({ id: listId });
           if (list == null) {
             return siemResponse.error({
-              body: `list id: "${listId}" does not exist`,
+              body: `list_id: "${listId}" does not exist`,
               statusCode: 404,
             });
           } else {
-            const listItem = await lists.getListItemByValue({
-              listId,
-              type: list.type,
-              value,
-            });
-            if (listItem.length === 0) {
+            const deleted = await lists.deleteListItemByValue({ listId, type: list.type, value });
+            if (deleted == null || deleted.length === 0) {
               return siemResponse.error({
-                body: `list_id: "${listId}" item of ${value} does not exist`,
+                body: `list_id: "${listId}" with ${value} was not found`,
                 statusCode: 404,
               });
             } else {
-              const [validated, errors] = validate(listItem, listsItemsArraySchema);
+              const [validated, errors] = validate(deleted, listsItemsArraySchema);
               if (errors != null) {
                 return siemResponse.error({ body: errors, statusCode: 500 });
               } else {

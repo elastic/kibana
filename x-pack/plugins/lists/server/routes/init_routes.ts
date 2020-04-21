@@ -6,44 +6,44 @@
 
 import { IRouter } from 'kibana/server';
 
-import { updateListsRoute } from './update_lists_route';
-import { updateListsItemsRoute } from './update_list_items_route';
+import { updateListRoute } from './update_list_route';
+import { updateListItemRoute } from './update_list_item_route';
 
 import {
-  createListsIndexRoute,
-  createListsItemsRoute,
-  createListsRoute,
-  deleteListsIndexRoute,
-  deleteListsItemsRoute,
-  deleteListsRoute,
-  exportListsItemsRoute,
-  importListsItemsRoute,
-  patchListsItemsRoute,
-  patchListsRoute,
-  readListsIndexRoute,
-  readListsItemsRoute,
-  readListsRoute,
+  createListIndexRoute,
+  createListItemRoute,
+  createListRoute,
+  deleteListIndexRoute,
+  deleteListItemRoute,
+  deleteListRoute,
+  exportListItemRoute,
+  importListItemRoute,
+  patchListItemRoute,
+  patchListRoute,
+  readListIndexRoute,
+  readListItemRoute,
+  readListRoute,
 } from '.';
 
 export const initRoutes = (router: IRouter): void => {
   // lists
-  createListsRoute(router);
-  readListsRoute(router);
-  updateListsRoute(router);
-  deleteListsRoute(router);
-  patchListsRoute(router);
+  createListRoute(router);
+  readListRoute(router);
+  updateListRoute(router);
+  deleteListRoute(router);
+  patchListRoute(router);
 
   // lists items
-  createListsItemsRoute(router);
-  readListsItemsRoute(router);
-  updateListsItemsRoute(router);
-  deleteListsItemsRoute(router);
-  patchListsItemsRoute(router);
-  exportListsItemsRoute(router);
-  importListsItemsRoute(router);
+  createListItemRoute(router);
+  readListItemRoute(router);
+  updateListItemRoute(router);
+  deleteListItemRoute(router);
+  patchListItemRoute(router);
+  exportListItemRoute(router);
+  importListItemRoute(router);
 
   // indexes of lists
-  createListsIndexRoute(router);
-  readListsIndexRoute(router);
-  deleteListsIndexRoute(router);
+  createListIndexRoute(router);
+  readListIndexRoute(router);
+  deleteListIndexRoute(router);
 };

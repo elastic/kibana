@@ -24,7 +24,7 @@ export const getCreateListOptionsMock = (): CreateListOptions => ({
   dateNow: DATE_NOW,
   description: DESCRIPTION,
   id: LIST_ID,
-  listsIndex: LISTS_INDEX,
+  listIndex: LISTS_INDEX,
   meta: META,
   name: NAME,
   tieBreaker: TIE_BREAKER,

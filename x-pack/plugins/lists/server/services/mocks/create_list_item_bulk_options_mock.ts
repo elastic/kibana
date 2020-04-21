@@ -23,7 +23,7 @@ export const getCreateListItemBulkOptionsMock = (): CreateListItemsBulkOptions =
   dataClient: getDataClientMock(),
   dateNow: DATE_NOW,
   listId: LIST_ID,
-  listsItemsIndex: LISTS_ITEMS_INDEX,
+  listItemIndex: LISTS_ITEMS_INDEX,
   meta: META,
   tieBreaker: TIE_BREAKERS,
   type: TYPE,

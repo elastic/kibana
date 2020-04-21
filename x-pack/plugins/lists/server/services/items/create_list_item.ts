@@ -15,7 +15,7 @@ import {
   Type,
 } from '../../../common/schemas';
 import { DataClient } from '../../types';
-import { transformListItemsToElasticQuery } from '../utils';
+import { transformListItemToElasticQuery } from '../utils';
 
 export interface CreateListItemOptions {
   id: IdOrUndefined;
@@ -23,7 +23,7 @@ export interface CreateListItemOptions {
   type: Type;
   value: string;
   dataClient: DataClient;
-  listsItemsIndex: string;
+  listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
   dateNow?: string;
@@ -36,7 +36,7 @@ export const createListItem = async ({
   type,
   value,
   dataClient,
-  listsItemsIndex,
+  listItemIndex,
   user,
   meta,
   dateNow,
@@ -55,13 +55,13 @@ export const createListItem = async ({
   };
   const body: IndexEsListsItemsSchema = {
     ...baseBody,
-    ...transformListItemsToElasticQuery({ type, value }),
+    ...transformListItemToElasticQuery({ type, value }),
   };
 
   const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('index', {
     body,
     id,
-    index: listsItemsIndex,
+    index: listItemIndex,
   });
 
   return {

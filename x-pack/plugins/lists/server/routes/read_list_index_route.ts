@@ -12,7 +12,7 @@ import { listsItemsIndexExistSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-export const readListsIndexRoute = (router: IRouter): void => {
+export const readListIndexRoute = (router: IRouter): void => {
   router.get(
     {
       options: {

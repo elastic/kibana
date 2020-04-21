@@ -22,7 +22,7 @@ import {
 
 import { getListClient } from '.';
 
-export const importListsItemsRoute = (router: IRouter): void => {
+export const importListItemRoute = (router: IRouter): void => {
   router.post(
     {
       options: {

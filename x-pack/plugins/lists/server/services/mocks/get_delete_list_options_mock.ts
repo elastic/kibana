@@ -12,6 +12,6 @@ import { LISTS_INDEX, LISTS_ITEMS_INDEX, LIST_ID } from './lists_services_mock_c
 export const getDeleteListOptionsMock = (): DeleteListOptions => ({
   dataClient: getDataClientMock(),
   id: LIST_ID,
-  listsIndex: LISTS_INDEX,
-  listsItemsIndex: LISTS_ITEMS_INDEX,
+  listIndex: LISTS_INDEX,
+  listItemIndex: LISTS_ITEMS_INDEX,
 });

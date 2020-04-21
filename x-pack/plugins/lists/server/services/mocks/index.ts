@@ -14,6 +14,6 @@ export * from './lists_services_mock_constants';
 export * from './get_update_list_options_mock';
 export * from './create_list_item_options_mock';
 export * from './get_list_item_response_mock';
-export * from './get_index_es_lists_mock';
-export * from './get_index_es_lists_items_mock';
+export * from './get_index_es_list_mock';
+export * from './get_index_es_list_item_mock';
 export * from './create_list_item_bulk_options_mock';

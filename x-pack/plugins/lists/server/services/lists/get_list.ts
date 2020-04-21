@@ -12,13 +12,13 @@ import { DataClient } from '../../types';
 interface GetListOptions {
   id: Id;
   dataClient: DataClient;
-  listsIndex: string;
+  listIndex: string;
 }
 
 export const getList = async ({
   id,
   dataClient,
-  listsIndex,
+  listIndex,
 }: GetListOptions): Promise<ListsSchema | null> => {
   const result: SearchResponse<SearchEsListsSchema> = await dataClient.callAsCurrentUser('search', {
     body: {
@@ -29,7 +29,7 @@ export const getList = async ({
       },
     },
     ignoreUnavailable: true,
-    index: listsIndex,
+    index: listIndex,
   });
   if (result.hits.hits.length) {
     return {

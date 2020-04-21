@@ -10,7 +10,7 @@ import {
   TIE_BREAKERS,
   VALUE_2,
   getCreateListItemBulkOptionsMock,
-  getIndexESListsItemsMock,
+  getIndexESListItemMock,
 } from '../mocks';
 
 import { createListItemsBulk } from './create_list_items_bulk';
@@ -27,9 +27,9 @@ describe('crete_list_item_bulk', () => {
   test('It calls "callAsCurrentUser" with body, index, and the bulk items', async () => {
     const options = getCreateListItemBulkOptionsMock();
     await createListItemsBulk(options);
-    const firstRecord: IndexEsListsItemsSchema = getIndexESListsItemsMock();
+    const firstRecord: IndexEsListsItemsSchema = getIndexESListItemMock();
     firstRecord.tie_breaker_id = TIE_BREAKERS[0];
-    const secondRecord: IndexEsListsItemsSchema = getIndexESListsItemsMock(VALUE_2);
+    const secondRecord: IndexEsListsItemsSchema = getIndexESListItemMock(VALUE_2);
     secondRecord.tie_breaker_id = TIE_BREAKERS[1];
     expect(options.dataClient.callAsCurrentUser).toBeCalledWith('bulk', {
       body: [

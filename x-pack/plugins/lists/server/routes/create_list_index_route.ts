@@ -12,7 +12,7 @@ import { acknowledgeSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-export const createListsIndexRoute = (router: IRouter): void => {
+export const createListIndexRoute = (router: IRouter): void => {
   router.post(
     {
       options: {

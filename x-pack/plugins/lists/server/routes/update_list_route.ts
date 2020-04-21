@@ -17,7 +17,7 @@ import { listsSchema, updateListsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-export const updateListsRoute = (router: IRouter): void => {
+export const updateListRoute = (router: IRouter): void => {
   router.put(
     {
       options: {

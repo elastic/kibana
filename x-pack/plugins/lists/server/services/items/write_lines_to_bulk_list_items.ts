@@ -9,13 +9,13 @@ import { Readable } from 'stream';
 import { MetaOrUndefined, Type } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
-import { BufferLines, createListItemsBulk, getListItemsByValues } from '.';
+import { BufferLines, createListItemsBulk, getListItemByValues } from '.';
 
 interface ImportListItemsToStreamOptions {
   listId: string;
   stream: Readable;
   dataClient: DataClient;
-  listsItemsIndex: string;
+  listItemIndex: string;
   type: Type;
   user: string;
   meta: MetaOrUndefined;
@@ -25,7 +25,7 @@ export const importListItemsToStream = ({
   listId,
   stream,
   dataClient,
-  listsItemsIndex,
+  listItemIndex,
   type,
   user,
   meta,
@@ -37,7 +37,7 @@ export const importListItemsToStream = ({
         buffer: lines,
         dataClient,
         listId,
-        listsItemsIndex,
+        listItemIndex,
         meta,
         type,
         user,
@@ -53,7 +53,7 @@ export const importListItemsToStream = ({
 interface WriteBufferToItemsOptions {
   listId: string;
   dataClient: DataClient;
-  listsItemsIndex: string;
+  listItemIndex: string;
   buffer: string[];
   type: Type;
   user: string;
@@ -68,16 +68,16 @@ interface LinesResult {
 export const writeBufferToItems = async ({
   listId,
   dataClient,
-  listsItemsIndex,
+  listItemIndex,
   buffer,
   type,
   user,
   meta,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
-  const items = await getListItemsByValues({
+  const items = await getListItemByValues({
     dataClient,
     listId,
-    listsItemsIndex,
+    listItemIndex,
     type,
     value: buffer,
   });
@@ -89,7 +89,7 @@ export const writeBufferToItems = async ({
   await createListItemsBulk({
     dataClient,
     listId,
-    listsItemsIndex,
+    listItemIndex,
     meta,
     type,
     user,

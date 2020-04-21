@@ -6,51 +6,45 @@
 
 import { IRouter } from 'kibana/server';
 
-import { LIST_URL } from '../../common/constants';
+import { LIST_ITEM_URL } from '../../common/constants';
 import {
   buildRouteValidation,
   buildSiemResponse,
   transformError,
   validate,
 } from '../siem_server_deps';
-import { createListsSchema, listsSchema } from '../../common/schemas';
+import { listsItemsSchema, updateListsItemsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-export const createListsRoute = (router: IRouter): void => {
-  router.post(
+export const updateListItemRoute = (router: IRouter): void => {
+  router.put(
     {
       options: {
         tags: ['access:lists'],
       },
-      path: LIST_URL,
+      path: LIST_ITEM_URL,
       validate: {
-        body: buildRouteValidation(createListsSchema),
+        body: buildRouteValidation(updateListsItemsSchema),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { name, description, id, type, meta } = request.body;
+        const { value, id, meta } = request.body;
         const lists = getListClient(context);
-        const listExists = await lists.getListIndexExists();
-        if (!listExists) {
+        const listItem = await lists.updateListItem({
+          id,
+          meta,
+          value,
+        });
+        if (listItem == null) {
           return siemResponse.error({
-            body: `To create a list, the index must exist first. Index "${lists.getListIndex()}" does not exist`,
-            statusCode: 400,
+            body: `list item id: "${id}" not found`,
+            statusCode: 404,
           });
         } else {
-          if (id != null) {
-            const list = await lists.getList({ id });
-            if (list != null) {
-              return siemResponse.error({
-                body: `list id: "${id}" already exists`,
-                statusCode: 409,
-              });
-            }
-          }
-          const list = await lists.createList({ description, id, meta, name, type });
-          const [validated, errors] = validate(list, listsSchema);
+          const [validated, errors] = validate(listItem, listsItemsSchema);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

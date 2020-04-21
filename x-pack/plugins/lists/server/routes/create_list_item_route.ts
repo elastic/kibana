@@ -17,7 +17,7 @@ import { createListsItemsSchema, listsItemsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-export const createListsItemsRoute = (router: IRouter): void => {
+export const createListItemRoute = (router: IRouter): void => {
   router.post(
     {
       options: {

@@ -12,21 +12,21 @@ import { getListItem } from '.';
 interface DeleteListItemOptions {
   id: Id;
   dataClient: DataClient;
-  listsItemsIndex: string;
+  listItemIndex: string;
 }
 
 export const deleteListItem = async ({
   id,
   dataClient,
-  listsItemsIndex,
+  listItemIndex,
 }: DeleteListItemOptions): Promise<ListsItemsSchema | null> => {
-  const listItem = await getListItem({ dataClient, id, listsItemsIndex });
+  const listItem = await getListItem({ dataClient, id, listItemIndex });
   if (listItem == null) {
     return null;
   } else {
     await dataClient.callAsCurrentUser('delete', {
       id,
-      index: listsItemsIndex,
+      index: listItemIndex,
     });
   }
   return listItem;

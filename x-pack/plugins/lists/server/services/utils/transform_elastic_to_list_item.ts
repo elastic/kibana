@@ -9,7 +9,7 @@ import { SearchResponse } from 'elasticsearch';
 import { ListsItemsArraySchema, SearchEsListsItemsSchema, Type } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
-export const transformElasticToListsItems = ({
+export const transformElasticToListItem = ({
   response,
   type,
 }: {

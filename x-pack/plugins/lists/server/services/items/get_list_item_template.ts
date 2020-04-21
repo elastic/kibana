@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import listsItemsMappings from './lists_items_mappings.json';
+import listsItemsMappings from './list_item_mappings.json';
 
-export const getListsItemsTemplate = (index: string): Record<string, unknown> => {
+export const getListItemTemplate = (index: string): Record<string, unknown> => {
   const template = {
     index_patterns: [`${index}-*`],
     mappings: listsItemsMappings,

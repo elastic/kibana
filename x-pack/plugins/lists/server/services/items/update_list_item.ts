@@ -12,7 +12,7 @@ import {
   MetaOrUndefined,
   UpdateEsListsItemsSchema,
 } from '../../../common/schemas';
-import { transformListItemsToElasticQuery } from '../utils';
+import { transformListItemToElasticQuery } from '../utils';
 import { DataClient } from '../../types';
 
 import { getListItem } from './get_list_item';
@@ -21,7 +21,7 @@ interface UpdateListItemOptions {
   id: Id;
   value: string | null | undefined;
   dataClient: DataClient;
-  listsItemsIndex: string;
+  listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
 }
@@ -30,12 +30,12 @@ export const updateListItem = async ({
   id,
   value,
   dataClient,
-  listsItemsIndex,
+  listItemIndex,
   user,
   meta,
 }: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
   const updatedAt = new Date().toISOString();
-  const listItem = await getListItem({ dataClient, id, listsItemsIndex });
+  const listItem = await getListItem({ dataClient, id, listItemIndex });
   if (listItem == null) {
     return null;
   } else {
@@ -43,7 +43,7 @@ export const updateListItem = async ({
       meta,
       updated_at: updatedAt,
       updated_by: user,
-      ...transformListItemsToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
+      ...transformListItemToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
     };
 
     const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('update', {
@@ -51,7 +51,7 @@ export const updateListItem = async ({
         doc,
       },
       id: listItem.id,
-      index: listsItemsIndex,
+      index: listItemIndex,
     });
     return {
       created_at: listItem.created_at,

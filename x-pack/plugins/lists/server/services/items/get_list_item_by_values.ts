@@ -8,23 +8,23 @@ import { SearchResponse } from 'elasticsearch';
 
 import { ListsItemsArraySchema, SearchEsListsItemsSchema, Type } from '../../../common/schemas';
 import { DataClient } from '../../types';
-import { getQueryFilterFromTypeValue, transformElasticToListsItems } from '../utils';
+import { getQueryFilterFromTypeValue, transformElasticToListItem } from '../utils';
 
-interface GetListItemsByValuesOptions {
+interface GetListItemByValuesOptions {
   listId: string;
   dataClient: DataClient;
-  listsItemsIndex: string;
+  listItemIndex: string;
   type: Type;
   value: string[];
 }
 
-export const getListItemsByValues = async ({
+export const getListItemByValues = async ({
   listId,
   dataClient,
-  listsItemsIndex,
+  listItemIndex,
   type,
   value,
-}: GetListItemsByValuesOptions): Promise<ListsItemsArraySchema> => {
+}: GetListItemByValuesOptions): Promise<ListsItemsArraySchema> => {
   const response: SearchResponse<SearchEsListsItemsSchema> = await dataClient.callAsCurrentUser(
     'search',
     {
@@ -36,9 +36,9 @@ export const getListItemsByValues = async ({
         },
       },
       ignoreUnavailable: true,
-      index: listsItemsIndex,
+      index: listItemIndex,
       size: value.length, // This has a limit on the number which is 10k
     }
   );
-  return transformElasticToListsItems({ response, type });
+  return transformElasticToListItem({ response, type });
 };

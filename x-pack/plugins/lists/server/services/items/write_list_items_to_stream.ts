@@ -21,7 +21,7 @@ export const SIZE = 100;
 interface ExportListItemsToStreamOptions {
   listId: string;
   dataClient: DataClient;
-  listsItemsIndex: string;
+  listItemIndex: string;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
 }
@@ -30,7 +30,7 @@ export const exportListItemsToStream = ({
   listId,
   dataClient,
   stream,
-  listsItemsIndex,
+  listItemIndex,
   stringToAppend,
 }: ExportListItemsToStreamOptions): void => {
   // Use a timeout to start the reading process on the next tick.
@@ -39,7 +39,7 @@ export const exportListItemsToStream = ({
     let searchAfter = await writeNextResponse({
       dataClient,
       listId,
-      listsItemsIndex,
+      listItemIndex,
       searchAfter: undefined,
       stream,
       stringToAppend,
@@ -48,7 +48,7 @@ export const exportListItemsToStream = ({
       searchAfter = await writeNextResponse({
         dataClient,
         listId,
-        listsItemsIndex,
+        listItemIndex,
         searchAfter,
         stream,
         stringToAppend,
@@ -61,7 +61,7 @@ export const exportListItemsToStream = ({
 interface WriteNextResponseOptions {
   listId: string;
   dataClient: DataClient;
-  listsItemsIndex: string;
+  listItemIndex: string;
   stream: PassThrough;
   searchAfter: string[] | undefined;
   stringToAppend: string | null | undefined;
@@ -71,14 +71,14 @@ export const writeNextResponse = async ({
   listId,
   dataClient,
   stream,
-  listsItemsIndex,
+  listItemIndex,
   searchAfter,
   stringToAppend,
 }: WriteNextResponseOptions): Promise<string[] | undefined> => {
   const response = await getResponse({
     dataClient,
     listId,
-    listsItemsIndex,
+    listItemIndex,
     searchAfter,
   });
 
@@ -102,7 +102,7 @@ interface GetResponseOptions {
   dataClient: DataClient;
   listId: string;
   searchAfter: undefined | string[];
-  listsItemsIndex: string;
+  listItemIndex: string;
   size?: number;
 }
 
@@ -110,7 +110,7 @@ export const getResponse = async ({
   dataClient,
   searchAfter,
   listId,
-  listsItemsIndex,
+  listItemIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<SearchResponse<SearchEsListsItemsSchema>> => {
   return dataClient.callAsCurrentUser('search', {
@@ -124,7 +124,7 @@ export const getResponse = async ({
       sort: [{ tie_breaker_id: 'asc' }],
     },
     ignoreUnavailable: true,
-    index: listsItemsIndex,
+    index: listItemIndex,
     size,
   });
 };

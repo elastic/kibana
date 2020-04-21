@@ -21,7 +21,7 @@ import { getList } from '.';
 export interface UpdateListOptions {
   id: Id;
   dataClient: DataClient;
-  listsIndex: string;
+  listIndex: string;
   user: string;
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
@@ -34,13 +34,13 @@ export const updateList = async ({
   name,
   description,
   dataClient,
-  listsIndex,
+  listIndex,
   user,
   meta,
   dateNow,
 }: UpdateListOptions): Promise<ListsSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
-  const list = await getList({ dataClient, id, listsIndex });
+  const list = await getList({ dataClient, id, listIndex });
   if (list == null) {
     return null;
   } else {
@@ -54,7 +54,7 @@ export const updateList = async ({
     const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('update', {
       body: { doc },
       id,
-      index: listsIndex,
+      index: listIndex,
     });
     return {
       created_at: list.created_at,

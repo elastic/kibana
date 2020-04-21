@@ -14,8 +14,8 @@ export const createConfig$ = (
   context: PluginInitializerContext
 ): Observable<Readonly<{
   enabled: boolean;
-  listsIndex: string;
-  listsItemsIndex: string;
+  listIndex: string;
+  listItemIndex: string;
 }>> => {
   return context.config.create<ConfigType>().pipe(map(config => config));
 };

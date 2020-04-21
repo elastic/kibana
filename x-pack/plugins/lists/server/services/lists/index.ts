@@ -7,6 +7,6 @@
 export * from './create_list';
 export * from './delete_list';
 export * from './get_list';
-export * from './get_lists_template';
+export * from './get_list_template';
 export * from './update_list';
 export * from './get_list_index';

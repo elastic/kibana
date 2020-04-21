@@ -6,7 +6,7 @@
 
 import { EsDataTypeUnion, Type } from '../../../common/schemas';
 
-export const transformListItemsToElasticQuery = ({
+export const transformListItemToElasticQuery = ({
   type,
   value,
 }: {

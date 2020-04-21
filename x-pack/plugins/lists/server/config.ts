@@ -8,8 +8,8 @@ import { TypeOf, schema } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  listsIndex: schema.string({ defaultValue: '.lists' }),
-  listsItemsIndex: schema.string({ defaultValue: '.items' }),
+  listIndex: schema.string({ defaultValue: '.lists' }),
+  listItemIndex: schema.string({ defaultValue: '.items' }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;

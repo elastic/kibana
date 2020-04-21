@@ -6,41 +6,45 @@
 
 import { IRouter } from 'kibana/server';
 
-import { LIST_URL } from '../../common/constants';
+import { LIST_ITEM_URL } from '../../common/constants';
 import {
   buildRouteValidation,
   buildSiemResponse,
   transformError,
   validate,
 } from '../siem_server_deps';
-import { listsSchema, readListsSchema } from '../../common/schemas';
+import { listsItemsSchema, patchListsItemsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-export const readListsRoute = (router: IRouter): void => {
-  router.get(
+export const patchListItemRoute = (router: IRouter): void => {
+  router.patch(
     {
       options: {
         tags: ['access:lists'],
       },
-      path: LIST_URL,
+      path: LIST_ITEM_URL,
       validate: {
-        query: buildRouteValidation(readListsSchema),
+        body: buildRouteValidation(patchListsItemsSchema),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { id } = request.query;
+        const { value, id, meta } = request.body;
         const lists = getListClient(context);
-        const list = await lists.getList({ id });
-        if (list == null) {
+        const listItem = await lists.updateListItem({
+          id,
+          meta,
+          value,
+        });
+        if (listItem == null) {
           return siemResponse.error({
-            body: `list id: "${id}" does not exist`,
+            body: `list item id: "${id}" not found`,
             statusCode: 404,
           });
         } else {
-          const [validated, errors] = validate(list, listsSchema);
+          const [validated, errors] = validate(listItem, listsItemsSchema);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

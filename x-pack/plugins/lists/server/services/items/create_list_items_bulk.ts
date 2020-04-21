@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 
-import { transformListItemsToElasticQuery } from '../utils';
+import { transformListItemToElasticQuery } from '../utils';
 import { DataClient } from '../../types';
 import {
   CreateEsBulkTypeSchema,
@@ -20,7 +20,7 @@ export interface CreateListItemsBulkOptions {
   type: Type;
   value: string[];
   dataClient: DataClient;
-  listsItemsIndex: string;
+  listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
   dateNow?: string;
@@ -32,7 +32,7 @@ export const createListItemsBulk = async ({
   type,
   value,
   dataClient,
-  listsItemsIndex,
+  listItemIndex,
   user,
   meta,
   dateNow,
@@ -55,9 +55,9 @@ export const createListItemsBulk = async ({
         tie_breaker_id: tieBreakerId,
         updated_at: createdAt,
         updated_by: user,
-        ...transformListItemsToElasticQuery({ type, value: singleValue }),
+        ...transformListItemToElasticQuery({ type, value: singleValue }),
       };
-      const createBody: CreateEsBulkTypeSchema = { create: { _index: listsItemsIndex } };
+      const createBody: CreateEsBulkTypeSchema = { create: { _index: listItemIndex } };
       return [...accum, createBody, elasticBody];
     },
     []
@@ -65,6 +65,6 @@ export const createListItemsBulk = async ({
 
   await dataClient.callAsCurrentUser('bulk', {
     body,
-    index: listsItemsIndex,
+    index: listItemIndex,
   });
 };

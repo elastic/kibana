@@ -17,7 +17,7 @@ import { deleteListsSchema, listsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-export const deleteListsRoute = (router: IRouter): void => {
+export const deleteListRoute = (router: IRouter): void => {
   router.delete(
     {
       options: {

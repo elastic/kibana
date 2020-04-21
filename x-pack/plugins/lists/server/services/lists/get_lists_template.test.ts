@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getListsTemplate } from './get_lists_template';
+import { getListTemplate } from './get_list_template';
 
-jest.mock('./lists_mappings.json', () => ({
-  listsMappings: {},
+jest.mock('./list_mappings.json', () => ({
+  listMappings: {},
 }));
 
-describe('get_lists_template', () => {
+describe('get_list_template', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -20,10 +20,10 @@ describe('get_lists_template', () => {
   });
 
   test('it returns a list template with the string filled in', async () => {
-    const template = getListsTemplate('some_index');
+    const template = getListTemplate('some_index');
     expect(template).toEqual({
       index_patterns: ['some_index-*'],
-      mappings: { listsMappings: {} },
+      mappings: { listMappings: {} },
       settings: { index: { lifecycle: { name: 'some_index', rollover_alias: 'some_index' } } },
     });
   });

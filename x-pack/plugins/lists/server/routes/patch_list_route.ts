@@ -17,7 +17,7 @@ import { listsSchema, patchListsSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-export const patchListsRoute = (router: IRouter): void => {
+export const patchListRoute = (router: IRouter): void => {
   router.patch(
     {
       options: {

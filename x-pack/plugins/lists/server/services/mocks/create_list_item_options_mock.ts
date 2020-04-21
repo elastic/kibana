@@ -23,7 +23,7 @@ export const getCreateListItemOptionsMock = (): CreateListItemOptions => ({
   dateNow: DATE_NOW,
   id: LIST_ITEM_ID,
   listId: LIST_ID,
-  listsItemsIndex: LISTS_ITEMS_INDEX,
+  listItemIndex: LISTS_ITEMS_INDEX,
   meta: META,
   tieBreaker: TIE_BREAKER,
   type: TYPE,

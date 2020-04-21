@@ -12,17 +12,17 @@ import { getList } from './get_list';
 export interface DeleteListOptions {
   id: Id;
   dataClient: DataClient;
-  listsIndex: string;
-  listsItemsIndex: string;
+  listIndex: string;
+  listItemIndex: string;
 }
 
 export const deleteList = async ({
   id,
   dataClient,
-  listsIndex,
-  listsItemsIndex,
+  listIndex,
+  listItemIndex,
 }: DeleteListOptions): Promise<ListsSchema | null> => {
-  const list = await getList({ dataClient, id, listsIndex });
+  const list = await getList({ dataClient, id, listIndex });
   if (list == null) {
     return null;
   } else {
@@ -34,12 +34,12 @@ export const deleteList = async ({
           },
         },
       },
-      index: listsItemsIndex,
+      index: listItemIndex,
     });
 
     await dataClient.callAsCurrentUser('delete', {
       id,
-      index: listsIndex,
+      index: listIndex,
     });
     return list;
   }

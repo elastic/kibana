@@ -9,7 +9,7 @@ import {
   LISTS_INDEX,
   LIST_ID,
   getCreateListOptionsMock,
-  getIndexESListsMock,
+  getIndexESListMock,
   getListResponseMock,
 } from '../mocks';
 
@@ -32,10 +32,10 @@ describe('crete_list', () => {
     expect(list).toEqual(expected);
   });
 
-  test('It calls "callAsCurrentUser" with body, index, and listsIndex', async () => {
+  test('It calls "callAsCurrentUser" with body, index, and listIndex', async () => {
     const options = getCreateListOptionsMock();
     await createList(options);
-    const body: IndexEsListsSchema = getIndexESListsMock();
+    const body: IndexEsListsSchema = getIndexESListMock();
     const expected = {
       body,
       id: LIST_ID,
