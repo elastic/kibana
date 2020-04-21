@@ -20,7 +20,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   const params: any = {
     index: dynamicSettings.heartbeatIndices,
     body: {
-      from: index,
+      from: index * size,
       size,
       query: {
         bool: {
@@ -64,10 +64,18 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
           sort: [{ 'monitor.id': 'asc' }],
         },
       },
+      aggs: {
+        total: {
+          cardinality: {
+            field: 'tls.server.hash.sha256',
+          },
+        },
+      },
     },
   };
 
   if (search) {
+    params.body.query.bool.minimum_should_match = 1;
     params.body.query.bool.should = [
       {
         wildcard: {
@@ -101,26 +109,24 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   }
 
   const result = await callES('search', params);
-  const formatted = (result?.hits?.hits ?? []).map((hit: any) => {
+
+  const certs = (result?.hits?.hits ?? []).map((hit: any) => {
     const {
       _source: {
-        tls: {
-          server: {
-            x509: {
-              issuer: { common_name: issuer },
-              subject: { common_name },
-            },
-            hash: { sha1, sha256 },
-          },
-          certificate_not_valid_after,
-          certificate_not_valid_before,
-        },
+        tls: { server, certificate_not_valid_after, certificate_not_valid_before },
       },
     } = hit;
+
+    const issuer = server?.x509?.issuer?.common_name;
+    const commonName = server?.x509?.subject?.common_name;
+    const sha1 = server?.hash?.sha1;
+    const sha256 = server?.hash?.sha256;
+
     const monitors = hit.inner_hits.monitors.hits.hits.map((monitor: any) => ({
       name: monitor._source?.monitor.name,
       id: monitor._source?.monitor.id,
     }));
+
     return {
       monitors,
       certificate_not_valid_after,
@@ -128,8 +134,9 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
       issuer,
       sha1,
       sha256,
-      common_name,
+      common_name: commonName,
     };
   });
-  return formatted;
+  const total = result?.aggregations?.total?.value ?? 0;
+  return { certs, total };
 };

@@ -5,19 +5,22 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiFieldSearch } from '@elastic/eui';
+import { EuiFieldSearch } from '@elastic/eui';
 import styled from 'styled-components';
 
 const WrapFieldSearch = styled(EuiFieldSearch)`
   min-width: 700px;
 `;
 
-export const CertificateSearch: React.FC = () => {
+export const CertificateSearch: React.FC = ({ setSearch }) => {
+  const onChange = e => {
+    setSearch(e.target.value);
+  };
+
   return (
     <WrapFieldSearch
       placeholder="Search certificates"
-      value={''}
-      onChange={() => {}}
+      onChange={onChange}
       isClearable={true}
       aria-label="Use aria labels when no actual label is in use"
     />

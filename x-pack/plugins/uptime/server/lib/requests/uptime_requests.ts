@@ -34,7 +34,6 @@ import {
 import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
 import { MonitorDurationResult } from '../../../../../legacy/plugins/uptime/common/types';
-import { GetCertificatesParams } from './get_certificates';
 
 type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 
@@ -52,5 +51,4 @@ export interface UptimeRequests {
   getPingHistogram: ESQ<GetPingHistogramParams, HistogramResult>;
   getSnapshotCount: ESQ<GetSnapshotCountParams, Snapshot>;
   getIndexStatus: ESQ<{}, StatesIndexStatus>;
-  getCertificates: ESQ<GetCertificatesParams, any>;
 }

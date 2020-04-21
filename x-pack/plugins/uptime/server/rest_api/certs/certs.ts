@@ -5,9 +5,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UMServerLibs } from '../lib/lib';
-import { UMRestApiRouteFactory } from '.';
-import { API_URLS } from '../../../../legacy/plugins/uptime/common/constants/rest_api';
+import { UMServerLibs } from '../../lib/lib';
+import { UMRestApiRouteFactory } from '../index';
+import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
 
 const DEFAULT_INDEX = 0;
 const DEFAULT_SIZE = 25;
@@ -36,18 +36,19 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     const from = request.query?.from ?? DEFAULT_FROM;
     const to = request.query?.to ?? DEFAULT_TO;
     const { search } = request.query;
-
+    const result = await libs.requests.getCerts({
+      callES,
+      dynamicSettings,
+      index,
+      search,
+      size,
+      from,
+      to,
+    });
     return response.ok({
       body: {
-        certs: await libs.requests.getCerts({
-          callES,
-          dynamicSettings,
-          index,
-          search,
-          size,
-          from,
-          to,
-        }),
+        certs: result.certs,
+        total: result.total,
       },
     });
   },

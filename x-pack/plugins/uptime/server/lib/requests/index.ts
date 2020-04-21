@@ -19,4 +19,3 @@ export { getPingHistogram, GetPingHistogramParams } from './get_ping_histogram';
 export { UptimeRequests } from './uptime_requests';
 export { getSnapshotCount, GetSnapshotCountParams } from './get_snapshot_counts';
 export { getIndexStatus } from './get_index_status';
-export { getCertificates } from './get_certificates';

@@ -18,7 +18,6 @@ export enum API_URLS {
   SNAPSHOT_COUNT = `/api/uptime/snapshot/count`,
   FILTERS = `/api/uptime/filters`,
   LOG_PAGE_VIEW = `/api/uptime/log_page_view`,
-  CERTIFICATES = `/api/uptime/certificates`,
 
   ML_MODULE_JOBS = `/api/ml/modules/jobs_exist/`,
   ML_SETUP_MODULE = '/api/ml/modules/setup/',
