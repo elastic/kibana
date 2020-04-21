@@ -73,7 +73,7 @@ cluster.
   ```
   % cat config/kibana.dev.yml
   monitoring.ui.elasticsearch:
-    url: "http://localhost:9210"
+    hosts: "http://localhost:9210"
     username: "kibana"
     password: "changeme"
   ```
