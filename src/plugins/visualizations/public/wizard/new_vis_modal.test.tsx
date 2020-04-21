@@ -21,7 +21,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypesStart, VisType } from '../vis_types';
 import { NewVisModal } from './new_vis_modal';
-import { SavedObjectsStart } from '../../../../core/public';
+import { ApplicationStart, SavedObjectsStart } from '../../../../core/public';
 
 describe('NewVisModal', () => {
   const { location } = window;
@@ -80,6 +80,7 @@ describe('NewVisModal', () => {
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
         uiSettings={uiSettings}
+        application={{} as ApplicationStart}
         savedObjects={{} as SavedObjectsStart}
       />
     );
@@ -94,6 +95,7 @@ describe('NewVisModal', () => {
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
         uiSettings={uiSettings}
+        application={{} as ApplicationStart}
         savedObjects={{} as SavedObjectsStart}
       />
     );
@@ -110,6 +112,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -128,6 +131,7 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -147,6 +151,7 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42', 'addToDashboard']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -167,6 +172,7 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -186,6 +192,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -205,6 +212,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -220,6 +228,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );

@@ -56,9 +56,7 @@ export class SampleDataViewDataButton extends React.Component {
         },
       }
     );
-    const dashboardPath = this.addBasePath(
-      `/app/kibana#/dashboard/${this.props.overviewDashboard}`
-    );
+    const dashboardPath = this.addBasePath(`/app/dashboards#/view/${this.props.overviewDashboard}`);
 
     if (this.props.appLinks.length === 0) {
       return (

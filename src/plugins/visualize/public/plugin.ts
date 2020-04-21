@@ -73,8 +73,8 @@ export class VisualizePlugin
     { home, kibanaLegacy, data }: VisualizePluginSetupDependencies
   ) {
     const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
-      baseUrl: core.http.basePath.prepend('/app/kibana'),
-      defaultSubUrl: '#/visualize',
+      baseUrl: core.http.basePath.prepend('/app/visualize'),
+      defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,

@@ -40,7 +40,7 @@ export function NoIndexPatternCallout() {
           id="xpack.maps.noIndexPattern.hintDescription"
           defaultMessage="Don't have any geospatial data sets? "
         />
-        <EuiLink href={http.basePath.prepend('/app/kibana#/home/tutorial_directory/sampleData')}>
+        <EuiLink href={http.basePath.prepend('/app/home#/tutorial_directory/sampleData')}>
           <FormattedMessage
             id="xpack.maps.noIndexPattern.getStartedLinkText"
             defaultMessage="Get started with some sample data sets."

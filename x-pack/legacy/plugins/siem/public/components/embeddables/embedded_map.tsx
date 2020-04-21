@@ -206,6 +206,7 @@ export const EmbeddedMapComponent = ({
             getEmbeddableFactory={npStart.plugins.embeddable.getEmbeddableFactory}
             getAllEmbeddableFactories={npStart.plugins.embeddable.getEmbeddableFactories}
             notifications={services.notifications}
+            application={services.application}
             overlays={services.overlays}
             inspector={services.inspector}
             SavedObjectFinder={getSavedObjectFinder(services.savedObjects, services.uiSettings)}

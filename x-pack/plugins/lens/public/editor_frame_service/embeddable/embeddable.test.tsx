@@ -49,6 +49,7 @@ describe('embeddable', () => {
       dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
+        editPath: '',
         editUrl: '',
         editable: true,
         savedVis,
@@ -70,6 +71,7 @@ describe('embeddable', () => {
       dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
+        editPath: '',
         editUrl: '',
         editable: true,
         savedVis,
@@ -96,6 +98,7 @@ describe('embeddable', () => {
       dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
+        editPath: '',
         editUrl: '',
         editable: true,
         savedVis,
@@ -120,6 +123,7 @@ describe('embeddable', () => {
       dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
       {
+        editPath: '',
         editUrl: '',
         editable: true,
         savedVis,
@@ -151,6 +155,7 @@ describe('embeddable', () => {
       timefilter,
       expressionRenderer,
       {
+        editPath: '',
         editUrl: '',
         editable: true,
         savedVis,

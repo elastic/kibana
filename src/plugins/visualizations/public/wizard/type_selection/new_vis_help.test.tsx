@@ -28,6 +28,7 @@ describe('NewVisHelp', () => {
         <NewVisHelp
           promotedTypes={[
             {
+              aliasApp: 'myApp',
               aliasPath: '/my/fancy/new/thing',
               description: 'Some desc',
               highlighted: false,
@@ -50,7 +51,7 @@ describe('NewVisHelp', () => {
           <FormattedMessage
             defaultMessage="Start creating your visualization by selecting a type for that visualization."
             id="visualizations.newVisWizard.helpText"
-            values={Object {}}
+            values={{}}
           />
         </p>
         <p>
