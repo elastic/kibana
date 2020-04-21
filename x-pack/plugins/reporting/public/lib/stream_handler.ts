@@ -22,7 +22,6 @@ import {
   getWarningFormulasToast,
   getWarningMaxSizeToast,
   getGenericWarningToast,
-  getGeneralErrorToast,
 } from '../components';
 import { ReportingAPIClient } from './reporting_api_client';
 
