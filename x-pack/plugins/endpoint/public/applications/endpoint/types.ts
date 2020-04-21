@@ -96,6 +96,8 @@ export interface HostListState {
   loading: boolean;
   detailsError?: ServerApiError;
   details?: Immutable<HostMetadata>;
+  /** Holds the Policy Response for the Host currently being displayed in the details */
+  policyResponse?: { [key: string]: any }; // Will be Typed once we have an API for it
   location?: Immutable<EndpointAppLocation>;
 }
 

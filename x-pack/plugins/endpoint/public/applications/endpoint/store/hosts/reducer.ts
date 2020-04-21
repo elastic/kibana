@@ -16,6 +16,7 @@ const initialState = (): HostListState => {
     loading: false,
     detailsError: undefined,
     details: undefined,
+    policyResponse: undefined,
     location: undefined,
   };
 };

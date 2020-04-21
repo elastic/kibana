@@ -22,7 +22,7 @@ import { FormattedDateAndTime } from '../../formatted_date_time';
 import { LinkToApp } from '../../components/link_to_app';
 import { useHostListSelector, useHostLogsUrl } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
-import { uiQueryParams } from '../../../store/hosts/selectors';
+import { policyResponseStatus, uiQueryParams } from '../../../store/hosts/selectors';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -31,9 +31,18 @@ const HostIds = styled(EuiListGroupItem)`
   }
 `;
 
+const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze({
+  success: 'success',
+  warning: 'warning',
+  failed: 'danger',
+});
+
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const { appId, appPath, url } = useHostLogsUrl(details.host.id);
   const queryParams = useHostListSelector(uiQueryParams);
+  const policyStatus = useHostListSelector(
+    policyResponseStatus
+  ) as keyof typeof POLICY_STATUS_TO_HEALTH_COLOR;
   const history = useHistory();
   const detailsResultsUpper = useMemo(() => {
     return [
@@ -79,7 +88,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           defaultMessage: 'Policy Status',
         }),
         description: (
-          <EuiHealth color="success">
+          <EuiHealth color={POLICY_STATUS_TO_HEALTH_COLOR[policyStatus] || 'subdued'}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
               data-test-subj="policyStatusValue"
@@ -90,8 +99,9 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
               }}
             >
               <FormattedMessage
-                id="xpack.endpoint.host.details.policyStatus.success"
-                defaultMessage="Successful"
+                id="xpack.endpoint.host.details.policyStatus"
+                defaultMessage="{policyStatus, select, success {Success} warning {Warning} failed {Failed} other {Unknown}}"
+                values={{ policyStatus }}
               />
             </EuiLink>
           </EuiHealth>
@@ -129,6 +139,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     details.host.ip,
     history,
     policyResponseUri,
+    policyStatus,
   ]);
 
   return (

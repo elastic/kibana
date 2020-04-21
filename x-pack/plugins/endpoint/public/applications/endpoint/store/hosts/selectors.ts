@@ -66,3 +66,13 @@ export const showView: (state: HostListState) => 'policy_response' | 'details' =
     return searchParams.show === 'policy_response' ? 'policy_response' : 'details';
   }
 );
+
+/**
+ * Returns the Policy Response overall status
+ */
+export const policyResponseStatus: (state: Immutable<HostListState>) => string = createSelector(
+  state => state.policyResponse,
+  policyResponse => {
+    return (policyResponse && policyResponse?.endpoint?.policy?.status) || '';
+  }
+);
