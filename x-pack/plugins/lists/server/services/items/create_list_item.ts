@@ -17,7 +17,7 @@ import {
 import { DataClient } from '../../types';
 import { transformListItemsToElasticQuery } from '../utils';
 
-interface CreateListItemOptions {
+export interface CreateListItemOptions {
   id: IdOrUndefined;
   listId: string;
   type: Type;
@@ -26,6 +26,8 @@ interface CreateListItemOptions {
   listsItemsIndex: string;
   user: string;
   meta: MetaOrUndefined;
+  dateNow?: string;
+  tieBreaker?: string;
 }
 
 export const createListItem = async ({
@@ -37,9 +39,11 @@ export const createListItem = async ({
   listsItemsIndex,
   user,
   meta,
+  dateNow,
+  tieBreaker,
 }: CreateListItemOptions): Promise<ListsItemsSchema> => {
-  const createdAt = new Date().toISOString();
-  const tieBreakerId = uuid.v4();
+  const createdAt = dateNow ?? new Date().toISOString();
+  const tieBreakerId = tieBreaker ?? uuid.v4();
   const baseBody = {
     created_at: createdAt,
     created_by: user,

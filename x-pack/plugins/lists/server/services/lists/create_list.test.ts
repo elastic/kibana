@@ -5,8 +5,13 @@
  */
 
 import { IndexEsListsSchema, ListsSchema } from '../../../common/schemas';
-import { LISTS_INDEX, LIST_ID, getCreateListOptionsMock, getListResponseMock } from '../mocks';
-import { getIndexESListsMock } from '../mocks/get_index_es_lists_mock';
+import {
+  LISTS_INDEX,
+  LIST_ID,
+  getCreateListOptionsMock,
+  getIndexESListsMock,
+  getListResponseMock,
+} from '../mocks';
 
 import { createList } from './create_list';
 
