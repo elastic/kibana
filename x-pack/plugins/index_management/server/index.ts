@@ -17,6 +17,6 @@ export const config = {
 
 /** @public */
 export { Dependencies } from './types';
-export { IndexMgmtSetup } from './plugin';
+export { IndexManagementPluginSetup } from './plugin';
 export { Index } from './types';
 export { IndexManagementConfig } from './config';

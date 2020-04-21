@@ -44,9 +44,13 @@ export { esSearchStrategyProvider, getEsPreference } from './es_search';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
-export { LegacyApiCaller, SearchRequest, SearchResponse } from './es_client';
-
-export { SearchError, SearchStrategyProvider, getSearchErrorType } from './search_strategy';
+export {
+  SearchError,
+  FetchOptions,
+  SearchRequest,
+  SearchResponse,
+  getSearchErrorType,
+} from './fetch';
 
 export {
   ISearchSource,
@@ -54,9 +58,8 @@ export {
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
+  createSearchSource,
 } from './search_source';
 
 export { SearchInterceptor } from './search_interceptor';
 export { RequestTimeoutError } from './request_timeout_error';
-
-export { FetchOptions } from './fetch';

@@ -18,10 +18,28 @@
  */
 
 import { SearchSource } from './search_source';
-import { IndexPattern } from '../..';
+import { IndexPattern, SortDirection } from '../..';
 import { mockDataServices } from '../aggs/test_helpers';
+import { setSearchService } from '../../services';
+import { searchStartMock } from '../mocks';
+import { fetchSoon } from '../legacy';
+import { CoreStart } from 'kibana/public';
+import { Observable } from 'rxjs';
 
-jest.mock('../fetch', () => ({
+// Setup search service mock
+searchStartMock.search = jest.fn(() => {
+  return new Observable(subscriber => {
+    setTimeout(() => {
+      subscriber.next({
+        rawResponse: '',
+      });
+      subscriber.complete();
+    }, 100);
+  });
+}) as any;
+setSearchService(searchStartMock);
+
+jest.mock('../legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
 }));
 
@@ -44,8 +62,11 @@ const indexPattern2 = ({
 } as unknown) as IndexPattern;
 
 describe('SearchSource', function() {
+  let uiSettingsMock: jest.Mocked<CoreStart['uiSettings']>;
   beforeEach(() => {
-    mockDataServices();
+    const { core } = mockDataServices();
+    uiSettingsMock = core.uiSettings;
+    jest.clearAllMocks();
   });
 
   describe('#setField()', function() {
@@ -148,6 +169,109 @@ describe('SearchSource', function() {
 
       expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).toBeCalledWith(searchSource, options);
+    });
+  });
+
+  describe('#legacy fetch()', () => {
+    beforeEach(() => {
+      uiSettingsMock.get.mockImplementation(() => {
+        return true; // batchSearches = true
+      });
+    });
+
+    afterEach(() => {
+      uiSettingsMock.get.mockImplementation(() => {
+        return false; // batchSearches = false
+      });
+    });
+
+    it('should call msearch', async () => {
+      const searchSource = new SearchSource({ index: indexPattern });
+      const options = {};
+      await searchSource.fetch(options);
+      expect(fetchSoon).toBeCalledTimes(1);
+    });
+  });
+
+  describe('#search service fetch()', () => {
+    it('should call msearch', async () => {
+      const searchSource = new SearchSource({ index: indexPattern });
+      const options = {};
+      await searchSource.fetch(options);
+      expect(searchStartMock.search).toBeCalledTimes(1);
+    });
+  });
+
+  describe('#serialize', function() {
+    it('should reference index patterns', () => {
+      const indexPattern123 = { id: '123' } as IndexPattern;
+      const searchSource = new SearchSource();
+      searchSource.setField('index', indexPattern123);
+      const { searchSourceJSON, references } = searchSource.serialize();
+      expect(references[0].id).toEqual('123');
+      expect(references[0].type).toEqual('index-pattern');
+      expect(JSON.parse(searchSourceJSON).indexRefName).toEqual(references[0].name);
+    });
+
+    it('should add other fields', () => {
+      const searchSource = new SearchSource();
+      searchSource.setField('highlightAll', true);
+      searchSource.setField('from', 123456);
+      const { searchSourceJSON } = searchSource.serialize();
+      expect(JSON.parse(searchSourceJSON).highlightAll).toEqual(true);
+      expect(JSON.parse(searchSourceJSON).from).toEqual(123456);
+    });
+
+    it('should omit sort and size', () => {
+      const searchSource = new SearchSource();
+      searchSource.setField('highlightAll', true);
+      searchSource.setField('from', 123456);
+      searchSource.setField('sort', { field: SortDirection.asc });
+      searchSource.setField('size', 200);
+      const { searchSourceJSON } = searchSource.serialize();
+      expect(Object.keys(JSON.parse(searchSourceJSON))).toEqual(['highlightAll', 'from']);
+    });
+
+    it('should serialize filters', () => {
+      const searchSource = new SearchSource();
+      const filter = [
+        {
+          query: 'query',
+          meta: {
+            alias: 'alias',
+            disabled: false,
+            negate: false,
+          },
+        },
+      ];
+      searchSource.setField('filter', filter);
+      const { searchSourceJSON } = searchSource.serialize();
+      expect(JSON.parse(searchSourceJSON).filter).toEqual(filter);
+    });
+
+    it('should reference index patterns in filters separately from index field', () => {
+      const searchSource = new SearchSource();
+      const indexPattern123 = { id: '123' } as IndexPattern;
+      searchSource.setField('index', indexPattern123);
+      const filter = [
+        {
+          query: 'query',
+          meta: {
+            alias: 'alias',
+            disabled: false,
+            negate: false,
+            index: '456',
+          },
+        },
+      ];
+      searchSource.setField('filter', filter);
+      const { searchSourceJSON, references } = searchSource.serialize();
+      expect(references[0].id).toEqual('123');
+      expect(references[0].type).toEqual('index-pattern');
+      expect(JSON.parse(searchSourceJSON).indexRefName).toEqual(references[0].name);
+      expect(references[1].id).toEqual('456');
+      expect(references[1].type).toEqual('index-pattern');
+      expect(JSON.parse(searchSourceJSON).filter[0].meta.indexRefName).toEqual(references[1].name);
     });
   });
 });

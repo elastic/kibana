@@ -69,6 +69,7 @@ export {
 } from './migrations';
 
 export {
+  SavedObjectsNamespaceType,
   SavedObjectStatusMeta,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,

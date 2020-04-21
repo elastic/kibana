@@ -16,10 +16,6 @@ import {
   EuiButtonEmpty,
   EuiSwitch,
   EuiFormRow,
-  EuiContextMenuItem,
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -29,6 +25,7 @@ import {
   ActionParamsProps,
 } from '../../../types';
 import { EmailActionParams, EmailActionConnector } from './types';
+import { AddMessageVariables } from '../add_message_variables';
 
 export function getActionType(): ActionTypeModel {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
@@ -368,25 +365,21 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
   const [addCC, setAddCC] = useState<boolean>(false);
   const [addBCC, setAddBCC] = useState<boolean>(false);
 
-  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
   useEffect(() => {
     if (!message && defaultMessage && defaultMessage.length > 0) {
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const messageVariablesItems = messageVariables?.map((variable: string) => (
-    <EuiContextMenuItem
-      key={variable}
-      icon="empty"
-      onClick={() => {
-        editAction('message', (message ?? '').concat(` {{${variable}}}`), index);
-        setIsVariablesPopoverOpen(false);
-      }}
-    >
-      {`{{${variable}}}`}
-    </EuiContextMenuItem>
-  ));
+
+  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
+    editAction(
+      paramsProperty,
+      ((actionParams as any)[paramsProperty] ?? '').concat(` {{${variable}}}`),
+      index
+    );
+  };
+
   return (
     <Fragment>
       <EuiFormRow
@@ -543,6 +536,15 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
             defaultMessage: 'Subject',
           }
         )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) =>
+              onSelectMessageVariable('subject', variable)
+            }
+            paramsProperty="subject"
+          />
+        }
       >
         <EuiFieldText
           fullWidth
@@ -571,27 +573,13 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
           }
         )}
         labelAppend={
-          <EuiPopover
-            id="singlePanel"
-            button={
-              <EuiButtonIcon
-                onClick={() => setIsVariablesPopoverOpen(true)}
-                iconType="indexOpen"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.addVariablePopoverButton',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-              />
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) =>
+              onSelectMessageVariable('message', variable)
             }
-            isOpen={isVariablesPopoverOpen}
-            closePopover={() => setIsVariablesPopoverOpen(false)}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={messageVariablesItems} />
-          </EuiPopover>
+            paramsProperty="message"
+          />
         }
       >
         <EuiTextArea

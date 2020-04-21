@@ -85,16 +85,20 @@ export default function({ getService }: FtrProviderContext) {
     };
   }
 
+  const calendarId = `wizard-test-calendar_${Date.now()}`;
+
   describe('population', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
-      await esArchiver.load('ml/ecommerce');
-      await ml.api.createCalendar('wizard-test-calendar');
+      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
+      await ml.api.createCalendar(calendarId);
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/farequote');
       await ml.api.cleanMlIndices();
     });
 
@@ -108,7 +112,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job creation loads the job type selection page', async () => {
-      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ecommerce');
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_ecommerce');
     });
 
     it('job creation loads the population job wizard page', async () => {
@@ -208,7 +212,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job creation assigns calendars', async () => {
-      await ml.jobWizardCommon.addCalendar('wizard-test-calendar');
+      await ml.jobWizardCommon.addCalendar(calendarId);
     });
 
     it('job creation opens the advanced section', async () => {
@@ -367,7 +371,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job cloning persists assigned calendars', async () => {
-      await ml.jobWizardCommon.assertCalendarsSelection(['wizard-test-calendar']);
+      await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);
     });
 
     it('job cloning opens the advanced section', async () => {

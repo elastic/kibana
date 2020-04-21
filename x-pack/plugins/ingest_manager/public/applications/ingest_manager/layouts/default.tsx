@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Section } from '../sections';
+import { AlphaMessaging } from '../components';
 import { useLink, useConfig } from '../hooks';
 import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from '../constants';
 
@@ -55,8 +56,8 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
                 disabled={!epm?.enabled}
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.appNavigation.packagesLinkText"
-                  defaultMessage="Packages"
+                  id="xpack.ingestManager.appNavigation.epmLinkText"
+                  defaultMessage="Integrations"
                 />
               </EuiTab>
               <EuiTab isSelected={section === 'agent_config'} href={useLink(AGENT_CONFIG_PATH)}>
@@ -80,6 +81,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
         </EuiFlexGroup>
       </Nav>
       {children}
+      <AlphaMessaging />
     </Container>
   );
 };

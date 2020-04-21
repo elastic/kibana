@@ -18,6 +18,7 @@
  */
 
 import { schema } from '..';
+import { TypeOf } from './object_type';
 
 test('returns value by default', () => {
   const type = schema.object({
@@ -349,4 +350,27 @@ test('unknowns = `ignore` affects only own keys', () => {
       },
     })
   ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
+});
+
+test('handles optional properties', () => {
+  const type = schema.object({
+    required: schema.string(),
+    optional: schema.maybe(schema.string()),
+  });
+
+  type SchemaType = TypeOf<typeof type>;
+
+  let foo: SchemaType = {
+    required: 'foo',
+  };
+  foo = {
+    required: 'hello',
+    optional: undefined,
+  };
+  foo = {
+    required: 'hello',
+    optional: 'bar',
+  };
+
+  expect(foo).toBeDefined();
 });

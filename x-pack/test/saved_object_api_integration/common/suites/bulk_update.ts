@@ -6,234 +6,119 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
-import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
+import { SPACES } from '../lib/spaces';
+import {
+  createRequest,
+  expectResponses,
+  getUrlPrefix,
+  getTestTitle,
+} from '../lib/saved_object_test_utils';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
-interface BulkUpdateTest {
-  statusCode: number;
-  response: (resp: { [key: string]: any }) => void;
+export interface BulkUpdateTestDefinition extends TestDefinition {
+  request: Array<{ type: string; id: string }>;
+}
+export type BulkUpdateTestSuite = TestSuite<BulkUpdateTestDefinition>;
+export interface BulkUpdateTestCase extends TestCase {
+  failure?: 404; // only used for permitted response case
 }
 
-interface BulkUpdateTests {
-  spaceAware: BulkUpdateTest;
-  notSpaceAware: BulkUpdateTest;
-  hiddenType: BulkUpdateTest;
-  doesntExist: BulkUpdateTest;
-}
+const NEW_ATTRIBUTE_KEY = 'title'; // all type mappings include this attribute, for simplicity's sake
+const NEW_ATTRIBUTE_VAL = `Updated attribute value ${Date.now()}`;
 
-interface BulkUpdateTestDefinition {
-  user?: TestDefinitionAuthentication;
-  spaceId?: string;
-  otherSpaceId?: string;
-  tests: BulkUpdateTests;
-}
+const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
+export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
 
 export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectNotFound = (type: string, id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
-    [key: string]: any;
-  }) => {
-    const [, savedObject] = resp.body.saved_objects;
-    expect(savedObject.error).eql({
-      statusCode: 404,
-      error: 'Not Found',
-      message: `Saved object [${type}/${getIdPrefix(spaceId)}${id}] not found`,
-    });
+  const expectForbidden = expectResponses.forbidden('bulk_update');
+  const expectResponseBody = (
+    testCases: BulkUpdateTestCase | BulkUpdateTestCase[],
+    statusCode: 200 | 403
+  ): ExpectResponseBody => async (response: Record<string, any>) => {
+    const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
+    if (statusCode === 403) {
+      const types = testCaseArray.map(x => x.type);
+      await expectForbidden(types)(response);
+    } else {
+      // permitted
+      const savedObjects = response.body.saved_objects;
+      expect(savedObjects).length(testCaseArray.length);
+      for (let i = 0; i < savedObjects.length; i++) {
+        const object = savedObjects[i];
+        const testCase = testCaseArray[i];
+        await expectResponses.permitted(object, testCase);
+        if (!testCase.failure) {
+          expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+        }
+      }
+    }
   };
-
-  const createExpectDoesntExistNotFound = (spaceId?: string) => {
-    return createExpectNotFound('visualization', 'not an id', spaceId);
-  };
-
-  const createExpectSpaceAwareNotFound = (spaceId?: string) => {
-    return createExpectNotFound('visualization', 'dd7caf20-9efd-11e7-acb3-3dab96693fab', spaceId);
-  };
-
-  const expectHiddenTypeNotFound = createExpectNotFound(
-    'hiddentype',
-    'hiddentype_1',
-    DEFAULT_SPACE_ID
-  );
-
-  const createExpectRbacForbidden = (types: string[]) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to bulk_update ${types.join()}`,
-    });
-  };
-
-  const expectDoesntExistRbacForbidden = createExpectRbacForbidden(['globaltype', 'visualization']);
-
-  const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden(['globaltype']);
-
-  const expectHiddenTypeRbacForbidden = createExpectRbacForbidden(['globaltype', 'hiddentype']);
-  const expectHiddenTypeRbacForbiddenWithGlobalAllowed = createExpectRbacForbidden(['hiddentype']);
-
-  const expectSpaceAwareRbacForbidden = createExpectRbacForbidden(['globaltype', 'visualization']);
-
-  const expectNotSpaceAwareResults = (resp: { [key: string]: any }) => {
-    const [, savedObject] = resp.body.saved_objects;
-    // loose uuid validation
-    expect(savedObject)
-      .to.have.property('id')
-      .match(/^[0-9a-f-]{36}$/);
-
-    // loose ISO8601 UTC time with milliseconds validation
-    expect(savedObject)
-      .to.have.property('updated_at')
-      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-
-    expect(savedObject).to.eql({
-      id: savedObject.id,
-      type: 'globaltype',
-      updated_at: savedObject.updated_at,
-      version: savedObject.version,
-      attributes: {
-        name: 'My second favorite',
+  const createTestDefinitions = (
+    testCases: BulkUpdateTestCase | BulkUpdateTestCase[],
+    forbidden: boolean,
+    options?: {
+      singleRequest?: boolean;
+      responseBodyOverride?: ExpectResponseBody;
+    }
+  ): BulkUpdateTestDefinition[] => {
+    const cases = Array.isArray(testCases) ? testCases : [testCases];
+    const responseStatusCode = forbidden ? 403 : 200;
+    if (!options?.singleRequest) {
+      // if we are testing cases that should result in a forbidden response, we can do each case individually
+      // this ensures that multiple test cases of a single type will each result in a forbidden error
+      return cases.map(x => ({
+        title: getTestTitle(x, responseStatusCode),
+        request: [createRequest(x)],
+        responseStatusCode,
+        responseBody: options?.responseBodyOverride || expectResponseBody(x, responseStatusCode),
+      }));
+    }
+    // batch into a single request to save time during test execution
+    return [
+      {
+        title: getTestTitle(cases, responseStatusCode),
+        request: cases.map(x => createRequest(x)),
+        responseStatusCode,
+        responseBody:
+          options?.responseBodyOverride || expectResponseBody(cases, responseStatusCode),
       },
-    });
+    ];
   };
 
-  const expectSpaceAwareResults = (resp: { [key: string]: any }) => {
-    const [, savedObject] = resp.body.saved_objects;
-    // loose uuid validation ignoring prefix
-    expect(savedObject)
-      .to.have.property('id')
-      .match(/[0-9a-f-]{36}$/);
-
-    // loose ISO8601 UTC time with milliseconds validation
-    expect(savedObject)
-      .to.have.property('updated_at')
-      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-
-    expect(savedObject).to.eql({
-      id: savedObject.id,
-      type: 'visualization',
-      updated_at: savedObject.updated_at,
-      version: savedObject.version,
-      attributes: {
-        title: 'My second favorite vis',
-      },
-    });
-  };
-
-  const makeBulkUpdateTest = (describeFn: DescribeFn) => (
+  const makeBulkUpdateTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
-    definition: BulkUpdateTestDefinition
+    definition: BulkUpdateTestSuite
   ) => {
-    const { user = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
-
-    // We add this type into all bulk updates
-    // to ensure that having additional items in the bulk
-    // update doesn't change the expected outcome overall
-    let updateCount = 0;
-    const generateNonSpaceAwareGlobalSavedObject = () => ({
-      type: 'globaltype',
-      id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-      attributes: {
-        name: `Update #${++updateCount}`,
-      },
-    });
+    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
-      it(`should return ${tests.spaceAware.statusCode} for a space-aware doc`, async () => {
-        await supertest
-          .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
-          .auth(user.username, user.password)
-          .send([
-            generateNonSpaceAwareGlobalSavedObject(),
-            {
-              type: 'visualization',
-              id: `${getIdPrefix(otherSpaceId || spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-              attributes: {
-                title: 'My second favorite vis',
-              },
-            },
-            generateNonSpaceAwareGlobalSavedObject(),
-          ])
-          .expect(tests.spaceAware.statusCode)
-          .then(tests.spaceAware.response);
-      });
 
-      it(`should return ${tests.notSpaceAware.statusCode} for a non space-aware doc`, async () => {
-        await supertest
-          .put(`${getUrlPrefix(otherSpaceId || spaceId)}/api/saved_objects/_bulk_update`)
-          .auth(user.username, user.password)
-          .send([
-            generateNonSpaceAwareGlobalSavedObject(),
-            {
-              type: 'globaltype',
-              id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-              attributes: {
-                name: 'My second favorite',
-              },
-            },
-            generateNonSpaceAwareGlobalSavedObject(),
-          ])
-          .expect(tests.notSpaceAware.statusCode)
-          .then(tests.notSpaceAware.response);
-      });
+      const attrs = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };
 
-      it(`should return ${tests.hiddenType.statusCode} for hiddentype doc`, async () => {
-        await supertest
-          .put(`${getUrlPrefix(otherSpaceId || spaceId)}/api/saved_objects/_bulk_update`)
-          .auth(user.username, user.password)
-          .send([
-            generateNonSpaceAwareGlobalSavedObject(),
-            {
-              type: 'hiddentype',
-              id: 'hiddentype_1',
-              attributes: {
-                name: 'My favorite hidden type',
-              },
-            },
-            generateNonSpaceAwareGlobalSavedObject(),
-          ])
-          .expect(tests.hiddenType.statusCode)
-          .then(tests.hiddenType.response);
-      });
-
-      describe('unknown id', () => {
-        it(`should return ${tests.doesntExist.statusCode}`, async () => {
+      for (const test of tests) {
+        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+          const requestBody = test.request.map(x => ({ ...x, ...attrs }));
           await supertest
             .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
-            .auth(user.username, user.password)
-            .send([
-              generateNonSpaceAwareGlobalSavedObject(),
-              {
-                type: 'visualization',
-                id: `${getIdPrefix(spaceId)}not an id`,
-                attributes: {
-                  title: 'My second favorite vis',
-                },
-              },
-              generateNonSpaceAwareGlobalSavedObject(),
-            ])
-            .expect(tests.doesntExist.statusCode)
-            .then(tests.doesntExist.response);
+            .auth(user?.username, user?.password)
+            .send(requestBody)
+            .expect(test.responseStatusCode)
+            .then(test.responseBody);
         });
-      });
+      }
     });
   };
 
-  const bulkUpdateTest = makeBulkUpdateTest(describe);
+  const addTests = makeBulkUpdateTest(describe);
   // @ts-ignore
-  bulkUpdateTest.only = makeBulkUpdateTest(describe.only);
+  addTests.only = makeBulkUpdateTest(describe.only);
 
   return {
-    createExpectDoesntExistNotFound,
-    createExpectSpaceAwareNotFound,
-    expectSpaceNotFound: expectHiddenTypeNotFound,
-    expectDoesntExistRbacForbidden,
-    expectNotSpaceAwareRbacForbidden,
-    expectNotSpaceAwareResults,
-    expectSpaceAwareRbacForbidden,
-    expectSpaceAwareResults,
-    expectHiddenTypeRbacForbidden,
-    expectHiddenTypeRbacForbiddenWithGlobalAllowed,
-    bulkUpdateTest,
+    addTests,
+    createTestDefinitions,
+    expectForbidden,
   };
 }

@@ -58,10 +58,27 @@ describe('state selectors', () => {
       loading: false,
       errors: [],
     },
+    pingList: {
+      loading: false,
+      pingList: {
+        total: 0,
+        locations: [],
+        pings: [],
+      },
+    },
     monitorDuration: {
       durationLines: null,
       loading: false,
       errors: [],
+    },
+    monitorList: {
+      list: {
+        prevPagePagination: null,
+        nextPagePagination: null,
+        summaries: [],
+        totalSummaryCount: 0,
+      },
+      loading: false,
     },
     ml: {
       mlJob: {

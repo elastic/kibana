@@ -72,6 +72,7 @@
   display: flex;
   flex-basis: 100%;
   flex: 1;
+  overflow: hidden;
 
   @include euiBreakpoint('xs', 's', 'm') {
     // If we are on a small screen we force the visualization to take 100% width.

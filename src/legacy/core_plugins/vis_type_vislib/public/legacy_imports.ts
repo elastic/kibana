@@ -19,8 +19,3 @@
 
 import { search } from '../../../../plugins/data/public';
 export const { tabifyAggResponse, tabifyGetColumns } = search;
-
-// @ts-ignore
-export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
-// @ts-ignore
-export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

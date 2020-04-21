@@ -63,3 +63,199 @@ test('tests loading system.yml', () => {
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
 });
+
+test('tests processing text field with multi fields', () => {
+  const textWithMultiFieldsLiteralYml = `
+- name: textWithMultiFields
+  type: text
+  multi_fields:
+    - name: raw
+      type: keyword
+    - name: indexed
+      type: text
+`;
+  const textWithMultiFieldsMapping = {
+    properties: {
+      textWithMultiFields: {
+        type: 'text',
+        fields: {
+          raw: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          indexed: {
+            type: 'text',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(textWithMultiFieldsLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(textWithMultiFieldsMapping));
+});
+
+test('tests processing keyword field with multi fields', () => {
+  const keywordWithMultiFieldsLiteralYml = `
+- name: keywordWithMultiFields
+  type: keyword
+  multi_fields:
+    - name: raw
+      type: keyword
+    - name: indexed
+      type: text
+`;
+
+  const keywordWithMultiFieldsMapping = {
+    properties: {
+      keywordWithMultiFields: {
+        ignore_above: 1024,
+        type: 'keyword',
+        fields: {
+          raw: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          indexed: {
+            type: 'text',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(keywordWithMultiFieldsMapping));
+});
+
+test('tests processing keyword field with multi fields with analyzed text field', () => {
+  const keywordWithAnalyzedMultiFieldsLiteralYml = `
+  - name: keywordWithAnalyzedMultiField
+    type: keyword
+    multi_fields:
+      - name: analyzed
+        type: text
+        analyzer: autocomplete
+        search_analyzer: standard
+  `;
+
+  const keywordWithAnalyzedMultiFieldsMapping = {
+    properties: {
+      keywordWithAnalyzedMultiField: {
+        ignore_above: 1024,
+        type: 'keyword',
+        fields: {
+          analyzed: {
+            analyzer: 'autocomplete',
+            search_analyzer: 'standard',
+            type: 'text',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(keywordWithAnalyzedMultiFieldsLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(keywordWithAnalyzedMultiFieldsMapping));
+});
+
+test('tests processing object field with no other attributes', () => {
+  const objectFieldLiteralYml = `
+- name: objectField
+  type: object
+`;
+  const objectFieldMapping = {
+    properties: {
+      objectField: {
+        type: 'object',
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldMapping));
+});
+
+test('tests processing object field with enabled set to false', () => {
+  const objectFieldEnabledFalseLiteralYml = `
+- name: objectField
+  type: object
+  enabled: false
+`;
+  const objectFieldEnabledFalseMapping = {
+    properties: {
+      objectField: {
+        type: 'object',
+        enabled: false,
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldEnabledFalseLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldEnabledFalseMapping));
+});
+
+test('tests processing object field with dynamic set to false', () => {
+  const objectFieldDynamicFalseLiteralYml = `
+- name: objectField
+  type: object
+  dynamic: false
+`;
+  const objectFieldDynamicFalseMapping = {
+    properties: {
+      objectField: {
+        type: 'object',
+        dynamic: false,
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldDynamicFalseLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicFalseMapping));
+});
+
+test('tests processing object field with dynamic set to true', () => {
+  const objectFieldDynamicTrueLiteralYml = `
+- name: objectField
+  type: object
+  dynamic: true
+`;
+  const objectFieldDynamicTrueMapping = {
+    properties: {
+      objectField: {
+        type: 'object',
+        dynamic: true,
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldDynamicTrueLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicTrueMapping));
+});
+
+test('tests processing object field with dynamic set to strict', () => {
+  const objectFieldDynamicStrictLiteralYml = `
+- name: objectField
+  type: object
+  dynamic: strict
+`;
+  const objectFieldDynamicStrictMapping = {
+    properties: {
+      objectField: {
+        type: 'object',
+        dynamic: 'strict',
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldDynamicStrictLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicStrictMapping));
+});
