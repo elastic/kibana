@@ -8,7 +8,7 @@ import { Location } from 'history';
 import { pick, isEmpty } from 'lodash';
 import moment from 'moment';
 import url from 'url';
-import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { getDiscoverHref } from '../Links/DiscoverLinks/DiscoverLink';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';

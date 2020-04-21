@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../legacy/plugins/infra/types/rison_node';
-import '../../../legacy/plugins/infra/types/eui';
+import '../../../typings/rison_node';
+import '../../infra/types/eui';
 // EUIBasicTable
-import '../../../legacy/plugins/reporting/public/components/report_listing';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import '../../reporting/public/components/report_listing';
 // .svg
-import '../../../legacy/plugins/canvas/types/webpack';
+// import '../../../legacy/plugins/canvas/types/webpack';
 
 // Allow unknown properties in an object
 export type AllowUnknownProperties<T> = T extends Array<infer X>

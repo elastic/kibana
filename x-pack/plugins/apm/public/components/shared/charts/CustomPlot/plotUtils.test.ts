@@ -6,10 +6,7 @@
 
 // @ts-ignore
 import * as plotUtils from './plotUtils';
-import {
-  TimeSeries,
-  Coordinate
-} from '../../../../../../../../plugins/apm/typings/timeseries';
+import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 
 describe('plotUtils', () => {
   describe('getPlotValues', () => {

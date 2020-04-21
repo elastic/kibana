@@ -10,8 +10,8 @@ import {
   expectTextsInDocument,
   expectTextsNotInDocument
 } from '../../../../utils/testHelpers';
-import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
-import { CustomLink } from '../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 
 describe('CustomLinkSection', () => {
   const customLinks = [

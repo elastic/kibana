@@ -5,8 +5,8 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFilterName } from '../../../../../../plugins/apm/server/lib/ui_filters/local_ui_filters/config';
-import { ProcessorEvent } from '../../../../../../plugins/apm/common/processor_event';
+import { LocalUIFilterName } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 export type IUrlParams = {
   detailTab?: string;

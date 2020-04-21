@@ -9,14 +9,14 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE
-} from '../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+} from '../../../common/elasticsearch_fieldnames';
 import {
   getMlJobId,
   getMlPrefix,
   encodeForMlApi
-} from '../../../../../../plugins/apm/common/ml_job_constants';
+} from '../../../common/ml_job_constants';
 import { callApi } from './callApi';
-import { ESFilter } from '../../../../../../plugins/apm/typings/elasticsearch';
+import { ESFilter } from '../../../typings/elasticsearch';
 import { callApmApi } from './createCallApmApi';
 
 interface MlResponseItem {

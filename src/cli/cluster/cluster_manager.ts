@@ -264,8 +264,8 @@ export class ClusterManager {
       fromRoot('src/legacy/server/sass/__tmp__'),
       fromRoot('x-pack/legacy/plugins/reporting/.chromium'),
       fromRoot('x-pack/plugins/siem/cypress'),
-      fromRoot('x-pack/legacy/plugins/apm/e2e'),
-      fromRoot('x-pack/legacy/plugins/apm/scripts'),
+      fromRoot('x-pack/plugins/apm/e2e'),
+      fromRoot('x-pack/plugins/apm/scripts'),
       fromRoot('x-pack/legacy/plugins/canvas/canvas_plugin_src'), // prevents server from restarting twice for Canvas plugin changes,
       'plugins/java_languageserver',
     ];

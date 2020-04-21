@@ -8,7 +8,7 @@ import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CustomLink } from '../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
+import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { useLicense } from '../../../../../hooks/useLicense';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { CustomLinkFlyout } from './CustomLinkFlyout';

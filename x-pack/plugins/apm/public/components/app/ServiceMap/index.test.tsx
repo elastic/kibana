@@ -6,7 +6,7 @@
 
 import { render } from '@testing-library/react';
 import React, { FunctionComponent } from 'react';
-import { License } from '../../../../../../../plugins/licensing/common/license';
+import { License } from '../../../../../licensing/common/license';
 import { LicenseContext } from '../../../context/LicenseContext';
 import { ServiceMap } from './';
 import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';

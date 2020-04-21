@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
-import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { startMLJob } from '../../../../../services/rest/ml';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';

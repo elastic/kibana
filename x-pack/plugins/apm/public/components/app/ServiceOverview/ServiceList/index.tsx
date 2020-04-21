@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceListAPIResponse } from '../../../../../../../../plugins/apm/server/lib/services/get_services';
-import { NOT_AVAILABLE_LABEL } from '../../../../../../../../plugins/apm/common/i18n';
+import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, convertTo } from '../../../../utils/formatters';
 import { ManagedTable } from '../../../shared/ManagedTable';

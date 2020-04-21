@@ -8,7 +8,7 @@ import { getTraceItems } from './get_trace_items';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../public/utils/testHelpers';
 
 describe('trace queries', () => {
   let mock: SearchParamsMock;

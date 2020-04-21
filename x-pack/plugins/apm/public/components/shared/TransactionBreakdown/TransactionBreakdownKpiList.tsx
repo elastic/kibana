@@ -13,10 +13,7 @@ import {
   EuiIcon
 } from '@elastic/eui';
 import styled from 'styled-components';
-import {
-  FORMATTERS,
-  InfraFormatterType
-} from '../../../../../../../plugins/infra/public';
+import { FORMATTERS, InfraFormatterType } from '../../../../../infra/public';
 
 interface TransactionBreakdownKpi {
   name: string;

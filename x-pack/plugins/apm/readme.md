@@ -32,7 +32,7 @@ _Docker Compose is required_
 ### E2E (Cypress) tests
 
 ```sh
-x-pack/legacy/plugins/apm/e2e/run-e2e.sh
+x-pack/plugins/apm/e2e/run-e2e.sh
 ```
 
 _Starts Kibana (:5701), APM Server (:8201) and Elasticsearch (:9201). Ingests sample data into Elasticsearch via APM Server and runs the Cypress tests_
@@ -94,13 +94,13 @@ _Note: Run the following commands from `kibana/`._
 #### Prettier
 
 ```
-yarn prettier  "./x-pack/legacy/plugins/apm/**/*.{tsx,ts,js}" --write
+yarn prettier  "./x-pack/plugins/apm/**/*.{tsx,ts,js}" --write
 ```
 
 #### ESLint
 
 ```
-yarn eslint ./x-pack/legacy/plugins/apm --fix
+yarn eslint ./x-pack/plugins/apm --fix
 ```
 
 ### Setup default APM users
@@ -117,7 +117,7 @@ For testing purposes APM uses 3 custom users:
 To create the users with the correct roles run the following script:
 
 ```sh
-node x-pack/legacy/plugins/apm/scripts/setup-kibana-security.js --role-suffix <github-username-or-something-unique>
+node x-pack/plugins/apm/scripts/setup-kibana-security.js --role-suffix <github-username-or-something-unique>
 ```
 
 The users will be created with the password specified in kibana.dev.yml for `elasticsearch.password`

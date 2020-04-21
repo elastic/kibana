@@ -7,8 +7,8 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useMemo, useState } from 'react';
-import { Filter } from '../../../../../../../plugins/apm/common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { Filter } from '../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import {
   ActionMenu,
   ActionMenuDivider,
@@ -17,7 +17,7 @@ import {
   SectionLinks,
   SectionSubtitle,
   SectionTitle
-} from '../../../../../../../plugins/observability/public';
+} from '../../../../../observability/public';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useLocation } from '../../../hooks/useLocation';

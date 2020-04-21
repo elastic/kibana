@@ -13,7 +13,7 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { HttpSetup } from 'kibana/public';
-import { AgentConfiguration } from '../../../../../../../../../plugins/apm/common/agent_configuration/configuration_types';
+import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { createCallApmApi } from '../../../../../services/rest/createCallApmApi';
 import { AgentConfigurationCreateEdit } from './index';

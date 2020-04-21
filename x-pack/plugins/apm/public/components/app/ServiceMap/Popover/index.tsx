@@ -14,7 +14,7 @@ import React, {
   useRef,
   useState
 } from 'react';
-import { SERVICE_NAME } from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
 import { Contents } from './Contents';
 import { animationOptions } from '../cytoscapeOptions';

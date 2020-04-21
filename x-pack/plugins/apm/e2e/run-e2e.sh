@@ -27,7 +27,7 @@ cd ${E2E_DIR}
 # Ask user to start Kibana
 ##################################################
 echo "\n${bold}To start Kibana please run the following command:${normal}
-node ./scripts/kibana --no-base-path --dev --no-dev-config --config x-pack/legacy/plugins/apm/e2e/ci/kibana.e2e.yml"
+node ./scripts/kibana --no-base-path --dev --no-dev-config --config x-pack/plugins/apm/e2e/ci/kibana.e2e.yml"
 
 #
 # Create tmp folder

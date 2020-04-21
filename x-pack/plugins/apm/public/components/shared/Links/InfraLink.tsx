@@ -10,7 +10,7 @@ import url from 'url';
 import { fromQuery } from './url_helpers';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { AppMountContextBasePath } from '../../../context/ApmPluginContext';
-import { InfraAppId } from '../../../../../../../plugins/infra/public';
+import { InfraAppId } from '../../../../../infra/public';
 
 interface InfraQueryParams {
   time?: number;

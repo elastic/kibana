@@ -25,7 +25,7 @@ import { Logger } from 'kibana/server';
 // @ts-ignore
 import consoleStamp from 'console-stamp';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CollectTelemetryParams } from '../../../../../plugins/apm/server/lib/apm_telemetry/collect_data_telemetry';
+import { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
 import { downloadTelemetryTemplate } from './download-telemetry-template';
 import mapping from '../../mappings.json';
 import { generateSampleDocuments } from './generate-sample-documents';

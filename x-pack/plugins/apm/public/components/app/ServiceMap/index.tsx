@@ -10,7 +10,7 @@ import React from 'react';
 import {
   invalidLicenseMessage,
   isValidPlatinumLicense
-} from '../../../../../../../plugins/apm/common/service_map';
+} from '../../../../common/service_map';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -23,7 +23,7 @@ import { EmptyBanner } from './EmptyBanner';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
 import { BetaBadge } from './BetaBadge';
-import { useTrackPageview } from '../../../../../../../plugins/observability/public';
+import { useTrackPageview } from '../../../../../observability/public';
 
 interface ServiceMapProps {
   serviceName?: string;

@@ -6,7 +6,7 @@
 import {
   inspectSearchParams,
   SearchParamsMock
-} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../../public/utils/testHelpers';
 import { getTransaction } from './get_transaction';
 import { Setup } from '../../helpers/setup_request';
 import {

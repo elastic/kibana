@@ -8,7 +8,7 @@ import { fireEvent, render, wait, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import * as apmApi from '../../../../../services/rest/createCallApmApi';
-import { License } from '../../../../../../../../../plugins/licensing/common/license';
+import { License } from '../../../../../../../licensing/common/license';
 import * as hooks from '../../../../../hooks/useFetcher';
 import { LicenseContext } from '../../../../../context/LicenseContext';
 import { CustomLinkOverview } from '.';

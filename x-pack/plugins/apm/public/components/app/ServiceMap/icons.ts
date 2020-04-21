@@ -5,12 +5,12 @@
  */
 
 import cytoscape from 'cytoscape';
-import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
+import { isRumAgentName } from '../../../../common/agent_name';
 import {
   AGENT_NAME,
   SPAN_SUBTYPE,
   SPAN_TYPE
-} from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+} from '../../../../common/elasticsearch_fieldnames';
 import awsIcon from './icons/aws.svg';
 import cassandraIcon from './icons/cassandra.svg';
 import darkIcon from './icons/dark.svg';

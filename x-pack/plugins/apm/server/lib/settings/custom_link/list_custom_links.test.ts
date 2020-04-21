@@ -8,7 +8,7 @@ import { listCustomLinks } from './list_custom_links';
 import {
   inspectSearchParams,
   SearchParamsMock
-} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../../public/utils/testHelpers';
 import { Setup } from '../../helpers/setup_request';
 import {
   SERVICE_NAME,

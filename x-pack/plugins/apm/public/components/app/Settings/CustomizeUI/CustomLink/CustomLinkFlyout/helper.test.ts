@@ -7,7 +7,7 @@ import {
   getSelectOptions,
   replaceTemplateVariables
 } from '../CustomLinkFlyout/helper';
-import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 
 describe('Custom link helper', () => {
   describe('getSelectOptions', () => {

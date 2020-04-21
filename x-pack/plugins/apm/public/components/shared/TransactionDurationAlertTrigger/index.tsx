@@ -7,11 +7,11 @@ import React from 'react';
 import { map } from 'lodash';
 import { EuiFieldNumber, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ForLastExpression } from '../../../../../../../plugins/triggers_actions_ui/public';
+import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import {
   TRANSACTION_ALERT_AGGREGATION_TYPES,
   ALERT_TYPES_CONFIG
-} from '../../../../../../../plugins/apm/common/alert_types';
+} from '../../../../common/alert_types';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';

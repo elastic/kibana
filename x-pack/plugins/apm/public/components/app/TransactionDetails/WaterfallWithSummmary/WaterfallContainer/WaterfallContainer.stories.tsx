@@ -7,7 +7,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TraceAPIResponse } from '../../../../../../../../../plugins/apm/server/lib/traces/get_trace';
+import { TraceAPIResponse } from '../../../../../../server/lib/traces/get_trace';
 import { WaterfallContainer } from './index';
 import {
   location,

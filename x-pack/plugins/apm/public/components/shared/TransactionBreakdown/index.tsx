@@ -11,7 +11,7 @@ import { TransactionBreakdownHeader } from './TransactionBreakdownHeader';
 import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { useUiTracker } from '../../../../../../../plugins/observability/public';
+import { useUiTracker } from '../../../../../observability/public';
 
 const emptyMessage = i18n.translate('xpack.apm.transactionBreakdown.noData', {
   defaultMessage: 'No data within this time range.'

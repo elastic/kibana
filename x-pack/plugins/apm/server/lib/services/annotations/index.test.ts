@@ -7,7 +7,7 @@ import { getServiceAnnotations } from '.';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../../public/utils/testHelpers';
 import noVersions from './__fixtures__/no_versions.json';
 import oneVersion from './__fixtures__/one_version.json';
 import multipleVersions from './__fixtures__/multiple_versions.json';

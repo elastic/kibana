@@ -19,7 +19,7 @@ import React from 'react';
 import {
   Filter,
   FilterKey
-} from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
+} from '../../../../../../../common/custom_link/custom_link_types';
 import {
   DEFAULT_OPTION,
   FILTER_SELECT_OPTIONS,

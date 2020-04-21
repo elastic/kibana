@@ -6,12 +6,12 @@
 import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
 import { isEmpty, get } from 'lodash';
-import { FILTER_OPTIONS } from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_filter_options';
+import { FILTER_OPTIONS } from '../../../../../../../common/custom_link/custom_link_filter_options';
 import {
   Filter,
   FilterKey
-} from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+} from '../../../../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 
 interface FilterSelectOption {
   value: 'DEFAULT' | FilterKey;

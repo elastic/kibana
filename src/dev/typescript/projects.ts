@@ -30,7 +30,7 @@ export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/siem/cypress/tsconfig.json'), {
     name: 'siem/cypress',
   }),
-  new Project(resolve(REPO_ROOT, 'x-pack/legacy/plugins/apm/e2e/tsconfig.json'), {
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/e2e/tsconfig.json'), {
     name: 'apm/cypress',
     disableTypeCheck: true,
   }),

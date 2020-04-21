@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ITransactionGroup } from '../../../../../../../plugins/apm/server/lib/transaction_groups/transform';
+import { ITransactionGroup } from '../../../../server/lib/transaction_groups/transform';
 import { fontSizes, truncate } from '../../../style/variables';
 import { convertTo } from '../../../utils/formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';

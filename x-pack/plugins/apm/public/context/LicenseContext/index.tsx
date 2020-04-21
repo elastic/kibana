@@ -6,7 +6,7 @@
 
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { ILicense } from '../../../../../../plugins/licensing/public';
+import { ILicense } from '../../../../licensing/public';
 import { useApmPluginContext } from '../../hooks/useApmPluginContext';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
 

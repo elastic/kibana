@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { Transaction } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 import {
   DiscoverTransactionLink,
   getDiscoverQuery

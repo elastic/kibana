@@ -20,7 +20,8 @@ import {
   ESSearchResponse
 } from '../../../typings/elasticsearch';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
-import { pickKeys } from '../../../../../legacy/plugins/apm/public/utils/pickKeys';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { pickKeys } from '../../../public/utils/pickKeys';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 

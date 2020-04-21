@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-E2E_DIR="x-pack/legacy/plugins/apm/e2e"
+E2E_DIR="x-pack/plugins/apm/e2e"
 
 echo "1/3 Install dependencies ..."
 # shellcheck disable=SC1091

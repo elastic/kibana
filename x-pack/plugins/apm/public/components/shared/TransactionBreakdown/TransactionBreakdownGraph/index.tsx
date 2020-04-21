@@ -7,17 +7,14 @@
 import React, { useMemo } from 'react';
 import numeral from '@elastic/numeral';
 import { throttle } from 'lodash';
-import { NOT_AVAILABLE_LABEL } from '../../../../../../../../plugins/apm/common/i18n';
-import {
-  Coordinate,
-  TimeSeries
-} from '../../../../../../../../plugins/apm/typings/timeseries';
-import { Maybe } from '../../../../../../../../plugins/apm/typings/common';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import { Maybe } from '../../../../../typings/common';
 import { TransactionLineChart } from '../../charts/TransactionCharts/TransactionLineChart';
 import { asPercent } from '../../../../utils/formatters';
 import { unit } from '../../../../style/variables';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { useUiTracker } from '../../../../../../../../plugins/observability/public';
+import { useUiTracker } from '../../../../../../observability/public';
 
 interface Props {
   timeseries: TimeSeries[];

@@ -9,9 +9,9 @@ import React, { useMemo } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { TraceList } from './TraceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTrackPageview } from '../../../../../../../plugins/observability/public';
+import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { PROJECTION } from '../../../../../../../plugins/apm/common/projections/typings';
+import { PROJECTION } from '../../../../common/projections/typings';
 
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();

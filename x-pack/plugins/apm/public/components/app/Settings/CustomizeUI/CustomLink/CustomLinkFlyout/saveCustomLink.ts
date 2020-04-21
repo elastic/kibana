@@ -9,7 +9,7 @@ import { NotificationsStart } from 'kibana/public';
 import {
   Filter,
   CustomLink
-} from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
+} from '../../../../../../../common/custom_link/custom_link_types';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 
 export async function saveCustomLink({

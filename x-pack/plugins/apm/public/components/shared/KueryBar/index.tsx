@@ -21,7 +21,7 @@ import {
   QuerySuggestion,
   esKuery,
   IIndexPattern
-} from '../../../../../../../../src/plugins/data/public';
+} from '../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
   margin-bottom: 10px;

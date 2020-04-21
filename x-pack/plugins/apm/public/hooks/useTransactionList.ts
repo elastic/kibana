@@ -9,7 +9,7 @@ import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TransactionGroupListAPIResponse } from '../../../../../plugins/apm/server/lib/transaction_groups';
+import { TransactionGroupListAPIResponse } from '../../server/lib/transaction_groups';
 
 const getRelativeImpact = (
   impact: number,

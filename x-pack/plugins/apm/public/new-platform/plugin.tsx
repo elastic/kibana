@@ -15,17 +15,17 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext
-} from '../../../../../../src/core/public';
-import { DataPublicPluginSetup } from '../../../../../../src/plugins/data/public';
-import { HomePublicPluginSetup } from '../../../../../../src/plugins/home/public';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { PluginSetupContract as AlertingPluginPublicSetup } from '../../../../../plugins/alerting/public';
-import { AlertType } from '../../../../../plugins/apm/common/alert_types';
-import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
+} from '../../../../../src/core/public';
+import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
+import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { PluginSetupContract as AlertingPluginPublicSetup } from '../../../alerting/public';
+import { AlertType } from '../../common/alert_types';
+import { LicensingPluginSetup } from '../../../licensing/public';
 import {
   AlertsContextProvider,
   TriggersAndActionsUIPublicPluginSetup
-} from '../../../../../plugins/triggers_actions_ui/public';
+} from '../../../triggers_actions_ui/public';
 import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
 import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';

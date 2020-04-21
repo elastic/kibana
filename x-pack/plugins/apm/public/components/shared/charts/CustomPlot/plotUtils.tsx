@@ -11,10 +11,7 @@ import d3 from 'd3';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  TimeSeries,
-  Coordinate
-} from '../../../../../../../../plugins/apm/typings/timeseries';
+import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 import { unit } from '../../../../style/variables';
 import { getDomainTZ, getTimeTicksTZ } from '../helper/timezone';
 

@@ -6,9 +6,9 @@
 
 import { Location } from 'history';
 import React from 'react';
-import { APMError } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
-import { Span } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { APMError } from '../../../../../../typings/es_schemas/ui/apm_error';
+import { Span } from '../../../../../../typings/es_schemas/ui/span';
+import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 import { getRenderedHref } from '../../../../../utils/testHelpers';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';

@@ -7,8 +7,8 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import Mustache from 'mustache';
 import React from 'react';
 import styled from 'styled-components';
-import { CustomLink } from '../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { px, truncate, units } from '../../../../style/variables';
 
 const LinkContainer = styled.li`

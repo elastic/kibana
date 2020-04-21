@@ -19,7 +19,7 @@ import {
   cytoscapeOptions,
   nodeHeight
 } from './cytoscapeOptions';
-import { useUiTracker } from '../../../../../../../plugins/observability/public';
+import { useUiTracker } from '../../../../../observability/public';
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
   undefined

@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React from 'react';
-import { SERVICE_FRAMEWORK_NAME } from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+import { SERVICE_FRAMEWORK_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceMetricFetcher } from './ServiceMetricFetcher';

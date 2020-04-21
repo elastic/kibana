@@ -15,12 +15,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
-import { CustomLink as CustomLinkType } from '../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { CustomLink as CustomLinkType } from '../../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import {
   ActionMenuDivider,
   SectionSubtitle
-} from '../../../../../../../../plugins/observability/public';
+} from '../../../../../../observability/public';
 import { CustomLinkSection } from './CustomLinkSection';
 import { ManageCustomLink } from './ManageCustomLink';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';

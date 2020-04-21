@@ -12,7 +12,7 @@ import { searchConfigurations } from './search_configurations';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../../public/utils/testHelpers';
 import { findExactConfiguration } from './find_exact_configuration';
 
 describe('agent configuration queries', () => {

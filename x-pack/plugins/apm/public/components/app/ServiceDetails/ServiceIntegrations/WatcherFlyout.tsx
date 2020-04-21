@@ -30,7 +30,7 @@ import { padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';

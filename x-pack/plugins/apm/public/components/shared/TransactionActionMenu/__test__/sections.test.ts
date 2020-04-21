@@ -5,7 +5,7 @@
  */
 import { Location } from 'history';
 import { getSections } from '../sections';
-import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { AppMountContextBasePath } from '../../../../context/ApmPluginContext';
 
 describe('Transaction action menu', () => {

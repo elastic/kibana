@@ -9,7 +9,7 @@ import { CSSProperties } from 'react';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE
-} from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+} from '../../../../common/elasticsearch_fieldnames';
 import { defaultIcon, iconForNode } from './icons';
 
 // IE 11 does not properly load some SVGs or draw certain shapes. This causes

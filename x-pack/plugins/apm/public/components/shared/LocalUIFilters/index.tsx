@@ -14,10 +14,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFilterName } from '../../../../../../../plugins/apm/server/lib/ui_filters/local_ui_filters/config';
+import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { Filter } from './Filter';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
-import { PROJECTION } from '../../../../../../../plugins/apm/common/projections/typings';
+import { PROJECTION } from '../../../../common/projections/typings';
 
 interface Props {
   projection: PROJECTION;

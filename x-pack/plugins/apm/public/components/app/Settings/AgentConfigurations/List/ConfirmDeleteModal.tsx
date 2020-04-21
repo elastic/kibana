@@ -9,8 +9,8 @@ import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AgentConfigurationListAPIResponse } from '../../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/list_configurations';
-import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/agent_configuration/all_option';
+import { AgentConfigurationListAPIResponse } from '../../../../../../server/lib/settings/agent_configuration/list_configurations';
+import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 import { callApmApi } from '../../../../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 

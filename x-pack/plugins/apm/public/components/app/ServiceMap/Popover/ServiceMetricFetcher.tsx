@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ServiceNodeMetrics } from '../../../../../../../../plugins/apm/common/service_map';
+import { ServiceNodeMetrics } from '../../../../../common/service_map';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ServiceMetricList } from './ServiceMetricList';

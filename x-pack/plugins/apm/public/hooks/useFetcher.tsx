@@ -9,7 +9,7 @@
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IHttpFetchError } from 'src/core/public';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { APMClient, callApmApi } from '../services/rest/createCallApmApi';
 import { useApmPluginContext } from './useApmPluginContext';

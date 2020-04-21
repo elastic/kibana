@@ -17,7 +17,7 @@ import {
 import { isEmpty } from 'lodash';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { AgentConfigurationList } from './List';
-import { useTrackPageview } from '../../../../../../../../plugins/observability/public';
+import { useTrackPageview } from '../../../../../../observability/public';
 import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
 
 export function AgentConfigurations() {

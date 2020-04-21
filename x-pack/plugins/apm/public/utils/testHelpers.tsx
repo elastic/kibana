@@ -16,14 +16,14 @@ import { render, waitForElement } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { APMConfig } from '../../../../../plugins/apm/server';
+import { APMConfig } from '../../server';
 import { LocationProvider } from '../context/LocationContext';
-import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
+import { PromiseReturnType } from '../../typings/common';
 import {
   ESFilter,
   ESSearchResponse,
   ESSearchRequest
-} from '../../../../../plugins/apm/typings/elasticsearch';
+} from '../../typings/elasticsearch';
 import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
 
 export function toJson(wrapper: ReactWrapper) {

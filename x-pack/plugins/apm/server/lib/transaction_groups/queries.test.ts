@@ -8,7 +8,7 @@ import { transactionGroupsFetcher } from './fetcher';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../public/utils/testHelpers';
 
 describe('transaction group queries', () => {
   let mock: SearchParamsMock;

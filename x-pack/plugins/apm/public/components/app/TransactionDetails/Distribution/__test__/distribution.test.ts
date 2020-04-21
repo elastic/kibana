@@ -6,7 +6,7 @@
 
 import { getFormattedBuckets } from '../index';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IBucket } from '../../../../../../../../../plugins/apm/server/lib/transactions/distribution/get_buckets/transform';
+import { IBucket } from '../../../../../../server/lib/transactions/distribution/get_buckets/transform';
 
 describe('Distribution', () => {
   it('getFormattedBuckets', () => {

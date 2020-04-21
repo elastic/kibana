@@ -5,10 +5,10 @@
  */
 import React from 'react';
 import { render, act, fireEvent } from '@testing-library/react';
-import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { CustomLinkPopover } from './CustomLinkPopover';
 import { expectTextsInDocument } from '../../../../utils/testHelpers';
-import { CustomLink } from '../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
+import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 
 describe('CustomLinkPopover', () => {
   const customLinks = [

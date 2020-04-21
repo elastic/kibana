@@ -6,8 +6,8 @@
 
 import { parse, stringify } from 'query-string';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFilterName } from '../../../../../../../plugins/apm/server/lib/ui_filters/local_ui_filters/config';
-import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
+import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? parse(search.slice(1), { sort: false }) : {};

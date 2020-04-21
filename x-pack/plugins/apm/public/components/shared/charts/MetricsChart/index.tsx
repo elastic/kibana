@@ -6,7 +6,7 @@
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { GenericMetricsChart } from '../../../../../../../../plugins/apm/server/lib/metrics/transform_metrics_chart';
+import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform_metrics_chart';
 // @ts-ignore
 import CustomPlot from '../CustomPlot';
 import {
@@ -17,10 +17,10 @@ import {
   getFixedByteFormatter,
   asDuration
 } from '../../../../utils/formatters';
-import { Coordinate } from '../../../../../../../../plugins/apm/typings/timeseries';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { useChartsSync } from '../../../../hooks/useChartsSync';
-import { Maybe } from '../../../../../../../../plugins/apm/typings/common';
+import { Maybe } from '../../../../../typings/common';
 
 interface Props {
   start: Maybe<number | string>;

@@ -35,9 +35,9 @@ const IGNORE_FILE_GLOBS = [
   // fixtures aren't used in production, ignore them
   '**/*fixtures*/**/*',
   // cypress isn't used in production, ignore it
-  'x-pack/legacy/plugins/apm/e2e/*',
+  'x-pack/plugins/apm/e2e/*',
   // apm scripts aren't used in production, ignore them
-  'x-pack/legacy/plugins/apm/scripts/*',
+  'x-pack/plugins/apm/scripts/*',
 ];
 
 run(async ({ log }) => {

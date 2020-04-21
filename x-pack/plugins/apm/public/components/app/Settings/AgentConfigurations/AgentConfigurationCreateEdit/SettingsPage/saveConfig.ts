@@ -6,11 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
-import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/agent_configuration/configuration_types';
+import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   getOptionLabel,
   omitAllOption
-} from '../../../../../../../../../../plugins/apm/common/agent_configuration/all_option';
+} from '../../../../../../../common/agent_configuration/all_option';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 
 export async function saveConfig({

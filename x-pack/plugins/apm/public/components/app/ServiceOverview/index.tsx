@@ -9,13 +9,13 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import url from 'url';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTrackPageview } from '../../../../../../../plugins/observability/public';
-import { PROJECTION } from '../../../../../../../plugins/apm/common/projections/typings';
+import { useTrackPageview } from '../../../../../observability/public';
+import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 

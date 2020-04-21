@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, fireEvent, act, wait } from '@testing-library/react';
 import { TransactionActionMenu } from '../TransactionActionMenu';
-import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import * as Transactions from './mockData';
 import {
   expectTextsNotInDocument,
@@ -15,7 +15,7 @@ import {
 } from '../../../../utils/testHelpers';
 import * as hooks from '../../../../hooks/useFetcher';
 import { LicenseContext } from '../../../../context/LicenseContext';
-import { License } from '../../../../../../../../plugins/licensing/common/license';
+import { License } from '../../../../../../licensing/common/license';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 import * as apmApi from '../../../../services/rest/createCallApmApi';
 

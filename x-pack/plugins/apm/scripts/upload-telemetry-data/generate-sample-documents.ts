@@ -18,7 +18,7 @@ import {
   CollectTelemetryParams,
   collectDataTelemetry
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../plugins/apm/server/lib/apm_telemetry/collect_data_telemetry';
+} from '../../server/lib/apm_telemetry/collect_data_telemetry';
 
 interface GenerateOptions {
   days: number;

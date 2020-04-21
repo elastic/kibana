@@ -20,10 +20,10 @@ import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AgentConfigurationListAPIResponse } from '../../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/list_configurations';
+import { AgentConfigurationListAPIResponse } from '../../../../../../server/lib/settings/agent_configuration/list_configurations';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { px, units } from '../../../../../style/variables';
-import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/agent_configuration/all_option';
+import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 import {
   createAgentConfigurationHref,
   editAgentConfigurationHref

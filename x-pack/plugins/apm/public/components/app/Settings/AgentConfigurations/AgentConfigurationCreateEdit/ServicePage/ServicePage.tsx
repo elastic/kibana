@@ -16,11 +16,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/agent_configuration/configuration_types';
+import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   omitAllOption,
   getOptionLabel
-} from '../../../../../../../../../../plugins/apm/common/agent_configuration/all_option';
+} from '../../../../../../../common/agent_configuration/all_option';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/useFetcher';
 import { FormRowSelect } from './FormRowSelect';
 import { APMLink } from '../../../../../shared/Links/apm/APMLink';

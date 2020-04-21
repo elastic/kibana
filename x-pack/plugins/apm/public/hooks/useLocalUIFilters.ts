@@ -7,17 +7,17 @@
 import { omit } from 'lodash';
 import { useFetcher } from './useFetcher';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFiltersAPIResponse } from '../../../../../plugins/apm/server/lib/ui_filters/local_ui_filters';
+import { LocalUIFiltersAPIResponse } from '../../server/lib/ui_filters/local_ui_filters';
 import { useUrlParams } from './useUrlParams';
 import {
   LocalUIFilterName,
   localUIFilters
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../plugins/apm/server/lib/ui_filters/local_ui_filters/config';
+} from '../../server/lib/ui_filters/local_ui_filters/config';
 import { history } from '../utils/history';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../context/UrlParamsContext/helpers';
-import { PROJECTION } from '../../../../../plugins/apm/common/projections/typings';
+import { PROJECTION } from '../../common/projections/typings';
 import { pickKeys } from '../utils/pickKeys';
 import { useCallApi } from './useCallApi';
 

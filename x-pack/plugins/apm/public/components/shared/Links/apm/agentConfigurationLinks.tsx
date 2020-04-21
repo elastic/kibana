@@ -5,7 +5,7 @@
  */
 
 import { getAPMHref } from './APMLink';
-import { AgentConfigurationIntake } from '../../../../../../../../plugins/apm/common/agent_configuration/configuration_types';
+import { AgentConfigurationIntake } from '../../../../../common/agent_configuration/configuration_types';
 import { history } from '../../../../utils/history';
 
 export function editAgentConfigurationHref(

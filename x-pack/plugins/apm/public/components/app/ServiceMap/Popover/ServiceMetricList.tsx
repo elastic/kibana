@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { ServiceNodeMetrics } from '../../../../../../../../plugins/apm/common/service_map';
+import { ServiceNodeMetrics } from '../../../../../common/service_map';
 import { asDuration, asPercent, tpmUnit } from '../../../../utils/formatters';
 
 function LoadingSpinner() {

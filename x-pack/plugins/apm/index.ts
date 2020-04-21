@@ -7,9 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import { APMPluginContract } from '../../../plugins/apm/server';
-import { LegacyPluginInitializer } from '../../../../src/legacy/types';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { APMPluginContract } from './server/index';
+import { LegacyPluginInitializer } from '../../../src/legacy/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../src/core/utils';
 import mappings from './mappings.json';
 
 export const apm: LegacyPluginInitializer = kibana => {

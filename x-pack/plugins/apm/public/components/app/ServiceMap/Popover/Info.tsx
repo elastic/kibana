@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import {
   SPAN_SUBTYPE,
   SPAN_TYPE
-} from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+} from '../../../../../common/elasticsearch_fieldnames';
 
 const ItemRow = styled.div`
   line-height: 2;
