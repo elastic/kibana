@@ -14,3 +14,73 @@ export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
 export const UPDATE_INDEXING_STAGE = 'UPDATE_INDEXING_STAGE';
+
+export function exitFullScreen() {
+  return {
+    type: SET_FULL_SCREEN,
+    isFullScreen: false,
+  };
+}
+
+export function updateFlyout(display) {
+  return {
+    type: UPDATE_FLYOUT,
+    display,
+  };
+}
+export function closeSetView() {
+  return {
+    type: CLOSE_SET_VIEW,
+  };
+}
+export function openSetView() {
+  return {
+    type: OPEN_SET_VIEW,
+  };
+}
+export function setIsLayerTOCOpen(isLayerTOCOpen) {
+  return {
+    type: SET_IS_LAYER_TOC_OPEN,
+    isLayerTOCOpen,
+  };
+}
+export function enableFullScreen() {
+  return {
+    type: SET_FULL_SCREEN,
+    isFullScreen: true,
+  };
+}
+export function setReadOnly(isReadOnly) {
+  return {
+    type: SET_READ_ONLY,
+    isReadOnly,
+  };
+}
+
+export function setOpenTOCDetails(layerIds) {
+  return {
+    type: SET_OPEN_TOC_DETAILS,
+    layerIds,
+  };
+}
+
+export function showTOCDetails(layerId) {
+  return {
+    type: SHOW_TOC_DETAILS,
+    layerId,
+  };
+}
+
+export function hideTOCDetails(layerId) {
+  return {
+    type: HIDE_TOC_DETAILS,
+    layerId,
+  };
+}
+
+export function updateIndexingStage(stage) {
+  return {
+    type: UPDATE_INDEXING_STAGE,
+    stage,
+  };
+}
