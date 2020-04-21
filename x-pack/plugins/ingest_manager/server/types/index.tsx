@@ -47,6 +47,7 @@ export {
   RegistrySearchResults,
   RegistrySearchResult,
   DefaultPackages,
+  DataStream,
 } from '../../common';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
