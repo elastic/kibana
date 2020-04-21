@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import $ from 'jquery';
 import _ from 'lodash';
 import sinon from 'sinon';
@@ -95,11 +94,11 @@ describe('Tooltip Positioning', function() {
       positionTooltip.getTtSize($tooltip.html(), $sizer);
 
       [w, h].forEach(function(spy) {
-        expect(spy).to.have.property('callCount', 1);
+        expect(spy).toHaveProperty('callCount', 1);
         const matchHtml = w.thisValues.filter(function($t) {
           return !$t.is($tooltip) && $t.html() === $tooltip.html();
         });
-        expect(matchHtml).to.have.length(1);
+        expect(matchHtml).toHaveLength(1);
       });
     });
   });
@@ -110,11 +109,11 @@ describe('Tooltip Positioning', function() {
       const pos = positionTooltip.getBasePosition(size, makeEvent());
 
       positions.forEach(function(p) {
-        expect(pos).to.have.property(p);
+        expect(pos).toHaveProperty(p);
       });
 
-      expect(pos.north).to.be.lessThan(pos.south);
-      expect(pos.east).to.be.greaterThan(pos.west);
+      expect(pos.north).toBeLessThan(pos.south);
+      expect(pos.east).toBeGreaterThan(pos.west);
     });
   });
 
@@ -123,11 +122,11 @@ describe('Tooltip Positioning', function() {
       const cbounds = positionTooltip.getBounds($chart);
 
       bounds.forEach(function(b) {
-        expect(cbounds).to.have.property(b);
+        expect(cbounds).toHaveProperty(b);
       });
 
-      expect(cbounds.top).to.be.lessThan(cbounds.bottom);
-      expect(cbounds.left).to.be.lessThan(cbounds.right);
+      expect(cbounds.top).toBeLessThan(cbounds.bottom);
+      expect(cbounds.left).toBeLessThan(cbounds.right);
     });
   });
 
@@ -137,18 +136,18 @@ describe('Tooltip Positioning', function() {
       $tooltip.css({ width: 15, height: 15 });
       $sizer.css({ width: 15, height: 15 });
       const size = positionTooltip.getTtSize($tooltip.html(), $sizer);
-      expect(size).to.have.property('width', 15);
-      expect(size).to.have.property('height', 15);
+      expect(size).toHaveProperty('width', 15);
+      expect(size).toHaveProperty('height', 15);
 
       // position the element based on a mouse that is in the middle of the chart
       const pos = positionTooltip.getBasePosition(size, makeEvent(0.5, 0.5));
 
       const overflow = positionTooltip.getOverflow(size, pos, [$chart, $window]);
       positions.forEach(function(p) {
-        expect(overflow).to.have.property(p);
+        expect(overflow).toHaveProperty(p);
 
         // all positions should be less than 0 because the tooltip is so much smaller than the chart
-        expect(overflow[p]).to.be.lessThan(0);
+        expect(overflow[p]).toBeLessThan(0);
       });
     });
 
@@ -160,12 +159,12 @@ describe('Tooltip Positioning', function() {
       const overflow = positionTooltip.getOverflow(size, pos, [$chart, $window]);
 
       positions.forEach(function(p) {
-        expect(overflow).to.have.property(p);
+        expect(overflow).toHaveProperty(p);
 
         if (p === 'south' || p === 'east') {
-          expect(overflow[p]).to.be.greaterThan(0);
+          expect(overflow[p]).toBeGreaterThan(0);
         } else {
-          expect(overflow[p]).to.be.lessThan(0);
+          expect(overflow[p]).toBeLessThan(0);
         }
       });
     });
@@ -176,10 +175,10 @@ describe('Tooltip Positioning', function() {
       $tooltip.css({ width: largeWidth });
       $sizer.css({ width: largeWidth });
       const size = positionTooltip.getTtSize($tooltip.html(), $sizer);
-      expect(size).to.have.property('width', largeWidth);
+      expect(size).toHaveProperty('width', largeWidth);
 
       // $chart is flush with the $window on the left side
-      expect(positionTooltip.getBounds($chart).left).to.be(0);
+      expect(positionTooltip.getBounds($chart).left).toBe(0);
 
       // Size $window large enough for tooltip on right side
       $window.css({ width: $chart.width() * 3 });
@@ -190,17 +189,17 @@ describe('Tooltip Positioning', function() {
       const overflow = positionTooltip.getOverflow(size, pos, [$chart, $window]);
 
       // no overflow on left (east)
-      expect(overflow.east).to.be.lessThan(0);
+      expect(overflow.east).toBeLessThan(0);
       // overflow on right (west)
-      expect(overflow.west).to.be.greaterThan(0);
+      expect(overflow.west).toBeGreaterThan(0);
     });
   });
 
   describe('positionTooltip() integration', function() {
     it('returns nothing if the $chart or $tooltip are not passed in', function() {
-      expect(positionTooltip() === void 0).to.be(true);
-      expect(positionTooltip(null, null, null) === void 0).to.be(true);
-      expect(positionTooltip(null, $(), $()) === void 0).to.be(true);
+      expect(positionTooltip() === void 0).toBe(true);
+      expect(positionTooltip(null, null, null) === void 0).toBe(true);
+      expect(positionTooltip(null, $(), $()) === void 0).toBe(true);
     });
 
     function check(xPercent, yPercent /*, prev, directions... */) {
@@ -215,23 +214,22 @@ describe('Tooltip Positioning', function() {
         prev: _.isObject(directions[0]) ? directions.shift() : null,
       });
 
-      expect(placement)
-        .to.have.property('top')
-        .and.property('left');
+      expect(placement).toHaveProperty('top');
+      expect(placement).toHaveProperty('left');
 
       directions.forEach(function(dir) {
         switch (dir) {
           case 'top':
-            expect(placement.top).to.be.lessThan(event.clientY);
+            expect(placement.top).toBeLessThan(event.clientY);
             return;
           case 'bottom':
-            expect(placement.top).to.be.greaterThan(event.clientY);
+            expect(placement.top).toBeGreaterThan(event.clientY);
             return;
           case 'right':
-            expect(placement.left).to.be.greaterThan(event.clientX);
+            expect(placement.left).toBeGreaterThan(event.clientX);
             return;
           case 'left':
-            expect(placement.left).to.be.lessThan(event.clientX);
+            expect(placement.left).toBeLessThan(event.clientX);
             return;
         }
       });

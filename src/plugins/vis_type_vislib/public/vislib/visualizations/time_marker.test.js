@@ -17,15 +17,12 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
 import d3 from 'd3';
 import $ from 'jquery';
-import expect from '@kbn/expect';
 
-import series from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
-import terms from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_columns';
-import { TimeMarker } from '../../../../../../../plugins/vis_type_vislib/public/vislib/visualizations/time_marker';
+import series from '../../fixtures/mock_data/date_histogram/_series';
+import terms from '../../fixtures/mock_data/terms/_columns';
+import { TimeMarker } from './time_marker';
 
 describe('Vislib Time Marker Test Suite', function() {
   const height = 50;
@@ -89,13 +86,13 @@ describe('Vislib Time Marker Test Suite', function() {
 
     it('should return true when data is time based', function() {
       boolean = defaultMarker._isTimeBasedChart(selection);
-      expect(boolean).to.be(true);
+      expect(boolean).toBe(true);
     });
 
     it('should return false when data is not time based', function() {
       newSelection = selection.datum(terms);
       boolean = defaultMarker._isTimeBasedChart(newSelection);
-      expect(boolean).to.be(false);
+      expect(boolean).toBe(false);
     });
   });
 
@@ -109,34 +106,34 @@ describe('Vislib Time Marker Test Suite', function() {
     });
 
     it('should render the default line', function() {
-      expect(!!$('line.time-marker').length).to.be(true);
+      expect(!!$('line.time-marker').length).toBe(true);
     });
 
     it('should render the custom (user defined) lines', function() {
-      expect($('line.custom-time-marker').length).to.be(myTimes.length);
+      expect($('line.custom-time-marker').length).toBe(myTimes.length);
     });
 
     it('should set the class', function() {
       Array.prototype.forEach.call(lineArray, function(line) {
-        expect(line.getAttribute('class')).to.be(customClass);
+        expect(line.getAttribute('class')).toBe(customClass);
       });
     });
 
     it('should set the stroke', function() {
       Array.prototype.forEach.call(lineArray, function(line) {
-        expect(line.getAttribute('stroke')).to.be(color);
+        expect(line.getAttribute('stroke')).toBe(color);
       });
     });
 
     it('should set the stroke-opacity', function() {
       Array.prototype.forEach.call(lineArray, function(line) {
-        expect(+line.getAttribute('stroke-opacity')).to.be(opacity);
+        expect(+line.getAttribute('stroke-opacity')).toBe(opacity);
       });
     });
 
     it('should set the stroke-width', function() {
       Array.prototype.forEach.call(lineArray, function(line) {
-        expect(+line.getAttribute('stroke-width')).to.be(width);
+        expect(+line.getAttribute('stroke-width')).toBe(width);
       });
     });
   });

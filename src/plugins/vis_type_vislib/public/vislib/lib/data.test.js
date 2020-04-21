@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
 
 import { Data } from './data';
 import { getMockUiState } from '../../fixtures/_vis_fixture';
@@ -160,12 +159,12 @@ describe('Vislib Data Class Test Suite', function() {
 
   describe('Data Class (main)', function() {
     it('should be a function', function() {
-      expect(_.isFunction(Data)).to.be(true);
+      expect(_.isFunction(Data)).toBe(true);
     });
 
     it('should return an object', function() {
       const rowIn = new Data(rowsData, mockUiState, () => undefined);
-      expect(_.isObject(rowIn)).to.be(true);
+      expect(_.isObject(rowIn)).toBe(true);
     });
   });
 
@@ -183,7 +182,7 @@ describe('Vislib Data Class Test Suite', function() {
 
     it('should remove zero values', function() {
       const slices = data._removeZeroSlices(data.data.slices);
-      expect(slices.children.length).to.be(2);
+      expect(slices.children.length).toBe(2);
     });
   });
 
@@ -197,7 +196,7 @@ describe('Vislib Data Class Test Suite', function() {
     });
 
     it('should return an array of value objects from every series', function() {
-      expect(serOut.every(_.isObject)).to.be(true);
+      expect(serOut.every(_.isObject)).toBe(true);
     });
 
     it('should return all points from every series', testLength(seriesData));
@@ -220,7 +219,7 @@ describe('Vislib Data Class Test Suite', function() {
           0
         );
 
-        expect(data.flatten()).to.have.length(len);
+        expect(data.flatten()).toHaveLength(len);
       };
     }
   });
@@ -268,15 +267,15 @@ describe('Vislib Data Class Test Suite', function() {
     describe('getVisData', function() {
       it('should return the rows property', function() {
         const visData = data.getVisData();
-        expect(visData[0].title).to.eql(geohashGridData.rows[0].title);
+        expect(visData[0].title).toEqual(geohashGridData.rows[0].title);
       });
     });
 
     describe('getGeoExtents', function() {
       it('should return the min and max geoJson properties', function() {
         const minMax = data.getGeoExtents();
-        expect(minMax.min).to.be(1);
-        expect(minMax.max).to.be(331);
+        expect(minMax.min).toBe(1);
+        expect(minMax.max).toBe(331);
       });
     });
   });
@@ -284,7 +283,7 @@ describe('Vislib Data Class Test Suite', function() {
   describe('null value check', function() {
     it('should return false', function() {
       const data = new Data(rowsData, mockUiState, () => undefined);
-      expect(data.hasNullValues()).to.be(false);
+      expect(data.hasNullValues()).toBe(false);
     });
 
     it('should return true', function() {
@@ -304,7 +303,7 @@ describe('Vislib Data Class Test Suite', function() {
       });
 
       const data = new Data(nullRowData, mockUiState, () => undefined);
-      expect(data.hasNullValues()).to.be(true);
+      expect(data.hasNullValues()).toBe(true);
     });
   });
 });

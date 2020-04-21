@@ -19,7 +19,6 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
-import expect from '@kbn/expect';
 
 import { layoutTypes } from '../layout_types';
 
@@ -98,13 +97,13 @@ describe('Vislib Column Layout Test Suite', function() {
   });
 
   it('should return an array of objects', function() {
-    expect(Array.isArray(columnLayout)).to.be(true);
-    expect(_.isObject(columnLayout[0])).to.be(true);
+    expect(Array.isArray(columnLayout)).toBe(true);
+    expect(_.isObject(columnLayout[0])).toBe(true);
   });
 
   it('should throw an error when the wrong number or no arguments provided', function() {
     expect(function() {
       layoutTypes.point_series(el);
-    }).to.throwError();
+    }).toThrow();
   });
 });

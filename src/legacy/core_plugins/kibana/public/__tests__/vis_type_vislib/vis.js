@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
 import _ from 'lodash';
 import $ from 'jquery';
 import expect from '@kbn/expect';

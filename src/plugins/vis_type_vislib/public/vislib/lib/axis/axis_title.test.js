@@ -17,18 +17,15 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import expect from '@kbn/expect';
 
-import { AxisTitle } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/axis/axis_title';
-import { AxisConfig } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/axis/axis_config';
-import { VisConfig } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/vis_config';
-import { Data } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/data';
-import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { AxisTitle } from './axis_title';
+import { AxisConfig } from './axis_config';
+import { VisConfig } from '../vis_config';
+import { Data } from '../data';
+import { getMockUiState } from '../../../fixtures/_vis_fixture';
 
 describe('Vislib AxisTitle Class Test Suite', function() {
   let el;
@@ -161,7 +158,7 @@ describe('Vislib AxisTitle Class Test Suite', function() {
       $(el.node())
         .find('.x-axis-title')
         .find('svg').length
-    ).to.be(0);
+    ).toBe(0);
   });
 
   describe('render Method', function() {
@@ -171,8 +168,8 @@ describe('Vislib AxisTitle Class Test Suite', function() {
     });
 
     it('should append an svg to div', function() {
-      expect(el.select('.x-axis-title').selectAll('svg').length).to.be(1);
-      expect(el.select('.y-axis-title').selectAll('svg').length).to.be(1);
+      expect(el.select('.x-axis-title').selectAll('svg').length).toBe(1);
+      expect(el.select('.y-axis-title').selectAll('svg').length).toBe(1);
     });
 
     it('should append a g element to the svg', function() {
@@ -181,13 +178,13 @@ describe('Vislib AxisTitle Class Test Suite', function() {
           .select('.x-axis-title')
           .selectAll('svg')
           .select('g').length
-      ).to.be(1);
+      ).toBe(1);
       expect(
         el
           .select('.y-axis-title')
           .selectAll('svg')
           .select('g').length
-      ).to.be(1);
+      ).toBe(1);
     });
 
     it('should append text', function() {
@@ -196,19 +193,19 @@ describe('Vislib AxisTitle Class Test Suite', function() {
           .select('.x-axis-title')
           .selectAll('svg')
           .selectAll('text')
-      ).to.be(true);
+      ).toBe(true);
       expect(
         !!el
           .select('.y-axis-title')
           .selectAll('svg')
           .selectAll('text')
-      ).to.be(true);
+      ).toBe(true);
     });
   });
 
   describe('draw Method', function() {
     it('should be a function', function() {
-      expect(_.isFunction(xTitle.draw())).to.be(true);
+      expect(_.isFunction(xTitle.draw())).toBe(true);
     });
   });
 });

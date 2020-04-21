@@ -192,6 +192,9 @@ module.exports = {
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'src/core/(public|server)/**/*',
                   'examples/**/*',
+                  // next folder contains legacy browser tests which can't be migrated to jest
+                  // which import np files
+                  '!src/legacy/core_plugins/kibana/public/__tests__/**/*',
                 ],
                 from: [
                   'src/core/public/**/*',

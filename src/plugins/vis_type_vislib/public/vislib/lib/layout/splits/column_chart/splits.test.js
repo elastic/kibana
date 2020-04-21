@@ -18,7 +18,6 @@
  */
 
 import d3 from 'd3';
-import expect from '@kbn/expect';
 import $ from 'jquery';
 
 import { chartSplit } from './chart_split';
@@ -174,11 +173,11 @@ describe('Vislib Split Function Test Suite', function() {
       });
 
       it('should append the correct number of divs', function() {
-        expect($('.chart').length).to.be(2);
+        expect($('.chart').length).toBe(2);
       });
 
       it('should add the correct class name', function() {
-        expect(!!$('.visWrapper__splitCharts--row').length).to.be(true);
+        expect(!!$('.visWrapper__splitCharts--row').length).toBe(true);
       });
     });
 
@@ -213,16 +212,16 @@ describe('Vislib Split Function Test Suite', function() {
       });
 
       it('should append the correct number of divs', function() {
-        expect($('.chart-title').length).to.be(2);
+        expect($('.chart-title').length).toBe(2);
       });
 
       it('should remove the correct div', function() {
-        expect($('.visAxis__splitTitles--y').length).to.be(1);
-        expect($('.visAxis__splitTitles--x').length).to.be(0);
+        expect($('.visAxis__splitTitles--y').length).toBe(1);
+        expect($('.visAxis__splitTitles--x').length).toBe(0);
       });
 
       it('should remove all chart title divs when only one chart is rendered', function() {
-        expect(fixture).to.be(0);
+        expect(fixture).toBe(0);
       });
     });
 
@@ -246,7 +245,7 @@ describe('Vislib Split Function Test Suite', function() {
       });
 
       it('should append the correct number of divs', function() {
-        expect(divs.length).to.be(2);
+        expect(divs.length).toBe(2);
       });
     });
 
@@ -272,7 +271,7 @@ describe('Vislib Split Function Test Suite', function() {
       });
 
       it('should append the correct number of divs', function() {
-        expect(divs.length).to.be(2);
+        expect(divs.length).toBe(2);
       });
     });
   });

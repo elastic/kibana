@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
 
 import { layoutTypes as layoutType } from './layout_types';
 
@@ -30,10 +29,10 @@ describe('Vislib Layout Types Test Suite', function() {
   });
 
   it('should be an object', function() {
-    expect(_.isObject(layoutType)).to.be(true);
+    expect(_.isObject(layoutType)).toBe(true);
   });
 
   it('should return a function', function() {
-    expect(typeof layoutFunc).to.be('function');
+    expect(typeof layoutFunc).toBe('function');
   });
 });

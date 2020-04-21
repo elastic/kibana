@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import expect from '@kbn/expect';
 
 import { pointSeriesTooltipFormatter } from './_pointseries_tooltip_formatter';
 
@@ -64,19 +63,19 @@ describe('tooltipFormatter', function() {
     const event = _.cloneDeep(baseEvent);
     const $el = $(tooltipFormatter(event));
     const $rows = $el.find('tr');
-    expect($rows.length).to.be(3);
+    expect($rows.length).toBe(3);
 
     const $row1 = $rows.eq(0).find('td');
-    expect(cell($row1, 0)).to.be('inner');
-    expect(cell($row1, 1)).to.be('3');
+    expect(cell($row1, 0)).toBe('inner');
+    expect(cell($row1, 1)).toBe('3');
 
     const $row2 = $rows.eq(1).find('td');
-    expect(cell($row2, 0)).to.be('middle');
-    expect(cell($row2, 1)).to.be('2');
+    expect(cell($row2, 0)).toBe('middle');
+    expect(cell($row2, 1)).toBe('2');
 
     const $row3 = $rows.eq(2).find('td');
-    expect(cell($row3, 0)).to.be('top');
-    expect(cell($row3, 1)).to.be('1');
+    expect(cell($row3, 0)).toBe('top');
+    expect(cell($row3, 1)).toBe('1');
   });
 
   it('renders correctly on missing extraMetrics in datum', function() {
@@ -84,6 +83,6 @@ describe('tooltipFormatter', function() {
     delete event.datum.extraMetrics;
     const $el = $(tooltipFormatter(event));
     const $rows = $el.find('tr');
-    expect($rows.length).to.be(3);
+    expect($rows.length).toBe(3);
   });
 });

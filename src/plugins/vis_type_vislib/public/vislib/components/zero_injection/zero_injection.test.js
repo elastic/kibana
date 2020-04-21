@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
 import { injectZeros } from './inject_zeros';
 import { orderXValues } from './ordered_x_keys';
 import { getUniqKeys } from './uniq_keys';
@@ -159,45 +158,45 @@ describe('Vislib Zero Injection Module Test Suite', function() {
     });
 
     it('should be a function', function() {
-      expect(_.isFunction(injectZeros)).to.be(true);
+      expect(_.isFunction(injectZeros)).toBe(true);
     });
 
     it('should return an object with series[0].values', function() {
-      expect(_.isObject(sample1)).to.be(true);
-      expect(_.isObject(sample1[0].values)).to.be(true);
+      expect(_.isObject(sample1)).toBe(true);
+      expect(_.isObject(sample1[0].values)).toBe(true);
     });
 
     it('should return the same array of objects when the length of the series array is 1', function() {
-      expect(sample1[0].values[0].x).to.be(seriesData[0].values[0].x);
-      expect(sample1[0].values[1].x).to.be(seriesData[0].values[1].x);
-      expect(sample1[0].values[2].x).to.be(seriesData[0].values[2].x);
-      expect(sample1[0].values[3].x).to.be(seriesData[0].values[3].x);
-      expect(sample1[0].values[4].x).to.be(seriesData[0].values[4].x);
+      expect(sample1[0].values[0].x).toBe(seriesData[0].values[0].x);
+      expect(sample1[0].values[1].x).toBe(seriesData[0].values[1].x);
+      expect(sample1[0].values[2].x).toBe(seriesData[0].values[2].x);
+      expect(sample1[0].values[3].x).toBe(seriesData[0].values[3].x);
+      expect(sample1[0].values[4].x).toBe(seriesData[0].values[4].x);
     });
 
     it('should inject zeros in the input array', function() {
-      expect(sample2[1].values[1].y).to.be(0);
-      expect(sample2[2].values[0].y).to.be(0);
-      expect(sample2[2].values[1].y).to.be(0);
-      expect(sample2[2].values[4].y).to.be(0);
-      expect(sample3[1].values[1].y).to.be(0);
-      expect(sample3[2].values[0].y).to.be(0);
-      expect(sample3[2].values[1].y).to.be(0);
-      expect(sample3[2].values[4].y).to.be(0);
+      expect(sample2[1].values[1].y).toBe(0);
+      expect(sample2[2].values[0].y).toBe(0);
+      expect(sample2[2].values[1].y).toBe(0);
+      expect(sample2[2].values[4].y).toBe(0);
+      expect(sample3[1].values[1].y).toBe(0);
+      expect(sample3[2].values[0].y).toBe(0);
+      expect(sample3[2].values[1].y).toBe(0);
+      expect(sample3[2].values[4].y).toBe(0);
     });
 
     it('should return values arrays with the same x values', function() {
-      expect(sample2[1].values[0].x).to.be(sample2[2].values[0].x);
-      expect(sample2[1].values[1].x).to.be(sample2[2].values[1].x);
-      expect(sample2[1].values[2].x).to.be(sample2[2].values[2].x);
-      expect(sample2[1].values[3].x).to.be(sample2[2].values[3].x);
-      expect(sample2[1].values[4].x).to.be(sample2[2].values[4].x);
+      expect(sample2[1].values[0].x).toBe(sample2[2].values[0].x);
+      expect(sample2[1].values[1].x).toBe(sample2[2].values[1].x);
+      expect(sample2[1].values[2].x).toBe(sample2[2].values[2].x);
+      expect(sample2[1].values[3].x).toBe(sample2[2].values[3].x);
+      expect(sample2[1].values[4].x).toBe(sample2[2].values[4].x);
     });
 
     it('should return values arrays of the same length', function() {
-      expect(sample2[0].values.length).to.be(sample2[1].values.length);
-      expect(sample2[0].values.length).to.be(sample2[2].values.length);
-      expect(sample2[1].values.length).to.be(sample2[2].values.length);
+      expect(sample2[0].values.length).toBe(sample2[1].values.length);
+      expect(sample2[0].values.length).toBe(sample2[2].values.length);
+      expect(sample2[1].values.length).toBe(sample2[2].values.length);
     });
   });
 
@@ -211,24 +210,24 @@ describe('Vislib Zero Injection Module Test Suite', function() {
     });
 
     it('should return a function', function() {
-      expect(_.isFunction(orderXValues)).to.be(true);
+      expect(_.isFunction(orderXValues)).toBe(true);
     });
 
     it('should return an array', function() {
-      expect(Array.isArray(results)).to.be(true);
+      expect(Array.isArray(results)).toBe(true);
     });
 
     it('should return an array of values ordered by their index by default', function() {
-      expect(results[0]).to.be('1');
-      expect(results[1]).to.be('2');
-      expect(results[2]).to.be('3');
-      expect(results[3]).to.be('4');
-      expect(results[4]).to.be('5');
-      expect(numberedResults[0]).to.be(1);
-      expect(numberedResults[1]).to.be(2);
-      expect(numberedResults[2]).to.be(3);
-      expect(numberedResults[3]).to.be(4);
-      expect(numberedResults[4]).to.be(5);
+      expect(results[0]).toBe('1');
+      expect(results[1]).toBe('2');
+      expect(results[2]).toBe('3');
+      expect(results[3]).toBe('4');
+      expect(results[4]).toBe('5');
+      expect(numberedResults[0]).toBe(1);
+      expect(numberedResults[1]).toBe(2);
+      expect(numberedResults[2]).toBe(3);
+      expect(numberedResults[3]).toBe(4);
+      expect(numberedResults[4]).toBe(5);
     });
 
     it('should return an array of values that preserve the index from xAxisOrderedValues', function() {
@@ -257,7 +256,7 @@ describe('Vislib Zero Injection Module Test Suite', function() {
         ],
       };
       const result = orderXValues(data);
-      expect(result).to.eql(['1', '2', '3', '4', '5']);
+      expect(result).toEqual(['1', '2', '3', '4', '5']);
     });
 
     it('should return an array of values ordered by their sum when orderBucketsBySum is true', function() {
@@ -265,16 +264,16 @@ describe('Vislib Zero Injection Module Test Suite', function() {
       results = orderXValues(multiSeriesDataObj, orderBucketsBySum);
       numberedResults = orderXValues(multiSeriesNumberedDataObj, orderBucketsBySum);
 
-      expect(results[0]).to.be('3');
-      expect(results[1]).to.be('1');
-      expect(results[2]).to.be('4');
-      expect(results[3]).to.be('5');
-      expect(results[4]).to.be('2');
-      expect(numberedResults[0]).to.be(3);
-      expect(numberedResults[1]).to.be(1);
-      expect(numberedResults[2]).to.be(4);
-      expect(numberedResults[3]).to.be(5);
-      expect(numberedResults[4]).to.be(2);
+      expect(results[0]).toBe('3');
+      expect(results[1]).toBe('1');
+      expect(results[2]).toBe('4');
+      expect(results[3]).toBe('5');
+      expect(results[4]).toBe('2');
+      expect(numberedResults[0]).toBe(3);
+      expect(numberedResults[1]).toBe(1);
+      expect(numberedResults[2]).toBe(4);
+      expect(numberedResults[3]).toBe(5);
+      expect(numberedResults[4]).toBe(2);
     });
   });
 
@@ -288,39 +287,39 @@ describe('Vislib Zero Injection Module Test Suite', function() {
     it('should throw an error if input is not an object', function() {
       expect(function() {
         getUniqKeys(str);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         getUniqKeys(number);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         getUniqKeys(boolean);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         getUniqKeys(nullValue);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         getUniqKeys(emptyArray);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         getUniqKeys(notAValue);
-      }).to.throwError();
+      }).toThrow();
     });
 
     it('should return a function', function() {
-      expect(_.isFunction(getUniqKeys)).to.be(true);
+      expect(_.isFunction(getUniqKeys)).toBe(true);
     });
 
     it('should return an object', function() {
-      expect(_.isObject(results)).to.be(true);
+      expect(_.isObject(results)).toBe(true);
     });
 
     it('should return an object of unique keys', function() {
-      expect(_.uniq(_.keys(results)).length).to.be(_.keys(results).length);
+      expect(_.uniq(_.keys(results)).length).toBe(_.keys(results).length);
     });
   });
 
@@ -332,17 +331,17 @@ describe('Vislib Zero Injection Module Test Suite', function() {
     });
 
     it('should return a function', function() {
-      expect(_.isFunction(flattenData)).to.be(true);
+      expect(_.isFunction(flattenData)).toBe(true);
     });
 
     it('should return an array', function() {
-      expect(Array.isArray(results)).to.be(true);
+      expect(Array.isArray(results)).toBe(true);
     });
 
     it('should return an array of objects', function() {
-      expect(_.isObject(results[0])).to.be(true);
-      expect(_.isObject(results[1])).to.be(true);
-      expect(_.isObject(results[2])).to.be(true);
+      expect(_.isObject(results[0])).toBe(true);
+      expect(_.isObject(results[1])).toBe(true);
+      expect(_.isObject(results[2])).toBe(true);
     });
   });
 
@@ -360,67 +359,67 @@ describe('Vislib Zero Injection Module Test Suite', function() {
     it('should throw an error if input is not an array', function() {
       expect(function() {
         createZeroFilledArray(str);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         createZeroFilledArray(number);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         createZeroFilledArray(boolean);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         createZeroFilledArray(nullValue);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         createZeroFilledArray(emptyObject);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         createZeroFilledArray(notAValue);
-      }).to.throwError();
+      }).toThrow();
     });
 
     it('should return a function', function() {
-      expect(_.isFunction(createZeroFilledArray)).to.be(true);
+      expect(_.isFunction(createZeroFilledArray)).toBe(true);
     });
 
     it('should return an array', function() {
-      expect(Array.isArray(results1)).to.be(true);
+      expect(Array.isArray(results1)).toBe(true);
     });
 
     it('should return an array of objects', function() {
-      expect(_.isObject(results1[0])).to.be(true);
-      expect(_.isObject(results1[1])).to.be(true);
-      expect(_.isObject(results1[2])).to.be(true);
-      expect(_.isObject(results1[3])).to.be(true);
-      expect(_.isObject(results1[4])).to.be(true);
+      expect(_.isObject(results1[0])).toBe(true);
+      expect(_.isObject(results1[1])).toBe(true);
+      expect(_.isObject(results1[2])).toBe(true);
+      expect(_.isObject(results1[3])).toBe(true);
+      expect(_.isObject(results1[4])).toBe(true);
     });
 
     it('should return an array of objects where each y value is 0', function() {
-      expect(results1[0].y).to.be(0);
-      expect(results1[1].y).to.be(0);
-      expect(results1[2].y).to.be(0);
-      expect(results1[3].y).to.be(0);
-      expect(results1[4].y).to.be(0);
+      expect(results1[0].y).toBe(0);
+      expect(results1[1].y).toBe(0);
+      expect(results1[2].y).toBe(0);
+      expect(results1[3].y).toBe(0);
+      expect(results1[4].y).toBe(0);
     });
 
     it('should return an array of objects where each x values are numbers', function() {
-      expect(_.isNumber(results1[0].x)).to.be(true);
-      expect(_.isNumber(results1[1].x)).to.be(true);
-      expect(_.isNumber(results1[2].x)).to.be(true);
-      expect(_.isNumber(results1[3].x)).to.be(true);
-      expect(_.isNumber(results1[4].x)).to.be(true);
+      expect(_.isNumber(results1[0].x)).toBe(true);
+      expect(_.isNumber(results1[1].x)).toBe(true);
+      expect(_.isNumber(results1[2].x)).toBe(true);
+      expect(_.isNumber(results1[3].x)).toBe(true);
+      expect(_.isNumber(results1[4].x)).toBe(true);
     });
 
     it('should return an array of objects where each x values are strings', function() {
-      expect(_.isString(results2[0].x)).to.be(true);
-      expect(_.isString(results2[1].x)).to.be(true);
-      expect(_.isString(results2[2].x)).to.be(true);
-      expect(_.isString(results2[3].x)).to.be(true);
-      expect(_.isString(results2[4].x)).to.be(true);
+      expect(_.isString(results2[0].x)).toBe(true);
+      expect(_.isString(results2[1].x)).toBe(true);
+      expect(_.isString(results2[2].x)).toBe(true);
+      expect(_.isString(results2[3].x)).toBe(true);
+      expect(_.isString(results2[4].x)).toBe(true);
     });
   });
 
@@ -439,48 +438,48 @@ describe('Vislib Zero Injection Module Test Suite', function() {
     it('should throw an error if input are not arrays', function() {
       expect(function() {
         zeroFillDataArray(str, str);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         zeroFillDataArray(number, number);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         zeroFillDataArray(boolean, boolean);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         zeroFillDataArray(nullValue, nullValue);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         zeroFillDataArray(emptyObject, emptyObject);
-      }).to.throwError();
+      }).toThrow();
 
       expect(function() {
         zeroFillDataArray(notAValue, notAValue);
-      }).to.throwError();
+      }).toThrow();
     });
 
     it('should return a function', function() {
-      expect(_.isFunction(zeroFillDataArray)).to.be(true);
+      expect(_.isFunction(zeroFillDataArray)).toBe(true);
     });
 
     it('should return an array', function() {
-      expect(Array.isArray(results)).to.be(true);
+      expect(Array.isArray(results)).toBe(true);
     });
 
     it('should return an array of objects', function() {
-      expect(_.isObject(results[0])).to.be(true);
-      expect(_.isObject(results[1])).to.be(true);
-      expect(_.isObject(results[2])).to.be(true);
+      expect(_.isObject(results[0])).toBe(true);
+      expect(_.isObject(results[1])).toBe(true);
+      expect(_.isObject(results[2])).toBe(true);
     });
 
     it('should return an array with zeros injected in the appropriate objects as y values', function() {
-      expect(results[0].y).to.be(0);
-      expect(results[1].y).to.be(0);
-      expect(results[3].y).to.be(0);
-      expect(results[4].y).to.be(0);
+      expect(results[0].y).toBe(0);
+      expect(results[1].y).toBe(0);
+      expect(results[3].y).toBe(0);
+      expect(results[4].y).toBe(0);
     });
   });
 
@@ -493,18 +492,18 @@ describe('Vislib Zero Injection Module Test Suite', function() {
 
     it('should return an array of objects', function() {
       results.forEach(function(row) {
-        expect(Array.isArray(row.values)).to.be(true);
+        expect(Array.isArray(row.values)).toBe(true);
       });
     });
 
     it('should return ordered x values', function() {
       const values = results[0].values;
-      expect(values[0].x).to.be.lessThan(values[1].x);
-      expect(values[1].x).to.be.lessThan(values[2].x);
-      expect(values[2].x).to.be.lessThan(values[3].x);
-      expect(values[3].x).to.be.lessThan(values[4].x);
-      expect(values[4].x).to.be.lessThan(values[5].x);
-      expect(values[5].x).to.be.lessThan(values[6].x);
+      expect(values[0].x).toBeLessThan(values[1].x);
+      expect(values[1].x).toBeLessThan(values[2].x);
+      expect(values[2].x).toBeLessThan(values[3].x);
+      expect(values[3].x).toBeLessThan(values[4].x);
+      expect(values[4].x).toBeLessThan(values[5].x);
+      expect(values[5].x).toBeLessThan(values[6].x);
     });
   });
 });

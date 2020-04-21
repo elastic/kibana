@@ -17,27 +17,22 @@
  * under the License.
  */
 
-import './lib/types/pie';
-import './lib/types/point_series';
-import './lib/types';
-import './lib/layout/layout_types';
-import './lib/data';
-import './visualizations/vis_types';
-import { Vis } from './vis';
+import _ from 'lodash';
 
-// prefetched for faster optimization runs
-// end prefetching
+import { visTypes } from './vis_types';
 
-/**
- * Provides the Kibana4 Visualization Library
- *
- * @module vislib
- * @main vislib
- * @return {Object} Contains the version number and the Vis Class for creating visualizations
- */
-export function VislibProvider() {
-  return {
-    version: '0.0.0',
-    Vis,
-  };
-}
+describe('Vislib Vis Types Test Suite', function() {
+  let visFunc;
+
+  beforeEach(function() {
+    visFunc = visTypes.point_series;
+  });
+
+  it('should be an object', function() {
+    expect(_.isObject(visTypes)).toBe(true);
+  });
+
+  it('should return a function', function() {
+    expect(typeof visFunc).toBe('function');
+  });
+});

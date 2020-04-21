@@ -17,16 +17,13 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
 import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
-import expect from '@kbn/expect';
 
-import { Axis } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/axis';
-import { VisConfig } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/vis_config';
-import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { Axis } from './axis';
+import { VisConfig } from '../vis_config';
+import { getMockUiState } from '../../../fixtures/_vis_fixture';
 
 const YAxis = Axis;
 let mockUiState;
@@ -125,7 +122,7 @@ function createData(seriesData) {
 describe('Vislib yAxis Class Test Suite', function() {
   beforeEach(() => {
     mockUiState = getMockUiState();
-    expect($('.y-axis-wrapper')).to.have.length(0);
+    expect($('.y-axis-wrapper')).toHaveLength(0);
   });
 
   afterEach(function() {
@@ -142,15 +139,15 @@ describe('Vislib yAxis Class Test Suite', function() {
     });
 
     it('should append an svg to div', function() {
-      expect(el.selectAll('svg').length).to.be(1);
+      expect(el.selectAll('svg').length).toBe(1);
     });
 
     it('should append a g element to the svg', function() {
-      expect(el.selectAll('svg').select('g').length).to.be(1);
+      expect(el.selectAll('svg').select('g').length).toBe(1);
     });
 
     it('should append ticks with text', function() {
-      expect(!!el.selectAll('svg').selectAll('.tick text')).to.be(true);
+      expect(!!el.selectAll('svg').selectAll('.tick text')).toBe(true);
     });
   });
 
@@ -162,14 +159,14 @@ describe('Vislib yAxis Class Test Suite', function() {
 
     function checkDomain(min, max) {
       const domain = yScale.domain();
-      expect(domain[0]).to.be.lessThan(min + 1);
-      expect(domain[1]).to.be.greaterThan(max - 1);
+      expect(domain[0]).toBeLessThan(min + 1);
+      expect(domain[1]).toBeGreaterThan(max - 1);
       return domain;
     }
 
     function checkRange() {
-      expect(yScale.range()[0]).to.be(height);
-      expect(yScale.range()[1]).to.be(0);
+      expect(yScale.range()[0]).toBe(height);
+      expect(yScale.range()[1]).toBe(0);
     }
 
     describe('API', function() {
@@ -180,7 +177,7 @@ describe('Vislib yAxis Class Test Suite', function() {
       });
 
       it('should return a function', function() {
-        expect(_.isFunction(yScale)).to.be(true);
+        expect(_.isFunction(yScale)).toBe(true);
       });
     });
 
@@ -196,7 +193,7 @@ describe('Vislib yAxis Class Test Suite', function() {
         const min = 0;
         const max = _.max(_.flattenDeep(graphData));
         const domain = checkDomain(min, max);
-        expect(domain[1]).to.be.greaterThan(0);
+        expect(domain[1]).toBeGreaterThan(0);
         checkRange();
       });
     });
@@ -216,7 +213,7 @@ describe('Vislib yAxis Class Test Suite', function() {
         const min = _.min(_.flattenDeep(graphData));
         const max = 0;
         const domain = checkDomain(min, max);
-        expect(domain[0]).to.be.lessThan(0);
+        expect(domain[0]).toBeLessThan(0);
         checkRange();
       });
     });
@@ -236,8 +233,8 @@ describe('Vislib yAxis Class Test Suite', function() {
         const min = _.min(_.flattenDeep(graphData));
         const max = _.max(_.flattenDeep(graphData));
         const domain = checkDomain(min, max);
-        expect(domain[0]).to.be.lessThan(0);
-        expect(domain[1]).to.be.greaterThan(0);
+        expect(domain[0]).toBeLessThan(0);
+        expect(domain[1]).toBeGreaterThan(0);
         checkRange();
       });
     });
@@ -257,7 +254,7 @@ describe('Vislib yAxis Class Test Suite', function() {
 
         expect(function() {
           yAxis.axisScale.validateUserExtents(min, max);
-        }).to.throwError();
+        }).toThrow();
       });
 
       it('should return a decimal value', function() {
@@ -269,16 +266,16 @@ describe('Vislib yAxis Class Test Suite', function() {
         domain[1] = 80;
         const newDomain = yAxis.axisScale.validateUserExtents(domain);
 
-        expect(newDomain[0]).to.be(domain[0] / 100);
-        expect(newDomain[1]).to.be(domain[1] / 100);
+        expect(newDomain[0]).toBe(domain[0] / 100);
+        expect(newDomain[1]).toBe(domain[1] / 100);
       });
 
       it('should return the user defined value', function() {
         domain = [20, 50];
         const newDomain = yAxis.axisScale.validateUserExtents(domain);
 
-        expect(newDomain[0]).to.be(domain[0]);
-        expect(newDomain[1]).to.be(domain[1]);
+        expect(newDomain[0]).toBe(domain[0]);
+        expect(newDomain[1]).toBe(domain[1]);
       });
     });
 
@@ -289,7 +286,7 @@ describe('Vislib yAxis Class Test Suite', function() {
 
         expect(function() {
           yAxis.axisScale.validateAxisExtents(min, max);
-        }).to.throwError();
+        }).toThrow();
       });
 
       it('min > max', function() {
@@ -298,7 +295,7 @@ describe('Vislib yAxis Class Test Suite', function() {
 
         expect(function() {
           yAxis.axisScale.validateAxisExtents(min, max);
-        }).to.throwError();
+        }).toThrow();
       });
     });
   });
@@ -308,17 +305,17 @@ describe('Vislib yAxis Class Test Suite', function() {
 
     it('should return a function', function() {
       fnNames.forEach(function(fnName) {
-        expect(yAxis.axisScale.getD3Scale(fnName)).to.be.a(Function);
+        expect(yAxis.axisScale.getD3Scale(fnName)).toEqual(expect.any(Function));
       });
 
       // if no value is provided to the function, scale should default to a linear scale
-      expect(yAxis.axisScale.getD3Scale()).to.be.a(Function);
+      expect(yAxis.axisScale.getD3Scale()).toEqual(expect.any(Function));
     });
 
     it('should throw an error if function name is undefined', function() {
       expect(function() {
         yAxis.axisScale.getD3Scale('square');
-      }).to.throwError();
+      }).toThrow();
     });
   });
 
@@ -326,18 +323,18 @@ describe('Vislib yAxis Class Test Suite', function() {
     it('should throw an error', function() {
       expect(function() {
         yAxis.axisScale.logDomain(-10, -5);
-      }).to.throwError();
+      }).toThrow();
       expect(function() {
         yAxis.axisScale.logDomain(-10, 5);
-      }).to.throwError();
+      }).toThrow();
       expect(function() {
         yAxis.axisScale.logDomain(0, -5);
-      }).to.throwError();
+      }).toThrow();
     });
 
     it('should return a yMin value of 1', function() {
       const yMin = yAxis.axisScale.logDomain(0, 200)[0];
-      expect(yMin).to.be(1);
+      expect(yMin).toBe(1);
     });
   });
 
@@ -356,7 +353,7 @@ describe('Vislib yAxis Class Test Suite', function() {
     it('should use decimal format for small values', function() {
       yAxis.yMax = 1;
       const tickFormat = yAxis.getAxis().tickFormat();
-      expect(tickFormat(0.8)).to.be('0.8');
+      expect(tickFormat(0.8)).toBe('0.8');
     });
   });
 
@@ -366,7 +363,7 @@ describe('Vislib yAxis Class Test Suite', function() {
     });
 
     it('should be a function', function() {
-      expect(_.isFunction(yAxis.draw())).to.be(true);
+      expect(_.isFunction(yAxis.draw())).toBe(true);
     });
   });
 
@@ -376,9 +373,9 @@ describe('Vislib yAxis Class Test Suite', function() {
     });
 
     it('should return the correct number of ticks', function() {
-      expect(yAxis.tickScale(1000)).to.be(11);
-      expect(yAxis.tickScale(40)).to.be(3);
-      expect(yAxis.tickScale(20)).to.be(0);
+      expect(yAxis.tickScale(1000)).toBe(11);
+      expect(yAxis.tickScale(40)).toBe(3);
+      expect(yAxis.tickScale(20)).toBe(0);
     });
   });
 });

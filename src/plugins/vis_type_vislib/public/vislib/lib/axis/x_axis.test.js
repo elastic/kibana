@@ -17,16 +17,13 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
 import d3 from 'd3';
 import _ from 'lodash';
-import expect from '@kbn/expect';
 import $ from 'jquery';
 
-import { Axis } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/axis';
-import { VisConfig } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/vis_config';
-import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { Axis } from './axis';
+import { VisConfig } from '../vis_config';
+import { getMockUiState } from '../../../fixtures/_vis_fixture';
 
 describe('Vislib xAxis Class Test Suite', function() {
   let mockUiState;
@@ -143,15 +140,15 @@ describe('Vislib xAxis Class Test Suite', function() {
     });
 
     it('should append an svg to div', function() {
-      expect(el.selectAll('svg').length).to.be(1);
+      expect(el.selectAll('svg').length).toBe(1);
     });
 
     it('should append a g element to the svg', function() {
-      expect(el.selectAll('svg').select('g').length).to.be(1);
+      expect(el.selectAll('svg').select('g').length).toBe(1);
     });
 
     it('should append ticks with text', function() {
-      expect(!!el.selectAll('svg').selectAll('.tick text')).to.be(true);
+      expect(!!el.selectAll('svg').selectAll('.tick text')).toBe(true);
     });
   });
 
@@ -168,22 +165,22 @@ describe('Vislib xAxis Class Test Suite', function() {
     });
 
     it('should return a function', function() {
-      expect(_.isFunction(timeScale)).to.be(true);
+      expect(_.isFunction(timeScale)).toBe(true);
     });
 
     it('should return the correct domain', function() {
-      expect(_.isDate(timeScale.domain()[0])).to.be(true);
-      expect(_.isDate(timeScale.domain()[1])).to.be(true);
+      expect(_.isDate(timeScale.domain()[0])).toBe(true);
+      expect(_.isDate(timeScale.domain()[1])).toBe(true);
     });
 
     it('should return the min and max dates', function() {
-      expect(timeScale.domain()[0].toDateString()).to.be(new Date(1408734060000).toDateString());
-      expect(timeScale.domain()[1].toDateString()).to.be(new Date(1408734330000).toDateString());
+      expect(timeScale.domain()[0].toDateString()).toBe(new Date(1408734060000).toDateString());
+      expect(timeScale.domain()[1].toDateString()).toBe(new Date(1408734330000).toDateString());
     });
 
     it('should return the correct range', function() {
-      expect(range[0]).to.be(0);
-      expect(range[1]).to.be(width);
+      expect(range[0]).toBe(0);
+      expect(range[1]).toBe(width);
     });
   });
 
@@ -202,12 +199,12 @@ describe('Vislib xAxis Class Test Suite', function() {
     });
 
     it('should return an ordinal scale', function() {
-      expect(ordinalDomain.domain()[0]).to.be('this');
-      expect(ordinalDomain.domain()[4]).to.be('array');
+      expect(ordinalDomain.domain()[0]).toBe('this');
+      expect(ordinalDomain.domain()[4]).toBe('array');
     });
 
     it('should return an array of values', function() {
-      expect(Array.isArray(ordinalDomain.domain())).to.be(true);
+      expect(Array.isArray(ordinalDomain.domain())).toBe(true);
     });
   });
 
@@ -222,17 +219,17 @@ describe('Vislib xAxis Class Test Suite', function() {
     });
 
     it('should return a function', function() {
-      expect(_.isFunction(xScale)).to.be(true);
+      expect(_.isFunction(xScale)).toBe(true);
     });
 
     it('should return a domain', function() {
-      expect(_.isDate(xScale.domain()[0])).to.be(true);
-      expect(_.isDate(xScale.domain()[1])).to.be(true);
+      expect(_.isDate(xScale.domain()[0])).toBe(true);
+      expect(_.isDate(xScale.domain()[1])).toBe(true);
     });
 
     it('should return a range', function() {
-      expect(xScale.range()[0]).to.be(0);
-      expect(xScale.range()[1]).to.be(width);
+      expect(xScale.range()[0]).toBe(0);
+      expect(xScale.range()[1]).toBe(width);
     });
   });
 
@@ -245,13 +242,13 @@ describe('Vislib xAxis Class Test Suite', function() {
     });
 
     it('should create an getScale function on the xAxis class', function() {
-      expect(_.isFunction(xAxis.getScale())).to.be(true);
+      expect(_.isFunction(xAxis.getScale())).toBe(true);
     });
   });
 
   describe('draw Method', function() {
     it('should be a function', function() {
-      expect(_.isFunction(xAxis.draw())).to.be(true);
+      expect(_.isFunction(xAxis.draw())).toBe(true);
     });
   });
 });

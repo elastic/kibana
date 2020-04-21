@@ -17,13 +17,10 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
 import d3 from 'd3';
-import expect from '@kbn/expect';
 
-import { VisConfig } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/vis_config';
-import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { VisConfig } from './vis_config';
+import { getMockUiState } from '../../fixtures/_vis_fixture';
 
 describe('Vislib VisConfig Class Test Suite', function() {
   let el;
@@ -111,33 +108,33 @@ describe('Vislib VisConfig Class Test Suite', function() {
 
   describe('get Method', function() {
     it('should be a function', function() {
-      expect(typeof visConfig.get).to.be('function');
+      expect(typeof visConfig.get).toBe('function');
     });
 
     it('should get the property', function() {
-      expect(visConfig.get('el')).to.be(el);
-      expect(visConfig.get('type')).to.be('point_series');
+      expect(visConfig.get('el')).toBe(el);
+      expect(visConfig.get('type')).toBe('point_series');
     });
 
     it('should return defaults if property does not exist', function() {
-      expect(visConfig.get('this.does.not.exist', 'defaults')).to.be('defaults');
+      expect(visConfig.get('this.does.not.exist', 'defaults')).toBe('defaults');
     });
 
     it('should throw an error if property does not exist and defaults were not provided', function() {
       expect(function() {
         visConfig.get('this.does.not.exist');
-      }).to.throwError();
+      }).toThrow();
     });
   });
 
   describe('set Method', function() {
     it('should be a function', function() {
-      expect(typeof visConfig.set).to.be('function');
+      expect(typeof visConfig.set).toBe('function');
     });
 
     it('should set a property', function() {
       visConfig.set('this.does.not.exist', 'it.does.now');
-      expect(visConfig.get('this.does.not.exist')).to.be('it.does.now');
+      expect(visConfig.get('this.does.not.exist')).toBe('it.does.now');
     });
   });
 });

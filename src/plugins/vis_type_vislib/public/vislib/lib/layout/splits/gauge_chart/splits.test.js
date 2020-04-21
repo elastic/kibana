@@ -18,7 +18,6 @@
  */
 
 import d3 from 'd3';
-import expect from '@kbn/expect';
 import $ from 'jquery';
 
 import { chartSplit } from './chart_split';
@@ -172,11 +171,11 @@ describe('Vislib Gauge Split Function Test Suite', function() {
       });
 
       it('should append the correct number of divs', function() {
-        expect($('.chart').length).to.be(2);
+        expect($('.chart').length).toBe(2);
       });
 
       it('should add the correct class name', function() {
-        expect(!!$('.visWrapper__splitCharts--row').length).to.be(true);
+        expect(!!$('.visWrapper__splitCharts--row').length).toBe(true);
       });
     });
 
@@ -196,8 +195,8 @@ describe('Vislib Gauge Split Function Test Suite', function() {
       });
 
       it('should append the correct number of divs', function() {
-        expect($('.visAxis__splitTitles--x .chart-title').length).to.be(2);
-        expect($('.visAxis__splitTitles--y .chart-title').length).to.be(2);
+        expect($('.visAxis__splitTitles--x .chart-title').length).toBe(2);
+        expect($('.visAxis__splitTitles--y .chart-title').length).toBe(2);
       });
     });
   });

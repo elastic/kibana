@@ -22,8 +22,6 @@ import d3 from 'd3';
 import $ from 'jquery';
 import expect from '@kbn/expect';
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
 // Data
 import series from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
 import seriesPosNeg from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_pos_neg';

@@ -19,7 +19,6 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
-import expect from '@kbn/expect';
 import $ from 'jquery';
 
 import { Axis } from './axis';
@@ -164,7 +163,7 @@ describe('Vislib Axis Class Test Suite', function() {
         },
       ];
       const stackedData = yAxis._stackNegAndPosVals(seriesData);
-      expect(stackedData[1]).to.eql(expectedResult);
+      expect(stackedData[1]).toEqual(expectedResult);
     });
 
     it('should correctly stack pos and neg values', function() {
@@ -200,7 +199,7 @@ describe('Vislib Axis Class Test Suite', function() {
         value.y = -value.y;
       });
       const stackedData = yAxis._stackNegAndPosVals(dataClone);
-      expect(stackedData[1]).to.eql(expectedResult);
+      expect(stackedData[1]).toEqual(expectedResult);
     });
 
     it('should correctly stack mixed pos and neg values', function() {
@@ -236,7 +235,7 @@ describe('Vislib Axis Class Test Suite', function() {
         if (i % 2 === 1) value.y = -value.y;
       });
       const stackedData = yAxis._stackNegAndPosVals(dataClone);
-      expect(stackedData[1]).to.eql(expectedResult);
+      expect(stackedData[1]).toEqual(expectedResult);
     });
   });
 });

@@ -17,25 +17,32 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { ErrorHandler } from './_error_handler';
 
-import _ from 'lodash';
-import expect from '@kbn/expect';
+describe('Vislib ErrorHandler Test Suite', function() {
+  let errorHandler;
 
-import { visTypes } from '../../../../../../../plugins/vis_type_vislib/public/vislib/visualizations/vis_types';
-
-describe('Vislib Vis Types Test Suite', function() {
-  let visFunc;
-
-  beforeEach(function() {
-    visFunc = visTypes.point_series;
+  beforeEach(() => {
+    errorHandler = new ErrorHandler();
   });
 
-  it('should be an object', function() {
-    expect(_.isObject(visTypes)).to.be(true);
-  });
+  describe('validateWidthandHeight Method', function() {
+    it('should throw an error when width and/or height is 0', function() {
+      expect(function() {
+        errorHandler.validateWidthandHeight(0, 200);
+      }).toThrow();
+      expect(function() {
+        errorHandler.validateWidthandHeight(200, 0);
+      }).toThrow();
+    });
 
-  it('should return a function', function() {
-    expect(typeof visFunc).to.be('function');
+    it('should throw an error when width and/or height is NaN', function() {
+      expect(function() {
+        errorHandler.validateWidthandHeight(null, 200);
+      }).toThrow();
+      expect(function() {
+        errorHandler.validateWidthandHeight(200, null);
+      }).toThrow();
+    });
   });
 });

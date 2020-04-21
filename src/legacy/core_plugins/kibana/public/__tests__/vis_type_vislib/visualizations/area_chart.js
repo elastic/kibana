@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
