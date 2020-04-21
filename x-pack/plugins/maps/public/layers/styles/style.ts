@@ -10,9 +10,8 @@ import { ILayer } from '../layer';
 import { IField } from '../fields/field';
 import { DataRequest } from '../util/data_request';
 
-// todo: not sure if this is the right one
 export interface IStyle {
-  getDescriptor(): StyleDescriptor;
+  getDescriptor(): StyleDescriptor | null;
   getDescriptorWithMissingStylePropsRemoved(
     nextFields: IField[]
   ): { hasChanges: boolean; nextStyleDescriptor?: StyleDescriptor };
@@ -30,7 +29,7 @@ export interface IStyle {
 export class AbstractStyle implements IStyle {
   readonly _descriptor: StyleDescriptor;
 
-  constructor(descriptor: StyleDescriptor) {
+  constructor(descriptor: StyleDescriptor | null) {
     this._descriptor = descriptor;
   }
 
