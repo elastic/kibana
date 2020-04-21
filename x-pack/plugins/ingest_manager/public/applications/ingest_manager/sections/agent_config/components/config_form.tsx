@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiComboBox,
   EuiIconTip,
+  EuiCheckboxGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -244,66 +245,63 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiText>
               <h4>
                 <FormattedMessage
                   id="xpack.ingestManager.agentConfigForm.monitoringLabel"
-                  defaultMessage="Monitor Elastic agent"
+                  defaultMessage="Agent monitoring"
                 />
               </h4>
             </EuiText>
+            <EuiSpacer size="m" />
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.ingestManager.agentConfigForm.monitoringDescription"
+                defaultMessage="Collect data about your agents. This information can be usefull for debugging and understanding perfomance."
+              />
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiSwitch
-              showLabel={true}
-              label={
-                <FormattedMessage
-                  id="xpack.ingestManager.agentConfigForm.monitoringLogsFieldLabel"
-                  defaultMessage="Collect agent logs"
-                />
-              }
-              checked={
-                agentConfig.monitoring_enabled !== undefined &&
-                agentConfig.monitoring_enabled.indexOf('logs') >= 0
-              }
-              onChange={() => {
+            <EuiCheckboxGroup
+              options={[
+                {
+                  id: 'logs',
+                  label: i18n.translate(
+                    'xpack.ingestManager.agentConfigForm.monitoringLogsFieldLabel',
+                    { defaultMessage: 'Collect agent logs' }
+                  ),
+                },
+                {
+                  id: 'metrics',
+                  label: i18n.translate(
+                    'xpack.ingestManager.agentConfigForm.monitoringMetricsFieldLabel',
+                    { defaultMessage: 'Collect agent metrics' }
+                  ),
+                },
+              ]}
+              idToSelectedMap={(agentConfig.monitoring_enabled || []).reduce(
+                (acc: { logs: boolean; metrics: boolean }, key) => {
+                  acc[key] = true;
+                  return acc;
+                },
+                { logs: false, metrics: false }
+              )}
+              onChange={id => {
+                if (id !== 'logs' && id !== 'metrics') {
+                  return;
+                }
+
                 const hasLogs =
-                  agentConfig.monitoring_enabled &&
-                  agentConfig.monitoring_enabled.indexOf('logs') >= 0;
+                  agentConfig.monitoring_enabled && agentConfig.monitoring_enabled.indexOf(id) >= 0;
 
                 const previousValues = agentConfig.monitoring_enabled || [];
                 updateAgentConfig({
                   monitoring_enabled: hasLogs
-                    ? previousValues.filter(type => type !== 'logs')
-                    : [...previousValues, 'logs'],
-                });
-              }}
-            />
-            <EuiSpacer size="m" />
-            <EuiSwitch
-              showLabel={true}
-              label={
-                <FormattedMessage
-                  id="xpack.ingestManager.agentConfigForm.monitoringMetricsFieldLabel"
-                  defaultMessage="Collect agent metrics"
-                />
-              }
-              checked={
-                agentConfig.monitoring_enabled !== undefined &&
-                agentConfig.monitoring_enabled.indexOf('metrics') >= 0
-              }
-              onChange={() => {
-                const hasMetrics =
-                  agentConfig.monitoring_enabled &&
-                  agentConfig.monitoring_enabled.indexOf('metrics') >= 0;
-
-                const previousValues = agentConfig.monitoring_enabled || [];
-                updateAgentConfig({
-                  monitoring_enabled: hasMetrics
-                    ? previousValues.filter(type => type !== 'metrics')
-                    : [...previousValues, 'metrics'],
+                    ? previousValues.filter(type => type !== id)
+                    : [...previousValues, id],
                 });
               }}
             />
