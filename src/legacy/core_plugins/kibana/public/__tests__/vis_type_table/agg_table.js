@@ -22,11 +22,18 @@ import moment from 'moment';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { npStart } from '../../legacy_imports';
+import './legacy';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { npStart } from 'ui/new_platform';
 import { round } from 'lodash';
-import { getAngularModule } from '../../get_inner_angular';
-import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInnerAngular } from '../../../../../../plugins/vis_type_table/public/get_inner_angular';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { initTableVisLegacyModule } from '../../../../../../plugins/vis_type_table/public/table_vis_legacy_module';
 import { tabifiedData } from './tabified_data';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { configureAppAngularModule } from '../../../../../../plugins/kibana_legacy/public/angular';
 
 describe('Table Vis - AggTable Directive', function() {
   let $rootScope;
@@ -34,7 +41,8 @@ describe('Table Vis - AggTable Directive', function() {
   let settings;
 
   const initLocalAngular = () => {
-    const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
+    const tableVisModule = getInnerAngular('kibana/table_vis', npStart.core);
+    configureAppAngularModule(tableVisModule, npStart.core, true);
     initTableVisLegacyModule(tableVisModule);
   };
 

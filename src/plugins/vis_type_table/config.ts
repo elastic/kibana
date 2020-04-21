@@ -17,32 +17,10 @@
  * under the License.
  */
 
-import { SchemaConfig } from '../../../../plugins/visualizations/public';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export enum AggTypes {
-  SUM = 'sum',
-  AVG = 'avg',
-  MIN = 'min',
-  MAX = 'max',
-  COUNT = 'count',
-}
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+});
 
-export interface Dimensions {
-  buckets: SchemaConfig[];
-  metrics: SchemaConfig[];
-}
-
-export interface TableVisParams {
-  type: 'table';
-  perPage: number | '';
-  showPartialRows: boolean;
-  showMetricsAtAllLevels: boolean;
-  sort: {
-    columnIndex: number | null;
-    direction: string | null;
-  };
-  showTotal: boolean;
-  totalFunc: AggTypes;
-  percentageCol: string;
-  dimensions: Dimensions;
-}
+export type ConfigSchema = TypeOf<typeof configSchema>;

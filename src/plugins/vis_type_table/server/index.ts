@@ -17,9 +17,18 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { TableVisPlugin as Plugin } from './plugin';
+import { PluginConfigDescriptor } from 'kibana/server';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+import { configSchema, ConfigSchema } from '../config';
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('table_vis.enabled', 'vis_type_table.enabled'),
+  ],
+};
+
+export const plugin = () => ({
+  setup() {},
+  start() {},
+});
