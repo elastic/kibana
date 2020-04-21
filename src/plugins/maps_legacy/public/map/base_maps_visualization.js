@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KibanaMap } from '../index';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import { getInjectedVarFunc, getUiSettings, getToasts } from '../kibana_services';
@@ -27,7 +26,7 @@ import { getInjectedVarFunc, getUiSettings, getToasts } from '../kibana_services
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS
 
-export function BaseMapsVisualizationProvider(mapServiceSettings) {
+export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) {
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
    * @class BaseMapsVisualization
@@ -98,7 +97,7 @@ export function BaseMapsVisualizationProvider(mapServiceSettings) {
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
       const services = { toastService };
 
-      this._kibanaMap = new KibanaMap(this._container, options, services);
+      this._kibanaMap = getKibanaMap(this._container, options, services);
       this._kibanaMap.setMinZoom(WMS_MINZOOM); //use a default
       this._kibanaMap.setMaxZoom(WMS_MAXZOOM); //use a default
 

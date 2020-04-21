@@ -32,15 +32,14 @@ import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim'
 import { createTileMapFn } from './tile_map_fn';
 // @ts-ignore
 import { createTileMapTypeDefinition } from './tile_map_type';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
+import { getBaseMapsVis, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 /** @private */
 interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
-  serviceSettings: IServiceSettings;
   uiSettings: IUiSettingsClient;
   getZoomPrecision: any;
   getPrecision: any;
-  notificationService: any;
+  BaseMapsVisualization: any;
 }
 
 /** @internal */
@@ -65,10 +64,9 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
   ) {
     const { getZoomPrecision, getPrecision, serviceSettings } = mapsLegacy;
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
-      serviceSettings,
       getZoomPrecision,
       getPrecision,
-      notificationService: core.notifications.toasts,
+      BaseMapsVisualization: getBaseMapsVis(core),
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };

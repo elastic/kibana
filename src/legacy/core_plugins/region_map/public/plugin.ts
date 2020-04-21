@@ -25,21 +25,23 @@ import {
 } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
-
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
-
 // @ts-ignore
 import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
+import {
+  getBaseMapsVis,
+  IServiceSettings,
+  MapsLegacyPluginSetup,
+} from '../../../../plugins/maps_legacy/public';
 
 /** @private */
 interface RegionMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
   serviceSettings: IServiceSettings;
-  notificationService: any;
+  BaseMapsVisualization: any;
 }
 
 /** @internal */
@@ -72,7 +74,7 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
       uiSettings: core.uiSettings,
       regionmapsConfig: core.injectedMetadata.getInjectedVar('regionmap') as RegionMapsConfig,
       serviceSettings: mapsLegacy.serviceSettings,
-      notificationService: core.notifications.toasts,
+      BaseMapsVisualization: getBaseMapsVis(core),
       ...(await __LEGACY.setup()),
     };
 

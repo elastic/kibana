@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { MapsLegacyPlugin } from './plugin';
+import { CoreSetup } from 'kibana/public';
+import { bindSetupCoreAndPlugins, MapsLegacyPlugin } from './plugin';
 // @ts-ignore
 import * as colorUtil from './map/color_util';
 // @ts-ignore
@@ -29,6 +30,7 @@ import { convertToGeoJson } from './map/convert_to_geojson';
 // @ts-ignore
 import { scaleBounds, getPrecision, geoContains } from './map/decode_geo_hash';
 // @ts-ignore
+import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
 import {
   VectorLayer,
   FileLayerField,
@@ -56,6 +58,21 @@ export {
   FileLayer,
   TmsLayer,
 };
+
+// Due to a leaflet/leaflet-draw bug, it's not possible to consume leaflet maps w/ draw control
+// through a pipeline leveraging angular. For this reason, client plugins need to
+// init kibana map and the basemaps visualization directly rather than consume through
+// the usual plugin interface
+export function getKibanaMapFactory(core: CoreSetup) {
+  bindSetupCoreAndPlugins(core);
+  return (...args) => new KibanaMap(...args);
+}
+
+export function getBaseMapsVis(core: CoreSetup) {
+  const getKibanaMap = getKibanaMapFactory(core);
+  const serviceSettings = new ServiceSettings();
+  return new BaseMapsVisualizationProvider(getKibanaMap, serviceSettings);
+}
 
 export type MapsLegacyPluginSetup = ReturnType<MapsLegacyPlugin['setup']>;
 export type MapsLegacyPluginStart = ReturnType<MapsLegacyPlugin['start']>;
