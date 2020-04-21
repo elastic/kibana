@@ -41,4 +41,10 @@ describe('crete_list_item_bulk', () => {
       index: LISTS_ITEMS_INDEX,
     });
   });
+
+  test('It should not call the dataClient when the values are empty', async () => {
+    const options = getCreateListItemBulkOptionsMock();
+    options.value = [];
+    expect(options.dataClient.callAsCurrentUser).not.toBeCalled();
+  });
 });
