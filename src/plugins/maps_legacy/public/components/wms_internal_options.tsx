@@ -21,8 +21,8 @@ import React from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { TextInputOption } from '../../../../../plugins/charts/public';
-import { WMSOptions } from '../types';
+import { TextInputOption } from '../../../charts/public';
+import { WMSOptions } from '../common/types/external_basemap_types';
 
 interface WmsInternalOptions {
   wms: WMSOptions;

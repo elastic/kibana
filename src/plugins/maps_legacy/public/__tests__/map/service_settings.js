@@ -26,7 +26,7 @@ import EMS_TILES from './ems_mocks/sample_tiles.json';
 import EMS_STYLE_ROAD_MAP_BRIGHT from './ems_mocks/sample_style_bright';
 import EMS_STYLE_ROAD_MAP_DESATURATED from './ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from './ems_mocks/sample_style_dark';
-import { ORIGIN } from '../../common/origin';
+import { ORIGIN } from '../../common/constants/origin';
 
 describe('service_settings (FKA tilemaptest)', function() {
   let serviceSettings;

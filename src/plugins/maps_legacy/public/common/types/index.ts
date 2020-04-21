@@ -17,31 +17,10 @@
  * under the License.
  */
 
-import { TmsLayer } from '../../../../plugins/maps_legacy/public';
-import { MapTypes } from './map_types';
-
-export interface WMSOptions {
-  selectedTmsLayer?: TmsLayer;
-  enabled: boolean;
-  url?: string;
-  options: {
-    version?: string;
-    layers?: string;
-    format: string;
-    transparent: boolean;
-    attribution?: string;
-    styles?: string;
-  };
-}
-
-export interface TileMapVisParams {
-  colorSchema: string;
-  mapType: MapTypes;
-  isDesaturated: boolean;
-  addTooltip: boolean;
-  heatClusterSize: number;
-  legendPosition: 'bottomright' | 'bottomleft' | 'topright' | 'topleft';
-  mapZoom: number;
-  mapCenter: [number, number];
-  wms: WMSOptions;
-}
+/**
+ * Use * syntax so that these exports do not break when internal
+ * types are stripped.
+ */
+export * from './external_basemap_types';
+export * from './map_types';
+export * from './region_map_types';

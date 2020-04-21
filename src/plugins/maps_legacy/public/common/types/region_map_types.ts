@@ -17,7 +17,20 @@
  * under the License.
  */
 
-export enum ORIGIN {
-  EMS = 'elastic_maps_service',
-  KIBANA_YML = 'self_hosted',
+import { VectorLayer, FileLayerField } from '../../index';
+import { WMSOptions } from './external_basemap_types';
+
+export interface RegionMapVisParams {
+  readonly addTooltip: true;
+  readonly legendPosition: 'bottomright';
+  colorSchema: string;
+  emsHotLink?: string | null;
+  mapCenter: [number, number];
+  mapZoom: number;
+  outlineWeight: number | '';
+  isDisplayWarning: boolean;
+  showAllShapes: boolean;
+  selectedLayer?: VectorLayer;
+  selectedJoinField?: FileLayerField;
+  wms: WMSOptions;
 }

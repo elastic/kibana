@@ -75,5 +75,10 @@ export function getBaseMapsVis(core: CoreSetup) {
   return new BaseMapsVisualizationProvider(getKibanaMap, serviceSettings);
 }
 
+export * from './common/types';
+export { ORIGIN } from './common/constants/origin';
+
+export { WmsOptions } from './components/wms_options';
+
 export type MapsLegacyPluginSetup = ReturnType<MapsLegacyPlugin['setup']>;
 export type MapsLegacyPluginStart = ReturnType<MapsLegacyPlugin['start']>;
