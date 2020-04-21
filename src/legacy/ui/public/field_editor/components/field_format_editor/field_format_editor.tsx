@@ -38,13 +38,20 @@ interface EditorComponentProps {
 }
 
 interface FieldFormatEditorState {
-  EditorComponent?: React.FC<EditorComponentProps>;
+  EditorComponent: React.FC<EditorComponentProps>;
 }
 
 export class FieldFormatEditor extends PureComponent<
   FieldFormatEditorProps,
   FieldFormatEditorState
 > {
+  constructor(props: FieldFormatEditorProps) {
+    super(props);
+    this.state = {
+      EditorComponent: props.fieldFormatEditors.byFormatId[props.fieldFormatId],
+    };
+  }
+
   static getDerivedStateFromProps(nextProps: FieldFormatEditorProps) {
     return {
       EditorComponent: nextProps.fieldFormatEditors.byFormatId[nextProps.fieldFormatId] || null,
