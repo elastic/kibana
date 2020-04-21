@@ -8,6 +8,9 @@ import { getOr } from 'lodash/fp';
 
 import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
+import { NoteSavedObject } from '../../../common/types/timeline/note';
+import { PinnedEventSavedObject } from '../../../common/types/timeline/pinned_event';
+import { SavedTimeline, TimelineSavedObject, TimelineType } from '../../../common/types/timeline';
 import {
   ResponseTimeline,
   PageInfoTimeline,
@@ -18,13 +21,10 @@ import {
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 import * as note from '../note/saved_object';
-import { NoteSavedObject } from '../note/types';
-import { PinnedEventSavedObject } from '../pinned_event/types';
 import * as pinnedEvent from '../pinned_event/saved_object';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from './saved_object_mappings';
-import { SavedTimeline, TimelineSavedObject, TimelineType } from './types';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];

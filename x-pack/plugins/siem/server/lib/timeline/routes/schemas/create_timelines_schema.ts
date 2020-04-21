@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as rt from 'io-ts';
-import { unionWithNullType } from '../../../framework';
-import { SavedTimelineRuntimeType } from '../../types';
+
+import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
+import { unionWithNullType } from '../../../../../common/utility_types';
 
 export const createTimelineSchema = rt.type({
   timeline: SavedTimelineRuntimeType,

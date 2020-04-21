@@ -7,14 +7,11 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import * as runtimeTypes from 'io-ts';
+import { SavedObjectsClient } from 'kibana/server';
 
-import { unionWithNullType } from '../framework';
-import { NoteSavedObjectToReturnRuntimeType, NoteSavedObject } from '../note/types';
-import {
-  PinnedEventToReturnSavedObjectRuntimeType,
-  PinnedEventSavedObject,
-} from '../pinned_event/types';
-import { SavedObjectsClient } from '../../../../../../src/core/server';
+import { unionWithNullType } from '../../utility_types';
+import { NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
+import { PinnedEventToReturnSavedObjectRuntimeType, PinnedEventSavedObject } from './pinned_event';
 
 /*
  *  ColumnHeader Types

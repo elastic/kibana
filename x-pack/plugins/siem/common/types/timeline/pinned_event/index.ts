@@ -8,7 +8,7 @@
 
 import * as runtimeTypes from 'io-ts';
 
-import { unionWithNullType } from '../framework';
+import { unionWithNullType } from '../../../utility_types';
 
 /*
  *  Note Types

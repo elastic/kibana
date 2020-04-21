@@ -16,6 +16,11 @@ import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import {
+  SavedNote,
+  NoteSavedObjectRuntimeType,
+  NoteSavedObject,
+} from '../../../common/types/timeline/note';
+import {
   PageInfoNote,
   ResponseNote,
   ResponseNotes,
@@ -23,7 +28,6 @@ import {
   NoteResult,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
-import { SavedNote, NoteSavedObjectRuntimeType, NoteSavedObject } from './types';
 import { noteSavedObjectType } from './saved_object_mappings';
 import { timelineSavedObjectType } from '../../saved_objects';
 import { pickSavedTimeline } from '../timeline/pick_saved_timeline';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineSavedObject } from '../../types';
+import { TimelineSavedObject } from '../../../../../common/types/timeline';
 
 const UPDATE_TIMELINE_ERROR_MESSAGE =
   'CREATE timeline with PATCH is not allowed, please use POST instead';

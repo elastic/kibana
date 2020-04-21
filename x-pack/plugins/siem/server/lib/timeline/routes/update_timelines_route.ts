@@ -3,19 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TIMELINE_URL } from '../../../../common/constants';
-import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
-import { createTimelines, getTimeline, getTemplateTimeline } from './utils/create_timelines';
-import { FrameworkRequest } from '../../framework';
+
 import { IRouter } from '../../../../../../../src/core/server';
+
+import { TIMELINE_URL } from '../../../../common/constants';
+import { TimelineType } from '../../../../common/types/timeline';
+
 import { SetupPlugins } from '../../../plugin';
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { ConfigType } from '../../..';
+
+import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
+import { FrameworkRequest } from '../../framework';
 
 import { updateTimelineSchema } from './schemas/update_timelines_schema';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { TimelineType } from '../types';
 import { buildFrameworkRequest } from './utils/common';
+import { createTimelines, getTimeline, getTemplateTimeline } from './utils/create_timelines';
 import { checkIsFailureCases } from './utils/update_timelines';
-import { ConfigType } from '../../..';
 
 export const updateTimelinesRoute = (
   router: IRouter,

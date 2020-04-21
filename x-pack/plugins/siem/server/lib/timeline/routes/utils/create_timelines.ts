@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEmpty } from 'lodash/fp';
+
 import * as timelineLib from '../../saved_object';
 import * as pinnedEventLib from '../../../pinned_event/saved_object';
 import * as noteLib from '../../../note/saved_object';
 import { FrameworkRequest } from '../../../framework';
-import { SavedTimeline, TimelineSavedObject } from '../../types';
-import { SavedNote } from '../../../note/types';
+import { SavedTimeline, TimelineSavedObject } from '../../../../../common/types/timeline';
+import { SavedNote } from '../../../../../common/types/timeline/note';
 import { NoteResult, ResponseTimeline } from '../../../../graphql/types';
 export const CREATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE timeline with POST is not allowed, please use PATCH instead';

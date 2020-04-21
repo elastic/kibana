@@ -8,6 +8,11 @@ import { transformError, buildSiemResponse } from '../../detection_engine/routes
 import { IRouter } from '../../../../../../../src/core/server';
 import { ConfigType } from '../../..';
 import { SetupPlugins } from '../../../plugin';
+import { TimelineType } from '../../../../common/types/timeline';
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+
+import { createTimelineSchema } from './schemas/create_timelines_schema';
+import { buildFrameworkRequest } from './utils/common';
 import {
   createTimelines,
   getTimeline,
@@ -15,11 +20,6 @@ import {
   CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
   CREATE_TIMELINE_ERROR_MESSAGE,
 } from './utils/create_timelines';
-
-import { createTimelineSchema } from './schemas/create_timelines_schema';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { TimelineType } from '../types';
-import { buildFrameworkRequest } from './utils/common';
 
 export const createTimelinesRoute = (
   router: IRouter,

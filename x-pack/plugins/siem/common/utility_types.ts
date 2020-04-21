@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as runtimeTypes from 'io-ts';
 import { ReactNode } from 'react';
 
 export type Pick3<T, K1 extends keyof T, K2 extends keyof T[K1], K3 extends keyof T[K1][K2]> = {
@@ -17,3 +18,6 @@ export interface DescriptionList {
   title: NonNullable<ReactNode>;
   description: NonNullable<ReactNode>;
 }
+
+export const unionWithNullType = <T extends runtimeTypes.Mixed>(type: T) =>
+  runtimeTypes.union([type, runtimeTypes.null]);
