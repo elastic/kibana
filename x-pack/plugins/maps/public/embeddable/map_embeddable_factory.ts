@@ -93,6 +93,14 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
 
+    let settings;
+    if (savedMap.mapStateJSON) {
+      const mapState = JSON.parse(savedMap.mapStateJSON);
+      if (mapState.settings) {
+        settings = mapState.settings;
+      }
+    }
+
     const embeddable = new MapEmbeddable(
       {
         layerList,
@@ -100,6 +108,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
         editUrl: getHttp().basePath.prepend(createMapPath(savedObjectId)),
         indexPatterns,
         editable: await this.isEditable(),
+        settings,
       },
       input,
       parent
