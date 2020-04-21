@@ -26,7 +26,8 @@ import {
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns } from '../../../public/services';
 import { mockDataServices } from '../../../public/search/aggs/test_helpers';
-import { createFiltersFromValueClickAction, EventData } from './create_filters_from_value_click';
+import { createFiltersFromValueClickAction } from './create_filters_from_value_click';
+import { ValueClickTriggerContext } from '../../../../embeddable/public';
 
 const mockField = {
   name: 'bytes',
@@ -38,7 +39,7 @@ const mockField = {
 };
 
 describe('createFiltersFromValueClick', () => {
-  let dataPoints: EventData[];
+  let dataPoints: ValueClickTriggerContext['data']['data'];
 
   beforeEach(() => {
     dataPoints = [

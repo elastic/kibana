@@ -22,15 +22,9 @@ import moment from 'moment';
 import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
 import { deserializeAggConfig } from '../../search/expressions/utils';
-import { KibanaDatatable } from '../../../../expressions';
+import { RangeSelectTriggerContext } from '../../../../embeddable/public';
 
-export interface RangeSelectEvent {
-  table: KibanaDatatable;
-  column: number;
-  range: number[];
-}
-
-export async function createFiltersFromRangeSelectAction(event: RangeSelectEvent) {
+export async function createFiltersFromRangeSelectAction(event: RangeSelectTriggerContext['data']) {
   const column: Record<string, any> = event.table.columns[event.column];
 
   if (!column || !column.meta) {

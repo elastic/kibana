@@ -18,16 +18,35 @@
  */
 
 import { Trigger } from '../../../../ui_actions/public';
+import { KibanaDatatable } from '../../../../expressions';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext {
   embeddable: IEmbeddable;
 }
 
-export interface EmbeddableVisTriggerContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable?: T;
+export interface ValueClickTriggerContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable?: IEmbeddable;
   timeFieldName?: string;
-  data: unknown;
+  data: {
+    data: Array<{
+      table: Pick<KibanaDatatable, 'rows' | 'columns'>;
+      column: number;
+      row: number;
+      value: any;
+    }>;
+    negate?: boolean;
+  };
+}
+
+export interface RangeSelectTriggerContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable?: IEmbeddable;
+  timeFieldName?: string;
+  data: {
+    table: KibanaDatatable;
+    column: number;
+    range: number[];
+  };
 }
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
