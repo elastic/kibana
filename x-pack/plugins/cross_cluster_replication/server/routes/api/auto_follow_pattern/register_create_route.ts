@@ -33,7 +33,7 @@ export const registerCreateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { id, ...rest } = request.body as typeof bodySchema.type;
+      const { id, ...rest } = request.body;
       const body = serializeAutoFollowPattern(rest as AutoFollowPattern);
 
       /**

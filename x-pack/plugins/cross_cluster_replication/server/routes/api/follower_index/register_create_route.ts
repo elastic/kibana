@@ -43,7 +43,7 @@ export const registerCreateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { name, ...rest } = request.body as typeof bodySchema.type;
+      const { name, ...rest } = request.body;
       const body = removeEmptyFields(serializeFollowerIndex(rest as FollowerIndex));
 
       try {

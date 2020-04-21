@@ -38,7 +38,7 @@ export const registerUpdateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { id } = request.params as typeof paramsSchema.type;
+      const { id } = request.params;
       const body = serializeAutoFollowPattern(request.body as AutoFollowPattern);
 
       try {

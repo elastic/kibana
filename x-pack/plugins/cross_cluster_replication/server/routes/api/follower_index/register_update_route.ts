@@ -43,7 +43,7 @@ export const registerUpdateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { id } = request.params as typeof paramsSchema.type;
+      const { id } = request.params;
 
       // We need to first pause the follower and then resume it by passing the advanced settings
       try {

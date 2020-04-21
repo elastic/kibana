@@ -29,7 +29,7 @@ export const registerDeleteRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { id } = request.params as typeof paramsSchema.type;
+      const { id } = request.params;
       const ids = id.split(',');
 
       const itemsDeleted: string[] = [];
