@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
+import { ExpressionAstExpression, ExpressionAstArgument } from 'src/plugins/expressions/public';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
@@ -31,7 +32,7 @@ import { FieldFormatsStart } from '../../field_formats';
 type State = string | number | boolean | null | undefined | SerializableState;
 
 interface SerializableState {
-  [key: string]: AggConfigSerialized | State | State[];
+  [key: string]: State | State[];
 }
 
 export interface AggConfigSerialized {
@@ -302,6 +303,53 @@ export class AggConfig {
    */
   toJSON(): AggConfigSerialized {
     return this.serialize();
+  }
+
+  /**
+   * @returns Returns an ExpressionAst representing the function for this agg type.
+   */
+  toExpressionAst(): ExpressionAstExpression | undefined {
+    const functionName = this.type && this.type.expressionName;
+    const { type, ...rest } = this.serialize();
+    if (!functionName || !rest.params) {
+      // Return undefined - there is no matching expression function for this agg
+      return;
+    }
+
+    // Go through each of the params and convert to an array of expression args.
+    const params = Object.entries(rest.params).reduce((acc, [key, value]) => {
+      const deserializedParam = this.getAggParams().find(p => p.name === key);
+
+      if (deserializedParam && deserializedParam.type === 'agg') {
+        // We can call `toExpressionAst` if our param is another agg
+        acc[key] = [this.getParam(key).toExpressionAst()];
+      } else if (typeof value === 'object') {
+        // For some params which are object, like ranges, we stringify for now
+        acc[key] = [JSON.stringify(value)];
+      } else if (typeof value !== 'undefined') {
+        // Everything else just gets stored in an array if it is defined
+        acc[key] = [value];
+      }
+
+      return acc;
+    }, {} as Record<string, ExpressionAstArgument[]>);
+
+    return {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: functionName,
+          arguments: {
+            ...params,
+            // Expression args which are provided to all functions
+            id: [this.id],
+            enabled: [this.enabled],
+            ...(this.schema ? { schema: [this.schema] } : {}), // schema may be undefined
+          },
+        },
+      ],
+    };
   }
 
   getAggParams() {

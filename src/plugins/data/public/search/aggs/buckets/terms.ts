@@ -82,6 +82,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
   new BucketAggType(
     {
       name: BUCKET_TYPES.TERMS,
+      expressionName: 'aggTerms',
       title: termsTitle,
       makeLabel(agg) {
         const params = agg.params;
@@ -169,8 +170,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           type: 'agg',
           allowedAggs: termsAggFilter,
           default: null,
-          makeAgg(termsAgg, state: AggConfigSerialized) {
-            state = state || {};
+          makeAgg(termsAgg, state = { type: 'count' }) {
             state.schema = 'orderAgg';
             const orderAgg = termsAgg.aggConfigs.createAggConfig<IBucketAggConfig>(state, {
               addToAggConfigs: false,

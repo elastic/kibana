@@ -40,6 +40,7 @@ export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDe
   new BucketAggType(
     {
       name: BUCKET_TYPES.RANGE,
+      expressionName: 'aggRange',
       title: rangeTitle,
       createFilter: createFilterRange,
       makeLabel(aggConfig) {

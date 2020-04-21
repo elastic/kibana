@@ -369,6 +369,180 @@ describe('AggConfig', () => {
     });
   });
 
+  describe('#toExpressionAst', () => {
+    beforeEach(() => {
+      fieldFormats.getDefaultInstance = (() => ({
+        getConverterFor: (t?: string) => t || identity,
+      })) as any;
+      indexPattern.fields.getByName = name =>
+        ({
+          format: {
+            getConverterFor: (t?: string) => t || identity,
+          },
+        } as IndexPatternField);
+    });
+
+    it('works with primitive param types', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const configStates = {
+        enabled: true,
+        type: 'terms',
+        schema: 'segment',
+        params: {
+          field: 'machine.os.keyword',
+          order: 'asc',
+        },
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      expect(aggConfig.toExpressionAst()).toMatchInlineSnapshot(`
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "enabled": Array [
+                  true,
+                ],
+                "id": Array [
+                  "1",
+                ],
+                "missingBucket": Array [
+                  false,
+                ],
+                "missingBucketLabel": Array [
+                  "Missing",
+                ],
+                "order": Array [
+                  "asc",
+                ],
+                "otherBucket": Array [
+                  false,
+                ],
+                "otherBucketLabel": Array [
+                  "Other",
+                ],
+                "schema": Array [
+                  "segment",
+                ],
+                "size": Array [
+                  5,
+                ],
+              },
+              "function": "aggTerms",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        }
+      `);
+    });
+
+    it('creates a subexpression for params of type "agg"', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const configStates = {
+        type: 'terms',
+        params: {
+          field: 'machine.os.keyword',
+          order: 'asc',
+          orderAgg: {
+            enabled: true,
+            type: 'terms',
+            params: {
+              field: 'bytes',
+              order: 'asc',
+              size: 5,
+            },
+          },
+        },
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      const aggArg = aggConfig.toExpressionAst()?.chain[0].arguments.orderAgg;
+      expect(aggArg).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "enabled": Array [
+                    true,
+                  ],
+                  "id": Array [
+                    "1-orderAgg",
+                  ],
+                  "missingBucket": Array [
+                    false,
+                  ],
+                  "missingBucketLabel": Array [
+                    "Missing",
+                  ],
+                  "order": Array [
+                    "asc",
+                  ],
+                  "otherBucket": Array [
+                    false,
+                  ],
+                  "otherBucketLabel": Array [
+                    "Other",
+                  ],
+                  "schema": Array [
+                    "orderAgg",
+                  ],
+                  "size": Array [
+                    5,
+                  ],
+                },
+                "function": "aggTerms",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ]
+      `);
+    });
+
+    it('includes stringified advanced json params in the args', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const configStates = {
+        type: 'terms',
+        params: {
+          field: 'machine.os.keyword',
+          order: 'asc',
+          json: { foo: 'bar' },
+        },
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      const json = aggConfig.toExpressionAst()?.chain[0].arguments.json;
+      expect(json).toEqual([JSON.stringify(configStates.params.json)]);
+    });
+
+    it('stringifies any other params which are an object', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const configStates = {
+        type: 'range',
+        params: {
+          field: 'bytes',
+          ranges: [
+            { from: 0, to: 1000 },
+            { from: 1000, to: 2000 },
+          ],
+        },
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      const ranges = aggConfig.toExpressionAst()?.chain[0].arguments.ranges;
+      expect(ranges).toEqual([JSON.stringify(configStates.params.ranges)]);
+    });
+
+    it(`returns undefined if an expressionName doesn't exist on the agg type`, () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const configStates = {
+        type: 'unknown type',
+        params: {},
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      expect(aggConfig.toExpressionAst()).toBe(undefined);
+    });
+  });
+
   describe('#makeLabel', () => {
     let aggConfig: AggConfig;
 

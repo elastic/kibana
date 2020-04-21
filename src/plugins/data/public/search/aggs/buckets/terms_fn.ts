@@ -145,7 +145,10 @@ export const aggTerms = (): FunctionDefinition => ({
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
-    const orderAgg = args.orderAgg?.value;
+
+    // Need to spread this object to work around TS bug:
+    // https://github.com/microsoft/TypeScript/issues/15300#issuecomment-436793742
+    const orderAgg = args.orderAgg?.value ? { ...args.orderAgg.value } : undefined;
 
     return {
       type: 'agg_type',
