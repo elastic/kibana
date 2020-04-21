@@ -7,7 +7,7 @@
 import { HttpSetup } from 'kibana/public';
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-
+import { NotificationsSetup } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -22,6 +22,7 @@ export interface AppServices {
   metric: UiMetricService;
   documentation: DocumentationService;
   api: ApiService;
+  notifications: NotificationsSetup;
 }
 
 export interface CoreServices {

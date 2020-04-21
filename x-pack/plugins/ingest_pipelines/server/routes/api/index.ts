@@ -11,3 +11,5 @@ export { registerCreateRoute } from './create';
 export { registerUpdateRoute } from './update';
 
 export { registerPrivilegesRoute } from './privileges';
+
+export { registerDeleteRoute } from './delete';

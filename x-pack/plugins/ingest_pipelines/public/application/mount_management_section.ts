@@ -28,6 +28,7 @@ export async function mountManagementSection(
     metric: uiMetricService,
     documentation: documentationService,
     api: apiService,
+    notifications: coreSetup.notifications,
   };
 
   return renderApp(element, I18nContext, services, { http });
