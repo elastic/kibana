@@ -8308,7 +8308,6 @@
     "xpack.ingestManager.agentDetails.statusLabel": "状态",
     "xpack.ingestManager.agentDetails.typeLabel": "类型",
     "xpack.ingestManager.agentDetails.unavailableConfigTooltipText": "此配置不再可用",
-    "xpack.ingestManager.agentDetails.unenrollButtonText": "取消注册",
     "xpack.ingestManager.agentDetails.unexceptedErrorTitle": "加载代理时发生错误",
     "xpack.ingestManager.agentDetails.userProvidedMetadataSectionSubtitle": "用户提供的元数据",
     "xpack.ingestManager.agentEnrollment.apiKeySelectionDescription": "快速选择所需的代理配置和平台。然后，根据下面的说明设置和注册代理。",

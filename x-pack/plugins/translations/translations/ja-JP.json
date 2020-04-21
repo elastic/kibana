@@ -8305,7 +8305,6 @@
     "xpack.ingestManager.agentDetails.statusLabel": "ステータス",
     "xpack.ingestManager.agentDetails.typeLabel": "タイプ",
     "xpack.ingestManager.agentDetails.unavailableConfigTooltipText": "この構成は利用できなくなりました",
-    "xpack.ingestManager.agentDetails.unenrollButtonText": "登録解除",
     "xpack.ingestManager.agentDetails.unexceptedErrorTitle": "エージェントを読み込む間にエラーが発生しました",
     "xpack.ingestManager.agentDetails.userProvidedMetadataSectionSubtitle": "ユーザー提供メタデータ",
     "xpack.ingestManager.agentEnrollment.apiKeySelectionDescription": "ご希望のエージェント構成とプラットフォームをすばやく選択できます。次いで、以下の手順に従ってエージェントをセットアップして登録します。",
