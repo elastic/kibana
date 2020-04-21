@@ -24,7 +24,7 @@ import { initRegistries, populateRegistries, destroyRegistries } from './registr
 import { getDocumentationLinks } from './lib/documentation_links';
 // @ts-ignore untyped component
 import { HelpMenu } from './components/help_menu/help_menu';
-import { createStore } from './store';
+import { createStore, destroyStore } from './store';
 
 import { VALUE_CLICK_TRIGGER, ActionByType } from '../../../../../src/plugins/ui_actions/public';
 /* eslint-disable */
@@ -56,12 +56,14 @@ export const renderApp = (
   { element }: AppMountParameters,
   canvasStore: Store
 ) => {
-  console.log('mounting here', element);
   const canvasServices = Object.entries(services).reduce((reduction, [key, provider]) => {
     reduction[key] = provider.getService();
 
     return reduction;
   }, {} as Record<string, any>);
+
+  element.style.display = 'flex';
+  element.style['flex-grow'] = 1;
 
   ReactDOM.render(
     <KibanaContextProvider services={{ ...plugins, ...coreStart, canvas: canvasServices }}>
@@ -147,6 +149,7 @@ export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDe
   stopServices();
   destroyRegistries();
   resetInterpreter();
+  destroyStore();
 
   startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, emptyAction.id);
   if (restoreAction) {

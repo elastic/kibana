@@ -1,0 +1,10 @@
+{
+  "id": "canvas2",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "canvas2"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}

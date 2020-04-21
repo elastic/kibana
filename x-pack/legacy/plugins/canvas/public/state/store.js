@@ -25,6 +25,10 @@ export function createStore(initialState) {
   return store;
 }
 
+export function destroyStore() {
+  store = undefined;
+}
+
 export function getState() {
   return store.getState();
 }
