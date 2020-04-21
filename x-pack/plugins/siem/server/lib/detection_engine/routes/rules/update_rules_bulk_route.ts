@@ -83,7 +83,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             version,
             exceptions_list,
           } = payloadRule;
-          const finalIndex = outputIndex ?? siemClient.signalsIndex;
+          const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
             validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });

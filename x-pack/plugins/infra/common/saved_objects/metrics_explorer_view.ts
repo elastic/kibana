@@ -11,7 +11,7 @@ import {
   MetricsExplorerChartOptions,
   MetricsExplorerTimeOptions,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../public/containers/metrics_explorer/use_metrics_explorer_options';
+} from '../../public/pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedViewSavedObject } from '../../public/hooks/use_saved_view';
 

@@ -83,7 +83,7 @@ export const updateRulesRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const finalIndex = outputIndex ?? siemClient.signalsIndex;
+        const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
         const rule = await updateRules({
           alertsClient,
           actionsClient,
