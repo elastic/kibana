@@ -9,7 +9,15 @@ import { AgentStatus } from './models';
 export * from './models';
 export * from './rest_spec';
 
+/**
+ * A service that provides exported functions that return information about an Agent
+ */
 export interface AgentService {
+  /**
+   * Return the status by the Agent's id
+   * @param soClient
+   * @param agentId
+   */
   getAgentStatusById(soClient: SavedObjectsClientContract, agentId: string): Promise<AgentStatus>;
 }
 
