@@ -9,9 +9,14 @@ import mappings from './mappings.json';
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { migrations } from './migrations';
-import { getAppTitle } from './common/i18n_getters';
+import { getAppTitle } from '../../../plugins/maps/common/i18n_getters';
 import { MapPlugin } from './server/plugin';
-import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from './common/constants';
+import {
+  APP_ID,
+  APP_ICON,
+  createMapPath,
+  MAP_SAVED_OBJECT_TYPE,
+} from '../../../plugins/maps/common/constants';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export function maps(kibana) {
@@ -53,7 +58,6 @@ export function maps(kibana) {
         };
       },
       embeddableFactories: ['plugins/maps/embeddable/map_embeddable_factory'],
-      home: ['plugins/maps/legacy_register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'maps-telemetry': {
@@ -78,7 +82,6 @@ export function maps(kibana) {
       },
       mappings,
       migrations,
-      hacks: ['plugins/maps/register_vis_type_alias'],
     },
     config(Joi) {
       return Joi.object({
