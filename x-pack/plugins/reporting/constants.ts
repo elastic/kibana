@@ -7,13 +7,6 @@
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
-export const JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG = {
-  jobCompletionNotifier: {
-    interval: 10000,
-    intervalErrorMultiplier: 5,
-  },
-};
-
 // Routes
 export const API_BASE_URL = '/api/reporting';
 export const API_LIST_URL = `${API_BASE_URL}/jobs`;

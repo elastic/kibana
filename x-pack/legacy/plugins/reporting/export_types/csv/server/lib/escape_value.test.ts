@@ -11,7 +11,7 @@ describe('escapeValue', function() {
   describe('quoteValues is true', function() {
     let escapeValue: (val: string) => string;
     beforeEach(function() {
-      escapeValue = createEscapeValue(true);
+      escapeValue = createEscapeValue(true, false);
     });
 
     it('should escape value with spaces', function() {
@@ -46,12 +46,42 @@ describe('escapeValue', function() {
   describe('quoteValues is false', function() {
     let escapeValue: (val: string) => string;
     beforeEach(function() {
-      escapeValue = createEscapeValue(false);
+      escapeValue = createEscapeValue(false, false);
     });
 
     it('should return the value unescaped', function() {
       const value = '"foo, bar & baz-qux"';
       expect(escapeValue(value)).to.be(value);
+    });
+  });
+
+  describe('escapeValues', () => {
+    describe('when true', () => {
+      let escapeValue: (val: string) => string;
+      beforeEach(function() {
+        escapeValue = createEscapeValue(true, true);
+      });
+
+      ['@', '+', '-', '='].forEach(badChar => {
+        it(`should escape ${badChar} injection values`, function() {
+          expect(escapeValue(`${badChar}cmd|' /C calc'!A0`)).to.be(
+            `"'${badChar}cmd|' /C calc'!A0"`
+          );
+        });
+      });
+    });
+
+    describe('when false', () => {
+      let escapeValue: (val: string) => string;
+      beforeEach(function() {
+        escapeValue = createEscapeValue(true, false);
+      });
+
+      ['@', '+', '-', '='].forEach(badChar => {
+        it(`should not escape ${badChar} injection values`, function() {
+          expect(escapeValue(`${badChar}cmd|' /C calc'!A0`)).to.be(`"${badChar}cmd|' /C calc'!A0"`);
+        });
+      });
     });
   });
 });

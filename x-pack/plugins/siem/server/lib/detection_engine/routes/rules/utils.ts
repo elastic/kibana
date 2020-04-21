@@ -148,7 +148,7 @@ export const transformAlertToRule = (
     last_failure_message: ruleStatus?.attributes.lastFailureMessage,
     last_success_message: ruleStatus?.attributes.lastSuccessMessage,
     // TODO: (LIST-FEATURE) Remove hasListsFeature() check once we have lists available for a release
-    lists: hasListsFeature() ? alert.params.lists : null,
+    exceptions_list: hasListsFeature() ? alert.params.exceptions_list : null,
   });
 };
 

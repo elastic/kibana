@@ -31,7 +31,7 @@ import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { EmbeddableStart, EmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
-import { setAngularModule, setServices, setUrlTracker } from './kibana_services';
+import { getHistory, setAngularModule, setServices, setUrlTracker } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { buildServices } from './build_services';
@@ -98,6 +98,10 @@ export class DiscoverPlugin implements Plugin<void, void> {
       stop: stopUrlTracker,
       setActiveUrl: setTrackedUrl,
     } = createKbnUrlTracker({
+      // we pass getter here instead of plain `history`,
+      // so history is lazily created (when app is mounted)
+      // this prevents redundant `#` when not in discover app
+      getHistory,
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/discover',
       storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
@@ -174,7 +178,7 @@ export class DiscoverPlugin implements Plugin<void, void> {
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(core, plugins);
+      const services = await buildServices(core, plugins, getHistory);
       setServices(services);
       this.servicesInitialized = true;
 
