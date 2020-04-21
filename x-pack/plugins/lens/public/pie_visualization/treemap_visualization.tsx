@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  SuggestionRequest,
-  Visualization,
-  VisualizationSuggestion,
-  OperationMetadata,
-} from '../types';
+import { Visualization, OperationMetadata } from '../types';
 import { LayerState, PieVisualizationState } from './types';
-import { CHART_NAMES } from './constants';
+import { treemapSuggestions } from './suggestions';
+import { CHART_NAMES, MAX_TREEMAP_BUCKETS } from './constants';
+import { pieVisualization } from './pie_visualization';
 
 function newLayerState(layerId: string): LayerState {
   return {
@@ -26,8 +22,6 @@ function newLayerState(layerId: string): LayerState {
 const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number';
-
-import { pieVisualization } from './pie_visualization';
 
 export const treemapVisualization: Visualization<PieVisualizationState, PieVisualizationState> = {
   ...pieVisualization,
@@ -54,72 +48,7 @@ export const treemapVisualization: Visualization<PieVisualizationState, PieVisua
     );
   },
 
-  getSuggestions({
-    table,
-    state,
-    keptLayerIds,
-  }: SuggestionRequest<PieVisualizationState>): Array<
-    VisualizationSuggestion<PieVisualizationState>
-  > {
-    if (
-      keptLayerIds.length > 1 ||
-      (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
-      (state && table.changeType === 'unchanged') ||
-      table.columns.some(col => col.operation.dataType === 'date')
-    ) {
-      return [];
-    }
-
-    const [slices, metrics] = partition(table.columns, col => col.operation.isBucketed);
-
-    if (slices.length > 2 || metrics.length > 1) {
-      return [];
-    }
-
-    const title =
-      table.changeType === 'unchanged'
-        ? i18n.translate('xpack.lens.pie.suggestionLabel', {
-            defaultMessage: 'As {chartName}',
-            values: { chartName: CHART_NAMES.treemap.label },
-          })
-        : i18n.translate('xpack.lens.pie.suggestionOf', {
-            defaultMessage: '{chartName} {operations}',
-            values: {
-              chartName: CHART_NAMES.treemap.label,
-              operations:
-                table.label ||
-                table.columns
-                  .map(col => col.operation.label)
-                  .join(
-                    i18n.translate('xpack.lens.datatable.conjunctionSign', {
-                      defaultMessage: ' & ',
-                      description:
-                        'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
-                    })
-                  ),
-            },
-          });
-
-    return [
-      {
-        title,
-        score: 0.6,
-        state: {
-          shape: 'treemap',
-          layers: [
-            {
-              layerId: table.layerId,
-              slices: slices.map(col => col.columnId),
-              metric: metrics[0].columnId,
-            },
-          ],
-        },
-        previewIcon: 'bullseye',
-        // dont show suggestions for reduced versions or single-line tables
-        hide: table.changeType === 'reduced',
-      },
-    ];
-  },
+  getSuggestions: treemapSuggestions,
 
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find(l => l.layerId === layerId);
@@ -144,7 +73,7 @@ export const treemapVisualization: Visualization<PieVisualizationState, PieVisua
           }),
           layerId,
           accessors: sortedColumns,
-          supportsMoreColumns: sortedColumns.length < 2,
+          supportsMoreColumns: sortedColumns.length < MAX_TREEMAP_BUCKETS,
           filterOperations: bucketedOperations,
           required: true,
         },

@@ -5,9 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
 import color from 'color';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import {
@@ -23,115 +21,18 @@ import {
   RecursivePartial,
   LayerValue,
 } from '@elastic/charts';
-import {
-  KibanaDatatableColumn,
-  IInterpreterRenderHandlers,
-  ExpressionRenderDefinition,
-  ExpressionFunctionDefinition,
-} from 'src/plugins/expressions/public';
-import { EmbeddableVisTriggerContext } from '../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
-import { LensMultiTable, FormatFactory } from '../types';
+import { FormatFactory } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES } from './constants';
+import { ColumnGroups, PieExpressionProps } from './types';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { getExecuteTriggerActions } from './services';
+import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
-interface Args {
-  slices: string[];
-  metric?: string;
-  shape: 'pie' | 'donut' | 'treemap';
-  hideLabels: boolean;
-}
-
-export interface PieProps {
-  data: LensMultiTable;
-  args: Args;
-}
-
-export interface PieRender {
-  type: 'render';
-  as: 'lens_pie_renderer';
-  value: PieProps;
-}
-
-export const pie: ExpressionFunctionDefinition<'lens_pie', LensMultiTable, Args, PieRender> = {
-  name: 'lens_pie',
-  type: 'render',
-  help: i18n.translate('xpack.lens.pie.expressionHelpLabel', {
-    defaultMessage: 'Pie renderer',
-  }),
-  args: {
-    slices: {
-      types: ['string'],
-      multi: true,
-      help: '',
-    },
-    metric: {
-      types: ['string'],
-      help: '',
-    },
-    shape: {
-      types: ['string'],
-      options: ['pie', 'donut', 'treemap'],
-      help: '',
-    },
-    hideLabels: {
-      types: ['boolean'],
-      help: '',
-    },
-  },
-  inputTypes: ['lens_multitable'],
-  fn(data: LensMultiTable, args: Args) {
-    return {
-      type: 'render',
-      as: 'lens_pie_renderer',
-      value: {
-        data,
-        args,
-      },
-    };
-  },
-};
-
-export const getPieRenderer = (dependencies: {
-  formatFactory: Promise<FormatFactory>;
-  chartTheme: PartialTheme;
-  isDarkMode: boolean;
-}): ExpressionRenderDefinition<PieProps> => ({
-  name: 'lens_pie_renderer',
-  displayName: i18n.translate('xpack.lens.pie.visualizationName', {
-    defaultMessage: 'Pie',
-  }),
-  help: '',
-  validate: () => undefined,
-  reuseDomNode: true,
-  render: async (domNode: Element, config: PieProps, handlers: IInterpreterRenderHandlers) => {
-    const executeTriggerActions = getExecuteTriggerActions();
-    const formatFactory = await dependencies.formatFactory;
-    ReactDOM.render(
-      <MemoizedChart
-        {...config}
-        {...dependencies}
-        formatFactory={formatFactory}
-        executeTriggerActions={executeTriggerActions}
-        isDarkMode={dependencies.isDarkMode}
-      />,
-      domNode,
-      () => {
-        handlers.done();
-      }
-    );
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
-  },
-});
-
-const MemoizedChart = React.memo(PieComponent);
-
 export function PieComponent(
-  props: PieProps & {
+  props: PieExpressionProps & {
     formatFactory: FormatFactory;
     chartTheme: Exclude<PartialTheme, undefined>;
     isDarkMode: boolean;
@@ -150,21 +51,10 @@ export function PieComponent(
     });
   }
 
-  const fillLabel: Partial<PartitionFillLabel> = {
-    textInvertible: true,
-    valueFont: {
-      fontWeight: 800,
-    },
-    valueFormatter: () => '',
-  };
-
   // The datatable for pie charts should include subtotals, like this:
   // [bucket, subtotal, bucket, count]
   // But the user only configured [bucket, bucket, count]
-  const columnGroups: Array<{
-    col: KibanaDatatableColumn;
-    metrics: KibanaDatatableColumn[];
-  }> = [];
+  const columnGroups: ColumnGroups = [];
   firstTable.columns.forEach(col => {
     if (slices.includes(col.id)) {
       columnGroups.push({
@@ -175,6 +65,13 @@ export function PieComponent(
       columnGroups[columnGroups.length - 1].metrics.push(col);
     }
   });
+
+  const fillLabel: Partial<PartitionFillLabel> = {
+    textInvertible: true,
+    // Hides numbers from appearing inside chart, but they still appear in linkLabel
+    // and tooltips.
+    valueFormatter: () => '',
+  };
 
   const layers: PartitionLayer[] = columnGroups.map(({ col }, layerIndex) => {
     return {
@@ -193,14 +90,16 @@ export function PieComponent(
         shape === 'treemap' && layerIndex < columnGroups.length - 1
           ? {
               ...fillLabel,
+              // For the treemap, hide all text except for the most detailed slice
+              // Otherwise text will overlap and be unreadable
               valueFormatter: () => '',
               textColor: 'rgba(0,0,0,0)',
             }
           : fillLabel,
       shape: {
         fillColor: d => {
-          // Color is determined by the positional index of the top layer
-          // This is done recursively until we reach the top layer
+          // Color is determined by round-robin on the index of the innermost slice
+          // This has to be done recursively until we get to the slice index
           let parentIndex = 0;
           let tempParent: typeof d | typeof d['parent'] = d;
           while (tempParent.parent && tempParent.depth > 0) {
@@ -255,14 +154,14 @@ export function PieComponent(
       ? formatters[metricColumn.id]
       : props.formatFactory({ id: 'percent' });
 
-  const reverseGroups = columnGroups.reverse();
-
   const [state, setState] = useState({ isReady: false });
   // It takes a cycle for the chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
     setState({ isReady: true });
   }, []);
+
+  const reverseGroups = [...columnGroups].reverse();
 
   const hasNegative = firstTable.rows.some(row => {
     const value = row[metricColumn.id];
@@ -290,7 +189,7 @@ export function PieComponent(
   }
 
   return (
-    <VisualizationContainer className="lnsSunburstExpression__container" isReady={state.isReady}>
+    <VisualizationContainer className="lnsPieExpression__container" isReady={state.isReady}>
       <Chart>
         <Settings
           showLegend={!hideLabels && columnGroups.length > 1}
@@ -303,21 +202,11 @@ export function PieComponent(
                 ? (args[args.length - 1][0] as LayerValue[])
                 : (args[0][0] as LayerValue[]);
 
-            const context: EmbeddableVisTriggerContext = {
-              data: {
-                data: (clickedLayers as LayerValue[]).reverse().map((clickedLayer, index) => {
-                  const layerColumnId = columnGroups[index].col.id;
-                  return {
-                    row: firstTable.rows.findIndex(
-                      row => row[layerColumnId] === clickedLayer.groupByRollup
-                    ),
-                    column: firstTable.columns.findIndex(col => col.id === layerColumnId),
-                    value: clickedLayer.groupByRollup,
-                    table: firstTable,
-                  };
-                }),
-              },
-            };
+            const context = getFilterContext(
+              clickedLayers,
+              columnGroups.map(({ col }) => col.id),
+              firstTable
+            );
 
             executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
           }}
@@ -325,18 +214,7 @@ export function PieComponent(
         <Partition
           id={shape}
           data={firstTable.rows}
-          valueAccessor={(d: Datum) => {
-            if (typeof d[metricColumn.id] === 'number') {
-              return d[metricColumn.id];
-            }
-            // Sometimes there is missing data for outer slices
-            // When there is missing data, we fall back to the next slices
-            // This creates a sunburst effect
-            const hasMetric = reverseGroups.find(
-              group => group.metrics.length && d[group.metrics[0].id]
-            );
-            return hasMetric ? d[hasMetric.metrics[0].id] : Number.EPSILON;
-          }}
+          valueAccessor={(d: Datum) => getSliceValueWithFallback(d, reverseGroups, metricColumn)}
           percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
           valueGetter={hideLabels ? undefined : 'percent'}
           valueFormatter={(d: number) => (hideLabels ? '' : formatters[metricColumn.id].convert(d))}

@@ -9,7 +9,7 @@ import { CoreSetup, CoreStart } from 'src/core/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { pieVisualization } from './pie_visualization';
 import { treemapVisualization } from './treemap_visualization';
-import { pie, getPieRenderer } from './expression';
+import { pie, getPieRenderer } from './register_expression';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { setExecuteTriggerActions } from './services';

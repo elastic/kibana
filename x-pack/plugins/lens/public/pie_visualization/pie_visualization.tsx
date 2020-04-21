@@ -4,17 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  SuggestionRequest,
-  Visualization,
-  VisualizationSuggestion,
-  OperationMetadata,
-} from '../types';
+import { Visualization, OperationMetadata } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import { LayerState, PieVisualizationState } from './types';
-import { CHART_NAMES } from './constants';
+import { pieSuggestions } from './suggestions';
+import { CHART_NAMES, MAX_PIE_BUCKETS } from './constants';
 
 function newLayerState(layerId: string): LayerState {
   return {
@@ -78,72 +73,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
 
   getPersistableState: state => state,
 
-  getSuggestions({
-    table,
-    state,
-    keptLayerIds,
-  }: SuggestionRequest<PieVisualizationState>): Array<
-    VisualizationSuggestion<PieVisualizationState>
-  > {
-    if (
-      keptLayerIds.length > 1 ||
-      (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
-      (state && table.changeType === 'unchanged') ||
-      table.columns.some(col => col.operation.dataType === 'date')
-    ) {
-      return [];
-    }
-
-    const [slices, metrics] = partition(table.columns, col => col.operation.isBucketed);
-
-    if (slices.length === 0 || metrics.length > 1) {
-      return [];
-    }
-
-    const title =
-      table.changeType === 'unchanged'
-        ? i18n.translate('xpack.lens.pie.suggestionLabel', {
-            defaultMessage: 'As {chartName}',
-            values: { chartName: state ? CHART_NAMES[state.shape].label : CHART_NAMES.donut.label },
-          })
-        : i18n.translate('xpack.lens.pie.suggestionOf', {
-            defaultMessage: '{chartName} {operations}',
-            values: {
-              chartName: state ? CHART_NAMES[state.shape].label : CHART_NAMES.donut.label,
-              operations:
-                table.label ||
-                table.columns
-                  .map(col => col.operation.label)
-                  .join(
-                    i18n.translate('xpack.lens.datatable.conjunctionSign', {
-                      defaultMessage: ' & ',
-                      description:
-                        'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
-                    })
-                  ),
-            },
-          });
-
-    return [
-      {
-        title,
-        score: 0.6,
-        state: {
-          shape: state ? state.shape : 'donut',
-          layers: [
-            {
-              layerId: table.layerId,
-              slices: slices.map(col => col.columnId),
-              metric: metrics[0].columnId,
-            },
-          ],
-        },
-        previewIcon: 'bullseye',
-        // dont show suggestions for reduced versions or single-line tables
-        hide: table.changeType === 'reduced',
-      },
-    ];
-  },
+  getSuggestions: pieSuggestions,
 
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find(l => l.layerId === layerId);
@@ -168,7 +98,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
           }),
           layerId,
           accessors: sortedColumns,
-          supportsMoreColumns: sortedColumns.length < 3,
+          supportsMoreColumns: sortedColumns.length < MAX_PIE_BUCKETS,
           filterOperations: bucketedOperations,
           required: true,
         },
