@@ -18,7 +18,6 @@ exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
           "indexPattern": undefined,
           "info": Array [],
           "name": "Elastic",
-          "routes": undefined,
           "searchable": true,
           "type": "name",
         },
@@ -46,7 +45,6 @@ exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
           "indexPattern": undefined,
           "info": Array [],
           "name": "timestamp",
-          "routes": undefined,
           "type": "date",
         },
       ]
@@ -73,7 +71,6 @@ exports[`IndexedFieldsTable should render normally 1`] = `
           "indexPattern": undefined,
           "info": Array [],
           "name": "Elastic",
-          "routes": undefined,
           "searchable": true,
           "type": "name",
         },
@@ -84,7 +81,6 @@ exports[`IndexedFieldsTable should render normally 1`] = `
           "indexPattern": undefined,
           "info": Array [],
           "name": "timestamp",
-          "routes": undefined,
           "type": "date",
         },
         Object {
@@ -94,7 +90,6 @@ exports[`IndexedFieldsTable should render normally 1`] = `
           "indexPattern": undefined,
           "info": Array [],
           "name": "conflictingField",
-          "routes": undefined,
           "type": "conflict",
         },
       ]
