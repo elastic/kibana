@@ -20,8 +20,7 @@ import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FLYOUT_STATE } from '../../../../../../plugins/maps/public/reducers/ui';
+import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettingsPanel } from '../map_settings_panel';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
