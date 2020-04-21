@@ -6,10 +6,8 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FLYOUT_STATE } from '../../../../../../plugins/maps/public/reducers/ui';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MapStoreState } from '../../../../../../plugins/maps/public/reducers/store';
+import { FLYOUT_STATE } from '../../reducers/ui';
+import { MapStoreState } from '../../reducers/store';
 import { MapSettingsPanel } from './map_settings_panel';
 import { rollbackMapSettings, updateMapSetting } from '../../actions/map_actions';
 import { getMapSettings, hasMapSettingsChanges } from '../../selectors/map_selectors';
