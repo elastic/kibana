@@ -21,6 +21,7 @@ export const deprecations = ({
   renameFromRoot,
 }: ConfigDeprecationFactory): ConfigDeprecation[] => {
   return [
+    // This order matters. The "blanket rename" needs to happen at the end
     renameFromRoot('xpack.monitoring.max_bucket_size', 'monitoring.ui.max_bucket_size'),
     renameFromRoot('xpack.monitoring.min_interval_seconds', 'monitoring.ui.min_interval_seconds'),
     renameFromRoot(
