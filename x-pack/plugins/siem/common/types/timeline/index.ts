@@ -208,6 +208,17 @@ export interface TimelineSavedObject
 /**
  * All Timeline Saved object type with metadata
  */
+export const TimelineResponseType = runtimeTypes.type({
+  code: runtimeTypes.number,
+  message: runtimeTypes.string,
+  timeline: TimelineSavedToReturnObjectRuntimeType,
+});
+
+export interface TimelineResponse extends runtimeTypes.TypeOf<typeof TimelineResponseType> {}
+
+/**
+ * All Timeline Saved object type with metadata
+ */
 
 export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
   total: runtimeTypes.number,

@@ -7,7 +7,7 @@
 import uuid from 'uuid';
 import { has } from 'lodash/fp';
 import { createBulkErrorObject, BulkError } from '../../../detection_engine/routes/utils';
-import { SavedTimeline } from '../../types';
+import { SavedTimeline } from '../../../../../common/types/timeline';
 import { NoteResult } from '../../../../graphql/types';
 import { HapiReadableStream } from '../../../detection_engine/rules/types';
 

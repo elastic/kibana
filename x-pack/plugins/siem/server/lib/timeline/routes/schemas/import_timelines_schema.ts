@@ -7,8 +7,10 @@ import * as rt from 'io-ts';
 
 import { Readable } from 'stream';
 import { either } from 'fp-ts/lib/Either';
+
+import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
+
 import { eventNotes, globalNotes, pinnedEventIds } from './schemas';
-import { SavedTimelineRuntimeType } from '../../types';
 
 export const ImportTimelinesSchemaRt = rt.intersection([
   SavedTimelineRuntimeType,

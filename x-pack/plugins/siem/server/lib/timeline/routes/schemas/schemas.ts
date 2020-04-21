@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as runtimeTypes from 'io-ts';
-import { unionWithNullType } from '../../../framework';
-import { SavedNoteRuntimeType } from '../../../note/types';
+import { unionWithNullType } from '../../../../../common/utility_types';
+import { SavedNoteRuntimeType } from '../../../../../common/types/timeline/note';
 
 export const eventNotes = runtimeTypes.array(unionWithNullType(SavedNoteRuntimeType));
 export const globalNotes = runtimeTypes.array(unionWithNullType(SavedNoteRuntimeType));

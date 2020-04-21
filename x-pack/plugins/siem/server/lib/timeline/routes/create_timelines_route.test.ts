@@ -19,7 +19,7 @@ import {
   createMockConfig,
 } from '../../detection_engine/routes/__mocks__';
 import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
-import { TimelineType } from '../types';
+import { TimelineType } from '../../../../common/types/timeline';
 
 import {
   mockGetCurrentUser,

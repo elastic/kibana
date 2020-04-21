@@ -7,7 +7,7 @@
 import uuid from 'uuid';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
-import { SavedTimeline, TimelineType } from './types';
+import { SavedTimeline, TimelineType } from '../../../common/types/timeline';
 
 export const pickSavedTimeline = (
   timelineId: string | null,

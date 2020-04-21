@@ -29,9 +29,9 @@ import {
 } from 'rxjs/operators';
 
 import { esFilters, Filter, MatchAllFilter } from '../../../../../../../src/plugins/data/public';
-import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
+// import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {
-  PersistTimelineMutation,
+  // PersistTimelineMutation,
   TimelineInput,
   ResponseTimeline,
   TimelineResult,
@@ -75,9 +75,10 @@ import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_p
 import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
 import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-import { refetchQueries } from './refetch_queries';
+// import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
+import { persistTimeline } from '../../containers/timeline/api';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
@@ -175,19 +176,24 @@ export const createTimelineEpic = <State>(): Epic<
           return epicPersistTimelineFavorite(apolloClient, action, timeline, action$, timeline$);
         } else if (timelineActionsType.includes(action.type)) {
           return from(
-            apolloClient.mutate<
-              PersistTimelineMutation.Mutation,
-              PersistTimelineMutation.Variables
-            >({
-              mutation: persistTimelineMutation,
-              fetchPolicy: 'no-cache',
-              variables: {
-                timelineId,
-                version,
-                timeline: convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
-              },
-              refetchQueries,
+            persistTimeline({
+              timelineId,
+              version,
+              timeline: convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
             })
+            // apolloClient.mutate<
+            //   PersistTimelineMutation.Mutation,
+            //   PersistTimelineMutation.Variables
+            // >({
+            //   mutation: persistTimelineMutation,
+            //   fetchPolicy: 'no-cache',
+            //   variables: {
+            //     timelineId,
+            //     version,
+            //     timeline: convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
+            //   },
+            //   refetchQueries,
+            // })
           ).pipe(
             withLatestFrom(timeline$),
             mergeMap(([result, recentTimeline]) => {

@@ -5,7 +5,7 @@
  */
 
 import { ElasticsearchMappingOf } from '../../utils/typed_elasticsearch_mappings';
-import { SavedNote } from './types';
+import { SavedNote } from '../../../common/types/timeline/note';
 
 export const noteSavedObjectType = 'siem-ui-timeline-note';
 

@@ -11,7 +11,7 @@ import {
 } from '../../../../../common/constants';
 import stream from 'stream';
 import { requestMock } from '../../../detection_engine/routes/__mocks__';
-import { SavedTimeline, TimelineType } from '../../types';
+import { SavedTimeline, TimelineType } from '../../../../../common/types/timeline';
 
 const readable = new stream.Readable();
 export const getExportTimelinesRequest = () =>

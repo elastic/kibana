@@ -10,8 +10,8 @@ import {
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
 } from '../../../../saved_objects';
-import { NoteSavedObject } from '../../../note/types';
-import { PinnedEventSavedObject } from '../../../pinned_event/types';
+import { NoteSavedObject } from '../../../../../common/types/timeline/note';
+import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
 import { convertSavedObjectToSavedTimeline } from '../../convert_saved_object_to_savedtimeline';
 
 import { convertSavedObjectToSavedPinnedEvent } from '../../../pinned_event/saved_object';
@@ -29,7 +29,7 @@ import {
   ExportedNotes,
   TimelineSavedObject,
   ExportTimelineNotFoundError,
-} from '../../types';
+} from '../../../../../common/types/timeline';
 import { transformDataToNdjson } from '../../../../utils/read_stream/create_stream_from_ndjson';
 
 export type TimelineSavedObjectsClient = Pick<

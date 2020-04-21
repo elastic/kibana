@@ -5,8 +5,9 @@
  */
 
 import * as rt from 'io-ts';
-import { unionWithNullType } from '../../../framework';
-import { SavedTimelineRuntimeType } from '../../types';
+
+import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
+import { unionWithNullType } from '../../../../../common/utility_types';
 
 export const updateTimelineSchema = rt.type({
   timeline: SavedTimelineRuntimeType,
