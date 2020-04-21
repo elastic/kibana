@@ -52,6 +52,7 @@ export const ExpressionEditor: React.FC<Props> = props => {
   const { createDerivedIndexPattern } = useSource({ sourceId: 'default' });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
+  const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('logs'), [
     createDerivedIndexPattern,
   ]);
@@ -70,6 +71,7 @@ export const ExpressionEditor: React.FC<Props> = props => {
   useEffect(() => {
     for (const [key, value] of Object.entries(DEFAULT_EXPRESSION)) {
       setAlertParams(key, value);
+      setHasSetDefaults(true);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -126,6 +128,8 @@ export const ExpressionEditor: React.FC<Props> = props => {
 
   // Wait until field info has loaded
   if (supportedFields.length === 0) return null;
+  // Wait until the alert param defaults have been set
+  if (!hasSetDefaults) return null;
 
   return (
     <>

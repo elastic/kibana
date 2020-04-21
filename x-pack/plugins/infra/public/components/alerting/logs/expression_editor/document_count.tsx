@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiPopoverTitle,
   EuiFlexItem,
@@ -17,17 +18,29 @@ import {
 } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
-import { Comparator, LogDocumentCountAlertParams } from '../../../../../common/alerting/logs/types';
+import {
+  Comparator,
+  ComparatorToi18nMap,
+  LogDocumentCountAlertParams,
+} from '../../../../../common/alerting/logs/types';
+
+const documentCountPrefix = i18n.translate('xpack.infra.logs.alertFlyout.documentCountPrefix', {
+  defaultMessage: 'when',
+});
+
+const documentCountValue = i18n.translate('xpack.infra.logs.alertFlyout.documentCountValue', {
+  defaultMessage: 'Log entries',
+});
 
 const getComparatorOptions = (): Array<{
   value: Comparator;
-  text: Comparator;
+  text: string;
 }> => {
   return [
-    { value: Comparator.LT, text: Comparator.LT },
-    { value: Comparator.LT_OR_EQ, text: Comparator.LT_OR_EQ },
-    { value: Comparator.GT, text: Comparator.GT },
-    { value: Comparator.GT_OR_EQ, text: Comparator.GT_OR_EQ },
+    { value: Comparator.LT, text: ComparatorToi18nMap[Comparator.LT] },
+    { value: Comparator.LT_OR_EQ, text: ComparatorToi18nMap[Comparator.LT_OR_EQ] },
+    { value: Comparator.GT, text: ComparatorToi18nMap[Comparator.GT] },
+    { value: Comparator.GT_OR_EQ, text: ComparatorToi18nMap[Comparator.GT_OR_EQ] },
   ];
 };
 
@@ -49,9 +62,9 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
           id="comparator"
           button={
             <EuiExpression
-              description="when"
+              description={documentCountPrefix}
               uppercase={true}
-              value={comparator}
+              value={comparator ? ComparatorToi18nMap[comparator] : ''}
               isActive={isComparatorPopoverOpen}
               onClick={() => setComparatorPopoverOpenState(true)}
             />
@@ -63,7 +76,7 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
           anchorPosition="downLeft"
         >
           <div>
-            <EuiPopoverTitle>WHEN</EuiPopoverTitle>
+            <EuiPopoverTitle>{documentCountPrefix}</EuiPopoverTitle>
             <EuiSelect
               compressed
               value={comparator}
@@ -81,7 +94,7 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
             <EuiExpression
               description={value}
               uppercase={true}
-              value={'log entries'}
+              value={documentCountValue}
               isActive={isValuePopoverOpen}
               onClick={() => setIsValuePopoverOpen(true)}
               color={errors.value.length === 0 ? 'secondary' : 'danger'}
@@ -94,7 +107,7 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
           anchorPosition="downLeft"
         >
           <div>
-            <EuiPopoverTitle>LOG ENTRIES</EuiPopoverTitle>
+            <EuiPopoverTitle>{documentCountValue}</EuiPopoverTitle>
             <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
               <EuiFieldNumber
                 compressed

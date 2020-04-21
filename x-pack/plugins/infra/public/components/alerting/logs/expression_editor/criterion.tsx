@@ -21,29 +21,61 @@ import { i18n } from '@kbn/i18n';
 import { IFieldType } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
-import { Comparator, Criterion as CriterionType } from '../../../../../common/alerting/logs/types';
+import {
+  Comparator,
+  Criterion as CriterionType,
+  ComparatorToi18nMap,
+} from '../../../../../common/alerting/logs/types';
+
+const firstCriterionFieldPrefix = i18n.translate(
+  'xpack.infra.logs.alertFlyout.firstCriterionFieldPrefix',
+  {
+    defaultMessage: 'with',
+  }
+);
+
+const successiveCriterionFieldPrefix = i18n.translate(
+  'xpack.infra.logs.alertFlyout.successiveCriterionFieldPrefix',
+  {
+    defaultMessage: 'and',
+  }
+);
+
+const criterionFieldTitle = i18n.translate('xpack.infra.logs.alertFlyout.criterionFieldTitle', {
+  defaultMessage: 'Field',
+});
+
+const criterionComparatorValueTitle = i18n.translate(
+  'xpack.infra.logs.alertFlyout.criterionComparatorValueTitle',
+  {
+    defaultMessage: 'Comparison : Value',
+  }
+);
 
 const getCompatibleComparatorsForField = (fieldInfo: IFieldType | undefined) => {
   if (fieldInfo?.type === 'number') {
     return [
-      { value: Comparator.GT, text: Comparator.GT },
-      { value: Comparator.GT_OR_EQ, text: Comparator.GT_OR_EQ },
-      { value: Comparator.LT, text: Comparator.LT },
-      { value: Comparator.LT_OR_EQ, text: Comparator.LT_OR_EQ },
-      { value: Comparator.EQ, text: Comparator.EQ },
-      { value: Comparator.NOT_EQ, text: Comparator.NOT_EQ },
+      { value: Comparator.GT, text: ComparatorToi18nMap[Comparator.GT] },
+      { value: Comparator.GT_OR_EQ, text: ComparatorToi18nMap[Comparator.GT_OR_EQ] },
+      { value: Comparator.LT, text: ComparatorToi18nMap[Comparator.LT] },
+      { value: Comparator.LT_OR_EQ, text: ComparatorToi18nMap[Comparator.LT_OR_EQ] },
+      { value: Comparator.EQ, text: ComparatorToi18nMap[Comparator.EQ] },
+      { value: Comparator.NOT_EQ, text: ComparatorToi18nMap[Comparator.NOT_EQ] },
     ];
   } else if (fieldInfo?.aggregatable) {
     return [
-      { value: Comparator.EQ, text: Comparator.EQ },
-      { value: Comparator.NOT_EQ, text: Comparator.NOT_EQ },
+      { value: Comparator.EQ, text: ComparatorToi18nMap[Comparator.EQ] },
+      { value: Comparator.NOT_EQ, text: ComparatorToi18nMap[Comparator.NOT_EQ] },
     ];
   } else {
     return [
-      { value: Comparator.MATCH, text: Comparator.MATCH },
-      { value: Comparator.NOT_MATCH, text: Comparator.NOT_MATCH },
-      { value: Comparator.MATCH_PHRASE, text: Comparator.MATCH_PHRASE },
-      { value: Comparator.NOT_MATCH_PHRASE, text: Comparator.NOT_MATCH_PHRASE },
+      { value: Comparator.MATCH, text: ComparatorToi18nMap[Comparator.MATCH] },
+      { value: Comparator.NOT_MATCH, text: ComparatorToi18nMap[Comparator.NOT_MATCH] },
+      { value: Comparator.MATCH_PHRASE, text: ComparatorToi18nMap[Comparator.MATCH_PHRASE] },
+      {
+        value: Comparator.NOT_MATCH_PHRASE,
+        text: ComparatorToi18nMap[Comparator.NOT_MATCH_PHRASE],
+      },
     ];
   }
 };
@@ -121,7 +153,7 @@ export const Criterion: React.FC<Props> = ({
           id="criterion-field"
           button={
             <EuiExpression
-              description={idx === 0 ? 'with' : 'and'}
+              description={idx === 0 ? firstCriterionFieldPrefix : successiveCriterionFieldPrefix}
               uppercase={true}
               value={criterion.field}
               isActive={isFieldPopoverOpen}
@@ -136,7 +168,7 @@ export const Criterion: React.FC<Props> = ({
           anchorPosition="downLeft"
         >
           <div>
-            <EuiPopoverTitle>Field</EuiPopoverTitle>
+            <EuiPopoverTitle>{criterionFieldTitle}</EuiPopoverTitle>
             <EuiFormRow isInvalid={errors.field.length > 0} error={errors.field}>
               <EuiSelect
                 compressed
@@ -170,7 +202,7 @@ export const Criterion: React.FC<Props> = ({
           anchorPosition="downLeft"
         >
           <div>
-            <EuiPopoverTitle>Comparison : Value</EuiPopoverTitle>
+            <EuiPopoverTitle>{criterionComparatorValueTitle}</EuiPopoverTitle>
             <EuiFormRow isInvalid={errors.comparator.length > 0} error={errors.comparator}>
               <EuiSelect
                 compressed
@@ -183,7 +215,7 @@ export const Criterion: React.FC<Props> = ({
               {fieldInfo?.type === 'number' ? (
                 <EuiFieldNumber
                   compressed
-                  value={criterion.value as number}
+                  value={criterion.value as number | undefined}
                   onChange={e => {
                     const number = parseInt(e.target.value, 10);
                     updateCriterion(idx, { value: number ? number : undefined });
