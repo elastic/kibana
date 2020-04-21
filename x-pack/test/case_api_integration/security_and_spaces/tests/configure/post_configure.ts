@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  describe('get_configure', () => {
+  describe('post_configure', () => {
     beforeEach(async () => {
       await deleteConfiguration(es);
     });
@@ -29,17 +29,24 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteConfiguration(es);
     });
 
-    it('should return an empty find body correctly if no configuration is loaded', async () => {
+    it('should create a configuration', async () => {
       const { body } = await supertest
-        .get(CASE_CONFIGURE_URL)
+        .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
-        .send()
+        .send(getConfiguration())
         .expect(200);
 
-      expect(body).to.eql({});
+      const data = removeServerGeneratedPropertiesFromConfigure(body);
+      expect(data).to.eql(getConfigurationOutput());
     });
 
-    it('should return a configuration', async () => {
+    it('should keep only the latest configuration', async () => {
+      await supertest
+        .post(CASE_CONFIGURE_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getConfiguration('connector-2'))
+        .expect(200);
+
       await supertest
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
