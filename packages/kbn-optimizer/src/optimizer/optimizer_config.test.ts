@@ -146,6 +146,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/x-pack/plugins,
           <absolute path>/plugins,
           <absolute path>/examples,
+          <absolute path>/x-pack/examples,
           <absolute path>-extra,
         ],
         "profileWebpack": false,

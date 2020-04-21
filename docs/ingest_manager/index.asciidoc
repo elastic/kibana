@@ -113,7 +113,7 @@ Ingest Management enforces an indexing strategy to allow the system to automatic
 {type}-{dataset}-{namespace}
 ```
 
-The `{type}` can be `logs` or `metrics`. The `{namespace}` is the part where the user can use free form. The only two requirement are that it has only characters allowed in an Elasticsearch index name and does NOT contain a `-`. The `dataset` is defined by the data that is indexed. The same requirements as for the namespace apply. It is expected that the fields for type, namespace and dataset are part of each event and are constant keywords.
+The `{type}` can be `logs` or `metrics`. The `{namespace}` is the part where the user can use free form. The only two requirement are that it has only characters allowed in an Elasticsearch index name and does NOT contain a `-`. The `dataset` is defined by the data that is indexed. The same requirements as for the namespace apply. It is expected that the fields for type, namespace and dataset are part of each event and are constant keywords. If there is a dataset or a namespace with a `-` inside, it is recommended to replace it either by a `.` or a `_`.
 
 Note: More `{type}`s might be added in the future like `apm` and `endpoint`.
 
@@ -125,6 +125,8 @@ This indexing strategy has a few advantages:
 * Having the namespace user configurable makes setting security permissions possible.
 * Having a global metrics and logs template, allows to create new indices on demand which still follow the convention. This is common in the case of k8s as an example.
 * Constant keywords allow to narrow down the indices we need to access for querying very efficiently. This is especially relevant in environments which a large number of indices or with indices on slower nodes.
+
+Overall it creates smaller indices in size, makes querying more efficient and allows users to define their own naming parts in namespace and still benefiting from all features that can be built on top of the indexing startegy.
 
 === Ingest Pipeline
 
