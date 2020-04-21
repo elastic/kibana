@@ -81,7 +81,7 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
             .screenshotPage()
             .then(lastScreen => {
               resolve({
-                content_type: 'image/jpeg',
+                content_type: 'image/png',
                 content: lastScreen.toString('base64'),
                 size: lastScreen.byteLength,
                 warnings: ['PDF export timed out, debug screenshot captured'],

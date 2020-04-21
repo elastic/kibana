@@ -63,8 +63,7 @@ export class HeadlessChromiumDriverFactory {
     }
 
     return this.page.screenshot({
-      type: 'jpeg',
-      quality: 50,
+      type: 'png',
       fullPage: true,
     });
   }
