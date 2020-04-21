@@ -18,7 +18,7 @@
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createTableVisFn } from './table_vis_fn';
 import { getTableVisTypeDefinition } from './table_vis_type';
@@ -34,7 +34,6 @@ export interface TablePluginSetupDependencies {
 /** @internal */
 export interface TablePluginStartDependencies {
   data: DataPublicPluginStart;
-  visualizations: VisualizationsStart;
 }
 
 /** @internal */
@@ -56,7 +55,7 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
     );
   }
 
-  public start(core: CoreStart, { data, visualizations }: TablePluginStartDependencies) {
+  public start(core: CoreStart, { data }: TablePluginStartDependencies) {
     setFormatService(data.fieldFormats);
   }
 }

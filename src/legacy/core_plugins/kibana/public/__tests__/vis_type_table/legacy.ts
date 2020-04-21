@@ -35,5 +35,4 @@ const pluginInstance = new TableVisPlugin({} as PluginInitializerContext);
 export const setup = pluginInstance.setup(npSetup.core, plugins);
 export const start = pluginInstance.start(npStart.core, {
   data: npStart.plugins.data,
-  visualizations: npStart.plugins.visualizations,
 });
