@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
-
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createTableVisFn } from './table_vis_fn';
-import { tableVisTypeDefinition } from './table_vis_type';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { getTableVisTypeDefinition } from './table_vis_type';
+import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService } from './services';
 
 /** @internal */
@@ -40,6 +39,7 @@ export interface TablePluginStartDependencies {
 /** @internal */
 export class TableVisPlugin implements Plugin<Promise<void>, void> {
   initializerContext: PluginInitializerContext;
+  createBaseVisualization: any;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -50,8 +50,9 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
     { expressions, visualizations }: TablePluginSetupDependencies
   ) {
     expressions.registerFunction(createTableVisFn);
-
-    visualizations.createBaseVisualization(tableVisTypeDefinition);
+    visualizations.createBaseVisualization(
+      getTableVisTypeDefinition(core, this.initializerContext)
+    );
   }
 
   public start(core: CoreStart, { data }: TablePluginStartDependencies) {

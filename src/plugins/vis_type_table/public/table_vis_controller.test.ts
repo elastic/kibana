@@ -26,24 +26,23 @@ import $ from 'jquery';
 import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
-import { tableVisTypeDefinition } from './table_vis_type';
-import { Vis } from '../../../../plugins/visualizations/public';
+import { getTableVisTypeDefinition } from './table_vis_type';
+import { Vis } from '../../visualizations/public';
 // eslint-disable-next-line
-import { stubFields } from '../../../../plugins/data/public/stubs';
+import { stubFields } from '../../data/public/stubs';
 // eslint-disable-next-line
 import { tableVisResponseHandler } from './table_vis_response_handler';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from '../../../core/public/mocks';
+import { IAggConfig, search } from '../../data/public';
+// TODO: remove linting disable
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart } from './legacy_imports';
-import { IAggConfig, search } from '../../../../plugins/data/public';
+import { searchStartMock } from '../../data/public/search/mocks';
 
-// should be mocked once get rid of 'ui/new_platform' legacy imports
-const { createAggConfigs } = npStart.plugins.data.search.aggs;
+const { createAggConfigs } = searchStartMock.aggs;
 
 const { tabifyAggResponse } = search;
 
-jest.mock('ui/new_platform');
-jest.mock('../../../../plugins/kibana_legacy/public/angular/angular_config', () => ({
+jest.mock('../../kibana_legacy/public/angular/angular_config', () => ({
   configureAppAngularModule: () => {},
 }));
 
@@ -89,7 +88,11 @@ describe('Table Vis - Controller', () => {
   let stubIndexPattern: any;
 
   const initLocalAngular = () => {
-    const tableVisModule = getAngularModule('kibana/table_vis', coreMock.createStart());
+    const tableVisModule = getAngularModule(
+      'kibana/table_vis',
+      coreMock.createStart(),
+      coreMock.createPluginInitializerContext()
+    );
     initTableVisLegacyModule(tableVisModule);
   };
 
@@ -110,9 +113,13 @@ describe('Table Vis - Controller', () => {
       (cfg: any) => cfg,
       'time',
       stubFields,
-      coreMock.createStart()
+      coreMock.createSetup()
     );
   });
+  const tableVisTypeDefinition = getTableVisTypeDefinition(
+    coreMock.createSetup(),
+    coreMock.createPluginInitializerContext()
+  );
 
   function getRangeVis(params?: object) {
     return ({
