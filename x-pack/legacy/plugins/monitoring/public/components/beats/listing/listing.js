@@ -59,7 +59,7 @@ export class Listing extends PureComponent {
           return (
             <div>
               <EuiLink
-                href={getSafeForExternalLink(`/beats/beat/${beat.uuid}`)}
+                href={getSafeForExternalLink(`#/beats/beat/${beat.uuid}`)}
                 data-test-subj={`beatLink-${name}`}
               >
                 {name}
