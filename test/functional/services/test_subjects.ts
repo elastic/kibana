@@ -45,6 +45,9 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
 
   class TestSubjects {
+    findByCssSelector(arg0: string) {
+      throw new Error('Method not implemented.');
+    }
     public async exists(selector: string, options: ExistsOptions = {}): Promise<boolean> {
       const { timeout = WAIT_FOR_EXISTS_TIME, allowHidden = false } = options;
 
