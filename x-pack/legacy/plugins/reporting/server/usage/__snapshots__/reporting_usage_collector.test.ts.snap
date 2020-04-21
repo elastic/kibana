@@ -1,5 +1,95 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`data modeling with empty data 1`] = `
+Object {
+  "PNG": Object {
+    "available": true,
+    "total": 0,
+  },
+  "_all": 0,
+  "available": true,
+  "browser_type": undefined,
+  "csv": Object {
+    "available": true,
+    "total": 0,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "available": true,
+      "total": 0,
+    },
+    "_all": 0,
+    "csv": Object {
+      "available": true,
+      "total": 0,
+    },
+    "printable_pdf": Object {
+      "app": Object {
+        "dashboard": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "layout": Object {
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 0,
+      "failed": 0,
+    },
+    "status_by_app": Object {},
+  },
+  "lastDay": Object {
+    "PNG": Object {
+      "available": true,
+      "total": 0,
+    },
+    "_all": 0,
+    "csv": Object {
+      "available": true,
+      "total": 0,
+    },
+    "printable_pdf": Object {
+      "app": Object {
+        "dashboard": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "layout": Object {
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 0,
+      "failed": 0,
+    },
+    "status_by_app": Object {},
+  },
+  "printable_pdf": Object {
+    "app": Object {
+      "dashboard": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "layout": Object {
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "status": Object {
+    "completed": 0,
+    "failed": 0,
+  },
+  "status_by_app": Object {},
+}
+`;
+
 exports[`data modeling with normal looking usage data 1`] = `
 Object {
   "PNG": Object {
@@ -122,6 +212,102 @@ Object {
     "failed": Object {
       "visualization": 3,
     },
+  },
+}
+`;
+
+exports[`data modeling with sparse data 1`] = `
+Object {
+  "PNG": Object {
+    "available": true,
+    "total": 0,
+  },
+  "_all": 1,
+  "available": true,
+  "browser_type": undefined,
+  "csv": Object {
+    "available": true,
+    "total": 1,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "available": true,
+      "total": 0,
+    },
+    "_all": 1,
+    "csv": Object {
+      "available": true,
+      "total": 1,
+    },
+    "printable_pdf": Object {
+      "app": Object {
+        "dashboard": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "layout": Object {
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 1,
+      "failed": 0,
+    },
+    "status_by_app": Object {
+      "completed": Object {},
+    },
+  },
+  "lastDay": Object {
+    "PNG": Object {
+      "available": true,
+      "total": 0,
+    },
+    "_all": 1,
+    "csv": Object {
+      "available": true,
+      "total": 1,
+    },
+    "printable_pdf": Object {
+      "app": Object {
+        "dashboard": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "layout": Object {
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 1,
+      "failed": 0,
+    },
+    "status_by_app": Object {
+      "completed": Object {},
+    },
+  },
+  "printable_pdf": Object {
+    "app": Object {
+      "dashboard": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "layout": Object {
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "status": Object {
+    "completed": 1,
+    "failed": 0,
+  },
+  "status_by_app": Object {
+    "completed": Object {},
   },
 }
 `;

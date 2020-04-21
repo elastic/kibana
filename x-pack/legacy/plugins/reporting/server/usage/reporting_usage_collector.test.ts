@@ -219,6 +219,70 @@ describe('data modeling', () => {
     const usageStats = await fetch(callClusterMock as any);
     expect(usageStats).toMatchSnapshot();
   });
+
+  test('with sparse data', async () => {
+    const mockConfig = getMockReportingConfig();
+    const plugins = getPluginsMock();
+    const { fetch } = getReportingUsageCollector(
+      mockConfig,
+      plugins.usageCollection,
+      plugins.__LEGACY.plugins.xpack_main.info,
+      exportTypesRegistry,
+      function isReady() {
+        return Promise.resolve(true);
+      }
+    );
+    const callClusterMock = jest.fn(() =>
+      Promise.resolve(
+        getResponseMock({
+          aggregations: {
+            ranges: {
+              buckets: {
+                all: { doc_count: 1, jobTypes: { buckets: [ { doc_count: 1, key: 'csv', }, ], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [ { appNames: { buckets: [], }, doc_count: 1, key: 'completed', }, ], }, statusTypes: { buckets: [ { doc_count: 1, key: 'completed', }, ], }, },
+                last7Days: { doc_count: 1, jobTypes: { buckets: [ { doc_count: 1, key: 'csv', }, ], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [ { appNames: { buckets: [], }, doc_count: 1, key: 'completed', }, ], }, statusTypes: { buckets: [ { doc_count: 1, key: 'completed', }, ], }, },
+                lastDay: { doc_count: 1, jobTypes: { buckets: [ { doc_count: 1, key: 'csv', }, ], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [ { appNames: { buckets: [], }, doc_count: 1, key: 'completed', }, ], }, statusTypes: { buckets: [ { doc_count: 1, key: 'completed', }, ], }, },
+              },
+            },
+          },
+        } as SearchResponse) // prettier-ignore
+      )
+    );
+
+    const usageStats = await fetch(callClusterMock as any);
+    expect(usageStats).toMatchSnapshot();
+  });
+
+  test('with empty data', async () => {
+    const mockConfig = getMockReportingConfig();
+    const plugins = getPluginsMock();
+    const { fetch } = getReportingUsageCollector(
+      mockConfig,
+      plugins.usageCollection,
+      plugins.__LEGACY.plugins.xpack_main.info,
+      exportTypesRegistry,
+      function isReady() {
+        return Promise.resolve(true);
+      }
+    );
+    const callClusterMock = jest.fn(() =>
+      Promise.resolve(
+        getResponseMock({
+          aggregations: {
+            ranges: {
+              buckets: {
+                all: { doc_count: 0, jobTypes: { buckets: [], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [], }, statusTypes: { buckets: [], }, },
+                last7Days: { doc_count: 0, jobTypes: { buckets: [], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [], }, statusTypes: { buckets: [], }, },
+                lastDay: { doc_count: 0, jobTypes: { buckets: [], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [], }, statusTypes: { buckets: [], }, },
+              },
+            },
+          },
+        } as SearchResponse) // prettier-ignore
+      )
+    );
+
+    const usageStats = await fetch(callClusterMock as any);
+    expect(usageStats).toMatchSnapshot();
+  });
 });
 
 describe('Ready for collection observable', () => {
