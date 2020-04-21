@@ -18,12 +18,6 @@
  */
 
 import _ from 'lodash';
-import {
-  AxisModes,
-  AxisTypes,
-  Positions,
-  ScaleTypes,
-} from '../../../../legacy/core_plugins/vis_type_vislib/public/utils/collections';
 
 /**
  * Will figure out if an heatmap state was saved before the auto coloring
@@ -98,13 +92,13 @@ function convertSeriesParams(visState) {
       {
         id: 'ValueAxis-1',
         name: 'LeftAxis-1',
-        type: AxisTypes.VALUE,
-        position: Positions.LEFT,
+        type: 'value',
+        position: 'left',
         show: true,
         style: {},
         scale: {
-          type: ScaleTypes.LINEAR,
-          mode: AxisModes.NORMAL,
+          type: 'linear',
+          mode: 'normal',
         },
         labels: {
           show: true,
