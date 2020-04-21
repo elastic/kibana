@@ -25,18 +25,16 @@ export interface EmbeddableContext {
   embeddable: IEmbeddable;
 }
 
-interface EventData {
-  table: Pick<KibanaDatatable, 'rows' | 'columns'>;
-  column: number;
-  row: number;
-  value: any;
-}
-
 export interface ValueClickTriggerContext {
   embeddable?: IEmbeddable;
   timeFieldName?: string;
   data: {
-    data: EventData[];
+    data: Array<{
+      table: Pick<KibanaDatatable, 'rows' | 'columns'>;
+      column: number;
+      row: number;
+      value: any;
+    }>;
     negate?: boolean;
   };
 }
