@@ -33,7 +33,7 @@ const searchStartMock: jest.Mocked<ISearchStart> = {
   setInterceptor: jest.fn(),
   search: jest.fn(),
   searchSource: {
-    create: jest.fn(() => searchSourceMock),
+    create: jest.fn().mockReturnValue(searchSourceMock),
     fromJSON: jest.fn(),
   },
   __LEGACY: {
