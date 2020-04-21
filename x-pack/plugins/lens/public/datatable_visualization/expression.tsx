@@ -15,7 +15,6 @@ import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions/public';
-import { BUCKET_TYPES } from '../../../../../src/plugins/data/public';
 import { VisualizationContainer } from '../visualization_container';
 import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
@@ -36,6 +35,12 @@ export interface DatatableProps {
   data: LensMultiTable;
   args: Args;
 }
+
+type DatatableRenderProps = DatatableProps & {
+  formatFactory: FormatFactory;
+  executeTriggerActions: UiActionsStart['executeTriggerActions'];
+  getType: Function;
+};
 
 export interface DatatableRender {
   type: 'render';
@@ -112,9 +117,10 @@ export const datatableColumns: ExpressionFunctionDefinition<
   },
 };
 
-export const getDatatableRenderer = (
-  formatFactory: Promise<FormatFactory>
-): ExpressionRenderDefinition<DatatableProps> => ({
+export const getDatatableRenderer = (dependencies: {
+  formatFactory: Promise<FormatFactory>;
+  getType: Promise<Function>;
+}): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
     defaultMessage: 'Datatable',
@@ -127,13 +133,15 @@ export const getDatatableRenderer = (
     config: DatatableProps,
     handlers: IInterpreterRenderHandlers
   ) => {
-    const resolvedFormatFactory = await formatFactory;
+    const resolvedFormatFactory = await dependencies.formatFactory;
     const executeTriggerActions = getExecuteTriggerActions();
+    const resolvedGetType = await dependencies.getType;
     ReactDOM.render(
       <DatatableComponent
         {...config}
         formatFactory={resolvedFormatFactory}
         executeTriggerActions={executeTriggerActions}
+        getType={resolvedGetType}
       />,
       domNode,
       () => {
@@ -144,12 +152,7 @@ export const getDatatableRenderer = (
   },
 });
 
-function DatatableComponent(
-  props: DatatableProps & {
-    formatFactory: FormatFactory;
-    executeTriggerActions: UiActionsStart['executeTriggerActions'];
-  }
-) {
+function DatatableComponent(props: DatatableRenderProps) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
@@ -192,9 +195,7 @@ function DatatableComponent(
             const col = firstTable.columns.find(c => c.id === field);
             const colIndex = firstTable.columns.findIndex(c => c.id === field);
 
-            const filterable = Boolean(
-              Object.values(BUCKET_TYPES).find(bucketType => bucketType === col?.meta?.type)
-            );
+            const filterable = col?.meta?.type && props.getType(col.meta.type)?.type === 'buckets';
             return {
               field,
               name: (col && col.name) || '',
