@@ -94,7 +94,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.apiUrlTextFieldLabel',
           {
-            defaultMessage: 'API URL',
+            defaultMessage: 'API URL (optional)',
           }
         )}
       >
@@ -118,7 +118,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         fullWidth
         helpText={
           <EuiLink
-            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-pagerduty.html#configuring-pagerduty"
+            href="https://www.elastic.co/guide/en/kibana/current/pagerduty-action-type.html"
             target="_blank"
           >
             <FormattedMessage
@@ -132,7 +132,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyTextFieldLabel',
           {
-            defaultMessage: 'Routing key',
+            defaultMessage: 'Integration key',
           }
         )}
       >
@@ -175,20 +175,20 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   } = actionParams;
   const severityOptions = [
     {
-      value: 'info',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectInfoOptionLabel',
-        {
-          defaultMessage: 'Info',
-        }
-      ),
-    },
-    {
       value: 'critical',
       text: i18n.translate(
         'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectCriticalOptionLabel',
         {
           defaultMessage: 'Critical',
+        }
+      ),
+    },
+    {
+      value: 'error',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectErrorOptionLabel',
+        {
+          defaultMessage: 'Error',
         }
       ),
     },
@@ -202,11 +202,11 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
       ),
     },
     {
-      value: 'error',
+      value: 'info',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectErrorOptionLabel',
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectInfoOptionLabel',
         {
-          defaultMessage: 'Error',
+          defaultMessage: 'Info',
         }
       ),
     },
