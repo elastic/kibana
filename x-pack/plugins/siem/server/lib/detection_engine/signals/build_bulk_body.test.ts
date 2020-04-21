@@ -59,7 +59,7 @@ describe('buildBulkBody', () => {
             depth: 1,
           },
         ],
-        original_time: 'someTimeStamp',
+        original_time: '2020-04-20T21:27:45+0000',
         status: 'open',
         rule: {
           actions: [],
@@ -185,7 +185,7 @@ describe('buildBulkBody', () => {
             depth: 1,
           },
         ],
-        original_time: 'someTimeStamp',
+        original_time: '2020-04-20T21:27:45+0000',
         status: 'open',
         rule: {
           actions: [],
@@ -309,7 +309,7 @@ describe('buildBulkBody', () => {
             depth: 1,
           },
         ],
-        original_time: 'someTimeStamp',
+        original_time: '2020-04-20T21:27:45+0000',
         status: 'open',
         rule: {
           actions: [],
@@ -426,7 +426,7 @@ describe('buildBulkBody', () => {
             depth: 1,
           },
         ],
-        original_time: 'someTimeStamp',
+        original_time: '2020-04-20T21:27:45+0000',
         status: 'open',
         rule: {
           actions: [],
