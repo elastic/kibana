@@ -9,8 +9,9 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 
+import { formatErrors } from '../../../../utils/build_validation/format_errors';
+import { exactCheck } from '../../../../utils/build_validation/exact_check';
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
-import { formatErrors } from '../schemas/response/utils';
 import {
   isAlertType,
   IRuleSavedAttributesSavedObjectAttributes,
@@ -19,7 +20,6 @@ import {
 import { OutputRuleAlertRest } from '../../types';
 import { createBulkErrorObject, BulkError } from '../utils';
 import { rulesSchema, RulesSchema } from '../schemas/response/rules_schema';
-import { exactCheck } from '../schemas/response/exact_check';
 import { transformFindAlerts, transform, transformAlertToRule } from './utils';
 import { findRulesSchema } from '../schemas/response/find_rules_schema';
 import { RuleActions } from '../../rule_actions/types';

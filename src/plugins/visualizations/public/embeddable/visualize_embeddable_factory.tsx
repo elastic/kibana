@@ -25,7 +25,7 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   IContainer,
-} from '../../../../plugins/embeddable/public';
+} from '../../../embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
@@ -39,9 +39,15 @@ import {
 import { showNewVisModal } from '../wizard';
 import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
+import { StartServicesGetter } from '../../../kibana_utils/public';
+import { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
+}
+
+export interface VisualizeEmbeddableFactoryDeps {
+  start: StartServicesGetter<Pick<VisualizationsStartDeps, 'inspector'>>;
 }
 
 export class VisualizeEmbeddableFactory
@@ -79,7 +85,8 @@ export class VisualizeEmbeddableFactory
       return visType.stage !== 'experimental';
     },
   };
-  constructor() {}
+
+  constructor(private readonly deps: VisualizeEmbeddableFactoryDeps) {}
 
   public async isEditable() {
     return getCapabilities().visualize.save as boolean;
@@ -101,7 +108,7 @@ export class VisualizeEmbeddableFactory
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
       const vis = new Vis(savedObject.visState.type, await convertToSerializedVis(savedObject));
-      return createVisEmbeddableFromObject(vis, input, parent);
+      return createVisEmbeddableFromObject(this.deps)(vis, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
