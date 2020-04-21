@@ -192,21 +192,19 @@ module.exports = {
                 from: [
                   'src/core/public/**/*',
                   '!src/core/public/index.ts', // relative import
-                  '!src/core/public/mocks',
-                  '!src/core/public/mocks.ts', // relative import
-                  '!src/core/public/*.test.mocks',
+                  '!src/core/public/mocks{,.ts}',
+                  '!src/core/server/types{,.ts}',
                   '!src/core/public/utils/**/*',
+                  '!src/core/public/*.test.mocks{,.ts}',
 
                   'src/core/server/**/*',
                   '!src/core/server/index.ts', // relative import
-                  '!src/core/server/mocks',
-                  '!src/core/server/mocks.ts', // relative import
-                  '!src/core/server/types',
-                  '!src/core/server/types.ts',
+                  '!src/core/server/mocks{,.ts}',
+                  '!src/core/server/types{,.ts}',
                   '!src/core/server/test_utils',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
-                  '!src/core/server/*.test.mocks',
+                  '!src/core/server/*.test.mocks{,.ts}',
                 ],
                 allowSameFolder: true,
                 errorMessage:
