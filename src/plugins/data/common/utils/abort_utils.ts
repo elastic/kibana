@@ -40,11 +40,13 @@ export class AbortError extends Error {
 export function toPromise(signal: AbortSignal, shouldReject?: false): Promise<undefined | Event>;
 export function toPromise(signal: AbortSignal, shouldReject?: true): Promise<never>;
 export function toPromise(signal: AbortSignal, shouldReject: boolean = false) {
-  return new Promise((resolve, reject) => {
+  const promise = new Promise((resolve, reject) => {
     const action = shouldReject ? reject : resolve;
     if (signal.aborted) action();
     signal.addEventListener('abort', action);
   });
+  promise.catch(() => {});
+  return promise;
 }
 
 /**
