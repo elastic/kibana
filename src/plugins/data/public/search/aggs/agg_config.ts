@@ -28,11 +28,17 @@ import { ISearchSource } from '../search_source';
 import { FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../common';
 import { FieldFormatsStart } from '../../field_formats';
 
+type State = string | number | boolean | null | undefined | SerializableState;
+
+interface SerializableState {
+  [key: string]: AggConfigSerialized | State | State[];
+}
+
 export interface AggConfigSerialized {
   type: string;
   enabled?: boolean;
   id?: string;
-  params?: Record<string, any>; // TODO: this should enforce serializable state
+  params?: SerializableState;
   schema?: string;
 }
 
@@ -260,7 +266,10 @@ export class AggConfig {
     return configDsl;
   }
 
-  toJSON(): AggConfigSerialized {
+  /**
+   * @returns Returns a serialized representation of an AggConfig.
+   */
+  serialize(): AggConfigSerialized {
     const params = this.params;
 
     const outParams = _.transform(
@@ -284,8 +293,15 @@ export class AggConfig {
       enabled: this.enabled,
       type: this.type && this.type.name,
       schema: this.schema,
-      params: outParams,
+      params: outParams as SerializableState,
     };
+  }
+
+  /**
+   * @deprecated - Use serialize() instead.
+   */
+  toJSON(): AggConfigSerialized {
+    return this.serialize();
   }
 
   getAggParams() {

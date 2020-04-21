@@ -18,11 +18,11 @@
  */
 
 import { functionWrapper } from '../test_helpers';
-import { aggTypeTerms } from './terms_fn';
+import { aggTerms } from './terms_fn';
 
 describe('agg_expression_functions', () => {
-  describe('aggTypeTerms', () => {
-    const fn = functionWrapper(aggTypeTerms());
+  describe('aggTerms', () => {
+    const fn = functionWrapper(aggTerms());
 
     it('fills in defaults when only required args are provided', () => {
       const actual = fn({
@@ -112,26 +112,23 @@ describe('agg_expression_functions', () => {
           "missingBucketLabel": "Missing",
           "order": "asc",
           "orderAgg": Object {
-            "type": "agg_type",
-            "value": Object {
-              "enabled": true,
-              "id": undefined,
-              "params": Object {
-                "exclude": undefined,
-                "field": "name",
-                "include": undefined,
-                "missingBucket": false,
-                "missingBucketLabel": "Missing",
-                "order": "asc",
-                "orderAgg": undefined,
-                "orderBy": "1",
-                "otherBucket": false,
-                "otherBucketLabel": "Other",
-                "size": 5,
-              },
-              "schema": undefined,
-              "type": "terms",
+            "enabled": true,
+            "id": undefined,
+            "params": Object {
+              "exclude": undefined,
+              "field": "name",
+              "include": undefined,
+              "missingBucket": false,
+              "missingBucketLabel": "Missing",
+              "order": "asc",
+              "orderAgg": undefined,
+              "orderBy": "1",
+              "otherBucket": false,
+              "otherBucketLabel": "Other",
+              "size": 5,
             },
+            "schema": undefined,
+            "type": "terms",
           },
           "orderBy": "1",
           "otherBucket": false,

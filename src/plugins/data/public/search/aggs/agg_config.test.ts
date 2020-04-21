@@ -26,16 +26,18 @@ import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
+import { FieldFormatsStart } from '../../field_formats';
 import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;
   let typesRegistry: AggTypesRegistryStart;
-  const fieldFormats = fieldFormatsServiceMock.createStartContract();
+  let fieldFormats: FieldFormatsStart;
 
   beforeEach(() => {
     jest.restoreAllMocks();
     mockDataServices();
+    fieldFormats = fieldFormatsServiceMock.createStartContract();
     indexPattern = stubIndexPatternWithFields as IndexPattern;
     typesRegistry = mockAggTypesRegistry();
   });
@@ -325,7 +327,7 @@ describe('AggConfig', () => {
     });
   });
 
-  describe('#toJSON', () => {
+  describe('#serialize', () => {
     it('includes the aggs id, params, type and schema', () => {
       const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
@@ -342,7 +344,7 @@ describe('AggConfig', () => {
       expect(aggConfig.type).toHaveProperty('name', 'date_histogram');
       expect(typeof aggConfig.schema).toBe('string');
 
-      const state = aggConfig.toJSON();
+      const state = aggConfig.serialize();
       expect(state).toHaveProperty('id', '1');
       expect(typeof state.params).toBe('object');
       expect(state).toHaveProperty('type', 'date_histogram');
@@ -422,6 +424,9 @@ describe('AggConfig', () => {
     let aggConfig: AggConfig;
 
     beforeEach(() => {
+      fieldFormats.getDefaultInstance = (() => ({
+        getConverterFor: (t?: string) => t || identity,
+      })) as any;
       indexPattern.fields.getByName = name =>
         ({
           format: {
@@ -434,11 +439,7 @@ describe('AggConfig', () => {
         type: 'histogram',
         schema: 'bucket',
         params: {
-          field: {
-            format: {
-              getConverterFor: (t?: string) => t || identity,
-            },
-          },
+          field: 'bytes',
         },
       };
       const ac = new AggConfigs(indexPattern, [configStates], { typesRegistry, fieldFormats });
@@ -446,6 +447,11 @@ describe('AggConfig', () => {
     });
 
     it("returns the field's formatter", () => {
+      aggConfig.params.field = {
+        format: {
+          getConverterFor: (t?: string) => t || identity,
+        },
+      };
       expect(aggConfig.fieldFormatter().toString()).toBe(
         aggConfig
           .getField()

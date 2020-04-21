@@ -18,18 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from '../../../../../expressions/public';
 import { AggExpressionType, AggExpressionFunctionArgs } from '../';
 
-const aggTypeName = 'terms';
-const fnName = 'aggTypeTerms';
+const aggName = 'terms';
+const fnName = 'aggTerms';
 
 type Input = any;
-type Arguments = AggExpressionFunctionArgs<typeof aggTypeName>;
+type AggArgs = AggExpressionFunctionArgs<typeof aggName>;
+// Since the orderAgg param is an agg nested in a subexpression, we need to
+// overwrite the param type to expect a value of type AggExpressionType.
+type Arguments = AggArgs &
+  Assign<
+    AggArgs,
+    { orderAgg?: AggArgs['orderAgg'] extends undefined ? undefined : AggExpressionType }
+  >;
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
 
-export const aggTypeTerms = (): FunctionDefinition => ({
+export const aggTerms = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.buckets.terms.help', {
     defaultMessage: 'Generates AggConfigJSON for a terms agg',
@@ -111,6 +119,7 @@ export const aggTypeTerms = (): FunctionDefinition => ({
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
+    const orderAgg = args.orderAgg?.value;
 
     return {
       type: 'agg_type',
@@ -118,8 +127,11 @@ export const aggTypeTerms = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: aggTypeName,
-        params: { ...rest },
+        type: aggName,
+        params: {
+          ...rest,
+          orderAgg,
+        },
       },
     };
   },

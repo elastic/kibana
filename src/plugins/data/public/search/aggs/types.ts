@@ -76,7 +76,7 @@ export interface SearchAggsStart {
 /** @internal */
 export interface AggExpressionType {
   type: 'agg_type';
-  value: CreateAggConfigParams;
+  value: AggConfigSerialized;
 }
 
 /** @internal */
