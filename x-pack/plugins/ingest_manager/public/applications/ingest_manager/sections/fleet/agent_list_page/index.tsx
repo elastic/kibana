@@ -25,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { CSSProperties } from 'styled-components';
-import { AgentEnrollmentFlyout, AgentReassignConfigFlyout } from './components';
+import { AgentEnrollmentFlyout } from './components';
 import { Agent } from '../../../types';
 import {
   usePagination,
@@ -35,7 +35,7 @@ import {
   useUrlParams,
   useLink,
 } from '../../../hooks';
-import { ConnectedLink } from '../components';
+import { ConnectedLink, AgentReassignConfigFlyout } from '../components';
 import { SearchBar } from '../../../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
@@ -373,7 +373,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {agentToReassignId && (
         <AgentReassignConfigFlyout
           agentId={agentToReassignId}
-          agentConfigs={agentConfigs}
           onClose={() => {
             setAgentToReassignId(undefined);
             agentsRequest.sendRequest();

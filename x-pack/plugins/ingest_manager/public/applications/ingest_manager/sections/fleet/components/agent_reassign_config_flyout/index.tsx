@@ -22,23 +22,26 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentConfig, Datasource } from '../../../../../types';
-import { useGetOneAgentConfig, sendPutAgentReassign, useCore } from '../../../../../hooks';
-import { PackageIcon } from '../../../../../components/package_icon';
+import { Datasource } from '../../../../types';
+import {
+  useGetOneAgentConfig,
+  sendPutAgentReassign,
+  useCore,
+  useGetAgentConfigs,
+} from '../../../../hooks';
+import { PackageIcon } from '../../../../components/package_icon';
 
 interface Props {
   onClose: () => void;
-  agentConfigs: AgentConfig[];
   agentId: string;
 }
 
-export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({
-  onClose,
-  agentId,
-  agentConfigs = [],
-}) => {
+export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onClose, agentId }) => {
   const { notifications } = useCore();
   const [selectedAgentConfigId, setSelectedAgentConfigId] = useState<string | undefined>(undefined);
+
+  const agentConfigsRequest = useGetAgentConfigs();
+  const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
 
   const agentConfigRequest = useGetOneAgentConfig(selectedAgentConfigId as string);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
@@ -58,6 +61,13 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({
         throw res.error;
       }
       setIsSubmitting(false);
+      const successMessage = i18n.translate(
+        'xpack.ingestManager.agentReassignConfig.successSingleNotificationTitle',
+        {
+          defaultMessage: 'Successfully changed the configuration',
+        }
+      );
+      notifications.toasts.addSuccess(successMessage);
       onClose();
     } catch (error) {
       setIsSubmitting(false);
