@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { AggConfig, IAggConfig } from '../agg_config';
+import { AggConfig, IAggConfig, AggConfigSerialized } from '../agg_config';
 import { BaseParamType } from './base';
 
 export class AggParamType<TAggConfig extends IAggConfig = IAggConfig> extends BaseParamType<
   TAggConfig
 > {
-  makeAgg: (agg: TAggConfig, state?: any) => TAggConfig;
+  makeAgg: (agg: TAggConfig, state?: AggConfigSerialized) => TAggConfig;
   allowedAggs: string[] = [];
 
   constructor(config: Record<string, any>) {
@@ -42,11 +42,11 @@ export class AggParamType<TAggConfig extends IAggConfig = IAggConfig> extends Ba
     }
     if (!config.serialize) {
       this.serialize = (agg: TAggConfig) => {
-        return agg.toJSON();
+        return agg.serialize();
       };
     }
     if (!config.deserialize) {
-      this.deserialize = (state: unknown, agg?: TAggConfig): TAggConfig => {
+      this.deserialize = (state: AggConfigSerialized, agg?: TAggConfig): TAggConfig => {
         if (!agg) {
           throw new Error('aggConfig was not provided to AggParamType deserialize function');
         }
