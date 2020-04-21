@@ -33,13 +33,7 @@ import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
-import {
-  noteSavedObjectType,
-  pinnedEventSavedObjectType,
-  timelineSavedObjectType,
-  ruleStatusSavedObjectType,
-  ruleActionsSavedObjectType,
-} from './saved_objects';
+import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
@@ -87,6 +81,7 @@ export class Plugin {
       );
     }
 
+    initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
 
     const router = core.http.createRouter();
@@ -128,15 +123,11 @@ export class Plugin {
               'alert',
               'action',
               'action_task_params',
-              noteSavedObjectType,
-              pinnedEventSavedObjectType,
-              timelineSavedObjectType,
-              ruleStatusSavedObjectType,
-              ruleActionsSavedObjectType,
               'cases',
               'cases-comments',
               'cases-configure',
               'cases-user-actions',
+              ...savedObjectTypes,
             ],
             read: ['config'],
           },
@@ -159,15 +150,11 @@ export class Plugin {
             all: ['alert', 'action', 'action_task_params'],
             read: [
               'config',
-              noteSavedObjectType,
-              pinnedEventSavedObjectType,
-              timelineSavedObjectType,
-              ruleStatusSavedObjectType,
-              ruleActionsSavedObjectType,
               'cases',
               'cases-comments',
               'cases-configure',
               'cases-user-actions',
+              ...savedObjectTypes,
             ],
           },
           ui: [
