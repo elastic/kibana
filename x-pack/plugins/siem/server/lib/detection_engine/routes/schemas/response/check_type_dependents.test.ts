@@ -15,17 +15,13 @@ import {
   addQueryFields,
   addMlFields,
 } from './check_type_dependents';
-import {
-  foldLeftRight,
-  getBaseResponsePayload,
-  getPaths,
-  getMlRuleResponsePayload,
-} from './__mocks__/utils';
+import { getBaseResponsePayload, getMlRuleResponsePayload } from './__mocks__/utils';
 import { left } from 'fp-ts/lib/Either';
-import { exactCheck } from './exact_check';
 import { RulesSchema } from './rules_schema';
 import { TypeAndTimelineOnly } from './type_timeline_only_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
+import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
+import { exactCheck } from '../../../../../utils/build_validation/exact_check';
 
 describe('check_type_dependents', () => {
   beforeAll(() => {
