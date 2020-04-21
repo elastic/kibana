@@ -16,6 +16,7 @@ import {
 import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initCaseConfigureGetActionConnector } from './get_connectors';
 import { getActions } from '../../__mocks__/request_responses';
+import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../common/constants';
 
 describe('GET connectors', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -25,7 +26,7 @@ describe('GET connectors', () => {
 
   it('returns the connectors', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure/connectors/_find',
+      path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
       method: 'get',
     });
 
@@ -44,7 +45,7 @@ describe('GET connectors', () => {
 
   it('it throws an error when actions client is null', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure/connectors/_find',
+      path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
       method: 'get',
     });
 

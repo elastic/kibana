@@ -24,6 +24,7 @@ export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const log = getService('log');
   const config = getService('config');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
     'reporting',
     'common',
@@ -161,7 +162,27 @@ export default function({ getService, getPageObjects }) {
           expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
 
+        it('becomes available/not available when a saved search is created, changed and saved again', async () => {
+          // create new search, csv export is not available
+          await PageObjects.discover.clickNewSearchButton();
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+          // save search, csv export is available
+          await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+          // add filter, csv export is not available
+          await filterBar.addFilter('currency', 'is', 'EUR');
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+          // save search again, csv export is available
+          await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        });
+
         it('generates a report with data', async () => {
+          await PageObjects.discover.clickNewSearchButton();
           await PageObjects.reporting.setTimepickerInDataRange();
           await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
           await PageObjects.reporting.openCsvReportingPanel();
