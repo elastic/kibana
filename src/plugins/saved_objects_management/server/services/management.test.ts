@@ -28,7 +28,7 @@ describe('SavedObjectsManagement', () => {
     registry.registerType({
       name: 'unknown',
       hidden: false,
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       mappings: { properties: {} },
       migrations: {},
       ...type,

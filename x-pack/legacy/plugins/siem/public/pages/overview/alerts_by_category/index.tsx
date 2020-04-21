@@ -7,9 +7,9 @@
 import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo } from 'react';
-
 import { Position } from '@elastic/charts';
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../../../plugins/siem/common/constants';
 import { SHOWING, UNIT } from '../../../components/alerts_viewer/translations';
 import { getDetectionEngineAlertUrl } from '../../../components/link_to/redirect_to_detection_engine';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
