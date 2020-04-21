@@ -28,8 +28,7 @@ export function registerEnginesRoute({ router, config }) {
       });
 
       if (enginesResponse.url.endsWith('/login')) {
-        return response.custom({
-          statusCode: 200,
+        return response.ok({
           body: { message: 'no-as-account' },
           headers: { 'content-type': 'application/json' },
         });
