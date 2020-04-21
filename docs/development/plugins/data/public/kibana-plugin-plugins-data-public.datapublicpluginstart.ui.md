@@ -10,6 +10,5 @@
 ui: {
         IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
         SearchBar: React.ComponentType<StatefulSearchBarProps>;
-        ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
     };
 ```

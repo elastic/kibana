@@ -11,5 +11,5 @@ This function is a factory function that returns the actual utility when calling
 <b>Signature:</b>
 
 ```typescript
-createSearchSource: (indexPatterns: Pick<import("../../index_patterns/index_patterns").IndexPatternsService, "get" | "clearCache" | "getFieldsForTimePattern" | "getFieldsForWildcard" | "getIds" | "getTitles" | "getFields" | "getCache" | "getDefault" | "make">) => (searchSourceJson: string, references: SavedObjectReference[]) => Promise<SearchSource>
+createSearchSource: (indexPatterns: Pick<import("../../index_patterns/index_patterns").IndexPatternsService, "get" | "clearCache" | "getFieldsForTimePattern" | "getFieldsForWildcard" | "ensureDefaultIndexPattern" | "getIds" | "getTitles" | "getFields" | "getCache" | "getDefault" | "make">) => (searchSourceJson: string, references: SavedObjectReference[]) => Promise<SearchSource>
 ```

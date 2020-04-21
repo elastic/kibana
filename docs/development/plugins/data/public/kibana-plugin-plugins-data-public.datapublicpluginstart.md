@@ -20,5 +20,5 @@ export interface DataPublicPluginStart
 |  [indexPatterns](./kibana-plugin-plugins-data-public.datapublicpluginstart.indexpatterns.md) | <code>IndexPatternsContract</code> |  |
 |  [query](./kibana-plugin-plugins-data-public.datapublicpluginstart.query.md) | <code>QueryStart</code> |  |
 |  [search](./kibana-plugin-plugins-data-public.datapublicpluginstart.search.md) | <code>ISearchStart</code> |  |
-|  [ui](./kibana-plugin-plugins-data-public.datapublicpluginstart.ui.md) | <code>{</code><br/><code>        IndexPatternSelect: React.ComponentType&lt;IndexPatternSelectProps&gt;;</code><br/><code>        SearchBar: React.ComponentType&lt;StatefulSearchBarProps&gt;;</code><br/><code>        ensureDefaultIndexPattern: EnsureDefaultIndexPattern;</code><br/><code>    }</code> |  |
+|  [ui](./kibana-plugin-plugins-data-public.datapublicpluginstart.ui.md) | <code>{</code><br/><code>        IndexPatternSelect: React.ComponentType&lt;IndexPatternSelectProps&gt;;</code><br/><code>        SearchBar: React.ComponentType&lt;StatefulSearchBarProps&gt;;</code><br/><code>    }</code> |  |
 
