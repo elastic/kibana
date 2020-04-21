@@ -34,10 +34,8 @@ export interface LocationDurationLine {
 export interface MonitorDurationResult {
   /** The average values for the monitor duration. */
   locationDurationLines: LocationDurationLine[];
-  /** The counts of up/down checks for the monitor. */
-  status: StatusData[];
-  /** The maximum status doc count in this chart. */
-  statusMaxCount: number;
-  /** The maximum duration value in this chart. */
-  durationMaxValue: number;
+}
+
+export interface MonitorIdParam {
+  monitorId: string;
 }

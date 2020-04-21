@@ -42,6 +42,6 @@ export function manageQuery<T>(WrappedComponent: React.ComponentClass<T> | React
       return <WrappedComponent {...(otherProps as T)} />;
     }
   }
-  ManageQuery.displayName = `ManageQuery (${WrappedComponent.displayName || 'Unknown'})`;
+  ManageQuery.displayName = `ManageQuery (${WrappedComponent?.displayName ?? 'Unknown'})`;
   return ManageQuery;
 }

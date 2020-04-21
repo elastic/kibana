@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { WithHoverActions } from '../../with_hover_actions';
@@ -26,21 +25,52 @@ export const AddFilterToGlobalSearchBar = React.memo<OwnProps>(
   ({ children, filter, onFilterAdded }) => {
     const { filterManager } = useKibana().services.data.query;
 
-    const addToKql = useCallback(() => {
+    const filterForValue = useCallback(() => {
       filterManager.addFilters(filter);
+
       if (onFilterAdded != null) {
         onFilterAdded();
       }
-    }, [filter, filterManager, onFilterAdded]);
+    }, [filterManager, filter, onFilterAdded]);
+
+    const filterOutValue = useCallback(() => {
+      filterManager.addFilters({
+        ...filter,
+        meta: {
+          ...filter.meta,
+          negate: true,
+        },
+      });
+
+      if (onFilterAdded != null) {
+        onFilterAdded();
+      }
+    }, [filterManager, filter, onFilterAdded]);
 
     return (
       <WithHoverActions
         hoverContent={
-          <HoverActionsContainer data-test-subj="hover-actions-container" paddingSize="none">
+          <div data-test-subj="hover-actions-container">
             <EuiToolTip content={i18n.FILTER_FOR_VALUE}>
-              <EuiIcon data-test-subj="add-to-filter" type="filter" onClick={addToKql} />
+              <EuiButtonIcon
+                aria-label={i18n.FILTER_FOR_VALUE}
+                color="text"
+                data-test-subj="add-to-filter"
+                iconType="magnifyWithPlus"
+                onClick={filterForValue}
+              />
             </EuiToolTip>
-          </HoverActionsContainer>
+
+            <EuiToolTip content={i18n.FILTER_OUT_VALUE}>
+              <EuiButtonIcon
+                aria-label={i18n.FILTER_OUT_VALUE}
+                color="text"
+                data-test-subj="filter-out-value"
+                iconType="magnifyWithMinus"
+                onClick={filterOutValue}
+              />
+            </EuiToolTip>
+          </div>
         }
         render={() => children}
       />
@@ -49,16 +79,3 @@ export const AddFilterToGlobalSearchBar = React.memo<OwnProps>(
 );
 
 AddFilterToGlobalSearchBar.displayName = 'AddFilterToGlobalSearchBar';
-
-export const HoverActionsContainer = styled(EuiPanel)`
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  height: 34px;
-  justify-content: center;
-  left: 5px;
-  position: absolute;
-  top: -10px;
-  width: 34px;
-  cursor: pointer;
-`;

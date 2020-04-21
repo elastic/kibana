@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../reducers/util';
+import { MIN_ZOOM, MAX_ZOOM } from '../../../common/constants';
 
 export class AbstractSource {
   static isIndexingSource = false;
@@ -79,7 +79,7 @@ export class AbstractSource {
     return false;
   }
 
-  isQueryAware() {
+  async isTimeAware() {
     return false;
   }
 
@@ -105,6 +105,14 @@ export class AbstractSource {
 
   getQueryableIndexPatternIds() {
     return [];
+  }
+
+  isFilterByMapBounds() {
+    return false;
+  }
+
+  isQueryAware() {
+    return false;
   }
 
   getGeoGridPrecision() {
@@ -139,5 +147,13 @@ export class AbstractSource {
 
   async getValueSuggestions(/* field, query */) {
     return [];
+  }
+
+  getMinZoom() {
+    return MIN_ZOOM;
+  }
+
+  getMaxZoom() {
+    return MAX_ZOOM;
   }
 }
