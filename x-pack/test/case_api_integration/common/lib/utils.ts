@@ -14,11 +14,11 @@ export const getConfiguration = (connector_id: string = 'connector-1'): CasesCon
   };
 };
 
-export const getConfigurationOutput = (): Partial<CasesConfigureResponse> => {
+export const getConfigurationOutput = (update = false): Partial<CasesConfigureResponse> => {
   return {
     ...getConfiguration(),
     created_by: { email: null, full_name: null, username: 'elastic' },
-    updated_by: null,
+    updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
   };
 };
 

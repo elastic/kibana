@@ -21,11 +21,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('legacyEs');
 
   describe('get_configure', () => {
-    beforeEach(async () => {
-      await deleteConfiguration(es);
-    });
-
-    after(async () => {
+    afterEach(async () => {
       await deleteConfiguration(es);
     });
 
