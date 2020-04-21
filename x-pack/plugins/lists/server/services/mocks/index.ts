@@ -17,3 +17,4 @@ export * from './get_list_item_response_mock';
 export * from './get_index_es_list_mock';
 export * from './get_index_es_list_item_mock';
 export * from './create_list_item_bulk_options_mock';
+export * from './get_delete_list_item_by_value_options_mock';

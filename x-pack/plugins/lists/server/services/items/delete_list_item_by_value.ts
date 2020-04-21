@@ -10,7 +10,7 @@ import { DataClient } from '../../types';
 
 import { getListItemByValues } from './get_list_item_by_values';
 
-interface DeleteListItemByValueOptions {
+export interface DeleteListItemByValueOptions {
   listId: string;
   type: Type;
   value: string;
