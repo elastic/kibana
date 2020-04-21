@@ -27,7 +27,7 @@ export interface IStyle {
 }
 
 export class AbstractStyle implements IStyle {
-  readonly _descriptor: StyleDescriptor;
+  readonly _descriptor: StyleDescriptor | null;
 
   constructor(descriptor: StyleDescriptor | null) {
     this._descriptor = descriptor;
@@ -45,7 +45,7 @@ export class AbstractStyle implements IStyle {
     return { fieldMeta: {} };
   }
 
-  getDescriptor(): StyleDescriptor {
+  getDescriptor(): StyleDescriptor | null {
     return this._descriptor;
   }
 
