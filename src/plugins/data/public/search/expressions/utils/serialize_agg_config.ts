@@ -26,6 +26,7 @@ import { getSearchService } from '../../../../public/services';
 export const serializeAggConfig = (aggConfig: IAggConfig): KibanaDatatableColumnMeta => {
   return {
     type: aggConfig.type.name,
+    isBucketed: aggConfig.type.type === 'buckets',
     indexPatternId: aggConfig.getIndexPattern().id,
     aggConfigParams: aggConfig.toJSON().params,
   };
