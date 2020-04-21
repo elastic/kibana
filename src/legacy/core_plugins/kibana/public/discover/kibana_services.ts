@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { createHashHistory } from 'history';
 import { DiscoverServices } from './build_services';
 import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
 import { search } from '../../../../../plugins/data/public';
@@ -51,6 +52,11 @@ export function setServices(newServices: any) {
 export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
   setTrackedUrl: (url: string) => void;
 }>('urlTracker');
+
+/**
+ * Makes sure discover and context are using one instance of history
+ */
+export const getHistory = _.once(() => createHashHistory());
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
 export {
