@@ -8,15 +8,15 @@ import { i18n } from '@kbn/i18n';
 
 import { hasLicenseExpired } from '../license';
 
-import { MlCapabilities, getDefaultPrivileges } from '../../../common/types/privileges';
-import { getPrivileges, getManageMlPrivileges } from './get_privileges';
+import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/privileges';
+import { getCapabilities, getManageMlCapabilities } from './get_privileges';
 import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
-let _capabilities: MlCapabilities = getDefaultPrivileges();
+let _capabilities: MlCapabilities = getDefaultCapabilities();
 // manage_ml requires all monitor and admin cluster privileges: https://github.com/elastic/elasticsearch/blob/664a29c8905d8ce9ba8c18aa1ed5c5de93a0eabc/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/privilege/ClusterPrivilege.java#L53
 export function checkGetManagementMlJobs() {
   return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
-    getManageMlPrivileges().then(
+    getManageMlCapabilities().then(
       ({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
         _capabilities = capabilities;
         // Loop through all capabilities to ensure they are all set to true.
@@ -35,7 +35,7 @@ export function checkGetManagementMlJobs() {
 
 export function checkGetJobsPrivilege(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+    getCapabilities().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       _capabilities = capabilities;
       // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
       // all other functionality is controlled by the return capabilities object.
@@ -54,7 +54,7 @@ export function checkGetJobsPrivilege(): Promise<MlCapabilities> {
 
 export function checkCreateJobsPrivilege(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+    getCapabilities().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       _capabilities = capabilities;
       // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
       // allow the promise to resolve as the separate license check will redirect then user to
@@ -73,7 +73,7 @@ export function checkCreateJobsPrivilege(): Promise<MlCapabilities> {
 
 export function checkFindFileStructurePrivilege(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(({ capabilities }) => {
+    getCapabilities().then(({ capabilities }) => {
       _capabilities = capabilities;
       // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
       // all other functionality is controlled by the return _capabilities object

@@ -21,7 +21,7 @@ jest.mock('../../../license', () => ({
   isFullLicense: () => false,
 }));
 jest.mock('../../../privilege/get_privileges', () => ({
-  getPrivileges: () => {},
+  getCapabilities: () => {},
 }));
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true,

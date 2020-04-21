@@ -8,7 +8,7 @@ import {
   adminMlCapabilities,
   userMlCapabilities,
   MlCapabilities,
-  getDefaultPrivileges,
+  getDefaultCapabilities,
 } from '../../../../common/types/privileges';
 
 export function getAdminCapabilities() {
@@ -25,5 +25,5 @@ export function getUserCapabilities() {
     caps[k] = true;
   });
 
-  return { ...getDefaultPrivileges(), ...caps } as MlCapabilities;
+  return { ...getDefaultCapabilities(), ...caps } as MlCapabilities;
 }

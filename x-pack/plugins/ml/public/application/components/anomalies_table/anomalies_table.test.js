@@ -15,7 +15,7 @@ jest.mock('../../license', () => ({
   hasLicenseExpired: () => false,
 }));
 jest.mock('../../privilege/get_privileges', () => ({
-  getPrivileges: () => {},
+  getCapabilities: () => {},
 }));
 jest.mock('../../services/field_format_service', () => ({
   getFieldFormat: () => {},

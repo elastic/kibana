@@ -5,9 +5,9 @@
  */
 
 import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabilities';
-import { privilegesProvider } from './check_privileges';
+import { capabilitiesProvider } from './check_privileges';
 import { MlLicense } from '../../../common/license';
-import { getDefaultPrivileges } from '../../../common/types/privileges';
+import { getDefaultCapabilities } from '../../../common/types/privileges';
 
 const mlLicense = {
   isSecurityEnabled: () => true,
@@ -25,31 +25,31 @@ const mlIsNotEnabled = async () => false;
 const callWithRequestNonUpgrade = async () => ({ upgrade_mode: false });
 const callWithRequestUpgrade = async () => ({ upgrade_mode: true });
 
-describe('check_privileges', () => {
-  describe('getPrivileges() - right number of capabilities', () => {
+describe('check_capabilities', () => {
+  describe('getCapabilities() - right number of capabilities', () => {
     test('kibana capabilities count', async done => {
-      const { getPrivileges } = privilegesProvider(
+      const { getCapabilities } = capabilitiesProvider(
         callWithRequestNonUpgrade,
         getAdminCapabilities(),
         mlLicense,
         mlIsEnabled
       );
-      const { capabilities } = await getPrivileges();
+      const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
       expect(count).toBe(22);
       done();
     });
   });
 
-  describe('getPrivileges() with security', () => {
+  describe('getCapabilities() with security', () => {
     test('ml_user capabilities only', async done => {
-      const { getPrivileges } = privilegesProvider(
+      const { getCapabilities } = capabilitiesProvider(
         callWithRequestNonUpgrade,
         getUserCapabilities(),
         mlLicense,
         mlIsEnabled
       );
-      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(false);
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
@@ -78,13 +78,13 @@ describe('check_privileges', () => {
     });
 
     test('full capabilities', async done => {
-      const { getPrivileges } = privilegesProvider(
+      const { getCapabilities } = capabilitiesProvider(
         callWithRequestNonUpgrade,
         getAdminCapabilities(),
         mlLicense,
         mlIsEnabled
       );
-      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(false);
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
@@ -113,13 +113,13 @@ describe('check_privileges', () => {
     });
 
     test('upgrade in progress with full capabilities', async done => {
-      const { getPrivileges } = privilegesProvider(
+      const { getCapabilities } = capabilitiesProvider(
         callWithRequestUpgrade,
         getAdminCapabilities(),
         mlLicense,
         mlIsEnabled
       );
-      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(true);
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
@@ -148,13 +148,13 @@ describe('check_privileges', () => {
     });
 
     test('upgrade in progress with partial capabilities', async done => {
-      const { getPrivileges } = privilegesProvider(
+      const { getCapabilities } = capabilitiesProvider(
         callWithRequestUpgrade,
         getUserCapabilities(),
         mlLicense,
         mlIsEnabled
       );
-      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(true);
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
@@ -183,13 +183,13 @@ describe('check_privileges', () => {
     });
 
     test('ml_user capabilities with basic license', async done => {
-      const { getPrivileges } = privilegesProvider(
+      const { getCapabilities } = capabilitiesProvider(
         callWithRequestNonUpgrade,
         getUserCapabilities(),
         mlLicenseBasic,
         mlIsEnabled
       );
-      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(false);
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(capabilities.canGetJobs).toBe(false);
@@ -218,13 +218,13 @@ describe('check_privileges', () => {
     });
 
     test('full user with basic license', async done => {
-      const { getPrivileges } = privilegesProvider(
+      const { getCapabilities } = capabilitiesProvider(
         callWithRequestNonUpgrade,
         getAdminCapabilities(),
         mlLicenseBasic,
         mlIsEnabled
       );
-      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(false);
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(capabilities.canGetJobs).toBe(false);
@@ -253,13 +253,13 @@ describe('check_privileges', () => {
     });
 
     test('full capabilities, ml disabled in space', async done => {
-      const { getPrivileges } = privilegesProvider(
+      const { getCapabilities } = capabilitiesProvider(
         callWithRequestNonUpgrade,
-        getDefaultPrivileges(),
+        getDefaultCapabilities(),
         mlLicense,
         mlIsNotEnabled
       );
-      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+      const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(false);
       expect(mlFeatureEnabledInSpace).toBe(false);
       expect(capabilities.canGetJobs).toBe(false);
@@ -289,13 +289,13 @@ describe('check_privileges', () => {
   });
 
   test('full capabilities, basic license, ml disabled in space', async done => {
-    const { getPrivileges } = privilegesProvider(
+    const { getCapabilities } = capabilitiesProvider(
       callWithRequestNonUpgrade,
-      getDefaultPrivileges(),
+      getDefaultCapabilities(),
       mlLicenseBasic,
       mlIsNotEnabled
     );
-    const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getPrivileges();
+    const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
     expect(upgradeInProgress).toBe(false);
     expect(mlFeatureEnabledInSpace).toBe(false);
     expect(capabilities.canGetJobs).toBe(false);

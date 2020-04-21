@@ -7,14 +7,14 @@
 import { IScopedClusterClient } from 'kibana/server';
 import {
   MlCapabilities,
-  getDefaultPrivileges,
+  getDefaultCapabilities,
   adminMlCapabilities,
   MlCapabilitiesResponse,
 } from '../../../common/types/privileges';
 import { upgradeCheckProvider } from './upgrade';
 import { MlLicense } from '../../../common/license';
 
-export function privilegesProvider(
+export function capabilitiesProvider(
   callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
   mlCapabilities: MlCapabilities,
   mlLicense: MlLicense,
@@ -22,13 +22,13 @@ export function privilegesProvider(
   ignoreSpaces: boolean = false
 ) {
   const { isUpgradeInProgress } = upgradeCheckProvider(callAsCurrentUser);
-  async function getPrivileges(): Promise<MlCapabilitiesResponse> {
+  async function getCapabilities(): Promise<MlCapabilitiesResponse> {
     const upgradeInProgress = await isUpgradeInProgress();
     const isPlatinumOrTrialLicense = mlLicense.isFullLicense();
     const mlFeatureEnabledInSpace = await isMlEnabledInSpace();
 
     const basicMlCapabilities = {
-      ...getDefaultPrivileges(),
+      ...getDefaultCapabilities(),
       canFindFileStructure: mlCapabilities.canFindFileStructure,
     };
 
@@ -45,7 +45,7 @@ export function privilegesProvider(
       mlFeatureEnabledInSpace,
     };
   }
-  return { getPrivileges };
+  return { getCapabilities };
 }
 
 function disableAdminPrivileges(capabilities: MlCapabilities) {

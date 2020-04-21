@@ -300,14 +300,14 @@ export const ml = {
     });
   },
 
-  checkMlPrivileges() {
+  checkMlCapabilities() {
     return http<MlCapabilitiesResponse>({
       path: `${basePath()}/ml_capabilities`,
       method: 'GET',
     });
   },
 
-  checkManageMLPrivileges() {
+  checkManageMLCapabilities() {
     return http<MlCapabilitiesResponse>({
       path: `${basePath()}/ml_capabilities`,
       method: 'GET',

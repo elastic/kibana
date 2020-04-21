@@ -46,7 +46,7 @@ export type UserMlCapabilities = typeof userMlCapabilities;
 export type AdminMlCapabilities = typeof adminMlCapabilities;
 export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
 
-export function getDefaultPrivileges(): MlCapabilities {
+export function getDefaultCapabilities(): MlCapabilities {
   return {
     ...userMlCapabilities,
     ...adminMlCapabilities,

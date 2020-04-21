@@ -9,9 +9,9 @@ import { ml } from '../services/ml_api_service';
 import { setUpgradeInProgress } from '../services/upgrade_service';
 import { MlCapabilitiesResponse } from '../../../common/types/privileges';
 
-export function getPrivileges(): Promise<MlCapabilitiesResponse> {
+export function getCapabilities(): Promise<MlCapabilitiesResponse> {
   return new Promise((resolve, reject) => {
-    ml.checkMlPrivileges()
+    ml.checkMlCapabilities()
       .then((resp: MlCapabilitiesResponse) => {
         if (resp.upgradeInProgress === true) {
           setUpgradeInProgress(true);
@@ -24,9 +24,9 @@ export function getPrivileges(): Promise<MlCapabilitiesResponse> {
   });
 }
 
-export function getManageMlPrivileges(): Promise<MlCapabilitiesResponse> {
+export function getManageMlCapabilities(): Promise<MlCapabilitiesResponse> {
   return new Promise((resolve, reject) => {
-    ml.checkManageMLPrivileges()
+    ml.checkManageMLCapabilities()
       .then((resp: MlCapabilitiesResponse) => {
         if (resp.upgradeInProgress === true) {
           setUpgradeInProgress(true);

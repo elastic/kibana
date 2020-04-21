@@ -11,7 +11,7 @@ import { CloudSetup } from '../../../../cloud/server';
 import { LicenseCheck } from '../license_checks';
 import { spacesUtilsProvider, RequestFacade } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
-import { privilegesProvider } from '../../lib/check_privileges';
+import { capabilitiesProvider } from '../../lib/check_privileges';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { MlCapabilities, MlCapabilitiesResponse } from '../../../common/types/privileges';
@@ -51,14 +51,14 @@ export function getMlSystemProvider(
             throw new Error('resolveMlCapabilities is not defined');
           }
 
-          const { getPrivileges } = privilegesProvider(
+          const { getCapabilities } = capabilitiesProvider(
             callAsCurrentUser,
             mlCapabilities,
             mlLicense,
             isMlEnabledInSpace,
             ignoreSpaces
           );
-          return getPrivileges();
+          return getCapabilities();
         },
         async mlInfo(): Promise<MlInfoResponse> {
           isMinimumLicense();

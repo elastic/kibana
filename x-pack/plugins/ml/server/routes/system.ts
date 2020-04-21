@@ -10,7 +10,7 @@ import { Request } from 'hapi';
 import { RequestHandlerContext } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../client/log';
-import { privilegesProvider } from '../lib/check_privileges';
+import { capabilitiesProvider } from '../lib/check_privileges';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { RouteInitialization, SystemRouteDeps } from '../types';
 
@@ -129,7 +129,7 @@ export function systemRoutes(
           return response.customError(wrapError(new Error('resolveMlCapabilities is not defined')));
         }
 
-        const { getPrivileges } = privilegesProvider(
+        const { getCapabilities } = capabilitiesProvider(
           context.ml!.mlClient.callAsCurrentUser,
           mlCapabilities,
           mlLicense,
@@ -137,7 +137,7 @@ export function systemRoutes(
           ignoreSpaces
         );
         return response.ok({
-          body: await getPrivileges(),
+          body: await getCapabilities(),
         });
       } catch (error) {
         return response.customError(wrapError(error));
