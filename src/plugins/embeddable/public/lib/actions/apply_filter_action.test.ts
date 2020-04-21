@@ -34,7 +34,7 @@ test('has expected display name', () => {
 describe('getIconType()', () => {
   test('returns "filter" icon', async () => {
     const action = createFilterAction();
-    const result = action.getIconType();
+    const result = action.getIconType({} as any);
     expect(result).toBe('filter');
   });
 });
