@@ -38,13 +38,12 @@ import {
   serializeFieldFormat,
   TimeRange,
   IIndexPattern,
-  RangeFilter,
+  isRangeFilter,
 } from '../../../common';
-import { FilterManager } from '../../query';
+import { FilterManager, calculateBounds, getTimeFilter } from '../../query';
 import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
-import { calculateBounds, getTimeForField } from '../../query/timefilter/get_time';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
@@ -129,17 +128,17 @@ const handleCourierRequest = async ({
   const allTimeFields =
     timeFields && timeFields.length > 0
       ? timeFields
-      : [
-          indexPattern?.fields.find(field => field.name === indexPattern.timeFieldName)?.name,
-        ].filter((fieldName): fieldName is string => Boolean(fieldName));
+      : indexPattern?.getTimeField()
+      ? [indexPattern?.getTimeField()]
+      : [];
 
   // If a timeRange has been specified and we had at least one timeField available, create range
   // filters for that those time fields
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
       return allTimeFields
-        .map(fieldName => getTimeForField(indexPattern, timeRange, fieldName))
-        .filter((rangeFilter): rangeFilter is RangeFilter => Boolean(rangeFilter));
+        .map(fieldName => getTimeFilter(indexPattern, timeRange, fieldName))
+        .filter(isRangeFilter);
     });
   }
 

@@ -53,7 +53,7 @@ function createTimeRangeFilter(
   );
 }
 
-export function getTimeForField(
+export function getTimeFilter(
   indexPattern: IIndexPattern | undefined,
   timeRange: TimeRange,
   fieldName: string
