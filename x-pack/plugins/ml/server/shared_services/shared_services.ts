@@ -27,14 +27,22 @@ export type SharedServices = JobServiceProvider &
 export function createSharedServices(
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
-  cloud: CloudSetup
+  cloud: CloudSetup,
+  resolveMlCapabilities: (request: any) => any
 ): SharedServices {
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
 
   return {
     ...getJobServiceProvider(isFullLicense),
     ...getAnomalyDetectorsProvider(isFullLicense),
-    ...getMlSystemProvider(isMinimumLicense, isFullLicense, mlLicense, spaces, cloud),
+    ...getMlSystemProvider(
+      isMinimumLicense,
+      isFullLicense,
+      mlLicense,
+      spaces,
+      cloud,
+      resolveMlCapabilities
+    ),
     ...getModulesProvider(isFullLicense),
     ...getResultsServiceProvider(isFullLicense),
   };

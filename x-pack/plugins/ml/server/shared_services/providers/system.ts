@@ -11,16 +11,17 @@ import { CloudSetup } from '../../../../cloud/server';
 import { LicenseCheck } from '../license_checks';
 import { spacesUtilsProvider, RequestFacade } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
-import { privilegesProvider, MlCapabilities } from '../../lib/check_privileges';
+import { privilegesProvider } from '../../lib/check_privileges';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { MlCapabilities, MlCapabilitiesResponse } from '../../../common/types/privileges';
 
 export interface MlSystemProvider {
   mlSystemProvider(
     callAsCurrentUser: APICaller,
     request: RequestFacade
   ): {
-    mlCapabilities(ignoreSpaces?: boolean): Promise<MlCapabilities>;
+    mlCapabilities(ignoreSpaces?: boolean): Promise<MlCapabilitiesResponse>;
     mlInfo(): Promise<MlInfoResponse>;
     mlSearch<T>(searchParams: SearchParams): Promise<SearchResponse<T>>;
   };
@@ -31,12 +32,13 @@ export function getMlSystemProvider(
   isFullLicense: LicenseCheck,
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
-  cloud: CloudSetup | undefined
+  cloud: CloudSetup | undefined,
+  resolveMlCapabilities: (request: any) => Promise<MlCapabilities | null>
 ): MlSystemProvider {
   return {
     mlSystemProvider(callAsCurrentUser: APICaller, request: RequestFacade) {
       return {
-        mlCapabilities(ignoreSpaces?: boolean) {
+        async mlCapabilities(ignoreSpaces?: boolean) {
           isMinimumLicense();
 
           const { isMlEnabledInSpace } =
@@ -44,8 +46,14 @@ export function getMlSystemProvider(
               ? spacesUtilsProvider(spaces, request)
               : { isMlEnabledInSpace: async () => true };
 
+          const mlCapabilities = await resolveMlCapabilities(request);
+          if (mlCapabilities === null) {
+            throw new Error('resolveMlCapabilities is not defined');
+          }
+
           const { getPrivileges } = privilegesProvider(
             callAsCurrentUser,
+            mlCapabilities,
             mlLicense,
             isMlEnabledInSpace,
             ignoreSpaces

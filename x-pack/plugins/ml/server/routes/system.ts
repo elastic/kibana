@@ -19,7 +19,7 @@ import { RouteInitialization, SystemRouteDeps } from '../types';
  */
 export function systemRoutes(
   { router, mlLicense }: RouteInitialization,
-  { spaces, cloud }: SystemRouteDeps
+  { spaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
   async function getNodeCount(context: RequestHandlerContext) {
     const filterPath = 'nodes.*.attributes';
@@ -103,7 +103,7 @@ export function systemRoutes(
    * @apiGroup SystemRoutes
    *
    * @api {get} /api/ml/ml_capabilities Check ML capabilities
-   * @apiName MlCapabilities
+   * @apiName MlCapabilitiesResponse
    * @apiDescription Checks ML capabilities
    */
   router.get(
@@ -124,8 +124,14 @@ export function systemRoutes(
             ? spacesUtilsProvider(spaces, (request as unknown) as Request)
             : { isMlEnabledInSpace: async () => true };
 
+        const mlCapabilities = await resolveMlCapabilities(request);
+        if (mlCapabilities === null) {
+          return response.customError(wrapError(new Error('resolveMlCapabilities is not defined')));
+        }
+
         const { getPrivileges } = privilegesProvider(
           context.ml!.mlClient.callAsCurrentUser,
+          mlCapabilities,
           mlLicense,
           isMlEnabledInSpace,
           ignoreSpaces

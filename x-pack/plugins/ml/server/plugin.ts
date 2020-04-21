@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
+  CoreStart,
   Plugin,
   IScopedClusterClient,
   Logger,
@@ -15,6 +16,7 @@ import {
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
+import { MlCapabilities } from '../common/types/privileges';
 
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
 import { initMlTelemetry } from './lib/telemetry';
@@ -41,6 +43,7 @@ import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
 import { MlServerLicense } from './lib/license';
 import { createSharedServices, SharedServices } from './shared_services';
+import { userMlCapabilities, adminMlCapabilities } from '../common/types/privileges';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -59,6 +62,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   private log: Logger;
   private version: string;
   private mlLicense: MlServerLicense;
+  private capabilities: CoreStart['capabilities'] | null = null;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
@@ -93,7 +97,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
                 all: [],
                 read: [],
               },
-              ui: [],
+              ui: Object.keys(userMlCapabilities),
             },
           },
           {
@@ -105,7 +109,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
                 all: [],
                 read: [],
               },
-              ui: [],
+              ui: Object.keys(adminMlCapabilities),
             },
           },
         ],
@@ -132,6 +136,14 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       mlLicense: this.mlLicense,
     };
 
+    const resolveMlCapabilities = async (request: any) => {
+      if (this.capabilities === null) {
+        return null;
+      }
+      const capabilities = await this.capabilities.resolveCapabilities(request);
+      return capabilities.ml as MlCapabilities;
+    };
+
     annotationRoutes(routeInit, plugins.security);
     calendars(routeInit);
     dataFeedRoutes(routeInit);
@@ -144,24 +156,27 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     indicesRoutes(routeInit);
     jobAuditMessagesRoutes(routeInit);
     jobRoutes(routeInit);
-    jobServiceRoutes(routeInit);
+    jobServiceRoutes(routeInit, { resolveMlCapabilities });
     notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit, this.version);
     systemRoutes(routeInit, {
       spaces: plugins.spaces,
       cloud: plugins.cloud,
+      resolveMlCapabilities,
     });
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
 
     return {
-      ...createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud),
+      ...createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud, resolveMlCapabilities),
       mlClient,
     };
   }
 
-  public start(): MlPluginStart {}
+  public start(coreStart: CoreStart): MlPluginStart {
+    this.capabilities = coreStart.capabilities;
+  }
 
   public stop() {
     this.mlLicense.unsubscribe();

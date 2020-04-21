@@ -15,7 +15,7 @@ import { jobs } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
 import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
 
-import { PrivilegesResponse } from '../../../../common/types/privileges';
+import { MlCapabilitiesResponse } from '../../../../common/types/privileges';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import {
   Job,
@@ -301,14 +301,14 @@ export const ml = {
   },
 
   checkMlPrivileges() {
-    return http<PrivilegesResponse>({
+    return http<MlCapabilitiesResponse>({
       path: `${basePath()}/ml_capabilities`,
       method: 'GET',
     });
   },
 
   checkManageMLPrivileges() {
-    return http<PrivilegesResponse>({
+    return http<MlCapabilitiesResponse>({
       path: `${basePath()}/ml_capabilities`,
       method: 'GET',
       query: { ignoreSpaces: true },

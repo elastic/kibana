@@ -6,9 +6,8 @@
 
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import { RouteInitialization, JobServiceRouteDeps } from '../types';
 import {
   categorizationFieldExamplesSchema,
   chartSchema,
@@ -27,24 +26,17 @@ import { categorizationExamplesProvider } from '../models/job_service/new_job';
 /**
  * Routes for job service
  */
-export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
-  async function hasPermissionToCreateJobs(
-    callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']
-  ) {
-    if (mlLicense.isSecurityEnabled() === false) {
-      return true;
+export function jobServiceRoutes(
+  { router, mlLicense }: RouteInitialization,
+  { resolveMlCapabilities }: JobServiceRouteDeps
+) {
+  async function hasPermissionToCreateJobs(request: any) {
+    const mlCapabilities = await resolveMlCapabilities(request);
+    if (mlCapabilities === null) {
+      throw new Error('resolveMlCapabilities is not defined');
     }
 
-    const resp = await callAsCurrentUser('ml.privilegeCheck', {
-      body: {
-        cluster: [
-          'cluster:admin/xpack/ml/job/put',
-          'cluster:admin/xpack/ml/job/open',
-          'cluster:admin/xpack/ml/datafeeds/put',
-        ],
-      },
-    });
-    return resp.has_all_requested;
+    return mlCapabilities.canCreateJob;
   }
 
   /**
@@ -595,7 +587,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       try {
         // due to the use of the _analyze endpoint which is called by the kibana user,
         // basic job creation privileges are required to use this endpoint
-        if ((await hasPermissionToCreateJobs(context.ml!.mlClient.callAsCurrentUser)) === false) {
+        if ((await hasPermissionToCreateJobs(request)) === false) {
           throw Boom.forbidden(
             'Insufficient privileges, the machine_learning_admin role is required.'
           );

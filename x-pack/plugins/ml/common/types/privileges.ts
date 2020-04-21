@@ -5,70 +5,56 @@
  */
 //
 
-export interface Privileges {
+export const userMlCapabilities = {
   // Anomaly Detection
-  canGetJobs: boolean;
-  canCreateJob: boolean;
-  canDeleteJob: boolean;
-  canOpenJob: boolean;
-  canCloseJob: boolean;
-  canForecastJob: boolean;
-  canGetDatafeeds: boolean;
-  canStartStopDatafeed: boolean;
-  canUpdateJob: boolean;
-  canUpdateDatafeed: boolean;
-  canPreviewDatafeed: boolean;
+  canGetJobs: false,
+  canGetDatafeeds: false,
   // Calendars
-  canGetCalendars: boolean;
-  canCreateCalendar: boolean;
-  canDeleteCalendar: boolean;
-  // Filters
-  canGetFilters: boolean;
-  canCreateFilter: boolean;
-  canDeleteFilter: boolean;
+  canGetCalendars: false,
   // File Data Visualizer
-  canFindFileStructure: boolean;
+  canFindFileStructure: false,
+  // Filters
+  canGetFilters: false,
   // Data Frame Analytics
-  canGetDataFrameAnalytics: boolean;
-  canDeleteDataFrameAnalytics: boolean;
-  canCreateDataFrameAnalytics: boolean;
-  canStartStopDataFrameAnalytics: boolean;
-}
+  canGetDataFrameAnalytics: false,
+};
 
-export function getDefaultPrivileges(): Privileges {
+export const adminMlCapabilities = {
+  // Anomaly Detection
+  canCreateJob: false,
+  canDeleteJob: false,
+  canOpenJob: false,
+  canCloseJob: false,
+  canForecastJob: false,
+  canStartStopDatafeed: false,
+  canUpdateJob: false,
+  canUpdateDatafeed: false,
+  canPreviewDatafeed: false,
+  // Calendars
+  canCreateCalendar: false,
+  canDeleteCalendar: false,
+  // Filters
+  canCreateFilter: false,
+  canDeleteFilter: false,
+  // Data Frame Analytics
+  canDeleteDataFrameAnalytics: false,
+  canCreateDataFrameAnalytics: false,
+  canStartStopDataFrameAnalytics: false,
+};
+
+export type UserMlCapabilities = typeof userMlCapabilities;
+export type AdminMlCapabilities = typeof adminMlCapabilities;
+export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
+
+export function getDefaultPrivileges(): MlCapabilities {
   return {
-    // Anomaly Detection
-    canGetJobs: false,
-    canCreateJob: false,
-    canDeleteJob: false,
-    canOpenJob: false,
-    canCloseJob: false,
-    canForecastJob: false,
-    canGetDatafeeds: false,
-    canStartStopDatafeed: false,
-    canUpdateJob: false,
-    canUpdateDatafeed: false,
-    canPreviewDatafeed: false,
-    // Calendars
-    canGetCalendars: false,
-    canCreateCalendar: false,
-    canDeleteCalendar: false,
-    // Filters
-    canGetFilters: false,
-    canCreateFilter: false,
-    canDeleteFilter: false,
-    // File Data Visualizer
-    canFindFileStructure: false,
-    // Data Frame Analytics
-    canGetDataFrameAnalytics: false,
-    canDeleteDataFrameAnalytics: false,
-    canCreateDataFrameAnalytics: false,
-    canStartStopDataFrameAnalytics: false,
+    ...userMlCapabilities,
+    ...adminMlCapabilities,
   };
 }
 
-export interface PrivilegesResponse {
-  capabilities: Privileges;
+export interface MlCapabilitiesResponse {
+  capabilities: MlCapabilities;
   upgradeInProgress: boolean;
   isPlatinumOrTrialLicense: boolean;
   mlFeatureEnabledInSpace: boolean;
