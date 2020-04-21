@@ -18,16 +18,14 @@ import {
 import { WithHeaderLayout } from '../../../../layouts';
 import { AgentConfig, PackageInfo } from '../../../../types';
 import { PackageIcon } from '../../../../components/package_icon';
-import { CreateDatasourceFrom, CreateDatasourceStep } from '../types';
+import { CreateDatasourceFrom } from '../types';
 
 export const CreateDatasourcePageLayout: React.FunctionComponent<{
   from: CreateDatasourceFrom;
-  basePath: string;
   cancelUrl: string;
-  maxStep: CreateDatasourceStep | '';
   agentConfig?: AgentConfig;
   packageInfo?: PackageInfo;
-}> = ({ from, basePath, cancelUrl, maxStep, agentConfig, packageInfo, children }) => {
+}> = ({ from, cancelUrl, agentConfig, packageInfo, children }) => {
   const leftColumn = (
     <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       <EuiFlexItem>

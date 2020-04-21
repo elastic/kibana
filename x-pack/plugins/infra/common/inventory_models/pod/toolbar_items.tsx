@@ -6,8 +6,8 @@
 
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
-import { MetricsAndGroupByToolbarItems } from '../shared/compontents/metrics_and_groupby_toolbar_items';
+import { ToolbarProps } from '../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
+import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_groupby_toolbar_items';
 import { SnapshotMetricType } from '../types';
 
 export const PodToolbarItems = (props: ToolbarProps) => {
