@@ -6,6 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { Route, Switch, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
+import { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -36,10 +37,7 @@ import {
 } from './sections';
 
 interface AppProps {
-  history: {
-    push: any;
-    createHref: any;
-  };
+  history: History;
   location: any;
 }
 

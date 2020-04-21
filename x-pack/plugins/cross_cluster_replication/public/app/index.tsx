@@ -43,7 +43,8 @@ export async function mountApp({
   ELASTIC_WEBSITE_URL: string;
   DOC_LINK_VERSION: string;
 }): Promise<UnmountCallback> {
-  // Initialize additional services.
+  // Import and initialize additional services here instead of in plugin.ts to reduce the size of the
+  // initial bundle as much as possible.
   initBreadcrumbs(setBreadcrumbs);
   initDocumentation(`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`);
 
