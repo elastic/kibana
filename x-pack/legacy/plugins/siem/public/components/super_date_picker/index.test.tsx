@@ -8,6 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
+import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../plugins/siem/common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 import { apolloClientObservable, mockGlobalState } from '../../mock';
 import { createUseUiSetting$Mock } from '../../mock/kibana_react';
@@ -15,7 +16,6 @@ import { createStore, State } from '../../store';
 
 import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';
-import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../common/constants';
 
 jest.mock('../../lib/kibana');
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
