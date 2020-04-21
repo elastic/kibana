@@ -166,22 +166,29 @@ async function enrichHostMetadata(
   metadataRequestContext: MetadataRequestContext
 ): Promise<HostInfo> {
   let hostStatus = HostStatus.ERROR;
+  let elasticAgentId = hostMetadata?.elastic?.agent?.id;
+  const log = logger(metadataRequestContext.endpointAppContext);
   try {
     /**
      * Get agent status by elastic agent id if available or use the host id.
      * https://github.com/elastic/endpoint-app-team/issues/354
      */
+
+    if (!elasticAgentId) {
+      elasticAgentId = hostMetadata.host.id;
+      log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
+    }
+
     const status = await metadataRequestContext.endpointAppContext.agentService.getAgentStatusById(
       metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-      hostMetadata.elastic.agent.id || hostMetadata.host.id
+      elasticAgentId
     );
     hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
-      logger(metadataRequestContext.endpointAppContext).warn(
-        `agent with id ${hostMetadata.elastic.agent.id} not found`
-      );
+      log.warn(`agent with id ${elasticAgentId} not found`);
     } else {
+      log.error(e);
       throw e;
     }
   }
