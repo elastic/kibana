@@ -17,14 +17,29 @@
  * under the License.
  */
 
-export type SearchRequest = any;
-export type SearchResponse = any;
+import { i18n } from '@kbn/i18n';
 
-export interface LegacyApiCaller {
-  search: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
-  msearch: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
-}
+import {
+  EmbeddableFactoryDefinition,
+  EmbeddableInput,
+  IContainer,
+} from '../../../embeddable_plugin';
+import { PlaceholderEmbeddable, PLACEHOLDER_EMBEDDABLE } from './placeholder_embeddable';
 
-interface LegacyApiCallerResponse extends Promise<SearchResponse> {
-  abort: () => void;
+export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition {
+  public readonly type = PLACEHOLDER_EMBEDDABLE;
+
+  public async isEditable() {
+    return false;
+  }
+
+  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+    return new PlaceholderEmbeddable(initialInput, parent);
+  }
+
+  public getDisplayName() {
+    return i18n.translate('dashboard.placeholder.factory.displayName', {
+      defaultMessage: 'placeholder',
+    });
+  }
 }

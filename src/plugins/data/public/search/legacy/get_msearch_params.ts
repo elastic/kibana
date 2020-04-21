@@ -17,5 +17,13 @@
  * under the License.
  */
 
-export { getEsClient } from './get_es_client';
-export { SearchRequest, SearchResponse, LegacyApiCaller } from './types';
+import { IUiSettingsClient } from 'kibana/public';
+import { getIgnoreThrottled, getMaxConcurrentShardRequests } from '../fetch';
+
+export function getMSearchParams(config: IUiSettingsClient) {
+  return {
+    rest_total_hits_as_int: true,
+    ignore_throttled: getIgnoreThrottled(config),
+    max_concurrent_shard_requests: getMaxConcurrentShardRequests(config),
+  };
+}

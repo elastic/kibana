@@ -63,7 +63,7 @@ export const getBaseResponsePayload = (anchorDate: string = ANCHOR_DATE): RulesS
   language: 'kuery',
   rule_id: 'query-rule-id',
   interval: '5m',
-  lists: [
+  exceptions_list: [
     {
       field: 'source.ip',
       values_operator: 'included',

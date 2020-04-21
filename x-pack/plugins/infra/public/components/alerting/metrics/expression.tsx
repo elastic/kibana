@@ -347,7 +347,11 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
 
   const updateAggType = useCallback(
     (at: string) => {
-      setAlertParams(expressionId, { ...expression, aggType: at as MetricExpression['aggType'] });
+      setAlertParams(expressionId, {
+        ...expression,
+        aggType: at as MetricExpression['aggType'],
+        metric: at === 'count' ? undefined : expression.metric,
+      });
     },
     [expressionId, expression, setAlertParams]
   );

@@ -17,21 +17,20 @@
  * under the License.
  */
 
-import { IndexPattern } from '../..';
-import { FetchHandlers } from '../fetch/types';
+import { FetchHandlers } from '../fetch';
 import { SearchRequest, SearchResponse } from '..';
 
+export interface SearchStrategySearchParams extends FetchHandlers {
+  searchRequests: SearchRequest[];
+}
+
+// @deprecated
 export interface SearchStrategyProvider {
   id: string;
   search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
-  isViable: (indexPattern: IndexPattern) => boolean;
 }
 
 export interface SearchStrategyResponse {
   searching: Promise<SearchResponse[]>;
   abort: () => void;
-}
-
-export interface SearchStrategySearchParams extends FetchHandlers {
-  searchRequests: SearchRequest[];
 }
