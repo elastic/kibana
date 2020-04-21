@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract, ChromeStart, OverlayStart, CoreStart } from 'kibana/public';
+import { SavedObjectsClientContract, ChromeStart, OverlayStart } from 'kibana/public';
 import { DataPublicPluginStart, IndexPatternsContract } from '../../../../plugins/data/public';
 import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import { createSavedDashboardClass } from './saved_dashboard';
@@ -28,8 +28,6 @@ interface Services {
   search: DataPublicPluginStart['search'];
   chrome: ChromeStart;
   overlays: OverlayStart;
-  injectedMetadata: CoreStart['injectedMetadata'];
-  uiSettings: CoreStart['uiSettings'];
 }
 
 /**
