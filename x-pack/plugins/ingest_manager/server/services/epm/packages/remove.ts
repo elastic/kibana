@@ -21,7 +21,8 @@ export async function removeInstallation(options: {
   const [pkgName] = pkgkey.split('-');
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new Error('integration does not exist');
-  if (installation.removable === false) throw new Error('this integration is not removable');
+  if (installation.removable === false)
+    throw new Error(`The ${pkgName} integration is installed by default and cannot be removed`);
   const installedObjects = installation.installed || [];
 
   // Delete the manager saved object with references to the asset objects
