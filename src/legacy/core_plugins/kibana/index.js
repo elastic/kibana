@@ -137,13 +137,6 @@ export default function(kibana) {
             };
           },
         },
-        url: {
-          defaultSearchField: 'url',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return `/goto/${encodeURIComponent(obj.id)}`;
-          },
-        },
       },
 
       savedObjectSchemas: {
