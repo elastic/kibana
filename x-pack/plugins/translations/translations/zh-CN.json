@@ -8800,8 +8800,6 @@
     "xpack.logstash.idFormatErrorMessage": "管道 ID 必须以字母或下划线开头，并只能包含字母、下划线、短划线和数字",
     "xpack.logstash.insufficientUserPermissionsDescription": "管理 Logstash 管道的用户权限不足",
     "xpack.logstash.kibanaManagementPipelinesTitle": "仅在 Kibana“管理”中创建的管道显示在此处",
-    "xpack.logstash.managementSection.createPipelineTitle": "创建管道",
-    "xpack.logstash.managementSection.editPipelineTitle": "编辑管道",
     "xpack.logstash.managementSection.enableSecurityDescription": "必须启用 Security，才能使用 Logstash 管道管理功能。请在 elasticsearch.yml 中设置 xpack.security.enabled: true。",
     "xpack.logstash.managementSection.licenseDoesNotSupportDescription": "您的{licenseType}许可不支持 Logstash 管道管理功能。请升级您的许可。",
     "xpack.logstash.managementSection.notPossibleToManagePipelinesMessage": "您不能管理 Logstash 管道，因为许可信息当前不可用。",
