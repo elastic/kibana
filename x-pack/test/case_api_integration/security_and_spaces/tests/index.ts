@@ -12,5 +12,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./configure/get_configure'));
+    loadTestFile(require.resolve('./configure/get_connectors'));
   });
 };

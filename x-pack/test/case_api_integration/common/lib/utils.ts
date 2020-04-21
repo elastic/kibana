@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CasesConfigureRequest, CasesConfigureResponse } from '../../plugins/case/common/api';
+import { CasesConfigureRequest, CasesConfigureResponse } from '../../../../plugins/case/common/api';
 
 export const getConfiguration = (connector_id: string = 'connector-1'): CasesConfigureRequest => {
   return {
@@ -38,3 +38,34 @@ export const deleteConfiguration = async (es: any): Promise<void> => {
     body: {},
   });
 };
+
+export const getConnector = () => ({
+  name: 'ServiceNow Connector',
+  actionTypeId: '.servicenow',
+  secrets: {
+    username: 'admin',
+    password: 'admin',
+  },
+  config: {
+    apiUrl: 'localhost',
+    casesConfiguration: {
+      mapping: [
+        {
+          source: 'title',
+          target: 'short_description',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'description',
+          target: 'description',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'comments',
+          target: 'comments',
+          actionType: 'append',
+        },
+      ],
+    },
+  },
+});

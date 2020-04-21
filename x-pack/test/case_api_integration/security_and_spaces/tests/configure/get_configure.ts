@@ -13,7 +13,7 @@ import {
   removeServerGeneratedPropertiesFromConfigure,
   getConfigurationOutput,
   deleteConfiguration,
-} from '../../../utils';
+} from '../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
