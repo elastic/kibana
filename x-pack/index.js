@@ -9,9 +9,7 @@ import { graph } from './legacy/plugins/graph';
 import { monitoring } from './legacy/plugins/monitoring';
 import { reporting } from './legacy/plugins/reporting';
 import { security } from './legacy/plugins/security';
-import { tilemap } from './legacy/plugins/tilemap';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
-import { logstash } from './legacy/plugins/logstash';
 import { beats } from './legacy/plugins/beats_management';
 import { apm } from './legacy/plugins/apm';
 import { maps } from './legacy/plugins/maps';
@@ -40,9 +38,7 @@ module.exports = function(kibana) {
     reporting(kibana),
     spaces(kibana),
     security(kibana),
-    tilemap(kibana),
     dashboardMode(kibana),
-    logstash(kibana),
     beats(kibana),
     apm(kibana),
     maps(kibana),
