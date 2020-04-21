@@ -140,6 +140,34 @@ describe('TaskManagerRunner', () => {
     expect(runner.expiration).toEqual(now.add(1, 'm').toDate());
   });
 
+  test('runDuration returns duration which has elapsed since start', async () => {
+    const now = moment()
+      .subtract(30, 's')
+      .toDate();
+    const { runner } = testOpts({
+      instance: {
+        schedule: { interval: '10m' },
+        status: TaskStatus.Running,
+        startedAt: now,
+      },
+      definitions: {
+        bar: {
+          timeout: `1m`,
+          createTaskRunner: () => ({
+            async run() {
+              return;
+            },
+          }),
+        },
+      },
+    });
+
+    await runner.run();
+
+    expect(runner.isExpired).toBe(false);
+    expect(runner.startedAt).toEqual(now);
+  });
+
   test('reschedules tasks that return a runAt', async () => {
     const runAt = minutesFromNow(_.random(1, 10));
     const { runner, store } = testOpts({

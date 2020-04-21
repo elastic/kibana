@@ -9,6 +9,7 @@ import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { mockLogger, resolvable, sleep } from './test_utils';
 import { asOk } from './lib/result_type';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
+import moment from 'moment';
 
 describe('TaskPool', () => {
   test('occupiedWorkers are a sum of running tasks', async () => {
@@ -212,6 +213,12 @@ describe('TaskPool', () => {
         get expiration() {
           return now;
         },
+        get startedAt() {
+          // 5 and a half minutes
+          return moment(now)
+            .subtract(5, 'm')
+            .toDate();
+        },
         cancel: shouldRun,
       },
       {
@@ -238,7 +245,7 @@ describe('TaskPool', () => {
     expect(pool.availableWorkers).toEqual(0);
 
     expect(logger.warn).toHaveBeenCalledWith(
-      `Cancelling task TaskType "shooooo" as it expired at ${now} after running for 5m.`
+      `Cancelling task TaskType "shooooo" as it expired at ${now.toISOString()} after running for 5 minutes (with timeout set at 5m).`
     );
   });
 
@@ -295,6 +302,9 @@ describe('TaskPool', () => {
       run: mockRun(),
       toString: () => `TaskType "shooooo"`,
       get expiration() {
+        return new Date();
+      },
+      get startedAt() {
         return new Date();
       },
       get definition() {

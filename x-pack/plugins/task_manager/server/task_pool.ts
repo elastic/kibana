@@ -8,6 +8,7 @@
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
+import moment from 'moment';
 import { performance } from 'perf_hooks';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
@@ -149,9 +150,9 @@ export class TaskPool {
     for (const task of this.running) {
       if (task.isExpired) {
         this.logger.warn(
-          `Cancelling task ${task.toString()} as it expired at ${task.expiration}${
-            task.definition.timeout ? ` after running for ${task.definition.timeout}` : ``
-          }.`
+          `Cancelling task ${task.toString()} as it expired at ${task.expiration.toISOString()}${
+            task.startedAt ? ` after running for ${moment(task.startedAt).toNow(true)}` : ``
+          }${task.definition.timeout ? ` (with timeout set at ${task.definition.timeout})` : ``}.`
         );
         this.cancelTask(task);
       }

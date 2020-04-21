@@ -40,6 +40,7 @@ const EMPTY_RUN_RESULT: SuccessfulRunResult = {};
 export interface TaskRunner {
   isExpired: boolean;
   expiration: Date;
+  startedAt: Date | null;
   definition: TaskDefinition;
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
@@ -136,6 +137,13 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public get expiration() {
     return intervalFromDate(this.instance.startedAt!, this.definition.timeout)!;
+  }
+
+  /**
+   * Gets the duration of the current task run
+   */
+  public get startedAt() {
+    return this.instance.startedAt;
   }
 
   /**
