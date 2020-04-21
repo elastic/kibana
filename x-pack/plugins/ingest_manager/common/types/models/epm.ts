@@ -57,6 +57,7 @@ export interface RegistryPackage {
   icons?: RegistryImage[];
   assets?: string[];
   internal?: boolean;
+  removable?: boolean;
   format_version: string;
   datasets?: Dataset[];
   datasources?: RegistryDatasource[];

@@ -90,7 +90,7 @@ export async function installPackage(options: {
   // TODO: change epm API to /packageName/version so we don't need to do this
   const [pkgName, pkgVersion] = pkgkey.split('-');
   const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
-  const { internal = false } = registryPackageInfo;
+  const { internal = false, removable = true } = registryPackageInfo;
 
   const installKibanaAssetsPromise = installKibanaAssets({
     savedObjectsClient,
@@ -127,6 +127,7 @@ export async function installPackage(options: {
     pkgName,
     pkgVersion,
     internal,
+    removable,
     toSaveAssetRefs,
     toSaveESIndexPatterns,
   });
@@ -158,6 +159,7 @@ export async function saveInstallationReferences(options: {
   pkgName: string;
   pkgVersion: string;
   internal: boolean;
+  removable: boolean;
   toSaveAssetRefs: AssetReference[];
   toSaveESIndexPatterns: Record<string, string>;
 }) {
@@ -166,6 +168,7 @@ export async function saveInstallationReferences(options: {
     pkgName,
     pkgVersion,
     internal,
+    removable,
     toSaveAssetRefs,
     toSaveESIndexPatterns,
   } = options;
@@ -191,6 +194,7 @@ export async function saveInstallationReferences(options: {
       name: pkgName,
       version: pkgVersion,
       internal,
+      removable,
     },
     { id: pkgName, overwrite: true }
   );
