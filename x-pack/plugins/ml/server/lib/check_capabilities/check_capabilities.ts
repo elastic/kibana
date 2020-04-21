@@ -10,7 +10,7 @@ import {
   getDefaultCapabilities,
   adminMlCapabilities,
   MlCapabilitiesResponse,
-} from '../../../common/types/privileges';
+} from '../../../common/types/capabilities';
 import { upgradeCheckProvider } from './upgrade';
 import { MlLicense } from '../../../common/license';
 
@@ -32,14 +32,14 @@ export function capabilitiesProvider(
       canFindFileStructure: mlCapabilities.canFindFileStructure,
     };
 
-    const privileges = isPlatinumOrTrialLicense ? mlCapabilities : basicMlCapabilities;
+    const capabilities = isPlatinumOrTrialLicense ? mlCapabilities : basicMlCapabilities;
     if (upgradeInProgress === true) {
-      // if an upgrade is in progress, set all admin privileges to false
-      disableAdminPrivileges(privileges);
+      // if an upgrade is in progress, set all admin capabilities to false
+      disableAdminPrivileges(capabilities);
     }
 
     return {
-      capabilities: privileges,
+      capabilities,
       upgradeInProgress,
       isPlatinumOrTrialLicense,
       mlFeatureEnabledInSpace,

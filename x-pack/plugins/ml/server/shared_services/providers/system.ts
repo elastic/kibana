@@ -11,10 +11,10 @@ import { CloudSetup } from '../../../../cloud/server';
 import { LicenseCheck } from '../license_checks';
 import { spacesUtilsProvider, RequestFacade } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
-import { capabilitiesProvider } from '../../lib/check_privileges';
+import { capabilitiesProvider } from '../../lib/check_capabilities';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import { MlCapabilities, MlCapabilitiesResponse } from '../../../common/types/privileges';
+import { MlCapabilities, MlCapabilitiesResponse } from '../../../common/types/capabilities';
 
 export interface MlSystemProvider {
   mlSystemProvider(

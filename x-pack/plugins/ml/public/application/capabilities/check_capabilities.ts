@@ -8,8 +8,8 @@ import { i18n } from '@kbn/i18n';
 
 import { hasLicenseExpired } from '../license';
 
-import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/privileges';
-import { getCapabilities, getManageMlCapabilities } from './get_privileges';
+import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/capabilities';
+import { getCapabilities, getManageMlCapabilities } from './get_capabilities';
 import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
@@ -33,7 +33,7 @@ export function checkGetManagementMlJobs() {
   });
 }
 
-export function checkGetJobsPrivilege(): Promise<MlCapabilities> {
+export function checkGetJobsCapabilities(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
     getCapabilities().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       _capabilities = capabilities;
@@ -52,7 +52,7 @@ export function checkGetJobsPrivilege(): Promise<MlCapabilities> {
   });
 }
 
-export function checkCreateJobsPrivilege(): Promise<MlCapabilities> {
+export function checkCreateJobsCapabilities(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
     getCapabilities().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       _capabilities = capabilities;
@@ -89,9 +89,9 @@ export function checkFindFileStructurePrivilege(): Promise<MlCapabilities> {
 
 // check the privilege type and the license to see whether a user has permission to access a feature.
 // takes the name of the privilege variable as specified in get_privileges.js
-export function checkPermission(privilegeType: keyof MlCapabilities) {
+export function checkPermission(capability: keyof MlCapabilities) {
   const licenseHasExpired = hasLicenseExpired();
-  return _capabilities[privilegeType] === true && licenseHasExpired !== true;
+  return _capabilities[capability] === true && licenseHasExpired !== true;
 }
 
 // create the text for the button's tooltips if the user's license has

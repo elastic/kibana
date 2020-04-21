@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import * as CheckPrivilige from '../../../../../privilege/check_privilege';
+import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
 
 import { DeleteAction } from './action_delete';
 

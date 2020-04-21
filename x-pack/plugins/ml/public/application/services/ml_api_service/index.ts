@@ -15,7 +15,7 @@ import { jobs } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
 import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
 
-import { MlCapabilitiesResponse } from '../../../../common/types/privileges';
+import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import {
   Job,

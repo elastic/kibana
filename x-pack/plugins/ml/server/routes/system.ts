@@ -10,7 +10,7 @@ import { Request } from 'hapi';
 import { RequestHandlerContext } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../client/log';
-import { capabilitiesProvider } from '../lib/check_privileges';
+import { capabilitiesProvider } from '../lib/check_capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { RouteInitialization, SystemRouteDeps } from '../types';
 

@@ -9,7 +9,7 @@ import {
   userMlCapabilities,
   MlCapabilities,
   getDefaultCapabilities,
-} from '../../../../common/types/privileges';
+} from '../../../../common/types/capabilities';
 
 export function getAdminCapabilities() {
   const caps: any = {};

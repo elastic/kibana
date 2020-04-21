@@ -7,7 +7,7 @@
 import { ml } from '../services/ml_api_service';
 
 import { setUpgradeInProgress } from '../services/upgrade_service';
-import { MlCapabilitiesResponse } from '../../../common/types/privileges';
+import { MlCapabilitiesResponse } from '../../../common/types/capabilities';
 
 export function getCapabilities(): Promise<MlCapabilitiesResponse> {
   return new Promise((resolve, reject) => {

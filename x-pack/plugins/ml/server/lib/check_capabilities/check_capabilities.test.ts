@@ -5,9 +5,9 @@
  */
 
 import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabilities';
-import { capabilitiesProvider } from './check_privileges';
+import { capabilitiesProvider } from './check_capabilities';
 import { MlLicense } from '../../../common/license';
-import { getDefaultCapabilities } from '../../../common/types/privileges';
+import { getDefaultCapabilities } from '../../../common/types/capabilities';
 
 const mlLicense = {
   isSecurityEnabled: () => true,

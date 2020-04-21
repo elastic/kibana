@@ -13,7 +13,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { MlServerLicense } from './lib/license';
-import { MlCapabilities } from '../common/types/privileges';
+import { MlCapabilities } from '../common/types/capabilities';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;

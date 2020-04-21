@@ -6,7 +6,7 @@
 
 import { createAction } from 'redux-actions';
 import { createAsyncAction } from './utils';
-import { MlCapabilitiesResponse } from '../../../../../../plugins/ml/common/types/privileges';
+import { MlCapabilitiesResponse } from '../../../../../../plugins/ml/common/types/capabilities';
 import { AnomaliesTableRecord } from '../../../../../../plugins/ml/common/types/anomalies';
 import {
   CreateMLJobSuccess,

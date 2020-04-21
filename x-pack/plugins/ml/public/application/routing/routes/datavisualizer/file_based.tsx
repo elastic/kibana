@@ -17,7 +17,7 @@ import { useResolver } from '../../use_resolver';
 import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
 
 import { checkBasicLicense } from '../../../license';
-import { checkFindFileStructurePrivilege } from '../../../privilege/check_privilege';
+import { checkFindFileStructurePrivilege } from '../../../capabilities/check_capabilities';
 import { loadIndexPatterns } from '../../../util/index_utils';
 
 import { DATA_VISUALIZER_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';

@@ -16,7 +16,7 @@ import {
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
-import { MlCapabilities } from '../common/types/privileges';
+import { MlCapabilities } from '../common/types/capabilities';
 
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
 import { initMlTelemetry } from './lib/telemetry';
@@ -43,7 +43,7 @@ import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
 import { MlServerLicense } from './lib/license';
 import { createSharedServices, SharedServices } from './shared_services';
-import { userMlCapabilities, adminMlCapabilities } from '../common/types/privileges';
+import { userMlCapabilities, adminMlCapabilities } from '../common/types/capabilities';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {

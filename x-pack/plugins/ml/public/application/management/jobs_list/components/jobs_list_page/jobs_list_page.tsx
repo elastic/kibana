@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { checkGetManagementMlJobs } from '../../../../privilege/check_privilege';
+import { checkGetManagementMlJobs } from '../../../../capabilities/check_capabilities';
 
 import { getDocLinks } from '../../../../util/dependency_cache';
 // @ts-ignore undeclared module
