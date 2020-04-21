@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexEsListsItemsSchema } from '../../../common/schemas';
+import { IndexEsListItemSchema } from '../../../common/schemas';
 import {
   LISTS_ITEMS_INDEX,
   TIE_BREAKERS,
@@ -27,9 +27,9 @@ describe('crete_list_item_bulk', () => {
   test('It calls "callAsCurrentUser" with body, index, and the bulk items', async () => {
     const options = getCreateListItemBulkOptionsMock();
     await createListItemsBulk(options);
-    const firstRecord: IndexEsListsItemsSchema = getIndexESListItemMock();
+    const firstRecord: IndexEsListItemSchema = getIndexESListItemMock();
     firstRecord.tie_breaker_id = TIE_BREAKERS[0];
-    const secondRecord: IndexEsListsItemsSchema = getIndexESListItemMock(VALUE_2);
+    const secondRecord: IndexEsListItemSchema = getIndexESListItemMock(VALUE_2);
     secondRecord.tie_breaker_id = TIE_BREAKERS[1];
     expect(options.dataClient.callAsCurrentUser).toBeCalledWith('bulk', {
       body: [

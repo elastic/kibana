@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListsItemsArraySchema, Type } from '../../../common/schemas';
+import { ListItemArraySchema, Type } from '../../../common/schemas';
 import { getQueryFilterFromTypeValue } from '../utils';
 import { DataClient } from '../../types';
 
@@ -24,7 +24,7 @@ export const deleteListItemByValue = async ({
   type,
   dataClient,
   listItemIndex,
-}: DeleteListItemByValueOptions): Promise<ListsItemsArraySchema> => {
+}: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
   const listItems = await getListItemByValues({
     dataClient,
     listId,

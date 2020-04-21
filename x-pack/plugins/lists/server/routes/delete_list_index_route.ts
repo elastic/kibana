@@ -43,9 +43,9 @@ export const deleteListIndexRoute = (router: IRouter): void => {
       try {
         const lists = getListClient(context);
         const listsIndexExists = await lists.getListIndexExists();
-        const listsItemsIndexExists = await lists.getListItemIndexExists();
+        const listItemIndexExists = await lists.getListItemIndexExists();
 
-        if (!listsIndexExists && !listsItemsIndexExists) {
+        if (!listsIndexExists && !listItemIndexExists) {
           return siemResponse.error({
             body: `index: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" does not exist`,
             statusCode: 404,
@@ -54,27 +54,27 @@ export const deleteListIndexRoute = (router: IRouter): void => {
           if (listsIndexExists) {
             await lists.deleteListIndex();
           }
-          if (listsItemsIndexExists) {
+          if (listItemIndexExists) {
             await lists.deleteListItemIndex();
           }
 
           const listsPolicyExists = await lists.getListPolicyExists();
-          const listsItemsPolicyExists = await lists.getListItemPolicyExists();
+          const listItemPolicyExists = await lists.getListItemPolicyExists();
 
           if (listsPolicyExists) {
             await lists.deleteListPolicy();
           }
-          if (listsItemsPolicyExists) {
+          if (listItemPolicyExists) {
             await lists.deleteListItemPolicy();
           }
 
           const listsTemplateExists = await lists.getListTemplateExists();
-          const listsItemsTemplateExists = await lists.getListItemTemplateExists();
+          const listItemTemplateExists = await lists.getListItemTemplateExists();
 
           if (listsTemplateExists) {
             await lists.deleteListTemplate();
           }
-          if (listsItemsTemplateExists) {
+          if (listItemTemplateExists) {
             await lists.deleteListItemTemplate();
           }
 

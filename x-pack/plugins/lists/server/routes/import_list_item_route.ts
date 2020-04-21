@@ -14,10 +14,10 @@ import {
   validate,
 } from '../siem_server_deps';
 import {
-  ImportListsItemsSchema,
+  ImportListItemSchema,
   acknowledgeSchema,
-  importListsItemsQuerySchema,
-  importListsItemsSchema,
+  importListItemQuerySchema,
+  importListItemSchema,
 } from '../../common/schemas';
 
 import { getListClient } from '.';
@@ -33,10 +33,10 @@ export const importListItemRoute = (router: IRouter): void => {
       },
       path: `${LIST_ITEM_URL}/_import`,
       validate: {
-        body: buildRouteValidation<typeof importListsItemsSchema, ImportListsItemsSchema>(
-          importListsItemsSchema
+        body: buildRouteValidation<typeof importListItemSchema, ImportListItemSchema>(
+          importListItemSchema
         ),
-        query: buildRouteValidation(importListsItemsQuerySchema),
+        query: buildRouteValidation(importListItemQuerySchema),
       },
     },
     async (context, request, response) => {

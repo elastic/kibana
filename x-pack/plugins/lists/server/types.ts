@@ -9,7 +9,7 @@ import { IContextProvider, RequestHandler, ScopedClusterClient } from 'kibana/se
 import { SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 
-import { ListsClient } from './services/lists/client';
+import { ListClient } from './services/lists/client';
 
 export type DataClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
 export type ContextProvider = IContextProvider<RequestHandler<unknown, unknown, unknown>, 'lists'>;
@@ -19,11 +19,11 @@ export interface PluginsSetup {
   spaces: SpacesPluginSetup | undefined | null;
 }
 
-export type ContextProviderReturn = Promise<{ getListsClient: () => ListsClient }>;
+export type ContextProviderReturn = Promise<{ getListClient: () => ListClient }>;
 declare module 'src/core/server' {
   interface RequestHandlerContext {
     lists?: {
-      getListsClient: () => ListsClient;
+      getListClient: () => ListClient;
     };
   }
 }

@@ -9,10 +9,10 @@ import { CreateDocumentResponse } from 'elasticsearch';
 import {
   DescriptionOrUndefined,
   Id,
-  ListsSchema,
+  ListSchema,
   MetaOrUndefined,
   NameOrUndefined,
-  UpdateEsListsSchema,
+  UpdateEsListSchema,
 } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
@@ -38,13 +38,13 @@ export const updateList = async ({
   user,
   meta,
   dateNow,
-}: UpdateListOptions): Promise<ListsSchema | null> => {
+}: UpdateListOptions): Promise<ListSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
   const list = await getList({ dataClient, id, listIndex });
   if (list == null) {
     return null;
   } else {
-    const doc: UpdateEsListsSchema = {
+    const doc: UpdateEsListSchema = {
       description,
       meta,
       name,

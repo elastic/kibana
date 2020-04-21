@@ -8,15 +8,14 @@
 
 import * as t from 'io-ts';
 
-import { descriptionOrUndefined, id, metaOrUndefined, nameOrUndefined } from '../common/schemas';
+import { idOrUndefined, list_idOrUndefined, valueOrUndefined } from '../common/schemas';
 
-export const patchListsSchema = t.exact(
+export const deleteListItemSchema = t.exact(
   t.type({
-    description: descriptionOrUndefined,
-    id,
-    meta: metaOrUndefined,
-    name: nameOrUndefined,
+    id: idOrUndefined,
+    list_id: list_idOrUndefined,
+    value: valueOrUndefined,
   })
 );
 
-export type PatchListsSchema = t.TypeOf<typeof patchListsSchema>;
+export type DeleteListItemSchema = t.TypeOf<typeof deleteListItemSchema>;

@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { LIST_INDEX } from '../../common/constants';
 import { buildSiemResponse, transformError, validate } from '../siem_server_deps';
-import { listsItemsIndexExistSchema } from '../../common/schemas';
+import { listItemIndexExistSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -27,24 +27,24 @@ export const readListIndexRoute = (router: IRouter): void => {
       try {
         const lists = getListClient(context);
         const listsIndexExists = await lists.getListIndexExists();
-        const listsItemsIndexExists = await lists.getListItemIndexExists();
+        const listItemIndexExists = await lists.getListItemIndexExists();
 
-        if (listsIndexExists || listsItemsIndexExists) {
+        if (listsIndexExists || listItemIndexExists) {
           const [validated, errors] = validate(
-            { lists_index: listsIndexExists, lists_items_index: listsItemsIndexExists },
-            listsItemsIndexExistSchema
+            { lists_index: listsIndexExists, lists_items_index: listItemIndexExists },
+            listItemIndexExistSchema
           );
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
             return response.ok({ body: validated ?? {} });
           }
-        } else if (!listsIndexExists && listsItemsIndexExists) {
+        } else if (!listsIndexExists && listItemIndexExists) {
           return siemResponse.error({
             body: `index ${lists.getListIndex()} does not exist`,
             statusCode: 404,
           });
-        } else if (!listsItemsIndexExists && listsIndexExists) {
+        } else if (!listItemIndexExists && listsIndexExists) {
           return siemResponse.error({
             body: `index ${lists.getListItemIndex()} does not exist`,
             statusCode: 404,

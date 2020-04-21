@@ -9,8 +9,8 @@ import { CreateDocumentResponse } from 'elasticsearch';
 
 import {
   IdOrUndefined,
-  IndexEsListsItemsSchema,
-  ListsItemsSchema,
+  IndexEsListItemSchema,
+  ListItemSchema,
   MetaOrUndefined,
   Type,
 } from '../../../common/schemas';
@@ -41,7 +41,7 @@ export const createListItem = async ({
   meta,
   dateNow,
   tieBreaker,
-}: CreateListItemOptions): Promise<ListsItemsSchema> => {
+}: CreateListItemOptions): Promise<ListItemSchema> => {
   const createdAt = dateNow ?? new Date().toISOString();
   const tieBreakerId = tieBreaker ?? uuid.v4();
   const baseBody = {
@@ -53,7 +53,7 @@ export const createListItem = async ({
     updated_at: createdAt,
     updated_by: user,
   };
-  const body: IndexEsListsItemsSchema = {
+  const body: IndexEsListItemSchema = {
     ...baseBody,
     ...transformListItemToElasticQuery({ type, value }),
   };

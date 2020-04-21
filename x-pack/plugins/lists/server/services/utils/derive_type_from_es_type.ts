@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchEsListsItemsSchema, Type } from '../../../common/schemas';
+import { SearchEsListItemSchema, Type } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
 interface DeriveTypeFromItemOptions {
-  item: SearchEsListsItemsSchema;
+  item: SearchEsListItemSchema;
 }
 
 export const deriveTypeFromItem = ({ item }: DeriveTypeFromItemOptions): Type => {

@@ -6,11 +6,11 @@
 
 import { RequestHandlerContext } from 'kibana/server';
 
-import { ListsClient } from '../../services/lists/client';
+import { ListClient } from '../../services/lists/client';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
-export const getListClient = (context: RequestHandlerContext): ListsClient => {
-  const lists = context.lists?.getListsClient();
+export const getListClient = (context: RequestHandlerContext): ListClient => {
+  const lists = context.lists?.getListClient();
   if (lists == null) {
     throw new ErrorWithStatusCode('Lists is not found as a plugin', 404);
   } else {

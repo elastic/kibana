@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListsItemsArraySchema, Type } from '../../../common/schemas';
+import { ListItemArraySchema, Type } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
 import { getListItemByValues } from '.';
@@ -23,7 +23,7 @@ export const getListItemByValue = async ({
   listItemIndex,
   type,
   value,
-}: GetListItemByValueOptions): Promise<ListsItemsArraySchema> => {
+}: GetListItemByValueOptions): Promise<ListItemArraySchema> => {
   return getListItemByValues({
     dataClient,
     listId,

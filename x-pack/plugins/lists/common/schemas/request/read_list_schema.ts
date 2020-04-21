@@ -8,14 +8,12 @@
 
 import * as t from 'io-ts';
 
-import { idOrUndefined, list_idOrUndefined, valueOrUndefined } from '../common/schemas';
+import { id } from '../common/schemas';
 
-export const deleteListsItemsSchema = t.exact(
+export const readListSchema = t.exact(
   t.type({
-    id: idOrUndefined,
-    list_id: list_idOrUndefined,
-    value: valueOrUndefined,
+    id,
   })
 );
 
-export type DeleteListsItemsSchema = t.TypeOf<typeof deleteListsItemsSchema>;
+export type ReadListSchema = t.TypeOf<typeof readListSchema>;

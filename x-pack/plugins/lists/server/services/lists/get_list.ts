@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { Id, ListsSchema, SearchEsListsSchema } from '../../../common/schemas';
+import { Id, ListSchema, SearchEsListSchema } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
 interface GetListOptions {
@@ -19,8 +19,8 @@ export const getList = async ({
   id,
   dataClient,
   listIndex,
-}: GetListOptions): Promise<ListsSchema | null> => {
-  const result: SearchResponse<SearchEsListsSchema> = await dataClient.callAsCurrentUser('search', {
+}: GetListOptions): Promise<ListSchema | null> => {
+  const result: SearchResponse<SearchEsListSchema> = await dataClient.callAsCurrentUser('search', {
     body: {
       query: {
         term: {

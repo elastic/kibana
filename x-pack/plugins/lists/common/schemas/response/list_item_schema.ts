@@ -21,7 +21,7 @@ import {
   value,
 } from '../common/schemas';
 
-export const listsItemsSchema = t.exact(
+export const listItemSchema = t.exact(
   t.type({
     created_at,
     created_by,
@@ -36,7 +36,7 @@ export const listsItemsSchema = t.exact(
   })
 );
 
-export type ListsItemsSchema = t.TypeOf<typeof listsItemsSchema>;
+export type ListItemSchema = t.TypeOf<typeof listItemSchema>;
 
-export const listsItemsArraySchema = t.array(listsItemsSchema);
-export type ListsItemsArraySchema = t.TypeOf<typeof listsItemsArraySchema>;
+export const listItemArraySchema = t.array(listItemSchema);
+export type ListItemArraySchema = t.TypeOf<typeof listItemArraySchema>;

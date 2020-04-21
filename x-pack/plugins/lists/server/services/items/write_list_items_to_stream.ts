@@ -8,7 +8,7 @@ import { PassThrough } from 'stream';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { SearchEsListsItemsSchema } from '../../../common/schemas';
+import { SearchEsListItemSchema } from '../../../common/schemas';
 import { DataClient } from '../../types';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
@@ -112,7 +112,7 @@ export const getResponse = async ({
   listId,
   listItemIndex,
   size = SIZE,
-}: GetResponseOptions): Promise<SearchResponse<SearchEsListsItemsSchema>> => {
+}: GetResponseOptions): Promise<SearchResponse<SearchEsListItemSchema>> => {
   return dataClient.callAsCurrentUser('search', {
     body: {
       query: {
@@ -130,7 +130,7 @@ export const getResponse = async ({
 };
 
 interface WriteResponseHitsToStreamOptions {
-  response: SearchResponse<SearchEsListsItemsSchema>;
+  response: SearchResponse<SearchEsListItemSchema>;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
 }

@@ -10,13 +10,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
 
 import { getListRequest } from './mocks/utils';
-import { createListsSchema } from './create_lists_schema';
+import { createListSchema } from './create_list_schema';
 
-describe('lists', () => {
+describe('create_list_schema', () => {
   // TODO: Finish the tests for this
   test('it should validate a typical lists request', () => {
     const payload = getListRequest();
-    const decoded = createListsSchema.decode(payload);
+    const decoded = createListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 

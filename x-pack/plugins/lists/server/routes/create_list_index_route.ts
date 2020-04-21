@@ -27,9 +27,9 @@ export const createListIndexRoute = (router: IRouter): void => {
       try {
         const lists = getListClient(context);
         const listsIndexExists = await lists.getListIndexExists();
-        const listsItemsIndexExists = await lists.getListItemIndexExists();
+        const listItemIndexExists = await lists.getListItemIndexExists();
 
-        if (listsIndexExists && listsItemsIndexExists) {
+        if (listsIndexExists && listItemIndexExists) {
           return siemResponse.error({
             body: `index: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" already exists`,
             statusCode: 409,
@@ -59,7 +59,7 @@ export const createListIndexRoute = (router: IRouter): void => {
           if (!listsIndexExists) {
             await lists.createListBootStrapIndex();
           }
-          if (!listsItemsIndexExists) {
+          if (!listItemIndexExists) {
             await lists.createListItemBootStrapIndex();
           }
 

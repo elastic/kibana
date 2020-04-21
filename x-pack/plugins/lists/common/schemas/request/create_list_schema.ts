@@ -8,30 +8,16 @@
 
 import * as t from 'io-ts';
 
-import {
-  created_at,
-  created_by,
-  description,
-  metaOrUndefined,
-  name,
-  tie_breaker_id,
-  type,
-  updated_at,
-  updated_by,
-} from '../common/schemas';
+import { description, idOrUndefined, metaOrUndefined, name, type } from '../common/schemas';
 
-export const searchEsListsSchema = t.exact(
+export const createListSchema = t.exact(
   t.type({
-    created_at,
-    created_by,
     description,
+    id: idOrUndefined,
     meta: metaOrUndefined,
     name,
-    tie_breaker_id,
     type,
-    updated_at,
-    updated_by,
   })
 );
 
-export type SearchEsListsSchema = t.TypeOf<typeof searchEsListsSchema>;
+export type CreateListSchema = t.TypeOf<typeof createListSchema>;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Id, ListsSchema } from '../../../common/schemas';
+import { Id, ListSchema } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
 import { getList } from './get_list';
@@ -21,7 +21,7 @@ export const deleteList = async ({
   dataClient,
   listIndex,
   listItemIndex,
-}: DeleteListOptions): Promise<ListsSchema | null> => {
+}: DeleteListOptions): Promise<ListSchema | null> => {
   const list = await getList({ dataClient, id, listIndex });
   if (list == null) {
     return null;

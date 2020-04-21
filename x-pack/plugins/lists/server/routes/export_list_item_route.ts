@@ -10,7 +10,7 @@ import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { exportListsItemsQuerySchema } from '../../common/schemas';
+import { exportListItemQuerySchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -22,7 +22,7 @@ export const exportListItemRoute = (router: IRouter): void => {
       },
       path: `${LIST_ITEM_URL}/_export`,
       validate: {
-        query: buildRouteValidation(exportListsItemsQuerySchema),
+        query: buildRouteValidation(exportListItemQuerySchema),
         // TODO: Do we want to add a body here like export_rules_route and allow a size limit?
       },
     },

@@ -13,7 +13,7 @@ import {
   transformError,
   validate,
 } from '../siem_server_deps';
-import { listsSchema, patchListsSchema } from '../../common/schemas';
+import { listSchema, patchListSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -25,7 +25,7 @@ export const patchListRoute = (router: IRouter): void => {
       },
       path: LIST_URL,
       validate: {
-        body: buildRouteValidation(patchListsSchema),
+        body: buildRouteValidation(patchListSchema),
       },
     },
     async (context, request, response) => {
@@ -40,7 +40,7 @@ export const patchListRoute = (router: IRouter): void => {
             statusCode: 404,
           });
         } else {
-          const [validated, errors] = validate(list, listsSchema);
+          const [validated, errors] = validate(list, listSchema);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

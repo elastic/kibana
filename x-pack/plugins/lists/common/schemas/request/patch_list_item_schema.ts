@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 
 import { id, metaOrUndefined, valueOrUndefined } from '../common/schemas';
 
-export const patchListsItemsSchema = t.exact(
+export const patchListItemSchema = t.exact(
   t.type({
     id,
     meta: metaOrUndefined,
@@ -18,4 +18,4 @@ export const patchListsItemsSchema = t.exact(
   })
 );
 
-export type PatchListsItemsSchema = t.TypeOf<typeof patchListsItemsSchema>;
+export type PatchListItemSchema = t.TypeOf<typeof patchListItemSchema>;

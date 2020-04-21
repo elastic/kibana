@@ -8,12 +8,25 @@
 
 import * as t from 'io-ts';
 
-import { esDataTypeUnion, metaOrUndefined, updated_at, updated_by } from '../common/schemas';
+import {
+  created_at,
+  created_by,
+  esDataTypeUnion,
+  list_id,
+  metaOrUndefined,
+  tie_breaker_id,
+  updated_at,
+  updated_by,
+} from '../common/schemas';
 
-export const updateEsListsItemsSchema = t.intersection([
+export const indexEsListItemSchema = t.intersection([
   t.exact(
     t.type({
+      created_at,
+      created_by,
+      list_id,
       meta: metaOrUndefined,
+      tie_breaker_id,
       updated_at,
       updated_by,
     })
@@ -21,4 +34,4 @@ export const updateEsListsItemsSchema = t.intersection([
   esDataTypeUnion,
 ]);
 
-export type UpdateEsListsItemsSchema = t.TypeOf<typeof updateEsListsItemsSchema>;
+export type IndexEsListItemSchema = t.TypeOf<typeof indexEsListItemSchema>;

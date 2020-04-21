@@ -8,16 +8,13 @@
 
 import * as t from 'io-ts';
 
-import { description, idOrUndefined, metaOrUndefined, name, type } from '../common/schemas';
+import { list_id } from '../common/schemas';
 
-export const createListsSchema = t.exact(
+export const exportListItemQuerySchema = t.exact(
   t.type({
-    description,
-    id: idOrUndefined,
-    meta: metaOrUndefined,
-    name,
-    type,
+    list_id,
+    // TODO: Add file_name here with a default value
   })
 );
 
-export type CreateListsSchema = t.TypeOf<typeof createListsSchema>;
+export type ExportListItemQuerySchema = t.TypeOf<typeof exportListItemQuerySchema>;

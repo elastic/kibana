@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListsSchema } from '../../../common/schemas';
+import { ListSchema } from '../../../common/schemas';
 import {
   LISTS_INDEX,
   LISTS_ITEMS_INDEX,
@@ -37,7 +37,7 @@ describe('delete_list', () => {
   });
 
   test('Delete returns the list if a list is returned from getList', async () => {
-    const list: ListsSchema = getListResponseMock();
+    const list: ListSchema = getListResponseMock();
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
     const deletedList = await deleteList(options);
@@ -45,7 +45,7 @@ describe('delete_list', () => {
   });
 
   test('Delete calls "deleteByQuery" and "delete" if a list is returned from getList', async () => {
-    const list: ListsSchema = getListResponseMock();
+    const list: ListSchema = getListResponseMock();
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
     await deleteList(options);
@@ -57,7 +57,7 @@ describe('delete_list', () => {
   });
 
   test('Delete calls "delete" second if a list is returned from getList', async () => {
-    const list: ListsSchema = getListResponseMock();
+    const list: ListSchema = getListResponseMock();
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
     await deleteList(options);

@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './search_es_lists_items_schema';
-export * from './search_es_lists_schema';
+export * from './search_es_list_item_schema';
+export * from './search_es_list_schema';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexEsListsSchema } from '../../../common/schemas';
+import { IndexEsListSchema } from '../../../common/schemas';
 
 import {
   DATE_NOW,
@@ -16,7 +16,7 @@ import {
   USER,
 } from './lists_services_mock_constants';
 
-export const getIndexESListMock = (): IndexEsListsSchema => ({
+export const getIndexESListMock = (): IndexEsListSchema => ({
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,

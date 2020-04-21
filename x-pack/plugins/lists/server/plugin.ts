@@ -13,11 +13,11 @@ import { SpacesServiceSetup } from '../../spaces/server';
 
 import { ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';
-import { ListsClient } from './services/lists/client';
+import { ListClient } from './services/lists/client';
 import { ContextProvider, ContextProviderReturn, PluginsSetup } from './types';
 import { createConfig$ } from './create_config';
 
-export class ListsPlugin {
+export class ListPlugin {
   private readonly logger: Logger;
   private spaces: SpacesServiceSetup | undefined | null;
   private config: ConfigType | undefined | null;
@@ -70,8 +70,8 @@ export class ListsPlugin {
         throw new TypeError('Security plugin is required for this plugin to operate');
       } else {
         return {
-          getListsClient: (): ListsClient =>
-            new ListsClient({
+          getListClient: (): ListClient =>
+            new ListClient({
               config,
               dataClient,
               request,

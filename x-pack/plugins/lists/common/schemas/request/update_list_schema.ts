@@ -8,12 +8,15 @@
 
 import * as t from 'io-ts';
 
-import { id } from '../common/schemas';
+import { description, id, metaOrUndefined, name } from '../common/schemas';
 
-export const deleteListsSchema = t.exact(
+export const updateListSchema = t.exact(
   t.type({
+    description,
     id,
+    meta: metaOrUndefined,
+    name,
   })
 );
 
-export type DeleteListsSchema = t.TypeOf<typeof deleteListsSchema>;
+export type UpdateListSchema = t.TypeOf<typeof updateListSchema>;

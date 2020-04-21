@@ -7,8 +7,8 @@
 import { PluginInitializerContext } from '../../../../src/core/server';
 
 import { ConfigSchema } from './config';
-import { ListsPlugin } from './plugin';
+import { ListPlugin } from './plugin';
 
 export const config = { schema: ConfigSchema };
-export const plugin = (initializerContext: PluginInitializerContext): ListsPlugin =>
-  new ListsPlugin(initializerContext);
+export const plugin = (initializerContext: PluginInitializerContext): ListPlugin =>
+  new ListPlugin(initializerContext);

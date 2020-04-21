@@ -6,9 +6,9 @@
 
 import * as t from 'io-ts';
 
-export const listsItemsIndexExistSchema = t.type({
+export const listItemIndexExistSchema = t.type({
   lists_index: t.boolean,
   lists_items_index: t.boolean,
 });
 
-export type ListsItemsIndexExistSchema = t.TypeOf<typeof listsItemsIndexExistSchema>;
+export type ListItemIndexExistSchema = t.TypeOf<typeof listItemIndexExistSchema>;

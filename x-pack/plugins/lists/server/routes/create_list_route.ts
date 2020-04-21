@@ -13,7 +13,7 @@ import {
   transformError,
   validate,
 } from '../siem_server_deps';
-import { createListsSchema, listsSchema } from '../../common/schemas';
+import { createListSchema, listSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -25,7 +25,7 @@ export const createListRoute = (router: IRouter): void => {
       },
       path: LIST_URL,
       validate: {
-        body: buildRouteValidation(createListsSchema),
+        body: buildRouteValidation(createListSchema),
       },
     },
     async (context, request, response) => {
@@ -50,7 +50,7 @@ export const createListRoute = (router: IRouter): void => {
             }
           }
           const list = await lists.createList({ description, id, meta, name, type });
-          const [validated, errors] = validate(list, listsSchema);
+          const [validated, errors] = validate(list, listSchema);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

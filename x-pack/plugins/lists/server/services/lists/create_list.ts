@@ -11,8 +11,8 @@ import { DataClient } from '../../types';
 import {
   Description,
   IdOrUndefined,
-  IndexEsListsSchema,
-  ListsSchema,
+  IndexEsListSchema,
+  ListSchema,
   MetaOrUndefined,
   Name,
   Type,
@@ -42,9 +42,9 @@ export const createList = async ({
   meta,
   dateNow,
   tieBreaker,
-}: CreateListOptions): Promise<ListsSchema> => {
+}: CreateListOptions): Promise<ListSchema> => {
   const createdAt = dateNow ?? new Date().toISOString();
-  const body: IndexEsListsSchema = {
+  const body: IndexEsListSchema = {
     created_at: createdAt,
     created_by: user,
     description,

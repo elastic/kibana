@@ -6,16 +6,16 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ListsItemsArraySchema, SearchEsListsItemsSchema, Type } from '../../../common/schemas';
+import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
 export const transformElasticToListItem = ({
   response,
   type,
 }: {
-  response: SearchResponse<SearchEsListsItemsSchema>;
+  response: SearchResponse<SearchEsListItemSchema>;
   type: Type;
-}): ListsItemsArraySchema => {
+}): ListItemArraySchema => {
   return response.hits.hits.map(hit => {
     const {
       _id,

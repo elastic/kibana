@@ -8,7 +8,7 @@ import { KibanaRequest, ScopedClusterClient } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../../../security/server';
 import { SpacesServiceSetup } from '../../../../spaces/server';
-import { ListsItemsArraySchema, ListsItemsSchema, ListsSchema } from '../../../common/schemas';
+import { ListItemArraySchema, ListItemSchema, ListSchema } from '../../../common/schemas';
 import { ConfigType } from '../../config';
 import {
   createList,
@@ -65,7 +65,7 @@ import {
 } from './client_types';
 
 // TODO: Consider an interface and a factory
-export class ListsClient {
+export class ListClient {
   private readonly spaces: SpacesServiceSetup | undefined | null;
   private readonly config: ConfigType;
   private readonly dataClient: Pick<
@@ -101,7 +101,7 @@ export class ListsClient {
     return getListItemIndex({ listsItemsIndexName, request, spaces });
   };
 
-  public getList = async ({ id }: GetListOptions): Promise<ListsSchema | null> => {
+  public getList = async ({ id }: GetListOptions): Promise<ListSchema | null> => {
     const { dataClient } = this;
     const listIndex = this.getListIndex();
     return getList({ dataClient, id, listIndex });
@@ -113,7 +113,7 @@ export class ListsClient {
     description,
     type,
     meta,
-  }: CreateListOptions): Promise<ListsSchema> => {
+  }: CreateListOptions): Promise<ListSchema> => {
     const { dataClient, security, request } = this;
     const listIndex = this.getListIndex();
     const user = getUser({ request, security });
@@ -126,7 +126,7 @@ export class ListsClient {
     description,
     type,
     meta,
-  }: CreateListIfItDoesNotExistOptions): Promise<ListsSchema> => {
+  }: CreateListIfItDoesNotExistOptions): Promise<ListSchema> => {
     const list = await this.getList({ id });
     if (list == null) {
       return this.createList({ description, id, meta, name, type });
@@ -291,9 +291,7 @@ export class ListsClient {
     return deleteTemplate(callAsCurrentUser, listItemIndex);
   };
 
-  public deleteListItem = async ({
-    id,
-  }: DeleteListItemOptions): Promise<ListsItemsSchema | null> => {
+  public deleteListItem = async ({ id }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
     const { dataClient } = this;
     const listItemIndex = this.getListItemIndex();
     return deleteListItem({ dataClient, id, listItemIndex });
@@ -303,7 +301,7 @@ export class ListsClient {
     listId,
     value,
     type,
-  }: DeleteListItemByValueOptions): Promise<ListsItemsArraySchema> => {
+  }: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
     const { dataClient } = this;
     const listItemIndex = this.getListItemIndex();
     return deleteListItemByValue({
@@ -315,7 +313,7 @@ export class ListsClient {
     });
   };
 
-  public deleteList = async ({ id }: DeleteListOptions): Promise<ListsSchema | null> => {
+  public deleteList = async ({ id }: DeleteListOptions): Promise<ListSchema | null> => {
     const { dataClient } = this;
     const listIndex = this.getListIndex();
     const listItemIndex = this.getListItemIndex();
@@ -367,7 +365,7 @@ export class ListsClient {
     listId,
     value,
     type,
-  }: GetListItemByValueOptions): Promise<ListsItemsArraySchema> => {
+  }: GetListItemByValueOptions): Promise<ListItemArraySchema> => {
     const { dataClient } = this;
     const listItemIndex = this.getListItemIndex();
     return getListItemByValue({
@@ -385,7 +383,7 @@ export class ListsClient {
     value,
     type,
     meta,
-  }: CreateListItemOptions): Promise<ListsItemsSchema> => {
+  }: CreateListItemOptions): Promise<ListItemSchema> => {
     const { dataClient, security, request } = this;
     const listItemIndex = this.getListItemIndex();
     const user = getUser({ request, security });
@@ -405,7 +403,7 @@ export class ListsClient {
     id,
     value,
     meta,
-  }: UpdateListItemOptions): Promise<ListsItemsSchema | null> => {
+  }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
     const { dataClient, security, request } = this;
     const user = getUser({ request, security });
     const listItemIndex = this.getListItemIndex();
@@ -424,7 +422,7 @@ export class ListsClient {
     name,
     description,
     meta,
-  }: UpdateListOptions): Promise<ListsSchema | null> => {
+  }: UpdateListOptions): Promise<ListSchema | null> => {
     const { dataClient, security, request } = this;
     const user = getUser({ request, security });
     const listIndex = this.getListIndex();
@@ -439,7 +437,7 @@ export class ListsClient {
     });
   };
 
-  public getListItem = async ({ id }: GetListItemOptions): Promise<ListsItemsSchema | null> => {
+  public getListItem = async ({ id }: GetListItemOptions): Promise<ListItemSchema | null> => {
     const { dataClient } = this;
     const listItemIndex = this.getListItemIndex();
     return getListItem({
@@ -453,7 +451,7 @@ export class ListsClient {
     type,
     listId,
     value,
-  }: GetListItemsByValueOptions): Promise<ListsItemsArraySchema> => {
+  }: GetListItemsByValueOptions): Promise<ListItemArraySchema> => {
     const { dataClient } = this;
     const listItemIndex = this.getListItemIndex();
     return getListItemByValues({

@@ -20,7 +20,7 @@ import {
   updated_by,
 } from '../common/schemas';
 
-export const indexEsListsSchema = t.exact(
+export const searchEsListSchema = t.exact(
   t.type({
     created_at,
     created_by,
@@ -34,4 +34,4 @@ export const indexEsListsSchema = t.exact(
   })
 );
 
-export type IndexEsListsSchema = t.TypeOf<typeof indexEsListsSchema>;
+export type SearchEsListSchema = t.TypeOf<typeof searchEsListSchema>;

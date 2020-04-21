@@ -12,7 +12,7 @@ import * as t from 'io-ts';
 
 import { file } from '../common/schemas';
 
-export const importListsItemsSchema = t.exact(
+export const importListItemSchema = t.exact(
   t.type({
     file,
   })
@@ -27,6 +27,6 @@ export interface HapiReadableStream extends Readable {
 /**
  * Special interface since we are streaming in a file through a reader
  */
-export interface ImportListsItemsSchema {
+export interface ImportListItemSchema {
   file: HapiReadableStream;
 }

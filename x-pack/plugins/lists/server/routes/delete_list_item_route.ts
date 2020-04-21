@@ -13,11 +13,7 @@ import {
   transformError,
   validate,
 } from '../siem_server_deps';
-import {
-  deleteListsItemsSchema,
-  listsItemsArraySchema,
-  listsItemsSchema,
-} from '../../common/schemas';
+import { deleteListItemSchema, listItemArraySchema, listItemSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -29,7 +25,7 @@ export const deleteListItemRoute = (router: IRouter): void => {
       },
       path: LIST_ITEM_URL,
       validate: {
-        query: buildRouteValidation(deleteListsItemsSchema),
+        query: buildRouteValidation(deleteListItemSchema),
       },
     },
     async (context, request, response) => {
@@ -45,7 +41,7 @@ export const deleteListItemRoute = (router: IRouter): void => {
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(deleted, listsItemsSchema);
+            const [validated, errors] = validate(deleted, listItemSchema);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {
@@ -67,7 +63,7 @@ export const deleteListItemRoute = (router: IRouter): void => {
                 statusCode: 404,
               });
             } else {
-              const [validated, errors] = validate(deleted, listsItemsArraySchema);
+              const [validated, errors] = validate(deleted, listItemArraySchema);
               if (errors != null) {
                 return siemResponse.error({ body: errors, statusCode: 500 });
               } else {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexEsListsItemsSchema, ListsItemsSchema } from '../../../common/schemas';
+import { IndexEsListItemSchema, ListItemSchema } from '../../../common/schemas';
 import {
   LISTS_ITEMS_INDEX,
   LIST_ITEM_ID,
@@ -27,7 +27,7 @@ describe('crete_list_item', () => {
   test('it returns a list item as expected with the id changed out for the elastic id', async () => {
     const options = getCreateListItemOptionsMock();
     const listItem = await createListItem(options);
-    const expected: ListsItemsSchema = getListItemResponseMock();
+    const expected: ListItemSchema = getListItemResponseMock();
     expected.id = 'elastic-id-123';
     expect(listItem).toEqual(expected);
   });
@@ -35,7 +35,7 @@ describe('crete_list_item', () => {
   test('It calls "callAsCurrentUser" with body, index, and listIndex', async () => {
     const options = getCreateListItemOptionsMock();
     await createListItem(options);
-    const body: IndexEsListsItemsSchema = getIndexESListItemMock();
+    const body: IndexEsListItemSchema = getIndexESListItemMock();
     const expected = {
       body,
       id: LIST_ITEM_ID,
@@ -48,7 +48,7 @@ describe('crete_list_item', () => {
     const options = getCreateListItemOptionsMock();
     options.id = undefined;
     const list = await createListItem(options);
-    const expected: ListsItemsSchema = getListItemResponseMock();
+    const expected: ListItemSchema = getListItemResponseMock();
     expected.id = 'elastic-id-123';
     expect(list).toEqual(expected);
   });

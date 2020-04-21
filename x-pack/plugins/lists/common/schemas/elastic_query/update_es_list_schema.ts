@@ -9,31 +9,21 @@
 import * as t from 'io-ts';
 
 import {
-  created_at,
-  created_by,
-  description,
-  id,
+  descriptionOrUndefined,
   metaOrUndefined,
-  name,
-  tie_breaker_id,
-  type,
+  nameOrUndefined,
   updated_at,
   updated_by,
 } from '../common/schemas';
 
-export const listsSchema = t.exact(
+export const updateEsListSchema = t.exact(
   t.type({
-    created_at,
-    created_by,
-    description,
-    id,
+    description: descriptionOrUndefined,
     meta: metaOrUndefined,
-    name,
-    tie_breaker_id,
-    type,
+    name: nameOrUndefined,
     updated_at,
     updated_by,
   })
 );
 
-export type ListsSchema = t.TypeOf<typeof listsSchema>;
+export type UpdateEsListSchema = t.TypeOf<typeof updateEsListSchema>;
