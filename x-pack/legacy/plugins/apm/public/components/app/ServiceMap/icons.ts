@@ -8,12 +8,12 @@ import cytoscape from 'cytoscape';
 import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
 import {
   AGENT_NAME,
-  SERVICE_NAME,
   SPAN_SUBTYPE,
   SPAN_TYPE
 } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import awsIcon from './icons/aws.svg';
 import cassandraIcon from './icons/cassandra.svg';
+import darkIcon from './icons/dark.svg';
 import databaseIcon from './icons/database.svg';
 import defaultIconImport from './icons/default.svg';
 import documentsIcon from './icons/documents.svg';
@@ -39,8 +39,7 @@ import websocketIcon from './icons/websocket.svg';
 
 export const defaultIcon = defaultIconImport;
 
-// The colors here are taken from the logos of the corresponding technologies
-const icons: { [key: string]: string } = {
+const defaultTypeIcons: { [key: string]: string } = {
   cache: databaseIcon,
   db: databaseIcon,
   ext: globeIcon,
@@ -49,7 +48,34 @@ const icons: { [key: string]: string } = {
   resource: globeIcon
 };
 
-const serviceIcons: { [key: string]: string } = {
+const typeIcons: { [key: string]: { [key: string]: string } } = {
+  aws: {
+    servicename: awsIcon
+  },
+  db: {
+    cassandra: cassandraIcon,
+    elasticsearch: elasticsearchIcon,
+    mongodb: mongodbIcon,
+    mysql: mysqlIcon,
+    postgresql: postgresqlIcon,
+    redis: redisIcon
+  },
+  external: {
+    graphql: graphqlIcon,
+    grpc: grpcIcon,
+    websocket: websocketIcon
+  },
+  messaging: {
+    jms: javaIcon,
+    kafka: kafkaIcon
+  },
+  template: {
+    handlebars: handlebarsIcon
+  }
+};
+
+const agentIcons: { [key: string]: string } = {
+  dark: darkIcon,
   dotnet: dotNetIcon,
   go: goIcon,
   java: javaIcon,
@@ -59,6 +85,24 @@ const serviceIcons: { [key: string]: string } = {
   python: pythonIcon,
   ruby: rubyIcon
 };
+
+function getAgentIcon(agentName?: string) {
+  // RUM can have multiple names. Normalize it
+  const normalizedAgentName = isRumAgentName(agentName) ? 'js-base' : agentName;
+  return normalizedAgentName && agentIcons[normalizedAgentName];
+}
+
+function getSpanIcon(type?: string, subtype?: string) {
+  if (!type) {
+    return;
+  }
+
+  const types = type ? typeIcons[type] : {};
+  if (subtype && subtype in types) {
+    return types[subtype];
+  }
+  return defaultTypeIcons[type];
+}
 
 // IE 11 does not properly load some SVGs, which causes a runtime error and the
 // map to not work at all. We would prefer to do some kind of feature detection
@@ -72,85 +116,13 @@ const serviceIcons: { [key: string]: string } = {
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export function iconForNode(node: cytoscape.NodeSingular) {
+  const agentName = node.data(AGENT_NAME);
+  const subtype = node.data(SPAN_SUBTYPE);
   const type = node.data(SPAN_TYPE);
 
-  if (node.data(SERVICE_NAME)) {
-    const agentName = node.data(AGENT_NAME);
-    // RUM can have multiple names. Normalize it
-    const normalizedAgentName = isRumAgentName(agentName)
-      ? 'js-base'
-      : agentName;
-    return serviceIcons[normalizedAgentName];
-  } else if (isIE11) {
-    return defaultIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'aws' &&
-    node.data(SPAN_SUBTYPE) === 'servicename'
-  ) {
-    return awsIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'db' &&
-    node.data(SPAN_SUBTYPE) === 'cassandra'
-  ) {
-    return cassandraIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'db' &&
-    node.data(SPAN_SUBTYPE) === 'elasticsearch'
-  ) {
-    return elasticsearchIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'external' &&
-    node.data(SPAN_SUBTYPE) === 'graphql'
-  ) {
-    return graphqlIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'external' &&
-    node.data(SPAN_SUBTYPE) === 'grpc'
-  ) {
-    return grpcIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'template' &&
-    node.data(SPAN_SUBTYPE) === 'handlebars'
-  ) {
-    return handlebarsIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'messaging' &&
-    node.data(SPAN_SUBTYPE) === 'kafka'
-  ) {
-    return kafkaIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'messaging' &&
-    node.data(SPAN_SUBTYPE) === 'jms'
-  ) {
-    return javaIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'db' &&
-    node.data(SPAN_SUBTYPE) === 'mongodb'
-  ) {
-    return mongodbIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'db' &&
-    node.data(SPAN_SUBTYPE) === 'mysql'
-  ) {
-    return mysqlIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'db' &&
-    node.data(SPAN_SUBTYPE) === 'postgresql'
-  ) {
-    return postgresqlIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'db' &&
-    node.data(SPAN_SUBTYPE) === 'redis'
-  ) {
-    return redisIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'external' &&
-    node.data(SPAN_SUBTYPE) === 'websocket'
-  ) {
-    return websocketIcon;
-  } else if (icons[type]) {
-    return icons[type];
-  } else {
+  if (isIE11) {
     return defaultIcon;
   }
+
+  return getAgentIcon(agentName) || getSpanIcon(type, subtype) || defaultIcon;
 }
