@@ -123,7 +123,7 @@ export class CollectConfigContainer extends React.Component<
       config.dashboardId
     );
 
-    if (!this.isMounted) return; // bailout if response is no longer needed
+    if (!this.isMounted) return;
 
     // handle case when destination dashboard is no longer exist
     if (savedObject.error?.statusCode === 404) {
@@ -134,7 +134,6 @@ export class CollectConfigContainer extends React.Component<
       return;
     }
 
-    // any other error
     if (savedObject.error) {
       this.setState({
         error: savedObject.error.message,
