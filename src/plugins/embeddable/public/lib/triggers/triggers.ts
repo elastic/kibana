@@ -35,8 +35,10 @@ interface EventData {
 export interface ValueClickTriggerContext {
   embeddable?: IEmbeddable;
   timeFieldName?: string;
-  data: EventData[];
-  negate?: boolean;
+  data: {
+    data: EventData[];
+    negate?: boolean;
+  };
 }
 
 export interface RangeSelectTriggerContext {

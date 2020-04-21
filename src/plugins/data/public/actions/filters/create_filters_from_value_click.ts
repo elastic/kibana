@@ -114,7 +114,7 @@ const createFilter = async (
 export const createFiltersFromValueClickAction = async ({
   data,
   negate,
-}: ValueClickTriggerContext) => {
+}: ValueClickTriggerContext['data']) => {
   const filters: Filter[] = [];
 
   await Promise.all(

@@ -39,7 +39,7 @@ const mockField = {
 };
 
 describe('createFiltersFromValueClick', () => {
-  let dataPoints: ValueClickTriggerContext['data'];
+  let dataPoints: ValueClickTriggerContext['data']['data'];
 
   beforeEach(() => {
     dataPoints = [

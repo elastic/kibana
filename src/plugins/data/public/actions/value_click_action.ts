@@ -36,7 +36,7 @@ export type ValueClickActionContext = ValueClickTriggerContext;
 
 async function isCompatible(context: ValueClickActionContext) {
   try {
-    const filters: Filter[] = await createFiltersFromValueClickAction(context);
+    const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
     return filters.length > 0;
   } catch {
     return false;
@@ -61,7 +61,7 @@ export function valueClickAction(
         throw new IncompatibleActionError();
       }
 
-      const filters: Filter[] = await createFiltersFromValueClickAction(context);
+      const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
 
       let selectedFilters = filters;
 
