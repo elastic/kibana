@@ -6,6 +6,10 @@
 
 import { LicenseType } from '../../licensing/common/types';
 
+export { ConnectorPublicConfigurationType } from '../server/builtin_action_types/connectors/types';
+export { ServiceNowPublicConfigurationType } from '../server/builtin_action_types/connectors/servicenow/types';
+export { ServiceNowSecretConfigurationType } from '../server/builtin_action_types/connectors/servicenow/types';
+
 export interface ActionType {
   id: string;
   name: string;

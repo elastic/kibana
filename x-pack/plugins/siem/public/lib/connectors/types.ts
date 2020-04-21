@@ -5,6 +5,9 @@
  */
 
 import { ActionType } from '../../../../../../plugins/triggers_actions_ui/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionConnectorFieldsProps } from '../../../../../../plugins/triggers_actions_ui/public/types';
+import { ConnectorPublicConfigurationType } from '../../../../../../plugins/actions/common';
 
 import {
   ConfigType,
@@ -18,4 +21,32 @@ export interface ServiceNowActionConnector {
 
 export interface Connector extends ActionType {
   logo: string;
+}
+
+export interface ActionConnector {
+  config: ConnectorPublicConfigurationType;
+  secrets: {};
+}
+
+export interface ActionConnectorParams {
+  message: string;
+}
+
+export interface ActionConnectorValidationErrors {
+  apiUrl: string[];
+}
+
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<T>;
+
+export interface ConnectorFlyoutFormProps<T> {
+  errors: { [key: string]: string[] };
+  action: T;
+  onChangeSecret: (key: string, value: string) => void;
+  onBlurSecret: (key: string) => void;
+}
+
+export interface ConnectorFlyoutHOCProps<T> {
+  ConnectorFormComponent: React.FC<ConnectorFlyoutFormProps<T>>;
+  configKeys?: string[];
+  secretKeys?: string[];
 }

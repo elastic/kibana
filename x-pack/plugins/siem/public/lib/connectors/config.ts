@@ -11,8 +11,8 @@ import { connector as serviceNowConnectorConfig } from './servicenow/config';
 import { connector as resilientConnectorConfig } from './resilient/config';
 
 export const connectorsConfiguration: Record<string, Connector> = {
-  '.servicenow': { ...serviceNowConnectorConfig },
-  '.resilient': { ...resilientConnectorConfig },
+  '.servicenow': serviceNowConnectorConfig,
+  '.resilient': resilientConnectorConfig,
 };
 
 export const defaultMapping: CasesConfigurationMapping[] = [
