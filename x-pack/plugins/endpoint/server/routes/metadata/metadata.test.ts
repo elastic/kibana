@@ -270,12 +270,14 @@ describe('test endpoint route', () => {
     });
 
     it('should return a single endpoint with status error when AgentService throw 404', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { id: (data as any).hits.hits[0]._id },
-      });
       const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
         HostMetadata
       >;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: response.hits.hits[0]._id },
+      });
+
       mockAgentService.getAgentStatusById = jest.fn().mockImplementation(() => {
         throw Boom.notFound('Agent not found');
       });
@@ -298,12 +300,14 @@ describe('test endpoint route', () => {
     });
 
     it('should return a single endpoint with status error when status is not offline or online', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { id: (data as any).hits.hits[0]._id },
-      });
       const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
         HostMetadata
       >;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: response.hits.hits[0]._id },
+      });
+
       mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('warning');
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>

@@ -167,9 +167,13 @@ async function enrichHostMetadata(
 ): Promise<HostInfo> {
   let hostStatus = HostStatus.ERROR;
   try {
+    /**
+     * Get agent status by elastic agent id if available or use the host id.
+     * https://github.com/elastic/endpoint-app-team/issues/354
+     */
     const status = await metadataRequestContext.endpointAppContext.agentService.getAgentStatusById(
       metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-      hostMetadata.elastic.agent.id
+      hostMetadata.elastic.agent.id || hostMetadata.host.id
     );
     hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;
   } catch (e) {
