@@ -21,7 +21,17 @@ import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import { PipelineForm } from '../../components';
 
-export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+interface Props {
+  /**
+   * This value may be passed in to prepopulate the creation form
+   */
+  sourcePipeline?: Pipeline;
+}
+
+export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
+  history,
+  sourcePipeline,
+}) => {
   const { services } = useKibana();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -87,6 +97,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
         <EuiSpacer size="l" />
 
         <PipelineForm
+          defaultValue={sourcePipeline}
           onSave={onSave}
           onCancel={onCancel}
           isSaving={isSaving}

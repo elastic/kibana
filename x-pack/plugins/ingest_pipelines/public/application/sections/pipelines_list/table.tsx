@@ -15,6 +15,7 @@ export interface Props {
   pipelines: Pipeline[];
   onReloadClick: () => void;
   onEditPipelineClick: (pipelineName: string) => void;
+  onClonePipelineClick: (pipelineName: string) => void;
   onDeletePipelineClick: (pipelineName: string[]) => void;
   onViewPipelineClick: (pipeline: Pipeline) => void;
 }
@@ -23,6 +24,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
   onReloadClick,
   onEditPipelineClick,
+  onClonePipelineClick,
   onDeletePipelineClick,
   onViewPipelineClick,
 }) => {
@@ -110,6 +112,18 @@ export const PipelineTable: FunctionComponent<Props> = ({
               type: 'icon',
               icon: 'pencil',
               onClick: ({ name }) => onEditPipelineClick(name),
+            },
+            {
+              name: i18n.translate('xpack.ingestPipelines.list.table.cloneActionLabel', {
+                defaultMessage: 'Clone',
+              }),
+              description: i18n.translate(
+                'xpack.ingestPipelines.list.table.cloneActionDescription',
+                { defaultMessage: 'Clone this pipeline' }
+              ),
+              type: 'icon',
+              icon: 'copy',
+              onClick: ({ name }) => onClonePipelineClick(name),
             },
             {
               name: i18n.translate('xpack.ingestPipelines.list.table.deleteActionLabel', {
