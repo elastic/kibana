@@ -16,7 +16,7 @@ import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { copyPersistentState } from '../../../reducers/util';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { DataRequestAbortError } from '../../util/data_request';
