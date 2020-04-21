@@ -997,4 +997,3 @@ export function setHiddenLayers(hiddenLayerIds) {
     }
   };
 }
->>>>>>> f43d555f14e22ca0a6ed91db7ea2af855e62eb1f
