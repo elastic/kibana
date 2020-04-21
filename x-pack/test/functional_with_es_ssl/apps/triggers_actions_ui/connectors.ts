@@ -209,27 +209,5 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);
       expect(await testSubjects.exists('saveEditedActionButton')).to.be(false);
     });
-
-    it('should be able to clear selected index on index connector form', async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('connectorsTab');
-      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-      await testSubjects.click('.index-card');
-
-      const indexComboBox = await find.byCssSelector('#indexConnectorSelectSearchBox');
-      await indexComboBox.click();
-      await indexComboBox.type('k');
-      const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-      await filterSelectItem.click();
-
-      const indexValueBeforeClear = await find.byCssSelector('.euiComboBoxPill');
-      expect(await indexValueBeforeClear.getAttribute('value')).to.be('.kibana');
-
-      await testSubjects.click('comboBoxClearButton');
-
-      const indexValueAfterClear = await find.byCssSelector('.euiComboBoxPill');
-      expect(await indexValueAfterClear.getAttribute('value')).to.be('');
-    });
   });
 };
