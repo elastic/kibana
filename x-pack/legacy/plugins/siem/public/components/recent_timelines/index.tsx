@@ -6,11 +6,11 @@
 
 import ApolloClient from 'apollo-client';
 import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
-import { AllTimelinesQuery } from '../../containers/timeline/all';
+import { AllTimelinesQuery, useGetAllTimeline } from '../../containers/timeline/all';
 import { SortFieldTimeline, Direction } from '../../graphql/types';
 import { queryTimelineById, dispatchUpdateTimeline } from '../open_timeline/helpers';
 import { OnOpenTimeline } from '../open_timeline/types';
@@ -62,35 +62,37 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
       [filterBy]
     );
 
-    return (
-      <AllTimelinesQuery
-        pageInfo={{
+    const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
+
+    useEffect(() => {
+      fetchAllTimeline({
+        pageInfo: {
           pageIndex: 1,
           pageSize: PAGE_SIZE,
-        }}
-        search={''}
-        sort={{
+        },
+        search: '',
+        sort: {
           sortField: SortFieldTimeline.updated,
           sortOrder: Direction.desc,
-        }}
-        onlyUserFavorite={filterBy === 'favorites'}
-      >
-        {({ timelines, loading }) => (
-          <>
-            {loading ? (
-              loadingPlaceholders
-            ) : (
-              <RecentTimelines
-                noTimelinesMessage={noTimelinesMessage}
-                onOpenTimeline={onOpenTimeline}
-                timelines={timelines}
-              />
-            )}
-            <EuiHorizontalRule margin="s" />
-            <EuiText size="xs">{linkAllTimelines}</EuiText>
-          </>
+        },
+        onlyUserFavorite: filterBy === 'favorites',
+      });
+    }, [filterBy]);
+
+    return (
+      <>
+        {loading ? (
+          loadingPlaceholders
+        ) : (
+          <RecentTimelines
+            noTimelinesMessage={noTimelinesMessage}
+            onOpenTimeline={onOpenTimeline}
+            timelines={timelines}
+          />
         )}
-      </AllTimelinesQuery>
+        <EuiHorizontalRule margin="s" />
+        <EuiText size="xs">{linkAllTimelines}</EuiText>
+      </>
     );
   }
 );

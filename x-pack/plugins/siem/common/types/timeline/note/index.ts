@@ -56,11 +56,7 @@ export const NoteSavedObjectToReturnRuntimeType = runtimeTypes.intersection([
     version: runtimeTypes.string,
   }),
   runtimeTypes.partial({
-    timelineVersion: runtimeTypes.union([
-      runtimeTypes.string,
-      runtimeTypes.null,
-      runtimeTypes.undefined,
-    ]),
+    timelineVersion: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 

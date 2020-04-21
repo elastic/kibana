@@ -154,8 +154,8 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   kqlMode: unionWithNullType(runtimeTypes.string),
   kqlQuery: unionWithNullType(SavedFilterQueryQueryRuntimeType),
   title: unionWithNullType(runtimeTypes.string),
-  templateTimelineId: unionWithNullType(runtimeTypes.string),
-  templateTimelineVersion: unionWithNullType(runtimeTypes.number),
+  // templateTimelineId: unionWithNullType(runtimeTypes.string),
+  // templateTimelineVersion: unionWithNullType(runtimeTypes.number),
   timelineType: unionWithNullType(TimelineTypeLiteralRt),
   dateRange: unionWithNullType(SavedDateRangePickerRuntimeType),
   savedQueryId: unionWithNullType(runtimeTypes.string),
@@ -182,8 +182,6 @@ export const TimelineSavedObjectRuntimeType = runtimeTypes.intersection([
   }),
   runtimeTypes.partial({
     savedObjectId: runtimeTypes.string,
-    templateTimelineId: runtimeTypes.string,
-    timelineType: TimelineTypeLiteralRt,
   }),
 ]);
 
@@ -208,11 +206,15 @@ export interface TimelineSavedObject
 /**
  * All Timeline Saved object type with metadata
  */
-export const TimelineResponseType = runtimeTypes.type({
-  code: runtimeTypes.number,
-  message: runtimeTypes.string,
-  timeline: TimelineSavedToReturnObjectRuntimeType,
-});
+export const TimelineResponseType = runtimeTypes.intersection([
+  runtimeTypes.partial({
+    code: unionWithNullType(runtimeTypes.number),
+    message: unionWithNullType(runtimeTypes.string),
+  }),
+  runtimeTypes.type({
+    timeline: TimelineSavedToReturnObjectRuntimeType,
+  }),
+]);
 
 export interface TimelineResponse extends runtimeTypes.TypeOf<typeof TimelineResponseType> {}
 

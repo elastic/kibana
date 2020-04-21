@@ -39,7 +39,7 @@ import {
 import { AppApolloClient } from '../../lib/lib';
 import { addError } from '../app/actions';
 import { NotesById } from '../app/model';
-import { TimeRange } from '../inputs/model';
+import { TimeRange, GlobalQuery } from '../inputs/model';
 
 import {
   applyKqlFilterQuery,
@@ -79,10 +79,13 @@ import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persi
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
 import { persistTimeline } from '../../containers/timeline/api';
+import { ALL_TIMELINE_QUERY_ID } from '../../containers/timeline/all';
+import { inputsModel } from '../inputs';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
   timelineTimeRangeSelector: (state: State) => TimeRange;
+  selectAllTimelineQuery: () => (state: State, id: string) => GlobalQuery;
   selectNotesByIdSelector: (state: State) => NotesById;
   apolloClient$: Observable<AppApolloClient>;
 }
@@ -120,9 +123,23 @@ export const createTimelineEpic = <State>(): Epic<
 > => (
   action$,
   state$,
-  { selectNotesByIdSelector, timelineByIdSelector, timelineTimeRangeSelector, apolloClient$ }
+  {
+    selectAllTimelineQuery,
+    selectNotesByIdSelector,
+    timelineByIdSelector,
+    timelineTimeRangeSelector,
+    apolloClient$,
+  }
 ) => {
   const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
+
+  const allTimelineQuery$ = state$.pipe(
+    map(state => {
+      const getQuery = selectAllTimelineQuery();
+      return getQuery(state, ALL_TIMELINE_QUERY_ID);
+    }),
+    filter(isNotNull)
+  );
 
   const notes$ = state$.pipe(map(selectNotesByIdSelector), filter(isNotNull));
 
@@ -181,25 +198,16 @@ export const createTimelineEpic = <State>(): Epic<
               version,
               timeline: convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
             })
-            // apolloClient.mutate<
-            //   PersistTimelineMutation.Mutation,
-            //   PersistTimelineMutation.Variables
-            // >({
-            //   mutation: persistTimelineMutation,
-            //   fetchPolicy: 'no-cache',
-            //   variables: {
-            //     timelineId,
-            //     version,
-            //     timeline: convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
-            //   },
-            //   refetchQueries,
-            // })
           ).pipe(
-            withLatestFrom(timeline$),
-            mergeMap(([result, recentTimeline]) => {
+            withLatestFrom(timeline$, allTimelineQuery$),
+            mergeMap(([result, recentTimeline, allTimelineQuery]) => {
               const savedTimeline = recentTimeline[action.payload.id];
               const response: ResponseTimeline = get('data.persistTimeline', result);
               const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+
+              if (allTimelineQuery.refetch != null) {
+                (allTimelineQuery.refetch as inputsModel.Refetch)();
+              }
 
               return [
                 response.code === 409

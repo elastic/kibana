@@ -6,6 +6,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 
 import { throwErrors } from '../../../../../../plugins/case/common/api';
 import {
@@ -37,12 +38,12 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
   );
 
 const postTimeline = async ({ timeline }: RequestPostTimeline): Promise<TimelineResponse> => {
-  const response = await KibanaServices.get().http.fetch<TimelineResponse>(TIMELINE_URL, {
+  const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_URL, {
     method: 'POST',
     body: JSON.stringify(timeline),
     // signal,
   });
-  return decodeTimelineResponse(response);
+  return response; // decodeTimelineResponse(response);
 };
 
 const patchTimeline = async ({
@@ -50,12 +51,13 @@ const patchTimeline = async ({
   timeline,
   version,
 }: RequestPatchTimeline): Promise<TimelineResponse> => {
-  const response = await KibanaServices.get().http.fetch<TimelineResponse>(TIMELINE_URL, {
+  const response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
     method: 'PATCH',
     body: JSON.stringify({ timeline, timelineId, version }),
     // signal,
   });
-  return decodeTimelineResponse(response);
+  console.log('PathReporter', PathReporter.report(TimelineResponseType.decode(response)));
+  return response; // decodeTimelineResponse(response);
 };
 
 export const persistTimeline = async ({

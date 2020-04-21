@@ -11,7 +11,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
-import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
+import { AllTimelinesVariables, useGetAllTimeline } from '../../containers/timeline/all';
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
@@ -103,6 +103,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     /** The requested field to sort on */
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
+
+    const { fetchAllTimeline, timelines, loading, totalCount, refetch } = useGetAllTimeline();
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {
@@ -251,75 +253,73 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       focusInput();
     }, []);
 
-    return (
-      <AllTimelinesQuery
-        pageInfo={{
+    useEffect(() => {
+      fetchAllTimeline({
+        pageInfo: {
           pageIndex: pageIndex + 1,
           pageSize,
-        }}
-        search={search}
-        sort={{ sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction }}
-        onlyUserFavorite={onlyFavorites}
-      >
-        {({ timelines, loading, totalCount, refetch }) => {
-          return !isModal ? (
-            <OpenTimeline
-              data-test-subj={'open-timeline'}
-              deleteTimelines={onDeleteOneTimeline}
-              defaultPageSize={defaultPageSize}
-              isLoading={loading}
-              itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-              importDataModalToggle={importDataModalToggle}
-              onAddTimelinesToFavorites={undefined}
-              onDeleteSelected={onDeleteSelected}
-              onlyFavorites={onlyFavorites}
-              onOpenTimeline={openTimeline}
-              onQueryChange={onQueryChange}
-              onSelectionChange={onSelectionChange}
-              onTableChange={onTableChange}
-              onToggleOnlyFavorites={onToggleOnlyFavorites}
-              onToggleShowNotes={onToggleShowNotes}
-              pageIndex={pageIndex}
-              pageSize={pageSize}
-              query={search}
-              refetch={refetch}
-              searchResults={timelines}
-              setImportDataModalToggle={setImportDataModalToggle}
-              selectedItems={selectedItems}
-              sortDirection={sortDirection}
-              sortField={sortField}
-              title={title}
-              totalSearchResultsCount={totalCount}
-            />
-          ) : (
-            <OpenTimelineModalBody
-              data-test-subj={'open-timeline-modal'}
-              deleteTimelines={onDeleteOneTimeline}
-              defaultPageSize={defaultPageSize}
-              hideActions={hideActions}
-              isLoading={loading}
-              itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-              onAddTimelinesToFavorites={undefined}
-              onlyFavorites={onlyFavorites}
-              onOpenTimeline={openTimeline}
-              onQueryChange={onQueryChange}
-              onSelectionChange={onSelectionChange}
-              onTableChange={onTableChange}
-              onToggleOnlyFavorites={onToggleOnlyFavorites}
-              onToggleShowNotes={onToggleShowNotes}
-              pageIndex={pageIndex}
-              pageSize={pageSize}
-              query={search}
-              searchResults={timelines}
-              selectedItems={selectedItems}
-              sortDirection={sortDirection}
-              sortField={sortField}
-              title={title}
-              totalSearchResultsCount={totalCount}
-            />
-          );
-        }}
-      </AllTimelinesQuery>
+        },
+        search,
+        sort: { sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction },
+        onlyUserFavorite: onlyFavorites,
+      });
+    }, [pageIndex, pageSize, search, sortField, sortDirection, onlyFavorites]);
+
+    return !isModal ? (
+      <OpenTimeline
+        data-test-subj={'open-timeline'}
+        deleteTimelines={onDeleteOneTimeline}
+        defaultPageSize={defaultPageSize}
+        isLoading={loading}
+        itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+        importDataModalToggle={importDataModalToggle}
+        onAddTimelinesToFavorites={undefined}
+        onDeleteSelected={onDeleteSelected}
+        onlyFavorites={onlyFavorites}
+        onOpenTimeline={openTimeline}
+        onQueryChange={onQueryChange}
+        onSelectionChange={onSelectionChange}
+        onTableChange={onTableChange}
+        onToggleOnlyFavorites={onToggleOnlyFavorites}
+        onToggleShowNotes={onToggleShowNotes}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        query={search}
+        refetch={refetch}
+        searchResults={timelines}
+        setImportDataModalToggle={setImportDataModalToggle}
+        selectedItems={selectedItems}
+        sortDirection={sortDirection}
+        sortField={sortField}
+        title={title}
+        totalSearchResultsCount={totalCount}
+      />
+    ) : (
+      <OpenTimelineModalBody
+        data-test-subj={'open-timeline-modal'}
+        deleteTimelines={onDeleteOneTimeline}
+        defaultPageSize={defaultPageSize}
+        hideActions={hideActions}
+        isLoading={loading}
+        itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+        onAddTimelinesToFavorites={undefined}
+        onlyFavorites={onlyFavorites}
+        onOpenTimeline={openTimeline}
+        onQueryChange={onQueryChange}
+        onSelectionChange={onSelectionChange}
+        onTableChange={onTableChange}
+        onToggleOnlyFavorites={onToggleOnlyFavorites}
+        onToggleShowNotes={onToggleShowNotes}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        query={search}
+        searchResults={timelines}
+        selectedItems={selectedItems}
+        sortDirection={sortDirection}
+        sortField={sortField}
+        title={title}
+        totalSearchResultsCount={totalCount}
+      />
     );
   }
 );

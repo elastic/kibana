@@ -40,11 +40,7 @@ export const PinnedEventSavedObjectRuntimeType = runtimeTypes.intersection([
   }),
   runtimeTypes.partial({
     pinnedEventId: unionWithNullType(runtimeTypes.string),
-    timelineVersion: runtimeTypes.union([
-      runtimeTypes.string,
-      runtimeTypes.null,
-      runtimeTypes.undefined,
-    ]),
+    timelineVersion: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 
@@ -55,11 +51,7 @@ export const PinnedEventToReturnSavedObjectRuntimeType = runtimeTypes.intersecti
   }),
   SavedPinnedEventRuntimeType,
   runtimeTypes.partial({
-    timelineVersion: runtimeTypes.union([
-      runtimeTypes.string,
-      runtimeTypes.null,
-      runtimeTypes.undefined,
-    ]),
+    timelineVersion: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 
