@@ -16,7 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe.only('Delete reports', function() {
+  describe('Delete reports', function() {
     before(async () => {
       await esArchiver.load('empty_kibana');
       await esArchiver.load('reporting/archived_reports');
