@@ -16007,7 +16007,6 @@
     "xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription": "アクションタイプを読み込み中...",
     "xpack.triggersActionsUI.sections.alertForm.renotifyFieldLabel": "通知間隔",
     "xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip": "アラートがアクティブな間にアクションを繰り返す頻度を定義します。",
-    "xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle": "{actionConnectorName}",
     "xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle": "アクション:アクションタイプを選択してください",
     "xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle": "トリガータイプを選択してください",
     "xpack.triggersActionsUI.sections.alertForm.selectedAlertTypeTitle": "{alertType}",
