@@ -36,6 +36,8 @@ import { CapabilitiesStrings } from '../i18n';
 
 import { startServices, stopServices, services } from './services';
 
+import './style/index.scss';
+
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
 let restoreAction: ActionByType<any> | undefined;
