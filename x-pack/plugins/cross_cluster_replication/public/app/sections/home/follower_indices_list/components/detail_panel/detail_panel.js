@@ -489,7 +489,6 @@ export class DetailPanel extends Component {
 
     return (
       <EuiFlyout
-        className="ccrFollowerIndicesDetailPanel"
         data-test-subj="followerIndexDetail"
         onClose={closeDetailPanel}
         aria-labelledby="followerIndexDetailsFlyoutTitle"

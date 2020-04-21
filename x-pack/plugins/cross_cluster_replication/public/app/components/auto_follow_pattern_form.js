@@ -512,7 +512,6 @@ export class AutoFollowPatternForm extends PureComponent {
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
               <EuiFormRow
-                className="ccrFollowerIndicesFormRow"
                 label={
                   <FormattedMessage
                     id="xpack.crossClusterReplication.autoFollowPatternForm.autoFollowPattern.fieldPrefixLabel"
@@ -535,7 +534,6 @@ export class AutoFollowPatternForm extends PureComponent {
 
             <EuiFlexItem>
               <EuiFormRow
-                className="ccrFollowerIndicesFormRow"
                 label={
                   <FormattedMessage
                     id="xpack.crossClusterReplication.autoFollowPatternForm.autoFollowPattern.fieldSuffixLabel"
@@ -557,9 +555,7 @@ export class AutoFollowPatternForm extends PureComponent {
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiFormHelpText
-            className={isPrefixInvalid || isSuffixInvalid ? null : 'ccrFollowerIndicesHelpText'}
-          >
+          <EuiFormHelpText>
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternForm.fieldFollowerIndicesHelpLabel"
               defaultMessage="Spaces and the characters {characterList} are not allowed."
