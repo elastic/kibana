@@ -28,7 +28,7 @@ import {
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableVisTriggerContext } from '../../../../../src/plugins/embeddable/public';
+import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { LensMultiTable, FormatFactory } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
@@ -277,15 +277,13 @@ export function XYChart({
 
           const timeFieldName = xDomain && xAxisFieldName;
 
-          const context: EmbeddableVisTriggerContext = {
-            data: {
-              data: points.map(point => ({
-                row: point.row,
-                column: point.column,
-                value: point.value,
-                table,
-              })),
-            },
+          const context: ValueClickTriggerContext = {
+            data: points.map(point => ({
+              row: point.row,
+              column: point.column,
+              value: point.value,
+              table,
+            })),
             timeFieldName,
           };
 

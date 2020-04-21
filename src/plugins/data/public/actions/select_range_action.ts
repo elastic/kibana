@@ -23,18 +23,13 @@ import {
   IncompatibleActionError,
   ActionByType,
 } from '../../../../plugins/ui_actions/public';
-import {
-  createFiltersFromRangeSelectAction,
-  RangeSelectEvent,
-} from './filters/create_filters_from_range_select';
+import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
+import { RangeSelectTriggerContext } from '../../../embeddable/public';
 import { FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
-export interface SelectRangeActionContext {
-  data: RangeSelectEvent;
-  timeFieldName: string;
-}
+export type SelectRangeActionContext = RangeSelectTriggerContext;
 
 async function isCompatible(context: SelectRangeActionContext) {
   try {

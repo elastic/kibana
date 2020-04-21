@@ -19,20 +19,18 @@
 
 import moment from 'moment';
 
-import {
-  createFiltersFromRangeSelectAction,
-  RangeSelectEvent,
-} from './create_filters_from_range_select';
+import { createFiltersFromRangeSelectAction } from './create_filters_from_range_select';
 
 import { IndexPatternsContract, RangeFilter } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns } from '../../../public/services';
 import { mockDataServices } from '../../../public/search/aggs/test_helpers';
+import { TriggerContextMapping } from '../../../../ui_actions/public';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
-  let baseEvent: RangeSelectEvent;
+  let baseEvent: TriggerContextMapping['SELECT_RANGE_TRIGGER']['data'];
 
   const indexPattern = {
     id: 'indexPatternId',

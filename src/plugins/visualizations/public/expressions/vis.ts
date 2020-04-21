@@ -71,7 +71,8 @@ export class ExprVis extends EventEmitter {
           if (!this.eventsSubject) return;
           this.eventsSubject.next({
             name: 'filterBucket',
-            data: data.data ? data : { negate: false, data: [data] },
+            data: data.data ? data.data : [data],
+            negate: data.negate,
           });
         },
         brush: (data: any) => {

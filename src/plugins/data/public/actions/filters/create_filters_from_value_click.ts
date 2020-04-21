@@ -21,18 +21,7 @@ import { KibanaDatatable } from '../../../../../plugins/expressions/public';
 import { deserializeAggConfig } from '../../search/expressions';
 import { esFilters, Filter } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
-
-export interface EventData {
-  table: Pick<KibanaDatatable, 'rows' | 'columns'>;
-  column: number;
-  row: number;
-  value: any;
-}
-
-export interface ValueClickEvent {
-  data: EventData[];
-  negate?: boolean;
-}
+import { ValueClickTriggerContext } from '../../../../embeddable/public';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -44,7 +33,7 @@ export interface ValueClickEvent {
  * @return {array} - array of terms to filter against
  */
 const getOtherBucketFilterTerms = (
-  table: EventData['table'],
+  table: Pick<KibanaDatatable, 'rows' | 'columns'>,
   columnIndex: number,
   rowIndex: number
 ) => {
@@ -81,7 +70,11 @@ const getOtherBucketFilterTerms = (
  * @param  {string} cellValue - value of the current cell
  * @return {Filter[]|undefined} - list of filters to provide to queryFilter.addFilters()
  */
-const createFilter = async (table: EventData['table'], columnIndex: number, rowIndex: number) => {
+const createFilter = async (
+  table: Pick<KibanaDatatable, 'rows' | 'columns'>,
+  columnIndex: number,
+  rowIndex: number
+) => {
   if (!table || !table.columns || !table.columns[columnIndex]) {
     return;
   }
@@ -118,7 +111,10 @@ const createFilter = async (table: EventData['table'], columnIndex: number, rowI
 };
 
 /** @public */
-export const createFiltersFromValueClickAction = async ({ data, negate }: ValueClickEvent) => {
+export const createFiltersFromValueClickAction = async ({
+  data,
+  negate,
+}: ValueClickTriggerContext) => {
   const filters: Filter[] = [];
 
   await Promise.all(
