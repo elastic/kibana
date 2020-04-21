@@ -64,6 +64,24 @@ const ParamsSchema = schema.object(
     component: schema.maybe(schema.string()),
     group: schema.maybe(schema.string()),
     class: schema.maybe(schema.string()),
+    links: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          href: schema.uri(),
+          text: schema.maybe(schema.string()),
+        })
+      )
+    ),
+    images: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          src: schema.uri(),
+          href: schema.maybe(schema.uri()),
+          alt: schema.maybe(schema.string()),
+        })
+      )
+    ),
+    customDetails: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   },
   { validate: validateParams }
 );
@@ -234,6 +252,9 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): any 
   if (params.component != null) data.payload.component = params.component;
   if (params.group != null) data.payload.group = params.group;
   if (params.class != null) data.payload.class = params.class;
+  if (params.customDetails != null) data.payload.custom_details = params.customDetails;
+  if (params.links != null) data.links = params.links;
+  if (params.images != null) data.images = params.images;
 
   return data;
 }

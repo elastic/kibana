@@ -128,6 +128,22 @@ describe('validateParams()', () => {
       component: 'a component',
       group: 'a group',
       class: 'a class',
+      customDetails: {
+        'a key': 'a value',
+      },
+      links: [
+        {
+          href: 'http://example.com/pagerduty',
+          text: 'a link',
+        },
+      ],
+      images: [
+        {
+          src: 'http://example.com/pagerduty.png',
+          href: 'http://example.com/pagerduty',
+          alt: 'an alternate',
+        },
+      ],
     };
     expect(validateParams(actionType, params)).toEqual(params);
   });
@@ -213,6 +229,22 @@ describe('execute()', () => {
       component: 'the-component',
       group: 'the-group',
       class: 'the-class',
+      customDetails: {
+        'the-key': 'the-value',
+      },
+      links: [
+        {
+          href: 'http://example.com/pagerduty',
+          text: 'the link',
+        },
+      ],
+      images: [
+        {
+          src: 'http://example.com/pagerduty.png',
+          href: 'http://example.com/pagerduty',
+          alt: 'the alternate',
+        },
+      ],
     };
 
     postPagerdutyMock.mockImplementation(() => {
@@ -235,9 +267,25 @@ describe('execute()', () => {
         "data": Object {
           "dedup_key": "a-dedup-key",
           "event_action": "trigger",
+          "images": Array [
+            Object {
+              "alt": "the alternate",
+              "href": "http://example.com/pagerduty",
+              "src": "http://example.com/pagerduty.png",
+            },
+          ],
+          "links": Array [
+            Object {
+              "href": "http://example.com/pagerduty",
+              "text": "the link",
+            },
+          ],
           "payload": Object {
             "class": "the-class",
             "component": "the-component",
+            "custom_details": Object {
+              "the-key": "the-value",
+            },
             "group": "the-group",
             "severity": "critical",
             "source": "the-source",
@@ -278,6 +326,22 @@ describe('execute()', () => {
       component: 'the-component',
       group: 'the-group',
       class: 'the-class',
+      customDetails: {
+        'the-key': 'the-value',
+      },
+      links: [
+        {
+          href: 'http://example.com/pagerduty',
+          text: 'the link',
+        },
+      ],
+      images: [
+        {
+          src: 'http://example.com/pagerduty.png',
+          href: 'http://example.com/pagerduty',
+          alt: 'the alternate',
+        },
+      ],
     };
 
     postPagerdutyMock.mockImplementation(() => {
@@ -334,6 +398,22 @@ describe('execute()', () => {
       component: 'the-component',
       group: 'the-group',
       class: 'the-class',
+      customDetails: {
+        'the-key': 'the-value',
+      },
+      links: [
+        {
+          href: 'http://example.com/pagerduty',
+          text: 'the link',
+        },
+      ],
+      images: [
+        {
+          src: 'http://example.com/pagerduty.png',
+          href: 'http://example.com/pagerduty',
+          alt: 'the alternate',
+        },
+      ],
     };
 
     postPagerdutyMock.mockImplementation(() => {
@@ -372,7 +452,7 @@ describe('execute()', () => {
     `);
   });
 
-  test('should fail when sendPagerdury throws', async () => {
+  test('should fail when sendPagerduty throws', async () => {
     const secrets = { routingKey: 'super-secret' };
     const config = {};
     const params = {};
@@ -400,7 +480,7 @@ describe('execute()', () => {
     `);
   });
 
-  test('should fail when sendPagerdury returns 429', async () => {
+  test('should fail when sendPagerduty returns 429', async () => {
     const secrets = { routingKey: 'super-secret' };
     const config = {};
     const params = {};
@@ -428,7 +508,7 @@ describe('execute()', () => {
     `);
   });
 
-  test('should fail when sendPagerdury returns 501', async () => {
+  test('should fail when sendPagerduty returns 501', async () => {
     const secrets = { routingKey: 'super-secret' };
     const config = {};
     const params = {};
@@ -456,7 +536,7 @@ describe('execute()', () => {
     `);
   });
 
-  test('should fail when sendPagerdury returns 418', async () => {
+  test('should fail when sendPagerduty returns 418', async () => {
     const secrets = { routingKey: 'super-secret' };
     const config = {};
     const params = {};
