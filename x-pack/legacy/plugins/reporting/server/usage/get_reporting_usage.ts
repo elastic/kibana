@@ -104,6 +104,9 @@ type RangeStatSets = Partial<
 
 async function handleResponse(response: SearchResponse): Promise<RangeStatSets> {
   const buckets = get<SearchAggregation>(response, 'aggregations.ranges.buckets');
+  if (!buckets) {
+    return {};
+  }
   const { lastDay, last7Days, all } = buckets;
 
   const lastDayUsage = lastDay ? getAggStats(lastDay) : ({} as RangeStats);
