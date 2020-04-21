@@ -13,15 +13,17 @@ import {
   setDynamicSettingsFail,
 } from '../actions/dynamic_settings';
 import { DynamicSettings } from '../../../common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 
 export interface DynamicSettingsState {
-  settings?: DynamicSettings;
+  settings: DynamicSettings;
   loadError?: Error;
   saveError?: Error;
   loading: boolean;
 }
 
 const initialState: DynamicSettingsState = {
+  settings: DYNAMIC_SETTINGS_DEFAULTS,
   loading: true,
 };
 
@@ -31,23 +33,22 @@ export const dynamicSettingsReducer = handleActions<DynamicSettingsState, any>(
       ...state,
       loading: true,
     }),
-    [String(getDynamicSettingsSuccess)]: (state, action: Action<DynamicSettings>) => {
-      return {
-        loading: false,
-        settings: action.payload,
-      };
-    },
-    [String(getDynamicSettingsFail)]: (state, action: Action<Error>) => {
-      return {
-        loading: false,
-        loadError: action.payload,
-      };
-    },
+    [String(getDynamicSettingsSuccess)]: (state, action: Action<DynamicSettings>) => ({
+      ...state,
+      loading: false,
+      settings: action.payload,
+    }),
+    [String(getDynamicSettingsFail)]: (state, action: Action<Error>) => ({
+      ...state,
+      loading: false,
+      loadError: action.payload,
+    }),
     [String(setDynamicSettings)]: state => ({
       ...state,
       loading: true,
     }),
     [String(setDynamicSettingsSuccess)]: (state, action: Action<DynamicSettings>) => ({
+      ...state,
       settings: action.payload,
       saveSucceded: true,
       loading: false,

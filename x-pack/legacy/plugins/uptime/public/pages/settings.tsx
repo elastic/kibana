@@ -17,8 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { cloneDeep, isEqual, set } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { isEqual, merge } from 'lodash';
 import { Link } from 'react-router-dom';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
@@ -32,14 +31,15 @@ import {
   CertificateExpirationForm,
   OnFieldChangeType,
 } from '../components/settings/certificate_form';
+import * as Translations from './translations';
 
 const getFieldErrors = (formFields: DynamicSettings | null) => {
   if (formFields) {
     const blankStr = 'May not be blank';
     const { certificatesThresholds, heartbeatIndices } = formFields;
     const heartbeatIndErr = heartbeatIndices.match(/^\S+$/) ? '' : blankStr;
-    const errorStateErr = certificatesThresholds?.errorState ? null : blankStr;
-    const warningStateErr = certificatesThresholds?.warningState ? null : blankStr;
+    const errorStateErr = certificatesThresholds?.expiration ? null : blankStr;
+    const warningStateErr = certificatesThresholds?.age ? null : blankStr;
     return {
       heartbeatIndices: heartbeatIndErr,
       certificatesThresholds:
@@ -57,10 +57,7 @@ const getFieldErrors = (formFields: DynamicSettings | null) => {
 export const SettingsPage = () => {
   const dss = useSelector(selectDynamicSettings);
 
-  const settingsBreadcrumbText = i18n.translate('xpack.uptime.settingsBreadcrumbText', {
-    defaultMessage: 'Settings',
-  });
-  useBreadcrumbs([{ text: settingsBreadcrumbText }]);
+  useBreadcrumbs([{ text: Translations.settings.breadcrumbText }]);
 
   useUptimeTelemetry(UptimePage.Settings);
 
@@ -70,52 +67,32 @@ export const SettingsPage = () => {
     dispatch(getDynamicSettings());
   }, [dispatch]);
 
-  const [formFields, setFormFields] = useState<DynamicSettings | null>(dss.settings || null);
-
-  if (!dss.loadError && formFields == null && dss.settings) {
-    setFormFields({ ...dss.settings });
-  }
+  const [formFields, setFormFields] = useState<DynamicSettings>({ ...dss.settings });
 
   const fieldErrors = getFieldErrors(formFields);
 
   const isFormValid = !(fieldErrors && Object.values(fieldErrors).find(v => !!v));
 
-  const onChangeFormField: OnFieldChangeType = (field, value) => {
-    if (formFields) {
-      const newFormFields = cloneDeep(formFields);
-      set(newFormFields, field, value);
-      setFormFields(cloneDeep(newFormFields));
-    }
-  };
+  const onChangeFormField: OnFieldChangeType = changedField =>
+    setFormFields(Object.assign({ ...merge(formFields, changedField) }));
 
   const onApply = (event: React.FormEvent) => {
     event.preventDefault();
-    if (formFields) {
-      dispatch(setDynamicSettings(formFields));
-    }
+    dispatch(setDynamicSettings(formFields));
   };
 
-  const resetForm = () => {
-    if (formFields && dss.settings) {
-      setFormFields({ ...dss.settings });
-    }
-  };
+  const resetForm = () => setFormFields({ ...dss.settings });
 
-  const isFormDirty = dss.settings ? !isEqual(dss.settings, formFields) : true;
+  const isFormDirty = !isEqual(dss.settings, formFields);
   const canEdit: boolean =
     !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
   const isFormDisabled = dss.loading || !canEdit;
 
-  const editNoticeTitle = i18n.translate('xpack.uptime.settings.cannotEditTitle', {
-    defaultMessage: 'You do not have permission to edit settings.',
-  });
-  const editNoticeText = i18n.translate('xpack.uptime.settings.cannotEditText', {
-    defaultMessage:
-      "Your user currently has 'Read' permissions for the Uptime app. Enable a permissions-level of 'All' to edit these settings.",
-  });
   const cannotEditNotice = canEdit ? null : (
     <>
-      <EuiCallOut title={editNoticeTitle}>{editNoticeText}</EuiCallOut>
+      <EuiCallOut title={Translations.settings.editNoticeTitle}>
+        {Translations.settings.editNoticeText}
+      </EuiCallOut>
       <EuiSpacer size="s" />
     </>
   );
@@ -124,9 +101,7 @@ export const SettingsPage = () => {
     <>
       <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeSettingsToOverviewLink">
         <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-          {i18n.translate('xpack.uptime.settings.returnToOverviewLinkLabel', {
-            defaultMessage: 'Return to overview',
-          })}
+          {Translations.settings.returnToOverviewLinkLabel}
         </EuiButtonEmpty>
       </Link>
       <EuiSpacer size="s" />

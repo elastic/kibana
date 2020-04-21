@@ -15,7 +15,6 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { defaultDynamicSettings } from '../../../common/runtime_types';
 import { selectDynamicSettings } from '../../state/selectors';
 import { SettingsFormProps } from './certificate_form';
 
@@ -63,7 +62,7 @@ export const IndicesForm: React.FC<SettingsFormProps> = ({
               id="xpack.uptime.sourceConfiguration.heartbeatIndicesDefaultValue"
               defaultMessage="The default value is {defaultValue}"
               values={{
-                defaultValue: <EuiCode>{defaultDynamicSettings.heartbeatIndices}</EuiCode>,
+                defaultValue: <EuiCode>{dss.settings.heartbeatIndices}</EuiCode>,
               }}
             />
           }
@@ -81,7 +80,7 @@ export const IndicesForm: React.FC<SettingsFormProps> = ({
             disabled={isDisabled}
             isLoading={dss.loading}
             value={formFields?.heartbeatIndices || ''}
-            onChange={(event: any) => onChange('heartbeatIndices', event.currentTarget.value)}
+            onChange={(event: any) => onChange({ heartbeatIndices: event.currentTarget.value })}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

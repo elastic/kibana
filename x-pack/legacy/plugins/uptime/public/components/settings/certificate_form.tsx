@@ -12,18 +12,16 @@ import {
   EuiFormRow,
   EuiCode,
   EuiFieldNumber,
+  EuiText,
   EuiTitle,
   EuiSpacer,
-  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { defaultDynamicSettings, DynamicSettings } from '../../../common/runtime_types';
+import { DynamicSettings } from '../../../common/runtime_types';
 import { selectDynamicSettings } from '../../state/selectors';
 
-type NumStr = string | number;
-
-export type OnFieldChangeType = (field: string, value?: NumStr) => void;
+export type OnFieldChangeType = (changedValues: Partial<DynamicSettings>) => void;
 
 export interface SettingsFormProps {
   onChange: OnFieldChangeType;
@@ -55,15 +53,15 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
         title={
           <h4>
             <FormattedMessage
-              id="xpack.uptime.sourceConfiguration.stateThresholds"
-              defaultMessage="Expiration State Thresholds"
+              id="xpack.uptime.sourceConfiguration.expirationThreshold"
+              defaultMessage="Expiration/Age Thresholds"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.uptime.sourceConfiguration.stateThresholdsDescription"
-            defaultMessage="Set certificate expiration warning/error thresholds"
+            id="xpack.uptime.sourceConfiguration.certificateThresholdDescription"
+            defaultMessage="Set certificate expiration/age thresholds"
           />
         }
       >
@@ -76,9 +74,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
               id="xpack.uptime.sourceConfiguration.errorStateDefaultValue"
               defaultMessage="The default value is {defaultValue}"
               values={{
-                defaultValue: (
-                  <EuiCode>{defaultDynamicSettings?.certificatesThresholds?.errorState}</EuiCode>
-                ),
+                defaultValue: <EuiCode>{dss.settings.certificatesThresholds?.expiration}</EuiCode>,
               }}
             />
           }
@@ -86,7 +82,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
           label={
             <FormattedMessage
               id="xpack.uptime.sourceConfiguration.errorStateLabel"
-              defaultMessage="Error state"
+              defaultMessage="Expiration threshold"
             />
           }
         >
@@ -97,17 +93,23 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
                 fullWidth
                 disabled={isDisabled}
                 isLoading={dss.loading}
-                value={formFields?.certificatesThresholds?.errorState || ''}
+                value={formFields?.certificatesThresholds?.expiration || ''}
                 onChange={({ currentTarget: { value } }: any) =>
-                  onChange(
-                    'certificatesThresholds.errorState',
-                    value === '' ? undefined : Number(value)
-                  )
+                  onChange({
+                    certificatesThresholds: {
+                      expiration: value === '' ? undefined : Number(value),
+                    },
+                  })
                 }
               />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
-              <EuiSelect options={[{ value: 'day', text: 'Days' }]} />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.uptime.sourceConfiguration.ageLimit.units.days"
+                  defaultMessage="Days"
+                />
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
@@ -120,9 +122,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
               id="xpack.uptime.sourceConfiguration.warningStateDefaultValue"
               defaultMessage="The default value is {defaultValue}"
               values={{
-                defaultValue: (
-                  <EuiCode>{defaultDynamicSettings?.certificatesThresholds?.warningState}</EuiCode>
-                ),
+                defaultValue: <EuiCode>{dss.settings.certificatesThresholds?.age}</EuiCode>,
               }}
             />
           }
@@ -130,7 +130,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
           label={
             <FormattedMessage
               id="xpack.uptime.sourceConfiguration.warningStateLabel"
-              defaultMessage="Warning state"
+              defaultMessage="Age limit"
             />
           }
         >
@@ -143,14 +143,21 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
                 fullWidth
                 disabled={isDisabled}
                 isLoading={dss.loading}
-                value={formFields?.certificatesThresholds?.warningState || ''}
+                value={formFields?.certificatesThresholds?.age || ''}
                 onChange={(event: any) =>
-                  onChange('certificatesThresholds.warningState', Number(event.currentTarget.value))
+                  onChange({
+                    certificatesThresholds: { age: Number(event.currentTarget.value) },
+                  })
                 }
               />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
-              <EuiSelect options={[{ value: 'day', text: 'Days' }]} />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.uptime.sourceConfiguration.ageLimit.units.days"
+                  defaultMessage="Days"
+                />
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
