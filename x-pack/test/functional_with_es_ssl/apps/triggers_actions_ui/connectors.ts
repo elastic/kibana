@@ -210,12 +210,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await testSubjects.exists('saveEditedActionButton')).to.be(false);
     });
 
-    it('should not be able to clear selected index on index connector form', async () => {
+    it('should be able to clear selected index on index connector form', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await testSubjects.click('connectorsTab');
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
       await testSubjects.click('.index-card');
 
-      const indexComboBox = await testSubjects.find('connectorIndexesComboBox');
+      const indexComboBox = await find.byCssSelector('#indexConnectorSelectSearchBox');
       await indexComboBox.click();
       await indexComboBox.type('k');
       const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
