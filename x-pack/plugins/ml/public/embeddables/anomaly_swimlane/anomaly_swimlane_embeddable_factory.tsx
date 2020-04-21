@@ -43,7 +43,8 @@ export class AnomalySwimlaneEmbeddableFactory
 
   public async getExplicitInput(): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
     return new Promise(async resolve => {
-      const { overlays, uiSettings } = (await this.getStartServices())[0];
+      const [coreStart] = await this.getStartServices();
+      const { overlays, uiSettings } = coreStart;
 
       const maps = {
         groupsMap: getInitialGroupsMap([]),
@@ -66,9 +67,6 @@ export class AnomalySwimlaneEmbeddableFactory
             onSelectionConfirmed={({ jobIds, groups }) => {
               resolve({ jobIds });
               flyoutSession.close();
-            }}
-            onJobsFetched={r => {
-              console.log(r, '___r___');
             }}
             maps={maps}
           />

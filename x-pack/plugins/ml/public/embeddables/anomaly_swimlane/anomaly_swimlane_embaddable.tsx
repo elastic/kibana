@@ -7,6 +7,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from 'kibana/public';
+import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { combineLatest, from, of, Subject } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import {
   Embeddable,
   EmbeddableInput,
@@ -19,6 +22,11 @@ import {
 } from '../../application/explorer/explorer_swimlane';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
+import {
+  initGetSwimlaneBucketInterval,
+  loadOverallData,
+  OverallSwimlaneData,
+} from '../../application/explorer/explorer_utils';
 
 export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
 
@@ -38,7 +46,9 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput
 > {
-  private node?: Element;
+  private node?: HTMLElement;
+  private swimlaneProps: ExplorerSwimlaneProps | undefined;
+  private reload$ = new Subject();
   public readonly type: string = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
   constructor(
@@ -56,21 +66,64 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
       parent
     );
 
-    this.getInput$().subscribe(input => {
-      const jobIds = input.jobIds;
-      const viewBy = input.viewBy;
-
-      this.updateOutput({
-        jobIds,
-        viewBy,
-        defaultTitle: `ML ${jobIds} anomaly swimlane`,
-      });
-    });
-
-    // this.input includes jobId, timeRange, query and filters
+    this.listenForInputUpdates();
   }
 
-  private getSwimlaneProps(input: Partial<AnomalySwimlaneEmbeddableInput>): ExplorerSwimlaneProps {
+  private listenForInputUpdates() {
+    combineLatest([this.getInput$(), this.reload$.pipe(debounceTime(500), startWith(null))])
+      .pipe(
+        map(([input]) => input),
+        switchMap(({ timeRange, query, jobIds }) => {
+          const selectedJobs = [
+            {
+              id: jobIds[0],
+              selected: true,
+              bucketSpanSeconds: 900,
+            },
+          ];
+
+          const [{ uiSettings, notifications }, pluginStart] = this.services;
+
+          const timeBuckets = new TimeBuckets({
+            'histogram:maxBars': uiSettings.get('histogram:maxBars'),
+            'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+            dateFormat: uiSettings.get('dateFormat'),
+            'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+          });
+          const { timefilter } = pluginStart.data.query.timefilter;
+          timefilter.enableTimeRangeSelector();
+
+          const interval = initGetSwimlaneBucketInterval(
+            () => timefilter,
+            () => timeBuckets
+          )(selectedJobs, 300);
+
+          return from(loadOverallData(selectedJobs, interval, timefilter.getBounds())).pipe(
+            catchError(error => {
+              notifications.toasts.addError(new Error(error), {
+                title: i18n.translate('xpack.ml.swimlaneEmbeddable.errorMessage', {
+                  defaultMessage: 'Unable to load a swimlane data',
+                }),
+              });
+              return of(null);
+            })
+          );
+        })
+      )
+      .subscribe(swimlaneData => {
+        if (!swimlaneData) {
+          return;
+        }
+
+        this.updateSwimlaneProps(this.input, swimlaneData.overallSwimlaneData);
+        this.render(this.node!);
+      });
+  }
+
+  private updateSwimlaneProps(
+    input: Partial<AnomalySwimlaneEmbeddableInput>,
+    swimlaneData: OverallSwimlaneData
+  ): void {
     const { uiSettings } = this.services[0];
 
     const timeBuckets = new TimeBuckets({
@@ -80,49 +133,32 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
 
-    return {
+    this.swimlaneProps = {
       timeBuckets,
-      chartWidth: 0,
-      swimlaneCellClick: e => {
-        console.log(e, '___e___');
-      },
-      swimlaneData: {
-        laneLabels: ['Overall'],
-        earliest: 1572825600,
-        latest: 1572912000,
-        interval: 3600,
-        points: [
-          {
-            laneLabel: 'Overall',
-            time: 1572825600,
-            value: 0,
-          },
-          { laneLabel: 'Overall', time: 1572829200, value: 0 },
-        ],
-      },
+      chartWidth: 600,
+      swimlaneData,
       swimlaneType: 'overall',
-      swimlaneRenderDoneListener: e => {
-        console.log(e, '___ea___');
-      },
       filterActive: false,
       maskAll: false,
     };
   }
 
   public render(node: HTMLElement) {
-    const swimlaneProps = this.getSwimlaneProps(this.input);
-
     this.node = node;
+
+    if (this.swimlaneProps === undefined) {
+      return;
+    }
+
+    const { chartWidth, timeBuckets, swimlaneData, swimlaneType } = this.swimlaneProps;
 
     ReactDOM.render(
       <div data-test-subj="mlMaxAnomalyScoreEmbeddable">
         <ExplorerSwimlane
-          chartWidth={swimlaneProps.chartWidth}
-          timeBuckets={swimlaneProps.timeBuckets}
-          swimlaneCellClick={swimlaneProps.swimlaneCellClick}
-          swimlaneData={swimlaneProps.swimlaneData}
-          swimlaneType={swimlaneProps.swimlaneType}
-          swimlaneRenderDoneListener={swimlaneProps.swimlaneRenderDoneListener}
+          chartWidth={chartWidth}
+          timeBuckets={timeBuckets}
+          swimlaneData={swimlaneData}
+          swimlaneType={swimlaneType}
         />
       </div>,
       node
@@ -136,5 +172,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     }
   }
 
-  public reload() {}
+  public reload() {
+    this.reload$.next();
+  }
 }

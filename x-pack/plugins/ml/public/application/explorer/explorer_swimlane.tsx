@@ -54,7 +54,7 @@ export interface ExplorerSwimlaneProps {
   filterActive?: boolean;
   maskAll?: boolean;
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
-  swimlaneCellClick: Function;
+  swimlaneCellClick?: Function;
   swimlaneData: {
     laneLabels: any[];
     earliest: number;
@@ -69,7 +69,7 @@ export interface ExplorerSwimlaneProps {
     type: string;
     times: number[];
   };
-  swimlaneRenderDoneListener: Function;
+  swimlaneRenderDoneListener?: Function;
 }
 
 export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
@@ -83,8 +83,6 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
   rootNode = React.createRef<HTMLDivElement>();
 
   componentDidMount() {
-    console.log(this.props, '___this.props___');
-
     // property for data comparison to be able to filter
     // consecutive click events with the same data.
     let previousSelectedData: any = null;
@@ -160,7 +158,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
   }
 
   selectCell(cellsToSelect: any[], { laneLabels, bucketScore, times }: SelectedData) {
-    const { selection, swimlaneCellClick, swimlaneData, swimlaneType } = this.props;
+    const { selection, swimlaneCellClick = () => {}, swimlaneData, swimlaneType } = this.props;
 
     let triggerNewSelection = false;
 
@@ -312,7 +310,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       return getSeverityColor(value);
     }
 
-    const numBuckets = (endTime - startTime) / stepSecs;
+    const numBuckets = Math.round((endTime - startTime) / stepSecs);
     const cellHeight = 30;
     const height = (lanes.length + 1) * cellHeight - 10;
     const laneLabelWidth = 170;
@@ -332,7 +330,6 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     // Get the scaled date format to use for x axis tick labels.
     timeBuckets.setInterval(`${stepSecs}s`);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
-    console.log(xAxisTickFormat, '___xAxisTickFormat___');
 
     function cellMouseOverFactory(time: number, i: number) {
       // Don't use an arrow function here because we need access to `this`,
@@ -421,7 +418,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
         }
       })
       .on('click', () => {
-        if (selection && typeof selection.lanes !== 'undefined') {
+        if (selection && typeof selection.lanes !== 'undefined' && swimlaneCellClick) {
           swimlaneCellClick({});
         }
       })
@@ -581,7 +578,9 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       element.selectAll('.sl-cell-inner').classed('sl-cell-inner-masked', true);
     }
 
-    this.props.swimlaneRenderDoneListener();
+    if (this.props.swimlaneRenderDoneListener) {
+      this.props.swimlaneRenderDoneListener();
+    }
 
     if (
       (swimlaneType !== selectedType ||

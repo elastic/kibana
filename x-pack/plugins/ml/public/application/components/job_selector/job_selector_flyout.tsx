@@ -39,7 +39,7 @@ export interface JobSelectorFlyoutProps {
   selectedIds?: string[];
   newSelection?: string[];
   onFlyoutClose: () => void;
-  onJobsFetched: (maps: JobSelectionMaps) => void;
+  onJobsFetched?: (maps: JobSelectionMaps) => void;
   onSelectionChange?: (newSelection: string[]) => void;
   onSelectionConfirmed: (payload: {
     newSelection: string[];
@@ -154,7 +154,9 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
       setJobs(normalizedJobs);
       setGroups(groupsWithTimerange);
 
-      onJobsFetched({ groupsMap, jobsMap: resp.jobsMap });
+      if (onJobsFetched) {
+        onJobsFetched({ groupsMap, jobsMap: resp.jobsMap });
+      }
     } catch (e) {
       console.error('Error fetching jobs with time range', e); // eslint-disable-line
       const { toasts } = notifications;

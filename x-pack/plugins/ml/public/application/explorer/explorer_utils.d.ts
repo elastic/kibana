@@ -56,6 +56,8 @@ export declare const getSelectionTimeRange: (
   bounds: TimeRangeBounds
 ) => SelectionTimeRange;
 
+export declare function initGetSwimlaneBucketInterval(timeFilter: any, timeBuckets: any): any;
+
 export declare const getSwimlaneBucketInterval: (
   selectedJobs: ExplorerJob[],
   swimlaneContainerWidth: number
