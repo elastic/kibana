@@ -76,6 +76,7 @@ export interface AggParamsTerms {
   // advanced
   exclude?: string;
   include?: string;
+  json?: string;
 }
 
 export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDependencies) =>

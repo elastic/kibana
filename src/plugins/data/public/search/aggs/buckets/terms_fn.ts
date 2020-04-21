@@ -142,9 +142,22 @@ export const aggTerms = (): FunctionDefinition => ({
         defaultMessage: 'Specific bucket values to include in results',
       }),
     },
+    json: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.buckets.terms.json.help', {
+        defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
+      }),
+    },
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
+
+    let json;
+    try {
+      json = args.json ? JSON.parse(args.json) : undefined;
+    } catch (e) {
+      throw new Error('Unable to parse json argument string');
+    }
 
     // Need to spread this object to work around TS bug:
     // https://github.com/microsoft/TypeScript/issues/15300#issuecomment-436793742
@@ -160,6 +173,7 @@ export const aggTerms = (): FunctionDefinition => ({
         params: {
           ...rest,
           orderAgg,
+          json,
         },
       },
     };

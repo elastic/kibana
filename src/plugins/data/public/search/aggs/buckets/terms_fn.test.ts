@@ -40,6 +40,7 @@ describe('agg_expression_functions', () => {
               "exclude": undefined,
               "field": "machine.os.keyword",
               "include": undefined,
+              "json": undefined,
               "missingBucket": false,
               "missingBucketLabel": "Missing",
               "order": "asc",
@@ -80,6 +81,7 @@ describe('agg_expression_functions', () => {
             "exclude": "ios",
             "field": "machine.os.keyword",
             "include": undefined,
+            "json": undefined,
             "missingBucket": true,
             "missingBucketLabel": "missing",
             "order": "desc",
@@ -108,6 +110,7 @@ describe('agg_expression_functions', () => {
           "exclude": undefined,
           "field": "machine.os.keyword",
           "include": undefined,
+          "json": undefined,
           "missingBucket": false,
           "missingBucketLabel": "Missing",
           "order": "asc",
@@ -118,6 +121,7 @@ describe('agg_expression_functions', () => {
               "exclude": undefined,
               "field": "name",
               "include": undefined,
+              "json": undefined,
               "missingBucket": false,
               "missingBucketLabel": "Missing",
               "order": "asc",
@@ -136,6 +140,25 @@ describe('agg_expression_functions', () => {
           "size": 5,
         }
       `);
+    });
+
+    test('correctly parses json string argument', () => {
+      const actual = fn({
+        field: 'machine.os.keyword',
+        order: 'asc',
+        orderBy: '1',
+        json: '{ "foo": true }',
+      });
+
+      expect(actual.value.params.json).toEqual({ foo: true });
+      expect(() => {
+        fn({
+          field: 'machine.os.keyword',
+          order: 'asc',
+          orderBy: '1',
+          json: '/// intentionally malformed json ///',
+        });
+      }).toThrowErrorMatchingInlineSnapshot(`"Unable to parse json argument string"`);
     });
   });
 });
