@@ -107,7 +107,4 @@ export const getAggTypes = ({
 
 import { aggTerms } from './buckets/terms_fn';
 
-export const getAggTypesFunctions = () => ({
-  buckets: [aggTerms],
-  metrics: [],
-});
+export const getAggTypesFunctions = () => [aggTerms];
