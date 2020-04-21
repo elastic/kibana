@@ -22,7 +22,10 @@ import { i18n } from '@kbn/i18n';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterTerms } from './create_filter/terms';
-import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
+import {
+  isStringOrNumberType,
+  migrateIncludeExcludeFormat,
+} from './migrate_include_exclude_format';
 import { IAggConfigs } from '../agg_configs';
 
 import { Adapters } from '../../../../../inspector/public';
@@ -266,7 +269,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           }),
           type: 'string',
           advanced: true,
-          shouldShow: isStringType,
+          shouldShow: isStringOrNumberType,
           ...migrateIncludeExcludeFormat,
         },
         {
@@ -276,7 +279,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           }),
           type: 'string',
           advanced: true,
-          shouldShow: isStringType,
+          shouldShow: isStringOrNumberType,
           ...migrateIncludeExcludeFormat,
         },
       ],

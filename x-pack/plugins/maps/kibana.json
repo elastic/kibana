@@ -3,6 +3,14 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "maps"],
-  "requiredPlugins": ["inspector"],
+  "requiredPlugins": [
+    "inspector",
+    "home",
+    "data",
+    "fileUpload",
+    "uiActions",
+    "navigation",
+    "visualizations"
+  ],
   "ui": true
 }
