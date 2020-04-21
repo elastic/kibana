@@ -33,7 +33,7 @@ const HostIds = styled(EuiListGroupItem)`
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const { appId, appPath, url } = useHostLogsUrl(details.host.id);
-  const queryParams = useHostListSelector(uiQueryParams);
+  const queryParams = useHostSelector(uiQueryParams);
   const history = useHistory();
   const detailsResultsUpper = useMemo(() => {
     return [

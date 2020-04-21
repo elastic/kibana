@@ -80,7 +80,7 @@ export const hasSelectedHost: (state: Immutable<HostState>) => boolean = createS
 );
 
 /** What policy details panel view to show */
-export const showView: (state: HostListState) => 'policy_response' | 'details' = createSelector(
+export const showView: (state: HostState) => 'policy_response' | 'details' = createSelector(
   uiQueryParams,
   searchParams => {
     return searchParams.show === 'policy_response' ? 'policy_response' : 'details';

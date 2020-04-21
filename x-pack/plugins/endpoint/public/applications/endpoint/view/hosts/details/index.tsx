@@ -70,7 +70,7 @@ export const HostDetailsFlyout = memo(() => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 data-test-subj="hostDetailsFlyoutTitle">
-            {loading ? <EuiLoadingContent lines={1} /> : details.host.hostname}
+            {loading ? <EuiLoadingContent lines={1} /> : details?.host?.hostname}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
