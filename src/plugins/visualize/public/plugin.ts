@@ -33,7 +33,11 @@ import { Storage, createKbnUrlTracker } from '../../kibana_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart } from '../../share/public';
-import { KibanaLegacySetup, AngularRenderedAppUpdater } from '../../kibana_legacy/public';
+import {
+  KibanaLegacySetup,
+  AngularRenderedAppUpdater,
+  KibanaLegacyStart,
+} from '../../kibana_legacy/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
@@ -47,6 +51,7 @@ export interface VisualizePluginStartDependencies {
   share?: SharePluginStart;
   visualizations: VisualizationsStart;
   dashboard: DashboardStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -114,7 +119,7 @@ export class VisualizePlugin
           pluginInitializerContext: this.initializerContext,
           addBasePath: coreStart.http.basePath.prepend,
           core: coreStart,
-          config: kibanaLegacy.config,
+          kibanaLegacy: pluginsStart.kibanaLegacy,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
           localStorage: new Storage(localStorage),
@@ -144,10 +149,7 @@ export class VisualizePlugin
       },
     });
 
-    kibanaLegacy.forwardApp('visualize', 'visualize', path => {
-      const newPath = path.replace(/\/visualize/, '');
-      return `#${newPath}`;
-    });
+    kibanaLegacy.forwardApp('visualize', 'visualize');
 
     if (home) {
       home.featureCatalogue.register({

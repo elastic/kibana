@@ -71,6 +71,7 @@ export interface RenderDeps {
   share?: SharePluginStart;
   config: KibanaLegacyStart['config'];
   usageCollection?: UsageCollectionSetup;
+  navigateToDefaultApp: KibanaLegacyStart['navigateToDefaultApp'];
 }
 
 let angularModuleInstance: IModule | null = null;

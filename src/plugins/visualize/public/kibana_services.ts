@@ -48,7 +48,7 @@ export interface VisualizeKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
   savedVisualizations: SavedVisualizations;
   share?: SharePluginStart;
-  config: KibanaLegacyStart['config'];
+  kibanaLegacy: KibanaLegacyStart;
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
   dashboard: DashboardStart;

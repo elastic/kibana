@@ -125,6 +125,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
         );
       },
     });
+    kibanaLegacy.forwardApp('dev_tools', 'dev_tools');
 
     return {
       register: (devTool: DevTool) => {

@@ -38,11 +38,12 @@ import { setServices } from './application/kibana_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-import { KibanaLegacySetup } from '../../kibana_legacy/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   telemetry?: TelemetryPluginStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -71,7 +72,10 @@ export class HomePublicPlugin
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [coreStart, { telemetry, data }] = await core.getStartServices();
+        const [
+          coreStart,
+          { telemetry, data, kibanaLegacy: kibanaLegacyStart },
+        ] = await core.getStartServices();
         setServices({
           trackUiMetric,
           kibanaVersion: this.initializerContext.env.packageInfo.version,
@@ -88,7 +92,7 @@ export class HomePublicPlugin
           getBasePath: core.http.basePath.get,
           indexPatternService: data.indexPatterns,
           environmentService: this.environmentService,
-          config: kibanaLegacy.config,
+          kibanaLegacy: kibanaLegacyStart,
           homeConfig: this.initializerContext.config.get(),
           tutorialService: this.tutorialService,
           featureCatalogue: this.featuresCatalogueRegistry,
@@ -97,6 +101,8 @@ export class HomePublicPlugin
         return await renderApp(params.element);
       },
     });
+    kibanaLegacy.forwardApp('home', 'home');
+
     return {
       featureCatalogue: { ...this.featuresCatalogueRegistry.setup() },
       environment: { ...this.environmentService.setup() },

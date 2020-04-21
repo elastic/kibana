@@ -36,6 +36,9 @@ export function send(method: string, path: string, data: any) {
 
   const options: JQuery.AjaxSettings = {
     url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
+    headers: {
+      'kbn-xsrf': 'kibana',
+    },
     data,
     contentType: getContentType(data),
     cache: false,

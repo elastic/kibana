@@ -227,8 +227,11 @@ export function initVisualizeApp(app, deps) {
           },
         },
       })
-      .when(`visualize/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
+      .otherwise({
+        template: '<span></span>',
+        controller: function() {
+          deps.kibanaLegacy.navigateToDefaultApp();
+        },
       });
   });
 }

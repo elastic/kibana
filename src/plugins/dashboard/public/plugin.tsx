@@ -228,13 +228,14 @@ export class DashboardPlugin
           navigation,
           share: shareStart,
           data: dataStart,
-          kibanaLegacy: { dashboardConfig },
+          kibanaLegacy: { dashboardConfig, navigateToDefaultApp },
         } = pluginsStart;
 
         const deps: RenderDeps = {
           pluginInitializerContext: this.initializerContext,
           core: coreStart,
           dashboardConfig,
+          navigateToDefaultApp,
           navigation,
           share: shareStart,
           data: dataStart,
