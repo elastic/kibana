@@ -595,7 +595,7 @@ export ELASTIC_APM_SERVICE_NAME=
         values: { defaultApmServerUrl: 'http://localhost:8200' }
       }
     )}
-export ELASTIC_APM_SERVER_URL=${apmServerUrl}
+export ELASTIC_APM_SERVER_URLS=${apmServerUrl}
 
 # ${i18n.translate(
       'xpack.apm.tutorial.goClient.configure.commands.useIfApmRequiresTokenComment',
