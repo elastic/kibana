@@ -99,17 +99,15 @@ export const CertificateList = ({ page, sort, setPage, setSort }) => {
     hidePerPageOptions: false,
   };
 
-  const sorting = {
-    sort,
-  };
-
   return (
     <EuiBasicTable
       columns={columns}
       items={certificates?.certs ?? []}
       pagination={pagination}
       onChange={onTableChange}
-      sorting={sorting}
+      sorting={{
+        sort,
+      }}
     />
   );
 };
