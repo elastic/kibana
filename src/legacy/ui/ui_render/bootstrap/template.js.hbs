@@ -78,10 +78,10 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
           '{{this}}',
         {{/each}}
         '{{regularBundlePath}}/commons.bundle.js',
-        {{!-- '{{regularBundlePath}}/plugin:data/data.plugin.js', --}}
-        '{{regularBundlePath}}/plugin:kibanaUtils/kibanaUtils.plugin.js',
-        '{{regularBundlePath}}/plugin:esUiShared/esUiShared.plugin.js',
-        '{{regularBundlePath}}/plugin:kibanaReact/kibanaReact.plugin.js'
+        {{!-- '{{regularBundlePath}}/plugin/data/data.plugin.js', --}}
+        '{{regularBundlePath}}/plugin/kibanaUtils/kibanaUtils.plugin.js',
+        '{{regularBundlePath}}/plugin/esUiShared/esUiShared.plugin.js',
+        '{{regularBundlePath}}/plugin/kibanaReact/kibanaReact.plugin.js'
     ], function () {
       load([
         '{{regularBundlePath}}/{{appId}}.bundle.js',
