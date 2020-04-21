@@ -55,7 +55,8 @@ export default function canvasCustomElementTest({
       });
     });
 
-    it('adds the custom element to the workpad when prompted', async () => {
+    // https://github.com/elastic/kibana/issues/63339
+    it.skip('adds the custom element to the workpad when prompted', async () => {
       await PageObjects.canvas.openAddElementModal();
 
       // open the custom elements tab
