@@ -31,47 +31,64 @@ Alerting has built-in <<action-types, actions>> and
 a| *Canvas with your visualizations*
 
 Visualizations that you created in Lens, Visualize, and
-TSVB can now be part of your Canvas workpad. This makes it easier for you
-to create a branded version of your dashboard
-to present to your peers.
+TSVB can now be part of a Canvas workpad. This makes it easier for you
+to brand your Canvas presentation to your executive team and partners.
 
 | image:release-notes/images/7-7-canvas-and-lens.png[Embedded maps in Canvas]
 
-a| *Lens filtering in dashboards*
+a| *Better Lens filtering in dashboards*
 
-To make dashboards even more interactive,
-you can now filter Lens visualizations with a single click.
-This gets you to the answers you're looking for, faster.
+Digging into the Lens visualizations in your
+dashboard just got faster. You can now filter the data in one
+Lens visualization, and immediately apply that filter to all
+Lens visualizations on the same dashboard.
 
 | image:release-notes/images/7-7-lens-filter-in-dashboard.png[Filter Lens visualizations in dashboard]
 
-a| *Value formatting in Lens*
+a| *Number formatting in Lens*
 
-Lens helps you more accurately display the data you
-are analyzing by enabling you to format values. You can
-format numbers as percentage and bytes and include a decimal point.
+To more accurately display the data in Lens visualizations,
+try out the new number formats. You can format numbers as percentages
+or bytes and customize the placement of the decimal point.
 
 | image:release-notes/images/7-7-lens-format-values.png[Formatted values in Lens]
 
-a| *Distance filters in Elastic Maps*
+a| *Indivual map points on zoom*
 
-You can now filter points in your map by selecting a
-center location and then drawing a distance radius with your mouse.  This
-addresses a common use case&mdash;using the map tiles underneath a data layer
-as a visual reference for what location points to keep.
-
-| image:release-notes/images/7-6-maps-category.png[Nested field]
-
-a| *Blended layers in Elastic Maps*
-
-Blended layers are good for working with large amounts of data.
-Toggle a setting, and your map will show an
-aggregated cluster of data points when your viewing
-area has more than 10,000 discrete points.  This is useful anytime you map data
-points are in both dense urban areas and more rural locations.
+By default, a map now shows an
+aggregation of data points when your viewing
+area has more than 10,000 discrete points.  When you pan or zoom to an area
+with less than 10,000 points, you'll see
+individual points. This feature is useful for map data
+points that are in both dense urban areas and rural locations.
 
 | image:release-notes/images/7-6-maps-category.png[Nested field]
 
+a| *Distance filters in maps*
+
+The distance filter is a new way
+to filter for map data
+within a specific radius.  Simply select a
+central location, and then draw a circle around it with your mouse.
+The distance filter is in addition to filtering by custom shape or rectangular bound.
+
+| image:release-notes/images/7-7-maps-distance-filter.png[Distance filters in Elastic Maps]
+
+a| *Extension to query timeout*
+
+You can now opt to extend a query to run pasts its hard timeout.
+For example, when a dashboard query time is close
+to timing out, you're asked it you want to  run it to completion.
+
+| image:release-notes/images/7-7-query-timeout.png[Continue query beyond timeout]
+
+a| *Multiple SSO options*
+
+{kib} now gives you multiple SSO authentication methods,
+so you can configure the sign-on experience that is best for
+your organization and users.
+
+|
 
 
 |===
