@@ -19,7 +19,10 @@ export async function createAgentAction(
     data: newAgentAction.data ? JSON.stringify(newAgentAction.data) : undefined,
   });
 
-  return savedObjectToAgentAction(so);
+  const agentAction = savedObjectToAgentAction(so);
+  agentAction.data = newAgentAction.data;
+
+  return agentAction;
 }
 
 export async function getAgentActionsForCheckin(
@@ -50,22 +53,24 @@ export async function getAgentActionByIds(
   soClient: SavedObjectsClientContract,
   actionIds: string[]
 ) {
-  const res = await soClient.bulkGet<AgentActionSOAttributes>(
-    actionIds.map(actionId => ({
-      id: actionId,
-      type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    }))
-  );
+  const actions = (
+    await soClient.bulkGet<AgentActionSOAttributes>(
+      actionIds.map(actionId => ({
+        id: actionId,
+        type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+      }))
+    )
+  ).saved_objects.map(savedObjectToAgentAction);
 
   return Promise.all(
-    res.saved_objects.map(async so => {
+    actions.map(async action => {
       // Get decrypted actions
       return savedObjectToAgentAction(
         await appContextService
           .getEncryptedSavedObjects()
           .getDecryptedAsInternalUser<AgentActionSOAttributes>(
             AGENT_ACTION_SAVED_OBJECT_TYPE,
-            so.id
+            action.id
           )
       );
     })

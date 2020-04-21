@@ -125,16 +125,19 @@ export async function generateEnrollmentAPIKey(
 
   const apiKey = Buffer.from(`${key.id}:${key.api_key}`).toString('base64');
 
-  return savedObjectToEnrollmentApiKey(
-    await soClient.create<EnrollmentAPIKeySOAttributes>(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, {
+  const so = await soClient.create<EnrollmentAPIKeySOAttributes>(
+    ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+    {
       active: true,
       api_key_id: key.id,
       api_key: apiKey,
       name,
       config_id: configId,
       created_at: new Date().toISOString(),
-    })
+    }
   );
+
+  return getEnrollmentAPIKey(soClient, so.id);
 }
 
 function savedObjectToEnrollmentApiKey({
