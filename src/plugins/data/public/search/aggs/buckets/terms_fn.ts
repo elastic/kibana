@@ -40,52 +40,68 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arg
 export const aggTerms = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.buckets.terms.help', {
-    defaultMessage: 'Generates AggConfigJSON for a terms agg',
+    defaultMessage: 'Generates a serialized agg config for a terms agg',
   }),
   type: 'agg_type',
   args: {
     id: {
       types: ['string'],
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.id.help', {
+        defaultMessage: 'ID for this aggregation',
+      }),
     },
     enabled: {
       types: ['boolean'],
       default: true,
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.field.help', {
+        defaultMessage: 'Field to use for this aggregation',
+      }),
     },
     schema: {
       types: ['string'],
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.schema.help', {
+        defaultMessage: 'Schema to use for this aggregation',
+      }),
     },
     field: {
       types: ['string'],
       required: true,
       help: i18n.translate('data.search.aggs.buckets.terms.field.help', {
-        defaultMessage: 'Field to use for terms aggregation',
+        defaultMessage: 'Field to use for this aggregation',
       }),
     },
     order: {
       types: ['string'],
       required: true,
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.order.help', {
+        defaultMessage: 'Order in which to return the results: asc or desc',
+      }),
     },
     orderBy: {
       types: ['string'],
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.orderBy.help', {
+        defaultMessage: 'Field to order results by',
+      }),
     },
     orderAgg: {
       types: ['agg_type'],
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.orderAgg.help', {
+        defaultMessage: 'Agg config to use for ordering results',
+      }),
     },
     size: {
       types: ['number'],
       default: 5,
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.size.help', {
+        defaultMessage: 'Max number of buckets to retrieve',
+      }),
     },
     missingBucket: {
       types: ['boolean'],
       default: false,
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.missingBucket.help', {
+        defaultMessage: 'When set to true, groups together any buckets with missing fields',
+      }),
     },
     missingBucketLabel: {
       types: ['string'],
@@ -94,27 +110,37 @@ export const aggTerms = (): FunctionDefinition => ({
         description: `Default label used in charts when documents are missing a field.
       Visible when you create a chart with a terms aggregation and enable "Show missing values"`,
       }),
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.missingBucketLabel.help', {
+        defaultMessage: 'Default label used in charts when documents are missing a field.',
+      }),
     },
     otherBucket: {
       types: ['boolean'],
       default: false,
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.otherBucket.help', {
+        defaultMessage: 'When set to true, groups together any buckets beyond the allowed size',
+      }),
     },
     otherBucketLabel: {
       types: ['string'],
       default: i18n.translate('data.search.aggs.buckets.terms.otherBucketLabel', {
         defaultMessage: 'Other',
       }),
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.otherBucketLabel.help', {
+        defaultMessage: 'Default label used in charts for documents in the Other bucket',
+      }),
     },
     exclude: {
       types: ['string'],
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.exclude.help', {
+        defaultMessage: 'Specific bucket values to exclude from results',
+      }),
     },
     include: {
       types: ['string'],
-      help: '',
+      help: i18n.translate('data.search.aggs.buckets.terms.include.help', {
+        defaultMessage: 'Specific bucket values to include in results',
+      }),
     },
   },
   fn: (input, args) => {
