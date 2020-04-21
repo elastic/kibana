@@ -78,3 +78,54 @@ export function IndicesEditSectionsProvider() {
     return editSections;
   };
 }
+
+function getTitle(type, filteredCount, totalCount) {
+  let translateKey = '';
+  switch (type) {
+    case 'indexed':
+      translateKey = 'kbn.management.editIndexPattern.tabs.fieldsHeader';
+      break;
+    case 'scripted':
+      translateKey = 'kbn.management.editIndexPattern.tabs.scriptedHeader';
+      break;
+    case 'sourceFilters':
+      translateKey = 'kbn.management.editIndexPattern.tabs.sourceHeader';
+      break;
+  }
+  const count = `(${
+    filteredCount[type] === totalCount[type]
+      ? filteredCount[type]
+      : filteredCount[type] + ' / ' + totalCount[type]
+  })`;
+  return (
+    i18n.translate(translateKey, {
+      defaultMessage: 'Fields',
+    }) + count
+  );
+}
+
+export function getTabs(indexPattern, fieldFilter, indexPatternListProvider) {
+  const totalCount = getCounts(indexPattern.fields, indexPattern.sourceFilters);
+  const filteredCount = getCounts(indexPattern.fields, indexPattern.sourceFilters, fieldFilter);
+
+  const tabs = [];
+
+  tabs.push({
+    name: getTitle('indexed', filteredCount, totalCount),
+    id: 'indexedFields',
+  });
+
+  if (indexPatternListProvider.areScriptedFieldsEnabled(indexPattern)) {
+    tabs.push({
+      name: getTitle('scripted', filteredCount, totalCount),
+      id: 'scriptedFields',
+    });
+  }
+
+  tabs.push({
+    name: getTitle('sourceFilters', filteredCount, totalCount),
+    id: 'sourceFilters',
+  });
+
+  return tabs;
+}
