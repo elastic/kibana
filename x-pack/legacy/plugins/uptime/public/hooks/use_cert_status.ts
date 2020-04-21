@@ -1,0 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import moment from 'moment';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectDynamicSettings } from '../state/selectors';
+import { getDynamicSettings } from '../state/actions/dynamic_settings';
+
+export enum CERT_STATUS {
+  OK = 'OK',
+  EXPIRING_SOON = 'EXPIRING_SOON',
+  EXPIRED = 'EXPIRED',
+}
+
+export const useCertStatus = (expiryDate?: string) => {
+  const {
+    settings: {
+      certificatesThresholds: { errorState },
+    },
+  } = useSelector(selectDynamicSettings);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getDynamicSettings());
+  }, [dispatch]);
+
+  const certValidityDate = new Date(expiryDate ?? '');
+
+  const isValidDate = !isNaN(certValidityDate.valueOf());
+
+  if (!isValidDate) {
+    return false;
+  }
+
+  const isExpiringSoon = moment(certValidityDate).diff(moment(), 'days') < errorState;
+
+  const isExpired = moment(certValidityDate) < moment();
+
+  return isExpired
+    ? CERT_STATUS.EXPIRED
+    : isExpiringSoon
+    ? CERT_STATUS.EXPIRING_SOON
+    : CERT_STATUS.OK;
+};

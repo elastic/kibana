@@ -6,7 +6,15 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { EuiBasicTable, EuiButton, EuiCopy, EuiIcon, EuiIconTip, EuiLink } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiCopy,
+  EuiIcon,
+  EuiIconTip,
+  EuiLink,
+  EuiToolTip,
+} from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import {
@@ -14,26 +22,25 @@ import {
   getCertificatesActions,
 } from '../../state/certificates/certificates';
 import { CertStatus } from './cert_status';
+import { CertMonitors } from './cert_monitors';
 
 const columns = [
   {
-    field: 'Status',
+    field: 'tls.certificate_not_valid_after',
     name: 'Status',
+    sortable: true,
     render: (val, item) => {
       return <CertStatus cert={item} />;
     },
   },
   {
     name: 'Common Name',
-
     field: 'common_name',
   },
   {
     name: 'Monitors',
     field: 'monitors',
-    render: monitors => {
-      return monitors.map(({ id, name }) => name || id).join();
-    },
+    render: monitors => <CertMonitors monitors={monitors} />,
   },
   {
     name: 'Issued By',
@@ -42,12 +49,22 @@ const columns = [
   {
     name: 'Expiration Date',
     field: 'certificate_not_valid_after',
+    sortable: true,
+    align: 'center',
     render: (value: string) => {
       return moment(value).format('L LT');
     },
   },
   {
-    name: 'SH256',
+    name: (
+      <EuiToolTip content="Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the client.">
+        <span>
+          SHA256
+          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        </span>
+      </EuiToolTip>
+    ),
+    width: '100px',
     actions: [
       {
         render: item => {
@@ -55,7 +72,7 @@ const columns = [
             <EuiCopy textToCopy={item.sha256?.toUpperCase()}>
               {copy => (
                 <EuiLink onClick={copy}>
-                  <EuiIconTip type="copy" content="Click to Copy SHA 256 Value" position="bottom" />
+                  <EuiIcon type="copy" content="Click to Copy SHA 256 Value" position="bottom" />
                 </EuiLink>
               )}
             </EuiCopy>
@@ -66,11 +83,12 @@ const columns = [
   },
 ];
 
-export const CertificateList = ({ page, setPage }) => {
+export const CertificateList = ({ page, sort, setPage, setSort }) => {
   const certificates = useSelector(certificatesSelector);
 
   const onTableChange = newVal => {
     setPage(newVal.page);
+    setSort(newVal.sort);
   };
 
   const pagination = {
@@ -81,12 +99,17 @@ export const CertificateList = ({ page, setPage }) => {
     hidePerPageOptions: false,
   };
 
+  const sorting = {
+    sort,
+  };
+
   return (
     <EuiBasicTable
       columns={columns}
       items={certificates?.certs ?? []}
       pagination={pagination}
       onChange={onTableChange}
+      sorting={sorting}
     />
   );
 };

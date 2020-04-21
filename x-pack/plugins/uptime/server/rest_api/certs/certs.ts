@@ -13,6 +13,8 @@ const DEFAULT_INDEX = 0;
 const DEFAULT_SIZE = 25;
 const DEFAULT_FROM = 'now-1d';
 const DEFAULT_TO = 'now';
+const DEFAULT_SORT = 'tls.certificate_not_valid_after';
+const DEFAULT_DIRECTION = 'asc';
 
 export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -24,17 +26,17 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
       search: schema.maybe(schema.string()),
       index: schema.maybe(schema.number()),
       size: schema.maybe(schema.number()),
+      sortBy: schema.maybe(schema.string()),
+      direction: schema.maybe(schema.string()),
     }),
-  },
-  writeAccess: false,
-  options: {
-    tags: ['access:uptime-read'],
   },
   handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
     const index = request.query?.index ?? DEFAULT_INDEX;
     const size = request.query?.size ?? DEFAULT_SIZE;
     const from = request.query?.from ?? DEFAULT_FROM;
     const to = request.query?.to ?? DEFAULT_TO;
+    const sortBy = request.query?.sortBy ?? DEFAULT_SORT;
+    const direction = request.query?.direction ?? DEFAULT_DIRECTION;
     const { search } = request.query;
     const result = await libs.requests.getCerts({
       callES,
@@ -44,6 +46,8 @@ export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
       size,
       from,
       to,
+      sortBy,
+      direction,
     });
     return response.ok({
       body: {

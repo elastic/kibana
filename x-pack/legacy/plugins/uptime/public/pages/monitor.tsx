@@ -5,8 +5,8 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { monitorStatusSelector } from '../state/selectors';
 import { PageHeader } from './page_header';
@@ -15,8 +15,15 @@ import { useMonitorId, useUptimeTelemetry, UptimePage } from '../hooks';
 import { MonitorCharts } from '../components/monitor';
 import { MonitorStatusDetails } from '../components/monitor';
 import { PingList } from '../components/monitor';
+import { getDynamicSettings } from '../state/actions/dynamic_settings';
 
 export const MonitorPage: React.FC = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getDynamicSettings());
+  }, [dispatch]);
+
   const monitorId = useMonitorId();
 
   const selectedMonitor = useSelector(monitorStatusSelector);

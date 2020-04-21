@@ -7,7 +7,15 @@
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { EuiButtonEmpty, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useUptimeTelemetry, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
@@ -15,7 +23,7 @@ import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { CertificateList } from '../components/certificates/certificates_list';
 import { CertificateSearch } from '../components/certificates/certificate_search';
-import { OVERVIEW_ROUTE } from '../../common/constants';
+import { OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../common/constants';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { getCertificatesActions } from '../state/certificates/certificates';
 
@@ -27,7 +35,8 @@ export const CertificatesPage: React.FC = () => {
 
   useBreadcrumbs([{ text: 'Certificates' }]);
 
-  const [page, setPage] = useState({ index: 0, size: 5 });
+  const [page, setPage] = useState({ index: 0, size: 10 });
+  const [sort, setSort] = useState({ field: 'tls.certificate_not_valid_after', direction: 'asc' });
   const [search, setSearch] = useState('');
 
   const dispatch = useDispatch();
@@ -37,25 +46,41 @@ export const CertificatesPage: React.FC = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(getCertificatesActions.get({ search, ...page }));
-  }, [dispatch, page, search]);
+    dispatch(
+      getCertificatesActions.get({ search, ...page, sortBy: sort.field, direction: sort.direction })
+    );
+  }, [dispatch, page, search, sort.direction, sort.field]);
 
   return (
     <>
-      <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeCertificatesToOverviewLink">
-        <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-          {i18n.translate('xpack.uptime.certificates.returnToOverviewLinkLabel', {
-            defaultMessage: 'Return to overview',
-          })}
-        </EuiButtonEmpty>
-      </Link>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeCertificatesToOverviewLink">
+            <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
+              {i18n.translate('xpack.uptime.certificates.returnToOverviewLinkLabel', {
+                defaultMessage: 'Return to overview',
+              })}
+            </EuiButtonEmpty>
+          </Link>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <Link to={SETTINGS_ROUTE} data-test-subj="uptimeCertificatesToOverviewLink">
+            <EuiButtonEmpty size="s" color="primary" iconType="gear">
+              {i18n.translate('xpack.uptime.certificates.settingsLinkLabel', {
+                defaultMessage: 'Settings',
+              })}
+            </EuiButtonEmpty>
+          </Link>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiSpacer size="m" />
       <EuiPanel>
         <PageHeader headingText={'Certificates'} datePicker={false} />
         <EuiSpacer size="m" />
         <CertificateSearch setSearch={setSearch} />
         <EuiSpacer size="m" />
-        <CertificateList page={page} setPage={setPage} />
+        <CertificateList page={page} setPage={setPage} sort={sort} setSort={setSort} />
       </EuiPanel>
     </>
   );

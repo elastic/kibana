@@ -24,7 +24,7 @@ import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';
-import { MonitorPageLink } from './monitor_page_link';
+import { MonitorPageLink } from '../../common/monitor_page_link';
 import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
@@ -33,6 +33,7 @@ import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
 import { useUrlParams } from '../../../hooks';
 import { CERTIFICATES_ROUTE } from '../../../../common/constants';
+import { CertStatusColumn } from './cert_status_column';
 
 interface Props extends MonitorListProps {
   lastRefresh: number;
@@ -56,13 +57,13 @@ const getPageSizeValue = () => {
   return value;
 };
 
-export const MonitorListComponent: React.FC<Props> = ({
+export const MonitorListComponent = ({
   filters,
   getMonitorList,
   lastRefresh,
   monitorList: { list, error, loading },
   linkParameters,
-}) => {
+}): Props => {
   const [pageSize, setPageSize] = useState<number>(getPageSizeValue());
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
@@ -148,8 +149,8 @@ export const MonitorListComponent: React.FC<Props> = ({
     {
       align: 'center' as const,
       field: 'state.tls',
-      name: labels.HISTORY_COLUMN_LABEL,
-      render: () => <div>TLS Certificate Expires Soon</div>,
+      name: labels.TLS_COLUMN_LABEL,
+      render: tls => <CertStatusColumn cert={tls?.[0]} />,
     },
     {
       align: 'center' as const,

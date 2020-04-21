@@ -15,13 +15,26 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   to,
   search,
   size,
+  sortBy,
+  direction,
 }) => {
   const searchWrapper = `*${search}*`;
+  let sort = sortBy;
+  if (sort === 'certificate_not_valid_after') {
+    sort = 'tls.certificate_not_valid_after';
+  }
   const params: any = {
     index: dynamicSettings.heartbeatIndices,
     body: {
       from: index * size,
       size,
+      sort: [
+        {
+          [sort]: {
+            order: direction,
+          },
+        },
+      ],
       query: {
         bool: {
           filter: [

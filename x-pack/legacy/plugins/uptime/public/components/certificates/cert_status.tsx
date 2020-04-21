@@ -5,34 +5,39 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { EuiHealth } from '@elastic/eui';
-import { useSelector } from 'react-redux';
-import { selectDynamicSettings } from '../../state/selectors';
 import { Cert } from '../../../common/runtime_types';
+import { CERT_STATUS, useCertStatus } from '../../hooks/use_cert_status';
 
 interface Props {
   cert: Cert;
 }
 
 export const CertStatus: React.FC<Props> = ({ cert }) => {
-  const {
-    settings: {
-      certificatesThresholds: { errorState },
-    },
-  } = useSelector(selectDynamicSettings);
+  const certStatus = useCertStatus(cert?.certificate_not_valid_after);
 
-  const expiryDate = moment(cert.certificate_not_valid_after);
-  const currDate = moment();
-  const valid = expiryDate.diff(currDate, 'days') > errorState;
-  const invalid = expiryDate < currDate;
-  const expiringSoon = valid && expiryDate.diff(currDate, 'days') < errorState;
+  const isExpiringSoon = certStatus === CERT_STATUS.EXPIRING_SOON;
 
-  if (valid) {
-    return <EuiHealth color="success"> OK </EuiHealth>;
+  const isExpired = certStatus === CERT_STATUS.EXPIRED;
+
+  if (isExpiringSoon) {
+    return (
+      <EuiHealth color="#E9AA3C">
+        <span>Expires Soon</span>
+      </EuiHealth>
+    );
   }
-  if (invalid) {
-    return <EuiHealth color="danger"> Expired </EuiHealth>;
+  if (isExpired) {
+    return (
+      <EuiHealth color="danger">
+        <span>Expired</span>
+      </EuiHealth>
+    );
   }
-  return <EuiHealth color="#E9AA3C"> Expires Soon </EuiHealth>;
+
+  return (
+    <EuiHealth color="success">
+      <span>OK</span>
+    </EuiHealth>
+  );
 };
