@@ -9,14 +9,14 @@ A migration function for a [saved object type](./kibana-plugin-core-server.saved
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectMigrationFn<InputProps = any, MigratedProps = any> = (doc: SavedObjectUnsanitizedDoc<InputProps>, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc<MigratedProps>;
+export declare type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes = unknown> = (doc: SavedObjectUnsanitizedDoc<InputAttributes>, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
 ```
 
 ## Example
 
 
 ```typescript
-const migrateProperty: SavedObjectMigrationFn = (doc, { log }) => {
+const migrateProperty: SavedObjectMigrationFn<MyUnmigratedAttributes, MyMigratedAttributes> = (doc, { log }) => {
   if(doc.attributes.someProp === null) {
     log.warn('Skipping migration');
   } else {

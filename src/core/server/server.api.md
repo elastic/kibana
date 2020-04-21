@@ -1682,7 +1682,7 @@ export interface SavedObjectMigrationContext {
 // Warning: (ae-forgotten-export) The symbol "SavedObjectUnsanitizedDoc" needs to be exported by the entry point index.d.ts
 //
 // @public
-export type SavedObjectMigrationFn<InputProps = any, MigratedProps = any> = (doc: SavedObjectUnsanitizedDoc<InputProps>, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc<MigratedProps>;
+export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes = unknown> = (doc: SavedObjectUnsanitizedDoc<InputAttributes>, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
 
 // @public
 export interface SavedObjectMigrationMap {
