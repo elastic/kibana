@@ -25,12 +25,13 @@ This tools is for anybody who is working on a codebase where they have to mainta
 
 - interactively backport one or more commits to one or more branches with an intuitive UI
 - will never run `git reset --hard` or other git commands in your working directory - all git operations are handled in a separate directory
-- backport a commit by specifying a PR (`--pr 1337`)
-- list and backport commits by a particular user (`--author john`)
-- list and backport commits by a particular path (`--path src/plugins/chatbot`)
+- backport a commit by specifying a PR (`backport --pr 1337`)
+- list and backport commits by a particular user (`backport --author john`)
+- list and backport commits by a particular path (`backport --path src/plugins/chatbot`)
 - forward port commits: `backport --sourceBranch 7.x --branch master` (will backport from 7.x to master)
+- backport merge commits (`backport --mainline`)
 - see which commits have been backported and to which branches
-- add custom titles, descriptions and labels to the created backport PRs
+- customize the title, description and labels of the created backport PRs
 
 ## Requirements
 
