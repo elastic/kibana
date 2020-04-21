@@ -46,6 +46,16 @@ export const selectPingList = ({ pingList, ui: { lastRefresh } }: AppState) => (
   lastRefresh,
 });
 
+export const snapshotDataSelector = ({
+  snapshot: { count, loading },
+  ui: { lastRefresh, esKuery },
+}: AppState) => ({
+  count,
+  lastRefresh,
+  loading,
+  esKuery,
+});
+
 const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
 
 export const hasMLFeatureAvailable = createSelector(
