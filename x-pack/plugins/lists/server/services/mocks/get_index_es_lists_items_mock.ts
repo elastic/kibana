@@ -8,10 +8,10 @@ import { IndexEsListsItemsSchema } from '../../../common/schemas';
 
 import { DATE_NOW, LIST_ID, META, TIE_BREAKER, USER, VALUE } from './lists_services_mock_constants';
 
-export const getIndexESListsItemsMock = (): IndexEsListsItemsSchema => ({
+export const getIndexESListsItemsMock = (ip = VALUE): IndexEsListsItemsSchema => ({
   created_at: DATE_NOW,
   created_by: USER,
-  ip: VALUE,
+  ip,
   list_id: LIST_ID,
   meta: META,
   tie_breaker_id: TIE_BREAKER,

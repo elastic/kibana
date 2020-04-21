@@ -15,7 +15,7 @@ import {
 
 import { createListItem } from './create_list_item';
 
-describe('crete_list', () => {
+describe('crete_list_item', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

@@ -15,7 +15,7 @@ import {
   Type,
 } from '../../../common/schemas';
 
-interface CreateListItemsBulkOptions {
+export interface CreateListItemsBulkOptions {
   listId: string;
   type: Type;
   value: string[];
@@ -23,6 +23,8 @@ interface CreateListItemsBulkOptions {
   listsItemsIndex: string;
   user: string;
   meta: MetaOrUndefined;
+  dateNow?: string;
+  tieBreaker?: string[];
 }
 
 export const createListItemsBulk = async ({
@@ -33,15 +35,18 @@ export const createListItemsBulk = async ({
   listsItemsIndex,
   user,
   meta,
+  dateNow,
+  tieBreaker,
 }: CreateListItemsBulkOptions): Promise<void> => {
   // It causes errors if you try to add items to bulk that do not exist within ES
   if (!value.length) {
     return;
   }
   const body = value.reduce<Array<IndexEsListsItemsSchema | CreateEsBulkTypeSchema>>(
-    (accum, singleValue) => {
-      const createdAt = new Date().toISOString();
-      const tieBreakerId = uuid.v4();
+    (accum, singleValue, index) => {
+      const createdAt = dateNow ?? new Date().toISOString();
+      const tieBreakerId =
+        tieBreaker != null && tieBreaker[index] != null ? tieBreaker[index] : uuid.v4();
       const elasticBody: IndexEsListsItemsSchema = {
         created_at: createdAt,
         created_by: user,
