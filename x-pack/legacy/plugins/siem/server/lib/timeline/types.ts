@@ -246,6 +246,11 @@ export type ExportedTimelines = TimelineSavedObject &
     pinnedEventIds: string[];
   };
 
+export interface ExportTimelineNotFoundError {
+  statusCode: number;
+  message: string;
+}
+
 export interface BulkGetInput {
   type: string;
   id: string;

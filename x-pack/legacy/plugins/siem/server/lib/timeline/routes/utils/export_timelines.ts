@@ -28,6 +28,7 @@ import {
   ExportTimelineSavedObjectsClient,
   ExportedNotes,
   TimelineSavedObject,
+  ExportTimelineNotFoundError,
 } from '../../types';
 import { transformDataToNdjson } from '../../../../utils/read_stream/create_stream_from_ndjson';
 
@@ -129,12 +130,23 @@ const getTimelines = async (
     )
   );
 
-  const timelineObjects: TimelineSavedObject[] | undefined =
-    savedObjects != null
-      ? savedObjects.saved_objects.map((savedObject: unknown) => {
-          return convertSavedObjectToSavedTimeline(savedObject);
-        })
-      : [];
+  const timelineObjects: {
+    timelines: TimelineSavedObject[];
+    errors: ExportTimelineNotFoundError[];
+  } = savedObjects.saved_objects.reduce(
+    (acc, savedObject) => {
+      return savedObject.error == null
+        ? {
+            errors: acc.errors,
+            timelines: [...acc.timelines, convertSavedObjectToSavedTimeline(savedObject)],
+          }
+        : { errors: [...acc.errors, savedObject.error], timelines: acc.timelines };
+    },
+    {
+      timelines: [] as TimelineSavedObject[],
+      errors: [] as ExportTimelineNotFoundError[],
+    }
+  );
 
   return timelineObjects;
 };
@@ -142,12 +154,8 @@ const getTimelines = async (
 const getTimelinesFromObjects = async (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
   ids: string[]
-): Promise<ExportedTimelines[]> => {
-  const timelines: TimelineSavedObject[] = await getTimelines(savedObjectsClient, ids);
-  // To Do for feature freeze
-  // if (timelines.length !== request.body.ids.length) {
-  //   //figure out which is missing to tell user
-  // }
+): Promise<Array<ExportedTimelines | ExportTimelineNotFoundError>> => {
+  const { timelines, errors } = await getTimelines(savedObjectsClient, ids);
 
   const [notes, pinnedEventIds] = await Promise.all([
     Promise.all(ids.map(timelineId => getNotesByTimelineId(savedObjectsClient, timelineId))),
@@ -181,7 +189,7 @@ const getTimelinesFromObjects = async (
     return acc;
   }, []);
 
-  return myResponse ?? [];
+  return [...myResponse, ...errors] ?? [];
 };
 
 export const getExportTimelineByObjectIds = async ({
