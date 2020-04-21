@@ -17,7 +17,7 @@ import {
 import { getAsyncInitialState, handleAsyncAction } from './utils';
 import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 import { AsyncInitialState } from './types';
-import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
+import { MlCapabilitiesResponse } from '../../../../../../plugins/ml/common/types/privileges';
 import { CreateMLJobSuccess, DeleteJobResults } from '../actions/types';
 import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_recognizer';
 
@@ -26,7 +26,7 @@ export interface MLJobState {
   createJob: AsyncInitialState<CreateMLJobSuccess>;
   deleteJob: AsyncInitialState<DeleteJobResults>;
   anomalies: AsyncInitialState<AnomalyRecords>;
-  mlCapabilities: AsyncInitialState<PrivilegesResponse>;
+  mlCapabilities: AsyncInitialState<MlCapabilitiesResponse>;
 }
 
 const initialState: MLJobState = {

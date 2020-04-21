@@ -6,7 +6,7 @@
 
 import { createAction } from 'redux-actions';
 import { createAsyncAction } from './utils';
-import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
+import { MlCapabilitiesResponse } from '../../../../../../plugins/ml/common/types/privileges';
 import { AnomaliesTableRecord } from '../../../../../../plugins/ml/common/types/anomalies';
 import {
   CreateMLJobSuccess,
@@ -27,7 +27,7 @@ export const createMLJobAction = createAsyncAction<
   CreateMLJobSuccess | null
 >('CREATE_ML_JOB');
 
-export const getMLCapabilitiesAction = createAsyncAction<any, PrivilegesResponse>(
+export const getMLCapabilitiesAction = createAsyncAction<any, MlCapabilitiesResponse>(
   'GET_ML_CAPABILITIES'
 );
 
