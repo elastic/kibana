@@ -67,9 +67,12 @@ import {
   ExpandPanelActionContext,
   ReplacePanelAction,
   ReplacePanelActionContext,
+  ClonePanelAction,
+  ClonePanelActionContext,
   ACTION_EXPAND_PANEL,
   ACTION_REPLACE_PANEL,
   RenderDeps,
+  ACTION_CLONE_PANEL,
 } from './application';
 import {
   DashboardAppLinkGeneratorState,
@@ -78,6 +81,7 @@ import {
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
+import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -115,6 +119,7 @@ declare module '../../../plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
+    [ACTION_CLONE_PANEL]: ClonePanelActionContext;
   }
 }
 
@@ -172,6 +177,9 @@ export class DashboardPlugin
 
     const factory = new DashboardContainerFactory(getStartServices);
     embeddable.registerEmbeddableFactory(factory.type, factory);
+
+    const placeholderFactory = new PlaceholderEmbeddableFactory();
+    embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
 
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
@@ -296,7 +304,12 @@ export class DashboardPlugin
       plugins.embeddable.getEmbeddableFactories
     );
     uiActions.registerAction(changeViewAction);
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, changeViewAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
+
+    const clonePanelAction = new ClonePanelAction(core);
+    uiActions.registerAction(clonePanelAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
+
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,
