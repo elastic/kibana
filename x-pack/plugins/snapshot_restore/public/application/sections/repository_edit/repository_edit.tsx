@@ -10,7 +10,8 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiCallOut, EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';
 
-import { RepositoryForm, SectionError, SectionLoading, Error } from '../../components';
+import { SectionError, Error } from '../../../shared_imports';
+import { RepositoryForm, SectionLoading } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
