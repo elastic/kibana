@@ -19,7 +19,7 @@ import {
   updated_by,
 } from '../common/schemas';
 
-export const createEsListsItemsSchema = t.intersection([
+export const indexEsListsItemsSchema = t.intersection([
   t.exact(
     t.type({
       created_at,
@@ -34,4 +34,4 @@ export const createEsListsItemsSchema = t.intersection([
   esDataTypeUnion,
 ]);
 
-export type CreateEsListsItemsSchema = t.TypeOf<typeof createEsListsItemsSchema>;
+export type IndexEsListsItemsSchema = t.TypeOf<typeof indexEsListsItemsSchema>;

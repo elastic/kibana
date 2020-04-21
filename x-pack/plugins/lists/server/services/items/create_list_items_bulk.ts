@@ -10,7 +10,7 @@ import { transformListItemsToElasticQuery } from '../utils';
 import { DataClient } from '../../types';
 import {
   CreateEsBulkTypeSchema,
-  CreateEsListsItemsSchema,
+  IndexEsListsItemsSchema,
   MetaOrUndefined,
   Type,
 } from '../../../common/schemas';
@@ -38,11 +38,11 @@ export const createListItemsBulk = async ({
   if (!value.length) {
     return;
   }
-  const body = value.reduce<Array<CreateEsListsItemsSchema | CreateEsBulkTypeSchema>>(
+  const body = value.reduce<Array<IndexEsListsItemsSchema | CreateEsBulkTypeSchema>>(
     (accum, singleValue) => {
       const createdAt = new Date().toISOString();
       const tieBreakerId = uuid.v4();
-      const elasticBody: CreateEsListsItemsSchema = {
+      const elasticBody: IndexEsListsItemsSchema = {
         created_at: createdAt,
         created_by: user,
         list_id: listId,

@@ -8,8 +8,8 @@ import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
 
 import {
-  CreateEsListsItemsSchema,
   IdOrUndefined,
+  IndexEsListsItemsSchema,
   ListsItemsSchema,
   MetaOrUndefined,
   Type,
@@ -53,7 +53,7 @@ export const createListItem = async ({
     updated_at: createdAt,
     updated_by: user,
   };
-  const body: CreateEsListsItemsSchema = {
+  const body: IndexEsListsItemsSchema = {
     ...baseBody,
     ...transformListItemsToElasticQuery({ type, value }),
   };

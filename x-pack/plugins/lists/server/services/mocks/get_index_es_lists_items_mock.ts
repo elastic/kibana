@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CreateEsListsItemsSchema } from '../../../common/schemas';
+import { IndexEsListsItemsSchema } from '../../../common/schemas';
 
 import { DATE_NOW, LIST_ID, META, TIE_BREAKER, USER, VALUE } from './lists_services_mock_constants';
 
-export const getIndexESListsItemsMock = (): CreateEsListsItemsSchema => ({
+export const getIndexESListsItemsMock = (): IndexEsListsItemsSchema => ({
   created_at: DATE_NOW,
   created_by: USER,
   ip: VALUE,

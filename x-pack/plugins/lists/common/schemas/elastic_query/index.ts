@@ -6,5 +6,5 @@
 export * from './update_es_lists_schema';
 export * from './index_es_lists_schema';
 export * from './update_es_lists_items_schema';
-export * from './create_es_lists_items_schema';
+export * from './index_es_lists_items_schema';
 export * from './create_es_bulk_type';

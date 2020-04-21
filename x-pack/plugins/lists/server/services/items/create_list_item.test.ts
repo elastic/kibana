@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CreateEsListsItemsSchema, ListsItemsSchema } from '../../../common/schemas';
+import { IndexEsListsItemsSchema, ListsItemsSchema } from '../../../common/schemas';
 import {
   LISTS_ITEMS_INDEX,
   LIST_ITEM_ID,
@@ -35,7 +35,7 @@ describe('crete_list', () => {
   test('It calls "callAsCurrentUser" with body, index, and listsIndex', async () => {
     const options = getCreateListItemOptionsMock();
     await createListItem(options);
-    const body: CreateEsListsItemsSchema = getIndexESListsItemsMock();
+    const body: IndexEsListsItemsSchema = getIndexESListsItemsMock();
     const expected = {
       body,
       id: LIST_ITEM_ID,
