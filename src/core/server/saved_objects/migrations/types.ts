@@ -26,7 +26,7 @@ import { SavedObjectsMigrationLogger } from './core/migration_logger';
  *
  * @example
  * ```typescript
- * const migrateProperty: SavedObjectMigrationFn = (doc, { log }) => {
+ * const migrateProperty: SavedObjectMigrationFn<MyUnmigratedAttributes, MyMigratedAttributes> = (doc, { log }) => {
  *   if(doc.attributes.someProp === null) {
  *     log.warn('Skipping migration');
  *   } else {
@@ -39,10 +39,10 @@ import { SavedObjectsMigrationLogger } from './core/migration_logger';
  *
  * @public
  */
-export type SavedObjectMigrationFn<InputProps = any, MigratedProps = any> = (
-  doc: SavedObjectUnsanitizedDoc<InputProps>,
+export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes = unknown> = (
+  doc: SavedObjectUnsanitizedDoc<InputAttributes>,
   context: SavedObjectMigrationContext
-) => SavedObjectUnsanitizedDoc<MigratedProps>;
+) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
 
 /**
  * Migration context provided when invoking a {@link SavedObjectMigrationFn | migration handler}
