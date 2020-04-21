@@ -114,22 +114,6 @@ fi
 echo "\n${bold}Waiting for Kibana to start...${normal}"
 echo "Note: you need to start Kibana manually. Find the instructions at the top."
 yarn wait-on -i 500 -w 500 http://localhost:${KIBANA_PORT}/status > /dev/null
-echo "\n✅ Kibana status is ready"
-
-### As suggested the /api/status entrypoint is not not ready
-### before all assets have been compiled?
-if [ -n "${JENKINS_URL}" ] ; then
-  n=0
-  until [ $n -ge 20 ]
-  do
-    curl --silent --user admin:changeme \
-          "localhost:${KIBANA_PORT}/api/status" | \
-            jq .status.overall.state | \
-            grep 'green' && break
-    n=$[$n+1]
-    sleep 30
-  done
-fi
 echo "\n✅ Setup completed successfully. Running tests...\n"
 
 #
