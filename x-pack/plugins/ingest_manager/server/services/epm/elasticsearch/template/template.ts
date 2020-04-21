@@ -283,22 +283,22 @@ const queryIndicesFromTemplates = async (
   templates: TemplateRef[]
 ): Promise<CurrentIndex[]> => {
   const indexPromises = templates.map(template => {
-    return createIndexFromNamespace(callCluster, template);
+    return getIndices(callCluster, template);
   });
   const indexObjects = await Promise.all(indexPromises);
   return indexObjects.filter(item => item !== undefined).flat();
 };
 
-const createIndexFromNamespace = async (
+const getIndices = async (
   callCluster: CallESAsCurrentUser,
   template: TemplateRef
 ): Promise<CurrentIndex[] | undefined> => {
   const { templateName, indexTemplate } = template;
-  const res = await callCluster('search', getIndexByNamespaceQuery(templateName));
-  const namespaces: any[] = res?.aggregations?.streams.buckets;
-  if (namespaces) {
-    return namespaces.map(namespace => ({
-      indexName: `${templateName}-${namespace.key}`,
+  const res = await callCluster('search', getIndexQuery(templateName));
+  const indices: any[] = res?.aggregations?.index.buckets;
+  if (indices) {
+    return indices.map(index => ({
+      indexName: index.key,
       indexTemplate,
     }));
   }
@@ -347,13 +347,31 @@ const updateExistingIndex = async ({
   }
 };
 
-const getIndexByNamespaceQuery = (templateName: string) => ({
+const getIndexQuery = (templateName: string) => ({
   index: `${templateName}-*`,
-  size: 1,
+  size: 0,
   body: {
+    query: {
+      bool: {
+        must: [
+          {
+            exists: {
+              field: 'stream.namespace',
+            },
+          },
+          {
+            exists: {
+              field: 'stream.dataset',
+            },
+          },
+        ],
+      },
+    },
     aggs: {
-      streams: {
-        terms: { field: 'fields.stream.namespace' },
+      index: {
+        terms: {
+          field: '_index',
+        },
       },
     },
   },
