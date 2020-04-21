@@ -5,16 +5,12 @@
  */
 
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from 'src/core/server';
+import { IRouter, kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
 import { isEsError } from '../../../lib/is_es_error';
 import { formatEsError } from '../../../lib/format_es_error';
 import { License } from '../../../services';
+import { mockRouteContext } from '../test_lib';
 import { registerCreateRoute } from './register_create_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -40,13 +36,9 @@ describe('[CCR API] Create follower index', () => {
   });
 
   it('should return 200 status when follower index is created', async () => {
-    const mockRouteContext = ({
-      crossClusterReplication: {
-        client: {
-          callAsCurrentUser: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
-        },
-      },
-    } as unknown) as RequestHandlerContext;
+    const routeContextMock = mockRouteContext({
+      callAsCurrentUser: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+    });
 
     const request = httpServerMock.createKibanaRequest({
       body: {
@@ -56,7 +48,7 @@ describe('[CCR API] Create follower index', () => {
       },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
   });
 });

@@ -5,16 +5,12 @@
  */
 
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from 'src/core/server';
+import { IRouter, kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
 import { isEsError } from '../../../lib/is_es_error';
 import { formatEsError } from '../../../lib/format_es_error';
 import { License } from '../../../services';
+import { mockRouteContext } from '../test_lib';
 import { registerFetchRoute } from './register_fetch_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -103,19 +99,15 @@ describe('[CCR API] Fetch all follower indices', () => {
       },
     };
 
-    const mockRouteContext = ({
-      crossClusterReplication: {
-        client: {
-          callAsCurrentUser: jest
-            .fn()
-            .mockResolvedValueOnce(ccrInfoMockResponse)
-            .mockResolvedValueOnce(ccrStatsMockResponse),
-        },
-      },
-    } as unknown) as RequestHandlerContext;
+    const routeContextMock = mockRouteContext({
+      callAsCurrentUser: jest
+        .fn()
+        .mockResolvedValueOnce(ccrInfoMockResponse)
+        .mockResolvedValueOnce(ccrStatsMockResponse),
+    });
 
     const request = httpServerMock.createKibanaRequest();
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
 
     expect(response.payload.indices).toEqual([
       {

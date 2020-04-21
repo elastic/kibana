@@ -5,16 +5,12 @@
  */
 
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from 'src/core/server';
+import { IRouter, kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
 import { isEsError } from '../../../lib/is_es_error';
 import { formatEsError } from '../../../lib/format_es_error';
 import { License } from '../../../services';
+import { mockRouteContext } from '../test_lib';
 import { registerUnfollowRoute } from './register_unfollow_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -40,85 +36,73 @@ describe('[CCR API] Unfollow follower index/indices', () => {
   });
 
   it('unfollows a single item', async () => {
-    const mockRouteContext = ({
-      crossClusterReplication: {
-        client: {
-          callAsCurrentUser: jest
-            .fn()
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true }),
-        },
-      },
-    } as unknown) as RequestHandlerContext;
+    const routeContextMock = mockRouteContext({
+      callAsCurrentUser: jest
+        .fn()
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true }),
+    });
 
     const request = httpServerMock.createKibanaRequest({
       params: { id: 'a' },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
     expect(response.payload.itemsUnfollowed).toEqual(['a']);
     expect(response.payload.errors).toEqual([]);
   });
 
   it('unfollows multiple items', async () => {
-    const mockRouteContext = ({
-      crossClusterReplication: {
-        client: {
-          callAsCurrentUser: jest
-            .fn()
-            // a
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            // b
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            // c
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true }),
-        },
-      },
-    } as unknown) as RequestHandlerContext;
+    const routeContextMock = mockRouteContext({
+      callAsCurrentUser: jest
+        .fn()
+        // a
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        // b
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        // c
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true }),
+    });
 
     const request = httpServerMock.createKibanaRequest({
       params: { id: 'a,b,c' },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
     expect(response.payload.itemsUnfollowed).toEqual(['a', 'b', 'c']);
     expect(response.payload.errors).toEqual([]);
   });
 
   it('returns partial errors', async () => {
-    const mockRouteContext = ({
-      crossClusterReplication: {
-        client: {
-          callAsCurrentUser: jest
-            .fn()
-            // a
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            // b
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockRejectedValueOnce({ response: { error: {} } }),
-        },
-      },
-    } as unknown) as RequestHandlerContext;
+    const routeContextMock = mockRouteContext({
+      callAsCurrentUser: jest
+        .fn()
+        // a
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        // b
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockRejectedValueOnce({ response: { error: {} } }),
+    });
 
     const request = httpServerMock.createKibanaRequest({
       params: { id: 'a,b' },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
     expect(response.payload.itemsUnfollowed).toEqual(['a']);
     expect(response.payload.errors[0].id).toEqual('b');
   });

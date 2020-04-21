@@ -5,16 +5,12 @@
  */
 
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from 'src/core/server';
+import { IRouter, kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
 import { isEsError } from '../../../lib/is_es_error';
 import { formatEsError } from '../../../lib/format_es_error';
 import { License } from '../../../services';
+import { mockRouteContext } from '../test_lib';
 import { registerUpdateRoute } from './register_update_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -40,14 +36,10 @@ describe('[CCR API] Update auto-follow pattern', () => {
   });
 
   it('should serialize the payload before sending it to Elasticsearch', async () => {
-    const mockRouteContext = ({
-      crossClusterReplication: {
-        client: {
-          // Just echo back what we send so we can inspect it.
-          callAsCurrentUser: jest.fn().mockImplementation((endpoint, payload) => payload),
-        },
-      },
-    } as unknown) as RequestHandlerContext;
+    const routeContextMock = mockRouteContext({
+      // Just echo back what we send so we can inspect it.
+      callAsCurrentUser: jest.fn().mockImplementation((endpoint, payload) => payload),
+    });
 
     const request = httpServerMock.createKibanaRequest({
       params: { id: 'foo' },
@@ -58,7 +50,7 @@ describe('[CCR API] Update auto-follow pattern', () => {
       },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
 
     expect(response.payload).toEqual({
       id: 'foo',

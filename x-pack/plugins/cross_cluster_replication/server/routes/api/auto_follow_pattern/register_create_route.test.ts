@@ -5,16 +5,12 @@
  */
 
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from 'src/core/server';
+import { IRouter, kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
 import { isEsError } from '../../../lib/is_es_error';
 import { formatEsError } from '../../../lib/format_es_error';
 import { License } from '../../../services';
+import { mockRouteContext } from '../test_lib';
 import { registerCreateRoute } from './register_create_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -40,14 +36,10 @@ describe('[CCR API] Create auto-follow pattern', () => {
   });
 
   it('should throw a 409 conflict error if id already exists', async () => {
-    const mockRouteContext = ({
-      crossClusterReplication: {
-        client: {
-          // Fail the uniqueness check.
-          callAsCurrentUser: jest.fn().mockResolvedValueOnce(true),
-        },
-      },
-    } as unknown) as RequestHandlerContext;
+    const routeContextMock = mockRouteContext({
+      // Fail the uniqueness check.
+      callAsCurrentUser: jest.fn().mockResolvedValueOnce(true),
+    });
 
     const request = httpServerMock.createKibanaRequest({
       body: {
@@ -56,22 +48,18 @@ describe('[CCR API] Create auto-follow pattern', () => {
       },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
     expect(response.status).toEqual(409);
   });
 
   it('should return 200 status when the id does not exist', async () => {
-    const mockRouteContext = ({
-      crossClusterReplication: {
-        client: {
-          callAsCurrentUser: jest
-            .fn()
-            // Pass the uniqueness check.
-            .mockRejectedValueOnce({ statusCode: 404 })
-            .mockResolvedValueOnce(true),
-        },
-      },
-    } as unknown) as RequestHandlerContext;
+    const routeContextMock = mockRouteContext({
+      callAsCurrentUser: jest
+        .fn()
+        // Pass the uniqueness check.
+        .mockRejectedValueOnce({ statusCode: 404 })
+        .mockResolvedValueOnce(true),
+    });
 
     const request = httpServerMock.createKibanaRequest({
       body: {
@@ -80,7 +68,7 @@ describe('[CCR API] Create auto-follow pattern', () => {
       },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
   });
 });

@@ -5,16 +5,12 @@
  */
 
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from 'src/core/server';
+import { IRouter, kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
 import { isEsError } from '../../../lib/is_es_error';
 import { formatEsError } from '../../../lib/format_es_error';
 import { License } from '../../../services';
+import { mockRouteContext } from '../test_lib';
 import { registerPauseRoute } from './register_pause_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -40,62 +36,50 @@ describe('[CCR API] Pause auto-follow pattern(s)', () => {
   });
 
   it('pauses a single item', async () => {
-    const mockRouteContext = ({
-      crossClusterReplication: {
-        client: {
-          callAsCurrentUser: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
-        },
-      },
-    } as unknown) as RequestHandlerContext;
+    const routeContextMock = mockRouteContext({
+      callAsCurrentUser: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+    });
 
     const request = httpServerMock.createKibanaRequest({
       params: { id: 'a' },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
     expect(response.payload.itemsPaused).toEqual(['a']);
     expect(response.payload.errors).toEqual([]);
   });
 
   it('pauses multiple items', async () => {
-    const mockRouteContext = ({
-      crossClusterReplication: {
-        client: {
-          callAsCurrentUser: jest
-            .fn()
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockResolvedValueOnce({ acknowledge: true }),
-        },
-      },
-    } as unknown) as RequestHandlerContext;
+    const routeContextMock = mockRouteContext({
+      callAsCurrentUser: jest
+        .fn()
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockResolvedValueOnce({ acknowledge: true }),
+    });
 
     const request = httpServerMock.createKibanaRequest({
       params: { id: 'a,b,c' },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
     expect(response.payload.itemsPaused).toEqual(['a', 'b', 'c']);
     expect(response.payload.errors).toEqual([]);
   });
 
   it('returns partial errors', async () => {
-    const mockRouteContext = ({
-      crossClusterReplication: {
-        client: {
-          callAsCurrentUser: jest
-            .fn()
-            .mockResolvedValueOnce({ acknowledge: true })
-            .mockRejectedValueOnce({ response: { error: {} } }),
-        },
-      },
-    } as unknown) as RequestHandlerContext;
+    const routeContextMock = mockRouteContext({
+      callAsCurrentUser: jest
+        .fn()
+        .mockResolvedValueOnce({ acknowledge: true })
+        .mockRejectedValueOnce({ response: { error: {} } }),
+    });
 
     const request = httpServerMock.createKibanaRequest({
       params: { id: 'a,b' },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(routeContextMock, request, kibanaResponseFactory);
     expect(response.payload.itemsPaused).toEqual(['a']);
     expect(response.payload.errors[0].id).toEqual('b');
   });
