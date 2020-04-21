@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { SearchSourceType } from '../../../../../plugins/data/public';
-
 export const getSearchSourceMock = (esSearchResponse?: any) =>
-  (jest.fn().mockImplementation(() => ({
+  jest.fn().mockImplementation(() => ({
     setParent: jest.fn(),
     setField: jest.fn(),
     fetch: jest.fn().mockResolvedValue(
@@ -43,4 +41,4 @@ export const getSearchSourceMock = (esSearchResponse?: any) =>
             },
           }
     ),
-  })) as unknown) as SearchSourceType;
+  }));

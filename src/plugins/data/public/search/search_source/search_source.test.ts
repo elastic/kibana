@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Observable } from 'rxjs';
-import { getSearchSourceType, SearchSourceType } from './search_source';
+import { SearchSource } from './search_source';
 import { IndexPattern, SortDirection } from '../..';
 import { fetchSoon } from '../legacy';
 import { IUiSettingsClient } from '../../../../../core/public';
@@ -50,8 +50,8 @@ const indexPattern2 = ({
 } as unknown) as IndexPattern;
 
 describe('SearchSource', () => {
-  let SearchSource: SearchSourceType;
   let mockSearchMethod: any;
+  let searchSourceDependencies: any;
 
   beforeEach(() => {
     const core = coreMock.createStart();
@@ -68,19 +68,17 @@ describe('SearchSource', () => {
       });
     });
 
-    SearchSource = getSearchSourceType({
-      search: {
-        ...data.search,
-        search: mockSearchMethod,
-      },
-      uiSettings: core.uiSettings,
+    searchSourceDependencies = {
+      search: mockSearchMethod,
+      legacySearch: data.search.__LEGACY,
       injectedMetadata: core.injectedMetadata,
-    });
+      uiSettings: core.uiSettings,
+    };
   });
 
   describe('#setField()', () => {
     test('sets the value for the property', () => {
-      const searchSource = new SearchSource();
+      const searchSource = new SearchSource({}, searchSourceDependencies);
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
     });
@@ -88,7 +86,7 @@ describe('SearchSource', () => {
 
   describe('#getField()', () => {
     test('gets the value for the property', () => {
-      const searchSource = new SearchSource();
+      const searchSource = new SearchSource({}, searchSourceDependencies);
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
     });
@@ -98,7 +96,7 @@ describe('SearchSource', () => {
     describe('auto-sourceFiltering', () => {
       describe('new index pattern assigned', () => {
         test('generates a searchSource filter', async () => {
-          const searchSource = new SearchSource();
+          const searchSource = new SearchSource({}, searchSourceDependencies);
           expect(searchSource.getField('index')).toBe(undefined);
           expect(searchSource.getField('source')).toBe(undefined);
           searchSource.setField('index', indexPattern);
@@ -108,7 +106,7 @@ describe('SearchSource', () => {
         });
 
         test('removes created searchSource filter on removal', async () => {
-          const searchSource = new SearchSource();
+          const searchSource = new SearchSource({}, searchSourceDependencies);
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', undefined);
           const request = await searchSource.getSearchRequestBody();
@@ -118,7 +116,7 @@ describe('SearchSource', () => {
 
       describe('new index pattern assigned over another', () => {
         test('replaces searchSource filter with new', async () => {
-          const searchSource = new SearchSource();
+          const searchSource = new SearchSource({}, searchSourceDependencies);
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', indexPattern2);
           expect(searchSource.getField('index')).toBe(indexPattern2);
@@ -127,7 +125,7 @@ describe('SearchSource', () => {
         });
 
         test('removes created searchSource filter on removal', async () => {
-          const searchSource = new SearchSource();
+          const searchSource = new SearchSource({}, searchSourceDependencies);
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', indexPattern2);
           searchSource.setField('index', undefined);
@@ -140,7 +138,7 @@ describe('SearchSource', () => {
 
   describe('#onRequestStart()', () => {
     test('should be called when starting a request', async () => {
-      const searchSource = new SearchSource({ index: indexPattern });
+      const searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
       const options = {};
@@ -149,8 +147,8 @@ describe('SearchSource', () => {
     });
 
     test('should not be called on parent searchSource', async () => {
-      const parent = new SearchSource();
-      const searchSource = new SearchSource({ index: indexPattern });
+      const parent = new SearchSource({}, searchSourceDependencies);
+      const searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
 
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
@@ -164,8 +162,11 @@ describe('SearchSource', () => {
     });
 
     test('should be called on parent searchSource if callParentStartHandlers is true', async () => {
-      const parent = new SearchSource();
-      const searchSource = new SearchSource({ index: indexPattern }).setParent(parent, {
+      const parent = new SearchSource({}, searchSourceDependencies);
+      const searchSource = new SearchSource(
+        { index: indexPattern },
+        searchSourceDependencies
+      ).setParent(parent, {
         callParentStartHandlers: true,
       });
 
@@ -184,22 +185,20 @@ describe('SearchSource', () => {
   describe('#legacy fetch()', () => {
     beforeEach(() => {
       const core = coreMock.createStart();
-      const data = dataPluginMock.createStartContract();
 
-      SearchSource = getSearchSourceType({
-        search: data.search,
+      searchSourceDependencies = {
+        ...searchSourceDependencies,
         uiSettings: {
           ...core.uiSettings,
           get: jest.fn(() => {
             return true; // batchSearches = true
           }),
         } as IUiSettingsClient,
-        injectedMetadata: core.injectedMetadata,
-      });
+      };
     });
 
     test('should call msearch', async () => {
-      const searchSource = new SearchSource({ index: indexPattern });
+      const searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
       const options = {};
       await searchSource.fetch(options);
       expect(fetchSoon).toBeCalledTimes(1);
@@ -208,7 +207,7 @@ describe('SearchSource', () => {
 
   describe('#search service fetch()', () => {
     test('should call msearch', async () => {
-      const searchSource = new SearchSource({ index: indexPattern });
+      const searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
       const options = {};
 
       await searchSource.fetch(options);
@@ -219,7 +218,7 @@ describe('SearchSource', () => {
   describe('#serialize', () => {
     test('should reference index patterns', () => {
       const indexPattern123 = { id: '123' } as IndexPattern;
-      const searchSource = new SearchSource();
+      const searchSource = new SearchSource({}, searchSourceDependencies);
       searchSource.setField('index', indexPattern123);
       const { searchSourceJSON, references } = searchSource.serialize();
       expect(references[0].id).toEqual('123');
@@ -228,7 +227,7 @@ describe('SearchSource', () => {
     });
 
     test('should add other fields', () => {
-      const searchSource = new SearchSource();
+      const searchSource = new SearchSource({}, searchSourceDependencies);
       searchSource.setField('highlightAll', true);
       searchSource.setField('from', 123456);
       const { searchSourceJSON } = searchSource.serialize();
@@ -237,7 +236,7 @@ describe('SearchSource', () => {
     });
 
     test('should omit sort and size', () => {
-      const searchSource = new SearchSource();
+      const searchSource = new SearchSource({}, searchSourceDependencies);
       searchSource.setField('highlightAll', true);
       searchSource.setField('from', 123456);
       searchSource.setField('sort', { field: SortDirection.asc });
@@ -247,7 +246,7 @@ describe('SearchSource', () => {
     });
 
     test('should serialize filters', () => {
-      const searchSource = new SearchSource();
+      const searchSource = new SearchSource({}, searchSourceDependencies);
       const filter = [
         {
           query: 'query',
@@ -264,7 +263,7 @@ describe('SearchSource', () => {
     });
 
     test('should reference index patterns in filters separately from index field', () => {
-      const searchSource = new SearchSource();
+      const searchSource = new SearchSource({}, searchSourceDependencies);
       const indexPattern123 = { id: '123' } as IndexPattern;
       searchSource.setField('index', indexPattern123);
       const filter = [

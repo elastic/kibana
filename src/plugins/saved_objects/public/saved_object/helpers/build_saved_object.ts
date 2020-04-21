@@ -30,7 +30,6 @@ import {
 } from '../../types';
 import { applyESResp } from './apply_es_resp';
 import { saveSavedObject } from './save_saved_object';
-import { getSearchSourceType } from '../../../../data/public';
 
 export function buildSavedObject(
   savedObject: SavedObject,
@@ -56,11 +55,7 @@ export function buildSavedObject(
   savedObject.defaults = config.defaults || {};
   // optional search source which this object configures
   savedObject.searchSource = config.searchSource
-    ? new (getSearchSourceType({
-        uiSettings: services.uiSettings,
-        injectedMetadata: services.injectedMetadata,
-        search: services.search,
-      }))()
+    ? services.search.searchSource.create()
     : undefined;
   // the id of the document
   savedObject.id = config.id || void 0;

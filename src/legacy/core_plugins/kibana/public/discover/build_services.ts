@@ -63,10 +63,10 @@ export interface DiscoverServices {
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
-  injectedMetadata: CoreStart['injectedMetadata'];
   search: DataPublicPluginStart['search'];
   visualizations: VisualizationsStart;
 }
+
 export async function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins
@@ -104,7 +104,6 @@ export async function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     visualizations: plugins.visualizations,
-    injectedMetadata: core.injectedMetadata,
     search: plugins.data.search,
   };
 }

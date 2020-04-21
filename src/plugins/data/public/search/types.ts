@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart, SavedObjectReference } from 'kibana/public';
 import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor } from './search_interceptor';
+import { ISearchSource, SearchSourceFields } from './search_source';
 
 export interface ISearchContext {
   core: CoreStart;
@@ -59,7 +60,7 @@ export type TRegisterSearchStrategyProvider = <T extends TStrategyTypes>(
   searchStrategyProvider: TSearchStrategyProvider<T>
 ) => void;
 
-interface ISearchStartLegacy {
+export interface ISearchStartLegacy {
   esClient: LegacyApiCaller;
 }
 
@@ -80,5 +81,12 @@ export interface ISearchStart {
   aggs: SearchAggsStart;
   setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
+  searchSource: {
+    create: (fields?: SearchSourceFields) => ISearchSource;
+    fromJSON: (
+      searchSourceJson: string,
+      references: SavedObjectReference[]
+    ) => Promise<ISearchSource>;
+  };
   __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
 }

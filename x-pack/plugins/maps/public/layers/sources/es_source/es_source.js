@@ -10,7 +10,7 @@ import {
   fetchSearchSourceAndRecordWithInspector,
   getIndexPatternService,
   getTimeFilter,
-  getSearchSource,
+  getSearchService,
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import _ from 'lodash';
@@ -125,9 +125,8 @@ export class AbstractESSource extends AbstractVectorSource {
     if (isTimeAware) {
       allFilters.push(getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters));
     }
-
-    const SearchSource = getSearchSource();
-    const searchSource = new SearchSource(initialSearchContext);
+    const searchService = getSearchService();
+    const searchSource = searchService.searchSource.create(initialSearchContext);
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
@@ -137,7 +136,8 @@ export class AbstractESSource extends AbstractVectorSource {
     }
 
     if (searchFilters.sourceQuery) {
-      const layerSearchSource = new SearchSource();
+      const layerSearchSource = searchService.searchSource.create();
+
       layerSearchSource.setField('index', indexPattern);
       layerSearchSource.setField('query', searchFilters.sourceQuery);
       searchSource.setParent(layerSearchSource);
@@ -296,8 +296,8 @@ export class AbstractESSource extends AbstractVectorSource {
     }, {});
 
     const indexPattern = await this.getIndexPattern();
-    const SearchSource = getSearchSource();
-    const searchSource = new SearchSource();
+    const searchService = getSearchService();
+    const searchSource = searchService.searchSource.create();
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);

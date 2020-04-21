@@ -26,7 +26,6 @@ import {
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
 import { IndexPatternsContract } from '../../../data/public';
 import { dataPluginMock } from '../../../data/public/mocks';
-import { coreMock } from '../../../../core/public/mocks';
 
 class SavedObjectNotFound extends Error {
   constructor(options: Record<string, any>) {
@@ -239,12 +238,9 @@ describe('resolveSavedObjects', () => {
 
     beforeEach(() => {
       const search = dataPluginMock.createStartContract().search;
-      const { uiSettings, injectedMetadata } = coreMock.createStart();
 
       dependencies = {
         search,
-        uiSettings,
-        injectedMetadata,
       };
     });
 

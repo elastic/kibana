@@ -53,8 +53,6 @@ export const registerServices = async (
         search: data.search,
         chrome: coreStart.chrome,
         overlays: coreStart.overlays,
-        uiSettings: coreStart.uiSettings,
-        injectedMetadata: coreStart.injectedMetadata,
       }),
     });
   }

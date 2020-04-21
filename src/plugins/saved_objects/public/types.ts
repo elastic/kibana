@@ -23,7 +23,6 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObjectReference,
-  CoreStart,
 } from 'kibana/public';
 import {
   DataPublicPluginStart,
@@ -75,8 +74,6 @@ export interface SavedObjectKibanaServices {
   search: DataPublicPluginStart['search'];
   chrome: ChromeStart;
   overlays: OverlayStart;
-  uiSettings: CoreStart['uiSettings'];
-  injectedMetadata: CoreStart['injectedMetadata'];
 }
 
 export interface SavedObjectConfig {

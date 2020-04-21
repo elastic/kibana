@@ -56,7 +56,7 @@ describe('Flyout', () => {
   };
 
   beforeEach(() => {
-    const { http, overlays, uiSettings, injectedMetadata } = coreMock.createStart();
+    const { http, overlays } = coreMock.createStart();
     const search = dataPluginMock.createStartContract().search;
 
     defaultProps = {
@@ -70,8 +70,6 @@ describe('Flyout', () => {
       http,
       allowedTypes: ['search', 'index-pattern', 'visualization'],
       serviceRegistry: serviceRegistryMock.create(),
-      uiSettings,
-      injectedMetadata,
       search,
     };
   });
@@ -506,8 +504,6 @@ describe('Flyout', () => {
         true,
         defaultProps.indexPatterns,
         {
-          injectedMetadata: defaultProps.injectedMetadata,
-          uiSettings: defaultProps.uiSettings,
           search: defaultProps.search,
         }
       );

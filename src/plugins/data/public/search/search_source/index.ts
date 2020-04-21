@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { getSearchSourceType, SearchSourceType, ISearchSource } from './search_source';
-export { createSearchSourceFactory } from './create_search_source';
+export { SearchSource, ISearchSource, SearchSourceDependencies } from './search_source';
+export { createSearchSourceFromJSON } from './create_search_source';
 export { SortDirection, EsQuerySortValue, SearchSourceFields } from './types';

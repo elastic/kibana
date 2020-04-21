@@ -20,7 +20,7 @@ import { transform, defaults, isFunction } from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
 import { migrateLegacyQuery } from '../../../../kibana_legacy/public';
 import { InvalidJSONProperty } from '../../../../kibana_utils/public';
-import { getSearchSourceType, SearchSourceDependencies } from './search_source';
+import { SearchSourceDependencies, SearchSource, ISearchSource } from './search_source';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { SearchSourceFields } from './types';
 
@@ -40,14 +40,14 @@ import { SearchSourceFields } from './types';
  *
  *
  * @public */
-export const createSearchSourceFactory = async (
-  searchSourceJson: string,
-  references: SavedObjectReference[],
+export const createSearchSourceFromJSON = (
   indexPatterns: IndexPatternsContract,
   searchSourceDependencies: SearchSourceDependencies
-) => {
-  const SearchSource = getSearchSourceType(searchSourceDependencies);
-  const searchSource = new SearchSource();
+) => async (
+  searchSourceJson: string,
+  references: SavedObjectReference[]
+): Promise<ISearchSource> => {
+  const searchSource = new SearchSource({}, searchSourceDependencies);
 
   // if we have a searchSource, set its values based on the searchSourceJson field
   let searchSourceValues: Record<string, unknown>;

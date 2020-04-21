@@ -20,6 +20,12 @@
 import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
 
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
+import {
+  createSearchSourceFromJSON,
+  SearchSource,
+  SearchSourceDependencies,
+  SearchSourceFields,
+} from './search_source';
 import { ISearchSetup, ISearchStart, TSearchStrategyProvider, TSearchStrategiesMap } from './types';
 import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './legacy';
@@ -43,6 +49,7 @@ import {
   siblingPipelineAggHelper,
 } from './aggs';
 import { FieldFormatsStart } from '../field_formats';
+import { ISearchGeneric } from './i_search';
 
 interface SearchServiceSetupDependencies {
   packageInfo: PackageInfo;
@@ -130,6 +137,33 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const aggTypesStart = this.aggTypesRegistry.start();
 
+    const search: ISearchGeneric = (request, options, strategyName) => {
+      const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
+      const searchStrategy = strategyProvider({
+        core,
+        getSearchStrategy: this.getSearchStrategy,
+      });
+      return this.searchInterceptor.search(searchStrategy.search as any, request, options);
+    };
+
+    const legacySearch = {
+      esClient: this.esClient!,
+      AggConfig,
+      AggType,
+      aggTypeFieldFilters,
+      FieldParamType,
+      MetricAggType,
+      parentPipelineAggHelper,
+      siblingPipelineAggHelper,
+    };
+
+    const searchSourceDependencies: SearchSourceDependencies = {
+      uiSettings: core.uiSettings,
+      injectedMetadata: core.injectedMetadata,
+      search,
+      legacySearch,
+    };
+
     return {
       aggs: {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
@@ -141,28 +175,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         },
         types: aggTypesStart,
       },
-      search: (request, options, strategyName) => {
-        const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
-        const { search } = strategyProvider({
-          core,
-          getSearchStrategy: this.getSearchStrategy,
-        });
-        return this.searchInterceptor.search(search as any, request, options);
+      search,
+      searchSource: {
+        create: (fields?: SearchSourceFields) => new SearchSource(fields, searchSourceDependencies),
+        fromJSON: createSearchSourceFromJSON(dependencies.indexPatterns, searchSourceDependencies),
       },
       setInterceptor: (searchInterceptor: SearchInterceptor) => {
         // TODO: should an intercepror have a destroy method?
         this.searchInterceptor = searchInterceptor;
       },
-      __LEGACY: {
-        esClient: this.esClient!,
-        AggConfig,
-        AggType,
-        aggTypeFieldFilters,
-        FieldParamType,
-        MetricAggType,
-        parentPipelineAggHelper,
-        siblingPipelineAggHelper,
-      },
+      __LEGACY: legacySearch,
     };
   }
 

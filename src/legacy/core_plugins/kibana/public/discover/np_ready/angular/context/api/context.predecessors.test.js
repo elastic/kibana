@@ -29,23 +29,21 @@ const ANCHOR_TIMESTAMP_3 = new Date(MS_PER_DAY * 3).toJSON();
 const ANCHOR_TIMESTAMP_1000 = new Date(MS_PER_DAY * 1000).toJSON();
 const ANCHOR_TIMESTAMP_3000 = new Date(MS_PER_DAY * 3000).toJSON();
 
-let mockSearchSource;
-
-jest.mock('../../../../../../../../../plugins/data/public/search', () => {
-  const origin = jest.requireActual('../../../../../../../../../plugins/data/public/search');
-  return {
-    ...origin,
-    getSearchSourceType: jest.fn(() => jest.fn().mockImplementation(() => mockSearchSource)),
-  };
-});
-
 describe('context app', function() {
   describe('function fetchPredecessors', function() {
     let fetchPredecessors;
+    let mockSearchSource;
 
     beforeEach(() => {
-      setServices({});
       mockSearchSource = createContextSearchSourceStub([], '@timestamp', MS_PER_DAY * 8);
+
+      setServices({
+        search: {
+          searchSource: {
+            create: jest.fn().mockImplementation(() => mockSearchSource),
+          },
+        },
+      });
 
       fetchPredecessors = (
         indexPatternId,

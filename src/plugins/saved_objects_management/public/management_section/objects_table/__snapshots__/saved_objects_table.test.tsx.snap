@@ -242,21 +242,6 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
       "make": [Function],
     }
   }
-  injectedMetadata={
-    Object {
-      "getBasePath": [MockFunction],
-      "getCspConfig": [MockFunction],
-      "getInjectedVar": [MockFunction],
-      "getInjectedVars": [MockFunction],
-      "getKibanaBranch": [MockFunction],
-      "getKibanaBuildNumber": [MockFunction],
-      "getKibanaVersion": [MockFunction],
-      "getLegacyMetadata": [MockFunction],
-      "getLegacyMode": [MockFunction],
-      "getPlugins": [MockFunction],
-      "getServerBasePath": [MockFunction],
-    }
-  }
   overlays={
     Object {
       "banners": Object {
@@ -299,6 +284,10 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
         },
       },
       "search": [MockFunction],
+      "searchSource": Object {
+        "create": [MockFunction],
+        "fromJSON": [MockFunction],
+      },
       "setInterceptor": [MockFunction],
     }
   }
@@ -307,23 +296,6 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
       "all": [MockFunction],
       "get": [MockFunction],
       "register": [MockFunction],
-    }
-  }
-  uiSettings={
-    Object {
-      "get": [MockFunction],
-      "get$": [MockFunction],
-      "getAll": [MockFunction],
-      "getSaved$": [MockFunction],
-      "getUpdate$": [MockFunction],
-      "getUpdateErrors$": [MockFunction],
-      "isCustom": [MockFunction],
-      "isDeclared": [MockFunction],
-      "isDefault": [MockFunction],
-      "isOverridden": [MockFunction],
-      "overrideLocalDefault": [MockFunction],
-      "remove": [MockFunction],
-      "set": [MockFunction],
     }
   }
 />

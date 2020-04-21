@@ -34,8 +34,6 @@ import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import {
   httpServiceMock,
   overlayServiceMock,
-  injectedMetadataServiceMock,
-  uiSettingsServiceMock,
   notificationServiceMock,
   savedObjectsServiceMock,
   applicationServiceMock,
@@ -90,8 +88,6 @@ describe('SavedObjectsTable', () => {
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
   let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
-  let injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createStartContract>;
-  let uiSettings: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
   let search: ReturnType<typeof dataPluginMock.createStartContract>['search'];
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
@@ -111,8 +107,6 @@ describe('SavedObjectsTable', () => {
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
-    uiSettings = uiSettingsServiceMock.createStartContract();
-    injectedMetadata = injectedMetadataServiceMock.createStartContract();
     search = dataPluginMock.createStartContract().search;
 
     const applications = applicationServiceMock.createStartContract();
@@ -149,8 +143,6 @@ describe('SavedObjectsTable', () => {
       perPageConfig: 15,
       goInspectObject: () => {},
       canGoInApp: () => true,
-      uiSettings,
-      injectedMetadata,
       search,
     };
 

@@ -104,14 +104,10 @@ describe('Saved Object', () => {
   }
 
   beforeEach(() => {
-    const { injectedMetadata, uiSettings } = coreMock.createStart();
-
     SavedObjectClass = createSavedObjectClass(({
       savedObjectsClient: savedObjectsClientStub,
       indexPatterns: dataStartMock.indexPatterns,
       search: dataStartMock.search,
-      uiSettings,
-      injectedMetadata,
     } as unknown) as SavedObjectKibanaServices);
   });
 

@@ -192,8 +192,6 @@ const SavedObjectsTablePage = ({
       overlays={coreStart.overlays}
       notifications={coreStart.notifications}
       applications={coreStart.application}
-      uiSettings={coreStart.uiSettings}
-      injectedMetadata={coreStart.injectedMetadata}
       perPageConfig={itemsPerPage}
       goInspectObject={savedObject => {
         const { editUrl } = savedObject.meta;

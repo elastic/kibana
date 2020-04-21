@@ -168,8 +168,6 @@ export class VisualizationsPlugin
       chrome: core.chrome,
       overlays: core.overlays,
       visualizationTypes: types,
-      injectedMetadata: core.injectedMetadata,
-      uiSettings: core.uiSettings,
     });
     setSavedVisualizationsLoader(savedVisualizationsLoader);
 

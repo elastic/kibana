@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { InputControlVisDependencies } from '../plugin';
+import { getSearchSourceMock } from './get_search_service_mock';
 
 const fields = [] as any;
 fields.push({ name: 'myField' } as any);
@@ -26,13 +27,20 @@ fields.getByName = (name: any) => {
   return fields.find(({ name: n }: { name: string }) => n === name);
 };
 
-export const getDepsMock = (): InputControlVisDependencies =>
+export const getDepsMock = ({
+  searchSource = {
+    create: getSearchSourceMock(),
+  },
+} = {}): InputControlVisDependencies =>
   ({
     core: {
       getStartServices: jest.fn().mockReturnValue([
         null,
         {
           data: {
+            search: {
+              searchSource,
+            },
             ui: {
               IndexPatternSelect: () => (<div />) as any,
             },
@@ -58,6 +66,11 @@ export const getDepsMock = (): InputControlVisDependencies =>
       },
     },
     data: {
+      search: {
+        searchSource: {
+          create: getSearchSourceMock(),
+        },
+      },
       query: {
         filterManager: {
           fieldName: 'myField',

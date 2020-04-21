@@ -54,7 +54,6 @@ import {
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
-  CoreStart,
 } from 'src/core/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -88,8 +87,6 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
-  injectedMetadata: CoreStart['injectedMetadata'];
-  uiSettings: CoreStart['uiSettings'];
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
   notifications: NotificationsStart;
@@ -472,9 +469,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         newIndexPatternUrl={newIndexPatternUrl}
         allowedTypes={this.props.allowedTypes}
         overlays={this.props.overlays}
-        uiSettings={this.props.uiSettings}
         search={this.props.search}
-        injectedMetadata={this.props.injectedMetadata}
       />
     );
   }

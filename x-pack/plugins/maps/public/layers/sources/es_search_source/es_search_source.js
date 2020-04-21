@@ -10,7 +10,7 @@ import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
-import { getSearchSource } from '../../../kibana_services';
+import { getSearchService } from '../../../kibana_services';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { VectorLayer } from '../../vector_layer';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
@@ -427,8 +427,8 @@ export class ESSearchSource extends AbstractESSource {
       return {};
     }
 
-    const SearchSource = getSearchSource();
-    const searchSource = new SearchSource();
+    const searchService = getSearchService();
+    const searchSource = searchService.searchSource.create();
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);

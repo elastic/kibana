@@ -19,7 +19,7 @@
 import _ from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
 import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
-import { IndexPattern, createSearchSourceFactory } from '../../../../data/public';
+import { IndexPattern } from '../../../../data/public';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given
@@ -65,15 +65,9 @@ export async function applyESResp(
 
   if (config.searchSource) {
     try {
-      savedObject.searchSource = await createSearchSourceFactory(
+      savedObject.searchSource = await dependencies.search.searchSource.fromJSON(
         meta.searchSourceJSON,
-        resp.references,
-        dependencies.indexPatterns,
-        {
-          search: dependencies.search,
-          uiSettings: dependencies.uiSettings,
-          injectedMetadata: dependencies.injectedMetadata,
-        }
+        resp.references
       );
     } catch (error) {
       if (

@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreStart } from 'src/core/public';
-import { IIndexPattern, SearchSourceType, DataPublicPluginStart } from 'src/plugins/data/public';
+import { IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
 
 export function getLicenseId(): any;
 export function getInspector(): any;
@@ -30,7 +29,7 @@ export function getUiActions(): any;
 export function getCore(): any;
 export function getNavigation(): any;
 export function getCoreI18n(): any;
-export function getSearchSource(): () => SearchSourceType;
+export function getSearchService(): DataPublicPluginStart['search'];
 
 export function setLicenseId(args: unknown): void;
 export function setInspector(args: unknown): void;
@@ -55,4 +54,3 @@ export function setCore(args: unknown): void;
 export function setNavigation(args: unknown): void;
 export function setCoreI18n(args: unknown): void;
 export function setSearchService(args: DataPublicPluginStart['search']): void;
-export function setInjectedMetadata(args: CoreStart['injectedMetadata']): void;

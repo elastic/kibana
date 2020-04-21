@@ -69,29 +69,29 @@
  *    `appSearchSource`.
  */
 
-// eslint-disable-next-line max-classes-per-file
 import { uniqueId, uniq, extend, pick, difference, set, omit, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
 import { CoreStart, SavedObjectReference } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { IIndexPattern, SearchRequest } from '../..';
+import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';
-import { DataPublicPluginStart } from '../../../../data/public';
 
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from '../legacy';
+import { ISearchStart } from '../types';
 
 export interface SearchSourceDependencies {
   uiSettings: CoreStart['uiSettings'];
-  search: DataPublicPluginStart['search'];
+  search: ISearchGeneric;
+  legacySearch: ISearchStart['__LEGACY'];
   injectedMetadata: CoreStart['injectedMetadata'];
 }
 
-/** @internal **/
+/** @public **/
 export class SearchSource {
   private id: string = uniqueId('data_source');
   private searchStrategyId?: string;
@@ -210,9 +210,9 @@ export class SearchSource {
       body: searchRequest.body,
       ...searchParams,
     };
-    return search
-      .search({ params, indexType: searchRequest.indexType }, { signal })
-      .pipe(map(({ rawResponse }) => handleResponse(searchRequest, rawResponse)));
+    return search({ params, indexType: searchRequest.indexType }, { signal }).pipe(
+      map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
+    );
   }
 
   /**
@@ -220,8 +220,9 @@ export class SearchSource {
    * @return {Promise<SearchResponse<unknown>>}
    */
   private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
-    const { injectedMetadata, search, uiSettings } = this.dependencies;
+    const { injectedMetadata, legacySearch, uiSettings } = this.dependencies;
     const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
+
     return await fetchSoon(
       searchRequest,
       {
@@ -229,7 +230,7 @@ export class SearchSource {
         ...options,
       },
       {
-        searchService: search,
+        legacySearchService: legacySearch,
         config: uiSettings,
         esShardTimeout,
       }
@@ -551,15 +552,4 @@ export class SearchSource {
 }
 
 /** @public **/
-export const getSearchSourceType = (dependencies: SearchSourceDependencies): SearchSourceType => {
-  return class DecoratedSearchSource extends SearchSource {
-    constructor(fields?: SearchSourceFields) {
-      super(fields, dependencies);
-    }
-  };
-};
-
-/** @public **/
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
-/** @public **/
-export type SearchSourceType = new (fields?: SearchSourceFields) => ISearchSource;

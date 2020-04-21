@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { esFilters, search, getSearchSourceType } from '../../../../src/plugins/data/public';
+import { esFilters, search } from '../../../../src/plugins/data/public';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 const { getRequestInspectorStats, getResponseInspectorStats } = search;
@@ -138,15 +138,4 @@ export const getCoreI18n = () => coreI18n;
 
 let dataSearchService;
 export const setSearchService = searchService => (dataSearchService = searchService);
-
-let injectedMetadata;
-export const setInjectedMetadata = injectedMetadataService =>
-  (injectedMetadata = injectedMetadataService);
-
-export const getSearchSource = () => {
-  return getSearchSourceType({
-    uiSettings,
-    search: dataSearchService,
-    injectedMetadata,
-  });
-};
+export const getSearchService = () => dataSearchService;
