@@ -39,6 +39,7 @@ const EMPTY_RUN_RESULT: SuccessfulRunResult = {};
 
 export interface TaskRunner {
   isExpired: boolean;
+  expiration: Date;
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
@@ -130,10 +131,17 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   /**
+   * Gets the time at which this task will expire.
+   */
+  public get expiration() {
+    return intervalFromDate(this.instance.startedAt!, this.definition.timeout)!;
+  }
+
+  /**
    * Gets whether or not this task has run longer than its expiration setting allows.
    */
   public get isExpired() {
-    return intervalFromDate(this.instance.startedAt!, this.definition.timeout)! < new Date();
+    return this.expiration < new Date();
   }
 
   /**
@@ -261,12 +269,12 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public async cancel() {
     const { task } = this;
-    if (task && task.cancel) {
+    if (task?.cancel) {
       this.task = undefined;
       return task.cancel();
     }
 
-    this.logger.warn(`The task ${this} is not cancellable.`);
+    this.logger.debug(`The task ${this} is not cancellable.`);
   }
 
   private validateResult(result?: RunResult | void): Result<SuccessfulRunResult, FailedRunResult> {

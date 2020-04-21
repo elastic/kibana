@@ -148,7 +148,9 @@ export class TaskPool {
   private cancelExpiredTasks() {
     for (const task of this.running) {
       if (task.isExpired) {
-        this.logger.debug(`Cancelling expired task ${task.toString()}.`);
+        this.logger.debug(
+          `Cancelling task ${task.toString()} as it expired at ${task.expiration}.`
+        );
         this.cancelTask(task);
       }
     }
