@@ -16,11 +16,11 @@ export interface AggregationBuckets {
 export interface StatusByAppBucket {
   key: string;
   doc_count: number;
-  appNames: {
+  jobTypes: {
     buckets: Array<{
       doc_count: number;
       key: string;
-      jobType: AggregationBuckets;
+      appNames: AggregationBuckets;
     }>;
   };
 }
@@ -88,7 +88,7 @@ interface StatusByAppCounts {
 export type RangeStats = JobTypes & {
   _all: number;
   status: StatusCounts;
-  status_by_app: StatusByAppCounts;
+  statuses: StatusByAppCounts;
 };
 
 export type ExportType = 'csv' | 'printable_pdf' | 'PNG';

@@ -47,7 +47,7 @@ export const decorateRangeStats = (
   const {
     _all: rangeAll,
     status: rangeStatus,
-    status_by_app: rangeStatusByApp,
+    statuses: rangeStatusByApp,
     [PDF_JOB_TYPE]: rangeStatsPdf,
     ...rangeStatsBasic
   } = rangeStats;
@@ -74,7 +74,7 @@ export const decorateRangeStats = (
   const resultStats = {
     _all: rangeAll || 0,
     status: { completed: 0, failed: 0, ...rangeStatus },
-    status_by_app: rangeStatusByApp,
+    statuses: rangeStatusByApp,
     ...rangePdf,
     ...rangeBasic,
   } as RangeStats;

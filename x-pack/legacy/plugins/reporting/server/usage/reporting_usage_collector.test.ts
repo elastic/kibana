@@ -206,9 +206,30 @@ describe('data modeling', () => {
           aggregations: {
             ranges: {
               buckets: {
-                all: { doc_count: 40, layoutTypes: { doc_count: 15, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 15 }] }, }, statusByApp: { buckets: [ { key: 'completed', doc_count: 34, appNames: { buckets: [ { key: 'visualization', doc_count: 21, jobType: { buckets: [ { key: 'PNG', doc_count: 16 }, { key: 'printable_pdf', doc_count: 5 }, ], }, }, { key: 'canvas workpad', doc_count: 9, jobType: { buckets: [{ key: 'printable_pdf', doc_count: 9 }] }, }, { key: 'dashboard', doc_count: 4, jobType: { buckets: [{ key: 'PNG', doc_count: 4 }] }, }, ], }, }, { key: 'completed_with_warnings', doc_count: 3, appNames: { buckets: [ { key: 'dashboard', doc_count: 2, jobType: { buckets: [{ key: 'PNG', doc_count: 2 }] }, }, { key: 'canvas workpad', doc_count: 1, jobType: { buckets: [{ key: 'printable_pdf', doc_count: 1 }] }, }, ], }, }, { key: 'failed', doc_count: 3, appNames: { buckets: [ { key: 'visualization', doc_count: 3, jobType: { buckets: [{ key: 'PNG', doc_count: 3 }] }, }, ], }, }, ], }, objectTypes: { doc_count: 15, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 10 }, { key: 'visualization', doc_count: 5 }, ], }, }, statusTypes: { buckets: [ { key: 'completed', doc_count: 34 }, { key: 'completed_with_warnings', doc_count: 3 }, { key: 'failed', doc_count: 3 }, ], }, jobTypes: { buckets: [ { key: 'PNG', doc_count: 25 }, { key: 'printable_pdf', doc_count: 15 }, ], }, },
-                last7Days: { doc_count: 15, layoutTypes: { doc_count: 9, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 9 }] }, }, statusByApp: { buckets: [ { key: 'completed', doc_count: 12, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 7, jobType: { buckets: [{ key: 'printable_pdf', doc_count: 7 }] }, }, { key: 'dashboard', doc_count: 4, jobType: { buckets: [{ key: 'PNG', doc_count: 4 }] }, }, { key: 'visualization', doc_count: 1, jobType: { buckets: [{ key: 'printable_pdf', doc_count: 1 }] }, }, ], }, }, { key: 'completed_with_warnings', doc_count: 3, appNames: { buckets: [ { key: 'dashboard', doc_count: 2, jobType: { buckets: [{ key: 'PNG', doc_count: 2 }] }, }, { key: 'canvas workpad', doc_count: 1, jobType: { buckets: [{ key: 'printable_pdf', doc_count: 1 }] }, }, ], }, }, ], }, objectTypes: { doc_count: 9, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 8 }, { key: 'visualization', doc_count: 1 }, ], }, }, statusTypes: { buckets: [ { key: 'completed', doc_count: 12 }, { key: 'completed_with_warnings', doc_count: 3 }, ], }, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 9 }, { key: 'PNG', doc_count: 6 }, ], }, },
-                lastDay: { doc_count: 7, layoutTypes: { doc_count: 1, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 1 }] }, }, statusByApp: { buckets: [ { key: 'completed', doc_count: 5, appNames: { buckets: [ { key: 'dashboard', doc_count: 4, jobType: { buckets: [{ key: 'PNG', doc_count: 4 }] }, }, { key: 'visualization', doc_count: 1, jobType: { buckets: [{ key: 'printable_pdf', doc_count: 1 }] }, }, ], }, }, { key: 'completed_with_warnings', doc_count: 2, appNames: { buckets: [ { key: 'dashboard', doc_count: 2, jobType: { buckets: [{ key: 'PNG', doc_count: 2 }] }, }, ], }, }, ], }, objectTypes: { doc_count: 1, pdf: { buckets: [{ key: 'visualization', doc_count: 1 }] }, }, statusTypes: { buckets: [ { key: 'completed', doc_count: 5 }, { key: 'completed_with_warnings', doc_count: 2 }, ], }, jobTypes: { buckets: [ { key: 'PNG', doc_count: 6 }, { key: 'printable_pdf', doc_count: 1 }, ], }, },
+                all: {
+                  doc_count: 12,
+                  jobTypes: { buckets: [ { doc_count: 9, key: 'printable_pdf' }, { doc_count: 3, key: 'PNG' }, ], },
+                  layoutTypes: { doc_count: 9, pdf: { buckets: [{ doc_count: 9, key: 'preserve_layout' }] }, },
+                  objectTypes: { doc_count: 9, pdf: { buckets: [ { doc_count: 6, key: 'canvas workpad' }, { doc_count: 3, key: 'visualization' }, ], }, },
+                  statusByApp: { buckets: [ { doc_count: 10, jobTypes: { buckets: [ { appNames: { buckets: [ { doc_count: 6, key: 'canvas workpad' }, { doc_count: 3, key: 'visualization' }, ], }, doc_count: 9, key: 'printable_pdf', }, { appNames: { buckets: [{ doc_count: 1, key: 'visualization' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed', }, { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'failed', }, ], },
+                  statusTypes: { buckets: [ { doc_count: 10, key: 'completed' }, { doc_count: 1, key: 'completed_with_warnings' }, { doc_count: 1, key: 'failed' }, ], },
+                },
+                last7Days: {
+                  doc_count: 1,
+                  jobTypes: { buckets: [{ doc_count: 1, key: 'PNG' }] },
+                  layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
+                  objectTypes: { doc_count: 0, pdf: { buckets: [] } },
+                  statusByApp: { buckets: [ { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, ], },
+                  statusTypes: { buckets: [{ doc_count: 1, key: 'completed_with_warnings' }] },
+                },
+                lastDay: {
+                  doc_count: 1,
+                  jobTypes: { buckets: [{ doc_count: 1, key: 'PNG' }] },
+                  layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
+                  objectTypes: { doc_count: 0, pdf: { buckets: [] } },
+                  statusByApp: { buckets: [ { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, ], },
+                  statusTypes: { buckets: [{ doc_count: 1, key: 'completed_with_warnings' }] },
+                },
               },
             },
           },
@@ -238,9 +259,30 @@ describe('data modeling', () => {
           aggregations: {
             ranges: {
               buckets: {
-                all: { doc_count: 1, jobTypes: { buckets: [ { doc_count: 1, key: 'csv', }, ], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [ { appNames: { buckets: [], }, doc_count: 1, key: 'completed', }, ], }, statusTypes: { buckets: [ { doc_count: 1, key: 'completed', }, ], }, },
-                last7Days: { doc_count: 1, jobTypes: { buckets: [ { doc_count: 1, key: 'csv', }, ], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [ { appNames: { buckets: [], }, doc_count: 1, key: 'completed', }, ], }, statusTypes: { buckets: [ { doc_count: 1, key: 'completed', }, ], }, },
-                lastDay: { doc_count: 1, jobTypes: { buckets: [ { doc_count: 1, key: 'csv', }, ], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [ { appNames: { buckets: [], }, doc_count: 1, key: 'completed', }, ], }, statusTypes: { buckets: [ { doc_count: 1, key: 'completed', }, ], }, },
+                all: {
+                  doc_count: 4,
+                  layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
+                  statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
+                  objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
+                  statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
+                  jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
+                },
+                last7Days: {
+                  doc_count: 4,
+                  layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
+                  statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
+                  objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
+                  statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
+                  jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
+                },
+                lastDay: {
+                  doc_count: 4,
+                  layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
+                  statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
+                  objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
+                  statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
+                  jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
+                },
               },
             },
           },
@@ -270,16 +312,36 @@ describe('data modeling', () => {
           aggregations: {
             ranges: {
               buckets: {
-                all: { doc_count: 0, jobTypes: { buckets: [], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [], }, statusTypes: { buckets: [], }, },
-                last7Days: { doc_count: 0, jobTypes: { buckets: [], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [], }, statusTypes: { buckets: [], }, },
-                lastDay: { doc_count: 0, jobTypes: { buckets: [], }, layoutTypes: { doc_count: 0, pdf: { buckets: [], }, }, objectTypes: { doc_count: 0, pdf: { buckets: [], }, }, statusByApp: { buckets: [], }, statusTypes: { buckets: [], }, },
+                all: {
+                  doc_count: 0,
+                  jobTypes: { buckets: [] },
+                  layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
+                  objectTypes: { doc_count: 0, pdf: { buckets: [] } },
+                  statusByApp: { buckets: [] },
+                  statusTypes: { buckets: [] },
+                },
+                last7Days: {
+                  doc_count: 0,
+                  jobTypes: { buckets: [] },
+                  layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
+                  objectTypes: { doc_count: 0, pdf: { buckets: [] } },
+                  statusByApp: { buckets: [] },
+                  statusTypes: { buckets: [] },
+                },
+                lastDay: {
+                  doc_count: 0,
+                  jobTypes: { buckets: [] },
+                  layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
+                  objectTypes: { doc_count: 0, pdf: { buckets: [] } },
+                  statusByApp: { buckets: [] },
+                  statusTypes: { buckets: [] },
+                },
               },
             },
           },
-        } as SearchResponse) // prettier-ignore
+        } as SearchResponse)
       )
     );
-
     const usageStats = await fetch(callClusterMock as any);
     expect(usageStats).toMatchSnapshot();
   });

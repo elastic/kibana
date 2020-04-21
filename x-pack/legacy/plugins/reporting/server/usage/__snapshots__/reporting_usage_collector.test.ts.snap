@@ -40,7 +40,7 @@ Object {
       "completed": 0,
       "failed": 0,
     },
-    "status_by_app": Object {},
+    "statuses": Object {},
   },
   "lastDay": Object {
     "PNG": Object {
@@ -68,7 +68,7 @@ Object {
       "completed": 0,
       "failed": 0,
     },
-    "status_by_app": Object {},
+    "statuses": Object {},
   },
   "printable_pdf": Object {
     "app": Object {
@@ -86,7 +86,7 @@ Object {
     "completed": 0,
     "failed": 0,
   },
-  "status_by_app": Object {},
+  "statuses": Object {},
 }
 `;
 
@@ -94,9 +94,9 @@ exports[`data modeling with normal looking usage data 1`] = `
 Object {
   "PNG": Object {
     "available": true,
-    "total": 25,
+    "total": 3,
   },
-  "_all": 40,
+  "_all": 12,
   "available": true,
   "browser_type": undefined,
   "csv": Object {
@@ -107,49 +107,44 @@ Object {
   "last7Days": Object {
     "PNG": Object {
       "available": true,
-      "total": 6,
+      "total": 1,
     },
-    "_all": 15,
+    "_all": 1,
     "csv": Object {
       "available": true,
       "total": 0,
     },
     "printable_pdf": Object {
       "app": Object {
-        "canvas workpad": 8,
         "dashboard": 0,
-        "visualization": 1,
+        "visualization": 0,
       },
       "available": true,
       "layout": Object {
-        "preserve_layout": 9,
+        "preserve_layout": 0,
         "print": 0,
       },
-      "total": 9,
+      "total": 0,
     },
     "status": Object {
-      "completed": 12,
-      "completed_with_warnings": 3,
+      "completed": 0,
+      "completed_with_warnings": 1,
       "failed": 0,
     },
-    "status_by_app": Object {
-      "completed": Object {
-        "canvas workpad": 7,
-        "dashboard": 4,
-        "visualization": 1,
-      },
+    "statuses": Object {
       "completed_with_warnings": Object {
-        "canvas workpad": 1,
-        "dashboard": 2,
+        "PNG": Object {
+          "dashboard": 1,
+        },
       },
     },
   },
   "lastDay": Object {
     "PNG": Object {
       "available": true,
-      "total": 6,
+      "total": 1,
     },
-    "_all": 7,
+    "_all": 1,
     "csv": Object {
       "available": true,
       "total": 0,
@@ -157,60 +152,65 @@ Object {
     "printable_pdf": Object {
       "app": Object {
         "dashboard": 0,
-        "visualization": 1,
+        "visualization": 0,
       },
       "available": true,
       "layout": Object {
-        "preserve_layout": 1,
+        "preserve_layout": 0,
         "print": 0,
       },
-      "total": 1,
+      "total": 0,
     },
     "status": Object {
-      "completed": 5,
-      "completed_with_warnings": 2,
+      "completed": 0,
+      "completed_with_warnings": 1,
       "failed": 0,
     },
-    "status_by_app": Object {
-      "completed": Object {
-        "dashboard": 4,
-        "visualization": 1,
-      },
+    "statuses": Object {
       "completed_with_warnings": Object {
-        "dashboard": 2,
+        "PNG": Object {
+          "dashboard": 1,
+        },
       },
     },
   },
   "printable_pdf": Object {
     "app": Object {
-      "canvas workpad": 10,
+      "canvas workpad": 6,
       "dashboard": 0,
-      "visualization": 5,
+      "visualization": 3,
     },
     "available": true,
     "layout": Object {
-      "preserve_layout": 15,
+      "preserve_layout": 9,
       "print": 0,
     },
-    "total": 15,
+    "total": 9,
   },
   "status": Object {
-    "completed": 34,
-    "completed_with_warnings": 3,
-    "failed": 3,
+    "completed": 10,
+    "completed_with_warnings": 1,
+    "failed": 1,
   },
-  "status_by_app": Object {
+  "statuses": Object {
     "completed": Object {
-      "canvas workpad": 9,
-      "dashboard": 4,
-      "visualization": 21,
+      "PNG": Object {
+        "visualization": 1,
+      },
+      "printable_pdf": Object {
+        "canvas workpad": 6,
+        "visualization": 3,
+      },
     },
     "completed_with_warnings": Object {
-      "canvas workpad": 1,
-      "dashboard": 2,
+      "PNG": Object {
+        "dashboard": 1,
+      },
     },
     "failed": Object {
-      "visualization": 3,
+      "PNG": Object {
+        "dashboard": 1,
+      },
     },
   },
 }
@@ -220,9 +220,9 @@ exports[`data modeling with sparse data 1`] = `
 Object {
   "PNG": Object {
     "available": true,
-    "total": 0,
+    "total": 1,
   },
-  "_all": 1,
+  "_all": 4,
   "available": true,
   "browser_type": undefined,
   "csv": Object {
@@ -233,81 +233,111 @@ Object {
   "last7Days": Object {
     "PNG": Object {
       "available": true,
-      "total": 0,
+      "total": 1,
     },
-    "_all": 1,
+    "_all": 4,
     "csv": Object {
       "available": true,
       "total": 1,
     },
     "printable_pdf": Object {
       "app": Object {
-        "dashboard": 0,
+        "canvas workpad": 1,
+        "dashboard": 1,
         "visualization": 0,
       },
       "available": true,
       "layout": Object {
-        "preserve_layout": 0,
+        "preserve_layout": 2,
         "print": 0,
       },
-      "total": 0,
+      "total": 2,
     },
     "status": Object {
-      "completed": 1,
+      "completed": 4,
       "failed": 0,
     },
-    "status_by_app": Object {
-      "completed": Object {},
+    "statuses": Object {
+      "completed": Object {
+        "PNG": Object {
+          "dashboard": 1,
+        },
+        "csv": Object {},
+        "printable_pdf": Object {
+          "canvas workpad": 1,
+          "dashboard": 1,
+        },
+      },
     },
   },
   "lastDay": Object {
     "PNG": Object {
       "available": true,
-      "total": 0,
+      "total": 1,
     },
-    "_all": 1,
+    "_all": 4,
     "csv": Object {
       "available": true,
       "total": 1,
     },
     "printable_pdf": Object {
       "app": Object {
-        "dashboard": 0,
+        "canvas workpad": 1,
+        "dashboard": 1,
         "visualization": 0,
       },
       "available": true,
       "layout": Object {
-        "preserve_layout": 0,
+        "preserve_layout": 2,
         "print": 0,
       },
-      "total": 0,
+      "total": 2,
     },
     "status": Object {
-      "completed": 1,
+      "completed": 4,
       "failed": 0,
     },
-    "status_by_app": Object {
-      "completed": Object {},
+    "statuses": Object {
+      "completed": Object {
+        "PNG": Object {
+          "dashboard": 1,
+        },
+        "csv": Object {},
+        "printable_pdf": Object {
+          "canvas workpad": 1,
+          "dashboard": 1,
+        },
+      },
     },
   },
   "printable_pdf": Object {
     "app": Object {
-      "dashboard": 0,
+      "canvas workpad": 1,
+      "dashboard": 1,
       "visualization": 0,
     },
     "available": true,
     "layout": Object {
-      "preserve_layout": 0,
+      "preserve_layout": 2,
       "print": 0,
     },
-    "total": 0,
+    "total": 2,
   },
   "status": Object {
-    "completed": 1,
+    "completed": 4,
     "failed": 0,
   },
-  "status_by_app": Object {
-    "completed": Object {},
+  "statuses": Object {
+    "completed": Object {
+      "PNG": Object {
+        "dashboard": 1,
+      },
+      "csv": Object {},
+      "printable_pdf": Object {
+        "canvas workpad": 1,
+        "dashboard": 1,
+      },
+    },
   },
 }
 `;

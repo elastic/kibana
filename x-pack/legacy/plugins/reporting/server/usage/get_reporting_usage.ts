@@ -39,15 +39,20 @@ const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
 const getKeyCount = (buckets: KeyCountBucket[]): { [key: string]: number } =>
   buckets.reduce((accum, { key, doc_count: count }) => ({ ...accum, [key]: count }), {});
 
-// indexes some key/count buckets by statusType > appName: statusCount
+// indexes some key/count buckets by statusType > appName > jobType: statusCount
 const getAppStatuses = (buckets: StatusByAppBucket[]) =>
-  buckets.reduce((acc, cur) => {
+  buckets.reduce((statuses, statusBucket) => {
     return {
-      ...acc,
-      [cur.key]: cur.appNames.buckets.reduce((a, c) => {
+      ...statuses,
+      [statusBucket.key]: statusBucket.jobTypes.buckets.reduce((jobTypes, job) => {
         return {
-          ...a,
-          [c.key]: c.doc_count,
+          ...jobTypes,
+          [job.key]: job.appNames.buckets.reduce((apps, app) => {
+            return {
+              ...apps,
+              [app.key]: app.doc_count,
+            };
+          }, {}),
         };
       }, {}),
     };
@@ -90,7 +95,7 @@ function getAggStats(aggs: AggregationResultBuckets): RangeStats {
     statusByApp = getAppStatuses(statusAppBuckets);
   }
 
-  return { _all: all, status: statusTypes, status_by_app: statusByApp, ...jobTypes };
+  return { _all: all, status: statusTypes, statuses: statusByApp, ...jobTypes };
 }
 
 type SearchAggregation = SearchResponse['aggregations']['ranges']['buckets'];
@@ -148,10 +153,10 @@ export async function getReportingUsage(
             [STATUS_BY_APP_KEY]: {
               terms: { field: 'status', size: DEFAULT_TERMS_SIZE },
               aggs: {
-                appNames: {
-                  terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE },
+                jobTypes: {
+                  terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE },
                   aggs: {
-                    jobType: { terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
+                    appNames: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } }, // NOTE Discover/CSV export is missing the 'meta.objectType' field, so Discover/CSV results are missing for this agg
                   },
                 },
               },
