@@ -238,9 +238,9 @@ export function KbnAggTable(config, RecursionHelper) {
 }
 
 /**
- * @param {[]Object} columns - the formatted columns that will be displayed
+ * @param {Object[]} columns - the formatted columns that will be displayed
  * @param {String} title - the title of the column to add to
- * @param {[]Object} rows - the row data for the columns
+ * @param {Object[]} rows - the row data for the columns
  * @param {Number} insertAtIndex - the index to insert the percentage column at
  * @returns {Object} - cols and rows for the table to render now included percentage column(s)
  */

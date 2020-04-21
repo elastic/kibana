@@ -20,17 +20,24 @@
 import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { npStart } from '../../legacy_imports';
-import { getAngularModule } from '../../get_inner_angular';
-import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
+import './legacy';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInnerAngular } from '../../../../../../plugins/vis_type_table/public/get_inner_angular';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { initTableVisLegacyModule } from '../../../../../../plugins/vis_type_table/public/table_vis_legacy_module';
 import { tabifiedData } from './tabified_data';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { npStart } from 'ui/new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { configureAppAngularModule } from '../../../../../../plugins/kibana_legacy/public/angular';
 
 describe('Table Vis - AggTableGroup Directive', function() {
   let $rootScope;
   let $compile;
 
   const initLocalAngular = () => {
-    const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
+    const tableVisModule = getInnerAngular('kibana/table_vis', npStart.core);
+    configureAppAngularModule(tableVisModule, npStart.core, true);
     initTableVisLegacyModule(tableVisModule);
   };
 
