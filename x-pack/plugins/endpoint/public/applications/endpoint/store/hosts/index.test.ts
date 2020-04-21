@@ -37,6 +37,11 @@ describe('HostList store concerns', () => {
         pageIndex: 0,
         total: 0,
         loading: false,
+        error: undefined,
+        details: undefined,
+        detailsLoading: false,
+        detailsError: undefined,
+        location: undefined,
       });
     });
 

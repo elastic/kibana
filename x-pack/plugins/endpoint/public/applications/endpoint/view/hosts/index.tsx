@@ -6,20 +6,8 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageContent,
-  EuiHorizontalRule,
-  EuiTitle,
-  EuiBasicTable,
-  EuiText,
-  EuiLink,
-  EuiHealth,
-} from '@elastic/eui';
+import { EuiHorizontalRule, EuiBasicTable, EuiText, EuiLink, EuiHealth } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { EuiBasicTableColumn } from '@elastic/eui';
@@ -29,6 +17,7 @@ import { useHostSelector } from './hooks';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
 import { HostMetadata, Immutable } from '../../../../../common/types';
+import { PageView } from '../components/page_view';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const HostList = () => {
@@ -157,60 +146,29 @@ export const HostList = () => {
   }, [queryParams, history]);
 
   return (
-    <HostPage>
+    <PageView
+      viewType="list"
+      data-test-subj="hostPage"
+      headerLeft={i18n.translate('xpack.endpoint.hostList.title', { defaultMessage: 'Hosts' })}
+    >
       {hasSelectedHost && <HostDetailsFlyout />}
-      <EuiPage className="hostPage">
-        <EuiPageBody>
-          <EuiPageHeader className="hostHeader">
-            <EuiTitle size="l">
-              <h1 data-test-subj="hostListTitle">
-                <FormattedMessage id="xpack.endpoint.host.hosts" defaultMessage="Hosts" />
-              </h1>
-            </EuiTitle>
-          </EuiPageHeader>
-
-          <EuiPageContent className="hostPageContent">
-            <EuiText color="subdued" size="xs">
-              <FormattedMessage
-                id="xpack.endpoint.host.list.totalCount"
-                defaultMessage="Showing: {totalItemCount, plural, one {# Host} other {# Hosts}}"
-                values={{ totalItemCount }}
-              />
-            </EuiText>
-            <EuiHorizontalRule margin="xs" />
-            <EuiBasicTable
-              data-test-subj="hostListTable"
-              items={useMemo(() => [...listData], [listData])}
-              columns={columns}
-              loading={loading}
-              error={listError?.message}
-              pagination={paginationSetup}
-              onChange={onTableChange}
-            />
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    </HostPage>
+      <EuiText color="subdued" size="xs">
+        <FormattedMessage
+          id="xpack.endpoint.host.list.totalCount"
+          defaultMessage="Showing: {totalItemCount, plural, one {# Host} other {# Hosts}}"
+          values={{ totalItemCount }}
+        />
+      </EuiText>
+      <EuiHorizontalRule margin="xs" />
+      <EuiBasicTable
+        data-test-subj="hostListTable"
+        items={useMemo(() => [...listData], [listData])}
+        columns={columns}
+        loading={loading}
+        error={listError?.message}
+        pagination={paginationSetup}
+        onChange={onTableChange}
+      />
+    </PageView>
   );
 };
-
-const HostPage = styled.div`
-  .hostPage {
-    padding: 0;
-  }
-  .hostHeader {
-    background-color: ${props => props.theme.eui.euiColorLightestShade};
-    border-bottom: ${props => props.theme.eui.euiBorderThin};
-    padding: ${props =>
-      props.theme.eui.euiSizeXL +
-      ' ' +
-      0 +
-      props.theme.eui.euiSizeXL +
-      ' ' +
-      props.theme.eui.euiSizeL};
-    margin-bottom: 0;
-  }
-  .hostPageContent {
-    border: none;
-  }
-`;
