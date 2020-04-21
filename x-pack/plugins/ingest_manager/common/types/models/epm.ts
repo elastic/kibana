@@ -256,10 +256,19 @@ export enum DefaultPackages {
   endpoint = 'endpoint',
 }
 
+export interface IndexTemplateMappings {
+  properties: any;
+}
+
 export interface IndexTemplate {
   order: number;
   index_patterns: string[];
   settings: any;
   mappings: object;
   aliases: object;
+}
+
+export interface TemplateRef {
+  templateName: string;
+  indexTemplate: IndexTemplate;
 }

@@ -32,7 +32,7 @@ import { IRouter } from '../../../../../../../src/core/server';
 import { SetupPlugins } from '../../../plugin';
 import { ImportTimelinesPayloadSchemaRt } from './schemas/import_timelines_schema';
 import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
-import { ConfigType } from '../../..';
+import { ConfigType } from '../../../config';
 
 import { Timeline } from '../saved_object';
 import { validate } from '../../detection_engine/routes/rules/validate';
