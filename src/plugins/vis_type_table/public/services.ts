@@ -17,18 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from './legacy_imports';
-import { plugin } from '.';
+import { createGetterSetter } from '../../kibana_utils/public';
+import { DataPublicPluginStart } from '../../data/public';
 
-import { TablePluginSetupDependencies } from './plugin';
-
-const plugins: Readonly<TablePluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: npSetup.plugins.visualizations,
-};
-
-const pluginInstance = plugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core, { data: npStart.plugins.data });
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('table data.fieldFormats');

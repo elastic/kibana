@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './index.scss';
+import { PluginInitializerContext } from 'kibana/public';
+import { TableVisPlugin as Plugin } from './plugin';
 
-import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
-
-export const [getFormatService, setFormatService] = createGetterSetter<
-  DataPublicPluginStart['fieldFormats']
->('table data.fieldFormats');
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}
