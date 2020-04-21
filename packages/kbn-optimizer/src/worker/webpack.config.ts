@@ -162,7 +162,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           ],
         },
         {
-          test: /\.(scss|css)$/,
+          test: /\.scss$/,
           exclude: /node_modules/,
           oneOf: [
             {

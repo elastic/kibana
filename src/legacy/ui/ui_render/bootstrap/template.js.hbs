@@ -69,12 +69,12 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     }
 
     load([
-        {{#each jsDependencies}}
+        {{#each jsDependencyPaths}}
           '{{this}}',
         {{/each}}
     ], function () {
       load([
-        '{{entryBundle}}',
+        '{{entryBundlePath}}',
         {{#each styleSheetPaths}}
           '{{this}}',
         {{/each}}

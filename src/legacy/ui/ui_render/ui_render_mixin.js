@@ -111,12 +111,13 @@ export function uiRenderMixin(kbnServer, server, config) {
             ? [
                 `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
+                `${regularBundlePath}/dark_theme.style.css`,
               ]
             : [
                 `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+                `${regularBundlePath}/light_theme.style.css`,
               ]),
-          `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
           `${regularBundlePath}/commons.style.css`,
           ...(isCore
             ? []
@@ -135,7 +136,7 @@ export function uiRenderMixin(kbnServer, server, config) {
               ]),
         ];
 
-        const jsDependencies = [
+        const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
             filename => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
           ),
@@ -155,9 +156,9 @@ export function uiRenderMixin(kbnServer, server, config) {
         const bootstrap = new AppBootstrap({
           templateData: {
             darkMode,
-            jsDependencies,
+            jsDependencyPaths,
             styleSheetPaths,
-            entryBundle: isCore
+            entryBundlePath: isCore
               ? `${regularBundlePath}/core/core.entry.js`
               : `${regularBundlePath}/${app.getId()}.bundle.js`,
           },

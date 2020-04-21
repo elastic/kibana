@@ -20,6 +20,9 @@
 /**
  * This is the entry point used to boot the frontend when serving a application
  * that lives in the Kibana Platform.
+ *
+ * Any changes to this file should be kept in sync with
+ * src/legacy/ui/ui_bundles/app_entry_template.js
  */
 
 import './index.scss';

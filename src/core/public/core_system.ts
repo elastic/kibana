@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './core.css';
-
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';

@@ -2,6 +2,7 @@
 // import this explicitly
 @import '../../legacy/ui/public/styles/_styling_constants';
 
+@import './core';
 @import './chrome/index';
 @import './overlays/index';
 @import './rendering/index';
