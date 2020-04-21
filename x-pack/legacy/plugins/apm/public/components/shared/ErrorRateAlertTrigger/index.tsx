@@ -6,6 +6,7 @@
 import React from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isFinite } from 'lodash';
 import { ForLastExpression } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG } from '../../../../../../../plugins/apm/common/alert_types';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
@@ -37,15 +38,17 @@ export function ErrorRateAlertTrigger(props: Props) {
     ...alertParams
   };
 
+  const threshold = isFinite(params.threshold) ? params.threshold : '';
+
   const fields = [
     <PopoverExpression
       title={i18n.translate('xpack.apm.errorRateAlertTrigger.isAbove', {
         defaultMessage: 'is above'
       })}
-      value={params.threshold.toString()}
+      value={threshold.toString()}
     >
       <EuiFieldNumber
-        value={alertParams.threshold ?? ''}
+        value={threshold}
         step={0}
         onChange={e =>
           setAlertParams('threshold', parseInt(e.target.value, 10))

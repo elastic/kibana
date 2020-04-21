@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { WithCopyToClipboard } from '../../../lib/clipboard/with_copy_to_clipboard';
@@ -19,33 +19,23 @@ const BodyContainer = styled(EuiPanel)`
 
 BodyContainer.displayName = 'BodyContainer';
 
-const HoverActionsContainer = styled(EuiPanel)`
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  height: 25px;
-  justify-content: center;
-  left: 5px;
-  position: absolute;
-  top: -5px;
-  width: 30px;
-`;
+export const NoteCardBody = React.memo<{ rawNote: string }>(({ rawNote }) => {
+  const hoverContent = useMemo(
+    () => (
+      <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
+        <WithCopyToClipboard text={rawNote} titleSummary={i18n.NOTE.toLowerCase()} />
+      </EuiToolTip>
+    ),
+    [rawNote]
+  );
 
-HoverActionsContainer.displayName = 'HoverActionsContainer';
+  const render = useCallback(() => <Markdown raw={rawNote} />, [rawNote]);
 
-export const NoteCardBody = React.memo<{ rawNote: string }>(({ rawNote }) => (
-  <BodyContainer data-test-subj="note-card-body" hasShadow={false} paddingSize="s">
-    <WithHoverActions
-      hoverContent={
-        <HoverActionsContainer data-test-subj="hover-actions-container">
-          <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-            <WithCopyToClipboard text={rawNote} titleSummary={i18n.NOTE.toLowerCase()} />
-          </EuiToolTip>
-        </HoverActionsContainer>
-      }
-      render={() => <Markdown raw={rawNote} />}
-    />
-  </BodyContainer>
-));
+  return (
+    <BodyContainer data-test-subj="note-card-body" hasShadow={false} paddingSize="s">
+      <WithHoverActions hoverContent={hoverContent} render={render} />
+    </BodyContainer>
+  );
+});
 
 NoteCardBody.displayName = 'NoteCardBody';

@@ -238,6 +238,8 @@ module.exports = function(grunt) {
         'test/server_integration/http/ssl/config.js',
         '--config',
         'test/server_integration/http/ssl_redirect/config.js',
+        '--config',
+        'test/server_integration/http/cache/config.js',
         '--bail',
         '--debug',
         '--kibana-install-dir',

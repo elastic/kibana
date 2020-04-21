@@ -6,12 +6,15 @@
 import { Plugin, CoreSetup, PluginInitializerContext, Logger } from 'kibana/server';
 import { first } from 'rxjs/operators';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
+import { IngestManagerSetupContract } from '../../ingest_manager/server';
 import { createConfig$, EndpointConfigType } from './config';
 import { EndpointAppContext } from './types';
 
-import { registerEndpointRoutes } from './routes/metadata';
 import { registerAlertRoutes } from './routes/alerts';
 import { registerResolverRoutes } from './routes/resolver';
+import { registerIndexPatternRoute } from './routes/index_pattern';
+import { registerEndpointRoutes } from './routes/metadata';
+import { IngestIndexPatternRetriever } from './index_pattern';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -19,6 +22,7 @@ export interface EndpointPluginStartDependencies {} // eslint-disable-line @type
 
 export interface EndpointPluginSetupDependencies {
   features: FeaturesPluginSetupContract;
+  ingestManager: IngestManagerSetupContract;
 }
 
 export class EndpointPlugin
@@ -62,6 +66,10 @@ export class EndpointPlugin
       },
     });
     const endpointContext = {
+      indexPatternRetriever: new IngestIndexPatternRetriever(
+        plugins.ingestManager.esIndexPatternService,
+        this.initializerContext.logger
+      ),
       logFactory: this.initializerContext.logger,
       config: (): Promise<EndpointConfigType> => {
         return createConfig$(this.initializerContext)
@@ -73,6 +81,7 @@ export class EndpointPlugin
     registerEndpointRoutes(router, endpointContext);
     registerResolverRoutes(router, endpointContext);
     registerAlertRoutes(router, endpointContext);
+    registerIndexPatternRoute(router, endpointContext);
   }
 
   public start() {

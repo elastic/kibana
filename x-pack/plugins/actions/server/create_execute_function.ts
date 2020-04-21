@@ -6,7 +6,12 @@
 
 import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import { GetBasePathFunction, RawAction, ActionTypeRegistryContract } from './types';
+import {
+  GetBasePathFunction,
+  RawAction,
+  ActionTypeRegistryContract,
+  PreConfiguredAction,
+} from './types';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
@@ -14,6 +19,7 @@ interface CreateExecuteFunctionOptions {
   getBasePath: GetBasePathFunction;
   isESOUsingEphemeralEncryptionKey: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export interface ExecuteOptions {
@@ -29,6 +35,7 @@ export function createExecuteFunction({
   actionTypeRegistry,
   getScopedSavedObjectsClient,
   isESOUsingEphemeralEncryptionKey,
+  preconfiguredActions,
 }: CreateExecuteFunctionOptions) {
   return async function execute({ id, params, spaceId, apiKey }: ExecuteOptions) {
     if (isESOUsingEphemeralEncryptionKey === true) {
@@ -61,9 +68,9 @@ export function createExecuteFunction({
     };
 
     const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-    const actionSavedObject = await savedObjectsClient.get<RawAction>('action', id);
+    const actionTypeId = await getActionTypeId(id);
 
-    actionTypeRegistry.ensureActionTypeEnabled(actionSavedObject.attributes.actionTypeId);
+    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
       actionId: id,
@@ -72,7 +79,7 @@ export function createExecuteFunction({
     });
 
     await taskManager.schedule({
-      taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
+      taskType: `actions:${actionTypeId}`,
       params: {
         spaceId,
         actionTaskParamsId: actionTaskParamsRecord.id,
@@ -80,5 +87,15 @@ export function createExecuteFunction({
       state: {},
       scope: ['actions'],
     });
+
+    async function getActionTypeId(actionId: string): Promise<string> {
+      const pcAction = preconfiguredActions.find(action => action.id === actionId);
+      if (pcAction) {
+        return pcAction.actionTypeId;
+      }
+
+      const actionSO = await savedObjectsClient.get<RawAction>('action', actionId);
+      return actionSO.attributes.actionTypeId;
+    }
   };
 }

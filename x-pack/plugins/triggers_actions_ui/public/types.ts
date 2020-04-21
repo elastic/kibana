@@ -66,6 +66,7 @@ export interface ActionConnector {
   name: string;
   referencedByCount?: number;
   config: Record<string, any>;
+  isPreconfigured: boolean;
 }
 
 export type ActionConnectorWithoutId = Omit<ActionConnector, 'id'>;
@@ -111,5 +112,5 @@ export interface AlertTypeModel {
 }
 
 export interface IErrorObject {
-  [key: string]: string[];
+  [key: string]: string | string[] | IErrorObject;
 }

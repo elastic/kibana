@@ -5,8 +5,10 @@
  */
 
 export * from './alerts';
+export * from './certs';
 export * from './common';
 export * from './monitor';
 export * from './overview_filters';
+export * from './ping';
 export * from './snapshot';
 export * from './dynamic_settings';

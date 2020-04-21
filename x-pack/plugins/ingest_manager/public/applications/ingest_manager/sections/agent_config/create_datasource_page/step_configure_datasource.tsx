@@ -3,24 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState, Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiSteps,
   EuiPanel,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiFieldText,
-  EuiButtonEmpty,
   EuiSpacer,
   EuiEmptyPrompt,
   EuiText,
-  EuiButton,
-  EuiComboBox,
+  EuiCallOut,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   AgentConfig,
   PackageInfo,
@@ -28,7 +22,9 @@ import {
   NewDatasource,
   DatasourceInput,
 } from '../../../types';
+import { Loading } from '../../../components';
 import { packageToConfigDatasourceInputs } from '../../../services';
+import { DatasourceValidationResults, validationHasErrors } from './services';
 import { DatasourceInputPanel } from './components';
 
 export const StepConfigureDatasource: React.FunctionComponent<{
@@ -36,12 +32,19 @@ export const StepConfigureDatasource: React.FunctionComponent<{
   packageInfo: PackageInfo;
   datasource: NewDatasource;
   updateDatasource: (fields: Partial<NewDatasource>) => void;
-  backLink: JSX.Element;
-  cancelUrl: string;
-  onNext: () => void;
-}> = ({ agentConfig, packageInfo, datasource, updateDatasource, backLink, cancelUrl, onNext }) => {
+  validationResults: DatasourceValidationResults;
+  submitAttempted: boolean;
+}> = ({
+  agentConfig,
+  packageInfo,
+  datasource,
+  updateDatasource,
+  validationResults,
+  submitAttempted,
+}) => {
   // Form show/hide states
-  const [isShowingAdvancedDefine, setIsShowingAdvancedDefine] = useState<boolean>(false);
+
+  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Update datasource's package and config info
   useEffect(() => {
@@ -80,109 +83,9 @@ export const StepConfigureDatasource: React.FunctionComponent<{
     }
   }, [datasource.package, datasource.config_id, agentConfig, packageInfo, updateDatasource]);
 
-  // Step A, define datasource
-  const DefineDatasource = (
-    <EuiPanel>
-      <EuiFlexGrid columns={2}>
-        <EuiFlexItem>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ingestManager.createDatasource.stepConfigure.datasourceNameInputLabel"
-                defaultMessage="Data source name"
-              />
-            }
-          >
-            <EuiFieldText
-              value={datasource.name}
-              onChange={e =>
-                updateDatasource({
-                  name: e.target.value,
-                })
-              }
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ingestManager.createDatasource.stepConfigure.datasourceDescriptionInputLabel"
-                defaultMessage="Description"
-              />
-            }
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.ingestManager.createDatasource.stepConfigure.inputVarFieldOptionalLabel"
-                  defaultMessage="Optional"
-                />
-              </EuiText>
-            }
-          >
-            <EuiFieldText
-              value={datasource.description}
-              onChange={e =>
-                updateDatasource({
-                  description: e.target.value,
-                })
-              }
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiSpacer size="m" />
-      <EuiButtonEmpty
-        flush="left"
-        size="xs"
-        iconType={isShowingAdvancedDefine ? 'arrowUp' : 'arrowDown'}
-        onClick={() => setIsShowingAdvancedDefine(!isShowingAdvancedDefine)}
-      >
-        <FormattedMessage
-          id="xpack.ingestManager.createDatasource.stepConfigure.advancedOptionsToggleLinkText"
-          defaultMessage="Advanced options"
-        />
-      </EuiButtonEmpty>
-      {/* Todo: Populate list of existing namespaces */}
-      {isShowingAdvancedDefine ? (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <EuiFlexGrid columns={2}>
-            <EuiFlexItem>
-              <EuiFormRow
-                label={
-                  <FormattedMessage
-                    id="xpack.ingestManager.createDatasource.stepConfigure.datasourceNamespaceInputLabel"
-                    defaultMessage="Namespace"
-                  />
-                }
-              >
-                <EuiComboBox
-                  noSuggestions
-                  singleSelection={true}
-                  selectedOptions={datasource.namespace ? [{ label: datasource.namespace }] : []}
-                  onCreateOption={(newNamespace: string) => {
-                    updateDatasource({
-                      namespace: newNamespace,
-                    });
-                  }}
-                  onChange={(newNamespaces: Array<{ label: string }>) => {
-                    updateDatasource({
-                      namespace: newNamespaces.length ? newNamespaces[0].label : '',
-                    });
-                  }}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGrid>
-        </Fragment>
-      ) : null}
-    </EuiPanel>
-  );
-
   // Step B, configure inputs (and their streams)
   // Assume packages only export one datasource for now
-  const ConfigureInputs =
+  const renderConfigureInputs = () =>
     packageInfo.datasources &&
     packageInfo.datasources[0] &&
     packageInfo.datasources[0].inputs &&
@@ -208,6 +111,8 @@ export const StepConfigureDatasource: React.FunctionComponent<{
                     inputs: newInputs,
                   });
                 }}
+                inputValidationResults={validationResults!.inputs![datasourceInput.type]}
+                forceShowErrors={submitAttempted}
               />
             </EuiFlexItem>
           ) : null;
@@ -232,61 +137,33 @@ export const StepConfigureDatasource: React.FunctionComponent<{
       </EuiPanel>
     );
 
-  return (
+  return validationResults ? (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>{backLink}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSteps
-              steps={[
-                {
-                  title: i18n.translate(
-                    'xpack.ingestManager.createDatasource.stepConfigure.defineDatasourceTitle',
-                    {
-                      defaultMessage: 'Define your datasource',
-                    }
-                  ),
-                  children: DefineDatasource,
-                },
-                {
-                  title: i18n.translate(
-                    'xpack.ingestManager.createDatasource.stepConfigure.chooseDataTitle',
-                    {
-                      defaultMessage: 'Choose the data you want to collect',
-                    }
-                  ),
-                  children: ConfigureInputs,
-                },
-              ]}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty href={cancelUrl}>
+      <EuiFlexItem>{renderConfigureInputs()}</EuiFlexItem>
+      {hasErrors && submitAttempted ? (
+        <EuiFlexItem>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.ingestManager.createDatasource.stepConfigure.validationErrorTitle',
+              {
+                defaultMessage: 'Your data source configuration has errors',
+              }
+            )}
+            color="danger"
+          >
+            <p>
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.cancelLinkText"
-                defaultMessage="Cancel"
+                id="xpack.ingestManager.createDatasource.stepConfigure.validationErrorText"
+                defaultMessage="Please fix the above errors before continuing"
               />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="arrowRight" iconSide="right" onClick={() => onNext()}>
-              <FormattedMessage
-                id="xpack.ingestManager.createDatasource.continueButtonText"
-                defaultMessage="Continue"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
+  ) : (
+    <Loading />
   );
 };

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { createHashHistory, History } from 'history';
+import { History } from 'history';
 
 import {
   Capabilities,
@@ -51,7 +51,7 @@ export interface DiscoverServices {
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
   DocViewer: DocViewerComponent;
-  history: History;
+  history: () => History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract;
@@ -67,15 +67,18 @@ export interface DiscoverServices {
 }
 export async function buildServices(
   core: CoreStart,
-  plugins: DiscoverStartPlugins
+  plugins: DiscoverStartPlugins,
+  getHistory: () => History
 ): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
+    search: plugins.data.search,
     chrome: core.chrome,
     overlays: core.overlays,
   };
   const savedObjectService = createSavedSearchesLoader(services);
+
   return {
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
@@ -84,11 +87,11 @@ export async function buildServices(
     data: plugins.data,
     docLinks: core.docLinks,
     DocViewer: plugins.discover.docViews.DocViewer,
-    history: createHashHistory(),
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
+    history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
     inspector: plugins.inspector,
     // @ts-ignore

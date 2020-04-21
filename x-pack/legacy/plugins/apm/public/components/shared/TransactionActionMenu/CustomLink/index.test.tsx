@@ -28,7 +28,7 @@ describe('Custom links', () => {
     );
 
     expectTextsInDocument(component, [
-      'No custom links found. Set up your own custom links i.e. a link to a specific Dashboard or external link.'
+      'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.'
     ]);
     expectTextsNotInDocument(component, ['Create']);
   });

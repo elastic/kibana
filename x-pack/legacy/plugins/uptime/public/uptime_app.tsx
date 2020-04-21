@@ -7,24 +7,25 @@
 import { EuiPage, EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { I18nStart, ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import { PluginsSetup } from 'ui/new_platform/new_platform';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { UMGraphQLClient, UMUpdateBadge } from './lib/lib';
+import { UMUpdateBadge } from './lib/lib';
 import {
   UptimeRefreshContextProvider,
   UptimeSettingsContextProvider,
   UptimeThemeContextProvider,
 } from './contexts';
-import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
+import { CommonlyUsedRange } from './components/common/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
-import { UptimeAlertsFlyoutWrapper } from './components/connected';
-import { UptimeAlertsContextProvider } from './components/functional/alerts';
+import {
+  UptimeAlertsContextProvider,
+  UptimeAlertsFlyoutWrapper,
+} from './components/overview/alerts';
 import { kibanaService } from './state/kibana_service';
 
 export interface UptimeAppColors {
@@ -39,7 +40,6 @@ export interface UptimeAppColors {
 export interface UptimeAppProps {
   basePath: string;
   canSave: boolean;
-  client: UMGraphQLClient;
   core: CoreStart;
   darkMode: boolean;
   i18n: I18nStart;
@@ -59,7 +59,6 @@ const Application = (props: UptimeAppProps) => {
   const {
     basePath,
     canSave,
-    client,
     core,
     darkMode,
     i18n: i18nCore,
@@ -97,22 +96,23 @@ const Application = (props: UptimeAppProps) => {
         <ReduxProvider store={store}>
           <KibanaContextProvider services={{ ...core, ...plugins }}>
             <Router basename={routerBasename}>
-              <ApolloProvider client={client}>
-                <UptimeRefreshContextProvider>
-                  <UptimeSettingsContextProvider {...props}>
-                    <UptimeThemeContextProvider darkMode={darkMode}>
-                      <UptimeAlertsContextProvider>
-                        <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                          <main>
-                            <UptimeAlertsFlyoutWrapper />
-                            <PageRouter autocomplete={plugins.data.autocomplete} />
-                          </main>
-                        </EuiPage>
-                      </UptimeAlertsContextProvider>
-                    </UptimeThemeContextProvider>
-                  </UptimeSettingsContextProvider>
-                </UptimeRefreshContextProvider>
-              </ApolloProvider>
+              <UptimeRefreshContextProvider>
+                <UptimeSettingsContextProvider {...props}>
+                  <UptimeThemeContextProvider darkMode={darkMode}>
+                    <UptimeAlertsContextProvider>
+                      <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                        <main>
+                          <UptimeAlertsFlyoutWrapper
+                            alertTypeId="xpack.uptime.alerts.monitorStatus"
+                            canChangeTrigger={false}
+                          />
+                          <PageRouter autocomplete={plugins.data.autocomplete} />
+                        </main>
+                      </EuiPage>
+                    </UptimeAlertsContextProvider>
+                  </UptimeThemeContextProvider>
+                </UptimeSettingsContextProvider>
+              </UptimeRefreshContextProvider>
             </Router>
           </KibanaContextProvider>
         </ReduxProvider>

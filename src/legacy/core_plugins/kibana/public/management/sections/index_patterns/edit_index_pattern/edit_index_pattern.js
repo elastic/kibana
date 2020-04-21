@@ -18,18 +18,20 @@
  */
 
 import _ from 'lodash';
-import './index_header';
-import './create_edit_field';
+import { HashRouter } from 'react-router-dom';
+import { IndexHeader } from './index_header';
+import { CreateEditField } from './create_edit_field';
 import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import { fatalError, toastNotifications } from 'ui/notify';
+import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
+import createEditFieldtemplate from './create_edit_field.html';
 import { fieldWildcardMatcher } from '../../../../../../../../plugins/kibana_utils/public';
 import { subscribeWithScope } from '../../../../../../../../plugins/kibana_legacy/public';
-import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
@@ -38,17 +40,20 @@ import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { npStart } from 'ui/new_platform';
-
-import { getEditBreadcrumbs } from '../breadcrumbs';
+import {
+  getEditBreadcrumbs,
+  getEditFieldBreadcrumbs,
+  getCreateFieldBreadcrumbs,
+} from '../breadcrumbs';
+import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from './constants';
 import { createEditIndexPatternPageStateContainer } from './edit_index_pattern_state_container';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
 const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
+const REACT_INDEX_HEADER_DOM_ELEMENT_ID = 'reactIndexHeader';
 
-const TAB_INDEXED_FIELDS = 'indexedFields';
-const TAB_SCRIPTED_FIELDS = 'scriptedFields';
-const TAB_SOURCE_FILTERS = 'sourceFilters';
+const EDIT_FIELD_PATH = '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}';
 
 function updateSourceFiltersTable($scope) {
   $scope.$$postDigest(() => {
@@ -98,8 +103,8 @@ function updateScriptedFieldsTable($scope) {
           fieldFilter={$scope.fieldFilter}
           scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
           helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.changeToRoute(obj, route);
+            redirectToRoute: field => {
+              $scope.kbnUrl.changePath(EDIT_FIELD_PATH, field);
               $scope.$apply();
             },
             getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
@@ -141,8 +146,8 @@ function updateIndexedFieldsTable($scope) {
           fieldWildcardMatcher={$scope.fieldWildcardMatcher}
           indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
           helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.changeToRoute(obj, route);
+            redirectToRoute: field => {
+              $scope.kbnUrl.changePath(EDIT_FIELD_PATH, field);
               $scope.$apply();
             },
             getFieldInfo: $scope.getFieldInfo,
@@ -157,6 +162,33 @@ function updateIndexedFieldsTable($scope) {
 function destroyIndexedFieldsTable() {
   const node = document.getElementById(REACT_INDEXED_FIELDS_DOM_ELEMENT_ID);
   node && unmountComponentAtNode(node);
+}
+
+function destroyIndexHeader() {
+  const node = document.getElementById(REACT_INDEX_HEADER_DOM_ELEMENT_ID);
+  node && unmountComponentAtNode(node);
+}
+
+function renderIndexHeader($scope, config) {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_INDEX_HEADER_DOM_ELEMENT_ID);
+    if (!node) {
+      return;
+    }
+
+    render(
+      <I18nContext>
+        <IndexHeader
+          indexPattern={$scope.indexPattern}
+          setDefault={$scope.setDefaultPattern}
+          refreshFields={$scope.refreshFields}
+          deleteIndexPattern={$scope.removePattern}
+          defaultIndex={config.get('defaultIndex')}
+        />
+      </I18nContext>,
+      node
+    );
+  });
 }
 
 function handleTabChange($scope, newTab) {
@@ -239,14 +271,12 @@ uiModules
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
-    $scope.indexPatternListProvider = managementSetup.indexPattern.list;
-    $scope.indexPattern.tags = managementSetup.indexPattern.list.getIndexPatternTags(
+    $scope.indexPatternListProvider = npStart.plugins.indexPatternManagement.list;
+    $scope.indexPattern.tags = npStart.plugins.indexPatternManagement.list.getIndexPatternTags(
       $scope.indexPattern,
       $scope.indexPattern.id === config.get('defaultIndex')
     );
-    $scope.getFieldInfo = managementSetup.indexPattern.list.getFieldInfo.bind(
-      managementSetup.indexPattern.list
-    );
+    $scope.getFieldInfo = npStart.plugins.indexPatternManagement.list.getFieldInfo;
     docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
@@ -257,7 +287,7 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        managementSetup.indexPattern.list
+        npStart.plugins.indexPatternManagement.list
       );
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
@@ -363,7 +393,7 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        managementSetup.indexPattern.list
+        npStart.plugins.indexPatternManagement.list
       );
 
       if ($scope.fieldFilter === undefined) {
@@ -392,6 +422,90 @@ uiModules
       destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
       destroySourceFiltersTable();
+      destroyIndexHeader();
       destroyState();
     });
+
+    renderIndexHeader($scope, config);
+  });
+
+// routes for create edit field. Will be removed after migartion all component to react.
+const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
+const renderCreateEditField = ($scope, $route, getConfig, $http, fieldFormatEditors) => {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_FIELD_EDITOR_ID);
+    if (!node) {
+      return;
+    }
+
+    render(
+      <HashRouter>
+        <I18nContext>
+          <CreateEditField
+            indexPattern={$route.current.locals.indexPattern}
+            mode={$route.current.mode}
+            fieldName={$route.current.params.fieldName}
+            fieldFormatEditors={fieldFormatEditors}
+            getConfig={getConfig}
+            services={{
+              http: $http,
+              notifications: npStart.core.notifications,
+              docTitle: npStart.core.chrome.docTitle,
+            }}
+          />
+        </I18nContext>
+      </HashRouter>,
+      node
+    );
+  });
+};
+
+const destroyCreateEditField = () => {
+  const node = document.getElementById(REACT_FIELD_EDITOR_ID);
+  node && unmountComponentAtNode(node);
+};
+
+uiRoutes
+  .when('/management/kibana/index_patterns/:indexPatternId/field/:fieldName*', {
+    mode: 'edit',
+    k7Breadcrumbs: getEditFieldBreadcrumbs,
+  })
+  .when('/management/kibana/index_patterns/:indexPatternId/create-field/', {
+    mode: 'create',
+    k7Breadcrumbs: getCreateFieldBreadcrumbs,
+  })
+  .defaults(/management\/kibana\/index_patterns\/[^\/]+\/(field|create-field)(\/|$)/, {
+    template: createEditFieldtemplate,
+    mapBreadcrumbs($route, breadcrumbs) {
+      const { indexPattern } = $route.current.locals;
+      return breadcrumbs.map(crumb => {
+        if (crumb.id !== indexPattern.id) {
+          return crumb;
+        }
+
+        return {
+          ...crumb,
+          display: indexPattern.title,
+        };
+      });
+    },
+    resolve: {
+      indexPattern: function($route, Promise, redirectWhenMissing) {
+        const { indexPatterns } = npStart.plugins.data;
+        return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId)).catch(
+          redirectWhenMissing('/management/kibana/index_patterns')
+        );
+      },
+    },
+    controllerAs: 'fieldSettings',
+    controller: function FieldEditorPageController($scope, $route, $http, Private, config) {
+      const getConfig = (...args) => config.get(...args);
+      const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
+
+      renderCreateEditField($scope, $route, getConfig, $http, fieldFormatEditors);
+
+      $scope.$on('$destroy', () => {
+        destroyCreateEditField();
+      });
+    },
   });

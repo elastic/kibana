@@ -8,7 +8,8 @@ import seedrandom from 'seedrandom';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { EndpointDocGenerator, Event } from '../common/generate_data';
-import { default as mapping } from './mapping.json';
+import { default as eventMapping } from './event_mapping.json';
+import { default as alertMapping } from './alert_mapping.json';
 
 main();
 
@@ -25,6 +26,12 @@ async function main() {
       default: 'http://localhost:9200',
       type: 'string',
     },
+    alertIndex: {
+      alias: 'ai',
+      describe: 'index to store alerts in',
+      default: 'events-endpoint-1',
+      type: 'string',
+    },
     eventIndex: {
       alias: 'ei',
       describe: 'index to store events in',
@@ -34,7 +41,7 @@ async function main() {
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
-      default: 'endpoint-agent-1',
+      default: 'metrics-endpoint-default-1',
       type: 'string',
     },
     auth: {
@@ -95,7 +102,16 @@ async function main() {
       type: 'boolean',
       default: false,
     },
+    setupOnly: {
+      alias: 'so',
+      describe:
+        'Run only the index and pipeline creation then exit. This is intended to be used to set up the Endpoint App for use with the real Elastic Endpoint.',
+      type: 'boolean',
+      default: false,
+    },
   }).argv;
+  const pipelineName = 'endpoint-event-pipeline';
+  eventMapping.settings.index.default_pipeline = pipelineName;
   const clientOptions: ClientOptions = {
     node: argv.node,
   };
@@ -107,7 +123,7 @@ async function main() {
   if (argv.delete) {
     try {
       await client.indices.delete({
-        index: [argv.eventIndex, argv.metadataIndex],
+        index: [argv.eventIndex, argv.metadataIndex, argv.alertIndex],
       });
     } catch (err) {
       if (err instanceof ResponseError && err.statusCode !== 404) {
@@ -117,21 +133,42 @@ async function main() {
       }
     }
   }
+
+  const pipeline = {
+    description: 'redirects alerts to their own index',
+    processors: [
+      {
+        set: {
+          field: '_index',
+          value: argv.alertIndex,
+          if: "ctx.event.kind == 'alert'",
+        },
+      },
+      {
+        set: {
+          field: 'mutable_state.triage_status',
+          value: 'open',
+        },
+      },
+    ],
+  };
   try {
-    await client.indices.create({
-      index: argv.eventIndex,
-      body: mapping,
+    await client.ingest.putPipeline({
+      id: pipelineName,
+      body: pipeline,
     });
   } catch (err) {
-    if (
-      err instanceof ResponseError &&
-      err.body.error.type !== 'resource_already_exists_exception'
-    ) {
-      // eslint-disable-next-line no-console
-      console.log(err.body);
-      process.exit(1);
-    }
+    // eslint-disable-next-line no-console
+    console.log(err);
+    process.exit(1);
   }
+
+  await createIndex(client, argv.alertIndex, alertMapping);
+  await createIndex(client, argv.eventIndex, eventMapping);
+  if (argv.setupOnly) {
+    process.exit(0);
+  }
+
   let seed = argv.seed;
   if (!seed) {
     seed = Math.random().toString();
@@ -180,6 +217,24 @@ async function main() {
         );
         await client.bulk({ body });
       }
+    }
+  }
+}
+
+async function createIndex(client: Client, index: string, mapping: any) {
+  try {
+    await client.indices.create({
+      index,
+      body: mapping,
+    });
+  } catch (err) {
+    if (
+      err instanceof ResponseError &&
+      err.body.error.type !== 'resource_already_exists_exception'
+    ) {
+      // eslint-disable-next-line no-console
+      console.log(err.body);
+      process.exit(1);
     }
   }
 }

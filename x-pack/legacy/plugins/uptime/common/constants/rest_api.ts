@@ -5,8 +5,10 @@
  */
 
 export enum API_URLS {
+  CERTS = '/api/uptime/certs',
   INDEX_PATTERN = `/api/uptime/index_pattern`,
   INDEX_STATUS = '/api/uptime/index_status',
+  MONITOR_LIST = `/api/uptime/monitor/list`,
   MONITOR_LOCATIONS = `/api/uptime/monitor/locations`,
   MONITOR_DURATION = `/api/uptime/monitor/duration`,
   MONITOR_DETAILS = `/api/uptime/monitor/details`,
@@ -15,7 +17,7 @@ export enum API_URLS {
   PING_HISTOGRAM = `/api/uptime/ping/histogram`,
   SNAPSHOT_COUNT = `/api/uptime/snapshot/count`,
   FILTERS = `/api/uptime/filters`,
-  logPageView = `/api/uptime/logPageView`,
+  LOG_PAGE_VIEW = `/api/uptime/log_page_view`,
 
   ML_MODULE_JOBS = `/api/ml/modules/jobs_exist/`,
   ML_SETUP_MODULE = '/api/ml/modules/setup/',

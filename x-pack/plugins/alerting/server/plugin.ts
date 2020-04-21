@@ -19,7 +19,6 @@ import { TaskRunnerFactory } from './task_runner';
 import { AlertsClientFactory } from './alerts_client_factory';
 import { LicenseState } from './lib/license_state';
 import {
-  IClusterClient,
   KibanaRequest,
   Logger,
   PluginInitializerContext,
@@ -29,6 +28,7 @@ import {
   IContextProvider,
   RequestHandler,
   SharedGlobalConfig,
+  ElasticsearchServiceStart,
 } from '../../../../src/core/server';
 
 import {
@@ -56,6 +56,15 @@ import {
 import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
+import { IEventLogger, IEventLogService } from '../../event_log/server';
+
+const EVENT_LOG_PROVIDER = 'alerting';
+export const EVENT_LOG_ACTIONS = {
+  execute: 'execute',
+  executeAction: 'execute-action',
+  newInstance: 'new-instance',
+  resolvedInstance: 'resolved-instance',
+};
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
@@ -73,6 +82,7 @@ export interface AlertingPluginsSetup {
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  eventLog: IEventLogService;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -84,7 +94,6 @@ export class AlertingPlugin {
   private readonly logger: Logger;
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
-  private adminClient?: IClusterClient;
   private serverBasePath?: string;
   private licenseState: LicenseState | null = null;
   private isESOUsingEphemeralEncryptionKey?: boolean;
@@ -93,6 +102,7 @@ export class AlertingPlugin {
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaIndex: Promise<string>;
+  private eventLogger?: IEventLogger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
@@ -108,7 +118,6 @@ export class AlertingPlugin {
   }
 
   public async setup(core: CoreSetup, plugins: AlertingPluginsSetup): Promise<PluginSetupContract> {
-    this.adminClient = core.elasticsearch.adminClient;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.spaces = plugins.spaces?.spacesService;
     this.security = plugins.security;
@@ -131,6 +140,11 @@ export class AlertingPlugin {
         'mutedInstanceIds',
         'updatedBy',
       ]),
+    });
+
+    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+    this.eventLogger = plugins.eventLog.getLogger({
+      event: { provider: EVENT_LOG_PROVIDER },
     });
 
     const alertTypeRegistry = new AlertTypeRegistry({
@@ -174,7 +188,7 @@ export class AlertingPlugin {
     unmuteAllAlertRoute(router, this.licenseState);
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
-    healthRoute(router, this.licenseState);
+    healthRoute(router, this.licenseState, plugins.encryptedSavedObjects);
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
@@ -202,15 +216,17 @@ export class AlertingPlugin {
       getSpaceId(request: KibanaRequest) {
         return spaces?.getSpaceId(request);
       },
+      preconfiguredActions: plugins.actions.preconfiguredActions,
     });
 
     taskRunnerFactory.initialize({
       logger,
-      getServices: this.getServicesFactory(core.savedObjects),
+      getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
       spaceIdToNamespace: this.spaceIdToNamespace,
       actionsPlugin: plugins.actions,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
+      eventLogger: this.eventLogger!,
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
@@ -245,11 +261,11 @@ export class AlertingPlugin {
   };
 
   private getServicesFactory(
-    savedObjects: SavedObjectsServiceStart
+    savedObjects: SavedObjectsServiceStart,
+    elasticsearch: ElasticsearchServiceStart
   ): (request: KibanaRequest) => Services {
-    const { adminClient } = this;
     return request => ({
-      callCluster: adminClient!.asScoped(request).callAsCurrentUser,
+      callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: savedObjects.getScopedClient(request),
     });
   }

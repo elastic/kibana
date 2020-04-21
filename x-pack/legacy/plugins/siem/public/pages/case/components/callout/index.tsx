@@ -24,10 +24,12 @@ const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) =>
 
   return showCallOut ? (
     <>
-      <EuiCallOut title={title} color="primary" iconType="gear">
-        {!isEmpty(messages) && <EuiDescriptionList listItems={messages} />}
-        {!isEmpty(message) && <p>{message}</p>}
-        <EuiButton color="primary" onClick={handleCallOut}>
+      <EuiCallOut title={title} color="primary" iconType="gear" data-test-subj="case-call-out">
+        {!isEmpty(messages) && (
+          <EuiDescriptionList data-test-subj="callout-messages" listItems={messages} />
+        )}
+        {!isEmpty(message) && <p data-test-subj="callout-message">{message}</p>}
+        <EuiButton data-test-subj="callout-dismiss" color="primary" onClick={handleCallOut}>
           {i18n.DISMISS_CALLOUT}
         </EuiButton>
       </EuiCallOut>

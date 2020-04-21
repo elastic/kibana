@@ -187,8 +187,9 @@ export const postAgentCheckinHandler: RequestHandler<
       action: 'checkin',
       success: true,
       actions: actions.map(a => ({
+        agent_id: agent.id,
         type: a.type,
-        data: a.data ? JSON.parse(a.data) : a.data,
+        data: a.data,
         id: a.id,
         created_at: a.created_at,
       })),

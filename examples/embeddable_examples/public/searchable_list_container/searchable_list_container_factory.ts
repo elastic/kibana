@@ -29,7 +29,7 @@ import {
 } from './searchable_list_container';
 
 interface StartServices {
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  embeddableServices: EmbeddableStart;
 }
 
 export class SearchableListContainerFactory implements EmbeddableFactoryDefinition {
@@ -43,8 +43,8 @@ export class SearchableListContainerFactory implements EmbeddableFactoryDefiniti
   }
 
   public create = async (initialInput: SearchableContainerInput) => {
-    const { getEmbeddableFactory } = await this.getStartServices();
-    return new SearchableListContainer(initialInput, getEmbeddableFactory);
+    const { embeddableServices } = await this.getStartServices();
+    return new SearchableListContainer(initialInput, embeddableServices);
   };
 
   public getDisplayName() {

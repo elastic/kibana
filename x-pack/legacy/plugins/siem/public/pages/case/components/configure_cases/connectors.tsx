@@ -28,7 +28,7 @@ const EuiFormRowExtended = styled(EuiFormRow)`
   }
 `;
 
-interface Props {
+export interface Props {
   connectors: Connector[];
   disabled: boolean;
   isLoading: boolean;
@@ -48,7 +48,11 @@ const ConnectorsComponent: React.FC<Props> = ({
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>{i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink disabled={disabled} onClick={handleShowAddFlyout}>
+        <EuiLink
+          disabled={disabled}
+          onClick={handleShowAddFlyout}
+          data-test-subj="case-configure-add-connector-button"
+        >
           {i18n.ADD_NEW_CONNECTOR}
         </EuiLink>
       </EuiFlexItem>
@@ -61,14 +65,20 @@ const ConnectorsComponent: React.FC<Props> = ({
         fullWidth
         title={<h3>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h3>}
         description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
+        data-test-subj="case-connectors-form-group"
       >
-        <EuiFormRowExtended fullWidth label={dropDownLabel}>
+        <EuiFormRowExtended
+          fullWidth
+          label={dropDownLabel}
+          data-test-subj="case-connectors-form-row"
+        >
           <ConnectorsDropdown
             connectors={connectors}
             disabled={disabled}
             selectedConnector={selectedConnector}
             isLoading={isLoading}
             onChange={onChangeConnector}
+            data-test-subj="case-connectors-dropdown"
           />
         </EuiFormRowExtended>
       </EuiDescribedFormGroup>

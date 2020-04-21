@@ -21,8 +21,12 @@ import { EuiPanel, EuiTitle, EuiColorPicker, EuiFormRow, EuiSpacer } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SelectOption, SwitchOption, ValidationVisOptionsProps } from '../../common';
-import { NumberInputOption } from '../../common/required_number_input';
+import { ValidationVisOptionsProps } from '../../common';
+import {
+  SelectOption,
+  SwitchOption,
+  RequiredNumberInputOption,
+} from '../../../../../../../plugins/charts/public';
 import { BasicVislibParams } from '../../../types';
 
 function ThresholdPanel({
@@ -73,7 +77,7 @@ function ThresholdPanel({
 
       {stateParams.thresholdLine.show && (
         <>
-          <NumberInputOption
+          <RequiredNumberInputOption
             label={i18n.translate('visTypeVislib.editors.pointSeries.thresholdLine.valueLabel', {
               defaultMessage: 'Threshold value',
             })}
@@ -83,7 +87,7 @@ function ThresholdPanel({
             setValidity={setThresholdLineValidity}
           />
 
-          <NumberInputOption
+          <RequiredNumberInputOption
             label={i18n.translate('visTypeVislib.editors.pointSeries.thresholdLine.widthLabel', {
               defaultMessage: 'Line width',
             })}

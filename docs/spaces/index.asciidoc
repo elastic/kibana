@@ -9,10 +9,10 @@ the dashboards and saved objects that belong to that space.
 {kib} creates a default space for you.
 After you create your own
 spaces, you're asked to choose a space when you log in to Kibana. You can change your
-current space at any time by using the menu in the upper left.
+current space at any time by using the menu.
 
 [role="screenshot"]
-image::spaces/images/change-space.png["Change current space"]
+image::spaces/images/change-space.png["Change current space menu"]
 
 Kibana supports spaces in several ways.  You can:
 

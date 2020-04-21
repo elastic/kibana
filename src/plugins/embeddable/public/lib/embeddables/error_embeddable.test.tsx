@@ -20,8 +20,6 @@ import React from 'react';
 import { ErrorEmbeddable } from './error_embeddable';
 import { EmbeddableRoot } from './embeddable_root';
 import { mount } from 'enzyme';
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
 
 test('ErrorEmbeddable renders an embeddable', async () => {
   const embeddable = new ErrorEmbeddable('some error occurred', { id: '123', title: 'Error' });

@@ -18,11 +18,12 @@ import {
 } from '@elastic/eui';
 import { builtInComparators } from '../constants';
 import { Comparator } from '../types';
+import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 
 interface ThresholdExpressionProps {
   thresholdComparator: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeSelectedThresholdComparator: (selectedThresholdComparator?: string) => void;
   onChangeSelectedThreshold: (selectedThreshold?: number[]) => void;
   customComparators?: {

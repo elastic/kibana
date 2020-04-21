@@ -13,11 +13,13 @@ import {
   EuiTableActionsColumnType,
   EuiText,
   EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import * as H from 'history';
 import React, { Dispatch } from 'react';
 
+import { isMlRule } from '../../../../../../../../plugins/siem/common/detection_engine/ml_helpers';
 import { Rule, RuleStatus } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { FormattedDate } from '../../../../components/formatted_date';
@@ -36,6 +38,7 @@ import {
 } from './actions';
 import { Action } from './reducer';
 import { LocalizedDateTooltip } from '../../../../components/localized_date_tooltip';
+import * as detectionI18n from '../../translations';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -88,6 +91,7 @@ interface GetColumns {
   dispatch: React.Dispatch<Action>;
   dispatchToaster: Dispatch<ActionToaster>;
   history: H.History;
+  hasMlPermissions: boolean;
   hasNoPermissions: boolean;
   loadingRuleIds: string[];
   reFetchRules: (refreshPrePackagedRule?: boolean) => void;
@@ -98,6 +102,7 @@ export const getColumns = ({
   dispatch,
   dispatchToaster,
   history,
+  hasMlPermissions,
   hasNoPermissions,
   loadingRuleIds,
   reFetchRules,
@@ -182,14 +187,25 @@ export const getColumns = ({
       field: 'enabled',
       name: i18n.COLUMN_ACTIVATE,
       render: (value: Rule['enabled'], item: Rule) => (
-        <RuleSwitch
-          data-test-subj="enabled"
-          dispatch={dispatch}
-          id={item.id}
-          enabled={item.enabled}
-          isDisabled={hasNoPermissions}
-          isLoading={loadingRuleIds.includes(item.id)}
-        />
+        <EuiToolTip
+          position="top"
+          content={
+            isMlRule(item.type) && !hasMlPermissions
+              ? detectionI18n.ML_RULES_DISABLED_MESSAGE
+              : undefined
+          }
+        >
+          <RuleSwitch
+            data-test-subj="enabled"
+            dispatch={dispatch}
+            id={item.id}
+            enabled={item.enabled}
+            isDisabled={
+              hasNoPermissions || (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
+            }
+            isLoading={loadingRuleIds.includes(item.id)}
+          />
+        </EuiToolTip>
       ),
       sortable: true,
       width: '95px',
@@ -227,7 +243,7 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
         <EuiText data-test-subj="bulk_create_time_durations" size="s">
           {value != null && value.length > 0
             ? Math.max(...value?.map(item => Number.parseFloat(item)))
-            : null}
+            : getEmptyTagValue()}
         </EuiText>
       ),
       truncateText: true,
@@ -240,7 +256,7 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
         <EuiText data-test-subj="search_after_time_durations" size="s">
           {value != null && value.length > 0
             ? Math.max(...value?.map(item => Number.parseFloat(item)))
-            : null}
+            : getEmptyTagValue()}
         </EuiText>
       ),
       truncateText: true,
@@ -251,7 +267,7 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
       name: i18n.COLUMN_GAP,
       render: (value: RuleStatus['current_status']['gap']) => (
         <EuiText data-test-subj="gap" size="s">
-          {value}
+          {value ?? getEmptyTagValue()}
         </EuiText>
       ),
       truncateText: true,

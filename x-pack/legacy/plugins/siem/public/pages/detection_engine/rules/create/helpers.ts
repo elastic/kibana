@@ -8,10 +8,10 @@ import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
 
-import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../common/constants';
-import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
-import { RuleType } from '../../../../../common/detection_engine/types';
-import { isMlRule } from '../../../../../common/detection_engine/ml_helpers';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../../../plugins/siem/common/constants';
+import { transformAlertToRuleAction } from '../../../../../../../../plugins/siem/common/detection_engine/transform_actions';
+import { RuleType } from '../../../../../../../../plugins/siem/common/detection_engine/types';
+import { isMlRule } from '../../../../../../../../plugins/siem/common/detection_engine/ml_helpers';
 import { NewRule } from '../../../../containers/detection_engine/rules';
 
 import {
@@ -155,7 +155,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
     enabled,
     throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {
-      kibanaSiemAppUrl,
+      kibana_siem_app_url: kibanaSiemAppUrl,
     },
   };
 };

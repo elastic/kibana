@@ -8,6 +8,7 @@ import { AlertType } from '../types';
 import { createExecutionHandler } from './create_execution_handler';
 import { loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../actions/server/mocks';
+import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 
 const alertType: AlertType = {
   id: 'test',
@@ -31,6 +32,7 @@ const createExecutionHandlerParams = {
   getBasePath: jest.fn().mockReturnValue(undefined),
   alertType,
   logger: loggingServiceMock.create().get(),
+  eventLogger: eventLoggerMock.create(),
   actions: [
     {
       id: '1',
@@ -75,6 +77,36 @@ test('calls actionsPlugin.execute per selected action', async () => {
           },
         ]
     `);
+
+  const eventLogger = createExecutionHandlerParams.eventLogger;
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-action",
+          },
+          "kibana": Object {
+            "alerting": Object {
+              "instance_id": "2",
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "type": "alert",
+              },
+              Object {
+                "id": "1",
+                "type": "action",
+              },
+            ],
+          },
+          "message": "alert: test:1: 'name-of-alert' instanceId: '2' scheduled actionGroup: 'default' action: test:1",
+        },
+      ],
+    ]
+  `);
 });
 
 test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {

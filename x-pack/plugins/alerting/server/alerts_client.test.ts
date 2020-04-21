@@ -30,6 +30,7 @@ const alertsClientParams = {
   invalidateAPIKey: jest.fn(),
   logger: loggingServiceMock.create().get(),
   encryptedSavedObjectsPlugin: encryptedSavedObjects,
+  preconfiguredActions: [],
 };
 
 beforeEach(() => {

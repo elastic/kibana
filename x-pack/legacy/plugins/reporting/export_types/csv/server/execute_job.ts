@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import Hapi from 'hapi';
 import { IUiSettingsClient, KibanaRequest } from '../../../../../../../src/core/server';
-import { CSV_JOB_TYPE } from '../../../common/constants';
+import { CSV_JOB_TYPE, CSV_BOM_CHARS } from '../../../common/constants';
 import { ReportingCore } from '../../../server/core';
 import { cryptoFactory } from '../../../server/lib';
 import { getFieldFormats } from '../../../server/services';
@@ -43,9 +43,18 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
     } = job;
 
     const decryptHeaders = async () => {
-      let decryptedHeaders;
       try {
-        decryptedHeaders = await crypto.decrypt(headers);
+        if (typeof headers !== 'string') {
+          throw new Error(
+            i18n.translate(
+              'xpack.reporting.exportTypes.csv.executeJob.missingJobHeadersErrorMessage',
+              {
+                defaultMessage: 'Job headers are missing',
+              }
+            )
+          );
+        }
+        return await crypto.decrypt(headers);
       } catch (err) {
         logger.error(err);
         throw new Error(
@@ -58,7 +67,6 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
           )
         ); // prettier-ignore
       }
-      return decryptedHeaders;
     };
 
     const fakeRequest = KibanaRequest.from({
@@ -113,7 +121,9 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
     ]);
 
     const generateCsv = createGenerateCsv(jobLogger);
-    const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv({
+    const bom = config.get('csv', 'useByteOrderMarkEncoding') ? CSV_BOM_CHARS : '';
+
+    const { content, maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv({
       searchRequest,
       fields,
       metaFields,
@@ -126,15 +136,18 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
         checkForFormulas: config.get('csv', 'checkForFormulas'),
         maxSizeBytes: config.get('csv', 'maxSizeBytes'),
         scroll: config.get('csv', 'scroll'),
+        escapeFormulaValues: config.get('csv', 'escapeFormulaValues'),
       },
     });
 
+    // @TODO: Consolidate these one-off warnings into the warnings array (max-size reached and csv contains formulas)
     return {
       content_type: 'text/csv',
-      content,
+      content: bom + content,
       max_size_reached: maxSizeReached,
       size,
       csv_contains_formulas: csvContainsFormulas,
+      warnings,
     };
   };
 };

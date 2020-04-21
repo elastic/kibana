@@ -105,7 +105,7 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
   sortOrder: 'desc',
 };
 
-const initialData: AllCases = {
+export const initialData: AllCases = {
   cases: [],
   countClosedCases: null,
   countOpenCases: null,
@@ -113,7 +113,7 @@ const initialData: AllCases = {
   perPage: 0,
   total: 0,
 };
-interface UseGetCases extends UseGetCasesState {
+export interface UseGetCases extends UseGetCasesState {
   dispatchUpdateCaseProperty: ({
     updateKey,
     updateValue,
@@ -121,7 +121,7 @@ interface UseGetCases extends UseGetCasesState {
     version,
     refetchCasesStatus,
   }: UpdateCase) => void;
-  refetchCases: (filters: FilterOptions, queryParams: QueryParams) => void;
+  refetchCases: () => void;
   setFilters: (filters: Partial<FilterOptions>) => void;
   setQueryParams: (queryParams: Partial<QueryParams>) => void;
   setSelectedCases: (mySelectedCases: Case[]) => void;

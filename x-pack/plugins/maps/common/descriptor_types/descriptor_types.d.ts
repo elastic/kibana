@@ -9,6 +9,11 @@ import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER, SCALING_TYPES } from 
 import { VectorStyleDescriptor } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 
+export type AttributionDescriptor = {
+  attributionText?: string;
+  attributionUrl?: string;
+};
+
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
@@ -84,16 +89,39 @@ export type WMSSourceDescriptor = {
   attributionUrl: string;
 };
 
-export type XYZTMSSourceDescriptor = {
-  id: string;
-  type: string;
+export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
+  AttributionDescriptor & {
+    urlTemplate: string;
+  };
+
+export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & {
   urlTemplate: string;
+  layerName: string;
+
+  // These are the min/max zoom levels of the availability of the a particular layerName in the tileset at urlTemplate.
+  // These are _not_ the visible zoom-range of the data on a map.
+  // Tiled data can be displayed at higher levels of zoom than that they are stored in the tileset.
+  // e.g. EMS basemap data from level 14 is at most detailed resolution and can be displayed at higher levels
+  minSourceZoom: number;
+  maxSourceZoom: number;
 };
 
 export type JoinDescriptor = {
   leftField: string;
   right: ESTermSourceDescriptor;
 };
+
+export type SourceDescriptor =
+  | XYZTMSSourceDescriptor
+  | WMSSourceDescriptor
+  | KibanaTilemapSourceDescriptor
+  | KibanaRegionmapSourceDescriptor
+  | ESTermSourceDescriptor
+  | ESSearchSourceDescriptor
+  | ESGeoGridSourceDescriptor
+  | EMSFileSourceDescriptor
+  | ESPewPewSourceDescriptor
+  | TiledSingleLayerVectorSourceDescriptor;
 
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
@@ -104,7 +132,7 @@ export type LayerDescriptor = {
   label?: string;
   minZoom?: number;
   maxZoom?: number;
-  sourceDescriptor: AbstractSourceDescriptor;
+  sourceDescriptor: SourceDescriptor;
   type?: string;
   visible?: boolean;
 };

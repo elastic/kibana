@@ -8,32 +8,12 @@ import { HttpSetup } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../constants';
 import { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../types';
 
-// We are assuming there won't be many actions. This is why we will load
-// all the actions in advance and assume the total count to not go over 100 or so.
-// We'll set this max setting assuming it's never reached.
-const MAX_ACTIONS_RETURNED = 10000;
-
 export async function loadActionTypes({ http }: { http: HttpSetup }): Promise<ActionType[]> {
   return await http.get(`${BASE_ACTION_API_PATH}/types`);
 }
 
-export async function loadAllActions({
-  http,
-}: {
-  http: HttpSetup;
-}): Promise<{
-  page: number;
-  perPage: number;
-  total: number;
-  data: ActionConnector[];
-}> {
-  return await http.get(`${BASE_ACTION_API_PATH}/_find`, {
-    query: {
-      per_page: MAX_ACTIONS_RETURNED,
-      sort_field: 'name.keyword',
-      sort_order: 'asc',
-    },
-  });
+export async function loadAllActions({ http }: { http: HttpSetup }): Promise<ActionConnector[]> {
+  return await http.get(`${BASE_ACTION_API_PATH}/_getAll`);
 }
 
 export async function createActionConnector({

@@ -326,7 +326,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.clickOptionalAddNewButton();
+        await this.clickAddNewIndexPatternButton();
         if (!isStandardIndexPattern) {
           await this.clickCreateNewRollupButton();
         }
@@ -356,11 +356,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await this.getIndexPatternIdFromUrl();
     }
 
-    // adding a method to check if the create index pattern button is visible when more than 1 index pattern is present
-    async clickOptionalAddNewButton() {
-      if (await testSubjects.isDisplayed('createIndexPatternButton')) {
-        await testSubjects.click('createIndexPatternButton');
-      }
+    async clickAddNewIndexPatternButton() {
+      await testSubjects.click('createIndexPatternButton');
     }
 
     async clickCreateNewRollupButton() {

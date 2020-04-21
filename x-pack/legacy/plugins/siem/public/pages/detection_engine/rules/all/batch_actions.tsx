@@ -14,13 +14,15 @@ import {
   enableRulesAction,
   exportRulesAction,
 } from './actions';
-import { ActionToaster } from '../../../../components/toasters';
+import { ActionToaster, displayWarningToast } from '../../../../components/toasters';
 import { Rule } from '../../../../containers/detection_engine/rules';
+import * as detectionI18n from '../../translations';
 
 interface GetBatchItems {
   closePopover: () => void;
   dispatch: Dispatch<Action>;
   dispatchToaster: Dispatch<ActionToaster>;
+  hasMlPermissions: boolean;
   loadingRuleIds: string[];
   reFetchRules: (refreshPrePackagedRule?: boolean) => void;
   rules: Rule[];
@@ -31,6 +33,7 @@ export const getBatchItems = ({
   closePopover,
   dispatch,
   dispatchToaster,
+  hasMlPermissions,
   loadingRuleIds,
   reFetchRules,
   rules,
@@ -57,7 +60,22 @@ export const getBatchItems = ({
         const deactivatedIds = selectedRuleIds.filter(
           id => !rules.find(r => r.id === id)?.enabled ?? false
         );
-        await enableRulesAction(deactivatedIds, true, dispatch, dispatchToaster);
+
+        const deactivatedIdsNoML = deactivatedIds.filter(
+          id => rules.find(r => r.id === id)?.type !== 'machine_learning' ?? false
+        );
+
+        const mlRuleCount = deactivatedIds.length - deactivatedIdsNoML.length;
+        if (!hasMlPermissions && mlRuleCount > 0) {
+          displayWarningToast(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount), dispatchToaster);
+        }
+
+        await enableRulesAction(
+          hasMlPermissions ? deactivatedIds : deactivatedIdsNoML,
+          true,
+          dispatch,
+          dispatchToaster
+        );
       }}
     >
       {i18n.BATCH_ACTION_ACTIVATE_SELECTED}

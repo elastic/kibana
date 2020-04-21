@@ -5,6 +5,7 @@
  */
 import { EuiCallOut, EuiConfirmModal, EuiOverlayMask, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface ConfirmPackageInstallProps {
   onCancel: () => void;
@@ -17,18 +18,46 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
-        title={`Install ${packageName}?`}
+        title={
+          <FormattedMessage
+            id="xpack.ingestManager.integrations.settings.confirmInstallModal.installTitle"
+            defaultMessage="Install {packageName}"
+            values={{ packageName }}
+          />
+        }
         onCancel={onCancel}
         onConfirm={onConfirm}
-        cancelButtonText="Cancel"
-        confirmButtonText="Install package"
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.ingestManager.integrations.settings.confirmInstallModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.ingestManager.integrations.settings.confirmInstallModal.installButtonLabel"
+            defaultMessage="Install {packageName}"
+            values={{ packageName }}
+          />
+        }
         defaultFocusedButton="confirm"
       >
-        <EuiCallOut title={`This package will install ${numOfAssets} assets.`} />
+        <EuiCallOut
+          iconType="iInCircle"
+          title={
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.settings.confirmInstallModal.installCalloutTitle"
+              defaultMessage="This action will install {numOfAssets} assets"
+              values={{ numOfAssets }}
+            />
+          }
+        />
         <EuiSpacer size="l" />
         <p>
-          and will only be accessible to users who have permission to view this Space. Elasticsearch
-          assets are installed globally and will be accessible to all Kibana users.
+          <FormattedMessage
+            id="xpack.ingestManager.integrations.settings.confirmInstallModal.installDescription"
+            defaultMessage="Kibana assets will be installed in the current Space (Default) and will only be accessible to users who have permission to view this Space. Elasticsearch assets are installed globally and will be accessible to all Kibana users."
+          />
         </p>
       </EuiConfirmModal>
     </EuiOverlayMask>

@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { createHashHistory } from 'history';
 import { DiscoverServices } from './build_services';
+import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
+import { search } from '../../../../../plugins/data/public';
 
 let angularModule: any = null;
 let services: DiscoverServices | null = null;
@@ -50,10 +53,11 @@ export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
   setTrackedUrl: (url: string) => void;
 }>('urlTracker');
 
-// EXPORT legacy static dependencies, should be migrated when available in a new version;
-export { wrapInI18nContext } from 'ui/i18n';
-import { search } from '../../../../../plugins/data/public';
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/common';
+/**
+ * Makes sure discover and context are using one instance of history
+ */
+export const getHistory = _.once(() => createHashHistory());
+
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
 export {
   unhashUrl,
@@ -78,5 +82,3 @@ export {
   EsQuerySortValue,
   SortDirection,
 } from '../../../../../plugins/data/public';
-// @ts-ignore
-export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

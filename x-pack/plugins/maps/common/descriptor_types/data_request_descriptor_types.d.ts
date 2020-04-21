@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
 import { MapExtent, MapQuery } from './map_descriptor';
 
 // Global map state passed to every layer.
@@ -18,12 +19,26 @@ export type MapFilters = {
   zoom: number;
 };
 
+type ESSearchSourceSyncMeta = {
+  sortField: string;
+  sortOrder: SORT_ORDER;
+  scalingType: SCALING_TYPES;
+  topHitsSplitField: string;
+  topHitsSize: number;
+};
+
+type ESGeoGridSourceSyncMeta = {
+  requestType: RENDER_AS;
+};
+
+export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncMeta | null;
+
 export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
   fieldNames: string[];
-  geogridPrecision: number;
+  geogridPrecision?: number;
   sourceQuery: MapQuery;
-  sourceMeta: unknown;
+  sourceMeta: VectorSourceSyncMeta;
 };
 
 export type VectorStyleRequestMeta = MapFilters & {
@@ -50,7 +65,7 @@ export type DataMeta = Partial<VectorSourceRequestMeta> &
 
 export type DataRequestDescriptor = {
   dataId: string;
-  dataMetaAtStart?: DataMeta;
+  dataMetaAtStart?: DataMeta | null;
   dataRequestToken?: symbol;
   data?: object;
   dataMeta?: DataMeta;

@@ -7,9 +7,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ApolloProvider } from 'react-apollo';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { BehaviorSubject } from 'rxjs';
-import { pluck } from 'rxjs/operators';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 
 // TODO use theme provided from parentApp when kibana supports it
@@ -17,9 +14,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EuiThemeProvider } from '../../../observability/public/typings/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
-import { createStore } from '../store';
 import { ApolloClientContext } from '../utils/apollo_context';
-import { ReduxStateContextProvider } from '../utils/redux_context';
 import { HistoryContext } from '../utils/history_context';
 import {
   useUiSetting$,

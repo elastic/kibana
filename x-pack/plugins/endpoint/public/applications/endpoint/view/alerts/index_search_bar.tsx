@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { memo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
@@ -14,11 +14,18 @@ import { urlFromQueryParams } from './url_from_query_params';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import * as selectors from '../../store/alerts/selectors';
 import { EndpointPluginServices } from '../../../../plugin';
+import { clone } from '../../models/index_pattern';
 
 export const AlertIndexSearchBar = memo(() => {
   const history = useHistory();
   const queryParams = useAlertListSelector(selectors.uiQueryParams);
   const searchBarIndexPatterns = useAlertListSelector(selectors.searchBarIndexPatterns);
+
+  // Deeply clone the search bar index patterns as the receiving component may mutate them
+  const clonedSearchBarIndexPatterns = useMemo(
+    () => searchBarIndexPatterns.map(pattern => clone(pattern)),
+    [searchBarIndexPatterns]
+  );
   const searchBarQuery = useAlertListSelector(selectors.searchBarQuery);
   const searchBarDateRange = useAlertListSelector(selectors.searchBarDateRange);
   const searchBarFilters = useAlertListSelector(selectors.searchBarFilters);
@@ -68,7 +75,7 @@ export const AlertIndexSearchBar = memo(() => {
           dataTestSubj="alertsSearchBar"
           appName="endpoint"
           isLoading={false}
-          indexPatterns={searchBarIndexPatterns}
+          indexPatterns={clonedSearchBarIndexPatterns}
           query={searchBarQuery}
           dateRangeFrom={searchBarDateRange.from}
           dateRangeTo={searchBarDateRange.to}

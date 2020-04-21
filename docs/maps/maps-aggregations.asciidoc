@@ -20,6 +20,8 @@ You can add the following metric aggregations:
 
 * *Sum.* The total value.
 
+* *Top term.* The most common value.
+
 * *Unique count.* The number of distinct values.
 
 Use aggregated layers with document layers to show aggregated views when the map shows larger
@@ -37,14 +39,24 @@ image::maps/images/grid_to_docs.gif[]
 
 The *Grid aggregation* source uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[GeoTile grid aggregation] to group your documents into grids. You can calculate metrics for each gridded cell.
 
-You can symbolize grid aggregation metrics as:
+Symbolize grid aggregation metrics as:
+
+*Clusters*:: Creates a <<vector-layer, vector layer>> with a cluster symbol for each gridded cell.
+The cluster location is the weighted centroid for all geo-points in the gridded cell.
 
 *Grid rectangles*:: Creates a <<vector-layer, vector layer>> with a bounding box polygon for each gridded cell.
 
 *Heat map*:: Creates a <<heatmap-layer, heat map layer>> that clusters the weighted centroids for each gridded cell.
 
-*Clusters*:: Creates a <<vector-layer, vector layer>> with a cluster symbol for each gridded cell.
-The cluster location is the weighted centroid for all geo-points in the gridded cell.
+To enable grid aggregation:
+
+. Click *Add layer*, then select the *Grid aggregation* source.
+
+To enable a blended layer that dynamically shows clusters or documents:
+
+. Click *Add layer*, then select the *Documents* source.
+. Configure *Index pattern* and the *Geospatial field*. To enable clustering, the *Geospatial field* must be set to a field mapped as {ref}/geo-point.html[geo_point].
+. In *Scaling*, select *Show clusters when results exceed 10000*.
 
 
 [role="xpack"]
@@ -55,10 +67,11 @@ You can display the most relevant documents per entity, for example, the most re
 To get this data, {es} first groups your data using a {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation],
 then accumulates the most relevant documents based on sort order for each entry using a {ref}/search-aggregations-metrics-top-hits-aggregation.html[top hits metric aggregation].
 
-Top hits per entity is available for <<vector-layer, vector layers>> with *Documents* source.
 To enable top hits:
 
-. In *Sorting*, select the *Show documents per entity* checkbox.
+. Click *Add layer* button and select *Documents* source.
+. Configure *Index pattern* and *Geospatial field*.
+. In *Scaling*, select *Show top hits per entity*.
 . Set *Entity* to the field that identifies entities in your documents.
 This field will be used in the terms aggregation to group your documents into entity buckets.
 . Set *Documents per entity* to configure the maximum number of documents accumulated per entity.

@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformSourceSelectionProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async assertSourceListContainsEntry(sourceName: string) {
@@ -23,8 +24,10 @@ export function TransformSourceSelectionProvider({ getService }: FtrProviderCont
 
     async selectSource(sourceName: string) {
       await this.filterSourceSelection(sourceName);
-      await testSubjects.clickWhenNotDisabled(`savedObjectTitle${sourceName}`);
-      await testSubjects.existOrFail('transformPageCreateTransform');
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(`savedObjectTitle${sourceName}`);
+        await testSubjects.existOrFail('transformPageCreateTransform', { timeout: 10 * 1000 });
+      });
     },
   };
 }

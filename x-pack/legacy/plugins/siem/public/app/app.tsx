@@ -20,7 +20,7 @@ import { pluck } from 'rxjs/operators';
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../lib/kibana';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
-import { DEFAULT_DARK_MODE } from '../../common/constants';
+import { DEFAULT_DARK_MODE } from '../../../../../plugins/siem/common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
 import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs, AppApolloClient } from '../lib/lib';

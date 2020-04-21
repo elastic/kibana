@@ -80,7 +80,7 @@ export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
       // Avoid reseting the form on component mount.
       didMountRef.current = true;
     }
-  }, [defaultValue, form]);
+  }, [defaultValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {
@@ -90,7 +90,7 @@ export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
   }, [dispatch]);
 
   return (
-    <>
+    <div data-test-subj="dynamicTemplates">
       <EuiText size="s" color="subdued">
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dynamicTemplatesDescription"
@@ -113,6 +113,7 @@ export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
           component={JsonEditorField}
           componentProps={{
             euiCodeEditorProps: {
+              ['data-test-subj']: 'dynamicTemplatesEditor',
               height: '600px',
               'aria-label': i18n.translate(
                 'xpack.idxMgmt.mappingsEditor.dynamicTemplatesEditorAriaLabel',
@@ -124,6 +125,6 @@ export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
           }}
         />
       </Form>
-    </>
+    </div>
   );
 });
