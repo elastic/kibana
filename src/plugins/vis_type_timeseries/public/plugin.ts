@@ -32,13 +32,16 @@ import {
   setFieldFormats,
   setCoreStart,
   setDataStart,
+  setChartsSetup,
 } from './services';
 import { DataPublicPluginStart } from '../../data/public';
+import { ChartsPluginSetup } from '../../charts/public';
 
 /** @internal */
 export interface MetricsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  charts: ChartsPluginSetup;
 }
 
 /** @internal */
@@ -56,10 +59,11 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations }: MetricsPluginSetupDependencies
+    { expressions, visualizations, charts }: MetricsPluginSetupDependencies
   ) {
     expressions.registerFunction(createMetricsFn);
     setUISettings(core.uiSettings);
+    setChartsSetup(charts);
     visualizations.createReactVisualization(metricsVisDefinition);
   }
 
