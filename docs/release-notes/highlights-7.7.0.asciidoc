@@ -44,7 +44,7 @@ image:release-notes/images/7-7-canvas-and-lens.png[Embedded maps in Canvas]
 [[lens-filtering-highlights]]
 === Improved filtering of Lens visualizations in dashboards
 
-Digging into the Lens visualizations in your
+Digging into the Lens visualizations on your
 dashboard just got faster. You can now filter the data in one
 Lens visualization, and immediately apply that filter to all
 Lens visualizations on the dashboard.
@@ -56,8 +56,8 @@ image:release-notes/images/7-7-lens-filter-in-dashboard.png[Filter Lens visualiz
 [[lens-formatting-highlights]]
 === Number formatting in Lens
 
-To more accurately display the data in Lens visualizations,
-try out the new number formats. A new dropdown has options for formatting
+To accurately display the data in Lens visualizations,
+try out the new number formats. The new dropdown has options for formatting
 numbers as percentages
 and bytes. There's also a field for setting how many decimal places to display.
 
@@ -70,7 +70,7 @@ image:release-notes/images/7-7-lens-format-values.png[Formatted values in Lens]
 
 *Elastic Maps* improves the way you work with large amounts of coordinate data.
 With the new default setting, points are clustered on a map until you zoom into an area with
-less than 10,000 discrete points.  Then, you'll automatically see
+less than 10,000 discrete points.  Then, you'll see
 individual points. This feature is useful for map data
 points that are in both dense urban areas and rural locations.
 
@@ -85,7 +85,7 @@ The distance filter is a new way
 to filter map data
 within a specific radius.  Simply select a
 central location, and then draw a circle around it with your mouse.
-The distance filter is in addition to filtering by custom shape or rectangular bound.
+The distance filter is in addition to the tools for filtering data by custom shape and by rectangular bound.
 
 [role="screenshot"]
 image:release-notes/images/7-7-maps-distance-filter.png[Distance filters in Elastic Maps]
@@ -100,7 +100,7 @@ For a complete list of enhancements and other changes, check out the
 // end::notable-highlights[]
 
 [float]
-=== Give 7.6 a try
+=== Give 7.7 a try
 
 Try 7.7 now by deploying {es} and {kib} on
 https://www.elastic.co/cloud/elasticsearch-service/signup[Elastic Cloud] or
