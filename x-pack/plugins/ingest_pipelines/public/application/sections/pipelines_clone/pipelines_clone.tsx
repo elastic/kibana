@@ -22,8 +22,7 @@ export interface ParamProps {
  * to load and set as the source pipeline for the {@link PipelinesCreate} form.
  */
 export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> = props => {
-  const { match } = props;
-  const { sourceName } = match.params;
+  const { sourceName } = props.match.params;
   const { services } = useKibana();
 
   const { error, data: pipeline, isLoading, isInitialRequest } = services.api.useLoadPipeline(
