@@ -53,6 +53,8 @@ const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
 const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
 const REACT_INDEX_HEADER_DOM_ELEMENT_ID = 'reactIndexHeader';
 
+const EDIT_FIELD_PATH = '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}';
+
 function updateSourceFiltersTable($scope) {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_SOURCE_FILTERS_DOM_ELEMENT_ID);
@@ -101,8 +103,8 @@ function updateScriptedFieldsTable($scope) {
           fieldFilter={$scope.fieldFilter}
           scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
           helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.changeToRoute(obj, route);
+            redirectToRoute: field => {
+              $scope.kbnUrl.changePath(EDIT_FIELD_PATH, field);
               $scope.$apply();
             },
             getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
@@ -144,8 +146,8 @@ function updateIndexedFieldsTable($scope) {
           fieldWildcardMatcher={$scope.fieldWildcardMatcher}
           indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
           helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.changeToRoute(obj, route);
+            redirectToRoute: field => {
+              $scope.kbnUrl.changePath(EDIT_FIELD_PATH, field);
               $scope.$apply();
             },
             getFieldInfo: $scope.getFieldInfo,
