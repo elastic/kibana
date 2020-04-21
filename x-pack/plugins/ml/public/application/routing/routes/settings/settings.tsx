@@ -17,7 +17,7 @@ import { useResolver } from '../../use_resolver';
 import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license';
 import {
-  checkGetJobsCapabilities,
+  checkGetJobsCapabilitiesResolver,
   checkPermission,
 } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
@@ -35,7 +35,7 @@ export const settingsRoute: MlRoute = {
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
-    checkGetJobsCapabilities,
+    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
     getMlNodeCount,
   });
 

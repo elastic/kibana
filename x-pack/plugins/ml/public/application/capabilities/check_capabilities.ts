@@ -14,7 +14,7 @@ import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 // manage_ml requires all monitor and admin cluster privileges: https://github.com/elastic/elasticsearch/blob/664a29c8905d8ce9ba8c18aa1ed5c5de93a0eabc/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/privilege/ClusterPrivilege.java#L53
-export function checkGetManagementMlJobs() {
+export function checkGetManagementMlJobsResolver() {
   return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
     getManageMlCapabilities().then(
       ({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
@@ -33,7 +33,7 @@ export function checkGetManagementMlJobs() {
   });
 }
 
-export function checkGetJobsCapabilities(): Promise<MlCapabilities> {
+export function checkGetJobsCapabilitiesResolver(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
     getCapabilities().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       _capabilities = capabilities;
@@ -52,7 +52,7 @@ export function checkGetJobsCapabilities(): Promise<MlCapabilities> {
   });
 }
 
-export function checkCreateJobsCapabilities(): Promise<MlCapabilities> {
+export function checkCreateJobsCapabilitiesResolver(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
     getCapabilities().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       _capabilities = capabilities;
@@ -71,7 +71,7 @@ export function checkCreateJobsCapabilities(): Promise<MlCapabilities> {
   });
 }
 
-export function checkFindFileStructurePrivilege(): Promise<MlCapabilities> {
+export function checkFindFileStructurePrivilegeResolver(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
     getCapabilities().then(({ capabilities }) => {
       _capabilities = capabilities;
