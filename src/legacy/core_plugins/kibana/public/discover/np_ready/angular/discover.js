@@ -57,7 +57,6 @@ const {
   core,
   chrome,
   data,
-  docTitle,
   history: getHistory,
   indexPatterns,
   filterManager,
@@ -217,6 +216,7 @@ function discoverController(
     isAppStateDirty,
     kbnUrlStateStorage,
     getPreviousAppState,
+    resetInitialAppState,
   } = getState({
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
@@ -376,6 +376,8 @@ function discoverController(
             // If the save wasn't successful, put the original values back.
             if (!response.id || response.error) {
               savedSearch.title = currentTitle;
+            } else {
+              resetInitialAppState();
             }
             return response;
           });
@@ -761,7 +763,7 @@ function discoverController(
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
-            docTitle.change(savedSearch.lastSavedTitle);
+            chrome.docTitle.change(savedSearch.lastSavedTitle);
           }
         }
       });
