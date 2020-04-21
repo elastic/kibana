@@ -108,7 +108,7 @@ To clone an existing panel open the panel menu of the element you wish to clone 
 
 * Cloned panels appear beside the original, and will move other panels down to make room if necessary.
 
-* Clones Support all of the original panel's functionality, including re-naming, editing, and cloning.
+* Clones support all of the original panel's functionality, including renaming, editing, and cloning.
 
 * All cloned visualizations will appear in the visualization list.
 
