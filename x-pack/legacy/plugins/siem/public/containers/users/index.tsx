@@ -10,7 +10,7 @@ import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 import { compose } from 'redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import { DEFAULT_INDEX_KEY } from '../../../../../../plugins/siem/common/constants';
 import { GetUsersQuery, FlowTarget, PageInfoPaginated, UsersEdges } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { withKibana, WithKibanaProps } from '../../lib/kibana';
