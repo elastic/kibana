@@ -86,7 +86,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
               timeline_id: timelineId,
               timeline_title: timelineTitle,
               version,
-              lists,
+              exceptions_list,
             } = payloadRule;
             const ruleIdOrUuid = ruleId ?? uuid.v4();
             try {
@@ -143,7 +143,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 references,
                 note,
                 version,
-                lists,
+                exceptions_list,
                 actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is set to rule, otherwise we are a notification and should not enable it,
               });
 
