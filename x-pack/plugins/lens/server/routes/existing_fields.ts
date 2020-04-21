@@ -258,6 +258,8 @@ async function fetchIndexPatternStats({
   return result.hits.hits;
 }
 
+// Recursive function to determine if the _source of a document
+// contains a known path.
 function exists(obj: unknown, path: string[], i = 0): boolean {
   if (obj == null) {
     return false;
@@ -272,6 +274,22 @@ function exists(obj: unknown, path: string[], i = 0): boolean {
   }
 
   if (typeof obj === 'object') {
+    // Because Elasticsearch flattens paths, dots in the field name are allowed
+    // as JSON keys. For example, { 'a.b': 10 }
+    const partialKeyMatches = Object.getOwnPropertyNames(obj)
+      .map(key => key.split('.'))
+      .filter(keyPaths => keyPaths.every((key, keyIndex) => key === path[keyIndex + i]));
+
+    if (partialKeyMatches.length) {
+      return partialKeyMatches.every(keyPaths => {
+        return exists(
+          (obj as Record<string, unknown>)[keyPaths.join('.')],
+          path,
+          i + keyPaths.length
+        );
+      });
+    }
+
     return exists((obj as Record<string, unknown>)[path[i]], path, i + 1);
   }
 

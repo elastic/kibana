@@ -10,6 +10,12 @@ import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import { MapView } from './inspector/views/map_view';
 import {
   setAutocompleteService,
+  setCore,
+  setCoreChrome,
+  setCoreI18n,
+  setCoreOverlays,
+  setData,
+  setDocLinks,
   setFileUpload,
   setHttp,
   setIndexPatternSelect,
@@ -17,29 +23,43 @@ import {
   setInjectedVarFunc,
   setInspector,
   setLicenseId,
+  setMapsCapabilities,
+  setNavigation,
+  setSavedObjectsClient,
   setTimeFilter,
   setToasts,
+  setUiActions,
   setUiSettings,
+  setVisualizations,
   // @ts-ignore
 } from './kibana_services';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
+// @ts-ignore
+import { getMapsVisTypeAlias } from './maps_vis_type_alias';
+import { registerLayerWizards } from './layers/load_layer_wizards';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
+  home: HomePublicPluginSetup;
+  visualizations: VisualizationsSetup;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
   const { licensing } = plugins;
-  const { injectedMetadata, http } = core;
+  const { injectedMetadata, uiSettings, http, notifications } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
   }
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
   setHttp(http);
-  setUiSettings(core.uiSettings);
-  setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
-  setToasts(core.notifications.toasts);
+  setToasts(notifications.toasts);
+  setInjectedVarFunc(injectedMetadata.getInjectedVar);
+  setVisualizations(plugins.visualizations);
+  setUiSettings(uiSettings);
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
@@ -50,6 +70,17 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setTimeFilter(data.query.timefilter.timefilter);
   setIndexPatternService(data.indexPatterns);
   setAutocompleteService(data.autocomplete);
+  setCore(core);
+  setSavedObjectsClient(core.savedObjects.client);
+  setCoreChrome(core.chrome);
+  setCoreOverlays(core.overlays);
+  setMapsCapabilities(core.application.capabilities.maps);
+  setDocLinks(core.docLinks);
+  setData(plugins.data);
+  setUiActions(plugins.uiActions);
+  setNavigation(plugins.navigation);
+  setCoreI18n(core.i18n);
+  registerLayerWizards();
 };
 
 /**
@@ -70,8 +101,15 @@ export class MapsPlugin
       MapsPluginStartDependencies
     > {
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
-    plugins.inspector.registerView(MapView);
+    const { inspector, home, visualizations } = plugins;
+    bindSetupCoreAndPlugins(core, plugins);
+
+    inspector.registerView(MapView);
+    home.featureCatalogue.register(featureCatalogueEntry);
+    visualizations.registerAlias(getMapsVisTypeAlias());
   }
 
-  public start(core: CoreStart, plugins: any) {}
+  public start(core: CoreStart, plugins: any) {
+    bindStartCoreAndPlugins(core, plugins);
+  }
 }

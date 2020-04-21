@@ -9,8 +9,8 @@ import { EuiText } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
+import { isMlRule } from '../../../../../../../../../plugins/siem/common/detection_engine/ml_helpers';
 import { esKuery } from '../../../../../../../../../../src/plugins/data/public';
-import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
 import { FieldValueQueryBar } from '../query_bar';
 import {
   ERROR_CODE,
