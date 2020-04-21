@@ -9,9 +9,10 @@ import {
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
   ALERT_GUARD_RAIL_TYPES,
   ALERT_ACTION_TYPE_EMAIL,
+  ALERT_ACTION_TYPE_LOG,
 } from '../../../../../common/constants';
 import { handleError } from '../../../../lib/errors';
-import { fetchDefaultEmailAddress } from '../../../../lib/alerts/fetch_default_email_address';
+// import { fetchDefaultEmailAddress } from '../../../../lib/alerts/fetch_default_email_address';
 
 export function createEnableGuardRailsRoute(server) {
   server.route({
@@ -35,45 +36,59 @@ export function createEnableGuardRailsRoute(server) {
       },
     },
     async handler(req, res) {
-      const { emailAddress, emailActionId, emailAction } = req.payload;
+      const { emailAddress, emailAction } = req.payload;
       const alertsClient = await req.getAlertsClient();
       const actionsClient = await req.getActionsClient();
 
+      const types = await req.getActionTypeRegistry();
+      const emailType = types.find(type => type.id === ALERT_ACTION_TYPE_EMAIL);
+
       try {
-        // If an email address is provided, store it since we only allow a single
-        // email to function across all Stack Monitoring alerts
-        if (emailAddress) {
-          await req
-            .getUiSettingsService()
-            .set(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS, emailAddress);
-        } else {
-          const storedEmailAddress = await fetchDefaultEmailAddress(req.getUiSettingsService());
-          if (!storedEmailAddress) {
-            return res.badRequest({
-              body:
-                'No email provided and no stored email to use. Please provide one in the request.',
-            });
+        let emailActionId = req.payload.emailActionId;
+
+        // Email requires gold
+        if (emailType && emailType.enabledInLicense) {
+          // If an email address is provided, store it since we only allow a single
+          // email to function across all Stack Monitoring alerts
+          if (emailAddress) {
+            await req
+              .getUiSettingsService()
+              .set(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS, emailAddress);
           }
-        }
-
-        if (!emailActionId && !emailAction) {
-          return res.badRequest({ body: 'No email action provided.' });
-        }
-
-        let actionId = emailActionId;
-        if (!emailActionId && emailAction) {
-          const action = await actionsClient.create({ action: emailAction });
-          actionId = action.id;
-        } else {
-          try {
-            await actionsClient.get({ id: actionId });
-          } catch (err) {
-            if (err.output.statusCode === 404) {
-              return res.badRequest({ body: 'Provided emailActionId is not valid.' });
+          /*else {
+            const storedEmailAddress = await fetchDefaultEmailAddress(req.getUiSettingsService());
+            if (!storedEmailAddress) {
+              return res.badRequest({
+                body:
+                  'No email provided and no stored email to use. Please provide one in the request.',
+              });
             }
-            throw err;
+          }*/
+
+          // if (!emailActionId && !emailAction) {
+          //   return res.badRequest({ body: 'No email action provided.' });
+          // }
+
+          if (!emailActionId && emailAction) {
+            const action = await actionsClient.create({ action: emailAction });
+            emailActionId = action.id;
+          } else if (emailActionId) {
+            try {
+              await actionsClient.get({ id: emailActionId });
+            } catch (err) {
+              if (err.output.statusCode === 404) {
+                return res.badRequest({ body: 'Provided emailActionId is not valid.' });
+              }
+              throw err;
+            }
           }
         }
+
+        const serverLogAction = await actionsClient.create({
+          action: {
+            actionTypeId: ALERT_ACTION_TYPE_LOG,
+          },
+        });
 
         const createdAlerts = [];
         for (const type of ALERT_GUARD_RAIL_TYPES) {
@@ -88,6 +103,28 @@ export function createEnableGuardRailsRoute(server) {
             continue;
           }
 
+          const actions = [
+            {
+              group: 'default',
+              id: serverLogAction.id,
+              params: {
+                message: '{{context.log_message}}',
+              },
+            },
+          ];
+
+          if (emailActionId) {
+            actions.push({
+              group: 'default',
+              id: emailActionId,
+              params: {
+                subject: '{{context.email_subject}}',
+                message: `{{context.email_message}}`,
+                to: ['{{context.email_to}}'],
+              },
+            });
+          }
+
           const result = await alertsClient.create({
             data: {
               enabled: true,
@@ -95,17 +132,7 @@ export function createEnableGuardRailsRoute(server) {
               alertTypeId: type,
               throttle: '10m', // default
               schedule: { interval: '1m' },
-              actions: [
-                {
-                  group: 'default',
-                  id: actionId,
-                  params: {
-                    subject: '{{context.subject}}',
-                    message: `{{context.message}}`,
-                    to: ['{{context.to}}'],
-                  },
-                },
-              ],
+              actions,
             },
           });
 

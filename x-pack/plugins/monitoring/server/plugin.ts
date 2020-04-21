@@ -346,6 +346,7 @@ export class Plugin {
             payload: req.body,
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
+            getActionTypeRegistry: () => context.actions?.listTypes(),
             getAlertsClient: () => plugins.alerting.getAlertsClientWithRequest(req),
             getActionsClient: () => plugins.actions.getActionsClientWithRequest(req),
             server: {

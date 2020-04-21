@@ -5,7 +5,7 @@
  */
 import moment from 'moment';
 import { Logger } from '../../../../../../src/core/server';
-import { AlertCommonPerClusterState } from '../../alerts/types';
+import { AlertState } from '../../alerts/types';
 import { AlertsClient } from '../../../../alerting/server';
 
 export async function fetchStatus(
@@ -38,21 +38,23 @@ export async function fetchStatus(
           // Now that we have the id, we can get the state
           const states = await alertsClient.getAlertState({ id });
           if (!states || !states.alertTypeState) {
-            // console.log(JSON.stringify(states, null, 2))
             // log.warn(`No alert states found for type ${type} which is unexpected.`);
             return resolve({ type, stateless: true });
           }
 
-          const state = Object.values(states.alertTypeState)[0] as AlertCommonPerClusterState;
-          const isInBetween = moment(state.ui.resolvedMS).isBetween(start, end);
-          if (state.ui.isFiring || isInBetween) {
-            return resolve({
-              type,
-              firing: true,
-              state,
-            });
+          const state = Object.values(states.alertTypeState)[0] as AlertState;
+          if (state) {
+            const isInBetween = moment(state.ui.resolvedMS).isBetween(start, end);
+            if (state.ui.isFiring || isInBetween) {
+              return resolve({
+                type,
+                firing: true,
+                state,
+              });
+            }
+            return resolve({ type, firing: false, state });
           }
-          return resolve({ type, firing: false, state });
+          return resolve({ type, firing: false });
         })
     )
   );

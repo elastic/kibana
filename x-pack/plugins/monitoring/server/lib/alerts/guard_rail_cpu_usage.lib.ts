@@ -28,21 +28,27 @@ import { getMetrics } from '../details/get_metrics';
 // @ts-ignore
 import { prefixIndexPattern } from '../ccs_utils';
 
-const RESOLVED_SUBJECT_TEXT = i18n.translate('xpack.monitoring.alerts.cpuUsage.subject.resolved', {
-  defaultMessage: 'RESOLVED',
-});
+const RESOLVED_SUBJECT_TEXT = i18n.translate(
+  'xpack.monitoring.alerts.cpuUsage.email.subject.resolved',
+  {
+    defaultMessage: 'RESOLVED',
+  }
+);
 
-const NEW_SUBJECT_TEXT = i18n.translate('xpack.monitoring.alerts.cpuUsage.subject.new', {
+const NEW_SUBJECT_TEXT = i18n.translate('xpack.monitoring.alerts.cpuUsage.email.subject.new', {
   defaultMessage: 'NEW',
 });
 
-const SUBJECT = i18n.translate('xpack.monitoring.alerts.cpuUsage.subject', {
+const SUBJECT = i18n.translate('xpack.monitoring.alerts.cpuUsage.email.subject', {
   defaultMessage: 'X-Pack Monitoring: CPU Usage exceeded threshold',
 });
 
-const RESOLVED_MESSAGE_TEXT = i18n.translate('xpack.monitoring.alerts.cpuUsage.message.resolved', {
-  defaultMessage: 'This cluster alert has been resolved: ',
-});
+const RESOLVED_MESSAGE_TEXT = i18n.translate(
+  'xpack.monitoring.alerts.cpuUsage.email.message.resolved',
+  {
+    defaultMessage: 'This cluster alert has been resolved: ',
+  }
+);
 
 function tokenize(
   message: string,
@@ -86,7 +92,7 @@ export function executeActions(
   const message = tokenize(
     `${alertState.ui.isFiring ? '' : RESOLVED_MESSAGE_TEXT} ${config.alerts.cpu_usage.email
       .message ||
-      i18n.translate('xpack.monitoring.alerts.cpuUsage.message', {
+      i18n.translate('xpack.monitoring.alerts.cpuUsage.email.message', {
         defaultMessage: `We detected that **{nodeName}** in **{clusterName}** is reporting cpu usage of **{cpuUsage}%**. [Click to view more]({url})`,
         values: defaults,
       })}`,
@@ -94,10 +100,22 @@ export function executeActions(
     defaults
   );
 
+  const logMessage = tokenize(
+    `${alertState.ui.isFiring ? '' : RESOLVED_MESSAGE_TEXT} ${config.alerts.cpu_usage.email
+      .message ||
+      i18n.translate('xpack.monitoring.alerts.cpuUsage.log.message', {
+        defaultMessage: `We detected that {nodeName} in {clusterName} is reporting cpu usage of {cpuUsage}%. Want to get emails too? Visit the Stack Monitoring UI in Kibana to find out more.`,
+        values: defaults,
+      })}`,
+    config,
+    defaults
+  );
+
   instance.scheduleActions('default', {
-    subject,
-    message,
-    to: emailAddress,
+    email_subject: subject,
+    email_message: message,
+    email_to: emailAddress,
+    log_message: logMessage,
   });
 }
 

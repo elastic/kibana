@@ -268,9 +268,14 @@ export const ALERT_TYPES = [
 
 /**
  * Matches the id for the built-in in email action type
- * See x-pack/legacy/plugins/actions/server/builtin_action_types/email.ts
+ * See x-pack/plugins/actions/server/builtin_action_types/email.ts
  */
 export const ALERT_ACTION_TYPE_EMAIL = '.email';
+/**
+ * Matches the id for the built-in in log action type
+ * See x-pack/plugins/actions/server/builtin_action_types/log.ts
+ */
+export const ALERT_ACTION_TYPE_LOG = '.server-log';
 
 /**
  * The number of alerts that have been migrated
