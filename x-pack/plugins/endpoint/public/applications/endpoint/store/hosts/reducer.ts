@@ -80,6 +80,8 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           ...state,
           location: action.payload,
           loading: true,
+          error: undefined,
+          detailsError: undefined,
         };
       }
     } else if (isCurrentlyOnDetailsPage) {
@@ -89,6 +91,8 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           ...state,
           location: action.payload,
           detailsLoading: true,
+          error: undefined,
+          detailsError: undefined,
         };
       } else {
         // if previous page was not host list or host details, load both list and details
@@ -97,6 +101,8 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           location: action.payload,
           loading: true,
           detailsLoading: true,
+          error: undefined,
+          detailsError: undefined,
         };
       }
     }
@@ -104,6 +110,8 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
     return {
       ...state,
       location: action.payload,
+      error: undefined,
+      detailsError: undefined,
     };
   }
   return state;
