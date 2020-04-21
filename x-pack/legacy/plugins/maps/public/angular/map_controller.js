@@ -86,7 +86,6 @@ import {
   bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
   bindStartCoreAndPlugins as bindNpStartCoreAndPlugins,
 } from '../../../../../plugins/maps/public/plugin'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { deepEquals } from './deep_equals';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
@@ -344,18 +343,14 @@ app.controller(
 
       const savedLayerList = savedMap.getLayerList();
 
-      // return !savedLayerList
-      //   ? !_.isEqual(layerListConfigOnly, initialLayerListConfig)
-      //   : // savedMap stores layerList as a JSON string using JSON.stringify.
-      //     // JSON.stringify removes undefined properties from objects.
-      //     // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
-      //     // Need to perform the same process for layerListConfigOnly to compare apples to apples
-      //     // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
-      //     !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
-
       return !savedLayerList
-        ? !deepEquals(layerListConfigOnly, initialLayerListConfig)
-        : !deepEquals(layerListConfigOnly, savedLayerList);
+        ? !_.isEqual(layerListConfigOnly, initialLayerListConfig)
+        : // savedMap stores layerList as a JSON string using JSON.stringify.
+          // JSON.stringify removes undefined properties from objects.
+          // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
+          // Need to perform the same process for layerListConfigOnly to compare apples to apples
+          // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
+          !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
     }
 
     function isOnMapNow() {
