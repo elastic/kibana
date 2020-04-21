@@ -12,5 +12,4 @@ export const updateTimelineSchema = rt.type({
   timeline: SavedTimelineRuntimeType,
   timelineId: unionWithNullType(rt.string),
   version: unionWithNullType(rt.string),
-  pinndedEventIds: rt.array(unionWithNullType(rt.string)),
 });

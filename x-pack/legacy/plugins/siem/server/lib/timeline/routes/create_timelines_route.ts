@@ -67,12 +67,7 @@ export const createTimelinesRoute = (
         }
 
         // Create timeline
-        const newTimeline = await createTimelines(
-          (frameworkRequest as unknown) as FrameworkRequest,
-          timeline,
-          null,
-          version
-        );
+        const newTimeline = await createTimelines(frameworkRequest, timeline, null, version);
         return response.ok({
           body: {
             data: {
