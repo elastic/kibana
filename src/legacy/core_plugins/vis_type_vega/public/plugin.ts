@@ -53,7 +53,6 @@ export interface VegaPluginSetupDependencies {
   data: ReturnType<DataPublicPlugin['setup']>;
   visTypeVega: VisTypeVegaSetup;
   mapsLegacy: any;
-  kibanaMapFactory: (args: any) => any;
 }
 
 /** @internal */

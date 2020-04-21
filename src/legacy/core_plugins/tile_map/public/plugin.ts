@@ -62,7 +62,7 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
     core: CoreSetup,
     { expressions, visualizations, mapsLegacy, __LEGACY }: TileMapPluginSetupDependencies
   ) {
-    const { getZoomPrecision, getPrecision, serviceSettings } = mapsLegacy;
+    const { getZoomPrecision, getPrecision } = mapsLegacy;
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
       getZoomPrecision,
       getPrecision,
