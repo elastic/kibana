@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type AggConfigOptions = Assign<AggConfigJson, {
+export declare type AggConfigOptions = Assign<AggConfigSerialized, {
     type: IAggType;
 }>;
 ```
