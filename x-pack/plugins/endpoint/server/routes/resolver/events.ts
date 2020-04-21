@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
 import { Fetcher } from './utils/fetch';
+import { IndexPatternRetriever } from '../../index_pattern';
 
 interface EventsQueryParams {
   events: number;
@@ -40,7 +41,10 @@ export const validateEvents = {
   }),
 };
 
-export function handleEvents(log: Logger): RequestHandler<EventsPathParams, EventsQueryParams> {
+export function handleEvents(
+  log: Logger,
+  indexRetriever: IndexPatternRetriever
+): RequestHandler<EventsPathParams, EventsQueryParams> {
   return async (context, req, res) => {
     const {
       params: { id },
@@ -48,8 +52,9 @@ export function handleEvents(log: Logger): RequestHandler<EventsPathParams, Even
     } = req;
     try {
       const client = context.core.elasticsearch.dataClient;
+      const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
-      const fetcher = new Fetcher(client, id, endpointID);
+      const fetcher = new Fetcher(client, id, indexPattern, endpointID);
       const tree = await fetcher.events(events, afterEvent);
 
       return res.ok({

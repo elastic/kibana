@@ -171,7 +171,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
 
     return isIpFieldPopulated({ destinationIp, sourceIp, type }) ||
       hasPorts({ destinationPort, sourcePort, type }) ? (
-      <EuiBadge data-test-subj={`${type}-ip-badge`} color="hollow">
+      <EuiBadge data-test-subj={`${type}-ip-badge`} color="hollow" title="">
         <EuiFlexGroup
           alignItems="center"
           data-test-subj={`${type}-ip-group`}

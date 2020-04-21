@@ -5,10 +5,13 @@
  */
 import { EndpointAppConstants } from '../../../../common/types';
 import { LifecycleQuery } from './lifecycle';
+import { fakeEventIndexPattern } from './children.test';
 
 describe('lifecycle query', () => {
   it('generates the correct legacy queries', () => {
-    expect(new LifecycleQuery('awesome-id').build('5')).toStrictEqual({
+    expect(
+      new LifecycleQuery(EndpointAppConstants.LEGACY_EVENT_INDEX_NAME, 'awesome-id').build('5')
+    ).toStrictEqual({
       body: {
         query: {
           bool: {
@@ -36,7 +39,7 @@ describe('lifecycle query', () => {
   });
 
   it('generates the correct non-legacy queries', () => {
-    expect(new LifecycleQuery().build('baz')).toStrictEqual({
+    expect(new LifecycleQuery(fakeEventIndexPattern).build('baz')).toStrictEqual({
       body: {
         query: {
           bool: {
@@ -56,7 +59,7 @@ describe('lifecycle query', () => {
         size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
-      index: EndpointAppConstants.EVENT_INDEX_NAME,
+      index: fakeEventIndexPattern,
     });
   });
 });

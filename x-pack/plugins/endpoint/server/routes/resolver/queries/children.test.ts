@@ -6,11 +6,17 @@
 import { ChildrenQuery } from './children';
 import { EndpointAppConstants } from '../../../../common/types';
 
+export const fakeEventIndexPattern = 'events-endpoint-*';
+
 describe('children events query', () => {
   it('generates the correct legacy queries', () => {
     const timestamp = new Date().getTime();
     expect(
-      new ChildrenQuery('awesome-id', { size: 1, timestamp, eventID: 'foo' }).build('5')
+      new ChildrenQuery(EndpointAppConstants.LEGACY_EVENT_INDEX_NAME, 'awesome-id', {
+        size: 1,
+        timestamp,
+        eventID: 'foo',
+      }).build('5')
     ).toStrictEqual({
       body: {
         query: {
@@ -63,7 +69,11 @@ describe('children events query', () => {
     const timestamp = new Date().getTime();
 
     expect(
-      new ChildrenQuery(undefined, { size: 1, timestamp, eventID: 'bar' }).build('baz')
+      new ChildrenQuery(fakeEventIndexPattern, undefined, {
+        size: 1,
+        timestamp,
+        eventID: 'bar',
+      }).build('baz')
     ).toStrictEqual({
       body: {
         query: {
@@ -96,7 +106,7 @@ describe('children events query', () => {
         size: 1,
         sort: [{ '@timestamp': 'asc' }, { 'event.id': 'asc' }],
       },
-      index: EndpointAppConstants.EVENT_INDEX_NAME,
+      index: fakeEventIndexPattern,
     });
   });
 });

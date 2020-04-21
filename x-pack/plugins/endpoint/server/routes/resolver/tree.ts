@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
 import { Fetcher } from './utils/fetch';
 import { Tree } from './utils/tree';
+import { IndexPatternRetriever } from '../../index_pattern';
 
 interface TreeQueryParams {
   // the rough approximation of how many children you can request per process, per level
@@ -53,7 +54,10 @@ export const validateTree = {
   }),
 };
 
-export function handleTree(log: Logger): RequestHandler<TreePathParams, TreeQueryParams> {
+export function handleTree(
+  log: Logger,
+  indexRetriever: IndexPatternRetriever
+): RequestHandler<TreePathParams, TreeQueryParams> {
   return async (context, req, res) => {
     const {
       params: { id },
@@ -69,8 +73,9 @@ export function handleTree(log: Logger): RequestHandler<TreePathParams, TreeQuer
     } = req;
     try {
       const client = context.core.elasticsearch.dataClient;
+      const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
-      const fetcher = new Fetcher(client, id, endpointID);
+      const fetcher = new Fetcher(client, id, indexPattern, endpointID);
       const tree = await Tree.merge(
         fetcher.children(children, generations, afterChild),
         fetcher.ancestors(ancestors + 1),

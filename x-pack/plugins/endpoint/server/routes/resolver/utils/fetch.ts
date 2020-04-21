@@ -17,6 +17,7 @@ export class Fetcher {
   constructor(
     private readonly client: IScopedClusterClient,
     private readonly id: string,
+    private readonly indexPattern: string,
     private readonly endpointID?: string
   ) {}
 
@@ -49,7 +50,7 @@ export class Fetcher {
       return;
     }
 
-    const query = new LifecycleQuery(this.endpointID);
+    const query = new LifecycleQuery(this.indexPattern, this.endpointID);
     const { results } = await query.search(this.client, curNode);
 
     if (results.length === 0) {
@@ -65,7 +66,11 @@ export class Fetcher {
   }
 
   private async doEvents(tree: Tree, limit: number, after?: string) {
-    const query = new EventsQuery(this.endpointID, getPaginationParams(limit, after));
+    const query = new EventsQuery(
+      this.indexPattern,
+      this.endpointID,
+      getPaginationParams(limit, after)
+    );
 
     const { totals, results } = await query.search(this.client, this.id);
     tree.addEvent(...results);
@@ -82,8 +87,12 @@ export class Fetcher {
   ) {
     if (levels === 0 || ids.length === 0) return;
 
-    const childrenQuery = new ChildrenQuery(this.endpointID, getPaginationParams(limit, after));
-    const lifecycleQuery = new LifecycleQuery(this.endpointID);
+    const childrenQuery = new ChildrenQuery(
+      this.indexPattern,
+      this.endpointID,
+      getPaginationParams(limit, after)
+    );
+    const lifecycleQuery = new LifecycleQuery(this.indexPattern, this.endpointID);
 
     const { totals, results } = await childrenQuery.search(this.client, ...ids);
     if (results.length === 0) {
@@ -102,7 +111,7 @@ export class Fetcher {
   }
 
   private async doStats(tree: Tree) {
-    const statsQuery = new StatsQuery(this.endpointID);
+    const statsQuery = new StatsQuery(this.indexPattern, this.endpointID);
     const ids = tree.ids();
     const { extras } = await statsQuery.search(this.client, ...ids);
     const alerts = extras?.alerts || {};

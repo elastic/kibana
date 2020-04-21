@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
 import { Fetcher } from './utils/fetch';
+import { IndexPatternRetriever } from '../../index_pattern';
 
 interface AncestryQueryParams {
   ancestors: number;
@@ -39,7 +40,8 @@ export const validateAncestry = {
 };
 
 export function handleAncestry(
-  log: Logger
+  log: Logger,
+  indexRetriever: IndexPatternRetriever
 ): RequestHandler<AncestryPathParams, AncestryQueryParams> {
   return async (context, req, res) => {
     const {
@@ -48,8 +50,9 @@ export function handleAncestry(
     } = req;
     try {
       const client = context.core.elasticsearch.dataClient;
+      const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
-      const fetcher = new Fetcher(client, id, endpointID);
+      const fetcher = new Fetcher(client, id, indexPattern, endpointID);
       const tree = await fetcher.ancestors(ancestors + 1);
 
       return res.ok({

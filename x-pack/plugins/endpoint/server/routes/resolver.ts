@@ -13,6 +13,7 @@ import { handleTree, validateTree } from './resolver/tree';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
+  const indexPatternService = endpointAppContext.indexPatternRetriever;
 
   router.get(
     {
@@ -20,7 +21,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateEvents,
       options: { authRequired: true },
     },
-    handleEvents(log)
+    handleEvents(log, indexPatternService)
   );
 
   router.get(
@@ -29,7 +30,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateChildren,
       options: { authRequired: true },
     },
-    handleChildren(log)
+    handleChildren(log, indexPatternService)
   );
 
   router.get(
@@ -38,7 +39,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateAncestry,
       options: { authRequired: true },
     },
-    handleAncestry(log)
+    handleAncestry(log, indexPatternService)
   );
 
   router.get(
@@ -47,6 +48,6 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateTree,
       options: { authRequired: true },
     },
-    handleTree(log)
+    handleTree(log, indexPatternService)
   );
 }

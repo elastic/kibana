@@ -5,6 +5,7 @@
  */
 import { EndpointAppConstants } from '../../../../common/types';
 import { StatsQuery } from './stats';
+import { fakeEventIndexPattern } from './children.test';
 
 describe('stats query', () => {
   it('generates the correct legacy queries', () => {
@@ -105,7 +106,7 @@ describe('stats query', () => {
   });
 
   it('generates the correct non-legacy queries', () => {
-    expect(new StatsQuery().build('baz')).toStrictEqual({
+    expect(new StatsQuery(fakeEventIndexPattern).build('baz')).toStrictEqual({
       body: {
         size: 0,
         query: {
@@ -181,7 +182,7 @@ describe('stats query', () => {
           },
         },
       },
-      index: EndpointAppConstants.EVENT_INDEX_NAME,
+      index: fakeEventIndexPattern,
     });
   });
 });

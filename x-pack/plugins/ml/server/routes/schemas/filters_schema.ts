@@ -6,14 +6,21 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const createFilterSchema = {
+export const createFilterSchema = schema.object({
   filterId: schema.string(),
   description: schema.maybe(schema.string()),
   items: schema.arrayOf(schema.string()),
-};
+});
 
-export const updateFilterSchema = {
+export const updateFilterSchema = schema.object({
   description: schema.maybe(schema.string()),
   addItems: schema.maybe(schema.arrayOf(schema.string())),
   removeItems: schema.maybe(schema.arrayOf(schema.string())),
-};
+});
+
+export const filterIdSchema = schema.object({
+  /**
+   * ID of the filter
+   */
+  filterId: schema.string(),
+});
