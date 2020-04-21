@@ -12,7 +12,6 @@ import { IFieldType } from 'src/plugins/data/public';
 import { colorTransformer, MetricsExplorerColor } from '../../../../../common/color_palette';
 import { MetricsExplorerMetric } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
-import { isDisplayable } from '../../../../utils/is_displayable';
 
 interface Props {
   autoFocus?: boolean;
@@ -54,9 +53,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
     [onChange, options.aggregation, colors]
   );
 
-  const comboOptions = fields
-    .filter(field => isDisplayable(field))
-    .map(field => ({ label: field.name, value: field.name }));
+  const comboOptions = fields.map(field => ({ label: field.name, value: field.name }));
   const selectedOptions = options.metrics
     .filter(m => m.aggregation !== 'count')
     .map(metric => ({
