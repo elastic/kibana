@@ -31,7 +31,7 @@ import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/r
 import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_route';
 import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
 import { SetupPlugins } from '../plugin';
-import { ConfigType } from '..';
+import { ConfigType } from '../config';
 
 export const initRoutes = (
   router: IRouter,

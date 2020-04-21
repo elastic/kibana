@@ -6,7 +6,7 @@
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { ConfigType } from '../../../..';
+import { ConfigType } from '../../../../config';
 import { ExportRulesRequestParams } from '../../rules/types';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { exportRulesSchema, exportRulesQuerySchema } from '../schemas/export_rules_schema';
