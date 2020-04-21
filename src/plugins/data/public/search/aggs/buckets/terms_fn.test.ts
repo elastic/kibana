@@ -24,7 +24,7 @@ describe('agg_expression_functions', () => {
   describe('aggTerms', () => {
     const fn = functionWrapper(aggTerms());
 
-    it('fills in defaults when only required args are provided', () => {
+    test('fills in defaults when only required args are provided', () => {
       const actual = fn({
         field: 'machine.os.keyword',
         order: 'asc',
@@ -56,7 +56,7 @@ describe('agg_expression_functions', () => {
       `);
     });
 
-    it('includes optional params when they are provided', () => {
+    test('includes optional params when they are provided', () => {
       const actual = fn({
         id: '1',
         enabled: false,
@@ -95,7 +95,7 @@ describe('agg_expression_functions', () => {
       `);
     });
 
-    it('handles orderAgg as a subexpression', () => {
+    test('handles orderAgg as a subexpression', () => {
       const actual = fn({
         field: 'machine.os.keyword',
         order: 'asc',
