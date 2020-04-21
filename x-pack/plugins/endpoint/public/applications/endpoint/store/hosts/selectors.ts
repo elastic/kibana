@@ -45,6 +45,7 @@ export const uiQueryParams: (
         'selected_host',
         'page_size',
         'page_index',
+        'show',
       ];
 
       for (const key of keys) {
@@ -75,5 +76,13 @@ export const hasSelectedHost: (state: Immutable<HostState>) => boolean = createS
   uiQueryParams,
   ({ selected_host: selectedHost }) => {
     return selectedHost !== undefined;
+  }
+);
+
+/** What policy details panel view to show */
+export const showView: (state: HostListState) => 'policy_response' | 'details' = createSelector(
+  uiQueryParams,
+  searchParams => {
+    return searchParams.show === 'policy_response' ? 'policy_response' : 'details';
   }
 );
