@@ -13,13 +13,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/63621
-  describe.skip('host list', function() {
+  describe('host list', function() {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
     before(async () => {
       await esArchiver.load('endpoint/metadata/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts');
       await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.endpoint.waitForTableToHaveData('hostListTable');
     });
 
     it('finds title', async () => {
@@ -121,6 +122,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       after(async () => {
         // reload the data so the other tests continue to pass
         await esArchiver.load('endpoint/metadata/api_feature');
+        await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.endpoint.waitForTableToHaveData('hostListTable');
       });
       it('displays no items found when empty', async () => {
         // get the host list table data and verify message
