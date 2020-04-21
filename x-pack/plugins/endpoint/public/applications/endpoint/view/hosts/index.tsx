@@ -149,7 +149,7 @@ export const HostList = () => {
     <PageView
       viewType="list"
       data-test-subj="hostPage"
-      headerLeft={i18n.translate('xpack.endpoint.hostList.title', { defaultMessage: 'Hosts' })}
+      headerLeft={i18n.translate('xpack.endpoint.host.hosts', { defaultMessage: 'Hosts' })}
     >
       {hasSelectedHost && <HostDetailsFlyout />}
       <EuiText color="subdued" size="xs">
