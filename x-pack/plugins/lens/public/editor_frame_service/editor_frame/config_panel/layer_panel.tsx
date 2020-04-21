@@ -85,7 +85,7 @@ export function LayerPanel(
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
-      <EuiPanel className="lnsConfigPanel__panel" paddingSize="s">
+      <EuiPanel className="lnsLayerPanel" paddingSize="s">
         <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
           <EuiFlexItem grow={false}>
             <LayerSettings
@@ -145,7 +145,7 @@ export function LayerPanel(
           const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
           return (
             <EuiFormRow
-              className="lnsConfigPanel__row"
+              className="lnsLayerPanel__row"
               label={group.groupLabel}
               key={index}
               isInvalid={isMissing}
@@ -161,7 +161,7 @@ export function LayerPanel(
                 {group.accessors.map(accessor => (
                   <DragDrop
                     key={accessor}
-                    className="lnsConfigPanel__dimension"
+                    className="lnsLayerPanel__dimension"
                     data-test-subj={group.dataTestSubj}
                     droppable={
                       dragDropContext.dragging &&
@@ -258,7 +258,7 @@ export function LayerPanel(
                 ))}
                 {group.supportsMoreColumns ? (
                   <DragDrop
-                    className="lnsConfigPanel__dimension"
+                    className="lnsLayerPanel__dimension"
                     data-test-subj={group.dataTestSubj}
                     droppable={
                       dragDropContext.dragging &&
@@ -294,7 +294,7 @@ export function LayerPanel(
                       accessor={newId}
                       groupId={group.groupId}
                       trigger={
-                        <div className="lnsConfigPanel__triggerLink">
+                        <div className="lnsLayerPanel__triggerLink">
                           <EuiButtonEmpty
                             iconType="plusInCircleFilled"
                             data-test-subj="lns-empty-dimension"

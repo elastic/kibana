@@ -29,8 +29,8 @@ export function DimensionPopover({
   const noMatch = popoverState.isOpen ? !groups.some(d => d.accessors.includes(accessor)) : false;
   return (
     <EuiPopover
-      className="lnsConfigPanel__popover"
-      anchorClassName="lnsConfigPanel__trigger"
+      className="lnsDimensionPopover"
+      anchorClassName="lnsDimensionPopover__trigger"
       isOpen={
         popoverState.isOpen &&
         (popoverState.openId === accessor || (noMatch && popoverState.addingToGroupId === groupId))
