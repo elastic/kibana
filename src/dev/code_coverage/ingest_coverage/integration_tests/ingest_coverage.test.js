@@ -57,6 +57,8 @@ describe('Ingesting Coverage to Cluster', () => {
   const justTotalPath = 'jest-combined/coverage-summary-just-total.json';
   const noTotalsPath = 'jest-combined/coverage-summary-NO-total.json';
   const bothIndexesPath = 'jest-combined/coverage-summary-manual-mix.json';
+  const moreThanOneKibanaInPath =
+    'jest-combined/coverage-summary-manual-mix-for-testing-kibana-path-error-dima-found.json';
 
   describe('with NODE_ENV set to "integration_test"', () => {
     describe(`and debug || verbose turned on`, () => {
@@ -117,7 +119,6 @@ describe('Ingesting Coverage to Cluster', () => {
           )
         );
       });
-
       describe(`to both indexes in the same push`, () => {
         const mutableBothIndexesChunks = [];
 
@@ -183,6 +184,36 @@ describe('Ingesting Coverage to Cluster', () => {
             expect(portion).to.contain(commitMsg);
             expect(portion).to.contain(`"Lorem :) ipsum Tre' λ dolor sit amet, consectetur ..."`);
           });
+        });
+      });
+      describe(`when 'kibana' exists in the covered file path more than once`, () => {
+        const chunks = [];
+
+        beforeAll(done => {
+          const ingestAndMutateAsync = ingestAndMutate(done);
+          const ingestAndMutateMoreThanOneKibana = ingestAndMutateAsync(moreThanOneKibanaInPath);
+          const verboseIngestAndMutateAsyncWithPath = ingestAndMutateMoreThanOneKibana(verboseArgs);
+          verboseIngestAndMutateAsyncWithPath(chunks);
+        });
+        it(`should only truncate the first one`, () => {
+          const justUrl = text => x => x.split(text)[1].trim();
+
+          const splitFromText = justUrl('staticSiteUrl:');
+          const actual = siteUrlsSplitByNewLineWithoutBlanks(chunks)
+            .filter(x => x.includes('### staticSiteUrl'))
+            .map(splitFromText)
+            .map(x => {
+              const dropped =
+                'https://kibana-coverage.elastic.dev/2020-03-02T21:11:47Z/jest-combined/';
+              return x.replace(dropped, '');
+            });
+
+          console.log(`\n### actual: \n\t${actual}`);
+
+          expect(actual).to.be(
+            'src/legacy/core_plugins/kibana/public/discover/get_inner_angular.ts'
+          );
+          // /var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/src/legacy/core_plugins/kibana/public/discover/get_inner_angular.ts
         });
       });
     });
