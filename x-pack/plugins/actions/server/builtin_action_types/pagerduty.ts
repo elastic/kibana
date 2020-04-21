@@ -70,18 +70,26 @@ const ParamsSchema = schema.object(
 
 function validateParams(paramsObject: any): string | void {
   const params: ActionParamsType = paramsObject;
-
   const { timestamp } = params;
   if (timestamp != null) {
-    let date;
     try {
-      date = Date.parse(timestamp);
+      const date = Date.parse(timestamp);
+      if (isNaN(date)) {
+        return i18n.translate('xpack.actions.builtin.pagerduty.invalidTimestampErrorMessage', {
+          defaultMessage: `error parsing timestamp "{timestamp}"`,
+          values: {
+            timestamp,
+          },
+        });
+      }
     } catch (err) {
-      return 'error parsing timestamp: ${err.message}';
-    }
-
-    if (isNaN(date)) {
-      return 'error parsing timestamp';
+      return i18n.translate('xpack.actions.builtin.pagerduty.timestampParsingFailedErrorMessage', {
+        defaultMessage: `error parsing timestamp "{timestamp}": {message}`,
+        values: {
+          timestamp,
+          message: err.message,
+        },
+      });
     }
   }
 }
