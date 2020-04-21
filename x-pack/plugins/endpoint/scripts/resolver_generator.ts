@@ -29,7 +29,7 @@ async function main() {
     alertIndex: {
       alias: 'ai',
       describe: 'index to store alerts in',
-      default: '.alerts-endpoint-000001',
+      default: 'events-endpoint-1',
       type: 'string',
     },
     eventIndex: {
