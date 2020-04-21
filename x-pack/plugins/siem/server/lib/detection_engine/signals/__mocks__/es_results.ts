@@ -86,7 +86,7 @@ export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSource
   _id: someUuid,
   _source: {
     someKey: 'someValue',
-    '@timestamp': 'someTimeStamp',
+    '@timestamp': '2020-04-20T21:27:45+0000',
   },
 });
 
@@ -97,7 +97,7 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
   _id: someUuid,
   _source: {
     someKey: 'someValue',
-    '@timestamp': 'someTimeStamp',
+    '@timestamp': '2020-04-20T21:27:45+0000',
   },
 });
 
@@ -109,7 +109,7 @@ export const sampleDocWithSortId = (someUuid: string = sampleIdGuid): SignalSour
   _id: someUuid,
   _source: {
     someKey: 'someValue',
-    '@timestamp': 'someTimeStamp',
+    '@timestamp': '2020-04-20T21:27:45+0000',
   },
   sort: ['1234567891111'],
 });
