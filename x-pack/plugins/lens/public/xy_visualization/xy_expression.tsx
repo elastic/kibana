@@ -30,7 +30,10 @@ import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaDatatableColumn } from '../../../../../src/plugins/expressions/public';
-import { EmbeddableVisTriggerContext } from '../../../../../src/plugins/embeddable/public';
+import {
+  ValueClickTriggerContext,
+  RangeSelectTriggerContext,
+} from '../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { LensMultiTable, FormatFactory } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
@@ -249,29 +252,11 @@ export function XYChart({
 
           const xAxisFieldName = xAxisColumn?.meta?.aggConfigParams?.field;
           const timeFieldName = xDomain && xAxisFieldName;
-
-          // TODO: simplify the context structure: https://github.com/elastic/kibana/issues/62936
-          const context: EmbeddableVisTriggerContext = {
+          const context: RangeSelectTriggerContext = {
             data: {
-              range: [moment(min).toISOString(), moment(max).toISOString()],
-              data: {
-                ordered: {
-                  date: isTimeViz,
-                },
-                series: [
-                  {
-                    values: table.rows.map((row, rowIndex) => ({
-                      xRaw: {
-                        table,
-                        column: table.columns.findIndex(
-                          el => el.id === firstLayerWithData.xAccessor
-                        ), // index of X accessor in the table:
-                        row: rowIndex,
-                      },
-                    })),
-                  },
-                ],
-              },
+              range: [min, max],
+              table,
+              column: table.columns.findIndex(el => el.id === firstLayerWithData.xAccessor),
             },
             timeFieldName,
           };
@@ -316,7 +301,7 @@ export function XYChart({
           const xAxisFieldName = xAxisColumn?.meta?.aggConfigParams?.field;
           const timeFieldName = xDomain && xAxisFieldName;
 
-          const context: EmbeddableVisTriggerContext = {
+          const context: ValueClickTriggerContext = {
             data: {
               data: points.map(point => ({
                 row: point.row,

@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set as _set } from 'lodash/fp';
-import {
-  noteSavedObjectType,
-  pinnedEventSavedObjectType,
-  timelineSavedObjectType,
-} from '../../../../saved_objects';
 import { NoteSavedObject } from '../../../note/types';
 import { PinnedEventSavedObject } from '../../../pinned_event/types';
 import { convertSavedObjectToSavedTimeline } from '../../convert_saved_object_to_savedtimeline';
@@ -30,6 +24,9 @@ import {
   TimelineSavedObject,
 } from '../../types';
 import { transformDataToNdjson } from '../../../../utils/read_stream/create_stream_from_ndjson';
+import { pinnedEventSavedObjectType } from '../../../pinned_event/saved_object_mappings';
+import { noteSavedObjectType } from '../../../note/saved_object_mappings';
+import { timelineSavedObjectType } from '../../saved_object_mappings';
 
 export type TimelineSavedObjectsClient = Pick<
   SavedObjectsClient,

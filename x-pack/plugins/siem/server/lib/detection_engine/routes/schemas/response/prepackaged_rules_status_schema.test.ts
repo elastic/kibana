@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { exactCheck } from './exact_check';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from './__mocks__/utils';
 import { left } from 'fp-ts/lib/Either';
 import {
   PrePackagedRulesStatusSchema,
   prePackagedRulesStatusSchema,
 } from './prepackaged_rules_status_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
+import { exactCheck } from '../../../../../utils/build_validation/exact_check';
+import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
 
 describe('prepackaged_rules_schema', () => {
   beforeAll(() => {
