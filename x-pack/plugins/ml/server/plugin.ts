@@ -71,6 +71,9 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
+    const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
+    const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
+
     plugins.features.registerFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
@@ -97,7 +100,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
                 all: [],
                 read: [],
               },
-              ui: Object.keys(userMlCapabilities),
+              ui: userMlCapabilitiesKeys,
             },
           },
           {
@@ -109,7 +112,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
                 all: [],
                 read: [],
               },
-              ui: Object.keys(adminMlCapabilities),
+              ui: [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys],
             },
           },
         ],
