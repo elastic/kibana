@@ -215,7 +215,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                   label={i18n.translate(
                     'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
                     {
-                      defaultMessage: 'Pre-configured',
+                      defaultMessage: 'Preconfigured',
                     }
                   )}
                   tooltipContent="This connector can't be deleted."
@@ -338,8 +338,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             data-test-subj="createActionButton"
             key="create-action"
             fill
-            iconType="plusInCircle"
-            iconSide="left"
             onClick={() => setAddFlyoutVisibility(true)}
           >
             <FormattedMessage
