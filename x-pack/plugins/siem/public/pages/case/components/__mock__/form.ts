@@ -5,7 +5,7 @@
  */
 import { useForm } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks';
 jest.mock(
-  '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
+  '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
 export const mockFormHook = {
   isSubmitted: false,

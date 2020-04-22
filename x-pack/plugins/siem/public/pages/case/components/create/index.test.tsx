@@ -22,11 +22,11 @@ import { useForm } from '../../../../../../../../src/plugins/es_ui_shared/static
 import { wait } from '../../../../lib/helpers';
 import { SiemPageName } from '../../../home/types';
 jest.mock(
-  '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
+  '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
 jest.mock('../../../../containers/case/use_get_tags');
 jest.mock(
-  '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form_data_provider',
+  '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form_data_provider',
   () => ({
     FormDataProvider: ({ children }: { children: ({ tags }: { tags: string[] }) => void }) =>
       children({ tags: ['rad', 'dude'] }),

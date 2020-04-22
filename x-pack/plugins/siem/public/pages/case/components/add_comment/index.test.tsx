@@ -17,7 +17,7 @@ import { usePostComment } from '../../../../containers/case/use_post_comment';
 import { useForm } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
 import { wait } from '../../../../lib/helpers';
 jest.mock(
-  '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
+  '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
 jest.mock('../../../../components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../../../containers/case/use_post_comment');
