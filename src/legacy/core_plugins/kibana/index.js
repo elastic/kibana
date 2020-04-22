@@ -54,7 +54,6 @@ export default function(kibana) {
     },
 
     uiExports: {
-      hacks: ['plugins/kibana/discover/legacy', 'plugins/kibana/dev_tools'],
       app: {
         id: 'kibana',
         title: 'Kibana',

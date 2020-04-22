@@ -16,13 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+import { formatMsg, formatStack } from '../../../../../kibana_legacy/public';
 
-import { PluginInitializerContext } from 'kibana/public';
-import { DiscoverPlugin } from './plugin';
-
-export { DiscoverSetup, DiscoverStart } from './plugin';
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DiscoverPlugin(initializerContext);
+interface Props {
+  error: Error | string;
 }
 
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
+export function DocViewerError({ error }: Props) {
+  const errMsg = formatMsg(error);
+  const errStack = typeof error === 'object' ? formatStack(error) : '';
+
+  return (
+    <EuiCallOut title={errMsg} color="danger" iconType="cross" data-test-subj="docViewerError">
+      {errStack && <EuiCodeBlock>{errStack}</EuiCodeBlock>}
+    </EuiCallOut>
+  );
+}

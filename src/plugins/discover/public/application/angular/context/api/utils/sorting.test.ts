@@ -16,13 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { reverseSortDir, SortDirection } from './sorting';
 
-import { PluginInitializerContext } from 'kibana/public';
-import { DiscoverPlugin } from './plugin';
-
-export { DiscoverSetup, DiscoverStart } from './plugin';
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DiscoverPlugin(initializerContext);
-}
-
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
+describe('function reverseSortDir', function() {
+  test('reverse a given sort direction', function() {
+    expect(reverseSortDir(SortDirection.asc)).toBe(SortDirection.desc);
+    expect(reverseSortDir(SortDirection.desc)).toBe(SortDirection.asc);
+  });
+});

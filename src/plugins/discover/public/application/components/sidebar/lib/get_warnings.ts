@@ -16,13 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
+import { IndexPatternField } from '../../../../../../data/public';
 
-import { PluginInitializerContext } from 'kibana/public';
-import { DiscoverPlugin } from './plugin';
+export function getWarnings(field: IndexPatternField) {
+  let warnings = [];
 
-export { DiscoverSetup, DiscoverStart } from './plugin';
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DiscoverPlugin(initializerContext);
+  if (field.scripted) {
+    warnings.push(
+      i18n.translate(
+        'kbn.discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription',
+        {
+          defaultMessage: 'Scripted fields can take a long time to execute.',
+        }
+      )
+    );
+  }
+
+  if (warnings.length > 1) {
+    warnings = warnings.map(function(warning, i) {
+      return (i > 0 ? '\n' : '') + (i + 1) + ' - ' + warning;
+    });
+  }
+
+  return warnings;
 }
-
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';

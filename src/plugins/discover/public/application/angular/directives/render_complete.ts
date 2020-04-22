@@ -16,13 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IScope } from 'angular';
+import { RenderCompleteHelper } from '../../../../../kibana_utils/public';
 
-import { PluginInitializerContext } from 'kibana/public';
-import { DiscoverPlugin } from './plugin';
-
-export { DiscoverSetup, DiscoverStart } from './plugin';
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DiscoverPlugin(initializerContext);
+export function createRenderCompleteDirective() {
+  return {
+    controller($scope: IScope, $element: JQLite) {
+      const el = $element[0];
+      const renderCompleteHelper = new RenderCompleteHelper(el);
+      $scope.$on('$destroy', renderCompleteHelper.destroy);
+    },
+  };
 }
-
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
