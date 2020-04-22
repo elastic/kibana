@@ -34,7 +34,6 @@ import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../c
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
-const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
 const STATIC_BUNDLE_PLUGINS = [
@@ -105,7 +104,6 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     output: {
       path: bundle.outputDir,
       filename: `[name].${bundle.type}.js`,
-      publicPath: PUBLIC_PATH_PLACEHOLDER,
       devtoolModuleFilenameTemplate: info =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
@@ -268,15 +266,24 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
         {
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              presets: IS_CODE_COVERAGE
-                ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
-                : [BABEL_PRESET_PATH],
+          use: [
+            {
+              loader: require.resolve('./public_path_loader.js'),
+              options: {
+                test: bundle.entry,
+                key: bundle.id,
+              },
             },
-          },
+            {
+              loader: 'babel-loader',
+              options: {
+                babelrc: false,
+                presets: IS_CODE_COVERAGE
+                  ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
+                  : [BABEL_PRESET_PATH],
+              },
+            },
+          ],
         },
         {
           test: /\.(html|md|txt|tmpl)$/,

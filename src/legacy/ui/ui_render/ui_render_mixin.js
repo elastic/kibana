@@ -153,11 +153,22 @@ export function uiRenderMixin(kbnServer, server, config) {
           `${regularBundlePath}/plugin/kibanaReact/kibanaReact.plugin.js`,
         ];
 
+        const uiPluginIds = [...kbnServer.newPlatform.__internals.uiPlugins.public.keys()];
+
+        const publicPathMap = JSON.stringify({
+          core: `${regularBundlePath}/core/`,
+          ...uiPluginIds.reduce(
+            (acc, nextId) => ({ ...acc, [nextId]: `${regularBundlePath}/plugin/${nextId}/` }),
+            {}
+          ),
+        });
+
         const bootstrap = new AppBootstrap({
           templateData: {
             darkMode,
             jsDependencyPaths,
             styleSheetPaths,
+            publicPathMap,
             entryBundlePath: isCore
               ? `${regularBundlePath}/core/core.entry.js`
               : `${regularBundlePath}/${app.getId()}.bundle.js`,

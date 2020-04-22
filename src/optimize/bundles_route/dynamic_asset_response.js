@@ -52,7 +52,7 @@ import { replacePlaceholder } from '../public_path_placeholder';
  *  @property {LruCache} options.fileHashCache
  */
 export async function createDynamicAssetResponse(options) {
-  const { request, h, bundlesPath, publicPath, fileHashCache } = options;
+  const { request, h, bundlesPath, publicPath, fileHashCache, replacePublicPath } = options;
 
   let fd;
   try {
@@ -78,8 +78,10 @@ export async function createDynamicAssetResponse(options) {
     });
     fd = null; // read stream is now responsible for fd
 
+    const content = replacePublicPath ? replacePlaceholder(read, publicPath) : read;
+
     return h
-      .response(replacePlaceholder(read, publicPath))
+      .response(content)
       .takeover()
       .code(200)
       .etag(`${hash}-${publicPath}`)

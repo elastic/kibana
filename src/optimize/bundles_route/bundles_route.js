@@ -83,14 +83,16 @@ export function createBundlesRoute({
         `${basePublicPath}/bundles/plugin/${id}/`,
         `/bundles/plugin/${id}/`,
         path,
-        fileHashCache
+        fileHashCache,
+        false
       )
     ),
     buildRouteForBundles(
       `${basePublicPath}/bundles/core/`,
       `/bundles/core/`,
       fromRoot(join('src', 'core', 'target', 'public')),
-      fileHashCache
+      fileHashCache,
+      false
     ),
     buildRouteForBundles(
       `${basePublicPath}/bundles/`,
@@ -108,7 +110,13 @@ export function createBundlesRoute({
   ];
 }
 
-function buildRouteForBundles(publicPath, routePath, bundlesPath, fileHashCache) {
+function buildRouteForBundles(
+  publicPath,
+  routePath,
+  bundlesPath,
+  fileHashCache,
+  replacePublicPath = true
+) {
   return {
     method: 'GET',
     path: `${routePath}{path*}`,
@@ -129,6 +137,7 @@ function buildRouteForBundles(publicPath, routePath, bundlesPath, fileHashCache)
               bundlesPath,
               fileHashCache,
               publicPath,
+              replacePublicPath,
             });
           },
         },
