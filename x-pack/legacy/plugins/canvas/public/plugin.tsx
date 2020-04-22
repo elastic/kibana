@@ -101,7 +101,7 @@ export class CanvasPlugin
     // Register core canvas stuff
     canvasApi.addFunctions(
       initFunctions({
-        calculateBounds: plugins.data.query.timefilter.timefilter.calculateBounds,
+        timefilter: plugins.data.query.timefilter.timefilter,
         prependBasePath: core.http.basePath.prepend,
         typesRegistry: plugins.expressions.__LEGACY.types,
       })

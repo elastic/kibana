@@ -32,14 +32,14 @@ interface Arguments {
 function parseDateMath(
   timeRange: TimeRange,
   timeZone: string,
-  calculateBounds: InitializeArguments['calculateBounds']
+  timefilter: InitializeArguments['timefilter']
 ) {
   // the datemath plugin always parses dates by using the current default moment time zone.
   // to use the configured time zone, we are switching just for the bounds calculation.
   const defaultTimezone = moment().zoneName();
   moment.tz.setDefault(timeZone);
 
-  const parsedRange = calculateBounds(timeRange);
+  const parsedRange = timefilter.calculateBounds(timeRange);
 
   // reset default moment timezone
   moment.tz.setDefault(defaultTimezone);
@@ -97,11 +97,7 @@ export function timelionFunctionFactory(initialize: InitializeArguments): () => 
         const timeFilter = input.and.find(and => and.type === 'time');
         const range = timeFilter
           ? { min: timeFilter.from, max: timeFilter.to }
-          : parseDateMath(
-              { from: args.from, to: args.to },
-              args.timezone,
-              initialize.calculateBounds
-            );
+          : parseDateMath({ from: args.from, to: args.to }, args.timezone, initialize.timefilter);
 
         const body = {
           extended: {

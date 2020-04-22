@@ -13,7 +13,7 @@ import { CanvasSetupDeps, CoreSetup } from '../plugin';
 export interface InitializeArguments {
   prependBasePath: CoreSetup['http']['basePath']['prepend'];
   typesRegistry: CanvasSetupDeps['expressions']['__LEGACY']['types'];
-  calculateBounds: CanvasSetupDeps['data']['query']['timefilter']['timefilter']['calculateBounds'];
+  timefilter: CanvasSetupDeps['data']['query']['timefilter']['timefilter'];
 }
 
 export function initFunctions(initialize: InitializeArguments) {
