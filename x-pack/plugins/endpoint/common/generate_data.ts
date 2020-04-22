@@ -14,7 +14,7 @@ import {
   OSFields,
   PolicyData,
   HostPolicyResponse,
-  PolicyResponseActionStatus,
+  HostPolicyResponseActionStatus,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
 
@@ -540,23 +540,23 @@ export class EndpointDocGenerator {
           applied: {
             version: '1.0.0',
             id: '17d4b81d-9940-4b64-9de5-3e03ef1fb5cf',
-            status: PolicyResponseActionStatus.success,
+            status: HostPolicyResponseActionStatus.success,
             response: {
               configurations: {
                 malware: {
-                  status: PolicyResponseActionStatus.success,
+                  status: HostPolicyResponseActionStatus.success,
                   concerned_actions: ['download_model', 'workflow', 'a_custom_future_action'],
                 },
                 events: {
-                  status: PolicyResponseActionStatus.success,
+                  status: HostPolicyResponseActionStatus.success,
                   concerned_actions: ['ingest_events_config', 'workflow'],
                 },
                 logging: {
-                  status: PolicyResponseActionStatus.success,
+                  status: HostPolicyResponseActionStatus.success,
                   concerned_actions: ['configure_elasticsearch_connection'],
                 },
                 streaming: {
-                  status: PolicyResponseActionStatus.success,
+                  status: HostPolicyResponseActionStatus.success,
                   concerned_actions: [
                     'detect_file_open_events',
                     'download_global_artifacts',
@@ -566,31 +566,31 @@ export class EndpointDocGenerator {
               },
               actions: {
                 download_model: {
-                  status: PolicyResponseActionStatus.success,
+                  status: HostPolicyResponseActionStatus.success,
                   message: 'model downloaded',
                 },
                 ingest_events_config: {
-                  status: PolicyResponseActionStatus.success,
+                  status: HostPolicyResponseActionStatus.success,
                   message: 'no action taken',
                 },
                 workflow: {
-                  status: PolicyResponseActionStatus.success,
+                  status: HostPolicyResponseActionStatus.success,
                   message: 'the flow worked well',
                 },
                 a_custom_future_action: {
-                  status: PolicyResponseActionStatus.success,
+                  status: HostPolicyResponseActionStatus.success,
                   message: 'future message',
                 },
                 configure_elasticsearch_connection: {
-                  status: PolicyResponseActionStatus.success,
+                  status: HostPolicyResponseActionStatus.success,
                   message: 'some message',
                 },
                 detect_file_open_events: {
-                  status: PolicyResponseActionStatus.success,
+                  status: HostPolicyResponseActionStatus.success,
                   message: 'some message',
                 },
                 download_global_artifacts: {
-                  status: PolicyResponseActionStatus.success,
+                  status: HostPolicyResponseActionStatus.success,
                   message: 'some message',
                 },
               },

@@ -90,7 +90,10 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           defaultMessage: 'Policy Status',
         }),
         description: (
-          <EuiHealth color={POLICY_STATUS_TO_HEALTH_COLOR[policyStatus] || 'subdued'}>
+          <EuiHealth
+            color={POLICY_STATUS_TO_HEALTH_COLOR[policyStatus] || 'subdued'}
+            data-test-subj="policyStatusHealth"
+          >
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
               data-test-subj="policyStatusValue"

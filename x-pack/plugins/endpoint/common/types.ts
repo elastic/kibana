@@ -577,7 +577,7 @@ export type NewPolicyData = NewDatasource & {
 /**
  * the possible status for actions, configurations and overall Policy Response
  */
-export enum PolicyResponseActionStatus {
+export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
@@ -587,7 +587,7 @@ export enum PolicyResponseActionStatus {
  * The details of a given action
  */
 interface HostPolicyResponseActionDetails {
-  status: PolicyResponseActionStatus;
+  status: HostPolicyResponseActionStatus;
   message: string;
 }
 
@@ -621,7 +621,7 @@ interface HostPolicyResponseActions {
 }
 
 interface HostPolicyResponseConfigurationStatus {
-  status: PolicyResponseActionStatus;
+  status: HostPolicyResponseActionStatus;
   concerned_actions: Array<keyof HostPolicyResponseActions>;
 }
 
@@ -652,7 +652,7 @@ export interface HostPolicyResponse {
       applied: {
         version: string;
         id: string;
-        status: PolicyResponseActionStatus;
+        status: HostPolicyResponseActionStatus;
         response: {
           configurations: {
             malware: HostPolicyResponseConfigurationStatus;
