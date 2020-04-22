@@ -6,49 +6,32 @@
 
 import React, { FC, Fragment, useState } from 'react';
 
-import { EuiCallOut, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { useResultsViewConfig } from '../../../../common';
 import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
 
+import { JobConfigErrorCallout } from '../job_config_error_callout';
 import { LoadingPanel } from '../loading_panel';
 
 import { EvaluatePanel } from './evaluate_panel';
 import { ResultsTable } from './results_table';
-
-export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
-  <EuiTitle size="xs">
-    <span>
-      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {
-        defaultMessage: 'Destination index for regression job ID {jobId}',
-        values: { jobId },
-      })}
-    </span>
-  </EuiTitle>
-);
-
-const jobConfigErrorTitle = i18n.translate(
-  'xpack.ml.dataframe.analytics.regressionExploration.jobConfigurationFetchError',
-  {
-    defaultMessage:
-      'Unable to fetch results. An error occurred loading the job configuration data.',
-  }
-);
-
-const jobCapsErrorTitle = i18n.translate(
-  'xpack.ml.dataframe.analytics.regressionExploration.jobCapsFetchError',
-  {
-    defaultMessage: "Unable to fetch results. An error occurred loading the index's field data.",
-  }
-);
 
 interface Props {
   jobId: string;
 }
 
 export const RegressionExploration: FC<Props> = ({ jobId }) => {
+  const explorationTitle = i18n.translate(
+    'xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle',
+    {
+      defaultMessage: 'Destination index for regression job ID {jobId}',
+      values: { jobId },
+    }
+  );
+
   const {
     indexPattern,
     isInitialized,
@@ -62,17 +45,11 @@ export const RegressionExploration: FC<Props> = ({ jobId }) => {
 
   if (jobConfigErrorMessage !== undefined || jobCapsServiceErrorMessage !== undefined) {
     return (
-      <EuiPanel grow={false}>
-        <ExplorationTitle jobId={jobId} />
-        <EuiSpacer />
-        <EuiCallOut
-          title={jobConfigErrorMessage ? jobConfigErrorTitle : jobCapsErrorTitle}
-          color="danger"
-          iconType="cross"
-        >
-          <p>{jobConfigErrorMessage ? jobConfigErrorMessage : jobCapsServiceErrorMessage}</p>
-        </EuiCallOut>
-      </EuiPanel>
+      <JobConfigErrorCallout
+        jobCapsServiceErrorMessage={jobCapsServiceErrorMessage}
+        jobConfigErrorMessage={jobConfigErrorMessage}
+        title={explorationTitle}
+      />
     );
   }
 
@@ -93,6 +70,7 @@ export const RegressionExploration: FC<Props> = ({ jobId }) => {
             indexPattern={indexPattern}
             jobStatus={jobStatus}
             setEvaluateSearchQuery={setSearchQuery}
+            title={explorationTitle}
           />
         )}
     </Fragment>

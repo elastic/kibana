@@ -15,7 +15,6 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 
 import {
@@ -33,28 +32,23 @@ import { defaultSearchQuery, useResultsViewConfig, INDEX_STATUS } from '../../..
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 
 import { ExplorationQueryBar } from '../exploration_query_bar';
+import { ExplorationTitle } from '../exploration_title';
 
 import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
 
 export type TableItem = Record<string, any>;
 
-const ExplorationTitle: FC<{ jobId: string }> = ({ jobId }) => (
-  <EuiTitle size="xs">
-    <span>
-      {i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
-        defaultMessage: 'Outlier detection job ID {jobId}',
-        values: { jobId },
-      })}
-    </span>
-  </EuiTitle>
-);
-
 interface ExplorationProps {
   jobId: string;
 }
 
 export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
+  const explorationTitle = i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
+    defaultMessage: 'Outlier detection job ID {jobId}',
+    values: { jobId },
+  });
+
   const { indexPattern, jobConfig, jobStatus } = useResultsViewConfig(jobId);
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
@@ -65,7 +59,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
     return (
       <EuiPanel grow={false}>
-        <ExplorationTitle jobId={jobId} />
+        <ExplorationTitle title={explorationTitle} />
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
             defaultMessage: 'An error occurred loading the index data.',
@@ -94,7 +88,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
         gutterSize="s"
       >
         <EuiFlexItem grow={false}>
-          <ExplorationTitle jobId={jobId} />
+          <ExplorationTitle title={explorationTitle} />
         </EuiFlexItem>
         {jobStatus !== undefined && (
           <EuiFlexItem grow={false}>

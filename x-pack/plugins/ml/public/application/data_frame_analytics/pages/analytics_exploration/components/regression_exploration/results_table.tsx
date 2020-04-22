@@ -33,8 +33,8 @@ import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { ExplorationQueryBar } from '../exploration_query_bar';
+import { ExplorationTitle } from '../exploration_title';
 
-import { ExplorationTitle } from './regression_exploration';
 import { useRegressionData } from './use_regression_data';
 
 const showingDocs = i18n.translate(
@@ -57,10 +57,11 @@ interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DATA_FRAME_TASK_STATE;
   setEvaluateSearchQuery: React.Dispatch<React.SetStateAction<object>>;
+  title: string;
 }
 
 export const ResultsTable: FC<Props> = React.memo(
-  ({ indexPattern, jobConfig, jobStatus, setEvaluateSearchQuery }) => {
+  ({ indexPattern, jobConfig, jobStatus, setEvaluateSearchQuery, title }) => {
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
 
     useEffect(() => {
@@ -80,7 +81,7 @@ export const ResultsTable: FC<Props> = React.memo(
         <EuiPanel grow={false}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <ExplorationTitle jobId={jobConfig.id} />
+              <ExplorationTitle title={title} />
             </EuiFlexItem>
             {jobStatus !== undefined && (
               <EuiFlexItem grow={false}>
@@ -107,7 +108,7 @@ export const ResultsTable: FC<Props> = React.memo(
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
-                <ExplorationTitle jobId={jobConfig.id} />
+                <ExplorationTitle title={title} />
               </EuiFlexItem>
               {jobStatus !== undefined && (
                 <EuiFlexItem grow={false}>
