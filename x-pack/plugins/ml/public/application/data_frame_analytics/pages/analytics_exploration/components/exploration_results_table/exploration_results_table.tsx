@@ -37,14 +37,14 @@ import { ExplorationQueryBar } from '../exploration_query_bar';
 import { useExplorationResults } from './use_exploration_results';
 
 const showingDocs = i18n.translate(
-  'xpack.ml.dataframe.analytics.classificationExploration.documentsShownHelpText',
+  'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',
   {
     defaultMessage: 'Showing documents for which predictions exist',
   }
 );
 
 const showingFirstDocs = i18n.translate(
-  'xpack.ml.dataframe.analytics.classificationExploration.firstDocumentsShownHelpText',
+  'xpack.ml.dataframe.analytics.explorationResults.firstDocumentsShownHelpText',
   {
     defaultMessage: 'Showing first {searchSize} documents for which predictions exist',
     values: { searchSize: SEARCH_SIZE },
@@ -130,7 +130,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
                 {docFieldsCount > MAX_COLUMNS && (
                   <EuiText size="s">
                     {i18n.translate(
-                      'xpack.ml.dataframe.analytics.classificationExploration.fieldSelection',
+                      'xpack.ml.dataframe.analytics.explorationResults.fieldSelection',
                       {
                         defaultMessage:
                           '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',

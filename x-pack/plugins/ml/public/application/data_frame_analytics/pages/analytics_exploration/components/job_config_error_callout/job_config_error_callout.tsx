@@ -12,20 +12,13 @@ import { i18n } from '@kbn/i18n';
 
 import { ExplorationTitle } from '../exploration_title';
 
-const jobConfigErrorTitle = i18n.translate(
-  'xpack.ml.dataframe.analytics.classificationExploration.jobConfigurationFetchError',
-  {
-    defaultMessage:
-      'Unable to fetch results. An error occurred loading the job configuration data.',
-  }
-);
+const jobConfigErrorTitle = i18n.translate('xpack.ml.dataframe.analytics.jobConfig.errorTitle', {
+  defaultMessage: 'Unable to fetch results. An error occurred loading the job configuration data.',
+});
 
-const jobCapsErrorTitle = i18n.translate(
-  'xpack.ml.dataframe.analytics.classificationExploration.jobCapsFetchError',
-  {
-    defaultMessage: "Unable to fetch results. An error occurred loading the index's field data.",
-  }
-);
+const jobCapsErrorTitle = i18n.translate('xpack.ml.dataframe.analytics.jobCaps.errorTitle', {
+  defaultMessage: "Unable to fetch results. An error occurred loading the index's field data.",
+});
 
 interface Props {
   jobCapsServiceErrorMessage: string | undefined;
