@@ -22,8 +22,6 @@ import { mockGlobalState } from './global_state';
 import { createKibanaContextProviderMock } from './kibana_react';
 import { FieldHook, useForm } from '../shared_imports';
 
-jest.mock('ui/new_platform');
-
 const state: State = mockGlobalState;
 
 interface Props {
