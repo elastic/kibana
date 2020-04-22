@@ -8,7 +8,7 @@ import { EuiPageContent } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { HashRouter, Switch, Route } from 'react-router-dom';
 
-import { BASE_PATH, APP_REQUIRED_PRIVILEGE } from '../../common/constants';
+import { BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
 
 import {
   SectionError,
@@ -46,7 +46,9 @@ export const App: FunctionComponent = () => {
   }
 
   return (
-    <WithPrivileges privileges={[`cluster.${APP_REQUIRED_PRIVILEGE}`]}>
+    <WithPrivileges
+      privileges={APP_CLUSTER_REQUIRED_PRIVILEGES.map(privilege => `cluster.${privilege}`)}
+    >
       {({ isLoading, hasPrivileges, privilegesMissing }) => {
         if (isLoading) {
           return (

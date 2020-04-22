@@ -15,4 +15,7 @@ export const BASE_PATH = '/management/elasticsearch/ingest_pipelines';
 
 export const API_BASE_PATH = '/api/ingest_pipelines';
 
-export const APP_REQUIRED_PRIVILEGE = 'manage_pipeline';
+export const APP_CLUSTER_REQUIRED_PRIVILEGES = [
+  'manage_ingest_pipelines',
+  'cluster:monitor/nodes/info',
+];

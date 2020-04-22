@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { RouteDependencies } from '../../types';
-import { API_BASE_PATH, APP_REQUIRED_PRIVILEGE } from '../../../common/constants';
+import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../../common/constants';
 import { Privileges } from '../../../../../../src/plugins/es_ui_shared/public';
+
+const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
+  Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
+    if (!privilegesObject[privilegeName]) {
+      privileges.push(privilegeName);
+    }
+    return privileges;
+  }, []);
 
 export const registerPrivilegesRoute = ({ license, router }: RouteDependencies) => {
   router.get(
@@ -28,19 +36,19 @@ export const registerPrivilegesRoute = ({ license, router }: RouteDependencies) 
       };
 
       try {
-        const { has_all_requested: hasAllPrivileges } = await dataClient.callAsCurrentUser(
+        const { has_all_requested: hasAllPrivileges, cluster } = await dataClient.callAsCurrentUser(
           'transport.request',
           {
             path: '/_security/user/_has_privileges',
             method: 'POST',
             body: {
-              cluster: [APP_REQUIRED_PRIVILEGE],
+              cluster: APP_CLUSTER_REQUIRED_PRIVILEGES,
             },
           }
         );
 
         if (!hasAllPrivileges) {
-          privilegesResult.missingPrivileges.cluster = [APP_REQUIRED_PRIVILEGE];
+          privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
         }
 
         privilegesResult.hasAllPrivileges = hasAllPrivileges;
