@@ -117,7 +117,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     this.preconfiguredActions = [];
   }
 
-  public async setup(core: CoreSetup, plugins: ActionsPluginsSetup): Promise<PluginSetupContract> {
+  public async setup(
+    core: CoreSetup<ActionsPluginsStart>,
+    plugins: ActionsPluginsSetup
+  ): Promise<PluginSetupContract> {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
@@ -182,7 +185,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      core.getStartServices().then(async ([, startPlugins]: [CoreStart, any, any]) => {
+      core.getStartServices().then(async ([, startPlugins]) => {
         registerActionsUsageCollector(usageCollection, startPlugins.taskManager);
 
         initializeActionsTelemetry(
@@ -299,7 +302,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
   private createRouteHandlerContext = (
     defaultKibanaIndex: string
-  ): IContextProvider<RequestHandler<any, any, any>, 'actions'> => {
+  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
     const { actionTypeRegistry, isESOUsingEphemeralEncryptionKey, preconfiguredActions } = this;
 
     return async function actionsRouteHandlerContext(context, request) {

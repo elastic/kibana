@@ -9,6 +9,7 @@ import { mockRouter, RouterMock } from '../../../../../src/core/server/http/rout
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { actionsClientMock } from '../actions_client.mock';
 
 jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -36,9 +37,8 @@ describe('getAllActionRoute', () => {
       }
     `);
 
-    const actionsClient = {
-      getAll: jest.fn().mockResolvedValueOnce([]),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([]);
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
 
@@ -72,9 +72,8 @@ describe('getAllActionRoute', () => {
       }
     `);
 
-    const actionsClient = {
-      getAll: jest.fn().mockResolvedValueOnce([]),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([]);
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
 
@@ -104,9 +103,8 @@ describe('getAllActionRoute', () => {
       }
     `);
 
-    const actionsClient = {
-      getAll: jest.fn().mockResolvedValueOnce([]),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([]);
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
 

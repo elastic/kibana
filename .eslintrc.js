@@ -731,6 +731,17 @@ module.exports = {
     },
 
     /**
+     * Alerting Services overrides
+     */
+    {
+      // typescript only for front and back end
+      files: ['x-pack/{,legacy/}plugins/actions/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
      * Lens overrides
      */
     {
