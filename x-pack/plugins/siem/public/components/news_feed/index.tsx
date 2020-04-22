@@ -5,10 +5,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import chrome from 'ui/chrome';
 
 import { fetchNews, getNewsFeedUrl, getNewsItemsFromApiResponse } from './helpers';
-import { useKibana, useUiSetting$ } from '../../lib/kibana';
+import { useKibana, useUiSetting$, KibanaServices } from '../../lib/kibana';
 import { NewsFeed } from './news_feed';
 import { NewsItem } from './types';
 
@@ -26,7 +25,7 @@ export const StatefulNewsFeed = React.memo<{
 
   const newsFeedUrl = getNewsFeedUrl({
     newsFeedUrlSetting,
-    getKibanaVersion: chrome.getKibanaVersion,
+    getKibanaVersion: () => KibanaServices.getKibanaVersion(),
   });
 
   useEffect(() => {

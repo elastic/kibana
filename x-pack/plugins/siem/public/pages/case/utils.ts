@@ -5,13 +5,14 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { Breadcrumb } from 'ui/chrome';
+
+import { ChromeBreadcrumb } from 'src/core/public';
 
 import { getCaseDetailsUrl, getCaseUrl, getCreateCaseUrl } from '../../components/link_to';
 import { RouteSpyState } from '../../utils/route/types';
 import * as i18n from './translations';
 
-export const getBreadcrumbs = (params: RouteSpyState, search: string[]): Breadcrumb[] => {
+export const getBreadcrumbs = (params: RouteSpyState, search: string[]): ChromeBreadcrumb[] => {
   const queryParameters = !isEmpty(search[0]) ? search[0] : null;
 
   let breadcrumb = [

@@ -54,12 +54,11 @@ export type Start = ReturnType<Plugin['start']>;
 export class Plugin implements IPlugin<Setup, Start> {
   public id = 'siem';
   public name = 'SIEM';
+  private kibanaVersion: string;
 
-  constructor(
-    // @ts-ignore this is added to satisfy the New Platform typing constraint,
-    // but we're not leveraging any of its functionality yet.
-    private readonly initializerContext: PluginInitializerContext
-  ) {}
+  constructor(initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+  }
 
   public setup(core: CoreSetup, plugins: SetupPlugins) {
     initTelemetry(plugins.usageCollection, this.id);
@@ -82,7 +81,7 @@ export class Plugin implements IPlugin<Setup, Start> {
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
-    KibanaServices.init({ ...core, ...plugins });
+    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
 
     return {};
   }

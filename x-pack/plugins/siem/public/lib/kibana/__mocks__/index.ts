@@ -12,7 +12,7 @@ import {
   createWithKibanaMock,
 } from '../../../mock/kibana_react';
 
-export const KibanaServices = { get: jest.fn() };
+export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => '8.0.0') };
 export const useKibana = jest.fn(createUseKibanaMock());
 export const useUiSetting = jest.fn(createUseUiSettingMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
