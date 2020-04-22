@@ -13,7 +13,7 @@ import {
 import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams, OutputRuleAlertRest } from '../../types';
 import { IRuleStatusAttributes } from '../../rules/types';
-import { ruleStatusSavedObjectType } from '../../../../saved_objects';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const sampleRuleAlertParams = (
   maxSignals?: number | undefined,
@@ -44,7 +44,7 @@ export const sampleRuleAlertParams = (
   meta: undefined,
   threat: undefined,
   version: 1,
-  lists: [
+  exceptions_list: [
     {
       field: 'source.ip',
       values_operator: 'included',
