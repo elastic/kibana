@@ -241,7 +241,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     this.onFormatChange(fieldFormatId as string, newParams);
   };
 
-  onFormatParamsError = (error: string) => {
+  onFormatParamsError = (error?: string) => {
     this.setState({
       hasFormatError: !!error,
     });

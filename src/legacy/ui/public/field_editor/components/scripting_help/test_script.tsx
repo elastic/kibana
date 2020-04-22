@@ -38,17 +38,15 @@ const { SearchBar } = npStart.plugins.data.ui;
 
 const { uiSettings } = npStart.core;
 
-import { esQuery, IndexPattern } from '../../../../../../plugins/data/public';
-import { ExecuteScriptParams } from '../../types';
+import { esQuery, IndexPattern, Query } from '../../../../../../plugins/data/public';
+import { ExecuteScript } from '../../types';
 
 interface TestScriptProps {
   indexPattern: IndexPattern;
   lang: string;
   name?: string;
   script?: string;
-  executeScript: (
-    params: ExecuteScriptParams
-  ) => { status: number; hits: { hits: any[] }; error?: any }; // todo
+  executeScript: ExecuteScript;
 }
 
 interface AdditionalField {
@@ -80,7 +78,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
   }
 
   // todo type this
-  previewScript = async (searchContext?: any) => {
+  previewScript = async (searchContext?: { query?: Query | undefined }) => {
     const { indexPattern, lang, name, script, executeScript } = this.props;
 
     if (!script || script.length === 0) {
@@ -96,7 +94,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
       const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
       query = esQuery.buildEsQuery(
         this.props.indexPattern,
-        searchContext.query,
+        searchContext.query || [],
         [],
         esQueryConfigs
       );

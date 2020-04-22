@@ -19,14 +19,14 @@
 
 import React, { PureComponent, Fragment } from 'react';
 
-interface FieldFormatEditorProps {
+export interface FieldFormatEditorProps {
   fieldType: string;
   fieldFormat: any; // todo
   fieldFormatId: string;
   fieldFormatParams: any; // todo
   fieldFormatEditors: any; // todo
   onChange: (change: { fieldType: string; [key: string]: any }) => void; // todo define next to caller
-  onError: (error: string) => void;
+  onError: (error?: string) => void;
 }
 
 interface EditorComponentProps {

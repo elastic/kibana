@@ -44,7 +44,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
         name: i18n.translate('common.ui.fieldEditor.samples.inputHeader', {
           defaultMessage: 'Input',
         }),
-        render: (input: any) => {
+        render: (input: {} | string) => {
           return typeof input === 'object' ? JSON.stringify(input) : input;
         },
       },

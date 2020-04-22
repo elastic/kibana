@@ -18,6 +18,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { DurationFormat } from 'src/plugins/data/public';
 
 import { EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
 
@@ -70,7 +71,10 @@ export class DurationFormatEditor extends DefaultFormatEditor<
     const output = super.getDerivedStateFromProps(nextProps, state);
     let error = null;
 
-    if (!nextProps.format.isHuman() && nextProps.formatParams.outputPrecision > 20) {
+    if (
+      !(nextProps.format as DurationFormat).isHuman() &&
+      nextProps.formatParams.outputPrecision > 20
+    ) {
       error = i18n.translate('common.ui.fieldEditor.durationErrorMessage', {
         defaultMessage: 'Decimal places must be between 0 and 20',
       });
@@ -141,7 +145,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
             isInvalid={!!error}
           />
         </EuiFormRow>
-        {!format.isHuman() ? (
+        {!(format as DurationFormat).isHuman() ? (
           <EuiFormRow
             label={
               <FormattedMessage

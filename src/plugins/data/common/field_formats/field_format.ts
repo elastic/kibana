@@ -127,12 +127,12 @@ export abstract class FieldFormat {
    */
   getConverterFor(
     contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE
-  ): FieldFormatConvertFunction | null {
+  ): FieldFormatConvertFunction {
     if (!this.convertObject) {
       this.convertObject = this.setupContentType();
     }
 
-    return this.convertObject[contentType] || null;
+    return this.convertObject[contentType];
   }
 
   /**

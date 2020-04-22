@@ -18,7 +18,8 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { ExecuteScriptParams } from '../types';
+import { Query } from 'src/plugins/data/public';
+import { ExecuteScriptParams, ExecuteScriptResult } from '../types';
 
 export const executeScript = async ({
   name,
@@ -27,7 +28,7 @@ export const executeScript = async ({
   indexPatternTitle,
   query,
   additionalFields = [],
-}: ExecuteScriptParams) => {
+}: ExecuteScriptParams): Promise<ExecuteScriptResult> => {
   // Using _msearch because _search with index name in path dorks everything up
   const header = {
     index: indexPatternTitle,
@@ -37,7 +38,7 @@ export const executeScript = async ({
   const search = {
     query: {
       match_all: {},
-    },
+    } as Query['query'],
     script_fields: {
       [name]: {
         script: {
@@ -46,17 +47,16 @@ export const executeScript = async ({
         },
       },
     },
+    _source: undefined as string[] | undefined,
     size: 10,
     timeout: '30s',
   };
 
   if (additionalFields.length > 0) {
-    // @ts-ignore
     search._source = additionalFields;
   }
 
   if (query) {
-    // @ts-ignore
     search.query = query;
   }
 

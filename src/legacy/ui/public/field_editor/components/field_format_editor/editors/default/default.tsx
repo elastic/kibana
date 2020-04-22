@@ -20,13 +20,15 @@
 import React, { PureComponent, ReactText } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { FieldFormat, FieldFormatsContentType } from 'src/plugins/data/public';
 import { Sample } from '../../../../types';
+import { FieldFormatEditorProps } from '../../field_format_editor';
 
 export const convertSampleInput = (
   converter: (input: string | number | Array<string | number>) => string,
   inputs: Array<string | number | Array<string | number>>
 ) => {
-  let error = null;
+  let error;
   let samples: Sample[] = [];
 
   try {
@@ -54,17 +56,19 @@ interface SampleInputs {
 }
 
 export interface FormatEditorProps<P> {
-  fieldType: string; // todo change to enum
-  format: any; // todo DecoratedFieldFormat
-  formatParams: { type?: string } & P; // todo
+  fieldType: string;
+  format: FieldFormat;
+  formatParams: { type?: string } & P;
   onChange: (newParams: any) => void; // todo
-  onError: (error: any) => void; // todo
+  // onChange: FieldFormatEditorProps['onChange'];
+  // onError: (error: any) => void; // todo
+  onError: FieldFormatEditorProps['onError'];
   basePath: string;
 }
 
 export interface FormatEditorState {
   sampleInputs: ReactText[];
-  sampleConverterType?: string;
+  sampleConverterType: FieldFormatsContentType;
   error: any;
   samples: Sample[];
   sampleInputsByType: SampleInputs;
@@ -72,7 +76,7 @@ export interface FormatEditorState {
 
 export const defaultState = {
   sampleInputs: [] as ReactText[],
-  sampleConverterType: 'text',
+  sampleConverterType: 'text' as FieldFormatsContentType,
   error: null,
   samples: [] as Sample[],
   sampleInputsByType: {},

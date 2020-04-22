@@ -25,14 +25,14 @@ import { ScriptingSyntax } from './scripting_syntax';
 import { TestScript } from './test_script';
 
 import { IndexPattern } from '../../../../../../plugins/data/public';
-import { ExecuteScriptParams } from '../../types';
+import { ExecuteScript } from '../../types';
 
 interface ScriptingHelpFlyoutProps {
   indexPattern: IndexPattern;
   lang: string;
   name?: string;
   script?: string;
-  executeScript: (params: ExecuteScriptParams) => void;
+  executeScript: ExecuteScript;
   isVisible: boolean;
   onClose: () => void;
 }

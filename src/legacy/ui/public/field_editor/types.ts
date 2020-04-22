@@ -18,18 +18,26 @@
  */
 
 import { ReactText } from 'react';
+import { Query } from 'src/plugins/data/public';
 
 export interface Sample {
   input: ReactText | ReactText[];
   output: string;
 }
 
-// incomplete
 export interface ExecuteScriptParams {
   name: string;
   lang: string;
   script: string;
   indexPatternTitle: string;
-  query?: any; // todo
+  query?: Query['query'];
   additionalFields?: string[];
 }
+
+export interface ExecuteScriptResult {
+  status: number;
+  hits: { hits: any[] };
+  error?: any;
+}
+
+export type ExecuteScript = (params: ExecuteScriptParams) => Promise<ExecuteScriptResult>;
