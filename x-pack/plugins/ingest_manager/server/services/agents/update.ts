@@ -7,7 +7,7 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { listAgents } from './crud';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { unenrollAgents } from './unenroll';
+import { unenrollAgent } from './unenroll';
 import { agentConfigService } from '../agent_config';
 
 export async function updateAgentsForConfigId(
@@ -55,9 +55,8 @@ export async function unenrollForConfigId(soClient: SavedObjectsClientContract, 
     if (agents.length === 0) {
       hasMore = false;
     }
-    await unenrollAgents(
-      soClient,
-      agents.map(a => a.id)
-    );
+    for (const agent of agents) {
+      await unenrollAgent(soClient, agent.id);
+    }
   }
 }
