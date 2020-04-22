@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useCallback, useEffect, Fragment } from 'react';
+import React, { useState, useCallback, useEffect, Fragment, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -33,10 +33,12 @@ import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '../../../../../../../../../plugins/kibana_utils/public';
 import { IndexPatternManagementStart } from '../../../../../../../../../plugins/index_pattern_management/public';
 import { IndexPattern, IndexPatternField } from '../../../../../../../../../plugins/data/public';
+import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
+import { TAB_INDEXED_FIELDS } from '../constants';
 import { SourceFiltersTable } from '../source_filters_table';
 import { IndexedFieldsTable } from '../indexed_fields_table';
 import { ScriptedFieldsTable } from '../scripted_fields_table';
-import { getTabs, getTabIdFromURL, getPath, convertToEuiSelectOption } from './utils';
+import { getTabs, getPath, convertToEuiSelectOption } from './utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: IndexPattern;
@@ -64,6 +66,9 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string>('');
   const [indexedFieldTypes, setIndexedFieldType] = useState<EuiSelectOption[]>([]);
   const [scriptedFieldLanguages, setScriptedFieldLanguages] = useState<EuiSelectOption[]>([]);
+  const [syncingStateFunc, setSyncingStateFunc] = useState<any>({
+    getCurrentTab: () => TAB_INDEXED_FIELDS,
+  });
 
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
@@ -88,117 +93,175 @@ export function Tabs({ config, indexPattern, fields, services, history, location
     refreshFilters();
   }, [indexPattern, indexPattern.fields, refreshFilters]);
 
-  const fieldWildcardMatcherDecorated = (filters: string[]) =>
-    fieldWildcardMatcher(filters, config.get('metaFields'));
+  const fieldWildcardMatcherDecorated = useCallback(
+    (filters: string[]) => fieldWildcardMatcher(filters, config.get('metaFields')),
+    [config]
+  );
 
-  const getFilterSection = (type: string) => {
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={true}>
-          <EuiFieldSearch
-            placeholder={filterPlaceholder}
-            value={fieldFilter}
-            onChange={e => setFieldFilter(e.target.value)}
-            data-test-subj="indexPatternFieldFilter"
-            aria-label={filterAriaLabel}
-          />
-        </EuiFlexItem>
-        {type === 'indexedFields' && indexedFieldTypes.length > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiSelect
-              options={indexedFieldTypes}
-              value={indexedFieldTypeFilter}
-              onChange={e => setIndexedFieldTypeFilter(e.target.value)}
-              data-test-subj="indexedFieldTypeFilterDropdown"
+  const getFilterSection = useCallback(
+    (type: string) => {
+      return (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={true}>
+            <EuiFieldSearch
+              placeholder={filterPlaceholder}
+              value={fieldFilter}
+              onChange={e => setFieldFilter(e.target.value)}
+              data-test-subj="indexPatternFieldFilter"
+              aria-label={filterAriaLabel}
             />
           </EuiFlexItem>
-        )}
-        {type === 'scriptedFields' && scriptedFieldLanguages.length > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiSelect
-              options={scriptedFieldLanguages}
-              value={scriptedFieldLanguageFilter}
-              onChange={e => setScriptedFieldLanguageFilter(e.target.value)}
-              data-test-subj="indexedFieldTypeFilterDropdown"
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
-  };
+          {type === 'indexedFields' && indexedFieldTypes.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiSelect
+                options={indexedFieldTypes}
+                value={indexedFieldTypeFilter}
+                onChange={e => setIndexedFieldTypeFilter(e.target.value)}
+                data-test-subj="indexedFieldTypeFilterDropdown"
+              />
+            </EuiFlexItem>
+          )}
+          {type === 'scriptedFields' && scriptedFieldLanguages.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiSelect
+                options={scriptedFieldLanguages}
+                value={scriptedFieldLanguageFilter}
+                onChange={e => setScriptedFieldLanguageFilter(e.target.value)}
+                data-test-subj="indexedFieldTypeFilterDropdown"
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
+    },
+    [
+      fieldFilter,
+      indexedFieldTypeFilter,
+      indexedFieldTypes,
+      scriptedFieldLanguageFilter,
+      scriptedFieldLanguages,
+    ]
+  );
 
-  const getContent = (type: string) => {
-    switch (type) {
-      case 'indexedFields':
-        return (
-          <Fragment>
-            <EuiSpacer size="m" />
-            {getFilterSection(type)}
-            <EuiSpacer size="m" />
-            <IndexedFieldsTable
-              fields={fields}
-              indexPattern={indexPattern}
-              fieldFilter={fieldFilter}
-              fieldWildcardMatcher={fieldWildcardMatcherDecorated}
-              indexedFieldTypeFilter={indexedFieldTypeFilter}
-              helpers={{
-                redirectToRoute: (field: IndexPatternField) => {
-                  history.push(getPath(field));
-                },
-                getFieldInfo: services.indexPatternManagement.list.getFieldInfo,
-              }}
-            />
-          </Fragment>
-        );
-      case 'scriptedFields':
-        return (
-          <Fragment>
-            <EuiSpacer size="m" />
-            {getFilterSection(type)}
-            <EuiSpacer size="m" />
-            <ScriptedFieldsTable
-              indexPattern={indexPattern}
-              fieldFilter={fieldFilter}
-              scriptedFieldLanguageFilter={scriptedFieldLanguageFilter}
-              helpers={{
-                redirectToRoute: (field: IndexPatternField) => {
-                  history.push(getPath(field));
-                },
-              }}
-              onRemoveField={refreshFilters}
-            />
-          </Fragment>
-        );
-      case 'sourceFilters':
-        return (
-          <Fragment>
-            <EuiSpacer size="m" />
-            {getFilterSection(type)}
-            <EuiSpacer size="m" />
-            <SourceFiltersTable
-              indexPattern={indexPattern}
-              filterFilter={fieldFilter}
-              fieldWildcardMatcher={fieldWildcardMatcherDecorated}
-              onAddOrRemoveFilter={refreshFilters}
-            />
-          </Fragment>
-        );
-    }
-  };
+  const getContent = useCallback(
+    (type: string) => {
+      switch (type) {
+        case 'indexedFields':
+          return (
+            <Fragment>
+              <EuiSpacer size="m" />
+              {getFilterSection(type)}
+              <EuiSpacer size="m" />
+              <IndexedFieldsTable
+                fields={fields}
+                indexPattern={indexPattern}
+                fieldFilter={fieldFilter}
+                fieldWildcardMatcher={fieldWildcardMatcherDecorated}
+                indexedFieldTypeFilter={indexedFieldTypeFilter}
+                helpers={{
+                  redirectToRoute: (field: IndexPatternField) => {
+                    history.push(getPath(field));
+                  },
+                  getFieldInfo: services.indexPatternManagement.list.getFieldInfo,
+                }}
+              />
+            </Fragment>
+          );
+        case 'scriptedFields':
+          return (
+            <Fragment>
+              <EuiSpacer size="m" />
+              {getFilterSection(type)}
+              <EuiSpacer size="m" />
+              <ScriptedFieldsTable
+                indexPattern={indexPattern}
+                fieldFilter={fieldFilter}
+                scriptedFieldLanguageFilter={scriptedFieldLanguageFilter}
+                helpers={{
+                  redirectToRoute: (field: IndexPatternField) => {
+                    history.push(getPath(field));
+                  },
+                }}
+                onRemoveField={refreshFilters}
+              />
+            </Fragment>
+          );
+        case 'sourceFilters':
+          return (
+            <Fragment>
+              <EuiSpacer size="m" />
+              {getFilterSection(type)}
+              <EuiSpacer size="m" />
+              <SourceFiltersTable
+                indexPattern={indexPattern}
+                filterFilter={fieldFilter}
+                fieldWildcardMatcher={fieldWildcardMatcherDecorated}
+                onAddOrRemoveFilter={refreshFilters}
+              />
+            </Fragment>
+          );
+      }
+    },
+    [
+      fieldFilter,
+      fieldWildcardMatcherDecorated,
+      fields,
+      getFilterSection,
+      history,
+      indexPattern,
+      indexedFieldTypeFilter,
+      refreshFilters,
+      scriptedFieldLanguageFilter,
+      services.indexPatternManagement.list.getFieldInfo,
+    ]
+  );
 
-  const euiTabs: EuiTabbedContentTab[] = getTabs(
-    indexPattern,
-    fieldFilter,
-    services.indexPatternManagement.list
-  ).map((tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
-    return {
-      ...tab,
-      content: getContent(tab.id),
+  const euiTabs: EuiTabbedContentTab[] = useMemo(
+    () =>
+      getTabs(indexPattern, fieldFilter, services.indexPatternManagement.list).map(
+        (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
+          return {
+            ...tab,
+            content: getContent(tab.id),
+          };
+        }
+      ),
+    [fieldFilter, getContent, indexPattern, services.indexPatternManagement.list]
+  );
+
+  const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);
+
+  useEffect(() => {
+    const {
+      startSyncingState,
+      stopSyncingState,
+      setCurrentTab,
+      getCurrentTab,
+    } = createEditIndexPatternPageStateContainer({
+      useHashedUrl: config.get('state:storeInSessionStorage'),
+      defaultTab: TAB_INDEXED_FIELDS,
+    });
+
+    startSyncingState();
+    setSyncingStateFunc({
+      setCurrentTab,
+      getCurrentTab,
+    });
+    setSelectedTabId(getCurrentTab());
+
+    return () => {
+      stopSyncingState();
     };
-  });
+  }, [config]);
 
-  const tabId = getTabIdFromURL(location.search);
-  const selectedTab = euiTabs.find(tab => tab.id === tabId) || euiTabs[0];
-
-  return <EuiTabbedContent tabs={euiTabs} initialSelectedTab={selectedTab} autoFocus="selected" />;
+  return (
+    <EuiTabbedContent
+      tabs={euiTabs}
+      selectedTab={euiTabs.find(tab => tab.id === selectedTabId)}
+      onTabClick={tab => {
+        setSelectedTabId(tab.id);
+        syncingStateFunc.setCurrentTab(tab.id);
+      }}
+    />
+  );
 }
