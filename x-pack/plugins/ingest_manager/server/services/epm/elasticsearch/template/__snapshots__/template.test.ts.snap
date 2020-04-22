@@ -28,9 +28,6 @@ exports[`tests loading base.yml: base.yml 1`] = `
     }
   },
   "mappings": {
-    "_meta": {
-      "package": "foo"
-    },
     "dynamic_templates": [
       {
         "strings_as_keyword": {
@@ -47,12 +44,12 @@ exports[`tests loading base.yml: base.yml 1`] = `
       "user": {
         "properties": {
           "auid": {
-            "type": "keyword",
-            "ignore_above": 1024
+            "ignore_above": 1024,
+            "type": "keyword"
           },
           "euid": {
-            "type": "keyword",
-            "ignore_above": 1024
+            "ignore_above": 1024,
+            "type": "keyword"
           }
         }
       },
@@ -73,12 +70,12 @@ exports[`tests loading base.yml: base.yml 1`] = `
       "nested": {
         "properties": {
           "bar": {
-            "type": "keyword",
-            "ignore_above": 1024
+            "ignore_above": 1024,
+            "type": "keyword"
           },
           "baz": {
-            "type": "keyword",
-            "ignore_above": 1024
+            "ignore_above": 1024,
+            "type": "keyword"
           }
         }
       },
@@ -123,9 +120,6 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
     }
   },
   "mappings": {
-    "_meta": {
-      "package": "foo"
-    },
     "dynamic_templates": [
       {
         "strings_as_keyword": {
@@ -142,8 +136,8 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
       "coredns": {
         "properties": {
           "id": {
-            "type": "keyword",
-            "ignore_above": 1024
+            "ignore_above": 1024,
+            "type": "keyword"
           },
           "query": {
             "properties": {
@@ -151,28 +145,28 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
                 "type": "long"
               },
               "class": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "name": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "type": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               }
             }
           },
           "response": {
             "properties": {
               "code": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "flags": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "size": {
                 "type": "long"
@@ -218,9 +212,6 @@ exports[`tests loading system.yml: system.yml 1`] = `
     }
   },
   "mappings": {
-    "_meta": {
-      "package": "foo"
-    },
     "dynamic_templates": [
       {
         "strings_as_keyword": {
@@ -509,12 +500,12 @@ exports[`tests loading system.yml: system.yml 1`] = `
           "diskio": {
             "properties": {
               "name": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "serial_number": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "read": {
                 "properties": {
@@ -643,16 +634,16 @@ exports[`tests loading system.yml: system.yml 1`] = `
                 "type": "long"
               },
               "device_name": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "type": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "mount_point": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "files": {
                 "type": "long"
@@ -867,8 +858,8 @@ exports[`tests loading system.yml: system.yml 1`] = `
           "network": {
             "properties": {
               "name": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "out": {
                 "properties": {
@@ -946,12 +937,12 @@ exports[`tests loading system.yml: system.yml 1`] = `
           "process": {
             "properties": {
               "state": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "cmdline": {
-                "type": "keyword",
-                "ignore_above": 2048
+                "ignore_above": 2048,
+                "type": "keyword"
               },
               "env": {
                 "type": "object"
@@ -1040,22 +1031,22 @@ exports[`tests loading system.yml: system.yml 1`] = `
               "cgroup": {
                 "properties": {
                   "id": {
-                    "type": "keyword",
-                    "ignore_above": 1024
+                    "ignore_above": 1024,
+                    "type": "keyword"
                   },
                   "path": {
-                    "type": "keyword",
-                    "ignore_above": 1024
+                    "ignore_above": 1024,
+                    "type": "keyword"
                   },
                   "cpu": {
                     "properties": {
                       "id": {
-                        "type": "keyword",
-                        "ignore_above": 1024
+                        "ignore_above": 1024,
+                        "type": "keyword"
                       },
                       "path": {
-                        "type": "keyword",
-                        "ignore_above": 1024
+                        "ignore_above": 1024,
+                        "type": "keyword"
                       },
                       "cfs": {
                         "properties": {
@@ -1118,12 +1109,12 @@ exports[`tests loading system.yml: system.yml 1`] = `
                   "cpuacct": {
                     "properties": {
                       "id": {
-                        "type": "keyword",
-                        "ignore_above": 1024
+                        "ignore_above": 1024,
+                        "type": "keyword"
                       },
                       "path": {
-                        "type": "keyword",
-                        "ignore_above": 1024
+                        "ignore_above": 1024,
+                        "type": "keyword"
                       },
                       "total": {
                         "properties": {
@@ -1158,12 +1149,12 @@ exports[`tests loading system.yml: system.yml 1`] = `
                   "memory": {
                     "properties": {
                       "id": {
-                        "type": "keyword",
-                        "ignore_above": 1024
+                        "ignore_above": 1024,
+                        "type": "keyword"
                       },
                       "path": {
-                        "type": "keyword",
-                        "ignore_above": 1024
+                        "ignore_above": 1024,
+                        "type": "keyword"
                       },
                       "mem": {
                         "properties": {
@@ -1382,12 +1373,12 @@ exports[`tests loading system.yml: system.yml 1`] = `
                   "blkio": {
                     "properties": {
                       "id": {
-                        "type": "keyword",
-                        "ignore_above": 1024
+                        "ignore_above": 1024,
+                        "type": "keyword"
                       },
                       "path": {
-                        "type": "keyword",
-                        "ignore_above": 1024
+                        "ignore_above": 1024,
+                        "type": "keyword"
                       },
                       "total": {
                         "properties": {
@@ -1436,20 +1427,20 @@ exports[`tests loading system.yml: system.yml 1`] = `
           "raid": {
             "properties": {
               "name": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "status": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "level": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "sync_action": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "disks": {
                 "properties": {
@@ -1507,24 +1498,24 @@ exports[`tests loading system.yml: system.yml 1`] = `
                     "type": "long"
                   },
                   "host": {
-                    "type": "keyword",
-                    "ignore_above": 1024
+                    "ignore_above": 1024,
+                    "type": "keyword"
                   },
                   "etld_plus_one": {
-                    "type": "keyword",
-                    "ignore_above": 1024
+                    "ignore_above": 1024,
+                    "type": "keyword"
                   },
                   "host_error": {
-                    "type": "keyword",
-                    "ignore_above": 1024
+                    "ignore_above": 1024,
+                    "type": "keyword"
                   }
                 }
               },
               "process": {
                 "properties": {
                   "cmdline": {
-                    "type": "keyword",
-                    "ignore_above": 1024
+                    "ignore_above": 1024,
+                    "type": "keyword"
                   }
                 }
               },
@@ -1622,42 +1613,42 @@ exports[`tests loading system.yml: system.yml 1`] = `
           "users": {
             "properties": {
               "id": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "seat": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "path": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "type": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "service": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "remote": {
                 "type": "boolean"
               },
               "state": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "scope": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "leader": {
                 "type": "long"
               },
               "remote_host": {
-                "type": "keyword",
-                "ignore_above": 1024
+                "ignore_above": 1024,
+                "type": "keyword"
               }
             }
           }

@@ -5,19 +5,16 @@
  */
 
 import expect from '@kbn/expect';
-import path from 'path';
-import fs from 'fs';
-import { promisify } from 'util';
-import { checkIfPdfsMatch, checkIfPngsMatch } from './lib';
 
-const writeFileAsync = promisify(fs.writeFile);
-const mkdirAsync = promisify(fs.mkdir);
-
-const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
+/*
+ * TODO Remove this file and spread the tests to various apps
+ */
 
 export default function({ getService, getPageObjects }) {
-  const retry = getService('retry');
-  const config = getService('config');
+  const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
+  const log = getService('log');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
     'reporting',
     'common',
@@ -27,275 +24,161 @@ export default function({ getService, getPageObjects }) {
     'visualize',
     'visEditor',
   ]);
-  const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/45499
-  // FLAKY: https://github.com/elastic/kibana/issues/48721
-  describe.skip('Reporting', () => {
-    before('initialize tests', async () => {
-      await PageObjects.reporting.initTests();
-    });
-
-    const expectDisabledGenerateReportButton = async () => {
-      const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
-      await retry.try(async () => {
-        const isDisabled = await generateReportButton.getAttribute('disabled');
-        expect(isDisabled).to.be('true');
-      });
-    };
-
-    const expectEnabledGenerateReportButton = async () => {
-      const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
-      await retry.try(async () => {
-        const isDisabled = await generateReportButton.getAttribute('disabled');
-        expect(isDisabled).to.be(null);
-      });
-    };
-
-    const expectReportCanBeCreated = async () => {
-      await PageObjects.reporting.clickGenerateReportButton();
-      const success = await PageObjects.reporting.checkForReportingToasts();
-      expect(success).to.be(true);
-    };
-
-    const writeSessionReport = async (name, rawPdf, reportExt = 'pdf') => {
-      const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
-      await mkdirAsync(sessionDirectory, { recursive: true });
-      const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
-      await writeFileAsync(sessionReportPath, rawPdf);
-      return sessionReportPath;
-    };
-
-    const getBaselineReportPath = (fileName, reportExt = 'pdf') => {
-      const baselineFolder = path.resolve(REPORTS_FOLDER, 'baseline');
-      return path.resolve(baselineFolder, `${fileName}.${reportExt}`);
-    };
-
+  describe('Reporting', () => {
     describe('Dashboard', () => {
-      beforeEach(() => PageObjects.reporting.clearToastNotifications());
+      before('initialize tests', async () => {
+        log.debug('ReportingPage:initTests');
+        await esArchiver.loadIfNeeded('reporting/ecommerce');
+        await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
+        await browser.setWindowSize(1600, 850);
+      });
+      after('clean up archives', async () => {
+        await esArchiver.unload('reporting/ecommerce');
+        await esArchiver.unload('reporting/ecommerce_kibana');
+      });
 
       describe('Print PDF button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.clickNewDashboard();
           await PageObjects.reporting.openPdfReportingPanel();
-          await expectDisabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         });
 
         it('becomes available when saved', async () => {
-          await PageObjects.dashboard.saveDashboard('mypdfdash');
+          await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
-          await expectEnabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
       });
 
-      describe.skip('Print Layout', () => {
-        it('matches baseline report', async function() {
+      describe('Print Layout', () => {
+        it('Job completes and generates a download URL', async function() {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(300000);
           await PageObjects.common.navigateToApp('dashboard');
-          await PageObjects.dashboard.gotoDashboardEditMode('mypdfdash');
-          await PageObjects.reporting.setTimepickerInDataRange();
-          const visualizations = PageObjects.dashboard.getTestVisualizationNames();
-
-          // There is a current issue causing reports with tilemaps to timeout:
-          // https://github.com/elastic/kibana/issues/14136. Once that is resolved, add the tilemap visualization
-          // back in!
-          const tileMapIndex = visualizations.indexOf('Visualization TileMap');
-          visualizations.splice(tileMapIndex, 1);
-          await PageObjects.dashboard.addVisualizations(visualizations);
-
-          await PageObjects.dashboard.saveDashboard('report test');
-
+          await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
-          await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
 
-          const url = await PageObjects.reporting.getUrlOfTab(1);
-          await PageObjects.reporting.closeTab(1);
-          const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-          const reportFileName = 'dashboard_print';
-          const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-          const percentSimilar = await checkIfPdfsMatch(
-            sessionReportPath,
-            getBaselineReportPath(reportFileName),
-            config.get('screenshots.directory'),
-            log
-          );
-          // After expected OS differences, the diff count came to be around 128k
-          expect(percentSimilar).to.be.lessThan(0.05);
-        });
-
-        it('matches same baseline report with margins turned on', async function() {
-          // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins.
-          this.timeout(360000);
-
-          await PageObjects.dashboard.switchToEditMode();
-          await PageObjects.dashboard.useMargins(true);
-          await PageObjects.dashboard.saveDashboard('report test');
-          await PageObjects.reporting.openPdfReportingPanel();
-          await PageObjects.reporting.checkUsePrintLayout();
-          await PageObjects.reporting.clickGenerateReportButton();
-          await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
-
-          const url = await PageObjects.reporting.getUrlOfTab(1);
-          const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-
-          await PageObjects.reporting.closeTab(1);
-          const reportFileName = 'dashboard_print';
-          const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-          const percentSimilar = await checkIfPdfsMatch(
-            sessionReportPath,
-            getBaselineReportPath(reportFileName),
-            config.get('screenshots.directory'),
-            log
-          );
-          // After expected OS differences, the diff count came to be around 128k
-          expect(percentSimilar).to.be.lessThan(0.05);
+          const url = await PageObjects.reporting.getReportURL(60000);
+          expect(url).to.match(/download/);
         });
       });
 
-      // TODO Re-enable the tests after removing Phantom:
-      // https://github.com/elastic/kibana/issues/21485
-      describe.skip('Preserve Layout', () => {
-        it('matches baseline report', async function() {
-          // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins.
-          this.timeout(360000);
-
-          await PageObjects.reporting.openPdfReportingPanel();
-          await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
-          await PageObjects.reporting.clickGenerateReportButton();
-          await PageObjects.reporting.removeForceSharedItemsContainerSize();
-
-          await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
-
-          const url = await PageObjects.reporting.getUrlOfTab(1);
-          await PageObjects.reporting.closeTab(1);
-          const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-
-          const reportFileName = 'dashboard_preserve_layout';
-          const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-
-          const percentSimilar = await checkIfPdfsMatch(
-            sessionReportPath,
-            getBaselineReportPath(reportFileName),
-            config.get('screenshots.directory'),
-            log
-          );
-          expect(percentSimilar).to.be.lessThan(0.05);
-        });
-      });
-
-      // FLAKY: https://github.com/elastic/kibana/issues/43131
-      describe.skip('Print PNG button', () => {
+      describe('Print PNG button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.clickNewDashboard();
           await PageObjects.reporting.openPngReportingPanel();
-          await expectDisabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         });
 
         it('becomes available when saved', async () => {
-          await PageObjects.dashboard.saveDashboard('mypngdash');
+          await PageObjects.dashboard.saveDashboard('My PNG Dash');
           await PageObjects.reporting.openPngReportingPanel();
-          await expectEnabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
       });
 
-      // TODO Re-enable the tests after removing Phantom:
-      // https://github.com/elastic/kibana/issues/21485
-      describe.skip('Preserve Layout', () => {
-        it('matches baseline report', async function() {
-          // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins.
-          this.timeout(360000);
-
+      describe('Preserve Layout', () => {
+        it('Job completes and generates a download URL', async function() {
+          this.timeout(300000);
           await PageObjects.common.navigateToApp('dashboard');
-          await PageObjects.dashboard.gotoDashboardEditMode('My PNG Dash');
-          await PageObjects.reporting.setTimepickerInDataRange();
-          const visualizations = PageObjects.dashboard.getTestVisualizationNames();
-
-          // There is a current issue causing reports with tilemaps to timeout:
-          // https://github.com/elastic/kibana/issues/14136. Once that is resolved, add the tilemap visualization
-          // back in!
-          const tileMapIndex = visualizations.indexOf('Visualization TileMap');
-          visualizations.splice(tileMapIndex, 1);
-          await PageObjects.dashboard.addVisualizations(visualizations);
-
-          await PageObjects.dashboard.saveDashboard('PNG report test');
-
+          await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
           await PageObjects.reporting.openPngReportingPanel();
           await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
-          await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
-
-          const url = await PageObjects.reporting.getUrlOfTab(1);
-          await PageObjects.reporting.closeTab(1);
-          const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-
-          const reportFileName = 'dashboard_preserve_layout';
-          const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
-          const percentSimilar = await checkIfPngsMatch(
-            sessionReportPath,
-            getBaselineReportPath(reportFileName, 'png'),
-            config.get('screenshots.directory'),
-            log
-          );
-          expect(percentSimilar).to.be.lessThan(0.05);
+          const url = await PageObjects.reporting.getReportURL(60000);
+          expect(url).to.match(/download/);
         });
       });
     });
 
     describe('Discover', () => {
-      // FLAKY: https://github.com/elastic/kibana/issues/31379
-      describe.skip('Generate CSV button', () => {
+      before('initialize tests', async () => {
+        log.debug('ReportingPage:initTests');
+        await esArchiver.loadIfNeeded('reporting/ecommerce');
+        await browser.setWindowSize(1600, 850);
+      });
+      after('clean up archives', async () => {
+        await esArchiver.unload('reporting/ecommerce');
+      });
+
+      describe('Generate CSV button', () => {
         beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
         it('is not available if new', async () => {
           await PageObjects.reporting.openCsvReportingPanel();
-          await expectDisabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         });
 
         it('becomes available when saved', async () => {
           await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
           await PageObjects.reporting.openCsvReportingPanel();
-          await expectEnabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        });
+
+        it('becomes available/not available when a saved search is created, changed and saved again', async () => {
+          // create new search, csv export is not available
+          await PageObjects.discover.clickNewSearchButton();
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+          // save search, csv export is available
+          await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+          // add filter, csv export is not available
+          await filterBar.addFilter('currency', 'is', 'EUR');
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+          // save search again, csv export is available
+          await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
 
         it('generates a report with data', async () => {
+          await PageObjects.discover.clickNewSearchButton();
           await PageObjects.reporting.setTimepickerInDataRange();
           await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
           await PageObjects.reporting.openCsvReportingPanel();
-          await expectReportCanBeCreated();
+          expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
         });
 
         it('generates a report with no data', async () => {
           await PageObjects.reporting.setTimepickerInNoDataRange();
           await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
           await PageObjects.reporting.openCsvReportingPanel();
-          await expectReportCanBeCreated();
+          expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
         });
       });
     });
 
     describe('Visualize', () => {
+      before('initialize tests', async () => {
+        log.debug('ReportingPage:initTests');
+        await esArchiver.loadIfNeeded('reporting/ecommerce');
+        await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
+        await browser.setWindowSize(1600, 850);
+      });
+      after('clean up archives', async () => {
+        await esArchiver.unload('reporting/ecommerce');
+        await esArchiver.unload('reporting/ecommerce_kibana');
+      });
+
       describe('Print PDF button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToUrl('visualize', 'new');
           await PageObjects.visualize.clickAreaChart();
-          await PageObjects.visualize.clickNewSearch();
+          await PageObjects.visualize.clickNewSearch('ecommerce');
           await PageObjects.reporting.openPdfReportingPanel();
-          await expectDisabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         });
 
         it('becomes available when saved', async () => {
@@ -305,34 +188,21 @@ export default function({ getService, getPageObjects }) {
           await PageObjects.visEditor.clickGo();
           await PageObjects.visualize.saveVisualization('my viz');
           await PageObjects.reporting.openPdfReportingPanel();
-          await expectEnabledGenerateReportButton();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
 
-        // TODO Re-enable the tests after removing Phantom:
-        // https://github.com/elastic/kibana/issues/21485
-        it.skip('matches baseline report', async function() {
+        it('Job completes and generates a download URL', async function() {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);
 
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
-          await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
 
-          const url = await PageObjects.reporting.getUrlOfTab(1);
-          const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-
-          await PageObjects.reporting.closeTab(1);
-          const reportFileName = 'visualize_print';
-          const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-          const percentSimilar = await checkIfPdfsMatch(
-            sessionReportPath,
-            getBaselineReportPath(reportFileName),
-            config.get('screenshots.directory'),
-            log
-          );
-          expect(percentSimilar).to.be.lessThan(0.05);
+          const url = await PageObjects.reporting.getReportURL(60000);
+          expect(url).to.match(/download/);
         });
       });
     });

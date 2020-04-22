@@ -5,6 +5,13 @@
  */
 
 import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_PREPACKAGED_URL,
+  DETECTION_ENGINE_RULES_STATUS_URL,
+  DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
+  DETECTION_ENGINE_TAGS_URL,
+} from '../../../../../../../plugins/siem/common/constants';
+import {
   AddRulesProps,
   DeleteRulesProps,
   DuplicateRulesProps,
@@ -23,13 +30,6 @@ import {
   BulkRuleResponse,
 } from './types';
 import { KibanaServices } from '../../../lib/kibana';
-import {
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_PREPACKAGED_URL,
-  DETECTION_ENGINE_RULES_STATUS_URL,
-  DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
-  DETECTION_ENGINE_TAGS_URL,
-} from '../../../../common/constants';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 
 /**
@@ -266,8 +266,8 @@ export const getRuleStatusById = async ({
   signal: AbortSignal;
 }): Promise<RuleStatusResponse> =>
   KibanaServices.get().http.fetch<RuleStatusResponse>(DETECTION_ENGINE_RULES_STATUS_URL, {
-    method: 'GET',
-    query: { ids: JSON.stringify([id]) },
+    method: 'POST',
+    body: JSON.stringify({ ids: [id] }),
     signal,
   });
 
@@ -289,8 +289,8 @@ export const getRulesStatusByIds = async ({
   const res = await KibanaServices.get().http.fetch<RuleStatusResponse>(
     DETECTION_ENGINE_RULES_STATUS_URL,
     {
-      method: 'GET',
-      query: { ids: JSON.stringify(ids) },
+      method: 'POST',
+      body: JSON.stringify({ ids }),
       signal,
     }
   );

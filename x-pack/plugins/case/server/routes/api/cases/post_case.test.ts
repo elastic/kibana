@@ -14,6 +14,7 @@ import {
   mockCases,
 } from '../__fixtures__';
 import { initPostCaseApi } from './post_case';
+import { CASES_URL } from '../../../../common/constants';
 
 describe('POST cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -26,7 +27,7 @@ describe('POST cases', () => {
   });
   it(`Posts a new case`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: CASES_URL,
       method: 'post',
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',
@@ -49,7 +50,7 @@ describe('POST cases', () => {
 
   it(`Error if you passing status for a new case`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: CASES_URL,
       method: 'post',
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',
@@ -70,7 +71,7 @@ describe('POST cases', () => {
   });
   it(`Returns an error if postNewCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: CASES_URL,
       method: 'post',
       body: {
         description: 'Throw an error',
@@ -93,7 +94,7 @@ describe('POST cases', () => {
     routeHandler = await createRoute(initPostCaseApi, 'post', true);
 
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases',
+      path: CASES_URL,
       method: 'post',
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',
