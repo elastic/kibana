@@ -14,12 +14,18 @@ const Page = styled(EuiPage)`
 
 interface Props extends HeaderProps {
   restrictWidth?: number;
+  restrictHeaderWidth?: number;
   children?: React.ReactNode;
 }
 
-export const WithHeaderLayout: React.FC<Props> = ({ restrictWidth, children, ...rest }) => (
+export const WithHeaderLayout: React.FC<Props> = ({
+  restrictWidth,
+  restrictHeaderWidth,
+  children,
+  ...rest
+}) => (
   <Fragment>
-    <Header {...rest} />
+    <Header maxWidth={restrictHeaderWidth} {...rest} />
     <Page restrictWidth={restrictWidth || 1200}>
       <EuiPageBody>
         <EuiSpacer size="m" />

@@ -332,10 +332,7 @@ describe('import timelines', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        [
-          'Invalid value undefined supplied to : { file: (ReadableRt & { hapi: { filename: string } }) }/file: (ReadableRt & { hapi: { filename: string } })/0: ReadableRt',
-          'Invalid value undefined supplied to : { file: (ReadableRt & { hapi: { filename: string } }) }/file: (ReadableRt & { hapi: { filename: string } })/1: { hapi: { filename: string } }',
-        ].join('\n')
+        'Invalid value "undefined" supplied to "file",Invalid value "undefined" supplied to "file"'
       );
     });
   });
