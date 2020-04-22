@@ -28,9 +28,8 @@ import {
 
 // @ts-ignore
 import StubIndexPattern from 'test_utils/stub_index_pattern';
-import { InvalidJSONProperty } from '../../../kibana_utils/public';
 import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../plugins/data/public/mocks';
+import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
 import { IIndexPattern } from '../../../data/common/index_patterns';
 
@@ -40,9 +39,9 @@ describe('Saved Object', () => {
   const startMock = coreMock.createStart();
   const dataStartMock = dataPluginMock.createStartContract();
   const saveOptionsMock = {} as SavedObjectSaveOpts;
+  const savedObjectsClientStub = startMock.savedObjects.client;
 
   let SavedObjectClass: new (config: SavedObjectConfig) => SavedObject;
-  const savedObjectsClientStub = startMock.savedObjects.client;
 
   /**
    * Returns a fake doc response with the given index and id, of type dashboard
@@ -107,7 +106,13 @@ describe('Saved Object', () => {
     SavedObjectClass = createSavedObjectClass(({
       savedObjectsClient: savedObjectsClientStub,
       indexPatterns: dataStartMock.indexPatterns,
-      search: dataStartMock.search,
+      search: {
+        ...dataStartMock.search,
+        searchSource: {
+          ...dataStartMock.search.searchSource,
+          create: createSearchSourceMock,
+        },
+      },
     } as unknown) as SavedObjectKibanaServices);
   });
 
@@ -409,24 +414,6 @@ describe('Saved Object', () => {
           expect(!!err).toBe(true);
         }
       });
-    });
-
-    it('forwards thrown exceptions from createSearchSource', async () => {
-      const savedObject = await createInitializedSavedObject({
-        type: 'dashboard',
-        searchSource: true,
-      });
-      const response = {
-        found: true,
-        _source: {},
-      };
-
-      try {
-        await savedObject.applyESResp(response);
-        throw new Error('applyESResp should have failed, but did not.');
-      } catch (err) {
-        expect(err instanceof InvalidJSONProperty).toBe(true);
-      }
     });
 
     it('preserves original defaults if not overridden', () => {

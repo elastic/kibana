@@ -31,8 +31,6 @@ const services = {
   search: npStart.plugins.data.search,
   chrome: npStart.core.chrome,
   overlays: npStart.core.overlays,
-  uiSettings: npStart.core.uiSettings,
-  injectedMetadata: npStart.core.injectedMetadata,
 };
 
 const SavedSheet = createSavedSheetClass(services, npStart.core.uiSettings);

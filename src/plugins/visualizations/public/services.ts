@@ -20,7 +20,6 @@
 import {
   Capabilities,
   ChromeStart,
-  CoreStart,
   HttpStart,
   I18nStart,
   IUiSettingsClient,
@@ -65,9 +64,6 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatt
 );
 
 export const [getSearch, setSearch] = createGetterSetter<DataPublicPluginStart['search']>('Search');
-export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
-  CoreStart['injectedMetadata']
->('InjectedMetadata');
 
 export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
   'UsageCollection'

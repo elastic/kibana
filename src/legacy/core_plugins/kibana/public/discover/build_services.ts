@@ -63,7 +63,6 @@ export interface DiscoverServices {
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
-  search: DataPublicPluginStart['search'];
   visualizations: VisualizationsStart;
 }
 
@@ -105,6 +104,5 @@ export async function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     visualizations: plugins.visualizations,
-    search: plugins.data.search,
   };
 }

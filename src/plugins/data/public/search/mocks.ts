@@ -20,7 +20,7 @@
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
 import { AggTypeFieldFilters } from './aggs/param_types/filter';
 import { ISearchStart } from './types';
-import { searchSourceMock } from './search_source/mocks';
+import { searchSourceMock, createSearchSourceMock } from './search_source/mocks';
 
 const searchSetupMock = {
   aggs: searchAggsSetupMock(),
@@ -32,10 +32,7 @@ const searchStartMock: jest.Mocked<ISearchStart> = {
   aggs: searchAggsStartMock(),
   setInterceptor: jest.fn(),
   search: jest.fn(),
-  searchSource: {
-    create: jest.fn().mockReturnValue(searchSourceMock),
-    fromJSON: jest.fn(),
-  },
+  searchSource: searchSourceMock,
   __LEGACY: {
     AggConfig: jest.fn() as any,
     AggType: jest.fn(),
@@ -51,4 +48,4 @@ const searchStartMock: jest.Mocked<ISearchStart> = {
   },
 };
 
-export { searchSourceMock, searchSetupMock, searchStartMock };
+export { searchSetupMock, searchStartMock, createSearchSourceMock };

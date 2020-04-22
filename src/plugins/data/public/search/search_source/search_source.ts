@@ -82,12 +82,12 @@ import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '.
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from '../legacy';
-import { ISearchStart } from '../types';
+import { ISearchStartLegacy } from '../types';
 
 export interface SearchSourceDependencies {
   uiSettings: CoreStart['uiSettings'];
   search: ISearchGeneric;
-  legacySearch: ISearchStart['__LEGACY'];
+  legacySearch: ISearchStartLegacy;
   injectedMetadata: CoreStart['injectedMetadata'];
 }
 
