@@ -22,7 +22,7 @@ jest.mock('./action_handlers');
 const handleIncidentMock = handleIncident as jest.Mock;
 
 const services: Services = {
-  callCluster: async (path: string, opts: unknown) => {},
+  callCluster: async (path: string, opts: any) => {},
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 

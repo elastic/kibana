@@ -6,7 +6,6 @@
 
 import { TimeSeriesQuerySchema, TimeSeriesQuery } from './time_series_types';
 import { runTests } from './core_query_types.test';
-import { TypeOf } from '@kbn/config-schema';
 
 const DefaultParams: Writable<Partial<TimeSeriesQuery>> = {
   index: 'index-name',
@@ -20,7 +19,6 @@ const DefaultParams: Writable<Partial<TimeSeriesQuery>> = {
 describe('TimeSeriesParams validate()', () => {
   runTests(TimeSeriesQuerySchema, DefaultParams);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
   beforeEach(() => {
     params = { ...DefaultParams };
@@ -104,7 +102,7 @@ describe('TimeSeriesParams validate()', () => {
     return () => validate();
   }
 
-  function validate(): TypeOf<typeof TimeSeriesQuerySchema> {
+  function validate(): any {
     return TimeSeriesQuerySchema.validate(params);
   }
 });

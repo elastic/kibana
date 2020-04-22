@@ -7,7 +7,7 @@ import { configSchema } from './config';
 
 describe('config validation', () => {
   test('action defaults', () => {
-    const config: Record<string, unknown> = {};
+    const config: Record<string, any> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
@@ -23,7 +23,7 @@ describe('config validation', () => {
   });
 
   test('action with preconfigured actions', () => {
-    const config: Record<string, unknown> = {
+    const config: Record<string, any> = {
       preconfigured: [
         {
           id: 'my-slack1',

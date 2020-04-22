@@ -19,8 +19,7 @@ const DefaultParams: Writable<Partial<CoreQueryParams>> = {
   timeWindowUnit: 'm',
 };
 
-export function runTests(schema: ObjectType, defaultTypeParams: Record<string, unknown>): void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function runTests(schema: ObjectType, defaultTypeParams: Record<string, any>): void {
   let params: any;
 
   describe('coreQueryTypes', () => {
@@ -187,7 +186,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, u
     return () => validate();
   }
 
-  function validate(): unknown {
+  function validate(): any {
     return schema.validate(params);
   }
 }

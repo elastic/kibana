@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertingPlugin, AlertingPluginsSetup, AlertingPluginsStart } from './plugin';
+import { AlertingPlugin } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../../plugins/licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../plugins/encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogServiceMock } from '../../event_log/server/event_log_service.mock';
-import { KibanaRequest } from 'kibana/server';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
@@ -27,13 +26,13 @@ describe('Alerting Plugin', () => {
             ...coreSetup.http,
             route: jest.fn(),
           },
-        } as ReturnType<typeof coreMock.createSetup>,
-        ({
+        } as any,
+        {
           licensing: licensingMock.createSetup(),
           encryptedSavedObjects: encryptedSavedObjectsSetup,
           taskManager: taskManagerMock.createSetup(),
           eventLog: eventLogServiceMock.create(),
-        } as unknown) as AlertingPluginsSetup
+        } as any
       );
 
       expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
@@ -65,28 +64,28 @@ describe('Alerting Plugin', () => {
               ...coreSetup.http,
               route: jest.fn(),
             },
-          } as ReturnType<typeof coreMock.createSetup>,
-          ({
+          } as any,
+          {
             licensing: licensingMock.createSetup(),
             encryptedSavedObjects: encryptedSavedObjectsSetup,
             taskManager: taskManagerMock.createSetup(),
             eventLog: eventLogServiceMock.create(),
-          } as unknown) as AlertingPluginsSetup
+          } as any
         );
 
         const startContract = plugin.start(
-          coreMock.createStart() as ReturnType<typeof coreMock.createStart>,
-          ({
+          coreMock.createStart() as any,
+          {
             actions: {
               execute: jest.fn(),
               getActionsClientWithRequest: jest.fn(),
             },
-          } as unknown) as AlertingPluginsStart
+          } as any
         );
 
         expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
         expect(() =>
-          startContract.getAlertsClientWithRequest({} as KibanaRequest)
+          startContract.getAlertsClientWithRequest({} as any)
         ).toThrowErrorMatchingInlineSnapshot(
           `"Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
         );
@@ -108,27 +107,27 @@ describe('Alerting Plugin', () => {
               ...coreSetup.http,
               route: jest.fn(),
             },
-          } as ReturnType<typeof coreMock.createSetup>,
-          ({
+          } as any,
+          {
             licensing: licensingMock.createSetup(),
             encryptedSavedObjects: encryptedSavedObjectsSetup,
             taskManager: taskManagerMock.createSetup(),
             eventLog: eventLogServiceMock.create(),
-          } as unknown) as AlertingPluginsSetup
+          } as any
         );
 
         const startContract = plugin.start(
-          coreMock.createStart() as ReturnType<typeof coreMock.createStart>,
-          ({
+          coreMock.createStart() as any,
+          {
             actions: {
               execute: jest.fn(),
               getActionsClientWithRequest: jest.fn(),
             },
             spaces: () => null,
-          } as unknown) as AlertingPluginsStart
+          } as any
         );
 
-        const fakeRequest = ({
+        const fakeRequest = {
           headers: {},
           getBasePath: () => '',
           path: '/',
@@ -142,8 +141,8 @@ describe('Alerting Plugin', () => {
             },
           },
           getSavedObjectsClient: jest.fn(),
-        } as unknown) as KibanaRequest;
-        await startContract.getAlertsClientWithRequest(fakeRequest);
+        };
+        await startContract.getAlertsClientWithRequest(fakeRequest as any);
       });
     });
   });

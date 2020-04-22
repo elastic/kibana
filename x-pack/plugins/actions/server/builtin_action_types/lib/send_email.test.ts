@@ -63,15 +63,12 @@ describe('send_email module', () => {
   });
 
   test('handles unauthenticated email using not secure host/port', async () => {
-    const sendEmailOptions = getSendEmailOptions({
-      transport: {
-        host: 'example.com',
-        port: 1025,
-      },
-    });
+    const sendEmailOptions = getSendEmailOptions();
     delete sendEmailOptions.transport.service;
     delete sendEmailOptions.transport.user;
     delete sendEmailOptions.transport.password;
+    sendEmailOptions.transport.host = 'example.com';
+    sendEmailOptions.transport.port = 1025;
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -108,17 +105,13 @@ describe('send_email module', () => {
   });
 
   test('handles unauthenticated email using secure host/port', async () => {
-    const sendEmailOptions = getSendEmailOptions({
-      transport: {
-        host: 'example.com',
-        port: 1025,
-        secure: true,
-      },
-    });
+    const sendEmailOptions = getSendEmailOptions();
     delete sendEmailOptions.transport.service;
     delete sendEmailOptions.transport.user;
     delete sendEmailOptions.transport.password;
-
+    sendEmailOptions.transport.host = 'example.com';
+    sendEmailOptions.transport.port = 1025;
+    sendEmailOptions.transport.secure = true;
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -161,22 +154,19 @@ describe('send_email module', () => {
   });
 });
 
-function getSendEmailOptions({ content = {}, routing = {}, transport = {} } = {}) {
+function getSendEmailOptions(): any {
   return {
     content: {
-      ...content,
       message: 'a message',
       subject: 'a subject',
     },
     routing: {
-      ...routing,
       from: 'fred@example.com',
       to: ['jim@example.com'],
       cc: ['bob@example.com', 'robert@example.com'],
       bcc: [],
     },
     transport: {
-      ...transport,
       service: 'whatever',
       user: 'elastic',
       password: 'changeme',

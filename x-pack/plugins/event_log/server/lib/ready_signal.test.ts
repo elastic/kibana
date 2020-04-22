@@ -16,11 +16,11 @@ describe('ReadySignal', () => {
   test('works as expected', async done => {
     let value = 41;
 
-    timeoutSet(100, async () => {
+    timeoutSet(100, () => {
       expect(value).toBe(41);
     });
 
-    timeoutSet(250, async () => readySignal.signal(42));
+    timeoutSet(250, () => readySignal.signal(42));
 
     timeoutSet(400, async () => {
       expect(value).toBe(42);
@@ -35,6 +35,6 @@ describe('ReadySignal', () => {
   });
 });
 
-function timeoutSet(ms: number, fn: () => Promise<unknown>): void {
+function timeoutSet(ms: number, fn: any) {
   setTimeout(fn, ms);
 }

@@ -7,7 +7,7 @@ import { configSchema } from './config';
 
 describe('config validation', () => {
   test('task manager defaults', () => {
-    const config: Record<string, unknown> = {};
+    const config: Record<string, any> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
@@ -21,7 +21,7 @@ describe('config validation', () => {
   });
 
   test('the ElastiSearch Tasks index cannot be used for task manager', () => {
-    const config: Record<string, unknown> = {
+    const config: Record<string, any> = {
       index: '.tasks',
     };
     expect(() => {

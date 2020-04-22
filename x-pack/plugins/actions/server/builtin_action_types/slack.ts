@@ -156,7 +156,7 @@ async function slackExecutor(
   return successResult(actionId, result);
 }
 
-function successResult(actionId: string, data: unknown): ActionTypeExecutorResult {
+function successResult(actionId: string, data: any): ActionTypeExecutorResult {
   return { status: 'ok', data, actionId };
 }
 

@@ -91,7 +91,7 @@ describe('execute()', () => {
     await actionType.executor({
       actionId,
       services: {
-        callCluster: async (path: string, opts: unknown) => {},
+        callCluster: async (path: string, opts: any) => {},
         savedObjectsClient: savedObjectsClientMock.create(),
       },
       params: { message: 'message text here', level: 'info' },

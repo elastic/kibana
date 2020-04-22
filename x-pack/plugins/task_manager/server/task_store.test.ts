@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable  @typescript-eslint/no-explicit-any */
 
 import _ from 'lodash';
 import sinon from 'sinon';
