@@ -5,7 +5,8 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import { ConfigSchema } from './plugin';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ConfigSchema } from '../../../../plugins/apm/public/plugin';
 
 const { core } = npStart;
 
@@ -13,12 +14,12 @@ export function getConfigFromInjectedMetadata(): ConfigSchema {
   const {
     apmIndexPatternTitle,
     apmServiceMapEnabled,
-    apmUiEnabled
+    apmUiEnabled,
   } = core.injectedMetadata.getInjectedVars();
 
   return {
     indexPatternTitle: `${apmIndexPatternTitle}`,
     serviceMapEnabled: !!apmServiceMapEnabled,
-    ui: { enabled: !!apmUiEnabled }
+    ui: { enabled: !!apmUiEnabled },
   };
 }

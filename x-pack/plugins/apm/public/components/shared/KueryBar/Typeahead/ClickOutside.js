@@ -27,6 +27,7 @@ export default class ClickOutside extends Component {
   };
 
   render() {
+    // eslint-disable-next-line no-unused-vars
     const { onClickOutside, ...restProps } = this.props;
     return (
       <div ref={this.setNodeRef} {...restProps}>

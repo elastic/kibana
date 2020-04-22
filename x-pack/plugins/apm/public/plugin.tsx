@@ -15,35 +15,35 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext
-} from '../../../../../src/core/public';
-import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
-import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { PluginSetupContract as AlertingPluginPublicSetup } from '../../../alerting/public';
-import { AlertType } from '../../common/alert_types';
-import { LicensingPluginSetup } from '../../../licensing/public';
+} from '../../../../src/core/public';
+import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+import { PluginSetupContract as AlertingPluginPublicSetup } from '../../alerting/public';
+import { AlertType } from '../common/alert_types';
+import { LicensingPluginSetup } from '../../licensing/public';
 import {
   AlertsContextProvider,
   TriggersAndActionsUIPublicPluginSetup
-} from '../../../triggers_actions_ui/public';
-import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
-import { routes } from '../components/app/Main/route_config';
-import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
-import { ErrorRateAlertTrigger } from '../components/shared/ErrorRateAlertTrigger';
-import { TransactionDurationAlertTrigger } from '../components/shared/TransactionDurationAlertTrigger';
-import { ApmPluginContext } from '../context/ApmPluginContext';
-import { LicenseProvider } from '../context/LicenseContext';
-import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
-import { LocationProvider } from '../context/LocationContext';
-import { MatchedRouteProvider } from '../context/MatchedRouteContext';
-import { UrlParamsProvider } from '../context/UrlParamsContext';
-import { createCallApmApi } from '../services/rest/createCallApmApi';
-import { createStaticIndexPattern } from '../services/rest/index_pattern';
-import { px, unit, units } from '../style/variables';
-import { history } from '../utils/history';
+} from '../../triggers_actions_ui/public';
+import { APMIndicesPermission } from './components/app/APMIndicesPermission';
+import { routes } from './components/app/Main/route_config';
+import { ScrollToTopOnPathChange } from './components/app/Main/ScrollToTopOnPathChange';
+import { UpdateBreadcrumbs } from './components/app/Main/UpdateBreadcrumbs';
+import { ErrorRateAlertTrigger } from './components/shared/ErrorRateAlertTrigger';
+import { TransactionDurationAlertTrigger } from './components/shared/TransactionDurationAlertTrigger';
+import { ApmPluginContext } from './context/ApmPluginContext';
+import { LicenseProvider } from './context/LicenseContext';
+import { LoadingIndicatorProvider } from './context/LoadingIndicatorContext';
+import { LocationProvider } from './context/LocationContext';
+import { MatchedRouteProvider } from './context/MatchedRouteContext';
+import { UrlParamsProvider } from './context/UrlParamsContext';
+import { createCallApmApi } from './services/rest/createCallApmApi';
+import { createStaticIndexPattern } from './services/rest/index_pattern';
+import { px, unit, units } from './style/variables';
+import { history } from './utils/history';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
-import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
+import { getConfigFromInjectedMetadata } from '../../../legacy/plugins/apm/public/getConfigFromInjectedMetadata';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';

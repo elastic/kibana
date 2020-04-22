@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 
 export const featureCatalogueEntry = {
   id: 'apm',

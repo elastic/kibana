@@ -8,6 +8,9 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { APMOSSConfig } from 'src/plugins/apm_oss/server';
 import { APMPlugin } from './plugin';
+import savedObjectMappings from './mappings.json';
+
+export { savedObjectMappings };
 
 export const config = {
   exposeToBrowser: {

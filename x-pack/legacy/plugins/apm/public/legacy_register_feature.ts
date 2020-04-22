@@ -5,20 +5,19 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-import { featureCatalogueEntry } from './new-platform/featureCatalogueEntry';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { featureCatalogueEntry } from '../../../../plugins/apm/public/featureCatalogueEntry';
 
 const {
   core,
-  plugins: { home }
+  plugins: { home },
 } = npSetup;
-const apmUiEnabled = core.injectedMetadata.getInjectedVar(
-  'apmUiEnabled'
-) as boolean;
+const apmUiEnabled = core.injectedMetadata.getInjectedVar('apmUiEnabled') as boolean;
 
 if (apmUiEnabled) {
   home.featureCatalogue.register(featureCatalogueEntry);
 }
 
 home.environment.update({
-  apmUi: apmUiEnabled
+  apmUi: apmUiEnabled,
 });

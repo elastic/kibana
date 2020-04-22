@@ -9,7 +9,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 import Suggestion from './suggestion';
-import { units, px, unit } from '../../../../../../apm/public/style/variables';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { units, px, unit } from '../../../../../../../../plugins/apm/public/style/variables';
 import { tint } from 'polished';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 

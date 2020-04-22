@@ -11,6 +11,6 @@
     "alerting"
   ],
   "server": true,
-  "ui": true,
+  "ui": false,
   "configPath": ["xpack", "apm"]
 }

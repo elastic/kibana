@@ -6,7 +6,7 @@
 import React from 'react';
 import { ApmPluginContext, ApmPluginContextValue } from '.';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
-import { ConfigSchema } from '../../new-platform/plugin';
+import { ConfigSchema } from '../../plugin';
 
 const mockCore = {
   chrome: {
