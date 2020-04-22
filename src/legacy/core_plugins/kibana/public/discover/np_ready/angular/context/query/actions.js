@@ -29,8 +29,8 @@ import { FAILURE_REASONS, LOADING_STATUS } from './constants';
 import { MarkdownSimple } from '../../../../../../../../../plugins/kibana_react/public';
 
 export function QueryActionsProvider(Promise) {
-  const { filterManager, indexPatterns, search } = getServices();
-  const fetchAnchor = fetchAnchorProvider(indexPatterns, search.searchSource.create());
+  const { filterManager, indexPatterns, data } = getServices();
+  const fetchAnchor = fetchAnchorProvider(indexPatterns, data.search.searchSource.create());
   const { fetchSurroundingDocs } = fetchContextProvider(indexPatterns);
   const { setPredecessorCount, setQueryParameters, setSuccessorCount } = getQueryParameterActions(
     filterManager,
