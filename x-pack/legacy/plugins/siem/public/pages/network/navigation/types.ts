@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ESTermQuery } from '../../../../../../../plugins/siem/common/typed_json';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/';
 
 import { NavTab } from '../../../components/navigation/types';
 import { FlowTargetSourceDest } from '../../../graphql/types';
 import { networkModel } from '../../../store';
-import { ESTermQuery } from '../../../../common/typed_json';
 import { GlobalTimeArgs } from '../../../containers/global_time';
 
 import { SetAbsoluteRangeDatePicker } from '../types';

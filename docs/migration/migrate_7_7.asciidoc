@@ -19,17 +19,20 @@ The following section is re-used in the Installation and Upgrade Guide
 [float]
 === Breaking changes for users
 
-// tag::notable-breaking-changes[]
 There are no user-facing breaking changes in 7.7.
-// end::notable-breaking-changes[]
 
 [float]
 === Breaking changes for plugin developers
 
-////
-*via [#60574](https://github.com/elastic/kibana/pull/60574)*
+[discrete]
+==== Add addInfo toast to core notifications service
 
-## Goodbye, legacy data plugin 👋
+This Info toast will be used for the async search notifications.
+
+*via {pull}60574[#60574]*
+
+[discrete]
+==== Goodbye, legacy data plugin
 
 The legacy `data` plugin located in `src/legacy/core_plugins/data` has been removed. This change only affects legacy platform plugins which are either:
 1. Importing the `public/setup` or `public/legacy` "shim" files from the legacy data plugin to access runtime contracts; or
@@ -62,35 +65,22 @@ const myPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginAp
 );
 ```
 
-For more information on where to locate new platform `data` services, please refer to the table of [plugins for shared application services](https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services) in `src/core/MIGRATION.md`.
+For more information on where to locate new platform `data` services,
+please refer to the table of
+https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
+in `src/core/MIGRATION.md`.
 
-*via [#60449](https://github.com/elastic/kibana/pull/60449)*
+*via {pull}60449[#60449]*
 
-## Delete FilterStateManager and QueryFilter :-D
+[discrete]
+==== Delete FilterStateManager and QueryFilter
 
-Deleted unused legacy exports
- - Delete `FilterStateManager`  
- - Delete `QueryFilter`
- - Delete `SavedQuery` re-export from legacy
+Delete unused legacy exports `FilterStateManager`, `QueryFilter`, and `SavedQuery`.
 
-### Checklist
+*via {pull}59872[#59872]*
 
-Delete any items that are not applicable to this PR.
-
-- [ ] Any text added follows [EUI's writing guidelines](https://elastic.github.io/eui/#/guidelines/writing), uses sentence case text and includes [i18n support](https://github.com/elastic/kibana/blob/master/packages/kbn-i18n/README.md)
-- [ ] [Documentation](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#writing-documentation) was added for features that require explanation or tutorials
-- [ ] [Unit or functional tests](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility) were updated or added to match the most common scenarios
-- [ ] This was checked for [keyboard-only and screenreader accessibility](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Accessibility#Accessibility_testing_checklist)
-- [ ] This renders correctly on smaller devices using a responsive layout. (You can test this [in your browser](https://www.browserstack.com/guide/responsive-testing-on-local-server)
-- [ ] This was checked for cross-browser compatibility, [including a check against IE11](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility)
-
-### For maintainers
-
-- [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
-
-*via [#59872](https://github.com/elastic/kibana/pull/59872)*
-
-## Add UiSettings validation & Kibana default route redirection
+[discrete]
+==== Add UiSettings validation & Kibana default route redirection
 
 UiSettings definition allows to specify validation functions:
 ```js
@@ -105,20 +95,23 @@ uiSettings.register({
 })
 ```
 
-*via [#59694](https://github.com/elastic/kibana/pull/59694)*
+*via {pull}59694[#59694]*
 
-## Allow disabling xsrf protection per an endpoint
+[discrete]
+==== Allow disabling xsrf protection per an endpoint
 
 Route configuration allows to disable xsrf protection for destructive HTTP methods:
+
 ```js
 routet.get({ path: ..., validate: ..., options: { xsrfRequired: false } })
 ```
+*via {pull}58717[#58717]*
 
-*via [#58717](https://github.com/elastic/kibana/pull/58717)*
+[discrete]
+==== Add core metrics service
 
-## Add core metrics service
-
-A new `metrics` API is available from core, and allow retrieving various metrics regarding the http server, process and os load/usages
+A new `metrics` API is available from core, which allows retrieving various
+metrics regarding the HTTP server, process, and OS load/usages.
 
 ```typescript
 core.metrics.getOpsMetrics$().subscribe(metrics => {
@@ -126,22 +119,24 @@ core.metrics.getOpsMetrics$().subscribe(metrics => {
 })
 ```
 
-*via [#58623](https://github.com/elastic/kibana/pull/58623)*
+*via {pull}58623[#58623]*
 
-## Add an optional authentication mode for HTTP resources
+[discrete]
+==== Add an optional authentication mode for HTTP resources
 
 A route config accepts `authRequired: 'optional'`. A user can access a resource if has valid credentials or no credentials at all. Can be useful when we grant access to a resource but want to identify a user if possible.
 ```js
 router.get( { path: '/',  options: { authRequired: 'optional' } }, handler);
 ```
 
-*via [#58589](https://github.com/elastic/kibana/pull/58589)*
+*via {pull}58589[#58589]*
 
-## Migrate doc view part of discover
+[discrete]
+==== Migrate doc view part of discover
 
 The extension point for registering custom doc views was migrateed and can be used directly within the new platform.
 
-An working example of the new integration can be seen in `test/plugin_functional/plugins/doc_views_plugin/public/plugin.tsx`.
+A working example of the new integration can be seen in `test/plugin_functional/plugins/doc_views_plugin/public/plugin.tsx`.
 
 To register doc views, list `discover` as a required dependency of your plugin and use the `docViews.addDocView` method exposed in the setup contract:
 ```tsx
@@ -161,39 +156,46 @@ export class MyPlugin implements Plugin<void, void> {
 
 ```
 
-*via [#58094](https://github.com/elastic/kibana/pull/58094)*
+*via {pull}58094[#58094]*
 
-## [Telemetry] Server backpressure mechanism
+[discrete]
+==== [Telemetry] Server backpressure mechanism
 
-Add a backpressure mechanism for sending telemetry on the server. Usage data will always be sent from the browser even if we are also sending it from the server. Server side Telemetry usage data sender will send an `OPTIONS` request before `POST`ing the data to our cluster to ensure the endpoint is reachable.
+Add a backpressure mechanism for sending telemetry on the server.
+Usage data will always be sent from the browser even if we are also sending
+it from the server. Server side Telemetry usage data sender will send an `OPTIONS`
+request before `POST`ing the data to our cluster to ensure the endpoint is reachable.
 
-### Fallback mechanism
+[discrete]
+*Fallback mechanism*
 
-1. Always send usage from browser regardless of the `telemetry.sendUsageFrom` kibana config.
+. Always send usage from browser regardless of the `telemetry.sendUsageFrom` kibana config.
 
-### Server usage backpressure
 
-1. Send usage from server in addition to browser if `telemetry.sendUsageFrom` is set to `server`.
+*Server usage backpressure*
 
-2. Initial server usage attempt is after 5 minutes from starting kibana. Attempt to send every 12 hours afterwards.
+. Send usage from server in addition to browser if `telemetry.sendUsageFrom` is set to `server`.
 
-3. Stop attempting to send usage from the server if the attempts fail three times (initial attempt 5 minutes from server start, and two consecutive 12 hours attempts). 
+. Initial server usage attempt is after 5 minutes from starting kibana. Attempt to send every 12 hours afterwards.
 
-4. Restart attempt count after each kibana version upgrade (patch/minor/major).
+. Stop attempting to send usage from the server if the attempts fail three times (initial attempt 5 minutes from server start, and two consecutive 12 hours attempts).
 
-5. Restart attempt count if it succeeds in any of the 3 tries.
+. Restart attempt count after each kibana version upgrade (patch/minor/major).
 
-### Sending usage mechanism from server:
+. Restart attempt count if it succeeds in any of the 3 tries.
+
+*Sending usage mechanism from server:*
 
 Send `OPTIONS` request before attempting to send telemetry from server. `OPTIONS` is less intrusive as it does not contain any payload and is used to check if the endpoint is reachable. We can also use it in the future to check for allowed headers to use etc.
 
-- If `OPTIONS` request succeed; send usage via `POST`.
+* If `OPTIONS` request succeed; send usage via `POST`.
 
-- If `OPTIONS` request fails; dont send usage and follow the retry logic above.
+* If `OPTIONS` request fails; dont send usage and follow the retry logic above.
 
-*via [#57556](https://github.com/elastic/kibana/pull/57556)*
+*via {pull}57556[#57556]*
 
-## Expressions server-side
+[discrete]
+==== Expressions server-side
 
 It is now possible to register expression functions and types on the Kibana server and execute expressions on the server. The API is the same as in the browser-side plugin, e.g:
 
@@ -202,9 +204,10 @@ plugins.expressions.registerFunction(/* ... */);
 const result = await plugins.expressions.run('var_set name="foo" value="bar" | var name="foo"', null);
 ```
 
-*via [#57537](https://github.com/elastic/kibana/pull/57537)*
+*via {pull}57537[#57537]*
 
-## Local actions
+[discrete]
+==== Local actions
 
 `actionIds` property has been removed from`Trigger` interface in `ui_actions` plugin. Use `attachAction()` method instead, for example:
 
@@ -221,17 +224,21 @@ const trigger = {
 };
 ```
 
-*via [#57451](https://github.com/elastic/kibana/pull/57451)*
+*via {pull}57451[#57451]*
 
-## Use log4j pattern syntax
+[discrete]
+==== Use log4j pattern syntax
 
-Logging output of the New platform plugins can use adjusted via [new config.](https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md)
+Logging output of the New platform plugins can use adjusted
+via https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[new config].
 
-*via [#57433](https://github.com/elastic/kibana/pull/57433)*
+*via {pull}57433[#57433]*
 
-## Allow savedObjects types registration from NP
+[discrete]
+==== Allow savedObjects types registration from NP
 
-A new `registerType` API has been added to the core savedObjects `setup` API, allowing to register savedObject types from new platform plugins
+A new `registerType` API has been added to the core savedObjects `setup` API,
+allowing to register savedObject types from new platform plugins
 
 ```ts
 // src/plugins/my_plugin/server/saved_objects/types.ts
@@ -271,30 +278,33 @@ export class Plugin() {
 
 Please check the migration guide for more complete examples and migration procedure.
 
-*via [#57430](https://github.com/elastic/kibana/pull/57430)*
+*via {pull}57430[#57430]*
 
-## Expose Vis on the contract as it requires visTypes
+[discrete]
+==== Expose Vis on the contract as it requires visTypes
 
 In most of the places `Vis` used as a type, but in couple places it is used as a class.
 At the moment `Vis` as a class is not stateless, as it depends on `visTypes`. As it is not stateless, `Vis` class was removed from public exports and exposed on `visualisations` contract instead:
 
-```
+```ts
 new visualizationsStart.Vis(....);
 ```
 
 `Vis` as interface still can be imported as:
 
-```
+```ts
 import { Vis } from '../../../../../core_plugins/visualizations/public';
 ```
 
-*via [#56968](https://github.com/elastic/kibana/pull/56968)*
+*via {pull}56968[#56968]*
 
-## Add ScopedHistory to AppMountParams
+[discrete]
+==== Add ScopedHistory to AppMountParams
 
 Kibana Platform applications should use the provided `history` instance to integrate routing rather than setting up their own using `appBasePath` (which is now deprecated).
 
-#### Before
+*Before*
+
 ```tsx
 core.application.register({
   id: 'myApp',
@@ -310,7 +320,7 @@ core.application.register({
 });
 ```
 
-#### After
+*After*
 ```tsx
 core.application.register({
   id: 'myApp',
@@ -326,20 +336,26 @@ core.application.register({
 });
 ```
 
-*via [#56705](https://github.com/elastic/kibana/pull/56705)*
+*via {pull}56705[#56705]*
 
-#### Before 
+[discrete]
+==== Move new_vis_modal to visualizations plugin
+
+*Before*
+
 NewVisModal component and showNewVisModal function were statically exported and received all the dependencies as props/parameters.
 
-#### After
+*After*
+
 `showNewVisModal()` is part of the plugin contract and plugin dependencies are provided implicitly.
-```
+
+```tsx
 npStart.plugins.visualizations.showNewVisModal();
 ```
+*via {pull}56654[#56654]*
 
-*via [#56654](https://github.com/elastic/kibana/pull/56654)*
-
-## UiComponent
+[discrete]
+==== UiComponent
 
 `UiComponent` interface was added to `kibana_utils` plugin. `UiComponent` represents a user interface building block, like a React component, but `UiComponent` does not have to be implemented in React&mdash;it can be implemented in plain JS or React, or Angular, etc.
 
@@ -352,35 +368,49 @@ export type UiComponent<Props extends object = object> = () => {
 };
 ```
 
-Although Kibana aims to be library agnostic, Kibana itself is written in React, therefore `UiComponent` is designed such that it maps directly to a functional React component: `UiCompnent` interface corresponds to `React.ComponentType` type and `UiCompnent` props map to React component props.
+Although Kibana aims to be library agnostic, Kibana itself is written in React,
+therefore `UiComponent` is designed such that it maps directly to a
+functional React component: `UiCompnent` interface corresponds
+to `React.ComponentType` type and `UiCompnent` props map to React component props.
 
-To help use `UiComponent` interface in the codebase `uiToReactComponent` and `reactToUiComponent` helper functions were added to `kibana_react` plugin, they transform a `UiComponent` into a React component and vice versa, respectively.
+To help use `UiComponent` interface in the codebase `uiToReactComponent` and
+`reactToUiComponent` helper functions were added to `kibana_react` plugin,
+they transform a `UiComponent` into a React component and vice versa, respectively.
 
 ```ts
 const uiToReactComponent: (comp: UiComponent) => React.ComponentType;
 const reactToUiComponent: (comp: React.ComponentType) => UiComponent;
 ```
 
-*via [#56555](https://github.com/elastic/kibana/pull/56555)*
+*via {pull}56555[#56555]*
 
-## Start consuming np logging config
+[discrete]
+==== Start consuming np logging config
 
-Provides experimental support of new logging format for **new platform plugins**. More about logging format: https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md
+Provides experimental support of new logging format for **new platform plugins**.
+More about https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[the logging format].
 
-*via [#56480](https://github.com/elastic/kibana/pull/56480)*
+*via {pull}56480[#56480]*
 
-## [State Management] State syncing utils docs
+[discrete]
+==== [State Management] State syncing utils docs
 
-Docs for state syncing utils are available at: https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync
+Refer to https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync[these docs]
+on state syncing utils.
 
-*via [#56479](https://github.com/elastic/kibana/pull/56479)*
+*via {pull}56479[#56479]*
 
-## [NP] Move saved object modal into new platform
 
-`SavedObjectSaveModal`, `showSaveModal` and `SaveResult` from _`ui/saved_objects`_, and `SavedObjectFinderUi`, `SavedObjectMetaData` and `OnSaveProps` from _`src/plugins/kibana_react/public`_ were moved to a new plugin **`src/plugins/saved_objects`**.
+[discrete]
+==== [NP] Move saved object modal into new platform
+
+`SavedObjectSaveModal`, `showSaveModal` and `SaveResult` from _`ui/saved_objects`_,
+and `SavedObjectFinderUi`, `SavedObjectMetaData` and `OnSaveProps`
+from _`src/plugins/kibana_react/public`_ were moved to a new plugin **`src/plugins/saved_objects`**.
 
 Also now `showSaveModal` requires the second argument  - `I18nContext`:
-```
+
+```ts
 import { showSaveModal } from 'src/plugins/saved_objects/public';
 ...
 
@@ -388,13 +418,15 @@ showSaveModal(saveModal, npStart.core.i18n.Context);
 
 ```
 
-*via [#56383](https://github.com/elastic/kibana/pull/56383)*
+*via {pull}56383[#56383]*
 
-## [State Management] State syncing helpers for query service I
+[discrete]
+==== [State Management] State syncing helpers for query service
 
-Query service of data plugin now has state$ observable which allows to watch for query service data changes: 
+Query service of data plugin now has state$ observable which allows to
+watch for query service data changes:
 
-```
+```ts
 interface QueryState {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
@@ -412,30 +444,14 @@ interface QueryStateChange {
 state$: Observable<{ changes: QueryStateChange; state: QueryState }>;
 ```
 
+*via {pull}56128[#56128]*
 
+[discrete]
+==== Migrate saved_object_save_as_checkbox directive to Timelion
 
-
-
-### Checklist
-
-Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable to this PR.
-
-- [ ] This was checked for cross-browser compatibility, [including a check against IE11](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility)
-- [ ] Any text added follows [EUI's writing guidelines](https://elastic.github.io/eui/#/guidelines/writing), uses sentence case text and includes [i18n support](https://github.com/elastic/kibana/blob/master/packages/kbn-i18n/README.md)
-- [ ] [Documentation](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#writing-documentation) was added for features that require explanation or tutorials
-- [x] [Unit or functional tests](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility) were updated or added to match the most common scenarios
-- [ ] This was checked for [keyboard-only and screenreader accessibility](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Accessibility#Accessibility_testing_checklist)
-
-### For maintainers
-
-- [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
-- [ ] This includes a feature addition or change that requires a release note and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
-
-*via [#56128](https://github.com/elastic/kibana/pull/56128)*
-
-## Migrate saved_object_save_as_checkbox directive to timelion
-
-Use our React component `SavedObjectSaveModal` with `showCopyOnSave={true}`  instead of the react directive. Note that `SavedObjectSaveModal` soon will be part of a new plugin, so the path will change.
+Use our React component `SavedObjectSaveModal` with `showCopyOnSave={true}`
+instead of the react directive. Note that `SavedObjectSaveModal`
+soon will be part of a new plugin, so the path will change.
 
 ```TypeScript
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
@@ -448,35 +464,29 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
  />
 ```
 
+*via {pull}56114[#56114]*
 
+[discrete]
+==== `ui/public` cleanup
 
+*Removed / moved modules*
 
-### Checklist
+In preparation for Kibana's upcoming https://github.com/elastic/kibana/issues/9675[new platform],
+we are in the process of https://github.com/elastic/kibana/issues/26505[migrating away]
+from the `ui/public` directory. Over time, the contents of this directory will
+be either deprecated or housed inside a parent plugin. If your plugin imports
+the listed items from the following `ui/public` modules, you will need to
+either update your import statements as indicated below, so that you are
+pulling these modules from their new locations, or copy the relevant code directly into your plugin.
 
-Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable to this PR.
+*`ui/agg_types`* https://github.com/elastic/kibana/pull/59605[#59605]
 
-~~- [ ] This was checked for cross-browser compatibility, [including a check against IE11](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility)~~
-~~- [ ] Any text added follows [EUI's writing guidelines](https://elastic.github.io/eui/#/guidelines/writing), uses sentence case text and includes [i18n support](https://github.com/elastic/kibana/blob/master/packages/kbn-i18n/README.md)~~
-~~- [ ] [Documentation](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#writing-documentation) was added for features that require explanation or tutorials~~
-~~- [ ] [Unit or functional tests](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility) were updated or added to match the most common scenarios~~
-~~- [ ] This was checked for [keyboard-only and screenreader accessibility](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Accessibility#Accessibility_testing_checklist)~~
+The `ui/agg_types` module has been removed in favor of the service provided by
+the `data` plugin in the new Kibana platform.
 
-### For maintainers
+Additionally, `aggTypes` and `AggConfigs` have been removed in favor of a
+`types` registry and a `createAggConfigs` function:
 
-~~- [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)~~
-~~- [ ] This includes a feature addition or change that requires a release note and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)~~
-
-*via [#56114](https://github.com/elastic/kibana/pull/56114)*
-
-## `ui/public` cleanup
-
-### Removed / moved modules
-In preparation for Kibana's upcoming [new platform](https://github.com/elastic/kibana/issues/9675), we are in the process of [migrating away](https://github.com/elastic/kibana/issues/26505) from the `ui/public` directory. Over time, the contents of this directory will be either deprecated or housed inside a parent plugin. If your plugin imports the listed items from the following `ui/public` modules, you will need to either update your import statements as indicated below, so that you are pulling these modules from their new locations, or copy the relevant code directly into your plugin. 
-
-#### `ui/agg_types` [#59605](https://github.com/elastic/kibana/pull/59605)
-The `ui/agg_types` module has been removed in favor of the service provided by the `data` plugin in the new Kibana platform.
-
-Additionally, `aggTypes` and `AggConfigs` have been removed in favor of a `types` registry and a `createAggConfigs` function:
 ```ts
 // old
 import { AggConfigs, aggTypes } from 'ui/agg_types';
@@ -499,24 +509,34 @@ const { isValidInterval } = search.aggs;
 import { BUCKET_TYPES, METRIC_TYPES } from 'src/plugins/data/public';
 ```
 
-The above examples are not comprehensive, but represent some of the more common uses of `agg_types`. For more details, please refer to the interfaces in [the source code](https://github.com/elastic/kibana/blob/master/src/plugins/data/public/types.ts#L50), as well as the data plugin's [`public/index` file](https://github.com/elastic/kibana/blob/master/src/plugins/data/public/index.ts#L282).
+The above examples are not comprehensive, but represent some of the more
+common uses of `agg_types`. For more details, please refer to the interfaces
+in https://github.com/elastic/kibana/blob/master/src/plugins/data/public/types.ts#L50[the source code],
+as well as the data plugin's https://github.com/elastic/kibana/blob/master/src/plugins/data/public/index.ts#L282[`public/index` file].
 
-#### `ui/time_buckets` [#58805](https://github.com/elastic/kibana/pull/58805)
-The `ui/time_buckets` module has been removed and is now internal to the `data` plugin's search & aggregations infrastructure. We are working on an improved set of helper utilities to eventually replace the need for the `TimeBuckets` class.
+
+*`ui/time_buckets`* https://github.com/elastic/kibana/pull/58805[#58805]
+
+The `ui/time_buckets` module has been removed and is now internal to the `data` plugin's
+search & aggregations infrastructure. We are working on an improved set of helper utilities
+to eventually replace the need for the `TimeBuckets` class.
 
 In the meantime, if you currently rely on `TimeBuckets`, please copy the relevant pieces into your plugin code.
 
 
-#### `ui/filter_manager` [#59872](https://github.com/elastic/kibana/pull/59872)
-The `ui/filter_manager` module has been removed and now services and UI components are available on the `data` plugin's query infrastructure.
+*`ui/filter_manager`* https://github.com/elastic/kibana/pull/59872[#59872]
 
-*via [#55926](https://github.com/elastic/kibana/pull/55926)*
+The `ui/filter_manager` module has been removed and now services and UI components
+are available on the `data` plugin's query infrastructure.
 
-## Add savedObjects mappings API to core
+*via {pull}55926[#55926]*
 
-Added API to register savedObjects mapping from the new platform
+[discrete]
+==== Add savedObjects mappings API to core
 
- ```ts
+Added API to register savedObjects mapping from the new platform.
+
+```ts
  // my-plugin/server/mappings.ts
 import { SavedObjectsTypeMappingDefinitions } from 'src/core/server';
 
@@ -529,7 +549,7 @@ export const mappings: SavedObjectsTypeMappingDefinitions = {
      }
    }
  }
- ```
+```
 
 ```ts
  // my-plugin/server/plugin.ts
@@ -540,22 +560,20 @@ export const mappings: SavedObjectsTypeMappingDefinitions = {
      savedObjects.registerMappings(mappings);
    }
  }
- ```
-
-*via [#55825](https://github.com/elastic/kibana/pull/55825)*
-
-## Explicitly test custom appRoutes
-
-Tests for custom `appRoute`s are now more clear and explicitly separate from those that test other rendering service interactions.
-
-*via [#55405](https://github.com/elastic/kibana/pull/55405)*
-
-## Remove the VisEditorTypesRegistryProvider
-
-The `VisEditorTypesRegistryProvider` is removed. By default, visualizations will use the `default` editor. 
-To specify a custom editor use `editor` parameter as a key and a `class` with your own controller as a value in a `vis` type definition:
-
 ```
+
+*via {pull}55825[#55825]*
+
+[discrete]
+==== Remove the VisEditorTypesRegistryProvider
+
+The `VisEditorTypesRegistryProvider` is removed. By default,
+visualizations will use the default editor.
+
+To specify a custom editor use editor parameter as a key and
+a class with your own controller as a value in a vis type definition:
+
+```ts
 {
     name: 'my_new_vis',
     title: 'My New Vis',
@@ -565,21 +583,32 @@ To specify a custom editor use `editor` parameter as a key and a `class` with yo
   }
 ```
 
-*via [#55370](https://github.com/elastic/kibana/pull/55370)*
+*via {pull}55370[#55370]*
 
-## [NP] Platform exposes API to get authenticated user data
+[discrete]
+==== Explicitly test custom appRoutes
+
+Tests for custom `appRoute`s are now more clear and explicitly separate
+from those that test other rendering service interactions.
+
+*via {pull}55405[#55405]*
+
+[discrete]
+==== [NP] Platform exposes API to get authenticated user data
 
 HttpService exposes:
-- `auth.get()` - returns auth status and associated user data. User data are opaque to the http service. Possible auth status values:
-  - `authenticated` - `auth` interceptor successfully authenticated a user.
-  - `unauthenticated` - `auth` interceptor failed user authentication.
-  - `unknown` - `auth` interceptor has not been registered.
 
-- `auth.isAuthenticated()` - returns true, if `auth` interceptor successfully authenticated a user.
+* `auth.get()` &mdash; returns auth status and associated user data. User data are opaque to the http service. Possible auth status values:
+** `authenticated` &mdash; `auth` interceptor successfully authenticated a user.
+** `unauthenticated` &mdash; `auth` interceptor failed user authentication.
+** `unknown` &mdash; `auth` interceptor has not been registered.
 
-*via [#55327](https://github.com/elastic/kibana/pull/55327)*
+* `auth.isAuthenticated()` - returns true, if `auth` interceptor successfully authenticated a user.
 
-## Implements `getStartServices` on server-side
+*via {pull}55327[#55327]*
+
+[discrete]
+==== Implements `getStartServices` on server-side
 
 Adds a new API to be able to access `start` dependencies when registering handlers in `setup` phase.
 
@@ -599,20 +628,21 @@ class MyPlugin implements Plugin {
 }
 ```
 
-*via [#55156](https://github.com/elastic/kibana/pull/55156)*
+*via {pull}55156[#55156]*
 
-## Expressions refactor
+[discrete]
+====  Expressions refactor
 
-...
+* `context.types` > `inputTypes`
+* Objects should be registered instead of function wrappers around those objects.
 
-- `context.types` 👉 `inputTypes`
-- Objects should be registered instead of function wrappers around those objects.
+*via {pull}54342[#54342]*
 
-*via [#54342](https://github.com/elastic/kibana/pull/54342)*
+[discrete]
+==== Refactor saved object management registry usage
 
-## Refactor saved object management registry usage
+Registration of the following `SavedObjectLoader` in Angular was removed:
 
-Registration of the following `SavedObjectLoader` in Angular was removed: 
 * `savedSearches`
 * `savedVisualizations`
 * `savedDashboard`
@@ -640,26 +670,16 @@ const savedSearches = createSavedSearchesService(services);
 const savedVisualizations = createSavedVisLoader(servicesForVisualizations);
 const savedDashboards = createSavedDashboardLoader(services);
 ```
-### Checklist
 
-Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable to this PR.
+*via {pull}54155[#54155]*
 
-~~- [ ] This was checked for cross-browser compatibility, [including a check against IE11](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility)~~
-~~- [ ] Any text added follows [EUI's writing guidelines](https://elastic.github.io/eui/#/guidelines/writing), uses sentence case text and includes [i18n support](https://github.com/elastic/kibana/blob/master/packages/kbn-i18n/README.md)~~
-~~- [ ] [Documentation](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#writing-documentation) was added for features that require explanation or tutorials~~
-~~- [ ] [Unit or functional tests](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility) were updated or added to match the most common scenarios~~
-~~- [ ] This was checked for [keyboard-only and screenreader accessibility](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Accessibility#Accessibility_testing_checklist)~~
+[discrete]
+==== Enforce camelCase format for a plugin id
 
-### For maintainers
+When creating a new platform plugin, you need to make sure that
+pluginId declared in camelCase within `kibana.json` manifest file.
+It might not match `pluginPath`, which is recommended to be in snake_case format.
 
-~~- [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)~~
-- [x] This includes a feature addition or change that requires a release note and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
-
-*via [#54155](https://github.com/elastic/kibana/pull/54155)*
-
-## Enforce camelCase format for a plugin id
-
-When creating a new platform plugin, you need to make sure that pluginId declared in camelCase within `kibana.json` manifest file. It might not match `pluginPath`, which is recommended to be in snake_case format.
 ```js
 // ok
 "pluginPath": ["foo"],
@@ -669,9 +689,10 @@ When creating a new platform plugin, you need to make sure that pluginId declare
 "id": "fooBar"
 ```
 
-*via [#53759](https://github.com/elastic/kibana/pull/53759)*
+*via {pull}53759[#53759]*
 
-## bfetch (2)
+[discrete]
+==== bfetch (2)
 
 Request batching and response streaming functionality of legacy Interpreter plugin has been moved out into a separate `bfetch` Kibana platform plugin. Now every plugin can create server endpoints and browser wrappers that can batch HTTP requests and stream responses back.
 
@@ -719,12 +740,204 @@ double({ num: 2 }).then(console.log, console.error); // { num: 4 }
 double({ num: 3 }).then(console.log, console.error); // { num: 6 }
 ```
 
-*via [#53711](https://github.com/elastic/kibana/pull/53711)*
+*via {pull}53711[#53711]*
 
-## Grouped Kibana nav
+[discrete]
+==== Grouped Kibana nav
 
-Plugins should now define a category if they have a navigation item: 
-- If you want to fit into our default categories, you can use our `DEFAULT_APP_CATEGORIES` defined in `src/core/utils/default_app_categories.ts`.
-- If you want to create their own category, you can also provide any object matching the `AppCategory` interface defined in `src/core/types/app_category.ts`.
+Plugins should now define a category if they have a navigation item:
 
-////
+* If you want to fit into our default categories, you can use our `DEFAULT_APP_CATEGORIES` defined in `src/core/utils/default_app_categories.ts`.
+* If you want to create their own category, you can also provide any object matching the `AppCategory` interface defined in `src/core/types/app_category.ts`.
+
+*via {pull}53545[#53545]*
+
+[discrete]
+==== Expose Elasticsearch from start and deprecate from setup
+
+Remove any API that could allow access/query to savedObjects from core setup
+contract, and move them to the start contract instead. Deprecate
+the `CoreSetup.elasticsearch` API and expose `CoreStart.elasticsearch` instead.
+
+
+*via {pull}59886[#59886]*
+
+[discrete]
+==== Embeddable triggers
+
+Embeddables can now report `ui_actions` triggers that they execute through the
+`.supportedTriggers()` method. For example:
+
+```js
+class MyEmbeddable extends Embeddable {
+  supportedTriggers() {
+    return ['VALUE_CLICK_TRIGGER'];
+  }
+}
+```
+The returned list of triggers will be used in the drilldowns feature on Dashboard,
+where users will be able to add drilldowns to embeddable triggers.
+
+*via {pull}58440[#58440]*
+
+[discrete]
+==== Force savedObject API consumers to define SO type explicitly
+
+The new interface enforces API consumers to specify SO type explicitly.
+Plugins can use `SavedObjectAttributes` to ensure their type are serializable,
+but it shouldn't be used as their domain-specific type.
+
+*via {pull}58022[#58022]*
+
+[discrete]
+==== Trigger context
+
+Improved types for trigger contexts, which are consumed by actions.
+
+*via {pull}57870[#57870]*
+
+[discrete]
+==== Expressions debug mode
+
+Add ability to execute expression in "debug" mode, which would collect execution
+information about each function. This is used in the Expression Explorer
+(developed by Canvas) and in Canvas when the expression editor is open.
+
+*via {pull}57841[#57841]*
+
+[discrete]
+==== Move ui/agg_types in to shim data plugin
+
+* Moves the contents of `ui/agg_types` into the legacy shim data plugin
+* Re-exports contracts `ui/agg_types` for BWC
+* Creates dedicated interfaces for classes commonly being used as types: IAggConfig, IAggConfigs, IAggType, IFieldParamType, IMetricAggType
+** Right now these are just re-exporting the class as a type;
+eventually we should put more detailed typings in place.
+
+*via {pull}56353[#56353]*
+
+[discrete]
+==== Stateful search bar default behaviors
+
+The goal of the stateful version of SearchBar / TopNavMenu is to be an easy way
+to consume the services offered by `plugins.data.query` where developers
+should be able to provide minimal configuration and get a fully working SearchBar.
+
+*via {pull}56160[#56160]*
+
+[discrete]
+==== Guide for creating alert / action types in the UI
+
+Documentation to help developers integrate their alert / action type within
+our Management UIs
+
+*via {pull}55963[#55963]*
+
+[discrete]
+==== Move search service code to NP
+
+Move all of the search service code to Kibana new platform. Also deletes `courier` folder
+and moves `getFlattenedObject` to `src/core/utils`.
+
+*via {pull}55430[#55430]*
+
+[discrete]
+==== Expose NP FieldFormats service to server side
+
+The fieldFormats service is used on the server side as well.
+At the moment, it resides in `src/legacy/ui/field_formats/mixin/field_formats_service.ts`
+and only the FE plugin exposes it.
+
+*via {pull}55419[#55419]*
+
+[discrete]
+==== Update plugin generator to generate NP plugins
+
+Add more options for Kibana new platform plugin generator.
+
+* Generate FE components
+* Generate server side endpoint
+* Generate SCSS
+* Generate an optional .eslintrc.js file (for 3rd party plugins mostly)
+* Init git repo (for 3rd party plugins)
+
+*via {pull}55281[#55281]*
+
+[discrete]
+==== Run SO migration after plugins setup phase
+
+* Moves `createScopedRepository` and `createInternalRepository` from `setup`
+contract to `start` contract, and removes `getScopedClient` from the `setup` contract.
+There is no longer a possibility to be performing any call to SO before core's `start` is done.
+* Creates the migrator, the repository accessors and runs the SO migration
+at the start of `SavedObjectsService.start()`, meaning that any SO call performed
+is assured to be done after the migration.
+* Changes the `setClientFactory` API to `setClientFactoryProvider` to provide a
+SO repository provider when registering the client factory.
+* Adapts the existing plugin calls to the removed APIs from `setup` to be now
+using `getStartServices` to access them on the core `start` contract.
+
+*via {pull}55012[#55012]*
+
+[discrete]
+==== Build immutable bundles for new platform plugins
+
+Plugins that have been migrated to the "new platform" are built with a new system
+into their own `target/public` directory. To build third-party plugin's with
+this new system either pass `--plugin-path` to `node scripts/build_new_platform_plugins`
+or use the `@kbn/optimizer` package in the Kibana repo to build your plugin as
+described in the readme for that package.
+
+*via {pull}53976[#53976]*
+
+
+[discrete]
+==== [Search service] Asynchronous ES search strategy
+
+Adds an async {es} search strategy, which utilizes the async search strategy to
+call the `_async_search` APIs in Elasticsearch, returning an observable over the responses.
+
+*via {pull}53538[#53538]*
+
+[discrete]
+==== [Vis: Default editor] EUIficate and Reactify the sidebar
+
+If you are using the `default` editor in your `VisType` visualization definition,
+remove the `editor: 'default'` param from it. The default editor controller
+will be used by default.
+
+The default editor controller receives an `optionsTemplate` or `optionTabs` parameter.
+These tabs should be React components:
+
+```ts
+{
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    editorConfig: {
+       optionsTemplate: MyReactComponent // or if multiple tabs are required:
+       optionTabs: [
+           { title: 'tab 3', editor: MyReactComponent }
+       ]
+    }
+  }
+```
+
+*via {pull}49864[#49864]*
+
+[discrete]
+==== [test] Consolidate top-level yarn scripts
+
+Over time Kibana has added a number of testing frameworks,
+but our top-level scripts have remained the same to avoid workflow changes.
+The current naming convention with the number of test options can leave room for ambiguity.
+
+You'll see two general changes:
+* docs will refer to the yarn script, giving us an abstraction to migrate
+frameworks out and avoid workflow interruptions (`grunt/gulp -> node scripts/*`)
+* test scripts now refer to the test runner, as opposed to the test
+type (`yarn test:server -> yarn test:mocha`)
+
+
+*via {pull}44679[#44679]*

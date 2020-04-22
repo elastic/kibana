@@ -37,7 +37,7 @@ export const uiQueryParams: (
       // Removes the `?` from the beginning of query string if it exists
       const query = querystring.parse(location.search.slice(1));
 
-      const keys: Array<keyof HostIndexUIQueryParams> = ['selected_host'];
+      const keys: Array<keyof HostIndexUIQueryParams> = ['selected_host', 'show'];
 
       for (const key of keys) {
         const value = query[key];
@@ -56,5 +56,13 @@ export const hasSelectedHost: (state: Immutable<HostListState>) => boolean = cre
   uiQueryParams,
   ({ selected_host: selectedHost }) => {
     return selectedHost !== undefined;
+  }
+);
+
+/** What policy details panel view to show */
+export const showView: (state: HostListState) => 'policy_response' | 'details' = createSelector(
+  uiQueryParams,
+  searchParams => {
+    return searchParams.show === 'policy_response' ? 'policy_response' : 'details';
   }
 );

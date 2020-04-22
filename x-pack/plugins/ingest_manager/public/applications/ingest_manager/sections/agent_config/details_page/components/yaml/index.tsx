@@ -25,7 +25,17 @@ import {
 import { ShellEnrollmentInstructions } from '../../../../../components/enrollment_instructions';
 import { Loading } from '../../../../../components';
 
-const CONFIG_KEYS_ORDER = ['id', 'revision', 'outputs', 'datasources'];
+const CONFIG_KEYS_ORDER = [
+  'id',
+  'name',
+  'revision',
+  'type',
+  'outputs',
+  'datasources',
+  'enabled',
+  'package',
+  'input',
+];
 
 export const ConfigYamlView = memo<{ config: AgentConfig }>(({ config }) => {
   const core = useCore();
@@ -44,10 +54,20 @@ export const ConfigYamlView = memo<{ config: AgentConfig }>(({ config }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={7}>
-        <EuiCodeBlock language="yaml" isCopyable>
+        <EuiCodeBlock language="yaml" isCopyable overflowHeight={500}>
           {dump(fullConfigRequest.data.item, {
             sortKeys: (keyA: string, keyB: string) => {
-              return CONFIG_KEYS_ORDER.indexOf(keyA) - CONFIG_KEYS_ORDER.indexOf(keyB);
+              const indexA = CONFIG_KEYS_ORDER.indexOf(keyA);
+              const indexB = CONFIG_KEYS_ORDER.indexOf(keyB);
+              if (indexA >= 0 && indexB < 0) {
+                return -1;
+              }
+
+              if (indexA < 0 && indexB >= 0) {
+                return 1;
+              }
+
+              return indexA - indexB;
             },
           })}
         </EuiCodeBlock>
