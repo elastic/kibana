@@ -69,6 +69,7 @@ function FieldListItemComponent(
     canHaveMultiFields,
     hasMultiFields,
     isExpanded,
+    path,
   } = field;
   // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
@@ -196,7 +197,7 @@ function FieldListItemComponent(
       className={classNames('mappingsEditor__fieldsListItem', {
         'mappingsEditor__fieldsListItem--dottedLine': hasDottedLine,
       })}
-      data-test-subj="fieldsListItem"
+      data-test-subj={`fieldsListItem ${path.join('')}Field`}
       ref={ref}
     >
       <div
@@ -229,6 +230,7 @@ function FieldListItemComponent(
                   color="text"
                   onClick={toggleExpand}
                   iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                  data-test-subj="toggleExpandButton"
                   aria-label={
                     isExpanded
                       ? i18n.translate('xpack.idxMgmt.mappingsEditor.collapseFieldButtonLabel', {

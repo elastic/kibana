@@ -35,7 +35,7 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 const createActions = (testBed: TestBed<TestSubjects>) => {
-  const { find, exists, waitFor, form, component } = testBed;
+  const { find, exists, waitFor, waitForFn, form, component } = testBed;
 
   const expandAllChildrenAt = async (path: string) => {
     const pathToArray = path.split('.');
@@ -100,11 +100,28 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     await waitFor('fieldsListItem', currentCount + 1);
   };
 
-  const editField = async (path: string) => {
+  const startEditField = async (path: string) => {
     const field = await getFieldAt(path);
     find('editFieldButton', field).simulate('click');
     // Wait until the details flyout is open
     await waitFor('mappingsEditorFieldEdit');
+  };
+
+  const showAdvancedSettings = async () => {
+    const checkIsVisible = async () =>
+      find('mappingsEditorFieldEdit.advancedSettings').props().style.display === 'block';
+
+    if (await checkIsVisible()) {
+      // Already opened, nothing else to do
+      return;
+    }
+
+    find('mappingsEditorFieldEdit.toggleAdvancedSetting').simulate('click');
+
+    await waitForFn(
+      checkIsVisible,
+      'Error waiting for the advanced settings CSS style.display to be "block"'
+    );
   };
 
   const selectTab = async (tab: 'fields' | 'templates' | 'advanced') => {
@@ -148,14 +165,19 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     return value.map(({ label }: any) => label);
   };
 
+  const getToggleValue = (testSubject: TestSubjects): boolean =>
+    find(testSubject).props()['aria-checked'];
+
   return {
     selectTab,
     getFieldAt,
     addField,
-    editField,
+    startEditField,
+    showAdvancedSettings,
     updateJsonEditor,
     getJsonEditorValue,
     getComboBoxValue,
+    getToggleValue,
   };
 };
 
@@ -243,4 +265,10 @@ export type TestSubjects =
   | 'createFieldForm'
   | 'createFieldForm.fieldType'
   | 'createFieldForm.addButton'
-  | 'mappingsEditorFieldEdit';
+  | 'mappingsEditorFieldEdit'
+  | 'mappingsEditorFieldEdit.flyoutTitle'
+  | 'mappingsEditorFieldEdit.documentationLink'
+  | 'mappingsEditorFieldEdit.fieldPath'
+  | 'mappingsEditorFieldEdit.advancedSettings'
+  | 'mappingsEditorFieldEdit.toggleAdvancedSetting'
+  | 'indexParameter.formRowToggle';

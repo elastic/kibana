@@ -72,7 +72,7 @@ describe('<MappingsEditor />', () => {
 
     test('should keep the changes when switching tabs', async () => {
       const {
-        actions: { addField, selectTab, updateJsonEditor, getJsonEditorValue },
+        actions: { addField, selectTab, updateJsonEditor, getJsonEditorValue, getToggleValue },
         component,
         find,
         exists,
@@ -122,9 +122,9 @@ describe('<MappingsEditor />', () => {
         await selectTab('advanced');
       });
 
-      let isDynamicMappingsEnabled = find(
+      let isDynamicMappingsEnabled = getToggleValue(
         'advancedConfiguration.dynamicMappingsToggle.input'
-      ).props()['aria-checked'];
+      );
       expect(isDynamicMappingsEnabled).toBe(true);
 
       let isNumericDetectionVisible = exists('advancedConfiguration.numericDetection');
@@ -138,9 +138,9 @@ describe('<MappingsEditor />', () => {
         await nextTick();
       });
 
-      isDynamicMappingsEnabled = find('advancedConfiguration.dynamicMappingsToggle.input').props()[
-        'aria-checked'
-      ];
+      isDynamicMappingsEnabled = getToggleValue(
+        'advancedConfiguration.dynamicMappingsToggle.input'
+      );
       expect(isDynamicMappingsEnabled).toBe(false);
 
       isNumericDetectionVisible = exists('advancedConfiguration.numericDetection');
@@ -170,9 +170,9 @@ describe('<MappingsEditor />', () => {
         await selectTab('advanced');
       });
 
-      isDynamicMappingsEnabled = find('advancedConfiguration.dynamicMappingsToggle.input').props()[
-        'aria-checked'
-      ];
+      isDynamicMappingsEnabled = getToggleValue(
+        'advancedConfiguration.dynamicMappingsToggle.input'
+      );
       expect(isDynamicMappingsEnabled).toBe(false);
       isNumericDetectionVisible = exists('advancedConfiguration.numericDetection');
       expect(isNumericDetectionVisible).toBe(false);
@@ -220,7 +220,7 @@ describe('<MappingsEditor />', () => {
 
     test('props.defaultValue => should prepopulate the editor data', async () => {
       const {
-        actions: { selectTab, getJsonEditorValue, getComboBoxValue },
+        actions: { selectTab, getJsonEditorValue, getComboBoxValue, getToggleValue },
         find,
       } = testBed;
 
@@ -249,14 +249,14 @@ describe('<MappingsEditor />', () => {
         await selectTab('advanced');
       });
 
-      const isDynamicMappingsEnabled = find(
+      const isDynamicMappingsEnabled = getToggleValue(
         'advancedConfiguration.dynamicMappingsToggle.input'
-      ).props()['aria-checked'];
+      );
       expect(isDynamicMappingsEnabled).toBe(defaultMappings.dynamic);
 
-      const isNumericDetectionEnabled = find(
+      const isNumericDetectionEnabled = getToggleValue(
         'advancedConfiguration.numericDetection.input'
-      ).props()['aria-checked'];
+      );
       expect(isNumericDetectionEnabled).toBe(defaultMappings.numeric_detection);
 
       expect(getComboBoxValue('sourceField.includesField')).toEqual(
@@ -269,9 +269,7 @@ describe('<MappingsEditor />', () => {
       const metaFieldValue = getJsonEditorValue('advancedConfiguration.metaField');
       expect(metaFieldValue).toEqual(defaultMappings._meta);
 
-      const isRoutingRequired = find('advancedConfiguration.routingRequiredToggle.input').props()[
-        'aria-checked'
-      ];
+      const isRoutingRequired = getToggleValue('advancedConfiguration.routingRequiredToggle.input');
       expect(isRoutingRequired).toBe(defaultMappings._routing.required);
     });
 
