@@ -6,16 +6,25 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
 import { TagList } from './';
 import { getFormMock } from '../__mock__/form';
 import { TestProviders } from '../../../../mock';
 import { wait } from '../../../../lib/helpers';
 import { useForm } from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks';
-import { act } from 'react-dom/test-utils';
+import { useGetTags } from '../../../../containers/case/use_get_tags';
 
 jest.mock(
   '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
+);
+jest.mock('../../../../containers/case/use_get_tags');
+jest.mock(
+  '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form_data_provider',
+  () => ({
+    FormDataProvider: ({ children }: { children: ({ tags }: { tags: string[] }) => void }) =>
+      children({ tags: ['rad', 'dude'] }),
+  })
 );
 const onSubmit = jest.fn();
 const defaultProps = {
@@ -26,11 +35,27 @@ const defaultProps = {
 };
 
 describe('TagList ', () => {
+  // Suppress warnings about "noSuggestions" prop
+  /* eslint-disable no-console */
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+  afterAll(() => {
+    console.error = originalError;
+  });
+  /* eslint-enable no-console */
   const sampleTags = ['coke', 'pepsi'];
+  const fetchTags = jest.fn();
   const formHookMock = getFormMock({ tags: sampleTags });
   beforeEach(() => {
     jest.resetAllMocks();
     (useForm as jest.Mock).mockImplementation(() => ({ form: formHookMock }));
+
+    (useGetTags as jest.Mock).mockImplementation(() => ({
+      tags: sampleTags,
+      fetchTags,
+    }));
   });
   it('Renders no tags, and then edit', () => {
     const wrapper = mount(
@@ -79,6 +104,23 @@ describe('TagList ', () => {
       await wait();
       expect(onSubmit).toBeCalledWith(sampleTags);
     });
+  });
+  it('Tag options render with new tags added', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <TagList {...defaultProps} />
+      </TestProviders>
+    );
+    wrapper
+      .find(`[data-test-subj="tag-list-edit-button"]`)
+      .last()
+      .simulate('click');
+    expect(
+      wrapper
+        .find(`[data-test-subj="caseTags"] [data-test-subj="input"]`)
+        .first()
+        .prop('options')
+    ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }]);
   });
   it('Cancels on cancel', async () => {
     const props = {
