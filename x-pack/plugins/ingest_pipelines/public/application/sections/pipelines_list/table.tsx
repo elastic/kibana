@@ -104,6 +104,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           }),
           actions: [
             {
+              isPrimary: true,
               name: i18n.translate('xpack.ingestPipelines.list.table.editActionLabel', {
                 defaultMessage: 'Edit',
               }),
@@ -128,6 +129,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
               onClick: ({ name }) => onClonePipelineClick(name),
             },
             {
+              isPrimary: true,
               name: i18n.translate('xpack.ingestPipelines.list.table.deleteActionLabel', {
                 defaultMessage: 'Delete',
               }),
