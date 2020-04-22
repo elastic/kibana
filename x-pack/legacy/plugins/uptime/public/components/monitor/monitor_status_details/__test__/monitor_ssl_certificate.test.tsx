@@ -11,6 +11,7 @@ import { EuiBadge } from '@elastic/eui';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { Tls } from '../../../../../common/runtime_types';
 import { MonitorSSLCertificate } from '../monitor_status_bar';
+import * as redux from 'react-redux';
 
 describe('MonitorStatusBar component', () => {
   let monitorTls: Tls;
@@ -23,6 +24,12 @@ describe('MonitorStatusBar component', () => {
     monitorTls = {
       certificate_not_valid_after: dateInTwoMonths,
     };
+
+    const spy = jest.spyOn(redux, 'useDispatch');
+    spy.mockReturnValue(jest.fn());
+
+    const spy1 = jest.spyOn(redux, 'useSelector');
+    spy1.mockReturnValue(true);
   });
 
   it('renders', () => {

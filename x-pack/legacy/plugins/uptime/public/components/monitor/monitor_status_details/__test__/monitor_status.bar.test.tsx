@@ -9,6 +9,7 @@ import React from 'react';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorStatusBarComponent } from '../monitor_status_bar';
 import { Ping } from '../../../../../common/runtime_types';
+import * as redux from 'react-redux';
 
 describe('MonitorStatusBar component', () => {
   let monitorStatus: Ping;
@@ -46,6 +47,12 @@ describe('MonitorStatusBar component', () => {
         },
       ],
     };
+
+    const spy = jest.spyOn(redux, 'useDispatch');
+    spy.mockReturnValue(jest.fn());
+
+    const spy1 = jest.spyOn(redux, 'useSelector');
+    spy1.mockReturnValue(true);
   });
 
   it('renders duration in ms, not us', () => {
