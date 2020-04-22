@@ -15,6 +15,7 @@ export interface Props {
   pipelines: Pipeline[];
   onReloadClick: () => void;
   onEditPipelineClick: (pipelineName: string) => void;
+  onClonePipelineClick: (pipelineName: string) => void;
   onDeletePipelineClick: (pipelineName: string[]) => void;
   onViewPipelineClick: (pipeline: Pipeline) => void;
 }
@@ -23,6 +24,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
   onReloadClick,
   onEditPipelineClick,
+  onClonePipelineClick,
   onDeletePipelineClick,
   onViewPipelineClick,
 }) => {
@@ -32,6 +34,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
     <EuiInMemoryTable
       itemId="name"
       isSelectable
+      sorting={{ sort: { field: 'name', direction: 'asc' } }}
       selection={{
         onSelectionChange: setSelection,
       }}
@@ -90,6 +93,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           name: i18n.translate('xpack.ingestPipelines.list.table.nameColumnTitle', {
             defaultMessage: 'Name',
           }),
+          sortable: true,
           render: (name: string, pipeline) => (
             <EuiLink onClick={() => onViewPipelineClick(pipeline)}>{name}</EuiLink>
           ),
@@ -100,6 +104,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           }),
           actions: [
             {
+              isPrimary: true,
               name: i18n.translate('xpack.ingestPipelines.list.table.editActionLabel', {
                 defaultMessage: 'Edit',
               }),
@@ -112,6 +117,19 @@ export const PipelineTable: FunctionComponent<Props> = ({
               onClick: ({ name }) => onEditPipelineClick(name),
             },
             {
+              name: i18n.translate('xpack.ingestPipelines.list.table.cloneActionLabel', {
+                defaultMessage: 'Clone',
+              }),
+              description: i18n.translate(
+                'xpack.ingestPipelines.list.table.cloneActionDescription',
+                { defaultMessage: 'Clone this pipeline' }
+              ),
+              type: 'icon',
+              icon: 'copy',
+              onClick: ({ name }) => onClonePipelineClick(name),
+            },
+            {
+              isPrimary: true,
               name: i18n.translate('xpack.ingestPipelines.list.table.deleteActionLabel', {
                 defaultMessage: 'Delete',
               }),

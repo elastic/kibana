@@ -51,6 +51,10 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
     history.push(encodeURI(`${BASE_PATH}/edit/${encodeURIComponent(name)}`));
   };
 
+  const clonePipeline = (name: string) => {
+    history.push(encodeURI(`${BASE_PATH}/create/${encodeURIComponent(name)}`));
+  };
+
   if (isLoading) {
     content = (
       <SectionLoading>
@@ -66,6 +70,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
         onReloadClick={sendRequest}
         onEditPipelineClick={editPipeline}
         onDeletePipelineClick={setPipelinesToDelete}
+        onClonePipelineClick={clonePipeline}
         onViewPipelineClick={setSelectedPipeline}
         pipelines={data}
       />
@@ -130,8 +135,9 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
         <PipelineDetails
           pipeline={selectedPipeline}
           onClose={() => setSelectedPipeline(undefined)}
-          onDeleteClick={setPipelinesToDelete}
           onEditClick={editPipeline}
+          onCloneClick={clonePipeline}
+          onDeleteClick={setPipelinesToDelete}
         />
       )}
       {pipelinesToDelete?.length > 0 ? (
