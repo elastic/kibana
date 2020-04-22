@@ -23,7 +23,6 @@ import { getExecuteTriggerActions } from '../services';
 
 export interface DatatableColumns {
   columnIds: string[];
-  filterable: boolean[];
 }
 
 interface Args {
@@ -103,11 +102,6 @@ export const datatableColumns: ExpressionFunctionDefinition<
       multi: true,
       help: '',
     },
-    filterable: {
-      types: ['boolean'],
-      multi: true,
-      help: '',
-    },
   },
   fn: function fn(input: unknown, args: DatatableColumns) {
     return {
@@ -152,7 +146,7 @@ export const getDatatableRenderer = (dependencies: {
   },
 });
 
-function DatatableComponent(props: DatatableRenderProps) {
+export function DatatableComponent(props: DatatableRenderProps) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
@@ -200,12 +194,12 @@ function DatatableComponent(props: DatatableRenderProps) {
               field,
               name: (col && col.name) || '',
               render: (value: unknown) => {
-                const formattedValue = formatters[field].convert(value);
+                const formattedValue = formatters[field]?.convert(value);
                 if (filterable && value) {
                   return (
                     <EuiFlexGroup justifyContent="spaceBetween" className="lnsDataTable__cell">
                       <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
-                      <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={false} data-test-subj="lensFilter">
                         <EuiFlexGroup className="lnsDataTable__filterGroup">
                           <EuiFlexItem
                             className="lnsDataTable__filter"
