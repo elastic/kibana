@@ -41,7 +41,7 @@ module.exports = on => {
   on('file:preprocessor', wp(options));
 
   on('before:browser:launch', (browser, options) => {
-    const downloadDirectory = path.join('cypress/downloads');
+    const downloadDirectory = path.join(__dirname, '..', 'downloads');
 
     if (browser.family === 'chromium') {
       options.preferences.default.download = { default_directory: downloadDirectory };
