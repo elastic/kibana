@@ -5,26 +5,12 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed, nextTick, getRandomString } from '../helpers';
+import { componentHelpers, MappingsEditorTestBed } from '../helpers';
 import { getFieldConfig } from '../../../lib';
 
 const { setup, expectDataUpdatedFactory } = componentHelpers.mappingsEditor;
 const onUpdateHandler = jest.fn();
 const expectDataUpdated = expectDataUpdatedFactory(onUpdateHandler);
-
-const allProps = {
-  type: 'text',
-  index: true,
-  analyzer: 'standard',
-  search_quote_analyzer: 'simple',
-  eager_global_ordinals: false,
-  index_phrases: false,
-  norms: true,
-  fielddata: false,
-  store: false,
-  index_options: 'positions',
-  search_analyzer: 'whitespace',
-};
 
 describe('text datatype', () => {
   const defaultMappings = {
