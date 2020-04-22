@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import migrations from './migrations';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
 
 export const graph: LegacyPluginInitializer = kibana => {
