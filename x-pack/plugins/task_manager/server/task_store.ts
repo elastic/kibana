@@ -193,7 +193,7 @@ export class TaskStore {
   /**
    * Claims available tasks from the index, which are ready to be run.
    * - runAt is now or past
-   * - is not currently claimed by unknown instance of Kibana
+   * - is not currently claimed by any instance of Kibana
    * - has a type that is in our task definitions
    *
    * @param {OwnershipClaimingOpts} options
@@ -328,7 +328,6 @@ export class TaskStore {
       // but actually returns the whole object that is passed to it, so as we know we're
       // passing in the whole object, this is safe to do.
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
-      // (updatedSavedObject as unknown) as SavedObject<SerializedConcreteTaskInstance>
       { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
     );
     return c;

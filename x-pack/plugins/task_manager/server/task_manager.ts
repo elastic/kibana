@@ -110,7 +110,7 @@ export class TaskManager {
   };
 
   /**
-   * Initializes the task manager, preventing unknown further addition of middleware,
+   * Initializes the task manager, preventing any further addition of middleware,
    * enabling the task manipulation methods, and beginning the background polling
    * mechanism.
    */
@@ -437,7 +437,7 @@ export async function awaitTaskRunResult(
             }
           },
           async (error: Error) => {
-            // reject if unknown error event takes place for the requested task
+            // reject if any error event takes place for the requested task
             subscription.unsubscribe();
             if (isTaskRunRequestEvent(taskEvent)) {
               return reject(
