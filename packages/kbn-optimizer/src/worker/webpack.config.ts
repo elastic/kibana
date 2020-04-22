@@ -102,7 +102,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
     output: {
       path: bundle.outputDir,
-      filename: '[name].plugin.js',
+      filename: `[name].${bundle.type}.js`,
       publicPath: PUBLIC_PATH_PLACEHOLDER,
       devtoolModuleFilenameTemplate: info =>
         `/${bundle.type}:${bundle.id}/${Path.relative(

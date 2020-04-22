@@ -19,13 +19,13 @@
 
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
-import { getBundles } from './get_bundles';
+import { getPluginBundles } from './get_plugin_bundles';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer('/repo'));
 
-it('returns a bundle for each plugin', () => {
+it('returns a bundle for core and each plugin', () => {
   expect(
-    getBundles(
+    getPluginBundles(
       [
         {
           directory: '/repo/plugins/foo',
