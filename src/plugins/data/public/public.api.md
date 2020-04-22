@@ -20,7 +20,7 @@ import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
-import { ExpressionAstExpression } from 'src/plugins/expressions/public';
+import { ExpressionAstFunction } from 'src/plugins/expressions/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { History } from 'history';
 import { HttpSetup } from 'src/core/public';

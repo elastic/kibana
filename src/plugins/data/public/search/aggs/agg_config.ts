@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { ExpressionAstExpression, ExpressionAstArgument } from 'src/plugins/expressions/public';
+import { ExpressionAstFunction, ExpressionAstArgument } from 'src/plugins/expressions/public';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
@@ -308,7 +308,7 @@ export class AggConfig {
   /**
    * @returns Returns an ExpressionAst representing the function for this agg type.
    */
-  toExpressionAst(): ExpressionAstExpression | undefined {
+  toExpressionAst(): ExpressionAstFunction | undefined {
     const functionName = this.type && this.type.expressionName;
     const { type, ...rest } = this.serialize();
     if (!functionName || !rest.params) {
@@ -320,11 +320,20 @@ export class AggConfig {
     const params = Object.entries(rest.params).reduce((acc, [key, value]) => {
       const deserializedParam = this.getAggParams().find(p => p.name === key);
 
-      if (deserializedParam && deserializedParam.type === 'agg') {
-        // We can call `toExpressionAst` if our param is another agg
-        acc[key] = [this.getParam(key).toExpressionAst()];
+      if (deserializedParam && deserializedParam.toExpressionAst) {
+        // If the param provides `toExpressionAst`, we call it with the value
+        const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key));
+        // const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key), value);
+        if (paramExpressionAst) {
+          acc[key] = [
+            {
+              type: 'expression',
+              chain: [paramExpressionAst],
+            },
+          ];
+        }
       } else if (typeof value === 'object') {
-        // For some params which are object, like ranges, we stringify for now
+        // For object params which don't provide `toExpressionAst`, we stringify
         acc[key] = [JSON.stringify(value)];
       } else if (typeof value !== 'undefined') {
         // Everything else just gets stored in an array if it is defined
@@ -335,20 +344,15 @@ export class AggConfig {
     }, {} as Record<string, ExpressionAstArgument[]>);
 
     return {
-      type: 'expression',
-      chain: [
-        {
-          type: 'function',
-          function: functionName,
-          arguments: {
-            ...params,
-            // Expression args which are provided to all functions
-            id: [this.id],
-            enabled: [this.enabled],
-            ...(this.schema ? { schema: [this.schema] } : {}), // schema may be undefined
-          },
-        },
-      ],
+      type: 'function',
+      function: functionName,
+      arguments: {
+        ...params,
+        // Expression args which are provided to all functions
+        id: [this.id],
+        enabled: [this.enabled],
+        ...(this.schema ? { schema: [this.schema] } : {}), // schema may be undefined
+      },
     };
   }
 

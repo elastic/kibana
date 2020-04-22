@@ -53,6 +53,14 @@ export class AggParamType<TAggConfig extends IAggConfig = IAggConfig> extends Ba
         return this.makeAgg(agg, state);
       };
     }
+    if (!config.toExpressionAst) {
+      this.toExpressionAst = (agg: TAggConfig) => {
+        if (!agg || !agg.toExpressionAst) {
+          throw new Error('aggConfig was not provided to AggParamType toExpressionAst function');
+        }
+        return agg.toExpressionAst();
+      };
+    }
 
     this.makeAgg = config.makeAgg;
     this.valueType = AggConfig;

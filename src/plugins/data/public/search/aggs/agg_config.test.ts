@@ -24,6 +24,7 @@ import { AggConfigs, CreateAggConfigParams } from './agg_configs';
 import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
+import { MetricAggType } from './metrics/metric_agg_type';
 import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
 import { FieldFormatsStart } from '../../field_formats';
@@ -396,42 +397,37 @@ describe('AggConfig', () => {
       const aggConfig = ac.createAggConfig(configStates);
       expect(aggConfig.toExpressionAst()).toMatchInlineSnapshot(`
         Object {
-          "chain": Array [
-            Object {
-              "arguments": Object {
-                "enabled": Array [
-                  true,
-                ],
-                "id": Array [
-                  "1",
-                ],
-                "missingBucket": Array [
-                  false,
-                ],
-                "missingBucketLabel": Array [
-                  "Missing",
-                ],
-                "order": Array [
-                  "asc",
-                ],
-                "otherBucket": Array [
-                  false,
-                ],
-                "otherBucketLabel": Array [
-                  "Other",
-                ],
-                "schema": Array [
-                  "segment",
-                ],
-                "size": Array [
-                  5,
-                ],
-              },
-              "function": "aggTerms",
-              "type": "function",
-            },
-          ],
-          "type": "expression",
+          "arguments": Object {
+            "enabled": Array [
+              true,
+            ],
+            "id": Array [
+              "1",
+            ],
+            "missingBucket": Array [
+              false,
+            ],
+            "missingBucketLabel": Array [
+              "Missing",
+            ],
+            "order": Array [
+              "asc",
+            ],
+            "otherBucket": Array [
+              false,
+            ],
+            "otherBucketLabel": Array [
+              "Other",
+            ],
+            "schema": Array [
+              "segment",
+            ],
+            "size": Array [
+              5,
+            ],
+          },
+          "function": "aggTerms",
+          "type": "function",
         }
       `);
     });
@@ -455,7 +451,7 @@ describe('AggConfig', () => {
         },
       };
       const aggConfig = ac.createAggConfig(configStates);
-      const aggArg = aggConfig.toExpressionAst()?.chain[0].arguments.orderAgg;
+      const aggArg = aggConfig.toExpressionAst()?.arguments.orderAgg;
       expect(aggArg).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -500,7 +496,50 @@ describe('AggConfig', () => {
       `);
     });
 
-    it('includes stringified advanced json params in the args', () => {
+    it('creates a subexpression for param types other than "agg" which have specified toExpressionAst', () => {
+      // Overwrite the `ranges` param in the `range` agg with a mock toExpressionAst function
+      const range: MetricAggType = typesRegistry.get('range');
+      range.expressionName = 'aggRange';
+      const rangesParam = range.params.find(p => p.name === 'ranges');
+      rangesParam!.toExpressionAst = (val: any) => ({
+        type: 'function',
+        function: 'aggRanges',
+        arguments: {
+          ranges: ['oh hi there!'],
+        },
+      });
+
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const configStates = {
+        type: 'range',
+        params: {
+          field: 'bytes',
+        },
+      };
+
+      const aggConfig = ac.createAggConfig(configStates);
+      const ranges = aggConfig.toExpressionAst()!.arguments.ranges;
+      expect(ranges).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "ranges": Array [
+                    "oh hi there!",
+                  ],
+                },
+                "function": "aggRanges",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ]
+      `);
+    });
+
+    it('stringifies any other params which are an object', () => {
       const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
         type: 'terms',
@@ -511,25 +550,8 @@ describe('AggConfig', () => {
         },
       };
       const aggConfig = ac.createAggConfig(configStates);
-      const json = aggConfig.toExpressionAst()?.chain[0].arguments.json;
+      const json = aggConfig.toExpressionAst()?.arguments.json;
       expect(json).toEqual([JSON.stringify(configStates.params.json)]);
-    });
-
-    it('stringifies any other params which are an object', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
-      const configStates = {
-        type: 'range',
-        params: {
-          field: 'bytes',
-          ranges: [
-            { from: 0, to: 1000 },
-            { from: 1000, to: 2000 },
-          ],
-        },
-      };
-      const aggConfig = ac.createAggConfig(configStates);
-      const ranges = aggConfig.toExpressionAst()?.chain[0].arguments.ranges;
-      expect(ranges).toEqual([JSON.stringify(configStates.params.ranges)]);
     });
 
     it(`returns undefined if an expressionName doesn't exist on the agg type`, () => {
