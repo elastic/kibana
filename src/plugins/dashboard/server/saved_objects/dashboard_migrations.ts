@@ -19,11 +19,7 @@
 
 import { get, flow } from 'lodash';
 
-import {
-  SavedObjectMigrationFn,
-  SavedObjectUnsanitizedDoc,
-  SavedObjectMigrationContext,
-} from 'kibana/server';
+import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { migrations730 } from './migrations_730';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
 import { DashboardDoc700To720 } from '../../common';
@@ -117,10 +113,5 @@ export const dashboardSavedObjectTypeMigrations = {
    */
   '6.7.2': flow<SavedObjectMigrationFn>(migrateMatchAllQuery),
   '7.0.0': flow<(doc: SavedObjectUnsanitizedDoc) => DashboardDoc700To720>(migrations700),
-  '7.3.0': flow<
-    (
-      doc: SavedObjectUnsanitizedDoc,
-      context: SavedObjectMigrationContext
-    ) => SavedObjectUnsanitizedDoc
-  >(migrations730),
+  '7.3.0': flow<SavedObjectMigrationFn>(migrations730),
 };
