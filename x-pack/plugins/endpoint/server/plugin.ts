@@ -36,10 +36,9 @@ export class EndpointPlugin
       EndpointPluginStartDependencies
     > {
   private readonly logger: Logger;
-  private readonly endpointAppContextService: EndpointAppContextService;
+  private readonly endpointAppContextService: EndpointAppContextService = new EndpointAppContextService();
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get('endpoint');
-    this.endpointAppContextService = new EndpointAppContextService();
   }
 
   public getEndpointAppContextService(): EndpointAppContextService {
