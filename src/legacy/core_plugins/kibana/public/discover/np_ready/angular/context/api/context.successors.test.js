@@ -39,9 +39,11 @@ describe('context app', function() {
       mockSearchSource = createContextSearchSourceStub([], '@timestamp');
 
       setServices({
-        search: {
-          searchSource: {
-            create: jest.fn().mockImplementation(() => mockSearchSource),
+        data: {
+          search: {
+            searchSource: {
+              create: jest.fn().mockImplementation(() => mockSearchSource),
+            },
           },
         },
       });
