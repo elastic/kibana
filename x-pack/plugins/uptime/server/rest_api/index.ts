@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createGetCertsRoute } from './certs';
 import { createGetOverviewFilters } from './overview_filters';
 import { createGetPingHistogramRoute, createGetPingsRoute } from './pings';
 import { createGetDynamicSettingsRoute, createPostDynamicSettingsRoute } from './dynamic_settings';
@@ -23,6 +24,7 @@ export { createRouteWithAuth } from './create_route_with_auth';
 export { uptimeRouteWrapper } from './uptime_route_wrapper';
 
 export const restApiRoutes: UMRestApiRouteFactory[] = [
+  createGetCertsRoute,
   createGetOverviewFilters,
   createGetPingsRoute,
   createGetIndexPatternRoute,
