@@ -35,7 +35,7 @@ export const EmptyState: React.FC = ({ children }) => {
   }, [dispatch, heartbeatIndices]);
 
   useEffect(() => {
-    dispatch(getDynamicSettings());
+    dispatch(getDynamicSettings({}));
   }, [dispatch]);
 
   return (
@@ -44,7 +44,6 @@ export const EmptyState: React.FC = ({ children }) => {
       loading={loading}
       errors={error ? [error] : undefined}
       children={children as React.ReactElement}
-      settings={settings}
     />
   );
 };
