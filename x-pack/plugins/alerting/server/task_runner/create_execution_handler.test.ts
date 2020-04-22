@@ -51,6 +51,18 @@ const createExecutionHandlerParams = {
 beforeEach(() => {
   jest.resetAllMocks();
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+  createExecutionHandlerParams.actionsPlugin.preconfiguredActions = [
+    {
+      actionTypeId: '.slack',
+      config: {
+        webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+      },
+      id: 'my-slack1',
+      name: 'Slack #xyz',
+      secrets: {},
+      isPreconfigured: true,
+    },
+  ];
 });
 
 test('calls actionsPlugin.execute per selected action', async () => {
@@ -146,6 +158,58 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
     spaceId: 'default',
     apiKey: createExecutionHandlerParams.apiKey,
   });
+});
+
+test('trow error error message when action type is disabled', async () => {
+  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(false);
+  const executionHandler = createExecutionHandler({
+    ...createExecutionHandlerParams,
+    actions: [
+      ...createExecutionHandlerParams.actions,
+      {
+        id: '2',
+        group: 'default',
+        actionTypeId: '.slack',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+    ],
+  });
+
+  await executionHandler({
+    actionGroup: 'default',
+    state: {},
+    context: {},
+    alertInstanceId: '2',
+  });
+
+  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(0);
+  const executionHandlerForPreconfiguredAction = createExecutionHandler({
+    ...createExecutionHandlerParams,
+    actions: [
+      ...createExecutionHandlerParams.actions,
+      {
+        id: 'my-slack1',
+        group: 'default',
+        actionTypeId: '.slack',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+    ],
+  });
+  await executionHandlerForPreconfiguredAction({
+    actionGroup: 'default',
+    state: {},
+    context: {},
+    alertInstanceId: '2',
+  });
+  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
 });
 
 test('limits actionsPlugin.execute per action group', async () => {

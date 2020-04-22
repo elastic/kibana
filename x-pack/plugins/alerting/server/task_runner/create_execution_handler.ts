@@ -71,7 +71,12 @@ export function createExecutionHandler({
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
     for (const action of actions) {
-      if (!actionsPlugin.isActionTypeEnabled(action.actionTypeId)) {
+      if (
+        !actionsPlugin.isActionTypeEnabled(action.actionTypeId) &&
+        !actionsPlugin.preconfiguredActions.find(
+          preconfiguredAction => preconfiguredAction.id === action.id
+        )
+      ) {
         logger.warn(
           `Alert "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
         );
