@@ -13,7 +13,7 @@ import {
   triggerAppRefresh,
   UiPayload,
   setAlertFlyoutVisible,
-} from '../actions/ui';
+} from '../actions';
 
 export interface UiState {
   alertFlyoutVisible: boolean;

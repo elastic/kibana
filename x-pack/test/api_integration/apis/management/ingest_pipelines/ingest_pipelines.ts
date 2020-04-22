@@ -185,5 +185,104 @@ export default function({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('Delete', () => {
+      const PIPELINE = {
+        description: 'test pipeline description',
+        processors: [
+          {
+            script: {
+              source: 'ctx._type = null',
+            },
+          },
+        ],
+        version: 1,
+      };
+
+      it('should delete a pipeline', async () => {
+        // Create pipeline to be deleted
+        const PIPELINE_ID = 'test_delete_pipeline';
+        createPipeline({ body: PIPELINE, id: PIPELINE_ID });
+
+        const uri = `${API_BASE_PATH}/${PIPELINE_ID}`;
+
+        const { body } = await supertest
+          .delete(uri)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body).to.eql({
+          itemsDeleted: [PIPELINE_ID],
+          errors: [],
+        });
+      });
+
+      it('should delete multiple pipelines', async () => {
+        // Create pipelines to be deleted
+        const PIPELINE_ONE_ID = 'test_delete_pipeline_1';
+        const PIPELINE_TWO_ID = 'test_delete_pipeline_2';
+        createPipeline({ body: PIPELINE, id: PIPELINE_ONE_ID });
+        createPipeline({ body: PIPELINE, id: PIPELINE_TWO_ID });
+
+        const uri = `${API_BASE_PATH}/${PIPELINE_ONE_ID},${PIPELINE_TWO_ID}`;
+
+        const {
+          body: { itemsDeleted, errors },
+        } = await supertest
+          .delete(uri)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(errors).to.eql([]);
+
+        // The itemsDeleted array order isn't guaranteed, so we assert against each pipeline name instead
+        [PIPELINE_ONE_ID, PIPELINE_TWO_ID].forEach(pipelineName => {
+          expect(itemsDeleted.includes(pipelineName)).to.be(true);
+        });
+      });
+
+      it('should return an error for any pipelines not sucessfully deleted', async () => {
+        const PIPELINE_DOES_NOT_EXIST = 'pipeline_does_not_exist';
+
+        // Create pipeline to be deleted
+        const PIPELINE_ONE_ID = 'test_delete_pipeline_1';
+        createPipeline({ body: PIPELINE, id: PIPELINE_ONE_ID });
+
+        const uri = `${API_BASE_PATH}/${PIPELINE_ONE_ID},${PIPELINE_DOES_NOT_EXIST}`;
+
+        const { body } = await supertest
+          .delete(uri)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body).to.eql({
+          itemsDeleted: [PIPELINE_ONE_ID],
+          errors: [
+            {
+              name: PIPELINE_DOES_NOT_EXIST,
+              error: {
+                msg: '[resource_not_found_exception] pipeline [pipeline_does_not_exist] is missing',
+                path: '/_ingest/pipeline/pipeline_does_not_exist',
+                query: {},
+                statusCode: 404,
+                response: JSON.stringify({
+                  error: {
+                    root_cause: [
+                      {
+                        type: 'resource_not_found_exception',
+                        reason: 'pipeline [pipeline_does_not_exist] is missing',
+                      },
+                    ],
+                    type: 'resource_not_found_exception',
+                    reason: 'pipeline [pipeline_does_not_exist] is missing',
+                  },
+                  status: 404,
+                }),
+              },
+            },
+          ],
+        });
+      });
+    });
   });
 }

@@ -9,3 +9,5 @@ export { PipelinesList } from './pipelines_list';
 export { PipelinesCreate } from './pipelines_create';
 
 export { PipelinesEdit } from './pipelines_edit';
+
+export { PipelinesClone } from './pipelines_clone';

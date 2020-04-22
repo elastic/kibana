@@ -6,12 +6,18 @@
 
 import { RouteDependencies } from '../types';
 
-import { registerGetRoutes, registerCreateRoute, registerUpdateRoute } from './api';
+import {
+  registerGetRoutes,
+  registerCreateRoute,
+  registerUpdateRoute,
+  registerDeleteRoute,
+} from './api';
 
 export class ApiRoutes {
   setup(dependencies: RouteDependencies) {
     registerGetRoutes(dependencies);
     registerCreateRoute(dependencies);
     registerUpdateRoute(dependencies);
+    registerDeleteRoute(dependencies);
   }
 }

@@ -15,7 +15,12 @@ import {
   useRequest as _useRequest,
 } from '../../shared_imports';
 import { UiMetricService } from './ui_metric';
-import { UIM_PIPELINE_CREATE, UIM_PIPELINE_UPDATE } from '../constants';
+import {
+  UIM_PIPELINE_CREATE,
+  UIM_PIPELINE_UPDATE,
+  UIM_PIPELINE_DELETE,
+  UIM_PIPELINE_DELETE_MANY,
+} from '../constants';
 
 export class ApiService {
   private client: HttpSetup | undefined;
@@ -84,6 +89,17 @@ export class ApiService {
     });
 
     this.trackUiMetric(UIM_PIPELINE_UPDATE);
+
+    return result;
+  }
+
+  public async deletePipelines(names: string[]) {
+    const result = this.sendRequest({
+      path: `${API_BASE_PATH}/${names.map(name => encodeURIComponent(name)).join(',')}`,
+      method: 'delete',
+    });
+
+    this.trackUiMetric(names.length > 1 ? UIM_PIPELINE_DELETE_MANY : UIM_PIPELINE_DELETE);
 
     return result;
   }
