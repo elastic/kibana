@@ -38,7 +38,7 @@ import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, APP_NAME, APP_ICON } from '../common/constants';
+import { APP_ID, APP_ICON } from '../common/constants';
 
 export { CoreSetup, CoreStart };
 
@@ -112,7 +112,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins.features.registerFeature({
       id: APP_ID,
       name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
-        defaultMessage: APP_NAME,
+        defaultMessage: 'SIEM',
       }),
       order: 1100,
       icon: APP_ICON,
