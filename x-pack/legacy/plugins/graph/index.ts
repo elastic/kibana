@@ -6,7 +6,6 @@
 
 // @ts-ignore
 import migrations from './migrations';
-import mappings from './mappings.json';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
 
 export const graph: LegacyPluginInitializer = kibana => {
@@ -14,11 +13,6 @@ export const graph: LegacyPluginInitializer = kibana => {
     id: 'graph',
     configPrefix: 'xpack.graph',
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-    uiExports: {
-      mappings,
-      migrations,
-    },
-
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
