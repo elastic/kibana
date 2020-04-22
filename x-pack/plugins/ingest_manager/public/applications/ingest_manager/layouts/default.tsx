@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Section } from '../sections';
+import { AlphaMessaging } from '../components';
 import { useLink, useConfig } from '../hooks';
 import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from '../constants';
 
@@ -19,6 +20,8 @@ interface Props {
 const Container = styled.div`
   min-height: calc(100vh - ${props => props.theme.eui.euiHeaderChildSize});
   background: ${props => props.theme.eui.euiColorEmptyShade};
+  display: flex;
+  flex-direction: column;
 `;
 
 const Nav = styled.nav`
@@ -80,6 +83,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
         </EuiFlexGroup>
       </Nav>
       {children}
+      <AlphaMessaging />
     </Container>
   );
 };
