@@ -19,8 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import ChoroplethLayer from './choropleth_layer';
-import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { toastNotifications } from 'ui/notify';
+import { getFormatService, getNotifications } from './kibana_services';
 import { truncatedColorMaps } from '../../../../plugins/charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider } from '../../../../plugins/maps_legacy/public';
@@ -75,7 +74,7 @@ export function createRegionMapVisualization({
         results
       );
 
-      const metricFieldFormatter = getFormat(this._params.metric.format);
+      const metricFieldFormatter = getFormatService(this._params.metric.format);
 
       this._choroplethLayer.setMetrics(results, metricFieldFormatter, valueColumn.name);
       if (termColumn && valueColumn) {
@@ -108,7 +107,7 @@ export function createRegionMapVisualization({
         this._params.showAllShapes
       );
 
-      const metricFieldFormatter = getFormat(this._params.metric.format);
+      const metricFieldFormatter = getFormatService(this._params.metric.format);
 
       this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
       this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
@@ -177,7 +176,7 @@ export function createRegionMapVisualization({
         const shouldShowWarning =
           this._params.isDisplayWarning && uiSettings.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {
-          toastNotifications.addWarning({
+          getNotifications().toasts.addWarning({
             title: i18n.translate('regionMap.visualization.unableToShowMismatchesWarningTitle', {
               defaultMessage:
                 'Unable to show {mismatchesLength} {oneMismatch, plural, one {result} other {results}} on map',

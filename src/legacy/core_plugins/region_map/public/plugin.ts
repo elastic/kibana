@@ -34,6 +34,8 @@ import {
   IServiceSettings,
   MapsLegacyPluginSetup,
 } from '../../../../plugins/maps_legacy/public';
+import { setFormatService, setNotifications } from './kibana_services';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
 /** @private */
 interface RegionMapVisualizationDependencies {
@@ -41,6 +43,7 @@ interface RegionMapVisualizationDependencies {
   regionmapsConfig: RegionMapsConfig;
   serviceSettings: IServiceSettings;
   BaseMapsVisualization: any;
+  notifications: CoreStart['notifications'] | undefined;
 }
 
 /** @internal */
@@ -48,6 +51,11 @@ export interface RegionMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   mapsLegacy: MapsLegacyPluginSetup;
+}
+
+/** @internal */
+export interface RegionMapPluginStartDependencies {
+  data: DataPublicPluginStart;
 }
 
 /** @internal */
@@ -66,8 +74,9 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, mapsLegacy }: RegionMapPluginSetupDependencies
+    { expressions, visualizations, mapsLegacy, notifications }: RegionMapPluginSetupDependencies
   ) {
+    setNotifications(notifications);
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       regionmapsConfig: core.injectedMetadata.getInjectedVar('regionmap') as RegionMapsConfig,
@@ -82,7 +91,7 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
     );
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
+  public start(core: CoreStart, { data }: RegionMapPluginStartDependencies) {
+    setFormatService(data.fieldFormats);
   }
 }
