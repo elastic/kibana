@@ -22,6 +22,7 @@ import {
   MalwareFields,
   UIPolicyConfig,
   PolicyData,
+  HostPolicyResponse,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
@@ -97,7 +98,7 @@ export interface HostListState {
   detailsError?: ServerApiError;
   details?: Immutable<HostMetadata>;
   /** Holds the Policy Response for the Host currently being displayed in the details */
-  policyResponse?: { [key: string]: any }; // Will be Typed once we have an API for it
+  policyResponse?: HostPolicyResponse;
   location?: Immutable<EndpointAppLocation>;
 }
 

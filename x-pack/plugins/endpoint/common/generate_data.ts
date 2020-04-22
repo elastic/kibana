@@ -13,7 +13,7 @@ import {
   HostMetadata,
   OSFields,
   PolicyData,
-  PolicyResponse,
+  HostPolicyResponse,
   PolicyResponseActionStatus,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
@@ -495,9 +495,12 @@ export class EndpointDocGenerator {
     };
   }
 
-  generatePolicyResponse(): PolicyResponse {
+  /**
+   * Generates a Host Policy response message
+   */
+  generatePolicyResponse(): HostPolicyResponse {
     return {
-      '@timestamp': new Date().getTime(),
+      '@timestamp': new Date().toISOString(),
       elastic: {
         agent: {
           id: 'c2a9093e-e289-4c0a-aa44-8c32a414fa7a',
@@ -542,7 +545,7 @@ export class EndpointDocGenerator {
               configurations: {
                 malware: {
                   status: PolicyResponseActionStatus.success,
-                  concerned_actions: ['download_model', 'workflow', 'a-custom-future-action'],
+                  concerned_actions: ['download_model', 'workflow', 'a_custom_future_action'],
                 },
                 events: {
                   status: PolicyResponseActionStatus.success,
@@ -557,7 +560,7 @@ export class EndpointDocGenerator {
                   concerned_actions: [
                     'detect_file_open_events',
                     'download_global_artifacts',
-                    'my-custom-value',
+                    'a_custom_future_action',
                   ],
                 },
               },
@@ -573,6 +576,22 @@ export class EndpointDocGenerator {
                 workflow: {
                   status: PolicyResponseActionStatus.success,
                   message: 'the flow worked well',
+                },
+                a_custom_future_action: {
+                  status: PolicyResponseActionStatus.success,
+                  message: 'future message',
+                },
+                configure_elasticsearch_connection: {
+                  status: PolicyResponseActionStatus.success,
+                  message: 'some message',
+                },
+                detect_file_open_events: {
+                  status: PolicyResponseActionStatus.success,
+                  message: 'some message',
+                },
+                download_global_artifacts: {
+                  status: PolicyResponseActionStatus.success,
+                  message: 'some message',
                 },
               },
             },

@@ -5,7 +5,7 @@
  */
 
 import { HostListPagination, ServerApiError } from '../../types';
-import { HostResultList, HostInfo } from '../../../../../common/types';
+import { HostResultList, HostInfo, GetHostPolicyResponse } from '../../../../../common/types';
 
 interface ServerReturnedHostList {
   type: 'serverReturnedHostList';
@@ -24,7 +24,7 @@ interface ServerFailedToReturnHostDetails {
 
 interface ServerReturnedHostPolicyResponse {
   type: 'serverReturnedHostPolicyResponse';
-  payload: { [key: string]: any }; // FIXME: replace with API response type once implemented
+  payload: GetHostPolicyResponse;
 }
 interface UserPaginatedHostList {
   type: 'userPaginatedHostList';

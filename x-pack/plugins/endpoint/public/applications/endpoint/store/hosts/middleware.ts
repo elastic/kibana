@@ -7,6 +7,7 @@
 import { ImmutableMiddlewareFactory } from '../../types';
 import { pageIndex, pageSize, isOnHostPage, hasSelectedHost, uiQueryParams } from './selectors';
 import { HostListState } from '../../types';
+import { HostPolicyResponse } from '../../../../../common/types';
 
 export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostListState> = coreStart => {
   return ({ getState, dispatch }) => next => async action => {
@@ -43,13 +44,15 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostListState> = 
         dispatch({
           type: 'serverReturnedHostPolicyResponse',
           payload: {
-            policy_response: {
+            policy_response: ({
               endpoint: {
                 policy: {
-                  status: 'success',
+                  applied: {
+                    status: 'success',
+                  },
                 },
               },
-            },
+            } as unknown) as HostPolicyResponse, // Temporary until we get API
           },
         });
       } catch (error) {

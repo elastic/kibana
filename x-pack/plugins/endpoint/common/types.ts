@@ -586,7 +586,7 @@ export enum PolicyResponseActionStatus {
 /**
  * The details of a given action
  */
-interface PolicyResponseActionDetails {
+interface HostPolicyResponseActionDetails {
   status: PolicyResponseActionStatus;
   message: string;
 }
@@ -594,42 +594,42 @@ interface PolicyResponseActionDetails {
 /**
  * A known list of possible Endpoint actions
  */
-interface PolicyResponseActions {
-  download_model: PolicyResponseActionDetails;
-  ingest_events_config: PolicyResponseActionDetails;
-  workflow: PolicyResponseActionDetails;
-  configure_elasticsearch_connection: PolicyResponseActionDetails;
-  configure_kernel: PolicyResponseActionDetails;
-  configure_logging: PolicyResponseActionDetails;
-  configure_malware: PolicyResponseActionDetails;
-  connect_kernel: PolicyResponseActionDetails;
-  detect_file_open_events: PolicyResponseActionDetails;
-  detect_file_write_events: PolicyResponseActionDetails;
-  detect_image_load_events: PolicyResponseActionDetails;
-  detect_process_events: PolicyResponseActionDetails;
-  download_global_artifacts: PolicyResponseActionDetails;
-  load_config: PolicyResponseActionDetails;
-  load_malware_model: PolicyResponseActionDetails;
-  read_elasticsearch_config: PolicyResponseActionDetails;
-  read_events_config: PolicyResponseActionDetails;
-  read_kernel_config: PolicyResponseActionDetails;
-  read_logging_config: PolicyResponseActionDetails;
-  read_malware_config: PolicyResponseActionDetails;
+interface HostPolicyResponseActions {
+  download_model: HostPolicyResponseActionDetails;
+  ingest_events_config: HostPolicyResponseActionDetails;
+  workflow: HostPolicyResponseActionDetails;
+  configure_elasticsearch_connection: HostPolicyResponseActionDetails;
+  configure_kernel: HostPolicyResponseActionDetails;
+  configure_logging: HostPolicyResponseActionDetails;
+  configure_malware: HostPolicyResponseActionDetails;
+  connect_kernel: HostPolicyResponseActionDetails;
+  detect_file_open_events: HostPolicyResponseActionDetails;
+  detect_file_write_events: HostPolicyResponseActionDetails;
+  detect_image_load_events: HostPolicyResponseActionDetails;
+  detect_process_events: HostPolicyResponseActionDetails;
+  download_global_artifacts: HostPolicyResponseActionDetails;
+  load_config: HostPolicyResponseActionDetails;
+  load_malware_model: HostPolicyResponseActionDetails;
+  read_elasticsearch_config: HostPolicyResponseActionDetails;
+  read_events_config: HostPolicyResponseActionDetails;
+  read_kernel_config: HostPolicyResponseActionDetails;
+  read_logging_config: HostPolicyResponseActionDetails;
+  read_malware_config: HostPolicyResponseActionDetails;
   // The list of possible Actions will change rapidly, so the below entry will allow
   // them without us defining them here statically
-  [key: string]: PolicyResponseActionDetails;
+  [key: string]: HostPolicyResponseActionDetails;
 }
 
-interface PolicyResponseConfigurationStatus {
+interface HostPolicyResponseConfigurationStatus {
   status: PolicyResponseActionStatus;
-  concerned_actions: Array<keyof PolicyResponseActions>;
+  concerned_actions: Array<keyof HostPolicyResponseActions>;
 }
 
 /**
  * Information about the applying of a policy to a given host
  */
-export interface PolicyResponse {
-  '@timestamp': number;
+export interface HostPolicyResponse {
+  '@timestamp': string;
   elastic: {
     agent: {
       id: string;
@@ -655,14 +655,21 @@ export interface PolicyResponse {
         status: PolicyResponseActionStatus;
         response: {
           configurations: {
-            malware: PolicyResponseConfigurationStatus;
-            events: PolicyResponseConfigurationStatus;
-            logging: PolicyResponseConfigurationStatus;
-            streaming: PolicyResponseConfigurationStatus;
+            malware: HostPolicyResponseConfigurationStatus;
+            events: HostPolicyResponseConfigurationStatus;
+            logging: HostPolicyResponseConfigurationStatus;
+            streaming: HostPolicyResponseConfigurationStatus;
           };
-          actions: Partial<PolicyResponseActions>;
+          actions: Partial<HostPolicyResponseActions>;
         };
       };
     };
   };
+}
+
+/**
+ * REST API response for retrieving a host's Policy Response status
+ */
+export interface GetHostPolicyResponse {
+  policy_response: HostPolicyResponse;
 }
