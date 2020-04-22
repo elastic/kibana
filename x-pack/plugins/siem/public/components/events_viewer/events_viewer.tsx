@@ -27,12 +27,7 @@ import { TimelineRefetch } from '../timeline/refetch_timeline';
 import { ManageTimelineContext, TimelineTypeContextProps } from '../timeline/timeline_context';
 import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../src/plugins/data/public';
+import { Filter, esQuery, IIndexPattern, Query } from '../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;

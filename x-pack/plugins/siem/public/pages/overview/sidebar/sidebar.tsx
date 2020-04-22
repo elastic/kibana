@@ -8,10 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import {
-  ENABLE_NEWS_FEED_SETTING,
-  NEWS_FEED_URL_SETTING,
-} from '../../../../common/constants';
+import { ENABLE_NEWS_FEED_SETTING, NEWS_FEED_URL_SETTING } from '../../../../common/constants';
 import { Filters as RecentCasesFilters } from '../../../components/recent_cases/filters';
 import { Filters as RecentTimelinesFilters } from '../../../components/recent_timelines/filters';
 import { StatefulRecentCases } from '../../../components/recent_cases';

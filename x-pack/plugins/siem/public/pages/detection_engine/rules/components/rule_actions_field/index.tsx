@@ -11,10 +11,7 @@ import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../../commo
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loadActionTypes } from '../../../../../../../triggers_actions_ui/public/application/lib/action_connector_api';
 import { SelectField } from '../../../../../shared_imports';
-import {
-  ActionForm,
-  ActionType,
-} from '../../../../../../../triggers_actions_ui/public';
+import { ActionForm, ActionType } from '../../../../../../../triggers_actions_ui/public';
 import { AlertAction } from '../../../../../../../alerting/common';
 import { useKibana } from '../../../../../lib/kibana';
 

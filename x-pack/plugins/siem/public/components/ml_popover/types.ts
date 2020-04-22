@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlError } from '../ml/types';
 import { AuditMessageBase } from 'ml/common/types/audit_message';
+import { MlError } from '../ml/types';
 
 export interface Group {
   id: string;

@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  RuleAlertAction,
-  RuleType,
-} from '../../../../common/detection_engine/types';
+import { RuleAlertAction, RuleType } from '../../../../common/detection_engine/types';
 import { AlertAction } from '../../../../../alerting/common';
 import { Filter } from '../../../../../../../src/plugins/data/common';
 import { FieldValueQueryBar } from './components/query_bar';
