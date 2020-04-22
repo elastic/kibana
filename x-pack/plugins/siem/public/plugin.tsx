@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   AppMountParameters,
   CoreSetup,
@@ -69,8 +71,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
 
     plugins.home.featureCatalogue.register({
       id: APP_ID,
-      title: APP_NAME,
-      description: 'Explore security metrics and logs for events and alerts',
+      title: i18n.translate('xpack.siem.featureCatalogue.title', {
+        defaultMessage: 'SIEM',
+      }),
+      description: i18n.translate('xpack.siem.featureCatalogue.description', {
+        defaultMessage: 'Explore security metrics and logs for events and alerts',
+      }),
       icon: APP_ICON,
       path: APP_PATH,
       showOnHomePage: true,
