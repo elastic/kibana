@@ -246,8 +246,15 @@ export const getDefaultFieldsFromJobCaps = (
   fields: Field[],
   jobConfig: DataFrameAnalyticsConfig,
   needsDestIndexFields: boolean
-): { selectedFields: Field[]; docFields: Field[]; depVarType?: ES_FIELD_TYPES } => {
-  const fieldsObj = { selectedFields: [], docFields: [] };
+): {
+  selectedFields: Field[];
+  docFields: Field[];
+  depVarType?: ES_FIELD_TYPES;
+} => {
+  const fieldsObj = {
+    selectedFields: [],
+    docFields: [],
+  };
   if (fields.length === 0) {
     return fieldsObj;
   }
@@ -267,38 +274,37 @@ export const getDefaultFieldsFromJobCaps = (
   const featureImportanceFields = [];
 
   if ((numTopFeatureImportanceValues ?? 0) > 0) {
-    featureImportanceFields.push(
-      ...fields.map(d => ({
-        id: `${resultsField}.feature_importance.${d.id}`,
-        name: `${resultsField}.feature_importance.${d.name}`,
-        type: KBN_FIELD_TYPES.NUMBER,
-      }))
+    featureImportanceFields.push({
+      id: `${resultsField}.feature_importance`,
+      name: `${resultsField}.feature_importance`,
+      type: KBN_FIELD_TYPES.NUMBER,
+    });
+  }
+
+  let allFields: any = [];
+  // Only need to add these fields if we didn't use dest index pattern to get the fields
+  if (needsDestIndexFields === true) {
+    allFields.push(
+      {
+        id: `${resultsField}.is_training`,
+        name: `${resultsField}.is_training`,
+        type: ES_FIELD_TYPES.BOOLEAN,
+      },
+      { id: predictedField, name: predictedField, type }
     );
   }
 
-  // Only need to add these fields if we didn't use dest index pattern to get the fields
-  const allFields: any =
-    needsDestIndexFields === true
-      ? [
-          {
-            id: `${resultsField}.is_training`,
-            name: `${resultsField}.is_training`,
-            type: ES_FIELD_TYPES.BOOLEAN,
-          },
-          { id: predictedField, name: predictedField, type },
-          ...featureImportanceFields,
-        ]
-      : [];
-
-  allFields.push(...fields);
+  allFields.push(...fields, ...featureImportanceFields);
   allFields.sort(({ name: a }: { name: string }, { name: b }: { name: string }) =>
     sortRegressionResultsFields(a, b, jobConfig)
   );
+  // Remove feature_importance fields provided by dest index since feature_importance is an array the path is not valid
+  if (needsDestIndexFields === false) {
+    allFields = allFields.filter((field: any) => !field.name.includes('.feature_importance.'));
+  }
 
   let selectedFields = allFields.filter(
-    (field: any) =>
-      field.name === predictedField ||
-      (!field.name.includes('.keyword') && !field.name.includes('.feature_importance.'))
+    (field: any) => field.name === predictedField || !field.name.includes('.keyword')
   );
 
   if (selectedFields.length > DEFAULT_REGRESSION_COLUMNS) {

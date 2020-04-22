@@ -13,6 +13,7 @@ import { AbstractTMSSource } from '../tms_source';
 import { LayerDescriptor, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty } from '../source';
 import { XYZTMSSourceConfig } from './xyz_tms_editor';
+import { ILayer } from '../../layer';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
   defaultMessage: 'Tile Map Service',
@@ -48,7 +49,7 @@ export class XYZTMSSource extends AbstractTMSSource {
     ];
   }
 
-  createDefaultLayer(options?: LayerDescriptor): TileLayer {
+  createDefaultLayer(options?: LayerDescriptor): ILayer {
     const layerDescriptor: LayerDescriptor = TileLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options,

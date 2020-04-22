@@ -3,7 +3,7 @@
 ## Purpose
 
 The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
-in their infrastructure. It's primarily built using React and Apollo's GraphQL tools.
+in their infrastructure.
 
 ## Layout
 
@@ -11,13 +11,15 @@ There are three sections to the app, `common`, `public`, and `server`.
 
 ### common
 
-Contains GraphQL types, constants and a few other files.
+Contains runtime types types, constants and a few other files.
+
+Notably, we use `io-ts`/`fp-ts` functions and types to help provide
+additional runtime safety for our API requests/responses.
 
 ### public
 
-Components come in two main types, queries and functional. Queries are extended from Apollo's queries
-type which abstracts a lot of the GraphQL connectivity away. Functional are dumb components that
-don't store any state.
+We use Redux and associated tools for managing our app state. Components come in the usual `connect`ed and
+presentational varieties.
 
 The `lib` directory controls bootstrapping code and adapter types.
 
@@ -27,11 +29,12 @@ The principal structure of the app is stored in `uptime_app.tsx`.
 
 ### server
 
-There is a `graphql` directory which contains the resolvers, schema files, and constants.
-
 The `lib` directory contains `adapters`, which are connections to external resources like Kibana
 Server, Elasticsearch, etc. In addition, it contains domains, which are libraries that provide
 functionality via adapters.
+
+The `requests` directory contains functions responsible for querying Elasticsearch and parsing its
+responses.
 
 There's also a `rest_api` folder that defines the structure of the RESTful API endpoints.
 

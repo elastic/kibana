@@ -10,8 +10,8 @@ import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/metric_threshold/types';
-import { MetricsExplorerOptions } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
+import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 interface Props {
   visible?: boolean;

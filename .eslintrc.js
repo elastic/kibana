@@ -96,7 +96,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
@@ -567,7 +567,7 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/legacy/plugins/siem/**/*.{ts,tsx}'],
+      files: ['x-pack/{,legacy/}plugins/siem/**/*.{ts,tsx}'],
       rules: {
         // This will be turned on after bug fixes are complete
         // '@typescript-eslint/explicit-member-accessibility': 'warn',
@@ -613,7 +613,7 @@ module.exports = {
     // },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
+      files: ['x-pack/{,legacy/}plugins/siem/**/*.{js,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
         mocha: true,

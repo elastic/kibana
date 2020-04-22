@@ -71,6 +71,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       }
     }
 
+    public async checkTimeSeriesIsLight() {
+      return await find.existsByCssSelector('.tvbVisTimeSeriesLight');
+    }
+
     public async checkTimeSeriesLegendIsPresent() {
       const isPresent = await find.existsByCssSelector('.echLegend');
       if (!isPresent) {
