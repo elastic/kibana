@@ -34,12 +34,12 @@ export const getListHandler: RequestHandler = async (context, request, response)
             must: [
               {
                 exists: {
-                  field: 'fields.stream.namespace',
+                  field: 'stream.namespace',
                 },
               },
               {
                 exists: {
-                  field: 'fields.stream.dataset',
+                  field: 'stream.dataset',
                 },
               },
             ],
@@ -57,19 +57,19 @@ export const getListHandler: RequestHandler = async (context, request, response)
             aggs: {
               dataset: {
                 terms: {
-                  field: 'fields.stream.dataset',
+                  field: 'stream.dataset',
                   size: 1,
                 },
               },
               namespace: {
                 terms: {
-                  field: 'fields.stream.namespace',
+                  field: 'stream.namespace',
                   size: 1,
                 },
               },
               type: {
                 terms: {
-                  field: 'fields.stream.type',
+                  field: 'stream.type',
                   size: 1,
                 },
               },
