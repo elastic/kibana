@@ -98,10 +98,6 @@ export interface ExpressionRenderingParams {
  * Constructs expression renderer handlers and passes them to expression renderer.
  */
 export class ExpressionRendering {
-  render$: Observable<number>;
-  update$: Observable<UpdateValue | null>;
-  events$: Observable<Event>;
-
   private destroyFn?: any;
   private renderCount: number = 0;
   private renderSubject: Rx.BehaviorSubject<number | null>;
@@ -141,7 +137,17 @@ export class ExpressionRendering {
     };
   }
 
-  render = async (data: any, uiState: any = {}) => {
+  private handleRenderError(error: RenderError) {
+    (this.params.onRenderError || onRenderErrorDefault)(this.params.element, error, this.handlers);
+  }
+
+  // Public API ----------------------------------------------------------------
+
+  public readonly render$: Observable<number>;
+  public readonly update$: Observable<UpdateValue | null>;
+  public readonly events$: Observable<Event>;
+
+  public readonly render = async (data: any, uiState: any = {}) => {
     if (!data || typeof data !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
@@ -171,7 +177,7 @@ export class ExpressionRendering {
     }
   };
 
-  destroy = () => {
+  public readonly destroy = () => {
     this.renderSubject.complete();
     this.eventsSubject.complete();
     this.updateSubject.complete();
@@ -180,9 +186,5 @@ export class ExpressionRendering {
     }
   };
 
-  getElement = () => this.params.element;
-
-  handleRenderError = (error: RenderError) => {
-    (this.params.onRenderError || onRenderErrorDefault)(this.params.element, error, this.handlers);
-  };
+  public readonly getElement = () => this.params.element;
 }
