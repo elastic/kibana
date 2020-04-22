@@ -6,7 +6,7 @@
 
 import { $Values } from '@kbn/utility-types';
 import _ from 'lodash';
-import { Action } from 'history';
+import { Action as Action_2 } from 'history';
 import { ApplicationStart } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
 import { Breadcrumb } from '@elastic/eui';
@@ -54,7 +54,8 @@ import { Subscription } from 'rxjs';
 import { Toast } from 'kibana/public';
 import { ToastsStart } from 'kibana/public';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart as UiActionsStart_2 } from 'src/plugins/ui_actions/public';
+import { UiComponent } from 'src/plugins/kibana_utils/public';
 import { Unit } from '@elastic/datemath';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues } from 'src/core/server/types';
