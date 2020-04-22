@@ -328,7 +328,6 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
     const timeline = getTimeline(state, 'timeline-1') ?? timelineDefaults;
-
     return {
       timeline,
     };

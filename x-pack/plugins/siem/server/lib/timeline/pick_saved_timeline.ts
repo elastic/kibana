@@ -26,21 +26,6 @@ export const pickSavedTimeline = (
     savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
 
-  // if (savedTimeline.timelineType === TimelineType.template) {
-  //   savedTimeline.timelineType = TimelineType.template;
-
-  //   if (savedTimeline.templateTimelineId == null) {
-  //     savedTimeline.templateTimelineId = uuid.v4();
-  //   }
-  //   if (savedTimeline.templateTimelineVersion == null) {
-  //     savedTimeline.templateTimelineVersion = 1;
-  //   }
-  // } else {
-  //   savedTimeline.timelineType = TimelineType.default;
-  //   savedTimeline.templateTimelineId = null;
-  //   savedTimeline.templateTimelineVersion = null;
-  // }
-
   if (savedTimeline.timelineType === TimelineType.template) {
     savedTimeline.timelineType = TimelineType.template;
     if (savedTimeline.templateTimelineId == null) {

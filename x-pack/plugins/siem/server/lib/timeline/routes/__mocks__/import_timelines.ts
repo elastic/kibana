@@ -152,7 +152,8 @@ export const mockGetTimelineValue = {
 export const mockGetTemplateTimelineValue = {
   ...mockGetTimelineValue,
   timelineType: TimelineType.template,
-  templateTimelineId: 'existing template timeline id',
+  templateTimelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+  templateTimelineVersion: 1,
 };
 
 export const mockParsedTimelineObject = omit(

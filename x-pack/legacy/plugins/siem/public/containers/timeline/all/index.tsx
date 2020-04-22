@@ -39,7 +39,7 @@ export interface AllTimelinesVariables {
 
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
 
-const getAllTimeline = memoizeOne(
+export const getAllTimeline = memoizeOne(
   (variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
     timelines.map(timeline => ({
       created: timeline.created,
