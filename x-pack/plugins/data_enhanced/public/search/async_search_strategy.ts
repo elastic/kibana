@@ -59,7 +59,7 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
           }
 
           // If the response indicates it is complete, stop polling and complete the observable
-          if (!response.is_partial && !response.is_running) return EMPTY;
+          if (!response.is_running) return EMPTY;
 
           id = response.id;
 
