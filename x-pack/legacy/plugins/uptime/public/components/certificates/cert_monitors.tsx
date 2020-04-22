@@ -5,20 +5,20 @@
  */
 
 import React from 'react';
-import { Cert } from '../../../common/runtime_types';
+import { CertMonitor } from '../../../common/runtime_types';
 import { MonitorPageLink } from '../common/monitor_page_link';
 
 interface Props {
-  monitors: Cert;
+  monitors: CertMonitor[];
 }
 
 export const CertMonitors: React.FC<Props> = ({ monitors }) => {
   return (
     <span>
-      {monitors.map((mon, ind) => (
+      {monitors.map((mon: CertMonitor, ind: number) => (
         <>
           {ind > 0 && ', '}
-          <MonitorPageLink key={mon.id} monitorId={mon.id} linkParameters={''}>
+          <MonitorPageLink key={mon.id} monitorId={mon.id!} linkParameters={''}>
             {mon.name || mon.id}
           </MonitorPageLink>
         </>

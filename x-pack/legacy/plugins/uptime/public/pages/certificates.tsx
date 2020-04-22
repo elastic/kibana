@@ -7,25 +7,17 @@
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useUptimeTelemetry, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { CertificateList } from '../components/certificates/certificates_list';
+import { CertificateList, CertSort } from '../components/certificates/certificates_list';
 import { CertificateSearch } from '../components/certificates/certificate_search';
 import { OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../common/constants';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
-import { getCertificatesActions } from '../state/certificates/certificates';
+import { getCertificatesAction } from '../state/certificates/certificates';
 
 export const CertificatesPage: React.FC = () => {
   useUptimeTelemetry(UptimePage.Certificates);
@@ -36,7 +28,10 @@ export const CertificatesPage: React.FC = () => {
   useBreadcrumbs([{ text: 'Certificates' }]);
 
   const [page, setPage] = useState({ index: 0, size: 10 });
-  const [sort, setSort] = useState({ field: 'tls.certificate_not_valid_after', direction: 'asc' });
+  const [sort, setSort] = useState<CertSort>({
+    field: 'certificate_not_valid_after',
+    direction: 'asc',
+  });
   const [search, setSearch] = useState('');
 
   const dispatch = useDispatch();
@@ -47,7 +42,7 @@ export const CertificatesPage: React.FC = () => {
 
   useEffect(() => {
     dispatch(
-      getCertificatesActions.get({ search, ...page, sortBy: sort.field, direction: sort.direction })
+      getCertificatesAction.get({ search, ...page, sortBy: sort.field, direction: sort.direction })
     );
   }, [dispatch, page, search, sort.direction, sort.field]);
 
@@ -80,7 +75,14 @@ export const CertificatesPage: React.FC = () => {
         <EuiSpacer size="m" />
         <CertificateSearch setSearch={setSearch} />
         <EuiSpacer size="m" />
-        <CertificateList page={page} setPage={setPage} sort={sort} setSort={setSort} />
+        <CertificateList
+          page={page}
+          onChange={(pageVal, sortVal) => {
+            setPage(pageVal);
+            setSort(sortVal);
+          }}
+          sort={sort}
+        />
       </EuiPanel>
     </>
   );

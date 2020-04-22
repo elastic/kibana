@@ -11,14 +11,10 @@ export const CertificatesStatesThresholdType = t.interface({
   errorState: t.number,
 });
 
-export const DynamicSettingsType = t.intersection([
-  t.type({
-    heartbeatIndices: t.string,
-  }),
-  t.partial({
-    certificatesThresholds: CertificatesStatesThresholdType,
-  }),
-]);
+export const DynamicSettingsType = t.type({
+  heartbeatIndices: t.string,
+  certificatesThresholds: CertificatesStatesThresholdType,
+});
 
 export const DynamicSettingsSaveType = t.intersection([
   t.type({

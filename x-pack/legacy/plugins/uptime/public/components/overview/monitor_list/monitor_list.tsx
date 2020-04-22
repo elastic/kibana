@@ -57,13 +57,13 @@ const getPageSizeValue = () => {
   return value;
 };
 
-export const MonitorListComponent = ({
+export const MonitorListComponent: React.FC<Props> = ({
   filters,
   getMonitorList,
   lastRefresh,
   monitorList: { list, error, loading },
   linkParameters,
-}): Props => {
+}) => {
   const [pageSize, setPageSize] = useState<number>(getPageSizeValue());
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
@@ -150,7 +150,7 @@ export const MonitorListComponent = ({
       align: 'center' as const,
       field: 'state.tls',
       name: labels.TLS_COLUMN_LABEL,
-      render: tls => <CertStatusColumn cert={tls?.[0]} />,
+      render: (tls: any) => <CertStatusColumn cert={tls?.[0]} />,
     },
     {
       align: 'center' as const,

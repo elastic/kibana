@@ -6,11 +6,17 @@
 
 import { UMElasticsearchQueryFn } from '../adapters';
 import {
+  OverviewFilters,
+  MonitorDetails,
+  MonitorLocations,
+  Snapshot,
+  StatesIndexStatus,
   HistogramResult,
   Ping,
   PingsResponse as PingResults,
   GetCertsParams,
   GetPingsParams,
+  CertResult,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import {
   GetFilterBarParams,
@@ -23,14 +29,6 @@ import {
   GetMonitorStatusParams,
   GetMonitorStatusResult,
 } from '.';
-import {
-  OverviewFilters,
-  MonitorDetails,
-  MonitorLocations,
-  Snapshot,
-  StatesIndexStatus,
-  Cert,
-} from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
 import { MonitorDurationResult } from '../../../../../legacy/plugins/uptime/common/types';
@@ -38,7 +36,7 @@ import { MonitorDurationResult } from '../../../../../legacy/plugins/uptime/comm
 type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 
 export interface UptimeRequests {
-  getCerts: ESQ<GetCertsParams, Cert[]>;
+  getCerts: ESQ<GetCertsParams, CertResult>;
   getFilterBar: ESQ<GetFilterBarParams, OverviewFilters>;
   getIndexPattern: ESQ<{}, {}>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;

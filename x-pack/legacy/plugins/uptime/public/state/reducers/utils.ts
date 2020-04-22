@@ -6,7 +6,6 @@
 
 import { Action } from 'redux-actions';
 import { AsyncAction } from '../actions/types';
-import { AsyncInitialState } from './types';
 
 export function handleAsyncAction<ReducerState>(
   storeKey: string,
@@ -42,7 +41,7 @@ export function handleAsyncAction<ReducerState>(
   };
 }
 
-export function getAsyncInitialState(initialData = null): AsyncInitialState {
+export function getAsyncInitialState(initialData = null) {
   return {
     data: initialData,
     loading: false,

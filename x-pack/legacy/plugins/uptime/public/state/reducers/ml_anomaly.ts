@@ -15,7 +15,6 @@ import {
   getMLCapabilitiesAction,
 } from '../actions';
 import { getAsyncInitialState, handleAsyncAction } from './utils';
-import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 import { AsyncInitialState } from './types';
 import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
 import { CreateMLJobSuccess, DeleteJobResults } from '../actions/types';
@@ -36,8 +35,6 @@ const initialState: MLJobState = {
   anomalies: getAsyncInitialState(),
   mlCapabilities: getAsyncInitialState(),
 };
-
-type Payload = IHttpFetchError;
 
 export const mlJobsReducer = handleActions<MLJobState>(
   {

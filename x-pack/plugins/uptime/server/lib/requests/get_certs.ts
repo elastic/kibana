@@ -5,9 +5,12 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Cert, GetCertsParams } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import {
+  CertResult,
+  GetCertsParams,
+} from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
-export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
+export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = async ({
   callES,
   dynamicSettings,
   index,

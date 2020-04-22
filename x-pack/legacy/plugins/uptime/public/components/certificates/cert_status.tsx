@@ -7,7 +7,8 @@
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
 import { Cert } from '../../../common/runtime_types';
-import { CERT_STATUS, useCertStatus } from '../../hooks/use_cert_status';
+import { CERT_STATUS, useCertStatus } from '../../hooks';
+import * as labels from './translations';
 
 interface Props {
   cert: Cert;
@@ -23,21 +24,21 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
   if (isExpiringSoon) {
     return (
       <EuiHealth color="#E9AA3C">
-        <span>Expires Soon</span>
+        <span>{labels.EXPIRES_SOON}</span>
       </EuiHealth>
     );
   }
   if (isExpired) {
     return (
       <EuiHealth color="danger">
-        <span>Expired</span>
+        <span>{labels.EXPIRED}</span>
       </EuiHealth>
     );
   }
 
   return (
     <EuiHealth color="success">
-      <span>OK</span>
+      <span>{labels.OK}</span>
     </EuiHealth>
   );
 };

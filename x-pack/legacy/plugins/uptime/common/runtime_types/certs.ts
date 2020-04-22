@@ -8,26 +8,28 @@ import * as t from 'io-ts';
 
 export const GetCertsParamsType = t.intersection([
   t.type({
-    from: t.string,
-    to: t.string,
     index: t.number,
     size: t.number,
+    sortBy: t.string,
+    direction: t.string,
   }),
   t.partial({
     search: t.string,
+    from: t.string,
+    to: t.string,
   }),
 ]);
 
 export type GetCertsParams = t.TypeOf<typeof GetCertsParamsType>;
 
+export const CertMonitorType = t.partial({
+  name: t.string,
+  id: t.string,
+});
+
 export const CertType = t.intersection([
   t.type({
-    monitors: t.array(
-      t.partial({
-        name: t.string,
-        id: t.string,
-      })
-    ),
+    monitors: t.array(CertMonitorType),
     sha256: t.string,
   }),
   t.partial({
@@ -39,4 +41,11 @@ export const CertType = t.intersection([
   }),
 ]);
 
+export const CertResultType = t.type({
+  certs: t.array(CertType),
+  total: t.number,
+});
+
 export type Cert = t.TypeOf<typeof CertType>;
+export type CertMonitor = t.TypeOf<typeof CertMonitorType>;
+export type CertResult = t.TypeOf<typeof CertResultType>;

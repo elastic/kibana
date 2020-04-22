@@ -4,25 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import styled from 'styled-components';
+import * as labels from './translations';
 
 const WrapFieldSearch = styled(EuiFieldSearch)`
   min-width: 700px;
 `;
+interface Props {
+  setSearch: (val: string) => void;
+}
 
-export const CertificateSearch: React.FC = ({ setSearch }) => {
-  const onChange = e => {
+export const CertificateSearch: React.FC<Props> = ({ setSearch }) => {
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
 
   return (
     <WrapFieldSearch
-      placeholder="Search certificates"
+      placeholder={labels.SEARCH_CERTS}
       onChange={onChange}
       isClearable={true}
-      aria-label="Use aria labels when no actual label is in use"
+      aria-label={labels.SEARCH_CERTS}
     />
   );
 };

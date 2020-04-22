@@ -4,60 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-
-import {
-  EuiBasicTable,
-  EuiButton,
-  EuiCopy,
-  EuiIcon,
-  EuiIconTip,
-  EuiLink,
-  EuiToolTip,
-} from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
 import moment from 'moment';
-import {
-  certificatesSelector,
-  getCertificatesActions,
-} from '../../state/certificates/certificates';
+import { useSelector } from 'react-redux';
+import { Direction, EuiBasicTable, EuiCopy, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { certificatesSelector } from '../../state/certificates/certificates';
 import { CertStatus } from './cert_status';
 import { CertMonitors } from './cert_monitors';
+import * as labels from './translations';
+import { Cert, CertMonitor } from '../../../common/runtime_types';
+
+interface Page {
+  index: number;
+  size: number;
+}
+
+export type CertFields =
+  | 'sha256'
+  | 'sha1'
+  | 'issuer'
+  | 'common_name'
+  | 'monitors'
+  | 'certificate_not_valid_after'
+  | 'certificate_not_valid_before';
+
+export interface CertSort {
+  field: CertFields;
+  direction: Direction;
+}
+
+interface Props {
+  page: Page;
+  sort: CertSort;
+  onChange: (page: Page, sort: CertSort) => void;
+}
 
 const columns = [
   {
     field: 'tls.certificate_not_valid_after',
-    name: 'Status',
+    name: labels.STATUS_COL,
     sortable: true,
-    render: (val, item) => {
+    render: (val: string, item: Cert) => {
       return <CertStatus cert={item} />;
     },
   },
   {
-    name: 'Common Name',
+    name: labels.COMMON_NAME_COL,
     field: 'common_name',
   },
   {
-    name: 'Monitors',
+    name: labels.MONITORS_COL,
     field: 'monitors',
-    render: monitors => <CertMonitors monitors={monitors} />,
+    render: (monitors: CertMonitor[]) => <CertMonitors monitors={monitors} />,
   },
   {
-    name: 'Issued By',
+    name: labels.ISSUED_BY_COL,
     field: 'issuer',
   },
   {
-    name: 'Expiration Date',
+    name: labels.EXP_DATE_COL,
     field: 'certificate_not_valid_after',
     sortable: true,
-    align: 'center',
     render: (value: string) => {
       return moment(value).format('L LT');
     },
   },
   {
     name: (
-      <EuiToolTip content="Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the client.">
+      <EuiToolTip
+        content="Certificate fingerprint using the SHA256 digest of DER-encoded version
+      of certificate offered by the client."
+      >
         <span>
           SHA256
           <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -67,12 +84,12 @@ const columns = [
     width: '100px',
     actions: [
       {
-        render: item => {
+        render: (item: Cert) => {
           return (
             <EuiCopy textToCopy={item.sha256?.toUpperCase()}>
               {copy => (
                 <EuiLink onClick={copy}>
-                  <EuiIcon type="copy" content="Click to Copy SHA 256 Value" position="bottom" />
+                  <EuiIcon type="copy" title="Click to Copy SHA 256 Value" />
                 </EuiLink>
               )}
             </EuiCopy>
@@ -83,12 +100,11 @@ const columns = [
   },
 ];
 
-export const CertificateList = ({ page, sort, setPage, setSort }) => {
+export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
   const certificates = useSelector(certificatesSelector);
 
-  const onTableChange = newVal => {
-    setPage(newVal.page);
-    setSort(newVal.sort);
+  const onTableChange = (newVal: Partial<Props>) => {
+    onChange(newVal.page as Page, newVal.sort as CertSort);
   };
 
   const pagination = {
@@ -106,7 +122,10 @@ export const CertificateList = ({ page, sort, setPage, setSort }) => {
       pagination={pagination}
       onChange={onTableChange}
       sorting={{
-        sort,
+        sort: {
+          field: sort.field,
+          direction: sort.direction,
+        },
       }}
     />
   );

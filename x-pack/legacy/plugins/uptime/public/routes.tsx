@@ -35,7 +35,7 @@ export const PageRouter: FC<RouterProps> = ({ autocomplete }) => (
     </Route>
     <Route path={CERTIFICATES_ROUTE}>
       <div data-test-subj="uptimeCertificatesPage">
-        <CertificatesPage autocomplete={autocomplete} />
+        <CertificatesPage />
       </div>
     </Route>
     <Route path={OVERVIEW_ROUTE}>

@@ -86,12 +86,20 @@ describe('getCerts', () => {
   it('parses query result and returns expected values', async () => {
     const result = await getCerts({
       callES: mockCallES,
-      dynamicSettings: { heartbeatIndices: 'heartbeat*' },
+      dynamicSettings: {
+        heartbeatIndices: 'heartbeat*',
+        certificatesThresholds: {
+          errorState: 7,
+          warningState: 30,
+        },
+      },
       index: 1,
       from: 'now-2d',
       to: 'now+1h',
       search: 'my_common_name',
       size: 30,
+      sortBy: 'tls.certificate_not_valid_after',
+      direction: 'desc',
     });
     expect(result).toMatchInlineSnapshot(`
       Array [

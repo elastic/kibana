@@ -6,7 +6,8 @@
 
 import { API_URLS } from '../../../common/constants';
 import { apiService } from './utils';
+import { GetCertsParams } from '../../../common/runtime_types';
 
-export const fetchCertificates = async params => {
+export const fetchCertificates = async (params: GetCertsParams) => {
   return await apiService.get(API_URLS.CERTS, params);
 };

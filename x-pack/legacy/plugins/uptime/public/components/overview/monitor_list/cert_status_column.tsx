@@ -6,9 +6,10 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiHealth, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiText } from '@elastic/eui';
 import { Cert } from '../../../../common/runtime_types';
 import { CERT_STATUS, useCertStatus } from '../../../hooks';
+import { EXPIRED, EXPIRES_SOON, OK } from '../../certificates/translations';
 
 interface Props {
   cert: Cert;
@@ -30,7 +31,7 @@ export const CertStatusColumn: React.FC<Props> = ({ cert }) => {
     return (
       <EuiText size="s">
         <EuiIcon color="#E9AA3C" type="lock" size="s" />
-        <Span>Expires Soon</Span>
+        <Span>{EXPIRES_SOON}</Span>
       </EuiText>
     );
   }
@@ -38,7 +39,7 @@ export const CertStatusColumn: React.FC<Props> = ({ cert }) => {
     return (
       <EuiText size="s">
         <EuiIcon color="danger" type="lock" size="s" />
-        <Span>Expired</Span>
+        <Span>{EXPIRED}</Span>
       </EuiText>
     );
   }
@@ -46,9 +47,9 @@ export const CertStatusColumn: React.FC<Props> = ({ cert }) => {
   return certStatus ? (
     <EuiText size="s">
       <EuiIcon color="success" type="lock" size="s" />
-      <Span>OK</Span>
+      <Span>{OK}</Span>
     </EuiText>
   ) : (
-    '-'
+    <span>-</span>
   );
 };
