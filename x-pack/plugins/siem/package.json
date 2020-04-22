@@ -15,6 +15,7 @@
     "@types/lodash": "^4.14.110"
   },
   "dependencies": {
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "react-markdown": "^4.0.6"
   }
 }
