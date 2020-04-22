@@ -102,7 +102,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
