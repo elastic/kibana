@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
 import { getPaginationParams } from './utils/pagination';
 import { RelatedEventsQuery } from './queries/related_events';
-import { endpointAppContextServices } from '../../endpoint_app_context_services';
+import { EndpointAppContext } from '../../types';
 
 interface RelatedEventsQueryParams {
   after?: string;
@@ -43,7 +43,8 @@ export const validateRelatedEvents = {
 };
 
 export function handleRelatedEvents(
-  log: Logger
+  log: Logger,
+  endpointAppContext: EndpointAppContext
 ): RequestHandler<RelatedEventsPathParams, RelatedEventsQueryParams> {
   return async (context, req, res) => {
     const {
@@ -51,7 +52,7 @@ export function handleRelatedEvents(
       query: { limit, after, legacyEndpointID },
     } = req;
     try {
-      const indexRetriever = endpointAppContextServices.getIndexPatternRetriever();
+      const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
       const pagination = getPaginationParams(limit, after);
 
       const client = context.core.elasticsearch.dataClient;

@@ -8,7 +8,6 @@ import { EndpointAppContext } from '../../../types';
 import { searchESForAlerts } from '../lib';
 import { getRequestData, mapToAlertResultList } from './lib';
 import { AlertingIndexGetQueryResult } from '../../../../common/types';
-import { endpointAppContextServices } from '../../../endpoint_app_context_services';
 
 export const alertListHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
@@ -19,7 +18,7 @@ export const alertListHandlerWrapper = function(
     res
   ) => {
     try {
-      const indexPattern = await endpointAppContextServices
+      const indexPattern = await endpointAppContext.service
         .getIndexPatternRetriever()
         .getEventIndexPattern(ctx);
       const reqData = await getRequestData(req, endpointAppContext);

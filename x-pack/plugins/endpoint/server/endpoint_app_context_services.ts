@@ -10,7 +10,7 @@ import { AgentService } from '../../ingest_manager/common/types';
  * A singleton that holds shared services that are initialized during the start up phase
  * of the plugin lifecycle. And stop during the stop phase, if needed.
  */
-class EndpointAppContextService {
+export class EndpointAppContextService {
   private indexPatternRetriever: IndexPatternRetriever | undefined;
   private agentService: AgentService | undefined;
 
@@ -38,5 +38,3 @@ class EndpointAppContextService {
     return this.indexPatternRetriever;
   }
 }
-
-export const endpointAppContextServices = new EndpointAppContextService();

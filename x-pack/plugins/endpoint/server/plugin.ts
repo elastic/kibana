@@ -14,8 +14,8 @@ import { registerResolverRoutes } from './routes/resolver';
 import { registerIndexPatternRoute } from './routes/index_pattern';
 import { registerEndpointRoutes } from './routes/metadata';
 import { IngestIndexPatternRetriever } from './index_pattern';
-import { endpointAppContextServices } from './endpoint_app_context_services';
 import { IngestManagerStartupContract } from '../../ingest_manager/common/types';
+import { EndpointAppContextService } from './endpoint_app_context_services';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -36,9 +36,16 @@ export class EndpointPlugin
       EndpointPluginStartDependencies
     > {
   private readonly logger: Logger;
+  private readonly endpointAppContextService: EndpointAppContextService;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get('endpoint');
+    this.endpointAppContextService = new EndpointAppContextService();
   }
+
+  public getEndpointAppContextService(): EndpointAppContextService {
+    return this.endpointAppContextService;
+  }
+
   public setup(core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
     plugins.features.registerFeature({
       id: 'endpoint',
@@ -69,6 +76,7 @@ export class EndpointPlugin
     });
     const endpointContext = {
       logFactory: this.initializerContext.logger,
+      service: this.endpointAppContextService,
       config: (): Promise<EndpointConfigType> => {
         return createConfig$(this.initializerContext)
           .pipe(first())
@@ -84,7 +92,7 @@ export class EndpointPlugin
 
   public start(core: CoreStart, plugins: EndpointPluginStartDependencies) {
     this.logger.debug('Starting plugin');
-    endpointAppContextServices.start({
+    this.endpointAppContextService.start({
       indexPatternRetriever: new IngestIndexPatternRetriever(
         plugins.ingestManager.esIndexPatternService,
         this.initializerContext.logger
@@ -94,6 +102,6 @@ export class EndpointPlugin
   }
   public stop() {
     this.logger.debug('Stopping plugin');
-    endpointAppContextServices.stop();
+    this.endpointAppContextService.stop();
   }
 }

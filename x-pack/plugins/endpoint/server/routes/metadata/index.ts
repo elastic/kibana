@@ -12,7 +12,6 @@ import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from '
 import { HostInfo, HostMetadata, HostResultList, HostStatus } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
 import { AgentStatus } from '../../../../ingest_manager/common/types/models';
-import { endpointAppContextServices } from '../../endpoint_app_context_services';
 
 interface HitSource {
   _source: HostMetadata;
@@ -62,7 +61,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const index = await endpointAppContextServices
+        const index = await endpointAppContext.service
           .getIndexPatternRetriever()
           .getMetadataIndexPattern(context);
         const queryParams = await kibanaRequestToMetadataListESQuery(
@@ -118,7 +117,7 @@ export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string
 ): Promise<HostInfo | undefined> {
-  const index = await endpointAppContextServices
+  const index = await metadataRequestContext.endpointAppContext.service
     .getIndexPatternRetriever()
     .getMetadataIndexPattern(metadataRequestContext.requestHandlerContext);
   const query = getESQueryHostMetadataByID(id, index);
@@ -180,7 +179,7 @@ async function enrichHostMetadata(
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 
-    const status = await endpointAppContextServices
+    const status = await metadataRequestContext.endpointAppContext.service
       .getAgentService()
       .getAgentStatusById(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,

@@ -10,7 +10,6 @@ import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
 import { getHostData } from '../../metadata';
-import { endpointAppContextServices } from '../../../endpoint_app_context_services';
 
 export const alertDetailsHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
@@ -27,7 +26,7 @@ export const alertDetailsHandlerWrapper = function(
         id: alertId,
       })) as GetResponse<AlertEvent>;
 
-      const indexPattern = await endpointAppContextServices
+      const indexPattern = await endpointAppContext.service
         .getIndexPatternRetriever()
         .getEventIndexPattern(ctx);
 

@@ -12,7 +12,6 @@ import {
 import { coreMock } from '../../../../src/core/server/mocks';
 import { PluginSetupContract } from '../../features/server';
 import { createMockIngestManagerStartupContract } from './mocks';
-import { endpointAppContextServices } from './endpoint_app_context_services';
 
 describe('test endpoint plugin', () => {
   let plugin: EndpointPlugin;
@@ -46,6 +45,8 @@ describe('test endpoint plugin', () => {
     await plugin.setup(mockCoreSetup, mockedEndpointPluginSetupDependencies);
     expect(mockedPluginSetupContract.registerFeature).toBeCalledTimes(1);
     expect(mockCoreSetup.http.createRouter).toBeCalledTimes(1);
+    expect(() => plugin.getEndpointAppContextService().getIndexPatternRetriever()).toThrow(Error);
+    expect(() => plugin.getEndpointAppContextService().getAgentService()).toThrow(Error);
   });
 
   it('test properly start plugin', async () => {
@@ -53,7 +54,7 @@ describe('test endpoint plugin', () => {
       ingestManager: createMockIngestManagerStartupContract(''),
     };
     await plugin.start(mockCoreStart, mockedEndpointPluginStartDependencies);
-    expect(endpointAppContextServices.getAgentService()).toBeTruthy();
-    expect(endpointAppContextServices.getIndexPatternRetriever()).toBeTruthy();
+    expect(plugin.getEndpointAppContextService().getAgentService()).toBeTruthy();
+    expect(plugin.getEndpointAppContextService().getIndexPatternRetriever()).toBeTruthy();
   });
 });
