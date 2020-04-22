@@ -125,7 +125,8 @@ const handleCourierRequest = async ({
 
   // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
   // pattern if it's available.
-  const defaultTimeFields = indexPattern?.getTimeField() ? [indexPattern?.getTimeField()] : [];
+  const defaultTimeField = indexPattern?.getTimeField();
+  const defaultTimeFields = defaultTimeField ? [defaultTimeField.name] : [];
   const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
 
   // If a timeRange has been specified and we had at least one timeField available, create range
