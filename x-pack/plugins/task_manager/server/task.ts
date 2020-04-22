@@ -245,7 +245,7 @@ export interface TaskInstance {
   /**
    * The state passed into the task's run function, and returned by the previous
    * run. If there was no previous run, or if the previous run did not return
-   * unknown state, this will be the empy object: {}
+   * any state, this will be the empy object: {}
    */
   // we allow any here as unknown will break current use in otehr plugins
   // this can be fixed by supporting generics in the future
@@ -340,7 +340,7 @@ export interface ConcreteTaskInstance extends TaskInstance {
   /**
    * The state passed into the task's run function, and returned by the previous
    * run. If there was no previous run, or if the previous run did not return
-   * unknown state, this will be the empy object: {}
+   * any state, this will be the empy object: {}
    */
   // we allow any here as unknown will break current use in otehr plugins
   // this can be fixed by supporting generics in the future
