@@ -10,19 +10,15 @@ import {
   EuiOverlayMask,
   EuiModal,
   EuiModalBody,
-  EuiTitle,
   EuiText,
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { LogEntry } from '../../../../common/http_api';
 import { Source } from '../../../containers/source';
-import { useColumnWidths } from '../../../components/logging/log_text_stream/log_entry_column';
-import { LogEntryRow } from '../../../components/logging/log_text_stream/log_entry_row';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
 import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
@@ -35,10 +31,6 @@ export const PageViewLogInContext: React.FC = () => {
   const columnConfigurations = useMemo(() => (source && source.configuration.logColumns) || [], [
     source,
   ]);
-  const { columnWidths, CharacterDimensionsProbe } = useColumnWidths({
-    columnConfigurations,
-    scale: textScale,
-  });
   const [{ contextEntry, entries, isLoading }, { setContextEntry }] = useContext(
     ViewLogInContext.Context
   );
@@ -63,29 +55,12 @@ export const PageViewLogInContext: React.FC = () => {
     <EuiOverlayMask>
       <EuiModal onClose={closeModal} maxWidth={false}>
         <EuiModalBody style={{ width: vw - MODAL_MARGIN * 2, height: vh - MODAL_MARGIN * 2 }}>
-          <CharacterDimensionsProbe />
           <EuiFlexGroup
             direction="column"
             responsive={false}
             wrap={false}
             style={{ height: '100%' }}
           >
-            <EuiFlexItem grow={false}>
-              <EuiSpacer />
-              <EuiTitle size="xxxs">
-                <h2>Selected log message</h2>
-              </EuiTitle>
-              <LogEntryRow
-                columnConfigurations={columnConfigurations}
-                columnWidths={columnWidths}
-                logEntry={contextEntry}
-                highlights={[]}
-                isActiveHighlight={false}
-                isHighlighted={true}
-                scale={textScale}
-                wrap={false}
-              />
-            </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <LogEntryContext context={contextEntry.context} />
               <ScrollableLogTextStreamView
