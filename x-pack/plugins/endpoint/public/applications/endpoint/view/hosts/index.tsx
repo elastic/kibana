@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, memo } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import {
   EuiPage,
   EuiPageBody,
@@ -31,11 +30,26 @@ import { useHostListSelector } from './hooks';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
 import { HostMetadata, Immutable } from '../../../../../common/types';
+import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
+
+const HostLink = memo<{
+  name: string;
+  href: string;
+  route: ReturnType<typeof urlFromQueryParams>;
+}>(({ name, href, route }) => {
+  const clickHandler = useNavigateByRouterEventHandler(route);
+
+  return (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink data-test-subj="hostnameCellLink" href={href} onClick={clickHandler}>
+      {name}
+    </EuiLink>
+  );
+});
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const HostList = () => {
   const dispatch = useDispatch<(a: HostAction) => void>();
-  const history = useHistory();
   const {
     listData,
     pageIndex,
@@ -75,18 +89,9 @@ export const HostList = () => {
           defaultMessage: 'Hostname',
         }),
         render: ({ host: { hostname, id } }: { host: { hostname: string; id: string } }) => {
+          const newQueryParams = urlFromQueryParams({ ...queryParams, selected_host: id });
           return (
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiLink
-              data-test-subj="hostnameCellLink"
-              href={'?' + urlFromQueryParams({ ...queryParams, selected_host: id }).search}
-              onClick={(ev: React.MouseEvent) => {
-                ev.preventDefault();
-                history.push(urlFromQueryParams({ ...queryParams, selected_host: id }));
-              }}
-            >
-              {hostname}
-            </EuiLink>
+            <HostLink name={hostname} href={'?' + newQueryParams.search} route={newQueryParams} />
           );
         },
       },
@@ -150,7 +155,7 @@ export const HostList = () => {
         },
       },
     ];
-  }, [queryParams, history]);
+  }, [queryParams]);
 
   return (
     <HostPage>

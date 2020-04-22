@@ -13,26 +13,27 @@ import {
 } from '../../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../../lib/kibana';
 
-import { CASES_CONFIGURE_URL } from '../constants';
+import {
+  CASE_CONFIGURE_CONNECTORS_URL,
+  CASE_CONFIGURE_URL,
+} from '../../../../../../../plugins/case/common/constants';
+
 import { ApiProps } from '../types';
 import { convertToCamelCase, decodeCaseConfigureResponse } from '../utils';
 import { CaseConfigure } from './types';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<Connector[]> => {
-  const response = await KibanaServices.get().http.fetch(
-    `${CASES_CONFIGURE_URL}/connectors/_find`,
-    {
-      method: 'GET',
-      signal,
-    }
-  );
+  const response = await KibanaServices.get().http.fetch(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`, {
+    method: 'GET',
+    signal,
+  });
 
   return response;
 };
 
 export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfigure | null> => {
   const response = await KibanaServices.get().http.fetch<CasesConfigureResponse>(
-    CASES_CONFIGURE_URL,
+    CASE_CONFIGURE_URL,
     {
       method: 'GET',
       signal,
@@ -51,7 +52,7 @@ export const postCaseConfigure = async (
   signal: AbortSignal
 ): Promise<CaseConfigure> => {
   const response = await KibanaServices.get().http.fetch<CasesConfigureResponse>(
-    CASES_CONFIGURE_URL,
+    CASE_CONFIGURE_URL,
     {
       method: 'POST',
       body: JSON.stringify(caseConfiguration),
@@ -68,7 +69,7 @@ export const patchCaseConfigure = async (
   signal: AbortSignal
 ): Promise<CaseConfigure> => {
   const response = await KibanaServices.get().http.fetch<CasesConfigureResponse>(
-    CASES_CONFIGURE_URL,
+    CASE_CONFIGURE_URL,
     {
       method: 'PATCH',
       body: JSON.stringify(caseConfiguration),
