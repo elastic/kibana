@@ -7,18 +7,18 @@
 <b>Signature:</b>
 
 ```typescript
-find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+find<T = unknown, A = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, aggs, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, } | <code>SavedObjectsFindOptions</code> |  |
+|  { search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, aggs, } | <code>SavedObjectsFindOptions</code> |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsFindResponse<T>>`
+`Promise<SavedObjectsFindResponse<T, A>>`
 
 {<!-- -->promise<!-- -->} - { saved\_objects: \[{ id, type, version, attributes }<!-- -->\], total, per\_page, page }
 

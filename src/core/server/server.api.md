@@ -1784,7 +1784,7 @@ export class SavedObjectsClient {
     static errors: typeof SavedObjectsErrorHelpers;
     // (undocumented)
     errors: typeof SavedObjectsErrorHelpers;
-    find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    find<T = unknown, A = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
@@ -1957,6 +1957,8 @@ export type SavedObjectsFieldMapping = SavedObjectsCoreFieldMapping | SavedObjec
 // @public (undocumented)
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
+    aggs?: string;
+    // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // (undocumented)
@@ -1981,7 +1983,9 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
 }
 
 // @public
-export interface SavedObjectsFindResponse<T = unknown> {
+export interface SavedObjectsFindResponse<T = unknown, A = unknown> {
+    // (undocumented)
+    aggregations?: A;
     // (undocumented)
     page: number;
     // (undocumented)
@@ -2170,7 +2174,7 @@ export class SavedObjectsRepository {
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
     // (undocumented)
-    find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    find<T = unknown, A = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, aggs, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<{
         id: string;
