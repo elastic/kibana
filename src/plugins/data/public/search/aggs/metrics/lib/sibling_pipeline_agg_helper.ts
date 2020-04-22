@@ -74,7 +74,7 @@ export const siblingPipelineAggHelper = {
         type: 'agg',
         allowedAggs: metricAggFilter,
         default: null,
-        makeAgg(agg: IMetricAggConfig, state: { type: 'count' }) {
+        makeAgg(agg: IMetricAggConfig, state = { type: 'count' }) {
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-metric';
           return orderAgg;
