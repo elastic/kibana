@@ -161,7 +161,7 @@ export const HostList = () => {
       <EuiText color="subdued" size="xs">
         <FormattedMessage
           id="xpack.endpoint.host.list.totalCount"
-          defaultMessage="Showing: {totalItemCount, plural, one {# Host} other {# Hosts}}"
+          defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
           values={{ totalItemCount }}
         />
       </EuiText>
