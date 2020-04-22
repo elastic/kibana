@@ -8,9 +8,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiSelect, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { uiModules } from '../../np_imports/angular/helpers/modules';
 import template from './index.html';
-import { Legacy } from '../../np_imports/legacy';
+import { Legacy } from '../../np_ready/legacy';
 import { shortenPipelineHash } from '../../../common/formatting';
 import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 import { Subscription } from 'rxjs';
@@ -198,8 +197,7 @@ export class MonitoringMainController {
   }
 }
 
-const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) => {
+export function monitoringMainProvider(breadcrumbs, license, kbnUrl, $injector) {
   const $executor = $injector.get('$executor');
 
   return {
@@ -210,7 +208,6 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
-      
       scope.$applyAsync(() => {
         controller.addTimerangeObservers();
         const setupObj = getSetupObj();
@@ -265,4 +262,4 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
       });
     },
   };
-});
+}

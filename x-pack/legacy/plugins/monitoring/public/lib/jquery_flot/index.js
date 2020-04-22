@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * Last remaining 'ui/*' imports that will eventually be shimmed with their np alternatives
- */
-
-export { npSetup, npStart } from 'ui/new_platform';
+export { default } from './jquery_flot';

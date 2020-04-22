@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../../np_ready/angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';

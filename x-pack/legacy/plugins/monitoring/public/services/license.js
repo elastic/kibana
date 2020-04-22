@@ -5,11 +5,9 @@
  */
 
 import { contains } from 'lodash';
-import { uiModules } from '../np_imports/angular/helpers/modules';
 import { ML_SUPPORTED_LICENSES } from '../../common/constants';
 
-const uiModule = uiModules.get('monitoring/license', []);
-uiModule.service('license', () => {
+export function licenseProvider() {
   return new (class LicenseService {
     constructor() {
       // do not initialize with usable state
@@ -50,4 +48,4 @@ uiModule.service('license', () => {
       return false;
     }
   })();
-});
+}

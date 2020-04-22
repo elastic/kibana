@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiText, EuiTitle, EuiLink, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
+import { EuiMonitoringTable } from '../../table';
 import { RecoveryIndex } from './recovery_index';
 import { TotalTime } from './total_time';
 import { SourceDestination } from './source_destination';

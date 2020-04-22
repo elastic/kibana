@@ -7,12 +7,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
-import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import { isPipelineMonitoringSupportedInVersion } from 'plugins/monitoring/lib/logstash/pipelines';
+import { uiRoutes } from '../../../np_ready/angular/helpers/routes';
+import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
+import { routeInitProvider } from '../../../lib/route_init';
+import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pipelines';
 import template from './index.html';
-import { Legacy } from '../../../np_imports/legacy';
+import { Legacy } from '../../../np_ready/legacy';
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { MonitoringViewBaseEuiTableController } from '../..';
 import { CODE_PATH_LOGSTASH } from '../../../../common/constants';

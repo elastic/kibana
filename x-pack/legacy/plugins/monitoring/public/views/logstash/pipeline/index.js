@@ -8,19 +8,19 @@
  * Logstash Node Pipeline View
  */
 import React from 'react';
-import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
+import { uiRoutes } from '../../../np_ready/angular/helpers/routes';
 import moment from 'moment';
-import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
+import { routeInitProvider } from '../../../lib/route_init';
 import { CALCULATE_DURATION_SINCE, CODE_PATH_LOGSTASH } from '../../../../common/constants';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import template from './index.html';
 import { i18n } from '@kbn/i18n';
-import { List } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/list';
-import { PipelineState } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline_state';
-import { PipelineViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer';
-import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline';
-import { vertexFactory } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/graph/vertex_factory';
+import { List } from '../../../components/logstash/pipeline_viewer/models/list';
+import { PipelineState } from '../../../components/logstash/pipeline_viewer/models/pipeline_state';
+import { PipelineViewer } from '../../../components/logstash/pipeline_viewer';
+import { Pipeline } from '../../../components/logstash/pipeline_viewer/models/pipeline';
+import { vertexFactory } from '../../../components/logstash/pipeline_viewer/models/graph/vertex_factory';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { EuiPageBody, EuiPage, EuiPageContent } from '@elastic/eui';
 

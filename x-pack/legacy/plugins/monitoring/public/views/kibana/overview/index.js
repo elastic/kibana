@@ -8,12 +8,12 @@
  * Kibana Overview
  */
 import React from 'react';
-import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
+import { uiRoutes } from '../../../np_ready/angular/helpers/routes';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
-import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
+import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
-import { Legacy } from '../../../np_imports/legacy';
+import { Legacy } from '../../../np_ready/legacy';
 import {
   EuiPage,
   EuiPageBody,

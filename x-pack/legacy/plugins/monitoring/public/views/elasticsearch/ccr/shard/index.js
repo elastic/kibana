@@ -7,9 +7,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { uiRoutes } from '../../../../np_imports/angular/helpers/routes';
+import { uiRoutes } from '../../../../np_ready/angular/helpers/routes';
 import { getPageData } from './get_page_data';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { routeInitProvider } from '../../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../../base_controller';
 import { CcrShard } from '../../../../components/elasticsearch/ccr_shard';

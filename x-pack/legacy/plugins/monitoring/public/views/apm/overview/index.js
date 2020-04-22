@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { find } from 'lodash';
-import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../../np_ready/angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmOverview } from '../../../components/apm/overview';

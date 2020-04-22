@@ -10,8 +10,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { partial } from 'lodash';
-import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../../np_ready/angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import { getPageData } from './get_page_data';
 import template from './index.html';
 import { Node } from '../../../components/elasticsearch/node/node';

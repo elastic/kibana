@@ -9,12 +9,12 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
-import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../../np_ready/angular/helpers/routes';
+import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
+import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
-import { Legacy } from '../../../np_imports/legacy';
-import { DetailStatus } from 'plugins/monitoring/components/logstash/detail_status';
+import { Legacy } from '../../../np_ready/legacy';
+import { DetailStatus } from '../../../components/logstash/detail_status';
 import {
   EuiPage,
   EuiPageBody,

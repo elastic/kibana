@@ -8,14 +8,14 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Logs } from './logs';
 
-jest.mock('../../np_imports/ui/chrome', () => {
+jest.mock('../../np_ready/ui/chrome', () => {
   return {
     getBasePath: () => '',
   };
 });
 
 jest.mock(
-  '../../np_imports/ui/capabilities',
+  '../../np_ready/ui/capabilities',
   () => ({
     capabilities: {
       get: () => ({ logs: { show: true } }),

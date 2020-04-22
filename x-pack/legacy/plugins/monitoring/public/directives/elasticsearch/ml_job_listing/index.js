@@ -8,9 +8,8 @@ import { capitalize } from 'lodash';
 import numeral from '@elastic/numeral';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { uiModules } from '../../../np_imports/angular/helpers/modules';
-import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
-import { MachineLearningJobStatusIcon } from 'plugins/monitoring/components/elasticsearch/ml_job_listing/status_icon';
+import { EuiMonitoringTable } from '../../../components/table';
+import { MachineLearningJobStatusIcon } from '../../../components/elasticsearch/ml_job_listing/status_icon';
 import { LARGE_ABBREVIATED, LARGE_BYTES } from '../../../../common/formatting';
 import { EuiLink, EuiPage, EuiPageContent, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { ClusterStatus } from '../../../components/elasticsearch/cluster_status';
@@ -92,8 +91,8 @@ const getColumns = (kbnUrl, scope) => [
   },
 ];
 
-const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringMlListing', kbnUrl => {
+//monitoringMlListing
+export function monitoringMlListingProvider(kbnUrl) {
   return {
     restrict: 'E',
     scope: {
@@ -161,4 +160,4 @@ uiModule.directive('monitoringMlListing', kbnUrl => {
       });
     },
   };
-});
+}

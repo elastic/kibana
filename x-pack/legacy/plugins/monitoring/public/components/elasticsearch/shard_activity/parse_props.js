@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from '../../../np_imports/legacy';
+import { Legacy } from '../../../np_ready/legacy';
 import { capitalize } from 'lodash';
-import { formatMetric } from 'plugins/monitoring/lib/format_number';
+import { formatMetric } from '../../../lib/format_number';
 import { formatDateTimeLocal } from '../../../../common/formatting';
 
 const getIpAndPort = transport => {

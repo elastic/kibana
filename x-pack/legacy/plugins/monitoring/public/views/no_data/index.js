@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiRoutes } from '../../np_imports/angular/helpers/routes';
+import { uiRoutes } from '../../np_ready/angular/helpers/routes';
 import template from './index.html';
 import { NoDataController } from './controller';
 

@@ -5,7 +5,7 @@
  */
 
 import { MonitoringViewBaseController } from './';
-import { euiTableStorageGetter, euiTableStorageSetter } from 'plugins/monitoring/components/table';
+import { euiTableStorageGetter, euiTableStorageSetter } from '../components/table';
 import { EUI_SORT_ASCENDING } from '../../common/constants';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];

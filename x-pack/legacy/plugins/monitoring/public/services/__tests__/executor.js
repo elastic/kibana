@@ -7,9 +7,9 @@
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { executorProvider } from '../executor_provider';
+import { executorProvider } from '../executor';
 import Bluebird from 'bluebird';
-import { Legacy } from '../np_imports/legacy';
+import { Legacy } from '../np_ready/legacy';
 
 describe('$executor service', () => {
   let scope;

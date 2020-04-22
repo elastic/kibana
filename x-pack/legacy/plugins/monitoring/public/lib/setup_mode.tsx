@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { get, contains } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Legacy } from '../np_imports/legacy';
+import { Legacy } from '../np_ready/legacy';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
 
@@ -180,7 +180,7 @@ export const setSetupModeMenuItem = () => {
   );
 };
 
-export const addSetupModeCallback = (callback: () => void) => setupModeState.callback = callback;
+export const addSetupModeCallback = (callback: () => void) => (setupModeState.callback = callback);
 
 export const initSetupModeState = async ($scope: any, $injector: any, callback?: () => void) => {
   angularState.scope = $scope;

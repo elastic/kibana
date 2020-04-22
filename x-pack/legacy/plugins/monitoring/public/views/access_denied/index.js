@@ -5,8 +5,8 @@
  */
 
 import { noop } from 'lodash';
-import { uiRoutes } from '../../np_imports/angular/helpers/routes';
-import { Legacy } from '../../np_imports/legacy';
+import { uiRoutes } from '../../np_ready/angular/helpers/routes';
+import { Legacy } from '../../np_ready/legacy';
 import template from './index.html';
 
 const tryPrivilege = ($http, kbnUrl) => {

@@ -7,27 +7,37 @@
 import angular, { IModule } from 'angular';
 import { uiRoutes } from './helpers/routes';
 import { Legacy } from '../legacy';
-import { uiModules } from './helpers/modules';
 import { configureAppAngularModule } from '../../../../../../../src/plugins/kibana_legacy/public';
 import { localAppModule, appModuleName } from './app_modules';
+
+import { MonitoringPluginDependencies } from '../types';
 
 const SAFARI_FIX = 'kbnLocalApplicationWrapper';
 export class AngularApp {
   private injector?: angular.auto.IInjectorService;
 
-  constructor({ core, element, data: { query }, navigation, isCloud, pluginInitializerContext }: any) { // TODO: add types
-    //uiModules.implement();
-    const app: IModule = localAppModule(core, query, navigation);
+  constructor(deps: MonitoringPluginDependencies) {
+    const {
+      core,
+      element,
+      data,
+      navigation,
+      isCloud,
+      pluginInitializerContext,
+      externalConfig,
+    } = deps;
+    const app: IModule = localAppModule(deps);
     app.run(($injector: angular.auto.IInjectorService) => {
-      this.injector = $injector
-      Legacy.init(core, query.timefilter.timefilter, this.injector, isCloud);
+      this.injector = $injector;
+      Legacy.init(
+        { core, element, data, navigation, isCloud, pluginInitializerContext, externalConfig },
+        this.injector
+      );
     });
 
     app.config(($routeProvider: unknown) => uiRoutes.addToProvider($routeProvider));
 
-    console.log('...CORE:', core)
-
-    const np = { core, env: pluginInitializerContext.env }
+    const np = { core, env: pluginInitializerContext.env };
     configureAppAngularModule(app, np, true);
     const appElement = document.createElement('div');
     appElement.setAttribute('style', 'height: 100%');
@@ -35,7 +45,7 @@ export class AngularApp {
     appElement.innerHTML = `<div ng-view style="height: 100%" id="monitoring-angular-app" class="${SAFARI_FIX}"></div>`;
 
     if (!element.classList.contains(SAFARI_FIX)) {
-      element.classList.add(SAFARI_FIX)
+      element.classList.add(SAFARI_FIX);
     }
 
     angular.bootstrap(appElement, [appModuleName]);

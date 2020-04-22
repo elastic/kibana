@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { Subscription } from 'rxjs';
 import { History } from 'history';
+import { createHashHistory } from 'history';
 import { QueryStart, TimefilterSetup } from '../../../../../../src/plugins/data/public/query';
 
 import {
   RefreshInterval,
   TimeRange,
-  syncQueryStateWithUrl
+  syncQueryStateWithUrl,
 } from '../../../../../../src/plugins/data/public';
 
 import {
@@ -25,40 +25,42 @@ import {
   syncState,
 } from '../../../../../../src/plugins/kibana_utils/public';
 
-import { createHashHistory } from 'history';
-
-type ngRoute = {
-  params: { _g: unknown }
+interface ngRoute {
+  params: { _g: unknown };
 }
 
-type RawObject = { [key: string]: unknown }
+interface RawObject {
+  [key: string]: unknown;
+}
 
 export interface MonitoringAppState {
-  [key: string]: unknown
-  cluster_uuid?: string
-  ccs?: boolean
-  inSetupMode?: boolean
-  refreshInterval?: RefreshInterval
-  time?: TimeRange
-  filters?: any[]
+  [key: string]: unknown;
+  cluster_uuid?: string;
+  ccs?: boolean;
+  inSetupMode?: boolean;
+  refreshInterval?: RefreshInterval;
+  time?: TimeRange;
+  filters?: any[];
 }
 
 export interface MonitoringAppStateTransitions {
   set: (
     state: MonitoringAppState
   ) => <T extends keyof MonitoringAppState>(
-      prop: T,
-      value: MonitoringAppState[T]
-    ) => MonitoringAppState;
+    prop: T,
+    value: MonitoringAppState[T]
+  ) => MonitoringAppState;
 }
 
 const GLOBAL_STATE_KEY = '_g';
-const objectEquals = (objA: any, objB: any) => (JSON.stringify(objA) === JSON.stringify(objB));
+const objectEquals = (objA: any, objB: any) => JSON.stringify(objA) === JSON.stringify(objB);
 
 export class GlobalState {
-
   private readonly stateSyncRef: ISyncStateRef;
-  private readonly stateContainer: StateContainer<MonitoringAppState, MonitoringAppStateTransitions>;
+  private readonly stateContainer: StateContainer<
+    MonitoringAppState,
+    MonitoringAppStateTransitions
+  >;
   private readonly stateStorage: IKbnUrlStateStorage;
   private readonly stateContainerChangeSub: Subscription;
   private readonly syncQueryStateWithUrlManager: { stop: () => void };
@@ -67,7 +69,12 @@ export class GlobalState {
   private lastAssignedState: MonitoringAppState = {};
   private lastKnownGlobalState?: string;
 
-  constructor(queryService: QueryStart, rootScope: ng.IRootScopeService, ngLocation: ng.ILocationService, externalState: RawObject) {
+  constructor(
+    queryService: QueryStart,
+    rootScope: ng.IRootScopeService,
+    ngLocation: ng.ILocationService,
+    externalState: RawObject
+  ) {
     this.timefilterRef = queryService.timefilter.timefilter;
 
     const history: History = createHashHistory();
@@ -76,7 +83,7 @@ export class GlobalState {
     const initialStateFromUrl = this.stateStorage.get(GLOBAL_STATE_KEY) as MonitoringAppState;
 
     this.stateContainer = createStateContainer(initialStateFromUrl, {
-      set: (state) => (prop, value) => ({ ...state, [prop]: value })
+      set: state => (prop, value) => ({ ...state, [prop]: value }),
     });
 
     this.stateSyncRef = syncState({
@@ -88,7 +95,9 @@ export class GlobalState {
     this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
       this.lastAssignedState = this.getState();
       if (!this.stateContainer.get() && this.lastKnownGlobalState) {
-        rootScope.$applyAsync(() => ngLocation.search(`${GLOBAL_STATE_KEY}=${this.lastKnownGlobalState}`).replace());
+        rootScope.$applyAsync(() =>
+          ngLocation.search(`${GLOBAL_STATE_KEY}=${this.lastKnownGlobalState}`).replace()
+        );
       }
       this.syncExternalState(externalState);
     });
@@ -104,7 +113,9 @@ export class GlobalState {
   private syncExternalState(externalState: { [key: string]: unknown }) {
     const currentState = this.stateContainer.get();
     for (const key in currentState) {
-      if (({ save: 1, time: 1, refreshInterval: 1, filters: 1 } as { [key: string]: number })[key]) {
+      if (
+        ({ save: 1, time: 1, refreshInterval: 1, filters: 1 } as { [key: string]: number })[key]
+      ) {
         continue;
       }
       if (currentState[key] !== externalState[key]) {
@@ -114,15 +125,18 @@ export class GlobalState {
   }
 
   private startHashSync(rootScope: ng.IRootScopeService, ngLocation: ng.ILocationService) {
-    rootScope.$on('$routeChangeStart', (_: { preventDefault: () => void }, newState: ngRoute, oldState: ngRoute) => {
-      const currentGlobalState = oldState?.params?._g;
-      const nextGlobalState = newState?.params?._g;
-      if (!nextGlobalState && currentGlobalState && typeof currentGlobalState === 'string') {
-        newState.params._g = currentGlobalState;
-        ngLocation.search(`${GLOBAL_STATE_KEY}=${currentGlobalState}`).replace();
+    rootScope.$on(
+      '$routeChangeStart',
+      (_: { preventDefault: () => void }, newState: ngRoute, oldState: ngRoute) => {
+        const currentGlobalState = oldState?.params?._g;
+        const nextGlobalState = newState?.params?._g;
+        if (!nextGlobalState && currentGlobalState && typeof currentGlobalState === 'string') {
+          newState.params._g = currentGlobalState;
+          ngLocation.search(`${GLOBAL_STATE_KEY}=${currentGlobalState}`).replace();
+        }
+        this.lastKnownGlobalState = (nextGlobalState || currentGlobalState) as string;
       }
-      this.lastKnownGlobalState = (nextGlobalState || currentGlobalState) as string;
-    });
+    );
   }
 
   public setState(state?: { [key: string]: unknown }) {
@@ -131,7 +145,11 @@ export class GlobalState {
     if (state && objectEquals(newAppState, currentAppState)) {
       return;
     }
-    const newState = { ...newAppState, refreshInterval: this.timefilterRef.getRefreshInterval(), time: this.timefilterRef.getTime() };
+    const newState = {
+      ...newAppState,
+      refreshInterval: this.timefilterRef.getRefreshInterval(),
+      time: this.timefilterRef.getTime(),
+    };
     this.lastAssignedState = newState;
     this.stateContainer.set(newState);
   }
@@ -148,5 +166,4 @@ export class GlobalState {
     this.stateContainerChangeSub && this.stateContainerChangeSub.unsubscribe();
     this.stateSyncRef && this.stateSyncRef.stop();
   }
-
 }

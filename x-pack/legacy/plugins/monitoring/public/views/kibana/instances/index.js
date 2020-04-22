@@ -5,12 +5,12 @@
  */
 
 import React, { Fragment } from 'react';
-import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../../np_ready/angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import { KibanaInstances } from 'plugins/monitoring/components/kibana/instances';
+import { KibanaInstances } from '../../../components/kibana/instances';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { KIBANA_SYSTEM_ID, CODE_PATH_KIBANA } from '../../../../common/constants';
 

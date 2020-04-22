@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
+import { mapSeverity } from '../../alerts/map_severity';
 import { EuiHealth, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';

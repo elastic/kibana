@@ -14,9 +14,9 @@ import {
   EuiLink,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { Stats } from 'plugins/monitoring/components/beats';
-import { formatMetric } from 'plugins/monitoring/lib/format_number';
-import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
+import { Stats } from '../../beats';
+import { formatMetric } from '../../../lib/format_number';
+import { EuiMonitoringTable } from '../../table';
 import { i18n } from '@kbn/i18n';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';

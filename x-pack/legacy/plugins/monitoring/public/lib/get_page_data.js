@@ -5,7 +5,7 @@
  */
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
-import { Legacy } from '../np_imports/legacy';
+import { Legacy } from '../np_ready/legacy';
 
 export function getPageData($injector, api) {
   const $http = $injector.get('$http');

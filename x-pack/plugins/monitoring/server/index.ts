@@ -14,4 +14,9 @@ export const plugin = (initContext: PluginInitializerContext) => new Plugin(init
 export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   schema: configSchema,
   deprecations,
+  exposeToBrowser: {
+    enabled: true,
+    ui: true,
+    kibana: true,
+  },
 };

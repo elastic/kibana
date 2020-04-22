@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { breadcrumbsProvider } from '../breadcrumbs_provider';
-import { MonitoringMainController } from 'plugins/monitoring/directives/main';
+import { breadcrumbsProvider } from '../breadcrumbs';
+import { MonitoringMainController } from '../../directives/main';
 
 describe('Monitoring Breadcrumbs Service', () => {
   it('in Cluster Alerts', () => {

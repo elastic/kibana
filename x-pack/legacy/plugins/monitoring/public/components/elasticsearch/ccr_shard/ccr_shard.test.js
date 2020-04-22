@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { CcrShard } from './ccr_shard';
 
-jest.mock('../../../np_imports/ui/chrome', () => {
+jest.mock('../../../np_ready/ui/chrome', () => {
   return {
     getBasePath: () => '',
     dangerouslyGetActiveInjector: () => ({ get: () => ({ get: () => 'utc' }) }),

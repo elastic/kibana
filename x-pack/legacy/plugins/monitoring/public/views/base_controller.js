@@ -8,8 +8,8 @@ import React from 'react';
 import moment from 'moment';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { getPageData } from '../lib/get_page_data';
-import { PageLoading } from 'plugins/monitoring/components';
-import { Legacy } from '../np_imports/legacy';
+import { PageLoading } from '../components';
+import { Legacy } from '../np_ready/legacy';
 import { PromiseWithCancel } from '../../common/cancel_promise';
 import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
 
@@ -112,7 +112,6 @@ export class MonitoringViewBaseController {
 
     const { enableTimeFilter = true, enableAutoRefresh = true } = options;
 
-
     this.updateData = () => {
       if (this.updateDataPromise) {
         // Do not sent another request if one is inflight
@@ -182,9 +181,10 @@ export class MonitoringViewBaseController {
     $scope.$on('$destroy', () => {
       clearTimeout(deferTimer);
       removePopstateHandler();
-      if (this.reactNodeId) {
+      const targetElement = document.getElementById(this.reactNodeId);
+      if (targetElement) {
         // WIP https://github.com/elastic/x-pack-kibana/issues/5198
-        unmountComponentAtNode(document.getElementById(this.reactNodeId));
+        unmountComponentAtNode(targetElement);
       }
       $executor.destroy();
     });

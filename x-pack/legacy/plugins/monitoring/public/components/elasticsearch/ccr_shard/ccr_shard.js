@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
-import { Legacy } from '../../../np_imports/legacy';
+import { Legacy } from '../../../np_ready/legacy';
 import {
   EuiPage,
   EuiPageBody,

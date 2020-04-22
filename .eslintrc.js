@@ -843,6 +843,12 @@ module.exports = {
         jquery: true,
       },
     },
+    {
+      files: ['x-pack/legacy/plugins/monitoring/public/lib/jquery_flot/**/*.js'],
+      env: {
+        jquery: true,
+      },
+    },
 
     /**
      * TSVB overrides

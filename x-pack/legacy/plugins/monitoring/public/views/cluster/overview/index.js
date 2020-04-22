@@ -5,13 +5,13 @@
  */
 import React, { Fragment } from 'react';
 import { isEmpty } from 'lodash';
-import { Legacy } from '../../../np_imports/legacy';
+import { Legacy } from '../../../np_ready/legacy';
 import { i18n } from '@kbn/i18n';
-import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../../np_ready/angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../';
-import { Overview } from 'plugins/monitoring/components/cluster/overview';
+import { Overview } from '../../../components/cluster/overview';
 import { SetupModeRenderer } from '../../../components/renderers';
 import {
   CODE_PATH_ALL,

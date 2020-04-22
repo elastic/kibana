@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { get, capitalize } from 'lodash';
-import { formatNumber } from 'plugins/monitoring/lib/format_number';
+import { formatNumber } from '../../../lib/format_number';
 import {
   ClusterItemContainer,
   HealthStatusIndicator,

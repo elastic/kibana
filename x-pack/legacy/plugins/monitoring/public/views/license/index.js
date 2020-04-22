@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiRoutes } from '../../np_imports/angular/helpers/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../np_ready/angular/helpers/routes';
+import { routeInitProvider } from '../../lib/route_init';
 import template from './index.html';
 import { LicenseViewController } from './controller';
 import { CODE_PATH_LICENSE } from '../../../common/constants';

@@ -6,11 +6,9 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { uiModules } from '../np_imports/angular/helpers/modules';
-import { Legacy } from '../np_imports/legacy';
+import { Legacy } from '../np_ready/legacy';
 
-const uiModule = uiModules.get('monitoring/title', []);
-uiModule.service('title', ($rootScope) => {
+export function titleProvider($rootScope) {
   return function changeTitle(cluster, suffix) {
     let clusterName = _.get(cluster, 'cluster_name');
     clusterName = clusterName ? `- ${clusterName}` : '';
@@ -24,4 +22,4 @@ uiModule.service('title', ($rootScope) => {
       );
     });
   };
-});
+}

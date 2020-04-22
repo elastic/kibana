@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Legacy } from '../../np_imports/legacy';
+import { Legacy } from '../../np_ready/legacy';
 import { Alert, BASE_ALERT_API_PATH } from '../../../../../../plugins/alerting/common';
 import { getSetupModeState, addSetupModeCallback, toggleSetupMode } from '../../lib/setup_mode';
 import { NUMBER_OF_MIGRATED_ALERTS, ALERT_TYPE_PREFIX } from '../../../common/constants';

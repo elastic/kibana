@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import React from 'react';
-import { formatMetric } from 'plugins/monitoring/lib/format_number';
+import { formatMetric } from '../../../lib/format_number';
 import {
   EuiFlexGrid,
   EuiFlexItem,

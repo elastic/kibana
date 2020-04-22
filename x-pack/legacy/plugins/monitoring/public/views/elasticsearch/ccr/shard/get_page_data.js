@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { Legacy } from '../../../../np_imports/legacy';
+import { ajaxErrorHandlersProvider } from '../../../../lib/ajax_error_handler';
+import { Legacy } from '../../../../np_ready/legacy';
 
 export function getPageData($injector) {
   const $http = $injector.get('$http');

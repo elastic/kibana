@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { EuiSpacer, EuiCodeBlock, EuiLink, EuiText } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Legacy } from '../../../../np_imports/legacy';
+import { Legacy } from '../../../../np_ready/legacy';
 import { getMigrationStatusStep, getSecurityStep } from '../common_instructions';
 
 export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {

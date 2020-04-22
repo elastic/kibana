@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { formatMetric } from 'plugins/monitoring/lib/format_number';
+import { formatMetric } from '../../lib/format_number';
 import { SummaryStatus } from '../summary_status';
 import { i18n } from '@kbn/i18n';
 

@@ -7,7 +7,7 @@
 import React, { ReactNode } from 'react';
 import { EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Legacy } from '../../../np_imports/legacy';
+import { Legacy } from '../../../np_ready/legacy';
 import { ActionResult } from '../../../../../../../plugins/actions/common';
 import { ALERT_ACTION_TYPE_EMAIL } from '../../../../common/constants';
 import { getMissingFieldErrors } from '../../../lib/form_validation';

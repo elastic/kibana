@@ -5,7 +5,7 @@
  */
 
 import { MonitoringViewBaseController } from './';
-import { tableStorageGetter, tableStorageSetter } from 'plugins/monitoring/components/table';
+import { tableStorageGetter, tableStorageSetter } from '../components/table';
 
 /**
  * Class to manage common instantiation behaviors in a view controller

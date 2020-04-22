@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from '../np_imports/angular/helpers/modules';
-import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { Legacy } from '../np_imports/legacy';
+import { ajaxErrorHandlersProvider } from '../lib/ajax_error_handler';
+import { Legacy } from '../np_ready/legacy';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 function formatClusters(clusters) {
@@ -20,8 +19,7 @@ function formatCluster(cluster) {
   return cluster;
 }
 
-const uiModule = uiModules.get('monitoring/clusters');
-uiModule.service('monitoringClusters', $injector => {
+export function monitoringClustersProvider($injector) {
   return (clusterUuid, ccs, codePaths) => {
     const { min, max } = Legacy.shims.timefilter.getBounds();
 
@@ -51,4 +49,4 @@ uiModule.service('monitoringClusters', $injector => {
         return ajaxErrorHandlers(err);
       });
   };
-});
+}

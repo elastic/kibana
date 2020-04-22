@@ -5,7 +5,7 @@
  */
 import React, { PureComponent } from 'react';
 import { capitalize } from 'lodash';
-import { Legacy } from '../../np_imports/legacy';
+import { Legacy } from '../../np_ready/legacy';
 import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
 import { INFRA_SOURCE_ID } from '../../../common/constants';
 import { formatDateTimeLocal } from '../../../common/formatting';

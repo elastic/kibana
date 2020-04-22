@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { StatusIcon } from 'plugins/monitoring/components/status_icon';
+import { StatusIcon } from '../../status_icon';
 import { i18n } from '@kbn/i18n';
 
 export function MachineLearningJobStatusIcon({ status }) {

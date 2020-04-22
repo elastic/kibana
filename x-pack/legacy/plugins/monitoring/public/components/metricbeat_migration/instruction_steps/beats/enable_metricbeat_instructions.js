@@ -9,7 +9,7 @@ import { EuiSpacer, EuiCodeBlock, EuiLink, EuiCallOut, EuiText } from '@elastic/
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UNDETECTED_BEAT_TYPE, DEFAULT_BEAT_FOR_URLS } from './common_beats_instructions';
-import { Legacy } from '../../../../np_imports/legacy';
+import { Legacy } from '../../../../np_ready/legacy';
 import { getMigrationStatusStep, getSecurityStep } from '../common_instructions';
 
 export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {

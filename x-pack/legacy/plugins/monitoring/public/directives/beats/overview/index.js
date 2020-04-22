@@ -6,11 +6,9 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { uiModules } from '../../../np_imports/angular/helpers/modules';
-import { BeatsOverview } from 'plugins/monitoring/components/beats/overview';
+import { BeatsOverview } from '../../../components/beats/overview';
 
-const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringBeatsOverview', () => {
+export function monitoringBeatsOverviewProvider() {
   return {
     restrict: 'E',
     scope: {
@@ -29,4 +27,4 @@ uiModule.directive('monitoringBeatsOverview', () => {
       });
     },
   };
-});
+}

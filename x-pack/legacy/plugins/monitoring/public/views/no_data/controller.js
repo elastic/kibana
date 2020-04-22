@@ -10,16 +10,17 @@ import {
   NodeSettingsChecker,
   Enabler,
   startChecks,
-} from 'plugins/monitoring/lib/elasticsearch_settings';
+} from '../../lib/elasticsearch_settings';
 import { ModelUpdater } from './model_updater';
-import { NoData } from 'plugins/monitoring/components';
+import { NoData } from '../../components';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
 import { MonitoringViewBaseController } from '../base_controller';
 import { i18n } from '@kbn/i18n';
-import { Legacy } from '../../np_imports/legacy';
+import { Legacy } from '../../np_ready/legacy';
 
 export class NoDataController extends MonitoringViewBaseController {
   constructor($injector, $scope) {
+    window.injectorThree = $injector;
     const monitoringClusters = $injector.get('monitoringClusters');
     const kbnUrl = $injector.get('kbnUrl');
     const $http = $injector.get('$http');

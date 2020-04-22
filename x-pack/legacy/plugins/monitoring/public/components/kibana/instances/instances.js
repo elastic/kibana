@@ -19,7 +19,7 @@ import { capitalize, get } from 'lodash';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { KibanaStatusIcon } from '../status_icon';
-import { StatusIcon } from 'plugins/monitoring/components/status_icon';
+import { StatusIcon } from '../../status_icon';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Legacy } from '../../np_imports/legacy';
+import { Legacy } from '../../np_ready/legacy';
 import { capitalize, get } from 'lodash';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
@@ -16,8 +16,8 @@ import {
   ALERT_TYPE_CLUSTER_STATE,
 } from '../../../common/constants';
 import { mapSeverity } from './map_severity';
-import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
-import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
+import { FormattedAlert } from '../../components/alerts/formatted_alert';
+import { EuiMonitoringTable } from '../../components/table';
 import { EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

@@ -43,7 +43,7 @@ const props = {
   updateLegend: () => void 0,
 };
 
-jest.mock('../../np_imports/ui/chrome', () => {
+jest.mock('../../np_ready/ui/chrome', () => {
   return {
     getBasePath: () => '',
   };

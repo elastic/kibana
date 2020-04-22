@@ -16,7 +16,7 @@ import {
   LOGSTASH_SYSTEM_ID,
 } from '../../../../common/constants';
 
-jest.mock('../../../np_imports/ui/shims', () => ({
+jest.mock('../../../np_ready/ui/shims', () => ({
   ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
   DOC_LINK_VERSION: 'current',
 }));

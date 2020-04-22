@@ -5,10 +5,8 @@
  */
 
 import _ from 'lodash';
-import { uiModules } from '../np_imports/angular/helpers/modules';
 
-const uiModule = uiModules.get('monitoring/features', []);
-uiModule.service('features', function($window) {
+export function featuresProvider($window) {
   function getData() {
     let returnData = {};
     const monitoringData = $window.localStorage.getItem('xpack.monitoring.data');
@@ -45,4 +43,4 @@ uiModule.service('features', function($window) {
     isEnabled,
     update,
   };
-});
+}

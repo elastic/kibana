@@ -4,86 +4,97 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../views/all';
 import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory } from '../../../../../../src/plugins/home/public';
-import { App, AppMountContext, AppMountParameters, CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../src/plugins/navigation/public';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import {
+  App,
+  AppMountContext,
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from 'kibana/public';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../../../src/plugins/home/public';
 import { initAngularBootstrap } from '../../../../../../src/plugins/kibana_legacy/public';
+import { MonitoringConfig } from '../../../../../plugins/monitoring/server/config';
+import { DEFAULT_APP_CATEGORIES } from '../../../../../../src/core/utils';
+import { MonitoringPluginDependencies } from './types';
 
-export interface MonitoringPluginDependencies {
-  navigation: NavigationStart
-  data: DataPublicPluginStart
-  element: HTMLElement
-  core: AppMountContext['core']
-  isCloud: boolean
-  pluginInitializerContext: PluginInitializerContext
-}
+import {
+  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
+  KIBANA_ALERTING_ENABLED,
+} from '../../common/constants';
 
-export class MonitoringPlugin implements Plugin<void, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
-  constructor(private initializerContext: PluginInitializerContext) { }
+export class MonitoringPlugin
+  implements Plugin<void, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
+  constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
-  public setup(core: CoreSetup<MonitoringPluginDependencies>, plugins: object & { home?: any, cloud?: { isCloudEnabled: boolean } }) {
+  public setup(
+    core: CoreSetup<MonitoringPluginDependencies>,
+    plugins: object & { home?: HomePublicPluginSetup; cloud?: { isCloudEnabled: boolean } }
+  ) {
     const { home } = plugins;
-
-    //console.log('...plugins:', plugins);
+    const id = 'monitoring';
+    const icon = 'monitoringApp';
+    const path = '/app/monitoring';
+    const title = i18n.translate('xpack.monitoring.stackMonitoringTitle', {
+      defaultMessage: 'Stack Monitoring',
+    });
 
     if (home) {
       home.featureCatalogue.register({
-        id: 'monitoring',
-        title: i18n.translate('xpack.monitoring.monitoringTitle', {
-          defaultMessage: 'Monitoring',
-        }),
+        id,
+        title,
+        icon,
+        path,
+        showOnHomePage: true,
+        category: FeatureCatalogueCategory.ADMIN,
         description: i18n.translate('xpack.monitoring.monitoringDescription', {
           defaultMessage: 'Track the real-time health and performance of your Elastic Stack.',
         }),
-        icon: 'monitoringApp',
-        path: '/app/monitoring',
-        showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
       });
     }
 
     initAngularBootstrap();
 
     const app: App = {
-      id: 'monitoring',
-      title: 'Monitoring',
+      id,
+      title,
+      order: 9002,
+      appRoute: path,
+      euiIconType: icon,
+      category: DEFAULT_APP_CATEGORIES.management,
       mount: async (context: AppMountContext, params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-
-        console.log('...coreStart:', coreStart);
-
-        const { AngularApp } = await import('../np_imports/angular');
-
-        
+        const { AngularApp } = await import('./angular');
         const deps: MonitoringPluginDependencies = {
           navigation: pluginsStart.navigation,
           element: params.element,
-          //core: context.core,
           core: coreStart,
           data: pluginsStart.data,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
-        }
+          externalConfig: this.getExternalConfig(),
+        };
 
         this.setInitialTimefilter(deps);
+        this.overrideAlertingEmailDefaults(deps);
 
         const monitoringApp = new AngularApp(deps);
         return monitoringApp.destroy;
       },
     };
 
-    
     core.application.register(app);
   }
 
-  public start(core: CoreStart, plugins: any) {
+  public start(core: CoreStart, plugins: any) {}
 
-
-  }
-
-  public stop() { }
+  public stop() {}
 
   private setInitialTimefilter({ core: coreContext, data }: MonitoringPluginDependencies) {
     const { timefilter } = data.query.timefilter;
@@ -96,9 +107,35 @@ export class MonitoringPlugin implements Plugin<void, void, MonitoringPluginDepe
       'timepicker:refreshIntervalDefaults',
       JSON.stringify(refreshInterval)
     );
-    uiSettings.overrideLocalDefault(
-      'timepicker:timeDefaults',
-      JSON.stringify(time)
-    );
+    uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify(time));
+  }
+
+  private overrideAlertingEmailDefaults({ core: coreContext }: MonitoringPluginDependencies) {
+    const { uiSettings } = coreContext;
+    if (KIBANA_ALERTING_ENABLED && !uiSettings.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS)) {
+      uiSettings.overrideLocalDefault(
+        MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
+        JSON.stringify({
+          name: i18n.translate('xpack.monitoring.alertingEmailAddress.name', {
+            defaultMessage: 'Alerting email address',
+          }),
+          value: '',
+          description: i18n.translate('xpack.monitoring.alertingEmailAddress.description', {
+            defaultMessage: `The default email address to receive alerts from Stack Monitoring`,
+          }),
+          category: ['monitoring'],
+        })
+      );
+    }
+  }
+
+  private getExternalConfig() {
+    const monitoring = this.initializerContext.config.get();
+    return [
+      ['minIntervalSeconds', monitoring.ui.min_interval_seconds],
+      ['showLicenseExpiration', monitoring.ui.show_license_expiration],
+      ['showCgroupMetricsElasticsearch', monitoring.ui.container.elasticsearch.enabled],
+      ['showCgroupMetricsLogstash', monitoring.ui.container.logstash.enabled],
+    ];
   }
 }

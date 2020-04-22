@@ -5,7 +5,7 @@
  */
 
 import { last, isFunction, debounce } from 'lodash';
-import $ from 'plugins/xpack_main/jquery_flot';
+import $ from '../../lib/jquery_flot';
 import { DEBOUNCE_FAST_MS } from '../../../common/constants';
 
 /**

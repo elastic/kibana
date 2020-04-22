@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, Component } from 'react';
-import { Legacy } from '../../../np_imports/legacy';
+import { Legacy } from '../../../np_ready/legacy';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { capitalize, partial } from 'lodash';
@@ -19,8 +19,8 @@ import {
   EuiSpacer,
   EuiIcon,
 } from '@elastic/eui';
-import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
-import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
+import { EuiMonitoringTable } from '../../table';
+import { AlertsIndicator } from '../../cluster/listing/alerts_indicator';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -241,7 +241,11 @@ const changeCluster = (scope, globalState, kbnUrl, clusterUuid, ccs) => {
 
 const licenseWarning = (scope, { title, text }) => {
   scope.$evalAsync(() => {
-    Legacy.shims.toastNotifications.addWarning({ title, text, 'data-test-subj': 'monitoringLicenseWarning' });
+    Legacy.shims.toastNotifications.addWarning({
+      title,
+      text,
+      'data-test-subj': 'monitoringLicenseWarning',
+    });
   });
 };
 

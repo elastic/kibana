@@ -7,10 +7,10 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
-import { Legacy } from '../../../np_imports/legacy';
+import { uiRoutes } from '../../../np_ready/angular/helpers/routes';
+import { Legacy } from '../../../np_ready/legacy';
 import template from './index.html';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';

@@ -9,11 +9,11 @@
  */
 import React from 'react';
 import { get } from 'lodash';
-import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
-import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../../np_ready/angular/helpers/routes';
+import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
+import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
-import { Legacy } from '../../../np_imports/legacy';
+import { Legacy } from '../../../np_ready/legacy';
 import {
   EuiPage,
   EuiPageBody,
@@ -24,7 +24,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
-import { DetailStatus } from 'plugins/monitoring/components/kibana/detail_status';
+import { DetailStatus } from '../../../components/kibana/detail_status';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { CODE_PATH_KIBANA } from '../../../../common/constants';
 

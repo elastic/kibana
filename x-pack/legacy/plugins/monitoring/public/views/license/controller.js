@@ -8,10 +8,10 @@ import { get, find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Legacy } from '../../np_imports/legacy';
+import { Legacy } from '../../np_ready/legacy';
 import { formatDateTimeLocal } from '../../../common/formatting';
-import { MANAGEMENT_BASE_PATH } from 'plugins/xpack_main/components';
-import { License } from 'plugins/monitoring/components';
+import { BASE_PATH as MANAGEMENT_BASE_PATH } from '../../../../../../plugins/license_management/common/constants';
+import { License } from '../../components';
 
 const REACT_NODE_ID = 'licenseReact';
 

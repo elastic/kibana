@@ -17,9 +17,10 @@ import {
   EuiFlexItem,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { LicenseStatus, AddLicense } from 'plugins/xpack_main/components';
+import { LicenseStatus } from '../../../../../../plugins/license_management/public/application/sections/license_dashboard/license_status';
+import { AddLicense } from '../../../../../../plugins/license_management/public/application/sections/license_dashboard/add_license';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Legacy } from '../../np_imports/legacy';
+import { Legacy } from '../../np_ready/legacy';
 
 const LicenseUpdateInfoForPrimary = ({ isPrimaryCluster, uploadLicensePath }) => {
   if (!isPrimaryCluster) {

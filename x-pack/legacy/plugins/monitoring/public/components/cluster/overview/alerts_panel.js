@@ -6,8 +6,8 @@
 
 import React, { Fragment } from 'react';
 import moment from 'moment-timezone';
-import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
-import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
+import { FormattedAlert } from '../../alerts/formatted_alert';
+import { mapSeverity } from '../../alerts/map_severity';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import {
   CALCULATE_DURATION_SINCE,

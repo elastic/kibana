@@ -1,4 +1,7 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-//import 'x-pack/legacy/plugins/monitoring/public/angular_imports';
 export { MonitoringPlugin } from 'x-pack/legacy/plugins/monitoring/public/np_ready/plugin';
-

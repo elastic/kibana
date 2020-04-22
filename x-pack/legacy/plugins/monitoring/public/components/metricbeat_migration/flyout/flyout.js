@@ -38,7 +38,7 @@ import {
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL,
 } from '../constants';
-import { Legacy } from '../../../np_imports/legacy';
+import { Legacy } from '../../../np_ready/legacy';
 import { getIdentifier, formatProductName } from '../../setup_mode/formatting';
 
 const storage = new Storage(window.localStorage);

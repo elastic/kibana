@@ -10,7 +10,7 @@ import { NoData } from '../';
 
 const enabler = {};
 
-jest.mock('../../../np_imports/ui/chrome', () => {
+jest.mock('../../../np_ready/ui/chrome', () => {
   return {
     getBasePath: () => '',
   };

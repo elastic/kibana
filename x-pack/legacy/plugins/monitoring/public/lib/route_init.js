@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
+import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { isInSetupMode } from './setup_mode';
 import { getClusterFromClusters } from './get_cluster_from_clusters';
 
