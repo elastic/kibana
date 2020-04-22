@@ -89,6 +89,9 @@ export class MBMapContainer extends React.Component {
       }
       if (this.props.spatialFiltersLayer) {
         this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
+      } else {
+        // Ensure spatial filters layer is removed from map
+        removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
       }
       this._syncSettings();
     }
