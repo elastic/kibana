@@ -7,15 +7,12 @@
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
-import {
-  FindRulesRequestParams,
-  IRuleSavedAttributesSavedObjectAttributes,
-} from '../../rules/types';
+import { FindRulesRequestParams } from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
 import { transformValidateFindAlerts } from './validate';
 import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
+import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
 export const findRulesRoute = (router: IRouter) => {
   router.get(
@@ -40,6 +37,7 @@ export const findRulesRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
+        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const rules = await findRules({
           alertsClient,
           perPage: query.per_page,
@@ -50,10 +48,7 @@ export const findRulesRoute = (router: IRouter) => {
         });
         const ruleStatuses = await Promise.all(
           rules.data.map(async rule => {
-            const results = await savedObjectsClient.find<
-              IRuleSavedAttributesSavedObjectAttributes
-            >({
-              type: ruleStatusSavedObjectType,
+            const results = await ruleStatusClient.find({
               perPage: 1,
               sortField: 'statusDate',
               sortOrder: 'desc',

@@ -37,7 +37,13 @@ export const alertDetailsHandlerWrapper = function(
         indexPattern
       );
 
-      const currentHostInfo = await getHostData(ctx, response._source.host.id, indexPattern);
+      const currentHostInfo = await getHostData(
+        {
+          endpointAppContext,
+          requestHandlerContext: ctx,
+        },
+        response._source.host.id
+      );
 
       return res.ok({
         body: {
