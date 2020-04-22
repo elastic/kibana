@@ -49,6 +49,13 @@ module.exports = async ({ config }) => {
     },
   });
 
+  config.module.rules.push({
+    test: /\.(html|md|txt|tmpl)$/,
+    use: {
+      loader: 'raw-loader',
+    },
+  });
+
   // Handle Typescript files
   config.module.rules.push({
     test: /\.tsx?$/,
