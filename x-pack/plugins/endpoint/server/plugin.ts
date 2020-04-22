@@ -70,6 +70,7 @@ export class EndpointPlugin
         plugins.ingestManager.esIndexPatternService,
         this.initializerContext.logger
       ),
+      agentService: plugins.ingestManager.agentService,
       logFactory: this.initializerContext.logger,
       config: (): Promise<EndpointConfigType> => {
         return createConfig$(this.initializerContext)
