@@ -753,6 +753,8 @@ export interface IIndexPattern {
     // (undocumented)
     fields: IFieldType[];
     // (undocumented)
+    getTimeField?(): IFieldType | undefined;
+    // (undocumented)
     id?: string;
     // (undocumented)
     timeFieldName?: string;
