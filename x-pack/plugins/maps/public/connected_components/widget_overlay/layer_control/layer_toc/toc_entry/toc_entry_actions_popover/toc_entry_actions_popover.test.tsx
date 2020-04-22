@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { LayerTocActions } from './layer_toc_actions';
+import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 
 let supportsFitToBounds;
 const layerMock = {
@@ -39,13 +39,13 @@ const defaultProps = {
   isUsingSearch: true,
 };
 
-describe('LayerTocActions', () => {
+describe('TOCEntryActionsPopover', () => {
   beforeEach(() => {
     supportsFitToBounds = true;
   });
 
   test('is rendered', async () => {
-    const component = shallowWithIntl(<LayerTocActions {...defaultProps} />);
+    const component = shallowWithIntl(<TOCEntryActionsPopover {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -56,7 +56,7 @@ describe('LayerTocActions', () => {
   });
 
   test('should not show edit actions in read only mode', async () => {
-    const component = shallowWithIntl(<LayerTocActions {...defaultProps} isReadOnly={true} />);
+    const component = shallowWithIntl(<TOCEntryActionsPopover {...defaultProps} isReadOnly={true} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -68,7 +68,7 @@ describe('LayerTocActions', () => {
 
   test('should disable fit to data when supportsFitToBounds is false', async () => {
     supportsFitToBounds = false;
-    const component = shallowWithIntl(<LayerTocActions {...defaultProps} />);
+    const component = shallowWithIntl(<TOCEntryActionsPopover {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));

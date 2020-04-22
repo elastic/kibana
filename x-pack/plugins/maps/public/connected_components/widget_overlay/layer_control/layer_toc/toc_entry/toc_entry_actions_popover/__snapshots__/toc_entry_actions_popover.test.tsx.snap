@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`LayerTocActions is rendered 1`] = `
+exports[`TOCEntryActionsPopover is rendered 1`] = `
 <EuiPopover
   anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
@@ -89,6 +89,7 @@ exports[`LayerTocActions is rendered 1`] = `
             },
             Object {
               "data-test-subj": "editLayerButton",
+              "disabled": undefined,
               "icon": <EuiIcon
                 size="m"
                 type="pencil"
@@ -123,7 +124,7 @@ exports[`LayerTocActions is rendered 1`] = `
 </EuiPopover>
 `;
 
-exports[`LayerTocActions should disable fit to data when supportsFitToBounds is false 1`] = `
+exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBounds is false 1`] = `
 <EuiPopover
   anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
@@ -212,6 +213,7 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
             },
             Object {
               "data-test-subj": "editLayerButton",
+              "disabled": undefined,
               "icon": <EuiIcon
                 size="m"
                 type="pencil"
@@ -246,7 +248,7 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
 </EuiPopover>
 `;
 
-exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
+exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1`] = `
 <EuiPopover
   anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
