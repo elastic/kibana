@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
+import React, { FunctionComponent, useState, useMemo, useEffect, useCallback } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -28,6 +28,8 @@ import { PipelineEditorProcessor } from './types';
 
 export interface OnUpdateHandlerArg {
   getData: () => DataOutResult;
+  validate: () => Promise<boolean>;
+  isValid?: boolean;
 }
 
 export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
@@ -56,6 +58,8 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
 
   useEffect(() => {
     onUpdate({
+      isValid: state.isValid,
+      validate: state.validate,
       getData: () => prepareDataOut(state),
     });
   }, [state, onUpdate]);
@@ -64,6 +68,13 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
     setSelectedProcessor(undefined);
     setIsAddingNewProcessor(false);
   };
+
+  const onFormUpdate = useCallback(
+    arg => {
+      dispatch({ type: 'processorForm.update', payload: arg });
+    },
+    [dispatch]
+  );
 
   return (
     <>
@@ -130,9 +141,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
       </EuiPanel>
       {selectedProcessor || isAddingNewProcessor ? (
         <SettingsFormFlyout
+          onFormUpdate={onFormUpdate}
           processor={selectedProcessor}
           onClose={() => {
             dismissFlyout();
+            dispatch({ type: 'processorForm.close' });
           }}
           onSubmit={processorSettings => {
             if (isAddingNewProcessor) {

@@ -8,21 +8,33 @@ import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 
 import React, { FunctionComponent } from 'react';
 
+import { OnFormUpdateArg } from '../../../../shared_imports';
+
 import { PipelineEditorProcessor } from '../types';
 
-import { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from './index';
+import { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from '.';
 
 export interface Props {
   processor: PipelineEditorProcessor | undefined;
+  onFormUpdate: (form: OnFormUpdateArg<any>) => void;
   onSubmit: (processor: ProcessorSettingsFromOnSubmitArg) => void;
   onClose: () => void;
 }
 
-export const SettingsFormFlyout: FunctionComponent<Props> = ({ onClose, processor, onSubmit }) => {
+export const SettingsFormFlyout: FunctionComponent<Props> = ({
+  onClose,
+  processor,
+  onSubmit,
+  onFormUpdate,
+}) => {
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutBody>
-        <ProcessorSettingsForm processor={processor as any} onSubmit={onSubmit} />
+        <ProcessorSettingsForm
+          onFormUpdate={onFormUpdate}
+          processor={processor as any}
+          onSubmit={onSubmit}
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   );

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import { EuiButton } from '@elastic/eui';
 
-import { Form, useForm, FormDataProvider } from '../../../../../shared_imports';
+import { Form, useForm, FormDataProvider, OnFormUpdateArg } from '../../../../../shared_imports';
 
 import { PipelineEditorProcessor } from '../../types';
 
@@ -18,10 +18,15 @@ export type ProcessorSettingsFromOnSubmitArg = Omit<PipelineEditorProcessor, 'id
 
 export interface Props {
   processor?: PipelineEditorProcessor;
+  onFormUpdate: (form: OnFormUpdateArg<any>) => void;
   onSubmit: (processor: ProcessorSettingsFromOnSubmitArg) => void;
 }
 
-export const ProcessorSettingsForm: FunctionComponent<Props> = ({ processor, onSubmit }) => {
+export const ProcessorSettingsForm: FunctionComponent<Props> = ({
+  processor,
+  onSubmit,
+  onFormUpdate,
+}) => {
   const handleSubmit = (data: any, isValid: boolean) => {
     if (isValid) {
       const { type, ...options } = data;
@@ -36,6 +41,11 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({ processor, onS
     defaultValue: processor ? { ...processor.options } : undefined,
     onSubmit: handleSubmit,
   });
+
+  useEffect(() => {
+    const subscription = form.subscribe(onFormUpdate);
+    return subscription.unsubscribe;
+  }, [form, onFormUpdate]);
 
   return (
     <Form form={form}>

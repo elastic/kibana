@@ -5,16 +5,26 @@
  */
 import { Reducer, useReducer } from 'react';
 import { euiDragDropReorder } from '@elastic/eui';
+
+import { OnFormUpdateArg } from '../../../shared_imports';
+
 import { createPipelineEditorProcessor, DataInResult } from './data_in';
 import { PipelineEditorProcessor } from './types';
 
-type State = DataInResult;
+type StateArg = DataInResult;
+
+interface State extends StateArg {
+  isValid?: boolean;
+  validate: () => Promise<boolean>;
+}
 
 type Action =
   | { type: 'addProcessor'; payload: { processor: Omit<PipelineEditorProcessor, 'id'> } }
   | { type: 'updateProcessor'; payload: { processor: PipelineEditorProcessor } }
   | { type: 'removeProcessor'; payload: { processor: PipelineEditorProcessor } }
-  | { type: 'reorderProcessors'; payload: { sourceIdx: number; destIdx: number } };
+  | { type: 'reorderProcessors'; payload: { sourceIdx: number; destIdx: number } }
+  | { type: 'processorForm.update'; payload: OnFormUpdateArg<any> }
+  | { type: 'processorForm.close' };
 
 const findProcessorIdx = (
   processors: PipelineEditorProcessor[],
@@ -23,7 +33,7 @@ const findProcessorIdx = (
   return processors.findIndex(p => p.id === processor.id);
 };
 
-const reducer: Reducer<State, Action> = (state, action) => {
+export const reducer: Reducer<State, Action> = (state, action) => {
   if (action.type === 'reorderProcessors') {
     const { destIdx, sourceIdx } = action.payload;
     return {
@@ -63,7 +73,25 @@ const reducer: Reducer<State, Action> = (state, action) => {
     };
   }
 
+  if (action.type === 'processorForm.update') {
+    const { isValid, validate } = action.payload;
+    return {
+      ...state,
+      isValid,
+      validate,
+    };
+  }
+
+  if (action.type === 'processorForm.close') {
+    return {
+      ...state,
+      isValid: undefined,
+      validate: () => Promise.resolve(true),
+    };
+  }
+
   return state;
 };
 
-export const useEditorState = (state: State) => useReducer<typeof reducer>(reducer, state);
+export const useEditorState = (initialState: StateArg) =>
+  useReducer<typeof reducer>(reducer, { ...initialState, validate: () => Promise.resolve(true) });

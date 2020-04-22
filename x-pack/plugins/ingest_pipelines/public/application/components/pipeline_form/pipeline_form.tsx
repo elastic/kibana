@@ -84,7 +84,22 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
 
   const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
     if (isValid) {
-      if (!showJsonProcessorsEditor) {
+      // TODO: The JSON processor editor should be removed entirely which will simplify this handler
+      if (!showJsonProcessorsEditor && processorsEditorState) {
+        if (processorsEditorState.isValid === undefined) {
+          (async () => {
+            const valid = await processorsEditorState.validate();
+            if (valid) {
+              onSave({ ...formData, processors } as Pipeline);
+            }
+          })();
+          return;
+        }
+
+        if (!processorsEditorState.isValid) {
+          return;
+        }
+
         const { processors } = processorsEditorState!.getData();
         onSave({ ...formData, processors } as Pipeline);
       } else {
@@ -147,7 +162,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
 
     return (
       <FormDataProvider pathsToWatch="processors">
-        {({ processors }: { processors: unknown }) => {
+        {({ processors }) => {
           const processorProp =
             typeof processors === 'string' && processors
               ? JSON.parse(processors)
