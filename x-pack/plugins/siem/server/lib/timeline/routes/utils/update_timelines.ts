@@ -66,7 +66,7 @@ export const checkIsFailureCases = (
     templateTimelineVersion != null &&
     existTemplateTimeline != null &&
     existTemplateTimeline.templateTimelineVersion != null &&
-    existTemplateTimeline.templateTimelineVersion > templateTimelineVersion
+    existTemplateTimeline.templateTimelineVersion >= templateTimelineVersion
   ) {
     // Throw error you can not update a template timeline version with an old version
     return {

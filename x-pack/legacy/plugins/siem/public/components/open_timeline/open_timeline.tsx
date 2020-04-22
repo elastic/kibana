@@ -14,7 +14,7 @@ import { TimelinesTable } from './timelines_table';
 import { TitleRow } from './title_row';
 import { ImportDataModal } from '../import_data_modal';
 import * as i18n from './translations';
-import { importTimelines } from '../../containers/timeline/all/api';
+import { importTimelines } from '../../containers/timeline/api';
 
 import {
   UtilityBarGroup,
