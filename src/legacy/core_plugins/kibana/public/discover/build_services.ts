@@ -42,6 +42,7 @@ import {
   DocViewerComponent,
   SavedSearch,
 } from '../../../../../plugins/discover/public';
+import { SavedObjectKibanaServices } from '../../../../../plugins/saved_objects/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -71,14 +72,12 @@ export async function buildServices(
   plugins: DiscoverStartPlugins,
   getHistory: () => History
 ): Promise<DiscoverServices> {
-  const services = {
+  const services: SavedObjectKibanaServices = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
     search: plugins.data.search,
     chrome: core.chrome,
     overlays: core.overlays,
-    injectedMetadata: core.injectedMetadata,
-    uiSettings: core.uiSettings,
   };
   const savedObjectService = createSavedSearchesLoader(services);
 
