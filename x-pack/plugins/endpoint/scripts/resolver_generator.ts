@@ -29,7 +29,7 @@ async function main() {
     alertIndex: {
       alias: 'ai',
       describe: 'index to store alerts in',
-      default: '.alerts-endpoint-000001',
+      default: 'events-endpoint-1',
       type: 'string',
     },
     eventIndex: {
@@ -41,7 +41,7 @@ async function main() {
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
-      default: 'endpoint-agent-1',
+      default: 'metrics-endpoint-default-1',
       type: 'string',
     },
     auth: {

@@ -279,6 +279,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   getNumericalMbFeatureStateValue(value) {
+    if (typeof value === 'number') {
+      return value;
+    }
+
     const valueAsFloat = parseFloat(value);
     return isNaN(valueAsFloat) ? null : valueAsFloat;
   }

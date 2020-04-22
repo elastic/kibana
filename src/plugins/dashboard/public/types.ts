@@ -152,6 +152,14 @@ export type DashboardAppStateDefaults = DashboardAppState & {
   description?: string;
 };
 
+/**
+ * In URL panels are optional,
+ * Panels are not added to the URL when in "view" mode
+ */
+export type DashboardAppStateInUrl = Omit<DashboardAppState, 'panels'> & {
+  panels?: SavedDashboardPanel[];
+};
+
 export interface DashboardAppStateTransitions {
   set: (
     state: DashboardAppState
