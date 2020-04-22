@@ -144,13 +144,3 @@ export class ExpressionRenderHandler {
     this.onRenderError(this.element, error, this.handlers);
   };
 }
-
-export function render(
-  element: HTMLElement,
-  data: any,
-  options?: Partial<ExpressionRenderHandlerParams>
-): ExpressionRenderHandler {
-  const handler = new ExpressionRenderHandler(element, options);
-  handler.render(data);
-  return handler;
-}

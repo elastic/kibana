@@ -39,7 +39,7 @@ import {
 } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, loader } from './loader';
-import { render, ExpressionRenderHandler } from './render';
+import { ExpressionRenderHandler } from './render';
 
 export interface ExpressionsSetupDeps {
   bfetch: BfetchPublicSetup;
@@ -92,7 +92,6 @@ export interface ExpressionsStart extends ExpressionsServiceStart {
   ExpressionRenderHandler: typeof ExpressionRenderHandler;
   loader: typeof loader;
   ReactExpressionRenderer: typeof ReactExpressionRenderer;
-  render: typeof render;
 }
 
 export class ExpressionsPublicPlugin
@@ -187,7 +186,6 @@ export class ExpressionsPublicPlugin
       ExpressionRenderHandler,
       loader,
       ReactExpressionRenderer,
-      render,
     };
 
     return Object.freeze(start);

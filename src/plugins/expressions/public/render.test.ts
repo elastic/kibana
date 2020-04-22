@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionRenderHandler, render } from './render';
+import { ExpressionRenderHandler } from './render';
 import { Observable } from 'rxjs';
 import { RenderError } from './types';
 import { getRenderersRegistry } from './services';
@@ -60,13 +60,6 @@ const getHandledError = () => {
     return null;
   }
 };
-
-describe('render helper function', () => {
-  it('returns ExpressionRenderHandler instance', () => {
-    const response = render(element, {});
-    expect(response).toBeInstanceOf(ExpressionRenderHandler);
-  });
-});
 
 describe('ExpressionRenderHandler', () => {
   it('constructor creates observers', () => {
