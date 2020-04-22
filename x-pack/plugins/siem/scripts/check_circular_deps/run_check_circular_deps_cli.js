@@ -11,13 +11,10 @@ import madge from 'madge';
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import { run, createFailError } from '@kbn/dev-utils';
 
-const legacyPluginPath = '../../../../legacy/plugins/siem';
-const pluginPath = '../..';
-
 run(
   async ({ log }) => {
     const result = await madge(
-      [resolve(__dirname, legacyPluginPath, 'public'), resolve(__dirname, pluginPath, 'common')],
+      [resolve(__dirname, '../../public'), resolve(__dirname, '../../common')],
       {
         fileExtensions: ['ts', 'js', 'tsx'],
         excludeRegExp: [
