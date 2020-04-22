@@ -6,7 +6,7 @@
 
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { LISTS_INDEX } from './lists_services_mock_constants';
+import { LIST_INDEX } from './lists_services_mock_constants';
 import { getShardMock } from './get_shard_mock';
 
 interface DataClientReturn {
@@ -16,7 +16,7 @@ interface DataClientReturn {
 
 export const getEmptyCreateDocumentResponseMock = (): CreateDocumentResponse => ({
   _id: 'elastic-id-123',
-  _index: LISTS_INDEX,
+  _index: LIST_INDEX,
   _shards: getShardMock(),
   _type: '',
   _version: 1,

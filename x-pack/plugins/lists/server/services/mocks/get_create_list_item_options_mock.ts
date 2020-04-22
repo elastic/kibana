@@ -9,9 +9,9 @@ import { CreateListItemOptions } from '../items';
 import { getDataClientMock } from './get_data_client_mock';
 import {
   DATE_NOW,
-  LISTS_ITEMS_INDEX,
   LIST_ID,
   LIST_ITEM_ID,
+  LIST_ITEM_INDEX,
   META,
   TIE_BREAKER,
   TYPE,
@@ -23,7 +23,7 @@ export const getCreateListItemOptionsMock = (): CreateListItemOptions => ({
   dateNow: DATE_NOW,
   id: LIST_ITEM_ID,
   listId: LIST_ID,
-  listItemIndex: LISTS_ITEMS_INDEX,
+  listItemIndex: LIST_ITEM_INDEX,
   meta: META,
   tieBreaker: TIE_BREAKER,
   type: TYPE,

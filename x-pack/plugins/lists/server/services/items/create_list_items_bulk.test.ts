@@ -6,7 +6,7 @@
 
 import { IndexEsListItemSchema } from '../../../common/schemas';
 import {
-  LISTS_ITEMS_INDEX,
+  LIST_ITEM_INDEX,
   TIE_BREAKERS,
   VALUE_2,
   getCreateListItemBulkOptionsMock,
@@ -33,12 +33,12 @@ describe('crete_list_item_bulk', () => {
     secondRecord.tie_breaker_id = TIE_BREAKERS[1];
     expect(options.dataClient.callAsCurrentUser).toBeCalledWith('bulk', {
       body: [
-        { create: { _index: LISTS_ITEMS_INDEX } },
+        { create: { _index: LIST_ITEM_INDEX } },
         firstRecord,
-        { create: { _index: LISTS_ITEMS_INDEX } },
+        { create: { _index: LIST_ITEM_INDEX } },
         secondRecord,
       ],
-      index: LISTS_ITEMS_INDEX,
+      index: LIST_ITEM_INDEX,
     });
   });
 

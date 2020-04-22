@@ -9,7 +9,7 @@ import { SearchResponse } from 'elasticsearch';
 import { SearchEsListSchema } from '../../../common/schemas';
 
 import { getShardMock } from './get_shard_mock';
-import { LISTS_INDEX } from './lists_services_mock_constants';
+import { LIST_INDEX } from './lists_services_mock_constants';
 import { getListResponseMock } from './get_list_response_mock';
 
 export const getSearchListMock = (): SearchResponse<SearchEsListSchema> => {
@@ -20,7 +20,7 @@ export const getSearchListMock = (): SearchResponse<SearchEsListSchema> => {
       hits: [
         {
           _id: '123',
-          _index: LISTS_INDEX,
+          _index: LIST_INDEX,
           _score: 0,
           _source: getListResponseMock(),
           _type: '',

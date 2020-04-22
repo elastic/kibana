@@ -9,7 +9,7 @@ import { DataClient } from '../../types';
 
 import { getListItem } from '.';
 
-interface DeleteListItemOptions {
+export interface DeleteListItemOptions {
   id: Id;
   dataClient: DataClient;
   listItemIndex: string;

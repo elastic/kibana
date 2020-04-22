@@ -6,8 +6,8 @@
 
 import { IndexEsListItemSchema, ListItemSchema } from '../../../common/schemas';
 import {
-  LISTS_ITEMS_INDEX,
   LIST_ITEM_ID,
+  LIST_ITEM_INDEX,
   getCreateListItemOptionsMock,
   getIndexESListItemMock,
   getListItemResponseMock,
@@ -39,7 +39,7 @@ describe('crete_list_item', () => {
     const expected = {
       body,
       id: LIST_ITEM_ID,
-      index: LISTS_ITEMS_INDEX,
+      index: LIST_ITEM_INDEX,
     };
     expect(options.dataClient.callAsCurrentUser).toBeCalledWith('index', expected);
   });

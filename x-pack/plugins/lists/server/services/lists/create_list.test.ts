@@ -6,8 +6,8 @@
 
 import { IndexEsListSchema, ListSchema } from '../../../common/schemas';
 import {
-  LISTS_INDEX,
   LIST_ID,
+  LIST_INDEX,
   getCreateListOptionsMock,
   getIndexESListMock,
   getListResponseMock,
@@ -39,7 +39,7 @@ describe('crete_list', () => {
     const expected = {
       body,
       id: LIST_ID,
-      index: LISTS_INDEX,
+      index: LIST_INDEX,
     };
     expect(options.dataClient.callAsCurrentUser).toBeCalledWith('index', expected);
   });

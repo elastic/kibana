@@ -9,8 +9,8 @@ import { getDataClientMock } from './get_data_client_mock';
 import {
   DATE_NOW,
   DESCRIPTION,
-  LISTS_INDEX,
   LIST_ID,
+  LIST_INDEX,
   META,
   NAME,
   USER,
@@ -21,7 +21,7 @@ export const getUpdateListOptionsMock = (): UpdateListOptions => ({
   dateNow: DATE_NOW,
   description: DESCRIPTION,
   id: LIST_ID,
-  listIndex: LISTS_INDEX,
+  listIndex: LIST_INDEX,
   meta: META,
   name: NAME,
   user: USER,

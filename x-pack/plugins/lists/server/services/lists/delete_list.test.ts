@@ -6,9 +6,9 @@
 
 import { ListSchema } from '../../../common/schemas';
 import {
-  LISTS_INDEX,
-  LISTS_ITEMS_INDEX,
   LIST_ID,
+  LIST_INDEX,
+  LIST_ITEM_INDEX,
   getDeleteListOptionsMock,
   getListResponseMock,
 } from '../mocks';
@@ -51,7 +51,7 @@ describe('delete_list', () => {
     await deleteList(options);
     const deleteByQuery = {
       body: { query: { term: { list_id: LIST_ID } } },
-      index: LISTS_ITEMS_INDEX,
+      index: LIST_ITEM_INDEX,
     };
     expect(options.dataClient.callAsCurrentUser).toBeCalledWith('deleteByQuery', deleteByQuery);
   });
@@ -63,7 +63,7 @@ describe('delete_list', () => {
     await deleteList(options);
     const deleteQuery = {
       id: LIST_ID,
-      index: LISTS_INDEX,
+      index: LIST_INDEX,
     };
     expect(options.dataClient.callAsCurrentUser).toHaveBeenNthCalledWith(2, 'delete', deleteQuery);
   });
