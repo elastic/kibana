@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiButton } from '@elastic/eui';
 
-import { Form, useForm, FormDataProvider } from '../../../../shared_imports';
+import { Form, useForm, FormDataProvider } from '../../../../../shared_imports';
 
 import { PipelineEditorProcessor } from '../../types';
 

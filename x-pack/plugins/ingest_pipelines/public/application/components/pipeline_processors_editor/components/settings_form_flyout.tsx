@@ -10,7 +10,7 @@ import React, { FunctionComponent } from 'react';
 
 import { PipelineEditorProcessor } from '../types';
 
-import { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from '.';
+import { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from './index';
 
 export interface Props {
   processor: PipelineEditorProcessor | undefined;

@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 
-import { Processor } from '../../../common/types';
+import { Processor } from '../../../../common/types';
 import { PipelineEditorProcessor } from './types';
 
 export interface DataInArgs {

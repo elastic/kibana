@@ -14,7 +14,7 @@ import {
   FormRow,
   UseField,
   Field,
-} from '../../../../../shared_imports';
+} from '../../../../../../shared_imports';
 
 const { emptyField } = fieldValidators;
 

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Processor } from '../../../common/types';
+import { Processor } from '../../../../common/types';
 
 import { DataInResult } from './data_in';
 import { PipelineEditorProcessor } from './types';

@@ -12,7 +12,7 @@ import {
   UseField,
   fieldValidators,
   FormRow,
-} from '../../../../../../shared_imports';
+} from '../../../../../../../shared_imports';
 import { types } from '../../map_processor_type_to_form';
 
 interface Props {

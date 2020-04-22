@@ -12,7 +12,7 @@ import {
   FIELD_TYPES,
   Field,
   ToggleField,
-} from '../../../../../../shared_imports';
+} from '../../../../../../../shared_imports';
 
 const ignoreFailureConfig: FieldConfig = {
   defaultValue: false,

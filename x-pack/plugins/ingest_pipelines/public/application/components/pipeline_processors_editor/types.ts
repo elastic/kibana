@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESCommonProcessorOptions } from '../../../common/types';
+import { ESCommonProcessorOptions } from '../../../../common/types';
 
 export type ProcessorOptions<CustomProcessorOptions = {}> = ESCommonProcessorOptions &
   CustomProcessorOptions;
