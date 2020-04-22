@@ -5,8 +5,8 @@
  */
 
 import _ from 'lodash';
-import { EditorFrameState } from './state_management';
-import { Datasource, Visualization } from '../../types';
+import { EditorFrameState } from '../state_management';
+import { Datasource, Visualization } from '../../../types';
 
 interface RemoveLayerOptions {
   trackUiEvent: (name: string) => void;

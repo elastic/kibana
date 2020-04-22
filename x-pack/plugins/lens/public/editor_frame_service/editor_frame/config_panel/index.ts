@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './loading';
-export * from './agent_reassign_config_flyout';
-export * from './navigation/child_routes';
-export * from './navigation/connected_link';
+export { ConfigPanelWrapper } from './config_panel';
