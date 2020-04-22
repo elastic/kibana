@@ -19,9 +19,5 @@
 
 module.exports = function(source) {
   const options = this.query;
-  if (!new RegExp(options.test).test(this.resourcePath)) {
-    return source;
-  }
-
-  return `__webpack_public_path__ = window.__kbnPublicPath__['${options.key}'];\n${source}`;
+  return `__webpack_public_path__ = window.__kbnPublicPath__['${options.key}'];${source}`;
 };

@@ -145,6 +145,13 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
       rules: [
         {
+          include: Path.join(bundle.contextDir, bundle.entry),
+          loader: require.resolve('./public_path_loader.js'),
+          options: {
+            key: bundle.id,
+          },
+        },
+        {
           test: /\.css$/,
           include: /node_modules/,
           use: [
@@ -266,24 +273,15 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
         {
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
-          use: [
-            {
-              loader: require.resolve('./public_path_loader.js'),
-              options: {
-                test: bundle.entry,
-                key: bundle.id,
-              },
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              presets: IS_CODE_COVERAGE
+                ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
+                : [BABEL_PRESET_PATH],
             },
-            {
-              loader: 'babel-loader',
-              options: {
-                babelrc: false,
-                presets: IS_CODE_COVERAGE
-                  ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
-                  : [BABEL_PRESET_PATH],
-              },
-            },
-          ],
+          },
         },
         {
           test: /\.(html|md|txt|tmpl)$/,

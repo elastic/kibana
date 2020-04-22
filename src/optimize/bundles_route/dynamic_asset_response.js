@@ -79,12 +79,13 @@ export async function createDynamicAssetResponse(options) {
     fd = null; // read stream is now responsible for fd
 
     const content = replacePublicPath ? replacePlaceholder(read, publicPath) : read;
+    const etag = replacePublicPath ? `${hash}-${publicPath}` : hash;
 
     return h
       .response(content)
       .takeover()
       .code(200)
-      .etag(`${hash}-${publicPath}`)
+      .etag(etag)
       .header('cache-control', 'must-revalidate')
       .type(request.server.mime.path(path).type);
   } catch (error) {
