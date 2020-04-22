@@ -28,9 +28,6 @@ type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T
  * A loosely typed definition of the elasticjs wrapper. It's beyond the scope
  * of this work to try to make a comprehensive type definition of this.
  */
-// we have a wrapper around callCluster that makes this impossible to type correctly
-// TODO: this should be replaced with the regulakr callCluster
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ElasticJs = (action: string, args: unknown) => Promise<unknown>;
 
 /**
