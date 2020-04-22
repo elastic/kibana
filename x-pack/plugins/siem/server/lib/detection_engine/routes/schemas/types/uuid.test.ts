@@ -6,8 +6,8 @@
 
 import { UUID } from './uuid';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from '../response/__mocks__/utils';
 import { left } from 'fp-ts/lib/Either';
+import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
 
 describe('uuid', () => {
   test('it should validate a uuid', () => {

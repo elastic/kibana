@@ -1,6 +1,6 @@
 [role="xpack"]
 [[server-log-action-type]]
-== Server log action type
+=== Server log action
 
 This action type writes and entry to the {kib} server log.
 
@@ -18,4 +18,4 @@ Name::      The name of the connector. The name is used to identify a  connector
 
 Server log actions have the following properties:
 
-Message::   The message to log. 
+Message::   The message to log.

@@ -195,11 +195,16 @@ kibana_vars=(
     xpack.reporting.capture.viewport.width
     xpack.reporting.capture.zoom
     xpack.reporting.csv.checkForFormulas
+    xpack.reporting.csv.escapeFormulaValues
     xpack.reporting.csv.enablePanelActionDownload
+    xpack.reporting.csv.useByteOrderMarkEncoding
     xpack.reporting.csv.maxSizeBytes
     xpack.reporting.csv.scroll.duration
     xpack.reporting.csv.scroll.size
     xpack.reporting.capture.maxAttempts
+    xpack.reporting.capture.timeouts.openUrl
+    xpack.reporting.capture.timeouts.waitForElements
+    xpack.reporting.capture.timeouts.renderComplete
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
     xpack.reporting.index

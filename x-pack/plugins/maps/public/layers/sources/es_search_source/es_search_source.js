@@ -10,7 +10,7 @@ import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
-import { SearchSource } from '../../../kibana_services';
+import { getSearchService } from '../../../kibana_services';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { VectorLayer } from '../../vector_layer';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
@@ -51,7 +51,7 @@ function getDocValueAndSourceFields(indexPattern, fieldNames) {
           lang: field.lang,
         },
       };
-    } else if (field.readFromDocValues) {
+    } else if (field.type !== ES_GEO_FIELD_TYPE.GEO_SHAPE && field.readFromDocValues) {
       const docValueField =
         field.type === 'date'
           ? {
@@ -427,13 +427,17 @@ export class ESSearchSource extends AbstractESSource {
       return {};
     }
 
-    const searchSource = new SearchSource();
+    const searchService = getSearchService();
+    const searchSource = searchService.searchSource.create();
+
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);
+
     const query = {
       language: 'kuery',
       query: `_id:"${docId}" and _index:"${index}"`,
     };
+
     searchSource.setField('query', query);
     searchSource.setField('fields', this._getTooltipPropertyNames());
 
