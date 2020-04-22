@@ -40,9 +40,10 @@ export function createMapPath(id: string) {
 export enum LAYER_TYPE {
   TILE = 'TILE',
   VECTOR = 'VECTOR',
-  VECTOR_TILE = 'VECTOR_TILE',
+  VECTOR_TILE = 'VECTOR_TILE', // for static display of mvt vector tiles with a mapbox stylesheet. Does not support any ad-hoc configurations. Used for consuming EMS vector tiles.
   HEATMAP = 'HEATMAP',
   BLENDED_VECTOR = 'BLENDED_VECTOR',
+  TILED_VECTOR = 'TILED_VECTOR', // similar to a regular vector-layer, but it consumes the data as .mvt tilea iso GeoJson. It supports similar ad-hoc configurations like a regular vector layer (E.g. using IVectorStyle), although there is some loss of functionality  e.g. does not support term joining
 }
 
 export enum SORT_ORDER {
@@ -61,6 +62,7 @@ export enum SOURCE_TYPES {
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
   REGIONMAP_FILE = 'REGIONMAP_FILE',
   GEOJSON_FILE = 'GEOJSON_FILE',
+  MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
 }
 
 export enum FIELD_ORIGIN {
