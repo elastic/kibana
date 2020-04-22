@@ -20,42 +20,27 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
   const browser = getService('browser');
-
-  const defaultSettings = {
-    defaultIndex: 'logstash-*',
-  };
-  const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
 
-  describe('saved queries saved objects', function describeIndexTests() {
+  describe('dashboard saved queries', function describeIndexTests() {
     before(async function() {
-      log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
-
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.replace(defaultSettings);
-      log.debug('discover');
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
     });
 
     describe('saved query management component functionality', function() {
-      before(async function() {
-        // set up a query with filters and a time filter
-        log.debug('set up a query with filters to save');
-        await queryBar.setQuery('response:200');
-        await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
-        const fromTime = 'Sep 20, 2015 @ 08:00:00.000';
-        const toTime = 'Sep 21, 2015 @ 08:00:00.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      before(async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
       });
 
       it('should show the saved query management component when there are no saved queries', async () => {
@@ -67,6 +52,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should allow a query to be saved via the saved objects management component', async () => {
+        await queryBar.setQuery('response:200');
         await savedQueryManagementComponent.saveNewQuery(
           'OkResponse',
           '200 responses for .jpg over 24 hours',
@@ -82,7 +68,6 @@ export default function({ getService, getPageObjects }) {
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
         expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
         expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
       });
@@ -90,10 +75,8 @@ export default function({ getService, getPageObjects }) {
       it('preserves the currently loaded query when the page is reloaded', async () => {
         await browser.refresh();
         const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
         expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
         expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
-        expect(await PageObjects.discover.getHitCount()).to.be('2,792');
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
 
@@ -128,14 +111,6 @@ export default function({ getService, getPageObjects }) {
         expect(await queryBar.getQueryString()).to.eql('');
       });
 
-      it('does not allow saving a query with a non-unique name', async () => {
-        await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
-      });
-
-      it('does not allow saving a query with leading or trailing whitespace in the name', async () => {
-        await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse ');
-      });
-
       it('resets any changes to a loaded query on reloading the same saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await queryBar.setQuery('response:503');
@@ -146,25 +121,6 @@ export default function({ getService, getPageObjects }) {
       it('allows clearing the currently loaded saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        expect(await queryBar.getQueryString()).to.eql('');
-      });
-
-      // https://github.com/elastic/kibana/issues/63505
-      it('allows clearing if non default language was remembered in localstorage', async () => {
-        await queryBar.switchQueryLanguage('lucene');
-        await PageObjects.common.navigateToApp('discover'); // makes sure discovered is reloaded without any state in url
-        await queryBar.expectQueryLanguageOrFail('lucene'); // make sure lucene is remembered after refresh (comes from localstorage)
-        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-        await queryBar.expectQueryLanguageOrFail('kql');
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        await queryBar.expectQueryLanguageOrFail('lucene');
-      });
-
-      // fails: bug in discover https://github.com/elastic/kibana/issues/63561
-      // unskip this test when bug is fixed
-      it.skip('changing language removes saved query', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-        await queryBar.switchQueryLanguage('lucene');
         expect(await queryBar.getQueryString()).to.eql('');
       });
     });
