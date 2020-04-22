@@ -12,6 +12,15 @@ E2E_DIR="${0%/*}/.."
 source src/dev/ci_setup/setup_env.sh true
 set -ex
 cd "${E2E_DIR}"
+
+## Let's remove the previous run test results to avoid messing up
+## with the test reporting in the CI.
 rm cypress/test-results/*.* || true
 rm -rf cypress/screenshots/* || true
+
+## Let's move previous videos to a backup folder.
+old_videos="cypress/videos/previous/$(date +%s)"
+mkdir -p "${old_videos}"
+mv cypress/videos/*.mp4 "${old_videos}/"
+
 yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
