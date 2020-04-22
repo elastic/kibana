@@ -6,7 +6,7 @@
 
 import { AbstractESAggSource } from '../es_agg_source';
 import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
-import { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
+import { GRID_RESOLUTION } from '../../../../common/constants';
 
 export class ESGeoGridSource extends AbstractESAggSource {
   static createDescriptor({
@@ -14,12 +14,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     geoField,
     requestType,
     resolution,
-  }: {
-    indexPatternId: string;
-    geoField: string;
-    requestType: RENDER_AS;
-    resolution?: GRID_RESOLUTION;
-  }): ESGeoGridSourceDescriptor;
+  }: Partial<ESGeoGridSourceDescriptor>): ESGeoGridSourceDescriptor;
 
   constructor(sourceDescriptor: ESGeoGridSourceDescriptor, inspectorAdapters: unknown);
 

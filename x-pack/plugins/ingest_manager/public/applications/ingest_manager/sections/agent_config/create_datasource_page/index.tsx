@@ -28,12 +28,11 @@ import {
 } from '../../../hooks';
 import { useLinks as useEPMLinks } from '../../epm/hooks';
 import { CreateDatasourcePageLayout, ConfirmCreateDatasourceModal } from './components';
-import { CreateDatasourceFrom, CreateDatasourceStep } from './types';
+import { CreateDatasourceFrom } from './types';
 import { DatasourceValidationResults, validateDatasource, validationHasErrors } from './services';
 import { StepSelectPackage } from './step_select_package';
 import { StepSelectConfig } from './step_select_config';
 import { StepConfigureDatasource } from './step_configure_datasource';
-
 import { StepDefineDatasource } from './step_define_datasource';
 
 export const CreateDatasourcePage: React.FunctionComponent = () => {
@@ -43,11 +42,9 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   } = useConfig();
   const {
     params: { configId, pkgkey },
-    url: basePath,
   } = useRouteMatch();
   const history = useHistory();
   const from: CreateDatasourceFrom = configId ? 'config' : 'package';
-  const [maxStep, setMaxStep] = useState<CreateDatasourceStep | ''>('');
 
   // Agent config and package info states
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
@@ -91,7 +88,6 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     } else {
       setFormState('INVALID');
       setPackageInfo(undefined);
-      setMaxStep('');
     }
 
     // eslint-disable-next-line no-console
@@ -105,7 +101,6 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     } else {
       setFormState('INVALID');
       setAgentConfig(undefined);
-      setMaxStep('');
     }
 
     // eslint-disable-next-line no-console
@@ -189,9 +184,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
 
   const layoutProps = {
     from,
-    basePath,
     cancelUrl,
-    maxStep,
     agentConfig,
     packageInfo,
   };

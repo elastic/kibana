@@ -32,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from '../../logs/reason';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 const calculateShards = shards => {
@@ -168,7 +169,7 @@ export function ElasticsearchPanel(props) {
   const showMlJobs = () => {
     // if license doesn't support ML, then `ml === null`
     if (props.ml) {
-      const gotoURL = '#/elasticsearch/ml_jobs';
+      const gotoURL = getSafeForExternalLink('#/elasticsearch/ml_jobs');
       return (
         <>
           <EuiDescriptionListTitle>

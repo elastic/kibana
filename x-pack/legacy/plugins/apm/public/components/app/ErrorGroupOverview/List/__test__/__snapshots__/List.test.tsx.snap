@@ -141,6 +141,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Group ID"
                 >
                   Group ID
                 </span>
@@ -162,6 +163,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Type"
                 >
                   Type
                 </span>
@@ -183,6 +185,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Error message and culprit"
                 >
                   Error message and culprit
                 </span>
@@ -231,6 +234,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                 >
                   <span
                     className="euiTableCellContent__text"
+                    title="Occurrences; Sorted in descending order"
                   >
                     Occurrences
                   </span>
@@ -272,6 +276,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                 >
                   <span
                     className="euiTableCellContent__text"
+                    title="Latest occurrence"
                   >
                     Latest occurrence
                   </span>
@@ -519,6 +524,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Group ID"
                 >
                   Group ID
                 </span>
@@ -540,6 +546,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Type"
                 >
                   Type
                 </span>
@@ -561,6 +568,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Error message and culprit"
                 >
                   Error message and culprit
                 </span>
@@ -609,6 +617,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <span
                     className="euiTableCellContent__text"
+                    title="Occurrences; Sorted in descending order"
                   >
                     Occurrences
                   </span>
@@ -650,6 +659,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <span
                     className="euiTableCellContent__text"
+                    title="Latest occurrence"
                   >
                     Latest occurrence
                   </span>
