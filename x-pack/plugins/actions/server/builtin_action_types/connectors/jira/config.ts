@@ -8,6 +8,6 @@ import { ConnectorConfiguration } from '../types';
 import * as i18n from './translations';
 
 export const config: ConnectorConfiguration = {
-  id: '.resilient',
+  id: '.jira',
   name: i18n.NAME,
 };

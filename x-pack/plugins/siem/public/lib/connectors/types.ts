@@ -43,6 +43,8 @@ export interface ConnectorFlyoutFormProps<T> {
   action: T;
   onChangeSecret: (key: string, value: string) => void;
   onBlurSecret: (key: string) => void;
+  onChangeConfig: (key: string, value: string) => void;
+  onBlurConfig: (key: string) => void;
 }
 
 export interface ConnectorFlyoutHOCProps<T> {

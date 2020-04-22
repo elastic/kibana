@@ -6,12 +6,12 @@
 
 import { Connector } from '../types';
 
-import { RESILIENT_TITLE } from './translations';
+import { JIRA_TITLE } from './translations';
 import logo from './logo.svg';
 
 export const connector: Connector = {
-  id: '.resilient',
-  name: RESILIENT_TITLE,
+  id: '.jira',
+  name: JIRA_TITLE,
   logo,
   enabled: true,
   enabledInConfig: true,

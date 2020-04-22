@@ -47,14 +47,8 @@ export interface ExternalServiceCredential {
 }
 
 export interface ConnectorValidation {
-  config: (
-    configurationUtilities: ActionsConfigurationUtilities,
-    configObject: ConnectorPublicConfigurationType
-  ) => void;
-  secrets: (
-    configurationUtilities: ActionsConfigurationUtilities,
-    secrets: ConnectorSecretConfigurationType
-  ) => void;
+  config: (configurationUtilities: ActionsConfigurationUtilities, configObject: any) => void;
+  secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: any) => void;
 }
 
 export interface ExternalServiceCaseResponse {
@@ -67,6 +61,7 @@ export interface ExternalServiceCaseResponse {
 export interface ExternalServiceCommentResponse {
   commentId: string;
   pushedDate: string;
+  externalCommentId?: string;
 }
 
 export interface ExternalServiceParams {
@@ -104,6 +99,7 @@ export interface CreateConnectorBasicArgs {
 export interface CreateConnectorArgs extends CreateConnectorBasicArgs {
   config: ConnectorConfiguration;
   validate: ConnectorValidation;
+  validationSchema: { config: any; secrets: any };
 }
 
 export interface CreateActionTypeArgs {

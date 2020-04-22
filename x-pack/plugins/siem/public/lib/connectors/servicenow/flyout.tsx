@@ -44,7 +44,7 @@ const ServiceNowConnectorForm: React.FC<ConnectorFlyoutFormProps<ServiceNowActio
               isInvalid={isUsernameInvalid}
               name="connector-servicenow-username"
               value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="usernameFromInput"
+              data-test-subj="connector-servicenow-username-form-input"
               onChange={evt => onChangeSecret('username', evt.target.value)}
               onBlur={() => onBlurSecret('username')}
             />
@@ -66,7 +66,7 @@ const ServiceNowConnectorForm: React.FC<ConnectorFlyoutFormProps<ServiceNowActio
               isInvalid={isPasswordInvalid}
               name="connector-servicenow-password"
               value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="passwordFromInput"
+              data-test-subj="connector-servicenow-password-form-input"
               onChange={evt => onChangeSecret('password', evt.target.value)}
               onBlur={() => onBlurSecret('password')}
             />

@@ -152,10 +152,13 @@ export const ServiceConnectorCaseResponseRt = rt.intersection([
   }),
   rt.partial({
     comments: rt.array(
-      rt.type({
-        commentId: rt.string,
-        pushedDate: rt.string,
-      })
+      rt.intersection([
+        rt.type({
+          commentId: rt.string,
+          pushedDate: rt.string,
+        }),
+        rt.partial({ externalCommentId: rt.string }),
+      ])
     ),
   }),
 ]);

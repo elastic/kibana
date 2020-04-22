@@ -10,7 +10,7 @@ import { api } from './api';
 import { config } from './config';
 import { validate } from './validators';
 import { createExternalService } from './service';
-import { ConnectorPublicConfiguration, ConnectorSecretConfiguration } from '../schema';
+import { JiraSecretConfiguration, JiraPublicConfiguration } from './schema';
 
 export const connector = createConnector({
   api,
@@ -18,7 +18,7 @@ export const connector = createConnector({
   validate,
   createExternalService,
   validationSchema: {
-    config: ConnectorPublicConfiguration,
-    secrets: ConnectorSecretConfiguration,
+    config: JiraPublicConfiguration,
+    secrets: JiraSecretConfiguration,
   },
 });

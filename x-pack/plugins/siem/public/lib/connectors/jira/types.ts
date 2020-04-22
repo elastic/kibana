@@ -8,11 +8,11 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
 import {
-  ResilientPublicConfigurationType,
-  ResilientSecretConfigurationType,
-} from '../../../../../../../plugins/actions/server/builtin_action_types/connectors/resilient/types';
+  JiraPublicConfigurationType,
+  JiraSecretConfigurationType,
+} from '../../../../../../../plugins/actions/server/builtin_action_types/connectors/jira/types';
 
-export interface ResilientActionConnector {
-  config: ResilientPublicConfigurationType;
-  secrets: ResilientSecretConfigurationType;
+export interface JiraActionConnector {
+  config: JiraPublicConfigurationType;
+  secrets: JiraSecretConfigurationType;
 }

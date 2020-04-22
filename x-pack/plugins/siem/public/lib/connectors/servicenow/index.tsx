@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
 import {
   ValidationResult,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths

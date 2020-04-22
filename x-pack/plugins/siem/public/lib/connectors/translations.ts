@@ -55,30 +55,27 @@ export const PASSWORD_REQUIRED = i18n.translate(
   }
 );
 
-export const API_KEY_LABEL = i18n.translate(
-  'xpack.siem.case.connectors.common.apiKeyTextFieldLabel',
+export const API_TOKEN_LABEL = i18n.translate(
+  'xpack.siem.case.connectors.common.apiTokenTextFieldLabel',
   {
-    defaultMessage: 'Api key',
+    defaultMessage: 'Api token',
   }
 );
 
-export const API_KEY_REQUIRED = i18n.translate(
-  'xpack.siem.case.connectors.common.requiredApiKeyTextField',
+export const API_TOKEN_REQUIRED = i18n.translate(
+  'xpack.siem.case.connectors.common.requiredApiTokenTextField',
   {
-    defaultMessage: 'Api key is required',
+    defaultMessage: 'Api token is required',
   }
 );
 
-export const API_SECRET_LABEL = i18n.translate(
-  'xpack.siem.case.connectors.common.apiSecretTextFieldLabel',
-  {
-    defaultMessage: 'Api secret',
-  }
-);
+export const EMAIL_LABEL = i18n.translate('xpack.siem.case.connectors.common.emailTextFieldLabel', {
+  defaultMessage: 'Email',
+});
 
-export const API_SECRET_REQUIRED = i18n.translate(
-  'xpack.siem.case.connectors.common.requiredApiSecretTextField',
+export const EMAIL_REQUIRED = i18n.translate(
+  'xpack.siem.case.connectors.common.requiredEmailTextField',
   {
-    defaultMessage: 'Api secret is required',
+    defaultMessage: 'Email is required',
   }
 );

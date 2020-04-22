@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, ChangeEvent, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { isEmpty, get } from 'lodash/fp';
@@ -61,7 +61,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
     }
 
     const handleOnChangeActionConfig = useCallback(
-      (key: string, evt: ChangeEvent<HTMLInputElement>) => editActionConfig(key, evt.target.value),
+      (key: string, value: string) => editActionConfig(key, value),
       []
     );
 
@@ -114,8 +114,8 @@ export const withConnectorFlyout = <T extends ActionConnector>({
                 name="apiUrl"
                 value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
                 data-test-subj="apiUrlFromInput"
-                placeholder="https://<instance>.service-now.com"
-                onChange={handleOnChangeActionConfig.bind(null, 'apiUrl')}
+                placeholder="https://<site-url>"
+                onChange={evt => handleOnChangeActionConfig('apiUrl', evt.target.value)}
                 onBlur={handleOnBlurActionConfig.bind(null, 'apiUrl')}
               />
             </EuiFormRow>
@@ -127,6 +127,8 @@ export const withConnectorFlyout = <T extends ActionConnector>({
           action={action}
           onChangeSecret={handleOnChangeSecretConfig}
           onBlurSecret={handleOnBlurSecretConfig}
+          onChangeConfig={handleOnChangeActionConfig}
+          onBlurConfig={handleOnBlurActionConfig}
         />
         <EuiSpacer size="l" />
         <EuiFlexGroup>

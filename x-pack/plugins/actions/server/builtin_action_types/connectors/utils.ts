@@ -10,11 +10,7 @@ import { AxiosInstance, Method, AxiosResponse } from 'axios';
 
 import { ActionTypeExecutorOptions, ActionTypeExecutorResult, ActionType } from '../../types';
 
-import {
-  ConnectorPublicConfiguration,
-  ConnectorSecretConfiguration,
-  ExecutorParamsSchema,
-} from './schema';
+import { ExecutorParamsSchema } from './schema';
 
 import {
   CreateConnectorArgs,
@@ -110,6 +106,7 @@ export const createConnector = ({
   config,
   validate,
   createExternalService,
+  validationSchema,
 }: CreateConnectorArgs) => {
   return ({
     configurationUtilities,
@@ -119,10 +116,10 @@ export const createConnector = ({
     name: config.name,
     minimumLicenseRequired: 'platinum',
     validate: {
-      config: schema.object(ConnectorPublicConfiguration, {
+      config: schema.object(validationSchema.config, {
         validate: curry(validate.config)(configurationUtilities),
       }),
-      secrets: schema.object(ConnectorSecretConfiguration, {
+      secrets: schema.object(validationSchema.secrets, {
         validate: curry(validate.secrets)(configurationUtilities),
       }),
       params: ExecutorParamsSchema,
@@ -134,7 +131,7 @@ export const createConnector = ({
 export const throwIfNotAlive = (
   status: number,
   contentType: string,
-  validStatusCodes: number[] = [200, 201]
+  validStatusCodes: number[] = [200, 201, 204]
 ) => {
   if (!validStatusCodes.includes(status) || !contentType.includes('application/json')) {
     throw new Error('Instance is not alive.');

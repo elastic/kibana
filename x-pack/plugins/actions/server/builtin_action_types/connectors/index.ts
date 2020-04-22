@@ -5,3 +5,4 @@
  */
 
 export { connector as getServiceNowConnector } from './servicenow';
+export { connector as getJiraConnector } from './jira';

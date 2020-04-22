@@ -7,16 +7,16 @@
 import { schema } from '@kbn/config-schema';
 import { ConnectorPublicConfiguration } from '../schema';
 
-export const ResilientPublicConfiguration = {
-  orgId: schema.number(),
+export const JiraPublicConfiguration = {
+  projectKey: schema.string(),
   ...ConnectorPublicConfiguration,
 };
 
-export const ResilientPublicConfigurationSchema = schema.object(ResilientPublicConfiguration);
+export const JiraPublicConfigurationSchema = schema.object(JiraPublicConfiguration);
 
-export const ResilientSecretConfiguration = {
-  apiKey: schema.string(),
-  apiSecret: schema.string(),
+export const JiraSecretConfiguration = {
+  email: schema.string(),
+  apiToken: schema.string(),
 };
 
-export const ResilientSecretConfigurationSchema = schema.object(ResilientSecretConfiguration);
+export const JiraSecretConfigurationSchema = schema.object(JiraSecretConfiguration);

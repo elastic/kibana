@@ -6,6 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NAME = i18n.translate('xpack.actions.builtin.resilientTitle', {
-  defaultMessage: 'IBM Resilient',
+export const NAME = i18n.translate('xpack.actions.builtin.jiraTitle', {
+  defaultMessage: 'Jira',
 });

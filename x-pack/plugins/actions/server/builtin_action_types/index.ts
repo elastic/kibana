@@ -16,7 +16,7 @@ import { getActionType as getSlackActionType } from './slack';
 import { getActionType as getWebhookActionType } from './webhook';
 
 // Connectors
-import { getServiceNowConnector } from './connectors';
+import { getServiceNowConnector, getJiraConnector } from './connectors';
 
 export function registerBuiltInActionTypes({
   actionsConfigUtils: configurationUtilities,
@@ -36,4 +36,5 @@ export function registerBuiltInActionTypes({
 
   // Connectors
   actionTypeRegistry.register(getServiceNowConnector({ configurationUtilities }));
+  actionTypeRegistry.register(getJiraConnector({ configurationUtilities }));
 }

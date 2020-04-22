@@ -8,11 +8,11 @@ import { CasesConfigurationMapping } from '../../containers/case/configure/types
 
 import { Connector } from './types';
 import { connector as serviceNowConnectorConfig } from './servicenow/config';
-import { connector as resilientConnectorConfig } from './resilient/config';
+import { connector as jiraConnectorConfig } from './jira/config';
 
 export const connectorsConfiguration: Record<string, Connector> = {
   '.servicenow': serviceNowConnectorConfig,
-  '.resilient': resilientConnectorConfig,
+  '.jira': jiraConnectorConfig,
 };
 
 export const defaultMapping: CasesConfigurationMapping[] = [
