@@ -9,11 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
 export function initDeleteAllCommentsApi({ caseService, router, userActionService }: RouteDeps) {
   router.delete(
     {
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),
