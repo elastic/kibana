@@ -11,15 +11,10 @@ import { EuiDataGridPaginationProps, EuiDataGridSorting, EuiDataGridColumn } fro
 
 import { Dictionary } from '../../../../common/types/common';
 
+import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
+
 export type ColumnId = string;
 export type DataGridItem = Record<string, any>;
-
-export enum INDEX_STATUS {
-  UNUSED,
-  LOADING,
-  LOADED,
-  ERROR,
-}
 
 export type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 
@@ -56,23 +51,26 @@ export interface SearchResponse7 extends SearchResponse<any> {
   };
 }
 
-export interface UseIndexDataReturnType {
+export interface UseIndexDataReturnType
+  extends Pick<
+    UseDataGridReturnType,
+    | 'errorMessage'
+    | 'invalidSortingColumnns'
+    | 'noDataMessage'
+    | 'onChangeItemsPerPage'
+    | 'onChangePage'
+    | 'onSort'
+    | 'pagination'
+    | 'setPagination'
+    | 'setVisibleColumns'
+    | 'rowCount'
+    | 'sortingColumns'
+    | 'status'
+    | 'tableItems'
+    | 'visibleColumns'
+  > {
   columns: EuiDataGridColumn[];
-  errorMessage: string;
-  invalidSortingColumnns: ColumnId[];
-  noDataMessage: string;
-  onChangeItemsPerPage: OnChangeItemsPerPage;
-  onChangePage: OnChangePage;
-  onSort: OnSort;
-  pagination: IndexPagination;
-  setPagination: Dispatch<SetStateAction<IndexPagination>>;
-  setVisibleColumns: Dispatch<SetStateAction<ColumnId[]>>;
   renderCellValue: RenderCellValue;
-  rowCount: number;
-  sortingColumns: EuiDataGridSorting['columns'];
-  status: INDEX_STATUS;
-  tableItems: DataGridItem[];
-  visibleColumns: ColumnId[];
 }
 
 export interface UseDataGridReturnType {
