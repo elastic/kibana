@@ -18,7 +18,8 @@
  */
 
 import { PanelNotFoundError } from '../../../embeddable_plugin';
-import { DashboardPanelState, GridData, DASHBOARD_GRID_COLUMN_COUNT } from '..';
+import { GridData } from '../../../../common';
+import { DashboardPanelState, DASHBOARD_GRID_COLUMN_COUNT } from '..';
 
 export type PanelPlacementMethod<PlacementArgs extends IPanelPlacementArgs> = (
   args: PlacementArgs
