@@ -14,7 +14,6 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiFlexItem,
   EuiFlexGroup,
@@ -29,9 +28,7 @@ const { time: timeStrings } = UnitStrings;
 const { getSecondsText, getMinutesText } = timeStrings;
 
 interface Props {
-  autoplayEnabled: boolean;
   autoplayInterval: number;
-  onSetEnabled: (enabled: boolean) => void;
   onSetInterval: (interval: number | undefined) => void;
 }
 
@@ -54,12 +51,7 @@ const ListGroup = ({ children, ...rest }: ListGroupProps) => (
 
 const generateId = htmlIdGenerator();
 
-export const KioskControls = ({
-  autoplayEnabled,
-  autoplayInterval,
-  onSetEnabled,
-  onSetInterval,
-}: Props) => {
+export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
   const RefreshItem = ({ duration, label, descriptionId }: RefreshItemProps) => (
     <li>
       <EuiLink onClick={() => onSetInterval(duration)} aria-describedby={descriptionId}>
@@ -72,7 +64,11 @@ export const KioskControls = ({
   const intervalTitleId = generateId();
 
   return (
-    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+    <EuiFlexGroup
+      direction="column"
+      justifyContent="spaceBetween"
+      className="canvasViewMenu__kioskSettings"
+    >
       <EuiFlexItem grow={false}>
         <EuiDescriptionList textStyle="reverse">
           <EuiDescriptionListTitle>{strings.getTitle()}</EuiDescriptionListTitle>
@@ -82,11 +78,6 @@ export const KioskControls = ({
         </EuiDescriptionList>
         <EuiHorizontalRule margin="m" />
 
-        <EuiSwitch
-          checked={autoplayEnabled}
-          label={strings.getCycleToggleSwitch()}
-          onChange={ev => onSetEnabled(ev.target.checked)}
-        />
         <EuiSpacer size="m" />
 
         <EuiTitle size="xxxs" id={intervalTitleId}>
@@ -137,8 +128,6 @@ export const KioskControls = ({
 };
 
 KioskControls.propTypes = {
-  autoplayEnabled: PropTypes.bool.isRequired,
   autoplayInterval: PropTypes.number.isRequired,
-  onSetEnabled: PropTypes.func.isRequired,
   onSetInterval: PropTypes.func.isRequired,
 };

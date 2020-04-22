@@ -22,7 +22,6 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { timeDuration } from '../../../lib/time_duration';
-import { RefreshControl } from '../refresh_control';
 import { CustomInterval } from './custom_interval';
 
 import { ComponentStrings, UnitStrings } from '../../../../i18n';
@@ -69,7 +68,11 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
   const intervalTitleId = generateId();
 
   return (
-    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+    <EuiFlexGroup
+      direction="column"
+      justifyContent="spaceBetween"
+      className="canvasViewMenu__kioskSettings"
+    >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="xs">
           <EuiFlexItem>
@@ -97,9 +100,6 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
                   </EuiToolTip>
                 </EuiFlexItem>
               ) : null}
-              <EuiFlexItem grow={false}>
-                <RefreshControl />
-              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -175,7 +175,6 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
           </ListGroup>
         </EuiText>
       </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
         <CustomInterval onSubmit={value => setRefresh(value)} />
       </EuiFlexItem>
