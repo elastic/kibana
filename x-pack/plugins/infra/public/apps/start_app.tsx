@@ -37,11 +37,6 @@ export async function startApp(
   triggersActionsUI: TriggersAndActionsUIPublicPluginSetup
 ) {
   const { element, history } = params;
-  const libs$ = new BehaviorSubject(libs);
-  const store = createStore({
-    apolloClient: libs$.pipe(pluck('apolloClient')),
-    observableApi: libs$.pipe(pluck('observableApi')),
-  });
 
   const InfraPluginRoot: React.FunctionComponent = () => {
     const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
@@ -50,21 +45,17 @@ export async function startApp(
       <core.i18n.Context>
         <EuiErrorBoundary>
           <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
-            <ReduxStoreProvider store={store}>
-              <ReduxStateContextProvider>
-                <ApolloProvider client={libs.apolloClient}>
-                  <ApolloClientContext.Provider value={libs.apolloClient}>
-                    <EuiThemeProvider darkMode={darkMode}>
-                      <HistoryContext.Provider value={history}>
-                        <NavigationWarningPromptProvider>
-                          <Router history={history} />
-                        </NavigationWarningPromptProvider>
-                      </HistoryContext.Provider>
-                    </EuiThemeProvider>
-                  </ApolloClientContext.Provider>
-                </ApolloProvider>
-              </ReduxStateContextProvider>
-            </ReduxStoreProvider>
+            <ApolloProvider client={libs.apolloClient}>
+              <ApolloClientContext.Provider value={libs.apolloClient}>
+                <EuiThemeProvider darkMode={darkMode}>
+                  <HistoryContext.Provider value={history}>
+                    <NavigationWarningPromptProvider>
+                      <Router history={history} />
+                    </NavigationWarningPromptProvider>
+                  </HistoryContext.Provider>
+                </EuiThemeProvider>
+              </ApolloClientContext.Provider>
+            </ApolloProvider>
           </TriggersActionsProvider>
         </EuiErrorBoundary>
       </core.i18n.Context>
