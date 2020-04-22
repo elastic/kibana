@@ -243,7 +243,7 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
         <EuiText data-test-subj="bulk_create_time_durations" size="s">
           {value != null && value.length > 0
             ? Math.max(...value?.map(item => Number.parseFloat(item)))
-            : null}
+            : getEmptyTagValue()}
         </EuiText>
       ),
       truncateText: true,
@@ -256,7 +256,7 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
         <EuiText data-test-subj="search_after_time_durations" size="s">
           {value != null && value.length > 0
             ? Math.max(...value?.map(item => Number.parseFloat(item)))
-            : null}
+            : getEmptyTagValue()}
         </EuiText>
       ),
       truncateText: true,
@@ -267,7 +267,7 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
       name: i18n.COLUMN_GAP,
       render: (value: RuleStatus['current_status']['gap']) => (
         <EuiText data-test-subj="gap" size="s">
-          {value}
+          {value ?? getEmptyTagValue()}
         </EuiText>
       ),
       truncateText: true,
