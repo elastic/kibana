@@ -51,6 +51,7 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
+    createRendering: jest.fn(),
     execute: jest.fn(),
     fork: jest.fn(),
     getFunction: jest.fn(),

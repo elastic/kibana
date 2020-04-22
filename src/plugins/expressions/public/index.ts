@@ -30,15 +30,15 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 // Static exports.
-export { ExpressionExecutor, IExpressionLoaderParams } from './types';
+export { ExpressionExecutor } from './types';
 export {
   ExpressionRendererComponent,
   ReactExpressionRenderer,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from './react_expression_renderer';
-export { ExpressionRenderHandler } from './render';
 export {
+  IExpressionLoaderParams,
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
   ArgumentType,

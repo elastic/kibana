@@ -17,13 +17,7 @@
  * under the License.
  */
 
-import { Adapters } from '../../../inspector/public';
-import {
-  IInterpreterRenderHandlers,
-  ExpressionValue,
-  ExecutionContextSearch,
-  ExpressionsService,
-} from '../../common';
+import { ExpressionsService } from '../../common';
 
 /**
  * @deprecated
@@ -40,25 +34,3 @@ export interface ExpressionExecutor {
 export interface ExpressionInterpreter {
   interpretAst: ExpressionsService['run'];
 }
-
-export interface IExpressionLoaderParams {
-  searchContext?: ExecutionContextSearch;
-  context?: ExpressionValue;
-  variables?: Record<string, any>;
-  disableCaching?: boolean;
-  customFunctions?: [];
-  customRenderers?: [];
-  uiState?: unknown;
-  inspectorAdapters?: Adapters;
-  onRenderError?: RenderErrorHandlerFnType;
-}
-
-export interface RenderError extends Error {
-  type?: string;
-}
-
-export type RenderErrorHandlerFnType = (
-  domNode: HTMLElement,
-  error: RenderError,
-  handlers: IInterpreterRenderHandlers
-) => void;

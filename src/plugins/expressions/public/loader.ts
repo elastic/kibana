@@ -20,24 +20,22 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { Adapters } from '../../inspector/public';
-import { IExpressionLoaderParams } from './types';
-import { ExpressionAstExpression } from '../common';
+import { ExpressionAstExpression, IExpressionLoaderParams, ExpressionRendering } from '../common';
 import { ExecutionContract } from '../common/execution/execution_contract';
 
-import { ExpressionRenderHandler } from './render';
 import { getExpressionsService } from './services';
 
 type Data = any;
 
 export class ExpressionLoader {
   data$: Observable<Data>;
-  update$: ExpressionRenderHandler['update$'];
-  render$: ExpressionRenderHandler['render$'];
-  events$: ExpressionRenderHandler['events$'];
+  update$: ExpressionRendering['update$'];
+  render$: ExpressionRendering['render$'];
+  events$: ExpressionRendering['events$'];
   loading$: Observable<void>;
 
   private execution: ExecutionContract | undefined;
-  private renderHandler: ExpressionRenderHandler;
+  private renderHandler: ExpressionRendering;
   private dataSubject: Subject<Data>;
   private loadingSubject: Subject<boolean>;
   private data: Data;
@@ -60,7 +58,8 @@ export class ExpressionLoader {
       map(() => void 0)
     );
 
-    this.renderHandler = new ExpressionRenderHandler(element, {
+    this.renderHandler = getExpressionsService().createRendering({
+      element,
       onRenderError: params && params.onRenderError,
     });
     this.render$ = this.renderHandler.render$;

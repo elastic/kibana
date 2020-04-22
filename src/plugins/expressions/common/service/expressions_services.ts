@@ -21,6 +21,12 @@ import { Executor } from '../executor';
 import { ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
+import {
+  ExpressionRenderingParams,
+  ExpressionRendering,
+} from '../expression_renderers/expression_rendering';
+
+export type ExpressionsCreateRenderingParams = Omit<ExpressionRenderingParams, 'renderers'>;
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -28,6 +34,7 @@ import { ExecutionContract } from '../execution/execution_contract';
  */
 export type ExpressionsServiceSetup = Pick<
   ExpressionsService,
+  | 'fork'
   | 'getFunction'
   | 'getFunctions'
   | 'getRenderer'
@@ -38,7 +45,6 @@ export type ExpressionsServiceSetup = Pick<
   | 'registerRenderer'
   | 'registerType'
   | 'run'
-  | 'fork'
 >;
 
 /**
@@ -47,6 +53,9 @@ export type ExpressionsServiceSetup = Pick<
  */
 export type ExpressionsServiceStart = Pick<
   ExpressionsService,
+  | 'createRendering'
+  | 'execute'
+  | 'fork'
   | 'getFunction'
   | 'getFunctions'
   | 'getRenderer'
@@ -54,8 +63,6 @@ export type ExpressionsServiceStart = Pick<
   | 'getType'
   | 'getTypes'
   | 'run'
-  | 'execute'
-  | 'fork'
 >;
 
 export interface ExpressionServiceParams {
@@ -254,6 +261,17 @@ export class ExpressionsService {
     const fork = new ExpressionsService({ executor, renderers });
 
     return fork;
+  };
+
+  public readonly createRendering = (
+    params: ExpressionsCreateRenderingParams
+  ): ExpressionRendering => {
+    const rendering = new ExpressionRendering({
+      ...params,
+      renderers: this.renderers,
+    });
+
+    return rendering;
   };
 
   /**

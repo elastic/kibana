@@ -34,12 +34,10 @@ import {
   setCoreStart,
   setInterpreter,
   setRenderersRegistry,
-  setNotifications,
   setExpressionsService,
 } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, loader } from './loader';
-import { ExpressionRenderHandler } from './render';
 
 export interface ExpressionsSetupDeps {
   bfetch: BfetchPublicSetup;
@@ -89,7 +87,6 @@ export interface ExpressionsSetup extends ExpressionsServiceSetup {
 
 export interface ExpressionsStart extends ExpressionsServiceStart {
   ExpressionLoader: typeof ExpressionLoader;
-  ExpressionRenderHandler: typeof ExpressionRenderHandler;
   loader: typeof loader;
   ReactExpressionRenderer: typeof ReactExpressionRenderer;
 }
@@ -177,13 +174,11 @@ export class ExpressionsPublicPlugin
 
   public start(core: CoreStart, { bfetch }: ExpressionsStartDeps): ExpressionsStart {
     setCoreStart(core);
-    setNotifications(core.notifications);
 
     const { expressions } = this;
     const start = {
       ...expressions.start(),
       ExpressionLoader,
-      ExpressionRenderHandler,
       loader,
       ReactExpressionRenderer,
     };

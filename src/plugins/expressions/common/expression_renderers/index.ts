@@ -20,3 +20,4 @@
 export * from './types';
 export * from './expression_renderer';
 export * from './expression_renderer_registry';
+export * from './expression_rendering';
