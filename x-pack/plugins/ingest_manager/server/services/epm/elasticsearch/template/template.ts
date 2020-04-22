@@ -5,17 +5,16 @@
  */
 
 import { Field, Fields } from '../../fields/field';
-import { Dataset, IndexTemplate } from '../../../../types';
+import {
+  Dataset,
+  CallESAsCurrentUser,
+  TemplateRef,
+  IndexTemplate,
+  IndexTemplateMappings,
+} from '../../../../types';
 import { getDatasetAssetBaseName } from '../index';
 
 interface Properties {
-  [key: string]: any;
-}
-interface Mappings {
-  properties: any;
-}
-
-interface Mapping {
   [key: string]: any;
 }
 
@@ -23,6 +22,13 @@ interface MultiFields {
   [key: string]: object;
 }
 
+export interface IndexTemplateMapping {
+  [key: string]: any;
+}
+export interface CurrentIndex {
+  indexName: string;
+  indexTemplate: IndexTemplate;
+}
 const DEFAULT_SCALING_FACTOR = 1000;
 const DEFAULT_IGNORE_ABOVE = 1024;
 
@@ -34,7 +40,7 @@ const DEFAULT_IGNORE_ABOVE = 1024;
 export function getTemplate(
   type: string,
   templateName: string,
-  mappings: Mappings,
+  mappings: IndexTemplateMappings,
   pipelineName?: string | undefined
 ): IndexTemplate {
   const template = getBaseTemplate(type, templateName, mappings);
@@ -52,7 +58,7 @@ export function getTemplate(
  *
  * @param fields
  */
-export function generateMappings(fields: Field[]): Mappings {
+export function generateMappings(fields: Field[]): IndexTemplateMappings {
   const props: Properties = {};
   // TODO: this can happen when the fields property in fields.yml is present but empty
   // Maybe validation should be moved to fields/field.ts
@@ -140,8 +146,8 @@ function generateMultiFields(fields: Fields): MultiFields {
   return multiFields;
 }
 
-function generateKeywordMapping(field: Field): Mapping {
-  const mapping: Mapping = {
+function generateKeywordMapping(field: Field): IndexTemplateMapping {
+  const mapping: IndexTemplateMapping = {
     ignore_above: DEFAULT_IGNORE_ABOVE,
   };
   if (field.ignore_above) {
@@ -150,8 +156,8 @@ function generateKeywordMapping(field: Field): Mapping {
   return mapping;
 }
 
-function generateTextMapping(field: Field): Mapping {
-  const mapping: Mapping = {};
+function generateTextMapping(field: Field): IndexTemplateMapping {
+  const mapping: IndexTemplateMapping = {};
   if (field.analyzer) {
     mapping.analyzer = field.analyzer;
   }
@@ -200,7 +206,11 @@ export function generateESIndexPatterns(datasets: Dataset[] | undefined): Record
   return patterns;
 }
 
-function getBaseTemplate(type: string, templateName: string, mappings: Mappings): IndexTemplate {
+function getBaseTemplate(
+  type: string,
+  templateName: string,
+  mappings: IndexTemplateMappings
+): IndexTemplate {
   return {
     // We need to decide which order we use for the templates
     order: 1,
@@ -234,10 +244,6 @@ function getBaseTemplate(type: string, templateName: string, mappings: Mappings)
       },
     },
     mappings: {
-      // To be filled with interesting information about this specific index
-      _meta: {
-        package: 'foo',
-      },
       // All the dynamic field mappings
       dynamic_templates: [
         // This makes sure all mappings are keywords by default
@@ -261,3 +267,112 @@ function getBaseTemplate(type: string, templateName: string, mappings: Mappings)
     aliases: {},
   };
 }
+
+export const updateCurrentWriteIndices = async (
+  callCluster: CallESAsCurrentUser,
+  templates: TemplateRef[]
+): Promise<void> => {
+  if (!templates) return;
+
+  const allIndices = await queryIndicesFromTemplates(callCluster, templates);
+  return updateAllIndices(allIndices, callCluster);
+};
+
+const queryIndicesFromTemplates = async (
+  callCluster: CallESAsCurrentUser,
+  templates: TemplateRef[]
+): Promise<CurrentIndex[]> => {
+  const indexPromises = templates.map(template => {
+    return getIndices(callCluster, template);
+  });
+  const indexObjects = await Promise.all(indexPromises);
+  return indexObjects.filter(item => item !== undefined).flat();
+};
+
+const getIndices = async (
+  callCluster: CallESAsCurrentUser,
+  template: TemplateRef
+): Promise<CurrentIndex[] | undefined> => {
+  const { templateName, indexTemplate } = template;
+  const res = await callCluster('search', getIndexQuery(templateName));
+  const indices: any[] = res?.aggregations?.index.buckets;
+  if (indices) {
+    return indices.map(index => ({
+      indexName: index.key,
+      indexTemplate,
+    }));
+  }
+};
+
+const updateAllIndices = async (
+  indexNameWithTemplates: CurrentIndex[],
+  callCluster: CallESAsCurrentUser
+): Promise<void> => {
+  const updateIndexPromises = indexNameWithTemplates.map(({ indexName, indexTemplate }) => {
+    return updateExistingIndex({ indexName, callCluster, indexTemplate });
+  });
+  await Promise.all(updateIndexPromises);
+};
+const updateExistingIndex = async ({
+  indexName,
+  callCluster,
+  indexTemplate,
+}: {
+  indexName: string;
+  callCluster: CallESAsCurrentUser;
+  indexTemplate: IndexTemplate;
+}) => {
+  const { settings, mappings } = indexTemplate;
+  // try to update the mappings first
+  // for now we assume updates are compatible
+  try {
+    await callCluster('indices.putMapping', {
+      index: indexName,
+      body: mappings,
+    });
+  } catch (err) {
+    throw new Error('incompatible mappings update');
+  }
+  // update settings after mappings was successful to ensure
+  // pointing to theme new pipeline is safe
+  // for now, only update the pipeline
+  if (!settings.index.default_pipeline) return;
+  try {
+    await callCluster('indices.putSettings', {
+      index: indexName,
+      body: { index: { default_pipeline: settings.index.default_pipeline } },
+    });
+  } catch (err) {
+    throw new Error('incompatible settings update');
+  }
+};
+
+const getIndexQuery = (templateName: string) => ({
+  index: `${templateName}-*`,
+  size: 0,
+  body: {
+    query: {
+      bool: {
+        must: [
+          {
+            exists: {
+              field: 'stream.namespace',
+            },
+          },
+          {
+            exists: {
+              field: 'stream.dataset',
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      index: {
+        terms: {
+          field: '_index',
+        },
+      },
+    },
+  },
+});
