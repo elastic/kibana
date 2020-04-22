@@ -50,12 +50,14 @@ export interface LinkIconProps extends LinkProps {
   children: string;
   iconSize?: IconSize;
   iconType: IconType;
+  dataTestSubj?: string;
 }
 
 export const LinkIcon = React.memo<LinkIconProps>(
   ({
     children,
     color,
+    dataTestSubj,
     disabled,
     href,
     iconSide = 'left',
@@ -67,6 +69,7 @@ export const LinkIcon = React.memo<LinkIconProps>(
     <Link
       className="siemLinkIcon"
       color={color}
+      data-test-subj={dataTestSubj}
       disabled={disabled}
       href={href}
       iconSide={iconSide}
