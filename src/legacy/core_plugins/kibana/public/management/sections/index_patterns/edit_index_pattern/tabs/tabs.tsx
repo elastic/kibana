@@ -165,6 +165,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
                   history.push(getPath(field));
                 },
               }}
+              onRemoveField={refreshFilters}
             />
           </Fragment>
         );
@@ -178,6 +179,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               indexPattern={indexPattern}
               filterFilter={fieldFilter}
               fieldWildcardMatcher={fieldWildcardMatcherDecorated}
+              onAddOrRemoveFilter={refreshFilters}
             />
           </Fragment>
         );
@@ -196,21 +198,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   });
 
   const tabId = getTabIdFromURL(location.search);
+  const selectedTab = euiTabs.find(tab => tab.id === tabId) || euiTabs[0];
 
-  const [selectedTab, setSelectedTab] = useState<EuiTabbedContentTab>(
-    euiTabs.find(tab => tab.id === tabId) || euiTabs[0]
-  );
-
-  const onTabClick = (tab: EuiTabbedContentTab) => {
-    setSelectedTab(tab);
-  };
-
-  return (
-    <EuiTabbedContent
-      tabs={euiTabs}
-      initialSelectedTab={selectedTab}
-      autoFocus="selected"
-      onTabClick={onTabClick}
-    />
-  );
+  return <EuiTabbedContent tabs={euiTabs} initialSelectedTab={selectedTab} autoFocus="selected" />;
 }

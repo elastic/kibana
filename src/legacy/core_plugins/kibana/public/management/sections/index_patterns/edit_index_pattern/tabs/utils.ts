@@ -43,7 +43,9 @@ function getCounts(
     indexed: 0,
     scripted: 0,
     sourceFilters: sourceFilters.excludes
-      ? sourceFilters.excludes.filter(value => value === fieldFilter).length
+      ? sourceFilters.excludes.filter(value =>
+          value.toLowerCase().includes(fieldFilter.toLowerCase())
+        ).length
       : 0,
   });
 

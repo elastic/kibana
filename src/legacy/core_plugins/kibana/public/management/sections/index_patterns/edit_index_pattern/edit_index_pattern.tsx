@@ -96,12 +96,7 @@ export const EditIndexPattern = withRouter(
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.filter(field => field.type === 'conflict')
     );
-
-    indexPattern.tags =
-      services.indexPatternManagement.list.getIndexPatternTags(
-        indexPattern,
-        indexPattern.id === config.get('defaultIndex')
-      ) || [];
+    const [defaultIndex, setDefaultIndex] = useState<string>(config.get('defaultIndex'));
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
@@ -110,6 +105,7 @@ export const EditIndexPattern = withRouter(
 
     const setDefaultPattern = useCallback(() => {
       config.set('defaultIndex', indexPattern.id);
+      setDefaultIndex(indexPattern.id || '');
     }, [config, indexPattern.id]);
 
     const refreshFields = () => {
@@ -125,7 +121,7 @@ export const EditIndexPattern = withRouter(
 
     const removePattern = () => {
       function doRemove() {
-        if (indexPattern.id === config.get('defaultIndex')) {
+        if (indexPattern.id === defaultIndex) {
           config.remove('defaultIndex');
           const otherPatterns = filter(indexPatterns, pattern => {
             return pattern.id !== indexPattern.id;
@@ -162,6 +158,12 @@ export const EditIndexPattern = withRouter(
       }
     );
 
+    indexPattern.tags =
+      services.indexPatternManagement.list.getIndexPatternTags(
+        indexPattern,
+        indexPattern.id === defaultIndex
+      ) || [];
+
     services.docTitle.change(indexPattern.title);
 
     return (
@@ -172,7 +174,7 @@ export const EditIndexPattern = withRouter(
             setDefault={setDefaultPattern}
             refreshFields={refreshFields}
             deleteIndexPattern={removePattern}
-            defaultIndex={config.get('defaultIndex')}
+            defaultIndex={defaultIndex}
           />
           <EuiSpacer size="s" />
           {Boolean(
