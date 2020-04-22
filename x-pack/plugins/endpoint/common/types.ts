@@ -35,6 +35,9 @@ type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
  */
 export type AlertAPIOrdering = 'asc' | 'desc';
 
+/**
+ * Returned by 'api/endpoint/alerts'
+ */
 export interface AlertResultList {
   /**
    * The alerts restricted by page size.
@@ -72,6 +75,9 @@ export interface AlertResultList {
   prev: string | null;
 }
 
+/**
+ * Returned by the server via /api/endpoint/metadata
+ */
 export interface HostResultList {
   /* the hosts restricted by the page size */
   hosts: HostInfo[];
