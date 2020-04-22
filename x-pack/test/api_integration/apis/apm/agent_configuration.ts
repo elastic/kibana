@@ -196,6 +196,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
       after(async () => {
         await deleteConfiguration(config);
+        await deleteConfiguration(configProduction);
       });
 
       it(`should have 'applied_by_agent=false' before supplying etag`, async () => {
@@ -215,10 +216,14 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       });
 
       it(`should have 'applied_by_agent=true' after supplying etag`, async () => {
+        await searchConfigurations({
+          service: { name: 'myservice', environment: 'development' },
+          etag,
+        });
+
         async function getAppliedByAgent() {
           const { body } = await searchConfigurations({
             service: { name: 'myservice', environment: 'development' },
-            etag,
           });
 
           return body._source.applied_by_agent;
@@ -235,10 +240,14 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         expect(res1.body._source.applied_by_agent).to.be(false);
       });
       it(`should have 'applied_by_agent=true' when 'appliedByAgent' attribute is true`, async () => {
+        await searchConfigurations({
+          service: { name: 'myservice', environment: 'production' },
+          mark_as_applied_by_agent: true,
+        });
+
         async function getAppliedByAgent() {
           const { body } = await searchConfigurations({
             service: { name: 'myservice', environment: 'production' },
-            applied_by_agent: true,
           });
 
           return body._source.applied_by_agent;
