@@ -20,7 +20,10 @@ export async function removeInstallation(options: {
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const [pkgName] = pkgkey.split('-');
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  const installedObjects = installation?.installed || [];
+  if (!installation) throw new Error('integration does not exist');
+  if (installation.removable === false)
+    throw new Error(`The ${pkgName} integration is installed by default and cannot be removed`);
+  const installedObjects = installation.installed || [];
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
