@@ -28,7 +28,7 @@ import {
 import { UsageCollectionSetup } from '../../usage_collection/server';
 
 interface HomeServerPluginSetupDependencies {
-  usage_collection?: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
@@ -39,7 +39,7 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core) },
-      sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usage_collection) },
+      sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usageCollection) },
     };
   }
 
