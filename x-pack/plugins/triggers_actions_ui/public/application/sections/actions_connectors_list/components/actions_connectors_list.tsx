@@ -338,8 +338,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             data-test-subj="createActionButton"
             key="create-action"
             fill
-            iconType="plusInCircle"
-            iconSide="left"
             onClick={() => setAddFlyoutVisibility(true)}
           >
             <FormattedMessage
