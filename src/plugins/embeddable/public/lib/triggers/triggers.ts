@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { KibanaDatatable } from '../../../../expressions';
 import { Trigger } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
