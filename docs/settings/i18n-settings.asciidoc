@@ -8,11 +8,13 @@ You do not need to configure any settings to run Kibana in English.
 [[general-i18n-settings-kb]]
 ==== General i18n Settings
 
-`i18n.locale`::
-Kibana currently supports the following locales:
-+
-- English - `en` (default)
-- Chinese - `zh-CN`
-- Japanese - `ja-JP`
+[cols="<h,<",]
+|===
+| i18n.locale
+  | {kib} currently supports the following locales:
+  +
+  - English - `en` (default)
+  - Chinese - `zh-CN`
+  - Japanese - `ja-JP`
 
-
+|===

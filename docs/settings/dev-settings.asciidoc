@@ -12,12 +12,20 @@ They are enabled by default.
 [[grok-settings]]
 ==== Grok Debugger settings
 
-`xpack.grokdebugger.enabled`::
-Set to `true` (default) to enable the <<xpack-grokdebugger,Grok Debugger>>.
+[cols="<h,<",]
+|===
+| xpack.grokdebugger.enabled
+  | Set to `true` (default) to enable the <<xpack-grokdebugger,Grok Debugger>>.
+
+|===
 
 [float]
 [[profiler-settings]]
 ==== {searchprofiler} Settings
 
-`xpack.searchprofiler.enabled`::
-Set to `true` (default) to enable the <<xpack-profiler,{searchprofiler}>>.
+[cols="<h,<",]
+|===
+| xpack.searchprofiler.enabled
+  | Set to `true` (default) to enable the <<xpack-profiler,{searchprofiler}>>.
+
+|===
