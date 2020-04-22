@@ -58,14 +58,18 @@ export class AnomalySwimlaneEmbeddableFactory
         toMountPoint(
           <JobSelectorFlyout
             dateFormatTz={dateFormatTz}
-            singleSelection={true}
+            singleSelection={false}
             timeseriesOnly={true}
             onFlyoutClose={() => {
               flyoutSession.close();
               resolve(undefined);
             }}
             onSelectionConfirmed={({ jobIds, groups }) => {
-              resolve({ jobIds });
+              const title = i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
+                defaultMessage: 'ML anomaly swimlane for {jobIds}',
+                values: { jobIds: jobIds.join(', ') },
+              });
+              resolve({ jobIds, title });
               flyoutSession.close();
             }}
             maps={maps}
