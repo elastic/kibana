@@ -75,6 +75,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
       category: FeatureCatalogueCategory.DATA,
     });
 
+    plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
+
     const security = plugins.security;
 
     core.application.register({
@@ -84,7 +86,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { renderApp } = await import('./app');
 
-        plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
         return renderApp(coreStart, { ...startPlugins, security } as StartPlugins, params);
       },
     });
