@@ -323,14 +323,13 @@ export class TaskStore {
       version: doc.version,
     });
 
-    const c = savedObjectToConcreteTaskInstance(
+    return savedObjectToConcreteTaskInstance(
       // The SavedObjects update api forces a Partial on the `attributes` on the response,
       // but actually returns the whole object that is passed to it, so as we know we're
       // passing in the whole object, this is safe to do.
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
       { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
     );
-    return c;
   }
 
   /**
