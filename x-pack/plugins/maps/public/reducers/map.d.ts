@@ -42,6 +42,10 @@ export type MapContext = {
 export type MapSettings = {
   maxZoom: number;
   minZoom: number;
+  showSpatialFilters: boolean;
+  spatialFiltersAlpa: string;
+  spatialFiltersFillColor: string;
+  spatialFiltersLineColor: string;
 };
 
 export type MapState = {

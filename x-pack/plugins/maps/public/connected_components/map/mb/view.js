@@ -87,7 +87,9 @@ export class MBMapContainer extends React.Component {
           }
         );
       }
-      this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
+      if (this.props.spatialFiltersLayer) {
+        this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
+      }
       this._syncSettings();
     }
   }, 256);

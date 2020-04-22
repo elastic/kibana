@@ -123,7 +123,7 @@ function makeMultiSourceMockLayer(layerId) {
 }
 
 describe('removeOrphanedSourcesAndLayers', () => {
-  const spatialFilterLayer = makeSingleSourceMockLayer(SPATIAL_FILTERS_LAYER_ID);
+  const spatialFilterLayer = makeMultiSourceMockLayer(SPATIAL_FILTERS_LAYER_ID);
   test('should remove foo and bar layer', async () => {
     const bazLayer = makeSingleSourceMockLayer('baz');
     const fooLayer = makeSingleSourceMockLayer('foo');
@@ -176,6 +176,25 @@ describe('removeOrphanedSourcesAndLayers', () => {
 
     const nextStyle = getMockStyle(nextLayerList);
     expect(removedStyle).toEqual(nextStyle);
+  });
+
+  test('should not remove spatial filter layer and sources when spatialFilterLayer is provided', async () => {
+    const styleWithSpatialFilters = getMockStyle([spatialFilterLayer]);
+    const mockMbMap = new MockMbMap(styleWithSpatialFilters);
+
+    removeOrphanedSourcesAndLayers(mockMbMap, [], spatialFilterLayer);
+    expect(mockMbMap.getStyle()).toEqual(styleWithSpatialFilters);
+  });
+
+  test('should remove spatial filter layer and sources when spatialFilterLayer is not provided', async () => {
+    const styleWithSpatialFilters = getMockStyle([spatialFilterLayer]);
+    const mockMbMap = new MockMbMap(styleWithSpatialFilters);
+
+    removeOrphanedSourcesAndLayers(mockMbMap, []);
+    expect(mockMbMap.getStyle()).toEqual({
+      layers: [],
+      sources: {},
+    });
   });
 });
 

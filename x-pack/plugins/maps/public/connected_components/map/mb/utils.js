@@ -13,7 +13,7 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
   const mbLayerIdsToRemove = [];
   mbStyle.layers.forEach(mbLayer => {
     // ignore mapbox layers from spatial filter layer
-    if (spatialFilterLayer.ownsMbLayerId(mbLayer.id)) {
+    if (spatialFilterLayer && spatialFilterLayer.ownsMbLayerId(mbLayer.id)) {
       return;
     }
 
@@ -30,7 +30,7 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
   for (const mbSourceId in mbStyle.sources) {
     if (mbStyle.sources.hasOwnProperty(mbSourceId)) {
       // ignore mapbox sources from spatial filter layer
-      if (spatialFilterLayer.ownsMbSourceId(mbSourceId)) {
+      if (spatialFilterLayer && spatialFilterLayer.ownsMbSourceId(mbSourceId)) {
         return;
       }
 

@@ -11,7 +11,7 @@ import { VectorTileLayer } from '../layers/vector_tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
 import { BlendedVectorLayer } from '../layers/blended_vector_layer';
-import { getTimeFilter, getUiSettings } from '../kibana_services';
+import { getTimeFilter } from '../kibana_services';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../layers/tiled_vector_layer';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
@@ -194,50 +194,56 @@ export const getDataFilters = createSelector(
   }
 );
 
-export const getSpatialFiltersLayer = createSelector(getFilters, filters => {
-  const featureCollection = {
-    type: 'FeatureCollection',
-    features: extractFeaturesFromFilters(filters),
-  };
-  const geoJsonSourceDescriptor = GeojsonFileSource.createDescriptor(
-    featureCollection,
-    'spatialFilters'
-  );
+export const getSpatialFiltersLayer = createSelector(
+  getFilters,
+  getMapSettings,
+  (filters, settings) => {
+    if (!settings.showSpatialFilters) {
+      return null;
+    }
 
-  // TODO make alpha, fillColor, and lineColor configurable as map properties
-  const isDarkMode = getUiSettings().get('theme:darkMode', false);
-  return new VectorLayer({
-    layerDescriptor: {
-      id: SPATIAL_FILTERS_LAYER_ID,
-      visible: true,
-      alpha: 0.3,
-      type: LAYER_TYPE.VECTOR,
-      __dataRequests: [
-        {
-          dataId: SOURCE_DATA_ID_ORIGIN,
-          data: featureCollection,
-        },
-      ],
-      style: {
-        properties: {
-          [VECTOR_STYLES.FILL_COLOR]: {
-            type: STYLE_TYPE.STATIC,
-            options: {
-              color: isDarkMode ? '#DCDCDC' : '#696969',
-            },
+    const featureCollection = {
+      type: 'FeatureCollection',
+      features: extractFeaturesFromFilters(filters),
+    };
+    const geoJsonSourceDescriptor = GeojsonFileSource.createDescriptor(
+      featureCollection,
+      'spatialFilters'
+    );
+
+    return new VectorLayer({
+      layerDescriptor: {
+        id: SPATIAL_FILTERS_LAYER_ID,
+        visible: true,
+        alpha: settings.spatialFiltersAlpa,
+        type: LAYER_TYPE.VECTOR,
+        __dataRequests: [
+          {
+            dataId: SOURCE_DATA_ID_ORIGIN,
+            data: featureCollection,
           },
-          [VECTOR_STYLES.LINE_COLOR]: {
-            type: STYLE_TYPE.STATIC,
-            options: {
-              color: isDarkMode ? '#FFF' : '#000',
+        ],
+        style: {
+          properties: {
+            [VECTOR_STYLES.FILL_COLOR]: {
+              type: STYLE_TYPE.STATIC,
+              options: {
+                color: settings.spatialFiltersFillColor,
+              },
+            },
+            [VECTOR_STYLES.LINE_COLOR]: {
+              type: STYLE_TYPE.STATIC,
+              options: {
+                color: settings.spatialFiltersLineColor,
+              },
             },
           },
         },
       },
-    },
-    source: new GeojsonFileSource(geoJsonSourceDescriptor),
-  });
-});
+      source: new GeojsonFileSource(geoJsonSourceDescriptor),
+    });
+  }
+);
 
 export const getLayerList = createSelector(
   getLayerListRaw,
