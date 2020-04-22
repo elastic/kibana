@@ -36,7 +36,7 @@ export const readPrivilegesRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const index = siemClient.signalsIndex;
+        const index = siemClient.getSignalsIndex();
         const clusterPrivileges = await readPrivileges(clusterClient.callAsCurrentUser, index);
         const privileges = merge(clusterPrivileges, {
           is_authenticated: security?.authc.isAuthenticated(request) ?? false,
