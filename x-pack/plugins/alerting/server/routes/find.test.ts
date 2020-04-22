@@ -108,13 +108,16 @@ describe('findAlertRoute', () => {
       data: [],
     });
 
-    const [context, req, res] = mockHandlerArguments(alertsClient, {
-      query: {
-        per_page: 1,
-        page: 1,
-        default_search_operator: 'OR',
-      },
-    });
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        query: {
+          per_page: 1,
+          page: 1,
+          default_search_operator: 'OR',
+        },
+      }
+    );
 
     await handler(context, req, res);
 
