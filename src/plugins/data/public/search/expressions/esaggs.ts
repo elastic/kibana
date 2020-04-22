@@ -68,7 +68,7 @@ const name = 'esaggs';
 type Input = KibanaContext | null;
 type Output = Promise<KibanaDatatable>;
 
-interface Arguments {
+export interface Arguments {
   index: string;
   metricsAtAllLevels: boolean;
   partialRows: boolean;
@@ -125,7 +125,7 @@ const handleCourierRequest = async ({
 
   // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
   // pattern if it's available.
-  const defaultTimeField = indexPattern?.getTimeField();
+  const defaultTimeField = indexPattern?.getTimeField?.();
   const defaultTimeFields = defaultTimeField ? [defaultTimeField.name] : [];
   const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
 
