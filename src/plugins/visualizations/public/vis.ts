@@ -29,20 +29,20 @@
 
 import { isFunction, defaults, cloneDeep } from 'lodash';
 import { PersistedState } from './persisted_state';
-import { getTypes, getAggs } from './services';
+import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
 import { VisType } from './vis_types';
 import {
   IAggConfigs,
   IndexPattern,
   ISearchSource,
   AggConfigOptions,
+  SearchSourceFields,
 } from '../../../plugins/data/public';
 
 export interface SerializedVisData {
   expression?: string;
   aggs: AggConfigOptions[];
-  indexPattern?: string;
-  searchSource?: ISearchSource;
+  searchSource: SearchSourceFields;
   savedSearchId?: string;
 }
 
@@ -60,7 +60,7 @@ export interface VisData {
   ast?: string;
   aggs?: IAggConfigs;
   indexPattern?: IndexPattern;
-  searchSource?: ISearchSource;
+  searchSource: ISearchSource;
   savedSearchId?: string;
 }
 
@@ -68,6 +68,20 @@ export interface VisParams {
   [key: string]: any;
 }
 
+const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
+  const searchSource = inputSearchSource.createCopy();
+  if (savedSearchId) {
+    const savedSearch = await getSavedSearchLoader().get(savedSearchId);
+
+    searchSource.setParent(savedSearch.searchSource);
+  }
+  searchSource!.setField('size', 0);
+  return searchSource;
+};
+
+interface PartialVisState extends Omit<SerializedVis, 'data'> {
+  data: Partial<SerializedVisData>;
+}
 export class Vis {
   public readonly type: VisType;
   public readonly id?: string;
@@ -77,7 +91,9 @@ export class Vis {
   // Session state is for storing information that is transitory, and will not be saved with the visualization.
   // For instance, map bounds, which depends on the view port, browser window size, etc.
   public sessionState: Record<string, any> = {};
-  public data: VisData = {};
+  public data: VisData = {
+    searchSource: {} as ISearchSource,
+  };
 
   public readonly uiState: PersistedState;
 
@@ -86,8 +102,6 @@ export class Vis {
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
     this.id = visState.id;
-
-    this.setState(visState || {});
   }
 
   private getType(visType: string) {
@@ -102,7 +116,7 @@ export class Vis {
     return defaults({}, cloneDeep(params || {}), cloneDeep(this.type.visConfig.defaults || {}));
   }
 
-  setState(state: SerializedVis) {
+  async setState(state: PartialVisState) {
     let typeChanged = false;
     if (state.type && this.type.name !== state.type) {
       // @ts-ignore
@@ -116,15 +130,19 @@ export class Vis {
       this.description = state.description;
     }
     if (state.params || typeChanged) {
-      this.params = this.getParams(state.params);
+      this.params = this.getParams(state.params!);
     }
 
     if (state.data && state.data.searchSource) {
-      this.data.searchSource = state.data.searchSource!;
+      this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource!);
       this.data.indexPattern = this.data.searchSource.getField('index');
     }
     if (state.data && state.data.savedSearchId) {
       this.data.savedSearchId = state.data.savedSearchId;
+      this.data.searchSource = await getSearchSource(
+        this.data.searchSource,
+        this.data.savedSearchId
+      );
     }
     if (state.data && state.data.aggs) {
       const configStates = this.initializeDefaultsFromSchemas(
@@ -142,22 +160,31 @@ export class Vis {
   }
 
   clone() {
-    return new Vis(this.type.name, this.serialize());
+    const { data, ...restOfSerialized } = this.serialize();
+    const vis = new Vis(this.type.name, restOfSerialized as any);
+    vis.setState(restOfSerialized as any);
+    const aggs = this.data.indexPattern
+      ? getAggs().createAggConfigs(this.data.indexPattern, data.aggs)
+      : undefined;
+    vis.data = {
+      ...this.data,
+      aggs,
+    };
+    return vis;
   }
 
   serialize(): SerializedVis {
     const aggs = this.data.aggs ? this.data.aggs.aggs.map(agg => agg.toJSON()) : [];
-    const indexPattern = this.data.searchSource && this.data.searchSource.getField('index');
     return {
       id: this.id,
       title: this.title,
+      description: this.description,
       type: this.type.name,
       params: cloneDeep(this.params) as any,
       uiState: this.uiState.toJSON(),
       data: {
         aggs: aggs as any,
-        indexPattern: indexPattern ? indexPattern.id : undefined,
-        searchSource: this.data.searchSource!.createCopy(),
+        searchSource: this.data.searchSource!.getSerializedFields(),
         savedSearchId: this.data.savedSearchId,
       },
     };

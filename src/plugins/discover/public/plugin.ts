@@ -20,8 +20,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { auto } from 'angular';
-import { CoreSetup, Plugin } from 'kibana/public';
-import { SavedObjectLoader, SavedObjectKibanaServices } from '../../saved_objects/public';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { SavedObjectLoader } from '../../saved_objects/public';
 import { DocViewInput, DocViewInputFn, DocViewRenderProps } from './doc_views/doc_views_types';
 import { DocViewsRegistry } from './doc_views/doc_views_registry';
 import { DocViewTable } from './components/table/table';
@@ -31,6 +31,7 @@ import { setDocViewsRegistry } from './services';
 import { createSavedSearchesLoader } from './saved_searches';
 
 import './index.scss';
+import { DataPublicPluginStart } from '../../data/public';
 
 /**
  * @public
@@ -64,21 +65,19 @@ export interface DiscoverStart {
      */
     DocViewer: React.ComponentType<DocViewRenderProps>;
   };
-  savedSearches: {
-    /**
-     * Create a {@link SavedObjectLoader | loader} to handle the saved searches type.
-     * @param services
-     */
-    createLoader(services: SavedObjectKibanaServices): SavedObjectLoader;
-  };
+  savedSearchLoader: SavedObjectLoader;
 }
 
+export interface DiscoverPluginStartDeps {
+  data: DataPublicPluginStart;
+}
 /**
  * Contains Discover, one of the oldest parts of Kibana
  * There are 2 kinds of Angular bootstrapped for rendering, additionally to the main Angular
  * Discover provides embeddables, those contain a slimmer Angular
  */
-export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
+export class DiscoverPlugin
+  implements Plugin<DiscoverSetup, DiscoverStart, {}, DiscoverPluginStartDeps> {
   private docViewsRegistry: DocViewsRegistry | null = null;
 
   setup(core: CoreSetup): DiscoverSetup {
@@ -109,14 +108,18 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     };
   }
 
-  start() {
+  start(core: CoreStart, { data }: DiscoverPluginStartDeps) {
     return {
       docViews: {
         DocViewer,
       },
-      savedSearches: {
-        createLoader: createSavedSearchesLoader,
-      },
+      savedSearchLoader: createSavedSearchesLoader({
+        savedObjectsClient: core.savedObjects.client,
+        indexPatterns: data.indexPatterns,
+        search: data.search,
+        chrome: core.chrome,
+        overlays: core.overlays,
+      }),
     };
   }
 }

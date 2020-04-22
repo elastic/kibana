@@ -75,7 +75,7 @@ export type VisualizationsSetup = TypesSetup;
 
 export interface VisualizationsStart extends TypesStart {
   savedVisualizationsLoader: SavedVisualizationsLoader;
-  createVis: (visType: string, visState?: SerializedVis) => Vis;
+  createVis: (visType: string, visState: SerializedVis) => Promise<Vis>;
   convertToSerializedVis: typeof convertToSerializedVis;
   convertFromSerializedVis: typeof convertFromSerializedVis;
   showNewVisModal: typeof showNewVisModal;
@@ -177,7 +177,11 @@ export class VisualizationsPlugin
        * @param {IIndexPattern} indexPattern - index pattern to use
        * @param {VisState} visState - visualization configuration
        */
-      createVis: (visType: string, visState?: SerializedVis) => new Vis(visType, visState),
+      createVis: async (visType: string, visState: SerializedVis) => {
+        const vis = new Vis(visType);
+        await vis.setState(visState);
+        return vis;
+      },
       convertToSerializedVis,
       convertFromSerializedVis,
       savedVisualizationsLoader,

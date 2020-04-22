@@ -37,9 +37,7 @@ const createStartContract = (): Start => {
     docViews: {
       DocViewer: jest.fn(() => null),
     },
-    savedSearches: {
-      createLoader: jest.fn(),
-    },
+    savedSearchLoader: {} as any,
   };
   return startContract;
 };
