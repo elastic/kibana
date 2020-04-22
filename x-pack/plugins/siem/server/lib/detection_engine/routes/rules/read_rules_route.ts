@@ -11,12 +11,9 @@ import { transformValidate } from './validate';
 import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
 import { readRules } from '../../rules/read_rules';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import {
-  ReadRuleRequestParams,
-  IRuleSavedAttributesSavedObjectAttributes,
-} from '../../rules/types';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { ReadRuleRequestParams } from '../../rules/types';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
+import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
 export const readRulesRoute = (router: IRouter) => {
   router.get(
@@ -41,6 +38,7 @@ export const readRulesRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
+        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const rule = await readRules({
           alertsClient,
           id,
@@ -51,10 +49,7 @@ export const readRulesRoute = (router: IRouter) => {
             savedObjectsClient,
             ruleAlertId: rule.id,
           });
-          const ruleStatuses = await savedObjectsClient.find<
-            IRuleSavedAttributesSavedObjectAttributes
-          >({
-            type: ruleStatusSavedObjectType,
+          const ruleStatuses = await ruleStatusClient.find({
             perPage: 1,
             sortField: 'statusDate',
             sortOrder: 'desc',

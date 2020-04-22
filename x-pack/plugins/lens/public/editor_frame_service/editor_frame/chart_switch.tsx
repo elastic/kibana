@@ -10,7 +10,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiKeyPadMenu,
-  EuiKeyPadMenuItemButton,
+  EuiKeyPadMenuItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { flatten } from 'lodash';
@@ -215,7 +215,7 @@ export function ChartSwitch(props: Props) {
       </EuiPopoverTitle>
       <EuiKeyPadMenu>
         {(visualizationTypes || []).map(v => (
-          <EuiKeyPadMenuItemButton
+          <EuiKeyPadMenuItem
             key={`${v.visualizationId}:${v.id}`}
             label={<span data-test-subj="visTypeTitle">{v.label}</span>}
             role="menuitem"
@@ -238,7 +238,7 @@ export function ChartSwitch(props: Props) {
             betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
           >
             <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} size="l" />
-          </EuiKeyPadMenuItemButton>
+          </EuiKeyPadMenuItem>
         ))}
       </EuiKeyPadMenu>
     </EuiPopover>

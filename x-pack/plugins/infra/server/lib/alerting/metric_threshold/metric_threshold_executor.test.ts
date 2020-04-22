@@ -149,6 +149,14 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceID)).toBe(undefined);
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
+    test('alerts as expected with the outside range comparator', async () => {
+      await execute(Comparator.OUTSIDE_RANGE, [0, 0.75]);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+      await execute(Comparator.OUTSIDE_RANGE, [0, 1.5]);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
     test('reports expected values to the action context', async () => {
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
