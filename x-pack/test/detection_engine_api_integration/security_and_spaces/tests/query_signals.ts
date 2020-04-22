@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../legacy/plugins/siem/common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../plugins/siem/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { getSignalStatus, createSignalsIndex, deleteSignalsIndex } from './utils';
 

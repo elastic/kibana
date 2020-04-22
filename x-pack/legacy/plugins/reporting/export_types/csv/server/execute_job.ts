@@ -123,7 +123,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
     const generateCsv = createGenerateCsv(jobLogger);
     const bom = config.get('csv', 'useByteOrderMarkEncoding') ? CSV_BOM_CHARS : '';
 
-    const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv({
+    const { content, maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv({
       searchRequest,
       fields,
       metaFields,
@@ -136,15 +136,18 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
         checkForFormulas: config.get('csv', 'checkForFormulas'),
         maxSizeBytes: config.get('csv', 'maxSizeBytes'),
         scroll: config.get('csv', 'scroll'),
+        escapeFormulaValues: config.get('csv', 'escapeFormulaValues'),
       },
     });
 
+    // @TODO: Consolidate these one-off warnings into the warnings array (max-size reached and csv contains formulas)
     return {
       content_type: 'text/csv',
       content: bom + content,
       max_size_reached: maxSizeReached,
       size,
       csv_contains_formulas: csvContainsFormulas,
+      warnings,
     };
   };
 };

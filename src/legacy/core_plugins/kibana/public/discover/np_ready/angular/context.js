@@ -81,6 +81,7 @@ function ContextAppRouteController($routeParams, $scope, $route) {
     defaultStepSize: getServices().uiSettings.get('context:defaultSize'),
     timeFieldName: indexPattern.timeFieldName,
     storeInSessionStorage: getServices().uiSettings.get('state:storeInSessionStorage'),
+    history: getServices().history(),
   });
   this.state = { ...appState.getState() };
   this.anchorId = $routeParams.id;

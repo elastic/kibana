@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
-import styled from 'styled-components';
+import { EuiPopover } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { IS_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
 
 interface Props {
   /**
@@ -26,34 +27,6 @@ interface Props {
    */
   render: (showHoverContent: boolean) => JSX.Element;
 }
-
-const HoverActionsPanelContainer = styled.div`
-  color: ${({ theme }) => theme.eui.textColors.default};
-  height: 100%;
-  position: relative;
-`;
-
-HoverActionsPanelContainer.displayName = 'HoverActionsPanelContainer';
-
-const HoverActionsPanel = React.memo<{ children: JSX.Element; show: boolean }>(
-  ({ children, show }) => (
-    <HoverActionsPanelContainer data-test-subj="hover-actions-panel-container">
-      {show ? children : null}
-    </HoverActionsPanelContainer>
-  )
-);
-
-HoverActionsPanel.displayName = 'HoverActionsPanel';
-
-const WithHoverActionsContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  height: 100%;
-  padding-right: 5px;
-`;
-
-WithHoverActionsContainer.displayName = 'WithHoverActionsContainer';
-
 /**
  * Decorates it's children with actions that are visible on hover.
  * This component does not enforce an opinion on the styling and
@@ -68,20 +41,41 @@ export const WithHoverActions = React.memo<Props>(
   ({ alwaysShow = false, hoverContent, render }) => {
     const [showHoverContent, setShowHoverContent] = useState(false);
     const onMouseEnter = useCallback(() => {
-      setShowHoverContent(true);
+      // NOTE: the following read from the DOM is expensive, but not as
+      // expensive as the default behavior, which adds a div to the body,
+      // which-in turn performs a more expensive change to the layout
+      if (!document.body.classList.contains(IS_DRAGGING_CLASS_NAME)) {
+        setShowHoverContent(true);
+      }
     }, []);
 
     const onMouseLeave = useCallback(() => {
       setShowHoverContent(false);
     }, []);
 
+    const content = useMemo(() => <>{render(showHoverContent)}</>, [render, showHoverContent]);
+
+    const isOpen = hoverContent != null && (showHoverContent || alwaysShow);
+
+    const popover = useMemo(() => {
+      return (
+        <EuiPopover
+          anchorPosition={'downCenter'}
+          button={content}
+          closePopover={onMouseLeave}
+          hasArrow={false}
+          isOpen={isOpen}
+          panelPaddingSize={!alwaysShow ? 's' : 'none'}
+        >
+          {isOpen ? hoverContent : null}
+        </EuiPopover>
+      );
+    }, [content, onMouseLeave, isOpen, alwaysShow, hoverContent]);
+
     return (
-      <WithHoverActionsContainer onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-        <>{render(showHoverContent)}</>
-        <HoverActionsPanel show={showHoverContent || alwaysShow}>
-          {hoverContent != null ? hoverContent : <></>}
-        </HoverActionsPanel>
-      </WithHoverActionsContainer>
+      <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        {popover}
+      </div>
     );
   }
 );
