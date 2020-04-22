@@ -124,10 +124,7 @@ export const AgentDetailSection: React.FunctionComponent<Props> = ({ agent }) =>
   return (
     <>
       {isReassignFlyoutOpen && (
-        <AgentReassignConfigFlyout
-          agentId={agent.id}
-          onClose={() => setIsReassignFlyoutOpen(false)}
-        />
+        <AgentReassignConfigFlyout agent={agent} onClose={() => setIsReassignFlyoutOpen(false)} />
       )}
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>

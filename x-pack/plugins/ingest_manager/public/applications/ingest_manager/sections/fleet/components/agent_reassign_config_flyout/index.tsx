@@ -22,7 +22,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Datasource } from '../../../../types';
+import { Datasource, Agent } from '../../../../types';
 import {
   useGetOneAgentConfig,
   sendPutAgentReassign,
@@ -33,12 +33,14 @@ import { PackageIcon } from '../../../../components/package_icon';
 
 interface Props {
   onClose: () => void;
-  agentId: string;
+  agent: Agent;
 }
 
-export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onClose, agentId }) => {
+export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onClose, agent }) => {
   const { notifications } = useCore();
-  const [selectedAgentConfigId, setSelectedAgentConfigId] = useState<string | undefined>(undefined);
+  const [selectedAgentConfigId, setSelectedAgentConfigId] = useState<string | undefined>(
+    agent.config_id
+  );
 
   const agentConfigsRequest = useGetAgentConfigs();
   const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
@@ -54,7 +56,7 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
       if (!selectedAgentConfigId) {
         throw new Error('No selected config id');
       }
-      const res = await sendPutAgentReassign(agentId, {
+      const res = await sendPutAgentReassign(agent.id, {
         config_id: selectedAgentConfigId,
       });
       if (res.error) {
@@ -111,7 +113,6 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
                   value: config.id,
                   text: config.name,
                 }))}
-                hasNoInitialSelection
                 value={selectedAgentConfigId}
                 onChange={e => setSelectedAgentConfigId(e.target.value)}
               />
@@ -166,7 +167,12 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton disabled={!agentConfig} fill onClick={onSubmit} isLoading={isSubmitting}>
+            <EuiButton
+              disabled={!agentConfig || agentConfig.id === agent.config_id}
+              fill
+              onClick={onSubmit}
+              isLoading={isSubmitting}
+            >
               <FormattedMessage
                 id="xpack.ingestManager.agentReassignConfig.continueButtonLabel"
                 defaultMessage="Assign configuration"

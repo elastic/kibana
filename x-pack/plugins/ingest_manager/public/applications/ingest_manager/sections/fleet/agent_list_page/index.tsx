@@ -362,6 +362,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     />
   );
 
+  const agentToReassign = agentToReassignId && agents.find(a => a.id === agentToReassignId);
+
   return (
     <>
       {isEnrollmentFlyoutOpen ? (
@@ -370,9 +372,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           onClose={() => setIsEnrollmentFlyoutOpen(false)}
         />
       ) : null}
-      {agentToReassignId && (
+      {agentToReassign && (
         <AgentReassignConfigFlyout
-          agentId={agentToReassignId}
+          agent={agentToReassign}
           onClose={() => {
             setAgentToReassignId(undefined);
             agentsRequest.sendRequest();
