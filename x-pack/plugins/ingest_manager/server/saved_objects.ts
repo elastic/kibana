@@ -150,6 +150,7 @@ export const savedObjectMappings = {
       name: { type: 'keyword' },
       version: { type: 'keyword' },
       internal: { type: 'boolean' },
+      removable: { type: 'boolean' },
       es_index_patterns: {
         dynamic: false,
         type: 'object',
