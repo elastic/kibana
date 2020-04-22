@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { StartServicesAccessor } from 'kibana/public';
+import { CoreStart, StartServicesAccessor } from 'kibana/public';
 
 import moment from 'moment';
 import {
@@ -24,6 +24,8 @@ import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public'
 import { MlStartDependencies } from '../../plugin';
 import { JobSelectorFlyout } from '../../application/components/job_selector/job_selector_flyout';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
+import { HttpService } from '../../application/services/http_service';
+import { MlAnomalyDetectorService } from '../../application/services/ml_anomanly_detector.service';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
@@ -82,11 +84,23 @@ export class AnomalySwimlaneEmbeddableFactory
     });
   }
 
+  private getMlServices(coreStart: CoreStart) {
+    const httpService = new HttpService(coreStart.http);
+    const mlAnomalyDetectorService = new MlAnomalyDetectorService(httpService);
+
+    return { mlAnomalyDetectorService };
+  }
+
   public async create(
     initialInput: AnomalySwimlaneEmbeddableInput,
     parent?: IContainer
   ): Promise<AnomalySwimlaneEmbeddable | ErrorEmbeddable> {
     const [coreStart, pluginsStart] = await this.getStartServices();
-    return new AnomalySwimlaneEmbeddable(initialInput, [coreStart, pluginsStart], parent);
+
+    return new AnomalySwimlaneEmbeddable(
+      initialInput,
+      [coreStart, pluginsStart, this.getMlServices(coreStart)],
+      parent
+    );
   }
 }

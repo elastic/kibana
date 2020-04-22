@@ -16,6 +16,7 @@ import {
 } from '../../../../../../src/plugins/embeddable/public';
 import { MlStartDependencies } from '../../plugin';
 import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
+import { MlAnomalyDetectorService } from '../../application/services/ml_anomanly_detector.service';
 
 export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
 
@@ -31,6 +32,10 @@ export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
   viewBy: string;
 }
 
+export interface MlServices {
+  mlAnomalyDetectorService: MlAnomalyDetectorService;
+}
+
 export class AnomalySwimlaneEmbeddable extends Embeddable<
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput
@@ -41,7 +46,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
 
   constructor(
     initialInput: AnomalySwimlaneEmbeddableInput,
-    private services: [CoreStart, MlStartDependencies],
+    private services: [CoreStart, MlStartDependencies, MlServices],
     parent?: IContainer
   ) {
     super(

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
-import { combineLatest, forkJoin, from, Observable, of } from 'rxjs';
+import { combineLatest, forkJoin, from, Observable, of, Subject } from 'rxjs';
 import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { throttle } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { ChartTooltip } from '../../application/components/chart_tooltip';
@@ -19,14 +20,12 @@ import {
   OverallSwimlaneData,
 } from '../../application/explorer/explorer_utils';
 import { MlStartDependencies } from '../../plugin';
-import { AnomalySwimlaneEmbeddableInput } from './anomaly_swimlane_embaddable';
-import { HttpService } from '../../application/services/http_service';
-import { MlAnomalyDetectorService } from '../../application/services/ml_anomanly_detector.service';
+import { AnomalySwimlaneEmbeddableInput, MlServices } from './anomaly_swimlane_embaddable';
 import { parseInterval } from '../../../common/util/parse_interval';
 
 export interface ExplorerSwimlaneContainerProps {
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
-  services: [CoreStart, MlStartDependencies];
+  services: [CoreStart, MlStartDependencies, MlServices];
   refresh: Observable<any>;
 }
 
@@ -35,13 +34,12 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   services,
   refresh,
 }) => {
-  const [{ uiSettings, notifications, http }, pluginStart] = services;
+  const [{ uiSettings, notifications }, pluginStart, { mlAnomalyDetectorService }] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [chartWidth, setChartWidth] = useState<number>(0);
 
-  const httpService = new HttpService(http);
-  const mlAnomalyDetectorService = new MlAnomalyDetectorService(httpService);
+  const chartWidth$ = useMemo(() => new Subject(), []);
 
   const timeBuckets = new TimeBuckets({
     'histogram:maxBars': uiSettings.get('histogram:maxBars'),
@@ -51,8 +49,13 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   });
 
   useEffect(() => {
-    combineLatest([embeddableInput, refresh.pipe(debounceTime(500), startWith(null))])
+    chartWidth$.next(chartWidth);
+  }, [chartWidth]);
+
+  useEffect(() => {
+    combineLatest([embeddableInput, chartWidth$, refresh.pipe(startWith(null))])
       .pipe(
+        debounceTime(500),
         map(([input]) => input),
         // resolve jobs' bucket spans
         switchMap(input => {
@@ -102,13 +105,11 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
       });
   }, []);
 
-  const onResize = (e: { width: number; height: number }) => {
+  const onResize = throttle((e: { width: number; height: number }) => {
     setChartWidth(e.width - 200);
-  };
+  }, 200);
 
   const swimlaneType = 'overall';
-
-  if (!swimlaneData) return null;
 
   return (
     <EuiResizeObserver onResize={onResize}>
@@ -120,13 +121,17 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             resizeRef(el);
           }}
         >
-          <ChartTooltip />
-          <ExplorerSwimlane
-            chartWidth={chartWidth}
-            timeBuckets={timeBuckets}
-            swimlaneData={swimlaneData}
-            swimlaneType={swimlaneType}
-          />
+          {chartWidth > 0 && swimlaneData && (
+            <>
+              <ChartTooltip />
+              <ExplorerSwimlane
+                chartWidth={chartWidth}
+                timeBuckets={timeBuckets}
+                swimlaneData={swimlaneData}
+                swimlaneType={swimlaneType}
+              />
+            </>
+          )}
         </div>
       )}
     </EuiResizeObserver>
