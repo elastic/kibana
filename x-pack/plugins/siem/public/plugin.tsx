@@ -50,10 +50,12 @@ export interface StartPlugins {
 }
 export type StartServices = CoreStart & StartPlugins;
 
-export type Setup = ReturnType<Plugin['setup']>;
-export type Start = ReturnType<Plugin['start']>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginStart {}
 
-export class Plugin implements IPlugin<Setup, Start> {
+export class Plugin implements IPlugin<PluginSetup, PluginStart> {
   public id = 'siem';
   public name = 'SIEM';
   private kibanaVersion: string;
