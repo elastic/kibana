@@ -24,6 +24,7 @@ import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
 import { HostMetadata } from '../../../../../../common/types';
 import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
+import { useNavigateByRouterEventHandler } from '../../hooks/use_navigate_by_router_event_handler';
 
 export const HostDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -92,24 +93,25 @@ export const HostDetailsFlyout = memo(() => {
 const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
-  const history = useHistory();
   const { show, ...queryParams } = useHostListSelector(uiQueryParams);
+  const detailsUri = useMemo(
+    () =>
+      urlFromQueryParams({
+        ...queryParams,
+        selected_host: hostMeta.host.id,
+      }),
+    [hostMeta.host.id, queryParams]
+  );
+  const backToDetailsClickHandler = useNavigateByRouterEventHandler(detailsUri);
   const backButtonProp = useMemo((): FlyoutSubHeaderProps['backButton'] => {
-    const detailsUri = urlFromQueryParams({
-      ...queryParams,
-      selected_host: hostMeta.host.id,
-    });
     return {
       title: i18n.translate('xpack.endpoint.host.policyResponse.backLinkTitle', {
         defaultMessage: 'Endpoint Details',
       }),
       href: '?' + detailsUri.search,
-      onClick: ev => {
-        ev.preventDefault();
-        history.push(detailsUri);
-      },
+      onClick: backToDetailsClickHandler,
     };
-  }, [history, hostMeta.host.id, queryParams]);
+  }, [backToDetailsClickHandler, detailsUri.search]);
 
   return (
     <>

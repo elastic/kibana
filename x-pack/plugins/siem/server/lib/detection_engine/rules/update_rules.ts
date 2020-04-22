@@ -7,11 +7,11 @@
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../alerting/server';
 import { readRules } from './read_rules';
-import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
+import { UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
-import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion } from './utils';
 import { hasListsFeature } from '../feature_flags';
+import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 
 export const updateRules = async ({
   alertsClient,
@@ -129,22 +129,22 @@ export const updateRules = async ({
     await alertsClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
     await alertsClient.enable({ id: rule.id });
-    const ruleCurrentStatus = savedObjectsClient
-      ? await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
-          type: ruleStatusSavedObjectType,
-          perPage: 1,
-          sortField: 'statusDate',
-          sortOrder: 'desc',
-          search: rule.id,
-          searchFields: ['alertId'],
-        })
-      : null;
+
+    const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+    const ruleCurrentStatus = await ruleStatusClient.find({
+      perPage: 1,
+      sortField: 'statusDate',
+      sortOrder: 'desc',
+      search: rule.id,
+      searchFields: ['alertId'],
+    });
+
     // set current status for this rule to be 'going to run'
     if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
       const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
-      currentStatusToDisable.attributes.status = 'going to run';
-      await savedObjectsClient?.update(ruleStatusSavedObjectType, currentStatusToDisable.id, {
+      await ruleStatusClient.update(currentStatusToDisable.id, {
         ...currentStatusToDisable.attributes,
+        status: 'going to run',
       });
     }
   }

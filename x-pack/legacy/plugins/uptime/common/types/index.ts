@@ -35,3 +35,7 @@ export interface MonitorDurationResult {
   /** The average values for the monitor duration. */
   locationDurationLines: LocationDurationLine[];
 }
+
+export interface MonitorIdParam {
+  monitorId: string;
+}
