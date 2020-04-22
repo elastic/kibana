@@ -16,13 +16,13 @@ import {
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
 import { HostMetadata } from '../../../../../../common/types';
 import { FormattedDateAndTime } from '../../formatted_date_time';
 import { LinkToApp } from '../../components/link_to_app';
 import { useHostListSelector, useHostLogsUrl } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
 import { policyResponseStatus, uiQueryParams } from '../../../store/hosts/selectors';
+import { useNavigateByRouterEventHandler } from '../../hooks/use_navigate_by_router_event_handler';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -43,7 +43,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const policyStatus = useHostListSelector(
     policyResponseStatus
   ) as keyof typeof POLICY_STATUS_TO_HEALTH_COLOR;
-  const history = useHistory();
   const detailsResultsUpper = useMemo(() => {
     return [
       {
@@ -74,6 +73,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       show: 'policy_response',
     });
   }, [details.host.id, queryParams]);
+  const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseUri);
 
   const detailsResultsLower = useMemo(() => {
     return [
@@ -93,10 +93,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
             <EuiLink
               data-test-subj="policyStatusValue"
               href={'?' + policyResponseUri.search}
-              onClick={(ev: React.MouseEvent) => {
-                ev.preventDefault();
-                history.push(policyResponseUri);
-              }}
+              onClick={policyStatusClickHandler}
             >
               <FormattedMessage
                 id="xpack.endpoint.host.details.policyStatus"
@@ -137,8 +134,8 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     details.endpoint.policy.id,
     details.host.hostname,
     details.host.ip,
-    history,
-    policyResponseUri,
+    policyResponseUri.search,
+    policyStatusClickHandler,
     policyStatus,
   ]);
 
