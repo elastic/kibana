@@ -14,7 +14,7 @@ export interface DataPublicPluginStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [actions](./kibana-plugin-plugins-data-public.datapublicpluginstart.actions.md) | <code>{</code><br/><code>        createFiltersFromEvent: typeof createFiltersFromEvent;</code><br/><code>    }</code> |  |
+|  [actions](./kibana-plugin-plugins-data-public.datapublicpluginstart.actions.md) | <code>{</code><br/><code>        createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;</code><br/><code>        createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;</code><br/><code>    }</code> |  |
 |  [autocomplete](./kibana-plugin-plugins-data-public.datapublicpluginstart.autocomplete.md) | <code>AutocompleteStart</code> |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.datapublicpluginstart.fieldformats.md) | <code>FieldFormatsStart</code> |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.datapublicpluginstart.indexpatterns.md) | <code>IndexPatternsContract</code> |  |
