@@ -23,6 +23,7 @@ import {
   isInteractiveDisabled,
   isTooltipControlDisabled,
   isViewControlHidden,
+  getMapSettings,
 } from '../../../selectors/map_selectors';
 
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
@@ -30,6 +31,7 @@ import { getInspectorAdapters } from '../../../reducers/non_serializable_instanc
 function mapStateToProps(state = {}) {
   return {
     isMapReady: getMapReady(state),
+    settings: getMapSettings(state),
     layerList: getLayerList(state),
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
