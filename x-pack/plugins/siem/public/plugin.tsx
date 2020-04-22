@@ -11,7 +11,10 @@ import {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '../../../../src/core/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import {
+  HomePublicPluginSetup,
+  FeatureCatalogueCategory,
+} from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { Start as NewsfeedStart } from '../../../../src/plugins/newsfeed/public';
@@ -62,6 +65,16 @@ export class Plugin implements IPlugin<Setup, Start> {
 
   public setup(core: CoreSetup, plugins: SetupPlugins) {
     initTelemetry(plugins.usageCollection, this.id);
+
+    plugins.home.featureCatalogue.register({
+      id: this.id,
+      title: this.name,
+      description: 'Explore security metrics and logs for events and alerts',
+      icon: 'securityAnalyticsApp',
+      path: `/app/${this.id}`,
+      showOnHomePage: true,
+      category: FeatureCatalogueCategory.DATA,
+    });
 
     const security = plugins.security;
 

@@ -29,7 +29,6 @@ export const siem = (kibana: any) => {
         listed: false,
         url: `/app/${APP_ID}`,
       },
-      home: ['plugins/siem/register_feature'],
       links: [
         {
           description: i18n.translate('xpack.siem.linkSecurityDescription', {
