@@ -8,8 +8,6 @@ export { AggName, isAggName } from './aggregations';
 export {
   getIndexDevConsoleStatement,
   getPivotPreviewDevConsoleStatement,
-  euiDataGridStyle,
-  euiDataGridToolbarSettings,
   INIT_MAX_COLUMNS,
 } from './data_grid';
 export {
