@@ -21,32 +21,31 @@ import { Start as NewsfeedStart } from '../../../../src/plugins/newsfeed/public'
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { initTelemetry } from './lib/telemetry';
-import { KibanaServices } from './lib/kibana';
-
-import { serviceNowActionType } from './lib/connectors';
-
 import {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
+  TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
+  TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
 import { SecurityPluginSetup } from '../../security/public';
+import { initTelemetry } from './lib/telemetry';
+import { KibanaServices } from './lib/kibana';
+import { serviceNowActionType } from './lib/connectors';
 
 export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
   security: SecurityPluginSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggers_actions_ui: TriggersActionsSetup;
   usageCollection: UsageCollectionSetup;
 }
+
 export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   newsfeed?: NewsfeedStart;
   security: SecurityPluginSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  triggers_actions_ui: TriggersActionsStart;
   uiActions: UiActionsStart;
 }
 export type StartServices = CoreStart & StartPlugins;

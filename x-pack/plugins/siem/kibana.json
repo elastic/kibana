@@ -3,8 +3,19 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "siem"],
-  "requiredPlugins": ["actions", "alerting", "features", "licensing"],
-  "optionalPlugins": ["encryptedSavedObjects", "ml", "security", "spaces"],
+  "requiredPlugins": [
+    "actions",
+    "alerting",
+    "data",
+    "embeddable",
+    "features",
+    "home",
+    "licensing",
+    "triggers_actions_ui",
+    "uiActions",
+    "usageCollection"
+  ],
+  "optionalPlugins": ["encryptedSavedObjects", "ml", "newsfeed", "security", "spaces"],
   "server": true,
   "ui": false
 }
