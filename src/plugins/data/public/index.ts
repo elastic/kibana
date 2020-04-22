@@ -294,6 +294,7 @@ import {
   convertIPRangeToString,
   intervalOptions, // only used in Discover
   isDateHistogramBucketAggConfig,
+  isNumberType,
   isStringType,
   isType,
   parentPipelineType,
@@ -393,6 +394,7 @@ export const search = {
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
     isDateHistogramBucketAggConfig,
+    isNumberType,
     isStringType,
     isType,
     isValidEsInterval,

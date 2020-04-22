@@ -33,9 +33,17 @@ import {
   setVisualizations,
   // @ts-ignore
 } from './kibana_services';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
+// @ts-ignore
+import { getMapsVisTypeAlias } from './maps_vis_type_alias';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
+import { registerLayerWizards } from './layers/load_layer_wizards';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
+  home: HomePublicPluginSetup;
+  visualizations: VisualizationsSetup;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
@@ -72,6 +80,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setUiActions(plugins.uiActions);
   setNavigation(plugins.navigation);
   setCoreI18n(core.i18n);
+  registerLayerWizards();
 };
 
 /**
@@ -92,8 +101,15 @@ export class MapsPlugin
       MapsPluginStartDependencies
     > {
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
-    plugins.inspector.registerView(MapView);
+    const { inspector, home, visualizations } = plugins;
+    bindSetupCoreAndPlugins(core, plugins);
+
+    inspector.registerView(MapView);
+    home.featureCatalogue.register(featureCatalogueEntry);
+    visualizations.registerAlias(getMapsVisTypeAlias());
   }
 
-  public start(core: CoreStart, plugins: any) {}
+  public start(core: CoreStart, plugins: any) {
+    bindStartCoreAndPlugins(core, plugins);
+  }
 }
