@@ -27,5 +27,5 @@ export {
   SearchResponse7,
   UseDataGridReturnType,
   UseIndexDataReturnType,
-  INDEX_STATUS,
 } from '../../../ml/public/application/components/data_grid';
+export { INDEX_STATUS } from '../../../ml/public/application/data_frame_analytics/common';

@@ -8,6 +8,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
+import { INDEX_STATUS } from '../../data_frame_analytics/common';
+
 import { INIT_MAX_COLUMNS } from './common';
 import {
   ColumnId,
@@ -17,7 +19,6 @@ import {
   OnChangePage,
   OnSort,
   UseDataGridReturnType,
-  INDEX_STATUS,
 } from './types';
 
 export const useDataGrid = (

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_data_grid.scss';
-
 import React, { useEffect, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -24,8 +22,10 @@ import {
 
 import { CoreSetup } from 'src/core/public';
 
+import { INDEX_STATUS } from '../../data_frame_analytics/common';
+
 import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
-import { INDEX_STATUS, UseIndexDataReturnType } from './types';
+import { UseIndexDataReturnType } from './types';
 
 export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
   <EuiTitle size="xs">
@@ -162,7 +162,6 @@ export const DataGrid: FC<Props> = props => {
       )}
       <EuiDataGrid
         aria-label={isWithHeader(props) ? props.title : ''}
-        className={`mlDataGrid${!isWithHeader(props) ? '-noHeader' : ''}`}
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         gridStyle={euiDataGridStyle}

@@ -24,8 +24,9 @@ import {
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
+import { FEATURE_INFLUENCE } from '../../../../common/constants';
 
-import { getFeatureCount, getOutlierScoreFieldName, FEATURE_INFLUENCE } from './common';
+import { getFeatureCount, getOutlierScoreFieldName } from './common';
 
 export const useOutlierData = (
   indexPattern: IndexPattern | undefined,
