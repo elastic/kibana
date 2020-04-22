@@ -38,6 +38,7 @@ describe('Upgrade Assistant Usage Collector', () => {
                   'ui_reindex.open': 4,
                   'ui_reindex.start': 2,
                   'ui_reindex.stop': 1,
+                  'ui_reindex.not_defined': 1,
                 },
               };
             },
