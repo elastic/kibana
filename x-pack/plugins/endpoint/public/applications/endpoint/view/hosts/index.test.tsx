@@ -152,6 +152,10 @@ describe('when on the hosts page', () => {
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.search).toEqual('?selected_host=1&show=policy_response');
     });
+    it.todo('should display Success overall policy status');
+    it.todo('should display Warning overall policy status');
+    it.todo('should display Failed overall policy status');
+    it.todo('should display Unknown overall policy status');
     it('should include the link to logs', async () => {
       const renderResult = render();
       const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
@@ -174,7 +178,7 @@ describe('when on the hosts page', () => {
         expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
       });
     });
-    describe('when showing host Policy Response', () => {
+    describe('when showing host Policy Response panel', () => {
       let renderResult: ReturnType<typeof render>;
       beforeEach(async () => {
         renderResult = render();
