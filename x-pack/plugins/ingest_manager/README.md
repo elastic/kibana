@@ -1,9 +1,9 @@
 # Ingest Manager
 ## Plugin
-  - No features enabled by default. See the TypeScript type for the [the available plugin configuration options](https://github.com/elastic/kibana/blob/feature-ingest/x-pack/plugins/ingest_manager/common/types/index.ts#L9-L19)
-  - Setting `xpack.ingestManager.enabled=true` is required to enable the plugin. It adds the `DATASOURCE_API_ROUTES` and `AGENT_CONFIG_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
-  - Adding `--xpack.ingestManager.epm.enabled=true` will add the EPM API & UI
-  - Adding `--xpack.ingestManager.fleet.enabled=true` will add the Fleet API & UI
+  - The plugin is disabled by default. See the TypeScript type for the [the available plugin configuration options](https://github.com/elastic/kibana/blob/master/x-pack/plugins/ingest_manager/common/types/index.ts#L9-L27)
+  - Setting `xpack.ingestManager.enabled=true` enables the plugin including the EPM and Fleet features. It also adds the `DATASOURCE_API_ROUTES` and `AGENT_CONFIG_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
+  - Adding `--xpack.ingestManager.epm.enabled=false` will disable the EPM API & UI
+  - Adding `--xpack.ingestManager.fleet.enabled=false` will disable the Fleet API & UI
     - [code for adding the routes](https://github.com/elastic/kibana/blob/1f27d349533b1c2865c10c45b2cf705d7416fb36/x-pack/plugins/ingest_manager/server/plugin.ts#L115-L133)
     - [Integration tests](server/integration_tests/router.test.ts)
   - Both EPM and Fleet require `ingestManager` be enabled. They are not standalone features.
@@ -25,7 +25,7 @@ One common development workflow is:
     ```
  - Start Kibana in another shell
     ```
-    yarn start --xpack.ingestManager.enabled=true --xpack.ingestManager.epm.enabled=true --xpack.ingestManager.fleet.enabled=true --no-base-path --xpack.endpoint.enabled=true
+    yarn start --xpack.ingestManager.enabled=true --no-base-path --xpack.endpoint.enabled=true
     ```
 
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide
