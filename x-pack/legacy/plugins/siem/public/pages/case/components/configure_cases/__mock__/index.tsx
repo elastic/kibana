@@ -8,13 +8,30 @@ import {
   Connector,
   CasesConfigurationMapping,
 } from '../../../../../containers/case/configure/types';
-import { State } from '../reducer';
 import { ReturnConnectors } from '../../../../../containers/case/configure/use_connectors';
 import { ReturnUseCaseConfigure } from '../../../../../containers/case/configure/use_configure';
 import { createUseKibanaMock } from '../../../../../mock/kibana_react';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { actionTypeRegistryMock } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/action_type_registry.mock';
+
+export const mapping: CasesConfigurationMapping[] = [
+  {
+    source: 'title',
+    target: 'short_description',
+    actionType: 'overwrite',
+  },
+  {
+    source: 'description',
+    target: 'description',
+    actionType: 'append',
+  },
+  {
+    source: 'comments',
+    target: 'comments',
+    actionType: 'append',
+  },
+];
 
 export const connectors: Connector[] = [
   {
@@ -25,23 +42,7 @@ export const connectors: Connector[] = [
     config: {
       apiUrl: 'https://instance1.service-now.com',
       casesConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'short_description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'append',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
+        mapping,
       },
     },
   },
@@ -75,39 +76,24 @@ export const connectors: Connector[] = [
   },
 ];
 
-export const mapping: CasesConfigurationMapping[] = [
-  {
-    source: 'title',
-    target: 'short_description',
-    actionType: 'overwrite',
-  },
-  {
-    source: 'description',
-    target: 'description',
-    actionType: 'append',
-  },
-  {
-    source: 'comments',
-    target: 'comments',
-    actionType: 'append',
-  },
-];
-
 export const searchURL =
   '?timerange=(global:(linkTo:!(),timerange:(from:1585487656371,fromStr:now-24h,kind:relative,to:1585574056371,toStr:now)),timeline:(linkTo:!(),timerange:(from:1585227005527,kind:absolute,to:1585313405527)))';
 
-export const initialState: State = {
-  connectorId: 'none',
-  closureType: 'close-by-user',
-  mapping: null,
-  currentConfiguration: { connectorId: 'none', closureType: 'close-by-user' },
-};
-
 export const useCaseConfigureResponse: ReturnUseCaseConfigure = {
+  closureType: 'close-by-user',
+  connectorId: 'none',
+  currentConfiguration: { connectorId: 'none', closureType: 'close-by-user' },
+  firstLoad: false,
   loading: false,
+  mapping: null,
+  persistCaseConfigure: jest.fn(),
   persistLoading: false,
   refetchCaseConfigure: jest.fn(),
-  persistCaseConfigure: jest.fn(),
+  setClosureType: jest.fn(),
+  setConnector: jest.fn(),
+  setCurrentConfiguration: jest.fn(),
+  setMapping: jest.fn(),
+  version: '',
 };
 
 export const useConnectorsResponse: ReturnConnectors = {

@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {
-  useReducer,
-  useCallback,
-  useEffect,
-  useState,
-  Dispatch,
-  SetStateAction,
-} from 'react';
+import React, { useCallback, useEffect, useState, Dispatch, SetStateAction } from 'react';
 import styled, { css } from 'styled-components';
 
 import {
@@ -38,17 +31,12 @@ import {
 import { ActionConnectorTableItem } from '../../../../../../../../plugins/triggers_actions_ui/public/types';
 import { getCaseUrl } from '../../../../components/link_to';
 import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
-import {
-  ClosureType,
-  CasesConfigurationMapping,
-  CCMapsCombinedActionAttributes,
-} from '../../../../containers/case/configure/types';
+import { CCMapsCombinedActionAttributes } from '../../../../containers/case/configure/types';
 import { Connectors } from '../configure_cases/connectors';
 import { ClosureOptions } from '../configure_cases/closure_options';
 import { Mapping } from '../configure_cases/mapping';
 import { SectionWrapper } from '../wrappers';
 import { navTabs } from '../../../../pages/home/home_navigations';
-import { configureCasesReducer, State, CurrentConfiguration } from './reducer';
 import * as i18n from './translations';
 
 const FormWrapper = styled.div`
@@ -65,13 +53,6 @@ const FormWrapper = styled.div`
     padding-bottom: ${theme.eui.paddingSizes.xl};
   `}
 `;
-
-const initialState: State = {
-  connectorId: 'none',
-  closureType: 'close-by-user',
-  mapping: null,
-  currentConfiguration: { connectorId: 'none', closureType: 'close-by-user' },
-};
 
 const actionTypes: ActionType[] = [
   {
@@ -102,44 +83,18 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   const [actionBarVisible, setActionBarVisible] = useState(false);
   const [totalConfigurationChanges, setTotalConfigurationChanges] = useState(0);
 
-  const [{ connectorId, closureType, mapping, currentConfiguration }, dispatch] = useReducer(
-    configureCasesReducer(),
-    initialState
-  );
-
-  const setCurrentConfiguration = useCallback((configuration: CurrentConfiguration) => {
-    dispatch({
-      type: 'setCurrentConfiguration',
-      currentConfiguration: { ...configuration },
-    });
-  }, []);
-
-  const setConnectorId = useCallback((newConnectorId: string) => {
-    dispatch({
-      type: 'setConnectorId',
-      connectorId: newConnectorId,
-    });
-  }, []);
-
-  const setClosureType = useCallback((newClosureType: ClosureType) => {
-    dispatch({
-      type: 'setClosureType',
-      closureType: newClosureType,
-    });
-  }, []);
-
-  const setMapping = useCallback((newMapping: CasesConfigurationMapping[]) => {
-    dispatch({
-      type: 'setMapping',
-      mapping: newMapping,
-    });
-  }, []);
-
-  const { loading: loadingCaseConfigure, persistLoading, persistCaseConfigure } = useCaseConfigure({
-    setConnector: setConnectorId,
+  const {
+    connectorId,
+    closureType,
+    mapping,
+    currentConfiguration,
+    loading: loadingCaseConfigure,
+    persistLoading,
+    persistCaseConfigure,
+    setConnector,
     setClosureType,
-    setCurrentConfiguration,
-  });
+    setMapping,
+  } = useCaseConfigure();
 
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
 
@@ -165,7 +120,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   const onClickAddConnector = useCallback(() => {
     setActionBarVisible(false);
     setAddFlyoutVisibility(true);
-  }, []);
+  }, [closureType]);
 
   const onClickUpdateConnector = useCallback(() => {
     setActionBarVisible(false);
@@ -177,13 +132,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
       connectorId,
       closureType,
     ]).length;
-
-    if (unsavedChanges === 0) {
-      setActionBarVisible(false);
-    } else {
-      setActionBarVisible(true);
-    }
-
+    setActionBarVisible(!(unsavedChanges === 0));
     setTotalConfigurationChanges(unsavedChanges);
   }, [currentConfiguration, connectorId, closureType]);
 
@@ -246,7 +195,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
   useEffect(() => {
     handleActionBar();
-  }, [connectors, connectorId, closureType, currentConfiguration]);
+  }, [
+    connectors,
+    connectorId,
+    closureType,
+    currentConfiguration.connectorId,
+    currentConfiguration.closureType,
+  ]);
 
   return (
     <FormWrapper>
@@ -267,7 +222,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors || !userCanCrud}
           isLoading={isLoadingConnectors}
-          onChangeConnector={setConnectorId}
+          onChangeConnector={setConnector}
           handleShowAddFlyout={onClickAddConnector}
           selectedConnector={connectorId}
         />

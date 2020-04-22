@@ -92,7 +92,7 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
   createdBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   connectorId: '123',
   connectorName: 'My Connector',
-  closureType: 'close-by-user',
+  closureType: 'close-by-pushing',
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
