@@ -66,24 +66,22 @@ const getLicenseCheckResult = (actionType: ActionType) => {
   };
 };
 
-const getConfigurationCheckResult = () => {
-  return {
-    isEnabled: false,
-    message: i18n.translate(
-      'xpack.triggersActionsUI.checkActionTypeEnabled.actionTypeDisabledByConfigMessage',
-      { defaultMessage: 'This connector is disabled by the Kibana configuration.' }
-    ),
-    messageCard: (
-      <EuiCard
-        title={i18n.translate(
-          'xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByConfigMessageTitle',
-          { defaultMessage: 'This feature is disabled by the Kibana configuration.' }
-        )}
-        description=""
-        className="actCheckActionTypeEnabled__disabledActionWarningCard"
-      />
-    ),
-  };
+const configurationCheckResult = {
+  isEnabled: false,
+  message: i18n.translate(
+    'xpack.triggersActionsUI.checkActionTypeEnabled.actionTypeDisabledByConfigMessage',
+    { defaultMessage: 'This connector is disabled by the Kibana configuration.' }
+  ),
+  messageCard: (
+    <EuiCard
+      title={i18n.translate(
+        'xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByConfigMessageTitle',
+        { defaultMessage: 'This feature is disabled by the Kibana configuration.' }
+      )}
+      description=""
+      className="actCheckActionTypeEnabled__disabledActionWarningCard"
+    />
+  ),
 };
 
 export function checkActionTypeEnabled(
@@ -94,7 +92,7 @@ export function checkActionTypeEnabled(
   }
 
   if (actionType?.enabledInConfig === false) {
-    return getConfigurationCheckResult();
+    return configurationCheckResult;
   }
 
   return { isEnabled: true };
@@ -115,7 +113,7 @@ export function checkActionFormActionTypeEnabled(
       preconfiguredConnector => preconfiguredConnector.actionTypeId === actionType.id
     )
   ) {
-    return getConfigurationCheckResult();
+    return configurationCheckResult;
   }
 
   return { isEnabled: true };

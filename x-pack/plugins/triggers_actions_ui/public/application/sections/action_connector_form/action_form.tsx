@@ -504,15 +504,18 @@ export const ActionForm = ({
   let actionTypeNodes: Array<JSX.Element | null> | null = null;
   let hasDisabledByLicenseActionTypes = false;
   if (actionTypesIndex) {
+    const preconfiguredConnectors = connectors.filter(connector => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
       .filter(item => actionTypesIndex[item.id])
-      .sort((a, b) => actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id]))
+      .sort((a, b) =>
+        actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
+      )
       .map(function(item, index) {
         const actionType = actionTypesIndex[item.id];
         const checkEnabledResult = checkActionFormActionTypeEnabled(
           actionTypesIndex[item.id],
-          connectors.filter(connector => connector.isPreconfigured)
+          preconfiguredConnectors
         );
         // if action type is not enabled in config and not preconfigured, it shouldn't be displayed
         if (!actionType.enabledInConfig && !checkEnabledResult.isEnabled) {
