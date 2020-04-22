@@ -26,6 +26,7 @@ import {
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
 import { SecurityPluginSetup } from '../../security/public';
+import { APP_ID, APP_NAME, APP_PATH, APP_ICON } from '../common/constants';
 import { initTelemetry } from './lib/telemetry';
 import { KibanaServices } from './lib/kibana';
 import { serviceNowActionType } from './lib/connectors';
@@ -57,8 +58,6 @@ export interface PluginSetup {}
 export interface PluginStart {}
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart> {
-  public id = 'siem';
-  public name = 'SIEM';
   private kibanaVersion: string;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -66,14 +65,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
   }
 
   public setup(core: CoreSetup, plugins: SetupPlugins) {
-    initTelemetry(plugins.usageCollection, this.id);
+    initTelemetry(plugins.usageCollection, APP_ID);
 
     plugins.home.featureCatalogue.register({
-      id: this.id,
-      title: this.name,
+      id: APP_ID,
+      title: APP_NAME,
       description: 'Explore security metrics and logs for events and alerts',
-      icon: 'securityAnalyticsApp',
-      path: `/app/${this.id}`,
+      icon: APP_ICON,
+      path: APP_PATH,
       showOnHomePage: true,
       category: FeatureCatalogueCategory.DATA,
     });
@@ -81,10 +80,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
     plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
 
     core.application.register({
-      id: this.id,
-      title: this.name,
+      id: APP_ID,
+      title: APP_NAME,
       order: 9000,
-      euiIconType: 'securityAnalyticsApp',
+      euiIconType: APP_ICON,
       async mount(params: AppMountParameters) {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { renderApp } = await import('./app');
