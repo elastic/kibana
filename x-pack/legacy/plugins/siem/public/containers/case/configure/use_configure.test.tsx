@@ -11,7 +11,7 @@ import {
   ReturnUseCaseConfigure,
   PersistCaseConfigure,
 } from './use_configure';
-import { caseConfigurationCamelCaseResponseMock } from './mock';
+import { mapping, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
@@ -57,9 +57,11 @@ describe('useConfigure', () => {
         ...initialState,
         closureType: caseConfigurationCamelCaseResponseMock.closureType,
         connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
+        connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
         currentConfiguration: {
           closureType: caseConfigurationCamelCaseResponseMock.closureType,
           connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
+          connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
         },
         version: caseConfigurationCamelCaseResponseMock.version,
         firstLoad: true,
@@ -87,6 +89,19 @@ describe('useConfigure', () => {
       expect(spyOnGetCaseConfigure).toHaveBeenCalledTimes(2);
     });
   });
+
+  test('correctly sets mappings', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
+        useCaseConfigure()
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      expect(result.current.mapping).toEqual(null);
+      result.current.setMapping(mapping);
+      expect(result.current.mapping).toEqual(mapping);
+    });
+  })
 
   test('set isLoading to true when fetching case configuration', async () => {
     await act(async () => {
@@ -225,9 +240,11 @@ describe('useConfigure', () => {
         ...initialState,
         closureType: caseConfigurationCamelCaseResponseMock.closureType,
         connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
+        connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
         currentConfiguration: {
           closureType: caseConfigurationCamelCaseResponseMock.closureType,
           connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
+          connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
         },
         firstLoad: true,
         loading: false,

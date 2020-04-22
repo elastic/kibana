@@ -11,29 +11,33 @@ import { useStateToaster, errorToToaster, displaySuccessToast } from '../../../c
 import * as i18n from './translations';
 import { CasesConfigurationMapping, ClosureType } from './types';
 
-export interface State {
-  closureType: ClosureType;
+interface Connector {
   connectorId: string;
-  currentConfiguration: CurrentConfiguration;
+  connectorName: string;
+}
+export interface ConnectorConfiguration extends Connector {
+  closureType: ClosureType;
+}
+
+export interface State extends ConnectorConfiguration {
+  currentConfiguration: ConnectorConfiguration;
   firstLoad: boolean;
   loading: boolean;
   mapping: CasesConfigurationMapping[] | null;
   persistLoading: boolean;
   version: string;
 }
-
-export interface CurrentConfiguration {
-  connectorId: State['connectorId'];
-  closureType: State['closureType'];
-}
 export type Action =
   | {
       type: 'setCurrentConfiguration';
-      currentConfiguration: CurrentConfiguration;
+      currentConfiguration: ConnectorConfiguration;
     }
   | {
-      type: 'setConnectorId';
-      connectorId: string;
+      type: 'setConnector';
+      connector: {
+        connectorId: State['connectorId'];
+        connectorName: State['connectorName'];
+      };
     }
   | {
       type: 'setLoading';
@@ -88,10 +92,10 @@ export const configureCasesReducer = (state: State, action: Action) => {
         currentConfiguration: { ...action.currentConfiguration },
       };
     }
-    case 'setConnectorId': {
+    case 'setConnector': {
       return {
         ...state,
-        connectorId: action.connectorId,
+        ...action.connector,
       };
     }
     case 'setClosureType': {
@@ -124,18 +128,20 @@ export interface ReturnUseCaseConfigure extends State {
     closureType,
   }: PersistCaseConfigure) => unknown;
   refetchCaseConfigure: () => void;
-  setClosureType: (newClosureType: ClosureType) => void;
-  setConnector: (newConnectorId: string) => void;
-  setCurrentConfiguration: (configuration: CurrentConfiguration) => void;
+  setClosureType: (closureType: ClosureType) => void;
+  setConnector: (connectorId: string, connectorName?: string) => void;
+  setCurrentConfiguration: (configuration: ConnectorConfiguration) => void;
   setMapping: (newMapping: CasesConfigurationMapping[]) => void;
 }
 
 export const initialState: State = {
   closureType: 'close-by-user',
   connectorId: 'none',
+  connectorName: 'none',
   currentConfiguration: {
     closureType: 'close-by-user',
     connectorId: 'none',
+    connectorName: 'none',
   },
   firstLoad: false,
   loading: true,
@@ -147,23 +153,23 @@ export const initialState: State = {
 export const useCaseConfigure = (): ReturnUseCaseConfigure => {
   const [state, dispatch] = useReducer(configureCasesReducer, initialState);
 
-  const setCurrentConfiguration = useCallback((configuration: CurrentConfiguration) => {
+  const setCurrentConfiguration = useCallback((configuration: ConnectorConfiguration) => {
     dispatch({
       currentConfiguration: configuration,
       type: 'setCurrentConfiguration',
     });
   }, []);
 
-  const setConnector = useCallback((newConnectorId: string) => {
+  const setConnector = useCallback((connectorId: string, connectorName?: string) => {
     dispatch({
-      connectorId: newConnectorId,
-      type: 'setConnectorId',
+      connector: { connectorId, connectorName: connectorName ?? '' },
+      type: 'setConnector',
     });
   }, []);
 
-  const setClosureType = useCallback((newClosureType: ClosureType) => {
+  const setClosureType = useCallback((closureType: ClosureType) => {
     dispatch({
-      closureType: newClosureType,
+      closureType,
       type: 'setClosureType',
     });
   }, []);
@@ -215,7 +221,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
         const res = await getCaseConfigure({ signal: abortCtrl.signal });
         if (!didCancel) {
           if (res != null) {
-            setConnector(res.connectorId);
+            setConnector(res.connectorId, res.connectorName);
             if (setClosureType != null) {
               setClosureType(res.closureType);
             }
@@ -227,6 +233,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
                 setCurrentConfiguration({
                   closureType: res.closureType,
                   connectorId: res.connectorId,
+                  connectorName: res.connectorName,
                 });
               }
             }
@@ -276,7 +283,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
                   abortCtrl.signal
                 );
           if (!didCancel) {
-            setConnector(res.connectorId);
+            setConnector(res.connectorId, res.connectorName);
             if (setClosureType) {
               setClosureType(res.closureType);
             }
@@ -285,6 +292,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
               setCurrentConfiguration({
                 connectorId: res.connectorId,
                 closureType: res.closureType,
+                connectorName: res.connectorName,
               });
             }
 
