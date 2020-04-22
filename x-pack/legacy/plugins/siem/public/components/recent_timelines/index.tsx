@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
-import { AllTimelinesQuery, useGetAllTimeline } from '../../containers/timeline/all';
+import { useGetAllTimeline } from '../../containers/timeline/all';
 import { SortFieldTimeline, Direction } from '../../graphql/types';
 import { queryTimelineById, dispatchUpdateTimeline } from '../open_timeline/helpers';
 import { OnOpenTimeline } from '../open_timeline/types';

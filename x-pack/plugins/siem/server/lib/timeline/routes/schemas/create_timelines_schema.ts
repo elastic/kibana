@@ -8,8 +8,12 @@ import * as rt from 'io-ts';
 import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
 import { unionWithNullType } from '../../../../../common/utility_types';
 
-export const createTimelineSchema = rt.type({
-  timeline: SavedTimelineRuntimeType,
-  timelineId: unionWithNullType(rt.string),
-  version: unionWithNullType(rt.string),
-});
+export const createTimelineSchema = rt.intersection([
+  rt.type({
+    timeline: SavedTimelineRuntimeType,
+  }),
+  rt.partial({
+    timelineId: unionWithNullType(rt.string),
+    version: unionWithNullType(rt.string),
+  }),
+]);

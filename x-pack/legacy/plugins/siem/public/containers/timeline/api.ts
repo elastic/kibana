@@ -6,7 +6,6 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 
 import { throwErrors } from '../../../../../../plugins/case/common/api';
 import {
@@ -14,10 +13,17 @@ import {
   TimelineResponse,
   TimelineResponseType,
 } from '../../../../../../plugins/siem/common/types/timeline';
-import { TIMELINE_URL } from '../../../../../../plugins/siem/common/constants';
+import {
+  TIMELINE_URL,
+  TIMELINE_IMPORT_URL,
+  TIMELINE_EXPORT_URL,
+} from '../../../../../../plugins/siem/common/constants';
 
 import { KibanaServices } from '../../lib/kibana';
+import { ExportSelectedData } from '../../components/generic_downloader';
+
 import { createToasterPlainError } from '../case/utils';
+import { ImportDataProps, ImportDataResponse } from '../detection_engine/rules';
 
 interface RequestPostTimeline {
   timeline: SavedTimeline;
@@ -40,10 +46,11 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
 const postTimeline = async ({ timeline }: RequestPostTimeline): Promise<TimelineResponse> => {
   const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_URL, {
     method: 'POST',
-    body: JSON.stringify(timeline),
+    body: JSON.stringify({ timeline }),
     // signal,
   });
-  return response; // decodeTimelineResponse(response);
+
+  return decodeTimelineResponse(response);
 };
 
 const patchTimeline = async ({
@@ -56,8 +63,8 @@ const patchTimeline = async ({
     body: JSON.stringify({ timeline, timelineId, version }),
     // signal,
   });
-  console.log('PathReporter', PathReporter.report(TimelineResponseType.decode(response)));
-  return response; // decodeTimelineResponse(response);
+
+  return decodeTimelineResponse(response);
 };
 
 export const persistTimeline = async ({
@@ -73,4 +80,42 @@ export const persistTimeline = async ({
     timeline,
     version: version ?? '',
   });
+};
+
+export const importTimelines = async ({
+  fileToImport,
+  overwrite = false,
+  signal,
+}: ImportDataProps): Promise<ImportDataResponse> => {
+  const formData = new FormData();
+  formData.append('file', fileToImport);
+
+  return KibanaServices.get().http.fetch<ImportDataResponse>(`${TIMELINE_IMPORT_URL}`, {
+    method: 'POST',
+    headers: { 'Content-Type': undefined },
+    query: { overwrite },
+    body: formData,
+    signal,
+  });
+};
+
+export const exportSelectedTimeline: ExportSelectedData = async ({
+  excludeExportDetails = false,
+  filename = `timelines_export.ndjson`,
+  ids = [],
+  signal,
+}): Promise<Blob> => {
+  const body = ids.length > 0 ? JSON.stringify({ ids }) : undefined;
+  const response = await KibanaServices.get().http.fetch<Blob>(`${TIMELINE_EXPORT_URL}`, {
+    method: 'POST',
+    body,
+    query: {
+      exclude_export_details: excludeExportDetails,
+      file_name: filename,
+    },
+    signal,
+    asResponse: true,
+  });
+
+  return response.body!;
 };
