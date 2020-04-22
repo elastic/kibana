@@ -137,7 +137,7 @@ describe('when on the hosts page', () => {
       const renderResult = render();
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
-      expect(policyStatusLink.textContent).toEqual('Successful');
+      expect(policyStatusLink.textContent).toEqual('Success');
       expect(policyStatusLink.getAttribute('href')).toEqual(
         '?selected_host=1&show=policy_response'
       );
