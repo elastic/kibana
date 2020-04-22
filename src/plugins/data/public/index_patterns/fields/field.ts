@@ -44,10 +44,8 @@ export class Field implements IFieldType {
   scripted?: boolean;
   subType?: IFieldSubType;
   displayName?: string;
+  indexPattern?: IndexPattern;
   format: any;
-  routes: Record<string, string> = {
-    edit: '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
-  };
   $$spec: FieldSpec;
 
   constructor(
@@ -146,7 +144,3 @@ export class Field implements IFieldType {
     return obj.create();
   }
 }
-
-Field.prototype.routes = {
-  edit: '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
-};

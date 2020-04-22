@@ -16,17 +16,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
-import { monitorStatesQuery } from '../../../queries/monitor_states_query';
-import {
-  MonitorSummary,
-  MonitorSummaryResult,
-  SummaryHistogramPoint,
-} from '../../../../common/graphql/types';
+import { HistogramPoint, FetchMonitorStatesQueryArgs } from '../../../../common/runtime_types';
+import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
-import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from './monitor_page_link';
@@ -34,21 +28,15 @@ import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListDrawer } from '../../connected';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
+import { MonitorListProps } from '../../connected/monitor/monitor_list';
+import { MonitorList } from '../../../state/reducers/monitor_list';
+import { useUrlParams } from '../../../hooks';
 
-interface MonitorListQueryResult {
-  monitorStates?: MonitorSummaryResult;
+interface Props extends MonitorListProps {
+  lastRefresh: number;
+  monitorList: MonitorList;
+  getMonitorList: (params: FetchMonitorStatesQueryArgs) => void;
 }
-
-interface MonitorListProps {
-  dangerColor: string;
-  hasActiveFilters: boolean;
-  successColor: string;
-  linkParameters?: string;
-  pageSize: number;
-  setPageSize: (size: number) => void;
-}
-
-type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
 
 const TruncatedEuiLink = styled(EuiLink)`
   white-space: nowrap;
@@ -56,14 +44,53 @@ const TruncatedEuiLink = styled(EuiLink)`
   text-overflow: ellipsis;
 `;
 
-export const MonitorListComponent = (props: Props) => {
-  const { dangerColor, data, errors, hasActiveFilters, linkParameters, loading } = props;
+const DEFAULT_PAGE_SIZE = 10;
+const LOCAL_STORAGE_KEY = 'xpack.uptime.monitorList.pageSize';
+const getPageSizeValue = () => {
+  const value = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '', 10);
+  if (isNaN(value)) {
+    return DEFAULT_PAGE_SIZE;
+  }
+  return value;
+};
+
+export const MonitorListComponent: React.FC<Props> = ({
+  filters,
+  getMonitorList,
+  lastRefresh,
+  monitorList: { list, error, loading },
+  linkParameters,
+}) => {
+  const [pageSize, setPageSize] = useState<number>(getPageSizeValue());
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
-  const items = data?.monitorStates?.summaries ?? [];
+  const [getUrlValues] = useUrlParams();
+  const { dateRangeStart, dateRangeEnd, pagination, statusFilter } = getUrlValues();
 
-  const nextPagePagination = data?.monitorStates?.nextPagePagination ?? '';
-  const prevPagePagination = data?.monitorStates?.prevPagePagination ?? '';
+  useEffect(() => {
+    getMonitorList({
+      dateRangeStart,
+      dateRangeEnd,
+      filters,
+      pageSize,
+      pagination,
+      statusFilter,
+    });
+  }, [
+    getMonitorList,
+    dateRangeStart,
+    dateRangeEnd,
+    filters,
+    lastRefresh,
+    pageSize,
+    pagination,
+    statusFilter,
+  ]);
+
+  const items = list.summaries ?? [];
+
+  const nextPagePagination = list.nextPagePagination ?? '';
+  const prevPagePagination = list.prevPagePagination ?? '';
 
   const getExpandedRowMap = () => {
     return drawerIds.reduce((map: ExpandedRowMap, id: string) => {
@@ -123,8 +150,8 @@ export const MonitorListComponent = (props: Props) => {
       mobileOptions: {
         show: false,
       },
-      render: (histogramSeries: SummaryHistogramPoint[] | null) => (
-        <MonitorBarSeries dangerColor={dangerColor} histogramSeries={histogramSeries} />
+      render: (histogramSeries: HistogramPoint[] | null) => (
+        <MonitorBarSeries histogramSeries={histogramSeries} />
       ),
     },
     {
@@ -153,70 +180,61 @@ export const MonitorListComponent = (props: Props) => {
   ];
 
   return (
-    <>
-      <EuiPanel>
-        <EuiTitle size="xs">
-          <h5>
-            <FormattedMessage
-              id="xpack.uptime.monitorList.monitoringStatusTitle"
-              defaultMessage="Monitor status"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiBasicTable
-          aria-label={labels.getDescriptionLabel(items.length)}
-          error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
-          // Only set loading to true when there are no items present to prevent the bug outlined in
-          // in https://github.com/elastic/eui/issues/2393 . Once that is fixed we can simply set the value here to
-          // loading={loading}
-          loading={loading && (!items || items.length < 1)}
-          isExpandable={true}
-          hasActions={true}
-          itemId="monitor_id"
-          itemIdToExpandedRowMap={getExpandedRowMap()}
-          items={items}
-          // TODO: not needed without sorting and pagination
-          // onChange={onChange}
-          noItemsMessage={
-            hasActiveFilters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE
-          }
-          // TODO: reintegrate pagination in future release
-          // pagination={pagination}
-          // TODO: reintegrate sorting in future release
-          // sorting={sorting}
-          columns={columns}
-        />
-        <EuiSpacer size="m" />
-        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <MonitorListPageSizeSelect size={props.pageSize} setSize={props.setPageSize} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false}>
-              <EuiFlexItem grow={false}>
-                <OverviewPageLink
-                  dataTestSubj="xpack.uptime.monitorList.prevButton"
-                  direction="prev"
-                  pagination={prevPagePagination}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <OverviewPageLink
-                  dataTestSubj="xpack.uptime.monitorList.nextButton"
-                  direction="next"
-                  pagination={nextPagePagination}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </>
+    <EuiPanel>
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.uptime.monitorList.monitoringStatusTitle"
+            defaultMessage="Monitor status"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiBasicTable
+        aria-label={labels.getDescriptionLabel(items.length)}
+        error={error?.message}
+        // Only set loading to true when there are no items present to prevent the bug outlined in
+        // in https://github.com/elastic/eui/issues/2393 . Once that is fixed we can simply set the value here to
+        // loading={loading}
+        loading={loading && (!items || items.length < 1)}
+        isExpandable={true}
+        hasActions={true}
+        itemId="monitor_id"
+        itemIdToExpandedRowMap={getExpandedRowMap()}
+        items={items}
+        // TODO: not needed without sorting and pagination
+        // onChange={onChange}
+        noItemsMessage={!!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE}
+        // TODO: reintegrate pagination in future release
+        // pagination={pagination}
+        // TODO: reintegrate sorting in future release
+        // sorting={sorting}
+        columns={columns}
+      />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <MonitorListPageSizeSelect size={pageSize} setSize={setPageSize} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false}>
+            <EuiFlexItem grow={false}>
+              <OverviewPageLink
+                dataTestSubj="xpack.uptime.monitorList.prevButton"
+                direction="prev"
+                pagination={prevPagePagination}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <OverviewPageLink
+                dataTestSubj="xpack.uptime.monitorList.nextButton"
+                direction="next"
+                pagination={nextPagePagination}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
-
-export const MonitorList = withUptimeGraphQL<MonitorListQueryResult, MonitorListProps>(
-  MonitorListComponent,
-  monitorStatesQuery
-);
