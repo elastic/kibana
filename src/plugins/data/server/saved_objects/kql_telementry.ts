@@ -16,8 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectsType } from 'kibana/server';
 
-export { searchSavedObjectType } from './search';
-export { querySavedObjectType } from './query';
-export { indexPatternSavedObjectType } from './index_patterns';
-export { kqlTelemetry } from './kql_telementry';
+export const kqlTelemetry: SavedObjectsType = {
+  name: 'kql_telemetry',
+  namespaceType: 'agnostic',
+  hidden: false,
+  mappings: {
+    properties: {
+      optInCount: {
+        type: 'long',
+      },
+      optOutCount: {
+        type: 'long',
+      },
+    },
+  },
+};

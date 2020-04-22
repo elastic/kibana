@@ -150,9 +150,6 @@ export default function(kibana) {
         'sample-data-telemetry': {
           isNamespaceAgnostic: true,
         },
-        'kql-telemetry': {
-          isNamespaceAgnostic: true,
-        },
       },
 
       injectDefaultVars(server, options) {
