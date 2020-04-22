@@ -21,7 +21,7 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
   );
 
 type ProvidersCommonConfigType = Record<
-  'enabled' | 'showInSelector' | 'order' | 'description',
+  'enabled' | 'showInSelector' | 'order' | 'description' | 'hint' | 'icon',
   Type<any>
 >;
 function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonConfigType> = {}) {
@@ -30,6 +30,8 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     showInSelector: schema.boolean({ defaultValue: true }),
     order: schema.number({ min: 0 }),
     description: schema.maybe(schema.string()),
+    hint: schema.maybe(schema.string()),
+    icon: schema.maybe(schema.string()),
     ...overrides,
   };
 }
@@ -53,11 +55,6 @@ type ProvidersConfigType = TypeOf<typeof providersConfigSchema>;
 const providersConfigSchema = schema.object(
   {
     basic: getUniqueProviderSchema('basic', {
-      description: schema.maybe(
-        schema.any({
-          validate: () => '`basic` provider does not support custom description.',
-        })
-      ),
       showInSelector: schema.boolean({
         defaultValue: true,
         validate: value => {
@@ -68,11 +65,6 @@ const providersConfigSchema = schema.object(
       }),
     }),
     token: getUniqueProviderSchema('token', {
-      description: schema.maybe(
-        schema.any({
-          validate: () => '`token` provider does not support custom description.',
-        })
-      ),
       showInSelector: schema.boolean({
         defaultValue: true,
         validate: value => {
@@ -131,6 +123,7 @@ const providersConfigSchema = schema.object(
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
+  loginHelp: schema.maybe(schema.string()),
   cookieName: schema.string({ defaultValue: 'sid' }),
   encryptionKey: schema.conditional(
     schema.contextRef('dist'),
@@ -147,7 +140,16 @@ export const ConfigSchema = schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
       defaultValue: {
-        basic: { basic: { enabled: true, showInSelector: true, order: 0, description: undefined } },
+        basic: {
+          basic: {
+            enabled: true,
+            showInSelector: true,
+            order: 0,
+            description: undefined,
+            hint: undefined,
+            icon: undefined,
+          },
+        },
         token: undefined,
         saml: undefined,
         oidc: undefined,
