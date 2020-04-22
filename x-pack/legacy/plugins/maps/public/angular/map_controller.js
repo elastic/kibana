@@ -39,6 +39,7 @@ import {
   replaceLayerList,
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
+  setMapSettings,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/actions/map_actions';
 import {
@@ -52,10 +53,14 @@ import {
   setReadOnly,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
+  openMapSettings,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/actions/ui_actions';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getIsFullScreen } from '../../../../../plugins/maps/public/selectors/ui_selectors';
+import {
+  getIsFullScreen,
+  getFlyoutDisplay,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/selectors/ui_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util';
 import {
@@ -395,6 +400,9 @@ app.controller(
         if (mapState.filters) {
           savedObjectFilters = mapState.filters;
         }
+        if (mapState.settings) {
+          store.dispatch(setMapSettings(mapState.settings));
+        }
       }
 
       if (savedMap.uiStateJSON) {
@@ -453,6 +461,7 @@ app.controller(
 
     $scope.isFullScreen = false;
     $scope.isSaveDisabled = false;
+    $scope.isOpenSettingsDisabled = false;
     function handleStoreChanges(store) {
       const nextIsFullScreen = getIsFullScreen(store.getState());
       if (nextIsFullScreen !== $scope.isFullScreen) {
@@ -472,6 +481,14 @@ app.controller(
       if (nextIsSaveDisabled !== $scope.isSaveDisabled) {
         $scope.$evalAsync(() => {
           $scope.isSaveDisabled = nextIsSaveDisabled;
+        });
+      }
+
+      const flyoutDisplay = getFlyoutDisplay(store.getState());
+      const nextIsOpenSettingsDisabled = flyoutDisplay !== FLYOUT_STATE.NONE;
+      if (nextIsOpenSettingsDisabled !== $scope.isOpenSettingsDisabled) {
+        $scope.$evalAsync(() => {
+          $scope.isOpenSettingsDisabled = nextIsOpenSettingsDisabled;
         });
       }
     }
@@ -589,6 +606,22 @@ app.controller(
         run() {
           const inspectorAdapters = getInspectorAdapters(store.getState());
           getInspector().open(inspectorAdapters, {});
+        },
+      },
+      {
+        id: 'mapSettings',
+        label: i18n.translate('xpack.maps.mapController.openSettingsButtonLabel', {
+          defaultMessage: `Map settings`,
+        }),
+        description: i18n.translate('xpack.maps.mapController.openSettingsDescription', {
+          defaultMessage: `Open map settings`,
+        }),
+        testId: 'openSettingsButton',
+        disableButton() {
+          return $scope.isOpenSettingsDisabled;
+        },
+        run() {
+          store.dispatch(openMapSettings());
         },
       },
       ...(getMapsCapabilities().save
