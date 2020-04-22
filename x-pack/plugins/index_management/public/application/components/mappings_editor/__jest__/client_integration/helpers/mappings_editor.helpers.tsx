@@ -107,6 +107,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     await waitFor('mappingsEditorFieldEdit');
   };
 
+  const updateFieldAndCloseFlyout = async () => {
+    find('mappingsEditorFieldEdit.editFieldUpdateButton').simulate('click');
+
+    await waitForFn(
+      async () => exists('mappingsEditorFieldEdit') === false,
+      'Error waiting for the details flyout to close'
+    );
+  };
+
   const showAdvancedSettings = async () => {
     const checkIsVisible = async () =>
       find('mappingsEditorFieldEdit.advancedSettings').props().style.display === 'block';
@@ -173,6 +182,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     getFieldAt,
     addField,
     startEditField,
+    updateFieldAndCloseFlyout,
     showAdvancedSettings,
     updateJsonEditor,
     getJsonEditorValue,
@@ -266,6 +276,7 @@ export type TestSubjects =
   | 'createFieldForm.fieldType'
   | 'createFieldForm.addButton'
   | 'mappingsEditorFieldEdit'
+  | 'mappingsEditorFieldEdit.editFieldUpdateButton'
   | 'mappingsEditorFieldEdit.flyoutTitle'
   | 'mappingsEditorFieldEdit.documentationLink'
   | 'mappingsEditorFieldEdit.fieldPath'

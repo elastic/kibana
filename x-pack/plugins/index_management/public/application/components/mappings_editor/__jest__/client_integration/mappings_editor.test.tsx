@@ -67,7 +67,7 @@ describe('<MappingsEditor />', () => {
     let testBed: MappingsEditorTestBed;
 
     beforeEach(async () => {
-      testBed = await setup({ defaultValue: defaultMappings, onUpdate() {} });
+      testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
     });
 
     test('should keep the changes when switching tabs', async () => {

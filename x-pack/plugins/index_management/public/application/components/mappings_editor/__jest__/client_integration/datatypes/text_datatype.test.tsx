@@ -43,7 +43,7 @@ describe('text datatype', () => {
   let testBed: MappingsEditorTestBed;
 
   beforeEach(async () => {
-    testBed = await setup({ defaultValue: defaultMappings, onUpdate() {} });
+    testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
 
     // We edit the field (by opening the flyout)
     await act(async () => {
@@ -56,9 +56,27 @@ describe('text datatype', () => {
   });
 
   test('flyout details initial view', async () => {
+    const updatedMappings = {
+      _meta: {}, // If undefined, an empty object is returned by the editor
+      _source: {}, // If undefined, an empty object is returned by the editor
+      ...defaultMappings,
+      properties: {
+        user: {
+          type: 'object', // As no type was defined, defaults to "object" type
+          properties: {
+            address: {
+              type: 'object', // As no type was defined, defaults to "object" type
+              properties: {
+                street: { type: 'text' },
+              },
+            },
+          },
+        },
+      },
+    };
     const {
       find,
-      actions: { getToggleValue, showAdvancedSettings },
+      actions: { getToggleValue, showAdvancedSettings, updateFieldAndCloseFlyout },
     } = testBed;
     const fieldPath = ['user', 'address', 'street'];
     const fieldName = fieldPath[fieldPath.length - 1];
@@ -76,6 +94,32 @@ describe('text datatype', () => {
     // The advanced settings should be hidden initially
     expect(find('mappingsEditorFieldEdit.advancedSettings').props().style.display).toEqual('none');
 
-    await showAdvancedSettings();
+    await act(async () => {
+      await showAdvancedSettings();
+    });
+
+    // TODO: find a way to automate the test that all expected fields are present
+    // and have their default value correctly set
+
+    await expectDataUpdated(updatedMappings);
+
+    await act(async () => {
+      await updateFieldAndCloseFlyout();
+    });
+
+    const streetField = {
+      type: 'text',
+      // All the default parameters values have been added
+      eager_global_ordinals: false,
+      fielddata: false,
+      index: true,
+      index_options: 'positions',
+      index_phrases: false,
+      norms: true,
+      store: false,
+    };
+    updatedMappings.properties.user.properties.address.properties.street = streetField;
+
+    await expectDataUpdated(updatedMappings);
   });
 });
