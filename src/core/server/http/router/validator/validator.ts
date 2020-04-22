@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { ValidationError, Type, schema, ObjectType, isConfigSchema } from '@kbn/config-schema';
+import {
+  ValidationError,
+  Type,
+  schema,
+  ObjectType,
+  TypeOf,
+  isConfigSchema,
+} from '@kbn/config-schema';
 import { Stream } from 'stream';
 import { RouteValidationError } from './validator_error';
 
@@ -85,7 +92,7 @@ type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> =
   T extends RouteValidationFunction<any>
     ? ReturnType<T>['value']
     : T extends Type<any>
-    ? ReturnType<T['validate']>
+    ? TypeOf<T>
     : undefined
 >;
 
@@ -170,7 +177,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getParams(data: unknown, namespace?: string): Readonly<P> {
-    return this.validate(this.config.params, this.options.unsafe?.params, data, namespace);
+    return this.validate(this.config.params, this.options.unsafe?.params, data, namespace) as P;
   }
 
   /**
@@ -178,7 +185,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getQuery(data: unknown, namespace?: string): Readonly<Q> {
-    return this.validate(this.config.query, this.options.unsafe?.query, data, namespace);
+    return this.validate(this.config.query, this.options.unsafe?.query, data, namespace) as Q;
   }
 
   /**
@@ -186,7 +193,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getBody(data: unknown, namespace?: string): Readonly<B> {
-    return this.validate(this.config.body, this.options.unsafe?.body, data, namespace);
+    return this.validate(this.config.body, this.options.unsafe?.body, data, namespace) as B;
   }
 
   /**
