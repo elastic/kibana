@@ -82,7 +82,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
     core.application.register({
       id: this.id,
       title: this.name,
-      async mount(context, params) {
+      async mount(params: AppMountParameters) {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { renderApp } = await import('./app');
 
