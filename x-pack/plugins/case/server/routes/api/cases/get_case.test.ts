@@ -18,6 +18,7 @@ import {
 } from '../__fixtures__';
 import { flattenCaseSavedObject } from '../utils';
 import { initGetCaseApi } from './get_case';
+import { CASE_DETAILS_URL } from '../../../../common/constants';
 
 describe('GET case', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -26,7 +27,7 @@ describe('GET case', () => {
   });
   it(`returns the case with empty case comments when includeComments is false`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}',
+      path: CASE_DETAILS_URL,
       method: 'get',
       params: {
         case_id: 'mock-id-1',
@@ -55,7 +56,7 @@ describe('GET case', () => {
   });
   it(`returns an error when thrown from getCase`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}',
+      path: CASE_DETAILS_URL,
       method: 'get',
       params: {
         case_id: 'abcdefg',
@@ -78,7 +79,7 @@ describe('GET case', () => {
   });
   it(`returns the case with case comments when includeComments is true`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}',
+      path: CASE_DETAILS_URL,
       method: 'get',
       params: {
         case_id: 'mock-id-1',
@@ -102,7 +103,7 @@ describe('GET case', () => {
   });
   it(`returns an error when thrown from getAllCaseComments`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}',
+      path: CASE_DETAILS_URL,
       method: 'get',
       params: {
         case_id: 'bad-guy',

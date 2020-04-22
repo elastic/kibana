@@ -18,11 +18,11 @@ export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     epm: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+      enabled: schema.boolean({ defaultValue: true }),
       registryUrl: schema.uri({ defaultValue: 'https://epr-staging.elastic.co' }),
     }),
     fleet: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+      enabled: schema.boolean({ defaultValue: true }),
       kibana: schema.object({
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
