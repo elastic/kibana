@@ -28,7 +28,10 @@ type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T
  * A loosely typed definition of the elasticjs wrapper. It's beyond the scope
  * of this work to try to make a comprehensive type definition of this.
  */
-export type ElasticJs = (action: string, args: any) => Promise<any>;
+// we have a wrapper around callCluster that makes this impossible to type correctly
+// TODO: this should be replaced with the regulakr callCluster
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ElasticJs = (action: string, args: unknown) => Promise<unknown>;
 
 /**
  * The run context is passed into a task's run function as its sole argument.
@@ -61,12 +64,12 @@ export interface RunResult {
    * The state which will be passed to the next run of this task (if this is a
    * recurring task). See the RunContext type definition for more details.
    */
-  state: Record<string, any>;
+  state: Record<string, unknown>;
 }
 
 export interface SuccessfulRunResult {
   runAt?: Date;
-  state?: Record<string, any>;
+  state?: Record<string, unknown>;
 }
 
 export interface FailedRunResult extends SuccessfulRunResult {
@@ -237,13 +240,19 @@ export interface TaskInstance {
    * A task-specific set of parameters, used by the task's run function to tailor
    * its work. This is generally user-input, such as { sms: '333-444-2222' }.
    */
+  // we allow any here as unknown will break current use in otehr plugins
+  // this can be fixed by supporting generics in the future
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
 
   /**
    * The state passed into the task's run function, and returned by the previous
    * run. If there was no previous run, or if the previous run did not return
-   * any state, this will be the empy object: {}
+   * unknown state, this will be the empy object: {}
    */
+  // we allow any here as unknown will break current use in otehr plugins
+  // this can be fixed by supporting generics in the future
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   state: Record<string, any>;
 
   /**
@@ -334,8 +343,11 @@ export interface ConcreteTaskInstance extends TaskInstance {
   /**
    * The state passed into the task's run function, and returned by the previous
    * run. If there was no previous run, or if the previous run did not return
-   * any state, this will be the empy object: {}
+   * unknown state, this will be the empy object: {}
    */
+  // we allow any here as unknown will break current use in otehr plugins
+  // this can be fixed by supporting generics in the future
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   state: Record<string, any>;
 
   /**
@@ -343,3 +355,15 @@ export interface ConcreteTaskInstance extends TaskInstance {
    */
   ownerId: string | null;
 }
+
+export type SerializedConcreteTaskInstance = Omit<
+  ConcreteTaskInstance,
+  'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'
+> & {
+  state: string;
+  params: string;
+  scheduledAt: string;
+  startedAt: string | null;
+  retryAt: string | null;
+  runAt: string;
+};

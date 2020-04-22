@@ -735,7 +735,9 @@ module.exports = {
      */
     {
       // typescript only for front and back end
-      files: ['x-pack/{,legacy/}plugins/{alerting,alerting_builtins,actions}/**/*.{ts,tsx}'],
+      files: [
+        'x-pack/{,legacy/}plugins/{alerting,alerting_builtins,actions,task_manager}/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },

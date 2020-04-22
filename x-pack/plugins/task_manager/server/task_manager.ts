@@ -43,6 +43,7 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   TaskStatus,
+  ElasticJs,
 } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { TaskPool } from './task_pool';
@@ -109,7 +110,7 @@ export class TaskManager {
   };
 
   /**
-   * Initializes the task manager, preventing any further addition of middleware,
+   * Initializes the task manager, preventing unknown further addition of middleware,
    * enabling the task manipulation methods, and beginning the background polling
    * mechanism.
    */
@@ -129,7 +130,7 @@ export class TaskManager {
     this.store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
-      callCluster: opts.callAsInternalUser,
+      callCluster: (opts.callAsInternalUser as unknown) as ElasticJs,
       index: opts.config.index,
       maxAttempts: opts.config.max_attempts,
       definitions: this.definitions,
@@ -273,7 +274,7 @@ export class TaskManager {
    */
   public async schedule(
     taskInstance: TaskInstanceWithDeprecatedFields,
-    options?: any
+    options?: object
   ): Promise<ConcreteTaskInstance> {
     await this.waitUntilStarted();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
@@ -308,7 +309,7 @@ export class TaskManager {
    */
   public async ensureScheduled(
     taskInstance: TaskInstanceWithId,
-    options?: any
+    options?: object
   ): Promise<TaskInstanceWithId> {
     try {
       return await this.schedule(taskInstance, options);
@@ -436,7 +437,7 @@ export async function awaitTaskRunResult(
             }
           },
           async (error: Error) => {
-            // reject if any error event takes place for the requested task
+            // reject if unknown error event takes place for the requested task
             subscription.unsubscribe();
             if (isTaskRunRequestEvent(taskEvent)) {
               return reject(

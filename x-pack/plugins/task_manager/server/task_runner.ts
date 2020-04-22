@@ -392,13 +392,13 @@ export class TaskManagerRunner implements TaskRunner {
     attempts,
     addDuration,
   }: {
-    error: any;
+    error: Error;
     attempts: number;
     addDuration?: string;
   }): Date | null {
     let result = null;
 
-    // Use custom retry logic, if any, otherwise we'll use the default logic
+    // Use custom retry logic, if unknown, otherwise we'll use the default logic
     const retry: boolean | Date = this.definition.getRetry
       ? this.definition.getRetry(attempts, error)
       : true;

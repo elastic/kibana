@@ -113,7 +113,7 @@ type AnyBoolCondition<T extends BoolClauseFilter> = {
 };
 
 /**
- * Describe a Bool Condition with any Condition on it, so it can handle both:
+ * Describe a Bool Condition with unknown Condition on it, so it can handle both:
  * ```
  * {
  *  bool: {
