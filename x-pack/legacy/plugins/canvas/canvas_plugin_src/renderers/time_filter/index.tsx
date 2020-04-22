@@ -13,10 +13,11 @@ import { TimeFilter } from './components';
 import { StartInitializer } from '../../plugin';
 import { RendererHandlers } from '../../../types';
 import { Arguments } from '../../functions/common/timefilterControl';
+import { RendererFactory } from '../../../types';
 
 const { timeFilter: strings } = RendererStrings;
 
-export const timeFilterFactory: StartInitializer<unknown> = (core, plugins) => {
+export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (core, plugins) => {
   const { uiSettings } = core;
 
   const customQuickRanges = (uiSettings.get('timepicker:quickRanges') || []).map(
