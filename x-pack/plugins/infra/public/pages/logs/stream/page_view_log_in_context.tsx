@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { LogEntry } from '../../../../common/http_api';
@@ -124,7 +125,7 @@ const LogEntryContext: React.FC<{ context: LogEntry['context'] }> = ({ context }
   }
 
   if ('host.name' in context) {
-    const filePath =
+    const shortenedFilePath =
       context['log.file.path'].length > 45
         ? context['log.file.path'].slice(0, 20) + '...' + context['log.file.path'].slice(-25)
         : context['log.file.path'];
@@ -133,7 +134,11 @@ const LogEntryContext: React.FC<{ context: LogEntry['context'] }> = ({ context }
       <EuiText size="s">
         <p>
           <EuiTextColor color="subdued">
-            Displayed logs are from file {filePath} and host {context['host.name']}
+            Displayed logs are from file{' '}
+            <EuiToolTip content={context['log.file.path']}>
+              <span>{shortenedFilePath}</span>
+            </EuiToolTip>{' '}
+            and host {context['host.name']}
           </EuiTextColor>
         </p>
       </EuiText>
