@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StartServices } from '../../plugin';
+import { CoreStart } from '../../../../../../src/core/public';
 
-type GlobalServices = Pick<StartServices, 'http' | 'uiSettings'>;
+type GlobalServices = Pick<CoreStart, 'http' | 'uiSettings'>;
 
 export class KibanaServices {
   private static kibanaVersion?: string;
@@ -16,7 +16,7 @@ export class KibanaServices {
     http,
     kibanaVersion,
     uiSettings,
-  }: StartServices & { kibanaVersion: string }) {
+  }: GlobalServices & { kibanaVersion: string }) {
     this.services = { http, uiSettings };
     this.kibanaVersion = kibanaVersion;
   }

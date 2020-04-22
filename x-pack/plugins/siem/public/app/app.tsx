@@ -17,7 +17,6 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 
-import { CoreStart } from '../../../../../src/core/public';
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../lib/kibana';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
@@ -25,7 +24,7 @@ import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
 import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs, AppApolloClient } from '../lib/lib';
-import { StartPlugins } from '../plugin';
+import { StartServices } from '../plugin';
 import { PageRouter } from '../routes';
 import { createStore, createInitialState } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
@@ -96,21 +95,18 @@ const StartAppComponent: FC<AppFrontendLibs> = libs => {
 const StartApp = memo(StartAppComponent);
 
 interface SiemAppComponentProps {
-  core: CoreStart;
-  plugins: StartPlugins;
+  services: StartServices;
 }
 
-const SiemAppComponent: React.FC<SiemAppComponentProps> = ({ core, plugins }) => (
+const SiemAppComponent: React.FC<SiemAppComponentProps> = ({ services }) => (
   <KibanaContextProvider
     services={{
       appName: 'siem',
       storage: new Storage(localStorage),
-      ...core,
-      ...plugins,
-      savedObjects: core.savedObjects,
+      ...services,
     }}
   >
-    <StartApp {...compose(core)} />
+    <StartApp {...compose(services)} />
   </KibanaContextProvider>
 );
 

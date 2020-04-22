@@ -42,11 +42,14 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   newsfeed?: NewsfeedStart;
-  security: SecurityPluginSetup;
   triggers_actions_ui: TriggersActionsStart;
   uiActions: UiActionsStart;
 }
-export type StartServices = CoreStart & StartPlugins;
+
+export type StartServices = CoreStart &
+  StartPlugins & {
+    security: SecurityPluginSetup;
+  };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
@@ -77,16 +80,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
 
     plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
 
-    const security = plugins.security;
-
     core.application.register({
       id: this.id,
       title: this.name,
       async mount(params: AppMountParameters) {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { renderApp } = await import('./app');
+        const services = {
+          ...coreStart,
+          ...startPlugins,
+          security: plugins.security,
+        } as StartServices;
 
-        return renderApp(coreStart, { ...startPlugins, security } as StartPlugins, params);
+        return renderApp(services, params);
       },
     });
 
