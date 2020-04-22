@@ -10,9 +10,11 @@ import {
   CoreStart,
   Plugin,
   IScopedClusterClient,
+  KibanaRequest,
   Logger,
   PluginInitializerContext,
   ICustomClusterClient,
+  CapabilitiesStart,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
@@ -62,7 +64,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   private log: Logger;
   private version: string;
   private mlLicense: MlServerLicense;
-  private capabilities: CoreStart['capabilities'] | null = null;
+  private capabilities: CapabilitiesStart | null = null;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
@@ -139,7 +141,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       mlLicense: this.mlLicense,
     };
 
-    const resolveMlCapabilities = async (request: any) => {
+    const resolveMlCapabilities = async (request: KibanaRequest) => {
       if (this.capabilities === null) {
         return null;
       }

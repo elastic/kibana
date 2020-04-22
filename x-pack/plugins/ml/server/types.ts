@@ -13,7 +13,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { MlServerLicense } from './lib/license';
-import { MlCapabilities } from '../common/types/capabilities';
+import { resolveMlCapabilitiesType } from '../common/types/capabilities';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -27,11 +27,11 @@ export interface LicenseCheckResult {
 export interface SystemRouteDeps {
   cloud: CloudSetup;
   spaces?: SpacesPluginSetup;
-  resolveMlCapabilities(request: any): Promise<MlCapabilities | null>;
+  resolveMlCapabilities: resolveMlCapabilitiesType;
 }
 
 export interface JobServiceRouteDeps {
-  resolveMlCapabilities(request: any): Promise<MlCapabilities | null>;
+  resolveMlCapabilities: resolveMlCapabilitiesType;
 }
 
 export interface PluginsSetup {

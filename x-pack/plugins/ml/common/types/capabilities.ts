@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-//
+
+import { KibanaRequest } from 'kibana/server';
 
 export const userMlCapabilities = {
   // Anomaly Detection
@@ -59,3 +60,5 @@ export interface MlCapabilitiesResponse {
   isPlatinumOrTrialLicense: boolean;
   mlFeatureEnabledInSpace: boolean;
 }
+
+export type resolveMlCapabilitiesType = (request: KibanaRequest) => Promise<MlCapabilities | null>;

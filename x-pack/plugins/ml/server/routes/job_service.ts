@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
+import { KibanaRequest } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization, JobServiceRouteDeps } from '../types';
 import {
@@ -30,7 +31,7 @@ export function jobServiceRoutes(
   { router, mlLicense }: RouteInitialization,
   { resolveMlCapabilities }: JobServiceRouteDeps
 ) {
-  async function hasPermissionToCreateJobs(request: any) {
+  async function hasPermissionToCreateJobs(request: KibanaRequest) {
     const mlCapabilities = await resolveMlCapabilities(request);
     if (mlCapabilities === null) {
       throw new Error('resolveMlCapabilities is not defined');
