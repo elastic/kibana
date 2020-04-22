@@ -19,5 +19,6 @@ export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
 export const useTimeZone = jest.fn();
 export const useDateFormat = jest.fn();
 export const useBasePath = jest.fn(() => '/test/base/path');
+export const useCurrentUser = jest.fn();
 export const withKibana = jest.fn(createWithKibanaMock());
 export const KibanaContextProvider = jest.fn(createKibanaContextProviderMock());
