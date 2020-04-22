@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './agent';
-export * from './agent_config';
-export * from './datasource';
-export * from './output';
-export * from './epm';
-export * from './enrollment_api_key';
-export * from './settings';
+export const GLOBAL_SETTINGS_SAVED_OBJET_TYPE = 'ingest_manager_settings';

@@ -37,6 +37,8 @@ import {
   registerAgentRoutes,
   registerEnrollmentApiKeyRoutes,
   registerInstallScriptRoutes,
+  registerOutputRoutes,
+  registerSettingsRoutes,
 } from './routes';
 
 import { AgentService, IngestManagerConfigType } from '../common';
@@ -132,6 +134,8 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
     // Register routes
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
+    registerOutputRoutes(router);
+    registerSettingsRoutes(router);
 
     // Conditional routes
     if (config.epm.enabled) {

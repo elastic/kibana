@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import * as settingsService from './settings';
+
 export { appContextService } from './app_context';
 export { ESIndexPatternService, ESIndexPatternSavedObjectService } from './es_index_pattern';
 
@@ -10,3 +12,4 @@ export { ESIndexPatternService, ESIndexPatternSavedObjectService } from './es_in
 export { datasourceService } from './datasource';
 export { agentConfigService } from './agent_config';
 export { outputService } from './output';
+export { settingsService };

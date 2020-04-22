@@ -42,6 +42,19 @@ export const AGENT_CONFIG_API_ROUTES = {
   FULL_INFO_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}/full`,
 };
 
+// Output API routes
+export const OUTPUT_API_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/outputs`,
+  INFO_PATTERN: `${API_ROOT}/outputs/{outputId}`,
+  UPDATE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
+};
+
+// Settings API routes
+export const SETTINGS_API_ROUTES = {
+  INFO_PATTERN: `${API_ROOT}/settings`,
+  UPDATE_PATTERN: `${API_ROOT}/settings`,
+};
+
 // Agent API routes
 export const AGENT_API_ROUTES = {
   LIST_PATTERN: `${FLEET_API_ROOT}/agents`,

@@ -12,6 +12,8 @@ import {
   AGENT_API_ROUTES,
   ENROLLMENT_API_KEY_ROUTES,
   SETUP_API_ROUTE,
+  OUTPUT_API_ROUTES,
+  SETTINGS_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -100,6 +102,18 @@ export const agentRouteService = {
   getUnenrollPath: () => AGENT_API_ROUTES.UNENROLL_PATTERN,
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
+};
+
+export const outputRoutesService = {
+  getInfoPath: (outputId: string) => OUTPUT_API_ROUTES.INFO_PATTERN.replace('{outputId}', outputId),
+  getUpdatePath: (outputId: string) =>
+    OUTPUT_API_ROUTES.UPDATE_PATTERN.replace('{outputId}', outputId),
+  getListPath: () => OUTPUT_API_ROUTES.LIST_PATTERN,
+};
+
+export const settingsRoutesService = {
+  getInfoPath: () => SETTINGS_API_ROUTES.INFO_PATTERN,
+  getUpdatePath: () => SETTINGS_API_ROUTES.UPDATE_PATTERN,
 };
 
 export const enrollmentAPIKeyRouteService = {
