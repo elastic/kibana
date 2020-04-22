@@ -7,6 +7,7 @@ import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { useForm, Form, SerializerFunc } from '../../shared_imports';
+import { GenericObject } from '../../types';
 import { Types, useDispatch } from '../../mappings_state';
 import { DynamicMappingSection } from './dynamic_mapping_section';
 import { SourceFieldSection } from './source_field_section';
@@ -20,7 +21,7 @@ interface Props {
   defaultValue?: MappingsConfiguration;
 }
 
-const stringifyJson = (json: { [key: string]: any }) =>
+const stringifyJson = (json: GenericObject) =>
   Object.keys(json).length ? JSON.stringify(json, null, 2) : '{\n\n}';
 
 const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
@@ -57,7 +58,7 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
   };
 };
 
-const formDeserializer = (formData: { [key: string]: any }) => {
+const formDeserializer = (formData: GenericObject) => {
   const {
     dynamic,
     numeric_detection,

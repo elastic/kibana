@@ -16,7 +16,7 @@ import {
   Dispatch,
 } from './reducer';
 import { Field } from './types';
-import { normalize, deNormalize } from './lib';
+import { normalize, deNormalize, stripUndefinedValues } from './lib';
 
 type Mappings = MappingsTemplates &
   MappingsConfiguration & {
@@ -135,8 +135,10 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
         const templatesData = nextState.templates.data.format();
 
         return {
-          ...configurationData,
-          ...templatesData,
+          ...stripUndefinedValues({
+            ...configurationData,
+            ...templatesData,
+          }),
           properties: fields,
         };
       },
