@@ -8,8 +8,9 @@
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
-import moment from 'moment';
+import moment, { Duration } from 'moment';
 import { performance } from 'perf_hooks';
+import { padLeft } from 'lodash';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
@@ -151,7 +152,15 @@ export class TaskPool {
       if (task.isExpired) {
         this.logger.warn(
           `Cancelling task ${task.toString()} as it expired at ${task.expiration.toISOString()}${
-            task.startedAt ? ` after running for ${moment(task.startedAt).toNow(true)}` : ``
+            task.startedAt
+              ? ` after running for ${durationAsString(
+                  moment.duration(
+                    moment(new Date())
+                      .utc()
+                      .diff(task.startedAt)
+                  )
+                )}`
+              : ``
           }${task.definition.timeout ? ` (with timeout set at ${task.definition.timeout})` : ``}.`
         );
         this.cancelTask(task);
@@ -173,4 +182,9 @@ export class TaskPool {
 function partitionListByCount<T>(list: T[], count: number): [T[], T[]] {
   const listInCount = list.splice(0, count);
   return [listInCount, list];
+}
+
+function durationAsString(duration: Duration): string {
+  const [m, s] = [duration.minutes(), duration.seconds()].map(value => padLeft(`${value}`, 2, '0'));
+  return `${m}m ${s}s`;
 }

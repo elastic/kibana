@@ -217,6 +217,7 @@ describe('TaskPool', () => {
           // 5 and a half minutes
           return moment(now)
             .subtract(5, 'm')
+            .subtract(30, 's')
             .toDate();
         },
         cancel: shouldRun,
@@ -245,7 +246,7 @@ describe('TaskPool', () => {
     expect(pool.availableWorkers).toEqual(0);
 
     expect(logger.warn).toHaveBeenCalledWith(
-      `Cancelling task TaskType "shooooo" as it expired at ${now.toISOString()} after running for 5 minutes (with timeout set at 5m).`
+      `Cancelling task TaskType "shooooo" as it expired at ${now.toISOString()} after running for 05m 30s (with timeout set at 5m).`
     );
   });
 
