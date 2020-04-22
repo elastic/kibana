@@ -149,6 +149,7 @@ export const createTimelineEpic = <State>(): Epic<
     action$.pipe(
       withLatestFrom(timeline$),
       filter(([action, timeline]) => {
+        console.error('epic', action, timeline);
         const timelineId: string = get('payload.id', action);
         const timelineObj: TimelineModel = timeline[timelineId];
         if (action.type === addError.type) {
@@ -184,6 +185,8 @@ export const createTimelineEpic = <State>(): Epic<
         const action: ActionTimeline = get('action', objAction);
         const timelineId = myEpicTimelineId.getTimelineId();
         const version = myEpicTimelineId.getTimelineVersion();
+
+        // console.error('dispatcher', objAction, timeline, myEpicTimelineId);
 
         if (timelineNoteActionsType.includes(action.type)) {
           return epicPersistNote(apolloClient, action, timeline, notes, action$, timeline$, notes$);

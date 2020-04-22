@@ -32,6 +32,8 @@ import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_ro
 import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
 import { createTimelinesRoute } from '../lib/timeline/routes/create_timelines_route';
 import { updateTimelinesRoute } from '../lib/timeline/routes/update_timelines_route';
+import { defaultTimelinesRoute } from '../lib/timeline/routes/default_timelines_route';
+import { resetTimelinesRoute } from '../lib/timeline/routes/reset_timelines_route';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '..';
 
@@ -64,6 +66,8 @@ export const initRoutes = (
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config);
+  defaultTimelinesRoute(router, config);
+  resetTimelinesRoute(router, config);
 
   findRulesStatusesRoute(router);
 

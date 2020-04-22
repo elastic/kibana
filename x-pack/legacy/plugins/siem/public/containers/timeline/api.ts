@@ -14,7 +14,10 @@ import {
   TimelineResponse,
   TimelineResponseType,
 } from '../../../../../../plugins/siem/common/types/timeline';
-import { TIMELINE_URL } from '../../../../../../plugins/siem/common/constants';
+import {
+  TIMELINE_URL,
+  TIMELINE_DEFAULT_URL,
+} from '../../../../../../plugins/siem/common/constants';
 
 import { KibanaServices } from '../../lib/kibana';
 import { createToasterPlainError } from '../case/utils';
@@ -73,4 +76,10 @@ export const persistTimeline = async ({
     timeline,
     version: version ?? '',
   });
+};
+
+export const getDefaultTimeline = async (): Promise<TimelineResponse> => {
+  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_DEFAULT_URL);
+
+  return response;
 };
