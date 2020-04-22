@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFieldText,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { LoginState } from '../../../../../common/login_state';
 
 interface Props {
@@ -14,6 +23,7 @@ interface Props {
   window: any;
   infoMessage?: string;
   loginState: LoginState;
+  loginAssistanceMessage: string;
   next: string;
   intl: InjectedIntl;
 }
@@ -38,6 +48,7 @@ class BasicLoginFormUI extends Component<Props, State> {
   public render() {
     return (
       <Fragment>
+        {this.renderLoginAssistanceMessage()}
         {this.renderMessage()}
         <EuiPanel>
           <form onSubmit={this.submit}>
@@ -102,6 +113,16 @@ class BasicLoginFormUI extends Component<Props, State> {
     );
   }
 
+  private renderLoginAssistanceMessage = () => {
+    return (
+      <Fragment>
+        <EuiText size="s">
+          <ReactMarkdown source={this.props.loginAssistanceMessage} />
+        </EuiText>
+      </Fragment>
+    );
+  };
+
   private renderMessage = () => {
     if (this.state.message) {
       return (
@@ -132,6 +153,7 @@ class BasicLoginFormUI extends Component<Props, State> {
         </Fragment>
       );
     }
+
     return null;
   };
 

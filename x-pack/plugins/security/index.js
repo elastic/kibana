@@ -38,6 +38,7 @@ export const security = (kibana) => new kibana.Plugin({
       encryptionKey: Joi.string(),
       sessionTimeout: Joi.number().allow(null).default(null),
       secureCookies: Joi.boolean().default(false),
+      loginAssistanceMessage: Joi.string(),
       public: Joi.object({
         protocol: Joi.string().valid(['http', 'https']),
         hostname: Joi.string().hostname(),
@@ -178,6 +179,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { showLogin, loginMessage, allowLogin, layout = 'form' } = xpackInfo.feature(plugin.id).getLicenseCheckResults() || {};
 
       return {
+        loginAssistanceMessage: config.get('xpack.security.loginAssistanceMessage') || '',
         loginState: {
           showLogin,
           allowLogin,
