@@ -19,7 +19,7 @@
 import { SavedObjectsType } from 'kibana/server';
 
 export const kqlTelemetry: SavedObjectsType = {
-  name: 'kql_telemetry',
+  name: 'kql-telemetry',
   namespaceType: 'agnostic',
   hidden: false,
   mappings: {
