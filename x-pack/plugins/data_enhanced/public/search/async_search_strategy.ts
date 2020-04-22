@@ -54,7 +54,7 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
       return search(request, options).pipe(
         expand(response => {
           // If the response indicates it is complete, stop polling and complete the observable
-          if ((response.loaded ?? 0) >= (response.total ?? 0)) return EMPTY;
+          if (response.is_partial === false) return EMPTY;
 
           id = response.id;
 
