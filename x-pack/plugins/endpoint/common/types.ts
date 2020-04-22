@@ -319,7 +319,7 @@ export interface ESTotal {
  */
 export type AlertHits = SearchResponse<AlertEvent>['hits']['hits'];
 
-export interface LegacyEndpointEvent {
+interface LegacyEndpointEvent {
   '@timestamp': number;
   endgame: {
     pid?: number;
@@ -346,7 +346,7 @@ export interface LegacyEndpointEvent {
   user?: object;
 }
 
-export interface EndpointEvent {
+interface EndpointEvent {
   '@timestamp': number;
   agent: {
     id: string;
@@ -503,27 +503,21 @@ export interface PolicyConfig {
 }
 
 /**
- * Windows-specific policy configuration that is supported via the UI
- */
-type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'events' | 'malware'>;
-
-/**
- * Mac-specific policy configuration that is supported via the UI
- */
-type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
-
-/**
- * Linux-specific policy configuration that is supported via the UI
- */
-type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
-
-/**
  * The set of Policy configuration settings that are show/edited via the UI
  */
 export interface UIPolicyConfig {
-  windows: WindowsPolicyConfig;
-  mac: MacPolicyConfig;
-  linux: LinuxPolicyConfig;
+  /**
+   * Windows-specific policy configuration that is supported via the UI
+   */
+  windows: Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+  /**
+   * Mac-specific policy configuration that is supported via the UI
+   */
+  mac: Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+  /**
+   * Linux-specific policy configuration that is supported via the UI
+   */
+  linux: Pick<PolicyConfig['linux'], 'events'>;
 }
 
 interface PolicyConfigAdvancedOptions {
