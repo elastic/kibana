@@ -45,7 +45,13 @@ export function toPromise(signal: AbortSignal, shouldReject: boolean = false) {
     if (signal.aborted) action();
     signal.addEventListener('abort', action);
   });
+
+  /**
+   * Below is to make sure we don't have unhandled promise rejections. Otherwise
+   * Jest tests fail.
+   */
   promise.catch(() => {});
+
   return promise;
 }
 
