@@ -195,15 +195,8 @@ export function PieComponent(
           showLegend={!hideLabels && columnGroups.length > 1}
           legendMaxDepth={1 /* Color is based only on first layer */}
           onElementClick={args => {
-            // This is a working around a bug in the chart library
-            // see https://github.com/elastic/elastic-charts/issues/624
-            const clickedLayers: LayerValue[] =
-              shape === 'treemap'
-                ? (args[args.length - 1][0] as LayerValue[])
-                : (args[0][0] as LayerValue[]);
-
             const context = getFilterContext(
-              clickedLayers,
+              args[0][0] as LayerValue[],
               columnGroups.map(({ col }) => col.id),
               firstTable
             );
