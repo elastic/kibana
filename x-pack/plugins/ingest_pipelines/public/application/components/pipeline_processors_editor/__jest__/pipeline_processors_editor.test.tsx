@@ -25,13 +25,19 @@ const testProcessors = {
 
 describe('Pipeline Editor', () => {
   it('provides the same data out it got in if nothing changes', async () => {
-    let stateReaderRef: any;
+    const onUpdate = jest.fn();
+
     await setup({
-      ...(testProcessors as any),
-      stateReaderRef: ref => (stateReaderRef = ref),
+      value: {
+        ...(testProcessors as any),
+      },
+      onUpdate,
     });
 
-    const data = stateReaderRef.current();
-    expect(data).toEqual(testProcessors);
+    const {
+      calls: [[arg]],
+    } = onUpdate.mock;
+
+    expect(arg.getData()).toEqual(testProcessors);
   });
 });
