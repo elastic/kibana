@@ -26,6 +26,7 @@ export default function({ getService }: PluginFunctionalProviderContext) {
   const flyout = getService('flyout');
 
   // FLAKY: https://github.com/elastic/kibana/issues/58692
+  // eslint-disable-next-line ban/ban
   describe.only('creating and adding children', () => {
     before(async () => {
       await testSubjects.click('embeddablePanelExamplae');
