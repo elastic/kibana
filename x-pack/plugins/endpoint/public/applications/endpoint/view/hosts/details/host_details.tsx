@@ -96,7 +96,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
               onClick={policyStatusClickHandler}
             >
               <FormattedMessage
-                id="xpack.endpoint.host.details.policyStatus"
+                id="xpack.endpoint.host.details.policyStatusValue"
                 defaultMessage="{policyStatus, select, success {Success} warning {Warning} failed {Failed} other {Unknown}}"
                 values={{ policyStatus }}
               />
