@@ -138,10 +138,8 @@ export class ClusterClientAdapter {
         hits: { hits, total },
       }: SearchResponse<unknown> = await this.callEs('search', {
         index,
-        /*
-          This ensures the hits.total is rturned as an int instead of an object value as
-          the SearchResponse type only supports total as an int, not as an object
-         */
+        // The SearchResponse type only supports total as an int,
+        // so we're forced to explicitly request that it return as an int
         rest_total_hits_as_int: true,
         body: {
           size: perPage,
