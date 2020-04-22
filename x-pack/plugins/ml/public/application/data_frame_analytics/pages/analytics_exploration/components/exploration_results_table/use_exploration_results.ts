@@ -19,9 +19,8 @@ import {
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
+import { FEATURE_IMPORTANCE } from '../../../../common/constants';
 import { sortExplorationResultsFields } from '../../../../common/fields';
-
-const FEATURE_IMPORTANCE = 'feature_importance';
 
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,

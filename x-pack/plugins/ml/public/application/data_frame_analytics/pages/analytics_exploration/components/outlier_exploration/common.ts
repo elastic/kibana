@@ -7,9 +7,7 @@
 import { DataGridItem } from '../../../../../components/data_grid';
 
 import { DataFrameAnalyticsConfig } from '../../../../common';
-
-export const FEATURE_INFLUENCE = 'feature_influence';
-export const OUTLIER_SCORE = 'outlier_score';
+import { FEATURE_INFLUENCE, OUTLIER_SCORE } from '../../../../common/constants';
 
 export const getOutlierScoreFieldName = (jobConfig: DataFrameAnalyticsConfig) =>
   `${jobConfig.dest.results_field}.${OUTLIER_SCORE}`;

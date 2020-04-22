@@ -21,15 +21,17 @@ import {
   EXTENDED_NUMERICAL_TYPES,
 } from '../../data_frame_analytics/common/fields';
 
+import {
+  FEATURE_IMPORTANCE,
+  FEATURE_INFLUENCE,
+  OUTLIER_SCORE,
+} from '../../data_frame_analytics/common/constants';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
-export const FEATURE_IMPORTANCE = 'feature_importance';
-export const FEATURE_INFLUENCE = 'feature_influence';
-export const OUTLIER_SCORE = 'outlier_score';
 export const INIT_MAX_COLUMNS = 20;
 
 export const euiDataGridStyle: EuiDataGridStyle = {
