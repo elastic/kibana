@@ -55,7 +55,7 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
         label: i18n.translate('home.tutorials.etcdMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

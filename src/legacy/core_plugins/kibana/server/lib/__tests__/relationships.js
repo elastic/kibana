@@ -101,7 +101,7 @@ const savedObjectsManagement = getManagementaMock({
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/discover/${encodeURIComponent(obj.id)}`,
+        path: `/app/discover#//${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'discover.show',
       };
     },
@@ -609,7 +609,7 @@ describe('findRelationships', () => {
           title: 'My Saved Search',
           editUrl: '/management/kibana/objects/savedSearches/1',
           inAppUrl: {
-            path: '/app/kibana#/discover/1',
+            path: '/app/discover#//1',
             uiCapabilitiesPath: 'discover.show',
           },
         },

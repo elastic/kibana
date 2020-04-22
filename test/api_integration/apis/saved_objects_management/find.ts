@@ -220,7 +220,7 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                path: '/app/discover#//960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
             });

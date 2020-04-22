@@ -32,7 +32,7 @@ export const querySavedObjectType: SavedObjectsType = {
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/discover?_a=(savedQuery:'${encodeURIComponent(obj.id)}')`,
+        path: `/app/discover#/?_a=(savedQuery:'${encodeURIComponent(obj.id)}')`,
         uiCapabilitiesPath: 'discover.show',
       };
     },

@@ -62,17 +62,7 @@ export default function(kibana) {
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       links: [
-        {
-          id: 'kibana:discover',
-          title: i18n.translate('kbn.discoverTitle', {
-            defaultMessage: 'Discover',
-          }),
-          order: -1003,
-          url: `${kbnBaseUrl}#/discover`,
-          euiIconType: 'discoverApp',
-          disableSubUrlTracking: true,
-          category: DEFAULT_APP_CATEGORIES.analyze,
-        },
+        // TODO get rid of kibana:discover references
         // TODO get rid of kibana:visualize references
         // TODO get rid of kibana:dashboard references
         // TODO get rid of kibana:dev_tools references

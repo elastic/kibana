@@ -51,6 +51,7 @@ import {
   setUrlTracker,
   setAngularModule,
   setServices,
+  getHistory,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { getInnerAngularModuleEmbeddable, getInnerAngularModule } from './get_inner_angular';
@@ -157,8 +158,8 @@ export class DiscoverPlugin
       stop: stopUrlTracker,
       setActiveUrl: setTrackedUrl,
     } = createKbnUrlTracker({
-      baseUrl: core.http.basePath.prepend('/app/kibana'),
-      defaultSubUrl: '#/discover',
+      baseUrl: core.http.basePath.prepend('/app/discover'),
+      defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
@@ -183,13 +184,18 @@ export class DiscoverPlugin
     };
 
     this.docViewsRegistry.setAngularInjectorGetter(this.getEmbeddableInjector);
-    plugins.kibanaLegacy.registerLegacyApp({
+    core.application.register({
       id: 'discover',
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
-      navLinkId: 'kibana:discover',
       order: -1004,
       euiIconType: 'discoverApp',
+      category: {
+        label: i18n.translate('core.ui.analyzeNavList.label', {
+          defaultMessage: 'Analyze',
+        }),
+        order: 1000,
+      },
       mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
@@ -209,6 +215,8 @@ export class DiscoverPlugin
         };
       },
     });
+
+    plugins.kibanaLegacy.forwardApp('discover', 'discover');
 
     if (plugins.home) {
       registerFeature(plugins.home);
@@ -247,7 +255,7 @@ export class DiscoverPlugin
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(core, plugins, this.initializerContext);
+      const services = await buildServices(core, plugins, getHistory, this.initializerContext);
       setServices(services);
       this.servicesInitialized = true;
 

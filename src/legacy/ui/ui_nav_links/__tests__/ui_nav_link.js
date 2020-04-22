@@ -28,7 +28,7 @@ describe('UiNavLink', () => {
         id: 'kibana:discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
+        url: '/app/discover#/',
         euiIconType: 'discoverApp',
         hidden: true,
         disabled: true,
@@ -58,7 +58,7 @@ describe('UiNavLink', () => {
       const spec = {
         id: 'kibana:discover',
         title: 'Discover',
-        url: '/app/kibana#/discover',
+        url: '/app/discover#/',
       };
       const link = new UiNavLink(spec);
 
@@ -70,7 +70,7 @@ describe('UiNavLink', () => {
         id: 'kibana:discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
+        url: '/app/discover#/',
         linkToLastSubUrl: false,
       };
       const link = new UiNavLink(spec);
@@ -83,7 +83,7 @@ describe('UiNavLink', () => {
         id: 'kibana:discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
+        url: '/app/discover#/',
       };
       const link = new UiNavLink(spec);
 
@@ -95,7 +95,7 @@ describe('UiNavLink', () => {
         id: 'kibana:discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
+        url: '/app/discover#/',
       };
       const link = new UiNavLink(spec);
 
@@ -107,7 +107,7 @@ describe('UiNavLink', () => {
         id: 'kibana:discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
+        url: '/app/discover#/',
       };
       const link = new UiNavLink(spec);
 
@@ -119,7 +119,7 @@ describe('UiNavLink', () => {
         id: 'kibana:discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
+        url: '/app/discover#/',
       };
       const link = new UiNavLink(spec);
 

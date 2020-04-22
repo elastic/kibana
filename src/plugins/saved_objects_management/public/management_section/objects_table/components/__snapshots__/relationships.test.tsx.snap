@@ -306,7 +306,7 @@ exports[`Relationships should render index patterns normally 1`] = `
                 "editUrl": "/management/kibana/objects/savedSearches/1",
                 "icon": "search",
                 "inAppUrl": Object {
-                  "path": "/app/kibana#/discover/1",
+                  "path": "/app/discover#//1",
                   "uiCapabilitiesPath": "discover.show",
                 },
                 "title": "My Search Title",

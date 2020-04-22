@@ -70,6 +70,7 @@ interface SearchEmbeddableConfig {
   $compile: ng.ICompileService;
   savedSearch: SavedSearch;
   editUrl: string;
+  editPath: string;
   indexPatterns?: IndexPattern[];
   editable: boolean;
   filterManager: FilterManager;
@@ -101,6 +102,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       $compile,
       savedSearch,
       editUrl,
+      editPath,
       indexPatterns,
       editable,
       filterManager,
@@ -111,7 +113,14 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   ) {
     super(
       initialInput,
-      { defaultTitle: savedSearch.title, editUrl, indexPatterns, editable },
+      {
+        defaultTitle: savedSearch.title,
+        editUrl,
+        editPath,
+        editApp: 'discover',
+        indexPatterns,
+        editable,
+      },
       parent
     );
 

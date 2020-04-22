@@ -246,18 +246,18 @@ describe('UrlFormat', () => {
     test('should support multiple types of relative urls', () => {
       const parsedUrl = {
         origin: 'http://kibana.host.com',
-        pathname: '/nbc/app/kibana#/discover',
+        pathname: '/nbc/app/discover#/',
         basePath: '/nbc',
       };
       const url = new UrlFormat({ parsedUrl });
       const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('#/foo')).toBe(
-        '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/kibana#/discover#/foo" target="_blank" rel="noopener noreferrer">#/foo</a></span>'
+        '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/discover#/#/foo" target="_blank" rel="noopener noreferrer">#/foo</a></span>'
       );
 
-      expect(converter('/nbc/app/kibana#/discover')).toBe(
-        '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/kibana#/discover" target="_blank" rel="noopener noreferrer">/nbc/app/kibana#/discover</a></span>'
+      expect(converter('/nbc/app/discover#/')).toBe(
+        '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/discover#/" target="_blank" rel="noopener noreferrer">/nbc/app/discover#/</a></span>'
       );
 
       expect(converter('../foo/bar')).toBe(

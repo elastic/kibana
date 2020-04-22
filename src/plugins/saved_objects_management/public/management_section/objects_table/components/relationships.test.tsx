@@ -45,7 +45,7 @@ describe('Relationships', () => {
             editUrl: '/management/kibana/objects/savedSearches/1',
             icon: 'search',
             inAppUrl: {
-              path: '/app/kibana#/discover/1',
+              path: '/app/discover#//1',
               uiCapabilitiesPath: 'discover.show',
             },
             title: 'My Search Title',

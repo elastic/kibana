@@ -107,7 +107,7 @@ app.config($routeProvider => {
       };
     },
   };
-  $routeProvider.when('/discover/:id?', {
+  $routeProvider.when('/:id?', {
     ...defaults,
     template: indexTemplate,
     reloadOnSearch: false,
@@ -154,13 +154,15 @@ app.config($routeProvider => {
                   history,
                   navigateToApp: core.application.navigateToApp,
                   mapping: {
-                    search: '/discover',
-                    'index-pattern':
-                      '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                    search: '/',
+                    'index-pattern': {
+                      app: 'kibana',
+                      path: `#/management/kibana/objects/savedSearches/${$route.current.params.id}`,
+                    },
                   },
                   toastNotifications,
                   onBeforeRedirect() {
-                    getUrlTracker().setTrackedUrl('/discover');
+                    getUrlTracker().setTrackedUrl('/');
                   },
                 })
               ),
@@ -261,7 +263,7 @@ function discoverController(
     }
   });
 
-  // this listener is waiting for such a path http://localhost:5601/app/kibana#/discover
+  // this listener is waiting for such a path http://localhost:5601/app/discover#/
   // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
   // to reload the page in a right way
   const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
