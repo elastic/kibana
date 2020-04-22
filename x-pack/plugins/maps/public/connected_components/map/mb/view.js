@@ -271,7 +271,9 @@ export class MBMapContainer extends React.Component {
     );
     this.props.layerList.forEach(layer => layer.syncLayerWithMB(this.state.mbMap));
     syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
-    moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
+    if (this.props.spatialFiltersLayer) {
+      moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
+    }
   };
 
   _syncMbMapWithInspector = () => {

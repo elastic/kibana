@@ -43,7 +43,7 @@ export type MapSettings = {
   maxZoom: number;
   minZoom: number;
   showSpatialFilters: boolean;
-  spatialFiltersAlpa: string;
+  spatialFiltersAlpa: number;
   spatialFiltersFillColor: string;
   spatialFiltersLineColor: string;
 };
