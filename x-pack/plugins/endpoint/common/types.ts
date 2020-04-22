@@ -25,31 +25,15 @@ export type Immutable<T> = T extends undefined | null | boolean | string | numbe
   ? ImmutableSet<M>
   : ImmutableObject<T>;
 
-export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
-export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
-export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
-export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
+type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
+type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
+type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
-export type Direction = 'asc' | 'desc';
-
-export class EndpointAppConstants {
-  static BASE_API_URL = '/api/endpoint';
-  static INDEX_PATTERN_ROUTE = `${EndpointAppConstants.BASE_API_URL}/index_pattern`;
-  static ALERT_INDEX_NAME = 'events-endpoint-1';
-  static EVENT_DATASET = 'events';
-  static DEFAULT_TOTAL_HITS = 10000;
-  /**
-   * Legacy events are stored in indices with endgame-* prefix
-   */
-  static LEGACY_EVENT_INDEX_NAME = 'endgame-*';
-
-  /**
-   * Alerts
-   **/
-  static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
-  static ALERT_LIST_DEFAULT_SORT = '@timestamp';
-  static MAX_LONG_INT = '9223372036854775807'; // 2^63-1
-}
+/**
+ * Values for the Alert APIs 'order' and 'direction' parameters.
+ */
+export type AlertAPIOrdering = 'asc' | 'desc';
 
 export interface AlertResultList {
   /**
@@ -99,43 +83,61 @@ export interface HostResultList {
   request_page_index: number;
 }
 
-export interface OSFields {
+/**
+ * Operating System metadata for a host.
+ */
+export interface HostOS {
   full: string;
   name: string;
   version: string;
   variant: string;
 }
-export interface HostFields {
+
+/**
+ * Host metadata. Describes an endpoint host.
+ */
+export interface Host {
   id: string;
   hostname: string;
   ip: string[];
   mac: string[];
-  os: OSFields;
+  os: HostOS;
 }
-export interface HashFields {
+
+/**
+ * A record of hashes for something. Provides hashes in multiple formats. A favorite structure of the Elastic Endpoint.
+ */
+interface Hashes {
+  /**
+   * A hash in MD5 format.
+   */
   md5: string;
+  /**
+   * A hash in SHA-1 format.
+   */
   sha1: string;
+  /**
+   * A hash in SHA-256 format.
+   */
   sha256: string;
 }
-export interface MalwareClassificationFields {
+
+interface MalwareClassification {
   identifier: string;
   score: number;
   threshold: number;
   version: string;
 }
-export interface PrivilegesFields {
-  description: string;
-  name: string;
-  enabled: boolean;
-}
-export interface ThreadFields {
+
+interface ThreadFields {
   id: number;
   service_name: string;
   start: number;
   start_address: number;
   start_address_module: string;
 }
-export interface DllFields {
+
+interface DllFields {
   pe: {
     architecture: string;
     imphash: string;
@@ -145,8 +147,8 @@ export interface DllFields {
     trusted: boolean;
   };
   compile_time: number;
-  hash: HashFields;
-  malware_classification: MalwareClassificationFields;
+  hash: Hashes;
+  malware_classification: MalwareClassification;
   mapped_address: number;
   mapped_size: number;
   path: string;
@@ -154,7 +156,6 @@ export interface DllFields {
 
 /**
  * Describes an Alert Event.
- * Should be in line with ECS schema.
  */
 export type AlertEvent = Immutable<{
   '@timestamp': number;
@@ -191,14 +192,14 @@ export type AlertEvent = Immutable<{
       entity_id: string;
     };
     name: string;
-    hash: HashFields;
+    hash: Hashes;
     pe?: {
       imphash: string;
     };
     executable: string;
     sid?: string;
     start: number;
-    malware_classification?: MalwareClassificationFields;
+    malware_classification?: MalwareClassification;
     token: {
       domain: string;
       type: string;
@@ -206,7 +207,11 @@ export type AlertEvent = Immutable<{
       sid: string;
       integrity_level: number;
       integrity_level_name: string;
-      privileges?: PrivilegesFields[];
+      privileges?: Array<{
+        description: string;
+        name: string;
+        enabled: boolean;
+      }>;
     };
     thread?: ThreadFields[];
     uptime: number;
@@ -220,7 +225,7 @@ export type AlertEvent = Immutable<{
     mtime: number;
     created: number;
     size: number;
-    hash: HashFields;
+    hash: Hashes;
     pe?: {
       imphash: string;
     };
@@ -228,10 +233,10 @@ export type AlertEvent = Immutable<{
       trusted: boolean;
       subject_name: string;
     };
-    malware_classification: MalwareClassificationFields;
+    malware_classification: MalwareClassification;
     temp_file_path: string;
   };
-  host: HostFields;
+  host: Host;
   dll?: DllFields[];
 }>;
 
@@ -249,9 +254,6 @@ interface AlertState {
   };
 }
 
-/**
- * Union of alert data and metadata.
- */
 export type AlertData = AlertEvent & AlertMetadata;
 
 export type AlertDetails = AlertData & AlertState;
@@ -301,7 +303,7 @@ export type HostMetadata = Immutable<{
     id: string;
     version: string;
   };
-  host: HostFields;
+  host: Host;
 }>;
 
 /**
@@ -365,7 +367,7 @@ export interface EndpointEvent {
     hostname: string;
     ip: string[];
     mac: string[];
-    os: OSFields;
+    os: HostOS;
   };
   process: {
     entity_id: string;
