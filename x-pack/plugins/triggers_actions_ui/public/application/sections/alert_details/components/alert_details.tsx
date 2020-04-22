@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { indexBy } from 'lodash';
 import {
   EuiPageBody,
@@ -21,6 +21,7 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiBetaBadge,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,8 @@ import {
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
 import { PLUGIN } from '../../../constants/plugin';
+import { AlertEdit } from '../../alert_form';
+import { AlertsContextProvider } from '../../../context/alerts_context';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -52,7 +55,17 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   muteAlert,
   requestRefresh,
 }) => {
-  const { capabilities } = useAppDependencies();
+  const {
+    http,
+    toastNotifications,
+    capabilities,
+    alertTypeRegistry,
+    actionTypeRegistry,
+    uiSettings,
+    docLinks,
+    charts,
+    dataPlugin,
+  } = useAppDependencies();
 
   const canSave = hasSaveAlertsCapability(capabilities);
 
@@ -61,6 +74,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
 
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
+  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
 
   return (
     <EuiPage>
@@ -90,6 +104,40 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup responsive={false} gutterSize="xs">
+                {canSave ? (
+                  <EuiFlexItem grow={false}>
+                    <Fragment>
+                      {' '}
+                      <EuiButtonEmpty
+                        iconType="pencil"
+                        onClick={() => setEditFlyoutVisibility(true)}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+                          defaultMessage="Edit"
+                        />
+                      </EuiButtonEmpty>
+                      <AlertsContextProvider
+                        value={{
+                          http,
+                          actionTypeRegistry,
+                          alertTypeRegistry,
+                          toastNotifications,
+                          uiSettings,
+                          docLinks,
+                          charts,
+                          dataFieldsFormats: dataPlugin.fieldFormats,
+                        }}
+                      >
+                        <AlertEdit
+                          initialAlert={alert}
+                          editFlyoutVisible={editFlyoutVisible}
+                          setEditFlyoutVisibility={setEditFlyoutVisibility}
+                        />
+                      </AlertsContextProvider>
+                    </Fragment>
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
                   <ViewInApp alert={alert} />
                 </EuiFlexItem>
