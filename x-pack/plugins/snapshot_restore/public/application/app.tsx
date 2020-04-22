@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common/constants';
-import { SectionLoading, SectionError } from './components';
+import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common';
+import {
+  useAuthorizationContext,
+  SectionError,
+  WithPrivileges,
+  NotAuthorizedSection,
+} from '../shared_imports';
+import { SectionLoading } from './components';
 import { BASE_PATH, DEFAULT_SECTION, Section } from './constants';
 import {
   RepositoryAdd,
@@ -21,11 +27,10 @@ import {
   PolicyEdit,
 } from './sections';
 import { useConfig } from './app_context';
-import { AuthorizationContext, WithPrivileges, NotAuthorizedSection } from './lib/authorization';
 
 export const App: React.FunctionComponent = () => {
   const { slm_ui: slmUi } = useConfig();
-  const { apiError } = useContext(AuthorizationContext);
+  const { apiError } = useAuthorizationContext();
 
   const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];
 
