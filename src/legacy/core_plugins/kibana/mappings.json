@@ -37,15 +37,5 @@
         "type": "long"
       }
     }
-  },
-  "sample-data-telemetry": {
-    "properties": {
-      "installCount": {
-        "type": "long"
-      },
-      "unInstallCount": {
-        "type": "long"
-      }
-    }
   }
 }
