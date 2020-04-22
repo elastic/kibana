@@ -16,11 +16,12 @@ import {
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
+import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 
 export function initPostCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.post(
     {
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       validate: {
         body: escapeHatch,
       },

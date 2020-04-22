@@ -255,6 +255,8 @@ export class DashboardPlugin
           localStorage: new Storage(localStorage),
           usageCollection,
         };
+        // make sure the index pattern list is up to date
+        await dataStart.indexPatterns.clearCache();
         const { renderApp } = await import('./application/application');
         const unmount = renderApp(params.element, params.appBasePath, deps);
         return () => {

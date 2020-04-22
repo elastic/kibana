@@ -139,6 +139,8 @@ export class VisualizePlugin
         };
         setServices(deps);
 
+        // make sure the index pattern list is up to date
+        await pluginsStart.data.indexPatterns.clearCache();
         const { renderApp } = await import('./application/application');
         params.element.classList.add('visAppWrapper');
         const unmount = renderApp(params.element, params.appBasePath, deps);
