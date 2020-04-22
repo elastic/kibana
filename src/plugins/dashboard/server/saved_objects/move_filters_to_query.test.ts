@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { esFilters, Filter } from 'src/plugins/data/public';
 import { moveFiltersToQuery, Pre600FilterQuery } from './move_filters_to_query';
-import { esFilters, Filter } from '../../../../../../plugins/data/public';
 
 const filter: Filter = {
   meta: { disabled: false, negate: false, alias: '' },

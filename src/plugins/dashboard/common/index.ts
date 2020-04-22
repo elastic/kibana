@@ -17,5 +17,20 @@
  * under the License.
  */
 
-export { migrations730 } from './migrations_730';
-export { migrateMatchAllQuery } from './migrate_match_all_query';
+export { GridData } from './embeddable/types';
+export {
+  RawSavedDashboardPanel730ToLatest,
+  DashboardDoc730ToLatest,
+  DashboardDoc700To720,
+  DashboardDocPre700,
+} from './bwc/types';
+export {
+  SavedDashboardPanelTo60,
+  SavedDashboardPanel610,
+  SavedDashboardPanel620,
+  SavedDashboardPanel630,
+  SavedDashboardPanel640To720,
+  SavedDashboardPanel730ToLatest,
+} from './types';
+
+export { migratePanelsTo730 } from './migrate_to_730_panels';

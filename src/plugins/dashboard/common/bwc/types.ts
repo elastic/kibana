@@ -18,31 +18,26 @@
  */
 
 import { SavedObjectReference } from 'kibana/public';
-import { GridData } from '../application';
 
-export interface SavedObjectAttributes {
+import { GridData } from '../';
+
+interface SavedObjectAttributes {
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };
 }
 
-export interface Doc<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+interface Doc<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
   references: SavedObjectReference[];
   attributes: Attributes;
   id: string;
   type: string;
 }
 
-export interface DocPre700<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+interface DocPre700<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
   attributes: Attributes;
   id: string;
   type: string;
-}
-
-export interface SavedObjectAttributes {
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: string;
-  };
 }
 
 interface DashboardAttributes extends SavedObjectAttributes {
@@ -54,8 +49,6 @@ interface DashboardAttributes extends SavedObjectAttributes {
   title: string;
   optionsJSON?: string;
 }
-
-export type DashboardAttributes730ToLatest = DashboardAttributes;
 
 interface DashboardAttributesTo720 extends SavedObjectAttributes {
   panelsJSON: string;

@@ -17,23 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { DashboardPlugin } from './plugin';
-
-export {
-  DashboardContainer,
-  DashboardContainerInput,
-  DashboardContainerFactory,
-  DASHBOARD_CONTAINER_TYPE,
-  // Types below here can likely be made private when dashboard app moved into this NP plugin.
-  DEFAULT_PANEL_WIDTH,
-  DEFAULT_PANEL_HEIGHT,
-} from './application';
-export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-
-export { DashboardStart } from './plugin';
-export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DashboardPlugin(initializerContext);
+export interface GridData {
+  w: number;
+  h: number;
+  x: number;
+  y: number;
+  i: string;
 }

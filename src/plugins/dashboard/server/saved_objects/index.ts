@@ -17,19 +17,4 @@
  * under the License.
  */
 
-import { DashboardDoc730ToLatest } from '../../../../../../plugins/dashboard/public';
-import { isDoc } from '../../../migrations/is_doc';
-
-export function isDashboardDoc(
-  doc: { [key: string]: unknown } | DashboardDoc730ToLatest
-): doc is DashboardDoc730ToLatest {
-  if (!isDoc(doc)) {
-    return false;
-  }
-
-  if (typeof (doc as DashboardDoc730ToLatest).attributes.panelsJSON !== 'string') {
-    return false;
-  }
-
-  return true;
-}
+export { dashboardSavedObjectType } from './dashboard';

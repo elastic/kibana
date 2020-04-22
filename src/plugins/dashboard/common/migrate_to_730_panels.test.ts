@@ -19,15 +19,12 @@
 import { migratePanelsTo730 } from './migrate_to_730_panels';
 import {
   RawSavedDashboardPanelTo60,
-  RawSavedDashboardPanel610,
-  RawSavedDashboardPanel620,
   RawSavedDashboardPanel630,
   RawSavedDashboardPanel640To720,
-  DEFAULT_PANEL_WIDTH,
-  DEFAULT_PANEL_HEIGHT,
-  SavedDashboardPanelTo60,
-  SavedDashboardPanel730ToLatest,
-} from '../../../../../../plugins/dashboard/public';
+  RawSavedDashboardPanel610,
+  RawSavedDashboardPanel620,
+} from './bwc/types';
+import { SavedDashboardPanelTo60, SavedDashboardPanel730ToLatest } from './types';
 
 test('6.0 migrates uiState, sort, scales, and gridData', async () => {
   const uiState = {
@@ -96,8 +93,8 @@ test('6.0 migration gives default width and height when missing', () => {
     },
   ];
   const newPanels = migratePanelsTo730(panels, '8.0.0', true);
-  expect(newPanels[0].gridData.w).toBe(DEFAULT_PANEL_WIDTH);
-  expect(newPanels[0].gridData.h).toBe(DEFAULT_PANEL_HEIGHT);
+  expect(newPanels[0].gridData.w).toBe(24);
+  expect(newPanels[0].gridData.h).toBe(15);
   expect(newPanels[0].version).toBe('8.0.0');
 });
 
