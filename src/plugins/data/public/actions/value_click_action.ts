@@ -50,6 +50,7 @@ export function valueClickAction(
   return createAction<typeof ACTION_VALUE_CLICK>({
     type: ACTION_VALUE_CLICK,
     id: ACTION_VALUE_CLICK,
+    getIconType: () => 'filter',
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',

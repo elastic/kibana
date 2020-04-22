@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 function toSeconds(ms) {
   return Math.floor(ms / 1000) + 's';
@@ -63,7 +64,9 @@ export class Ccr extends Component {
               ),
               render: shardId => {
                 return (
-                  <EuiLink href={`#/elasticsearch/ccr/${index}/shard/${shardId}`}>
+                  <EuiLink
+                    href={getSafeForExternalLink(`#/elasticsearch/ccr/${index}/shard/${shardId}`)}
+                  >
                     {shardId}
                   </EuiLink>
                 );
