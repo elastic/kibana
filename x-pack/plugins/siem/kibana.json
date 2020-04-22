@@ -19,5 +19,5 @@
   ],
   "optionalPlugins": ["encryptedSavedObjects", "ml", "newsfeed", "security", "spaces"],
   "server": true,
-  "ui": false
+  "ui": true
 }
