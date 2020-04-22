@@ -115,18 +115,13 @@ export interface HostState {
  * Query params on the host page parsed from the URL
  */
 export interface HostIndexUIQueryParams {
-  /**
-   * If host id is present, show the host detail flyout for the selected id
-   */
+  /** Selected host id shows host details flyout */
   selected_host?: string;
-  /**
-   * How many items to show in list
-   */
+  /** How many items to show in list */
   page_size?: string;
-  /**
-   * Which page to show
-   */
+  /** Which page to show */
   page_index?: string;
+  /** show the policy response or host details */
   show?: string;
 }
 
