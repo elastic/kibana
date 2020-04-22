@@ -100,7 +100,7 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
             <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${agent.id}`} key="viewConfig">
               <FormattedMessage
                 id="xpack.ingestManager.agentList.viewActionText"
-                defaultMessage="View Agent"
+                defaultMessage="View agent"
               />
             </EuiContextMenuItem>,
             <EuiContextMenuItem

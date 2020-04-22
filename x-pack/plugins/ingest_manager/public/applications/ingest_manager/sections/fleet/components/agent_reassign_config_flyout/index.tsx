@@ -66,7 +66,7 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
       const successMessage = i18n.translate(
         'xpack.ingestManager.agentReassignConfig.successSingleNotificationTitle',
         {
-          defaultMessage: 'Successfully changed the configuration',
+          defaultMessage: 'Agent configuration reassigned',
         }
       );
       notifications.toasts.addSuccess(successMessage);
@@ -74,14 +74,14 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
     } catch (error) {
       setIsSubmitting(false);
       notifications.toasts.addError(error, {
-        title: 'Error',
+        title: 'Unable to reassign agent configuration',
       });
     }
   }
 
   return (
     <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
-      <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
+      <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentReassigmentFlyoutTitle">
         <EuiTitle size="m">
           <h2 id="FleetAgentReassigmentFlyoutTitle">
             <FormattedMessage
@@ -94,7 +94,7 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
         <EuiText size="s">
           <FormattedMessage
             id="xpack.ingestManager.agentReassignConfig.flyoutDescription"
-            defaultMessage="Choose a new agent configuration to assign the selected agent(s) to."
+            defaultMessage="Choose a new agent configuration to assign the selected agent to."
           />
         </EuiText>
       </EuiFlyoutHeader>
