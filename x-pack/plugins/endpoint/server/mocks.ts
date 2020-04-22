@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IngestManagerSetupContract } from '../../ingest_manager/server';
-import { AgentService } from '../../ingest_manager/common/types';
+import { AgentService, IngestManagerStartupContract } from '../../ingest_manager/common/types';
 
 /**
  * Creates a mock IndexPatternRetriever for use in tests.
@@ -47,9 +46,9 @@ export const createMockAgentService = (): jest.Mocked<AgentService> => {
  * @param indexPattern a string index pattern to return when called by a test
  * @returns the same value as `indexPattern` parameter
  */
-export const createMockIngestManagerSetupContract = (
+export const createMockIngestManagerStartupContract = (
   indexPattern: string
-): IngestManagerSetupContract => {
+): IngestManagerStartupContract => {
   return {
     esIndexPatternService: {
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
