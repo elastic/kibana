@@ -7,29 +7,29 @@
 import uuid from 'uuid';
 
 import { Processor } from '../../../../common/types';
-import { PipelineEditorProcessor } from './types';
+import { ProcessorInternal } from './types';
 
-export interface DataInArgs {
+export interface DeserializeArgs {
   processors: Processor[];
   onFailure?: Processor[];
 }
 
-export interface DataInResult {
-  processors: PipelineEditorProcessor[];
-  onFailure?: PipelineEditorProcessor[];
+export interface DeserializeResult {
+  processors: ProcessorInternal[];
+  onFailure?: ProcessorInternal[];
 }
 
 const getProcessorType = (processor: Processor): string => {
   return Object.keys(processor)[0]!;
 };
 
-const convertToPipelineEditorProcessor = (processor: Processor): PipelineEditorProcessor => {
+const convertToPipelineInternalProcessor = (processor: Processor): ProcessorInternal => {
   const type = getProcessorType(processor);
   const options = processor[type];
   const onFailure = options.on_failure?.length
     ? convertProcessors(options.on_failure)
-    : (options.on_failure as PipelineEditorProcessor[] | undefined);
-  return createPipelineEditorProcessor({
+    : (options.on_failure as ProcessorInternal[] | undefined);
+  return createProcessorInternal({
     type,
     onFailure,
     options,
@@ -40,21 +40,21 @@ const convertProcessors = (processors: Processor[]) => {
   const convertedProcessors = [];
 
   for (const processor of processors) {
-    convertedProcessors.push(convertToPipelineEditorProcessor(processor));
+    convertedProcessors.push(convertToPipelineInternalProcessor(processor));
   }
   return convertedProcessors;
 };
 
-export const createPipelineEditorProcessor = (args: {
+export const createProcessorInternal = (args: {
   type: string;
   options: any;
-  onFailure?: PipelineEditorProcessor[];
+  onFailure?: ProcessorInternal[];
 }) => ({
   id: uuid.v4(),
   ...args,
 });
 
-export const prepareDataIn = ({ processors, onFailure }: DataInArgs): DataInResult => {
+export const deserialize = ({ processors, onFailure }: DeserializeArgs): DeserializeResult => {
   return {
     processors: convertProcessors(processors),
     onFailure: onFailure ? convertProcessors(onFailure) : undefined,

@@ -8,10 +8,10 @@ import { euiDragDropReorder } from '@elastic/eui';
 
 import { OnFormUpdateArg } from '../../../shared_imports';
 
-import { createPipelineEditorProcessor, DataInResult } from './data_in';
-import { PipelineEditorProcessor } from './types';
+import { createProcessorInternal, DeserializeResult } from './data_in';
+import { ProcessorInternal } from './types';
 
-type StateArg = DataInResult;
+type StateArg = DeserializeResult;
 
 interface State extends StateArg {
   isValid?: boolean;
@@ -19,16 +19,16 @@ interface State extends StateArg {
 }
 
 type Action =
-  | { type: 'addProcessor'; payload: { processor: Omit<PipelineEditorProcessor, 'id'> } }
-  | { type: 'updateProcessor'; payload: { processor: PipelineEditorProcessor } }
-  | { type: 'removeProcessor'; payload: { processor: PipelineEditorProcessor } }
+  | { type: 'addProcessor'; payload: { processor: Omit<ProcessorInternal, 'id'> } }
+  | { type: 'updateProcessor'; payload: { processor: ProcessorInternal } }
+  | { type: 'removeProcessor'; payload: { processor: ProcessorInternal } }
   | { type: 'reorderProcessors'; payload: { sourceIdx: number; destIdx: number } }
   | { type: 'processorForm.update'; payload: OnFormUpdateArg<any> }
   | { type: 'processorForm.close' };
 
 const findProcessorIdx = (
-  processors: PipelineEditorProcessor[],
-  processor: PipelineEditorProcessor
+  processors: ProcessorInternal[],
+  processor: ProcessorInternal
 ): number => {
   return processors.findIndex(p => p.id === processor.id);
 };
@@ -54,7 +54,7 @@ export const reducer: Reducer<State, Action> = (state, action) => {
 
   if (action.type === 'addProcessor') {
     const { processor: processorArgs } = action.payload;
-    const processor = createPipelineEditorProcessor(processorArgs);
+    const processor = createProcessorInternal(processorArgs);
     // TODO: For now we just append it to the processor array, this should be a bit more sophisticated
     return {
       ...state,

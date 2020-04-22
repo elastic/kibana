@@ -10,12 +10,12 @@ import React, { FunctionComponent } from 'react';
 
 import { OnFormUpdateArg } from '../../../../shared_imports';
 
-import { PipelineEditorProcessor } from '../types';
+import { ProcessorInternal } from '../types';
 
 import { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from '.';
 
 export interface Props {
-  processor: PipelineEditorProcessor | undefined;
+  processor: ProcessorInternal | undefined;
   onFormUpdate: (form: OnFormUpdateArg<any>) => void;
   onSubmit: (processor: ProcessorSettingsFromOnSubmitArg) => void;
   onClose: () => void;

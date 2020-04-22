@@ -21,13 +21,13 @@ import {
 import { Processor } from '../../../../common/types';
 
 import { SettingsFormFlyout } from './components';
-import { prepareDataIn } from './data_in';
-import { prepareDataOut, DataOutResult } from './data_out';
+import { deserialize } from './data_in';
+import { serialize, SerializeResult } from './data_out';
 import { useEditorState } from './reducer';
-import { PipelineEditorProcessor } from './types';
+import { ProcessorInternal } from './types';
 
 export interface OnUpdateHandlerArg {
-  getData: () => DataOutResult;
+  getData: () => SerializeResult;
   validate: () => Promise<boolean>;
   isValid?: boolean;
 }
@@ -46,12 +46,12 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   value: { processors: originalProcessors },
   onUpdate,
 }) => {
-  const dataInResult = useMemo(() => prepareDataIn({ processors: originalProcessors }), [
+  const dataInResult = useMemo(() => deserialize({ processors: originalProcessors }), [
     originalProcessors,
   ]);
   const [state, dispatch] = useEditorState(dataInResult);
   const { processors } = state;
-  const [selectedProcessor, setSelectedProcessor] = useState<PipelineEditorProcessor | undefined>(
+  const [selectedProcessor, setSelectedProcessor] = useState<ProcessorInternal | undefined>(
     undefined
   );
   const [isAddingNewProcessor, setIsAddingNewProcessor] = useState<boolean>(false);
@@ -60,14 +60,9 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
     onUpdate({
       isValid: state.isValid,
       validate: state.validate,
-      getData: () => prepareDataOut(state),
+      getData: () => serialize(state),
     });
   }, [state, onUpdate]);
-
-  const dismissFlyout = () => {
-    setSelectedProcessor(undefined);
-    setIsAddingNewProcessor(false);
-  };
 
   const onFormUpdate = useCallback(
     arg => {
@@ -75,6 +70,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
     },
     [dispatch]
   );
+
+  const dismissFlyout = () => {
+    setSelectedProcessor(undefined);
+    setIsAddingNewProcessor(false);
+  };
 
   return (
     <>

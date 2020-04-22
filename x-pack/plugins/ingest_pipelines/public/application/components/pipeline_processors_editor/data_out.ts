@@ -5,17 +5,17 @@
  */
 import { Processor } from '../../../../common/types';
 
-import { DataInResult } from './data_in';
-import { PipelineEditorProcessor } from './types';
+import { DeserializeResult } from './data_in';
+import { ProcessorInternal } from './types';
 
-type DataOutArgs = DataInResult;
+type SerializeArgs = DeserializeResult;
 
-export interface DataOutResult {
+export interface SerializeResult {
   processors: Processor[];
   onFailure?: Processor[];
 }
 
-const convertEditorProcessorToProcessor = (processor: PipelineEditorProcessor): Processor => {
+const convertProcessorInternalToProcessor = (processor: ProcessorInternal): Processor => {
   const { options, onFailure, type } = processor;
   const outProcessor = {
     [type]: {
@@ -32,16 +32,16 @@ const convertEditorProcessorToProcessor = (processor: PipelineEditorProcessor): 
   return outProcessor;
 };
 
-const convertProcessors = (processors: PipelineEditorProcessor[]) => {
+const convertProcessors = (processors: ProcessorInternal[]) => {
   const convertedProcessors = [];
 
   for (const processor of processors) {
-    convertedProcessors.push(convertEditorProcessorToProcessor(processor));
+    convertedProcessors.push(convertProcessorInternalToProcessor(processor));
   }
   return convertedProcessors;
 };
 
-export const prepareDataOut = ({ processors, onFailure }: DataOutArgs): DataOutResult => {
+export const serialize = ({ processors, onFailure }: SerializeArgs): SerializeResult => {
   return {
     processors: convertProcessors(processors),
     onFailure: onFailure ? convertProcessors(onFailure) : undefined,

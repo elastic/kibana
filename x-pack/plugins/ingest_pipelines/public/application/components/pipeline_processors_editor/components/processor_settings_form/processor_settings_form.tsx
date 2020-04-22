@@ -9,15 +9,15 @@ import { EuiButton } from '@elastic/eui';
 
 import { Form, useForm, FormDataProvider, OnFormUpdateArg } from '../../../../../shared_imports';
 
-import { PipelineEditorProcessor } from '../../types';
+import { ProcessorInternal } from '../../types';
 
 import { getProcessorForm } from './map_processor_type_to_form';
 import { CommonProcessorFields, ProcessorTypeField } from './processors/common_fields';
 
-export type ProcessorSettingsFromOnSubmitArg = Omit<PipelineEditorProcessor, 'id'>;
+export type ProcessorSettingsFromOnSubmitArg = Omit<ProcessorInternal, 'id'>;
 
 export interface Props {
-  processor?: PipelineEditorProcessor;
+  processor?: ProcessorInternal;
   onFormUpdate: (form: OnFormUpdateArg<any>) => void;
   onSubmit: (processor: ProcessorSettingsFromOnSubmitArg) => void;
 }
