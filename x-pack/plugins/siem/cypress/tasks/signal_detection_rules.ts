@@ -55,6 +55,7 @@ export const exportFirstRule = () => {
     .click({ force: true });
   cy.get(EXPORT_ACTION_BTN).click();
   cy.get(EXPORT_ACTION_BTN).should('not.exist');
+  cy.wait(5000);
 };
 
 export const filterByCustomRules = () => {
