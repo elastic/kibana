@@ -8,6 +8,7 @@ export {
   getUseField,
   getFieldValidityAndErrorMessage,
   FieldHook,
+  FieldValidateResponse,
   FIELD_TYPES,
   Form,
   FormData,
@@ -17,6 +18,7 @@ export {
   UseField,
   useForm,
   ValidationFunc,
+  VALIDATION_TYPES,
 } from '../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 export {
   Field,

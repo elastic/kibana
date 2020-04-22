@@ -8,9 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Root } from 'joi';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectMappings } from '../../../plugins/siem/server/saved_objects';
-
 import { APP_ID, APP_NAME } from '../../../plugins/siem/common/constants';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
@@ -46,7 +43,6 @@ export const siem = (kibana: any) => {
           category: DEFAULT_APP_CATEGORIES.security,
         },
       ],
-      mappings: savedObjectMappings,
     },
     config(Joi: Root) {
       return Joi.object()
