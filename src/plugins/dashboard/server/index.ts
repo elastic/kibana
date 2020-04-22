@@ -17,15 +17,14 @@
  * under the License.
  */
 
-import { Doc } from './types';
+import { PluginInitializerContext } from '../../../core/server';
+import { DashboardPlugin } from './plugin';
 
-export function isDoc(doc: { [key: string]: unknown } | Doc): doc is Doc {
-  return (
-    typeof doc.id === 'string' &&
-    typeof doc.type === 'string' &&
-    doc.attributes !== null &&
-    typeof doc.attributes === 'object' &&
-    doc.references !== null &&
-    typeof doc.references === 'object'
-  );
+//  This exports static code and TypeScript types,
+//  as well as, Kibana Platform `plugin()` initializer.
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DashboardPlugin(initializerContext);
 }
+
+export { DashboardPluginSetup, DashboardPluginStart } from './types';

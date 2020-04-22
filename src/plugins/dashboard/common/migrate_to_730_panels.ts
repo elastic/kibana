@@ -21,17 +21,19 @@ import semver from 'semver';
 import uuid from 'uuid';
 import {
   GridData,
+  SavedDashboardPanelTo60,
+  SavedDashboardPanel620,
+  SavedDashboardPanel630,
+  SavedDashboardPanel610,
+} from './';
+import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel630,
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
   RawSavedDashboardPanel610,
   RawSavedDashboardPanel620,
-  SavedDashboardPanelTo60,
-  SavedDashboardPanel620,
-  SavedDashboardPanel630,
-  SavedDashboardPanel610,
-} from '../../../../../../plugins/dashboard/public';
+} from './bwc/types';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;
@@ -92,7 +94,7 @@ function migratePre61PanelToLatest(
 ): RawSavedDashboardPanel730ToLatest {
   if (panel.col === undefined || panel.row === undefined) {
     throw new Error(
-      i18n.translate('kbn.dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage', {
+      i18n.translate('dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage', {
         defaultMessage:
           'Unable to migrate panel data for "6.1.0" backwards compatibility, panel does not contain expected col and/or row fields',
       })
@@ -151,7 +153,7 @@ function migrate610PanelToLatest(
   (['w', 'x', 'h', 'y'] as Array<keyof GridData>).forEach(key => {
     if (panel.gridData[key] === undefined) {
       throw new Error(
-        i18n.translate('kbn.dashboard.panel.unableToMigratePanelDataForSixThreeZeroErrorMessage', {
+        i18n.translate('dashboard.panel.unableToMigratePanelDataForSixThreeZeroErrorMessage', {
           defaultMessage:
             'Unable to migrate panel data for "6.3.0" backwards compatibility, panel does not contain expected field: {key}',
           values: { key },

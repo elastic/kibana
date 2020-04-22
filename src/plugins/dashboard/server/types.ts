@@ -17,5 +17,7 @@
  * under the License.
  */
 
-// @ts-ignore
-export { migrations } from './migrations';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DashboardPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DashboardPluginStart {}
