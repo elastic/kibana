@@ -19,30 +19,34 @@
 
 import moment from 'moment';
 
-import { onBrushEvent, BrushEvent } from './brush_event';
+import { createFiltersFromRangeSelectAction } from './create_filters_from_range_select';
 
-import { IndexPatternsContract } from '../../../public';
+import { IndexPatternsContract, RangeFilter } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns } from '../../../public/services';
 import { mockDataServices } from '../../../public/search/aggs/test_helpers';
+import { TriggerContextMapping } from '../../../../ui_actions/public';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
-  let baseEvent: BrushEvent;
+  let baseEvent: TriggerContextMapping['SELECT_RANGE_TRIGGER']['data'];
+
+  const indexPattern = {
+    id: 'indexPatternId',
+    timeFieldName: 'time',
+    fields: {
+      getByName: () => undefined,
+      filter: () => [],
+    },
+  };
 
   const aggConfigs = [
     {
       params: {
         field: {},
       },
-      getIndexPattern: () => ({
-        timeFieldName: 'time',
-        fields: {
-          getByName: () => undefined,
-          filter: () => [],
-        },
-      }),
+      getIndexPattern: () => indexPattern,
     },
   ];
 
@@ -50,56 +54,37 @@ describe('brushEvent', () => {
     mockDataServices();
     setIndexPatterns(({
       ...dataPluginMock.createStartContract().indexPatterns,
-      get: async () => ({
-        id: 'indexPatternId',
-        timeFieldName: 'time',
-        fields: {
-          getByName: () => undefined,
-          filter: () => [],
-        },
-      }),
+      get: async () => indexPattern,
     } as unknown) as IndexPatternsContract);
 
     baseEvent = {
-      data: {
-        ordered: {
-          date: false,
-        },
-        series: [
+      column: 0,
+      table: {
+        type: 'kibana_datatable',
+        columns: [
           {
-            values: [
-              {
-                xRaw: {
-                  column: 0,
-                  table: {
-                    columns: [
-                      {
-                        id: '1',
-                        meta: {
-                          type: 'histogram',
-                          indexPatternId: 'indexPatternId',
-                          aggConfigParams: aggConfigs[0].params,
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
+            id: '1',
+            name: '1',
+            meta: {
+              type: 'histogram',
+              indexPatternId: 'indexPatternId',
+              aggConfigParams: aggConfigs[0].params,
+            },
           },
         ],
+        rows: [],
       },
       range: [],
     };
   });
 
   test('should be a function', () => {
-    expect(typeof onBrushEvent).toBe('function');
+    expect(typeof createFiltersFromRangeSelectAction).toBe('function');
   });
 
   test('ignores event when data.xAxisField not provided', async () => {
-    const filter = await onBrushEvent(baseEvent);
-    expect(filter).toBeUndefined();
+    const filter = await createFiltersFromRangeSelectAction(baseEvent);
+    expect(filter).toEqual([]);
   });
 
   describe('handles an event when the x-axis field is a date field', () => {
@@ -109,29 +94,29 @@ describe('brushEvent', () => {
           name: 'time',
           type: 'date',
         };
-        baseEvent.data.ordered = { date: true };
       });
 
       afterAll(() => {
         baseEvent.range = [];
-        baseEvent.data.ordered = { date: false };
+        aggConfigs[0].params.field = {};
       });
 
       test('by ignoring the event when range spans zero time', async () => {
         baseEvent.range = [JAN_01_2014, JAN_01_2014];
-        const filter = await onBrushEvent(baseEvent);
-        expect(filter).toBeUndefined();
+        const filter = await createFiltersFromRangeSelectAction(baseEvent);
+        expect(filter).toEqual([]);
       });
 
       test('by updating the timefilter', async () => {
         baseEvent.range = [JAN_01_2014, JAN_01_2014 + DAY_IN_MS];
-        const filter = await onBrushEvent(baseEvent);
+        const filter = await createFiltersFromRangeSelectAction(baseEvent);
         expect(filter).toBeDefined();
 
-        if (filter) {
-          expect(filter.range.time.gte).toBe(new Date(JAN_01_2014).toISOString());
+        if (filter.length) {
+          const rangeFilter = filter[0] as RangeFilter;
+          expect(rangeFilter.range.time.gte).toBe(new Date(JAN_01_2014).toISOString());
           // Set to a baseline timezone for comparison.
-          expect(filter.range.time.lt).toBe(new Date(JAN_01_2014 + DAY_IN_MS).toISOString());
+          expect(rangeFilter.range.time.lt).toBe(new Date(JAN_01_2014 + DAY_IN_MS).toISOString());
         }
       });
     });
@@ -142,26 +127,26 @@ describe('brushEvent', () => {
           name: 'anotherTimeField',
           type: 'date',
         };
-        baseEvent.data.ordered = { date: true };
       });
 
       afterAll(() => {
         baseEvent.range = [];
-        baseEvent.data.ordered = { date: false };
+        aggConfigs[0].params.field = {};
       });
 
       test('creates a new range filter', async () => {
         const rangeBegin = JAN_01_2014;
         const rangeEnd = rangeBegin + DAY_IN_MS;
         baseEvent.range = [rangeBegin, rangeEnd];
-        const filter = await onBrushEvent(baseEvent);
+        const filter = await createFiltersFromRangeSelectAction(baseEvent);
 
         expect(filter).toBeDefined();
 
-        if (filter) {
-          expect(filter.range.anotherTimeField.gte).toBe(moment(rangeBegin).toISOString());
-          expect(filter.range.anotherTimeField.lt).toBe(moment(rangeEnd).toISOString());
-          expect(filter.range.anotherTimeField).toHaveProperty(
+        if (filter.length) {
+          const rangeFilter = filter[0] as RangeFilter;
+          expect(rangeFilter.range.anotherTimeField.gte).toBe(moment(rangeBegin).toISOString());
+          expect(rangeFilter.range.anotherTimeField.lt).toBe(moment(rangeEnd).toISOString());
+          expect(rangeFilter.range.anotherTimeField).toHaveProperty(
             'format',
             'strict_date_optional_time'
           );
@@ -184,20 +169,21 @@ describe('brushEvent', () => {
 
     test('by ignoring the event when range does not span at least 2 values', async () => {
       baseEvent.range = [1];
-      const filter = await onBrushEvent(baseEvent);
-      expect(filter).toBeUndefined();
+      const filter = await createFiltersFromRangeSelectAction(baseEvent);
+      expect(filter).toEqual([]);
     });
 
     test('by creating a new filter', async () => {
       baseEvent.range = [1, 2, 3, 4];
-      const filter = await onBrushEvent(baseEvent);
+      const filter = await createFiltersFromRangeSelectAction(baseEvent);
 
       expect(filter).toBeDefined();
 
-      if (filter) {
-        expect(filter.range.numberField.gte).toBe(1);
-        expect(filter.range.numberField.lt).toBe(4);
-        expect(filter.range.numberField).not.toHaveProperty('format');
+      if (filter.length) {
+        const rangeFilter = filter[0] as RangeFilter;
+        expect(rangeFilter.range.numberField.gte).toBe(1);
+        expect(rangeFilter.range.numberField.lt).toBe(4);
+        expect(rangeFilter.range.numberField).not.toHaveProperty('format');
       }
     });
   });

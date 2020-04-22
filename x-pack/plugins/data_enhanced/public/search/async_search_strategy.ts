@@ -53,8 +53,13 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
 
       return search(request, options).pipe(
         expand(response => {
+          // If the response indicates of an error, stop polling and complete the observable
+          if (!response || (response.is_partial && !response.is_running)) {
+            return throwError(new AbortError());
+          }
+
           // If the response indicates it is complete, stop polling and complete the observable
-          if (response.is_partial === false) return EMPTY;
+          if (!response.is_running) return EMPTY;
 
           id = response.id;
 
