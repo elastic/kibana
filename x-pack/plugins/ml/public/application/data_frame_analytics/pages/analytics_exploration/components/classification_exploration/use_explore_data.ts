@@ -3,113 +3,158 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, Dispatch, SetStateAction } from 'react';
+import { EuiDataGridPaginationProps, EuiDataGridSorting } from '@elastic/eui';
 
 import { SearchResponse } from 'elasticsearch';
 import { cloneDeep } from 'lodash';
 
-import { SortDirection, SORT_DIRECTION } from '../../../../../components/ml_in_memory_table';
+import { SORT_DIRECTION } from '../../../../../components/ml_in_memory_table';
 
 import { ml } from '../../../../../services/ml_api_service';
 import { getNestedProperty } from '../../../../../util/object_utils';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
-import { Field } from '../../../../../../../common/types/fields';
+import { isKeywordAndTextType } from '../../../../common/fields';
+import { Dictionary } from '../../../../../../../common/types/common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
   defaultSearchQuery,
   ResultsSearchQuery,
   isResultsSearchBoolQuery,
+  LoadExploreDataArg,
 } from '../../../../common/analytics';
 
 import {
   getDefaultFieldsFromJobCaps,
+  getDependentVar,
   getFlattenedFields,
+  getPredictedFieldName,
   DataFrameAnalyticsConfig,
   EsFieldName,
   INDEX_STATUS,
-  SEARCH_SIZE,
-  SearchQuery,
 } from '../../../../common';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-interface LoadClassificationExploreDataArg {
-  direction: SortDirection;
-  filterByIsTraining?: boolean;
-  field: string;
-  searchQuery: SavedSearchQuery;
-  requiresKeyword?: boolean;
-  pageIndex?: number;
-  pageSize?: number;
-}
-
 export type TableItem = Record<string, any>;
+type Pagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 
 export interface UseExploreDataReturnType {
   errorMessage: string;
-  loadExploreData: (arg: LoadClassificationExploreDataArg) => void;
-  sortField: EsFieldName;
-  sortDirection: SortDirection;
+  fieldTypes: { [key: string]: ES_FIELD_TYPES };
+  pagination: Pagination;
+  rowCount: number;
+  searchQuery: SavedSearchQuery;
+  selectedFields: EsFieldName[];
+  setFilterByIsTraining: Dispatch<SetStateAction<undefined | boolean>>;
+  setPagination: Dispatch<SetStateAction<Pagination>>;
+  setSearchQuery: Dispatch<SetStateAction<SavedSearchQuery>>;
+  setSelectedFields: Dispatch<SetStateAction<EsFieldName[]>>;
+  setSortingColumns: Dispatch<SetStateAction<EuiDataGridSorting['columns']>>;
+  sortingColumns: EuiDataGridSorting['columns'];
   status: INDEX_STATUS;
+  tableFields: string[];
   tableItems: TableItem[];
 }
 
+type EsSorting = Dictionary<{
+  order: 'asc' | 'desc';
+}>;
+
+// The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
+interface SearchResponse7 extends SearchResponse<any> {
+  hits: SearchResponse<any>['hits'] & {
+    total: {
+      value: number;
+      relation: string;
+    };
+  };
+}
+
 export const useExploreData = (
-  jobConfig: DataFrameAnalyticsConfig | undefined,
-  needsDestIndexFields: boolean,
-  selectedFields: Field[],
-  setSelectedFields: React.Dispatch<React.SetStateAction<Field[]>>,
-  setDocFields: React.Dispatch<React.SetStateAction<Field[]>>,
-  setDepVarType: React.Dispatch<React.SetStateAction<ES_FIELD_TYPES | undefined>>
+  jobConfig: DataFrameAnalyticsConfig,
+  needsDestIndexFields: boolean
 ): UseExploreDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
+
+  const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
+  const [tableFields, setTableFields] = useState<string[]>([]);
   const [tableItems, setTableItems] = useState<TableItem[]>([]);
-  const [sortField, setSortField] = useState<string>('');
-  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
+  const [fieldTypes, setFieldTypes] = useState<{ [key: string]: ES_FIELD_TYPES }>({});
+  const [rowCount, setRowCount] = useState(0);
+
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
+  const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
+  const [filterByIsTraining, setFilterByIsTraining] = useState<undefined | boolean>(undefined);
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
+
+  const predictedFieldName = getPredictedFieldName(
+    jobConfig.dest.results_field,
+    jobConfig.analysis
+  );
+  const dependentVariable = getDependentVar(jobConfig.analysis);
 
   const getDefaultSelectedFields = () => {
     const { fields } = newJobCapsService;
-
     if (selectedFields.length === 0 && jobConfig !== undefined) {
-      const {
-        selectedFields: defaultSelected,
-        docFields,
-        depVarType,
-      } = getDefaultFieldsFromJobCaps(fields, jobConfig, needsDestIndexFields);
+      const { selectedFields: defaultSelected, docFields } = getDefaultFieldsFromJobCaps(
+        fields,
+        jobConfig,
+        needsDestIndexFields
+      );
 
-      setDepVarType(depVarType);
-      setSelectedFields(defaultSelected);
-      setDocFields(docFields);
+      const types: { [key: string]: ES_FIELD_TYPES } = {};
+      const allFields: string[] = [];
+
+      docFields.forEach(field => {
+        types[field.id] = field.type;
+        allFields.push(field.id);
+      });
+
+      setFieldTypes(types);
+      setSelectedFields(defaultSelected.map(field => field.id));
+      setTableFields(allFields);
     }
   };
 
   const loadExploreData = async ({
-    field,
-    direction,
-    searchQuery,
-    requiresKeyword,
-  }: LoadClassificationExploreDataArg) => {
+    filterByIsTraining: isTraining,
+    searchQuery: incomingQuery,
+  }: LoadExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
 
       try {
         const resultsField = jobConfig.dest.results_field;
-        const searchQueryClone: ResultsSearchQuery = cloneDeep(searchQuery);
+        const searchQueryClone: ResultsSearchQuery = cloneDeep(incomingQuery);
         let query: ResultsSearchQuery;
+        const { pageIndex, pageSize } = pagination;
+        // If filterByIsTraining is defined - add that in to the final query
+        const trainingQuery =
+          isTraining !== undefined
+            ? {
+                term: { [`${resultsField}.is_training`]: { value: isTraining } },
+              }
+            : undefined;
 
-        if (JSON.stringify(searchQuery) === JSON.stringify(defaultSearchQuery)) {
-          query = {
+        if (JSON.stringify(incomingQuery) === JSON.stringify(defaultSearchQuery)) {
+          const existsQuery = {
             exists: {
               field: resultsField,
             },
           };
+
+          query = {
+            bool: {
+              must: [existsQuery],
+            },
+          };
+
+          if (trainingQuery !== undefined && isResultsSearchBoolQuery(query)) {
+            query.bool.must.push(trainingQuery);
+          }
         } else if (isResultsSearchBoolQuery(searchQueryClone)) {
           if (searchQueryClone.bool.must === undefined) {
             searchQueryClone.bool.must = [];
@@ -121,33 +166,37 @@ export const useExploreData = (
             },
           });
 
+          if (trainingQuery !== undefined) {
+            searchQueryClone.bool.must.push(trainingQuery);
+          }
+
           query = searchQueryClone;
         } else {
           query = searchQueryClone;
         }
 
-        const body: SearchQuery = {
-          query,
-        };
+        const sort: EsSorting = sortingColumns
+          .map(column => {
+            const { id } = column;
+            column.id = isKeywordAndTextType(id) ? `${id}.keyword` : id;
+            return column;
+          })
+          .reduce((s, column) => {
+            s[column.id] = { order: column.direction };
+            return s;
+          }, {} as EsSorting);
 
-        if (field !== undefined) {
-          body.sort = [
-            {
-              [`${field}${requiresKeyword ? '.keyword' : ''}`]: {
-                order: direction,
-              },
-            },
-          ];
-        }
-
-        const resp: SearchResponse<any> = await ml.esSearch({
+        const resp: SearchResponse7 = await ml.esSearch({
           index: jobConfig.dest.index,
-          size: SEARCH_SIZE,
-          body,
+          body: {
+            query,
+            from: pageIndex * pageSize,
+            size: pageSize,
+            ...(Object.keys(sort).length > 0 ? { sort } : {}),
+          },
         });
 
-        setSortField(field);
-        setSortDirection(direction);
+        setRowCount(resp.hits.total.value);
 
         const docs = resp.hits.hits;
 
@@ -199,10 +248,45 @@ export const useExploreData = (
   };
 
   useEffect(() => {
-    if (jobConfig !== undefined) {
-      getDefaultSelectedFields();
-    }
+    getDefaultSelectedFields();
   }, [jobConfig && jobConfig.id]);
 
-  return { errorMessage, loadExploreData, sortField, sortDirection, status, tableItems };
+  // By default set sorting to descending on the prediction field (`<dependent_varible or prediction_field_name>_prediction`).
+  useEffect(() => {
+    const sortByField = isKeywordAndTextType(dependentVariable)
+      ? `${predictedFieldName}.keyword`
+      : predictedFieldName;
+    const direction = SORT_DIRECTION.DESC;
+
+    setSortingColumns([{ id: sortByField, direction }]);
+  }, [jobConfig && jobConfig.id]);
+
+  useEffect(() => {
+    loadExploreData({ filterByIsTraining, searchQuery });
+  }, [
+    filterByIsTraining,
+    jobConfig && jobConfig.id,
+    pagination,
+    searchQuery,
+    selectedFields,
+    sortingColumns,
+  ]);
+
+  return {
+    errorMessage,
+    fieldTypes,
+    pagination,
+    searchQuery,
+    selectedFields,
+    rowCount,
+    setFilterByIsTraining,
+    setPagination,
+    setSelectedFields,
+    setSortingColumns,
+    setSearchQuery,
+    sortingColumns,
+    status,
+    tableItems,
+    tableFields,
+  };
 };
