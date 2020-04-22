@@ -23,7 +23,7 @@ import { Bundle } from '../common';
 
 import { KibanaPlatformPlugin } from './kibana_platform_plugins';
 
-export function getBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
+export function getPluginBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
   return plugins
     .filter(p => p.isUiPlugin)
     .map(

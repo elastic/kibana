@@ -10,6 +10,25 @@ export * from './models';
 export * from './rest_spec';
 
 /**
+ * Service to return the index pattern of EPM packages
+ */
+export interface ESIndexPatternService {
+  getESIndexPattern(
+    savedObjectsClient: SavedObjectsClientContract,
+    pkgName: string,
+    datasetPath: string
+  ): Promise<string | undefined>;
+}
+
+/**
+ * Describes public IngestManager plugin contract returned at the `startup` stage.
+ */
+export interface IngestManagerStartupContract {
+  esIndexPatternService: ESIndexPatternService;
+  agentService: AgentService;
+}
+
+/**
  * A service that provides exported functions that return information about an Agent
  */
 export interface AgentService {

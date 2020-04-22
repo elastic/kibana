@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getCoreStart } from '../legacy';
-
-export const getAdvancedSettings = () => getCoreStart().uiSettings;
+export function getSafeForExternalLink(url: string) {
+  return `${url.split('?')[0]}?${location.hash.split('?')[1]}`;
+}

@@ -10,15 +10,15 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiKeyPadMenu,
-  EuiKeyPadMenuItemButton,
+  EuiKeyPadMenuItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Visualization, FramePublicAPI, Datasource } from '../../types';
-import { Action } from './state_management';
-import { getSuggestions, switchToSuggestion, Suggestion } from './suggestion_helpers';
-import { trackUiEvent } from '../../lens_ui_telemetry';
+import { Visualization, FramePublicAPI, Datasource } from '../../../types';
+import { Action } from '../state_management';
+import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
+import { trackUiEvent } from '../../../lens_ui_telemetry';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -215,7 +215,7 @@ export function ChartSwitch(props: Props) {
       </EuiPopoverTitle>
       <EuiKeyPadMenu>
         {(visualizationTypes || []).map(v => (
-          <EuiKeyPadMenuItemButton
+          <EuiKeyPadMenuItem
             key={`${v.visualizationId}:${v.id}`}
             label={<span data-test-subj="visTypeTitle">{v.label}</span>}
             role="menuitem"
@@ -238,7 +238,7 @@ export function ChartSwitch(props: Props) {
             betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
           >
             <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} size="l" />
-          </EuiKeyPadMenuItemButton>
+          </EuiKeyPadMenuItem>
         ))}
       </EuiKeyPadMenu>
     </EuiPopover>
