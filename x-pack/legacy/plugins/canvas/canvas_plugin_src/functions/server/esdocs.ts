@@ -72,7 +72,8 @@ export function esdocs(): ExpressionFunctionDefinition<
 
       input.and = input.and.concat([
         {
-          type: 'luceneQueryString',
+          type: 'filter',
+          filterType: 'luceneQueryString',
           query: args.query,
           and: [],
         },

@@ -5,12 +5,11 @@
  */
 
 import { demodata } from './demodata';
+import { ExpressionValueFilter } from '../../../types';
 
-const nullFilter = {
+const nullFilter: ExpressionValueFilter = {
   type: 'filter',
-  meta: {},
-  size: null,
-  sort: [],
+  filterType: 'filter',
   and: [],
 };
 

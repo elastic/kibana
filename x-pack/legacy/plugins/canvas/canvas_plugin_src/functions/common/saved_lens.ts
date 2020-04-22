@@ -63,8 +63,8 @@ export function savedLens(): ExpressionFunctionDefinition<
       },
     },
     type: EmbeddableExpressionType,
-    fn: (context, args) => {
-      const filters = context ? context.and : [];
+    fn: (input, args) => {
+      const filters = input ? input.and : [];
 
       return {
         type: EmbeddableExpressionType,

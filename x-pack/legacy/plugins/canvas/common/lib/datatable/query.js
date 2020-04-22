@@ -15,14 +15,14 @@ export function queryDatatable(datatable, query) {
   if (query.and) {
     query.and.forEach(filter => {
       // handle exact matches
-      if (filter.type === 'exactly') {
+      if (filter.filterType === 'exactly') {
         datatable.rows = datatable.rows.filter(row => {
           return row[filter.column] === filter.value;
         });
       }
 
       // handle time filters
-      if (filter.type === 'time') {
+      if (filter.filterType === 'time') {
         const columnNames = datatable.columns.map(col => col.name);
 
         // remove row if no column match

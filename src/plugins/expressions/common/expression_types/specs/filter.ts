@@ -17,29 +17,31 @@
  * under the License.
  */
 
-import { ExpressionTypeDefinition } from '../types';
-
-const name = 'filter';
+import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 
 /**
  * Represents an object that is a Filter.
  */
-export interface ExpressionValueFilter {
-  type?: string;
-  value?: string;
-  column?: string;
-  and: ExpressionValueFilter[];
-  to?: string;
-  from?: string;
-  query?: string | null;
-}
+export type ExpressionValueFilter = ExpressionValueBoxed<
+  'filter',
+  {
+    filterType?: string;
+    value?: string;
+    column?: string;
+    and: ExpressionValueFilter[];
+    to?: string;
+    from?: string;
+    query?: string | null;
+  }
+>;
 
-export const filter: ExpressionTypeDefinition<typeof name, ExpressionValueFilter> = {
-  name,
+export const filter: ExpressionTypeDefinition<'filter', ExpressionValueFilter> = {
+  name: 'filter',
   from: {
     null: () => {
       return {
-        type: name,
+        type: 'filter',
+        filterType: 'filter',
         // Any meta data you wish to pass along.
         meta: {},
         // And filters. If you need an "or", create a filter type for it.

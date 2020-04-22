@@ -48,7 +48,8 @@ export function escount(): ExpressionFunctionDefinition<
     fn: (input, args, handlers) => {
       input.and = input.and.concat([
         {
-          type: 'luceneQueryString',
+          type: 'filter',
+          filterType: 'luceneQueryString',
           query: args.query,
           and: [],
         },

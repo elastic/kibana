@@ -6,14 +6,23 @@
 jest.mock('ui/new_platform');
 import { savedMap } from './saved_map';
 import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
+import { ExpressionValueFilter } from '../../../types';
 
-const filterContext = {
+const filterContext: ExpressionValueFilter = {
+  type: 'filter',
   and: [
-    { and: [], value: 'filter-value', column: 'filter-column', type: 'exactly' },
     {
+      type: 'filter',
+      and: [],
+      value: 'filter-value',
+      column: 'filter-column',
+      filterType: 'exactly',
+    },
+    {
+      type: 'filter',
       and: [],
       column: 'time-column',
-      type: 'time',
+      filterType: 'time',
       from: '2019-06-04T04:00:00.000Z',
       to: '2019-06-05T04:00:00.000Z',
     },
