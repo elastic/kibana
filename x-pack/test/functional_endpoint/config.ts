@@ -30,8 +30,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         '--xpack.endpoint.enabled=true',
         '--xpack.ingestManager.enabled=true',
-        '--xpack.ingestManager.epm.enabled=true',
-        '--xpack.ingestManager.fleet.enabled=true',
       ],
     },
   };

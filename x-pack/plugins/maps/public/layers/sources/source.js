@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../reducers/util';
 import { MIN_ZOOM, MAX_ZOOM } from '../../../common/constants';
 
