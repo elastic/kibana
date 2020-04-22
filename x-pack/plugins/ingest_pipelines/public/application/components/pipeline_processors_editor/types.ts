@@ -9,6 +9,7 @@ import { ESCommonProcessorOptions } from '../../../../common/types';
 export type ProcessorOptions<CustomProcessorOptions = {}> = ESCommonProcessorOptions &
   CustomProcessorOptions;
 
+/** @private */
 export interface ProcessorInternal<CustomProcessorOptions = {}> {
   readonly id: string;
   type: string;
