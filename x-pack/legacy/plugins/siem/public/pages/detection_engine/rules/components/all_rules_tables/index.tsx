@@ -7,13 +7,11 @@
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiTab,
-  EuiTabs,
   EuiEmptyPrompt,
   Direction,
   EuiTableSelectionType,
 } from '@elastic/eui';
-import React, { useMemo, memo, useState } from 'react';
+import React, { useMemo, memo } from 'react';
 import styled from 'styled-components';
 
 import { EuiBasicTableOnChange } from '../../types';
@@ -23,6 +21,7 @@ import {
   RuleStatusRowItemType,
 } from '../../../../../pages/detection_engine/rules/all/columns';
 import { Rule, Rules } from '../../../../../containers/detection_engine/rules';
+import { AllRulesTabs } from '../../all';
 
 // EuiBasicTable give me a hardtime with adding the ref attributes so I went the easy way
 // after few hours of fight with typescript !!!! I lost :(
@@ -57,27 +56,10 @@ interface AllRulesTablesProps {
   };
   tableOnChangeCallback: ({ page, sort }: EuiBasicTableOnChange) => void;
   tableRef?: React.MutableRefObject<EuiBasicTable | undefined>;
+  selectedTab: AllRulesTabs;
 }
 
-enum AllRulesTabs {
-  rules = 'rules',
-  monitoring = 'monitoring',
-}
-
-const allRulesTabs = [
-  {
-    id: AllRulesTabs.rules,
-    name: i18n.RULES_TAB,
-    disabled: false,
-  },
-  {
-    id: AllRulesTabs.monitoring,
-    name: i18n.MONITORING_TAB,
-    disabled: false,
-  },
-];
-
-const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
+export const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
   euiBasicTableSelectionProps,
   hasNoPermissions,
   monitoringColumns,
@@ -88,34 +70,17 @@ const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
   sorting,
   tableOnChangeCallback,
   tableRef,
+  selectedTab,
 }) => {
-  const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
   const emptyPrompt = useMemo(() => {
     return (
       <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
     );
   }, []);
-  const tabs = useMemo(
-    () => (
-      <EuiTabs>
-        {allRulesTabs.map(tab => (
-          <EuiTab
-            onClick={() => setAllRulesTab(tab.id)}
-            isSelected={tab.id === allRulesTab}
-            disabled={tab.disabled}
-            key={tab.id}
-          >
-            {tab.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-    ),
-    [allRulesTabs, allRulesTab, setAllRulesTab]
-  );
+
   return (
     <>
-      {tabs}
-      {allRulesTab === AllRulesTabs.rules && (
+      {selectedTab === AllRulesTabs.rules && (
         <MyEuiBasicTable
           data-test-subj="rules-table"
           columns={rulesColumns}
@@ -130,7 +95,7 @@ const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
           selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
         />
       )}
-      {allRulesTab === AllRulesTabs.monitoring && (
+      {selectedTab === AllRulesTabs.monitoring && (
         <MyEuiBasicTable
           data-test-subj="monitoring-table"
           columns={monitoringColumns}

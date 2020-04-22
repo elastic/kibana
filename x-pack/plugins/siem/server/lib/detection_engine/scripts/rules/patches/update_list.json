@@ -1,6 +1,6 @@
 {
   "rule_id": "query-with-list",
-  "lists": [
+  "exceptions_list": [
     {
       "field": "source.ip",
       "values_operator": "excluded",

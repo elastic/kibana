@@ -67,9 +67,12 @@ import {
   ExpandPanelActionContext,
   ReplacePanelAction,
   ReplacePanelActionContext,
+  ClonePanelAction,
+  ClonePanelActionContext,
   ACTION_EXPAND_PANEL,
   ACTION_REPLACE_PANEL,
   RenderDeps,
+  ACTION_CLONE_PANEL,
 } from './application';
 import {
   DashboardAppLinkGeneratorState,
@@ -78,6 +81,7 @@ import {
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
+import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -115,6 +119,7 @@ declare module '../../../plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
+    [ACTION_CLONE_PANEL]: ClonePanelActionContext;
   }
 }
 
@@ -172,6 +177,9 @@ export class DashboardPlugin
 
     const factory = new DashboardContainerFactory(getStartServices);
     embeddable.registerEmbeddableFactory(factory.type, factory);
+
+    const placeholderFactory = new PlaceholderEmbeddableFactory();
+    embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
 
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
@@ -243,6 +251,8 @@ export class DashboardPlugin
           localStorage: new Storage(localStorage),
           usageCollection,
         };
+        // make sure the index pattern list is up to date
+        await dataStart.indexPatterns.clearCache();
         const { renderApp } = await import('./application/application');
         const unmount = renderApp(params.element, params.appBasePath, deps);
         return () => {
@@ -297,6 +307,11 @@ export class DashboardPlugin
     );
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
+
+    const clonePanelAction = new ClonePanelAction(core);
+    uiActions.registerAction(clonePanelAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction);
+
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,

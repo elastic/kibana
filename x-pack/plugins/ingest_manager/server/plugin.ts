@@ -39,18 +39,20 @@ import {
   registerInstallScriptRoutes,
 } from './routes';
 
-import { IngestManagerConfigType } from '../common';
+import { AgentService, IngestManagerConfigType } from '../common';
 import {
   appContextService,
   ESIndexPatternService,
   ESIndexPatternSavedObjectService,
 } from './services';
+import { getAgentStatusById } from './services/agents';
 
 /**
  * Describes public IngestManager plugin contract returned at the `setup` stage.
  */
 export interface IngestManagerSetupContract {
   esIndexPatternService: ESIndexPatternService;
+  agentService: AgentService;
 }
 
 export interface IngestManagerSetupDeps {
@@ -148,6 +150,9 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
     }
     return deepFreeze({
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
+      agentService: {
+        getAgentStatusById,
+      },
     });
   }
 

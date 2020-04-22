@@ -60,6 +60,10 @@ export class AbstractVectorSource extends AbstractSource {
     throw new Error(`Should implemement ${this.constructor.type} ${this}`);
   }
 
+  getFieldNames() {
+    return [];
+  }
+
   /**
    * Retrieves a field. This may be an existing instance.
    * @param fieldName
