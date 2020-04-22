@@ -32,14 +32,14 @@ interface WmsInternalOptions {
 function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
   const wmsLink = (
     <EuiLink href="http://www.opengeospatial.org/standards/wms" target="_blank">
-      <FormattedMessage id="tileMap.wmsOptions.wmsLinkText" defaultMessage="OGC standard" />
+      <FormattedMessage id="maps_legacy.wmsOptions.wmsLinkText" defaultMessage="OGC standard" />
     </EuiLink>
   );
   const footnoteText = (
     <>
       <span aria-hidden="true">*</span>
       <FormattedMessage
-        id="tileMap.wmsOptions.mapLoadFailDescription"
+        id="maps_legacy.wmsOptions.mapLoadFailDescription"
         defaultMessage="If this parameter is incorrect, maps will fail to load."
       />
     </>
@@ -64,7 +64,7 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
       <EuiSpacer size="xs" />
       <EuiText size="xs">
         <FormattedMessage
-          id="tileMap.wmsOptions.wmsDescription"
+          id="maps_legacy.wmsOptions.wmsDescription"
           defaultMessage="WMS is an {wmsLink} for map image services."
           values={{ wmsLink }}
         />
@@ -74,14 +74,14 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
       <TextInputOption
         label={
           <>
-            <FormattedMessage id="tileMap.wmsOptions.wmsUrlLabel" defaultMessage="WMS url" />
+            <FormattedMessage id="maps_legacy.wmsOptions.wmsUrlLabel" defaultMessage="WMS url" />
             <span aria-hidden="true">*</span>
           </>
         }
         helpText={
           <>
             <FormattedMessage
-              id="tileMap.wmsOptions.urlOfWMSWebServiceTip"
+              id="maps_legacy.wmsOptions.urlOfWMSWebServiceTip"
               defaultMessage="The URL of the WMS web service."
             />
             {footnote}
@@ -95,14 +95,17 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
       <TextInputOption
         label={
           <>
-            <FormattedMessage id="tileMap.wmsOptions.wmsLayersLabel" defaultMessage="WMS layers" />
+            <FormattedMessage
+              id="maps_legacy.wmsOptions.wmsLayersLabel"
+              defaultMessage="WMS layers"
+            />
             <span aria-hidden="true">*</span>
           </>
         }
         helpText={
           <>
             <FormattedMessage
-              id="tileMap.wmsOptions.listOfLayersToUseTip"
+              id="maps_legacy.wmsOptions.listOfLayersToUseTip"
               defaultMessage="A comma separated list of layers to use."
             />
             {footnote}
@@ -117,7 +120,7 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
         label={
           <>
             <FormattedMessage
-              id="tileMap.wmsOptions.wmsVersionLabel"
+              id="maps_legacy.wmsOptions.wmsVersionLabel"
               defaultMessage="WMS version"
             />
             <span aria-hidden="true">*</span>
@@ -126,7 +129,7 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
         helpText={
           <>
             <FormattedMessage
-              id="tileMap.wmsOptions.versionOfWMSserverSupportsTip"
+              id="maps_legacy.wmsOptions.versionOfWMSserverSupportsTip"
               defaultMessage="The version of WMS the server supports."
             />
             {footnote}
@@ -140,14 +143,17 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
       <TextInputOption
         label={
           <>
-            <FormattedMessage id="tileMap.wmsOptions.wmsFormatLabel" defaultMessage="WMS format" />
+            <FormattedMessage
+              id="maps_legacy.wmsOptions.wmsFormatLabel"
+              defaultMessage="WMS format"
+            />
             <span aria-hidden="true">*</span>
           </>
         }
         helpText={
           <>
             <FormattedMessage
-              id="tileMap.wmsOptions.imageFormatToUseTip"
+              id="maps_legacy.wmsOptions.imageFormatToUseTip"
               defaultMessage="Usually image/png or image/jpeg. Use png if the server will return transparent layers."
             />
             {footnote}
@@ -161,13 +167,13 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
       <TextInputOption
         label={
           <FormattedMessage
-            id="tileMap.wmsOptions.wmsAttributionLabel"
+            id="maps_legacy.wmsOptions.wmsAttributionLabel"
             defaultMessage="WMS attribution"
           />
         }
         helpText={
           <FormattedMessage
-            id="tileMap.wmsOptions.attributionStringTip"
+            id="maps_legacy.wmsOptions.attributionStringTip"
             defaultMessage="Attribution string for the lower right corner."
           />
         }
@@ -179,14 +185,17 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
       <TextInputOption
         label={
           <>
-            <FormattedMessage id="tileMap.wmsOptions.wmsStylesLabel" defaultMessage="WMS styles" />
+            <FormattedMessage
+              id="maps_legacy.wmsOptions.wmsStylesLabel"
+              defaultMessage="WMS styles"
+            />
             <span aria-hidden="true">*</span>
           </>
         }
         helpText={
           <>
             <FormattedMessage
-              id="tileMap.wmsOptions.wmsServerSupportedStylesListTip"
+              id="maps_legacy.wmsOptions.wmsServerSupportedStylesListTip"
               defaultMessage="A comma separated list of WMS server supported styles to use. Blank in most cases."
             />
             {footnote}

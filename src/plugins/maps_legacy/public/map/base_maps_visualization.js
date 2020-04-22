@@ -206,7 +206,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
 
     async _updateData() {
       throw new Error(
-        i18n.translate('tileMap.baseMapsVisualization.childShouldImplementMethodErrorMessage', {
+        i18n.translate('maps_legacy.baseMapsVisualization.childShouldImplementMethodErrorMessage', {
           defaultMessage: 'Child should implement this method to respond to data-update',
         })
       );

@@ -59,7 +59,7 @@ function WmsOptions({ stateParams, setValue, vis }: Props) {
       <EuiTitle size="xs">
         <h2>
           <FormattedMessage
-            id="tileMap.wmsOptions.baseLayerSettingsTitle"
+            id="maps_legacy.wmsOptions.baseLayerSettingsTitle"
             defaultMessage="Base layer settings"
           />
         </h2>
@@ -67,10 +67,10 @@ function WmsOptions({ stateParams, setValue, vis }: Props) {
       <EuiSpacer size="s" />
 
       <SwitchOption
-        label={i18n.translate('tileMap.wmsOptions.wmsMapServerLabel', {
+        label={i18n.translate('maps_legacy.wmsOptions.wmsMapServerLabel', {
           defaultMessage: 'WMS map server',
         })}
-        tooltip={i18n.translate('tileMap.wmsOptions.useWMSCompliantMapTileServerTip', {
+        tooltip={i18n.translate('maps_legacy.wmsOptions.useWMSCompliantMapTileServerTip', {
           defaultMessage: 'Use WMS compliant map tile server. For advanced users only.',
         })}
         paramName="enabled"
@@ -83,7 +83,7 @@ function WmsOptions({ stateParams, setValue, vis }: Props) {
           <EuiSpacer size="s" />
           <SelectOption
             id="wmsOptionsSelectTmsLayer"
-            label={i18n.translate('tileMap.wmsOptions.layersLabel', {
+            label={i18n.translate('maps_legacy.wmsOptions.layersLabel', {
               defaultMessage: 'Layers',
             })}
             options={tmsLayerOptions}
