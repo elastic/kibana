@@ -303,7 +303,6 @@ export const StepDetailsForm: FC<Props> = React.memo(
             }
           >
             <EuiFieldText
-              placeholder="destination index"
               value={destinationIndex}
               onChange={e => setDestinationIndex(e.target.value)}
               aria-label={i18n.translate(
