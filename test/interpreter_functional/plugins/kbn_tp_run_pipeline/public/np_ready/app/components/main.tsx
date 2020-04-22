@@ -22,7 +22,7 @@ import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentHeader } from '@ela
 import { first } from 'rxjs/operators';
 import { IInterpreterRenderHandlers, ExpressionValue } from 'src/plugins/expressions';
 import { RequestAdapter, DataAdapter } from '../../../../../../../../src/plugins/inspector';
-import { Adapters, ExpressionRenderHandler } from '../../types';
+import { Adapters, ExpressionRendering } from '../../types';
 import { getExpressions } from '../../services';
 
 declare global {
@@ -68,13 +68,14 @@ class Main extends React.Component<{}, State> {
         .getData();
     };
 
-    let lastRenderHandler: ExpressionRenderHandler;
+    let lastRenderHandler: ExpressionRendering;
     window.renderPipelineResponse = async (context = {}) => {
       if (lastRenderHandler) {
         lastRenderHandler.destroy();
       }
 
-      lastRenderHandler = getExpressions().render(this.chartRef.current!, context, {
+      lastRenderHandler = getExpressions().createRendering({
+        element: this.chartRef.current!,
         onRenderError: (el: HTMLElement, error: unknown, handler: IInterpreterRenderHandlers) => {
           this.setState({
             expression: 'Render error!\n\n' + JSON.stringify(error),
@@ -82,6 +83,7 @@ class Main extends React.Component<{}, State> {
           handler.done();
         },
       });
+      lastRenderHandler.render(context);
 
       return lastRenderHandler.render$.pipe(first()).toPromise();
     };

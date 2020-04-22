@@ -35,7 +35,7 @@ export class ExpressionLoader {
   loading$: Observable<void>;
 
   private execution: ExecutionContract | undefined;
-  private renderHandler: ExpressionRendering;
+  private rendering: ExpressionRendering;
   private dataSubject: Subject<Data>;
   private loadingSubject: Subject<boolean>;
   private data: Data;
@@ -58,13 +58,13 @@ export class ExpressionLoader {
       map(() => void 0)
     );
 
-    this.renderHandler = getExpressionsService().createRendering({
+    this.rendering = getExpressionsService().createRendering({
       element,
       onRenderError: params && params.onRenderError,
     });
-    this.render$ = this.renderHandler.render$;
-    this.update$ = this.renderHandler.update$;
-    this.events$ = this.renderHandler.events$;
+    this.render$ = this.rendering.render$;
+    this.update$ = this.rendering.update$;
+    this.events$ = this.rendering.events$;
 
     this.update$.subscribe(value => {
       if (value) {
@@ -92,7 +92,7 @@ export class ExpressionLoader {
   destroy() {
     this.dataSubject.complete();
     this.loadingSubject.complete();
-    this.renderHandler.destroy();
+    this.rendering.destroy();
     if (this.execution) {
       this.execution.cancel();
     }
@@ -117,7 +117,7 @@ export class ExpressionLoader {
   }
 
   getElement(): HTMLElement {
-    return this.renderHandler.getElement();
+    return this.rendering.getElement();
   }
 
   inspect(): Adapters | undefined {
@@ -158,7 +158,7 @@ export class ExpressionLoader {
   };
 
   private render(data: Data): void {
-    this.renderHandler.render(data, this.params.uiState);
+    this.rendering.render(data, this.params.uiState);
   }
 
   private setParams(params?: IExpressionLoaderParams) {

@@ -38,6 +38,8 @@ export {
   ReactExpressionRendererType,
 } from './react_expression_renderer';
 export {
+  ExpressionRendering,
+  ExpressionsCreateRenderingParams,
   IExpressionLoaderParams,
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
