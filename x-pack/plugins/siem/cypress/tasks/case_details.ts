@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Timeline {
-  title: string;
-  description: string;
-  query: string;
-}
+import { TIMELINE_TITLE } from '../screens/timeline';
+
+export const openCaseTimeline = (link: string) => {
+  cy.visit('/app/kibana');
+  cy.visit(link);
+  cy.contains('a', 'SIEM');
+  cy.get(TIMELINE_TITLE).should('exist');
+};
