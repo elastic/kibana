@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { ExplorationPageWrapper } from '../exploration_page_wrapper';
 
 import { EvaluatePanel } from './evaluate_panel';
-import { ResultsTable } from './results_table';
 
 interface Props {
   jobId: string;
@@ -29,7 +28,6 @@ export const ClassificationExploration: FC<Props> = ({ jobId }) => {
         }
       )}
       EvaluatePanel={EvaluatePanel}
-      ResultsTable={ResultsTable}
     />
   );
 };

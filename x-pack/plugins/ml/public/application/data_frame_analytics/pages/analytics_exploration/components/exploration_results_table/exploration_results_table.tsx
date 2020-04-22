@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
-
 import { i18n } from '@kbn/i18n';
 import {
   EuiCallOut,
@@ -17,6 +16,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+
+import { DataGrid } from '../../../../../components/data_grid';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
+
 import {
   DataFrameAnalyticsConfig,
   MAX_COLUMNS,
@@ -26,26 +31,20 @@ import {
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
-
-import { DataGrid } from '../../../../../components/data_grid';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { getToastNotifications } from '../../../../../util/dependency_cache';
-
-import { ExplorationQueryBar } from '../exploration_query_bar';
 import { ExplorationTitle } from '../exploration_title';
+import { ExplorationQueryBar } from '../exploration_query_bar';
 
-import { useRegressionData } from './use_regression_data';
+import { useExplorationResults } from './use_exploration_results';
 
 const showingDocs = i18n.translate(
-  'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
+  'xpack.ml.dataframe.analytics.classificationExploration.documentsShownHelpText',
   {
     defaultMessage: 'Showing documents for which predictions exist',
   }
 );
 
 const showingFirstDocs = i18n.translate(
-  'xpack.ml.dataframe.analytics.regressionExploration.firstDocumentsShownHelpText',
+  'xpack.ml.dataframe.analytics.classificationExploration.firstDocumentsShownHelpText',
   {
     defaultMessage: 'Showing first {searchSize} documents for which predictions exist',
     values: { searchSize: SEARCH_SIZE },
@@ -60,7 +59,7 @@ interface Props {
   title: string;
 }
 
-export const ResultsTable: FC<Props> = React.memo(
+export const ExplorationResultsTable: FC<Props> = React.memo(
   ({ indexPattern, jobConfig, jobStatus, setEvaluateSearchQuery, title }) => {
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
 
@@ -68,11 +67,15 @@ export const ResultsTable: FC<Props> = React.memo(
       setEvaluateSearchQuery(searchQuery);
     }, [JSON.stringify(searchQuery)]);
 
-    const regressionData = useRegressionData(indexPattern, jobConfig, searchQuery);
-    const docFieldsCount = regressionData.columns.length;
-    const { columns, errorMessage, status, tableItems, visibleColumns } = regressionData;
+    const classificationData = useExplorationResults(indexPattern, jobConfig, searchQuery);
+    const docFieldsCount = classificationData.columns.length;
+    const { columns, errorMessage, status, tableItems, visibleColumns } = classificationData;
 
-    if (jobConfig === undefined || regressionData === undefined) {
+    useEffect(() => {
+      setEvaluateSearchQuery(searchQuery);
+    }, [JSON.stringify(searchQuery)]);
+
+    if (jobConfig === undefined || classificationData === undefined) {
       return null;
     }
     // if it's a searchBar syntax error leave the table visible so they can try again
@@ -103,7 +106,11 @@ export const ResultsTable: FC<Props> = React.memo(
     }
 
     return (
-      <EuiPanel grow={false} data-test-subj="mlDFAnalyticsRegressionExplorationTablePanel">
+      <EuiPanel
+        grow={false}
+        id="mlDataFrameAnalyticsTableResultsPanel"
+        data-test-subj="mlDFAnalyticsClassificationExplorationTablePanel"
+      >
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
@@ -123,7 +130,7 @@ export const ResultsTable: FC<Props> = React.memo(
                 {docFieldsCount > MAX_COLUMNS && (
                   <EuiText size="s">
                     {i18n.translate(
-                      'xpack.ml.dataframe.analytics.regressionExploration.fieldSelection',
+                      'xpack.ml.dataframe.analytics.classificationExploration.fieldSelection',
                       {
                         defaultMessage:
                           '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
@@ -156,7 +163,7 @@ export const ResultsTable: FC<Props> = React.memo(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DataGrid
-                {...regressionData}
+                {...classificationData}
                 dataTestSubj="mlExplorationDataGrid"
                 toastNotifications={getToastNotifications()}
               />

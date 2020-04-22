@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EvaluatePanelProps, ExplorationPageWrapper } from './exploration_page_wrapper';
+export { ExplorationResultsTable } from './exploration_results_table';

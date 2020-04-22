@@ -112,7 +112,7 @@ export const sortColumns = (obj: EsDocSource, resultsField: string) => (a: strin
   return a.localeCompare(b);
 };
 
-export const sortRegressionResultsFields = (
+export const sortExplorationResultsFields = (
   a: string,
   b: string,
   jobConfig: DataFrameAnalyticsConfig
@@ -298,7 +298,7 @@ export const getDefaultFieldsFromJobCaps = (
 
   allFields.push(...fields, ...featureImportanceFields);
   allFields.sort(({ name: a }: { name: string }, { name: b }: { name: string }) =>
-    sortRegressionResultsFields(a, b, jobConfig)
+    sortExplorationResultsFields(a, b, jobConfig)
   );
 
   let selectedFields = allFields.filter(
@@ -349,7 +349,7 @@ export const getDefaultClassificationFields = (
 
       return docs.some(row => row._source[k] !== null);
     })
-    .sort((a, b) => sortRegressionResultsFields(a, b, jobConfig))
+    .sort((a, b) => sortExplorationResultsFields(a, b, jobConfig))
     .slice(0, DEFAULT_REGRESSION_COLUMNS);
 };
 
@@ -382,7 +382,7 @@ export const getDefaultRegressionFields = (
 
       return docs.some(row => row._source[k] !== null);
     })
-    .sort((a, b) => sortRegressionResultsFields(a, b, jobConfig))
+    .sort((a, b) => sortExplorationResultsFields(a, b, jobConfig))
     .slice(0, DEFAULT_REGRESSION_COLUMNS);
 };
 

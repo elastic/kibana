@@ -19,11 +19,11 @@ import {
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { sortRegressionResultsFields } from '../../../../common/fields';
+import { sortExplorationResultsFields } from '../../../../common/fields';
 
 const FEATURE_IMPORTANCE = 'feature_importance';
 
-export const useClassificationData = (
+export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: SavedSearchQuery
@@ -38,7 +38,7 @@ export const useClassificationData = (
     const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
     columns.push(
       ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
-        sortRegressionResultsFields(a.id, b.id, jobConfig)
+        sortExplorationResultsFields(a.id, b.id, jobConfig)
       )
     );
   }

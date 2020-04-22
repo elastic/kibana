@@ -8,25 +8,28 @@ import React, { FC, useState } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 
-import { useResultsViewConfig } from '../../../../common';
+import { useResultsViewConfig, DataFrameAnalyticsConfig } from '../../../../common';
 import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
 
+import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
+
+import { ExplorationResultsTable } from '../exploration_results_table';
 import { JobConfigErrorCallout } from '../job_config_error_callout';
 import { LoadingPanel } from '../loading_panel';
+
+export interface EvaluatePanelProps {
+  jobConfig: DataFrameAnalyticsConfig;
+  jobStatus?: DATA_FRAME_TASK_STATE;
+  searchQuery: ResultsSearchQuery;
+}
 
 interface Props {
   jobId: string;
   title: string;
-  EvaluatePanel: any;
-  ResultsTable: any;
+  EvaluatePanel: FC<EvaluatePanelProps>;
 }
 
-export const ExplorationPageWrapper: FC<Props> = ({
-  jobId,
-  title,
-  EvaluatePanel,
-  ResultsTable,
-}) => {
+export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel }) => {
   const {
     indexPattern,
     isInitialized,
@@ -60,7 +63,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
         jobConfig !== undefined &&
         indexPattern !== undefined &&
         isInitialized === true && (
-          <ResultsTable
+          <ExplorationResultsTable
             jobConfig={jobConfig}
             indexPattern={indexPattern}
             jobStatus={jobStatus}
