@@ -6,7 +6,7 @@
 
 import { Timeline } from './timeline';
 
-export interface Case {
+export interface TestCase {
   name: string;
   tags: string[];
   description: string;
@@ -20,7 +20,7 @@ const caseTimeline: Timeline = {
   query: 'host.name:*',
 };
 
-export const case1: Case = {
+export const case1: TestCase = {
   name: 'This is the title of the case',
   tags: ['Tag1', 'Tag2'],
   description: 'This is the case description',

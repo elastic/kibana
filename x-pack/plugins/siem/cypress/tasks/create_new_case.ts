@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Case } from '../objects/case';
+import { TestCase } from '../objects/case';
 
 import {
   BACK_TO_CASES_BTN,
@@ -22,7 +22,7 @@ export const backToCases = () => {
   cy.get(BACK_TO_CASES_BTN).click({ force: true });
 };
 
-export const createNewCase = (newCase: Case) => {
+export const createNewCase = (newCase: TestCase) => {
   cy.get(TITLE_INPUT).type(newCase.name, { force: true });
   newCase.tags.forEach(tag => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
