@@ -14,7 +14,7 @@ import {
   SYNC_SEARCH_STRATEGY,
   TSearchStrategyProvider,
 } from '../../../../../src/plugins/data/public';
-import { IAsyncSearchRequest, IAsyncSearchOptions } from './types';
+import { IAsyncSearchRequest, IAsyncSearchOptions, IAsyncSearchResponse } from './types';
 
 export const ASYNC_SEARCH_STRATEGY = 'ASYNC_SEARCH_STRATEGY';
 
@@ -52,7 +52,7 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
         : NEVER;
 
       return search(request, options).pipe(
-        expand(response => {
+        expand((response: IAsyncSearchResponse) => {
           // If the response indicates of an error, stop polling and complete the observable
           if (!response || (response.is_partial && !response.is_running)) {
             return throwError(new AbortError());
