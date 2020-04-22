@@ -52,7 +52,7 @@ const getHandledError = () => {
   }
 };
 
-describe('ExpressionRenderHandler', () => {
+describe('ExpressionRendering', () => {
   it('constructor creates observers', () => {
     const { rendering } = setup({ element });
     expect(rendering.events$).toBeInstanceOf(Observable);
