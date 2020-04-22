@@ -6,8 +6,10 @@
 
 import squel from 'squel';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
+/* eslint-disable */
 // @ts-ignore untyped local
-import { queryEsSQL } from '../../../server/lib/query_es_sql';
+import { queryEsSQL } from '../../../../../../plugins/canvas/server/lib/query_es_sql';
+/* eslint-enable */
 import { Filter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 

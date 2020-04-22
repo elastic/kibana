@@ -6,7 +6,9 @@
 
 import { ExpressionFunctionDefinition, Filter } from 'src/plugins/expressions/common';
 // @ts-ignore untyped local
-import { buildESRequest } from '../../../server/lib/build_es_request';
+/* eslint-disable */
+import { buildESRequest } from '../../../../../../plugins/canvas/server/lib/build_es_request';
+/* eslint-enable */
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

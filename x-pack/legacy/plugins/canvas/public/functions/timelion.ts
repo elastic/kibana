@@ -12,7 +12,7 @@ import { TimeRange } from 'src/plugins/data/common';
 import { ExpressionFunctionDefinition, DatatableRow } from 'src/plugins/expressions/public';
 import { fetch } from '../../common/lib/fetch';
 // @ts-ignore untyped local
-import { buildBoolArray } from '../../server/lib/build_bool_array';
+import { buildBoolArray } from '../../public/lib/build_bool_array';
 import { Datatable, Filter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 

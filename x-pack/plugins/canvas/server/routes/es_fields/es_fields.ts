@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { API_ROUTE } from '../../../../../legacy/plugins/canvas/common/lib';
 import { catchErrorHandler } from '../catch_error_handler';
 // @ts-ignore unconverted lib
-import { normalizeType } from '../../../../../legacy/plugins/canvas/server/lib/normalize_type';
+import { normalizeType } from '../../lib/normalize_type';
 import { RouteInitializerDeps } from '..';
 
 const ESFieldsRequestSchema = schema.object({
