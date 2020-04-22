@@ -28,12 +28,6 @@ import {
   SavedObjectsMigrationVersion,
 } from '../../server';
 
-// TODO: Migrate to an error modal powered by the NP?
-import {
-  isAutoCreateIndexError,
-  showAutoCreateIndexErrorPage,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
 
@@ -226,7 +220,9 @@ export class SavedObjectsClient {
       .then(resp => this.createSavedObject(resp))
       .catch((error: object) => {
         if (isAutoCreateIndexError(error)) {
-          showAutoCreateIndexErrorPage();
+          window.location.assign(
+            this.http.basePath.prepend('/app/kibana#/error/action.auto_create_index')
+          );
         }
 
         throw error;
@@ -472,3 +468,9 @@ const renameKeys = <T extends Record<string, any>, U extends Record<string, any>
       ...{ [keysMap[key] || key]: obj[key] },
     };
   }, {});
+
+const isAutoCreateIndexError = (error: any) => {
+  return (
+    error?.res?.status === 503 && error?.body?.attributes?.code === 'ES_AUTO_CREATE_INDEX_ERROR'
+  );
+};
