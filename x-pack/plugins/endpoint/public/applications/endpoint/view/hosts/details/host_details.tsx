@@ -16,7 +16,7 @@ import {
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { HostMetadata } from '../../../../../../common/types';
+import { HostMetadata, HostPolicyResponseActionStatus } from '../../../../../../common/types';
 import { FormattedDateAndTime } from '../../formatted_date_time';
 import { LinkToApp } from '../../components/link_to_app';
 import { useHostListSelector, useHostLogsUrl } from '../hooks';
@@ -31,10 +31,12 @@ const HostIds = styled(EuiListGroupItem)`
   }
 `;
 
-const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze({
+const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
+  { [key in keyof typeof HostPolicyResponseActionStatus]: string }
+>({
   success: 'success',
   warning: 'warning',
-  failed: 'danger',
+  failure: 'danger',
 });
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
@@ -97,7 +99,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
             >
               <FormattedMessage
                 id="xpack.endpoint.host.details.policyStatusValue"
-                defaultMessage="{policyStatus, select, success {Success} warning {Warning} failed {Failed} other {Unknown}}"
+                defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
                 values={{ policyStatus }}
               />
             </EuiLink>
