@@ -15,7 +15,7 @@ import { exportFirstRule } from '../tasks/signal_detection_rules';
 
 import { DETECTIONS } from '../urls/navigation';
 
-const EXPECTED_RULE_FILE_PATH = '../downloads/rules_export.ndjson';
+const EXPECTED_RULE_FILE_PATH = 'cypress/downloads/rules_export.ndjson';
 const EXPECTED_EXPORTED_RULE_FILE_PATH = 'cypress/test_files/expected_rules_export.ndjson';
 
 describe('Export rules', () => {
