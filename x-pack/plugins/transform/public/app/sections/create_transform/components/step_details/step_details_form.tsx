@@ -258,8 +258,8 @@ export const StepDetailsForm: FC<Props> = React.memo(
             })}
           >
             <EuiFieldText
-            placeholder={i18n.translate(
-            'xpack.transform.stepDetailsForm.transformDescriptionPlaceholderText',
+              placeholder={i18n.translate(
+                'xpack.transform.stepDetailsForm.transformDescriptionPlaceholderText',
                 { defaultMessage: 'Description (optional)' }
               )}
               value={transformDescription}
