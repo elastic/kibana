@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
 
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
+import { getErrorMessage } from '../../../../common/util/errors';
+
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { ml } from '../../services/ml_api_service';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
@@ -34,56 +36,58 @@ export const useResultsViewConfig = (jobId: string) => {
   useEffect(() => {
     (async function() {
       setIsLoadingJobConfig(false);
-      const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
-      const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
-      const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
-        ? analyticsStats.data_frame_analytics[0]
-        : undefined;
 
-      if (stats !== undefined && stats.state) {
-        setJobStatus(stats.state);
-      }
+      try {
+        const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+        const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
+        const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
+          ? analyticsStats.data_frame_analytics[0]
+          : undefined;
 
-      if (
-        Array.isArray(analyticsConfigs.data_frame_analytics) &&
-        analyticsConfigs.data_frame_analytics.length > 0
-      ) {
-        const jobConfigUpdate = analyticsConfigs.data_frame_analytics[0];
+        if (stats !== undefined && stats.state) {
+          setJobStatus(stats.state);
+        }
 
-        try {
-          const destIndex = Array.isArray(jobConfigUpdate.dest.index)
-            ? jobConfigUpdate.dest.index[0]
-            : jobConfigUpdate.dest.index;
-          const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
-          let indexP: IndexPattern | undefined;
+        if (
+          Array.isArray(analyticsConfigs.data_frame_analytics) &&
+          analyticsConfigs.data_frame_analytics.length > 0
+        ) {
+          const jobConfigUpdate = analyticsConfigs.data_frame_analytics[0];
 
           try {
-            indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+            const destIndex = Array.isArray(jobConfigUpdate.dest.index)
+              ? jobConfigUpdate.dest.index[0]
+              : jobConfigUpdate.dest.index;
+            const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
+            let indexP: IndexPattern | undefined;
+
+            try {
+              indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+            } catch (e) {
+              indexP = undefined;
+            }
+
+            if (indexP === undefined) {
+              const sourceIndex = jobConfigUpdate.source.index[0];
+              const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+              indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+            }
+
+            if (indexP !== undefined) {
+              await newJobCapsService.initializeFromIndexPattern(indexP, false, false);
+              setJobConfig(analyticsConfigs.data_frame_analytics[0]);
+              setIndexPattern(indexP);
+              setIsInitialized(true);
+              setIsLoadingJobConfig(false);
+            }
           } catch (e) {
-            indexP = undefined;
-          }
-
-          if (indexP === undefined) {
-            const sourceIndex = jobConfigUpdate.source.index[0];
-            const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-            indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
-          }
-
-          if (indexP !== undefined) {
-            await newJobCapsService.initializeFromIndexPattern(indexP, false, false);
-            setJobConfig(analyticsConfigs.data_frame_analytics[0]);
-            setIndexPattern(indexP);
-            setIsInitialized(true);
+            setJobCapsServiceErrorMessage(getErrorMessage(e));
             setIsLoadingJobConfig(false);
           }
-        } catch (e) {
-          if (e.message !== undefined) {
-            setJobCapsServiceErrorMessage(e.message);
-          } else {
-            setJobCapsServiceErrorMessage(JSON.stringify(e));
-          }
-          setIsLoadingJobConfig(false);
         }
+      } catch (e) {
+        setJobConfigErrorMessage(getErrorMessage(e));
+        setIsLoadingJobConfig(false);
       }
     })();
   }, []);
