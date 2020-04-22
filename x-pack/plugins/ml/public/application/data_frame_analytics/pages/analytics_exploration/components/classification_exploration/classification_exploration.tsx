@@ -4,21 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
+import React, { FC, Fragment, useState } from 'react';
+
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { ml } from '../../../../../services/ml_api_service';
-import { DataFrameAnalyticsConfig } from '../../../../common';
+
+import { useResultsViewConfig } from '../../../../common';
+import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
+
+import { LoadingPanel } from '../loading_panel';
+
 import { EvaluatePanel } from './evaluate_panel';
 import { ResultsTable } from './results_table';
-import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
-import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
-import { LoadingPanel } from '../loading_panel';
-import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
-import { useMlContext } from '../../../../../contexts/ml';
-import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 
 export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
@@ -51,100 +49,16 @@ interface Props {
 }
 
 export const ClassificationExploration: FC<Props> = ({ jobId }) => {
-  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
-  const [jobStatus, setJobStatus] = useState<DATA_FRAME_TASK_STATE | undefined>(undefined);
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
-  const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
-  const [jobCapsServiceErrorMessage, setJobCapsServiceErrorMessage] = useState<undefined | string>(
-    undefined
-  );
+  const {
+    indexPattern,
+    isInitialized,
+    isLoadingJobConfig,
+    jobCapsServiceErrorMessage,
+    jobConfig,
+    jobConfigErrorMessage,
+    jobStatus,
+  } = useResultsViewConfig(jobId);
   const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
-  const mlContext = useMlContext();
-
-  const loadJobConfig = async () => {
-    setIsLoadingJobConfig(true);
-    try {
-      const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
-      const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
-      const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
-        ? analyticsStats.data_frame_analytics[0]
-        : undefined;
-
-      if (stats !== undefined && stats.state) {
-        setJobStatus(stats.state);
-      }
-
-      if (
-        Array.isArray(analyticsConfigs.data_frame_analytics) &&
-        analyticsConfigs.data_frame_analytics.length > 0
-      ) {
-        setJobConfig(analyticsConfigs.data_frame_analytics[0]);
-        setIsLoadingJobConfig(false);
-      } else {
-        setJobConfigErrorMessage(
-          i18n.translate(
-            'xpack.ml.dataframe.analytics.classificationExploration.jobConfigurationNoResultsMessage',
-            {
-              defaultMessage: 'No results found.',
-            }
-          )
-        );
-      }
-    } catch (e) {
-      if (e.message !== undefined) {
-        setJobConfigErrorMessage(e.message);
-      } else {
-        setJobConfigErrorMessage(JSON.stringify(e));
-      }
-      setIsLoadingJobConfig(false);
-    }
-  };
-
-  useEffect(() => {
-    loadJobConfig();
-  }, []);
-
-  const initializeJobCapsService = async () => {
-    if (jobConfig !== undefined) {
-      try {
-        const destIndex = Array.isArray(jobConfig.dest.index)
-          ? jobConfig.dest.index[0]
-          : jobConfig.dest.index;
-        const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
-        let indexP: IndexPattern | undefined;
-
-        try {
-          indexP = await mlContext.indexPatterns.get(destIndexPatternId);
-        } catch (e) {
-          indexP = undefined;
-        }
-
-        if (indexP === undefined) {
-          const sourceIndex = jobConfig.source.index[0];
-          const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-          indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
-        }
-
-        if (indexP !== undefined) {
-          setIndexPattern(indexP);
-          await newJobCapsService.initializeFromIndexPattern(indexP, false, false);
-        }
-        setIsInitialized(true);
-      } catch (e) {
-        if (e.message !== undefined) {
-          setJobCapsServiceErrorMessage(e.message);
-        } else {
-          setJobCapsServiceErrorMessage(JSON.stringify(e));
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    initializeJobCapsService();
-  }, [jobConfig && jobConfig.id]);
 
   if (jobConfigErrorMessage !== undefined || jobCapsServiceErrorMessage !== undefined) {
     return (

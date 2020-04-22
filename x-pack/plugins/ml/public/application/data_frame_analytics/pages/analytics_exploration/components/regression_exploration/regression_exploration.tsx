@@ -5,13 +5,18 @@
  */
 
 import React, { FC, Fragment, useState } from 'react';
+
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+
 import { useResultsViewConfig } from '../../../../common';
+import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
+
+import { LoadingPanel } from '../loading_panel';
+
 import { EvaluatePanel } from './evaluate_panel';
 import { ResultsTable } from './results_table';
-import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
-import { LoadingPanel } from '../loading_panel';
 
 export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">

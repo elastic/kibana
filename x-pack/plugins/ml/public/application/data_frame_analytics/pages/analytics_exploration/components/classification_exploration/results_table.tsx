@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect } from 'react';
+import React, { Fragment, FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiCallOut,
@@ -12,17 +12,15 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
-  EuiProgress,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
-import {
-  BASIC_NUMERICAL_TYPES,
-  EXTENDED_NUMERICAL_TYPES,
-  sortRegressionResultsFields,
-} from '../../../../common/fields';
+
+import { DataGrid } from '../../../../../components/data_grid';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import {
   DataFrameAnalyticsConfig,
@@ -33,10 +31,10 @@ import {
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
-import { useExploreData } from './use_explore_data'; // TableItem
 import { ExplorationTitle } from './classification_exploration';
-import { ClassificationExplorationDataGrid } from './classification_exploration_data_grid';
 import { ExplorationQueryBar } from '../exploration_query_bar';
+
+import { useClassificationData } from './use_classification_data';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.classificationExploration.documentsShownHelpText',
@@ -62,67 +60,21 @@ interface Props {
 
 export const ResultsTable: FC<Props> = React.memo(
   ({ indexPattern, jobConfig, jobStatus, setEvaluateSearchQuery }) => {
-    const needsDestIndexFields = indexPattern && indexPattern.title === jobConfig.source.index[0];
-    const resultsField = jobConfig.dest.results_field;
-    const {
-      errorMessage,
-      fieldTypes,
-      pagination,
-      searchQuery,
-      selectedFields,
-      rowCount,
-      setPagination,
-      setSearchQuery,
-      setSelectedFields,
-      setSortingColumns,
-      sortingColumns,
-      status,
-      tableFields,
-      tableItems,
-    } = useExploreData(jobConfig, needsDestIndexFields);
+    const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
 
     useEffect(() => {
       setEvaluateSearchQuery(searchQuery);
     }, [JSON.stringify(searchQuery)]);
 
-    const columns = tableFields
-      .sort((a: any, b: any) => sortRegressionResultsFields(a, b, jobConfig))
-      .map((field: any) => {
-        // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
-        // To fall back to the default string schema it needs to be undefined.
-        let schema;
-        let isSortable = true;
-        const type = fieldTypes[field];
-        const isNumber =
-          type !== undefined &&
-          (BASIC_NUMERICAL_TYPES.has(type) || EXTENDED_NUMERICAL_TYPES.has(type));
+    const classificationData = useClassificationData(indexPattern, jobConfig, searchQuery);
+    const docFieldsCount = classificationData.columns.length;
+    const { columns, errorMessage, status, tableItems, visibleColumns } = classificationData;
 
-        if (isNumber) {
-          schema = 'numeric';
-        }
+    useEffect(() => {
+      setEvaluateSearchQuery(searchQuery);
+    }, [JSON.stringify(searchQuery)]);
 
-        switch (type) {
-          case 'date':
-            schema = 'datetime';
-            break;
-          case 'geo_point':
-            schema = 'json';
-            break;
-          case 'boolean':
-            schema = 'boolean';
-            break;
-        }
-
-        if (field === `${resultsField}.feature_importance`) {
-          isSortable = false;
-        }
-
-        return { id: field, schema, isSortable };
-      });
-
-    const docFieldsCount = tableFields.length;
-
-    if (jobConfig === undefined) {
+    if (jobConfig === undefined || classificationData === undefined) {
       return null;
     }
     // if it's a searchBar syntax error leave the table visible so they can try again
@@ -181,7 +133,7 @@ export const ResultsTable: FC<Props> = React.memo(
                       {
                         defaultMessage:
                           '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
-                        values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
+                        values: { selectedFieldsLength: visibleColumns.length, docFieldsCount },
                       }
                     )}
                   </EuiText>
@@ -190,10 +142,6 @@ export const ResultsTable: FC<Props> = React.memo(
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {status === INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-        {status !== INDEX_STATUS.LOADING && (
-          <EuiProgress size="xs" color="accent" max={1} value={0} />
-        )}
         {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
@@ -213,18 +161,10 @@ export const ResultsTable: FC<Props> = React.memo(
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ClassificationExplorationDataGrid
-                columns={columns}
-                indexPattern={indexPattern}
-                pagination={pagination}
-                resultsField={jobConfig.dest.results_field}
-                rowCount={rowCount}
-                selectedFields={selectedFields}
-                setPagination={setPagination}
-                setSelectedFields={setSelectedFields}
-                setSortingColumns={setSortingColumns}
-                sortingColumns={sortingColumns}
-                tableItems={tableItems}
+              <DataGrid
+                {...classificationData}
+                dataTestSubj="mlExplorationDataGrid"
+                toastNotifications={getToastNotifications()}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
