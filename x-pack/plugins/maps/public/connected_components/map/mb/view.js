@@ -87,12 +87,7 @@ export class MBMapContainer extends React.Component {
           }
         );
       }
-      if (this.props.spatialFiltersLayer) {
-        this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
-      } else {
-        // Ensure spatial filters layer is removed from map
-        removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
-      }
+      this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
       this._syncSettings();
     }
   }, 256);
@@ -274,9 +269,7 @@ export class MBMapContainer extends React.Component {
     );
     this.props.layerList.forEach(layer => layer.syncLayerWithMB(this.state.mbMap));
     syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
-    if (this.props.spatialFiltersLayer) {
-      moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
-    }
+    moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
   };
 
   _syncMbMapWithInspector = () => {

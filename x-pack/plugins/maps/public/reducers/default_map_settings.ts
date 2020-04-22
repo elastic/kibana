@@ -13,7 +13,7 @@ export function getDefaultMapSettings(): MapSettings {
     minZoom: MIN_ZOOM,
     showSpatialFilters: true,
     spatialFiltersAlpa: 0.3,
-    spatialFiltersFillColor: '#696969',
-    spatialFiltersLineColor: '#000',
+    spatialFiltersFillColor: '#DA8B45',
+    spatialFiltersLineColor: '#DA8B45',
   };
 }

@@ -198,10 +198,6 @@ export const getSpatialFiltersLayer = createSelector(
   getFilters,
   getMapSettings,
   (filters, settings) => {
-    if (!settings.showSpatialFilters) {
-      return null;
-    }
-
     const featureCollection = {
       type: 'FeatureCollection',
       features: extractFeaturesFromFilters(filters),
@@ -214,7 +210,7 @@ export const getSpatialFiltersLayer = createSelector(
     return new VectorLayer({
       layerDescriptor: {
         id: SPATIAL_FILTERS_LAYER_ID,
-        visible: true,
+        visible: settings.showSpatialFilters,
         alpha: settings.spatialFiltersAlpa,
         type: LAYER_TYPE.VECTOR,
         __dataRequests: [

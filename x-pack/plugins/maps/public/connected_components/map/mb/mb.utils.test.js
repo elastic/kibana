@@ -185,17 +185,6 @@ describe('removeOrphanedSourcesAndLayers', () => {
     removeOrphanedSourcesAndLayers(mockMbMap, [], spatialFilterLayer);
     expect(mockMbMap.getStyle()).toEqual(styleWithSpatialFilters);
   });
-
-  test('should remove spatial filter layer and sources when spatialFilterLayer is not provided', async () => {
-    const styleWithSpatialFilters = getMockStyle([spatialFilterLayer]);
-    const mockMbMap = new MockMbMap(styleWithSpatialFilters);
-
-    removeOrphanedSourcesAndLayers(mockMbMap, []);
-    expect(mockMbMap.getStyle()).toEqual({
-      layers: [],
-      sources: {},
-    });
-  });
 });
 
 describe('syncLayerOrderForSingleLayer', () => {
