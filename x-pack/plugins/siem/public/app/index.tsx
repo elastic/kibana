@@ -7,7 +7,8 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { CoreStart, StartPlugins, AppMountParameters } from '../plugin';
+import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
+import { StartPlugins } from '../plugin';
 import { SiemApp } from './app';
 
 export const renderApp = (

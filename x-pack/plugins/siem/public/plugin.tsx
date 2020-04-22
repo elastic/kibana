@@ -30,8 +30,6 @@ import { initTelemetry } from './lib/telemetry';
 import { KibanaServices } from './lib/kibana';
 import { serviceNowActionType } from './lib/connectors';
 
-export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
-
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
   security: SecurityPluginSetup;
