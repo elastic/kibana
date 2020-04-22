@@ -240,7 +240,6 @@ export const StepDetailsForm: FC<Props> = React.memo(
             ]}
           >
             <EuiFieldText
-              placeholder="transform ID"
               value={transformId}
               onChange={e => setTransformId(e.target.value)}
               aria-label={i18n.translate(
@@ -257,15 +256,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
             label={i18n.translate('xpack.transform.stepDetailsForm.transformDescriptionLabel', {
               defaultMessage: 'Transform description',
             })}
-            helpText={i18n.translate(
-              'xpack.transform.stepDetailsForm.transformDescriptionHelpText',
-              {
-                defaultMessage: 'Optional descriptive text.',
-              }
-            )}
           >
             <EuiFieldText
-              placeholder="transform description"
+              placeholder="Description (optional)"
               value={transformDescription}
               onChange={e => setTransformDescription(e.target.value)}
               aria-label={i18n.translate(
