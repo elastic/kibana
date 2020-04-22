@@ -13,7 +13,7 @@ import { getCapabilities, getManageMlCapabilities } from './get_capabilities';
 import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
-// manage_ml requires all monitor and admin cluster privileges: https://github.com/elastic/elasticsearch/blob/664a29c8905d8ce9ba8c18aa1ed5c5de93a0eabc/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/privilege/ClusterPrivilege.java#L53
+
 export function checkGetManagementMlJobsResolver() {
   return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
     getManageMlCapabilities().then(
