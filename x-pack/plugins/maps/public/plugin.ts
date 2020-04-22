@@ -41,11 +41,13 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { MapEmbeddableFactory } from './embeddable';
+import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
   home: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
+  embeddable: EmbeddableSetup;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
