@@ -11,7 +11,7 @@ import { extractEntityID } from './utils/normalize';
 import { getPaginationParams } from './utils/pagination';
 import { LifecycleQuery } from './queries/lifecycle';
 import { ChildrenQuery } from './queries/children';
-import { IndexPatternRetriever } from '../../index_pattern';
+import { endpointAppContextServices } from '../../endpoint_app_context_services';
 
 interface ChildrenQueryParams {
   after?: string;
@@ -46,8 +46,7 @@ export const validateChildren = {
 };
 
 export function handleChildren(
-  log: Logger,
-  indexRetriever: IndexPatternRetriever
+  log: Logger
 ): RequestHandler<ChildrenPathParams, ChildrenQueryParams> {
   return async (context, req, res) => {
     const {
@@ -55,6 +54,7 @@ export function handleChildren(
       query: { limit, after, legacyEndpointID },
     } = req;
     try {
+      const indexRetriever = endpointAppContextServices.getIndexPatternRetriever();
       const pagination = getPaginationParams(limit, after);
       const indexPattern = await indexRetriever.getEventIndexPattern(context);
 

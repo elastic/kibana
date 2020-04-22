@@ -12,6 +12,7 @@ import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from '
 import { HostInfo, HostMetadata, HostResultList, HostStatus } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
 import { AgentStatus } from '../../../../ingest_manager/common/types/models';
+import { endpointAppContextServices } from '../../endpoint_app_context_services';
 
 interface HitSource {
   _source: HostMetadata;
@@ -61,9 +62,9 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const index = await endpointAppContext.indexPatternRetriever.getMetadataIndexPattern(
-          context
-        );
+        const index = await endpointAppContextServices
+          .getIndexPatternRetriever()
+          .getMetadataIndexPattern(context);
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
           endpointAppContext,
@@ -117,9 +118,9 @@ export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string
 ): Promise<HostInfo | undefined> {
-  const index = await metadataRequestContext.endpointAppContext.indexPatternRetriever.getMetadataIndexPattern(
-    metadataRequestContext.requestHandlerContext
-  );
+  const index = await endpointAppContextServices
+    .getIndexPatternRetriever()
+    .getMetadataIndexPattern(metadataRequestContext.requestHandlerContext);
   const query = getESQueryHostMetadataByID(id, index);
   const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.dataClient.callAsCurrentUser(
     'search',
@@ -179,10 +180,12 @@ async function enrichHostMetadata(
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 
-    const status = await metadataRequestContext.endpointAppContext.agentService.getAgentStatusById(
-      metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-      elasticAgentId
-    );
+    const status = await endpointAppContextServices
+      .getAgentService()
+      .getAgentStatusById(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        elasticAgentId
+      );
     hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {

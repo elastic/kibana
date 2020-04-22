@@ -13,6 +13,7 @@ import { registerAlertRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
 import { alertingIndexGetQuerySchema } from '../../../common/schema/alert_index';
 import { createMockAgentService, createMockIndexPatternRetriever } from '../../mocks';
+import { endpointAppContextServices } from '../../endpoint_app_context_services';
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -24,13 +25,19 @@ describe('test alerts route', () => {
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
-    registerAlertRoutes(routerMock, {
+
+    endpointAppContextServices.start({
       indexPatternRetriever: createMockIndexPatternRetriever('events-endpoint-*'),
       agentService: createMockAgentService(),
+    });
+
+    registerAlertRoutes(routerMock, {
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });
   });
+
+  afterEach(() => endpointAppContextServices.stop());
 
   it('should fail to validate when `page_size` is not a number', async () => {
     const validate = () => {

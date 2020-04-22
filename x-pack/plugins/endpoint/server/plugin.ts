@@ -3,10 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Plugin, CoreSetup, PluginInitializerContext, Logger } from 'kibana/server';
+import { Plugin, CoreSetup, PluginInitializerContext, Logger, CoreStart } from 'kibana/server';
 import { first } from 'rxjs/operators';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
-import { IngestManagerSetupContract } from '../../ingest_manager/server';
 import { createConfig$, EndpointConfigType } from './config';
 import { EndpointAppContext } from './types';
 
@@ -15,14 +14,17 @@ import { registerResolverRoutes } from './routes/resolver';
 import { registerIndexPatternRoute } from './routes/index_pattern';
 import { registerEndpointRoutes } from './routes/metadata';
 import { IngestIndexPatternRetriever } from './index_pattern';
+import { endpointAppContextServices } from './endpoint_app_context_services';
+import { IngestManagerStartupContract } from '../../ingest_manager/common/types';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
-export interface EndpointPluginStartDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface EndpointPluginStartDependencies {
+  ingestManager: IngestManagerStartupContract;
+}
 
 export interface EndpointPluginSetupDependencies {
   features: FeaturesPluginSetupContract;
-  ingestManager: IngestManagerSetupContract;
 }
 
 export class EndpointPlugin
@@ -66,11 +68,6 @@ export class EndpointPlugin
       },
     });
     const endpointContext = {
-      indexPatternRetriever: new IngestIndexPatternRetriever(
-        plugins.ingestManager.esIndexPatternService,
-        this.initializerContext.logger
-      ),
-      agentService: plugins.ingestManager.agentService,
       logFactory: this.initializerContext.logger,
       config: (): Promise<EndpointConfigType> => {
         return createConfig$(this.initializerContext)
@@ -85,10 +82,18 @@ export class EndpointPlugin
     registerIndexPatternRoute(router, endpointContext);
   }
 
-  public start() {
+  public start(core: CoreStart, plugins: EndpointPluginStartDependencies) {
     this.logger.debug('Starting plugin');
+    endpointAppContextServices.start({
+      indexPatternRetriever: new IngestIndexPatternRetriever(
+        plugins.ingestManager.esIndexPatternService,
+        this.initializerContext.logger
+      ),
+      agentService: plugins.ingestManager.agentService,
+    });
   }
   public stop() {
     this.logger.debug('Stopping plugin');
+    endpointAppContextServices.stop();
   }
 }

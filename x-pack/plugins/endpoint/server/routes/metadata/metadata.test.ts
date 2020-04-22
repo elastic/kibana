@@ -28,6 +28,7 @@ import * as data from '../../test_data/all_metadata_data.json';
 import { createMockAgentService, createMockMetadataIndexPatternRetriever } from '../../mocks';
 import { AgentService } from '../../../../ingest_manager/common/types';
 import Boom from 'boom';
+import { endpointAppContextServices } from '../../endpoint_app_context_services';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -49,13 +50,19 @@ describe('test endpoint route', () => {
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
     mockAgentService = createMockAgentService();
-    registerEndpointRoutes(routerMock, {
+
+    endpointAppContextServices.start({
       indexPatternRetriever: createMockMetadataIndexPatternRetriever(),
       agentService: mockAgentService,
+    });
+
+    registerEndpointRoutes(routerMock, {
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });
   });
+
+  afterEach(() => endpointAppContextServices.stop());
 
   function createRouteHandlerContext(
     dataClient: jest.Mocked<IScopedClusterClient>,
