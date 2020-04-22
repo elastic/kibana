@@ -21,6 +21,10 @@ import { esFilters } from '../../../../../../../src/plugins/data/public';
 // convenient to use real implementation here.
 import { createDirectAccessDashboardLinkGenerator } from '../../../../../../../src/plugins/dashboard/public/url_generator';
 import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/visualizations/public';
+import {
+  RangeSelectTriggerContext,
+  ValueClickTriggerContext,
+} from '../../../../../../../src/plugins/embeddable/public';
 
 describe('.isConfigValid()', () => {
   const drilldown = new DashboardToDashboardDrilldown({} as any);
@@ -109,7 +113,9 @@ describe('.execute() & getHref', () => {
     };
 
     const context = ({
-      data: useRangeEvent ? { range: {} } : { data: [] },
+      data: useRangeEvent
+        ? ({ range: {} } as RangeSelectTriggerContext['data'])
+        : ({ data: [] } as ValueClickTriggerContext['data']),
       timeFieldName: 'order_date',
       embeddable: {
         getInput: () => ({

@@ -18,7 +18,6 @@
  */
 
 import { Trigger } from '../../../../ui_actions/public';
-import { KibanaDatatable } from '../../../../expressions';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext {

@@ -8782,8 +8782,6 @@
     "xpack.logstash.idFormatErrorMessage": "パイプライン ID は文字またはアンダーラインで始まる必要があり、文字、アンダーライン、ハイフン、数字のみ使用できます",
     "xpack.logstash.insufficientUserPermissionsDescription": "Logstash パイプラインの管理に必要なユーザーパーミッションがありません",
     "xpack.logstash.kibanaManagementPipelinesTitle": "Kibana の管理で作成されたパイプラインだけがここに表示されます",
-    "xpack.logstash.managementSection.createPipelineTitle": "パイプラインの作成",
-    "xpack.logstash.managementSection.editPipelineTitle": "パイプラインの編集",
     "xpack.logstash.managementSection.enableSecurityDescription": "Logstash パイプライン管理機能を使用するには、セキュリティを有効にする必要があります。elasticsearch.yml で xpack.security.enabled: true に設定してください。",
     "xpack.logstash.managementSection.licenseDoesNotSupportDescription": "ご使用の {licenseType} ライセンスは Logstash パイプライン管理をサポートしていません。ライセンスをアップグレードしてください。",
     "xpack.logstash.managementSection.notPossibleToManagePipelinesMessage": "現在ライセンス情報が利用できないため Logstash パイプラインを使用できません。",
