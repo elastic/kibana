@@ -198,9 +198,13 @@ export class DiscoverPlugin
           throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
         appMounted();
-        await this.initializeServices();
+        const {
+          plugins: { data: dataStart },
+        } = await this.initializeServices();
         await this.initializeInnerAngular();
 
+        // make sure the index pattern list is up to date
+        await dataStart.indexPatterns.clearCache();
         const { renderApp } = await import('./application/application');
         const unmount = await renderApp(innerAngularName, params.element);
         return () => {

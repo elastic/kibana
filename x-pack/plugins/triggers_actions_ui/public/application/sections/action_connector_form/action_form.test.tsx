@@ -87,6 +87,14 @@ describe('action_form', () => {
           config: {},
           isPreconfigured: false,
         },
+        {
+          secrets: {},
+          id: 'test2',
+          actionTypeId: actionType.id,
+          name: 'Test connector 2',
+          config: {},
+          isPreconfigured: true,
+        },
       ]);
       const mockes = coreMock.createSetup();
       deps = {
@@ -100,6 +108,7 @@ describe('action_form', () => {
         disabledByLicenseActionType,
       ]);
       actionTypeRegistry.has.mockReturnValue(true);
+      actionTypeRegistry.get.mockReturnValue(actionType);
 
       const initialAlert = ({
         name: 'test',
@@ -204,6 +213,29 @@ describe('action_form', () => {
         `[data-test-subj="disabled-by-config-ActionTypeSelectOption"]`
       );
       expect(actionOption.exists()).toBeFalsy();
+    });
+
+    it(`renders available connectors for the selected action type`, async () => {
+      await setup();
+      const actionOption = wrapper.find(
+        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+      );
+      actionOption.first().simulate('click');
+      const combobox = wrapper.find(`[data-test-subj="selectActionConnector"]`);
+      expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "test",
+          "key": "test",
+          "label": "Test connector ",
+        },
+        Object {
+          "id": "test2",
+          "key": "test2",
+          "label": "Test connector 2 (preconfigured)",
+        },
+      ]
+      `);
     });
 
     it('renders action types disabled by license', async () => {

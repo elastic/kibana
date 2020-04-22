@@ -38,12 +38,12 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
     {
       __LEGACY: serverShim,
       usageCollection,
-      metrics,
+      visTypeTimeseries,
       indexManagement,
     }: {
       __LEGACY: ServerShim;
       usageCollection?: UsageCollectionSetup;
-      metrics?: VisTypeTimeseriesSetup;
+      visTypeTimeseries?: VisTypeTimeseriesSetup;
       indexManagement?: IndexManagementPluginSetup;
     }
   ) {
@@ -83,8 +83,8 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
       indexManagement.indexDataEnricher.add(rollupDataEnricher);
     }
 
-    if (metrics) {
-      const { addSearchStrategy } = metrics;
+    if (visTypeTimeseries) {
+      const { addSearchStrategy } = visTypeTimeseries;
       registerRollupSearchStrategy(routeDependencies, addSearchStrategy);
     }
   }

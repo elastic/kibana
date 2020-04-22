@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { createHashHistory, History } from 'history';
+import { History } from 'history';
 
 import {
   Capabilities,
@@ -40,6 +40,7 @@ import { ChartsPluginStart } from '../../charts/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { createSavedSearchesLoader, SavedSearch } from '.';
 import { DiscoverStartPlugins } from './plugin';
+import { getHistory } from './kibana_services';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -48,7 +49,7 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
-  history: History;
+  history: () => History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract;
@@ -75,6 +76,7 @@ export async function buildServices(
     overlays: core.overlays,
   };
   const savedObjectService = createSavedSearchesLoader(services);
+
   return {
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
@@ -82,11 +84,11 @@ export async function buildServices(
     core,
     data: plugins.data,
     docLinks: core.docLinks,
-    history: createHashHistory(),
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
+    history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
     inspector: plugins.inspector,
     metadata: {

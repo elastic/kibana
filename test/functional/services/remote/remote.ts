@@ -64,13 +64,10 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     lifecycle,
     config.get('browser.logPollingMs')
   );
-
   const isW3CEnabled = (driver as any).executor_.w3c;
 
   const caps = await driver.getCapabilities();
-  const browserVersion = caps.get(
-    isW3CEnabled || browserType === Browsers.ChromiumEdge ? 'browserVersion' : 'version'
-  );
+  const browserVersion = caps.get(isW3CEnabled ? 'browserVersion' : 'version');
 
   log.info(
     `Remote initialized: ${caps.get(

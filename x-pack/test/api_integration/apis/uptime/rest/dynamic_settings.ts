@@ -18,7 +18,13 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('can change the settings', async () => {
-      const newSettings = { heartbeatIndices: 'myIndex1*' };
+      const newSettings = {
+        heartbeatIndices: 'myIndex1*',
+        certificatesThresholds: {
+          errorState: 5,
+          warningState: 15,
+        },
+      };
       const postResponse = await supertest
         .post(`/api/uptime/dynamic_settings`)
         .set('kbn-xsrf', 'true')

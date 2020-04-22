@@ -31,11 +31,11 @@ import { IndexPatternField } from '../../../../../data/public';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
-    history: {
+    history: () => ({
       location: {
         search: '',
       },
-    },
+    }),
     capabilities: {
       visualize: {
         show: true,

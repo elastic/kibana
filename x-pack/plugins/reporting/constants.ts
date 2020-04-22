@@ -7,13 +7,6 @@
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
-export const JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG = {
-  jobCompletionNotifier: {
-    interval: 10000,
-    intervalErrorMultiplier: 5,
-  },
-};
-
 // Routes
 export const API_BASE_URL = '/api/reporting';
 export const API_LIST_URL = `${API_BASE_URL}/jobs`;
@@ -24,6 +17,7 @@ export const REPORTING_MANAGEMENT_HOME = '/app/kibana#/management/kibana/reporti
 // Statuses
 export const JOB_STATUS_FAILED = 'failed';
 export const JOB_STATUS_COMPLETED = 'completed';
+export const JOB_STATUS_WARNINGS = 'completed_with_warnings';
 
 export enum JobStatuses {
   PENDING = 'pending',
@@ -31,6 +25,7 @@ export enum JobStatuses {
   COMPLETED = 'completed',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
+  WARNINGS = 'completed_with_warnings',
 }
 
 // Types

@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AssetReference,
-  Dataset,
-  RegistryPackage,
-  IngestAssetType,
-  ElasticsearchAssetType,
-} from '../../../../types';
+import { Dataset, RegistryPackage, ElasticsearchAssetType, TemplateRef } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
@@ -22,7 +16,7 @@ export const installTemplates = async (
   callCluster: CallESAsCurrentUser,
   pkgName: string,
   pkgVersion: string
-) => {
+): Promise<TemplateRef[]> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global template
   installPreBuiltTemplates(pkgName, pkgVersion, callCluster);
@@ -30,7 +24,7 @@ export const installTemplates = async (
   // build templates per dataset from yml files
   const datasets = registryPackage.datasets;
   if (datasets) {
-    const templates = datasets.reduce<Array<Promise<AssetReference>>>((acc, dataset) => {
+    const installTemplatePromises = datasets.reduce<Array<Promise<TemplateRef>>>((acc, dataset) => {
       acc.push(
         installTemplateForDataset({
           pkg: registryPackage,
@@ -40,7 +34,9 @@ export const installTemplates = async (
       );
       return acc;
     }, []);
-    return Promise.all(templates).then(results => results.flat());
+
+    const res = await Promise.all(installTemplatePromises);
+    return res.flat();
   }
   return [];
 };
@@ -84,7 +80,7 @@ export async function installTemplateForDataset({
   pkg: RegistryPackage;
   callCluster: CallESAsCurrentUser;
   dataset: Dataset;
-}): Promise<AssetReference> {
+}): Promise<TemplateRef> {
   const fields = await loadFieldsFromYaml(pkg, dataset.path);
   return installTemplate({
     callCluster,
@@ -104,7 +100,7 @@ export async function installTemplate({
   fields: Field[];
   dataset: Dataset;
   packageVersion: string;
-}): Promise<AssetReference> {
+}): Promise<TemplateRef> {
   const mappings = generateMappings(processFields(fields));
   const templateName = generateTemplateName(dataset);
   let pipelineName;
@@ -122,6 +118,8 @@ export async function installTemplate({
     body: template,
   });
 
-  // The id of a template is its name
-  return { id: templateName, type: IngestAssetType.IndexTemplate };
+  return {
+    templateName,
+    indexTemplate: template,
+  };
 }
