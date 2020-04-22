@@ -17,50 +17,43 @@
  * under the License.
  */
 
-import { apmImport, apmInit } from '../apm';
-
-export const appEntryTemplate = bundle => `
 /**
- * Kibana entry file
- *
- * This is programmatically created and updated, do not modify
+ * This is the entry point used to boot the frontend when serving a application
+ * that lives in the Kibana Platform.
  *
  * Any changes to this file should be kept in sync with
- * src/core/public/entry_point.ts
- *
- * context: ${bundle.getContext()}
+ * src/legacy/ui/ui_bundles/app_entry_template.js
  */
 
-${apmImport()}
+import './index.scss';
 import { i18n } from '@kbn/i18n';
-import { CoreSystem } from '__kibanaCore__'
+import { CoreSystem } from './core_system';
 
-const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data'));
+const injectedMetadata = JSON.parse(
+  document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
+);
 
-${apmInit('injectedMetadata.vars.apmConfig')}
+if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true' && process.env.ELASTIC_APM_ACTIVE === 'true') {
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { init } = require('@elastic/apm-rum');
+  init(injectedMetadata.vars.apmConfig);
+}
 
-i18n.load(injectedMetadata.i18n.translationsUrl)
+i18n
+  .load(injectedMetadata.i18n.translationsUrl)
   .catch(e => e)
-  .then((i18nError) => {
+  .then(async i18nError => {
     const coreSystem = new CoreSystem({
       injectedMetadata,
       rootDomElement: document.body,
-      browserSupportsCsp: !window.__kbnCspNotEnforced__,
-      requireLegacyFiles: () => {
-        ${bundle.getRequires().join('\n  ')}
-      },
-      requireLegacyBootstrapModule: () => require('ui/chrome'),
-      requireNewPlatformShimModule: () => require('ui/new_platform'),
+      browserSupportsCsp: !(window as any).__kbnCspNotEnforced__,
     });
 
-    coreSystem
-      .setup()
-      .then((coreSetup) => {
-        if (i18nError) {
-          coreSetup.fatalErrors.add(i18nError);
-        }
+    const setup = await coreSystem.setup();
+    if (i18nError && setup) {
+      setup.fatalErrors.add(i18nError);
+    }
 
-        return coreSystem.start();
-      });
+    await coreSystem.start();
   });
-`;
