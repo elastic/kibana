@@ -26,6 +26,7 @@ import {
   SampleDataRegistryStart,
 } from './services';
 import { UsageCollectionSetup } from '../../usage_collection/server';
+import { sampleDataTelemetry } from './saved_objects';
 
 interface HomeServerPluginSetupDependencies {
   usage_collection?: UsageCollectionSetup;
@@ -37,6 +38,7 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
+    core.savedObjects.registerType(sampleDataTelemetry);
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core) },
       sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usage_collection) },

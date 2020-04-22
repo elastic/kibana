@@ -36,7 +36,9 @@ jest.mock('../../../legacy_imports', () => ({
 }));
 
 jest.mock('../../../services', () => ({
-  getDataActions: () => ({ createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']) }),
+  getDataActions: () => ({
+    createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
+  }),
 }));
 
 const vis = {

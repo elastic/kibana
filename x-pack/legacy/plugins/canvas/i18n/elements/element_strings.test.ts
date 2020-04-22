@@ -3,9 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-jest.mock('ui/new_platform');
 import { getElementStrings } from './element_strings';
-import { elementSpecs } from '../../canvas_plugin_src/elements';
+import { initializeElements } from '../../canvas_plugin_src/elements';
+import { coreMock } from '../../../../../../src/core/public/mocks';
+
+const elementSpecs = initializeElements(coreMock.createSetup() as any, {} as any);
 
 describe('ElementStrings', () => {
   const elementStrings = getElementStrings();

@@ -15,6 +15,7 @@ import {
   getRefreshConfig,
   getQuery,
   getFilters,
+  getMapSettings,
 } from '../../selectors/map_selectors';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../selectors/ui_selectors';
 
@@ -98,6 +99,7 @@ export function createSavedGisMapClass(services) {
         refreshConfig: getRefreshConfig(state),
         query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
         filters: getFilters(state),
+        settings: getMapSettings(state),
       });
 
       this.uiStateJSON = JSON.stringify({
