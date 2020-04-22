@@ -26,7 +26,7 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
   const { services } = useKibana();
 
   const { error, data: pipeline, isLoading, isInitialRequest } = services.api.useLoadPipeline(
-    sourceName
+    decodeURIComponent(sourceName)
   );
 
   useEffect(() => {
