@@ -20,6 +20,7 @@ import {
   UIM_PIPELINE_UPDATE,
   UIM_PIPELINE_DELETE,
   UIM_PIPELINE_DELETE_MANY,
+  UIM_PIPELINE_SIMULATE,
 } from '../constants';
 
 export class ApiService {
@@ -100,6 +101,22 @@ export class ApiService {
     });
 
     this.trackUiMetric(names.length > 1 ? UIM_PIPELINE_DELETE_MANY : UIM_PIPELINE_DELETE);
+
+    return result;
+  }
+
+  public async simulatePipeline(testConfig: {
+    documents: object[];
+    verbose?: boolean;
+    pipeline: Omit<Pipeline, 'name'>;
+  }) {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/simulate`,
+      method: 'post',
+      body: JSON.stringify(testConfig),
+    });
+
+    this.trackUiMetric(UIM_PIPELINE_SIMULATE);
 
     return result;
   }

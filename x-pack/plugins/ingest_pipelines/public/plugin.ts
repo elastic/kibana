@@ -23,7 +23,7 @@ export class IngestPipelinesPlugin implements Plugin {
     management.sections.getSection('elasticsearch')!.registerApp({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ingestPipelines.appTitle', {
-        defaultMessage: 'Ingest Pipelines',
+        defaultMessage: 'Ingest Node Pipelines',
       }),
       mount: async params => {
         const { mountManagementSection } = await import('./application/mount_management_section');

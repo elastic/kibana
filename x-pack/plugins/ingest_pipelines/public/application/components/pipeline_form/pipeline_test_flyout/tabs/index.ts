@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerGetRoutes } from './get';
+export { Tabs, Tab } from './pipeline_test_tabs';
 
-export { registerCreateRoute } from './create';
+export { DocumentsTab } from './tab_documents';
 
-export { registerUpdateRoute } from './update';
-
-export { registerDeleteRoute } from './delete';
-
-export { registerSimulateRoute } from './simulate';
+export { OutputTab } from './tab_output';

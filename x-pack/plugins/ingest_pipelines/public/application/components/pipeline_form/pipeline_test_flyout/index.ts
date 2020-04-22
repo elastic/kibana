@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerGetRoutes } from './get';
-
-export { registerCreateRoute } from './create';
-
-export { registerUpdateRoute } from './update';
-
-export { registerDeleteRoute } from './delete';
-
-export { registerSimulateRoute } from './simulate';
+export { PipelineTestFlyoutProvider as PipelineTestFlyout } from './pipeline_test_flyout_provider';

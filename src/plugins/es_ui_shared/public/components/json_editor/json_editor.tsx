@@ -26,7 +26,7 @@ import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 
 interface Props {
   onUpdate: OnJsonEditorUpdateHandler;
-  label?: string;
+  label?: string | React.ReactNode;
   helpText?: React.ReactNode;
   value?: string;
   defaultValue?: { [key: string]: any };
