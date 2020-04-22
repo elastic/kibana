@@ -74,11 +74,13 @@ describe('Ingesting Coverage to Cluster', () => {
         });
 
         it(`should say it's Just Logging when sending to the totals index: [${TOTALS_INDEX}]`, () => {
-          const actual = mutableTotalsIndexLoggingChunks.filter(x =>
+          const filtered = mutableTotalsIndexLoggingChunks.filter(x =>
             x.includes('debg ### Just Logging')
           );
-          const re = new RegExp(TOTALS_INDEX);
-          expect(re.test(actual)).to.be(true);
+          const justLoggingMsgsCount = filtered.length;
+
+          expect(justLoggingMsgsCount > 0).to.be(true);
+          expect(filtered.some(x => x.includes(TOTALS_INDEX)));
         });
 
         it(`should have a link to the index page for the specific test runner`, () => {
