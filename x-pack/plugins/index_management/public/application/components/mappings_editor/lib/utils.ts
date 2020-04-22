@@ -536,8 +536,12 @@ export const stripUndefinedValues = <T = GenericObject>(obj: GenericObject, recu
     if (value === undefined) {
       return acc;
     }
-    if (recursive && value !== null && typeof value === 'object') {
-      return { ...acc, [key]: stripUndefinedValues(value, recursive) };
+
+    if (Array.isArray(value) || value instanceof Date || value === null) {
+      return { ...acc, [key]: value };
     }
-    return { ...acc, [key]: value };
+
+    return recursive && typeof value === 'object'
+      ? { ...acc, [key]: stripUndefinedValues(value, recursive) }
+      : { ...acc, [key]: value };
   }, {} as T);
