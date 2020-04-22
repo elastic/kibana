@@ -11,11 +11,11 @@ import {
   createMockFramePublicAPI,
   createMockDatasource,
 } from '../../mocks';
-import { EuiKeyPadMenuItemButton } from '@elastic/eui';
+import { EuiKeyPadMenuItem } from '@elastic/eui';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
-import { ChartSwitch } from './chart_switch';
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../../types';
 import { Action } from '../state_management';
+import { ChartSwitch } from './chart_switch';
 
 describe('chart_switch', () => {
   function generateVisualization(id: string): jest.Mocked<Visualization> {
@@ -133,7 +133,7 @@ describe('chart_switch', () => {
   function getMenuItem(subType: string, component: ReactWrapper) {
     showFlyout(component);
     return component
-      .find(EuiKeyPadMenuItemButton)
+      .find(EuiKeyPadMenuItem)
       .find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`)
       .first();
   }

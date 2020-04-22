@@ -20,13 +20,16 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { SearchSource as SearchSourceClass } from '../legacy_imports';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';
-import { IFieldType, TimefilterContract } from '../.../../../../../../plugins/data/public';
+import {
+  IFieldType,
+  TimefilterContract,
+  DataPublicPluginStart,
+} from '../.../../../../../../plugins/data/public';
 
 const minMaxAgg = (field?: IFieldType) => {
   const aggBody: any = {};
@@ -52,6 +55,8 @@ const minMaxAgg = (field?: IFieldType) => {
 };
 
 export class RangeControl extends Control<RangeFilterManager> {
+  private searchSource: DataPublicPluginStart['search']['searchSource'];
+
   timefilter: TimefilterContract;
   abortController: any;
   min: any;
@@ -61,11 +66,12 @@ export class RangeControl extends Control<RangeFilterManager> {
     controlParams: ControlParams,
     filterManager: RangeFilterManager,
     useTimeFilter: boolean,
-    SearchSource: SearchSourceClass,
+    searchSource: DataPublicPluginStart['search']['searchSource'],
     deps: InputControlVisDependencies
   ) {
-    super(controlParams, filterManager, useTimeFilter, SearchSource);
+    super(controlParams, filterManager, useTimeFilter);
     this.timefilter = deps.data.query.timefilter.timefilter;
+    this.searchSource = searchSource;
   }
 
   async fetch() {
@@ -83,7 +89,7 @@ export class RangeControl extends Control<RangeFilterManager> {
     const fieldName = this.filterManager.fieldName;
     const aggs = minMaxAgg(indexPattern.fields.getByName(fieldName));
     const searchSource = createSearchSource(
-      this.SearchSource,
+      this.searchSource,
       null,
       indexPattern,
       aggs,
@@ -129,7 +135,6 @@ export class RangeControl extends Control<RangeFilterManager> {
 export async function rangeControlFactory(
   controlParams: ControlParams,
   useTimeFilter: boolean,
-  SearchSource: SearchSourceClass,
   deps: InputControlVisDependencies
 ): Promise<RangeControl> {
   const [, { data: dataPluginStart }] = await deps.core.getStartServices();
@@ -144,7 +149,7 @@ export async function rangeControlFactory(
       deps.data.query.filterManager
     ),
     useTimeFilter,
-    SearchSource,
+    dataPluginStart.search.searchSource,
     deps
   );
 }
