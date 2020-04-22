@@ -83,7 +83,7 @@ export const PipelineDetails: FunctionComponent<Props> = ({
       aria-label={i18n.translate(
         'xpack.ingestPipelines.list.pipelineDetails.managePipelineActionsAriaLabel',
         {
-          defaultMessage: 'Manage Pipeline',
+          defaultMessage: 'Manage pipeline',
         }
       )}
       onClick={() => setShowPopover(previousBool => !previousBool)}
@@ -92,7 +92,7 @@ export const PipelineDetails: FunctionComponent<Props> = ({
       fill
     >
       {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.managePipelineButtonLabel', {
-        defaultMessage: 'Manage Pipeline',
+        defaultMessage: 'Manage',
       })}
     </EuiButton>
   );
