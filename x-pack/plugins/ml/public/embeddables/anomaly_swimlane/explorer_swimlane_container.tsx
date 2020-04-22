@@ -6,7 +6,7 @@
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
-import { combineLatest, forkJoin, from, Observable, of, Subject } from 'rxjs';
+import { combineLatest, from, Observable, of, Subject } from 'rxjs';
 import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { throttle } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +34,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   services,
   refresh,
 }) => {
-  const [{ uiSettings, notifications }, pluginStart, { mlAnomalyDetectorService }] = services;
+  const [{ uiSettings, notifications }, pluginStart] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [chartWidth, setChartWidth] = useState<number>(0);
@@ -57,35 +57,27 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
       .pipe(
         debounceTime(500),
         map(([input]) => input),
-        // resolve jobs' bucket spans
-        switchMap(input => {
-          return forkJoin(
-            input.jobIds.map(jobId => mlAnomalyDetectorService.getJobById$(jobId))
-          ).pipe(
-            map(response => {
-              const jobs = response.map(job => {
-                const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-                return {
-                  id: job.job_id,
-                  selected: true,
-                  bucketSpanSeconds: bucketSpan!.asSeconds(),
-                };
-              });
-              return { ...input, jobs };
-            })
-          );
-        }),
         switchMap(input => {
           const { jobs } = input;
+
+          const jobsBucketSpans = jobs.map(job => {
+            const bucketSpan = parseInterval(job.analysis_config.bucket_span);
+            return {
+              id: job.job_id,
+              selected: true,
+              bucketSpanSeconds: bucketSpan!.asSeconds(),
+            };
+          });
+
           const { timefilter } = pluginStart.data.query.timefilter;
           timefilter.enableTimeRangeSelector();
 
           const interval = initGetSwimlaneBucketInterval(
             () => timefilter,
             () => timeBuckets
-          )(jobs, chartWidth);
+          )(jobsBucketSpans, chartWidth);
 
-          return from(loadOverallData(jobs, interval, timefilter.getBounds())).pipe(
+          return from(loadOverallData(jobsBucketSpans, interval, timefilter.getBounds())).pipe(
             catchError(error => {
               notifications.toasts.addError(new Error(error), {
                 title: i18n.translate('xpack.ml.swimlaneEmbeddable.errorMessage', {

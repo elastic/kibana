@@ -17,24 +17,28 @@ import {
 import { MlStartDependencies } from '../../plugin';
 import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
 import { MlAnomalyDetectorService } from '../../application/services/ml_anomanly_detector.service';
+import { Job } from '../../../common/types/anomaly_detection_jobs';
 
 export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
-  jobIds: string[];
-  viewBy: string;
+  jobs: Job[];
+  viewBy?: string;
+  swimlaneType: string;
 }
 
 export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
 
 export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
-  jobIds: string[];
+  jobs: Job[];
   viewBy: string;
 }
 
 export interface MlServices {
   mlAnomalyDetectorService: MlAnomalyDetectorService;
 }
+
+export type AnomalySwimlaneEmbeddableServices = [CoreStart, MlStartDependencies, MlServices];
 
 export class AnomalySwimlaneEmbeddable extends Embeddable<
   AnomalySwimlaneEmbeddableInput,
@@ -52,8 +56,8 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     super(
       initialInput,
       {
-        jobIds: initialInput.jobIds,
-        viewBy: initialInput.viewBy,
+        jobs: initialInput.jobs,
+        viewBy: initialInput.viewBy!,
         defaultTitle: initialInput.title,
       },
       parent

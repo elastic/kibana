@@ -7,9 +7,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { CoreStart, StartServicesAccessor } from 'kibana/public';
+import { StartServicesAccessor } from 'kibana/public';
 
 import moment from 'moment';
+import { forkJoin } from 'rxjs';
 import {
   IContainer,
   EmbeddableFactoryDefinition,
@@ -19,6 +20,7 @@ import {
   AnomalySwimlaneEmbeddable,
   AnomalySwimlaneEmbeddableInput,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  AnomalySwimlaneEmbeddableServices,
 } from './anomaly_swimlane_embaddable';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { MlStartDependencies } from '../../plugin';
@@ -26,12 +28,16 @@ import { JobSelectorFlyout } from '../../application/components/job_selector/job
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import { HttpService } from '../../application/services/http_service';
 import { MlAnomalyDetectorService } from '../../application/services/ml_anomanly_detector.service';
+import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
+import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
   public readonly type = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
   constructor(private getStartServices: StartServicesAccessor<MlStartDependencies>) {}
+
+  private services: AnomalySwimlaneEmbeddableServices | undefined;
 
   public async isEditable() {
     return true;
@@ -44,9 +50,10 @@ export class AnomalySwimlaneEmbeddableFactory
   }
 
   public async getExplicitInput(): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-    return new Promise(async resolve => {
-      const [coreStart] = await this.getStartServices();
-      const { overlays, uiSettings } = coreStart;
+    await this.initServices();
+
+    return new Promise(async (resolve, reject) => {
+      const [{ overlays, uiSettings }, , { mlAnomalyDetectorService }] = this.services!;
 
       const maps = {
         groupsMap: getInitialGroupsMap([]),
@@ -64,14 +71,37 @@ export class AnomalySwimlaneEmbeddableFactory
             timeseriesOnly={true}
             onFlyoutClose={() => {
               flyoutSession.close();
-              resolve(undefined);
+              reject();
             }}
-            onSelectionConfirmed={({ jobIds, groups }) => {
+            onSelectionConfirmed={async ({ jobIds, groups }) => {
               const title = i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
                 defaultMessage: 'ML anomaly swimlane for {jobIds}',
                 values: { jobIds: jobIds.join(', ') },
               });
-              resolve({ jobIds, title });
+
+              const jobs = await forkJoin(
+                jobIds.map(jobId => mlAnomalyDetectorService.getJobById$(jobId))
+              ).toPromise();
+
+              const influencers = mlAnomalyDetectorService.extractInfluencers(jobs);
+              influencers.push(VIEW_BY_JOB_LABEL);
+
+              const modalSession = overlays.openModal(
+                toMountPoint(
+                  <AnomalySwimlaneInitializer
+                    influencers={influencers}
+                    onCreate={({ viewBy, swimlaneType }) => {
+                      modalSession.close();
+                      resolve({ jobs, title, viewBy, swimlaneType });
+                    }}
+                    onCancel={() => {
+                      modalSession.close();
+                      reject();
+                    }}
+                  />
+                )
+              );
+
               flyoutSession.close();
             }}
             maps={maps}
@@ -84,23 +114,22 @@ export class AnomalySwimlaneEmbeddableFactory
     });
   }
 
-  private getMlServices(coreStart: CoreStart) {
+  private async initServices() {
+    if (this.services !== undefined) return;
+
+    const [coreStart, pluginsStart] = await this.getStartServices();
+
     const httpService = new HttpService(coreStart.http);
     const mlAnomalyDetectorService = new MlAnomalyDetectorService(httpService);
 
-    return { mlAnomalyDetectorService };
+    this.services = [coreStart, pluginsStart, { mlAnomalyDetectorService }];
   }
 
   public async create(
     initialInput: AnomalySwimlaneEmbeddableInput,
     parent?: IContainer
   ): Promise<AnomalySwimlaneEmbeddable | ErrorEmbeddable> {
-    const [coreStart, pluginsStart] = await this.getStartServices();
-
-    return new AnomalySwimlaneEmbeddable(
-      initialInput,
-      [coreStart, pluginsStart, this.getMlServices(coreStart)],
-      parent
-    );
+    await this.initServices();
+    return new AnomalySwimlaneEmbeddable(initialInput, this.services!, parent);
   }
 }
