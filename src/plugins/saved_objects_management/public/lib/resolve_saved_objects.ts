@@ -162,8 +162,8 @@ export async function resolveIndexPatternConflicts(
   resolutions: Array<{ oldId: string; newId: string }>,
   conflictedIndexPatterns: any[],
   overwriteAll: boolean,
-  indexPatterns: IndexPatternsContract,
   dependencies: {
+    indexPatterns: IndexPatternsContract;
     search: DataPublicPluginStart['search'];
   }
 ) {

@@ -502,9 +502,9 @@ describe('Flyout', () => {
         component.instance().resolutions,
         mockConflictedIndexPatterns,
         true,
-        defaultProps.indexPatterns,
         {
           search: defaultProps.search,
+          indexPatterns: defaultProps.indexPatterns,
         }
       );
       expect(saveObjectsMock).toHaveBeenCalledWith(

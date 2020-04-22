@@ -393,8 +393,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             resolutions,
             conflictedIndexPatterns!,
             isOverwriteAllChecked,
-            indexPatterns,
             {
+              indexPatterns,
               search,
             }
           );

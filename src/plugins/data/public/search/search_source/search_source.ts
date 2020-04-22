@@ -110,7 +110,7 @@ export class SearchSource {
   }
 
   /** ***
-   * PUBLIC APIgetInternalStartServices
+   * PUBLIC API
    *****/
 
   setPreferredSearchStrategyId(searchStrategyId: string) {

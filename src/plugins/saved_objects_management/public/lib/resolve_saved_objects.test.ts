@@ -234,12 +234,15 @@ describe('resolveSavedObjects', () => {
   });
 
   describe('resolveIndexPatternConflicts', () => {
-    let dependencies: Parameters<typeof resolveIndexPatternConflicts>[4];
+    let dependencies: Parameters<typeof resolveIndexPatternConflicts>[3];
 
     beforeEach(() => {
       const search = dataPluginMock.createStartContract().search;
 
       dependencies = {
+        indexPatterns: ({
+          get: (id: string) => Promise.resolve({ id }),
+        } as unknown) as IndexPatternsContract,
         search,
       };
     });
@@ -299,9 +302,6 @@ describe('resolveSavedObjects', () => {
         resolutions,
         conflictedIndexPatterns,
         overwriteAll,
-        ({
-          get: (id: string) => Promise.resolve({ id }),
-        } as unknown) as IndexPatternsContract,
         dependencies
       );
 
@@ -365,9 +365,6 @@ describe('resolveSavedObjects', () => {
         resolutions,
         conflictedIndexPatterns,
         overwriteAll,
-        ({
-          get: (id: string) => Promise.resolve({ id }),
-        } as unknown) as IndexPatternsContract,
         dependencies
       );
 
