@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import styled from 'styled-components';
-import { EuiIcon, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { Cert } from '../../../../common/runtime_types';
 import { CERT_STATUS, useCertStatus } from '../../../hooks';
 import { EXPIRED, EXPIRES_SOON, OK } from '../../certificates/translations';
@@ -27,29 +28,26 @@ export const CertStatusColumn: React.FC<Props> = ({ cert }) => {
 
   const isExpired = certStatus === CERT_STATUS.EXPIRED;
 
-  if (isExpiringSoon) {
+  const relativeDate = moment(cert?.certificate_not_valid_after).fromNow();
+  const CertStatus = ({ color, text }) => {
     return (
-      <EuiText size="s">
-        <EuiIcon color="#E9AA3C" type="lock" size="s" />
-        <Span>{EXPIRES_SOON}</Span>
-      </EuiText>
+      <EuiToolTip content={moment(cert?.certificate_not_valid_after).format('L LT')}>
+        <EuiText size="s">
+          <EuiIcon color={color} type="lock" size="s" />
+          <Span>
+            {text} {relativeDate}
+          </Span>
+        </EuiText>
+      </EuiToolTip>
     );
+  };
+
+  if (isExpiringSoon) {
+    return <CertStatus color="#E9AA3C" text={EXPIRES_SOON} />;
   }
   if (isExpired) {
-    return (
-      <EuiText size="s">
-        <EuiIcon color="danger" type="lock" size="s" />
-        <Span>{EXPIRED}</Span>
-      </EuiText>
-    );
+    return <CertStatus color="danger" text={EXPIRED} />;
   }
 
-  return certStatus ? (
-    <EuiText size="s">
-      <EuiIcon color="success" type="lock" size="s" />
-      <Span>{OK}</Span>
-    </EuiText>
-  ) : (
-    <span>-</span>
-  );
+  return certStatus ? <CertStatus color="success" text={'Expires'} /> : <span>-</span>;
 };

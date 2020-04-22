@@ -48,8 +48,8 @@ export const CertificatesPage: React.FC = () => {
 
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
           <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeCertificatesToOverviewLink">
             <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
               {i18n.translate('xpack.uptime.certificates.returnToOverviewLinkLabel', {
@@ -71,7 +71,7 @@ export const CertificatesPage: React.FC = () => {
 
       <EuiSpacer size="m" />
       <EuiPanel>
-        <PageHeader headingText={'Certificates'} datePicker={false} />
+        <PageHeader headingText={'TLS Certificates'} datePicker={false} />
         <EuiSpacer size="m" />
         <CertificateSearch setSearch={setSearch} />
         <EuiSpacer size="m" />

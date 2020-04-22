@@ -41,7 +41,7 @@ interface Props {
 
 const columns = [
   {
-    field: 'tls.certificate_not_valid_after',
+    field: 'certificate_not_valid_after',
     name: labels.STATUS_COL,
     sortable: true,
     render: (val: string, item: Cert) => {
@@ -76,7 +76,7 @@ const columns = [
       of certificate offered by the client."
       >
         <span>
-          SHA256
+          SHA 256
           <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
         </span>
       </EuiToolTip>

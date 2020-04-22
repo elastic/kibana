@@ -215,7 +215,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
         error={error?.message}

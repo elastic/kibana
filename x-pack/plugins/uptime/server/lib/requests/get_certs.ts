@@ -102,7 +102,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
       },
       {
         wildcard: {
-          'tls.common_name': {
+          'tls.server.x509.issuer.common_name': {
             value: searchWrapper,
           },
         },
