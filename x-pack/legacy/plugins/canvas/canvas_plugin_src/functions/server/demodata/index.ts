@@ -10,14 +10,19 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 import { queryDatatable } from '../../../../common/lib/datatable/query';
 import { DemoRows } from './demo_rows_types';
 import { getDemoRows } from './get_demo_rows';
-import { Filter, Datatable, DatatableColumn, DatatableRow } from '../../../../types';
+import { ExpressionValueFilter, Datatable, DatatableColumn, DatatableRow } from '../../../../types';
 import { getFunctionHelp } from '../../../../i18n';
 
 interface Arguments {
   type: string;
 }
 
-export function demodata(): ExpressionFunctionDefinition<'demodata', Filter, Arguments, Datatable> {
+export function demodata(): ExpressionFunctionDefinition<
+  'demodata',
+  ExpressionValueFilter,
+  Arguments,
+  Datatable
+> {
   const { help, args: argHelp } = getFunctionHelp().demodata;
 
   return {

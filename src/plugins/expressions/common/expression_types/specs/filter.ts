@@ -24,17 +24,17 @@ const name = 'filter';
 /**
  * Represents an object that is a Filter.
  */
-export interface Filter {
+export interface ExpressionValueFilter {
   type?: string;
   value?: string;
   column?: string;
-  and: Filter[];
+  and: ExpressionValueFilter[];
   to?: string;
   from?: string;
   query?: string | null;
 }
 
-export const filter: ExpressionTypeDefinition<typeof name, Filter> = {
+export const filter: ExpressionTypeDefinition<typeof name, ExpressionValueFilter> = {
   name,
   from: {
     null: () => {

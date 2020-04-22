@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '../../types';
+import { ExpressionValueFilter } from '../../types';
 // @ts-ignore Untyped Local
 import { buildBoolArray } from './build_bool_array';
 import {
@@ -20,7 +20,7 @@ export interface EmbeddableFilterInput {
 
 const TimeFilterType = 'time';
 
-function getTimeRangeFromFilters(filters: Filter[]): TimeRange | undefined {
+function getTimeRangeFromFilters(filters: ExpressionValueFilter[]): TimeRange | undefined {
   const timeFilter = filters.find(
     filter => filter.type !== undefined && filter.type === TimeFilterType
   );
@@ -33,11 +33,11 @@ function getTimeRangeFromFilters(filters: Filter[]): TimeRange | undefined {
     : undefined;
 }
 
-export function getQueryFilters(filters: Filter[]): DataFilter[] {
+export function getQueryFilters(filters: ExpressionValueFilter[]): DataFilter[] {
   return buildBoolArray(filters).map(esFilters.buildQueryFilter);
 }
 
-export function buildEmbeddableFilters(filters: Filter[]): EmbeddableFilterInput {
+export function buildEmbeddableFilters(filters: ExpressionValueFilter[]): EmbeddableFilterInput {
   return {
     timeRange: getTimeRangeFromFilters(filters),
     filters: getQueryFilters(filters),

@@ -5,16 +5,16 @@
  */
 
 import { buildEmbeddableFilters } from './build_embeddable_filters';
-import { Filter } from '../../types';
+import { ExpressionValueFilter } from '../../types';
 
-const columnFilter: Filter = {
+const columnFilter: ExpressionValueFilter = {
   and: [],
   value: 'filter-value',
   column: 'filter-column',
   type: 'exactly',
 };
 
-const timeFilter: Filter = {
+const timeFilter: ExpressionValueFilter = {
   and: [],
   column: 'time-column',
   type: 'time',

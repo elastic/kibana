@@ -13,7 +13,7 @@ import { ExpressionFunctionDefinition, DatatableRow } from 'src/plugins/expressi
 import { fetch } from '../../common/lib/fetch';
 // @ts-ignore untyped local
 import { buildBoolArray } from '../../server/lib/build_bool_array';
-import { Datatable, Filter } from '../../types';
+import { Datatable, ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 
 interface Arguments {
@@ -46,7 +46,7 @@ function parseDateMath(timeRange: TimeRange, timeZone: string) {
 
 export function timelion(): ExpressionFunctionDefinition<
   'timelion',
-  Filter,
+  ExpressionValueFilter,
   Arguments,
   Promise<Datatable>
 > {

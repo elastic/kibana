@@ -11,7 +11,7 @@ import { interpretAst } from '../lib/run_interpreter';
 // @ts-ignore untyped local
 import { getState } from '../state/store';
 import { getGlobalFilters } from '../state/selectors/workpad';
-import { Filter } from '../../types';
+import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 import { InitializeArguments } from '.';
 
@@ -41,7 +41,12 @@ function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = 
   });
 }
 
-type FiltersFunction = ExpressionFunctionDefinition<'filters', null, Arguments, Filter>;
+type FiltersFunction = ExpressionFunctionDefinition<
+  'filters',
+  null,
+  Arguments,
+  ExpressionValueFilter
+>;
 
 export function filtersFunctionFactory(initialize: InitializeArguments): () => FiltersFunction {
   return function filters(): FiltersFunction {

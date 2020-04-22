@@ -8,7 +8,7 @@ import squel from 'squel';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
-import { Filter } from '../../../types';
+import { ExpressionValueFilter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -20,7 +20,12 @@ interface Arguments {
   count: number;
 }
 
-export function esdocs(): ExpressionFunctionDefinition<'esdocs', Filter, Arguments, any> {
+export function esdocs(): ExpressionFunctionDefinition<
+  'esdocs',
+  ExpressionValueFilter,
+  Arguments,
+  any
+> {
   const { help, args: argHelp } = getFunctionHelp().esdocs;
 
   return {

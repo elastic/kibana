@@ -78,7 +78,7 @@ export {
   ExpressionValueRender,
   ExpressionValueSearchContext,
   ExpressionValueUnboxed,
-  Filter,
+  ExpressionValueFilter,
   Font,
   FontLabel,
   FontStyle,

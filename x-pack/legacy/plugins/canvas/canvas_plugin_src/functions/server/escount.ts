@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunctionDefinition, Filter } from 'src/plugins/expressions/common';
+import {
+  ExpressionFunctionDefinition,
+  ExpressionValueFilter,
+} from 'src/plugins/expressions/common';
 // @ts-ignore untyped local
 import { buildESRequest } from '../../../server/lib/build_es_request';
 import { getFunctionHelp } from '../../../i18n';
@@ -14,7 +17,12 @@ interface Arguments {
   query: string;
 }
 
-export function escount(): ExpressionFunctionDefinition<'escount', Filter, Arguments, any> {
+export function escount(): ExpressionFunctionDefinition<
+  'escount',
+  ExpressionValueFilter,
+  Arguments,
+  any
+> {
   const { help, args: argHelp } = getFunctionHelp().escount;
 
   return {
