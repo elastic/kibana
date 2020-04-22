@@ -21,6 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { IndexPatternField, IIndexPattern } from '../../../../../../../../../plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
+import { IndexedFieldItem } from './types';
 
 jest.mock('@elastic/eui', () => ({
   EuiFlexGroup: 'eui-flex-group',
@@ -37,7 +38,7 @@ jest.mock('./components/table', () => ({
 }));
 
 const helpers = {
-  redirectToRoute: (obj: any, route: string) => {},
+  redirectToRoute: (field: IndexedFieldItem) => {},
   getFieldInfo: () => [],
 };
 

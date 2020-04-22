@@ -31,7 +31,7 @@ const Tabs = styled(EuiTabs)`
 `;
 
 export interface HeaderProps {
-  restrictHeaderWidth?: number;
+  maxWidth?: number;
   leftColumn?: JSX.Element;
   rightColumn?: JSX.Element;
   rightColumnGrow?: EuiFlexItemProps['grow'];
@@ -52,10 +52,10 @@ export const Header: React.FC<HeaderProps> = ({
   rightColumn,
   rightColumnGrow,
   tabs,
-  restrictHeaderWidth,
+  maxWidth,
 }) => (
   <Container>
-    <Wrapper maxWidth={restrictHeaderWidth}>
+    <Wrapper maxWidth={maxWidth}>
       <HeaderColumns
         leftColumn={leftColumn}
         rightColumn={rightColumn}

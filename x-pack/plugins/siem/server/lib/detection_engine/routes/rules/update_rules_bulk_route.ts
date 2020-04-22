@@ -6,10 +6,7 @@
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import {
-  IRuleSavedAttributesSavedObjectAttributes,
-  UpdateRuleAlertParamsRest,
-} from '../../rules/types';
+import { UpdateRuleAlertParamsRest } from '../../rules/types';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
 import {
@@ -19,10 +16,10 @@ import {
   validateLicenseForRuleType,
 } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
+import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
 export const updateRulesBulkRoute = (router: IRouter) => {
   router.put(
@@ -47,6 +44,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
         return siemResponse.error({ statusCode: 404 });
       }
 
+      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async payloadRule => {
           const {
@@ -81,9 +79,9 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             references,
             note,
             version,
-            lists,
+            exceptions_list,
           } = payloadRule;
-          const finalIndex = outputIndex ?? siemClient.signalsIndex;
+          const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
             validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
@@ -121,7 +119,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               references,
               note,
               version,
-              lists,
+              exceptions_list,
               actions,
             });
             if (rule != null) {
@@ -134,10 +132,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
                 throttle,
                 name,
               });
-              const ruleStatuses = await savedObjectsClient.find<
-                IRuleSavedAttributesSavedObjectAttributes
-              >({
-                type: ruleStatusSavedObjectType,
+              const ruleStatuses = await ruleStatusClient.find({
                 perPage: 1,
                 sortField: 'statusDate',
                 sortOrder: 'desc',

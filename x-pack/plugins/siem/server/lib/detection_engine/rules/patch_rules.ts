@@ -7,10 +7,10 @@
 import { defaults } from 'lodash/fp';
 import { PartialAlert } from '../../../../../alerting/server';
 import { readRules } from './read_rules';
-import { PatchRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
+import { PatchRuleParams } from './types';
 import { addTags } from './add_tags';
-import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion, calculateName, calculateInterval } from './utils';
+import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 
 export const patchRules = async ({
   alertsClient,
@@ -44,7 +44,7 @@ export const patchRules = async ({
   references,
   note,
   version,
-  lists,
+  exceptions_list,
   anomalyThreshold,
   machineLearningJobId,
 }: PatchRuleParams): Promise<PartialAlert | null> => {
@@ -78,7 +78,7 @@ export const patchRules = async ({
     references,
     version,
     note,
-    lists,
+    exceptions_list,
     anomalyThreshold,
     machineLearningJobId,
   });
@@ -110,7 +110,7 @@ export const patchRules = async ({
       references,
       note,
       version: calculatedVersion,
-      lists,
+      exceptions_list,
       anomalyThreshold,
       machineLearningJobId,
     }
@@ -134,22 +134,22 @@ export const patchRules = async ({
     await alertsClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
     await alertsClient.enable({ id: rule.id });
-    const ruleCurrentStatus = savedObjectsClient
-      ? await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
-          type: ruleStatusSavedObjectType,
-          perPage: 1,
-          sortField: 'statusDate',
-          sortOrder: 'desc',
-          search: rule.id,
-          searchFields: ['alertId'],
-        })
-      : null;
+
+    const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+    const ruleCurrentStatus = await ruleStatusClient.find({
+      perPage: 1,
+      sortField: 'statusDate',
+      sortOrder: 'desc',
+      search: rule.id,
+      searchFields: ['alertId'],
+    });
+
     // set current status for this rule to be 'going to run'
     if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
       const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
-      currentStatusToDisable.attributes.status = 'going to run';
-      await savedObjectsClient?.update(ruleStatusSavedObjectType, currentStatusToDisable.id, {
+      await ruleStatusClient.update(currentStatusToDisable.id, {
         ...currentStatusToDisable.attributes,
+        status: 'going to run',
       });
     }
   } else {
