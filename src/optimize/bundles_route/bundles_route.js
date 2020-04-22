@@ -77,6 +77,7 @@ export function createBundlesRoute({
       routePath: '/bundles/kbn-ui-shared-deps/',
       bundlesPath: UiSharedDeps.distDir,
       fileHashCache,
+      replacePublicPath: false,
     }),
     ...npUiPluginPublicDirs.map(({ id, path }) =>
       buildRouteForBundles({

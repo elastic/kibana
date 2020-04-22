@@ -146,7 +146,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
       rules: [
         {
           include: Path.join(bundle.contextDir, bundle.entry),
-          loader: require.resolve('./public_path_loader.js'),
+          loader: UiSharedDeps.publicPathLoader,
           options: {
             key: bundle.id,
           },
