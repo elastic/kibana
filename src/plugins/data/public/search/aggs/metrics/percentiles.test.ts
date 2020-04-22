@@ -27,14 +27,16 @@ import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { InternalStartServices } from '../../../types';
 
 describe('AggTypesMetricsPercentilesProvider class', () => {
   let aggConfigs: IAggConfigs;
   const aggTypesDependencies: PercentilesMetricAggDependencies = {
-    getInternalStartServices: () => ({
-      fieldFormats: fieldFormatsServiceMock.createStartContract(),
-      notifications: notificationServiceMock.createStartContract(),
-    }),
+    getInternalStartServices: () =>
+      (({
+        fieldFormats: fieldFormatsServiceMock.createStartContract(),
+        notifications: notificationServiceMock.createStartContract(),
+      } as unknown) as InternalStartServices),
   };
 
   beforeEach(() => {
@@ -70,7 +72,7 @@ describe('AggTypesMetricsPercentilesProvider class', () => {
           },
         },
       ],
-      { typesRegistry }
+      { typesRegistry, fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
     );
   });
 

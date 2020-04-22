@@ -35,7 +35,7 @@ export class OssTelemetryPlugin implements Plugin {
     registerTasks({
       taskManager: deps.taskManager,
       logger: this.logger,
-      elasticsearch: core.elasticsearch,
+      getStartServices: core.getStartServices,
       config: this.config,
     });
     registerCollectors(

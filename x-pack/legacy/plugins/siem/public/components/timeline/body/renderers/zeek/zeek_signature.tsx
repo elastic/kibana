@@ -21,7 +21,7 @@ import * as i18n from './translations';
 
 const Badge = styled(EuiBadge)`
   vertical-align: top;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 Badge.displayName = 'Badge';
 
@@ -92,7 +92,7 @@ export const DraggableZeekElement = React.memo<{
             </DragEffects>
           ) : (
             <EuiToolTip data-test-subj="badge-tooltip" content={field}>
-              <Badge iconType="tag" color="hollow">
+              <Badge iconType="tag" color="hollow" title="">
                 {stringRenderer(value)}
               </Badge>
             </EuiToolTip>

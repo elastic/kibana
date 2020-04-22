@@ -9,4 +9,5 @@ import { IESAggSource } from '../es_agg_source';
 
 export interface IESTermSource extends IESAggSource {
   getTermField(): IField;
+  hasCompleteConfig(): boolean;
 }

@@ -96,7 +96,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
@@ -109,7 +109,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/lens/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/lens/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         'react-hooks/rules-of-hooks': 'off',
@@ -536,9 +536,15 @@ module.exports = {
      * ML overrides
      */
     {
-      files: ['x-pack/legacy/plugins/ml/**/*.js'],
+      files: ['x-pack/plugins/ml/**/*.js'],
       rules: {
         'no-shadow': 'error',
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: './x-pack',
+          },
+        ],
       },
     },
 
@@ -561,7 +567,7 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/legacy/plugins/siem/**/*.{ts,tsx}'],
+      files: ['x-pack/{,legacy/}plugins/siem/**/*.{ts,tsx}'],
       rules: {
         // This will be turned on after bug fixes are complete
         // '@typescript-eslint/explicit-member-accessibility': 'warn',
@@ -607,7 +613,7 @@ module.exports = {
     // },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
+      files: ['x-pack/{,legacy/}plugins/siem/**/*.{js,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
         mocha: true,
@@ -728,7 +734,7 @@ module.exports = {
      * Lens overrides
      */
     {
-      files: ['x-pack/legacy/plugins/lens/**/*.{ts,tsx}', 'x-pack/plugins/lens/**/*.{ts,tsx}'],
+      files: ['x-pack/plugins/lens/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },

@@ -29,6 +29,7 @@ import {
 } from './histogram';
 import { BucketAggType } from './bucket_agg_type';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { InternalStartServices } from '../../../types';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: HistogramBucketAggDependencies;
@@ -38,10 +39,11 @@ describe('Histogram Agg', () => {
 
     aggTypesDependencies = {
       uiSettings,
-      getInternalStartServices: () => ({
-        fieldFormats: fieldFormatsServiceMock.createStartContract(),
-        notifications: notificationServiceMock.createStartContract(),
-      }),
+      getInternalStartServices: () =>
+        (({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
+        } as unknown) as InternalStartServices),
     };
   });
 
@@ -70,7 +72,10 @@ describe('Histogram Agg', () => {
           params,
         },
       ],
-      { typesRegistry: mockAggTypesRegistry([getHistogramBucketAgg(aggTypesDependencies)]) }
+      {
+        typesRegistry: mockAggTypesRegistry([getHistogramBucketAgg(aggTypesDependencies)]),
+        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+      }
     );
   };
 
