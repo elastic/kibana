@@ -72,10 +72,6 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     return state.layers.map(l => l.layerId);
   },
 
-  canAppendLayer(state) {
-    return state.layers.length < 2;
-  },
-
   removeLayer(state, layerId) {
     return {
       ...state,

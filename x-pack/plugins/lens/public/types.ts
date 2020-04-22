@@ -401,8 +401,6 @@ export interface Visualization<T = unknown, P = unknown> {
   clearLayer: (state: T, layerId: string) => T;
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
-  /** When function is provided and returns true, multiple layers can be added */
-  canAppendLayer?: (state: T) => boolean;
   /** Track added layers in internal state */
   appendLayer?: (state: T, layerId: string) => T;
 
