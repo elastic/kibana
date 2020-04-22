@@ -52,7 +52,7 @@ describe('kibana.yml configured with map.tilemap.url', () => {
         sourceDescriptor: {
           type: 'KIBANA_TILEMAP',
         },
-        style: {},
+        style: { type: 'TILE' },
         type: 'TILE',
         visible: true,
       },
@@ -96,7 +96,7 @@ describe('EMS is enabled', () => {
           isAutoSelect: true,
           type: 'EMS_TMS',
         },
-        style: {},
+        style: { type: 'TILE' },
         type: 'VECTOR_TILE',
         visible: true,
       },
