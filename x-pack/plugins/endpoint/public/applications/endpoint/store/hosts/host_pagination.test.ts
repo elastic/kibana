@@ -52,39 +52,8 @@ describe('host list pagination: ', () => {
     };
   });
 
-  describe('when a new page size is passed', () => {
-    beforeEach(() => {
-      historyPush({ ...queryParams(), page_size: '20' });
-    });
-    it('should modify the url correctly', () => {
-      expect(queryParams()).toMatchInlineSnapshot(`
-        Object {
-          "page_index": "0",
-          "page_size": "20",
-        }
-      `);
-    });
-  });
-  describe('when an invalid page size is passed', () => {
-    beforeEach(() => {
-      historyPush({ ...queryParams(), page_size: '1' });
-    });
-    it('should modify the page size in the url to the default page size', () => {
-      expect(queryParams()).toEqual({ page_index: '0', page_size: '10' });
-    });
-  });
-
-  describe('when a new page index is passed', () => {
-    beforeEach(() => {
-      historyPush({ ...queryParams(), page_index: '2' });
-    });
-    it('should modify the page index in the url correctly', () => {
-      expect(queryParams()).toEqual({ page_index: '2', page_size: '10' });
-    });
-  });
-
-  describe('when a negative page index is passed', () => {
-    it('should modify the page index in the url to the default page index', async () => {
+  describe('when the user enteres the host list for the first time', () => {
+    it('the api is called with page_index and page_size defaulting to 0 and 10 respectively', async () => {
       const apiResponse = getEndpointListApiResponse();
       fakeHttpServices.post.mockResolvedValue(apiResponse);
       expect(fakeHttpServices.post).not.toHaveBeenCalled();
@@ -94,7 +63,6 @@ describe('host list pagination: ', () => {
         payload: {
           ...history.location,
           pathname: '/hosts',
-          search: '?page_index=-2',
         },
       });
       await waitForAction('serverReturnedHostList');
@@ -103,6 +71,75 @@ describe('host list pagination: ', () => {
           paging_properties: [{ page_index: '0' }, { page_size: '10' }],
         }),
       });
+    });
+  });
+  describe('when a new page size is passed', () => {
+    it('should modify the url correctly', () => {
+      historyPush({ ...queryParams(), page_size: '20' });
+      expect(queryParams()).toMatchInlineSnapshot(`
+        Object {
+          "page_index": "0",
+          "page_size": "20",
+        }
+      `);
+    });
+  });
+  describe('when an invalid page size is passed', () => {
+    it('should modify the page size in the url to the default page size', () => {
+      historyPush({ ...queryParams(), page_size: '1' });
+      expect(queryParams()).toEqual({ page_index: '0', page_size: '10' });
+    });
+  });
+
+  describe('when a negative page size is passed', () => {
+    it('should modify the page size in the url to the default page size', () => {
+      historyPush({ ...queryParams(), page_size: '-1' });
+      expect(queryParams()).toEqual({ page_index: '0', page_size: '10' });
+    });
+  });
+
+  describe('when a new page index is passed', () => {
+    it('should modify the page index in the url correctly', () => {
+      historyPush({ ...queryParams(), page_index: '2' });
+      expect(queryParams()).toEqual({ page_index: '2', page_size: '10' });
+    });
+  });
+
+  describe('when a negative page index is passed', () => {
+    it('should modify the page index in the url to the default page index', () => {
+      historyPush({ ...queryParams(), page_index: '-2' });
+      expect(queryParams()).toEqual({ page_index: '0', page_size: '10' });
+    });
+  });
+
+  describe('when invalid params are passed in the url', () => {
+    it('ignores non-numeric values for page_index and page_size', () => {
+      historyPush({ ...queryParams, page_index: 'one', page_size: 'fifty' });
+      expect(queryParams()).toEqual({ page_index: '0', page_size: '10' });
+    });
+
+    it('ignores unknown url search params', () => {
+      store.dispatch({
+        type: 'userChangedUrl',
+        payload: {
+          ...history.location,
+          pathname: '/hosts',
+          search: '?foo=bar',
+        },
+      });
+      expect(queryParams()).toEqual({ page_index: '0', page_size: '10' });
+    });
+
+    it('ignores multiple values of the same query params except the last value', () => {
+      store.dispatch({
+        type: 'userChangedUrl',
+        payload: {
+          ...history.location,
+          pathname: '/hosts',
+          search: '?page_index=2&page_index=3&page_size=20&page_size=50',
+        },
+      });
+      expect(queryParams()).toEqual({ page_index: '3', page_size: '50' });
     });
   });
 });

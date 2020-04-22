@@ -14,9 +14,9 @@ import { AppAction } from '../action';
 import { listData } from './selectors';
 import { DepsStartMock, depsStartMock } from '../../mocks';
 import { mockHostResultList } from './mock_host_result_list';
+import { createSpyMiddleware, MiddlewareActionSpyHelper } from '../test_utils';
 
 describe('host list middleware', () => {
-  const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
@@ -24,6 +24,8 @@ describe('host list middleware', () => {
   let store: HostListStore;
   let getState: HostListStore['getState'];
   let dispatch: HostListStore['dispatch'];
+  let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
+  let actionSpyMiddleware;
 
   let history: History<never>;
   const getEndpointListApiResponse = (): HostResultList => {
@@ -33,9 +35,10 @@ describe('host list middleware', () => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<HostState>());
     store = createStore(
       hostListReducer,
-      applyMiddleware(hostMiddlewareFactory(fakeCoreStart, depsStart))
+      applyMiddleware(hostMiddlewareFactory(fakeCoreStart, depsStart), actionSpyMiddleware)
     );
     getState = store.getState;
     dispatch = store.dispatch;
@@ -53,7 +56,7 @@ describe('host list middleware', () => {
         pathname: '/hosts',
       },
     });
-    await sleep();
+    await waitForAction('serverReturnedHostList');
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({
         paging_properties: [{ page_index: '0' }, { page_size: '10' }],

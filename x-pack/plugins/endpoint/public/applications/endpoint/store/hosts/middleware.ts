@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HostResultList } from '../../../../../common/types';
 import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './selectors';
 import { HostState } from '../../types';
 import { ImmutableMiddlewareFactory } from '../../types';
@@ -19,7 +20,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = core
     ) {
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
       try {
-        const response = await coreStart.http.post('/api/endpoint/metadata', {
+        const response = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
           }),
@@ -56,6 +57,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = core
             type: 'serverFailedToReturnHostList',
             payload: error,
           });
+          return;
         }
       }
 
