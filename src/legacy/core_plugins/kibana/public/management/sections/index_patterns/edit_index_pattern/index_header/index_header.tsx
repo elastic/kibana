@@ -30,8 +30,8 @@ import {
 import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
 
 interface IndexHeaderProps {
-  defaultIndex: string;
   indexPattern: IIndexPattern;
+  defaultIndex?: string;
   setDefault?: () => void;
   refreshFields?: () => void;
   deleteIndexPattern?: () => void;
@@ -77,7 +77,7 @@ export function IndexHeader({
               <EuiIcon size="xl" type="starFilled" />
             </EuiFlexItem>
           )}
-          <EuiFlexItem style={{ marginLeft: 0 }}>
+          <EuiFlexItem style={defaultIndex === indexPattern.id ? { marginLeft: 0 } : {}}>
             <EuiTitle>
               <h1 data-test-subj="indexPatternTitle">{indexPattern.title}</h1>
             </EuiTitle>
