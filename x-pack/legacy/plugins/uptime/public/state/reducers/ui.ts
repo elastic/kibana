@@ -16,11 +16,9 @@ import {
   setAlertFlyoutVisible,
 } from '../actions';
 
-import { CLIENT_ALERT_TYPES } from '../../../common/constants';
-
 export interface UiState {
   alertFlyoutVisible: boolean;
-  alertFlyoutType: string;
+  alertFlyoutType?: string;
   basePath: string;
   esKuery: string;
   integrationsPopoverOpen: PopoverState | null;
@@ -29,7 +27,6 @@ export interface UiState {
 
 const initialState: UiState = {
   alertFlyoutVisible: false,
-  alertFlyoutType: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   basePath: '',
   esKuery: '',
   integrationsPopoverOpen: null,

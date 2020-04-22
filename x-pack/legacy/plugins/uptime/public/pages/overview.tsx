@@ -23,8 +23,6 @@ import { OverviewPageProps } from '../components/overview/overview_container';
 interface Props extends OverviewPageProps {
   indexPattern: IIndexPattern | null;
   setEsKueryFilters: (esFilters: string) => void;
-  currentAlertType: string;
-  setAlertType: (alertType: string) => void;
 }
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
@@ -36,13 +34,7 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPageComponent = ({
-  autocomplete,
-  currentAlertType,
-  indexPattern,
-  setAlertType,
-  setEsKueryFilters,
-}: Props) => {
+export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFilters }: Props) => {
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
   const { search, filters: urlFilters } = params;
 

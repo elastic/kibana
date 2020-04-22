@@ -102,7 +102,7 @@ const Application = (props: UptimeAppProps) => {
                     <UptimeAlertsContextProvider>
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                         <main>
-                          <UptimeAlertsFlyoutWrapper canChangeTrigger={false} />
+                          <UptimeAlertsFlyoutWrapper />
                           <PageRouter autocomplete={plugins.data.autocomplete} />
                         </main>
                       </EuiPage>

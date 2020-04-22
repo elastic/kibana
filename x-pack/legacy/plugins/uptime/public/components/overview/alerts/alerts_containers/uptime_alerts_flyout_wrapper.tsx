@@ -10,11 +10,7 @@ import { setAlertFlyoutVisible } from '../../../../state/actions';
 import { UptimeAlertsFlyoutWrapperComponent } from '../uptime_alerts_flyout_wrapper';
 import { selectAlertFlyoutVisibility, selectAlertFlyoutType } from '../../../../state/selectors';
 
-interface Props {
-  canChangeTrigger?: boolean;
-}
-
-export const UptimeAlertsFlyoutWrapper = ({ canChangeTrigger }: Props) => {
+export const UptimeAlertsFlyoutWrapper: React.FC = () => {
   const dispatch = useDispatch();
   const setAddFlyoutVisibility = (value: React.SetStateAction<boolean>) =>
     // @ts-ignore the value here is a boolean, and it works with the action creator function
@@ -27,7 +23,6 @@ export const UptimeAlertsFlyoutWrapper = ({ canChangeTrigger }: Props) => {
     <UptimeAlertsFlyoutWrapperComponent
       alertFlyoutVisible={alertFlyoutVisible}
       alertTypeId={alertTypeId}
-      canChangeTrigger={canChangeTrigger}
       setAlertFlyoutVisibility={setAddFlyoutVisibility}
     />
   );

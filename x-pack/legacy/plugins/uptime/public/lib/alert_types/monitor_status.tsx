@@ -17,6 +17,8 @@ import {
 import { AlertTypeInitializer } from '.';
 import { StatusCheckExecutorParamsType } from '../../../common/runtime_types';
 import { AlertMonitorStatus } from '../../components/overview/alerts/alerts_containers';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants';
+import { MonitorStatusTranslations } from './translations';
 
 export const validate = (alertParams: any): ValidationResult => {
   const errors: Record<string, any> = {};
@@ -57,15 +59,15 @@ export const validate = (alertParams: any): ValidationResult => {
   return { errors };
 };
 
+const { name, defaultActionMessage } = MonitorStatusTranslations;
+
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   autocomplete,
 }): AlertTypeModel => ({
-  id: 'xpack.uptime.alerts.monitorStatus',
-  name: 'Uptime monitor status',
+  id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
+  name,
   iconClass: 'uptimeApp',
-  alertParamsExpression: params => {
-    return <AlertMonitorStatus {...params} autocomplete={autocomplete} />;
-  },
+  alertParamsExpression: params => <AlertMonitorStatus {...params} autocomplete={autocomplete} />,
   validate,
-  defaultActionMessage: `{{context.message}}\nLast triggered at: {{state.lastTriggeredAt}}\n{{context.downMonitorsWithGeo}}`,
+  defaultActionMessage,
 });

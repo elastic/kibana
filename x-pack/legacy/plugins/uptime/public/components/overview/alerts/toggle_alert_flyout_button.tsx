@@ -7,11 +7,12 @@
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants';
+import { ToggleFlyoutTranslations } from './translations';
 
 interface Props {
-  setAlertFlyoutVisible: (value: boolean) => void;
+  setAlertFlyoutVisible: (value: boolean | string) => void;
 }
 
 export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Props) => {
@@ -22,9 +23,7 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
     <EuiPopover
       button={
         <EuiButtonEmpty
-          aria-label={i18n.translate('xpack.uptime.alertsPopover.toggleButton.ariaLabel', {
-            defaultMessage: 'Open alert context menu',
-          })}
+          aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
           data-test-subj="xpack.uptime.alertsPopover.toggleButton"
           iconType="arrowDown"
           iconSide="right"
@@ -43,26 +42,37 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
       <EuiContextMenuPanel
         items={[
           <EuiContextMenuItem
-            aria-label={i18n.translate('xpack.uptime.toggleAlertFlyout.ariaLabel', {
-              defaultMessage: 'Open add alert flyout',
-            })}
+            aria-label={ToggleFlyoutTranslations.toggleMonitorStatusAriaLabel}
             data-test-subj="xpack.uptime.toggleAlertFlyout"
             key="create-alert"
             icon="bell"
             onClick={() => {
-              setAlertFlyoutVisible(true);
+              setAlertFlyoutVisible(CLIENT_ALERT_TYPES.MONITOR_STATUS);
               setIsOpen(false);
             }}
           >
             <FormattedMessage
               id="xpack.uptime.toggleAlertButton.content"
-              defaultMessage="Create alert"
+              defaultMessage="Create Monitor Status alert"
             />
           </EuiContextMenuItem>,
           <EuiContextMenuItem
-            aria-label={i18n.translate('xpack.uptime.navigateToAlertingUi', {
-              defaultMessage: 'Leave Uptime and go to Alerting Management page',
-            })}
+            aria-label={ToggleFlyoutTranslations.toggleTlsAriaLabel}
+            data-test-subj="xpack.uptime.toggleTlsAlertFlyout"
+            key="create-tls-alert"
+            icon="bell"
+            onClick={() => {
+              setAlertFlyoutVisible(CLIENT_ALERT_TYPES.TLS);
+              setIsOpen(false);
+            }}
+          >
+            <FormattedMessage
+              id="xpack.uptime.toggleTlsAlertButton.content"
+              defaultMessage="Create TLS alert"
+            />
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            aria-label={ToggleFlyoutTranslations.navigateToAlertingUIAriaLabel}
             data-test-subj="xpack.uptime.navigateToAlertingUi"
             icon="tableOfContents"
             key="navigate-to-alerting"
