@@ -37,6 +37,10 @@ export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer>
     return this.renderers.get(id) || null;
   }
 
+  public has(id: string): boolean {
+    return this.renderers.has(id);
+  }
+
   public toJS(): Record<string, ExpressionRenderer> {
     return this.toArray().reduce(
       (acc, renderer) => ({
