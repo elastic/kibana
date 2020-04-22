@@ -26,6 +26,7 @@ import {
   SampleDataRegistryStart,
 } from './services';
 import { UsageCollectionSetup } from '../../usage_collection/server';
+import { capabilitiesProvider } from './capabilities_provider';
 
 interface HomeServerPluginSetupDependencies {
   usage_collection?: UsageCollectionSetup;
@@ -37,6 +38,8 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
+    core.capabilities.registerProvider(capabilitiesProvider);
+
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core) },
       sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usage_collection) },
