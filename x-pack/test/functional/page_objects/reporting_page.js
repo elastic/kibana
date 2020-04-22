@@ -169,13 +169,6 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       const toTime = 'Sep 23, 1999 @ 18:31:44.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
-
-    async canReportBeCreated() {
-      await this.clickGenerateReportButton();
-      const success = await this.checkForReportingToasts();
-      return success;
-    }
   }
-
   return new ReportingPage();
 }

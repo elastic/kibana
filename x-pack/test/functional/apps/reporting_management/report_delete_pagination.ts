@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await security.testUser.setRoles(['global_discover_read', 'reporting_user']);
       await esArchiver.load('empty_kibana');
       await esArchiver.load('reporting/archived_reports');
-      await pageObjects.common.navigateToActualUrl('kibana', '/management/kibana/reporting');
+      await pageObjects.common.navigateToApp('reporting');
       await testSubjects.existOrFail('reportJobListing', { timeout: 200000 });
     });
 
@@ -31,9 +31,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await security.testUser.restoreDefaults();
     });
 
-    it('Confirm report deletion works', async () => {
+    it('Confirm single report deletion works', async () => {
       log.debug('Checking for reports.');
-
       await retry.try(async () => {
         await testSubjects.click('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3');
       });

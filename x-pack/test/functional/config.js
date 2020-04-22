@@ -197,6 +197,10 @@ export default async function({ readConfigFile }) {
         pathname: '/app/kibana/',
         hash: '/management/elasticsearch/transform',
       },
+      reporting: {
+        pathname: '/app/kibana/',
+        hash: '/management/kibana/reporting',
+      },
     },
 
     // choose where esArchiver should load archives from
