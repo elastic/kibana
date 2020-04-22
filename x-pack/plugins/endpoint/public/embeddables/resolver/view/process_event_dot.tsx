@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSelectable,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
@@ -111,11 +112,25 @@ const NodeSubMenu = React.memo(
         </EuiButton>
       );
     } else {
+      
+      const OptionList = ()=>{
+        const [options, setOptions] = useState([{ label: 'abc'}, { label: 'def'}]);
+        return useMemo(()=>(
+        <EuiSelectable 
+          singleSelection={true} 
+          options={options}
+          onChange={(newOptions)=>{ console.log('reset options'); setOptions(newOptions); }}
+        >
+          {list=>list}
+        </EuiSelectable>
+        ),[options])
+    }
       /**
        * When called with a set of `optionsWithActions`:
        * Render with a panel of options that appear when the menu host button is clicked
        */
       return (
+        <>
         <EuiButton
           onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
             clickEvent.preventDefault();
@@ -128,11 +143,14 @@ const NodeSubMenu = React.memo(
           tabIndex={-1}
         >
           {menuTitle}
+          
         </EuiButton>
+        <OptionList />
+        </>
       );
     }
   }
-);
+)
 
 /**
  * An artefact that represents a process node.
