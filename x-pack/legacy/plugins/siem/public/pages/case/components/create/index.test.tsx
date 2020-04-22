@@ -14,6 +14,8 @@ import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router
 
 import { useInsertTimeline } from '../../../../components/timeline/insert_timeline_popover/use_insert_timeline';
 import { usePostCase } from '../../../../containers/case/use_post_case';
+import { useGetTags } from '../../../../containers/case/use_get_tags';
+
 jest.mock('../../../../components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../../../containers/case/use_post_case');
 import { useForm } from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks';
@@ -21,6 +23,14 @@ import { wait } from '../../../../lib/helpers';
 import { SiemPageName } from '../../../home/types';
 jest.mock(
   '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
+);
+jest.mock('../../../../containers/case/use_get_tags');
+jest.mock(
+  '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form_data_provider',
+  () => ({
+    FormDataProvider: ({ children }: { children: ({ tags }: { tags: string[] }) => void }) =>
+      children({ tags: ['rad', 'dude'] }),
+  })
 );
 
 export const useFormMock = useForm as jest.Mock;
@@ -40,9 +50,11 @@ const defaultInsertTimeline = {
   handleCursorChange,
   handleOnTimelineChange,
 };
+
+const sampleTags = ['coke', 'pepsi'];
 const sampleData = {
   description: 'what a great description',
-  tags: ['coke', 'pepsi'],
+  tags: sampleTags,
   title: 'what a cool title',
 };
 const defaultPostCase = {
@@ -52,14 +64,28 @@ const defaultPostCase = {
   postCase,
 };
 describe('Create case', () => {
+  // Suppress warnings about "noSuggestions" prop
+  /* eslint-disable no-console */
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+  afterAll(() => {
+    console.error = originalError;
+  });
+  /* eslint-enable no-console */
+  const fetchTags = jest.fn();
   const formHookMock = getFormMock(sampleData);
-
   beforeEach(() => {
     jest.resetAllMocks();
     useInsertTimelineMock.mockImplementation(() => defaultInsertTimeline);
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
+    (useGetTags as jest.Mock).mockImplementation(() => ({
+      tags: sampleTags,
+      fetchTags,
+    }));
   });
 
   it('should post case on submit click', async () => {
@@ -117,5 +143,20 @@ describe('Create case', () => {
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy();
+  });
+  it('Tag options render with new tags added', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <Create />
+        </Router>
+      </TestProviders>
+    );
+    expect(
+      wrapper
+        .find(`[data-test-subj="caseTags"] [data-test-subj="input"]`)
+        .first()
+        .prop('options')
+    ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }]);
   });
 });
