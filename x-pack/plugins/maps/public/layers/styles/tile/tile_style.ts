@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IField } from '../../fields/field';
-import { IESAggSource } from '../es_agg_source';
+import { AbstractStyle } from '../style';
+import { LAYER_STYLE_TYPE } from '../../../../common/constants';
 
-export interface IESTermSource extends IESAggSource {
-  getTermField(): IField;
-  hasCompleteConfig(): boolean;
+export class TileStyle extends AbstractStyle {
+  constructor() {
+    super({
+      type: LAYER_STYLE_TYPE.TILE,
+    });
+  }
 }
