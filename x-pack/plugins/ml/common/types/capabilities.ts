@@ -61,4 +61,4 @@ export interface MlCapabilitiesResponse {
   mlFeatureEnabledInSpace: boolean;
 }
 
-export type resolveMlCapabilitiesType = (request: KibanaRequest) => Promise<MlCapabilities | null>;
+export type ResolveMlCapabilities = (request: KibanaRequest) => Promise<MlCapabilities | null>;

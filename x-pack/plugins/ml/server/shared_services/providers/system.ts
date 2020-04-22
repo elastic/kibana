@@ -14,10 +14,7 @@ import { SpacesPluginSetup } from '../../../../spaces/server';
 import { capabilitiesProvider } from '../../lib/check_capabilities';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import {
-  MlCapabilitiesResponse,
-  resolveMlCapabilitiesType,
-} from '../../../common/types/capabilities';
+import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';
 
 export interface MlSystemProvider {
   mlSystemProvider(
@@ -36,7 +33,7 @@ export function getMlSystemProvider(
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup | undefined,
-  resolveMlCapabilities: resolveMlCapabilitiesType
+  resolveMlCapabilities: ResolveMlCapabilities
 ): MlSystemProvider {
   return {
     mlSystemProvider(callAsCurrentUser: APICaller, request: KibanaRequest) {
