@@ -31,13 +31,6 @@ import { Timelines } from '../timelines';
 import { navTabs } from './home_navigations';
 import { SiemPageName } from './types';
 
-/*
- * This is import is important to keep because if we do not have it
- * we will loose the map embeddable until they move to the New Platform
- * we need to have it
- */
-import 'uiExports/embeddableFactories';
-
 const WrappedByAutoSizer = styled.div`
   height: 100%;
 `;

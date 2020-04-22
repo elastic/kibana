@@ -8,7 +8,6 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
-import { npStart } from 'ui/new_platform';
 
 import { EmbeddablePanel, ErrorEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -200,8 +199,8 @@ export const EmbeddedMapComponent = ({
             data-test-subj="embeddable-panel"
             embeddable={embeddable}
             getActions={services.uiActions.getTriggerCompatibleActions}
-            getEmbeddableFactory={npStart.plugins.embeddable.getEmbeddableFactory}
-            getAllEmbeddableFactories={npStart.plugins.embeddable.getEmbeddableFactories}
+            getEmbeddableFactory={services.embeddable.getEmbeddableFactory}
+            getAllEmbeddableFactories={services.embeddable.getEmbeddableFactories}
             notifications={services.notifications}
             overlays={services.overlays}
             inspector={services.inspector}
