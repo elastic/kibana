@@ -103,41 +103,64 @@ export function uiRenderMixin(kbnServer, server, config) {
         const dllJsChunks = DllCompiler.getRawDllConfig().chunks.map(
           chunk => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
         );
+
         const styleSheetPaths = [
-          ...dllStyleChunks,
+          ...(isCore ? [] : dllStyleChunks),
           `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
           ...(darkMode
             ? [
                 `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
+                `${regularBundlePath}/dark_theme.style.css`,
               ]
             : [
                 `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+                `${regularBundlePath}/light_theme.style.css`,
               ]),
-          `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
           `${regularBundlePath}/commons.style.css`,
-          ...(!isCore ? [`${regularBundlePath}/${app.getId()}.style.css`] : []),
-          ...kbnServer.uiExports.styleSheetPaths
-            .filter(path => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light'))
-            .map(path =>
-              path.localPath.endsWith('.scss')
-                ? `${basePath}/built_assets/css/${path.publicPath}`
-                : `${basePath}/${path.publicPath}`
-            )
-            .reverse(),
+          ...(isCore
+            ? []
+            : [
+                `${regularBundlePath}/${app.getId()}.style.css`,
+                ...kbnServer.uiExports.styleSheetPaths
+                  .filter(
+                    path => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
+                  )
+                  .map(path =>
+                    path.localPath.endsWith('.scss')
+                      ? `${basePath}/built_assets/css/${path.publicPath}`
+                      : `${basePath}/${path.publicPath}`
+                  )
+                  .reverse(),
+              ]),
+        ];
+
+        const jsDependencyPaths = [
+          ...UiSharedDeps.jsDepFilenames.map(
+            filename => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
+          ),
+          `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
+          ...(isCore
+            ? []
+            : [
+                `${dllBundlePath}/vendors_runtime.bundle.dll.js`,
+                ...dllJsChunks,
+                `${regularBundlePath}/commons.bundle.js`,
+              ]),
+          `${regularBundlePath}/plugin/kibanaUtils/kibanaUtils.plugin.js`,
+          `${regularBundlePath}/plugin/esUiShared/esUiShared.plugin.js`,
+          `${regularBundlePath}/plugin/kibanaReact/kibanaReact.plugin.js`,
         ];
 
         const bootstrap = new AppBootstrap({
           templateData: {
-            appId: isCore ? 'core' : app.getId(),
-            regularBundlePath,
-            dllBundlePath,
-            dllJsChunks,
-            styleSheetPaths,
-            sharedJsFilename: UiSharedDeps.jsFilename,
-            sharedJsDepFilenames: UiSharedDeps.jsDepFilenames,
             darkMode,
+            jsDependencyPaths,
+            styleSheetPaths,
+            entryBundlePath: isCore
+              ? `${regularBundlePath}/core/core.entry.js`
+              : `${regularBundlePath}/${app.getId()}.bundle.js`,
           },
         });
 

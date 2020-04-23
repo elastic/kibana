@@ -51,8 +51,12 @@ export function CanvasPageProvider({ getService }: FtrProviderContext) {
       expect(disabledAttr).to.be('true');
     },
 
-    async openAddElementModal() {
+    async openSavedElementsModal() {
       await testSubjects.click('add-element-button');
+      await testSubjects.click('saved-elements-menu-option');
+    },
+    async closeSavedElementsModal() {
+      await testSubjects.click('saved-elements-modal-close-button');
     },
 
     async expectAddElementButton() {

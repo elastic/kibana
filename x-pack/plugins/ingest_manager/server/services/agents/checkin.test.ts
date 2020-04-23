@@ -118,5 +118,19 @@ describe('Agent checkin service', () => {
 
       expect(res).toBeTruthy();
     });
+
+    it('should return true if this agent has no revision currently set', () => {
+      const res = shouldCreateConfigAction(
+        getAgent({
+          config_id: 'config1',
+          last_checkin: '2018-01-02T00:00:00',
+          config_revision: null,
+          config_newest_revision: 2,
+        }),
+        []
+      );
+
+      expect(res).toBeTruthy();
+    });
   });
 });
