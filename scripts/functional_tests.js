@@ -19,14 +19,14 @@
 
 // eslint-disable-next-line no-restricted-syntax
 const alwaysImportedTests = [
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/plugin_functional/config.js'),
-  require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
+  // require.resolve('../test/functional/config.js'),
+  // require.resolve('../test/plugin_functional/config.js'),
+  // require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
 ];
 // eslint-disable-next-line no-restricted-syntax
 const onlyNotInCoverageTests = [
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/interpreter_functional/config.ts'),
+  // require.resolve('../test/api_integration/config.js'),
+  // require.resolve('../test/interpreter_functional/config.ts'),
   require.resolve('../test/examples/config.js'),
 ];
 

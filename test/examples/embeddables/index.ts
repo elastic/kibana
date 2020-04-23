@@ -29,7 +29,8 @@ export default function({
   const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  describe('embeddable explorer', function() {
+  // eslint-disable-next-line ban/ban
+  describe.only('embeddable explorer', function() {
     before(async () => {
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('settings');
