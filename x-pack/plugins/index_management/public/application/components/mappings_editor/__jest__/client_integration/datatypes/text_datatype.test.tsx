@@ -123,4 +123,132 @@ describe('text datatype', () => {
     expect(data).toEqual(updatedMappings);
   });
 
+  test('analyzer parameter: default values', async () => {
+    const defaultMappings = {
+      _meta: {},
+      _source: {},
+      properties: {
+        myTextField: { type: 'text' },
+      },
+    };
+
+    let updatedMappings: any = { ...defaultMappings };
+
+    testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
+    // Make sure all the fields are expanded and present in the DOM
+    await testBed.actions.expandAllFields();
+
+    const {
+      find,
+      exists,
+      waitFor,
+      form: { selectCheckBox, setSelectValue },
+      actions: {
+        startEditField,
+        getCheckboxValue,
+        showAdvancedSettings,
+        updateFieldAndCloseFlyout,
+      },
+    } = testBed;
+    const fieldToEdit = 'myTextField';
+
+    // Start edit and immediately save to have all the default values
+    await startEditField(fieldToEdit);
+    await showAdvancedSettings();
+
+    await act(async () => {
+      await updateFieldAndCloseFlyout();
+      ({ data } = await getDataForwarded());
+    });
+
+    updatedMappings = {
+      ...updatedMappings,
+      properties: {
+        myTextField: {
+          ...updatedMappings.properties.myTextField,
+          eager_global_ordinals: false,
+          fielddata: false,
+          index: true,
+          index_options: 'positions',
+          index_phrases: false,
+          norms: true,
+          store: false,
+        },
+      },
+    };
+
+    expect(data).toEqual(updatedMappings);
+
+    // Start edit
+    await startEditField(fieldToEdit);
+    await showAdvancedSettings();
+
+    // When no analyzer is defined, defaults to "Index default"
+    let indexAnalyzerValue = find('analyzerParameters.indexAnalyzer.select').props().value;
+    expect(indexAnalyzerValue).toEqual('index_default');
+
+    let searchQuoteAnalyzerValue = find('analyzerParameters.searchQuoteAnalyzer.select').props()
+      .value;
+    expect(searchQuoteAnalyzerValue).toEqual('index_default');
+
+    // When no "search_analyzer" is defined, the checkBox should be checked
+    let isUseSameAnalyzerForSearchChecked = getCheckboxValue(
+      'analyzerParameters.useSameAnalyzerForSearchCheckBox.input'
+    );
+    expect(isUseSameAnalyzerForSearchChecked).toBe(true);
+
+    // And the search analyzer select should not exist
+    expect(exists('analyzerParameters.searchAnalyzer')).toBe(false);
+
+    // Uncheck the "Use same analyzer for search" checkbox and wait for the select
+    await act(async () => {
+      selectCheckBox('analyzerParameters.useSameAnalyzerForSearchCheckBox.input', false);
+      await waitFor('analyzerParameters.searchAnalyzer');
+    });
+
+    let searchAnalyzerValue = find('analyzerParameters.searchQuoteAnalyzer.select').props().value;
+    expect(searchAnalyzerValue).toEqual('index_default');
+
+    await act(async () => {
+      // Change the value of the 3 analyzers
+      setSelectValue('analyzerParameters.indexAnalyzer.select', 'standard');
+      setSelectValue('analyzerParameters.searchAnalyzer.select', 'simple');
+      setSelectValue('analyzerParameters.searchQuoteAnalyzer.select', 'whitespace');
+
+      // Save & close
+      await updateFieldAndCloseFlyout();
+    });
+
+    updatedMappings = {
+      ...updatedMappings,
+      properties: {
+        myTextField: {
+          ...updatedMappings.properties.myTextField,
+          analyzer: 'standard',
+          search_analyzer: 'simple',
+          search_quote_analyzer: 'whitespace',
+        },
+      },
+    };
+
+    ({ data } = await getDataForwarded());
+    expect(data).toEqual(updatedMappings);
+
+    // Re-open the flyout and make sure the select have the correct updated value
+    await startEditField(fieldToEdit);
+    await showAdvancedSettings();
+
+    isUseSameAnalyzerForSearchChecked = getCheckboxValue(
+      'analyzerParameters.useSameAnalyzerForSearchCheckBox.input'
+    );
+    expect(isUseSameAnalyzerForSearchChecked).toBe(false);
+
+    indexAnalyzerValue = find('analyzerParameters.indexAnalyzer.select').props().value;
+    searchAnalyzerValue = find('analyzerParameters.searchAnalyzer.select').props().value;
+    searchQuoteAnalyzerValue = find('analyzerParameters.searchQuoteAnalyzer.select').props().value;
+
+    expect(indexAnalyzerValue).toBe('standard');
+    expect(searchAnalyzerValue).toBe('simple');
+    expect(searchQuoteAnalyzerValue).toBe('whitespace');
+  }, 30000);
 });

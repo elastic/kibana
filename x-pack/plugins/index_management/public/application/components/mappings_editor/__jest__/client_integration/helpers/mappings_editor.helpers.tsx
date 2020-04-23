@@ -32,6 +32,15 @@ jest.mock('@elastic/eui', () => ({
       }}
     />
   ),
+  EuiSuperSelect: (props: any) => (
+    <input
+      data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
+      value={props.valueOfSelected}
+      onChange={e => {
+        props.onChange(e.target.value);
+      }}
+    />
+  ),
 }));
 
 const createActions = (testBed: TestBed<TestSubjects>) => {

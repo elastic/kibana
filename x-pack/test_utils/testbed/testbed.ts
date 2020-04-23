@@ -198,6 +198,18 @@ export const registerTestBed = <T extends string = string>(
         return new Promise(resolve => setTimeout(resolve));
       };
 
+      const setSelectValue: TestBed<T>['form']['setSelectValue'] = (select, value) => {
+        const formSelect = typeof select === 'string' ? find(select) : (select as ReactWrapper);
+
+        if (!formSelect.length) {
+          throw new Error(`Select "${select}" was not found.`);
+        }
+
+        formSelect.simulate('change', { target: { value } });
+
+        component.update();
+      };
+
       const selectCheckBox: TestBed<T>['form']['selectCheckBox'] = (
         testSubject,
         isChecked = true
@@ -296,6 +308,7 @@ export const registerTestBed = <T extends string = string>(
         },
         form: {
           setInputValue,
+          setSelectValue,
           selectCheckBox,
           toggleEuiSwitch,
           setComboBoxValue,

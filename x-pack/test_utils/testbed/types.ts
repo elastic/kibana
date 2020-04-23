@@ -81,6 +81,13 @@ export interface TestBed<T = string> {
       isAsync?: boolean
     ) => Promise<void> | void;
     /**
+     * Set the value of a <EuiSelect /> or a mocked <EuiSuperSelect />
+     *
+     * @param select The form select. Can either be a data-test-subj or a reactWrapper (can be a nested path. e.g. "myForm.myInput").
+     * @param value The value to set
+     */
+    setSelectValue: (select: T | ReactWrapper, value: string) => void;
+    /**
      * Select or unselect a form checkbox.
      *
      * @param dataTestSubject The test subject of the checkbox (can be a nested path. e.g. "myForm.mySelect").
