@@ -28,7 +28,7 @@ Table of Contents
   - [RESTful API](#restful-api)
     - [`POST /api/action`: Create action](#post-apiaction-create-action)
     - [`DELETE /api/action/{id}`: Delete action](#delete-apiactionid-delete-action)
-    - [`GET /api/action/_getAll`: Get all actions](#get-apiaction-get-all-actions)
+    - [`GET /api/action/_getAll`: Get all actions](#get-apiactiongetall-get-all-actions)
     - [`GET /api/action/{id}`: Get action](#get-apiactionid-get-action)
     - [`GET /api/action/types`: List action types](#get-apiactiontypes-list-action-types)
     - [`PUT /api/action/{id}`: Update action](#put-apiactionid-update-action)
@@ -64,6 +64,12 @@ Table of Contents
     - [`config`](#config-6)
     - [`secrets`](#secrets-6)
     - [`params`](#params-6)
+      - [`actionParams (pushToService)`](#actionparams-pushtoservice)
+  - [Jira](#jira)
+    - [`config`](#config-7)
+    - [`secrets`](#secrets-7)
+    - [`params`](#params-7)
+      - [`actionParams (pushToService)`](#actionparams-pushtoservice-1)
 - [Command Line Utility](#command-line-utility)
 
 ## Terminology
@@ -483,13 +489,60 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 
 ### `params`
 
+| Property     | Description                                                                      | Type   |
+| ------------ | -------------------------------------------------------------------------------- | ------ |
+| action       | The action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| actionParams | The parameters of the action                                                     | object |
+
+#### `actionParams (pushToService)`
+
 | Property    | Description                                                                                                                | Type                  |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | caseId      | The case id                                                                                                                | string                |
 | title       | The title of the case                                                                                                      | string _(optional)_   |
 | description | The description of the case                                                                                                | string _(optional)_   |
 | comments    | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`               | object[] _(optional)_ |
-| incidentID  | The id of the incident in ServiceNow . If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+| externalId  | The id of the incident in ServiceNow . If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+
+
+---
+
+## Jira 
+
+ID: `.jira`
+
+The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/platform/rest/v2/) to create and update Jira incidents.
+
+### `config`
+
+| Property           | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Type   |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| apiUrl             | ServiceNow instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | string |
+| casesConfiguration | Case configuration object. The object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the Jira field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'summary', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in ServiceNow and will be overwrite on each update. | object |
+
+### `secrets`
+
+| Property | Description                             | Type   |
+| -------- | --------------------------------------- | ------ |
+| email    | email for HTTP Basic authentication     | string |
+| apiToken | API token for HTTP Basic authentication | string |
+
+### `params`
+
+| Property     | Description                                                                      | Type   |
+| ------------ | -------------------------------------------------------------------------------- | ------ |
+| action       | The action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| actionParams | The parameters of the action                                                     | object |
+
+#### `actionParams (pushToService)`
+
+| Property    | Description                                                                                                         | Type                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| caseId      | The case id                                                                                                         | string                |
+| title       | The title of the case                                                                                               | string _(optional)_   |
+| description | The description of the case                                                                                         | string _(optional)_   |
+| comments    | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`        | object[] _(optional)_ |
+| externalId  | The id of the incident in Jira. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
 
 # Command Line Utility
 
