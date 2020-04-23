@@ -19,7 +19,6 @@ import { infra } from './legacy/plugins/infra';
 import { taskManager } from './legacy/plugins/task_manager';
 import { rollup } from './legacy/plugins/rollup';
 import { siem } from './legacy/plugins/siem';
-import { remoteClusters } from './legacy/plugins/remote_clusters';
 import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
 import { uptime } from './legacy/plugins/uptime';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
@@ -45,7 +44,6 @@ module.exports = function(kibana) {
     taskManager(kibana),
     rollup(kibana),
     siem(kibana),
-    remoteClusters(kibana),
     upgradeAssistant(kibana),
     uptime(kibana),
     encryptedSavedObjects(kibana),
