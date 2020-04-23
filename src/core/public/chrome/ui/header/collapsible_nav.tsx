@@ -74,6 +74,7 @@ interface Props {
   navLinks: NavLink[];
   recentNavLinks: RecentNavLink[];
   homeHref: string;
+  id: string;
   onIsLockedUpdate: OnIsLockedUpdate;
   onIsOpenUpdate: (isOpen?: boolean) => void;
 }
@@ -86,6 +87,7 @@ export function CollapsibleNav({
   onIsLockedUpdate,
   onIsOpenUpdate,
   homeHref,
+  id,
 }: Props) {
   const groupedNavLinks = groupBy(navLinks, link => link?.category?.label);
   const { undefined: unknowns, ...allCategorizedLinks } = groupedNavLinks;
@@ -94,7 +96,7 @@ export function CollapsibleNav({
 
   return (
     <EuiCollapsibleNav
-      id="guideCollapsibleNavAllExampleNav"
+      id={id}
       aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
         defaultMessage: 'Primary',
       })}
@@ -205,7 +207,7 @@ export function CollapsibleNav({
         {/* Docking button only for larger screens that can support it*/}
         <EuiShowFor sizes={['l', 'xl']}>
           <EuiCollapsibleNavGroup>
-            <EuiListGroup>
+            <EuiListGroup flush>
               <EuiListGroupItem
                 size="xs"
                 color="subdued"

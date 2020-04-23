@@ -26,6 +26,7 @@ import {
   // @ts-ignore
   EuiNavDrawer,
   EuiShowFor,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Component, createRef } from 'react';
@@ -207,24 +208,29 @@ export class Header extends Component<HeaderProps, State> {
         headerWrapper: this.state.navSetting === 'modern',
       }
     );
-
+    const navId = htmlIdGenerator()();
     return (
       <header className={className} data-test-subj="headerGlobalNav">
         <EuiHeader position="fixed">
           <EuiHeaderSection grow={false}>
             {this.state.navSetting === 'modern' ? (
-              <EuiHeaderSectionItem border="right">
-                <EuiHeaderSectionItemButton
-                  aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-                    defaultMessage: 'Toggle primary navigation',
-                  })}
-                  onClick={() => {
-                    this.setState({ isOpen: !this.state.isOpen });
-                  }}
-                >
-                  <EuiIcon type="menu" size="m" aria-hidden="true" />
-                </EuiHeaderSectionItemButton>
-              </EuiHeaderSectionItem>
+              !this.state.isLocked && (
+                <EuiHeaderSectionItem border="right">
+                  <EuiHeaderSectionItemButton
+                    aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                      defaultMessage: 'Toggle primary navigation',
+                    })}
+                    onClick={() => {
+                      this.setState({ isOpen: !this.state.isOpen });
+                    }}
+                    aria-expanded={this.state.isOpen}
+                    aria-pressed={this.state.isOpen}
+                    aria-controls={navId}
+                  >
+                    <EuiIcon type="menu" size="m" aria-hidden="true" />
+                  </EuiHeaderSectionItemButton>
+                </EuiHeaderSectionItem>
+              )
             ) : (
               // TODO when legacy nav removed
               // Delete this block
@@ -267,14 +273,15 @@ export class Header extends Component<HeaderProps, State> {
         </EuiHeader>
         {this.state.navSetting === 'modern' ? (
           <CollapsibleNav
+            id={navId}
             isLocked={this.state.isLocked}
             onIsLockedUpdate={this.props.onIsLockedUpdate}
             navLinks={navLinks}
             recentNavLinks={recentNavLinks}
             isOpen={this.state.isOpen}
             homeHref={this.props.homeHref}
-            onIsOpenUpdate={(isOpen = this.state.isOpen) => {
-              this.setState({ isOpen: !isOpen });
+            onIsOpenUpdate={(isOpen = !this.state.isOpen) => {
+              this.setState({ isOpen });
               // TODO when EUI is updated, place focus on nav toggle button
             }}
           />

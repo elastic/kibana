@@ -42,6 +42,7 @@
   flex-flow: column nowrap;
   margin: 0 auto;
   width: 100%;
+  min-height: calc(100vh - #{$euiHeaderHeightCompensation});
 }
 
 .app-wrapper-panel {
