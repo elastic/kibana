@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 
 import { copyPersistentState } from '../../../reducers/util';
-import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../es_geo_grid_source/geo_tile_utils';
 
@@ -223,9 +222,7 @@ export class AbstractESSource extends AbstractVectorSource {
   async supportsFitToBounds() {
     try {
       const geoField = await this._getGeoField();
-      // geo_bounds aggregation only supports geo_point
-      // there is currently no backend support for getting bounding box of geo_shape field
-      return geoField.type !== ES_GEO_FIELD_TYPE.GEO_SHAPE;
+      return geoField.aggregatable;
     } catch (error) {
       return false;
     }
