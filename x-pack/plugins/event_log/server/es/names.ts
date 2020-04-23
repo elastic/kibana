@@ -24,11 +24,11 @@ export function getEsNames(baseName: string): EsNames {
   const eventLogNameWithVersion = `${eventLogName}${EVENT_LOG_VERSION_SUFFIX}`;
   const eventLogPolicyName = `${
     baseName.startsWith('.') ? baseName.substring(1) : baseName
-  }${EVENT_LOG_NAME_SUFFIX}`;
+  }${EVENT_LOG_NAME_SUFFIX}-policy`;
   return {
     base: baseName,
     alias: eventLogNameWithVersion,
-    ilmPolicy: `${eventLogPolicyName}-policy`,
+    ilmPolicy: `${eventLogPolicyName}`,
     indexPattern: `${eventLogName}-*`,
     indexPatternWithVersion: `${eventLogNameWithVersion}-*`,
     initialIndex: `${eventLogNameWithVersion}-000001`,
