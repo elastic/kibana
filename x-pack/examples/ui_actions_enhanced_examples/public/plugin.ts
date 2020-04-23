@@ -9,6 +9,7 @@ import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actio
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { DrilldownsSetup, DrilldownsStart } from '../../../../x-pack/plugins/drilldowns/public';
 import { DashboardToDiscoverDrilldown } from './dashboard_to_discover_drilldown';
+import { DashboardToUrlDrilldown } from './dashboard_to_url_drilldown';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 
 export interface SetupDependencies {
@@ -29,6 +30,7 @@ export class UiActionsEnhancedExamplesPlugin
     const start = createStartServicesGetter(core.getStartServices);
 
     drilldowns.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
+    drilldowns.registerDrilldown(new DashboardToUrlDrilldown({ start }));
   }
 
   public start(core: CoreStart, plugins: StartDependencies) {}
