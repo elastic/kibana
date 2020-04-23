@@ -385,7 +385,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
               // have to remove the '*'
               return find
                 .clickByCssSelector(
-                  'div[data-test-subj="fieldInput0"] .euiBadge[title="*"] svg.euiIcon'
+                  'div[data-test-subj="fieldInput0"] [title="Remove * from selection in this group"] svg.euiIcon'
                 )
                 .then(function() {
                   return addGrantedField(userObj.elasticsearch.indices[0].field_security.grant);

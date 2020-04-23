@@ -30,7 +30,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('if successful with empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
-    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       someResult: sampleEmptyDocSearchResults(),
       ruleParams: sampleParams,
       services: mockService,
@@ -55,6 +55,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockService.callCluster).toHaveBeenCalledTimes(0);
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(0);
+    expect(lastLookBackDate).toBeNull();
   });
 
   test('if successful iteration of while loop with maxDocs', async () => {
@@ -105,7 +106,7 @@ describe('searchAfterAndBulkCreate', () => {
           },
         ],
       });
-    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(3, 1, someGuids.slice(6, 9)),
       ruleParams: sampleParams,
       services: mockService,
@@ -130,13 +131,14 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockService.callCluster).toHaveBeenCalledTimes(5);
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(3);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('if unsuccessful first bulk create', async () => {
     const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
     const sampleParams = sampleRuleAlertParams(10);
     mockService.callCluster.mockResolvedValue(sampleBulkCreateDuplicateResult);
-    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
       ruleParams: sampleParams,
       services: mockService,
@@ -161,6 +163,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockLogger.error).toHaveBeenCalled();
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(1);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids', async () => {
@@ -179,7 +182,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
     });
-    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       someResult: sampleDocSearchResultsNoSortId(),
       ruleParams: sampleParams,
       services: mockService,
@@ -204,6 +207,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockLogger.error).toHaveBeenCalled();
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(1);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids and 0 total hits', async () => {
@@ -222,7 +226,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
     });
-    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       someResult: sampleDocSearchResultsNoSortIdNoHits(),
       ruleParams: sampleParams,
       services: mockService,
@@ -246,6 +250,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(1);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('if successful iteration of while loop with maxDocs and search after returns results with no sort ids', async () => {
@@ -267,7 +272,7 @@ describe('searchAfterAndBulkCreate', () => {
         ],
       })
       .mockResolvedValueOnce(sampleDocSearchResultsNoSortId());
-    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
       ruleParams: sampleParams,
       services: mockService,
@@ -291,6 +296,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(1);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('if successful iteration of while loop with maxDocs and search after returns empty results with no sort ids', async () => {
@@ -312,7 +318,7 @@ describe('searchAfterAndBulkCreate', () => {
         ],
       })
       .mockResolvedValueOnce(sampleEmptyDocSearchResults());
-    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
       ruleParams: sampleParams,
       services: mockService,
@@ -336,6 +342,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(1);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('if returns false when singleSearchAfter throws an exception', async () => {
@@ -359,7 +366,7 @@ describe('searchAfterAndBulkCreate', () => {
       .mockImplementation(() => {
         throw Error('Fake Error');
       });
-    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
       ruleParams: sampleParams,
       services: mockService,
@@ -383,5 +390,6 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(1);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 });
