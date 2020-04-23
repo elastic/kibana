@@ -90,9 +90,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       },
     });
 
-    const dataStreams: DataStream[] = [];
-
-    (indexResults as any[]).forEach(result => {
+    const dataStreams: DataStream[] = (indexResults as any[]).map(result => {
       const {
         key: indexName,
         dataset: { buckets: datasetBuckets },
@@ -101,7 +99,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
         package: { buckets: packageBuckets },
         last_activity: { value_as_string: lastActivity },
       } = result;
-      dataStreams.push({
+      return {
         index: indexName,
         dataset: datasetBuckets.length ? datasetBuckets[0].key : '',
         namespace: namespaceBuckets.length ? namespaceBuckets[0].key : '',
@@ -109,7 +107,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
         package: packageBuckets.length ? packageBuckets[0].key : '',
         last_activity: lastActivity,
         size_in_bytes: indexStats[indexName] ? indexStats[indexName].total.store.size_in_bytes : 0,
-      });
+      };
     });
 
     const body: GetDataStreamsResponse = {
