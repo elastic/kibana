@@ -241,14 +241,14 @@ async function _assignPackageStreamToStream(
 
   // Populate template variables from input config and stream config
   const data: { [k: string]: string | string[] } = {};
-  if (input.config) {
-    for (const key of Object.keys(input.config)) {
-      data[key] = input.config[key].value;
+  if (input.pkg_variables) {
+    for (const key of Object.keys(input.pkg_variables)) {
+      data[key] = input.pkg_variables[key].value;
     }
   }
-  if (stream.config) {
-    for (const key of Object.keys(stream.config)) {
-      data[key] = stream.config[key].value;
+  if (stream.pkg_variables) {
+    for (const key of Object.keys(stream.pkg_variables)) {
+      data[key] = stream.pkg_variables[key].value;
     }
   }
   const yaml = safeLoad(createStream(data, pkgStream.buffer.toString()));

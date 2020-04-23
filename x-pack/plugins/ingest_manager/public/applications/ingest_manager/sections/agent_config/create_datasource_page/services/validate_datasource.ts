@@ -77,7 +77,7 @@ export const validateDatasource = (
 
   // Validate each datasource input with either its own config fields or streams
   datasource.inputs.forEach(input => {
-    if (!input.config && !input.streams) {
+    if (!input.pkg_variables && !input.streams) {
       return;
     }
 
@@ -95,7 +95,7 @@ export const validateDatasource = (
     );
 
     // Validate input-level config fields
-    const inputConfigs = Object.entries(input.config || {});
+    const inputConfigs = Object.entries(input.pkg_variables || {});
     if (inputConfigs.length) {
       inputValidationResults.config = inputConfigs.reduce((results, [name, configEntry]) => {
         results[name] = input.enabled
@@ -110,7 +110,7 @@ export const validateDatasource = (
     // Validate each input stream with config fields
     if (input.streams.length) {
       input.streams.forEach(stream => {
-        if (!stream.config) {
+        if (!stream.pkg_variables) {
           return;
         }
 
@@ -130,7 +130,7 @@ export const validateDatasource = (
         }, {} as Record<string, RegistryVarsEntry>);
 
         // Validate stream-level config fields
-        streamValidationResults.config = Object.entries(stream.config).reduce(
+        streamValidationResults.config = Object.entries(stream.pkg_variables).reduce(
           (results, [name, configEntry]) => {
             results[name] =
               input.enabled && stream.enabled

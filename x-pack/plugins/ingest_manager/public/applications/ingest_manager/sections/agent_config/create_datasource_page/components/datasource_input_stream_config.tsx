@@ -101,7 +101,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
         <EuiFlexGroup direction="column" gutterSize="m">
           {requiredVars.map(varDef => {
             const { name: varName, type: varType } = varDef;
-            const value = datasourceInputStream.config![varName].value;
+            const value = datasourceInputStream.pkg_variables![varName].value;
             return (
               <EuiFlexItem key={varName}>
                 <DatasourceInputVarField
@@ -109,8 +109,8 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                   value={value}
                   onChange={(newValue: any) => {
                     updateDatasourceInputStream({
-                      config: {
-                        ...datasourceInputStream.config,
+                      pkg_variables: {
+                        ...datasourceInputStream.pkg_variables,
                         [varName]: {
                           type: varType,
                           value: newValue,
@@ -145,7 +145,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
               {isShowingAdvanced
                 ? advancedVars.map(varDef => {
                     const { name: varName, type: varType } = varDef;
-                    const value = datasourceInputStream.config![varName].value;
+                    const value = datasourceInputStream.pkg_variables![varName].value;
                     return (
                       <EuiFlexItem key={varName}>
                         <DatasourceInputVarField
@@ -153,8 +153,8 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                           value={value}
                           onChange={(newValue: any) => {
                             updateDatasourceInputStream({
-                              config: {
-                                ...datasourceInputStream.config,
+                              pkg_variables: {
+                                ...datasourceInputStream.pkg_variables,
                                 [varName]: {
                                   type: varType,
                                   value: newValue,

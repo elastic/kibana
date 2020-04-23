@@ -126,6 +126,7 @@ export const savedObjectMappings = {
           enabled: { type: 'boolean' },
           processors: { type: 'keyword' },
           config: { type: 'flattened' },
+          pkg_variables: { type: 'flattened' },
           streams: {
             type: 'nested',
             properties: {
@@ -134,6 +135,7 @@ export const savedObjectMappings = {
               dataset: { type: 'keyword' },
               processors: { type: 'keyword' },
               config: { type: 'flattened' },
+              pkg_variables: { type: 'flattened' },
               pkg_stream: { type: 'flattened' },
             },
           },
