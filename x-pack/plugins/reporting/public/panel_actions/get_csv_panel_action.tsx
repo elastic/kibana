@@ -12,10 +12,10 @@ import { LicensingPluginSetup } from '../../../licensing/public';
 import { checkLicense } from '../lib/license_check';
 
 import { ViewMode, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-
-// @TODO: These import paths will need to be updated once discovery moves to non-legacy dir
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/constants';
-import { ISearchEmbeddable } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/types';
+import {
+  ISearchEmbeddable,
+  SEARCH_EMBEDDABLE_TYPE,
+} from '../../../../../src/plugins/discover/public';
 
 import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../constants';
 

@@ -34,17 +34,14 @@ import {
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
+import { SharePluginStart } from 'src/plugins/share/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { VisualizationsStart } from 'src/plugins/visualizations/public';
+import { SavedObjectKibanaServices } from 'src/plugins/saved_objects/public';
 
 import { DiscoverStartPlugins } from './plugin';
-import { SharePluginStart } from '../../../../../plugins/share/public';
-import { ChartsPluginStart } from '../../../../../plugins/charts/public';
-import { VisualizationsStart } from '../../../../../plugins/visualizations/public';
-import {
-  createSavedSearchesLoader,
-  DocViewerComponent,
-  SavedSearch,
-} from '../../../../../plugins/discover/public';
-import { SavedObjectKibanaServices } from '../../../../../plugins/saved_objects/public';
+import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
+import { getHistory } from './kibana_services';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;

@@ -26,3 +26,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
+export { ISearchEmbeddable, SEARCH_EMBEDDABLE_TYPE } from './application/embeddable';

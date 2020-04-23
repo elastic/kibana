@@ -47,6 +47,7 @@ import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
 import { JsonCodeBlock } from './application/components/json_code_block/json_code_block';
 import {
+  getHistory,
   setDocViewsRegistry,
   setUrlTracker,
   setAngularModule,
@@ -157,6 +158,10 @@ export class DiscoverPlugin
       stop: stopUrlTracker,
       setActiveUrl: setTrackedUrl,
     } = createKbnUrlTracker({
+      // we pass getter here instead of plain `history`,
+      // so history is lazily created (when app is mounted)
+      // this prevents redundant `#` when not in discover app
+      getHistory,
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/discover',
       storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
