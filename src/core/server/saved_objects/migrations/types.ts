@@ -40,8 +40,9 @@ import { SavedObjectsMigrationLogger } from './core/migration_logger';
  * @public
  */
 export type SavedObjectMigrationFn<
-  TDoc extends SavedObjectUnsanitizedDoc | SavedObjectSanitizedDoc = SavedObjectUnsanitizedDoc
-> = (doc: TDoc, context: SavedObjectMigrationContext) => TDoc;
+  TInputDoc extends SavedObjectUnsanitizedDoc | SavedObjectSanitizedDoc = SavedObjectUnsanitizedDoc,
+  TOutputDoc extends SavedObjectUnsanitizedDoc | SavedObjectSanitizedDoc = SavedObjectUnsanitizedDoc
+> = (doc: TInputDoc, context: SavedObjectMigrationContext) => TOutputDoc;
 
 /**
  * Migration context provided when invoking a {@link SavedObjectMigrationFn | migration handler}
