@@ -18,6 +18,7 @@ import {
 } from '../../../../../src/plugins/kibana_legacy/public';
 import { MonitoringPluginDependencies } from '../types';
 import { GlobalState } from '../url_state';
+import { getSafeForExternalLink } from '../lib/get_safe_for_external_link';
 
 // @ts-ignore
 import { formatNumber, formatMetric } from '../lib/format_number';
@@ -234,7 +235,8 @@ function createHrefModule(core: AppMountContext['core']) {
         pre: (_$scope, _$el, $attr) => {
           $attr.$observe(name, val => {
             if (val) {
-              $attr.$set('href', core.http.basePath.prepend(val as string));
+              const url = getSafeForExternalLink(val as string);
+              $attr.$set('href', core.http.basePath.prepend(url));
             }
           });
         },
