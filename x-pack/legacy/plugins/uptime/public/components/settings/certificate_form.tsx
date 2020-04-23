@@ -57,7 +57,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
       description={
         <FormattedMessage
           id="xpack.uptime.sourceConfiguration.certificateThresholdDescription"
-          defaultMessage="Change the threshold for displaying and alerting on certificate errors. Note, this will affect any configured alerts"
+          defaultMessage="Change the threshold for displaying and alerting on certificate errors. Note: this will affect any configured alerts."
         />
       }
     >
