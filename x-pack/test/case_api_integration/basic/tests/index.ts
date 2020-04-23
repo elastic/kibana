@@ -8,8 +8,9 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('case api security and spaces enabled', function() {
-    this.tags('ciGroup1');
+  describe('case api basic', function() {
+    // Fastest ciGroup for the moment.
+    this.tags('ciGroup2');
 
     loadTestFile(require.resolve('./configure/get_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
