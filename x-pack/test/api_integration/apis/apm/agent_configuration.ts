@@ -239,7 +239,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
         expect(res1.body._source.applied_by_agent).to.be(false);
       });
-      it(`should have 'applied_by_agent=true' when 'appliedByAgent' attribute is true`, async () => {
+      it(`should have 'applied_by_agent=true' when 'mark_as_applied_by_agent' attribute is true`, async () => {
         await searchConfigurations({
           service: { name: 'myservice', environment: 'production' },
           mark_as_applied_by_agent: true,
