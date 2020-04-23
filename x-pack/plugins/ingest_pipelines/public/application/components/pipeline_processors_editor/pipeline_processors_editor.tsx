@@ -4,23 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState, useMemo, useEffect, useCallback } from 'react';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiDragDropContext,
-  EuiDroppable,
-  EuiDraggable,
-  EuiIcon,
-  EuiButton,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiPanel, EuiButton } from '@elastic/eui';
 
 import { Processor } from '../../../../common/types';
 
-import { SettingsFormFlyout } from './components';
+import { SettingsFormFlyout, DragAndDropTree } from './components';
 import { deserialize } from './data_in';
 import { serialize, SerializeResult } from './data_out';
 import { useEditorState } from './reducer';
@@ -79,64 +68,15 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   return (
     <>
       <EuiPanel>
-        <EuiDragDropContext
-          onDragEnd={({ source, destination }) => {
-            if (source && destination) {
-              dispatch({
-                type: 'reorderProcessors',
-                payload: { sourceIdx: source.index, destIdx: destination.index },
-              });
-            }
+        <DragAndDropTree
+          onDragEnd={args => {
+            dispatch({
+              type: 'moveProcessor',
+              payload: args,
+            });
           }}
-        >
-          <EuiDroppable droppableId="PipelineEditorDroppableArea" spacing="m">
-            {processors.map((processor, idx) => {
-              const { type, id } = processor;
-              return (
-                <EuiDraggable
-                  spacing="m"
-                  key={id}
-                  draggableId={id}
-                  index={idx}
-                  customDragHandle={true}
-                >
-                  {provided => (
-                    <EuiPanel paddingSize="m">
-                      <EuiFlexGroup alignItems="center">
-                        <EuiFlexItem grow={false}>
-                          <div {...provided.dragHandleProps}>
-                            <EuiIcon type="grab" />
-                          </div>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>{type}</EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty size="s" onClick={() => setSelectedProcessor(processor)}>
-                            {i18n.translate(
-                              'xpack.ingestPipelines.pipelineEditor.editProcessorButtonLabel',
-                              { defaultMessage: 'Edit' }
-                            )}
-                          </EuiButtonEmpty>
-                          <EuiButtonEmpty
-                            size="s"
-                            onClick={() =>
-                              dispatch({ type: 'removeProcessor', payload: { processor } })
-                            }
-                          >
-                            {i18n.translate(
-                              'xpack.ingestPipelines.pipelineEditor.deleteProcessorButtonLabel',
-                              { defaultMessage: 'Delete' }
-                            )}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                  )}
-                </EuiDraggable>
-              );
-            })}
-          </EuiDroppable>
-        </EuiDragDropContext>
-        {/* TODO: Translate */}
+          processors={processors}
+        />
         <EuiButton onClick={() => setIsAddingNewProcessor(true)}>Add a processor</EuiButton>
       </EuiPanel>
       {selectedProcessor || isAddingNewProcessor ? (

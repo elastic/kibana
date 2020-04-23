@@ -7,8 +7,12 @@
 import { ESCommonProcessorOptions } from '../../../../common/types';
 
 export interface DraggableLocation {
-  pathSelector: string;
   index: number;
+  /**
+   * When path selector is undefined it means that we are at the tree
+   * root.
+   */
+  pathSelector?: string;
 }
 
 export type ProcessorOptions<CustomProcessorOptions = {}> = ESCommonProcessorOptions &

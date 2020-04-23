@@ -89,6 +89,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
         if (processorsEditorState.isValid === undefined) {
           (async () => {
             const valid = await processorsEditorState.validate();
+            const { processors } = processorsEditorState.getData();
             if (valid) {
               onSave({ ...formData, processors } as Pipeline);
             }
@@ -100,7 +101,7 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
           return;
         }
 
-        const { processors } = processorsEditorState!.getData();
+        const { processors } = processorsEditorState.getData();
         onSave({ ...formData, processors } as Pipeline);
       } else {
         onSave(formData as Pipeline);

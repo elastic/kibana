@@ -9,7 +9,8 @@ import { euiDragDropReorder } from '@elastic/eui';
 import { OnFormUpdateArg } from '../../../shared_imports';
 
 import { createProcessorInternal, DeserializeResult } from './data_in';
-import { ProcessorInternal } from './types';
+import { getValue, setValue } from './utils';
+import { ProcessorInternal, DraggableLocation } from './types';
 
 type StateArg = DeserializeResult;
 
@@ -22,7 +23,10 @@ type Action =
   | { type: 'addProcessor'; payload: { processor: Omit<ProcessorInternal, 'id'> } }
   | { type: 'updateProcessor'; payload: { processor: ProcessorInternal } }
   | { type: 'removeProcessor'; payload: { processor: ProcessorInternal } }
-  | { type: 'reorderProcessors'; payload: { sourceIdx: number; destIdx: number } }
+  | {
+      type: 'moveProcessor';
+      payload: { source: DraggableLocation; destination: DraggableLocation };
+    }
   | { type: 'processorForm.update'; payload: OnFormUpdateArg<any> }
   | { type: 'processorForm.close' };
 
@@ -34,12 +38,29 @@ const findProcessorIdx = (
 };
 
 export const reducer: Reducer<State, Action> = (state, action) => {
-  if (action.type === 'reorderProcessors') {
-    const { destIdx, sourceIdx } = action.payload;
-    return {
-      ...state,
-      processors: euiDragDropReorder(state.processors, sourceIdx, destIdx),
-    };
+  if (action.type === 'moveProcessor') {
+    const { destination, source } = action.payload;
+    if (destination.pathSelector === source.pathSelector) {
+      if (source.pathSelector === undefined) {
+        return {
+          ...state,
+          processors: euiDragDropReorder(state.processors, source.index, destination.index),
+        };
+      } else {
+        const path = source.pathSelector.split('.');
+        const processors = getValue<ProcessorInternal[]>(path, state.processors);
+        return {
+          ...state,
+          processors: setValue(
+            path,
+            state.processors,
+            euiDragDropReorder(processors, source.index, destination.index)
+          ),
+        };
+      }
+    } else {
+      return state;
+    }
   }
 
   if (action.type === 'removeProcessor') {
