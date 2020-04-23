@@ -30,9 +30,9 @@ const SAMPLE_DASHBOARD_TO_URL_DRILLDOWN = 'SAMPLE_DASHBOARD_TO_URL_DRILLDOWN';
 export class DashboardToUrlDrilldown implements Drilldown<Config, PlaceContext, ActionContext> {
   public readonly id = SAMPLE_DASHBOARD_TO_URL_DRILLDOWN;
 
-  public readonly order = 25;
+  public readonly order = 8;
 
-  public readonly getDisplayName = () => 'Go to URL';
+  public readonly getDisplayName = () => 'Go to URL (example)';
 
   public readonly euiIcon = 'link';
 

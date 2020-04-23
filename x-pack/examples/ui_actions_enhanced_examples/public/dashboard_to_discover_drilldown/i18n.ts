@@ -7,5 +7,5 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtGoToDiscover = i18n.translate('xpack.uiActionsEnhanced.drilldown.goToDiscover', {
-  defaultMessage: 'Go to Discover',
+  defaultMessage: 'Go to Discover (example)',
 });
