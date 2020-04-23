@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects }) {
 
   describe('visual builder', function describeIndexTests() {
 
-    describe('Time Series', function () {
+    // https://github.com/elastic/kibana/issues/31705
+    describe.skip('Time Series', function () {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
       });
