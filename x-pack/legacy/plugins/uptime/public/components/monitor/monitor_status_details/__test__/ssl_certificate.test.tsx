@@ -9,7 +9,7 @@ import moment from 'moment';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EuiBadge } from '@elastic/eui';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
-import { Tls } from '../../../../../common/runtime_types';
+import { defaultDynamicSettings, Tls } from '../../../../../common/runtime_types';
 import { MonitorSSLCertificate } from '../monitor_status_bar';
 import * as redux from 'react-redux';
 
@@ -29,7 +29,7 @@ describe('SSL Certificate component', () => {
     spy.mockReturnValue(jest.fn());
 
     const spy1 = jest.spyOn(redux, 'useSelector');
-    spy1.mockReturnValue(true);
+    spy1.mockReturnValue({ settings: defaultDynamicSettings });
   });
 
   it('renders', () => {
@@ -55,10 +55,12 @@ describe('SSL Certificate component', () => {
     const component = mountWithIntl(<MonitorSSLCertificate tls={monitorTls} />);
 
     const badgeComponent = component.find(EuiBadge);
+    expect(component).toMatchSnapshot();
+
     expect(badgeComponent.props().color).toBe('warning');
 
     const badgeComponentText = component.find('.euiBadge__text');
-    expect(badgeComponentText.text()).toBe(moment(dateIn15Days).fromNow());
+    expect(badgeComponentText.text()).toBe(moment(dateIn5Days).fromNow());
 
     expect(badgeComponent.find('span.euiBadge--warning')).toBeTruthy();
   });

@@ -28,4 +28,176 @@ Array [
 ]
 `;
 
+exports[`SSL Certificate component renders expiration date with a warning state if ssl expiry date is less than 5 days 1`] = `
+<MonitorSSLCertificate
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  tls={
+    Object {
+      "certificate_not_valid_after": "Tue Apr 28 2020 06:29:57 GMT-0400",
+    }
+  }
+>
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>
+  <EuiText
+    aria-label="SSL certificate expires in 5 days"
+    grow={false}
+    size="s"
+  >
+    <div
+      aria-label="SSL certificate expires in 5 days"
+      className="euiText euiText--small euiText--constrainedWidth"
+    >
+      <FormattedMessage
+        defaultMessage="SSL certificate expires {emphasizedText}"
+        id="xpack.uptime.monitorStatusBar.sslCertificateExpiry.badgeContent"
+        values={
+          Object {
+            "emphasizedText": <EuiBadge
+              color="warning"
+            >
+              in 5 days
+            </EuiBadge>,
+          }
+        }
+      >
+        SSL certificate expires 
+        <EuiBadge
+          color="warning"
+        >
+          <EuiInnerText>
+            <span
+              className="euiBadge euiBadge--iconLeft"
+              style={
+                Object {
+                  "backgroundColor": "#f1d86f",
+                  "color": "#000",
+                }
+              }
+              title="in 5 days"
+            >
+              <span
+                className="euiBadge__content"
+              >
+                <span
+                  className="euiBadge__text"
+                >
+                  in 5 days
+                </span>
+              </span>
+            </span>
+          </EuiInnerText>
+        </EuiBadge>
+      </FormattedMessage>
+    </div>
+  </EuiText>
+</MonitorSSLCertificate>
+`;
+
 exports[`SSL Certificate component renders null if invalid date 1`] = `null`;
