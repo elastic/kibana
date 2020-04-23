@@ -24,7 +24,7 @@ import {
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { FEATURE_INFLUENCE } from '../../../../common/constants';
+import { DEFAULT_RESULTS_FIELD, FEATURE_INFLUENCE } from '../../../../common/constants';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
@@ -81,6 +81,7 @@ export const useOutlierData = (
     indexPattern,
     dataGrid.pagination,
     dataGrid.tableItems,
+    jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD,
     (columnId, cellValue, fullItem, setCellProps) => {
       const resultsField = jobConfig?.dest.results_field ?? '';
 
@@ -88,8 +89,8 @@ export const useOutlierData = (
       let backgroundColor;
 
       // column with feature values get color coded by its corresponding influencer value
-      if (fullItem[`${resultsField}.${FEATURE_INFLUENCE}.${columnId}`] !== undefined) {
-        backgroundColor = colorRange(fullItem[`${resultsField}.${FEATURE_INFLUENCE}.${columnId}`]);
+      if (fullItem[resultsField][`${FEATURE_INFLUENCE}.${columnId}`] !== undefined) {
+        backgroundColor = colorRange(fullItem[resultsField][`${FEATURE_INFLUENCE}.${columnId}`]);
       }
 
       // column with influencer values get color coded by its own value

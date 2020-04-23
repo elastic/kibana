@@ -5,9 +5,13 @@
  */
 
 import moment from 'moment-timezone';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
-import { EuiDataGridSorting, EuiDataGridStyle } from '@elastic/eui';
+import {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridSorting,
+  EuiDataGridStyle,
+} from '@elastic/eui';
 
 import {
   IndexPattern,
@@ -101,10 +105,13 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 
     if (
       field === `${resultsField}.${OUTLIER_SCORE}` ||
-      field === `${resultsField}.${FEATURE_INFLUENCE}` ||
-      field === `${resultsField}.${FEATURE_IMPORTANCE}`
+      field.includes(`${resultsField}.${FEATURE_INFLUENCE}`)
     ) {
       schema = 'numeric';
+    }
+
+    if (field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`)) {
+      schema = 'json';
     }
 
     return { id: field, schema, isSortable };
@@ -139,11 +146,12 @@ export const useRenderCellValue = (
   indexPattern: IndexPattern | undefined,
   pagination: IndexPagination,
   tableItems: DataGridItem[],
+  resultsField: string,
   cellPropsCallback?: (
     columnId: string,
     cellValue: any,
     fullItem: Record<string, any>,
-    setCellProps: any
+    setCellProps: EuiDataGridCellValueElementProps['setCellProps']
   ) => void
 ): RenderCellValue => {
   const renderCellValue: RenderCellValue = useMemo(() => {
@@ -154,7 +162,7 @@ export const useRenderCellValue = (
     }: {
       rowIndex: number;
       columnId: string;
-      setCellProps: any;
+      setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
     }) => {
       const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
@@ -175,10 +183,9 @@ export const useRenderCellValue = (
       }
 
       function getCellValue(cId: string) {
-        if (cId.includes(`.${FEATURE_IMPORTANCE}.`)) {
-          const results = getNestedProperty(tableItems[adjustedRowIndex], 'ml', null);
-          const featureImportanceField = cId.replace('ml.', '');
-          return results[featureImportanceField];
+        if (cId.includes(`.${FEATURE_INFLUENCE}.`)) {
+          const results = getNestedProperty(tableItems[adjustedRowIndex], resultsField, null);
+          return results[cId.replace(`${resultsField}.`, '')];
         }
 
         return tableItems.hasOwnProperty(adjustedRowIndex)
@@ -187,6 +194,17 @@ export const useRenderCellValue = (
       }
 
       const cellValue = getCellValue(columnId);
+
+      // React by default doesn't all us to use a hook in a callback.
+      // However, this one will be passed on to EuiDataGrid and its docs
+      // recommend wrapping `setCellProps` in a `useEffect()` hook
+      // so we're ignoring the linting rule here.
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useEffect(() => {
+        if (typeof cellPropsCallback === 'function') {
+          cellPropsCallback(columnId, cellValue, fullItem, setCellProps);
+        }
+      }, [columnId, cellValue]);
 
       if (typeof cellValue === 'object' && cellValue !== null) {
         return JSON.stringify(cellValue);
@@ -215,10 +233,6 @@ export const useRenderCellValue = (
 
       if (typeof cellValue === 'object' && cellValue !== null) {
         return JSON.stringify(cellValue);
-      }
-
-      if (typeof cellPropsCallback === 'function') {
-        cellPropsCallback(columnId, cellValue, fullItem, setCellProps);
       }
 
       return cellValue;

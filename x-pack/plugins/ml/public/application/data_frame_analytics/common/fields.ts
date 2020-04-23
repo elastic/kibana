@@ -214,15 +214,11 @@ export const getDefaultFieldsFromJobCaps = (
     }`;
 
     if ((numTopFeatureImportanceValues ?? 0) > 0 && needsDestIndexFields === true) {
-      featureImportanceFields.push(
-        ...fields
-          .filter(d => !jobConfig.analyzed_fields.excludes.includes(d.id))
-          .map(d => ({
-            id: `${resultsField}.${FEATURE_IMPORTANCE}.${d.id}`,
-            name: `${resultsField}.${FEATURE_IMPORTANCE}.${d.name}`,
-            type: KBN_FIELD_TYPES.NUMBER,
-          }))
-      );
+      featureImportanceFields.push({
+        id: `${resultsField}.${FEATURE_IMPORTANCE}`,
+        name: `${resultsField}.${FEATURE_IMPORTANCE}`,
+        type: KBN_FIELD_TYPES.UNKNOWN,
+      });
     }
 
     // Only need to add these fields if we didn't use dest index pattern to get the fields

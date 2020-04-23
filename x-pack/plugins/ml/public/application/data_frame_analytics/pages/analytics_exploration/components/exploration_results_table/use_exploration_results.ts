@@ -19,7 +19,7 @@ import {
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { FEATURE_IMPORTANCE } from '../../../../common/constants';
+import { DEFAULT_RESULTS_FIELD, FEATURE_IMPORTANCE } from '../../../../common/constants';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
 
 export const useExplorationResults = (
@@ -60,7 +60,8 @@ export const useExplorationResults = (
   const renderCellValue = useRenderCellValue(
     indexPattern,
     dataGrid.pagination,
-    dataGrid.tableItems
+    dataGrid.tableItems,
+    jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD
   );
 
   return {
