@@ -81,8 +81,9 @@ const style: cytoscape.Stylesheet[] = [
       'overlay-opacity': 0,
       shape: (el: cytoscape.NodeSingular) =>
         isService(el) ? (isIE11 ? 'rectangle' : 'ellipse') : 'diamond',
-      'text-background-color': theme.euiColorLightestShade,
-      'text-background-opacity': 0,
+      'text-background-color': theme.euiColorPrimary,
+      'text-background-opacity': (el: cytoscape.NodeSingular) =>
+        el.hasClass('primary') || el.selected() ? 0.2 : 0,
       'text-background-padding': theme.paddingSizes.xs,
       'text-background-shape': 'roundrectangle',
       'text-margin-y': parseInt(theme.paddingSizes.s, 10),
