@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 
 import { registerTestBed, TestBed, nextTick } from '../../../../../../../../../test_utils';
 import { MappingsEditor } from '../../../mappings_editor';
@@ -37,40 +38,61 @@ jest.mock('@elastic/eui', () => ({
 const createActions = (testBed: TestBed<TestSubjects>) => {
   const { find, exists, waitFor, waitForFn, form, component } = testBed;
 
-  const expandAllChildrenAt = async (path: string) => {
-    const pathToArray = path.split('.');
+  const expandField = async (
+    field: ReactWrapper
+  ): Promise<{ isExpanded: boolean; testSubjectField: string }> => {
+    /**
+     * Field list item have 2 test subject assigned to them:
+     * data-test-subj="fieldsListItem <uniqueTestSubjId>"
+     *
+     * We read the second one as it is unique.
+     */
+    const testSubjectField = (field.props() as any)['data-test-subj']
+      .split(' ')
+      .filter((subj: string) => subj !== 'fieldsListItem')[0] as string;
 
-    const proceed = async (index = 0): Promise<void> => {
-      const pathToField = pathToArray.slice(0, index + 1);
-      const testSubjectField = `${pathToField.join('')}Field`;
+    const expandButton = find(`${testSubjectField}.toggleExpandButton` as TestSubjects);
 
-      const expandButton = find(`${testSubjectField}.toggleExpandButton` as TestSubjects);
+    // No expand button, so this field is not expanded
+    if (expandButton.length === 0) {
+      return { isExpanded: false, testSubjectField };
+    }
 
-      if (expandButton.length === 0) {
-        return;
+    const isExpanded = (expandButton.props()['aria-label'] as string).includes('Collapse');
+
+    if (!isExpanded) {
+      expandButton.simulate('click');
+    }
+
+    // Wait for the children FieldList to be in the DOM
+    await waitFor(`${testSubjectField}.fieldsList` as TestSubjects);
+
+    return { isExpanded: true, testSubjectField };
+  };
+
+  /**
+   * Expand all the children of a field.
+   *
+   * @param fieldName The field under wich we want to expand all the children.
+   * If no fieldName is provided, we expand all the **root** level fields.
+   */
+  const expandAllFields = async (fieldName?: string) => {
+    const fields = find(
+      fieldName ? (`${fieldName}.fieldsList.fieldsListItem` as TestSubjects) : 'fieldsListItem'
+    ).map(wrapper => wrapper); // convert to Array for our for of loop below
+
+    for (const field of fields) {
+      const { isExpanded, testSubjectField } = await expandField(field);
+
+      if (isExpanded) {
+        // Expand its children
+        await expandAllFields(testSubjectField);
       }
-      const isExpanded = (expandButton.props()['aria-label'] as string).includes('Collapse');
-
-      if (!isExpanded) {
-        expandButton.simulate('click');
-      }
-
-      // Wait for the children FieldList to be there
-      await waitFor(`${testSubjectField}.fieldsList` as TestSubjects);
-
-      if (index < pathToArray.length - 1) {
-        return proceed(++index);
-      }
-    };
-
-    return proceed();
+    }
   };
 
   // Get a nested field in the rendered DOM tree
   const getFieldAt = async (path: string) => {
-    // First make sure all the parents fields are expanded and all present in the DOM
-    await expandAllChildrenAt(path);
-
     const testSubjectField = `${path.split('.').join('')}Field`;
     return find(testSubjectField as TestSubjects);
   };
@@ -181,6 +203,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     selectTab,
     getFieldAt,
     addField,
+    expandAllFields,
     startEditField,
     updateFieldAndCloseFlyout,
     showAdvancedSettings,

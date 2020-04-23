@@ -26,15 +26,21 @@ describe('text datatype', () => {
       },
     },
   };
+
   let testBed: MappingsEditorTestBed;
 
-  beforeEach(async () => {
-    testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
-
-    // We edit the field (by opening the flyout)
+  beforeEach(async done => {
     await act(async () => {
-      await testBed.actions.startEditField('user.address.street');
+      testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
+      const {
+        actions: { expandAllFields },
+      } = testBed;
+
+      // Make sure all the fields are expanded and present in the DOM
+      await expandAllFields();
     });
+
+    done();
   });
 
   afterEach(() => {
@@ -42,30 +48,15 @@ describe('text datatype', () => {
   });
 
   test('flyout details initial view', async () => {
-    const updatedMappings = {
-      _meta: {}, // If undefined, an empty object is returned by the editor
-      _source: {}, // If undefined, an empty object is returned by the editor
-      ...defaultMappings,
-      properties: {
-        user: {
-          type: 'object', // As no type was defined, defaults to "object" type
-          properties: {
-            address: {
-              type: 'object', // As no type was defined, defaults to "object" type
-              properties: {
-                street: { type: 'text' },
-              },
-            },
-          },
-        },
-      },
-    };
     const {
       find,
-      actions: { getToggleValue, showAdvancedSettings, updateFieldAndCloseFlyout },
+      actions: { startEditField, getToggleValue, showAdvancedSettings, updateFieldAndCloseFlyout },
     } = testBed;
     const fieldPath = ['user', 'address', 'street'];
     const fieldName = fieldPath[fieldPath.length - 1];
+
+    // Open the flyout to edit the field
+    await startEditField(fieldPath.join('.'));
 
     // It should have the correct title
     expect(find('mappingsEditorFieldEdit.flyoutTitle').text()).toEqual(`Edit field '${fieldName}'`);
@@ -84,11 +75,31 @@ describe('text datatype', () => {
       await showAdvancedSettings();
     });
 
-    // TODO: find a way to automate the test that all expected fields are present
+    // TODO: find a way to automate testing that all expected fields are present
     // and have their default value correctly set
+
+    const updatedMappings = {
+      _meta: {}, // Was not defined so an empty object is returned by the editor
+      _source: {}, // Was not defined so an empty object is returned by the editor
+      ...defaultMappings,
+      properties: {
+        user: {
+          type: 'object', // Was not defined so it defaults to "object" type
+          properties: {
+            address: {
+              type: 'object', // Was not defined so it defaults to "object" type
+              properties: {
+                street: { type: 'text' },
+              },
+            },
+          },
+        },
+      },
+    };
 
     await expectDataUpdated(updatedMappings);
 
+    // Save the field and close the flyout
     await act(async () => {
       await updateFieldAndCloseFlyout();
     });

@@ -33,9 +33,7 @@ import { State } from '../reducer';
 import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
 
-export const getUniqueId = () => {
-  return uuid.v4();
-};
+export const getUniqueId = () => uuid.v4();
 
 const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
   if (dataType === 'text' || dataType === 'keyword') {

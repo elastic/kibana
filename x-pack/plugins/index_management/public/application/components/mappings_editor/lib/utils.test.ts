@@ -69,15 +69,15 @@ describe('utils', () => {
 
       const dataIN = {
         someString: 'world',
+        someNumber: 123,
+        someBoolean: true,
+        someArray: [1, 2, 3],
+        someEmptyObject: {},
+        someDate: myDate,
         stripThis: undefined,
         nested: {
           value: 'bar',
           stripThis: undefined,
-          someArray: [1, 2, 3],
-          someBoolean: true,
-          someNumber: 123,
-          someEmptyObject: {},
-          someDate: myDate,
           deepNested: {
             value: 'baz',
             stripThis: undefined,
@@ -87,13 +87,13 @@ describe('utils', () => {
 
       const dataOUT = {
         someString: 'world',
+        someNumber: 123,
+        someBoolean: true,
+        someArray: [1, 2, 3],
+        someEmptyObject: {},
+        someDate: myDate,
         nested: {
           value: 'bar',
-          someArray: [1, 2, 3],
-          someBoolean: true,
-          someNumber: 123,
-          someEmptyObject: {},
-          someDate: myDate,
           deepNested: {
             value: 'baz',
           },
