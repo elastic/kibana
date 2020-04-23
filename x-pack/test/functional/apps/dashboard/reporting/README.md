@@ -13,5 +13,5 @@ Every now and then visual changes will be made that will require the snapshots t
   node scripts/es_archiver load reporting/ecommerce --config=x-pack/test/reporting/configs/chromium_functional.js
   node scripts/es_archiver load reporting/ecommerce_kibana --config=x-pack/test/reporting/configs/chromium_functional.js
   ```
-2. Generate a report of the archived E-commerce dashboard
+2. Generate a report of the archived E-commerce dashboard in the Kibana UI.
 3. Download the report and save it in the `reports/baseline` folder.
