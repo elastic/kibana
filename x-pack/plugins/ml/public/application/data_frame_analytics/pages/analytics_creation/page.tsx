@@ -5,10 +5,21 @@
  */
 
 import React, { FC, useState } from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiSteps, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiSteps,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlContext } from '../../../contexts/ml';
+import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
+import { ConfigurationStepForm } from './components';
 
 enum ANALYTICS_STEPS {
   CONFIGURATION = 'Configuration',
@@ -18,35 +29,56 @@ enum ANALYTICS_STEPS {
   CREATE = 'Create',
 }
 
+export enum ANALYTICS_STEP_NUMBERS {
+  configuration = 1,
+  advanced = 2,
+  details = 3,
+  create = 4,
+}
+
 export const Page: FC = () => {
-  const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
+  const [currentStep, setCurrentStep] = useState<ANALYTICS_STEP_NUMBERS>(
+    ANALYTICS_STEP_NUMBERS.configuration
+  );
+
   const mlContext = useMlContext();
   const { currentIndexPattern } = mlContext;
+
+  const createAnalyticsForm = useCreateAnalyticsForm();
 
   const creationSteps = [
     {
       title: i18n.translate('xpack.dataframe.analytics.creation.configurationStepTitle', {
         defaultMessage: ANALYTICS_STEPS.CONFIGURATION,
       }),
-      children: <p>Job config</p>,
+      children:
+        currentStep === ANALYTICS_STEP_NUMBERS.configuration ? (
+          <ConfigurationStepForm {...createAnalyticsForm} setCurrentStep={setCurrentStep} />
+        ) : (
+          <span />
+        ),
+      step: ANALYTICS_STEP_NUMBERS.configuration,
     },
     {
       title: i18n.translate('xpack.dataframe.analytics.creation.advancedStepTitle', {
         defaultMessage: ANALYTICS_STEPS.ADVANCED,
       }),
-      children: <p>Advanced stuff</p>,
+      children: currentStep === ANALYTICS_STEP_NUMBERS.advanced ? <div>advanced</div> : <span />,
+      step: ANALYTICS_STEP_NUMBERS.advanced,
     },
     {
       title: i18n.translate('xpack.dataframe.analytics.creation.detailsStepTitle', {
         defaultMessage: ANALYTICS_STEPS.DETAILS,
       }),
-      children: <p>Job deets</p>,
+      children: currentStep === ANALYTICS_STEP_NUMBERS.details ? <div>details</div> : <span />,
+      step: ANALYTICS_STEP_NUMBERS.details,
     },
     {
       title: i18n.translate('xpack.dataframe.analytics.creation.createStepTitle', {
         defaultMessage: ANALYTICS_STEPS.CREATE,
       }),
-      children: <p>Get this job created</p>,
+      children: currentStep === ANALYTICS_STEP_NUMBERS.create ? <div>create</div> : <span />,
+      step: ANALYTICS_STEP_NUMBERS.create,
     },
   ];
   // EuiPageBody restrictWidth={1200}
@@ -54,15 +86,27 @@ export const Page: FC = () => {
     <EuiPage data-test-subj="mlAnalyticsCreationContainer">
       <EuiPageBody>
         <EuiPageContent>
-          <EuiTitle size="m">
-            <h1>
-              <FormattedMessage
-                id="xpack.dataframe.analytics.creationPageTitle"
-                defaultMessage="Create analytics job from the index pattern {indexTitle}"
-                values={{ indexTitle: currentIndexPattern.title }}
-              />
-            </h1>
-          </EuiTitle>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m">
+                <h1>
+                  <FormattedMessage
+                    id="xpack.dataframe.analytics.creationPageTitle"
+                    defaultMessage="Create analytics job"
+                  />
+                </h1>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <h2>
+                <FormattedMessage
+                  id="xpack.dataframe.analytics.creationPageSourceIndexTitle"
+                  defaultMessage="Source index pattern: {indexTitle}"
+                  values={{ indexTitle: currentIndexPattern.title }}
+                />
+              </h2>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer />
           <EuiSteps steps={creationSteps} />
         </EuiPageContent>

@@ -11,6 +11,7 @@ import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
 import {
+  FieldSelectionItem,
   isClassificationAnalysis,
   isRegressionAnalysis,
   DataFrameAnalyticsId,
@@ -58,7 +59,8 @@ export interface State {
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
     excludes: string[];
-    excludesOptions: EuiComboBoxOptionOption[];
+    excludesTableItems: FieldSelectionItem[];
+    excludesOptions: EuiComboBoxOptionOption[]; // TODO: remove once we switch to table
     fieldOptionsFetchFail: boolean;
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
@@ -117,6 +119,7 @@ export const getInitialState = (): State => ({
     destinationIndexPatternTitleExists: false,
     excludes: [],
     fieldOptionsFetchFail: false,
+    excludesTableItems: [],
     excludesOptions: [],
     jobId: '',
     jobIdExists: false,
