@@ -73,6 +73,26 @@ const subMenuAssets = {
   },
 };
 
+const OptionList = React.memo(() => {
+  const [options, setOptions] = useState([{ label: 'abc' }, { label: 'def' }]);
+  return useMemo(
+    () => (
+      <EuiSelectable
+        singleSelection={true}
+        options={options}
+        onChange={newOptions => {
+          // eslint-disable-next-line
+          console.log('reset options');
+          setOptions(newOptions);
+        }}
+      >
+        {list => list}
+      </EuiSelectable>
+    ),
+    [options]
+  );
+});
+
 const NodeSubMenu = React.memo(
   ({
     menuTitle,
@@ -112,45 +132,31 @@ const NodeSubMenu = React.memo(
         </EuiButton>
       );
     } else {
-      
-      const OptionList = ()=>{
-        const [options, setOptions] = useState([{ label: 'abc'}, { label: 'def'}]);
-        return useMemo(()=>(
-        <EuiSelectable 
-          singleSelection={true} 
-          options={options}
-          onChange={(newOptions)=>{ console.log('reset options'); setOptions(newOptions); }}
-        >
-          {list=>list}
-        </EuiSelectable>
-        ),[options])
-    }
       /**
        * When called with a set of `optionsWithActions`:
        * Render with a panel of options that appear when the menu host button is clicked
        */
       return (
         <>
-        <EuiButton
-          onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-            clickEvent.preventDefault();
-            clickEvent.stopPropagation();
-          }, [])}
-          color="ghost"
-          size="s"
-          iconType="arrowDown"
-          iconSide="right"
-          tabIndex={-1}
-        >
-          {menuTitle}
-          
-        </EuiButton>
-        <OptionList />
+          <EuiButton
+            onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+              clickEvent.preventDefault();
+              clickEvent.stopPropagation();
+            }, [])}
+            color="ghost"
+            size="s"
+            iconType="arrowDown"
+            iconSide="right"
+            tabIndex={-1}
+          >
+            {menuTitle}
+          </EuiButton>
+          <OptionList />
         </>
       );
     }
   }
-)
+);
 
 /**
  * An artefact that represents a process node.
