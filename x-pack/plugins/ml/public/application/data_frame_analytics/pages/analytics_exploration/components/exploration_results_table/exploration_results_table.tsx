@@ -109,7 +109,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
       <EuiPanel
         grow={false}
         id="mlDataFrameAnalyticsTableResultsPanel"
-        data-test-subj="mlDFAnalyticsClassificationExplorationTablePanel"
+        data-test-subj="mlDFAnalyticsExplorationTablePanel"
       >
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
