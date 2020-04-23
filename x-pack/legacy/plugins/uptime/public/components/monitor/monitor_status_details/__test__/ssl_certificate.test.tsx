@@ -13,7 +13,7 @@ import { Tls } from '../../../../../common/runtime_types';
 import { MonitorSSLCertificate } from '../monitor_status_bar';
 import * as redux from 'react-redux';
 
-describe('MonitorStatusBar component', () => {
+describe('SSL Certificate component', () => {
   let monitorTls: Tls;
 
   beforeEach(() => {
@@ -45,12 +45,12 @@ describe('MonitorStatusBar component', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders expiration date with a warning state if ssl expiry date is less than 30 days', () => {
-    const dateIn15Days = moment()
-      .add(15, 'day')
+  it('renders expiration date with a warning state if ssl expiry date is less than 5 days', () => {
+    const dateIn5Days = moment()
+      .add(5, 'day')
       .toString();
     monitorTls = {
-      certificate_not_valid_after: dateIn15Days,
+      certificate_not_valid_after: dateIn5Days,
     };
     const component = mountWithIntl(<MonitorSSLCertificate tls={monitorTls} />);
 

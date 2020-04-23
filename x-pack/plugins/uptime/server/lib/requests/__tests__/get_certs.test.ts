@@ -102,22 +102,25 @@ describe('getCerts', () => {
       direction: 'desc',
     });
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "certificate_not_valid_after": "2020-07-16T03:15:39.000Z",
-          "certificate_not_valid_before": "2019-08-16T01:40:25.000Z",
-          "common_name": "r2.shared.global.fastly.net",
-          "issuer": "GlobalSign CloudSSL CA - SHA256 - G3",
-          "monitors": Array [
-            Object {
-              "id": "real-world-test",
-              "name": "Real World Test",
-            },
-          ],
-          "sha1": "b7b4b89ef0d0caf39d223736f0fdbb03c7b426f1",
-          "sha256": "12b00d04db0db8caa302bfde043e88f95baceb91e86ac143e93830b4bbec726d",
-        },
-      ]
+      Object {
+        "certs": Array [
+          Object {
+            "certificate_not_valid_after": "2020-07-16T03:15:39.000Z",
+            "certificate_not_valid_before": "2019-08-16T01:40:25.000Z",
+            "common_name": "r2.shared.global.fastly.net",
+            "issuer": "GlobalSign CloudSSL CA - SHA256 - G3",
+            "monitors": Array [
+              Object {
+                "id": "real-world-test",
+                "name": "Real World Test",
+              },
+            ],
+            "sha1": "b7b4b89ef0d0caf39d223736f0fdbb03c7b426f1",
+            "sha256": "12b00d04db0db8caa302bfde043e88f95baceb91e86ac143e93830b4bbec726d",
+          },
+        ],
+        "total": 0,
+      }
     `);
     expect(mockCallES.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -135,6 +138,13 @@ describe('getCerts', () => {
                 "tls.certificate_not_valid_before",
                 "tls.certificate_not_valid_after",
               ],
+              "aggs": Object {
+                "total": Object {
+                  "cardinality": Object {
+                    "field": "tls.server.hash.sha256",
+                  },
+                },
+              },
               "collapse": Object {
                 "field": "tls.server.hash.sha256",
                 "inner_hits": Object {
@@ -155,7 +165,7 @@ describe('getCerts', () => {
                   ],
                 },
               },
-              "from": 1,
+              "from": 30,
               "query": Object {
                 "bool": Object {
                   "filter": Array [
@@ -173,6 +183,7 @@ describe('getCerts', () => {
                       },
                     },
                   ],
+                  "minimum_should_match": 1,
                   "should": Array [
                     Object {
                       "wildcard": Object {
@@ -183,7 +194,7 @@ describe('getCerts', () => {
                     },
                     Object {
                       "wildcard": Object {
-                        "tls.common_name": Object {
+                        "tls.server.x509.issuer.common_name": Object {
                           "value": "*my_common_name*",
                         },
                       },
@@ -206,6 +217,13 @@ describe('getCerts', () => {
                 },
               },
               "size": 30,
+              "sort": Array [
+                Object {
+                  "tls.certificate_not_valid_after": Object {
+                    "order": "desc",
+                  },
+                },
+              ],
             },
             "index": "heartbeat*",
           },

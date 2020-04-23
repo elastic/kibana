@@ -577,13 +577,13 @@ exports[`MonitorList component renders the monitor list 1`] = `
         <a
           href="/certificates"
         >
-          View Certificates Status
+          View certificates status
         </a>
       </h5>
     </div>
   </div>
   <div
-    class="euiSpacer euiSpacer--s"
+    class="euiSpacer euiSpacer--m"
   />
   <div
     aria-label="Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying 2 items."

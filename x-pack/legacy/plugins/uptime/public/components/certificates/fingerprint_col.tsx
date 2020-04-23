@@ -32,8 +32,8 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
   };
   return (
     <>
-      <ShaComponent text="SHA 1" val={cert?.sha1?.toUpperCase()} />
-      <ShaComponent text="SHA 256" val={cert?.sha256?.toUpperCase()} />
+      <ShaComponent text="SHA 1" val={cert?.sha1?.toUpperCase() ?? ''} />
+      <ShaComponent text="SHA 256" val={cert?.sha256?.toUpperCase() ?? ''} />
     </>
   );
 };

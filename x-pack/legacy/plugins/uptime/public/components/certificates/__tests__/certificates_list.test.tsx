@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallowWithRouter } from '../../../lib';
-import { CertificateList } from '../certificates_list';
+import { CertificateList, CertSort } from '../certificates_list';
 
 describe('CertificateList', () => {
   it('shallow renders expected elements for valid props', () => {
@@ -14,7 +14,7 @@ describe('CertificateList', () => {
       index: 0,
       size: 10,
     };
-    const sort = {
+    const sort: CertSort = {
       field: 'certificate_not_valid_after',
       direction: 'asc',
     };
