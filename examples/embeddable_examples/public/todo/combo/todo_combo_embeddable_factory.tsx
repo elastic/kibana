@@ -17,9 +17,10 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract, OverlayStart } from 'kibana/public';
 import { TodoSavedObjectAttributes } from 'examples/embeddable_examples/common';
-import uuid from 'uuid';
+import React from 'react';
+import { EuiConfirmModal } from '@elastic/eui';
 import {
   IContainer,
   EmbeddableStart,
@@ -32,10 +33,12 @@ import {
   TodoComboEmbeddable,
   TODO_COMBO_EMBEDDABLE,
 } from './todo_combo_embeddable';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
 interface StartServices {
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
   savedObjectsClient: SavedObjectsClientContract;
+  openModal: OverlayStart['openModal'];
 }
 
 export class TodoComboEmbeddableFactory
@@ -48,9 +51,9 @@ export class TodoComboEmbeddableFactory
     > {
   public readonly type = TODO_COMBO_EMBEDDABLE;
   public readonly savedObjectMetaData = {
-    name: 'Todo',
+    name: 'todo_Combo',
     includeFields: ['task', 'icon', 'title'],
-    type: 'todo',
+    type: 'todo_Combo',
     getIconForSavedObject: () => 'pencil',
   };
 
@@ -64,7 +67,6 @@ export class TodoComboEmbeddableFactory
     'SIMPLICITY',
     'Perfection',
     'FORMAT',
-    'YOU',
     'HUMILITY',
     'Ambition',
     'Speed',
@@ -101,19 +103,41 @@ export class TodoComboEmbeddableFactory
       task,
       icon: 'pencil',
     };
-    if (Math.random() > 0.5) {
-      const { savedObjectsClient } = await this.getStartServices();
-      const savedObject = await savedObjectsClient.create(this.type, attributes);
-      return {
-        inputType: 'reference',
-        savedObjectId: savedObject.id,
+    const { openModal, savedObjectsClient } = await this.getStartServices();
+    return new Promise<Partial<TodoComboInput>>(resolve => {
+      const byRef = async () => {
+        const savedObject = await savedObjectsClient.create(this.type, attributes);
+        resolve({
+          savedObjectId: savedObject.id,
+        });
       };
-    } else {
-      return {
-        inputType: 'value',
-        attributes,
+      const byVal = async () => {
+        resolve({
+          ...attributes,
+        });
       };
-    }
+      const overlay = openModal(
+        toMountPoint(
+          <EuiConfirmModal
+            title="By reference or by val???"
+            onCancel={() => {
+              byRef();
+              overlay.close();
+            }}
+            onConfirm={() => {
+              byVal();
+              overlay.close();
+            }}
+            cancelButtonText="by reference"
+            confirmButtonText="by val"
+            defaultFocusedButton="confirm"
+          >
+            <p>You&rsquo;re about to do something.</p>
+            <p>Are you sure you want to do this?</p>
+          </EuiConfirmModal>
+        )
+      );
+    });
   }
 
   public createFromSavedObject = (

@@ -31,18 +31,17 @@ import { TodoSavedObjectAttributes } from '../../../common';
 import { TodoComboEmbeddableComponent } from './todo_combo_component';
 
 export const TODO_COMBO_EMBEDDABLE = 'todo_Combo';
-
 export type TodoComboInput = TodoComboValInput | TodoComboRefInput;
 
-interface TodoComboValInput extends EmbeddableInput {
-  inputType: 'value';
-  attributes: TodoSavedObjectAttributes;
+interface TodoComboInheritedInput extends EmbeddableInput {
   search?: string;
 }
 
-interface TodoComboRefInput extends SavedObjectEmbeddableInput {
-  inputType: 'reference';
-  search?: string;
+type TodoComboValInput = TodoSavedObjectAttributes & TodoComboInheritedInput;
+type TodoComboRefInput = SavedObjectEmbeddableInput & TodoComboInheritedInput;
+
+export function isRefInput(input: TodoComboInput): input is TodoComboRefInput {
+  return (input as TodoComboRefInput).savedObjectId !== undefined;
 }
 
 export interface TodoComboOutput extends EmbeddableOutput {
@@ -87,7 +86,7 @@ export class TodoComboEmbeddable extends Embeddable<TodoComboInput, TodoComboOut
 
     this.subscription = this.getInput$().subscribe(async () => {
       let savedAttributes: TodoSavedObjectAttributes | undefined;
-      if (this.input.inputType === 'reference') {
+      if (isRefInput(this.input)) {
         if (this.savedObjectId !== this.input.savedObjectId) {
           this.savedObjectId = this.input.savedObjectId;
           const todoSavedObject = await this.savedObjectsClient.get<TodoSavedObjectAttributes>(
@@ -98,7 +97,7 @@ export class TodoComboEmbeddable extends Embeddable<TodoComboInput, TodoComboOut
         }
       } else {
         this.savedObjectId = undefined;
-        savedAttributes = this.input.attributes;
+        savedAttributes = this.input;
       }
 
       this.updateOutput({
@@ -117,7 +116,7 @@ export class TodoComboEmbeddable extends Embeddable<TodoComboInput, TodoComboOut
   }
 
   public async reload() {
-    if (this.input.inputType === 'reference') {
+    if (isRefInput(this.input)) {
       this.savedObjectId = this.input.savedObjectId;
       const todoSavedObject = await this.savedObjectsClient.get<TodoSavedObjectAttributes>(
         'todo',

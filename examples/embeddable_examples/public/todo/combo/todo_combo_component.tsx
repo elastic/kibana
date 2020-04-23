@@ -24,7 +24,12 @@ import { EuiAvatar } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { EuiFlexGrid } from '@elastic/eui';
 import { withEmbeddableSubscription } from '../../../../../src/plugins/embeddable/public';
-import { TodoComboEmbeddable, TodoComboInput, TodoComboOutput } from './todo_combo_embeddable';
+import {
+  TodoComboEmbeddable,
+  TodoComboInput,
+  TodoComboOutput,
+  isRefInput,
+} from './todo_combo_embeddable';
 
 interface Props {
   embeddable: TodoComboEmbeddable;
@@ -47,10 +52,8 @@ function wrapSearchTerms(task?: string, search?: string) {
   );
 }
 
-export function TodoComboEmbeddableComponentInner({
-  input: { inputType, search },
-  output: { savedAttributes },
-}: Props) {
+export function TodoComboEmbeddableComponentInner({ input, output: { savedAttributes } }: Props) {
+  const search = input?.search;
   const icon = savedAttributes?.icon;
   const title = savedAttributes?.title;
   const task = savedAttributes?.task;
@@ -66,7 +69,9 @@ export function TodoComboEmbeddableComponentInner({
       <EuiFlexItem>
         <EuiFlexGrid columns={2}>
           <EuiFlexItem>
-            <EuiText data-test-subj="todoEmbeddableTitle">BY {inputType}</EuiText>
+            <EuiText data-test-subj="todoEmbeddableTitle">
+              BY {isRefInput(input) ? 'Reference' : 'value'}
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText data-test-subj="todoEmbeddableTitle">

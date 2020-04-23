@@ -110,6 +110,7 @@ export class EmbeddableExamplesPlugin
       new TodoComboEmbeddableFactory(async () => ({
         savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
         getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+        openModal: (await core.getStartServices())[0].overlays.openModal,
       }))
     );
   }
