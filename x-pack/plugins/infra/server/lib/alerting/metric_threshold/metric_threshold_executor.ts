@@ -5,8 +5,6 @@
  */
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { convertSavedObjectToSavedSourceConfiguration } from '../../sources/sources';
-import { infraSourceConfigurationSavedObjectType } from '../../sources/saved_object_mappings';
 import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../utils/get_all_composite_data';
@@ -15,9 +13,9 @@ import { MetricExpressionParams, Comparator, Aggregators, AlertStates } from './
 import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { getDateHistogramOffset } from '../../snapshot/query_helpers';
+import { InfraBackendLibs } from '../../infra_types';
 
 const TOTAL_BUCKETS = 5;
-const DEFAULT_INDEX_PATTERN = 'metricbeat-*';
 
 interface Aggregation {
   aggregatedIntervals: {
@@ -67,6 +65,7 @@ const getParsedFilterQuery: (
 
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
+  timefield: string,
   groupBy?: string,
   filterQuery?: string
 ) => {
@@ -100,7 +99,7 @@ export const getElasticsearchMetricQuery = (
   const baseAggs = {
     aggregatedIntervals: {
       date_histogram: {
-        field: '@timestamp',
+        field: timefield,
         fixed_interval: interval,
         offset,
         extended_bounds: {
@@ -168,43 +167,23 @@ export const getElasticsearchMetricQuery = (
   };
 };
 
-const getIndexPattern: (
-  services: AlertServices,
-  sourceId?: string
-) => Promise<string> = async function({ savedObjectsClient }, sourceId = 'default') {
-  try {
-    const sourceConfiguration = await savedObjectsClient.get(
-      infraSourceConfigurationSavedObjectType,
-      sourceId
-    );
-    const { metricAlias } = convertSavedObjectToSavedSourceConfiguration(
-      sourceConfiguration
-    ).configuration;
-    return metricAlias || DEFAULT_INDEX_PATTERN;
-  } catch (e) {
-    if (e.output.statusCode === 404) {
-      return DEFAULT_INDEX_PATTERN;
-    } else {
-      throw e;
-    }
-  }
-};
-
 const getMetric: (
   services: AlertServices,
   params: MetricExpressionParams,
   index: string,
+  timefield: string,
   groupBy: string | undefined,
   filterQuery: string | undefined
 ) => Promise<Record<string, number>> = async function(
-  { savedObjectsClient, callCluster },
+  { callCluster },
   params,
   index,
+  timefield,
   groupBy,
   filterQuery
 ) {
   const { aggType } = params;
-  const searchBody = getElasticsearchMetricQuery(params, groupBy, filterQuery);
+  const searchBody = getElasticsearchMetricQuery(params, timefield, groupBy, filterQuery);
 
   try {
     if (groupBy) {
@@ -262,7 +241,7 @@ const mapToConditionsLookup = (
       {}
     );
 
-export const createMetricThresholdExecutor = (alertUUID: string) =>
+export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: string) =>
   async function({ services, params }: AlertExecutorOptions) {
     const { criteria, groupBy, filterQuery, sourceId } = params as {
       criteria: MetricExpressionParams[];
@@ -271,11 +250,22 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
       sourceId?: string;
     };
 
+    const source = await libs.sources.getSourceConfiguration(
+      services.savedObjectsClient,
+      sourceId || 'default'
+    );
+    const config = source.configuration;
     const alertResults = await Promise.all(
-      criteria.map(criterion =>
-        (async () => {
-          const index = await getIndexPattern(services, sourceId);
-          const currentValues = await getMetric(services, criterion, index, groupBy, filterQuery);
+      criteria.map(criterion => {
+        return (async () => {
+          const currentValues = await getMetric(
+            services,
+            criterion,
+            config.fields.timestamp,
+            config.metricAlias,
+            groupBy,
+            filterQuery
+          );
           const { threshold, comparator } = criterion;
           const comparisonFunction = comparatorMap[comparator];
           return mapValues(currentValues, value => ({
@@ -285,13 +275,14 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
             isNoData: value === null,
             isError: value === undefined,
           }));
-        })()
-      )
+        })();
+      })
     );
 
+    // Because each alert result has the same group definitions, just grap the groups from the first one.
     const groups = Object.keys(alertResults[0]);
     for (const group of groups) {
-      const alertInstance = services.alertInstanceFactory(`${alertUUID}-${group}`);
+      const alertInstance = services.alertInstanceFactory(`${alertId}-${group}`);
 
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every(result => result[group].shouldFire);

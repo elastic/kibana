@@ -11,27 +11,29 @@ import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_
 import { CloudToolbarItems } from '../shared/components/cloud_toolbar_items';
 import { SnapshotMetricType } from '../types';
 
+export const ec2MetricTypes: SnapshotMetricType[] = [
+  'cpu',
+  'rx',
+  'tx',
+  'diskIOReadBytes',
+  'diskIOWriteBytes',
+];
+
+export const ec2groupByFields = [
+  'cloud.availability_zone',
+  'cloud.machine.type',
+  'aws.ec2.instance.image.id',
+  'aws.ec2.instance.state.name',
+];
+
 export const AwsEC2ToolbarItems = (props: ToolbarProps) => {
-  const metricTypes: SnapshotMetricType[] = [
-    'cpu',
-    'rx',
-    'tx',
-    'diskIOReadBytes',
-    'diskIOWriteBytes',
-  ];
-  const groupByFields = [
-    'cloud.availability_zone',
-    'cloud.machine.type',
-    'aws.ec2.instance.image.id',
-    'aws.ec2.instance.state.name',
-  ];
   return (
     <>
       <CloudToolbarItems {...props} />
       <MetricsAndGroupByToolbarItems
         {...props}
-        metricTypes={metricTypes}
-        groupByFields={groupByFields}
+        metricTypes={ec2MetricTypes}
+        groupByFields={ec2groupByFields}
       />
     </>
   );

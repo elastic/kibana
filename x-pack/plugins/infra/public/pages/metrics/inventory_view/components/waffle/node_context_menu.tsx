@@ -72,7 +72,7 @@ export const NodeContextMenu: React.FC<Props> = ({
       }
     } else {
       if (options.fields) {
-        const { id } = findInventoryFields(nodeType, options.fields);
+        const { id } = findInventoryFields(nodeType, options.fields); // TODO: This will give me what I need to be able to filter alerts
         return {
           label: <EuiCode>{id}</EuiCode>,
           value: node.id,

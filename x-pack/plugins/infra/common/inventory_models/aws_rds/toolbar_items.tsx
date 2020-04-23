@@ -11,26 +11,28 @@ import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_
 import { CloudToolbarItems } from '../shared/components/cloud_toolbar_items';
 import { SnapshotMetricType } from '../types';
 
+export const rdsMetricTypes: SnapshotMetricType[] = [
+  'cpu',
+  'rdsConnections',
+  'rdsQueriesExecuted',
+  'rdsActiveTransactions',
+  'rdsLatency',
+];
+
+export const rdsGroupByFields = [
+  'cloud.availability_zone',
+  'aws.rds.db_instance.class',
+  'aws.rds.db_instance.status',
+];
+
 export const AwsRDSToolbarItems = (props: ToolbarProps) => {
-  const metricTypes: SnapshotMetricType[] = [
-    'cpu',
-    'rdsConnections',
-    'rdsQueriesExecuted',
-    'rdsActiveTransactions',
-    'rdsLatency',
-  ];
-  const groupByFields = [
-    'cloud.availability_zone',
-    'aws.rds.db_instance.class',
-    'aws.rds.db_instance.status',
-  ];
   return (
     <>
       <CloudToolbarItems {...props} />
       <MetricsAndGroupByToolbarItems
         {...props}
-        metricTypes={metricTypes}
-        groupByFields={groupByFields}
+        metricTypes={rdsMetricTypes}
+        groupByFields={rdsGroupByFields}
       />
     </>
   );

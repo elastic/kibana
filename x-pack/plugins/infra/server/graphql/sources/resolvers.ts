@@ -93,12 +93,17 @@ export const createSourcesResolvers = (
 } => ({
   Query: {
     async source(root, args, { req }) {
-      const requestedSourceConfiguration = await libs.sources.getSourceConfiguration(req, args.id);
+      const requestedSourceConfiguration = await libs.sources.getSourceConfiguration(
+        req.core.savedObjects.client,
+        args.id
+      );
 
       return requestedSourceConfiguration;
     },
     async allSources(root, args, { req }) {
-      const sourceConfigurations = await libs.sources.getAllSourceConfigurations(req);
+      const sourceConfigurations = await libs.sources.getAllSourceConfigurations(
+        req.core.savedObjects.client
+      );
 
       return sourceConfigurations;
     },

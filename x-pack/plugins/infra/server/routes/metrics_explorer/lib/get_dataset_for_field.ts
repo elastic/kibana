@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
-import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
+import { ESSearchClient } from '../../../lib/snapshot';
 
 interface EventDatasetHit {
   _source: {
@@ -16,8 +15,7 @@ interface EventDatasetHit {
 }
 
 export const getDatasetForField = async (
-  framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  client: ESSearchClient,
   field: string,
   indexPattern: string
 ) => {
@@ -33,11 +31,8 @@ export const getDatasetForField = async (
     },
   };
 
-  const response = await framework.callWithRequest<EventDatasetHit>(
-    requestContext,
-    'search',
-    params
-  );
+  const response = await client<EventDatasetHit>(params);
+
   if (response.hits.total.value === 0) {
     return null;
   }

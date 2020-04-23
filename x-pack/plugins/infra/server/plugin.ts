@@ -109,7 +109,7 @@ export class InfraServerPlugin {
         sources,
       }
     );
-    const snapshot = new InfraSnapshot({ sources, framework });
+    const snapshot = new InfraSnapshot();
     const logEntryCategoriesAnalysis = new LogEntryCategoriesAnalysis({ framework });
     const logEntryRateAnalysis = new LogEntryRateAnalysis({ framework });
 
@@ -147,7 +147,7 @@ export class InfraServerPlugin {
     ]);
 
     initInfraServer(this.libs);
-    registerAlertTypes(plugins.alerting);
+    registerAlertTypes(plugins.alerting, this.libs);
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
