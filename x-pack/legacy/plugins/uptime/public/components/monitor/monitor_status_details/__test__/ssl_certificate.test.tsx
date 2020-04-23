@@ -55,7 +55,6 @@ describe('SSL Certificate component', () => {
     const component = mountWithIntl(<MonitorSSLCertificate tls={monitorTls} />);
 
     const badgeComponent = component.find(EuiBadge);
-    expect(component).toMatchSnapshot();
 
     expect(badgeComponent.props().color).toBe('warning');
 

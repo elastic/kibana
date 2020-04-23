@@ -141,7 +141,7 @@ exports[`FingerprintCol shallow renders expected elements for valid props 1`] = 
   <FingerprintCol
     cert={
       Object {
-        "certificate_not_valid_after": "2020-06-03T12:00:00.000Z",
+        "certificate_not_valid_after": "2020-08-23T10:42:27.221Z",
         "certificate_not_valid_before": "2018-05-08T00:00:00.000Z",
         "common_name": "github.com",
         "issuer": "DigiCert SHA2 Extended Validation Server CA",
