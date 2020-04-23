@@ -18,7 +18,7 @@ import { ErrorWithStatusCode } from '../../error_with_status_code';
  */
 export const SIZE = 100;
 
-interface ExportListItemsToStreamOptions {
+export interface ExportListItemsToStreamOptions {
   listId: string;
   dataClient: DataClient;
   listItemIndex: string;
@@ -58,7 +58,7 @@ export const exportListItemsToStream = ({
   });
 };
 
-interface WriteNextResponseOptions {
+export interface WriteNextResponseOptions {
   listId: string;
   dataClient: DataClient;
   listItemIndex: string;
@@ -94,11 +94,12 @@ export const getSearchAfterFromResponse = <T>({
   response,
 }: {
   response: SearchResponse<T>;
-}): string[] | undefined => {
-  return response.hits.hits[response.hits.hits.length - 1].sort;
-};
+}): string[] | undefined =>
+  response.hits.hits.length > 0
+    ? response.hits.hits[response.hits.hits.length - 1].sort
+    : undefined;
 
-interface GetResponseOptions {
+export interface GetResponseOptions {
   dataClient: DataClient;
   listId: string;
   searchAfter: undefined | string[];
@@ -129,7 +130,7 @@ export const getResponse = async ({
   });
 };
 
-interface WriteResponseHitsToStreamOptions {
+export interface WriteResponseHitsToStreamOptions {
   response: SearchResponse<SearchEsListItemSchema>;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
@@ -140,19 +141,20 @@ export const writeResponseHitsToStream = ({
   stream,
   stringToAppend,
 }: WriteResponseHitsToStreamOptions): void => {
+  const stringToAppendOrEmpty = stringToAppend ?? '';
+
   response.hits.hits.forEach(hit => {
     if (hit._source.ip != null) {
-      stream.push(hit._source.ip);
+      stream.push(`${hit._source.ip}${stringToAppendOrEmpty}`);
     } else if (hit._source.keyword != null) {
-      stream.push(hit._source.keyword);
+      stream.push(`${hit._source.keyword}${stringToAppendOrEmpty}`);
     } else {
       throw new ErrorWithStatusCode(
-        `Encountered an error where hit._source was an unexpected type: ${hit._source}`,
+        `Encountered an error where hit._source was an unexpected type: ${JSON.stringify(
+          hit._source
+        )}`,
         400
       );
-    }
-    if (stringToAppend != null) {
-      stream.push(stringToAppend);
     }
   });
 };

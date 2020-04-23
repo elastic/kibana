@@ -22,10 +22,6 @@ jest.mock('./get_list_item_by_values', () => ({
   getListItemByValues: jest.fn(),
 }));
 
-jest.mock('./create_list_items_bulk', () => ({
-  createListItemsBulk: jest.fn(),
-}));
-
 describe('write_lines_to_bulk_list_items', () => {
   beforeEach(() => {
     jest.clearAllMocks();
