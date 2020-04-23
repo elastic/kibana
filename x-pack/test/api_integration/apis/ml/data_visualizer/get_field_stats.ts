@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
         { type: 'number', cardinality: 0 },
         { fieldName: 'responsetime', type: 'number', cardinality: 4249 },
       ],
-      samplerShardSize: 1000, // No sampling, as otherwise counts could vary on each run.
+      samplerShardSize: -1, // No sampling, as otherwise counts could vary on each run.
       timeFieldName: '@timestamp',
       maxExamples: 10,
     },
@@ -161,6 +161,22 @@ export default ({ getService }: FtrProviderContext) => {
       },
     },
   };
+
+  async function runGetFieldStatsRequest(
+    index: string,
+    user: USER,
+    requestBody: object,
+    expectedResponsecode: number
+  ): Promise<any> {
+    const { body } = await supertest
+      .post(`/api/ml/data_visualizer/get_field_stats/${index}`)
+      .auth(user, ml.securityCommon.getPasswordForUser(user))
+      .set(COMMON_HEADERS)
+      .send(requestBody)
+      .expect(expectedResponsecode);
+
+    return body;
+  }
 
   function compareByFieldName(a: { fieldName: string }, b: { fieldName: string }) {
     if (a.fieldName < b.fieldName) {
@@ -179,15 +195,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it(`${metricFieldsTestData.testTitle}`, async () => {
-      const { body } = await supertest
-        .post(`/api/ml/data_visualizer/get_field_stats/${metricFieldsTestData.index}`)
-        .auth(
-          metricFieldsTestData.user,
-          ml.securityCommon.getPasswordForUser(metricFieldsTestData.user)
-        )
-        .set(COMMON_HEADERS)
-        .send(metricFieldsTestData.requestBody)
-        .expect(metricFieldsTestData.expected.responseCode);
+      const body = await runGetFieldStatsRequest(
+        metricFieldsTestData.index,
+        metricFieldsTestData.user,
+        metricFieldsTestData.requestBody,
+        metricFieldsTestData.expected.responseCode
+      );
 
       // Cannot verify median and percentiles responses as the ES percentiles agg is non-deterministic.
       const expected = metricFieldsTestData.expected;
@@ -205,15 +218,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it(`${nonMetricFieldsTestData.testTitle}`, async () => {
-      const { body } = await supertest
-        .post(`/api/ml/data_visualizer/get_field_stats/${nonMetricFieldsTestData.index}`)
-        .auth(
-          nonMetricFieldsTestData.user,
-          ml.securityCommon.getPasswordForUser(nonMetricFieldsTestData.user)
-        )
-        .set(COMMON_HEADERS)
-        .send(nonMetricFieldsTestData.requestBody)
-        .expect(nonMetricFieldsTestData.expected.responseCode);
+      const body = await runGetFieldStatsRequest(
+        nonMetricFieldsTestData.index,
+        nonMetricFieldsTestData.user,
+        nonMetricFieldsTestData.requestBody,
+        nonMetricFieldsTestData.expected.responseCode
+      );
 
       // Sort the fields in the response before validating.
       const expectedRspFields = nonMetricFieldsTestData.expected.responseBody.sort(
@@ -224,12 +234,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it(`${errorTestData.testTitle}`, async () => {
-      const { body } = await supertest
-        .post(`/api/ml/data_visualizer/get_field_stats/${errorTestData.index}`)
-        .auth(errorTestData.user, ml.securityCommon.getPasswordForUser(errorTestData.user))
-        .set(COMMON_HEADERS)
-        .send(errorTestData.requestBody)
-        .expect(errorTestData.expected.responseCode);
+      const body = await runGetFieldStatsRequest(
+        errorTestData.index,
+        errorTestData.user,
+        errorTestData.requestBody,
+        errorTestData.expected.responseCode
+      );
 
       expect(body.error).to.eql(errorTestData.expected.responseBody.error);
       expect(body.message).to.eql(errorTestData.expected.responseBody.message);

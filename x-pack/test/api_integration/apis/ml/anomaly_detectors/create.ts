@@ -19,15 +19,15 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
-  const jobId = `fq_single_1_${Date.now()}`;
+  const jobId = `fq_single_${Date.now()}`;
 
   const testDataList = [
     {
       testTitle: 'ML Poweruser creates a single metric job',
       user: USER.ML_POWERUSER,
-      jobId,
+      jobId: `${jobId}_1`,
       requestBody: {
-        job_id: jobId,
+        job_id: `${jobId}_1`,
         description:
           'Single metric job based on the farequote dataset with 30m bucketspan and mean(responsetime)',
         groups: ['automated', 'farequote', 'single-metric'],
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         responseBody: {
-          job_id: jobId,
+          job_id: `${jobId}_1`,
           job_type: 'anomaly_detector',
           groups: ['automated', 'farequote', 'single-metric'],
           description:
@@ -74,9 +74,9 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitle: 'ML viewer cannot create a job',
       user: USER.ML_VIEWER,
-      jobId,
+      jobId: `${jobId}_2`,
       requestBody: {
-        job_id: jobId,
+        job_id: `${jobId}_2`,
         description:
           'Single metric job based on the farequote dataset with 30m bucketspan and mean(responsetime)',
         groups: ['automated', 'farequote', 'single-metric'],

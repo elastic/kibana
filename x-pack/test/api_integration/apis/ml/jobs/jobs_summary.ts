@@ -203,6 +203,21 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
+  async function runJobsSummaryRequest(
+    user: USER,
+    requestBody: object,
+    expectedResponsecode: number
+  ): Promise<any> {
+    const { body } = await supertest
+      .post('/api/ml/jobs/jobs_summary')
+      .auth(user, ml.securityCommon.getPasswordForUser(user))
+      .set(COMMON_HEADERS)
+      .send(requestBody)
+      .expect(expectedResponsecode);
+
+    return body;
+  }
+
   function compareById(a: { id: string }, b: { id: string }) {
     if (a.id < b.id) {
       return -1;
@@ -245,12 +260,11 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataListNoJobId) {
       describe('gets job summary with no job IDs supplied', function() {
         it(`${testData.testTitle}`, async () => {
-          const { body } = await supertest
-            .post('/api/ml/jobs/jobs_summary')
-            .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-            .set(COMMON_HEADERS)
-            .send(testData.requestBody)
-            .expect(testData.expected.responseCode);
+          const body = await runJobsSummaryRequest(
+            testData.user,
+            testData.requestBody,
+            testData.expected.responseCode
+          );
 
           // Validate the important parts of the response.
           const expectedResponse = testData.expected.responseBody;
@@ -283,12 +297,11 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataListWithJobId) {
       describe('gets job summary with job ID supplied', function() {
         it(`${testData.testTitle}`, async () => {
-          const { body } = await supertest
-            .post('/api/ml/jobs/jobs_summary')
-            .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-            .set(COMMON_HEADERS)
-            .send(testData.requestBody)
-            .expect(testData.expected.responseCode);
+          const body = await runJobsSummaryRequest(
+            testData.user,
+            testData.requestBody,
+            testData.expected.responseCode
+          );
 
           // Validate the important parts of the response.
           const expectedResponse = testData.expected.responseBody;
@@ -343,12 +356,11 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataListNegative) {
       describe('rejects request', function() {
         it(testData.testTitle, async () => {
-          const { body } = await supertest
-            .post('/api/ml/jobs/jobs_summary')
-            .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-            .set(COMMON_HEADERS)
-            .send(testData.requestBody)
-            .expect(testData.expected.responseCode);
+          const body = await runJobsSummaryRequest(
+            testData.user,
+            testData.requestBody,
+            testData.expected.responseCode
+          );
 
           expect(body)
             .to.have.property('error')

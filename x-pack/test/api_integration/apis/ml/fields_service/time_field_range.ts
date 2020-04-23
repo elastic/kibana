@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);
 
-        if (body.statusCode === 200) {
+        if (body.error === undefined) {
           expect(body).to.eql(testData.expected.responseBody);
         } else {
           expect(body.error).to.eql(testData.expected.responseBody.error);
