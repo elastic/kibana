@@ -62,6 +62,7 @@ export class VectorStyleEditor extends Component {
         name: field.getName(),
         origin: field.getOrigin(),
         type: await field.getDataType(),
+        supportsAutoDomain: field.supportsAutoDomain(),
       };
     };
 
@@ -109,7 +110,9 @@ export class VectorStyleEditor extends Component {
   }
 
   _getOrdinalFields() {
-    return [...this.state.dateFields, ...this.state.numberFields];
+    return [...this.state.dateFields, ...this.state.numberFields].filter(field => {
+      return field.supportsAutoDomain;
+    });
   }
 
   _handleSelectedFeatureChange = selectedFeature => {

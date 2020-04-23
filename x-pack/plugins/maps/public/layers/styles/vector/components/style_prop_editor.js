@@ -68,6 +68,7 @@ export class StylePropEditor extends Component {
     ];
 
     return (
+
       <EuiSelect
         options={options}
         value={this.props.styleProperty.isDynamic() ? STYLE_TYPE.DYNAMIC : STYLE_TYPE.STATIC}

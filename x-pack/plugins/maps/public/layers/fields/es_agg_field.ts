@@ -116,6 +116,10 @@ export class ESAggField implements IESAggField {
     return !isMetricCountable(this.getAggType());
   }
 
+  supportsAutoDomain(): boolean {
+    return true;
+  }
+
   canValueBeFormatted(): boolean {
     // Do not use field formatters for counting metrics
     return ![AGG_TYPE.COUNT, AGG_TYPE.UNIQUE_COUNT].includes(this.getAggType());

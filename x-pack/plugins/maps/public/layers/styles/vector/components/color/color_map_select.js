@@ -89,7 +89,8 @@ export class ColorMapSelect extends Component {
   };
 
   _renderColorStopsInput() {
-    if (!this.props.useCustomColorMap) {
+    console.log('render color stops inpiut')
+    if (this.props.supportsAutoDomain) {
       return null;
     }
 
@@ -102,7 +103,8 @@ export class ColorMapSelect extends Component {
           swatches={this.props.swatches}
         />
       );
-    } else
+    } else {
+      console.log('render colors', this.state.customColorMap);
       colorStopEditor = (
         <ColorStopsCategorical
           colorStops={this.state.customColorMap}
@@ -112,6 +114,7 @@ export class ColorMapSelect extends Component {
           swatches={this.props.swatches}
         />
       );
+    }
 
     return (
       <EuiFlexGroup>
@@ -127,11 +130,11 @@ export class ColorMapSelect extends Component {
         inputDisplay: this.props.customOptionLabel,
         'data-test-subj': `colorMapSelectOption_${CUSTOM_COLOR_MAP}`,
       },
-      ...this.props.colorMapOptions,
+      ...(this.props.supportsAutoDomain ? this.props.colorMapOptions : []),
     ];
 
     let valueOfSelected;
-    if (this.props.useCustomColorMap) {
+    if (this.props.useCustomColorMap || !this.props.supportsAutoDomain) {
       valueOfSelected = CUSTOM_COLOR_MAP;
     } else {
       valueOfSelected = this.props.colorMapOptions.find(option => option.value === this.props.color)
@@ -148,6 +151,7 @@ export class ColorMapSelect extends Component {
         {toggle}
         <EuiFlexItem>
           <EuiSuperSelect
+            disabled={!this.props.supportsAutoDomain}
             compressed
             options={colorMapOptionsWithCustom}
             onChange={this._onColorMapSelect}

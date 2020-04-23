@@ -46,4 +46,8 @@ export class MVTField extends AbstractField implements IField {
   async getLabel(): Promise<string> {
     return this.getName();
   }
+
+  supportsAutoDomain() {
+    return false;
+  }
 }

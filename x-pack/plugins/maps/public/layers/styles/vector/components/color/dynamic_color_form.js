@@ -85,11 +85,14 @@ export function DynamicColorForm({
       return null;
     }
 
+    console.log('f', field, fields);
+
     const showColorMapTypeToggle = !CATEGORICAL_DATA_TYPES.includes(field.type);
 
     if (styleProperty.isOrdinal()) {
       return (
         <ColorMapSelect
+          supportsAutoDomain={field.supportsAutoDomain}
           colorMapOptions={COLOR_GRADIENTS}
           customOptionLabel={i18n.translate('xpack.maps.style.customColorRampLabel', {
             defaultMessage: 'Custom color ramp',
@@ -99,7 +102,7 @@ export function DynamicColorForm({
           colorMapType={COLOR_MAP_TYPE.ORDINAL}
           color={styleOptions.color}
           customColorMap={styleOptions.customColorRamp}
-          useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
+          useCustomColorMap={!field.supportsAutoDomain || _.get(styleOptions, 'useCustomColorRamp', false)}
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
           swatches={swatches}
@@ -108,6 +111,7 @@ export function DynamicColorForm({
     } else if (styleProperty.isCategorical()) {
       return (
         <ColorMapSelect
+          supportsAutoDomain={field.supportsAutoDomain}
           colorMapOptions={COLOR_PALETTES}
           customOptionLabel={i18n.translate('xpack.maps.style.customColorPaletteLabel', {
             defaultMessage: 'Custom color palette',
@@ -117,7 +121,7 @@ export function DynamicColorForm({
           colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
           color={styleOptions.colorCategory}
           customColorMap={styleOptions.customColorPalette}
-          useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
+          useCustomColorMap={!field.supportsAutoDomain || _.get(styleOptions, 'useCustomColorPalette', false)}
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
           swatches={swatches}

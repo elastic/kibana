@@ -20,6 +20,8 @@ export interface IField {
   isValid(): boolean;
   getOrdinalFieldMetaRequest(): Promise<unknown>;
   getCategoricalFieldMetaRequest(): Promise<unknown>;
+  supportsFieldMeta(): boolean;
+  supportsAutoDomain(): boolean;
 }
 
 export class AbstractField implements IField {
@@ -70,6 +72,13 @@ export class AbstractField implements IField {
 
   supportsFieldMeta(): boolean {
     return false;
+  }
+
+  supportsAutoDomain(): boolean {
+    // Determines whether MAps can determine the domain of the field-values
+    // if this is not the case (e.g. for non-geojson data), than styling properties that require the domain to be known
+    // cannot use this property.
+    return true;
   }
 
   async getOrdinalFieldMetaRequest(): Promise<unknown> {
