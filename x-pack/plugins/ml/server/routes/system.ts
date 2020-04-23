@@ -10,7 +10,7 @@ import { Request } from 'hapi';
 import { RequestHandlerContext } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../client/log';
-import { capabilitiesProvider } from '../lib/check_capabilities';
+import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { RouteInitialization, SystemRouteDeps } from '../types';
 
@@ -109,15 +109,10 @@ export function systemRoutes(
   router.get(
     {
       path: '/api/ml/ml_capabilities',
-      validate: {
-        query: schema.object({
-          ignoreSpaces: schema.maybe(schema.string()),
-        }),
-      },
+      validate: false,
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
-        const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
         // if spaces is disabled force isMlEnabledInSpace to be true
         const { isMlEnabledInSpace } =
           spaces !== undefined
@@ -133,8 +128,7 @@ export function systemRoutes(
           context.ml!.mlClient.callAsCurrentUser,
           mlCapabilities,
           mlLicense,
-          isMlEnabledInSpace,
-          ignoreSpaces
+          isMlEnabledInSpace
         );
         return response.ok({
           body: await getCapabilities(),

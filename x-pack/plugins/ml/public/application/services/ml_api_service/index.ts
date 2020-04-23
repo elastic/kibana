@@ -311,7 +311,6 @@ export const ml = {
     return http<MlCapabilitiesResponse>({
       path: `${basePath()}/ml_capabilities`,
       method: 'GET',
-      query: { ignoreSpaces: true },
     });
   },
 

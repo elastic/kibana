@@ -11,7 +11,7 @@ import { CloudSetup } from '../../../../cloud/server';
 import { LicenseCheck } from '../license_checks';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
-import { capabilitiesProvider } from '../../lib/check_capabilities';
+import { capabilitiesProvider } from '../../lib/capabilities';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';
@@ -21,7 +21,7 @@ export interface MlSystemProvider {
     callAsCurrentUser: APICaller,
     request: KibanaRequest
   ): {
-    mlCapabilities(ignoreSpaces?: boolean): Promise<MlCapabilitiesResponse>;
+    mlCapabilities(): Promise<MlCapabilitiesResponse>;
     mlInfo(): Promise<MlInfoResponse>;
     mlSearch<T>(searchParams: SearchParams): Promise<SearchResponse<T>>;
   };
@@ -38,7 +38,7 @@ export function getMlSystemProvider(
   return {
     mlSystemProvider(callAsCurrentUser: APICaller, request: KibanaRequest) {
       return {
-        async mlCapabilities(ignoreSpaces?: boolean) {
+        async mlCapabilities() {
           isMinimumLicense();
 
           const { isMlEnabledInSpace } =
@@ -55,8 +55,7 @@ export function getMlSystemProvider(
             callAsCurrentUser,
             mlCapabilities,
             mlLicense,
-            isMlEnabledInSpace,
-            ignoreSpaces
+            isMlEnabledInSpace
           );
           return getCapabilities();
         },

@@ -47,6 +47,8 @@ export type UserMlCapabilities = typeof userMlCapabilities;
 export type AdminMlCapabilities = typeof adminMlCapabilities;
 export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
 
+export const basicLicenseMlCapabilities = ['canFindFileStructure'] as Array<keyof MlCapabilities>;
+
 export function getDefaultCapabilities(): MlCapabilities {
   return {
     ...userMlCapabilities,

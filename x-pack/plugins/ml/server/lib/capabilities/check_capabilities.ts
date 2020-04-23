@@ -7,7 +7,6 @@
 import { IScopedClusterClient } from 'kibana/server';
 import {
   MlCapabilities,
-  getDefaultCapabilities,
   adminMlCapabilities,
   MlCapabilitiesResponse,
 } from '../../../common/types/capabilities';
@@ -16,10 +15,9 @@ import { MlLicense } from '../../../common/license';
 
 export function capabilitiesProvider(
   callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
-  mlCapabilities: MlCapabilities,
+  capabilities: MlCapabilities,
   mlLicense: MlLicense,
-  isMlEnabledInSpace: () => Promise<boolean>,
-  ignoreSpaces: boolean = false
+  isMlEnabledInSpace: () => Promise<boolean>
 ) {
   const { isUpgradeInProgress } = upgradeCheckProvider(callAsCurrentUser);
   async function getCapabilities(): Promise<MlCapabilitiesResponse> {
@@ -27,12 +25,6 @@ export function capabilitiesProvider(
     const isPlatinumOrTrialLicense = mlLicense.isFullLicense();
     const mlFeatureEnabledInSpace = await isMlEnabledInSpace();
 
-    const basicMlCapabilities = {
-      ...getDefaultCapabilities(),
-      canFindFileStructure: mlCapabilities.canFindFileStructure,
-    };
-
-    const capabilities = isPlatinumOrTrialLicense ? mlCapabilities : basicMlCapabilities;
     if (upgradeInProgress === true) {
       // if an upgrade is in progress, set all admin capabilities to false
       disableAdminPrivileges(capabilities);

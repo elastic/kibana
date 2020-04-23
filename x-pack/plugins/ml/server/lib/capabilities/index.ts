@@ -5,3 +5,4 @@
  */
 
 export { capabilitiesProvider } from './check_capabilities';
+export { setupCapabilitiesSwitcher } from './capabilities_switcher';

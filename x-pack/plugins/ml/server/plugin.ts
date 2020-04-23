@@ -46,6 +46,7 @@ import { MlLicense } from '../common/license';
 import { MlServerLicense } from './lib/license';
 import { createSharedServices, SharedServices } from './shared_services';
 import { userMlCapabilities, adminMlCapabilities } from '../common/types/capabilities';
+import { setupCapabilitiesSwitcher } from './lib/capabilities';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -124,6 +125,9 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     this.mlLicense.setup(plugins.licensing.license$, [
       (mlLicense: MlLicense) => initSampleDataSets(mlLicense, plugins),
     ]);
+
+    // initialize capabilities switcher to add license filter to ml capabilities
+    setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
 
     // Can access via router's handler function 'context' parameter - context.ml.mlClient
     const mlClient = coreSetup.elasticsearch.createClient(PLUGIN_ID, {
