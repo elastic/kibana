@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
-import { IAppSearchProps } from '../../index';
+import { KibanaContext, IKibanaContext } from '../../../index';
 
 import EnginesIcon from '../../assets/engine.svg';
 import MetaEnginesIcon from '../../assets/meta_engine.svg';
@@ -27,8 +27,8 @@ import { EngineTable } from './engine_table';
 
 import './engine_overview.scss';
 
-export const EngineOverview: ReactFC<IAppSearchProps> = props => {
-  const { http, appSearchUrl } = props;
+export const EngineOverview: ReactFC<> = () => {
+  const { http } = useContext(KibanaContext) as IKibanaContext;
 
   const [isLoading, setIsLoading] = useState(true);
   const [hasNoAccount, setHasNoAccount] = useState(false);
@@ -88,17 +88,17 @@ export const EngineOverview: ReactFC<IAppSearchProps> = props => {
   }, [metaEnginesPage]); // eslint-disable-line
   // TODO: https://reactjs.org/docs/hooks-faq.html#is-it-safe-to-omit-functions-from-the-list-of-dependencies
 
-  if (hasErrorConnecting) return <ErrorState {...props} />;
-  if (hasNoAccount) return <NoUserState {...props} />;
-  if (isLoading) return <LoadingState {...props} />;
-  if (!engines.length) return <EmptyState {...props} />;
+  if (hasErrorConnecting) return <ErrorState />;
+  if (hasNoAccount) return <NoUserState />;
+  if (isLoading) return <LoadingState />;
+  if (!engines.length) return <EmptyState />;
 
   return (
     <EuiPage restrictWidth className="engine-overview">
-      <SetBreadcrumbs {...props} isRoot />
+      <SetBreadcrumbs isRoot />
 
       <EuiPageBody>
-        <EngineOverviewHeader appSearchUrl={appSearchUrl} />
+        <EngineOverviewHeader />
 
         <EuiPageContent>
           <EuiPageContentHeader>
@@ -117,7 +117,6 @@ export const EngineOverview: ReactFC<IAppSearchProps> = props => {
                 pageIndex: enginesPage - 1,
                 onPaginate: setEnginesPage,
               }}
-              appSearchUrl={appSearchUrl}
             />
           </EuiPageContentBody>
 
@@ -140,7 +139,6 @@ export const EngineOverview: ReactFC<IAppSearchProps> = props => {
                     pageIndex: metaEnginesPage - 1,
                     onPaginate: setMetaEnginesPage,
                   }}
-                  appSearchUrl={appSearchUrl}
                 />
               </EuiPageContentBody>
             </>

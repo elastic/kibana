@@ -4,23 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
-import { IAppSearchProps } from '../../index';
+import { KibanaContext, IKibanaContext } from '../../../index';
 
 import { EngineOverviewHeader } from '../engine_overview_header';
 
 import './empty_states.scss';
 
-export const EmptyState: React.FC<IAppSearchProps> = ({ appSearchUrl, setBreadcrumbs }) => {
+export const EmptyState: React.FC<> = () => {
+  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+
   return (
     <EuiPage restrictWidth className="empty-state">
-      <SetBreadcrumbs setBreadcrumbs={setBreadcrumbs} isRoot />
+      <SetBreadcrumbs isRoot />
 
       <EuiPageBody>
-        <EngineOverviewHeader appSearchUrl={appSearchUrl} />
+        <EngineOverviewHeader />
         <EuiPageContent>
           <EuiEmptyPrompt
             iconType="eyeClosed"
@@ -36,7 +38,7 @@ export const EmptyState: React.FC<IAppSearchProps> = ({ appSearchUrl, setBreadcr
               <EuiButton
                 iconType="popout"
                 fill
-                href={`${appSearchUrl}/as/engines/new`}
+                href={`${enterpriseSearchUrl}/as/engines/new`}
                 target="_blank"
               >
                 Create your first Engine

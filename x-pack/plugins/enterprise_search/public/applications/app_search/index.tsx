@@ -4,32 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { Route, Redirect } from 'react-router-dom';
 
-import { HttpHandler } from 'src/core/public';
-import { TSetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { KibanaContext, IKibanaContext } from '../index';
 
 import { SetupGuide } from './components/setup_guide';
 import { EngineOverview } from './components/engine_overview';
 
-export interface IAppSearchProps {
-  appSearchUrl?: string;
-  http(): HttpHandler;
-  setBreadCrumbs(): TSetBreadcrumbs;
-}
+export const AppSearch: React.FC<> = () => {
+  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
 
-export const AppSearch: React.FC<IAppSearchProps> = props => (
-  <>
-    <Route exact path="/app_search">
-      {!props.appSearchUrl ? (
-        <Redirect to="/app_search/setup_guide" />
-      ) : (
-        <EngineOverview {...props} />
-      )}
-    </Route>
-    <Route path="/app_search/setup_guide">
-      <SetupGuide {...props} />
-    </Route>
-  </>
-);
+  return (
+    <>
+      <Route exact path="/app_search">
+        {!enterpriseSearchUrl ? <Redirect to="/app_search/setup_guide" /> : <EngineOverview />}
+      </Route>
+      <Route path="/app_search/setup_guide">
+        <SetupGuide />
+      </Route>
+    </>
+  );
+};

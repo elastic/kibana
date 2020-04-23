@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiButton } from '@elastic/eui';
 
-interface IEngineOverviewHeader {
-  appSearchUrl?: string;
-}
+import { KibanaContext, IKibanaContext } from '../../../index';
 
-export const EngineOverviewHeader: React.FC<IEngineOverviewHeader> = ({ appSearchUrl }) => {
+export const EngineOverviewHeader: React.FC<> = () => {
+  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+
   const buttonProps = {
     fill: true,
     iconType: 'popout',
   };
-  if (appSearchUrl) {
-    buttonProps.href = `${appSearchUrl}/as`;
+  if (enterpriseSearchUrl) {
+    buttonProps.href = `${enterpriseSearchUrl}/as`;
     buttonProps.target = '_blank';
   } else {
     buttonProps.isDisabled = true;

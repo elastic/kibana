@@ -28,10 +28,10 @@ import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kiban
 import GettingStarted from '../../assets/getting_started.png';
 import './setup_guide.scss';
 
-export const SetupGuide: React.FC<> = props => {
+export const SetupGuide: React.FC<> = () => {
   return (
     <EuiPage className="setup-guide">
-      <SetBreadcrumbs {...props} text="Setup Guide" />
+      <SetBreadcrumbs text="Setup Guide" />
       <EuiPageSideBar>
         <EuiText color="subdued" size="s">
           <strong>Setup Guide</strong>

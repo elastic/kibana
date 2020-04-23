@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
+import { KibanaContext, IKibanaContext } from '../../index';
 import { appSearchBreadcrumbs } from './generate_breadcrumbs';
 
 /**
@@ -18,16 +19,13 @@ export type TSetBreadcrumbs = (breadcrumbs: EuiBreadcrumb[]) => void;
 
 interface ISetBreadcrumbsProps {
   text: string;
-  setBreadcrumbs(): setBreadcrumbs;
   isRoot?: boolean;
 }
 
-export const SetAppSearchBreadcrumbs: React.FC<ISetBreadcrumbsProps> = ({
-  text,
-  setBreadcrumbs,
-  isRoot,
-}) => {
+export const SetAppSearchBreadcrumbs: React.FC<ISetBreadcrumbsProps> = ({ text, isRoot }) => {
   const history = useHistory();
+  const { setBreadcrumbs } = useContext(KibanaContext) as IKibanaContext;
+
   const crumb = isRoot ? [] : [{ text, path: history.location.pathname }];
 
   useEffect(() => {
