@@ -18,7 +18,7 @@
  */
 
 import { flow, get } from 'lodash';
-import { SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationFn, SavedObjectSanitizedDoc } from 'kibana/server';
 import { DEFAULT_QUERY_LANGUAGE } from '../../common';
 
 const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
@@ -55,7 +55,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
-const migrateIndexPattern: SavedObjectMigrationFn = doc => {
+const migrateIndexPattern: SavedObjectMigrationFn<SavedObjectSanitizedDoc> = doc => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return doc;
@@ -68,7 +68,7 @@ const migrateIndexPattern: SavedObjectMigrationFn = doc => {
     return doc;
   }
 
-  if (searchSource.index && Array.isArray(doc.references)) {
+  if (searchSource.index) {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
@@ -97,13 +97,12 @@ const migrateIndexPattern: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
-const setNewReferences: SavedObjectMigrationFn = (doc, context) => {
-  doc.references = doc.references || [];
-  // Migrate index pattern
-  return migrateIndexPattern(doc, context);
-};
+const setNewReferences: SavedObjectMigrationFn = (doc, context) => ({
+  ...doc,
+  references: doc.references || [],
+});
 
-const migrateSearchSortToNestedArray: SavedObjectMigrationFn = doc => {
+const migrateSearchSortToNestedArray: SavedObjectMigrationFn<SavedObjectSanitizedDoc> = doc => {
   const sort = get(doc, 'attributes.sort');
   if (!sort) return doc;
 
@@ -123,6 +122,6 @@ const migrateSearchSortToNestedArray: SavedObjectMigrationFn = doc => {
 
 export const searchSavedObjectTypeMigrations = {
   '6.7.2': flow<SavedObjectMigrationFn>(migrateMatchAllQuery),
-  '7.0.0': flow<SavedObjectMigrationFn>(setNewReferences),
+  '7.0.0': flow<SavedObjectMigrationFn>(setNewReferences, migrateIndexPattern),
   '7.4.0': flow<SavedObjectMigrationFn>(migrateSearchSortToNestedArray),
 };

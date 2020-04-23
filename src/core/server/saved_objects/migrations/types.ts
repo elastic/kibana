@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectUnsanitizedDoc } from '../serialization';
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../serialization';
 import { SavedObjectsMigrationLogger } from './core/migration_logger';
 
 /**
@@ -39,10 +39,9 @@ import { SavedObjectsMigrationLogger } from './core/migration_logger';
  *
  * @public
  */
-export type SavedObjectMigrationFn = (
-  doc: SavedObjectUnsanitizedDoc,
-  context: SavedObjectMigrationContext
-) => SavedObjectUnsanitizedDoc;
+export type SavedObjectMigrationFn<
+  TDoc extends SavedObjectUnsanitizedDoc | SavedObjectSanitizedDoc = SavedObjectUnsanitizedDoc
+> = (doc: TDoc, context: SavedObjectMigrationContext) => TDoc;
 
 /**
  * Migration context provided when invoking a {@link SavedObjectMigrationFn | migration handler}
