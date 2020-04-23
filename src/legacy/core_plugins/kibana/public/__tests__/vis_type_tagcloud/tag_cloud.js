@@ -21,7 +21,6 @@ import expect from '@kbn/expect';
 import _ from 'lodash';
 import d3 from 'd3';
 
-import { TagCloud } from '../tag_cloud';
 import { fromNode, delay } from 'bluebird';
 import { ImageComparator } from 'test_utils/image_comparator';
 import simpleloadPng from './simpleload.png';
@@ -29,6 +28,9 @@ import simpleloadPng from './simpleload.png';
 // Replace with mock when converting to jest tests
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { seedColors } from '../../../../../../plugins/charts/public/services/colors/seed_colors';
+// Will be replaced with new path when tests are moved
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TagCloud } from '../../../../../../plugins/vis_type_tagcloud/public/components/tag_cloud';
 
 describe('tag cloud tests', function() {
   const minValue = 1;
