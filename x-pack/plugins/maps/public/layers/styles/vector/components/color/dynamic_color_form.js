@@ -126,6 +126,7 @@ export function DynamicColorForm({
     }
   };
 
+  console.log('render color select');
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">

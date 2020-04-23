@@ -9,19 +9,21 @@ import uuid from 'uuid/v4';
 import { AbstractSource, ImmutableSourceProperty } from '../source';
 import { TiledVectorLayer } from '../../tiled_vector_layer';
 import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
-import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
+import { FIELD_ORIGIN, MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
   MapExtent,
+  MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { VectorLayerArguments } from '../../vector_layer';
+import { MVTField } from '../../fields/mvt_field';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -46,7 +48,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
       layerName,
       minSourceZoom: Math.max(MIN_ZOOM, minSourceZoom),
       maxSourceZoom: Math.min(MAX_ZOOM, maxSourceZoom),
-      fields: fields ?? [],
+      fields: fields ? fields : [],
     };
   }
 
@@ -56,7 +58,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     sourceDescriptor: TiledSingleLayerVectorSourceDescriptor,
     inspectorAdapters?: object
   ) {
-    console.log('crearte source', sourceDescriptor);
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
@@ -66,13 +67,37 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   getFieldNames(): string[] {
-    console.log('need to implement this...');
-    return [];
+    console.log('getfn');
+    return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
+      return field.name;
+    });
+  }
+
+  getFieldByName(fieldName: string): IField | null {
+    return this.createField({ fieldName });
+  }
+
+  createField({ fieldName }: { fieldName: string }): IField {
+    const field = this._descriptor.fields.find((f: MVTFieldDescriptor) => {
+      return f.name === fieldName;
+    });
+    return new MVTField({
+      fieldName: field.name,
+      type: field.type,
+      source: this,
+      origin: FIELD_ORIGIN.SOURCE,
+    });
   }
 
   async getFields(): Promise<IField[]> {
-    console.log('also need to implement this');
-    return [];
+    return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
+      return new MVTField({
+        fieldName: field.name,
+        type: field.type,
+        source: this,
+        origin: FIELD_ORIGIN.SOURCE,
+      });
+    });
   }
 
   createDefaultLayer(options?: Partial<VectorLayerDescriptor>): TiledVectorLayer {
@@ -127,7 +152,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
         label: i18n.translate('xpack.maps.source.MVTSingleLayerVectorSource.fields', {
           defaultMessage: 'Fields',
         }),
-        value: (this._descriptor.fields ?? []).join(', '),
+        value: this._descriptor.fields.map(({ name, type }) => `${name}(${type})`).join(', '),
       },
     ];
   }
@@ -168,10 +193,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
       minLat: -90,
       minLon: -180,
     };
-  }
-
-  getFieldByName(fieldName: string): IField | null {
-    return null;
   }
 
   getSyncMeta(): VectorSourceSyncMeta {

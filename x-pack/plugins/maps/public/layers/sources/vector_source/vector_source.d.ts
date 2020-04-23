@@ -36,6 +36,7 @@ export interface IVectorSource extends ISource {
   getSyncMeta(): VectorSourceSyncMeta;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
+  createField({ fieldName }: { fieldName: string }): IField;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -53,6 +54,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   canFormatFeatureProperties(): boolean;
   getApplyGlobalQuery(): boolean;
   getFieldNames(): string[];
+  createField({ fieldName }: { fieldName: string }): IField;
 }
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {
