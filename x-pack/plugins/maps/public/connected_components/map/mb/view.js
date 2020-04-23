@@ -114,7 +114,6 @@ export class MBMapContainer extends React.Component {
 
   async _createMbMapInstance() {
     const initialView = await getInitialView(this.props.goto, this.props.settings);
-    console.log(initialView);
     return new Promise(resolve => {
       const mbStyle = {
         version: 8,

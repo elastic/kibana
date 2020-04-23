@@ -13,7 +13,7 @@ export async function getInitialView(
   settings: MapSettings
 ): Promise<MapCenterAndZoom | null> {
   if (settings.initialLocation === INITIAL_LOCATION.LAST_SAVED_LOCATION) {
-    return goto ? goto.center : null;
+    return goto && goto.center ? goto.center : null;
   } else if (settings.initialLocation === INITIAL_LOCATION.FIXED_LOCATION) {
     return {
       lat: settings.initialLat,
@@ -39,5 +39,7 @@ export async function getInitialView(
         }
       );
     });
+  } else {
+    return null;
   }
 }

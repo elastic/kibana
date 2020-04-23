@@ -57,9 +57,11 @@ export function NavigationPanel({ settings, updateMapSetting }: Props) {
     updateMapSetting('initialLocation', optionId);
   };
 
-  const onInitialLatChange = (e: ChangeEvent<HTMLInputElement>) => {
-    let value = event.target.valueAsNumber;
-    if (value < -90) {
+  const onInitialLatChange = (event: ChangeEvent<HTMLInputElement>) => {
+    let value = parseFloat(event.target.value);
+    if (isNaN(value)) {
+      value = 0;
+    } else if (value < -90) {
       value = -90;
     } else if (value > 90) {
       value = 90;
@@ -68,8 +70,10 @@ export function NavigationPanel({ settings, updateMapSetting }: Props) {
   };
 
   const onInitialLonChange = (event: ChangeEvent<HTMLInputElement>) => {
-    let value = event.target.valueAsNumber;
-    if (value < -180) {
+    let value = parseFloat(event.target.value);
+    if (isNaN(value)) {
+      value = 0;
+    } else if (value < -180) {
       value = -180;
     } else if (value > 180) {
       value = 180;
