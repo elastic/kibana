@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SortOrder, CursorDirection } from '../graphql/types';
+import { CursorDirection, SortOrder } from '../runtime_types';
 
 /**
  * The Uptime UI utilizes a settings context, the defaults for which are stored here.
  */
 export const CONTEXT_DEFAULTS = {
   /**
-   * The application cannot assume a basepath.
+   * The application cannot assume a basePath.
    */
   BASE_PATH: '',
 

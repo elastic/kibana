@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
 import { extractParentEntityID } from './utils/normalize';
 import { LifecycleQuery } from './queries/lifecycle';
 import { ResolverEvent } from '../../../common/types';
+import { EndpointAppContext } from '../../types';
 
 interface LifecycleQueryParams {
   ancestors: number;
@@ -46,7 +46,8 @@ function getParentEntityID(results: ResolverEvent[]) {
 }
 
 export function handleLifecycle(
-  log: Logger
+  log: Logger,
+  endpointAppContext: EndpointAppContext
 ): RequestHandler<LifecyclePathParams, LifecycleQueryParams> {
   return async (context, req, res) => {
     const {
@@ -54,10 +55,11 @@ export function handleLifecycle(
       query: { ancestors, legacyEndpointID },
     } = req;
     try {
+      const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
       const ancestorLifecycles = [];
       const client = context.core.elasticsearch.dataClient;
-
-      const lifecycleQuery = new LifecycleQuery(legacyEndpointID);
+      const indexPattern = await indexRetriever.getEventIndexPattern(context);
+      const lifecycleQuery = new LifecycleQuery(indexPattern, legacyEndpointID);
       const { results: processLifecycle } = await lifecycleQuery.search(client, id);
       let nextParentID = getParentEntityID(processLifecycle);
 

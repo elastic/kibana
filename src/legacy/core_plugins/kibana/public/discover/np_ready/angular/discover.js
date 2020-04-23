@@ -57,8 +57,7 @@ const {
   core,
   chrome,
   data,
-  docTitle,
-  history,
+  history: getHistory,
   indexPatterns,
   filterManager,
   share,
@@ -117,6 +116,7 @@ app.config($routeProvider => {
     reloadOnSearch: false,
     resolve: {
       savedObjects: function($route, Promise) {
+        const history = getHistory();
         const savedSearchId = $route.current.params.id;
         return ensureDefaultIndexPattern(core, data, history).then(() => {
           const { appStateContainer } = getState({ history });
@@ -205,6 +205,8 @@ function discoverController(
     return isDefaultType($scope.indexPattern) ? $scope.indexPattern.timeFieldName : undefined;
   };
 
+  const history = getHistory();
+
   const {
     appStateContainer,
     startSync: startStateSync,
@@ -214,6 +216,7 @@ function discoverController(
     isAppStateDirty,
     kbnUrlStateStorage,
     getPreviousAppState,
+    resetInitialAppState,
   } = getState({
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
@@ -373,6 +376,8 @@ function discoverController(
             // If the save wasn't successful, put the original values back.
             if (!response.id || response.error) {
               savedSearch.title = currentTitle;
+            } else {
+              resetInitialAppState();
             }
             return response;
           });
@@ -675,17 +680,6 @@ function discoverController(
         }
       });
 
-      $scope.$watch('vis.aggs', function() {
-        // no timefield, no vis, nothing to update
-        if (!getTimeField() || !$scope.vis) return;
-
-        const buckets = $scope.vis.data.aggs.byTypeName('buckets');
-
-        if (buckets && buckets.length === 1) {
-          $scope.bucketInterval = buckets[0].buckets.getInterval();
-        }
-      });
-
       $scope.$watchMulti(
         ['rows', 'fetchStatus'],
         (function updateResultState() {
@@ -769,7 +763,7 @@ function discoverController(
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
-            docTitle.change(savedSearch.lastSavedTitle);
+            chrome.docTitle.change(savedSearch.lastSavedTitle);
           }
         }
       });
@@ -839,13 +833,9 @@ function discoverController(
     if (newSavedQueryId) {
       setAppState({ savedQuery: newSavedQueryId });
     } else {
-      //reset filters and query string, remove savedQuery from state
+      // remove savedQueryId from state
       const state = {
         ...appStateContainer.getState(),
-        query: getDefaultQuery(
-          localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
-        ),
-        filters: [],
       };
       delete state.savedQuery;
       appStateContainer.set(state);
@@ -891,6 +881,9 @@ function discoverController(
         tabifiedData,
         getDimensions($scope.vis.data.aggs.aggs, $scope.timeRange)
       );
+      if ($scope.vis.data.aggs.aggs[1]) {
+        $scope.bucketInterval = $scope.vis.data.aggs.aggs[1].buckets.getInterval();
+      }
     }
 
     $scope.hits = resp.hits.total;

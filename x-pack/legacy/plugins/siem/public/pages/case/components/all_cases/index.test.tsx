@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import moment from 'moment-timezone';
 import { AllCases } from './';
 import { TestProviders } from '../../../../mock';
-import { useGetCasesMockState } from '../__mock__/case_data';
+import { useGetCasesMockState } from '../../../../containers/case/mock';
 import * as i18n from './translations';
 
 import { getEmptyTagValue } from '../../../../components/empty_value';
@@ -125,8 +125,9 @@ describe('AllCases', () => {
       wrapper
         .find(`[data-test-subj="case-table-column-createdAt"]`)
         .first()
+        .childAt(0)
         .prop('value')
-    ).toEqual(useGetCasesMockState.data.cases[0].createdAt);
+    ).toBe(useGetCasesMockState.data.cases[0].createdAt);
     expect(
       wrapper
         .find(`[data-test-subj="case-table-case-count"]`)

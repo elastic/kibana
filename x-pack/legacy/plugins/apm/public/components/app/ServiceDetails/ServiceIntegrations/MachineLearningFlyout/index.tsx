@@ -57,7 +57,8 @@ export class MachineLearningFlyout extends Component<Props, State> {
   };
 
   public addErrorToast = () => {
-    const core = this.context;
+    const { core } = this.context;
+
     const { urlParams } = this.props;
     const { serviceName } = urlParams;
 
