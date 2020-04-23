@@ -117,7 +117,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
 
   private getCreateMenuItems(): ReactElement[] {
     // eslint-disable-next-line no-console
-    console.log('all factories: ', JSON.stringify([...this.props.getAllFactories()]));
+    console.error('all factories: ', JSON.stringify([...this.props.getAllFactories()]));
     return [...this.props.getAllFactories()]
       .filter(factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew())
       .map(factory => (
