@@ -6,9 +6,8 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertDetails } from './alert_details';
-import { Alert, ActionType } from '../../../../types';
+import { Alert, ActionType, AlertTypeRegistryContract } from '../../../../types';
 import {
   EuiTitle,
   EuiBadge,
@@ -21,15 +20,30 @@ import { times, random } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ViewInApp } from './view_in_app';
 import { PLUGIN } from '../../../constants/plugin';
+import { coreMock } from 'src/core/public/mocks';
+const mockes = coreMock.createSetup();
 
 jest.mock('../../../app_context', () => ({
   useAppDependencies: jest.fn(() => ({
     http: jest.fn(),
-    legacy: {
-      capabilities: {
-        get: jest.fn(() => ({})),
-      },
+    capabilities: {
+      get: jest.fn(() => ({})),
     },
+    actionTypeRegistry: jest.fn(),
+    alertTypeRegistry: jest.fn(() => {
+      const mocked: jest.Mocked<AlertTypeRegistryContract> = {
+        has: jest.fn(),
+        register: jest.fn(),
+        get: jest.fn(),
+        list: jest.fn(),
+      };
+      return mocked;
+    }),
+    toastNotifications: mockes.notifications.toasts,
+    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+    uiSettings: mockes.uiSettings,
+    dataPlugin: jest.fn(),
+    charts: jest.fn(),
   })),
 }));
 
@@ -255,14 +269,11 @@ describe('alert_details', () => {
       expect(
         shallow(
           <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        ).containsMatchingElement(
-          <EuiButtonEmpty disabled={true} iconType="pencil">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-              defaultMessage="Edit"
-            />
-          </EuiButtonEmpty>
         )
+          .find(EuiButtonEmpty)
+          .find('[data-test-subj="openEditAlertFlyoutButton"]')
+          .first()
+          .exists()
       ).toBeTruthy();
     });
   });

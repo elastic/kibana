@@ -22,6 +22,44 @@ export class Alerts {
     });
   }
 
+  public async createAlertWithActions(
+    name: string,
+    alertTypeId: string,
+    params?: Record<string, any>,
+    actions?: Array<{
+      id: string;
+      group: string;
+      params: Record<string, any>;
+    }>,
+    tags?: string[],
+    consumer?: string,
+    schedule?: Record<string, any>,
+    throttle?: string
+  ) {
+    this.log.debug(`creating alert ${name}`);
+
+    const { data: alert, status, statusText } = await this.axios.post(`/api/alert`, {
+      enabled: true,
+      name,
+      tags,
+      alertTypeId,
+      consumer: consumer ?? 'bar',
+      schedule: schedule ?? { interval: '1m' },
+      throttle: throttle ?? '1m',
+      actions: actions ?? [],
+      params: params ?? {},
+    });
+    if (status !== 200) {
+      throw new Error(
+        `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(alert)}`
+      );
+    }
+
+    this.log.debug(`created alert ${alert.id}`);
+
+    return alert;
+  }
+
   public async createNoOp(name: string) {
     this.log.debug(`creating alert ${name}`);
 

@@ -6,6 +6,7 @@
 
 import React, { useState, Fragment } from 'react';
 import { indexBy } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import {
   EuiPageBody,
   EuiPageContent,
@@ -37,6 +38,7 @@ import { ViewInApp } from './view_in_app';
 import { PLUGIN } from '../../../constants/plugin';
 import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
+import { routeToAlertDetails } from '../../../constants';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -55,6 +57,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   muteAlert,
   requestRefresh,
 }) => {
+  const history = useHistory();
   const {
     http,
     toastNotifications,
@@ -75,6 +78,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+
+  const setAlert = async () => {
+    history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
+  };
 
   return (
     <EuiPage>
@@ -109,6 +116,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <Fragment>
                       {' '}
                       <EuiButtonEmpty
+                        data-test-subj="openEditAlertFlyoutButton"
                         iconType="pencil"
                         onClick={() => setEditFlyoutVisibility(true)}
                       >
@@ -127,6 +135,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           docLinks,
                           charts,
                           dataFieldsFormats: dataPlugin.fieldFormats,
+                          reloadAlerts: setAlert,
                         }}
                       >
                         <AlertEdit
