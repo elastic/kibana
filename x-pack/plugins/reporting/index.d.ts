@@ -4,15 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  HttpSetup,
-  Plugin,
-  PluginInitializerContext,
-  NotificationsStart,
-} from '../../../src/core/public';
-
 export type JobId = string;
 export type JobStatus =
   | 'completed'
@@ -20,9 +11,6 @@ export type JobStatus =
   | 'pending'
   | 'processing'
   | 'failed';
-
-export type HttpService = HttpSetup;
-export type NotificationsService = NotificationsStart;
 
 export interface SourceJob {
   _id: JobId;

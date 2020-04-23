@@ -148,7 +148,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="none" direction="column">
-            <MyEuiFlexItem grow={false}>
+            <MyEuiFlexItem data-test-subj="timeline" grow={false}>
               <EuiHighlight search={searchValue}>
                 {isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title}
               </EuiHighlight>

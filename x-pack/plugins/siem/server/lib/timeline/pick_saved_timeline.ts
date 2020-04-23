@@ -37,6 +37,8 @@ export const pickSavedTimeline = (
     }
   } else {
     savedTimeline.timelineType = TimelineType.default;
+    savedTimeline.templateTimelineId = null;
+    savedTimeline.templateTimelineVersion = null;
   }
 
   return savedTimeline;

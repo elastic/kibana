@@ -7,7 +7,17 @@
 import { extname } from 'path';
 import { chunk, omit } from 'lodash/fp';
 
+import { createPromiseFromStreams } from '../../../../../../../src/legacy/utils';
+import { IRouter } from '../../../../../../../src/core/server';
+
 import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
+
+import { SetupPlugins } from '../../../plugin';
+import { ConfigType } from '../../../config';
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+
+import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
+import { validate } from '../../detection_engine/routes/rules/validate';
 import {
   buildSiemResponse,
   createBulkErrorObject,
@@ -16,9 +26,9 @@ import {
 } from '../../detection_engine/routes/utils';
 
 import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from_ndjson';
-import { createPromiseFromStreams } from '../../../../../../../src/legacy/utils';
-import { ConfigType } from '../../..';
 
+import { ImportTimelinesPayloadSchemaRt } from './schemas/import_timelines_schema';
+import { buildFrameworkRequest } from './utils/common';
 import {
   getTupleDuplicateErrorsAndUniqueTimeline,
   isBulkError,
@@ -29,15 +39,6 @@ import {
   timelineSavedObjectOmittedFields,
 } from './utils/import_timelines';
 import { createTimelines, getTimeline } from './utils/create_timelines';
-
-import { IRouter } from '../../../../../../../src/core/server';
-import { SetupPlugins } from '../../../plugin';
-import { ImportTimelinesPayloadSchemaRt } from './schemas/import_timelines_schema';
-import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
-
-import { validate } from '../../detection_engine/routes/rules/validate';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { buildFrameworkRequest } from './utils/common';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 

@@ -33,7 +33,7 @@ import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_ro
 import { createTimelinesRoute } from '../lib/timeline/routes/create_timelines_route';
 import { updateTimelinesRoute } from '../lib/timeline/routes/update_timelines_route';
 import { SetupPlugins } from '../plugin';
-import { ConfigType } from '..';
+import { ConfigType } from '../config';
 
 export const initRoutes = (
   router: IRouter,

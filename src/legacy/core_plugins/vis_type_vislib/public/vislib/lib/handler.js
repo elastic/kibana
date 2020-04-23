@@ -83,10 +83,21 @@ export class Handler {
 
     // memoize so that the same function is returned every time,
     // allowing us to remove/re-add the same function
-    this.getProxyHandler = _.memoize(function(event) {
+    this.getProxyHandler = _.memoize(function(eventType) {
       const self = this;
-      return function(e) {
-        self.vis.emit(event, e);
+      return function(eventPayload) {
+        switch (eventType) {
+          case 'brush':
+            const xRaw = _.get(eventPayload.data, 'series[0].values[0].xRaw');
+            if (!xRaw) return; // not sure if this is possible?
+            return self.vis.emit(eventType, {
+              table: xRaw.table,
+              range: eventPayload.range,
+              column: xRaw.column,
+            });
+          case 'click':
+            return self.vis.emit(eventType, eventPayload);
+        }
       };
     });
 
