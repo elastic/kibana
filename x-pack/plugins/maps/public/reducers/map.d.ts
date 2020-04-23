@@ -15,6 +15,7 @@ import {
   MapRefreshConfig,
   TooltipState,
 } from '../../common/descriptor_types';
+import { INITIAL_LOCATION } from '../../common/constants';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
 
 export type MapContext = {
@@ -40,6 +41,10 @@ export type MapContext = {
 };
 
 export type MapSettings = {
+  initialLocation: INITIAL_LOCATION;
+  initialLat: number;
+  initialLon: number;
+  initialZoom: number;
   maxZoom: number;
   minZoom: number;
   showSpatialFilters: boolean;

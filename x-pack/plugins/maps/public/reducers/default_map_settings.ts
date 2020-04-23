@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MAX_ZOOM, MIN_ZOOM } from '../../common/constants';
+import { INITIAL_LOCATION, MAX_ZOOM, MIN_ZOOM } from '../../common/constants';
 import { MapSettings } from './map';
 
 export function getDefaultMapSettings(): MapSettings {
   return {
+    initialLocation: INITIAL_LOCATION.LAST_SAVED_LOCATION,
+    initialLat: 0,
+    initialLon: 0,
+    initialZoom: 2,
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
     showSpatialFilters: true,
