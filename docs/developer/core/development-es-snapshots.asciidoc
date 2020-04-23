@@ -1,4 +1,4 @@
-[[es-snapshots]]
+[[development-es-snapshots]]
 === Daily Elasticsearch Snapshots
 
 For local development and CI, Kibana, by default, uses Elasticsearch snapshots that are built daily when running tasks that require Elasticsearch (e.g. functional tests).
