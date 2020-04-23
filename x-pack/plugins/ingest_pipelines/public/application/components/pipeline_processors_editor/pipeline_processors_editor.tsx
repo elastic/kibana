@@ -14,6 +14,7 @@ import { deserialize } from './data_in';
 import { serialize, SerializeResult } from './data_out';
 import { useEditorState } from './reducer';
 import { ProcessorInternal } from './types';
+import { PipelineProcessor } from './pipeline_processor';
 
 export interface OnUpdateHandlerArg {
   getData: () => SerializeResult;
@@ -38,6 +39,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   const dataInResult = useMemo(() => deserialize({ processors: originalProcessors }), [
     originalProcessors,
   ]);
+
   const [state, dispatch] = useEditorState(dataInResult);
   const { processors } = state;
   const [selectedProcessor, setSelectedProcessor] = useState<ProcessorInternal | undefined>(
@@ -76,6 +78,24 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
             });
           }}
           processors={processors}
+          nodeComponent={({ processor, pathSelector }) => (
+            <PipelineProcessor
+              onClick={type => {
+                switch (type) {
+                  case 'edit':
+                    setSelectedProcessor(processor);
+                    break;
+                  case 'delete':
+                    // TODO: This should probably have a delete confirmation modal
+                    dispatch({ type: 'removeProcessor', payload: { processor, pathSelector } });
+                    break;
+                  case 'addOnFailure':
+                    break;
+                }
+              }}
+              processor={processor}
+            />
+          )}
         />
         <EuiButton onClick={() => setIsAddingNewProcessor(true)}>Add a processor</EuiButton>
       </EuiPanel>

@@ -7,18 +7,20 @@
 type Path = string[];
 
 /**
- * The below getter and setter functions are the immutable counter-parts to
- * lodash's `get` and `set` functions. They are built specifically to get and
- * set values with arrays that contain objects that contain arrays.
- *
- * 'immer' + lodash was attempted (as this would in theory provide the same
- * result) but resulted in an issue with updating the array in place. 'immer'
- * can also result in a high performance spike and is NOT call-stack safe.
+ * The below get and set functions are built with an API to make setting
+ * and get values from nested arrays a bit easier and more usable with
+ * immer.
  *
  * @remark
  * NEVER use these with objects that contain keys created by user input.
  */
 
+/**
+ * Given a path, get the value at the path
+ *
+ * @remark
+ * If path is an empty array, return the source.
+ */
 export const getValue = <Result = any>(path: Path, source: any) => {
   let current = source;
   for (const key of path) {
@@ -27,40 +29,38 @@ export const getValue = <Result = any>(path: Path, source: any) => {
   return (current as unknown) as Result;
 };
 
-const ARRAY = '[object Array]';
-const OBJECT = '[object Object]';
-
-const copy = (value: unknown): any => {
-  const result = Object.prototype.toString.call(value);
-  if (result === ARRAY) {
-    return [...(value as any[])];
-  }
-  if (result === OBJECT) {
-    return { ...(value as object) };
-  }
-  throw Error(`Unrecognized type ${result}`);
-};
-
-export const setValue = <Target = any, Value = any>(path: Path, source: Target, value: Value) => {
+/**
+ * Given a path, value and an object (array or object) set
+ * the value at the path.
+ *
+ * @remark
+ * If path is empty, do nothing
+ */
+export const setValue = <Target = any, Value = any>(
+  path: Path,
+  source: Target,
+  value: Value
+): void => {
   let current: any;
-  let result: Value;
+
+  if (!path.length) {
+    return;
+  }
 
   for (let idx = 0; idx < path.length; ++idx) {
     const key = path[idx];
     const atRoot = !current;
 
     if (atRoot) {
-      result = copy(source);
-      current = result;
+      current = source;
     }
 
     if (idx + 1 === path.length) {
       current[key] = value;
     } else {
-      current[key] = copy(current[key]);
       current = current[key];
     }
   }
 
-  return result!;
+  return;
 };

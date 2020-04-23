@@ -5,6 +5,7 @@
  */
 import { Reducer, useReducer } from 'react';
 import { euiDragDropReorder } from '@elastic/eui';
+import { produce } from 'immer';
 
 import { OnFormUpdateArg } from '../../../shared_imports';
 
@@ -22,7 +23,7 @@ interface State extends StateArg {
 type Action =
   | { type: 'addProcessor'; payload: { processor: Omit<ProcessorInternal, 'id'> } }
   | { type: 'updateProcessor'; payload: { processor: ProcessorInternal } }
-  | { type: 'removeProcessor'; payload: { processor: ProcessorInternal } }
+  | { type: 'removeProcessor'; payload: { processor: ProcessorInternal; pathSelector: string } }
   | {
       type: 'moveProcessor';
       payload: { source: DraggableLocation; destination: DraggableLocation };
@@ -40,24 +41,20 @@ const findProcessorIdx = (
 export const reducer: Reducer<State, Action> = (state, action) => {
   if (action.type === 'moveProcessor') {
     const { destination, source } = action.payload;
-    if (destination.pathSelector === source.pathSelector) {
-      if (source.pathSelector === undefined) {
-        return {
-          ...state,
-          processors: euiDragDropReorder(state.processors, source.index, destination.index),
-        };
-      } else {
-        const path = source.pathSelector.split('.');
-        const processors = getValue<ProcessorInternal[]>(path, state.processors);
-        return {
-          ...state,
-          processors: setValue(
-            path,
-            state.processors,
-            euiDragDropReorder(processors, source.index, destination.index)
-          ),
-        };
-      }
+
+    const basePath = ['processors'];
+
+    if (source.pathSelector === destination.pathSelector) {
+      return produce(state, draft => {
+        const path = basePath.concat(
+          source.pathSelector === 'ROOT' ? [] : source.pathSelector.split('.')
+        );
+        setValue(
+          path,
+          draft,
+          euiDragDropReorder(getValue(path, draft), source.index, destination.index)
+        );
+      });
     } else {
       return state;
     }

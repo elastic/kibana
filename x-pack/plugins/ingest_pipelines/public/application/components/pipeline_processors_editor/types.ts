@@ -9,10 +9,13 @@ import { ESCommonProcessorOptions } from '../../../../common/types';
 export interface DraggableLocation {
   index: number;
   /**
-   * When path selector is undefined it means that we are at the tree
-   * root.
+   * A '.' separated string value that indicates the path in an "n"
+   * nested structure.
+   *
+   * For instance:
+   * 'a.b.0.c' given { a: { b: [ { c: [] } ] } } => []
    */
-  pathSelector?: string;
+  pathSelector: string;
 }
 
 export type ProcessorOptions<CustomProcessorOptions = {}> = ESCommonProcessorOptions &

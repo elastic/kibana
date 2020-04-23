@@ -5,25 +5,28 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiDraggable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiDraggable, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel } from '@elastic/eui';
 
 import { ProcessorInternal } from '../../types';
 
+export interface TreeNodeComponentArgs {
+  processor: ProcessorInternal;
+  pathSelector: string;
+}
+
 interface Props {
+  component: (args: TreeNodeComponentArgs) => React.ReactNode;
   pathSelector: string;
   processor: ProcessorInternal;
   index: number;
 }
 
-export const TreeNode: FunctionComponent<Props> = ({ processor, pathSelector, index }) => {
+export const TreeNode: FunctionComponent<Props> = ({
+  processor,
+  pathSelector,
+  index,
+  component,
+}) => {
   return (
     <EuiDraggable
       spacing="m"
@@ -40,25 +43,7 @@ export const TreeNode: FunctionComponent<Props> = ({ processor, pathSelector, in
                 <EuiIcon type="grab" />
               </div>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{processor.type}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={() => {}}>
-                {i18n.translate('xpack.ingestPipelines.pipelineEditor.editProcessorButtonLabel', {
-                  defaultMessage: 'Edit',
-                })}
-              </EuiButtonEmpty>
-              <EuiButtonEmpty
-                size="s"
-                onClick={
-                  () => {}
-                  // dispatch({ type: 'removeProcessor', payload: { processor } })
-                }
-              >
-                {i18n.translate('xpack.ingestPipelines.pipelineEditor.deleteProcessorButtonLabel', {
-                  defaultMessage: 'Delete',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{component({ processor, pathSelector })}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
       )}
