@@ -348,9 +348,6 @@ describe('get()', () => {
       actionTypeId: '.slack',
       isPreconfigured: true,
       name: 'test',
-      config: {
-        foo: 'bar',
-      },
     });
     expect(savedObjectsClient.get).not.toHaveBeenCalled();
   });
@@ -418,9 +415,6 @@ describe('getAll()', () => {
         actionTypeId: '.slack',
         isPreconfigured: true,
         name: 'test',
-        config: {
-          foo: 'bar',
-        },
         referencedByCount: 2,
       },
     ]);

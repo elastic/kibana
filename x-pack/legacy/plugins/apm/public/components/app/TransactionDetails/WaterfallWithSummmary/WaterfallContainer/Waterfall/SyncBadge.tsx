@@ -13,7 +13,7 @@ import { px, units } from '../../../../../../style/variables';
 const SpanBadge = styled(EuiBadge)`
   display: inline-block;
   margin-right: ${px(units.quarter)};
-`;
+` as any;
 
 interface SyncBadgeProps {
   /**

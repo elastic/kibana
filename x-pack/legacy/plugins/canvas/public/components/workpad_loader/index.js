@@ -7,13 +7,14 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withState, getContext, withHandlers, withProps } from 'recompose';
+import moment from 'moment';
 import * as workpadService from '../../lib/workpad_service';
 import { canUserWrite } from '../../state/selectors/app';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { getId } from '../../lib/get_id';
 import { downloadWorkpad } from '../../lib/download_workpad';
 import { ComponentStrings, ErrorStrings } from '../../../i18n';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public/';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { WorkpadLoader as Component } from './workpad_loader';
 
 const { WorkpadLoader: strings } = ComponentStrings;
@@ -132,6 +133,12 @@ export const WorkpadLoader = compose(
 
         return errored.map(({ id }) => id);
       });
+    },
+  })),
+  withProps(props => ({
+    formatDate: date => {
+      const dateFormat = props.kibana.services.uiSettings.get('dateFormat');
+      return date && moment(date).format(dateFormat);
     },
   }))
 )(Component);

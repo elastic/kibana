@@ -30,7 +30,7 @@ const RoundedBadge = styled(EuiBadge)`
   .euiBadge__text {
     text-overflow: clip;
   }
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 RoundedBadge.displayName = 'RoundedBadge';
 
