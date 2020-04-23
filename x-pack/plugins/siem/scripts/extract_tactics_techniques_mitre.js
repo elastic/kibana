@@ -123,7 +123,7 @@ async function main() {
               .replace(/}"/g, '}')
               .replace(/"{/g, '{')};
 
-          export const techniques = ${JSON.stringify(techniques, null, 2)};
+          export const technique = ${JSON.stringify(techniques, null, 2)};
 
           export const techniquesOptions: MitreTechniquesOptions[] =
             ${JSON.stringify(getTechniquesOptions(techniques), null, 2)
