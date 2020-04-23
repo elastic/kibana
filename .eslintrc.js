@@ -720,7 +720,6 @@ module.exports = {
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
         'react/jsx-sort-default-props': 'error',
-        'react/jsx-curly-brace-presence': 'error',
         // might be introduced after the other warns are fixed
         // 'react/jsx-sort-props': 'error',
         // might be introduced after the other warns are fixed

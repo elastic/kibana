@@ -151,22 +151,19 @@ export const createTimelineEpic = <State>(): Epic<
     action$.pipe(
       withLatestFrom(timeline$),
       filter(([action, timeline]) => {
-        console.error('epic', action, timeline);
         const timelineId: string = get('payload.id', action);
         const timelineObj: TimelineModel = timeline[timelineId];
         if (action.type === addError.type) {
           return true;
         }
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
-          // myEpicTimelineId.setTimelineId(null);
-          // myEpicTimelineId.setTimelineVersion(null);
+          return true;
+        } else if (action.type === getDefaultTimeline.type && isItAtimelineAction(timelineId)) {
           return true;
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
-          return true;
-        } else if (action.type === getDefaultTimeline.type && isItAtimelineAction(timelineId)) {
           return true;
         } else if (
           timelineActionsType.includes(action.type) &&
@@ -200,7 +197,6 @@ export const createTimelineEpic = <State>(): Epic<
         } else if (action.type === getDefaultTimeline.type) {
           return epicDefaultTimeline(action, timeline, action$, timeline$, false);
         } else if (action.type === createTimeline.type) {
-          console.error('ceasdsdasdasdds');
           return epicDefaultTimeline(action, timeline, action$, timeline$, true);
         } else if (timelineActionsType.includes(action.type)) {
           return from(
