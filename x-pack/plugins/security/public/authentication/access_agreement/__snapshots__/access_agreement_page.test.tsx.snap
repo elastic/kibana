@@ -1,18 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AccessNoticePage renders as expected when state is available 1`] = `
+exports[`AccessAgreementPage renders as expected when state is available 1`] = `
 <AuthenticationStatePage
-  className="secAccessNoticePage"
+  className="secAccessAgreementPage"
   title={
     <FormattedMessage
-      defaultMessage="Access Notice"
-      id="xpack.security.accessNotice.title"
+      defaultMessage="Access Agreement"
+      id="xpack.security.accessAgreement.title"
       values={Object {}}
     />
   }
 >
   <div
-    className="secAuthenticationStatePage secAccessNoticePage"
+    className="secAuthenticationStatePage secAccessAgreementPage"
   >
     <header
       className="secAuthenticationStatePage__header"
@@ -48,11 +48,11 @@ exports[`AccessNoticePage renders as expected when state is available 1`] = `
             className="euiTitle euiTitle--large secAuthenticationStatePage__title"
           >
             <FormattedMessage
-              defaultMessage="Access Notice"
-              id="xpack.security.accessNotice.title"
+              defaultMessage="Access Agreement"
+              id="xpack.security.accessAgreement.title"
               values={Object {}}
             >
-              Access Notice
+              Access Agreement
             </FormattedMessage>
           </h1>
         </EuiTitle>
@@ -85,13 +85,13 @@ exports[`AccessNoticePage renders as expected when state is available 1`] = `
                 className="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
               >
                 <EuiFlexItem
-                  className="secAccessNoticePage__textWrapper"
+                  className="secAccessAgreementPage__textWrapper"
                 >
                   <div
-                    className="euiFlexItem secAccessNoticePage__textWrapper"
+                    className="euiFlexItem secAccessAgreementPage__textWrapper"
                   >
                     <div
-                      className="secAccessNoticePage__text"
+                      className="secAccessAgreementPage__text"
                     >
                       <EuiText
                         textAlign="left"
@@ -139,17 +139,17 @@ exports[`AccessNoticePage renders as expected when state is available 1`] = `
                   </div>
                 </EuiFlexItem>
                 <EuiFlexItem
-                  className="secAccessNoticePage__footer"
+                  className="secAccessAgreementPage__footer"
                 >
                   <div
-                    className="euiFlexItem secAccessNoticePage__footer"
+                    className="euiFlexItem secAccessAgreementPage__footer"
                   >
                     <div
-                      className="secAccessNoticePage__footerInner"
+                      className="secAccessAgreementPage__footerInner"
                     >
                       <EuiButton
                         color="primary"
-                        data-test-subj="accessNoticeAcknowledge"
+                        data-test-subj="accessAgreementAcknowledge"
                         fill={true}
                         isDisabled={false}
                         isLoading={false}
@@ -158,7 +158,7 @@ exports[`AccessNoticePage renders as expected when state is available 1`] = `
                       >
                         <button
                           className="euiButton euiButton--primary euiButton--fill"
-                          data-test-subj="accessNoticeAcknowledge"
+                          data-test-subj="accessAgreementAcknowledge"
                           disabled={false}
                           onClick={[Function]}
                           type="submit"
@@ -171,7 +171,7 @@ exports[`AccessNoticePage renders as expected when state is available 1`] = `
                             >
                               <FormattedMessage
                                 defaultMessage="Acknowledge and continue"
-                                id="xpack.security.accessNotice.acknowledgeButtonText"
+                                id="xpack.security.accessAgreement.acknowledgeButtonText"
                                 values={Object {}}
                               >
                                 Acknowledge and continue

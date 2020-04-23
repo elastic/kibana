@@ -434,12 +434,12 @@ describe('Common authentication routes', () => {
     });
   });
 
-  describe('acknowledge access notice', () => {
+  describe('acknowledge access agreement', () => {
     let routeHandler: RequestHandler<any, any, any>;
     let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
       const [acsRouteConfig, acsRouteHandler] = router.post.mock.calls.find(
-        ([{ path }]) => path === '/internal/security/access_notice/acknowledge'
+        ([{ path }]) => path === '/internal/security/access_agreement/acknowledge'
       )!;
 
       routeConfig = acsRouteConfig;
@@ -453,7 +453,7 @@ describe('Common authentication routes', () => {
 
     it('returns 500 if acknowledge throws unhandled exception.', async () => {
       const unhandledException = new Error('Something went wrong.');
-      authc.acknowledgeAccessNotice.mockRejectedValue(unhandledException);
+      authc.acknowledgeAccessAgreement.mockRejectedValue(unhandledException);
 
       const request = httpServerMock.createKibanaRequest();
       await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
@@ -464,7 +464,7 @@ describe('Common authentication routes', () => {
     });
 
     it('returns 204 if successfully acknowledged.', async () => {
-      authc.acknowledgeAccessNotice.mockResolvedValue(undefined);
+      authc.acknowledgeAccessAgreement.mockResolvedValue(undefined);
 
       const request = httpServerMock.createKibanaRequest();
       await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({

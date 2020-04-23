@@ -10,9 +10,9 @@ import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { AuthenticationStatePage } from '../components/authentication_state_page';
-import { AccessNoticePage } from './access_notice_page';
+import { AccessAgreementPage } from './access_agreement_page';
 
-describe('AccessNoticePage', () => {
+describe('AccessAgreementPage', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       value: { href: 'http://some-host/bar', protocol: 'http' },
@@ -26,10 +26,10 @@ describe('AccessNoticePage', () => {
 
   it('renders as expected when state is available', async () => {
     const coreStartMock = coreMock.createStart();
-    coreStartMock.http.get.mockResolvedValue({ accessNotice: 'This is [link](../link)' });
+    coreStartMock.http.get.mockResolvedValue({ accessAgreement: 'This is [link](../link)' });
 
     const wrapper = mountWithIntl(
-      <AccessNoticePage
+      <AccessAgreementPage
         http={coreStartMock.http}
         notifications={coreStartMock.notifications}
         fatalErrors={coreStartMock.fatalErrors}
@@ -46,7 +46,9 @@ describe('AccessNoticePage', () => {
 
     expect(wrapper.find(AuthenticationStatePage)).toMatchSnapshot();
     expect(coreStartMock.http.get).toHaveBeenCalledTimes(1);
-    expect(coreStartMock.http.get).toHaveBeenCalledWith('/internal/security/access_notice/state');
+    expect(coreStartMock.http.get).toHaveBeenCalledWith(
+      '/internal/security/access_agreement/state'
+    );
     expect(coreStartMock.fatalErrors.add).not.toHaveBeenCalled();
   });
 
@@ -56,7 +58,7 @@ describe('AccessNoticePage', () => {
     coreStartMock.http.get.mockRejectedValue(error);
 
     const wrapper = mountWithIntl(
-      <AccessNoticePage
+      <AccessAgreementPage
         http={coreStartMock.http}
         notifications={coreStartMock.notifications}
         fatalErrors={coreStartMock.fatalErrors}
@@ -69,21 +71,23 @@ describe('AccessNoticePage', () => {
     });
 
     expect(coreStartMock.http.get).toHaveBeenCalledTimes(1);
-    expect(coreStartMock.http.get).toHaveBeenCalledWith('/internal/security/access_notice/state');
+    expect(coreStartMock.http.get).toHaveBeenCalledWith(
+      '/internal/security/access_agreement/state'
+    );
     expect(coreStartMock.fatalErrors.add).toHaveBeenCalledTimes(1);
     expect(coreStartMock.fatalErrors.add).toHaveBeenCalledWith(error);
   });
 
   it('properly redirects after successful acknowledgement', async () => {
     const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
-    coreStartMock.http.get.mockResolvedValue({ accessNotice: 'This is [link](../link)' });
+    coreStartMock.http.get.mockResolvedValue({ accessAgreement: 'This is [link](../link)' });
     coreStartMock.http.post.mockResolvedValue(undefined);
 
-    window.location.href = `https://some-host/security/access_notice?next=${encodeURIComponent(
+    window.location.href = `https://some-host/security/access_agreement?next=${encodeURIComponent(
       '/some-base-path/app/kibana#/home?_g=()'
     )}`;
     const wrapper = mountWithIntl(
-      <AccessNoticePage
+      <AccessAgreementPage
         http={coreStartMock.http}
         notifications={coreStartMock.notifications}
         fatalErrors={coreStartMock.fatalErrors}
@@ -95,7 +99,7 @@ describe('AccessNoticePage', () => {
       wrapper.update();
     });
 
-    findTestSubject(wrapper, 'accessNoticeAcknowledge').simulate('click');
+    findTestSubject(wrapper, 'accessAgreementAcknowledge').simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -103,7 +107,7 @@ describe('AccessNoticePage', () => {
 
     expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
     expect(coreStartMock.http.post).toHaveBeenCalledWith(
-      '/internal/security/access_notice/acknowledge'
+      '/internal/security/access_agreement/acknowledge'
     );
 
     expect(window.location.href).toBe('/some-base-path/app/kibana#/home?_g=()');
@@ -117,12 +121,12 @@ describe('AccessNoticePage', () => {
 
     const failureReason = new Error('Oh no!');
     const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
-    coreStartMock.http.get.mockResolvedValue({ accessNotice: 'This is [link](../link)' });
+    coreStartMock.http.get.mockResolvedValue({ accessAgreement: 'This is [link](../link)' });
     coreStartMock.http.post.mockRejectedValue(failureReason);
 
     window.location.href = currentURL;
     const wrapper = mountWithIntl(
-      <AccessNoticePage
+      <AccessAgreementPage
         http={coreStartMock.http}
         notifications={coreStartMock.notifications}
         fatalErrors={coreStartMock.fatalErrors}
@@ -134,7 +138,7 @@ describe('AccessNoticePage', () => {
       wrapper.update();
     });
 
-    findTestSubject(wrapper, 'accessNoticeAcknowledge').simulate('click');
+    findTestSubject(wrapper, 'accessAgreementAcknowledge').simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -142,12 +146,12 @@ describe('AccessNoticePage', () => {
 
     expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
     expect(coreStartMock.http.post).toHaveBeenCalledWith(
-      '/internal/security/access_notice/acknowledge'
+      '/internal/security/access_agreement/acknowledge'
     );
 
     expect(window.location.href).toBe(currentURL);
     expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
-      title: 'Could not acknowledge access notice.',
+      title: 'Could not acknowledge access agreement.',
     });
   });
 });

@@ -30,7 +30,7 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     showInSelector: schema.boolean({ defaultValue: true }),
     order: schema.number({ min: 0 }),
     description: schema.maybe(schema.string()),
-    accessNotice: schema.maybe(schema.string()),
+    accessAgreement: schema.maybe(schema.string()),
     ...overrides,
   };
 }
@@ -154,7 +154,7 @@ export const ConfigSchema = schema.object({
             showInSelector: true,
             order: 0,
             description: undefined,
-            accessNotice: undefined,
+            accessAgreement: undefined,
           },
         },
         token: undefined,

@@ -11,7 +11,7 @@ export const securityAuditLoggerMock = {
     return ({
       savedObjectsAuthorizationFailure: jest.fn(),
       savedObjectsAuthorizationSuccess: jest.fn(),
-      accessNoticeAcknowledged: jest.fn(),
+      accessAgreementAcknowledged: jest.fn(),
     } as unknown) as jest.Mocked<SecurityAuditLogger>;
   },
 };

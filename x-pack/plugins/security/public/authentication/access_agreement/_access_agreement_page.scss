@@ -1,21 +1,21 @@
-.secAccessNoticePage .secAuthenticationStatePage__content {
+.secAccessAgreementPage .secAuthenticationStatePage__content {
   max-width: 600px;
 }
 
-.secAccessNoticePage__textWrapper {
+.secAccessAgreementPage__textWrapper {
   overflow-y: hidden;
 }
 
-.secAccessNoticePage__text {
+.secAccessAgreementPage__text {
   @include euiYScrollWithShadows;
   max-height: 400px;
   padding: $euiSize $euiSizeL 0;
 }
 
-.secAccessNoticePage__footer {
+.secAccessAgreementPage__footer {
   padding: $euiSize $euiSizeL $euiSizeL;
 }
 
-.secAccessNoticePage__footerInner {
+.secAccessAgreementPage__footerInner {
   text-align: left;
 }

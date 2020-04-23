@@ -12,22 +12,22 @@ interface CreateDeps {
   getStartServices: StartServicesAccessor;
 }
 
-export const accessNoticeApp = Object.freeze({
-  id: 'security_access_notice',
+export const accessAgreementApp = Object.freeze({
+  id: 'security_access_agreement',
   create({ application, getStartServices }: CreateDeps) {
     application.register({
       id: this.id,
-      title: i18n.translate('xpack.security.accessNoticeAppTitle', {
-        defaultMessage: 'Access Notice',
+      title: i18n.translate('xpack.security.accessAgreementAppTitle', {
+        defaultMessage: 'Access Agreement',
       }),
       chromeless: true,
-      appRoute: '/security/access_notice',
+      appRoute: '/security/access_agreement',
       async mount({ element }: AppMountParameters) {
-        const [[coreStart], { renderAccessNoticePage }] = await Promise.all([
+        const [[coreStart], { renderAccessAgreementPage }] = await Promise.all([
           getStartServices(),
-          import('./access_notice_page'),
+          import('./access_agreement_page'),
         ]);
-        return renderAccessNoticePage(coreStart.i18n, element, {
+        return renderAccessAgreementPage(coreStart.i18n, element, {
           http: coreStart.http,
           notifications: coreStart.notifications,
           fatalErrors: coreStart.fatalErrors,

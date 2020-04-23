@@ -23,14 +23,14 @@ interface Props {
   fatalErrors: FatalErrorsStart;
 }
 
-export function AccessNoticePage({ http, fatalErrors, notifications }: Props) {
+export function AccessAgreementPage({ http, fatalErrors, notifications }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [accessNotice, setAccessNotice] = useState<string | null>(null);
+  const [accessAgreement, setAccessAgreement] = useState<string | null>(null);
   useEffect(() => {
     http
-      .get<{ accessNotice: string }>('/internal/security/access_notice/state')
-      .then(response => setAccessNotice(response.accessNotice))
+      .get<{ accessAgreement: string }>('/internal/security/access_agreement/state')
+      .then(response => setAccessAgreement(response.accessAgreement))
       .catch(err => fatalErrors.add(err));
   }, [http, fatalErrors]);
 
@@ -40,12 +40,12 @@ export function AccessNoticePage({ http, fatalErrors, notifications }: Props) {
 
       try {
         setIsLoading(true);
-        await http.post('/internal/security/access_notice/acknowledge');
+        await http.post('/internal/security/access_agreement/acknowledge');
         window.location.href = parseNext(window.location.href, http.basePath.serverBasePath);
       } catch (err) {
         notifications.toasts.addError(err, {
-          title: i18n.translate('xpack.security.accessNotice.acknowledgeErrorMessage', {
-            defaultMessage: 'Could not acknowledge access notice.',
+          title: i18n.translate('xpack.security.accessAgreement.acknowledgeErrorMessage', {
+            defaultMessage: 'Could not acknowledge access agreement.',
           }),
         });
 
@@ -55,29 +55,32 @@ export function AccessNoticePage({ http, fatalErrors, notifications }: Props) {
     [http, notifications]
   );
 
-  if (accessNotice == null) {
+  if (accessAgreement == null) {
     return null;
   }
 
   return (
     <AuthenticationStatePage
-      className="secAccessNoticePage"
+      className="secAccessAgreementPage"
       title={
-        <FormattedMessage id="xpack.security.accessNotice.title" defaultMessage="Access Notice" />
+        <FormattedMessage
+          id="xpack.security.accessAgreement.title"
+          defaultMessage="Access Agreement"
+        />
       }
     >
       <form onSubmit={onAcknowledge}>
         <EuiPanel paddingSize="none">
           <EuiFlexGroup gutterSize="none" direction="column">
-            <EuiFlexItem className="secAccessNoticePage__textWrapper">
-              <div className="secAccessNoticePage__text">
+            <EuiFlexItem className="secAccessAgreementPage__textWrapper">
+              <div className="secAccessAgreementPage__text">
                 <EuiText textAlign="left">
-                  <ReactMarkdown>{accessNotice}</ReactMarkdown>
+                  <ReactMarkdown>{accessAgreement}</ReactMarkdown>
                 </EuiText>
               </div>
             </EuiFlexItem>
-            <EuiFlexItem className="secAccessNoticePage__footer">
-              <div className="secAccessNoticePage__footerInner">
+            <EuiFlexItem className="secAccessAgreementPage__footer">
+              <div className="secAccessAgreementPage__footerInner">
                 <EuiButton
                   fill
                   type="submit"
@@ -85,10 +88,10 @@ export function AccessNoticePage({ http, fatalErrors, notifications }: Props) {
                   onClick={onAcknowledge}
                   isDisabled={isLoading}
                   isLoading={isLoading}
-                  data-test-subj="accessNoticeAcknowledge"
+                  data-test-subj="accessAgreementAcknowledge"
                 >
                   <FormattedMessage
-                    id="xpack.security.accessNotice.acknowledgeButtonText"
+                    id="xpack.security.accessAgreement.acknowledgeButtonText"
                     defaultMessage="Acknowledge and continue"
                   />
                 </EuiButton>
@@ -102,14 +105,14 @@ export function AccessNoticePage({ http, fatalErrors, notifications }: Props) {
   );
 }
 
-export function renderAccessNoticePage(
+export function renderAccessAgreementPage(
   i18nStart: CoreStart['i18n'],
   element: Element,
   props: Props
 ) {
   ReactDOM.render(
     <i18nStart.Context>
-      <AccessNoticePage {...props} />
+      <AccessAgreementPage {...props} />
     </i18nStart.Context>,
     element
   );

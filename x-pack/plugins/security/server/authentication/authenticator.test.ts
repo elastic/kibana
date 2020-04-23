@@ -1112,11 +1112,11 @@ describe('Authenticator', () => {
       });
     });
 
-    describe('with Access Notice', () => {
+    describe('with Access Agreement', () => {
       const mockUser = mockAuthenticatedUser();
       beforeEach(() => {
         mockOptions = getMockOptions({
-          providers: { basic: { basic1: { order: 0, accessNotice: 'some notice' } } },
+          providers: { basic: { basic1: { order: 0, accessAgreement: 'some notice' } } },
         });
         mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
 
@@ -1127,7 +1127,7 @@ describe('Authenticator', () => {
         authenticator = new Authenticator(mockOptions);
       });
 
-      it('does not redirect to Access Notice if there is no active session', async () => {
+      it('does not redirect to Access Agreement if there is no active session', async () => {
         const request = httpServerMock.createKibanaRequest();
         mockSessionStorage.get.mockResolvedValue(null);
 
@@ -1136,7 +1136,7 @@ describe('Authenticator', () => {
         );
       });
 
-      it('does not redirect AJAX requests to Access Notice', async () => {
+      it('does not redirect AJAX requests to Access Agreement', async () => {
         const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
         mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
@@ -1145,7 +1145,7 @@ describe('Authenticator', () => {
         );
       });
 
-      it('does not redirect to Access Notice if request cannot be handled', async () => {
+      it('does not redirect to Access Agreement if request cannot be handled', async () => {
         const request = httpServerMock.createKibanaRequest();
         mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
@@ -1158,7 +1158,7 @@ describe('Authenticator', () => {
         );
       });
 
-      it('does not redirect to Access Notice if authentication fails', async () => {
+      it('does not redirect to Access Agreement if authentication fails', async () => {
         const request = httpServerMock.createKibanaRequest();
         mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
@@ -1172,7 +1172,7 @@ describe('Authenticator', () => {
         );
       });
 
-      it('does not redirect to Access Notice if redirect is required to complete authentication', async () => {
+      it('does not redirect to Access Agreement if redirect is required to complete authentication', async () => {
         const request = httpServerMock.createKibanaRequest();
         mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
@@ -1185,11 +1185,11 @@ describe('Authenticator', () => {
         );
       });
 
-      it('does not redirect to Access Notice if user has already acknowledged it', async () => {
+      it('does not redirect to Access Agreement if user has already acknowledged it', async () => {
         const request = httpServerMock.createKibanaRequest();
         mockSessionStorage.get.mockResolvedValue({
           ...mockSessVal,
-          flags: { accessNoticeAcknowledged: true },
+          flags: { accessAgreementAcknowledged: true },
         });
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
@@ -1197,8 +1197,8 @@ describe('Authenticator', () => {
         );
       });
 
-      it('does not redirect to Access Notice its own requests', async () => {
-        const request = httpServerMock.createKibanaRequest({ path: '/security/access_notice' });
+      it('does not redirect to Access Agreement its own requests', async () => {
+        const request = httpServerMock.createKibanaRequest({ path: '/security/access_agreement' });
         mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
@@ -1206,7 +1206,7 @@ describe('Authenticator', () => {
         );
       });
 
-      it('does not redirect to Access Notice if it is not configured', async () => {
+      it('does not redirect to Access Agreement if it is not configured', async () => {
         mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
         mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
         mockSessionStorage.get.mockResolvedValue(mockSessVal);
@@ -1218,13 +1218,13 @@ describe('Authenticator', () => {
         );
       });
 
-      it('redirects to Access Notice when needed.', async () => {
+      it('redirects to Access Agreement when needed.', async () => {
         mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
         const request = httpServerMock.createKibanaRequest();
         await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.redirectTo(
-            '/mock-server-basepath/security/access_notice?next=%2Fmock-server-basepath%2Fpath'
+            '/mock-server-basepath/security/access_agreement?next=%2Fmock-server-basepath%2Fpath'
           )
         );
       });
@@ -1396,7 +1396,7 @@ describe('Authenticator', () => {
     });
   });
 
-  describe('`acknowledgeAccessNotice` method', () => {
+  describe('`acknowledgeAccessAgreement` method', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
@@ -1422,9 +1422,9 @@ describe('Authenticator', () => {
       mockOptions.getCurrentUser.mockReturnValue(null);
 
       await expect(
-        authenticator.acknowledgeAccessNotice(httpServerMock.createKibanaRequest())
+        authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest())
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot acknowledge access notice for unauthenticated user."`
+        `"Cannot acknowledge access agreement for unauthenticated user."`
       );
 
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
@@ -1434,25 +1434,25 @@ describe('Authenticator', () => {
       mockSessionStorage.get.mockResolvedValue(null);
 
       await expect(
-        authenticator.acknowledgeAccessNotice(httpServerMock.createKibanaRequest())
+        authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest())
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot acknowledge access notice for unauthenticated user."`
+        `"Cannot acknowledge access agreement for unauthenticated user."`
       );
 
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
     });
 
-    it('properly acknowledges access notice for the authenticated user', async () => {
-      await authenticator.acknowledgeAccessNotice(httpServerMock.createKibanaRequest());
+    it('properly acknowledges access agreement for the authenticated user', async () => {
+      await authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest());
 
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
       expect(mockSessionStorage.set).toHaveBeenCalledWith({
         ...mockSessionValue,
-        flags: { accessNoticeAcknowledged: true },
+        flags: { accessAgreementAcknowledged: true },
       });
 
-      expect(mockOptions.auditLogger.accessNoticeAcknowledged).toHaveBeenCalledTimes(1);
-      expect(mockOptions.auditLogger.accessNoticeAcknowledged).toHaveBeenCalledWith('user', {
+      expect(mockOptions.auditLogger.accessAgreementAcknowledged).toHaveBeenCalledTimes(1);
+      expect(mockOptions.auditLogger.accessAgreementAcknowledged).toHaveBeenCalledWith('user', {
         type: 'basic',
         name: 'basic1',
       });

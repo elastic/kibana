@@ -13,7 +13,7 @@ import {
   HttpResourcesRequestHandler,
 } from '../../../../../../src/core/server';
 import { ConfigType } from '../../config';
-import { defineAccessNoticeRoutes } from './access_notice';
+import { defineAccessAgreementRoutes } from './access_agreement';
 
 import {
   coreMock,
@@ -23,7 +23,7 @@ import {
 import { routeDefinitionParamsMock } from '../index.mock';
 import { Authentication } from '../../authentication';
 
-describe('Access notice view routes', () => {
+describe('Access agreement view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;
   let router: jest.Mocked<IRouter>;
   let config: ConfigType;
@@ -35,7 +35,7 @@ describe('Access notice view routes', () => {
     authc = routeParamsMock.authc;
     config = routeParamsMock.config;
 
-    defineAccessNoticeRoutes(routeParamsMock);
+    defineAccessAgreementRoutes(routeParamsMock);
   });
 
   describe('View route', () => {
@@ -43,7 +43,7 @@ describe('Access notice view routes', () => {
     let routeConfig: RouteConfig<any, any, any, 'get'>;
     beforeEach(() => {
       const [viewRouteConfig, viewRouteHandler] = httpResources.register.mock.calls.find(
-        ([{ path }]) => path === '/security/access_notice'
+        ([{ path }]) => path === '/security/access_agreement'
       )!;
 
       routeConfig = viewRouteConfig;
@@ -66,12 +66,12 @@ describe('Access notice view routes', () => {
     });
   });
 
-  describe('Access notice state route', () => {
+  describe('Access agreement state route', () => {
     let routeHandler: RequestHandler<any, any, any, 'get'>;
     let routeConfig: RouteConfig<any, any, any, 'get'>;
     beforeEach(() => {
       const [loginStateRouteConfig, loginStateRouteHandler] = router.get.mock.calls.find(
-        ([{ path }]) => path === '/internal/security/access_notice/state'
+        ([{ path }]) => path === '/internal/security/access_agreement/state'
       )!;
 
       routeConfig = loginStateRouteConfig;
@@ -83,7 +83,7 @@ describe('Access notice view routes', () => {
       expect(routeConfig.validate).toBe(false);
     });
 
-    it('returns empty `accessNotice` if session info is not available.', async () => {
+    it('returns empty `accessAgreement` if session info is not available.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const contextMock = coreMock.createRequestHandlerContext();
 
@@ -92,13 +92,13 @@ describe('Access notice view routes', () => {
       await expect(
         routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
       ).resolves.toEqual({
-        options: { body: { accessNotice: '' } },
-        payload: { accessNotice: '' },
+        options: { body: { accessAgreement: '' } },
+        payload: { accessAgreement: '' },
         status: 200,
       });
     });
 
-    it('returns non-empty `accessNotice` only if it is configured.', async () => {
+    it('returns non-empty `accessAgreement` only if it is configured.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const contextMock = coreMock.createRequestHandlerContext();
 
@@ -106,18 +106,20 @@ describe('Access notice view routes', () => {
         authc: {
           providers: {
             basic: { basic1: { order: 0 } },
-            saml: { saml1: { order: 1, realm: 'realm1', accessNotice: 'Some access notice' } },
+            saml: {
+              saml1: { order: 1, realm: 'realm1', accessAgreement: 'Some access agreement' },
+            },
           },
         },
       }).config.authc;
 
       const cases: Array<[{ type: string; name: string }, string]> = [
         [{ type: 'basic', name: 'basic1' }, ''],
-        [{ type: 'saml', name: 'saml1' }, 'Some access notice'],
+        [{ type: 'saml', name: 'saml1' }, 'Some access agreement'],
         [{ type: 'unknown-type', name: 'unknown-name' }, ''],
       ];
 
-      for (const [sessionProvider, expectedAccessNotice] of cases) {
+      for (const [sessionProvider, expectedAccessAgreement] of cases) {
         authc.getSessionInfo.mockResolvedValue({
           now: Date.now(),
           idleTimeoutExpiration: null,
@@ -128,8 +130,8 @@ describe('Access notice view routes', () => {
         await expect(
           routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
         ).resolves.toEqual({
-          options: { body: { accessNotice: expectedAccessNotice } },
-          payload: { accessNotice: expectedAccessNotice },
+          options: { body: { accessAgreement: expectedAccessAgreement } },
+          payload: { accessAgreement: expectedAccessAgreement },
           status: 200,
         });
       }

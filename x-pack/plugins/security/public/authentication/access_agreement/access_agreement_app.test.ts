@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('./access_notice_page');
+jest.mock('./access_agreement_page');
 
 import { AppMount, ScopedHistory } from 'src/core/public';
-import { accessNoticeApp } from './access_notice_app';
+import { accessAgreementApp } from './access_agreement_app';
 
 import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
 
-describe('accessNoticeApp', () => {
+describe('accessAgreementApp', () => {
   it('properly registers application', () => {
     const coreSetupMock = coreMock.createSetup();
 
-    accessNoticeApp.create({
+    accessAgreementApp.create({
       application: coreSetupMock.application,
       getStartServices: coreSetupMock.getStartServices,
     });
@@ -24,10 +24,10 @@ describe('accessNoticeApp', () => {
 
     const [[appRegistration]] = coreSetupMock.application.register.mock.calls;
     expect(appRegistration).toEqual({
-      id: 'security_access_notice',
+      id: 'security_access_agreement',
       chromeless: true,
-      appRoute: '/security/access_notice',
-      title: 'Access Notice',
+      appRoute: '/security/access_agreement',
+      title: 'Access Agreement',
       mount: expect.any(Function),
     });
   });
@@ -38,7 +38,7 @@ describe('accessNoticeApp', () => {
     coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
     const containerMock = document.createElement('div');
 
-    accessNoticeApp.create({
+    accessAgreementApp.create({
       application: coreSetupMock.application,
       getStartServices: coreSetupMock.getStartServices,
     });
@@ -51,7 +51,7 @@ describe('accessNoticeApp', () => {
       history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
     });
 
-    const mockRenderApp = jest.requireMock('./access_notice_page').renderAccessNoticePage;
+    const mockRenderApp = jest.requireMock('./access_agreement_page').renderAccessAgreementPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(coreStartMock.i18n, containerMock, {
       http: coreStartMock.http,

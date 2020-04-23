@@ -58,10 +58,10 @@ export class SecurityAuditLogger {
     );
   }
 
-  accessNoticeAcknowledged(username: string, provider: { type: string; name: string }) {
+  accessAgreementAcknowledged(username: string, provider: { type: string; name: string }) {
     this.getAuditLogger().log(
-      'access_notice_acknowledged',
-      `${username} acknowledged access notice (${provider.type}/${provider.name}).`,
+      'access_agreement_acknowledged',
+      `${username} acknowledged access agreement (${provider.type}/${provider.name}).`,
       { username, provider }
     );
   }

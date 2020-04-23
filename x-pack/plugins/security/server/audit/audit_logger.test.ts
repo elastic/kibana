@@ -93,19 +93,19 @@ describe(`#savedObjectsAuthorizationSuccess`, () => {
   });
 });
 
-describe(`#accessNoticeAcknowledged`, () => {
+describe(`#accessAgreementAcknowledged`, () => {
   test('logs via auditLogger', () => {
     const auditLogger = createMockAuditLogger();
     const securityAuditLogger = new SecurityAuditLogger(() => auditLogger);
     const username = 'foo-user';
     const provider = { type: 'saml', name: 'saml1' };
 
-    securityAuditLogger.accessNoticeAcknowledged(username, provider);
+    securityAuditLogger.accessAgreementAcknowledged(username, provider);
 
     expect(auditLogger.log).toHaveBeenCalledTimes(1);
     expect(auditLogger.log).toHaveBeenCalledWith(
-      'access_notice_acknowledged',
-      'foo-user acknowledged access notice (saml/saml1).',
+      'access_agreement_acknowledged',
+      'foo-user acknowledged access agreement (saml/saml1).',
       { username, provider }
     );
   });

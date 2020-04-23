@@ -75,9 +75,9 @@ export interface ProviderSession {
    */
   flags?: {
     /**
-     * Indicates whether user acknowledged access notice or not.
+     * Indicates whether user acknowledged agreement notice or not.
      */
-    accessNoticeAcknowledged: boolean;
+    accessAgreementAcknowledged: boolean;
   };
 }
 
@@ -124,9 +124,9 @@ const providerMap = new Map<
 ]);
 
 /**
- * The route to the access notice UI.
+ * The route to the access agreement UI.
  */
-const ACCESS_NOTICE_ROUTE = '/security/access_notice';
+const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
 
 function assertRequest(request: KibanaRequest) {
   if (!(request instanceof KibanaRequest)) {
@@ -390,13 +390,13 @@ export class Authenticator {
       if (!authenticationResult.notHandled()) {
         if (
           authenticationResult.succeeded() &&
-          this.shouldRedirectToAccessNotice(request, updatedSession)
+          this.shouldRedirectToAccessAgreement(request, updatedSession)
         ) {
-          this.logger.debug('Redirecting user to the access notice screen.');
+          this.logger.debug('Redirecting user to the access agreement screen.');
           return AuthenticationResult.redirectTo(
             `${
               this.options.basePath.serverBasePath
-            }${ACCESS_NOTICE_ROUTE}?next=${encodeURIComponent(
+            }${ACCESS_AGREEMENT_ROUTE}?next=${encodeURIComponent(
               `${this.options.basePath.get(request)}${request.url.path}`
             )}`
           );
@@ -482,25 +482,25 @@ export class Authenticator {
   }
 
   /**
-   * Acknowledges access notice on behalf of the currently authenticated user.
+   * Acknowledges access agreement on behalf of the currently authenticated user.
    * @param request Request instance.
    */
-  async acknowledgeAccessNotice(request: KibanaRequest) {
+  async acknowledgeAccessAgreement(request: KibanaRequest) {
     assertRequest(request);
 
     const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
     const existingSession = await this.getSessionValue(sessionStorage);
     const currentUser = this.options.getCurrentUser(request);
     if (!existingSession || !currentUser) {
-      throw new Error('Cannot acknowledge access notice for unauthenticated user.');
+      throw new Error('Cannot acknowledge access agreement for unauthenticated user.');
     }
 
     sessionStorage.set({
       ...existingSession,
-      flags: { ...(existingSession.flags || {}), accessNoticeAcknowledged: true },
+      flags: { ...(existingSession.flags || {}), accessAgreementAcknowledged: true },
     });
 
-    this.options.auditLogger.accessNoticeAcknowledged(
+    this.options.auditLogger.accessAgreementAcknowledged(
       currentUser.username,
       existingSession.provider
     );
@@ -680,25 +680,25 @@ export class Authenticator {
   }
 
   /**
-   * Checks whether request should be redirected to the Access Notice UI.
+   * Checks whether request should be redirected to the Access Agreement UI.
    * @param request Request instance.
    * @param session Current session value if any.
    */
-  private shouldRedirectToAccessNotice(request: KibanaRequest, session: ProviderSession | null) {
-    // Request should be redirected to Access Notice UI only if all following conditions are met:
+  private shouldRedirectToAccessAgreement(request: KibanaRequest, session: ProviderSession | null) {
+    // Request should be redirected to Access Agreement UI only if all following conditions are met:
     //  1. Request can be redirected (not API call)
-    //  2. Request is authenticated, but user hasn't acknowledged access notice in the current
+    //  2. Request is authenticated, but user hasn't acknowledged access agreement in the current
     //     session yet (based on the flag we store in the session)
-    //  3. Request is authenticated by the provider that has `accessNotice` configured
-    //  4. And it's not a request to the Access Notice UI itself
+    //  3. Request is authenticated by the provider that has `accessAgreement` configured
+    //  4. And it's not a request to the Access Agreement UI itself
     return (
       canRedirectRequest(request) &&
       session != null &&
-      !session.flags?.accessNoticeAcknowledged &&
+      !session.flags?.accessAgreementAcknowledged &&
       (this.options.config.authc.providers as Record<string, any>)[session.provider.type]?.[
         session.provider.name
-      ]?.accessNotice &&
-      request.url.pathname !== ACCESS_NOTICE_ROUTE
+      ]?.accessAgreement &&
+      request.url.pathname !== ACCESS_AGREEMENT_ROUTE
     );
   }
 }

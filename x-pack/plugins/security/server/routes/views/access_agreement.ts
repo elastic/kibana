@@ -7,9 +7,9 @@
 import { RouteDefinitionParams } from '..';
 
 /**
- * Defines routes required for the Access Notice view.
+ * Defines routes required for the Access Agreement view.
  */
-export function defineAccessNoticeRoutes({
+export function defineAccessAgreementRoutes({
   authc,
   httpResources,
   config,
@@ -17,26 +17,26 @@ export function defineAccessNoticeRoutes({
   logger,
 }: RouteDefinitionParams) {
   httpResources.register(
-    { path: '/security/access_notice', validate: false },
+    { path: '/security/access_agreement', validate: false },
     async (context, request, response) => response.renderCoreApp()
   );
 
   router.get(
-    { path: '/internal/security/access_notice/state', validate: false },
+    { path: '/internal/security/access_agreement/state', validate: false },
     async (context, request, response) => {
       // It's not guaranteed that we'll have session for the authenticated user (e.g. when user is
       // authenticated with the help of HTTP authentication), that means we should safely check if
       // we have it and can get a corresponding configuration.
       try {
         const session = await authc.getSessionInfo(request);
-        const accessNotice =
+        const accessAgreement =
           (session &&
             (config.authc.providers as Record<string, any>)[session.provider.type]?.[
               session.provider.name
-            ]?.accessNotice) ||
+            ]?.accessAgreement) ||
           '';
 
-        return response.ok({ body: { accessNotice } });
+        return response.ok({ body: { accessAgreement } });
       } catch (err) {
         logger.error(err);
         return response.internalError();

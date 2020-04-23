@@ -176,7 +176,7 @@ export async function setupAuthentication({
     logout: authenticator.logout.bind(authenticator),
     getSessionInfo: authenticator.getSessionInfo.bind(authenticator),
     isProviderTypeEnabled: authenticator.isProviderTypeEnabled.bind(authenticator),
-    acknowledgeAccessNotice: authenticator.acknowledgeAccessNotice.bind(authenticator),
+    acknowledgeAccessAgreement: authenticator.acknowledgeAccessAgreement.bind(authenticator),
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { accessNoticeApp } from './access_notice_app';
+export { accessAgreementApp } from './access_agreement_app';

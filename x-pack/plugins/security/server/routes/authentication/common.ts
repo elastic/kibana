@@ -137,10 +137,10 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
   );
 
   router.post(
-    { path: '/internal/security/access_notice/acknowledge', validate: false },
+    { path: '/internal/security/access_agreement/acknowledge', validate: false },
     async (context, request, response) => {
       try {
-        await authc.acknowledgeAccessNotice(request);
+        await authc.acknowledgeAccessAgreement(request);
       } catch (err) {
         logger.error(err);
         return response.internalError();

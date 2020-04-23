@@ -20,7 +20,7 @@ describe('View routes', () => {
     expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
       .toMatchInlineSnapshot(`
       Array [
-        "/security/access_notice",
+        "/security/access_agreement",
         "/security/account",
         "/security/logged_out",
         "/logout",
@@ -29,7 +29,7 @@ describe('View routes', () => {
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
-        "/internal/security/access_notice/state",
+        "/internal/security/access_agreement/state",
       ]
     `);
   });
@@ -46,7 +46,7 @@ describe('View routes', () => {
       .toMatchInlineSnapshot(`
       Array [
         "/login",
-        "/security/access_notice",
+        "/security/access_agreement",
         "/security/account",
         "/security/logged_out",
         "/logout",
@@ -56,7 +56,7 @@ describe('View routes', () => {
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
         "/internal/security/login_state",
-        "/internal/security/access_notice/state",
+        "/internal/security/access_agreement/state",
       ]
     `);
   });
@@ -73,7 +73,7 @@ describe('View routes', () => {
       .toMatchInlineSnapshot(`
       Array [
         "/login",
-        "/security/access_notice",
+        "/security/access_agreement",
         "/security/account",
         "/security/logged_out",
         "/logout",
@@ -83,7 +83,7 @@ describe('View routes', () => {
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
         "/internal/security/login_state",
-        "/internal/security/access_notice/state",
+        "/internal/security/access_agreement/state",
       ]
     `);
   });
@@ -100,7 +100,7 @@ describe('View routes', () => {
       .toMatchInlineSnapshot(`
       Array [
         "/login",
-        "/security/access_notice",
+        "/security/access_agreement",
         "/security/account",
         "/security/logged_out",
         "/logout",
@@ -110,7 +110,7 @@ describe('View routes', () => {
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
         "/internal/security/login_state",
-        "/internal/security/access_notice/state",
+        "/internal/security/access_agreement/state",
       ]
     `);
   });

@@ -27,7 +27,7 @@ describe('config schema', () => {
           "providers": Object {
             "basic": Object {
               "basic": Object {
-                "accessNotice": undefined,
+                "accessAgreement": undefined,
                 "description": undefined,
                 "enabled": true,
                 "order": 0,
@@ -70,7 +70,7 @@ describe('config schema', () => {
           "providers": Object {
             "basic": Object {
               "basic": Object {
-                "accessNotice": undefined,
+                "accessAgreement": undefined,
                 "description": undefined,
                 "enabled": true,
                 "order": 0,
@@ -113,7 +113,7 @@ describe('config schema', () => {
           "providers": Object {
             "basic": Object {
               "basic": Object {
-                "accessNotice": undefined,
+                "accessAgreement": undefined,
                 "description": undefined,
                 "enabled": true,
                 "order": 0,
