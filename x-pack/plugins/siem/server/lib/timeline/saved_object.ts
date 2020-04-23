@@ -253,7 +253,8 @@ export const resetTimeline = async (request: FrameworkRequest, timelineIds: stri
         savedObjectsClient.update(
           timelineSavedObjectType,
           timelineId,
-          omit(['title', 'description', 'dateRange'], timelineDefaults)
+          omit(['dateRange'], timelineDefaults)
+          // omit(['title', 'description', 'dateRange'], timelineDefaults)
         ),
         note.deleteNoteByTimelineId(request, timelineId),
         pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),

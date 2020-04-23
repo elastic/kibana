@@ -241,9 +241,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const deleteTimelines: DeleteTimelines = useCallback(
       (timelineIds: string[], variables?: AllTimelinesVariables) => {
-        if (timelineIds.includes(timeline?.savedObjectId || '')) {
-          dispatch(createTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false }));
-        }
         apolloClient.mutate<DeleteTimelineMutation.Mutation, DeleteTimelineMutation.Variables>({
           mutation: deleteTimelineMutation,
           fetchPolicy: 'no-cache',

@@ -59,6 +59,7 @@ import {
   updateSort,
   upsertColumn,
   updateTimeline,
+  getDefaultTimeline,
   updateTitle,
   updateAutoSaveMsg,
   setFilters,
@@ -78,9 +79,10 @@ import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persi
 // import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
-import { persistTimeline, getDefaultTimeline } from '../../containers/timeline/api';
+import { persistTimeline } from '../../containers/timeline/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/timeline/all';
 import { inputsModel } from '../inputs';
+import { epicDefaultTimeline } from './epic_default_timeline';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
@@ -156,13 +158,15 @@ export const createTimelineEpic = <State>(): Epic<
           return true;
         }
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
-          myEpicTimelineId.setTimelineId(null);
-          myEpicTimelineId.setTimelineVersion(null);
+          // myEpicTimelineId.setTimelineId(null);
+          // myEpicTimelineId.setTimelineVersion(null);
           return true;
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
+          return true;
+        } else if (action.type === getDefaultTimeline.type && isItAtimelineAction(timelineId)) {
           return true;
         } else if (
           timelineActionsType.includes(action.type) &&
@@ -187,24 +191,17 @@ export const createTimelineEpic = <State>(): Epic<
         const timelineId = myEpicTimelineId.getTimelineId();
         const version = myEpicTimelineId.getTimelineVersion();
 
-        console.error('dispatcher', objAction, timeline, myEpicTimelineId);
-
         if (timelineNoteActionsType.includes(action.type)) {
           return epicPersistNote(apolloClient, action, timeline, notes, action$, timeline$, notes$);
         } else if (timelinePinnedEventActionsType.includes(action.type)) {
           return epicPersistPinnedEvent(apolloClient, action, timeline, action$, timeline$);
         } else if (timelineFavoriteActionsType.includes(action.type)) {
           return epicPersistTimelineFavorite(apolloClient, action, timeline, action$, timeline$);
+        } else if (action.type === getDefaultTimeline.type) {
+          return epicDefaultTimeline(action, timeline, action$, timeline$, false);
         } else if (action.type === createTimeline.type) {
-          return from(getDefaultTimeline({ clean: true })).pipe(
-            mergeMap(([result]) => {
-              const response: ResponseTimeline = get('data.persistTimeline', result);
-              if (response.timeline) {
-                return addTimeline({ id: 'timeline-1', timeline: response.timeline });
-              }
-              return empty()
-            })
-          );
+          console.error('ceasdsdasdasdds');
+          return epicDefaultTimeline(action, timeline, action$, timeline$, true);
         } else if (timelineActionsType.includes(action.type)) {
           return from(
             persistTimeline({

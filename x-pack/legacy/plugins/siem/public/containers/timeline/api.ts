@@ -124,9 +124,7 @@ export const exportSelectedTimeline: ExportSelectedData = async ({
 
 export const getDefaultTimeline = async (query: HttpFetchQuery): Promise<TimelineResponse> => {
   const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_DEFAULT_URL, {
-    query: {
-      clean: true,
-    },
+    query,
   });
 
   return decodeTimelineResponse(response);

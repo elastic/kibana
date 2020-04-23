@@ -13,9 +13,10 @@ import { buildRouteValidation } from '../../../utils/build_validation/route_vali
 import { TIMELINE_DEFAULT_URL } from '../../../../common/constants';
 import { buildFrameworkRequest } from './utils/common';
 import { SetupPlugins } from '../../../plugin';
-import { getAllTimeline, resetTimeline } from '../saved_object';
+import { getAllTimeline, resetTimeline, getTimeline, persistTimeline } from '../saved_object';
 import { SortFieldTimeline, Direction } from '../../../graphql/types';
 import { defaultTimelinesQuerySchema } from './schemas/default_timelines_schema';
+import { timelineDefaults } from '../default_timeline';
 
 export const defaultTimelinesRoute = (
   router: IRouter,
@@ -42,20 +43,26 @@ export const defaultTimelinesRoute = (
           sortField: SortFieldTimeline.updated,
           sortOrder: Direction.desc,
         });
+        console.error('allTimelines', JSON.stringify(allTimelines, null, 2));
+
         const defaultTimeline = find(['title', ''], allTimelines.timeline);
 
         console.error('defaultTimeline?.savedObjectId', defaultTimeline?.savedObjectId);
         console.error('request', request);
 
         if (defaultTimeline?.savedObjectId) {
-          if (request.query?.clean) {
-            const reseted = await resetTimeline(frameworkRequest, [defaultTimeline.savedObjectId]);
+          if (request.query?.clean === 'true') {
+            await resetTimeline(frameworkRequest, [defaultTimeline.savedObjectId]);
+            const cleanedTimeline = await getTimeline(
+              frameworkRequest,
+              defaultTimeline.savedObjectId
+            );
 
             return response.ok({
               body: {
                 data: {
                   persistTimeline: {
-                    timeline: reseted[0][0],
+                    timeline: cleanedTimeline,
                   },
                 },
               },
@@ -72,6 +79,27 @@ export const defaultTimelinesRoute = (
             },
           });
         }
+
+        const newTimelineResponse = await persistTimeline(
+          frameworkRequest,
+          null,
+          null,
+          timelineDefaults
+        );
+
+        if (newTimelineResponse.code === 200) {
+          return response.ok({
+            body: {
+              data: {
+                persistTimeline: {
+                  timeline: newTimelineResponse.timeline,
+                },
+              },
+            },
+          });
+        }
+
+        return response.ok({});
       } catch (err) {
         const error = transformError(err);
         const siemResponse = buildSiemResponse(response);

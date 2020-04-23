@@ -15,8 +15,6 @@ import { Pane } from './pane';
 import { timelineActions } from '../../store/actions';
 import { StatefulTimeline } from '../timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { useApolloClient } from '../../utils/apollo_context';
-import { updateIsLoading } from '../../store/timeline/actions';
 import { TimelineModel } from '../../store/timeline/model';
 
 export const Badge = styled(EuiBadge)`
@@ -47,13 +45,15 @@ export const FlyoutComponent: React.FC<FlyoutComponentProps> = ({
   timelineId,
   usersViewing,
 }) => {
-  const apolloClient = useApolloClient();
   const dispatch = useDispatch();
 
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const { dataProviders, show, width } =
-    useSelector<State, TimelineModel>(state => getTimeline(state, 'timeline-1')) ??
-    timelineDefaults;
+  const stateTimeline = useSelector<State, TimelineModel>(state =>
+    getTimeline(state, 'timeline-1')
+  );
+  const { dataProviders, show, width } = stateTimeline?.dataProviders
+    ? stateTimeline
+    : timelineDefaults;
 
   const handleClose = useCallback(
     () => dispatch(timelineActions.showTimeline({ id: timelineId, show: false })),
@@ -64,10 +64,6 @@ export const FlyoutComponent: React.FC<FlyoutComponentProps> = ({
     () => dispatch(timelineActions.showTimeline({ id: timelineId, show: true })),
     [timelineId, dispatch]
   );
-
-  const dispatchedUpdateIsLoading = useCallback(payload => dispatch(updateIsLoading(payload)), [
-    dispatch,
-  ]);
 
   return (
     <>

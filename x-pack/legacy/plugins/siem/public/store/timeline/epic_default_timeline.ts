@@ -4,29 +4,106 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { empty, of, merge } from 'rxjs';
-import { ajax } from 'rxjs/ajax';
-import { map } from 'rxjs/operators';
+import { empty, of, merge, Observable, from } from 'rxjs';
+import {
+  map,
+  filter,
+  switchMap,
+  withLatestFrom,
+  mergeMap,
+  startWith,
+  takeUntil,
+} from 'rxjs/operators';
+import { getOr, get } from 'lodash/fp';
 import { Epic } from 'redux-observable';
 import { Action } from 'redux';
-import { addTimeline } from './actions';
-import { getDefaultTimeline, decodeTimelineResponse } from '../../containers/timeline/api';
+import {
+  addTimeline,
+  createTimeline,
+  getDefaultTimeline as getDefaultTimelineAction,
+  showCallOutUnauthorizedMsg,
+  updateTimeline,
+  endTimelineSaving,
+  startTimelineSaving,
+} from './actions';
+import { getDefaultTimeline } from '../../containers/timeline/api';
+import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
+import { ActionTimeline, TimelineById } from './types';
+import { myEpicTimelineId } from './my_epic_timeline_id';
+import { addError } from '../app/actions';
+import {
+  formatTimelineResultToModel,
+  epicUpdateTimeline,
+} from '../../components/open_timeline/helpers';
+import { getTimeRangeSettings } from '../../utils/default_date_settings';
 
-export const createDefaultTimelineEpic = <State>(): Epic<Action, Action, State> => () => {
-  console.error('default timeline epic');
+export const epicDefaultTimeline = (
+  action: ActionTimeline,
+  timeline: TimelineById,
+  action$: Observable<Action>,
+  timeline$: Observable<TimelineById>,
+  clean: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Observable<any> =>
+  // !!myEpicTimelineId.getTimelineId()
+  from(getDefaultTimeline({ clean })).pipe(
+    withLatestFrom(timeline$),
+    mergeMap(([result, recentTimelines]) => {
+      const savedTimeline = recentTimelines[action.payload.id];
+      const response: ResponseTimeline = get('data.persistTimeline', result);
+      const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
-  return ajax.getJSON('/api/timeline/_default').pipe(
-    map(resp => {
-      console.error('resp', resp);
-      return addTimeline({ id: 'timeline-1', timeline: resp.data.persistTimeline.timeline });
-    })
+      console.error('savesdssss', savedTimeline, response);
+
+      const { timeline: timelineModel, notes } = formatTimelineResultToModel(
+        response.timeline,
+        false
+      );
+      const { from: settingsFrom, to: settingsTo } = getTimeRangeSettings();
+
+      return [
+        ...callOutMsg,
+        ...epicUpdateTimeline({
+          duplicate: false,
+          from: get('dateRange.start', timeline) ?? settingsFrom,
+          id: 'timeline-1',
+          notes,
+          timeline: {
+            ...timelineModel,
+            show: savedTimeline?.show ?? false,
+          },
+          to: get('dateRange.end', timeline) ?? settingsTo,
+        }),
+        endTimelineSaving({
+          id: action.payload.id,
+        }),
+      ];
+    }),
+    // startWith(startTimelineSaving({ id: action.payload.id })),
+    takeUntil(
+      action$.pipe(
+        withLatestFrom(timeline$),
+        filter(([checkAction, updatedTimeline]) => {
+          if (checkAction.type === addError.type) {
+            return true;
+          }
+          if (
+            checkAction.type === endTimelineSaving.type &&
+            updatedTimeline[get('payload.id', checkAction)].savedObjectId != null
+          ) {
+            myEpicTimelineId.setTimelineId(
+              updatedTimeline[get('payload.id', checkAction)].savedObjectId
+            );
+            myEpicTimelineId.setTimelineVersion(
+              updatedTimeline[get('payload.id', checkAction)].version
+            );
+            return true;
+          }
+          return false;
+        })
+      )
+    )
   );
 
-  // return of(getDefaultTimeline()).pipe(
-  //   map(resp => {
-  //     console.error('resp', resp);
-
-  //     return addTimeline({ id: 'timeline-1', timeline: resp.data.persistTimeline.timeline });
-  //   })
-  // );
-};
+export const createDefaultTimelineEpic = <State>(): Epic<Action, Action, State> => () =>
+  of(getDefaultTimelineAction({ id: 'timeline-1' }));

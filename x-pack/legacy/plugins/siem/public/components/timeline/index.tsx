@@ -157,11 +157,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       [columns, id]
     );
 
-    useEffect(() => {
-      if (createTimeline != null) {
-        createTimeline({ id, columns: defaultHeaders, show: false });
-      }
-    }, []);
+    console.error('sort', sort);
 
     return (
       <WithSource sourceId="default" indexToAdd={indexToAdd}>
@@ -169,7 +165,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           <Timeline
             browserFields={browserFields}
             columns={columns}
-            dataProviders={dataProviders!}
+            dataProviders={dataProviders}
             end={end}
             eventType={eventType}
             filters={filters}
@@ -190,9 +186,9 @@ const StatefulTimelineComponent = React.memo<Props>(
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            show={show!}
+            show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            sort={sort!}
+            sort={sort}
             start={start}
             toggleColumn={toggleColumn}
             usersViewing={usersViewing}
@@ -232,6 +228,7 @@ const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
+    console.error('timteline', timeline);
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
       columns,

@@ -75,9 +75,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    if (createTimeline != null) {
-      createTimeline({ id, columns, sort, itemsPerPage, showCheckboxes, showRowRenderers });
-    }
+    // if (createTimeline != null) {
+    //   createTimeline({ id, columns, sort, itemsPerPage, showCheckboxes, showRowRenderers });
+    // }
     return () => {
       deleteEventQuery({ id, inputId: 'global' });
     };
