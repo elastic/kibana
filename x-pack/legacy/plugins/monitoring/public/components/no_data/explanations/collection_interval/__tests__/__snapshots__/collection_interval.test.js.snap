@@ -365,6 +365,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
               isCopyable={false}
               paddingSize="l"
               transparentBackground={false}
+              whiteSpace="pre-wrap"
             >
               <Portal
                 containerInfo={
@@ -393,6 +394,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
               isCopyable={false}
               paddingSize="l"
               transparentBackground={false}
+              whiteSpace="pre-wrap"
             >
               <Portal
                 containerInfo={
@@ -695,6 +697,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
               isCopyable={false}
               paddingSize="l"
               transparentBackground={false}
+              whiteSpace="pre-wrap"
             >
               <Portal
                 containerInfo={
@@ -723,6 +726,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
               isCopyable={false}
               paddingSize="l"
               transparentBackground={false}
+              whiteSpace="pre-wrap"
             >
               <Portal
                 containerInfo={

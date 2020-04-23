@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { isAbsolute, extname } from 'path';
+import { isAbsolute, extname, join } from 'path';
 import LruCache from 'lru-cache';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { createDynamicAssetResponse } from './dynamic_asset_response';
 import { assertIsNpUiPluginPublicDirs } from '../np_ui_plugin_public_dirs';
+import { fromRoot } from '../../core/server/utils';
 
 /**
  *  Creates the routes that serves files from `bundlesPath` or from
@@ -71,37 +72,57 @@ export function createBundlesRoute({
   }
 
   return [
-    buildRouteForBundles(
-      `${basePublicPath}/bundles/kbn-ui-shared-deps/`,
-      '/bundles/kbn-ui-shared-deps/',
-      UiSharedDeps.distDir,
-      fileHashCache
-    ),
+    buildRouteForBundles({
+      publicPath: `${basePublicPath}/bundles/kbn-ui-shared-deps/`,
+      routePath: '/bundles/kbn-ui-shared-deps/',
+      bundlesPath: UiSharedDeps.distDir,
+      fileHashCache,
+      replacePublicPath: false,
+    }),
     ...npUiPluginPublicDirs.map(({ id, path }) =>
-      buildRouteForBundles(
-        `${basePublicPath}/bundles/plugin:${id}/`,
-        `/bundles/plugin:${id}/`,
-        path,
-        fileHashCache
-      )
+      buildRouteForBundles({
+        publicPath: `${basePublicPath}/bundles/plugin/${id}/`,
+        routePath: `/bundles/plugin/${id}/`,
+        bundlesPath: path,
+        fileHashCache,
+        replacePublicPath: false,
+      })
     ),
-    buildRouteForBundles(
-      `${basePublicPath}/bundles/`,
-      '/bundles/',
-      regularBundlesPath,
-      fileHashCache
-    ),
-    buildRouteForBundles(
-      `${basePublicPath}/built_assets/dlls/`,
-      '/built_assets/dlls/',
-      dllBundlesPath,
-      fileHashCache
-    ),
-    buildRouteForBundles(`${basePublicPath}/`, '/built_assets/css/', builtCssPath, fileHashCache),
+    buildRouteForBundles({
+      publicPath: `${basePublicPath}/bundles/core/`,
+      routePath: `/bundles/core/`,
+      bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
+      fileHashCache,
+      replacePublicPath: false,
+    }),
+    buildRouteForBundles({
+      publicPath: `${basePublicPath}/bundles/`,
+      routePath: '/bundles/',
+      bundlesPath: regularBundlesPath,
+      fileHashCache,
+    }),
+    buildRouteForBundles({
+      publicPath: `${basePublicPath}/built_assets/dlls/`,
+      routePath: '/built_assets/dlls/',
+      bundlesPath: dllBundlesPath,
+      fileHashCache,
+    }),
+    buildRouteForBundles({
+      publicPath: `${basePublicPath}/`,
+      routePath: '/built_assets/css/',
+      bundlesPath: builtCssPath,
+      fileHashCache,
+    }),
   ];
 }
 
-function buildRouteForBundles(publicPath, routePath, bundlesPath, fileHashCache) {
+function buildRouteForBundles({
+  publicPath,
+  routePath,
+  bundlesPath,
+  fileHashCache,
+  replacePublicPath = true,
+}) {
   return {
     method: 'GET',
     path: `${routePath}{path*}`,
@@ -122,6 +143,7 @@ function buildRouteForBundles(publicPath, routePath, bundlesPath, fileHashCache)
               bundlesPath,
               fileHashCache,
               publicPath,
+              replacePublicPath,
             });
           },
         },

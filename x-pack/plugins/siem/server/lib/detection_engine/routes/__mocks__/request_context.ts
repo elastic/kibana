@@ -13,6 +13,7 @@ import {
 import { alertsClientMock } from '../../../../../../alerting/server/mocks';
 import { actionsClientMock } from '../../../../../../actions/server/mocks';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
+import { siemMock } from '../../../../mocks';
 
 const createMockClients = () => ({
   actionsClient: actionsClientMock.create(),
@@ -20,7 +21,7 @@ const createMockClients = () => ({
   clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   licensing: { license: licensingMock.createLicenseMock() },
   savedObjectsClient: savedObjectsClientMock.create(),
-  siemClient: { signalsIndex: 'mockSignalsIndex' },
+  siemClient: siemMock.createClient(),
 });
 
 const createRequestContextMock = (

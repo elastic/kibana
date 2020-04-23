@@ -17,11 +17,16 @@
  * under the License.
  */
 
-import { PhraseFilter, IndexPattern, TimefilterContract } from '../../../../../plugins/data/public';
-import { SearchSource as SearchSourceClass, SearchSourceFields } from '../legacy_imports';
+import {
+  SearchSourceFields,
+  PhraseFilter,
+  IndexPattern,
+  TimefilterContract,
+  DataPublicPluginStart,
+} from '../../../../../plugins/data/public';
 
 export function createSearchSource(
-  SearchSource: SearchSourceClass,
+  { create }: DataPublicPluginStart['search']['searchSource'],
   initialState: SearchSourceFields | null,
   indexPattern: IndexPattern,
   aggs: any,
@@ -29,7 +34,8 @@ export function createSearchSource(
   filters: PhraseFilter[] = [],
   timefilter: TimefilterContract
 ) {
-  const searchSource = initialState ? new SearchSource(initialState) : new SearchSource();
+  const searchSource = create(initialState || {});
+
   // Do not not inherit from rootSearchSource to avoid picking up time and globals
   searchSource.setParent(undefined);
   searchSource.setField('filter', () => {
