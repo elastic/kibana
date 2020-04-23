@@ -9,6 +9,8 @@ import React, { useRef, FC } from 'react';
 import { TooltipValueFormatter } from '@elastic/charts';
 import useObservable from 'react-use/lib/useObservable';
 
+import './_index.scss';
+
 import { chartTooltip$, ChartTooltipState, ChartTooltipValue } from './chart_tooltip_service';
 
 type RefValue = HTMLElement | null;

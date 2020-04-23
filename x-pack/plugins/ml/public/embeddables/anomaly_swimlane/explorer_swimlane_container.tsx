@@ -22,6 +22,7 @@ import {
 } from './anomaly_swimlane_embaddable';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+import { ChartTooltip } from '../../application/components/chart_tooltip';
 
 const RESIZE_THROTTLE_TIME_MS = 200;
 
@@ -150,6 +151,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
         >
           {chartWidth > 0 && swimlaneData && swimlaneType && (
             <>
+              <ChartTooltip />
               <EuiSpacer size="m" />
               <ExplorerSwimlane
                 chartWidth={chartWidth}
