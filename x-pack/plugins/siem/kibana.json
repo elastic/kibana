@@ -11,8 +11,10 @@
     "esUiShared",
     "features",
     "home",
+    "inspector",
     "kibanaUtils",
     "licensing",
+    "maps",
     "triggers_actions_ui",
     "uiActions",
     "usageCollection"
