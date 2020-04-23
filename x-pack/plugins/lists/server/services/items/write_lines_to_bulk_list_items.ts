@@ -9,9 +9,11 @@ import { Readable } from 'stream';
 import { MetaOrUndefined, Type } from '../../../common/schemas';
 import { DataClient } from '../../types';
 
-import { BufferLines, createListItemsBulk, getListItemByValues } from '.';
+import { BufferLines } from './buffer_lines';
+import { getListItemByValues } from './get_list_item_by_values';
+import { createListItemsBulk } from './create_list_items_bulk';
 
-interface ImportListItemsToStreamOptions {
+export interface ImportListItemsToStreamOptions {
   listId: string;
   stream: Readable;
   dataClient: DataClient;
@@ -50,7 +52,7 @@ export const importListItemsToStream = ({
   });
 };
 
-interface WriteBufferToItemsOptions {
+export interface WriteBufferToItemsOptions {
   listId: string;
   dataClient: DataClient;
   listItemIndex: string;
@@ -60,7 +62,7 @@ interface WriteBufferToItemsOptions {
   meta: MetaOrUndefined;
 }
 
-interface LinesResult {
+export interface LinesResult {
   linesProcessed: number;
   duplicatesFound: number;
 }

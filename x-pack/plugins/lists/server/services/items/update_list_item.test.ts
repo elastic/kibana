@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListItemSchema } from '../../../common/schemas';
 import { getListItemResponseMock, getUpdateListItemOptionsMock } from '../mocks';
 
 import { updateListItem } from './update_list_item';
@@ -24,11 +23,11 @@ describe('update_list_item', () => {
   });
 
   test('it returns a list item as expected with the id changed out for the elastic id when there is a list item to update', async () => {
-    const list: ListItemSchema = getListItemResponseMock();
+    const list = getListItemResponseMock();
     ((getListItem as unknown) as jest.Mock).mockResolvedValueOnce(list);
     const options = getUpdateListItemOptionsMock();
     const updatedList = await updateListItem(options);
-    const expected: ListItemSchema = getListItemResponseMock();
+    const expected = getListItemResponseMock();
     expected.id = 'elastic-id-123';
     expect(updatedList).toEqual(expected);
   });

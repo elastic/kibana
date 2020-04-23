@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexEsListSchema, ListSchema } from '../../../common/schemas';
 import {
   LIST_ID,
   LIST_INDEX,
@@ -27,7 +26,7 @@ describe('crete_list', () => {
   test('it returns a list as expected with the id changed out for the elastic id', async () => {
     const options = getCreateListOptionsMock();
     const list = await createList(options);
-    const expected: ListSchema = getListResponseMock();
+    const expected = getListResponseMock();
     expected.id = 'elastic-id-123';
     expect(list).toEqual(expected);
   });
@@ -35,7 +34,7 @@ describe('crete_list', () => {
   test('It calls "callAsCurrentUser" with body, index, and listIndex', async () => {
     const options = getCreateListOptionsMock();
     await createList(options);
-    const body: IndexEsListSchema = getIndexESListMock();
+    const body = getIndexESListMock();
     const expected = {
       body,
       id: LIST_ID,
@@ -48,7 +47,7 @@ describe('crete_list', () => {
     const options = getCreateListOptionsMock();
     options.id = undefined;
     const list = await createList(options);
-    const expected: ListSchema = getListResponseMock();
+    const expected = getListResponseMock();
     expected.id = 'elastic-id-123';
     expect(list).toEqual(expected);
   });

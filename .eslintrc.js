@@ -662,7 +662,7 @@ module.exports = {
         'no-misleading-character-class': 'error',
         'no-new-symbol': 'error',
         'no-obj-calls': 'error',
-        'no-param-reassign': 'error',
+        'no-param-reassign': ['error', { props: true }],
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
         'no-return-await': 'error',
@@ -822,6 +822,7 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': 'error',
         'no-template-curly-in-string': 'error',
         'sort-keys': 'error',
+        'prefer-destructuring': 'error',
       },
     },
 

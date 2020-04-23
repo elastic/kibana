@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Readable } from 'stream';
+import { TestReadable } from '../mocks/test_readable';
 
 import { BufferLines } from './buffer_lines';
-
-class TestReadable extends Readable {
-  public _read(): void {}
-}
 
 describe('buffer_lines', () => {
   test('it can read a single line', done => {

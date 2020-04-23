@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListItemSchema } from '../../../common/schemas';
 import { LIST_ID, LIST_INDEX, getDataClientMock, getListItemResponseMock } from '../mocks';
 import { getSearchListItemMock } from '../mocks/get_search_list_item_mock';
 
@@ -23,7 +22,7 @@ describe('get_list_item', () => {
     const data = getSearchListItemMock();
     const dataClient = getDataClientMock(data);
     const list = await getListItem({ dataClient, id: LIST_ID, listItemIndex: LIST_INDEX });
-    const expected: ListItemSchema = getListItemResponseMock();
+    const expected = getListItemResponseMock();
     expect(list).toEqual(expected);
   });
 

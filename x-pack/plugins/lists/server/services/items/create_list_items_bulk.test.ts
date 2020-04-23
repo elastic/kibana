@@ -28,9 +28,8 @@ describe('crete_list_item_bulk', () => {
     const options = getCreateListItemBulkOptionsMock();
     await createListItemsBulk(options);
     const firstRecord: IndexEsListItemSchema = getIndexESListItemMock();
-    firstRecord.tie_breaker_id = TIE_BREAKERS[0];
     const secondRecord: IndexEsListItemSchema = getIndexESListItemMock(VALUE_2);
-    secondRecord.tie_breaker_id = TIE_BREAKERS[1];
+    [firstRecord.tie_breaker_id, secondRecord.tie_breaker_id] = TIE_BREAKERS;
     expect(options.dataClient.callAsCurrentUser).toBeCalledWith('bulk', {
       body: [
         { create: { _index: LIST_ITEM_INDEX } },

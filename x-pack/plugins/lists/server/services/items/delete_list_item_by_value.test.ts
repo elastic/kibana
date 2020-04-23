@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListItemArraySchema } from '../../../common/schemas';
 import { getDeleteListItemByValueOptionsMock, getListItemResponseMock } from '../mocks';
 
 import { getListItemByValues } from './get_list_item_by_values';
@@ -31,7 +30,7 @@ describe('delete_list_item_by_value', () => {
   });
 
   test('Delete returns the list item if a list item is returned from "getListByValues"', async () => {
-    const listItems: ListItemArraySchema = [getListItemResponseMock()];
+    const listItems = [getListItemResponseMock()];
     ((getListItemByValues as unknown) as jest.Mock).mockResolvedValueOnce(listItems);
     const options = getDeleteListItemByValueOptionsMock();
     const deletedListItem = await deleteListItemByValue(options);
@@ -39,7 +38,7 @@ describe('delete_list_item_by_value', () => {
   });
 
   test('Delete calls "deleteByQuery" if a list item is returned from "getListByValues"', async () => {
-    const listItems: ListItemArraySchema = [getListItemResponseMock()];
+    const listItems = [getListItemResponseMock()];
     ((getListItemByValues as unknown) as jest.Mock).mockResolvedValueOnce(listItems);
     const options = getDeleteListItemByValueOptionsMock();
     await deleteListItemByValue(options);

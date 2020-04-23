@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListItemSchema } from '../../../common/schemas';
 import { getListItemByValueOptionsMocks, getListItemResponseMock } from '../mocks';
 
 import { getListItemByValues } from './get_list_item_by_values';
@@ -24,11 +23,11 @@ describe('get_list_by_value', () => {
   });
 
   test('Calls get_list_item_by_values with its input', async () => {
-    const listItemMock: ListItemSchema = getListItemResponseMock();
+    const listItemMock = getListItemResponseMock();
     ((getListItemByValues as unknown) as jest.Mock).mockResolvedValueOnce([listItemMock]);
     const options = getListItemByValueOptionsMocks();
     const listItem = await getListItemByValue(options);
-    const expected: ListItemSchema = getListItemResponseMock();
+    const expected = getListItemResponseMock();
     expect(listItem).toEqual([expected]);
   });
 });
