@@ -20,13 +20,18 @@
 import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
 
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
+import {
+  createSearchSourceFromJSON,
+  SearchSource,
+  SearchSourceDependencies,
+  SearchSourceFields,
+} from './search_source';
 import { ISearchSetup, ISearchStart, TSearchStrategyProvider, TSearchStrategiesMap } from './types';
 import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './legacy';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
-import { createSearchSource } from './search_source';
 import { QuerySetup } from '../query';
 import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
@@ -43,8 +48,8 @@ import {
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
 } from './aggs';
-
 import { FieldFormatsStart } from '../field_formats';
+import { ISearchGeneric } from './i_search';
 
 interface SearchServiceSetupDependencies {
   packageInfo: PackageInfo;
@@ -52,9 +57,9 @@ interface SearchServiceSetupDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
-interface SearchStartDependencies {
-  fieldFormats: FieldFormatsStart;
+interface SearchServiceStartDependencies {
   indexPatterns: IndexPatternsContract;
+  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -117,10 +122,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
 
-  public start(
-    core: CoreStart,
-    { fieldFormats, indexPatterns }: SearchStartDependencies
-  ): ISearchStart {
+  public start(core: CoreStart, dependencies: SearchServiceStartDependencies): ISearchStart {
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -135,40 +137,54 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const aggTypesStart = this.aggTypesRegistry.start();
 
+    const search: ISearchGeneric = (request, options, strategyName) => {
+      const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
+      const searchStrategy = strategyProvider({
+        core,
+        getSearchStrategy: this.getSearchStrategy,
+      });
+      return this.searchInterceptor.search(searchStrategy.search as any, request, options);
+    };
+
+    const legacySearch = {
+      esClient: this.esClient!,
+      AggConfig,
+      AggType,
+      aggTypeFieldFilters,
+      FieldParamType,
+      MetricAggType,
+      parentPipelineAggHelper,
+      siblingPipelineAggHelper,
+    };
+
+    const searchSourceDependencies: SearchSourceDependencies = {
+      uiSettings: core.uiSettings,
+      injectedMetadata: core.injectedMetadata,
+      search,
+      legacySearch,
+    };
+
     return {
       aggs: {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
+            fieldFormats: dependencies.fieldFormats,
             typesRegistry: aggTypesStart,
-            fieldFormats,
           });
         },
         types: aggTypesStart,
       },
-      search: (request, options, strategyName) => {
-        const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
-        const { search } = strategyProvider({
-          core,
-          getSearchStrategy: this.getSearchStrategy,
-        });
-        return this.searchInterceptor.search(search as any, request, options);
+      search,
+      searchSource: {
+        create: (fields?: SearchSourceFields) => new SearchSource(fields, searchSourceDependencies),
+        fromJSON: createSearchSourceFromJSON(dependencies.indexPatterns, searchSourceDependencies),
       },
       setInterceptor: (searchInterceptor: SearchInterceptor) => {
         // TODO: should an intercepror have a destroy method?
         this.searchInterceptor = searchInterceptor;
       },
-      createSearchSource: createSearchSource(indexPatterns),
-      __LEGACY: {
-        esClient: this.esClient!,
-        AggConfig,
-        AggType,
-        aggTypeFieldFilters,
-        FieldParamType,
-        MetricAggType,
-        parentPipelineAggHelper,
-        siblingPipelineAggHelper,
-      },
+      __LEGACY: legacySearch,
     };
   }
 

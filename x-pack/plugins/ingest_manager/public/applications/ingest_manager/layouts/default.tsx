@@ -20,8 +20,6 @@ interface Props {
 const Container = styled.div`
   min-height: calc(100vh - ${props => props.theme.eui.euiHeaderChildSize});
   background: ${props => props.theme.eui.euiColorEmptyShade};
-  display: flex;
-  flex-direction: column;
 `;
 
 const Nav = styled.nav`

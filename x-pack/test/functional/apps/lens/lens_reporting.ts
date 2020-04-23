@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'reporting']);
-  const find = getService('find');
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
 
@@ -28,8 +27,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.clickItemLink('dashboard', 'Lens reportz');
       await PageObjects.reporting.openPdfReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
+      const url = await PageObjects.reporting.getReportURL(60000);
 
-      expect(await find.byButtonText('Download report', undefined, 60000)).to.be.ok();
+      expect(url).to.be.ok();
     });
   });
 }
