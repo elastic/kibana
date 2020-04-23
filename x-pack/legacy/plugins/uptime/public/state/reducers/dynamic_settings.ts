@@ -31,13 +31,11 @@ export const dynamicSettingsReducer = handleActions<DynamicSettingsState, any>(
       ...state,
       loading: true,
     }),
-    [String(getDynamicSettingsSuccess)]: (state, action: Action<DynamicSettings>) => ({
-      ...state,
+    [String(getDynamicSettingsSuccess)]: (_state, action: Action<DynamicSettings>) => ({
       loading: false,
       settings: action.payload,
     }),
-    [String(getDynamicSettingsFail)]: (state, action: Action<Error>) => ({
-      ...state,
+    [String(getDynamicSettingsFail)]: (_state, action: Action<Error>) => ({
       loading: false,
       loadError: action.payload,
     }),
@@ -45,7 +43,7 @@ export const dynamicSettingsReducer = handleActions<DynamicSettingsState, any>(
       ...state,
       loading: true,
     }),
-    [String(setDynamicSettingsSuccess)]: (state, action: Action<DynamicSettings>) => ({
+    [String(setDynamicSettingsSuccess)]: (_state, action: Action<DynamicSettings>) => ({
       settings: action.payload,
       saveSucceded: true,
       loading: false,
