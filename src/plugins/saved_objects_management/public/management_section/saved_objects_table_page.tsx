@@ -17,23 +17,16 @@
  * under the License.
  */
 
-import React, { useEffect, lazy, Suspense } from 'react';
-import ReactDOM from 'react-dom';
-import { HashRouter, Switch, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { CoreSetup, CoreStart, ChromeBreadcrumb, Capabilities } from 'src/core/public';
-import { ManagementAppMountParams } from '../../../management/public';
+import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../data/public';
-import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
-import { getAllowedTypes } from './../lib';
 
 const SavedObjectsTablePage = ({
   coreStart,
