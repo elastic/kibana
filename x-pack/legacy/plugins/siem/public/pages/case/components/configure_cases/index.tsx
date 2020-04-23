@@ -121,7 +121,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   const onClickAddConnector = useCallback(() => {
     setActionBarVisible(false);
     setAddFlyoutVisibility(true);
-  }, [closureType]);
+  }, []);
 
   const onClickUpdateConnector = useCallback(() => {
     setActionBarVisible(false);

@@ -9,14 +9,14 @@ import {
   initialState,
   useCaseConfigure,
   ReturnUseCaseConfigure,
-  PersistCaseConfigure,
+  ConnectorConfiguration,
 } from './use_configure';
 import { mapping, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
 
-const configuration: PersistCaseConfigure = {
+const configuration: ConnectorConfiguration = {
   connectorId: '456',
   connectorName: 'My Connector 2',
   closureType: 'close-by-pushing',
