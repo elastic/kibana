@@ -18,6 +18,7 @@ import {
 } from '../common/constants';
 import { getEsSpatialRelationLabel } from '../common/i18n_getters';
 import { SPATIAL_FILTER_TYPE } from './kibana_services';
+import turfCircle from '@turf/circle';
 
 function ensureGeoField(type) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
@@ -330,7 +331,7 @@ export function createDistanceFilterWithMeta({
           values: {
             distanceKm,
             geoFieldName,
-            pointLabel: point.join(','),
+            pointLabel: point.join(', '),
           },
         }),
   };
@@ -450,4 +451,41 @@ export function clamp(val, min, max) {
   } else {
     return val;
   }
+}
+
+export function extractFeaturesFromFilters(filters) {
+  const features = [];
+  filters
+    .filter(filter => {
+      return filter.meta.key && filter.meta.type === SPATIAL_FILTER_TYPE;
+    })
+    .forEach(filter => {
+      let geometry;
+      if (filter.geo_distance && filter.geo_distance[filter.meta.key]) {
+        const distanceSplit = filter.geo_distance.distance.split('km');
+        const distance = parseFloat(distanceSplit[0]);
+        const circleFeature = turfCircle(filter.geo_distance[filter.meta.key], distance);
+        geometry = circleFeature.geometry;
+      } else if (
+        filter.geo_shape &&
+        filter.geo_shape[filter.meta.key] &&
+        filter.geo_shape[filter.meta.key].shape
+      ) {
+        geometry = filter.geo_shape[filter.meta.key].shape;
+      } else {
+        // do not know how to convert spatial filter to geometry
+        // this includes pre-indexed shapes
+        return;
+      }
+
+      features.push({
+        type: 'Feature',
+        geometry,
+        properties: {
+          filter: filter.meta.alias,
+        },
+      });
+    });
+
+  return features;
 }

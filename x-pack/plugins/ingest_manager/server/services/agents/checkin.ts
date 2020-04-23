@@ -156,9 +156,13 @@ export function shouldCreateConfigAction(agent: Agent, actions: AgentAction[]): 
   }
 
   const isAgentConfigOutdated =
-    agent.config_revision &&
-    agent.config_newest_revision &&
-    agent.config_revision < agent.config_newest_revision;
+    // Config reassignment
+    (!agent.config_revision && agent.config_newest_revision) ||
+    // new revision of a config
+    (agent.config_revision &&
+      agent.config_newest_revision &&
+      agent.config_revision < agent.config_newest_revision);
+
   if (!isAgentConfigOutdated) {
     return false;
   }
