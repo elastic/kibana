@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ConfigType } from '../../config';
 import { RouteDefinitionParams } from '..';
 
 /**
@@ -31,9 +32,9 @@ export function defineAccessAgreementRoutes({
         const session = await authc.getSessionInfo(request);
         const accessAgreement =
           (session &&
-            (config.authc.providers as Record<string, any>)[session.provider.type]?.[
-              session.provider.name
-            ]?.accessAgreement?.message) ||
+            config.authc.providers[
+              session.provider.type as keyof ConfigType['authc']['providers']
+            ]?.[session.provider.name]?.accessAgreement?.message) ||
           '';
 
         return response.ok({ body: { accessAgreement } });

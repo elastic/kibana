@@ -1,201 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AccessAgreementPage renders as expected when state is available 1`] = `
-<AuthenticationStatePage
-  className="secAccessAgreementPage"
-  title={
-    <FormattedMessage
-      defaultMessage="Access Agreement"
-      id="xpack.security.accessAgreement.title"
-      values={Object {}}
-    />
-  }
+<ReactMarkdown
+  astPlugins={Array []}
+  escapeHtml={true}
+  plugins={Array []}
+  rawSourcePos={false}
+  renderers={Object {}}
+  skipHtml={false}
+  sourcePos={false}
+  transformLinkUri={[Function]}
 >
   <div
-    className="secAuthenticationStatePage secAccessAgreementPage"
+    key="root-1-1"
   >
-    <header
-      className="secAuthenticationStatePage__header"
+    <p
+      key="paragraph-1-1"
     >
-      <div
-        className="secAuthenticationStatePage__content eui-textCenter"
+      This is 
+      <a
+        href="../link"
+        key="link-1-9"
       >
-        <EuiSpacer
-          size="xxl"
-        >
-          <div
-            className="euiSpacer euiSpacer--xxl"
-          />
-        </EuiSpacer>
-        <span
-          className="secAuthenticationStatePage__logo"
-        >
-          <EuiIcon
-            size="xxl"
-            type="logoKibana"
-          >
-            <div
-              data-euiicon-type="logoKibana"
-              size="xxl"
-            />
-          </EuiIcon>
-        </span>
-        <EuiTitle
-          className="secAuthenticationStatePage__title"
-          size="l"
-        >
-          <h1
-            className="euiTitle euiTitle--large secAuthenticationStatePage__title"
-          >
-            <FormattedMessage
-              defaultMessage="Access Agreement"
-              id="xpack.security.accessAgreement.title"
-              values={Object {}}
-            >
-              Access Agreement
-            </FormattedMessage>
-          </h1>
-        </EuiTitle>
-        <EuiSpacer
-          size="xl"
-        >
-          <div
-            className="euiSpacer euiSpacer--xl"
-          />
-        </EuiSpacer>
-      </div>
-    </header>
-    <div
-      className="secAuthenticationStatePage__content eui-textCenter"
-    >
-      <form
-        onSubmit={[Function]}
-      >
-        <EuiPanel
-          paddingSize="none"
-        >
-          <div
-            className="euiPanel"
-          >
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="none"
-            >
-              <div
-                className="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
-              >
-                <EuiFlexItem
-                  className="secAccessAgreementPage__textWrapper"
-                >
-                  <div
-                    className="euiFlexItem secAccessAgreementPage__textWrapper"
-                  >
-                    <div
-                      className="secAccessAgreementPage__text"
-                    >
-                      <EuiText
-                        textAlign="left"
-                      >
-                        <div
-                          className="euiText euiText--medium"
-                        >
-                          <EuiTextAlign
-                            textAlign="left"
-                          >
-                            <div
-                              className="euiTextAlign euiTextAlign--left"
-                            >
-                              <ReactMarkdown
-                                astPlugins={Array []}
-                                escapeHtml={true}
-                                plugins={Array []}
-                                rawSourcePos={false}
-                                renderers={Object {}}
-                                skipHtml={false}
-                                sourcePos={false}
-                                transformLinkUri={[Function]}
-                              >
-                                <div
-                                  key="root-1-1"
-                                >
-                                  <p
-                                    key="paragraph-1-1"
-                                  >
-                                    This is 
-                                    <a
-                                      href="../link"
-                                      key="link-1-9"
-                                    >
-                                      link
-                                    </a>
-                                  </p>
-                                </div>
-                              </ReactMarkdown>
-                            </div>
-                          </EuiTextAlign>
-                        </div>
-                      </EuiText>
-                    </div>
-                  </div>
-                </EuiFlexItem>
-                <EuiFlexItem
-                  className="secAccessAgreementPage__footer"
-                >
-                  <div
-                    className="euiFlexItem secAccessAgreementPage__footer"
-                  >
-                    <div
-                      className="secAccessAgreementPage__footerInner"
-                    >
-                      <EuiButton
-                        color="primary"
-                        data-test-subj="accessAgreementAcknowledge"
-                        fill={true}
-                        isDisabled={false}
-                        isLoading={false}
-                        onClick={[Function]}
-                        type="submit"
-                      >
-                        <button
-                          className="euiButton euiButton--primary euiButton--fill"
-                          data-test-subj="accessAgreementAcknowledge"
-                          disabled={false}
-                          onClick={[Function]}
-                          type="submit"
-                        >
-                          <span
-                            className="euiButton__content"
-                          >
-                            <span
-                              className="euiButton__text"
-                            >
-                              <FormattedMessage
-                                defaultMessage="Acknowledge and continue"
-                                id="xpack.security.accessAgreement.acknowledgeButtonText"
-                                values={Object {}}
-                              >
-                                Acknowledge and continue
-                              </FormattedMessage>
-                            </span>
-                          </span>
-                        </button>
-                      </EuiButton>
-                    </div>
-                  </div>
-                </EuiFlexItem>
-              </div>
-            </EuiFlexGroup>
-          </div>
-        </EuiPanel>
-        <EuiSpacer
-          size="xxl"
-        >
-          <div
-            className="euiSpacer euiSpacer--xxl"
-          />
-        </EuiSpacer>
-      </form>
-    </div>
+        link
+      </a>
+    </p>
   </div>
-</AuthenticationStatePage>
+</ReactMarkdown>
 `;

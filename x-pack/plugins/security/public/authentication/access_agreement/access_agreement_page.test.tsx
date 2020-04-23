@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import { EuiLoadingContent } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { coreMock } from '../../../../../../src/core/public/mocks';
-import { AuthenticationStatePage } from '../components/authentication_state_page';
 import { AccessAgreementPage } from './access_agreement_page';
 
 describe('AccessAgreementPage', () => {
@@ -36,15 +37,17 @@ describe('AccessAgreementPage', () => {
       />
     );
 
-    // Shouldn't render anything if state isn't yet available.
-    expect(wrapper.isEmptyRender()).toBe(true);
+    expect(wrapper.exists(EuiLoadingContent)).toBe(true);
+    expect(wrapper.exists(ReactMarkdown)).toBe(false);
 
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
 
-    expect(wrapper.find(AuthenticationStatePage)).toMatchSnapshot();
+    expect(wrapper.find(ReactMarkdown)).toMatchSnapshot();
+    expect(wrapper.exists(EuiLoadingContent)).toBe(false);
+
     expect(coreStartMock.http.get).toHaveBeenCalledTimes(1);
     expect(coreStartMock.http.get).toHaveBeenCalledWith(
       '/internal/security/access_agreement/state'

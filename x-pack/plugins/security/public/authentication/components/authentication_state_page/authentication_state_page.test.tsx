@@ -25,7 +25,7 @@ describe('AuthenticationStatePage', () => {
         <AuthenticationStatePage className="customClassName" title={'foo'}>
           <span>hello world</span>
         </AuthenticationStatePage>
-      )
-    ).toMatchSnapshot();
+      ).exists('.secAuthenticationStatePage.customClassName')
+    ).toBe(true);
   });
 });

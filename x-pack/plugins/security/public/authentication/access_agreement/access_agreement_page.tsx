@@ -9,7 +9,15 @@ import './_index.scss';
 import React, { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import ReactMarkdown from 'react-markdown';
-import { EuiButton, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingContent,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
@@ -55,9 +63,43 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
     [http, notifications]
   );
 
-  if (accessAgreement == null) {
-    return null;
-  }
+  const content = accessAgreement ? (
+    <form onSubmit={onAcknowledge}>
+      <EuiPanel paddingSize="none">
+        <EuiFlexGroup gutterSize="none" direction="column">
+          <EuiFlexItem className="secAccessAgreementPage__textWrapper">
+            <div className="secAccessAgreementPage__text">
+              <EuiText textAlign="left">
+                <ReactMarkdown>{accessAgreement}</ReactMarkdown>
+              </EuiText>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem className="secAccessAgreementPage__footer">
+            <div className="secAccessAgreementPage__footerInner">
+              <EuiButton
+                fill
+                type="submit"
+                color="primary"
+                onClick={onAcknowledge}
+                isDisabled={isLoading}
+                isLoading={isLoading}
+                data-test-subj="accessAgreementAcknowledge"
+              >
+                <FormattedMessage
+                  id="xpack.security.accessAgreement.acknowledgeButtonText"
+                  defaultMessage="Acknowledge and continue"
+                />
+              </EuiButton>
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </form>
+  ) : (
+    <EuiPanel paddingSize="l">
+      <EuiLoadingContent lines={10} />
+    </EuiPanel>
+  );
 
   return (
     <AuthenticationStatePage
@@ -69,38 +111,8 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
         />
       }
     >
-      <form onSubmit={onAcknowledge}>
-        <EuiPanel paddingSize="none">
-          <EuiFlexGroup gutterSize="none" direction="column">
-            <EuiFlexItem className="secAccessAgreementPage__textWrapper">
-              <div className="secAccessAgreementPage__text">
-                <EuiText textAlign="left">
-                  <ReactMarkdown>{accessAgreement}</ReactMarkdown>
-                </EuiText>
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem className="secAccessAgreementPage__footer">
-              <div className="secAccessAgreementPage__footerInner">
-                <EuiButton
-                  fill
-                  type="submit"
-                  color="primary"
-                  onClick={onAcknowledge}
-                  isDisabled={isLoading}
-                  isLoading={isLoading}
-                  data-test-subj="accessAgreementAcknowledge"
-                >
-                  <FormattedMessage
-                    id="xpack.security.accessAgreement.acknowledgeButtonText"
-                    defaultMessage="Acknowledge and continue"
-                  />
-                </EuiButton>
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-        <EuiSpacer size="xxl" />
-      </form>
+      {content}
+      <EuiSpacer size="xxl" />
     </AuthenticationStatePage>
   );
 }
