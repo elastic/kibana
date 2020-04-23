@@ -37,7 +37,7 @@ const comparatorToI18n = (comparator: Comparator, threshold: number[], currentVa
   const ltText = i18n.translate('xpack.infra.metrics.alerting.threshold.ltComparator', {
     defaultMessage: 'less than',
   });
-  const eqText = i18n.translate('xpack.infra.metrics.alerting.threshold.ltComparator', {
+  const eqText = i18n.translate('xpack.infra.metrics.alerting.threshold.eqComparator', {
     defaultMessage: 'equal to',
   });
 
