@@ -28,10 +28,11 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
      * Get the attributes from each of the links in the apps menu
      */
     public async readLinks() {
-      const appMenu = await testSubjects.find('navDrawer');
-      const $ = await appMenu.parseDomContent();
+      await testSubjects.click('toggleNavButton');
 
-      const links = $.findTestSubjects('navDrawerAppsMenuLink')
+      const appMenu = await testSubjects.find('collapsibleNav');
+      const $ = await appMenu.parseDomContent();
+      const links = $.findTestSubjects('collapsibleNavAppLink')
         .toArray()
         .map(link => {
           return {
@@ -67,9 +68,10 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
     public async clickLink(name: string) {
       try {
         log.debug(`click "${name}" app link`);
-        const container = await testSubjects.find('navDrawer');
-        // Text content is not visible or selectable (0px width) so we use an attr with th same value
-        const link = await container.findByCssSelector(`[aria-label='${name}']`);
+        await testSubjects.click('toggleNavButton');
+
+        const nav = await testSubjects.find('collapsibleNav');
+        const link = await nav.findByPartialLinkText(name);
         await link.click();
       } finally {
         // Intentionally empty

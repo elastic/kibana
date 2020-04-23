@@ -217,6 +217,7 @@ export class Header extends Component<HeaderProps, State> {
               !this.state.isLocked && (
                 <EuiHeaderSectionItem border="right">
                   <EuiHeaderSectionItemButton
+                    data-test-subj="toggleNavButton"
                     aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
                       defaultMessage: 'Toggle primary navigation',
                     })}

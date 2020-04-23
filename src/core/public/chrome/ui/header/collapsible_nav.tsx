@@ -96,6 +96,7 @@ export function CollapsibleNav({
 
   return (
     <EuiCollapsibleNav
+      data-test-subj="collapsibleNav"
       id={id}
       aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
         defaultMessage: 'Primary',
@@ -143,6 +144,7 @@ export function CollapsibleNav({
             ({ label, href, onClick }: NavLink) => ({
               label,
               href,
+              'data-test-subj': 'collapsibleNavAppLink',
               onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
                 onIsOpenUpdate(false);
                 onClick(e);

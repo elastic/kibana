@@ -36,11 +36,11 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async clickVisualize() {
-      await appsMenu.clickLink('Visualize');
+      await appsMenu.clickLink('Visualization Library');
       await this.awaitGlobalLoadingIndicatorHidden();
       await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
         const firstBreadcrumb = await globalNav.getFirstBreadcrumb();
-        if (firstBreadcrumb !== 'Visualize') {
+        if (firstBreadcrumb !== 'Visualization Library') {
           log.debug('-- first breadcrumb =', firstBreadcrumb);
           return false;
         }
@@ -60,7 +60,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async clickStackManagement() {
-      await appsMenu.clickLink('Management');
+      await appsMenu.clickLink('Stack Management');
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 

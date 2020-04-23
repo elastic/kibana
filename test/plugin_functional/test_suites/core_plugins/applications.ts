@@ -138,7 +138,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     });
 
     it('can navigate from NP apps to legacy apps', async () => {
-      await appsMenu.clickLink('Management');
+      await appsMenu.clickLink('Stack Management');
       await loadingScreenShown();
       await testSubjects.existOrFail('managementNav');
     });
