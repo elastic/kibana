@@ -48,12 +48,12 @@ export const CleanClientModulesOnDLLTask = {
     ];
     const discoveredLegacyCorePluginEntries = await globby([
       `${baseDir}/src/legacy/core_plugins/*/index.js`,
-      // Small exception to load dynamically discovered functions for timelion plugin
-      `${baseDir}/src/legacy/core_plugins/timelion/server/*_functions/**/*.js`,
       `!${baseDir}/src/legacy/core_plugins/**/public`,
     ]);
     const discoveredPluginEntries = await globby([
       `${baseDir}/src/plugins/*/server/index.js`,
+      // Small exception to load dynamically discovered functions for timelion plugin
+      `${baseDir}/src/plugins/vis_type_timelion/server/*_functions/**/*.js`,
       `!${baseDir}/src/plugins/**/public`,
     ]);
     const discoveredNewPlatformXpackPlugins = await globby([
