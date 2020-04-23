@@ -19,7 +19,7 @@ import {
 import { isEmpty, difference } from 'lodash/fp';
 import { useKibana } from '../../../../lib/kibana';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
-import { useCaseConfigure } from '../../../../containers/case/configure/use_configure_better';
+import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
 import {
   ActionsConnectorsContextProvider,
   ActionType,
