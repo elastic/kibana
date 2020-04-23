@@ -49,6 +49,7 @@ import { InventoryItemType, SnapshotMetricType } from '../../../../common/invent
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import { MetricExpression } from './metric';
+import { NodeTypeExpression } from './node_type';
 
 interface AlertContextMeta {
   currentOptions?: Partial<MetricsExplorerOptions>;
@@ -93,17 +94,6 @@ export const Expressions: React.FC<Props> = props => {
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
   ]);
-
-  // const options = useMemo<MetricsExplorerOptions>(() => {
-  //   if (alertsContext.metadata?.currentOptions?.metrics) {
-  //     return alertsContext.metadata.currentOptions as MetricsExplorerOptions;
-  //   } else {
-  //     return {
-  //       metrics: [],
-  //       aggregation: 'avg',
-  //     };
-  //   }
-  // }, [alertsContext.metadata]);
 
   const updateParams = useCallback(
     (id, e: InventoryMetricConditions) => {
@@ -207,11 +197,12 @@ export const Expressions: React.FC<Props> = props => {
 
         setAlertParams('groupBy', md.currentOptions.groupBy);
       }
-      setAlertParams('sourceId', source?.id);
     } else {
       setAlertParams('criteria', [defaultExpression]);
     }
-  }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+    setAlertParams('sourceId', source?.id);
+    setAlertParams('nodeType', nodeType);
+  }, [alertsContext.metadata, defaultExpression, source, nodeType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -225,11 +216,7 @@ export const Expressions: React.FC<Props> = props => {
         </h4>
       </EuiText>
       <StyledExpression>
-        <WhenExpression
-          customAggTypesOptions={aggregationType}
-          aggType={nodeType}
-          onChangeSelectedAggType={updateNodeType}
-        />
+        <NodeTypeExpression options={nodeTypes} value={nodeType} onChange={updateNodeType} />
       </StyledExpression>
       <EuiSpacer size={'xs'} />
       {alertParams.criteria &&
@@ -407,6 +394,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
                 errors={errors}
               />
             </StyledExpression>
+            {metric && (
+              <StyledExpression>
+                <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                  <div>{metricUnit[metric]?.label || ''}</div>
+                </div>
+              </StyledExpression>
+            )}
           </StyledExpressionRow>
         </EuiFlexItem>
         {canDelete && (
@@ -432,7 +426,7 @@ const getDisplayNameForType = (type: InventoryItemType) => {
   return inventoryModel.displayName;
 };
 
-export const aggregationType: { [key: string]: any } = {
+export const nodeTypes: { [key: string]: any } = {
   host: {
     text: getDisplayNameForType('host'),
     value: 'host',
@@ -461,4 +455,21 @@ export const aggregationType: { [key: string]: any } = {
     text: getDisplayNameForType('awsSQS'),
     value: 'awsSQS',
   },
+};
+
+const metricUnit: Record<string, { label: string }> = {
+  count: { label: '' },
+  cpu: { label: '%' },
+  memory: { label: '%' },
+  rx: { label: 'bits/s' },
+  tx: { label: 'bits/s' },
+  logRate: { label: '/s' },
+  diskIOReadBytes: { label: 'bytes/s' },
+  diskIOWriteBytes: { label: 'bytes/s' },
+  s3BucketSize: { label: 'bytes' },
+  s3TotalRequests: { label: '' },
+  s3NumberOfObjects: { label: '' },
+  s3UploadBytes: { label: 'bytes' },
+  s3DownloadBytes: { label: 'bytes' },
+  sqsOldestMessage: { label: 'seconds' },
 };

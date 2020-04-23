@@ -57,6 +57,7 @@ export const createInventoryMetricThresholdExecutor = (
 
     if (shouldAlertFire) {
       alertInstance.scheduleActions(FIRED_ACTIONS.id, {
+        group: item,
         item,
         valueOf: mapToConditionsLookup(results, result => result[item].currentValue),
         thresholdOf: mapToConditionsLookup(criteria, c => c.threshold),
@@ -90,7 +91,8 @@ const evaluateCondtion = async (
   services: AlertServices,
   filterQuery?: string
 ): Promise<Record<string, ConditionResult>> => {
-  const { threshold, comparator, metric } = condition;
+  const { comparator, metric } = condition;
+  let { threshold } = condition;
 
   const currentValues = await getData(
     services,
@@ -100,6 +102,8 @@ const evaluateCondtion = async (
     sourceConfiguration,
     filterQuery
   );
+
+  threshold = threshold.map(n => convertMetricValue(metric, n));
 
   const comparisonFunction = comparatorMap[comparator];
 
@@ -171,4 +175,17 @@ export const FIRED_ACTIONS = {
   name: i18n.translate('xpack.infra.metrics.alerting.inventory.threshold.fired', {
     defaultMessage: 'Fired',
   }),
+};
+
+// Some metrics in the UI are in a different unit that what we store in ES.
+const convertMetricValue = (metric: SnapshotMetricType, value: number) => {
+  if (converters[metric]) {
+    return converters[metric](value);
+  } else {
+    return value;
+  }
+};
+const converters: Record<string, (n: number) => number> = {
+  cpu: n => Number(n) / 100,
+  memory: n => Number(n) / 100,
 };

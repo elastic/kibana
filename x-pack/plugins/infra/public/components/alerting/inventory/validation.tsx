@@ -18,7 +18,6 @@ export function validateMetricThreshold({
   const validationResult = { errors: {} };
   const errors: {
     [id: string]: {
-      aggField: string[];
       timeSizeUnit: string[];
       timeWindowSize: string[];
       threshold0: string[];
@@ -37,20 +36,12 @@ export function validateMetricThreshold({
     const id = idx.toString();
 
     errors[id] = errors[id] || {
-      aggField: [],
       timeSizeUnit: [],
       timeWindowSize: [],
       threshold0: [],
       threshold1: [],
       metric: [],
     };
-    if (!c.aggType) {
-      errors[id].aggField.push(
-        i18n.translate('xpack.infra.metrics.alertFlyout.error.aggregationRequired', {
-          defaultMessage: 'Aggreation is required.',
-        })
-      );
-    }
 
     if (!c.threshold || !c.threshold.length) {
       errors[id].threshold0.push(

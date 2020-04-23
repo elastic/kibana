@@ -46,12 +46,9 @@ interface Props {
 export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosition }: Props) => {
   const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
   const firstFieldOption = {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.common.expressionItems.of.selectTimeFieldOptionLabel',
-      {
-        defaultMessage: 'Select a field',
-      }
-    ),
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.metric.selectFieldLabel', {
+      defaultMessage: 'Select a metric',
+    }),
     value: '',
   };
 
@@ -64,7 +61,12 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
       id="aggFieldPopover"
       button={
         <EuiExpression
-          description={''}
+          description={i18n.translate(
+            'xpack.infra.metrics.alertFlyout.expression.metric.whenLabel',
+            {
+              defaultMessage: 'When',
+            }
+          )}
           value={metric?.text || firstFieldOption.text}
           isActive={aggFieldPopoverOpen || !metric}
           onClick={() => {
@@ -84,7 +86,7 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
       <div>
         <ClosablePopoverTitle onClose={() => setAggFieldPopoverOpen(false)}>
           <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.expression.metricsLabel"
+            id="xpack.infra.metrics.alertFlyout.expression.metric.popoverTitle"
             defaultMessage="Metric"
           />
         </ClosablePopoverTitle>
@@ -92,14 +94,14 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
           <EuiFlexItem grow={false} className="actOf__aggFieldContainer">
             <EuiFormRow
               fullWidth
-              isInvalid={errors.aggField.length > 0 && metric !== undefined}
-              error={errors.aggField}
+              isInvalid={errors.metric.length > 0 && metric !== undefined}
+              error={errors.metric}
             >
               <EuiComboBox
                 fullWidth
                 singleSelection={{ asPlainText: true }}
                 data-test-subj="availablefieldsOptionsComboBox"
-                isInvalid={errors.aggField.length > 0 && metric !== undefined}
+                isInvalid={errors.metric.length > 0 && metric !== undefined}
                 placeholder={firstFieldOption.text}
                 options={availablefieldsOptions}
                 noSuggestions={!availablefieldsOptions.length}

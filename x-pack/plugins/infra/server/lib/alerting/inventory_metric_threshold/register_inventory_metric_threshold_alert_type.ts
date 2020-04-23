@@ -30,7 +30,7 @@ const condition = schema.object({
 
 export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs) => ({
   id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  name: 'Inventory metric threshold',
+  name: 'Inventory',
   validate: {
     params: schema.object({
       criteria: schema.arrayOf(condition),
