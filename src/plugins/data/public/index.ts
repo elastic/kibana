@@ -365,8 +365,6 @@ export {
   SearchResponse,
   SearchError,
   ISearchSource,
-  SearchSource,
-  createSearchSource,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,

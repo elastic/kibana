@@ -26,6 +26,7 @@ import {
 import { PromiseServiceCreator } from './providers/promises';
 // @ts-ignore
 import { PrivateProvider } from './providers/private';
+import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
 type IPrivate = <T>(provider: (...injectable: any[]) => T) => T;
 
@@ -135,7 +136,8 @@ function createHrefModule(core: AppMountContext['core']) {
         pre: (_$scope, _$el, $attr) => {
           $attr.$observe(name, val => {
             if (val) {
-              $attr.$set('href', core.http.basePath.prepend(val as string));
+              const url = getSafeForExternalLink(val as string);
+              $attr.$set('href', core.http.basePath.prepend(url));
             }
           });
         },

@@ -176,9 +176,14 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    *
    * @api {post} /api/ml/jobs/jobs_summary Jobs summary
    * @apiName JobsSummary
-   * @apiDescription Creates a summary jobs list. Jobs include job stats, datafeed stats, and calendars.
+   * @apiDescription Returns a list of anomaly detection jobs, with summary level information for every job.
+   *  For any supplied job IDs, full job information will be returned, which include the analysis configuration,
+   *  job stats, datafeed stats, and calendars.
    *
    * @apiSchema (body) jobIdsSchema
+   *
+   * @apiSuccess {Array} jobsList list of jobs. For any supplied job IDs, the job object will contain a fullJob property
+   *    which includes the full configuration and stats for the job.
    */
   router.post(
     {
