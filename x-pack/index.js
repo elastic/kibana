@@ -21,7 +21,6 @@ import { taskManager } from './legacy/plugins/task_manager';
 import { rollup } from './legacy/plugins/rollup';
 import { siem } from './legacy/plugins/siem';
 import { remoteClusters } from './legacy/plugins/remote_clusters';
-import { crossClusterReplication } from './legacy/plugins/cross_cluster_replication';
 import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { actions } from './legacy/plugins/actions';
@@ -48,7 +47,6 @@ module.exports = function(kibana) {
     rollup(kibana),
     siem(kibana),
     remoteClusters(kibana),
-    crossClusterReplication(kibana),
     upgradeAssistant(kibana),
     encryptedSavedObjects(kibana),
     actions(kibana),

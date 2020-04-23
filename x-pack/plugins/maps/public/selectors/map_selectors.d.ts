@@ -6,8 +6,8 @@
 
 import { AnyAction } from 'redux';
 import { MapCenter } from '../../common/descriptor_types';
-
 import { MapStoreState } from '../reducers/store';
+import { MapSettings } from '../reducers/map';
 
 export function getHiddenLayerIds(state: MapStoreState): string[];
 
@@ -16,3 +16,7 @@ export function getMapZoom(state: MapStoreState): number;
 export function getMapCenter(state: MapStoreState): MapCenter;
 
 export function getQueryableUniqueIndexPatternIds(state: MapStoreState): string[];
+
+export function getMapSettings(state: MapStoreState): MapSettings;
+
+export function hasMapSettingsChanges(state: MapStoreState): boolean;
