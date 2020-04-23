@@ -25,7 +25,6 @@ interface State {
   minSourceZoom: number;
   maxSourceZoom: number;
   fields?: MVTFieldDescriptor[];
-
 }
 
 export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
@@ -44,7 +43,7 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
       this.state.urlTemplate.indexOf('{z}') >= 0;
 
     if (canPreview && this.state.layerName) {
-      console.log('nf', fields);
+      console.log('nf', this.state.fields);
       this.props.onSourceConfigChange({
         urlTemplate: this.state.urlTemplate,
         layerName: this.state.layerName,
@@ -76,14 +75,12 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
   };
 
   _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
-
     this.setState(
       {
         fields,
       },
       () => this._sourceConfigChange()
     );
-
   };
 
   _handleZoomRangeChange = (e: Value) => {
@@ -115,6 +112,16 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
         >
           <EuiFieldText value={this.state.layerName} onChange={this._handleLayerNameInputChange} />
         </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.layerNameMessage',
+            {
+              defaultMessage: 'Fields',
+            }
+          )}
+        >
+          <MVTFieldConfigEditor fields={this.state.fields} onChange={this._handleFieldChange} />
+        </EuiFormRow>
         <ValidatedDualRange
           label=""
           formRowDisplay="columnCompressed"
@@ -135,7 +142,6 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
           )}
         />
 
-        <MVTFieldConfigEditor fields={this.state.fields} onChange={this._handleFieldChange} />
       </Fragment>
     );
   }

@@ -6,9 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  MVTSingleLayerVectorSourceEditor,
-} from './mvt_single_layer_vector_source_editor';
+import { MVTSingleLayerVectorSourceEditor } from './mvt_single_layer_vector_source_editor';
 import { MVTSingleLayerVectorSource, sourceTitle } from './mvt_single_layer_vector_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { SOURCE_TYPES } from '../../../../common/constants';
@@ -25,6 +23,7 @@ export const mvtVectorSourceWizardConfig: LayerWizard = {
       layerName,
       minSourceZoom,
       maxSourceZoom,
+      fields,
     }: MVTSingleLayerVectorSourceConfig) => {
       const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor({
         urlTemplate,
@@ -32,6 +31,7 @@ export const mvtVectorSourceWizardConfig: LayerWizard = {
         minSourceZoom,
         maxSourceZoom,
         type: SOURCE_TYPES.MVT_SINGLE_LAYER,
+        fields,
       });
       const source = new MVTSingleLayerVectorSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);

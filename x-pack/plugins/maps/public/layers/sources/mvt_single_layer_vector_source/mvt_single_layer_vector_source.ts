@@ -37,6 +37,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     layerName,
     minSourceZoom,
     maxSourceZoom,
+    fields,
   }: TiledSingleLayerVectorSourceDescriptor) {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
@@ -45,6 +46,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
       layerName,
       minSourceZoom: Math.max(MIN_ZOOM, minSourceZoom),
       maxSourceZoom: Math.min(MAX_ZOOM, maxSourceZoom),
+      fields: fields ?? [],
     };
   }
 
@@ -54,6 +56,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     sourceDescriptor: TiledSingleLayerVectorSourceDescriptor,
     inspectorAdapters?: object
   ) {
+    console.log('crearte source', sourceDescriptor);
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
@@ -63,6 +66,12 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   getFieldNames(): string[] {
+    console.log('need to implement this...');
+    return [];
+  }
+
+  async getFields(): Promise<IField[]> {
+    console.log('also need to implement this');
     return [];
   }
 
@@ -92,10 +101,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     throw new Error('Does not implement getGeoJsonWithMeta');
   }
 
-  async getFields(): Promise<IField[]> {
-    return [];
-  }
-
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
@@ -117,6 +122,12 @@ export class MVTSingleLayerVectorSource extends AbstractSource
           defaultMessage: 'Max zoom',
         }),
         value: this._descriptor.maxSourceZoom.toString(),
+      },
+      {
+        label: i18n.translate('xpack.maps.source.MVTSingleLayerVectorSource.fields', {
+          defaultMessage: 'Fields',
+        }),
+        value: (this._descriptor.fields ?? []).join(', '),
       },
     ];
   }

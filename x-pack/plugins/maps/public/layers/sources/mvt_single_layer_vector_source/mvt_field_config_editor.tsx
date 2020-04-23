@@ -5,10 +5,39 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import React, { Component, Fragment } from 'react';
-import { EuiButton, EuiButtonIcon, EuiTextAlign } from '@elastic/eui';
+import React, { ChangeEvent, Component, Fragment } from 'react';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperSelect,
+  EuiFieldText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MVTFieldDescriptor, MVTFieldType } from '../../../../common/descriptor_types';
+import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
+
+const FIELD_TYPE_OPTIONS = [
+  {
+    value: MVTFieldType.String,
+    inputDisplay: (
+      <span>
+        <FieldIcon type={'string'} />
+        <span>String</span>
+      </span>
+    ),
+  },
+  {
+    value: MVTFieldType.Number,
+    inputDisplay: (
+      <span>
+        <FieldIcon type={'number'} />
+        <span>Number</span>
+      </span>
+    ),
+  },
+];
 
 export interface Props {
   fields: MVTFieldDescriptor[];
@@ -34,28 +63,59 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
       type: MVTFieldType.String,
       name: 'Foobar',
     });
+    this.props.onChange(newFields);
   };
+
+  _renderFieldTypeDropDown(mvtFieldConfig: MVTFieldDescriptor, index: number) {
+    const onChange = (type: MVTFieldType) => {
+      const newFields = this.props.fields.slice();
+      newFields[index].type = type;
+      this.props.onChange(newFields);
+    };
+
+    return (
+      <EuiSuperSelect
+        options={FIELD_TYPE_OPTIONS}
+        valueOfSelected={mvtFieldConfig.type}
+        onChange={value => onChange(value)}
+      />
+    );
+  }
+
+  _renderFieldNameInput(mvtFieldConfig: MVTFieldDescriptor, index: number) {
+    const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+      const name = e.target.value;
+      const newFields = this.props.fields.slice();
+      newFields[index].name = name;
+      this.props.onChange(newFields);
+    };
+    return (
+      <EuiFieldText value={mvtFieldConfig.name} onChange={onChange} aria-label={'Fieldname'} />
+    );
+  }
 
   _renderFieldConfig() {
     return this.props.fields.map((mvtFieldConfig: MVTFieldDescriptor, index: number) => {
       return (
-        <div key={mvtFieldConfig.name}>
-          <span>{mvtFieldConfig.name}</span>
-          <span>{mvtFieldConfig.type}</span>
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            onClick={() => {
-              this._removeField(index);
-            }}
-            title={i18n.translate('xpack.maps.mvtSource.trashButtonTitle', {
-              defaultMessage: 'Remove field',
-            })}
-            aria-label={i18n.translate('xpack.maps.mvtSource.trashButtonAriaLabel', {
-              defaultMessage: 'Remove field',
-            })}
-          />
-        </div>
+        <EuiFlexGroup key={index}>
+          <EuiFlexItem>{this._renderFieldNameInput(mvtFieldConfig, index)}</EuiFlexItem>
+          <EuiFlexItem>{this._renderFieldTypeDropDown(mvtFieldConfig, index)}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              onClick={() => {
+                this._removeField(index);
+              }}
+              title={i18n.translate('xpack.maps.mvtSource.trashButtonTitle', {
+                defaultMessage: 'Remove field',
+              })}
+              aria-label={i18n.translate('xpack.maps.mvtSource.trashButtonAriaLabel', {
+                defaultMessage: 'Remove field',
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     });
   }
