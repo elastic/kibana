@@ -4,7 +4,7 @@
 
 # Summary
 
-A core API exposed on both public and server sides, allowing to search for arbitrary objects and
+A core API exposed on both public and server sides, allowing to search for various objects and
 register result providers.
 
 # Basic example
@@ -71,18 +71,20 @@ interface GlobalSearchOptions {}
  * Representation of a result returned by a {@linlkGlobalSearchResultProvider | result provider}
  */
 interface GlobalSearchResult {
-  /* an arbitrary id that should be unique for an individual provider's results */
+  /** an id that should be unique for an individual provider's results */
   id: string;
-  /* the title/label of the result */
+  /** the title/label of the result */
   title: string;
-  /* the type of result / object  */
+  /** the type of result / object  */
   type: GlobalSearchResultType;
-  /* an optional EUI icon name to associate with the search result. If not specified, will use a default icon */
+  /** an optional EUI icon name to associate with the search result. If not specified, will use a default icon */
   icon?: string;
-  /* The url to navigate to this result. This can be either an absolute url, or a path relative to the server's publishUrl */
+  /** The url to navigate to this result. This can be either an absolute url, or a path relative to the server's publishUrl */
   url: string;
-  /* the score of the result, used for ordering individual results of a same type */
+  /** the score of the result, used for ordering individual results of a same type */
   score: number;
+  /** an optional record of metadata for this result */
+  meta?: Record<string, any>;
 }
 ```
 
@@ -123,9 +125,9 @@ type GlobalSearchResultProvider = {
 ```
 
 Notes: 
-- even if initial implementation will provide a static version of `GlobalSearchProviderContext`,
-it could be possible to allow plugins to register contexts as it's currently done for `RequestHandlerContext`.
-This will not be done until the need arises.
+- initial implementation will only provide a static / non extensible version of `GlobalSearchProviderContext`.
+It could be possible to allow plugins to register their own contexts as it's done for `RequestHandlerContext`,
+but this will not be done until the need arises.
 
 #### public
 
@@ -255,16 +257,49 @@ A new `server.publicAddress` property will be added to the kibana configuration.
 When not manually defined in the configuration, this property will be constructed using the known `server` configuration values:
 
 ```ts
-const publicAddress = removeTrailingSlash(
+const defaultPublicAddress = removeTrailingSlash(
   `${getServerInfo().protocol}://${httpConfig.host}:${httpConfig.port}/${httpConfig.basePath}`
 );
+
+const getPublicAddress = () => httpConfig.publicAddress ?? defaultPublicAddress;
 ```
 
-// TODO: example
+then a new `getAbsoluteUrl` api would be added to the core `http` service.
+
+```ts
+const getAbsoluteUrl = (path: string, request: KibanaRequest) => {
+  const publicUrl = getPublicAddress();
+  const absoluteUrl = joinRemovingDuplicateAndTrailingSlash(
+    publicUrl,
+    serverContract.basePath.get(request),
+    path
+  );
+}
+```
+
+Search results will then be consolidated before being returned to convert relative urls to absolute ones.
+
+```ts
+const consolidateResult(result: GlobalSearchResult, request: KibanaRequest) {
+  if(isUriPath(result.url)) {
+    result.url = http.getAbsoluteUrl(result.url, request)
+  }
+}
+```
 
 ### Redirecting to a result
 
-// TODO
+from the client-side, `NavigableGlobalSearchResult.navigateTo` would follow this logic:
+
+If all 3 of these criteria are true for `result.url`:
+
+- The domain of the URL (if present) matches the domain of the `publicUrl`
+- The pathname of the URL starts with the current basePath (eg. /mybasepath/s/my-space)
+- The pathname segment after the basePath matches an application route (eg. /app/<id>/)
+
+Then: match the pathname segment to the corresponding application and do the SPA navigation to that application using the remaining pathname segment
+
+Otherwise, do a full page navigation (window.location.assign())
 
 ### searching from the server side
 
@@ -393,14 +428,90 @@ cannot be canceled, neither from the public nor server API.
 
 # Drawbacks
 
-- The fact that some result providers must be on the client-side...
+- The fact that some result providers must be on the client-side complexify the API. 
 
 # Alternatives
 
 - could only allow to register result providers from the server-side for the public API
-- could have a struct instead of a url for internal results.
-- use plain string instead of enum for result `type`
-- should we pass a signal or a `canceled$` observable to the providers to allow search cancellation?
+  - would ensure 
+  
+  
+## `GlobalSearchResult.url` could be a struct instead of a url for internal results.
+
+One of the initial proposal was to have
+
+```ts
+url: { absUrl: string } | { application: string; path?: string };
+```
+
+That was making it way easier to redirect to an internal result from the UI, as we could directly call
+`application.navigateTo(application, { path })`.
+
+However, that didn't answer for need for the (future) need to be able to search for and redirect to object in 
+different spaces. We could have then changed to 
+
+```ts
+url: { absUrl: string } | { application: string; path?: string, space?: string };
+```
+
+But this had some issues:
+- `space` is an xpack plugin, adding this property in the oss implementation is problematic
+- `space` API is not callable from core or oss, meaning that we would have to 'forge' the url to this space anyway
+- this is really not generic. If another plugin was to alter the basepath, we would have needed to add it another property 
+
+So even if the 'parsable absolute url' approach seems fragile, it's probably still better than this alternative.
+
+## We could use plain string instead of an enum for `GlobalSearchResult.type`
+
+The current static enum used for type
+
+```ts
+enum SEARCH_TYPE {
+  // non-exhaustive
+  applications = 10,
+  dashboard = 20,
+  visualization = 30,
+  search = 40,
+}
+
+/** @public */
+type GlobalSearchResultType = keyof typeof SEARCH_TYPE;
+
+interface GlobalSearchResult {
+  // [...]
+  type: GlobalSearchResultType;
+}
+```
+
+has some limitations:
+- it forces the enum to be modified every time a new type is added
+- 3rd party plugins cannot introduce new types
+
+We could change the API to accept plain strings for `GlobalSearchResult.type`, however, atm this enum approach 
+is needed as the ordinal values of the entries is used in results sorting. Changing to plain strings forces to find 
+another sorting approach.
+
+## triggered searches could be cancelable
+
+In current specifications, once a search has been triggered, it's not possible to cancel it (see [Search cancellation](#search-cancellation))
+
+Main drawback of this decision is that if a `search` consumer 
+
+We could add an optional signal or observable in `GlobalSearchOptions`. That way a consumer knowing that a `find` call may be aborted could use
+this option.
+
+However result providers from plugins would still have to manually handles this signal to cancel any http call or 
+other asynchronous task that could be pending. 
+
+Note that as this can be implemented with an additional option, this can be done at a later time.
+
+## The GlobalSearch service could be provided as a plugin instead of a core service
+
+- could be provided as a plugin instead of a core service
+  - However as GS is going to be used in the header, what still would mean a bridge of some kind to be able to register it
+  to core.
+  - As the platform team is going to provide the base result providers for search results and application, that would mean
+  create yet another plugin for these providers
 
 # Adoption strategy
 
