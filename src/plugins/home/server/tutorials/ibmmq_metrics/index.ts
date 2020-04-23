@@ -48,7 +48,7 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-ibmmq.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/ibmmq.svg',
+    euiIconType: '/plugins/home/assets/logos/ibmmq.svg',
     isBeta: true,
     artifacts: {
       application: {
@@ -63,7 +63,7 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/ibmmq_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/ibmmq_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

@@ -65,7 +65,7 @@ export function nginxLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/nginx_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/nginx_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

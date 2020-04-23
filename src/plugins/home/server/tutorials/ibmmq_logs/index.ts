@@ -48,7 +48,7 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-ibmmq.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/ibmmq.svg',
+    euiIconType: '/plugins/home/assets/logos/ibmmq.svg',
     artifacts: {
       dashboards: [
         {
@@ -64,7 +64,7 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/ibmmq_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/ibmmq_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

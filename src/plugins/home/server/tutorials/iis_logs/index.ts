@@ -49,7 +49,7 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iis.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/iis.svg',
+    euiIconType: '/plugins/home/assets/logos/iis.svg',
     artifacts: {
       dashboards: [
         {
@@ -65,7 +65,7 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/iis_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/iis_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

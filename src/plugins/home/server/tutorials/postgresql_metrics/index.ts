@@ -65,7 +65,7 @@ export function postgresqlMetricsSpecProvider(context: TutorialContext): Tutoria
       },
     },
     completionTimeMinutes: 10,
-    // previewImagePath: '/plugins/kibana/home/tutorial_resources/postgresql_metrics/screenshot.png',
+    // previewImagePath: '/plugins/home/assets/postgresql_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

@@ -98,7 +98,7 @@ It allows you to monitor the performance of thousands of applications in real ti
     artifacts,
     onPrem: onPremInstructions(indices),
     elasticCloud: createElasticCloudInstructions(cloud),
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
+    previewImagePath: '/plugins/apm/assets/apm.png',
     savedObjects,
     savedObjectsInstallMsg: i18n.translate(
       'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',

@@ -7,7 +7,7 @@
     "xpack",
     "apm"
   ],
-  "ui": false,
+  "ui": true,
   "requiredPlugins": ["apm_oss", "data", "home", "licensing"],
   "optionalPlugins": ["cloud", "usageCollection", "taskManager","actions", "alerting"]
 }
