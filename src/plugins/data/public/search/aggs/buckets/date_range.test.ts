@@ -23,6 +23,7 @@ import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { InternalStartServices } from '../../../types';
 
 describe('date_range params', () => {
   let aggTypesDependencies: DateRangeBucketAggDependencies;
@@ -32,10 +33,11 @@ describe('date_range params', () => {
 
     aggTypesDependencies = {
       uiSettings,
-      getInternalStartServices: () => ({
-        fieldFormats: fieldFormatsServiceMock.createStartContract(),
-        notifications: notificationServiceMock.createStartContract(),
-      }),
+      getInternalStartServices: () =>
+        (({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
+        } as unknown) as InternalStartServices),
     };
   });
 
@@ -74,7 +76,10 @@ describe('date_range params', () => {
           params,
         },
       ],
-      { typesRegistry: mockAggTypesRegistry([getDateRangeBucketAgg(aggTypesDependencies)]) }
+      {
+        typesRegistry: mockAggTypesRegistry([getDateRangeBucketAgg(aggTypesDependencies)]),
+        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+      }
     );
   };
 

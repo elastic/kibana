@@ -34,6 +34,7 @@ export function runKbnOptimizer(opts: Record<string, any>, config: LegacyConfig)
   const optimizerConfig = OptimizerConfig.create({
     repoRoot: REPO_ROOT,
     watch: true,
+    includeCoreBundle: true,
     oss: !!opts.oss,
     examples: !!opts.runExamples,
     pluginPaths: config.get('plugins.paths'),

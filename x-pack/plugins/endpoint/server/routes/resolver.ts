@@ -19,7 +19,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateRelatedEvents,
       options: { authRequired: true },
     },
-    handleRelatedEvents(log)
+    handleRelatedEvents(log, endpointAppContext)
   );
 
   router.get(
@@ -28,7 +28,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateChildren,
       options: { authRequired: true },
     },
-    handleChildren(log)
+    handleChildren(log, endpointAppContext)
   );
 
   router.get(
@@ -37,6 +37,6 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateLifecycle,
       options: { authRequired: true },
     },
-    handleLifecycle(log)
+    handleLifecycle(log, endpointAppContext)
   );
 }

@@ -5,6 +5,7 @@
  */
 import { LoggerFactory } from 'kibana/server';
 import { EndpointConfigType } from './config';
+import { EndpointAppContextService } from './endpoint_app_context_services';
 
 /**
  * The context for Endpoint apps.
@@ -12,4 +13,9 @@ import { EndpointConfigType } from './config';
 export interface EndpointAppContext {
   logFactory: LoggerFactory;
   config(): Promise<EndpointConfigType>;
+
+  /**
+   * Object readiness is tied to plugin start method
+   */
+  service: EndpointAppContextService;
 }

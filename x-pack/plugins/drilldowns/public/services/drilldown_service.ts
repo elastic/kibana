@@ -67,7 +67,7 @@ export class DrilldownService {
           getIconType: () => euiIcon,
           getDisplayName: () => serializedAction.name,
           execute: async context => await execute(serializedAction.config, context),
-          getHref: getHref ? context => getHref(serializedAction.config, context) : undefined,
+          getHref: getHref ? async context => getHref(serializedAction.config, context) : undefined,
         }),
       } as ActionFactoryDefinition<
         Config,

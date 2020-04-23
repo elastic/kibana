@@ -18,18 +18,34 @@
  */
 
 import { Trigger } from '../../../../ui_actions/public';
+import { KibanaDatatable } from '../../../../expressions';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext {
   embeddable: IEmbeddable;
 }
 
-export interface EmbeddableVisTriggerContext {
+export interface ValueClickTriggerContext {
   embeddable?: IEmbeddable;
   timeFieldName?: string;
   data: {
-    e?: MouseEvent;
-    data: unknown;
+    data: Array<{
+      table: Pick<KibanaDatatable, 'rows' | 'columns'>;
+      column: number;
+      row: number;
+      value: any;
+    }>;
+    negate?: boolean;
+  };
+}
+
+export interface RangeSelectTriggerContext {
+  embeddable?: IEmbeddable;
+  timeFieldName?: string;
+  data: {
+    table: KibanaDatatable;
+    column: number;
+    range: number[];
   };
 }
 
@@ -44,5 +60,12 @@ export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
 export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
   id: PANEL_BADGE_TRIGGER,
   title: 'Panel badges',
-  description: 'Actions appear in title bar when an embeddable loads in a panel',
+  description: 'Actions appear in title bar when an embeddable loads in a panel.',
+};
+
+export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
+export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
+  id: PANEL_NOTIFICATION_TRIGGER,
+  title: 'Panel notifications',
+  description: 'Actions appear in top-right corner of a panel.',
 };

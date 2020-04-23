@@ -74,7 +74,7 @@ async function buildEuiContextMenuPanelItems<Context extends object>({
       return;
     }
 
-    items[index] = convertPanelActionToContextMenuItem({
+    items[index] = await convertPanelActionToContextMenuItem({
       action,
       actionContext,
       closeMenu,
@@ -86,7 +86,7 @@ async function buildEuiContextMenuPanelItems<Context extends object>({
   return items.filter(Boolean);
 }
 
-function convertPanelActionToContextMenuItem<Context extends object>({
+async function convertPanelActionToContextMenuItem<Context extends object>({
   action,
   actionContext,
   closeMenu,
@@ -94,7 +94,7 @@ function convertPanelActionToContextMenuItem<Context extends object>({
   action: Action<Context>;
   actionContext: Context;
   closeMenu: () => void;
-}): EuiContextMenuPanelItemDescriptor {
+}): Promise<EuiContextMenuPanelItemDescriptor> {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
     name: action.MenuItem
       ? React.createElement(uiToReactComponent(action.MenuItem), {
@@ -106,15 +106,32 @@ function convertPanelActionToContextMenuItem<Context extends object>({
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };
 
-  menuPanelItem.onClick = () => {
-    action.execute(actionContext);
+  menuPanelItem.onClick = event => {
+    if (event.currentTarget instanceof HTMLAnchorElement) {
+      // from react-router's <Link/>
+      if (
+        !event.defaultPrevented && // onClick prevented default
+        event.button === 0 && // ignore everything but left clicks
+        (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
+        !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
+      ) {
+        event.preventDefault();
+        action.execute(actionContext);
+      } else {
+        // let browser handle navigation
+      }
+    } else {
+      // not a link
+      action.execute(actionContext);
+    }
+
     closeMenu();
   };
 
   if (action.getHref) {
-    const href = action.getHref(actionContext);
+    const href = await action.getHref(actionContext);
     if (href) {
-      menuPanelItem.href = action.getHref(actionContext);
+      menuPanelItem.href = href;
     }
   }
 

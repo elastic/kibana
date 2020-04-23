@@ -5,8 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MetricExpressionParams } from '../../../../server/lib/alerting/metric_threshold/types';
+import {
+  MetricExpressionParams,
+  Comparator,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../server/lib/alerting/metric_threshold/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
 
@@ -60,7 +63,7 @@ export function validateMetricThreshold({
       );
     }
 
-    if (c.comparator === 'between' && (!c.threshold || c.threshold.length < 2)) {
+    if (c.comparator === Comparator.BETWEEN && (!c.threshold || c.threshold.length < 2)) {
       errors[id].threshold1.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdRequired', {
           defaultMessage: 'Threshold is required.',

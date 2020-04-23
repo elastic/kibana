@@ -40,6 +40,11 @@ exports[`renders ControlsTab 1`] = `
               "timefilter": Object {},
             },
           },
+          "search": Object {
+            "searchSource": Object {
+              "create": [MockFunction],
+            },
+          },
         },
       }
     }
@@ -94,6 +99,11 @@ exports[`renders ControlsTab 1`] = `
             },
             "timefilter": Object {
               "timefilter": Object {},
+            },
+          },
+          "search": Object {
+            "searchSource": Object {
+              "create": [MockFunction],
             },
           },
         },

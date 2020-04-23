@@ -18,7 +18,9 @@ export interface ActionFactoryDefinition<
   Config extends object = object,
   FactoryContext extends object = object,
   ActionContext extends object = object
-> extends Partial<Presentable<FactoryContext>>, Configurable<Config, FactoryContext> {
+>
+  extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
+    Configurable<Config, FactoryContext> {
   /**
    * Unique ID of the action factory. This ID is used to identify this action
    * factory in the registry as well as to construct actions of this type and

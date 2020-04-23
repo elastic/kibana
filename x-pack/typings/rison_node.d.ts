@@ -5,7 +5,7 @@
  */
 
 declare module 'rison-node' {
-  export type RisonValue = null | boolean | number | string | RisonObject | RisonArray;
+  export type RisonValue = undefined | null | boolean | number | string | RisonObject | RisonArray;
 
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface RisonArray extends Array<RisonValue> {}

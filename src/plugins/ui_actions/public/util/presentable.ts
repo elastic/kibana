@@ -51,9 +51,11 @@ export interface Presentable<Context extends object = object> {
   getDisplayName(context: Context): string;
 
   /**
-   * This method should return a link if this item can be clicked on.
+   * This method should return a link if this item can be clicked on. The link
+   * is used to navigate user if user middle-clicks it or Ctrl + clicks or
+   * right-clicks and selects "Open in new tab".
    */
-  getHref?(context: Context): string | undefined;
+  getHref?(context: Context): Promise<string | undefined>;
 
   /**
    * Returns a promise that resolves to true if this item is compatible given

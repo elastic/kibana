@@ -12,7 +12,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
-  EuiKeyPadMenuItemButton,
+  EuiKeyPadMenuItem,
 } from '@elastic/eui';
 import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
@@ -178,7 +178,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
         .sort((f1, f2) => f2.order - f1.order)
         .map(actionFactory => (
           <EuiFlexItem grow={false} key={actionFactory.id}>
-            <EuiKeyPadMenuItemButton
+            <EuiKeyPadMenuItem
               className="auaActionWizard__actionFactoryItem"
               label={actionFactory.getDisplayName(context)}
               data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
@@ -187,7 +187,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               {actionFactory.getIconType(context) && (
                 <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
               )}
-            </EuiKeyPadMenuItemButton>
+            </EuiKeyPadMenuItem>
           </EuiFlexItem>
         ))}
     </EuiFlexGroup>

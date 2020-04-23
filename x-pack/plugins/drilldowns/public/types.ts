@@ -109,7 +109,7 @@ export interface DrilldownDefinition<
   /**
    * A link where drilldown should navigate on middle click or Ctrl + click.
    */
-  getHref?(config: Config, context: ExecutionContext): string | undefined;
+  getHref?(config: Config, context: ExecutionContext): Promise<string | undefined>;
 }
 
 /**

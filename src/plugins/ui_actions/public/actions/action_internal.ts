@@ -51,8 +51,8 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
     return await this.definition.isCompatible(context);
   }
 
-  public getHref(context: Context<A>): string | undefined {
+  public async getHref(context: Context<A>): Promise<string | undefined> {
     if (!this.definition.getHref) return undefined;
-    return this.definition.getHref(context);
+    return await this.definition.getHref(context);
   }
 }

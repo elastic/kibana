@@ -5,13 +5,14 @@
  */
 
 import {
-  EmbeddableVisTriggerContext,
+  RangeSelectTriggerContext,
+  ValueClickTriggerContext,
   EmbeddableContext,
 } from '../../../../../../../src/plugins/embeddable/public';
 import { UiActionsCollectConfigProps } from '../../../../../../../src/plugins/ui_actions/public';
 
 export type PlaceContext = EmbeddableContext;
-export type ActionContext = EmbeddableVisTriggerContext;
+export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
 
 export interface Config {
   dashboardId?: string;
