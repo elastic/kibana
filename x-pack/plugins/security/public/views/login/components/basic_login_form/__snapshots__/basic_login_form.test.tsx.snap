@@ -2,6 +2,18 @@
 
 exports[`BasicLoginForm renders as expected 1`] = `
 <Fragment>
+  <EuiText
+    grow={true}
+    size="s"
+  >
+    <ReactMarkdown
+      escapeHtml={true}
+      renderers={Object {}}
+      skipHtml={false}
+      source=""
+      transformLinkUri={[Function]}
+    />
+  </EuiText>
   <EuiPanel
     grow={true}
     hasShadow={false}

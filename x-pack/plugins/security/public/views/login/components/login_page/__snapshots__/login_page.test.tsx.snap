@@ -182,6 +182,100 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
 </div>
 `;
 
+exports[`LoginPage disabled form states renders as expected when loginAssistanceMessage is set 1`] = `
+<div
+  className="loginWelcome login-form"
+>
+  <header
+    className="loginWelcome__header"
+  >
+    <div
+      className="loginWelcome__content eui-textCenter"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="loginWelcome__logo"
+      >
+        <EuiIcon
+          size="xxl"
+          type="logoKibana"
+        />
+      </span>
+      <EuiTitle
+        className="loginWelcome__title"
+        size="l"
+        textTransform="none"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Welcome to Kibana"
+            id="xpack.security.loginPage.welcomeTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+      <EuiText
+        className="loginWelcome__subtitle"
+        color="subdued"
+        grow={true}
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Your window into the Elastic Stack"
+            id="xpack.security.loginPage.welcomeDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="loginWelcome__content loginWelcome-body"
+  >
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <InjectIntl(BasicLoginFormUI)
+          http={
+            Object {
+              "post": [MockFunction],
+            }
+          }
+          isSecureConnection={false}
+          loginAssistanceMessage="This is an *important* message"
+          loginState={
+            Object {
+              "allowLogin": true,
+              "layout": "form",
+              "loginMessage": "",
+            }
+          }
+          next=""
+          requiresSecureConnection={false}
+          window={Object {}}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</div>
+`;
+
 exports[`LoginPage disabled form states renders as expected when secure cookies are required but not present 1`] = `
 <div
   className="loginWelcome login-form"
@@ -440,6 +534,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
             }
           }
           isSecureConnection={false}
+          loginAssistanceMessage=""
           loginState={
             Object {
               "allowLogin": true,

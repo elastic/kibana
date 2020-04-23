@@ -38,7 +38,8 @@ interface AnyObject {
       $http: AnyObject,
       $window: AnyObject,
       secureCookies: boolean,
-      loginState: LoginState
+      loginState: LoginState,
+      loginAssistanceMessage: string
     ) => {
       const basePath = chrome.getBasePath();
       const next = parseNext($window.location.href, basePath);
@@ -58,6 +59,7 @@ interface AnyObject {
               loginState={loginState}
               isSecureConnection={isSecure}
               requiresSecureConnection={secureCookies}
+              loginAssistanceMessage={loginAssistanceMessage}
               next={next}
             />
           </I18nContext>,
