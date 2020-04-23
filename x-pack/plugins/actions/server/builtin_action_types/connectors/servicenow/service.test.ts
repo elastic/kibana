@@ -9,7 +9,6 @@ import axios from 'axios';
 import { createExternalService } from './service';
 import * as utils from '../utils';
 import { ExternalService } from '../types';
-import { object } from 'joi';
 
 jest.mock('axios');
 jest.mock('../utils', () => {

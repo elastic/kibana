@@ -49,25 +49,28 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       username: 'changeme',
     },
     params: {
-      caseId: '123',
-      title: 'a title',
-      description: 'a description',
-      createdAt: '2020-03-13T08:34:53.450Z',
-      createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: null,
-      updatedBy: null,
-      incidentId: null,
-      comments: [
-        {
-          commentId: '456',
-          version: 'WzU3LDFd',
-          comment: 'first comment',
-          createdAt: '2020-03-13T08:34:53.450Z',
-          createdBy: { fullName: 'Elastic User', username: 'elastic' },
-          updatedAt: null,
-          updatedBy: null,
-        },
-      ],
+      action: 'pushToService',
+      actionParams: {
+        caseId: '123',
+        title: 'a title',
+        description: 'a description',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
+        updatedAt: null,
+        updatedBy: null,
+        externalId: null,
+        comments: [
+          {
+            commentId: '456',
+            version: 'WzU3LDFd',
+            comment: 'first comment',
+            createdAt: '2020-03-13T08:34:53.450Z',
+            createdBy: { fullName: 'Elastic User', username: 'elastic' },
+            updatedAt: null,
+            updatedBy: null,
+          },
+        ],
+      },
     },
   };
 
@@ -167,7 +170,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: error configuring servicenow action: target url "http://servicenow.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+              'error validating action type config: error configuring connector action: target url "http://servicenow.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
           });
         });
     });
@@ -289,7 +292,10 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         .post(`/api/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
-          params: { ...mockServiceNow.params, title: 'success', comments: [] },
+          params: {
+            ...mockServiceNow.params,
+            actionParams: { ...mockServiceNow.params.actionParams, title: 'success', comments: [] },
+          },
         })
         .expect(200);
 
@@ -297,8 +303,8 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         status: 'ok',
         actionId: simulatedActionId,
         data: {
-          incidentId: '123',
-          number: 'INC01',
+          id: '123',
+          title: 'INC01',
           pushedDate: '2020-03-10T12:24:20.000Z',
           url: `${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
         },
@@ -310,7 +316,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         .post(`/api/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
-          params: {},
+          params: { action: 'pushToService', actionParams: {} },
         })
         .then((resp: any) => {
           expect(resp.body).to.eql({
@@ -318,7 +324,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: false,
             message:
-              'error validating action params: [caseId]: expected value of type [string] but got [undefined]',
+              'error validating action params: [actionParams.caseId]: expected value of type [string] but got [undefined]',
           });
         });
     });
@@ -328,7 +334,12 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         .post(`/api/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
-          params: { caseId: 'success' },
+          params: {
+            ...mockServiceNow.params,
+            actionParams: {
+              caseId: 'success',
+            },
+          },
         })
         .then((resp: any) => {
           expect(resp.body).to.eql({
@@ -336,7 +347,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: false,
             message:
-              'error validating action params: [title]: expected value of type [string] but got [undefined]',
+              'error validating action params: [actionParams.title]: expected value of type [string] but got [undefined]',
           });
         });
     });
@@ -346,7 +357,13 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         .post(`/api/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
-          params: { caseId: 'success', title: 'success' },
+          params: {
+            ...mockServiceNow.params,
+            actionParams: {
+              caseId: 'success',
+              title: 'success',
+            },
+          },
         })
         .then((resp: any) => {
           expect(resp.body).to.eql({
@@ -354,7 +371,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: false,
             message:
-              'error validating action params: [createdAt]: expected value of type [string] but got [undefined]',
+              'error validating action params: [actionParams.createdAt]: expected value of type [string] but got [undefined]',
           });
         });
     });
@@ -365,11 +382,15 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            caseId: 'success',
-            title: 'success',
-            createdAt: 'success',
-            createdBy: { username: 'elastic' },
-            comments: [{}],
+            ...mockServiceNow.params,
+            actionParams: {
+              ...mockServiceNow.params.actionParams,
+              caseId: 'success',
+              title: 'success',
+              createdAt: 'success',
+              createdBy: { username: 'elastic' },
+              comments: [{}],
+            },
           },
         })
         .then((resp: any) => {
@@ -378,7 +399,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: false,
             message:
-              'error validating action params: [comments.0.commentId]: expected value of type [string] but got [undefined]',
+              'error validating action params: [actionParams.comments.0.commentId]: expected value of type [string] but got [undefined]',
           });
         });
     });
@@ -389,11 +410,15 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            caseId: 'success',
-            title: 'success',
-            createdAt: 'success',
-            createdBy: { username: 'elastic' },
-            comments: [{ commentId: 'success' }],
+            ...mockServiceNow.params,
+            actionParams: {
+              ...mockServiceNow.params.actionParams,
+              caseId: 'success',
+              title: 'success',
+              createdAt: 'success',
+              createdBy: { username: 'elastic' },
+              comments: [{ commentId: 'success' }],
+            },
           },
         })
         .then((resp: any) => {
@@ -402,7 +427,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: false,
             message:
-              'error validating action params: [comments.0.comment]: expected value of type [string] but got [undefined]',
+              'error validating action params: [actionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
           });
         });
     });
@@ -413,11 +438,15 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            caseId: 'success',
-            title: 'success',
-            createdAt: 'success',
-            createdBy: { username: 'elastic' },
-            comments: [{ commentId: 'success', comment: 'success' }],
+            ...mockServiceNow.params,
+            actionParams: {
+              ...mockServiceNow.params.actionParams,
+              caseId: 'success',
+              title: 'success',
+              createdAt: 'success',
+              createdBy: { username: 'elastic' },
+              comments: [{ commentId: 'success', comment: 'success' }],
+            },
           },
         })
         .then((resp: any) => {
@@ -426,7 +455,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: false,
             message:
-              'error validating action params: [comments.0.createdAt]: expected value of type [string] but got [undefined]',
+              'error validating action params: [actionParams.comments.0.createdAt]: expected value of type [string] but got [undefined]',
           });
         });
     });

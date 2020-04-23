@@ -6,7 +6,6 @@
 
 import { ActionType } from '../../../../../../plugins/triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionConnectorFieldsProps } from '../../../../../../plugins/triggers_actions_ui/public/types';
 import { ConnectorPublicConfigurationType } from '../../../../../../plugins/actions/common';
 
 import {
