@@ -1680,7 +1680,7 @@ export interface SavedObjectMigrationContext {
 }
 
 // @public
-export type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;
+export type SavedObjectMigrationFn<TInputDoc extends SavedObjectUnsanitizedDoc | SavedObjectSanitizedDoc = SavedObjectUnsanitizedDoc, TOutputDoc extends SavedObjectUnsanitizedDoc | SavedObjectSanitizedDoc = SavedObjectUnsanitizedDoc> = (doc: TInputDoc, context: SavedObjectMigrationContext) => TOutputDoc;
 
 // @public
 export interface SavedObjectMigrationMap {
