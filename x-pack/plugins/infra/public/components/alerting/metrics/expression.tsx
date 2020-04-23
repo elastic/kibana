@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiFormRow,
   EuiButtonEmpty,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -56,6 +57,7 @@ interface Props {
     groupBy?: string;
     filterQuery?: string;
     sourceId?: string;
+    alertOnNoData?: boolean;
   };
   alertsContext: AlertsContextValue<AlertContextMeta>;
   setAlertParams(key: string, value: any): void;
@@ -271,6 +273,15 @@ export const Expressions: React.FC<Props> = props => {
         </EuiButtonEmpty>
       </div>
 
+      <EuiSpacer size={'m'} />
+      <EuiCheckbox
+        id="metrics-alert-no-data-toggle"
+        label={i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
+          defaultMessage: "Alert me if there's no data",
+        })}
+        checked={alertParams.alertOnNoData}
+        onChange={e => setAlertParams('alertOnNoData', e.target.checked)}
+      />
       <EuiSpacer size={'m'} />
 
       {alertsContext.metadata && (

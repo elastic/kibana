@@ -75,7 +75,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
         groupBy: schema.maybe(schema.string()),
         filterQuery: schema.maybe(schema.string()),
         sourceId: schema.string(),
-        alertOnNoData: schema.boolean(),
+        alertOnNoData: schema.maybe(schema.boolean()),
       }),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
