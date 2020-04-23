@@ -33,6 +33,7 @@ import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_obj
 import {
   registerEPMRoutes,
   registerDatasourceRoutes,
+  registerDataStreamRoutes,
   registerAgentConfigRoutes,
   registerSetupRoutes,
   registerAgentRoutes,
@@ -142,6 +143,7 @@ export class IngestManagerPlugin
     // Register routes
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
+    registerDataStreamRoutes(router);
 
     // Conditional routes
     if (config.epm.enabled) {
