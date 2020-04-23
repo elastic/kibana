@@ -59,7 +59,7 @@ describe('buildBulkBody', () => {
             depth: 1,
           },
         ],
-        original_time: 'someTimeStamp',
+        original_time: '2020-04-20T21:27:45+0000',
         status: 'open',
         rule: {
           actions: [],
@@ -90,7 +90,7 @@ describe('buildBulkBody', () => {
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
-          lists: [
+          exceptions_list: [
             {
               field: 'source.ip',
               values_operator: 'included',
@@ -185,7 +185,7 @@ describe('buildBulkBody', () => {
             depth: 1,
           },
         ],
-        original_time: 'someTimeStamp',
+        original_time: '2020-04-20T21:27:45+0000',
         status: 'open',
         rule: {
           actions: [],
@@ -216,7 +216,7 @@ describe('buildBulkBody', () => {
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           throttle: 'no_actions',
-          lists: [
+          exceptions_list: [
             {
               field: 'source.ip',
               values_operator: 'included',
@@ -309,7 +309,7 @@ describe('buildBulkBody', () => {
             depth: 1,
           },
         ],
-        original_time: 'someTimeStamp',
+        original_time: '2020-04-20T21:27:45+0000',
         status: 'open',
         rule: {
           actions: [],
@@ -340,7 +340,7 @@ describe('buildBulkBody', () => {
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           throttle: 'no_actions',
-          lists: [
+          exceptions_list: [
             {
               field: 'source.ip',
               values_operator: 'included',
@@ -426,7 +426,7 @@ describe('buildBulkBody', () => {
             depth: 1,
           },
         ],
-        original_time: 'someTimeStamp',
+        original_time: '2020-04-20T21:27:45+0000',
         status: 'open',
         rule: {
           actions: [],
@@ -457,7 +457,7 @@ describe('buildBulkBody', () => {
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           throttle: 'no_actions',
-          lists: [
+          exceptions_list: [
             {
               field: 'source.ip',
               values_operator: 'included',

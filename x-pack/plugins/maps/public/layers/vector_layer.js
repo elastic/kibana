@@ -484,6 +484,8 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName(source);
+
+      //todo: cast source to ESSource when migrating to TS
       const styleMeta = await source.loadStylePropsMeta(
         layerName,
         style,

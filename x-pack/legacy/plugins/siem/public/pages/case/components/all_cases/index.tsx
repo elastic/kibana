@@ -313,6 +313,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={true}>
           <EuiFlexItem grow={false}>
             <OpenClosedStats
+              dataTestSubj="openStatsHeader"
               caseCount={countOpenCases}
               caseStatus={'open'}
               isLoading={isCasesStatusLoading}
@@ -320,6 +321,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
           </EuiFlexItem>
           <FlexItemDivider grow={false}>
             <OpenClosedStats
+              dataTestSubj="closedStatsHeader"
               caseCount={countClosedCases}
               caseStatus={'closed'}
               isLoading={isCasesStatusLoading}
@@ -341,6 +343,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
               fill
               href={getCreateCaseUrl(urlSearch)}
               iconType="plusInCircle"
+              data-test-subj="createNewCaseBtn"
             >
               {i18n.CREATE_TITLE}
             </EuiButton>

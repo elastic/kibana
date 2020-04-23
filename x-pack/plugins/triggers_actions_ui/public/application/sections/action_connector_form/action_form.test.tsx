@@ -232,7 +232,7 @@ describe('action_form', () => {
         Object {
           "id": "test2",
           "key": "test2",
-          "label": "Test connector 2 (pre-configured)",
+          "label": "Test connector 2 (preconfigured)",
         },
       ]
       `);

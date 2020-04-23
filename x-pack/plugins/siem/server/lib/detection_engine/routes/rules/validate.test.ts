@@ -71,7 +71,7 @@ export const ruleOutput: RulesSchema = {
       },
     },
   ],
-  lists: [
+  exceptions_list: [
     {
       field: 'source.ip',
       values_operator: 'included',

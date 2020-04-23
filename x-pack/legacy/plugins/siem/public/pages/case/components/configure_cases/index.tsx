@@ -85,6 +85,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
   const {
     connectorId,
+    connectorName,
     closureType,
     mapping,
     currentConfiguration,
@@ -131,10 +132,11 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     const unsavedChanges = difference(Object.values(currentConfiguration), [
       connectorId,
       closureType,
+      connectorName,
     ]).length;
     setActionBarVisible(!(unsavedChanges === 0));
     setTotalConfigurationChanges(unsavedChanges);
-  }, [currentConfiguration, connectorId, closureType]);
+  }, [currentConfiguration, connectorName, connectorId, closureType]);
 
   const handleSetAddFlyoutVisibility = useCallback(
     (isVisible: boolean) => {
@@ -195,7 +197,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
   useEffect(() => {
     handleActionBar();
-  }, [connectors, connectorId, closureType, currentConfiguration]);
+  }, [
+    connectors,
+    connectorId,
+    closureType,
+    currentConfiguration.connectorId,
+    currentConfiguration.closureType,
+  ]);
 
   return (
     <FormWrapper>

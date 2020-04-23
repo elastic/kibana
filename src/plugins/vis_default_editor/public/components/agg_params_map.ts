@@ -58,6 +58,8 @@ const buckets = {
     size: controls.SizeParamEditor,
   },
   [BUCKET_TYPES.TERMS]: {
+    include: controls.IncludeExcludeParamEditor,
+    exclude: controls.IncludeExcludeParamEditor,
     orderBy: controls.OrderByParamEditor,
     orderAgg: controls.OrderAggParamEditor,
     order: wrapWithInlineComp(controls.OrderParamEditor),

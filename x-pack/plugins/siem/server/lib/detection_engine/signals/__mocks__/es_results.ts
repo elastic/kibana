@@ -13,7 +13,7 @@ import {
 import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams, OutputRuleAlertRest } from '../../types';
 import { IRuleStatusAttributes } from '../../rules/types';
-import { ruleStatusSavedObjectType } from '../../../../saved_objects';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const sampleRuleAlertParams = (
   maxSignals?: number | undefined,
@@ -44,7 +44,7 @@ export const sampleRuleAlertParams = (
   meta: undefined,
   threat: undefined,
   version: 1,
-  lists: [
+  exceptions_list: [
     {
       field: 'source.ip',
       values_operator: 'included',
@@ -86,7 +86,7 @@ export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSource
   _id: someUuid,
   _source: {
     someKey: 'someValue',
-    '@timestamp': 'someTimeStamp',
+    '@timestamp': '2020-04-20T21:27:45+0000',
   },
 });
 
@@ -97,7 +97,7 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
   _id: someUuid,
   _source: {
     someKey: 'someValue',
-    '@timestamp': 'someTimeStamp',
+    '@timestamp': '2020-04-20T21:27:45+0000',
   },
 });
 
@@ -109,7 +109,7 @@ export const sampleDocWithSortId = (someUuid: string = sampleIdGuid): SignalSour
   _id: someUuid,
   _source: {
     someKey: 'someValue',
-    '@timestamp': 'someTimeStamp',
+    '@timestamp': '2020-04-20T21:27:45+0000',
   },
   sort: ['1234567891111'],
 });

@@ -79,7 +79,7 @@ describe('getExportAll', () => {
         throttle: 'no_actions',
         note: '# Investigative notes',
         version: 1,
-        lists: [
+        exceptions_list: [
           {
             field: 'source.ip',
             values_operator: 'included',
