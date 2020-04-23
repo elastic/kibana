@@ -74,7 +74,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Verify that the settings page shows the value we previously saved
       await settings.go();
       const fields = await settings.loadFields();
-      expect(fields).to.eql(newFieldValues);
+      expect(fields.heartbeatIndices).to.eql(newFieldValues.heartbeatIndices);
+    });
+
+    it('changing certificate expiration error threshold is reflected in settings page', async () => {
+      const settings = uptimeService.settings;
+
+      await settings.go();
+
+      const newErrorThreshold = '5';
+      await settings.changeErrorThresholdInput(newErrorThreshold);
+      await settings.apply();
+
+      await uptimePage.goToRoot();
+
+      // Verify that the settings page shows the value we previously saved
+      await settings.go();
+      const fields = await settings.loadFields();
+      expect(fields.certificatesThresholds.errorState).to.eql(newErrorThreshold);
+    });
+
+    it('changing certificate expiration warning threshold is reflected in settings page', async () => {
+      const settings = uptimeService.settings;
+
+      await settings.go();
+
+      const newWarningThreshold = '15';
+      await settings.changeWarningThresholdInput(newWarningThreshold);
+      await settings.apply();
+
+      await uptimePage.goToRoot();
+
+      // Verify that the settings page shows the value we previously saved
+      await settings.go();
+      const fields = await settings.loadFields();
+      expect(fields.certificatesThresholds.warningState).to.eql(newWarningThreshold);
     });
   });
 };

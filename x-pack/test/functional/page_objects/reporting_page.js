@@ -34,11 +34,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     async getReportURL(timeout) {
       log.debug('getReportURL');
 
-      const url = await testSubjects.getAttribute(
-        'downloadCompletedReportButton',
-        'data-test-href',
-        timeout
-      );
+      const url = await testSubjects.getAttribute('downloadCompletedReportButton', 'href', timeout);
 
       log.debug(`getReportURL got url: ${url}`);
 
