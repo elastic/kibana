@@ -18,10 +18,10 @@
  */
 
 import { Dictionary, countBy, defaults, unique } from 'lodash';
-import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern, IndexPatternField } from '../../../../../../../../../plugins/data/public';
 import { IndexPatternManagementStart } from '../../../../../../../../../plugins/index_pattern_management/public';
+import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
 
 function filterByName(items: IndexPatternField[], filter: string) {
   const lowercaseFilter = (filter || '').toLowerCase();
@@ -95,31 +95,22 @@ export function getTabs(
 
   tabs.push({
     name: getTitle('indexed', filteredCount, totalCount),
-    id: 'indexedFields',
+    id: TAB_INDEXED_FIELDS,
   });
 
   if (indexPatternListProvider.areScriptedFieldsEnabled(indexPattern)) {
     tabs.push({
       name: getTitle('scripted', filteredCount, totalCount),
-      id: 'scriptedFields',
+      id: TAB_SCRIPTED_FIELDS,
     });
   }
 
   tabs.push({
     name: getTitle('sourceFilters', filteredCount, totalCount),
-    id: 'sourceFilters',
+    id: TAB_SOURCE_FILTERS,
   });
 
   return tabs;
-}
-
-export function getTabIdFromURL(search: string) {
-  const params = parse(search);
-  let tabId = 'indexedFields';
-  if (params._a) {
-    tabId = (Array.isArray(params._a) ? params._a[0] : params._a).split(/[:)]/)[1];
-  }
-  return tabId;
 }
 
 export function getPath(field: IndexPatternField) {

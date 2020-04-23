@@ -34,7 +34,7 @@ import { fieldWildcardMatcher } from '../../../../../../../../../plugins/kibana_
 import { IndexPatternManagementStart } from '../../../../../../../../../plugins/index_pattern_management/public';
 import { IndexPattern, IndexPatternField } from '../../../../../../../../../plugins/data/public';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
-import { TAB_INDEXED_FIELDS } from '../constants';
+import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
 import { SourceFiltersTable } from '../source_filters_table';
 import { IndexedFieldsTable } from '../indexed_fields_table';
 import { ScriptedFieldsTable } from '../scripted_fields_table';
@@ -111,7 +111,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               aria-label={filterAriaLabel}
             />
           </EuiFlexItem>
-          {type === 'indexedFields' && indexedFieldTypes.length > 0 && (
+          {type === TAB_INDEXED_FIELDS && indexedFieldTypes.length > 0 && (
             <EuiFlexItem grow={false}>
               <EuiSelect
                 options={indexedFieldTypes}
@@ -121,7 +121,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               />
             </EuiFlexItem>
           )}
-          {type === 'scriptedFields' && scriptedFieldLanguages.length > 0 && (
+          {type === TAB_SCRIPTED_FIELDS && scriptedFieldLanguages.length > 0 && (
             <EuiFlexItem grow={false}>
               <EuiSelect
                 options={scriptedFieldLanguages}
@@ -146,7 +146,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   const getContent = useCallback(
     (type: string) => {
       switch (type) {
-        case 'indexedFields':
+        case TAB_INDEXED_FIELDS:
           return (
             <Fragment>
               <EuiSpacer size="m" />
@@ -167,7 +167,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               />
             </Fragment>
           );
-        case 'scriptedFields':
+        case TAB_SCRIPTED_FIELDS:
           return (
             <Fragment>
               <EuiSpacer size="m" />
@@ -186,7 +186,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               />
             </Fragment>
           );
-        case 'sourceFilters':
+        case TAB_SOURCE_FILTERS:
           return (
             <Fragment>
               <EuiSpacer size="m" />
