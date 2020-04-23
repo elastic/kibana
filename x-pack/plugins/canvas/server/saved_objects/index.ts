@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Timeline {
-  title: string;
-  description: string;
-  query: string;
-}
+import { workpadType } from './workpad';
+import { customElementType } from './custom_element';
+
+export { customElementType, workpadType };
