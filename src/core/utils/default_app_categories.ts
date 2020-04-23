@@ -46,6 +46,6 @@ export const DEFAULT_APP_CATEGORIES = Object.freeze({
     label: i18n.translate('core.ui.managementNavList.label', {
       defaultMessage: 'Management',
     }),
-    euiIconType: 'managementApp',
+    order: 5000,
   },
 });

@@ -436,8 +436,9 @@ export class CoreSystem {
 
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Readonly<{
-    analyze: {
+    kibana: {
         label: string;
+        euiIconType: string;
         order: number;
     };
     observability: {
@@ -452,7 +453,7 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
     };
     management: {
         label: string;
-        euiIconType: string;
+        order: number;
     };
 }>;
 
