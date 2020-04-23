@@ -1,5 +1,5 @@
 - Start Date: 2020-04-19
-- RFC PR: (leave this empty)
+- RFC PR: [#64284](https://github.com/elastic/kibana/pull/64284)
 - Kibana Issue: [#61657](https://github.com/elastic/kibana/issues/61657)
 
 # Summary
@@ -425,5 +425,6 @@ Are the current types, services and api names acceptable:
    - `GlobalSearch` ts prefix
    - `core.globalSearch` / `GlobalSearchService`
    - `GlobalSearchResultProvider`
+   - `core.globalSearch.find`
 
      
