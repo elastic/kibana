@@ -5,8 +5,8 @@
  */
 
 import { ExpressionFunctionDefinition, Filter } from 'src/plugins/expressions/common';
-// @ts-ignore untyped local
 /* eslint-disable */
+// @ts-ignore untyped local
 import { buildESRequest } from '../../../../../../plugins/canvas/server/lib/build_es_request';
 /* eslint-enable */
 import { getFunctionHelp } from '../../../i18n';
