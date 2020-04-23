@@ -62,6 +62,7 @@ export default {
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
+    '^(!!)?file-loader!': '<rootDir>/src/dev/jest/mocks/file_mock.js',
   },
   setupFiles: [
     '<rootDir>/src/dev/jest/setup/babel_polyfill.js',
