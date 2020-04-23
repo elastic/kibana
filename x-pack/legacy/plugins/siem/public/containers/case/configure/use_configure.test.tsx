@@ -101,7 +101,7 @@ describe('useConfigure', () => {
       result.current.setMapping(mapping);
       expect(result.current.mapping).toEqual(mapping);
     });
-  })
+  });
 
   test('set isLoading to true when fetching case configuration', async () => {
     await act(async () => {
@@ -177,7 +177,7 @@ describe('useConfigure', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      result.current.persistCaseConfigure({ ...configuration });
+      result.current.persistCaseConfigure(configuration);
 
       expect(result.current.connectorId).toEqual('123');
       await waitForNextUpdate();
