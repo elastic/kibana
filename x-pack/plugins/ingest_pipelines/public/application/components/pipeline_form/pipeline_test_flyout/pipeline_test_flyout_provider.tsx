@@ -10,7 +10,7 @@ import { Pipeline } from '../../../../../common/types';
 import { useFormContext } from '../../../../shared_imports';
 import { PipelineTestFlyout, PipelineTestFlyoutProps } from './pipeline_test_flyout';
 
-type Props = Omit<PipelineTestFlyoutProps, 'pipeline'>;
+type Props = Pick<PipelineTestFlyoutProps, 'closeFlyout'>;
 
 export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({ closeFlyout }) => {
   const form = useFormContext();
