@@ -221,7 +221,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           etag,
         });
 
-        async function getAppliedByAgent() {
+        async function hasBeenAppliedByAgent() {
           const { body } = await searchConfigurations({
             service: { name: 'myservice', environment: 'development' },
           });
@@ -230,7 +230,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         }
 
         // wait until `applied_by_agent` has been updated in elasticsearch
-        expect(await waitFor(getAppliedByAgent)).to.be(true);
+        expect(await waitFor(hasBeenAppliedByAgent)).to.be(true);
       });
       it(`should have 'applied_by_agent=false' before marking as applied`, async () => {
         const res1 = await searchConfigurations({
@@ -245,7 +245,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           mark_as_applied_by_agent: true,
         });
 
-        async function getAppliedByAgent() {
+        async function hasBeenAppliedByAgent() {
           const { body } = await searchConfigurations({
             service: { name: 'myservice', environment: 'production' },
           });
@@ -254,7 +254,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         }
 
         // wait until `applied_by_agent` has been updated in elasticsearch
-        expect(await waitFor(getAppliedByAgent)).to.be(true);
+        expect(await waitFor(hasBeenAppliedByAgent)).to.be(true);
       });
     });
   });
