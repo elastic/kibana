@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { EuiResizeObserver } from '@elastic/eui';
+import { EuiResizeObserver, EuiSpacer } from '@elastic/eui';
 import { combineLatest, from, Observable, of, Subject } from 'rxjs';
 import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { throttle } from 'lodash';
@@ -132,6 +132,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
         >
           {chartWidth > 0 && swimlaneData && swimlaneType && (
             <>
+              <EuiSpacer size="m" />
               <ChartTooltip />
               <ExplorerSwimlane
                 chartWidth={chartWidth}

@@ -31,10 +31,8 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
   onCreate,
   onCancel,
 }) => {
-  const [swimlaneType, setSwimlaneType] = useState('');
+  const [swimlaneType, setSwimlaneType] = useState<SWIMLANE_TYPE>(SWIMLANE_TYPE.OVERALL);
   const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState();
-
-  const isFormValid = !!swimlaneType;
 
   const swimlaneTypeOptions = [
     {
@@ -57,6 +55,10 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
       text: influencer,
     };
   });
+
+  const isFormValid =
+    swimlaneType === SWIMLANE_TYPE.OVERALL ||
+    (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewBySwimlaneFieldName);
 
   return (
     <div>
@@ -84,7 +86,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
               name="selectSwimlaneType"
               options={swimlaneTypeOptions}
               value={swimlaneType}
-              onChange={e => setSwimlaneType(e.target.value)}
+              onChange={e => setSwimlaneType(e.target.value as SWIMLANE_TYPE)}
               data-test-subj="mlSwimlaneTypeCombobox"
             />
           </EuiFormRow>
