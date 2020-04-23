@@ -89,7 +89,7 @@ export const CertificatesPage: React.FC = () => {
           onChange={(pageVal, sortVal) => {
             setPage(pageVal);
             setSort(sortVal);
-            localStorage.setItem(LOCAL_STORAGE_KEY, pageVal.size);
+            localStorage.setItem(LOCAL_STORAGE_KEY, pageVal.size.toString());
           }}
           sort={sort}
         />

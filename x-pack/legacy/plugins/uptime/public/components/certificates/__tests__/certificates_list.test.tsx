@@ -5,9 +5,7 @@
  */
 
 import React from 'react';
-import { CertMonitors } from '../cert_monitors';
 import { shallowWithRouter } from '../../../lib';
-import { CertStatus } from '../cert_status';
 import { CertificateList } from '../certificates_list';
 
 describe('CertificateList', () => {

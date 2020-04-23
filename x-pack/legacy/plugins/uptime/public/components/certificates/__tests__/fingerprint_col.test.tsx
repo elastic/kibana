@@ -6,18 +6,9 @@
 
 import React from 'react';
 import { renderWithRouter, shallowWithRouter } from '../../../lib';
-import { CertStatus } from '../cert_status';
-import * as redux from 'react-redux';
+import { FingerprintCol } from '../fingerprint_col';
 
-describe('CertStatus', () => {
-  beforeEach(() => {
-    const spy = jest.spyOn(redux, 'useDispatch');
-    spy.mockReturnValue(jest.fn());
-
-    const spy1 = jest.spyOn(redux, 'useSelector');
-    spy1.mockReturnValue(true);
-  });
-
+describe('FingerprintCol', () => {
   it('shallow renders expected elements for valid props', () => {
     const cert = {
       monitors: [{ name: '', id: 'github' }],
@@ -29,7 +20,7 @@ describe('CertStatus', () => {
       common_name: 'github.com',
     };
 
-    expect(shallowWithRouter(<CertStatus cert={cert} />)).toMatchSnapshot();
+    expect(shallowWithRouter(<FingerprintCol cert={cert} />)).toMatchSnapshot();
   });
 
   it('renders expected elements for valid props', () => {
@@ -43,6 +34,6 @@ describe('CertStatus', () => {
       common_name: 'github.com',
     };
 
-    expect(renderWithRouter(<CertStatus cert={cert} />)).toMatchSnapshot();
+    expect(renderWithRouter(<FingerprintCol cert={cert} />)).toMatchSnapshot();
   });
 });

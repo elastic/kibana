@@ -5,13 +5,14 @@
  */
 
 import React from 'react';
-import { CertMonitors } from '../cert_monitors';
-import { shallowWithRouter } from '../../../lib';
-import { CertStatus } from '../cert_status';
+import { renderWithRouter, shallowWithRouter } from '../../../lib';
 import { CertificateSearch } from '../cert_search';
 
 describe('CertificatesSearch', () => {
   it('shallow renders expected elements for valid props', () => {
     expect(shallowWithRouter(<CertificateSearch setSearch={jest.fn()} />)).toMatchSnapshot();
+  });
+  it('renders expected elements for valid props', () => {
+    expect(renderWithRouter(<CertificateSearch setSearch={jest.fn()} />)).toMatchSnapshot();
   });
 });

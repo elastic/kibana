@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { Cert } from '../../../../common/runtime_types';
 import { CERT_STATUS, useCertStatus } from '../../../hooks';
-import { EXPIRED, EXPIRES_SOON, OK } from '../../certificates/translations';
+import { EXPIRED, EXPIRES_SOON } from '../../certificates/translations';
 
 interface Props {
   cert: Cert;
@@ -29,7 +29,7 @@ export const CertStatusColumn: React.FC<Props> = ({ cert }) => {
   const isExpired = certStatus === CERT_STATUS.EXPIRED;
 
   const relativeDate = moment(cert?.certificate_not_valid_after).fromNow();
-  const CertStatus = ({ color, text }) => {
+  const CertStatus = ({ color, text }: { color: string; text: string }) => {
     return (
       <EuiToolTip content={moment(cert?.certificate_not_valid_after).format('L LT')}>
         <EuiText size="s">

@@ -1,5 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`CertificatesSearch renders expected elements for valid props 1`] = `
+.c0 {
+  min-width: 700px;
+}
+
+<div
+  class="euiFormControlLayout"
+>
+  <div
+    class="euiFormControlLayout__childrenWrapper"
+  >
+    <input
+      aria-label="Search certificates"
+      class="euiFieldSearch c0"
+      placeholder="Search certificates"
+      type="search"
+    />
+    <div
+      class="euiFormControlLayoutIcons"
+    >
+      <span
+        class="euiFormControlLayoutCustomIcon"
+      >
+        <div
+          aria-hidden="true"
+          class="euiFormControlLayoutCustomIcon__icon"
+          data-euiicon-type="search"
+        />
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`CertificatesSearch shallow renders expected elements for valid props 1`] = `
 <ContextProvider
   value={

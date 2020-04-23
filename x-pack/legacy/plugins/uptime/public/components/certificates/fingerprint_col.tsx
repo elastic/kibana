@@ -7,13 +7,16 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
+import { Cert } from '../../../common/runtime_types';
 
 const Span = styled.span`
   margin-right: 3px;
 `;
-
-export const FingerprintCol = ({ cert }) => {
-  const ShaComponent = ({ text, val }) => {
+interface Props {
+  cert: Cert;
+}
+export const FingerprintCol: React.FC<Props> = ({ cert }) => {
+  const ShaComponent = ({ text, val }: { text: string; val: string }) => {
     return (
       <Span>
         <EuiToolTip content={val}>

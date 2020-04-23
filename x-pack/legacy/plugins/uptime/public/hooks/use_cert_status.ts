@@ -5,10 +5,8 @@
  */
 
 import moment from 'moment';
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { selectDynamicSettings } from '../state/selectors';
-import { getDynamicSettings } from '../state/actions/dynamic_settings';
 
 export enum CERT_STATUS {
   OK = 'OK',

@@ -1,32 +1,93 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CertStatus renders expected elements for valid props 1`] = `
-<div
-  class="euiHealth"
->
-  <div
-    class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+exports[`FingerprintCol renders expected elements for valid props 1`] = `
+Array [
+  .c0 {
+  margin-right: 3px;
+}
+
+<span
+    class="c0"
   >
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+    <span
+      class="euiToolTipAnchor"
     >
-      <div
-        color="success"
-        data-euiicon-type="dot"
-      />
-    </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      <button
+        class="euiButtonEmpty euiButtonEmpty--primary"
+        type="button"
+      >
+        <span
+          class="euiButtonEmpty__content"
+        >
+          <span
+            class="euiButtonEmpty__text"
+          >
+            SHA 1 
+          </span>
+        </span>
+      </button>
+    </span>
+    <span
+      class="euiToolTipAnchor"
     >
-      <span>
-        OK
-      </span>
-    </div>
-  </div>
-</div>
+      <button
+        class="euiButtonIcon euiButtonIcon--primary"
+        title="Click to copy SHA 256 value"
+        type="button"
+      >
+        <div
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          data-euiicon-type="copy"
+        />
+      </button>
+    </span>
+  </span>,
+  .c0 {
+  margin-right: 3px;
+}
+
+<span
+    class="c0"
+  >
+    <span
+      class="euiToolTipAnchor"
+    >
+      <button
+        class="euiButtonEmpty euiButtonEmpty--primary"
+        type="button"
+      >
+        <span
+          class="euiButtonEmpty__content"
+        >
+          <span
+            class="euiButtonEmpty__text"
+          >
+            SHA 256 
+          </span>
+        </span>
+      </button>
+    </span>
+    <span
+      class="euiToolTipAnchor"
+    >
+      <button
+        class="euiButtonIcon euiButtonIcon--primary"
+        title="Click to copy SHA 256 value"
+        type="button"
+      >
+        <div
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          data-euiicon-type="copy"
+        />
+      </button>
+    </span>
+  </span>,
+]
 `;
 
-exports[`CertStatus shallow renders expected elements for valid props 1`] = `
+exports[`FingerprintCol shallow renders expected elements for valid props 1`] = `
 <ContextProvider
   value={
     Object {
@@ -77,7 +138,7 @@ exports[`CertStatus shallow renders expected elements for valid props 1`] = `
     }
   }
 >
-  <CertStatus
+  <FingerprintCol
     cert={
       Object {
         "certificate_not_valid_after": "2020-06-03T12:00:00.000Z",

@@ -1,5 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`CertMonitors renders expected elements for valid props 1`] = `
+<span>
+  <span>
+    <button
+      class="euiLink euiLink--primary"
+      type="button"
+    >
+      <a
+        data-test-subj="monitor-page-link-bad-ssl-dashboard"
+        href="/monitor/YmFkLXNzbC1kYXNoYm9hcmQ="
+      >
+        bad-ssl-dashboard
+      </a>
+    </button>
+  </span>
+  <span>
+    , 
+    <button
+      class="euiLink euiLink--primary"
+      type="button"
+    >
+      <a
+        data-test-subj="monitor-page-link-elastic-co"
+        href="/monitor/ZWxhc3RpYy1jbw=="
+      >
+        elastic
+      </a>
+    </button>
+  </span>
+  <span>
+    , 
+    <button
+      class="euiLink euiLink--primary"
+      type="button"
+    >
+      <a
+        data-test-subj="monitor-page-link-extended-validation"
+        href="/monitor/ZXh0ZW5kZWQtdmFsaWRhdGlvbg=="
+      >
+        extended-validation
+      </a>
+    </button>
+  </span>
+</span>
+`;
+
 exports[`CertMonitors shallow renders expected elements for valid props 1`] = `
 <ContextProvider
   value={
