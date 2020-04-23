@@ -39,8 +39,6 @@ export class AnomalySwimlaneEmbeddableFactory
 
   constructor(private getStartServices: StartServicesAccessor<MlStartDependencies>) {}
 
-  private services: AnomalySwimlaneEmbeddableServices | undefined;
-
   public async isEditable() {
     return false;
   }
@@ -52,10 +50,10 @@ export class AnomalySwimlaneEmbeddableFactory
   }
 
   public async getExplicitInput(): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-    await this.initializeServices();
+    const services = await this.getServices();
 
     return new Promise(async (resolve, reject) => {
-      const [{ overlays, uiSettings }, , { mlAnomalyDetectorService }] = this.services!;
+      const [{ overlays, uiSettings }, , { mlAnomalyDetectorService }] = services;
 
       const maps = {
         groupsMap: getInitialGroupsMap([]),
@@ -124,7 +122,7 @@ export class AnomalySwimlaneEmbeddableFactory
     });
   }
 
-  private async initializeServices() {
+  private async getServices(): Promise<AnomalySwimlaneEmbeddableServices> {
     const [coreStart, pluginsStart] = await this.getStartServices();
 
     const httpService = new HttpService(coreStart.http);
@@ -136,14 +134,14 @@ export class AnomalySwimlaneEmbeddableFactory
       mlResultsService
     );
 
-    this.services = [coreStart, pluginsStart, { mlAnomalyDetectorService, explorerService }];
+    return [coreStart, pluginsStart, { mlAnomalyDetectorService, explorerService }];
   }
 
   public async create(
     initialInput: AnomalySwimlaneEmbeddableInput,
     parent?: IContainer
   ): Promise<AnomalySwimlaneEmbeddable | ErrorEmbeddable> {
-    await this.initializeServices();
-    return new AnomalySwimlaneEmbeddable(initialInput, this.services!, parent);
+    const services = await this.getServices();
+    return new AnomalySwimlaneEmbeddable(initialInput, services, parent);
   }
 }

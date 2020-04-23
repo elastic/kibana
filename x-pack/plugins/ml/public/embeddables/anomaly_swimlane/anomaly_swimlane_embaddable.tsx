@@ -19,6 +19,12 @@ import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
 import { MlAnomalyDetectorService } from '../../application/services/ml_anomanly_detector.service';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
 import { ExplorerService } from '../../application/services/explorer.service';
+import {
+  Filter,
+  Query,
+  RefreshInterval,
+  TimeRange,
+} from '../../../../../../src/plugins/data/common';
 
 export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
 
@@ -26,6 +32,12 @@ export interface AnomalySwimlaneEmbeddableCustomInput {
   jobs: Job[];
   viewBy?: string;
   swimlaneType: string;
+
+  // Embeddable inputs which are not included in the default interface
+  filters: Filter[];
+  query: Query;
+  refreshConfig: RefreshInterval;
+  timeRange: TimeRange;
 }
 
 export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
@@ -34,6 +46,7 @@ export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
   jobs: Job[];
   swimlaneType: string;
   viewBy?: string;
+  timeRange?: TimeRange;
 }
 
 export interface MlServices {
@@ -77,6 +90,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
         embeddableInput={this.getInput$()}
         services={this.services}
         refresh={this.reload$.asObservable()}
+        onOutputChange={output => this.updateOutput(output)}
       />,
       node
     );

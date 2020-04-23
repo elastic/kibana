@@ -6,7 +6,7 @@
 
 import { IUiSettingsClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { TimefilterContract } from '../../../../../../src/plugins/data/public';
+import { TimefilterContract, TimeRange } from '../../../../../../src/plugins/data/public';
 import { getBoundsRoundedToInterval, TimeBuckets, TimeRangeBounds } from '../util/time_buckets';
 import { ExplorerJob, OverallSwimlaneData, SwimlaneData } from '../explorer/explorer_utils';
 import { VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
@@ -17,6 +17,7 @@ import { MlResultsService } from './results_service';
  */
 export class ExplorerService {
   private timeBuckets: TimeBuckets;
+  private _customTimeRange: TimeRange | undefined;
 
   constructor(
     private timeFilter: TimefilterContract,
@@ -32,10 +33,14 @@ export class ExplorerService {
     this.timeFilter.enableTimeRangeSelector();
   }
 
+  public setTimeRange(timeRange: TimeRange) {
+    this._customTimeRange = timeRange;
+  }
+
   public getSwimlaneBucketInterval(selectedJobs: ExplorerJob[], swimlaneContainerWidth: number) {
     // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
     // and the max bucket span for the jobs shown in the chart.
-    const bounds = this.timeFilter.getActiveBounds();
+    const bounds = this.getTimeBounds();
 
     if (bounds === undefined) {
       throw new Error('timeRangeSelectorEnabled has to be enabled');
@@ -86,7 +91,7 @@ export class ExplorerService {
       throw new Error('Explorer jobs collection is required');
     }
 
-    const bounds = this.timeFilter.getBounds();
+    const bounds = this.getTimeBounds();
 
     // Ensure the search bounds align to the bucketing interval used in the swimlane so
     // that the first and last buckets are complete.
@@ -130,7 +135,7 @@ export class ExplorerService {
     swimlaneContainerWidth: number,
     influencersFilterQuery?: any
   ): Promise<SwimlaneData | undefined> {
-    const timefilterBounds = this.timeFilter.getActiveBounds();
+    const timefilterBounds = this.getTimeBounds();
 
     if (timefilterBounds === undefined) {
       throw new Error('timeRangeSelectorEnabled has to be enabled');
@@ -193,6 +198,12 @@ export class ExplorerService {
     console.log('Explorer view by swimlane data set:', viewBySwimlaneData);
 
     return viewBySwimlaneData;
+  }
+
+  private getTimeBounds(): TimeRangeBounds {
+    return this._customTimeRange !== undefined
+      ? this.timeFilter.calculateBounds(this._customTimeRange)
+      : this.timeFilter.getBounds();
   }
 
   private processOverallResults(

@@ -7,24 +7,30 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { EuiResizeObserver, EuiSpacer } from '@elastic/eui';
 import { combineLatest, from, Observable, of, Subject } from 'rxjs';
-import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { catchError, debounceTime, map, skipWhile, startWith, switchMap } from 'rxjs/operators';
 import { throttle } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
-import { ChartTooltip } from '../../application/components/chart_tooltip';
 import { ExplorerSwimlane } from '../../application/explorer/explorer_swimlane';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { MlStartDependencies } from '../../plugin';
-import { AnomalySwimlaneEmbeddableInput, MlServices } from './anomaly_swimlane_embaddable';
+import {
+  AnomalySwimlaneEmbeddableInput,
+  AnomalySwimlaneEmbeddableOutput,
+  MlServices,
+} from './anomaly_swimlane_embaddable';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+
+const RESIZE_THROTTLE_TIME_MS = 200;
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
   services: [CoreStart, MlStartDependencies, MlServices];
   refresh: Observable<any>;
+  onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
 }
 
 export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
@@ -32,6 +38,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   embeddableInput,
   services,
   refresh,
+  onOutputChange,
 }) => {
   const [{ uiSettings, notifications }, , { explorerService }] = services;
 
@@ -39,7 +46,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [swimlaneType, setSwimlaneType] = useState<string>();
 
-  const chartWidth$ = useMemo(() => new Subject(), []);
+  const chartWidth$ = useMemo(() => new Subject<number>(), []);
 
   const timeBuckets = new TimeBuckets({
     'histogram:maxBars': uiSettings.get('histogram:maxBars'),
@@ -55,14 +62,17 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   useEffect(() => {
     const subscription = combineLatest([
       embeddableInput,
-      chartWidth$,
+      chartWidth$.pipe(skipWhile(v => !v)),
       refresh.pipe(startWith(null)),
     ])
       .pipe(
         debounceTime(500),
-        map(([input]) => input),
-        switchMap(input => {
-          const { jobs, viewBy, swimlaneType: swimlaneTypeInput } = input;
+        switchMap(([input, swimlaneContainerWidth]) => {
+          const { jobs, viewBy, swimlaneType: swimlaneTypeInput, timeRange } = input;
+
+          explorerService.setTimeRange(timeRange);
+
+          onOutputChange({ timeRange });
 
           if (!swimlaneType) {
             setSwimlaneType(swimlaneTypeInput);
@@ -77,7 +87,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             };
           });
 
-          return from(explorerService.loadOverallData(explorerJobs, chartWidth)).pipe(
+          return from(explorerService.loadOverallData(explorerJobs, swimlaneContainerWidth)).pipe(
             switchMap(overallSwimlaneData => {
               const { earliest, latest } = overallSwimlaneData;
 
@@ -85,14 +95,11 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
                 return from(
                   explorerService.loadViewBySwimlane(
                     [],
-                    {
-                      earliest,
-                      latest,
-                    },
+                    { earliest, latest },
                     explorerJobs,
                     viewBy!,
                     5,
-                    chartWidth
+                    swimlaneContainerWidth
                   )
                 ).pipe(
                   map(viewBySwimlaneData => {
@@ -127,8 +134,9 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   }, []);
 
   const onResize = throttle((e: { width: number; height: number }) => {
-    setChartWidth(e.width - 200);
-  }, 200);
+    const labelWidth = 200;
+    setChartWidth(e.width - labelWidth);
+  }, RESIZE_THROTTLE_TIME_MS);
 
   return (
     <EuiResizeObserver onResize={onResize}>
@@ -143,7 +151,6 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
           {chartWidth > 0 && swimlaneData && swimlaneType && (
             <>
               <EuiSpacer size="m" />
-              <ChartTooltip />
               <ExplorerSwimlane
                 chartWidth={chartWidth}
                 timeBuckets={timeBuckets}
