@@ -26,7 +26,8 @@ import {
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns } from '../../../public/services';
 import { mockDataServices } from '../../../public/search/aggs/test_helpers';
-import { createFiltersFromEvent, EventData } from './create_filters_from_event';
+import { createFiltersFromValueClickAction } from './create_filters_from_value_click';
+import { ValueClickTriggerContext } from '../../../../embeddable/public';
 
 const mockField = {
   name: 'bytes',
@@ -37,8 +38,8 @@ const mockField = {
   format: new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
 };
 
-describe('createFiltersFromEvent', () => {
-  let dataPoints: EventData[];
+describe('createFiltersFromValueClick', () => {
+  let dataPoints: ValueClickTriggerContext['data']['data'];
 
   beforeEach(() => {
     dataPoints = [
@@ -86,7 +87,7 @@ describe('createFiltersFromEvent', () => {
 
   test('ignores event when value for rows is not provided', async () => {
     dataPoints[0].table.rows[0]['1-1'] = null;
-    const filters = await createFiltersFromEvent(dataPoints);
+    const filters = await createFiltersFromValueClickAction({ data: dataPoints });
 
     expect(filters.length).toEqual(0);
   });
@@ -95,14 +96,14 @@ describe('createFiltersFromEvent', () => {
     if (dataPoints[0].table.columns[0].meta) {
       dataPoints[0].table.columns[0].meta.type = 'terms';
     }
-    const filters = await createFiltersFromEvent(dataPoints);
+    const filters = await createFiltersFromValueClickAction({ data: dataPoints });
 
     expect(filters.length).toEqual(1);
     expect(filters[0].query.match_phrase.bytes).toEqual('2048');
   });
 
   test('handles an event when aggregations type is not terms', async () => {
-    const filters = await createFiltersFromEvent(dataPoints);
+    const filters = await createFiltersFromValueClickAction({ data: dataPoints });
 
     expect(filters.length).toEqual(1);
 
