@@ -560,7 +560,6 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       const editor = await find.byCssSelector(aceEditorCssSelector);
       await editor.click();
       const existingText = await editor.getVisibleText();
-      log.debug(`\n\n${existingText}\n${existingText.length}\n`);
       for (let i = 0; i < existingText.length; i++) {
         await browser.pressKeys(browser.keys.BACK_SPACE);
       }
