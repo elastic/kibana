@@ -18,7 +18,7 @@
  */
 
 import { IUiSettingsClient } from '../../../../../core/public';
-import { ISearchStart } from '../types';
+import { ISearchStartLegacy } from '../types';
 
 export type SearchRequest = any;
 export type SearchResponse = any;
@@ -29,7 +29,7 @@ export interface FetchOptions {
 }
 
 export interface FetchHandlers {
-  searchService: ISearchStart;
+  legacySearchService: ISearchStartLegacy;
   config: IUiSettingsClient;
   esShardTimeout: number;
 }
