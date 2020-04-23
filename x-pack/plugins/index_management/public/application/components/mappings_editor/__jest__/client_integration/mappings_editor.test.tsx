@@ -7,11 +7,16 @@ import { act } from 'react-dom/test-utils';
 
 import { componentHelpers, MappingsEditorTestBed, nextTick, getRandomString } from './helpers';
 
-const { setup, expectDataUpdatedFactory } = componentHelpers.mappingsEditor;
+const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
 const onUpdateHandler = jest.fn();
-const expectDataUpdated = expectDataUpdatedFactory(onUpdateHandler);
+const getDataForwarded = getDataForwardedFactory(onUpdateHandler);
 
 describe('<MappingsEditor />', () => {
+  /**
+   * Variable to store the mappings data forwarded to the consumer component
+   */
+  let data: any;
+
   afterEach(() => {
     onUpdateHandler.mockReset();
   });
@@ -296,8 +301,9 @@ describe('<MappingsEditor />', () => {
 
       await act(async () => {
         await addField(newField.name, newField.type);
+        ({ data } = await getDataForwarded());
       });
-      await expectDataUpdated(updatedMappings);
+      expect(data).toEqual(updatedMappings);
 
       /**
        * Dynamic templates
@@ -316,8 +322,9 @@ describe('<MappingsEditor />', () => {
         await updateJsonEditor('dynamicTemplatesEditor', updatedTemplatesValue);
         await nextTick();
         component.update();
+        ({ data } = await getDataForwarded());
       });
-      await expectDataUpdated(updatedMappings);
+      expect(data).toEqual(updatedMappings);
 
       /**
        * Advanced settings
@@ -340,7 +347,8 @@ describe('<MappingsEditor />', () => {
         numeric_detection: undefined,
       };
 
-      await expectDataUpdated(updatedMappings);
+      ({ data } = await getDataForwarded());
+      expect(data).toEqual(updatedMappings);
     });
   });
 });

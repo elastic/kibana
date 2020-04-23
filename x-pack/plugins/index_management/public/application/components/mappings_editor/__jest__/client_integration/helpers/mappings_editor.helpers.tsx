@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
 import { registerTestBed, TestBed, nextTick } from '../../../../../../../../../test_utils';
@@ -199,6 +198,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   const getToggleValue = (testSubject: TestSubjects): boolean =>
     find(testSubject).props()['aria-checked'];
 
+  const getCheckboxValue = (testSubject: TestSubjects): boolean =>
+    find(testSubject).props().checked;
+
   return {
     selectTab,
     getFieldAt,
@@ -211,6 +213,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     getJsonEditorValue,
     getComboBoxValue,
     getToggleValue,
+    getCheckboxValue,
   };
 };
 
@@ -228,12 +231,12 @@ export const setup = async (props: any = { onUpdate() {} }): Promise<MappingsEdi
   };
 };
 
-export const expectDataUpdatedFactory = (onUpdateHandler: jest.MockedFunction<any>) => {
+export const getDataForwardedFactory = (onUpdateHandler: jest.MockedFunction<any>) => {
   /**
    * Helper to access the latest data sent to the onUpdate handler back to the consumer of the <MappingsEditor />.
    * Read the latest call with its argument passed and build the mappings object from it.
    */
-  const getDataForwarded = async () => {
+  return async () => {
     const mockCalls = onUpdateHandler.mock.calls;
 
     if (mockCalls.length === 0) {
@@ -245,26 +248,14 @@ export const expectDataUpdatedFactory = (onUpdateHandler: jest.MockedFunction<an
     const [arg] = mockCalls[mockCalls.length - 1];
     const { isValid, validate, getData } = arg;
 
-    let isMappingsValid: boolean = false;
-    let data: any;
-
-    await act(async () => {
-      isMappingsValid = isValid === undefined ? await validate() : isValid;
-      data = getData(isMappingsValid);
-    });
+    const isMappingsValid = isValid === undefined ? await validate() : isValid;
+    const data = getData(isMappingsValid);
 
     return {
       isValid: isMappingsValid,
       data,
     };
   };
-
-  const expectDataUpdated = async (expected: any) => {
-    const { data } = await getDataForwarded();
-    expect(data).toEqual(expected);
-  };
-
-  return expectDataUpdated;
 };
 
 export type MappingsEditorTestBed = TestBed<TestSubjects> & {
@@ -305,4 +296,9 @@ export type TestSubjects =
   | 'mappingsEditorFieldEdit.fieldPath'
   | 'mappingsEditorFieldEdit.advancedSettings'
   | 'mappingsEditorFieldEdit.toggleAdvancedSetting'
-  | 'indexParameter.formRowToggle';
+  | 'indexParameter.formRowToggle'
+  | 'analyzerParameters.indexAnalyzer.select'
+  | 'analyzerParameters.searchAnalyzer'
+  | 'analyzerParameters.searchAnalyzer.select'
+  | 'analyzerParameters.searchQuoteAnalyzer.select'
+  | 'analyzerParameters.useSameAnalyzerForSearchCheckBox.input';

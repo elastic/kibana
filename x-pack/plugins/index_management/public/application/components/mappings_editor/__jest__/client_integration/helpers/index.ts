@@ -6,7 +6,7 @@
 import {
   setup as mappingsEditorSetup,
   MappingsEditorTestBed,
-  expectDataUpdatedFactory,
+  getDataForwardedFactory,
 } from './mappings_editor.helpers';
 
 export {
@@ -17,7 +17,7 @@ export {
 } from '../../../../../../../../../test_utils';
 
 export const componentHelpers = {
-  mappingsEditor: { setup: mappingsEditorSetup, expectDataUpdatedFactory },
+  mappingsEditor: { setup: mappingsEditorSetup, getDataForwardedFactory },
 };
 
 export { MappingsEditorTestBed };
