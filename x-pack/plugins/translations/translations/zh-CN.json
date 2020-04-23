@@ -12398,7 +12398,6 @@
     "xpack.reporting.shareContextMenu.csvReportsButtonLabel": "CSV 报告",
     "xpack.reporting.shareContextMenu.pdfReportsButtonLabel": "PDF 报告",
     "xpack.reporting.shareContextMenu.pngReportsButtonLabel": "PNG 报告",
-    "xpack.rollupJobs.appName": "汇总/打包作业",
     "xpack.rollupJobs.appTitle": "汇总/打包作业",
     "xpack.rollupJobs.breadcrumbsTitle": "汇总/打包作业",
     "xpack.rollupJobs.create.backButton.label": "上一步",
