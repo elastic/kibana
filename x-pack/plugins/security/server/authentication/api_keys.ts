@@ -277,17 +277,8 @@ export class APIKeys {
   }
 
   private doesErrorIndicateAPIKeysAreDisabled(e: Record<string, any>) {
-    const responseText = e.response ?? '{}';
-    try {
-      const response = JSON.parse(responseText);
-      const disabledFeature = response?.error?.['disabled.feature'] ?? '';
-      return disabledFeature === 'api_keys';
-    } catch (error) {
-      this.logger.debug(`Error parsing exception response text: ${error.message}`);
-      // This is not part of a critical path. If we can't make a determiniation here,
-      // then assume api keys are enabled.
-    }
-    return false;
+    const disabledFeature = e.body?.error?.['disabled.feature'];
+    return disabledFeature === 'api_keys';
   }
 
   private getGrantParams(authorizationHeader: HTTPAuthorizationHeader): GrantAPIKeyParams {

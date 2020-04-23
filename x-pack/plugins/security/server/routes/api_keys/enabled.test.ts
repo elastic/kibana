@@ -102,11 +102,9 @@ describe('API keys enabled', () => {
     enabledApiKeysTest('returns false if API Keys are disabled', {
       apiResponse: async () => {
         const error = new Error();
-        (error as any).response = JSON.stringify({
-          error: {
-            'disabled.feature': 'api_keys',
-          },
-        });
+        (error as any).body = {
+          error: { 'disabled.feature': 'api_keys' },
+        };
         throw error;
       },
       asserts: {

@@ -16,7 +16,7 @@ import { APIKeys } from '../../authentication/api_keys';
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;
   callAsInternalUserResponses?: Array<() => Promise<unknown>>;
-  callAsCurrrentUserResponses?: Array<() => Promise<unknown>>;
+  callAsCurrentUserResponses?: Array<() => Promise<unknown>>;
   asserts: {
     statusCode: number;
     result?: Record<string, any>;
@@ -31,7 +31,7 @@ describe('Check API keys privileges', () => {
     {
       licenseCheckResult = { state: 'valid' },
       callAsInternalUserResponses = [],
-      callAsCurrrentUserResponses = [],
+      callAsCurrentUserResponses = [],
       asserts,
     }: TestOptions
   ) => {
@@ -50,7 +50,7 @@ describe('Check API keys privileges', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
-      for (const apiResponse of callAsCurrrentUserResponses) {
+      for (const apiResponse of callAsCurrentUserResponses) {
         mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
       }
       for (const apiResponse of callAsInternalUserResponses) {
@@ -109,7 +109,7 @@ describe('Check API keys privileges', () => {
 
     const error = Boom.notAcceptable('test not acceptable message');
     getPrivilegesTest('returns error from cluster client', {
-      callAsCurrrentUserResponses: [
+      callAsCurrentUserResponses: [
         async () => {
           throw error;
         },
@@ -133,7 +133,7 @@ describe('Check API keys privileges', () => {
 
   describe('success', () => {
     getPrivilegesTest('returns areApiKeysEnabled and isAdmin', {
-      callAsCurrrentUserResponses: [
+      callAsCurrentUserResponses: [
         async () => ({
           username: 'elastic',
           has_all_requested: true,
@@ -175,7 +175,7 @@ describe('Check API keys privileges', () => {
     getPrivilegesTest(
       'returns areApiKeysEnabled=false when API Keys are disabled in Elasticsearch',
       {
-        callAsCurrrentUserResponses: [
+        callAsCurrentUserResponses: [
           async () => ({
             username: 'elastic',
             has_all_requested: true,
@@ -187,11 +187,11 @@ describe('Check API keys privileges', () => {
         callAsInternalUserResponses: [
           async () => {
             const error = new Error();
-            (error as any).response = JSON.stringify({
+            (error as any).body = {
               error: {
                 'disabled.feature': 'api_keys',
               },
-            });
+            };
             throw error;
           },
         ],
@@ -212,7 +212,7 @@ describe('Check API keys privileges', () => {
     );
 
     getPrivilegesTest('returns isAdmin=false when user has insufficient privileges', {
-      callAsCurrrentUserResponses: [
+      callAsCurrentUserResponses: [
         async () => ({
           username: 'elastic',
           has_all_requested: true,
@@ -238,7 +238,7 @@ describe('Check API keys privileges', () => {
     });
 
     getPrivilegesTest('returns canManage=true when user can manage their own API Keys', {
-      callAsCurrrentUserResponses: [
+      callAsCurrentUserResponses: [
         async () => ({
           username: 'elastic',
           has_all_requested: true,

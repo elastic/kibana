@@ -8,11 +8,7 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
-export function defineEnabledApiKeysRoutes({
-  router,
-  clusterClient,
-  authc,
-}: RouteDefinitionParams) {
+export function defineEnabledApiKeysRoutes({ router, authc }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/api_key/_enabled',

@@ -26,7 +26,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
-import _ from 'lodash';
 import { NotificationsStart } from 'src/core/public';
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
@@ -511,7 +510,7 @@ export class APIKeysGridPage extends Component<Props, State> {
       this.props.notifications.toasts.addDanger(
         i18n.translate('xpack.security.management.apiKeys.table.fetchingApiKeysErrorMessage', {
           defaultMessage: 'Error checking privileges: {message}',
-          values: { message: _.get(e, 'body.message', '') },
+          values: { message: e.body?.message ?? '' },
         })
       );
     }

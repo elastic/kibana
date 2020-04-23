@@ -10,7 +10,7 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
-export function defineGetApiKeysRoutes({ router, clusterClient, authc }: RouteDefinitionParams) {
+export function defineGetApiKeysRoutes({ router, clusterClient }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/api_key',

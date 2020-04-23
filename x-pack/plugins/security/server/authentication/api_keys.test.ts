@@ -54,11 +54,9 @@ describe('API Keys', () => {
     it('returns false when the exception metadata indicates api keys are disabled', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       const error = new Error();
-      (error as any).response = JSON.stringify({
-        error: {
-          ['disabled.feature']: 'api_keys',
-        },
-      });
+      (error as any).body = {
+        error: { 'disabled.feature': 'api_keys' },
+      };
       mockClusterClient.callAsInternalUser.mockRejectedValue(error);
       const result = await apiKeys.areAPIKeysEnabled();
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
@@ -76,21 +74,19 @@ describe('API Keys', () => {
     it('throws the original error when exception metadata does not indicate that api keys are disabled', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       const error = new Error();
-      (error as any).response = JSON.stringify({
-        error: {
-          ['disabled.feature']: 'something_else',
-        },
-      });
+      (error as any).body = {
+        error: { 'disabled.feature': 'something_else' },
+      };
 
       mockClusterClient.callAsInternalUser.mockRejectedValue(error);
       expect(apiKeys.areAPIKeysEnabled()).rejects.toThrowError(error);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
     });
 
-    it('throws the original error when exception metadata cannot be parsed', async () => {
+    it('throws the original error when exception metadata does not contain `disabled.feature`', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       const error = new Error();
-      (error as any).response = '{ a string of invalid JSON';
+      (error as any).body = {};
 
       mockClusterClient.callAsInternalUser.mockRejectedValue(error);
       expect(apiKeys.areAPIKeysEnabled()).rejects.toThrowError(error);
