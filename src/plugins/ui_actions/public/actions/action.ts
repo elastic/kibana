@@ -63,9 +63,11 @@ export interface Action<Context = {}, T = ActionType> {
   isCompatible(context: Context): Promise<boolean>;
 
   /**
-   * If this returns something truthy, this is used in addition to the `execute` method when clicked.
+   * If this returns something truthy, this will be used as [href] attribute on a link if possible (e.g. in context menu item)
+   * to support right click -> open in a new tab behavior.
+   * For regular click navigation is prevented and `execute()` takes control.
    */
-  getHref?(context: Context): string | undefined;
+  getHref?(context: Context): Promise<string | undefined>;
 
   /**
    * Executes the action.

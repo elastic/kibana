@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MiddlewareFactory, PolicyListState, GetDatasourcesResponse } from '../../types';
+import { GetPolicyListResponse, ImmutableMiddlewareFactory, PolicyListState } from '../../types';
 import { sendGetEndpointSpecificDatasources } from './services/ingest';
 import { isOnPolicyListPage, urlSearchParams } from './selectors';
 
-export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = coreStart => {
+export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListState> = coreStart => {
   const http = coreStart.http;
 
   return ({ getState, dispatch }) => next => async action => {
@@ -18,7 +18,7 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
 
     if (action.type === 'userChangedUrl' && isOnPolicyListPage(state)) {
       const { page_index: pageIndex, page_size: pageSize } = urlSearchParams(state);
-      let response: GetDatasourcesResponse;
+      let response: GetPolicyListResponse;
 
       try {
         response = await sendGetEndpointSpecificDatasources(http, {

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiTitleSize } from '@elastic/eui';
 import { ScaleType, Position, TickFormatter } from '@elastic/charts';
 import { ActionCreator } from 'redux';
-import { ESQuery } from '../../../common/typed_json';
+import { ESQuery } from '../../../../../../plugins/siem/common/typed_json';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 import { InputsModelId } from '../../store/inputs/constants';
 import { HistogramType } from '../../graphql/types';
@@ -34,6 +35,7 @@ export interface MatrixHisrogramConfigs {
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
   title: string | GetTitle;
+  titleSize?: EuiTitleSize;
 }
 
 interface MatrixHistogramBasicProps {
@@ -57,14 +59,22 @@ interface MatrixHistogramBasicProps {
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
   title?: string | GetTitle;
+  titleSize?: EuiTitleSize;
 }
 
 export interface MatrixHistogramQueryProps {
   endDate: number;
   errorMessage: string;
   filterQuery?: ESQuery | string | undefined;
+  setAbsoluteRangeDatePicker?: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
+  setAbsoluteRangeDatePickerTarget?: InputsModelId;
   stackByField: string;
   startDate: number;
+  indexToAdd?: string[] | null;
   isInspected: boolean;
   histogramType: HistogramType;
 }
@@ -73,6 +83,7 @@ export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
   scaleType?: ScaleType;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
+  showSpacer?: boolean;
   legendPosition?: Position;
 }
 

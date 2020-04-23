@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createBrowserHistory } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ApolloProvider } from 'react-apollo';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { BehaviorSubject } from 'rxjs';
-import { pluck } from 'rxjs/operators';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 
 // TODO use theme provided from parentApp when kibana supports it
@@ -18,9 +14,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EuiThemeProvider } from '../../../observability/public/typings/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
-import { createStore } from '../store';
 import { ApolloClientContext } from '../utils/apollo_context';
-import { ReduxStateContextProvider } from '../utils/redux_context';
 import { HistoryContext } from '../utils/history_context';
 import {
   useUiSetting$,
@@ -30,6 +24,7 @@ import { AppRouter } from '../routers';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 import '../index.scss';
+import { NavigationWarningPromptProvider } from '../utils/navigation_warning_prompt';
 
 export const CONTAINER_CLASSNAME = 'infra-container-element';
 
@@ -41,13 +36,7 @@ export async function startApp(
   Router: AppRouter,
   triggersActionsUI: TriggersAndActionsUIPublicPluginSetup
 ) {
-  const { element, appBasePath } = params;
-  const history = createBrowserHistory({ basename: appBasePath });
-  const libs$ = new BehaviorSubject(libs);
-  const store = createStore({
-    apolloClient: libs$.pipe(pluck('apolloClient')),
-    observableApi: libs$.pipe(pluck('observableApi')),
-  });
+  const { element, history } = params;
 
   const InfraPluginRoot: React.FunctionComponent = () => {
     const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
@@ -56,19 +45,17 @@ export async function startApp(
       <core.i18n.Context>
         <EuiErrorBoundary>
           <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
-            <ReduxStoreProvider store={store}>
-              <ReduxStateContextProvider>
-                <ApolloProvider client={libs.apolloClient}>
-                  <ApolloClientContext.Provider value={libs.apolloClient}>
-                    <EuiThemeProvider darkMode={darkMode}>
-                      <HistoryContext.Provider value={history}>
-                        <Router history={history} />
-                      </HistoryContext.Provider>
-                    </EuiThemeProvider>
-                  </ApolloClientContext.Provider>
-                </ApolloProvider>
-              </ReduxStateContextProvider>
-            </ReduxStoreProvider>
+            <ApolloProvider client={libs.apolloClient}>
+              <ApolloClientContext.Provider value={libs.apolloClient}>
+                <EuiThemeProvider darkMode={darkMode}>
+                  <HistoryContext.Provider value={history}>
+                    <NavigationWarningPromptProvider>
+                      <Router history={history} />
+                    </NavigationWarningPromptProvider>
+                  </HistoryContext.Provider>
+                </EuiThemeProvider>
+              </ApolloClientContext.Provider>
+            </ApolloProvider>
           </TriggersActionsProvider>
         </EuiErrorBoundary>
       </core.i18n.Context>

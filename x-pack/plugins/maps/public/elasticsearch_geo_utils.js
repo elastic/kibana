@@ -18,6 +18,7 @@ import {
 } from '../common/constants';
 import { getEsSpatialRelationLabel } from '../common/i18n_getters';
 import { SPATIAL_FILTER_TYPE } from './kibana_services';
+import turfCircle from '@turf/circle';
 
 function ensureGeoField(type) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
@@ -64,7 +65,7 @@ function ensureGeometryType(type, expectedTypes) {
  * @param {string} geoFieldType Geometry field type ["geo_point", "geo_shape"]
  * @returns {number}
  */
-export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
+export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType, epochMillisFields) {
   const features = [];
   const tmpGeometriesAccumulator = [];
 
@@ -78,6 +79,16 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
       geoPointToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
     } else {
       geoShapeToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
+    }
+
+    // There is a bug in Elasticsearch API where epoch_millis are returned as a string instead of a number
+    // https://github.com/elastic/elasticsearch/issues/50622
+    // Convert these field values to integers.
+    for (let i = 0; i < epochMillisFields.length; i++) {
+      const fieldName = epochMillisFields[i];
+      if (typeof properties[fieldName] === 'string') {
+        properties[fieldName] = parseInt(properties[fieldName]);
+      }
     }
 
     // don't include geometry field value in properties
@@ -320,7 +331,7 @@ export function createDistanceFilterWithMeta({
           values: {
             distanceKm,
             geoFieldName,
-            pointLabel: point.join(','),
+            pointLabel: point.join(', '),
           },
         }),
   };
@@ -440,4 +451,41 @@ export function clamp(val, min, max) {
   } else {
     return val;
   }
+}
+
+export function extractFeaturesFromFilters(filters) {
+  const features = [];
+  filters
+    .filter(filter => {
+      return filter.meta.key && filter.meta.type === SPATIAL_FILTER_TYPE;
+    })
+    .forEach(filter => {
+      let geometry;
+      if (filter.geo_distance && filter.geo_distance[filter.meta.key]) {
+        const distanceSplit = filter.geo_distance.distance.split('km');
+        const distance = parseFloat(distanceSplit[0]);
+        const circleFeature = turfCircle(filter.geo_distance[filter.meta.key], distance);
+        geometry = circleFeature.geometry;
+      } else if (
+        filter.geo_shape &&
+        filter.geo_shape[filter.meta.key] &&
+        filter.geo_shape[filter.meta.key].shape
+      ) {
+        geometry = filter.geo_shape[filter.meta.key].shape;
+      } else {
+        // do not know how to convert spatial filter to geometry
+        // this includes pre-indexed shapes
+        return;
+      }
+
+      features.push({
+        type: 'Feature',
+        geometry,
+        properties: {
+          filter: filter.meta.alias,
+        },
+      });
+    });
+
+  return features;
 }

@@ -12,9 +12,13 @@ import routeData from 'react-router';
 import { InsertTimelinePopoverComponent } from './';
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => ({
-  useDispatch: () => mockDispatch,
-}));
+jest.mock('react-redux', () => {
+  const reactRedux = jest.requireActual('react-redux');
+  return {
+    ...reactRedux,
+    useDispatch: () => mockDispatch,
+  };
+});
 const mockLocation = {
   pathname: '/apath',
   hash: '',
@@ -26,6 +30,7 @@ const mockLocationWithState = {
   state: {
     insertTimeline: {
       timelineId: 'timeline-id',
+      timelineSavedObjectId: '34578-3497-5893-47589-34759',
       timelineTitle: 'Timeline title',
     },
   },
@@ -49,7 +54,7 @@ describe('Insert timeline popover ', () => {
       payload: { id: 'timeline-id', show: false },
       type: 'x-pack/siem/local/timeline/SHOW_TIMELINE',
     });
-    expect(onTimelineChange).toBeCalledWith('Timeline title', 'timeline-id');
+    expect(onTimelineChange).toBeCalledWith('Timeline title', '34578-3497-5893-47589-34759');
   });
   it('should do nothing when router state', () => {
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);

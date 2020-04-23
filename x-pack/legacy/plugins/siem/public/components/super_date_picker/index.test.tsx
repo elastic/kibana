@@ -8,6 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
+import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../plugins/siem/common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 import { apolloClientObservable, mockGlobalState } from '../../mock';
 import { createUseUiSetting$Mock } from '../../mock/kibana_react';
@@ -15,7 +16,6 @@ import { createStore, State } from '../../store';
 
 import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';
-import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../common/constants';
 
 jest.mock('../../lib/kibana');
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
@@ -118,8 +118,8 @@ describe('SIEM Super Date Picker', () => {
         expect(store.getState().inputs.global.timerange.kind).toBe('relative');
       });
 
-      test('Make Sure it is last 15 minutes date', () => {
-        expect(store.getState().inputs.global.timerange.fromStr).toBe('now-15m');
+      test('Make Sure it is last 24 hours date', () => {
+        expect(store.getState().inputs.global.timerange.fromStr).toBe('now-24h');
         expect(store.getState().inputs.global.timerange.toStr).toBe('now');
       });
 
@@ -180,7 +180,7 @@ describe('SIEM Super Date Picker', () => {
         ).toBe('Today');
       });
 
-      test('Today and Last 15 minutes are in Recently used date ranges', () => {
+      test('Today and Last 24 hours are in Recently used date ranges', () => {
         wrapper
           .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
@@ -198,7 +198,7 @@ describe('SIEM Super Date Picker', () => {
             .find('div.euiQuickSelectPopover__section')
             .at(1)
             .text()
-        ).toBe('Last 15 minutesToday');
+        ).toBe('Last 24 hoursToday');
       });
 
       test('Make sure that it does not add any duplicate if you click again on today', () => {

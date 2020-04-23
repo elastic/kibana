@@ -11,7 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
-} from 'src/core/server';
+} from 'kibana/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -38,7 +38,9 @@ import {
 } from './routes';
 
 import { IngestManagerConfigType } from '../common';
-import { appContextService } from './services';
+import { appContextService, ESIndexPatternSavedObjectService } from './services';
+import { ESIndexPatternService, AgentService } from './services';
+import { getAgentStatusById } from './services/agents';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -46,12 +48,16 @@ export interface IngestManagerSetupDeps {
   features?: FeaturesPluginSetup;
 }
 
+export type IngestManagerStartDeps = object;
+
 export interface IngestManagerAppContext {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
 }
+
+export type IngestManagerSetupContract = void;
 
 const allSavedObjectTypes = [
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -63,7 +69,22 @@ const allSavedObjectTypes = [
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 ];
 
-export class IngestManagerPlugin implements Plugin {
+/**
+ * Describes public IngestManager plugin contract returned at the `startup` stage.
+ */
+export interface IngestManagerStartContract {
+  esIndexPatternService: ESIndexPatternService;
+  agentService: AgentService;
+}
+
+export class IngestManagerPlugin
+  implements
+    Plugin<
+      IngestManagerSetupContract,
+      IngestManagerStartContract,
+      IngestManagerSetupDeps,
+      IngestManagerStartDeps
+    > {
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
 
@@ -144,6 +165,12 @@ export class IngestManagerPlugin implements Plugin {
       config$: this.config$,
       savedObjects: core.savedObjects,
     });
+    return {
+      esIndexPatternService: new ESIndexPatternSavedObjectService(),
+      agentService: {
+        getAgentStatusById,
+      },
+    };
   }
 
   public async stop() {

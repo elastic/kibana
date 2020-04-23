@@ -36,8 +36,8 @@ export const configSchema = schema.object({
   config: schema.string({ defaultValue: getConfigPath() }),
   banner: schema.boolean({ defaultValue: true }),
   url: schema.conditional(
-    schema.contextRef('dev'),
-    schema.literal(true),
+    schema.contextRef('dist'),
+    schema.literal(false), // Point to staging if it's not a distributable release
     schema.string({
       defaultValue: `https://telemetry-staging.elastic.co/xpack/${ENDPOINT_VERSION}/send`,
     }),
@@ -46,8 +46,8 @@ export const configSchema = schema.object({
     })
   ),
   optInStatusUrl: schema.conditional(
-    schema.contextRef('dev'),
-    schema.literal(true),
+    schema.contextRef('dist'),
+    schema.literal(false), // Point to staging if it's not a distributable release
     schema.string({
       defaultValue: `https://telemetry-staging.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`,
     }),

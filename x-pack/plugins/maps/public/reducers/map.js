@@ -46,8 +46,13 @@ import {
   HIDE_LAYER_CONTROL,
   HIDE_VIEW_CONTROL,
   SET_WAITING_FOR_READY_HIDDEN_LAYERS,
+  SET_MAP_SETTINGS,
+  ROLLBACK_MAP_SETTINGS,
+  TRACK_MAP_SETTINGS,
+  UPDATE_MAP_SETTING,
 } from '../actions/map_actions';
 
+import { getDefaultMapSettings } from './default_map_settings';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
@@ -57,8 +62,13 @@ const updateLayerInList = (state, layerId, attribute, newValue) => {
   if (!layerId) {
     return state;
   }
+
   const { layerList } = state;
   const layerIdx = getLayerIndex(layerList, layerId);
+  if (layerIdx === -1) {
+    return state;
+  }
+
   const updatedLayer = {
     ...layerList[layerIdx],
     // Update layer w/ new value. If no value provided, toggle boolean value
@@ -119,6 +129,8 @@ const INITIAL_STATE = {
   __transientLayerId: null,
   layerList: [],
   waitingForMapReadyLayerList: [],
+  settings: getDefaultMapSettings(),
+  __rollbackSettings: null,
 };
 
 export function map(state = INITIAL_STATE, action) {
@@ -173,6 +185,32 @@ export function map(state = INITIAL_STATE, action) {
       return {
         ...state,
         goto: null,
+      };
+    case SET_MAP_SETTINGS:
+      return {
+        ...state,
+        settings: { ...getDefaultMapSettings(), ...action.settings },
+      };
+    case ROLLBACK_MAP_SETTINGS:
+      return state.__rollbackSettings
+        ? {
+            ...state,
+            settings: { ...state.__rollbackSettings },
+            __rollbackSettings: null,
+          }
+        : state;
+    case TRACK_MAP_SETTINGS:
+      return {
+        ...state,
+        __rollbackSettings: state.settings,
+      };
+    case UPDATE_MAP_SETTING:
+      return {
+        ...state,
+        settings: {
+          ...(state.settings ? state.settings : {}),
+          [action.settingKey]: action.settingValue,
+        },
       };
     case SET_LAYER_ERROR_STATUS:
       const { layerList } = state;
