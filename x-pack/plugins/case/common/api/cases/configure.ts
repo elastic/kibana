@@ -11,7 +11,7 @@ import { UserRT } from '../user';
 
 /*
  * This types below are related to the service now configuration
- * mapping between our case and service-now
+ * mapping between our case and [service-now, jira]
  *
  */
 
@@ -32,6 +32,7 @@ const ThirdPartyFieldRT = rt.union([
   rt.literal('description'),
   rt.literal('not_mapped'),
   rt.literal('short_description'),
+  rt.literal('summary'),
 ]);
 
 export const CasesConfigurationMapsRT = rt.type({

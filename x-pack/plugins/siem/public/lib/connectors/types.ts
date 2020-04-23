@@ -10,8 +10,28 @@
 import { ActionType } from '../../../../triggers_actions_ui/public';
 import { ExternalIncidentServiceConfiguration } from '../../../../actions/server/builtin_action_types/case/types';
 
-export interface Connector extends ActionType {
+import {
+  ServiceNowFieldsType,
+  JiraFieldsType,
+} from '../../../../../../plugins/case/common/api/connectors';
+
+import {
+  ActionType as ThirdPartySupportedActions,
+  CaseField,
+} from '../../../../../../plugins/case/common/api';
+
+export type AllThirdPartyFields = ServiceNowFieldsType | JiraFieldsType;
+
+export interface ThirdPartyField {
+  label: string;
+  validSourceFields: CaseField[];
+  defaultSourceField: CaseField;
+  defaultActionType: ThirdPartySupportedActions;
+}
+
+export interface ConnectorConfiguration<T extends string> extends ActionType {
   logo: string;
+  fields: Record<T, ThirdPartyField>;
 }
 
 export interface ActionConnector {

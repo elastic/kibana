@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Connector } from '../types';
+import { ConnectorConfiguration, JiraFieldsType } from './types';
 
 import { JIRA_TITLE } from './translations';
 import logo from './logo.svg';
 
-export const connector: Connector = {
+export const connector: ConnectorConfiguration<JiraFieldsType> = {
   id: '.jira',
   name: JIRA_TITLE,
   logo,
@@ -17,4 +17,24 @@ export const connector: Connector = {
   enabledInConfig: true,
   enabledInLicense: true,
   minimumLicenseRequired: 'platinum',
+  fields: {
+    summary: {
+      label: 'Summary',
+      validSourceFields: ['title', 'description'],
+      defaultSourceField: 'title',
+      defaultActionType: 'overwrite',
+    },
+    description: {
+      label: 'Description',
+      validSourceFields: ['title', 'description'],
+      defaultSourceField: 'description',
+      defaultActionType: 'overwrite',
+    },
+    comments: {
+      label: 'Comments',
+      validSourceFields: ['comments'],
+      defaultSourceField: 'comments',
+      defaultActionType: 'append',
+    },
+  },
 };
