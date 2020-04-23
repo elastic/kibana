@@ -108,7 +108,11 @@ describe('Access agreement view routes', () => {
           providers: {
             basic: { basic1: { order: 0 } },
             saml: {
-              saml1: { order: 1, realm: 'realm1', accessAgreement: 'Some access agreement' },
+              saml1: {
+                order: 1,
+                realm: 'realm1',
+                accessAgreement: { message: 'Some access agreement' },
+              },
             },
           },
         },

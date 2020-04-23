@@ -30,7 +30,7 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     showInSelector: schema.boolean({ defaultValue: true }),
     order: schema.number({ min: 0 }),
     description: schema.maybe(schema.string()),
-    accessAgreement: schema.maybe(schema.string()),
+    accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
     ...overrides,
   };
 }

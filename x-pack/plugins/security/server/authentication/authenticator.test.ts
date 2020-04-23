@@ -1116,7 +1116,9 @@ describe('Authenticator', () => {
       const mockUser = mockAuthenticatedUser();
       beforeEach(() => {
         mockOptions = getMockOptions({
-          providers: { basic: { basic1: { order: 0, accessAgreement: 'some notice' } } },
+          providers: {
+            basic: { basic1: { order: 0, accessAgreement: { message: 'some notice' } } },
+          },
         });
         mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
 

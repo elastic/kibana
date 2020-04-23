@@ -33,7 +33,7 @@ export function defineAccessAgreementRoutes({
           (session &&
             (config.authc.providers as Record<string, any>)[session.provider.type]?.[
               session.provider.name
-            ]?.accessAgreement) ||
+            ]?.accessAgreement?.message) ||
           '';
 
         return response.ok({ body: { accessAgreement } });
