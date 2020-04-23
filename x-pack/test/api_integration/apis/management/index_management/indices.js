@@ -193,10 +193,10 @@ export default function({ getService }) {
           'size',
           'isFrozen',
           'aliases',
-          'ilm', // data enricher
-          'isRollupIndex', // data enricher
           // Cloud disables CCR, so wouldn't expect follower indices.
           'isFollowerIndex', // data enricher
+          'ilm', // data enricher
+          'isRollupIndex', // data enricher
         ];
         expect(Object.keys(body[0])).to.eql(expectedKeys);
       });
@@ -219,10 +219,10 @@ export default function({ getService }) {
             'size',
             'isFrozen',
             'aliases',
-            'ilm', // data enricher
-            'isRollupIndex', // data enricher
             // Cloud disables CCR, so wouldn't expect follower indices.
             'isFollowerIndex', // data enricher
+            'ilm', // data enricher
+            'isRollupIndex', // data enricher
           ];
           expect(Object.keys(body[0])).to.eql(expectedKeys);
           expect(body.length > 1).to.be(true); // to contrast it with the next test
