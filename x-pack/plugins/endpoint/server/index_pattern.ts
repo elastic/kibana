@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger, LoggerFactory, RequestHandlerContext } from 'kibana/server';
-import { ESIndexPatternService } from '../../ingest_manager/server';
 import { EndpointAppConstants } from '../common/types';
+import { ESIndexPatternService } from '../../ingest_manager/server';
 
 export interface IndexPatternRetriever {
   getIndexPattern(ctx: RequestHandlerContext, datasetPath: string): Promise<string>;

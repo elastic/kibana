@@ -15,6 +15,7 @@ import { flattenCaseSavedObject, wrapError, escapeHatch } from '../utils';
 import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
+import { CASE_DETAILS_URL } from '../../../../common/constants';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
@@ -24,7 +25,7 @@ export function initPushCaseUserActionApi({
 }: RouteDeps) {
   router.post(
     {
-      path: '/api/cases/{case_id}/_push',
+      path: `${CASE_DETAILS_URL}/_push`,
       validate: {
         params: schema.object({
           case_id: schema.string(),
