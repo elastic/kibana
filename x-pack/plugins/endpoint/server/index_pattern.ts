@@ -5,7 +5,7 @@
  */
 import { Logger, LoggerFactory, RequestHandlerContext } from 'kibana/server';
 import { EndpointAppConstants } from '../common/types';
-import { ESIndexPatternService } from '../../ingest_manager/common/types';
+import { ESIndexPatternService } from '../../ingest_manager/server';
 
 export interface IndexPatternRetriever {
   getIndexPattern(ctx: RequestHandlerContext, datasetPath: string): Promise<string>;
