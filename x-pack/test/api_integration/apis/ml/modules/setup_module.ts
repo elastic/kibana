@@ -6,10 +6,10 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { JOB_STATE, DATAFEED_STATE } from '../../../../plugins/ml/common/constants/states';
-import { USER } from '../../../functional/services/machine_learning/security_common';
+import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/constants/states';
+import { USER } from '../../../../functional/services/machine_learning/security_common';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
