@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { USER } from '../../../functional/services/machine_learning/security_common';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { USER } from '../../../../functional/services/machine_learning/security_common';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

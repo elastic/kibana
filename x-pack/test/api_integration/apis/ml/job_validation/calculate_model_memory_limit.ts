@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { USER } from '../../../functional/services/machine_learning/security_common';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { USER } from '../../../../functional/services/machine_learning/security_common';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

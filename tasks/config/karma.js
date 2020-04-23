@@ -53,6 +53,8 @@ module.exports = function(grunt) {
   function getKarmaFiles(shardNum) {
     return [
       'http://localhost:5610/test_bundle/built_css.css',
+      // Sets global variables normally set by the bootstrap.js script
+      'http://localhost:5610/test_bundle/karma/globals.js',
 
       ...UiSharedDeps.jsDepFilenames.map(
         chunkFilename => `http://localhost:5610/bundles/kbn-ui-shared-deps/${chunkFilename}`

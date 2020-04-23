@@ -3,11 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { DataStream } from '../models';
 
-export const GetFleetSetupRequestSchema = {};
-
-export const CreateFleetSetupRequestSchema = {};
-
-export interface CreateFleetSetupResponse {
-  isInitialized: boolean;
+export interface GetDataStreamsResponse {
+  data_streams: DataStream[];
 }
