@@ -13,10 +13,15 @@ import { useLinkProps } from '../../../hooks/use_link_props';
 export const AlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
-  const manageAlertsLinkProps = useLinkProps({
-    app: 'kibana',
-    hash: 'management/kibana/triggersActions/alerts',
-  });
+  const manageAlertsLinkProps = useLinkProps(
+    {
+      app: 'kibana',
+      hash: 'management/kibana/triggersActions/alerts',
+    },
+    {
+      hrefOnly: true,
+    }
+  );
 
   const closePopover = useCallback(() => {
     setPopoverOpen(false);
