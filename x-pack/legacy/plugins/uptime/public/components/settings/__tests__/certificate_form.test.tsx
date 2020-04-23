@@ -19,7 +19,7 @@ describe('CertificateForm', () => {
             heartbeatIndices: 'heartbeat-8*',
             certThresholds: { expiration: 7, age: 36 },
           }}
-          fieldErrors={{}}
+          fieldErrors={null}
           isDisabled={false}
         />
       )

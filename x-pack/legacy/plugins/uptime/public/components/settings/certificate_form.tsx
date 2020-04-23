@@ -17,8 +17,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { DynamicSettings, CertStateThresholds } from '../../../common/runtime_types';
+import { CertStateThresholds } from '../../../common/runtime_types';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { SettingsFormProps } from '../../pages/settings';
 
 interface ChangedValues {
   heartbeatIndices?: string;
@@ -26,14 +27,6 @@ interface ChangedValues {
 }
 
 export type OnFieldChangeType = (changedValues: ChangedValues) => void;
-
-export interface SettingsFormProps {
-  loading: boolean;
-  onChange: OnFieldChangeType;
-  formFields: DynamicSettings | null;
-  fieldErrors: any;
-  isDisabled: boolean;
-}
 
 export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
   loading,
@@ -70,7 +63,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
     >
       <EuiFormRow
         describedByIds={['errorState']}
-        error={fieldErrors?.certificatesThresholds?.errorState}
+        error={fieldErrors?.certificatesThresholds?.expirationThresholdError}
         fullWidth
         helpText={
           <FormattedMessage
@@ -83,7 +76,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
             }}
           />
         }
-        isInvalid={!!fieldErrors?.certificatesThresholds?.errorState}
+        isInvalid={!!fieldErrors?.certificatesThresholds?.expirationThresholdError}
         label={
           <FormattedMessage
             id="xpack.uptime.sourceConfiguration.errorStateLabel"
@@ -120,7 +113,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
       </EuiFormRow>
       <EuiFormRow
         describedByIds={['warningState']}
-        error={fieldErrors?.certificatesThresholds?.warningState}
+        error={fieldErrors?.certificatesThresholds?.ageThresholdError}
         fullWidth
         helpText={
           <FormattedMessage
@@ -131,7 +124,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
             }}
           />
         }
-        isInvalid={!!fieldErrors?.certificatesThresholds?.warningState}
+        isInvalid={!!fieldErrors?.certificatesThresholds?.ageThresholdError}
         label={
           <FormattedMessage
             id="xpack.uptime.sourceConfiguration.warningStateLabel"
