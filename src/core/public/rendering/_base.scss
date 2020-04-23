@@ -9,7 +9,9 @@
   min-height: 100%;
 }
 
-.app-wrapper {
+// TODO when legacy nav removed
+// Delete this block
+.chrHeaderWrapper:not(.headerWrapper) ~ .app-wrapper {
   display: flex;
   flex-flow: column nowrap;
   position: absolute;
@@ -31,6 +33,15 @@
   .navbar-right {
     margin-right: 0;
   }
+}
+
+// TODO when legacy nav removed
+// Remove .headerWrapper conditional
+.headerWrapper ~ .app-wrapper {
+  display: flex;
+  flex-flow: column nowrap;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .app-wrapper-panel {

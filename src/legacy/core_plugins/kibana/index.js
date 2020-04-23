@@ -67,33 +67,33 @@ export default function(kibana) {
           title: i18n.translate('kbn.discoverTitle', {
             defaultMessage: 'Discover',
           }),
-          order: -1003,
+          order: 2000,
           url: `${kbnBaseUrl}#/discover`,
           euiIconType: 'discoverApp',
           disableSubUrlTracking: true,
-          category: DEFAULT_APP_CATEGORIES.analyze,
+          category: DEFAULT_APP_CATEGORIES.kibana,
         },
         {
           id: 'kibana:visualize',
           title: i18n.translate('kbn.visualizeTitle', {
-            defaultMessage: 'Visualize',
+            defaultMessage: 'Visualization Library',
           }),
-          order: -1002,
+          order: 7000,
           url: `${kbnBaseUrl}#/visualize`,
           euiIconType: 'visualizeApp',
           disableSubUrlTracking: true,
-          category: DEFAULT_APP_CATEGORIES.analyze,
+          category: DEFAULT_APP_CATEGORIES.kibana,
         },
         {
           id: 'kibana:dashboard',
           title: i18n.translate('kbn.dashboardTitle', {
             defaultMessage: 'Dashboard',
           }),
-          order: -1001,
+          order: 1000,
           url: `${kbnBaseUrl}#/dashboards`,
           euiIconType: 'dashboardApp',
           disableSubUrlTracking: true,
-          category: DEFAULT_APP_CATEGORIES.analyze,
+          category: DEFAULT_APP_CATEGORIES.kibana,
         },
         {
           id: 'kibana:dev_tools',
@@ -108,7 +108,7 @@ export default function(kibana) {
         {
           id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Management',
+            defaultMessage: 'Stack Management',
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,

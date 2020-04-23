@@ -26,3 +26,4 @@ export {
   ChromeHelpExtensionMenuGitHubLink,
 } from './header_help_menu';
 export type OnIsLockedUpdate = (isLocked: boolean) => void;
+export type NavSetting = 'modern' | 'legacy';

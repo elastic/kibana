@@ -38,7 +38,9 @@ input[type='checkbox'],
 // Application Layout
 
 // chrome-context
-.content {
+// TODO when legacy nav removed
+// Delete this block
+.chrHeaderWrapper:not(.headerWrapper) .content {
   display: flex;
   flex-flow: row nowrap;
   width: 100%;

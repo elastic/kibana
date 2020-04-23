@@ -25,7 +25,6 @@ import {
   EuiIcon,
   // @ts-ignore
   EuiNavDrawer,
-  // @ts-ignore
   EuiShowFor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -43,13 +42,14 @@ import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { HeaderBadge } from './header_badge';
-import { OnIsLockedUpdate } from './';
+import { NavSetting, OnIsLockedUpdate } from './';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
-import { euiNavLink } from './nav_link';
+import { createNavLink, createRecentNavLink } from './nav_link';
 import { HeaderLogo } from './header_logo';
 import { NavDrawer } from './nav_drawer';
+import { CollapsibleNav } from './collapsible_nav';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -70,6 +70,7 @@ export interface HeaderProps {
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Rx.Observable<boolean>;
+  navSetting$: Rx.Observable<NavSetting>;
   onIsLockedUpdate: OnIsLockedUpdate;
 }
 
@@ -83,6 +84,8 @@ interface State {
   navControlsRight: readonly ChromeNavControl[];
   currentAppId: string | undefined;
   isLocked: boolean;
+  navSetting: NavSetting;
+  isOpen: boolean;
 }
 
 export class Header extends Component<HeaderProps, State> {
@@ -105,6 +108,8 @@ export class Header extends Component<HeaderProps, State> {
       navControlsRight: [],
       currentAppId: '',
       isLocked,
+      navSetting: 'modern',
+      isOpen: false,
     };
   }
 
@@ -120,7 +125,8 @@ export class Header extends Component<HeaderProps, State> {
         this.props.navControlsLeft$,
         this.props.navControlsRight$,
         this.props.application.currentAppId$,
-        this.props.isLocked$
+        this.props.isLocked$,
+        this.props.navSetting$
       )
     ).subscribe({
       next: ([
@@ -129,7 +135,7 @@ export class Header extends Component<HeaderProps, State> {
         forceNavigation,
         navLinks,
         recentlyAccessed,
-        [navControlsLeft, navControlsRight, currentAppId, isLocked],
+        [navControlsLeft, navControlsRight, currentAppId, isLocked, navSetting],
       ]) => {
         this.setState({
           appTitle,
@@ -141,6 +147,7 @@ export class Header extends Component<HeaderProps, State> {
           navControlsRight,
           currentAppId,
           isLocked,
+          navSetting,
         });
       },
     });
@@ -176,7 +183,7 @@ export class Header extends Component<HeaderProps, State> {
       kibanaVersion,
     } = this.props;
     const navLinks = this.state.navLinks.map(link =>
-      euiNavLink(
+      createNavLink(
         link,
         this.props.legacyMode,
         this.state.currentAppId,
@@ -184,26 +191,49 @@ export class Header extends Component<HeaderProps, State> {
         this.props.application.navigateToApp
       )
     );
+    const recentNavLinks = this.state.recentlyAccessed.map(link =>
+      createRecentNavLink(link, this.state.navLinks, this.props.basePath)
+    );
 
     if (!isVisible) {
       return null;
     }
 
     const className = classnames(
-      'chrHeaderWrapper',
+      'chrHeaderWrapper', // TODO when legacy nav removed - delete this
+      'hide-for-sharing',
       {
         'chrHeaderWrapper--navIsLocked': this.state.isLocked,
-      },
-      'hide-for-sharing'
+        headerWrapper: this.state.navSetting === 'modern',
+      }
     );
 
     return (
       <header className={className} data-test-subj="headerGlobalNav">
-        <EuiHeader>
+        <EuiHeader position="fixed">
           <EuiHeaderSection grow={false}>
-            <EuiShowFor sizes={['xs', 's']}>
-              <EuiHeaderSectionItem border="right">{this.renderMenuTrigger()}</EuiHeaderSectionItem>
-            </EuiShowFor>
+            {this.state.navSetting === 'modern' ? (
+              <EuiHeaderSectionItem border="right">
+                <EuiHeaderSectionItemButton
+                  aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                    defaultMessage: 'Toggle primary navigation',
+                  })}
+                  onClick={() => {
+                    this.setState({ isOpen: !this.state.isOpen });
+                  }}
+                >
+                  <EuiIcon type="menu" size="m" aria-hidden="true" />
+                </EuiHeaderSectionItemButton>
+              </EuiHeaderSectionItem>
+            ) : (
+              // TODO when legacy nav removed
+              // Delete this block
+              <EuiShowFor sizes={['xs', 's']}>
+                <EuiHeaderSectionItem border="right">
+                  {this.renderMenuTrigger()}
+                </EuiHeaderSectionItem>
+              </EuiShowFor>
+            )}
 
             <EuiHeaderSectionItem border="right">
               <HeaderLogo
@@ -235,15 +265,30 @@ export class Header extends Component<HeaderProps, State> {
             <HeaderNavControls side="right" navControls={navControlsRight} />
           </EuiHeaderSection>
         </EuiHeader>
-        <NavDrawer
-          isLocked={this.state.isLocked}
-          onIsLockedUpdate={this.props.onIsLockedUpdate}
-          navLinks={navLinks}
-          chromeNavLinks={this.state.navLinks}
-          recentlyAccessedItems={this.state.recentlyAccessed}
-          basePath={this.props.basePath}
-          ref={this.navDrawerRef}
-        />
+        {this.state.navSetting === 'modern' ? (
+          <CollapsibleNav
+            isLocked={this.state.isLocked}
+            onIsLockedUpdate={this.props.onIsLockedUpdate}
+            navLinks={navLinks}
+            recentNavLinks={recentNavLinks}
+            isOpen={this.state.isOpen}
+            homeHref={this.props.homeHref}
+            onIsOpenUpdate={(isOpen = this.state.isOpen) => {
+              this.setState({ isOpen: !isOpen });
+              // TODO when EUI is updated, place focus on nav toggle button
+            }}
+          />
+        ) : (
+          // TODO when legacy nav removed
+          // Delete this block
+          <NavDrawer
+            isLocked={this.state.isLocked}
+            onIsLockedUpdate={this.props.onIsLockedUpdate}
+            navLinks={navLinks}
+            recentNavLinks={recentNavLinks}
+            ref={this.navDrawerRef}
+          />
+        )}
       </header>
     );
   }

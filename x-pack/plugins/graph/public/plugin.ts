@@ -66,10 +66,10 @@ export class GraphPlugin
     core.application.register({
       id: 'graph',
       title: 'Graph',
-      order: 9000,
+      order: 6000,
       appRoute: '/app/graph',
       euiIconType: 'graphApp',
-      category: DEFAULT_APP_CATEGORIES.analyze,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');

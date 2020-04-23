@@ -1171,5 +1171,24 @@ export function getUiSettingDefaults() {
       category: ['accessibility'],
       requiresPageReload: true,
     },
+    pageNavigation: {
+      name: i18n.translate('kbn.advancedSettings.pageNavigationName', {
+        defaultMessage: 'Side nav style',
+      }),
+      value: 'modern',
+      description: i18n.translate('kbn.advancedSettings.pageNavigationDesc', {
+        defaultMessage: 'Change the style of navigation',
+      }),
+      type: 'select',
+      options: ['modern', 'legacy'],
+      optionLabels: {
+        modern: i18n.translate('kbn.advancedSettings.pageNavigationModern', {
+          defaultMessage: 'Modern',
+        }),
+        legacy: i18n.translate('kbn.advancedSettings.pageNavigationLegacy', {
+          defaultMessage: 'Legacy',
+        }),
+      },
+    },
   };
 }

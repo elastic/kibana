@@ -1,0 +1,243 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiCollapsibleNav,
+  EuiCollapsibleNavGroup,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiShowFor,
+  EuiText,
+} from '@elastic/eui';
+import { groupBy, sortBy } from 'lodash';
+import { OnIsLockedUpdate } from './';
+import { AppCategory } from '../../../../types';
+import { NavLink, RecentNavLink } from './nav_link';
+
+function getAllCategories(allCategorizedLinks: Record<string, NavLink[]>) {
+  const allCategories = {} as Record<string, AppCategory | undefined>;
+
+  for (const [key, value] of Object.entries(allCategorizedLinks)) {
+    allCategories[key] = value[0].category;
+  }
+
+  return allCategories;
+}
+
+function getOrderedCategories(
+  mainCategories: Record<string, NavLink[]>,
+  categoryDictionary: ReturnType<typeof getAllCategories>
+) {
+  return sortBy(
+    Object.keys(mainCategories),
+    categoryName => categoryDictionary[categoryName]?.order
+  );
+}
+
+function getCategoryLocalStorageKey(label: string) {
+  return `core.navGroup.${label}`;
+}
+
+function getIsCategoryOpen(label: string) {
+  const value = localStorage.getItem(getCategoryLocalStorageKey(label)) ?? 'true';
+
+  return value === 'true';
+}
+
+function setIsCategoryOpen(label: string, isOpen: boolean) {
+  localStorage.setItem(getCategoryLocalStorageKey(label), `${isOpen}`);
+}
+
+interface Props {
+  isLocked: boolean;
+  isOpen: boolean;
+  navLinks: NavLink[];
+  recentNavLinks: RecentNavLink[];
+  homeHref: string;
+  onIsLockedUpdate: OnIsLockedUpdate;
+  onIsOpenUpdate: (isOpen?: boolean) => void;
+}
+
+export function CollapsibleNav({
+  isLocked,
+  isOpen,
+  navLinks,
+  recentNavLinks,
+  onIsLockedUpdate,
+  onIsOpenUpdate,
+  homeHref,
+}: Props) {
+  const groupedNavLinks = groupBy(navLinks, link => link?.category?.label);
+  const { undefined: unknowns, ...allCategorizedLinks } = groupedNavLinks;
+  const categoryDictionary = getAllCategories(allCategorizedLinks);
+  const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
+
+  return (
+    <EuiCollapsibleNav
+      id="guideCollapsibleNavAllExampleNav"
+      aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+        defaultMessage: 'Primary',
+      })}
+      isOpen={isOpen}
+      isDocked={isLocked}
+      onClose={onIsOpenUpdate}
+    >
+      {/* Pinned items */}
+      <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+        <EuiCollapsibleNavGroup
+          background="light"
+          className="eui-yScroll"
+          style={{ maxHeight: '40vh' }}
+        >
+          <EuiListGroup
+            aria-label={i18n.translate('core.ui.primaryNav.pinnedLinksAriaLabel', {
+              defaultMessage: 'Pinned links',
+            })}
+            listItems={[
+              {
+                label: 'Home',
+                iconType: 'home',
+                href: homeHref,
+                onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                  onIsOpenUpdate(false);
+                },
+              },
+            ]}
+            maxWidth="none"
+            color="text"
+            gutterSize="none"
+            size="s"
+          />
+        </EuiCollapsibleNavGroup>
+      </EuiFlexItem>
+
+      <EuiHorizontalRule margin="none" />
+
+      {/* Kibana, Observability, Secuirty, and Management sections */}
+      <EuiFlexItem className="eui-yScroll">
+        {orderedCategories.map(categoryName => {
+          const category = categoryDictionary[categoryName]!;
+          const links = allCategorizedLinks[categoryName].map(
+            ({ label, href, onClick }: NavLink) => ({
+              label,
+              href,
+              onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                onIsOpenUpdate(false);
+                onClick(e);
+              },
+            })
+          );
+
+          return (
+            <EuiCollapsibleNavGroup
+              key={category.label}
+              iconType={category.euiIconType}
+              title={category.label}
+              isCollapsible={true}
+              initialIsOpen={getIsCategoryOpen(category.label)}
+              onToggle={isCategoryOpen => setIsCategoryOpen(category.label, isCategoryOpen)}
+            >
+              <EuiListGroup
+                aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {
+                  defaultMessage: 'Primary navigation links, {category}',
+                  values: { category: category.label },
+                })}
+                listItems={links}
+                maxWidth="none"
+                color="subdued"
+                gutterSize="none"
+                size="s"
+              />
+            </EuiCollapsibleNavGroup>
+          );
+        })}
+
+        {/* Recently viewed */}
+        <EuiCollapsibleNavGroup
+          key="recentlyViewed"
+          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
+          isCollapsible={true}
+          initialIsOpen={getIsCategoryOpen('recentlyViewed')}
+          onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen)}
+        >
+          {recentNavLinks.length > 0 ? (
+            <EuiListGroup
+              aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
+                defaultMessage: 'Recently viewed links',
+              })}
+              listItems={recentNavLinks}
+              maxWidth="none"
+              color="subdued"
+              gutterSize="none"
+              size="s"
+            />
+          ) : (
+            <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+              <p>
+                {i18n.translate('core.ui.EmptyRecentlyViewed', {
+                  defaultMessage: 'No recently viewed items',
+                })}
+              </p>
+            </EuiText>
+          )}
+        </EuiCollapsibleNavGroup>
+
+        {/* Docking button only for larger screens that can support it*/}
+        <EuiShowFor sizes={['l', 'xl']}>
+          <EuiCollapsibleNavGroup>
+            <EuiListGroup>
+              <EuiListGroupItem
+                size="xs"
+                color="subdued"
+                id="foo"
+                label={
+                  isLocked
+                    ? i18n.translate('core.ui.primaryNavSection.undockLabel', {
+                        defaultMessage: 'Undock navigation',
+                      })
+                    : i18n.translate('core.ui.primaryNavSection.dockLabel', {
+                        defaultMessage: 'Dock navigation',
+                      })
+                }
+                aria-label={
+                  isLocked
+                    ? i18n.translate('core.ui.primaryNavSection.undockAriaLabel', {
+                        defaultMessage: 'Undock primary navigation',
+                      })
+                    : i18n.translate('core.ui.primaryNavSection.dockAriaLabel', {
+                        defaultMessage: 'Dock primary navigation',
+                      })
+                }
+                onClick={() => {
+                  onIsLockedUpdate(!isLocked);
+                  // TODO should keep focus here
+                }}
+                iconType={isLocked ? 'lock' : 'lockOpen'}
+              />
+            </EuiListGroup>
+          </EuiCollapsibleNavGroup>
+        </EuiShowFor>
+      </EuiFlexItem>
+    </EuiCollapsibleNav>
+  );
+}

@@ -26,6 +26,7 @@ import { setDependencyCache } from './application/util/dependency_cache';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 import { registerFeature } from './register_feature';
 import { MlConfigType } from '../common/types/ml_config';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -50,9 +51,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       title: i18n.translate('xpack.ml.plugin.title', {
         defaultMessage: 'Machine Learning',
       }),
-      order: 30,
+      order: 5000,
       euiIconType: PLUGIN_ICON,
       appRoute: '/app/ml',
+      category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { renderApp } = await import('./application/app');

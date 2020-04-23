@@ -61,7 +61,7 @@ export function dashboardMode(kibana) {
             title: i18n.translate('xpack.dashboardMode.dashboardViewer.dashboardTitle', {
               defaultMessage: 'Dashboard',
             }),
-            order: -1001,
+            order: 1000,
             url: `${kbnBaseUrl}#/dashboards`,
             subUrlBase: `${kbnBaseUrl}#/dashboard`,
             description: i18n.translate(
@@ -71,7 +71,7 @@ export function dashboardMode(kibana) {
               }
             ),
             icon: 'plugins/kibana/dashboard/assets/dashboard.svg',
-            category: DEFAULT_APP_CATEGORIES.analyze,
+            category: DEFAULT_APP_CATEGORIES.kibana,
           },
         ],
       },

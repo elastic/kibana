@@ -34,7 +34,8 @@ export function maps(kibana) {
         main: 'plugins/maps/legacy',
         icon: 'plugins/maps/icon.svg',
         euiIconType: APP_ICON,
-        category: DEFAULT_APP_CATEGORIES.analyze,
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        order: 4000,
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();

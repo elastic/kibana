@@ -202,6 +202,7 @@ export class ChromeService {
             navControlsRight$={navControls.getRight$()}
             onIsLockedUpdate={setIsNavDrawerLocked}
             isLocked$={getIsNavDrawerLocked$}
+            navSetting$={uiSettings.get$('pageNavigation')}
           />
         </React.Fragment>
       ),
