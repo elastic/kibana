@@ -32,7 +32,9 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 jest.mock('../../../services', () => ({
-  getDataActions: () => ({ createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']) }),
+  getDataActions: () => ({
+    createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
+  }),
 }));
 
 const vis = {

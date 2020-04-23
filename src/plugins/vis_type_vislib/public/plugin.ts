@@ -111,6 +111,6 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
 
   public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
     setFormatService(data.fieldFormats);
-    setDataActions({ createFiltersFromEvent: data.actions.createFiltersFromEvent });
+    setDataActions(data.actions);
   }
 }
