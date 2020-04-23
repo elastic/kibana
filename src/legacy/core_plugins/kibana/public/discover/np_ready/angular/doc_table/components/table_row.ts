@@ -29,6 +29,7 @@ import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 
 import { dispatchRenderComplete } from '../../../../../../../../../plugins/kibana_utils/public';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../../../../../plugins/discover/common';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 import { esFilters } from '../../../../../../../../../plugins/data/public';
@@ -133,7 +134,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
         const newHtmls = [openRowHtml];
 
         const mapping = indexPattern.fields.getByName;
-        const hideTimeColumn = getServices().uiSettings.get('doc_table:hideTimeColumn');
+        const hideTimeColumn = getServices().uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
         if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(
             cellTemplate({

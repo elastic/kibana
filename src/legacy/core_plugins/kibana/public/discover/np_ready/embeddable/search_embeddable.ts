@@ -50,6 +50,10 @@ import {
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../../../../../../../plugins/discover/public';
+import {
+  SAMPLE_SIZE_SETTING,
+  SORT_DEFAULT_SETTING,
+} from '../../../../../../../plugins/discover/common';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -266,13 +270,13 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', getServices().uiSettings.get('discover:sampleSize'));
+    searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
     searchSource.setField(
       'sort',
       getSortForSearchSource(
         this.searchScope.sort,
         this.searchScope.indexPattern,
-        getServices().uiSettings.get('discover:sort:defaultOrder')
+        getServices().uiSettings.get(SORT_DEFAULT_SETTING)
       )
     );
 

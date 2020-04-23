@@ -31,6 +31,7 @@ import {
   VisualizationsStart,
   VisTypeAlias,
 } from '../../../../../../../../../plugins/visualizations/public';
+import { AGGS_TERMS_SIZE_SETTING } from '../../../../../../../../../plugins/discover/common';
 
 function getMapsAppBaseUrl(visualizations: VisualizationsStart) {
   const mapsAppVisAlias = visualizations.getAliases().find(({ name }) => {
@@ -124,7 +125,7 @@ export function getVisualizeUrl(
   columns: string[],
   services: DiscoverServices
 ) {
-  const aggsTermSize = services.uiSettings.get('discover:aggs:terms:size');
+  const aggsTermSize = services.uiSettings.get(AGGS_TERMS_SIZE_SETTING);
   const urlParams = parse(services.history().location.search) as Record<string, string>;
 
   if (

@@ -32,6 +32,7 @@ import React from 'react';
 import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../../../../plugins/data/common';
+import { FIELDS_LIMIT_SETTING } from '../../../../../../../../plugins/discover/common';
 import { SavedObject } from '../../../../../../../../core/types';
 
 jest.mock('../../../kibana_services', () => ({
@@ -48,7 +49,7 @@ jest.mock('../../../kibana_services', () => ({
     },
     uiSettings: {
       get: (key: string) => {
-        if (key === 'fields:popularLimit') {
+        if (key === FIELDS_LIMIT_SETTING) {
           return 5;
         } else if (key === 'shortDots:enable') {
           return false;

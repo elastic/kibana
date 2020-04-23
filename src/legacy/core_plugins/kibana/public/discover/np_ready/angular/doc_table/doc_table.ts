@@ -19,6 +19,7 @@
 
 import html from './doc_table.html';
 import { dispatchRenderComplete } from '../../../../../../../../plugins/kibana_utils/public';
+import { SAMPLE_SIZE_SETTING } from '../../../../../../../../plugins/discover/common';
 // @ts-ignore
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 import { getServices } from '../../../kibana_services';
@@ -64,7 +65,7 @@ export function createDocTableDirective(pagerFactory: any, $filter: any) {
       };
 
       $scope.limitedResultsWarning = getLimitedSearchResultsMessage(
-        getServices().uiSettings.get('discover:sampleSize')
+        getServices().uiSettings.get(SAMPLE_SIZE_SETTING)
       );
 
       $scope.addRows = function() {

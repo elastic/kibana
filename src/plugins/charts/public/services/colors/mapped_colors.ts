@@ -22,6 +22,7 @@ import d3 from 'd3';
 
 import { CoreSetup } from 'kibana/public';
 
+import { COLOR_MAPPING_SETTING } from '../../../common';
 import { createColorPalette } from './color_palette';
 
 const standardizeColor = (color: string) => d3.rgb(color).toString();
@@ -41,7 +42,7 @@ export class MappedColors {
   }
 
   private getConfigColorMapping() {
-    return _.mapValues(this.uiSettings.get('visualization:colorMapping'), standardizeColor);
+    return _.mapValues(this.uiSettings.get(COLOR_MAPPING_SETTING), standardizeColor);
   }
 
   public get oldMap(): any {
