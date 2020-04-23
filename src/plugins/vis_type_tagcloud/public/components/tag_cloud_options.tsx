@@ -20,9 +20,9 @@
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { ValidatedDualRange } from '../../../../../../src/plugins/kibana_react/public';
-import { SelectOption, SwitchOption } from '../../../../../plugins/charts/public';
+import { VisOptionsProps } from '../../../vis_default_editor/public';
+import { ValidatedDualRange } from '../../../kibana_react/public';
+import { SelectOption, SwitchOption } from '../../../charts/public';
 import { TagCloudVisParams } from '../types';
 
 function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps<TagCloudVisParams>) {

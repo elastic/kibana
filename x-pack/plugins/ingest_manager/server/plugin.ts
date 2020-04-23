@@ -11,9 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
-  RecursiveReadonly,
 } from 'kibana/server';
-import { deepFreeze } from '../../../../src/core/utils';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -39,8 +37,9 @@ import {
   registerInstallScriptRoutes,
 } from './routes';
 
-import { IngestManagerConfigType, IngestManagerStartupContract } from '../common';
+import { IngestManagerConfigType } from '../common';
 import { appContextService, ESIndexPatternSavedObjectService } from './services';
+import { ESIndexPatternService, AgentService } from './services';
 import { getAgentStatusById } from './services/agents';
 
 export interface IngestManagerSetupDeps {
@@ -49,12 +48,16 @@ export interface IngestManagerSetupDeps {
   features?: FeaturesPluginSetup;
 }
 
+export type IngestManagerStartDeps = object;
+
 export interface IngestManagerAppContext {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
 }
+
+export type IngestManagerSetupContract = void;
 
 const allSavedObjectTypes = [
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -66,7 +69,22 @@ const allSavedObjectTypes = [
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 ];
 
-export class IngestManagerPlugin implements Plugin<void, IngestManagerStartupContract> {
+/**
+ * Describes public IngestManager plugin contract returned at the `startup` stage.
+ */
+export interface IngestManagerStartContract {
+  esIndexPatternService: ESIndexPatternService;
+  agentService: AgentService;
+}
+
+export class IngestManagerPlugin
+  implements
+    Plugin<
+      IngestManagerSetupContract,
+      IngestManagerStartContract,
+      IngestManagerSetupDeps,
+      IngestManagerStartDeps
+    > {
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
 
@@ -140,19 +158,19 @@ export class IngestManagerPlugin implements Plugin<void, IngestManagerStartupCon
     plugins: {
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
-  ): Promise<RecursiveReadonly<IngestManagerStartupContract>> {
+  ) {
     appContextService.start({
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,
       config$: this.config$,
       savedObjects: core.savedObjects,
     });
-    return deepFreeze({
+    return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       agentService: {
         getAgentStatusById,
       },
-    });
+    };
   }
 
   public async stop() {

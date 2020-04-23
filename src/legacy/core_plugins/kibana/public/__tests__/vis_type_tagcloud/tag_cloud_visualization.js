@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { ImageComparator } from 'test_utils/image_comparator';
-import { createTagCloudVisualization } from '../tag_cloud_visualization';
 import basicdrawPng from './basicdraw.png';
 import afterresizePng from './afterresize.png';
 import afterparamChange from './afterparamchange.png';
@@ -32,7 +31,14 @@ import { ExprVis } from '../../../../../../plugins/visualizations/public/express
 import { seedColors } from '../../../../../../plugins/charts/public/services/colors/seed_colors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { BaseVisType } from '../../../../../../plugins/visualizations/public/vis_types/base_vis_type';
-import { createTagCloudVisTypeDefinition } from '../../tag_cloud_type';
+// Will be replaced with new path when tests are moved
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createTagCloudVisTypeDefinition } from '../../../../../../plugins/vis_type_tagcloud/public/tag_cloud_type';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createTagCloudVisualization } from '../../../../../../plugins/vis_type_tagcloud/public/components/tag_cloud_visualization';
+import { npStart } from 'ui/new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setFormatService } from '../../../../../../plugins/vis_type_tagcloud/public/services';
 
 const THRESHOLD = 0.65;
 const PIXEL_DIFF = 64;
@@ -65,6 +71,8 @@ describe('TagCloudVisualizationTest', function() {
       seedColors,
     },
   });
+
+  before(() => setFormatService(npStart.plugins.data.fieldFormats));
 
   beforeEach(ngMock.module('kibana'));
 
