@@ -85,7 +85,7 @@ export const fetchCollectionData = async (uuid?: string, fetchWithoutClusterUuid
   }
 };
 
-const notifySetupModeDataChange = () => setupModeState?.callback();
+const notifySetupModeDataChange = () => setupModeState.callback && setupModeState.callback();
 
 export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid = false) => {
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
