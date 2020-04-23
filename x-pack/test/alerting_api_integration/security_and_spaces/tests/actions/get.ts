@@ -141,9 +141,6 @@ export default function getActionTests({ getService }: FtrProviderContext) {
                 actionTypeId: '.slack',
                 name: 'Slack#xyz',
                 isPreconfigured: true,
-                config: {
-                  webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
-                },
               });
               break;
             default:
