@@ -84,7 +84,7 @@ export interface FindResult {
   data: SanitizedAlert[];
 }
 
-interface CreateOptions {
+export interface CreateOptions {
   data: Omit<
     Alert,
     | 'id'

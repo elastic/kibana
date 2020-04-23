@@ -133,7 +133,7 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
   const createAPIKeyResult = await constructorCall.createAPIKey();
   expect(createAPIKeyResult).toEqual({
     apiKeysEnabled: true,
-    result: { api_key: '123', id: 'abc' },
+    result: { api_key: '123', id: 'abc', name: '' },
   });
 });
 

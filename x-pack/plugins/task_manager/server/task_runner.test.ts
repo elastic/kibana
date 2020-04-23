@@ -854,8 +854,8 @@ describe('TaskManagerRunner', () => {
 
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
-    definitions?: any;
-    onTaskEvent?: (event: TaskEvent<any, any>) => void;
+    definitions?: unknown;
+    onTaskEvent?: (event: TaskEvent<unknown, unknown>) => void;
   }
 
   function testOpts(opts: TestOpts) {
@@ -904,7 +904,7 @@ describe('TaskManagerRunner', () => {
           title: 'Bar!',
           createTaskRunner,
         },
-      }),
+      }) as TaskDictionary<TaskDefinition>,
       onTaskEvent: opts.onTaskEvent,
     });
 
@@ -918,7 +918,7 @@ describe('TaskManagerRunner', () => {
     };
   }
 
-  async function testReturn(result: any, shouldBeValid: boolean) {
+  async function testReturn(result: unknown, shouldBeValid: boolean) {
     const { runner, logger } = testOpts({
       definitions: {
         bar: {
@@ -939,11 +939,11 @@ describe('TaskManagerRunner', () => {
     }
   }
 
-  function allowsReturnType(result: any) {
+  function allowsReturnType(result: unknown) {
     return testReturn(result, true);
   }
 
-  function disallowsReturnType(result: any) {
+  function disallowsReturnType(result: unknown) {
     return testReturn(result, false);
   }
 });

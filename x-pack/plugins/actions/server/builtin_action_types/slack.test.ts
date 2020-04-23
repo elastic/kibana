@@ -155,10 +155,12 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
     });
     expect(response).toMatchInlineSnapshot(`
-Object {
-  "text": "slack mockExecutor success: this invocation should succeed",
-}
-`);
+      Object {
+        "actionId": "",
+        "status": "ok",
+        "text": "slack mockExecutor success: this invocation should succeed",
+      }
+    `);
   });
 
   test('calls the mock executor with failure', async () => {
