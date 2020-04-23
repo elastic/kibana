@@ -45,9 +45,11 @@ describe('Async search strategy', () => {
 
   it('stops polling when the response is complete', async () => {
     mockSearch
-      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 1 }))
-      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }))
-      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }));
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 1, is_running: true, is_partial: true }))
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: false }))
+      .mockReturnValueOnce(
+        of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: false })
+      );
 
     const asyncSearch = asyncSearchStrategyProvider({
       core: mockCoreStart,
@@ -67,10 +69,39 @@ describe('Async search strategy', () => {
     expect(mockSearch).toBeCalledTimes(2);
   });
 
+  it('stops polling when the response is an error', async () => {
+    mockSearch
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 1, is_running: true, is_partial: true }))
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: true }))
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: true }));
+
+    const asyncSearch = asyncSearchStrategyProvider({
+      core: mockCoreStart,
+      getSearchStrategy: jest.fn().mockImplementation(() => {
+        return () => {
+          return {
+            search: mockSearch,
+          };
+        };
+      }),
+    });
+
+    expect(mockSearch).toBeCalledTimes(0);
+
+    await asyncSearch
+      .search(mockRequest, mockOptions)
+      .toPromise()
+      .catch(() => {
+        expect(mockSearch).toBeCalledTimes(2);
+      });
+  });
+
   it('only sends the ID and server strategy after the first request', async () => {
     mockSearch
-      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 1 }))
-      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }));
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 1, is_running: true, is_partial: true }))
+      .mockReturnValueOnce(
+        of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: false })
+      );
 
     const asyncSearch = asyncSearchStrategyProvider({
       core: mockCoreStart,
