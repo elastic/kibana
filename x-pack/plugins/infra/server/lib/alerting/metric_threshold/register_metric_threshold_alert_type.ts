@@ -51,27 +51,18 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
     }
   );
 
-  const valueOfActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.valueOfActionVariableDescription',
+  const alertStateActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.alertStateActionVariableDescription',
     {
-      defaultMessage:
-        'Record of the current value of the watched metric; grouped by condition, i.e valueOf.condition0, valueOf.condition1, etc.',
+      defaultMessage: 'Current state of the alert',
     }
   );
 
-  const thresholdOfActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.thresholdOfActionVariableDescription',
+  const reasonActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.reasonActionVariableDescription',
     {
       defaultMessage:
-        'Record of the alerting threshold; grouped by condition, i.e thresholdOf.condition0, thresholdOf.condition1, etc.',
-    }
-  );
-
-  const metricOfActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.metricOfActionVariableDescription',
-    {
-      defaultMessage:
-        'Record of the watched metric; grouped by condition, i.e metricOf.condition0, metricOf.condition1, etc.',
+        'A description of why the alert is in this state, including which metrics have crossed which thresholds',
     }
   );
 
@@ -84,6 +75,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
         groupBy: schema.maybe(schema.string()),
         filterQuery: schema.maybe(schema.string()),
         sourceId: schema.string(),
+        alertOnNoData: schema.boolean(),
       }),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
@@ -92,9 +84,8 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
-        { name: 'valueOf', description: valueOfActionVariableDescription },
-        { name: 'thresholdOf', description: thresholdOfActionVariableDescription },
-        { name: 'metricOf', description: metricOfActionVariableDescription },
+        { name: 'alertState', description: alertStateActionVariableDescription },
+        { name: 'reason', description: reasonActionVariableDescription },
       ],
     },
   });

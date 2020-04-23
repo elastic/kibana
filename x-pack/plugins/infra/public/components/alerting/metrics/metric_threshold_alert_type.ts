@@ -23,10 +23,9 @@ export function getAlertType(): AlertTypeModel {
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.threshold.defaultActionMessage',
       {
-        defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\}
+        defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
 
-\\{\\{context.metricOf.condition0\\}\\} has crossed a threshold of \\{\\{context.thresholdOf.condition0\\}\\}
-Current value is \\{\\{context.valueOf.condition0\\}\\}
+Because \\{\\{context.reason\\}\\}
 `,
       }
     ),

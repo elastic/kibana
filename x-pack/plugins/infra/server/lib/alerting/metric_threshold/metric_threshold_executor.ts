@@ -12,6 +12,13 @@ import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../utils/get_all_composite_data';
 import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Comparator, Aggregators, AlertStates } from './types';
+import {
+  buildErrorAlertReason,
+  buildFiredAlertReason,
+  buildNoDataAlertReason,
+  DOCUMENT_COUNT_I18N,
+  stateToAlertMessage,
+} from './messages';
 import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { getDateHistogramOffset } from '../../snapshot/query_helpers';
@@ -251,24 +258,14 @@ const comparatorMap = {
   [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
 };
 
-const mapToConditionsLookup = (
-  list: any[],
-  mapFn: (value: any, index: number, array: any[]) => unknown
-) =>
-  list
-    .map(mapFn)
-    .reduce(
-      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
-      {}
-    );
-
 export const createMetricThresholdExecutor = (alertUUID: string) =>
   async function({ services, params }: AlertExecutorOptions) {
-    const { criteria, groupBy, filterQuery, sourceId } = params as {
+    const { criteria, groupBy, filterQuery, sourceId, alertOnNoData } = params as {
       criteria: MetricExpressionParams[];
       groupBy: string | undefined;
       filterQuery: string | undefined;
       sourceId?: string;
+      alertOnNoData: boolean;
     };
 
     const alertResults = await Promise.all(
@@ -279,9 +276,12 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
           const { threshold, comparator } = criterion;
           const comparisonFunction = comparatorMap[comparator];
           return mapValues(currentValues, value => ({
+            metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
+            threshold,
+            comparator,
+            currentValue: value,
             shouldFire:
               value !== undefined && value !== null && comparisonFunction(value, threshold),
-            currentValue: value,
             isNoData: value === null,
             isError: value === undefined,
           }));
@@ -299,23 +299,43 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
       // whole alert is in a No Data/Error state
       const isNoData = alertResults.some(result => result[group].isNoData);
       const isError = alertResults.some(result => result[group].isError);
-      if (shouldAlertFire) {
+
+      const nextState = isError
+        ? AlertStates.ERROR
+        : isNoData
+        ? AlertStates.NO_DATA
+        : shouldAlertFire
+        ? AlertStates.ALERT
+        : AlertStates.OK;
+
+      let reason;
+      if (nextState === AlertStates.ALERT) {
+        reason = alertResults.map(result => buildFiredAlertReason(result[group])).join('; ');
+      }
+      if (alertOnNoData) {
+        if (nextState === AlertStates.NO_DATA) {
+          reason = alertResults
+            .filter(result => result[group].isNoData)
+            .map(result => buildNoDataAlertReason(result[group].metric))
+            .join('; ');
+        } else if (nextState === AlertStates.ERROR) {
+          reason = alertResults
+            .filter(result => result[group].isError)
+            .map(result => buildErrorAlertReason(result[group].metric))
+            .join('; ');
+        }
+      }
+      if (reason) {
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           group,
-          valueOf: mapToConditionsLookup(alertResults, result => result[group].currentValue),
-          thresholdOf: mapToConditionsLookup(criteria, criterion => criterion.threshold),
-          metricOf: mapToConditionsLookup(criteria, criterion => criterion.metric),
+          alertState: stateToAlertMessage[nextState],
+          reason,
         });
       }
+
       // Future use: ability to fetch display current alert state
       alertInstance.replaceState({
-        alertState: isError
-          ? AlertStates.ERROR
-          : isNoData
-          ? AlertStates.NO_DATA
-          : shouldAlertFire
-          ? AlertStates.ALERT
-          : AlertStates.OK,
+        alertState: nextState,
       });
     }
   };
