@@ -1,0 +1,10 @@
+{
+  "id": "greetingCards",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["greeting_cards"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}
