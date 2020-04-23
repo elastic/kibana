@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IndexPatternRetriever } from './index_pattern';
-import { AgentService } from '../../ingest_manager/common/types';
+import { AgentService } from '../../ingest_manager/server';
 
 /**
  * A singleton that holds shared services that are initialized during the start up phase
