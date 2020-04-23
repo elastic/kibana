@@ -17,29 +17,18 @@
  * under the License.
  */
 
-import { createTagCloudFn } from './tag_cloud_fn';
+import { PluginConfigDescriptor } from 'kibana/server';
 
-// eslint-disable-next-line
-import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
+import { configSchema, ConfigSchema } from '../config';
 
-describe('interpreter/functions#tagcloud', () => {
-  const fn = functionWrapper(createTagCloudFn());
-  const context = {
-    type: 'kibana_datatable',
-    rows: [{ 'col-0-1': 0 }],
-    columns: [{ id: 'col-0-1', name: 'Count' }],
-  };
-  const visConfig = {
-    scale: 'linear',
-    orientation: 'single',
-    minFontSize: 18,
-    maxFontSize: 72,
-    showLabel: true,
-    metric: { accessor: 0, format: { id: 'number' } },
-  };
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('tagcloud.enabled', 'vis_type_tagcloud.enabled'),
+  ],
+};
 
-  it('returns an object with the correct structure', () => {
-    const actual = fn(context, visConfig, undefined);
-    expect(actual).toMatchSnapshot();
-  });
+export const plugin = () => ({
+  setup() {},
+  start() {},
 });
