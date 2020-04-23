@@ -45,3 +45,7 @@ export const VALID_UNTIL_COL = i18n.translate('xpack.uptime.certs.list.validUnti
 export const FINGERPRINTS_COL = i18n.translate('xpack.uptime.certs.list.expirationDate', {
   defaultMessage: 'Fingerprints',
 });
+
+export const COPY_FINGERPRINT = i18n.translate('xpack.uptime.certs.list.copyFingerprint', {
+  defaultMessage: 'Click to copy fingerprint value',
+});

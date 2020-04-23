@@ -51,7 +51,7 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
       >
         {isExpired ? (
           <FormattedMessage
-            id="xpack.uptime.monitorStatusBar.sslCertificateExpiry.badgeContent"
+            id="xpack.uptime.monitorStatusBar.sslCertificateExpired.badgeContent"
             defaultMessage="SSL certificate expired {emphasizedText}"
             values={{
               emphasizedText: <EuiBadge color={'danger'}>{relativeDate}</EuiBadge>,

@@ -80,7 +80,7 @@ exports[`CertStatus shallow renders expected elements for valid props 1`] = `
   <CertStatus
     cert={
       Object {
-        "certificate_not_valid_after": "2020-08-23T15:56:36.646Z",
+        "certificate_not_valid_after": "2020-08-23T15:59:17.674Z",
         "certificate_not_valid_before": "2018-05-08T00:00:00.000Z",
         "common_name": "github.com",
         "issuer": "DigiCert SHA2 Extended Validation Server CA",

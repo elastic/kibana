@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 import { Cert } from '../../../common/runtime_types';
+import { COPY_FINGERPRINT } from './translations';
 
 const Span = styled.span`
   margin-right: 3px;
@@ -23,9 +24,7 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
           <EuiButtonEmpty>{text} </EuiButtonEmpty>
         </EuiToolTip>
         <EuiCopy textToCopy={val ?? ''}>
-          {copy => (
-            <EuiButtonIcon onClick={copy} iconType="copy" title="Click to copy SHA 256 value" />
-          )}
+          {copy => <EuiButtonIcon onClick={copy} iconType="copy" title={COPY_FINGERPRINT} />}
         </EuiCopy>
       </Span>
     );
