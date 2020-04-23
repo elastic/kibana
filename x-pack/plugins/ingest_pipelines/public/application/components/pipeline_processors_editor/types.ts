@@ -6,6 +6,11 @@
 
 import { ESCommonProcessorOptions } from '../../../../common/types';
 
+export interface DraggableLocation {
+  pathSelector: string;
+  index: number;
+}
+
 export type ProcessorOptions<CustomProcessorOptions = {}> = ESCommonProcessorOptions &
   CustomProcessorOptions;
 
