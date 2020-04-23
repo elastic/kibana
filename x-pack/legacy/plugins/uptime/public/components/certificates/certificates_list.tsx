@@ -40,43 +40,6 @@ interface Props {
   onChange: (page: Page, sort: CertSort) => void;
 }
 
-const columns = [
-  {
-    field: 'certificate_not_valid_after',
-    name: labels.STATUS_COL,
-    sortable: true,
-    render: (val: string, item: Cert) => {
-      return <CertStatus cert={item} />;
-    },
-  },
-  {
-    name: labels.COMMON_NAME_COL,
-    field: 'common_name',
-  },
-  {
-    name: labels.MONITORS_COL,
-    field: 'monitors',
-    render: (monitors: CertMonitor[]) => <CertMonitors monitors={monitors} />,
-  },
-  {
-    name: labels.ISSUED_BY_COL,
-    field: 'issuer',
-  },
-  {
-    name: labels.VALID_UNTIL_COL,
-    field: 'certificate_not_valid_after',
-    sortable: true,
-    render: (value: string) => {
-      return moment(value).format('L LT');
-    },
-  },
-  {
-    name: labels.FINGERPRINTS_COL,
-    field: 'sha256',
-    render: (val: string, item: Cert) => <FingerprintCol cert={item} />,
-  },
-];
-
 export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
   const certificates = useSelector(certificatesSelector);
 
@@ -91,6 +54,43 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
     pageSizeOptions: [5, 10, 15, 20],
     hidePerPageOptions: false,
   };
+
+  const columns = [
+    {
+      field: 'certificate_not_valid_after',
+      name: labels.STATUS_COL,
+      sortable: true,
+      render: (val: string, item: Cert) => {
+        return <CertStatus cert={item} />;
+      },
+    },
+    {
+      name: labels.COMMON_NAME_COL,
+      field: 'common_name',
+    },
+    {
+      name: labels.MONITORS_COL,
+      field: 'monitors',
+      render: (monitors: CertMonitor[]) => <CertMonitors monitors={monitors} />,
+    },
+    {
+      name: labels.ISSUED_BY_COL,
+      field: 'issuer',
+    },
+    {
+      name: labels.VALID_UNTIL_COL,
+      field: 'certificate_not_valid_after',
+      sortable: true,
+      render: (value: string) => {
+        return moment(value).format('L LT');
+      },
+    },
+    {
+      name: labels.FINGERPRINTS_COL,
+      field: 'sha256',
+      render: (val: string, item: Cert) => <FingerprintCol cert={item} />,
+    },
+  ];
 
   return (
     <EuiBasicTable

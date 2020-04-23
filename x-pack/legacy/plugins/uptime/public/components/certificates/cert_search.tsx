@@ -12,6 +12,7 @@ import * as labels from './translations';
 const WrapFieldSearch = styled(EuiFieldSearch)`
   min-width: 700px;
 `;
+
 interface Props {
   setSearch: (val: string) => void;
 }
@@ -23,6 +24,7 @@ export const CertificateSearch: React.FC<Props> = ({ setSearch }) => {
 
   return (
     <WrapFieldSearch
+      data-test-subj="uptimeCertSearch"
       placeholder={labels.SEARCH_CERTS}
       onChange={onChange}
       isClearable={true}

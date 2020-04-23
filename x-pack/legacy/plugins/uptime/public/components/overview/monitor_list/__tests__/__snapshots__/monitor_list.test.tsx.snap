@@ -575,6 +575,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         class="euiTitle euiTitle--xsmall"
       >
         <a
+          data-test-subj="uptimeCertificatesLink"
           href="/certificates"
         >
           View certificates status

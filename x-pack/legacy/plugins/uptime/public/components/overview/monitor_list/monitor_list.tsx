@@ -204,7 +204,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h5>
-              <Link to={CERTIFICATES_ROUTE}>
+              <Link to={CERTIFICATES_ROUTE} data-test-subj="uptimeCertificatesLink">
                 <FormattedMessage
                   id="xpack.uptime.monitorList.monitoringStatusTitle"
                   defaultMessage="View certificates status"

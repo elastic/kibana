@@ -14,6 +14,7 @@ exports[`CertificatesSearch renders expected elements for valid props 1`] = `
     <input
       aria-label="Search certificates"
       class="euiFieldSearch c0"
+      data-test-subj="uptimeCertSearch"
       placeholder="Search certificates"
       type="search"
     />

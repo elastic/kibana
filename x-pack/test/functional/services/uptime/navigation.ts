@@ -25,9 +25,13 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     });
   };
 
+  const refreshApp = async () => {
+    await testSubjects.click('superDatePickerApplyTimeButton');
+  };
+
   return {
     async refreshApp() {
-      await testSubjects.click('superDatePickerApplyTimeButton');
+      await refreshApp();
     },
 
     async goToUptime() {
@@ -58,6 +62,13 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
           timeout: 30000,
         });
       }
+    },
+
+    goToCertificates: async () => {
+      return retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.click('uptimeCertificatesLink');
+        await testSubjects.existOrFail('uptimeCertificatesPage');
+      });
     },
 
     async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {

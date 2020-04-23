@@ -21,7 +21,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('empty index', async () => {
       it('returns empty array for no data', async () => {
         const apiResponse = await supertest.get(API_URLS.CERTS);
-        expect(JSON.stringify(apiResponse.body)).to.eql('{"certs":[]}');
+        expect(JSON.stringify(apiResponse.body)).to.eql('{"certs":[],"total":0}');
       });
     });
 
