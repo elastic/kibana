@@ -45,7 +45,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
-  getCustomIconAndTooltipContent(): IconAndTooltipContent;
+  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
   getIconAndTooltipContent(zoomLevel: number, isUsingSearch: boolean): IconAndTooltipContent;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
@@ -88,7 +88,11 @@ export type Footnote = {
 export type IconAndTooltipContent = {
   icon?: ReactElement<any> | null;
   tooltipContent?: string | null;
-  footnotes?: Footnote[] | null;
+  footnotes: Footnote[];
+};
+export type CustomIconAndTooltipContent = {
+  icon: ReactElement<any> | null;
+  tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
 };
 
@@ -213,7 +217,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getCustomIconAndTooltipContent(): IconAndTooltipContent {
+  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };

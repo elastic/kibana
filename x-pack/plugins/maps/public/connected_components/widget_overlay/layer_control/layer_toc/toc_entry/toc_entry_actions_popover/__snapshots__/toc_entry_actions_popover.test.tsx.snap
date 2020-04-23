@@ -86,16 +86,18 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               />,
               "name": "Hide layer",
               "onClick": [Function],
+              "toolTipContent": null,
             },
             Object {
               "data-test-subj": "editLayerButton",
-              "disabled": undefined,
+              "disabled": false,
               "icon": <EuiIcon
                 size="m"
                 type="pencil"
               />,
               "name": "Edit layer",
               "onClick": [Function],
+              "toolTipContent": null,
             },
             Object {
               "data-test-subj": "cloneLayerButton",
@@ -105,6 +107,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               />,
               "name": "Clone layer",
               "onClick": [Function],
+              "toolTipContent": null,
             },
             Object {
               "data-test-subj": "removeLayerButton",
@@ -114,6 +117,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               />,
               "name": "Remove layer",
               "onClick": [Function],
+              "toolTipContent": null,
             },
           ],
           "title": "Layer actions",
@@ -210,16 +214,18 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               />,
               "name": "Hide layer",
               "onClick": [Function],
+              "toolTipContent": null,
             },
             Object {
               "data-test-subj": "editLayerButton",
-              "disabled": undefined,
+              "disabled": false,
               "icon": <EuiIcon
                 size="m"
                 type="pencil"
               />,
               "name": "Edit layer",
               "onClick": [Function],
+              "toolTipContent": null,
             },
             Object {
               "data-test-subj": "cloneLayerButton",
@@ -229,6 +235,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               />,
               "name": "Clone layer",
               "onClick": [Function],
+              "toolTipContent": null,
             },
             Object {
               "data-test-subj": "removeLayerButton",
@@ -238,6 +245,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               />,
               "name": "Remove layer",
               "onClick": [Function],
+              "toolTipContent": null,
             },
           ],
           "title": "Layer actions",
@@ -334,6 +342,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
               />,
               "name": "Hide layer",
               "onClick": [Function],
+              "toolTipContent": null,
             },
           ],
           "title": "Layer actions",

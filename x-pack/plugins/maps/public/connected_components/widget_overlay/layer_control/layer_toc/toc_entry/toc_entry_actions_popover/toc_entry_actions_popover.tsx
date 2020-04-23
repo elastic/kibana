@@ -31,6 +31,8 @@ interface State {
 }
 
 export class TOCEntryActionsPopover extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
   state = {
     isPopoverOpen: false,
     supportsFitToBounds: false,
@@ -158,6 +160,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
             }),
         icon: <EuiIcon type={this.props.layer.isVisible() ? 'eye' : 'eyeClosed'} size="m" />,
         'data-test-subj': 'layerVisibilityToggleButton',
+        toolTipContent: null,
         onClick: () => {
           this._closePopover();
           this._toggleVisible();
@@ -173,6 +176,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         }),
         icon: <EuiIcon type="pencil" size="m" />,
         'data-test-subj': 'editLayerButton',
+        toolTipContent: null,
         onClick: () => {
           this._closePopover();
           this.props.editLayer();
@@ -183,6 +187,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           defaultMessage: 'Clone layer',
         }),
         icon: <EuiIcon type="copy" size="m" />,
+        toolTipContent: null,
         'data-test-subj': 'cloneLayerButton',
         onClick: () => {
           this._closePopover();
@@ -194,6 +199,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           defaultMessage: 'Remove layer',
         }),
         icon: <EuiIcon type="trash" size="m" />,
+        toolTipContent: null,
         'data-test-subj': 'removeLayerButton',
         onClick: () => {
           this._closePopover();
