@@ -23,7 +23,7 @@ export default function({ getService }: FtrProviderContext) {
     it('can change the settings', async () => {
       const newSettings = {
         heartbeatIndices: 'myIndex1*',
-        certificatesThresholds: {
+        certThresholds: {
           expiration: 5,
           age: 15,
         },

@@ -55,7 +55,7 @@ exports[`CertificateForm shallow renders expected elements for valid props 1`] =
     fieldErrors={Object {}}
     formFields={
       Object {
-        "certificatesThresholds": Object {
+        "certThresholds": Object {
           "age": 36,
           "expiration": 7,
         },
@@ -63,6 +63,7 @@ exports[`CertificateForm shallow renders expected elements for valid props 1`] =
       }
     }
     isDisabled={false}
+    loading={false}
     onChange={[MockFunction]}
   />
 </ContextProvider>
