@@ -138,12 +138,14 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {put} /api/ml/anomaly_detectors/:jobId Instantiate an anomaly detection job
+   * @api {put} /api/ml/anomaly_detectors/:jobId Create an anomaly detection job
    * @apiName CreateAnomalyDetectors
    * @apiDescription Creates an anomaly detection job.
    *
    * @apiSchema (params) jobIdSchema
    * @apiSchema (body) anomalyDetectionJobSchema
+   *
+   * @apiSuccess {Object} job the configuration of the job that has been created.
    */
   router.put(
     {

@@ -7,6 +7,7 @@
 import path from 'path';
 import moment from 'moment';
 import 'moment-timezone';
+import ReactDOM from "react-dom";
 
 import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
@@ -24,6 +25,9 @@ moment.tz.setDefault('UTC');
 const testTime = new Date(Date.UTC(2019, 5, 1)); // June 1 2019
 Date.now = jest.fn(() => testTime);
 
+// Mock telemetry service 
+jest.mock('../public/lib/ui_metric', () => ({ trackCanvasUiMetric: () => { } }));
+
 // Mock EUI generated ids to be consistently predictable for snapshots.
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
@@ -32,7 +36,7 @@ jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `gene
 jest.mock('@elastic/eui/lib/components/code/code', () => {
   const React = require.requireActual('react');
   return {
-    EuiCode: ({children, className}) => (
+    EuiCode: ({ children, className }) => (
       <span>
         <code>{children}</code>
       </span>
@@ -61,6 +65,12 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
   };
 });
 
+
+// Mock React Portal for components that use modals, tooltips, etc
+ReactDOM.createPortal = jest.fn((element) => {
+  return element;
+});
+
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
     htmlIdGenerator: () => () => `generated-id`,
@@ -71,7 +81,7 @@ jest.mock('plugins/interpreter/registries', () => ({}));
 
 // Disabling this test due to https://github.com/elastic/eui/issues/2242
 jest.mock(
-  '../public/components/workpad_header/workpad_export/flyout/__examples__/share_website_flyout.stories',
+  '../public/components/workpad_header/share_menu/flyout/__examples__/share_website_flyout.stories',
   () => {
     return 'Disabled Panel';
   }
