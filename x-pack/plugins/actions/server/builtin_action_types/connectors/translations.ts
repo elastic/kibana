@@ -20,34 +20,34 @@ export const FIELD_INFORMATION = (
 ) => {
   switch (mode) {
     case 'create':
-      return i18n.translate('xpack.actions.builtin.connector.informationCreated', {
+      return i18n.translate('xpack.actions.builtin.connector.common.informationCreated', {
         values: { date, user },
         defaultMessage: '(created at {date} by {user})',
       });
     case 'update':
-      return i18n.translate('xpack.actions.builtin.connector.informationUpdated', {
+      return i18n.translate('xpack.actions.builtin.connector.common.informationUpdated', {
         values: { date, user },
         defaultMessage: '(updated at {date} by {user})',
       });
     case 'add':
-      return i18n.translate('xpack.actions.builtin.connector.informationAdded', {
+      return i18n.translate('xpack.actions.builtin.connector.common.informationAdded', {
         values: { date, user },
         defaultMessage: '(added at {date} by {user})',
       });
     default:
-      return i18n.translate('xpack.actions.builtin.connector.informationDefault', {
+      return i18n.translate('xpack.actions.builtin.connector.common.informationDefault', {
         values: { date, user },
         defaultMessage: '(created at {date} by {user})',
       });
   }
 };
 
-export const MAPPING_EMPTY = i18n.translate('xpack.actions.builtin.connector.emptyMapping', {
+export const MAPPING_EMPTY = i18n.translate('xpack.actions.builtin.connector.common.emptyMapping', {
   defaultMessage: '[casesConfiguration.mapping]: expected non-empty but got empty',
 });
 
 export const WHITE_LISTED_ERROR = (message: string) =>
-  i18n.translate('xpack.actions.builtin.connector.apiWhitelistError', {
+  i18n.translate('xpack.actions.builtin.connector.common.apiWhitelistError', {
     defaultMessage: 'error configuring connector action: {message}',
     values: {
       message,
