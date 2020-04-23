@@ -5,13 +5,17 @@
  */
 
 import React from 'react';
-import { createMockVisualization, createMockFramePublicAPI, createMockDatasource } from '../mocks';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
-import { ChartSwitch } from './chart_switch';
-import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
+import {
+  createMockVisualization,
+  createMockFramePublicAPI,
+  createMockDatasource,
+} from '../../mocks';
 import { EuiKeyPadMenuItem } from '@elastic/eui';
-import { Action } from './state_management';
+import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../../types';
+import { Action } from '../state_management';
+import { ChartSwitch } from './chart_switch';
 
 describe('chart_switch', () => {
   function generateVisualization(id: string): jest.Mocked<Visualization> {
