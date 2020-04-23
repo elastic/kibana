@@ -112,15 +112,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       }
       label={
         <FormattedMessage
-          defaultMessage="Format (Default: {defaultFormat})"
-          id="common.ui.fieldEditor.defaultFormatHeader"
-          values={
-            Object {
-              "defaultFormat": <eui-code>
-                Test format
-              </eui-code>,
-            }
-          }
+          defaultMessage="Format"
+          id="common.ui.fieldEditor.formatHeader"
+          values={Object {}}
         />
       }
     >
@@ -134,8 +128,8 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
               "value": "",
             },
             Object {
-              "text": "Test format",
-              "value": "test_format",
+              "text": undefined,
+              "value": "",
             },
           ]
         }
@@ -349,15 +343,9 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       }
       label={
         <FormattedMessage
-          defaultMessage="Format (Default: {defaultFormat})"
-          id="common.ui.fieldEditor.defaultFormatHeader"
-          values={
-            Object {
-              "defaultFormat": <eui-code>
-                Test format
-              </eui-code>,
-            }
-          }
+          defaultMessage="Format"
+          id="common.ui.fieldEditor.formatHeader"
+          values={Object {}}
         />
       }
     >
@@ -371,8 +359,8 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
               "value": "",
             },
             Object {
-              "text": "Test format",
-              "value": "test_format",
+              "text": undefined,
+              "value": "",
             },
           ]
         }
@@ -645,15 +633,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       }
       label={
         <FormattedMessage
-          defaultMessage="Format (Default: {defaultFormat})"
-          id="common.ui.fieldEditor.defaultFormatHeader"
-          values={
-            Object {
-              "defaultFormat": <eui-code>
-                Test format
-              </eui-code>,
-            }
-          }
+          defaultMessage="Format"
+          id="common.ui.fieldEditor.formatHeader"
+          values={Object {}}
         />
       }
     >
@@ -667,8 +649,8 @@ exports[`FieldEditor should show conflict field warning 1`] = `
               "value": "",
             },
             Object {
-              "text": "Test format",
-              "value": "test_format",
+              "text": undefined,
+              "value": "",
             },
           ]
         }
@@ -854,7 +836,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                   testlang
                 </eui-code>,
                 "painlessLink": <eui-link
-                  href="(docLink for scriptedFields.painless)"
+                  href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html"
                   target="_blank"
                 >
                   <FormattedMessage
@@ -972,15 +954,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       }
       label={
         <FormattedMessage
-          defaultMessage="Format (Default: {defaultFormat})"
-          id="common.ui.fieldEditor.defaultFormatHeader"
-          values={
-            Object {
-              "defaultFormat": <eui-code>
-                Test format
-              </eui-code>,
-            }
-          }
+          defaultMessage="Format"
+          id="common.ui.fieldEditor.formatHeader"
+          values={Object {}}
         />
       }
     >
@@ -994,8 +970,8 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "",
             },
             Object {
-              "text": "Test format",
-              "value": "test_format",
+              "text": undefined,
+              "value": "",
             },
           ]
         }
@@ -1324,15 +1300,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       }
       label={
         <FormattedMessage
-          defaultMessage="Format (Default: {defaultFormat})"
-          id="common.ui.fieldEditor.defaultFormatHeader"
-          values={
-            Object {
-              "defaultFormat": <eui-code>
-                Test format
-              </eui-code>,
-            }
-          }
+          defaultMessage="Format"
+          id="common.ui.fieldEditor.formatHeader"
+          values={Object {}}
         />
       }
     >
@@ -1346,8 +1316,8 @@ exports[`FieldEditor should show multiple type field warning with a table contai
               "value": "",
             },
             Object {
-              "text": "Test format",
-              "value": "test_format",
+              "text": undefined,
+              "value": "",
             },
           ]
         }

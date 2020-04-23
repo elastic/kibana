@@ -5,7 +5,6 @@ exports[`TruncateFormatEditor should render normally 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    error={null}
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -20,6 +19,7 @@ exports[`TruncateFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldNumber
+      defaultValue={5}
       isInvalid={false}
       min={1}
       onChange={[Function]}

@@ -32,6 +32,13 @@ class TestEditor extends PureComponent {
   }
 }
 
+const formatEditors = {
+  byFormatId: {
+    ip: TestEditor,
+    number: TestEditor,
+  },
+};
+
 describe('FieldFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
@@ -40,11 +47,7 @@ describe('FieldFormatEditor', () => {
         fieldFormat={{} as DefaultFormatEditor}
         fieldFormatId="number"
         fieldFormatParams={{}}
-        fieldFormatEditors={{
-          getEditor: () => {
-            return TestEditor;
-          },
-        }}
+        fieldFormatEditors={formatEditors}
         onChange={() => {}}
         onError={() => {}}
       />
@@ -60,11 +63,7 @@ describe('FieldFormatEditor', () => {
         fieldFormat={{} as DefaultFormatEditor}
         fieldFormatId="ip"
         fieldFormatParams={{}}
-        fieldFormatEditors={{
-          getEditor: () => {
-            return null;
-          },
-        }}
+        fieldFormatEditors={formatEditors}
         onChange={() => {}}
         onError={() => {}}
       />

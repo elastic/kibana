@@ -5,7 +5,6 @@ exports[`BytesFormatEditor should render normally 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    error={null}
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -47,6 +46,7 @@ exports[`BytesFormatEditor should render normally 1`] = `
       isInvalid={false}
       onChange={[Function]}
       placeholder="0,0.[000]b"
+      value=""
     />
   </EuiFormRow>
   <FormatEditorSamples

@@ -45,12 +45,12 @@ describe('DefaultFormatEditor', () => {
       const inputs = [1, 10, 15];
       const output = convertSampleInput(converter, inputs);
 
-      expect(output.error).toEqual(null);
+      expect(output.error).toBeUndefined();
       expect(JSON.stringify(output.samples)).toEqual(
         JSON.stringify([
-          { input: 1, output: 2 },
-          { input: 10, output: 20 },
-          { input: 15, output: 30 },
+          { input: 1, output: '2' },
+          { input: 10, output: '20' },
+          { input: 15, output: '30' },
         ])
       );
     });

@@ -5,7 +5,6 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    error={null}
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -30,6 +29,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
           },
         ]
       }
+      value=""
     />
   </EuiFormRow>
   <EuiFormRow
@@ -63,6 +63,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
           },
         ]
       }
+      value=""
     />
   </EuiFormRow>
   <FormatEditorSamples
@@ -116,7 +117,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    error={null}
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -141,6 +141,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
           },
         ]
       }
+      value=""
     />
   </EuiFormRow>
   <EuiFormRow
@@ -174,6 +175,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
           },
         ]
       }
+      value=""
     />
   </EuiFormRow>
   <EuiFormRow
@@ -198,6 +200,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       max={20}
       min={0}
       onChange={[Function]}
+      value={2}
     />
   </EuiFormRow>
   <FormatEditorSamples

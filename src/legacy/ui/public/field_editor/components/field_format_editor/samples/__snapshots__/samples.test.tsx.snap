@@ -41,7 +41,7 @@ exports[`FormatEditorSamples should render normally 1`] = `
         },
         Object {
           "input": 123,
-          "output": 456,
+          "output": "456",
         },
         Object {
           "input": Array [

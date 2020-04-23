@@ -5,7 +5,6 @@ exports[`StringFormatEditor should render normally 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    error={null}
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -21,6 +20,7 @@ exports[`StringFormatEditor should render normally 1`] = `
   >
     <EuiSelect
       data-test-subj="stringEditorTransform"
+      defaultValue=""
       isInvalid={false}
       onChange={[Function]}
       options={

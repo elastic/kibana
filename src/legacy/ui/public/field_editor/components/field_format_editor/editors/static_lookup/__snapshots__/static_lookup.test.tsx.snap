@@ -35,6 +35,8 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
               "type": "icon",
             },
           ],
+          "field": "actions",
+          "name": "actions",
           "width": "30px",
         },
       ]
@@ -140,6 +142,8 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
               "type": "icon",
             },
           ],
+          "field": "actions",
+          "name": "actions",
           "width": "30px",
         },
       ]

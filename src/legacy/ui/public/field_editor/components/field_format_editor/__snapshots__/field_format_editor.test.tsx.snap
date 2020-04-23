@@ -12,4 +12,14 @@ exports[`FieldFormatEditor should render normally 1`] = `
 </Fragment>
 `;
 
-exports[`FieldFormatEditor should render nothing if there is no editor for the format 1`] = `<Fragment />`;
+exports[`FieldFormatEditor should render nothing if there is no editor for the format 1`] = `
+<Fragment>
+  <TestEditor
+    fieldType="number"
+    format={Object {}}
+    formatParams={Object {}}
+    onChange={[Function]}
+    onError={[Function]}
+  />
+</Fragment>
+`;
