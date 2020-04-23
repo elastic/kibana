@@ -24,21 +24,6 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'GET',
   });
 
-  rollup.search = ca({
-    urls: [
-      {
-        fmt: '/<%=index%>/_rollup_search',
-        req: {
-          index: {
-            type: 'string',
-          },
-        },
-      },
-    ],
-    needBody: true,
-    method: 'POST',
-  });
-
   rollup.fieldCapabilities = ca({
     urls: [
       {
