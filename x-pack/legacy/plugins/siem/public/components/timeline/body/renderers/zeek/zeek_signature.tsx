@@ -21,7 +21,7 @@ import * as i18n from './translations';
 
 const Badge = styled(EuiBadge)`
   vertical-align: top;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 Badge.displayName = 'Badge';
 
