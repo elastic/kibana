@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { plugin } from '../../../legacy/plugins/monitoring/public/np_ready';
+import { PluginInitializerContext } from '../../../../src/core/public';
+import { MonitoringPlugin } from './plugin';
+
+export function plugin(ctx: PluginInitializerContext) {
+  return new MonitoringPlugin(ctx);
+}

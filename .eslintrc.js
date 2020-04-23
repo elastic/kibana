@@ -844,7 +844,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/monitoring/public/lib/jquery_flot/**/*.js'],
+      files: ['x-pack/plugins/monitoring/public/lib/jquery_flot/**/*.js'],
       env: {
         jquery: true,
       },
