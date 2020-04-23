@@ -4,30 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { empty, of, merge, Observable, from } from 'rxjs';
-import {
-  map,
-  filter,
-  switchMap,
-  withLatestFrom,
-  mergeMap,
-  startWith,
-  takeUntil,
-} from 'rxjs/operators';
-import { getOr, get } from 'lodash/fp';
+import { of, Observable, from } from 'rxjs';
+import { get } from 'lodash/fp';
+import { filter, withLatestFrom, mergeMap, startWith, takeUntil } from 'rxjs/operators';
 import { Epic } from 'redux-observable';
 import { Action } from 'redux';
 import {
-  addTimeline,
-  createTimeline,
   getDefaultTimeline as getDefaultTimelineAction,
   showCallOutUnauthorizedMsg,
-  updateTimeline,
   endTimelineSaving,
   startTimelineSaving,
 } from './actions';
 import { getDefaultTimeline } from '../../containers/timeline/api';
-import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { ActionTimeline, TimelineById } from './types';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { addError } from '../app/actions';
@@ -36,6 +24,7 @@ import {
   epicUpdateTimeline,
 } from '../../components/open_timeline/helpers';
 import { getTimeRangeSettings } from '../../utils/default_date_settings';
+import { ResponseTimeline } from '../../graphql/types';
 
 export const epicDefaultTimeline = (
   action: ActionTimeline,
@@ -53,8 +42,6 @@ export const epicDefaultTimeline = (
       const response: ResponseTimeline = get('data.persistTimeline', result);
       const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
-      console.error('savesdssss', savedTimeline, response);
-
       const { timeline: timelineModel, notes } = formatTimelineResultToModel(
         response.timeline,
         false
@@ -65,21 +52,21 @@ export const epicDefaultTimeline = (
         ...callOutMsg,
         ...epicUpdateTimeline({
           duplicate: false,
-          from: get('dateRange.start', timeline) ?? settingsFrom,
+          from: timeline?.dateRange?.start ?? settingsFrom,
           id: 'timeline-1',
           notes,
           timeline: {
             ...timelineModel,
             show: savedTimeline?.show ?? false,
           },
-          to: get('dateRange.end', timeline) ?? settingsTo,
+          to: timeline?.dateRange?.end ?? settingsTo,
         }),
         endTimelineSaving({
           id: action.payload.id,
         }),
       ];
     }),
-    // startWith(startTimelineSaving({ id: action.payload.id })),
+    startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(
       action$.pipe(
         withLatestFrom(timeline$),

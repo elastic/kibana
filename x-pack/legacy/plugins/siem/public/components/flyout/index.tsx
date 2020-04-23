@@ -24,7 +24,7 @@ export const Badge = styled(EuiBadge)`
   right: 0%;
   top: 0%;
   border-bottom-left-radius: 5px;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 Badge.displayName = 'Badge';
 

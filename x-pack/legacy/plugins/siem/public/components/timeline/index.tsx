@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
@@ -14,7 +14,6 @@ import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../st
 import { timelineActions } from '../../store/actions';
 import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { defaultHeaders } from './body/column_headers/default_headers';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
@@ -37,7 +36,6 @@ type Props = OwnProps & PropsFromRedux;
 const StatefulTimelineComponent = React.memo<Props>(
   ({
     columns,
-    createTimeline,
     dataProviders,
     eventType,
     end,
@@ -157,8 +155,6 @@ const StatefulTimelineComponent = React.memo<Props>(
       [columns, id]
     );
 
-    console.error('sort', sort);
-
     return (
       <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indexPattern, browserFields }) => (
@@ -228,7 +224,6 @@ const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
-    console.error('timteline', timeline);
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
       columns,
@@ -268,7 +263,6 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = {
   addProvider: timelineActions.addProvider,
-  createTimeline: timelineActions.createTimeline,
   onDataProviderEdited: timelineActions.dataProviderEdited,
   removeColumn: timelineActions.removeColumn,
   removeProvider: timelineActions.removeProvider,

@@ -36,19 +36,13 @@ export const defaultTimelinesRoute = (
     async (context, request, response) => {
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const siemResponse = buildSiemResponse(response);
-        const savedObjectsClient = context.core.savedObjects.client;
+        // const siemResponse = buildSiemResponse(response);
 
         const allTimelines = await getAllTimeline(frameworkRequest, null, null, null, {
           sortField: SortFieldTimeline.updated,
           sortOrder: Direction.desc,
         });
-        console.error('allTimelines', JSON.stringify(allTimelines, null, 2));
-
         const defaultTimeline = find(['title', ''], allTimelines.timeline);
-
-        console.error('defaultTimeline?.savedObjectId', defaultTimeline?.savedObjectId);
-        console.error('request', request);
 
         if (defaultTimeline?.savedObjectId) {
           if (request.query?.clean === 'true') {

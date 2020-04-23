@@ -8,7 +8,6 @@ import ApolloClient from 'apollo-client';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { AllTimelinesVariables, useGetAllTimeline } from '../../containers/timeline/all';
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
@@ -16,7 +15,7 @@ import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../grap
 import { State, timelineSelectors } from '../../store';
 import { TimelineModel } from '../../store/timeline/model';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { createTimeline, updateIsLoading } from '../../store/timeline/actions';
+import { updateIsLoading } from '../../store/timeline/actions';
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
@@ -115,8 +114,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const getTimeline = timelineSelectors.getTimelineByIdSelector();
     const timeline =
       useSelector<State>(state => getTimeline(state, 'timeline-1')) ?? timelineDefaults;
-
-    console.error('timeline', timeline);
 
     /* This feature will be implemented in the near future, so we are keeping it to know what to do */
 
