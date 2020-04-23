@@ -4,36 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash/fp';
-
-import { timelineSavedObjectType } from '../../../saved_objects';
 import { IRouter } from '../../../../../../../src/core/server';
 import { ConfigType } from '../../..';
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 import { TIMELINE_RESET_URL } from '../../../../common/constants';
+import { SetupPlugins } from '../../../plugin';
 
 import { resetTimelinesRequestBodySchema } from './schemas/reset_timelines_schema';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 
-import { deleteNoteByTimelineId } from '../../note/routes/utils';
-import { deleteAllPinnedEventsOnTimeline } from '../../pinned_event/routes/utils';
-import { timelineDefaults } from '../default_timeline';
+import { buildFrameworkRequest } from './utils/common';
+import { resetTimeline } from '../saved_object';
 
-export const resetTimelinesRoute = (router: IRouter, config: ConfigType) => {
+export const resetTimelinesRoute = (
+  router: IRouter,
+  config: ConfigType,
+  security: SetupPlugins['security']
+) => {
   router.post(
     {
       path: TIMELINE_RESET_URL,
       validate: {
         body: buildRouteValidation(resetTimelinesRequestBodySchema),
       },
-      // options: {
-      //   tags: ['access:siem'],
-      // },
+      options: {
+        tags: ['access:siem'],
+      },
     },
     async (context, request, response) => {
       try {
+        const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const siemResponse = buildSiemResponse(response);
-        const savedObjectsClient = context.core.savedObjects.client;
 
         if (!request.body.ids.length) {
           return siemResponse.error({
@@ -42,22 +43,10 @@ export const resetTimelinesRoute = (router: IRouter, config: ConfigType) => {
           });
         }
 
-        await Promise.all(
-          request.body.ids.map((timelineId: string) =>
-            Promise.all([
-              savedObjectsClient.update(
-                timelineSavedObjectType,
-                timelineId,
-                omit(['title', 'description'], timelineDefaults)
-              ),
-              deleteNoteByTimelineId(savedObjectsClient, timelineId),
-              deleteAllPinnedEventsOnTimeline(savedObjectsClient, timelineId),
-            ])
-          )
-        );
+        await resetTimeline(frameworkRequest, request.body.ids);
 
         return response.ok({
-          body: 'done',
+          body: request.body.ids,
         });
       } catch (err) {
         const error = transformError(err);

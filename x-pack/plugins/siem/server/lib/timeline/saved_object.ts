@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { getOr, omit } from 'lodash/fp';
 
 import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
@@ -25,6 +25,7 @@ import * as pinnedEvent from '../pinned_event/saved_object';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from './saved_object_mappings';
+import { timelineDefaults } from './default_timeline';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];
@@ -241,6 +242,26 @@ export const persistTimeline = async (
     }
     throw err;
   }
+};
+
+export const resetTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
+
+  const response = await Promise.all(
+    timelineIds.map(timelineId =>
+      Promise.all([
+        savedObjectsClient.update(
+          timelineSavedObjectType,
+          timelineId,
+          omit(['title', 'description', 'dateRange'], timelineDefaults)
+        ),
+        note.deleteNoteByTimelineId(request, timelineId),
+        pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
+      ])
+    )
+  );
+
+  return response;
 };
 
 export const deleteTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {

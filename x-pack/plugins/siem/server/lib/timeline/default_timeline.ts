@@ -6,7 +6,7 @@
 
 import { Direction } from '../../graphql/types';
 import { defaultHeaders } from './default_timeline_headers';
-import { SavedTimeline } from './types';
+import { SavedTimeline } from '../../../common/types/timeline';
 
 export const timelineDefaults: SavedTimeline = {
   columns: defaultHeaders,

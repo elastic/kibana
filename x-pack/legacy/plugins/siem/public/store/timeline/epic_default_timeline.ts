@@ -4,22 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { empty } from 'rxjs';
+import { empty, of, merge } from 'rxjs';
+import { ajax } from 'rxjs/ajax';
+import { map } from 'rxjs/operators';
 import { Epic } from 'redux-observable';
 import { Action } from 'redux';
 import { addTimeline } from './actions';
-import { getDefaultTimeline } from '../../containers/timeline/api';
+import { getDefaultTimeline, decodeTimelineResponse } from '../../containers/timeline/api';
 
-export const createDefaultTimelineEpic = <State>(): Epic<Action, Action, State, {}> => () => {
+export const createDefaultTimelineEpic = <State>(): Epic<Action, Action, State> => () => {
   console.error('default timeline epic');
 
-  return getDefaultTimeline()
-    .then(data => {
-      console.error('data', data);
-      addTimeline({
-        id: data.id,
-        timeline: data.attributes,
-      });
+  return ajax.getJSON('/api/timeline/_default').pipe(
+    map(resp => {
+      console.error('resp', resp);
+      return addTimeline({ id: 'timeline-1', timeline: resp.data.persistTimeline.timeline });
     })
-    .catch(() => empty());
+  );
+
+  // return of(getDefaultTimeline()).pipe(
+  //   map(resp => {
+  //     console.error('resp', resp);
+
+  //     return addTimeline({ id: 'timeline-1', timeline: resp.data.persistTimeline.timeline });
+  //   })
+  // );
 };

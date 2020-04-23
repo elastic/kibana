@@ -78,7 +78,7 @@ import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persi
 // import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
-import { persistTimeline } from '../../containers/timeline/api';
+import { persistTimeline, getDefaultTimeline } from '../../containers/timeline/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/timeline/all';
 import { inputsModel } from '../inputs';
 
@@ -158,6 +158,7 @@ export const createTimelineEpic = <State>(): Epic<
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
           myEpicTimelineId.setTimelineId(null);
           myEpicTimelineId.setTimelineVersion(null);
+          return true;
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
@@ -186,7 +187,7 @@ export const createTimelineEpic = <State>(): Epic<
         const timelineId = myEpicTimelineId.getTimelineId();
         const version = myEpicTimelineId.getTimelineVersion();
 
-        // console.error('dispatcher', objAction, timeline, myEpicTimelineId);
+        console.error('dispatcher', objAction, timeline, myEpicTimelineId);
 
         if (timelineNoteActionsType.includes(action.type)) {
           return epicPersistNote(apolloClient, action, timeline, notes, action$, timeline$, notes$);
@@ -194,6 +195,16 @@ export const createTimelineEpic = <State>(): Epic<
           return epicPersistPinnedEvent(apolloClient, action, timeline, action$, timeline$);
         } else if (timelineFavoriteActionsType.includes(action.type)) {
           return epicPersistTimelineFavorite(apolloClient, action, timeline, action$, timeline$);
+        } else if (action.type === createTimeline.type) {
+          return from(getDefaultTimeline({ clean: true })).pipe(
+            mergeMap(([result]) => {
+              const response: ResponseTimeline = get('data.persistTimeline', result);
+              if (response.timeline) {
+                return addTimeline({ id: 'timeline-1', timeline: response.timeline });
+              }
+              return empty()
+            })
+          );
         } else if (timelineActionsType.includes(action.type)) {
           return from(
             persistTimeline({

@@ -7,6 +7,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
+import { HttpFetchQuery } from 'kibana/public';
 import { throwErrors } from '../../../../../../plugins/case/common/api';
 import {
   SavedTimeline,
@@ -38,7 +39,7 @@ interface RequestPatchTimeline<T = string> extends RequestPostTimeline {
 
 type RequestPersistTimeline = RequestPostTimeline & Partial<RequestPatchTimeline<null | string>>;
 
-const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
+export const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
   pipe(
     TimelineResponseType.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
@@ -121,10 +122,12 @@ export const exportSelectedTimeline: ExportSelectedData = async ({
   return response.body!;
 };
 
-export const getDefaultTimeline = async (): Promise<TimelineResponse> => {
-  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_DEFAULT_URL);
-
-  console.error('response', response, decodeTimelineResponse(response));
+export const getDefaultTimeline = async (query: HttpFetchQuery): Promise<TimelineResponse> => {
+  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_DEFAULT_URL, {
+    query: {
+      clean: true,
+    },
+  });
 
   return decodeTimelineResponse(response);
 };

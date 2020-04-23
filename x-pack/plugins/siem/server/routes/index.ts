@@ -66,8 +66,8 @@ export const initRoutes = (
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config);
-  defaultTimelinesRoute(router, config);
-  resetTimelinesRoute(router, config);
+  defaultTimelinesRoute(router, config, security);
+  resetTimelinesRoute(router, config, security);
 
   findRulesStatusesRoute(router);
 
