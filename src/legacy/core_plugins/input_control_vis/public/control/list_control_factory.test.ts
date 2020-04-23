@@ -21,98 +21,17 @@ import { listControlFactory, ListControl } from './list_control_factory';
 import { ControlParams, CONTROL_TYPES } from '../editor_utils';
 import { getDepsMock, getSearchSourceMock } from '../test_utils';
 
-const MockSearchSource = getSearchSourceMock();
-const deps = getDepsMock();
-
-jest.doMock('./create_search_source.ts', () => ({
-  createSearchSource: MockSearchSource,
-}));
-
-describe('hasValue', () => {
-  const controlParams: ControlParams = {
-    id: '1',
-    fieldName: 'myField',
-    options: {} as any,
-    type: CONTROL_TYPES.LIST,
-    label: 'test',
-    indexPattern: {} as any,
-    parent: 'parent',
-  };
-  const useTimeFilter = false;
-
-  let listControl: ListControl;
-  beforeEach(async () => {
-    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource, deps);
+describe('listControlFactory', () => {
+  const searchSourceMock = getSearchSourceMock();
+  const deps = getDepsMock({
+    searchSource: {
+      create: searchSourceMock,
+    },
   });
 
-  test('should be false when control has no value', () => {
-    expect(listControl.hasValue()).toBe(false);
-  });
-
-  test('should be true when control has value', () => {
-    listControl.set([{ value: 'selected option', label: 'selection option' }]);
-    expect(listControl.hasValue()).toBe(true);
-  });
-
-  test('should be true when control has value that is the string "false"', () => {
-    listControl.set([{ value: 'false', label: 'selection option' }]);
-    expect(listControl.hasValue()).toBe(true);
-  });
-});
-
-describe('fetch', () => {
-  const controlParams: ControlParams = {
-    id: '1',
-    fieldName: 'myField',
-    options: {} as any,
-    type: CONTROL_TYPES.LIST,
-    label: 'test',
-    indexPattern: {} as any,
-    parent: 'parent',
-  };
-  const useTimeFilter = false;
-
-  let listControl: ListControl;
-  beforeEach(async () => {
-    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource, deps);
-  });
-
-  test('should pass in timeout parameters from injected vars', async () => {
-    await listControl.fetch();
-    expect(MockSearchSource).toHaveBeenCalledWith({
-      timeout: `1000ms`,
-      terminate_after: 100000,
-    });
-  });
-
-  test('should set selectOptions to results of terms aggregation', async () => {
-    await listControl.fetch();
-    expect(listControl.selectOptions).toEqual([
-      'Zurich Airport',
-      'Xi an Xianyang International Airport',
-    ]);
-  });
-});
-
-describe('fetch with ancestors', () => {
-  const controlParams: ControlParams = {
-    id: '1',
-    fieldName: 'myField',
-    options: {} as any,
-    type: CONTROL_TYPES.LIST,
-    label: 'test',
-    indexPattern: {} as any,
-    parent: 'parent',
-  };
-  const useTimeFilter = false;
-
-  let listControl: ListControl;
-  let parentControl;
-  beforeEach(async () => {
-    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource, deps);
-
-    const parentControlParams: ControlParams = {
-      id: 'parent',
+  describe('hasValue', () => {
+    const controlParams: ControlParams = {
+      id: '1',
       fieldName: 'myField',
       options: {} as any,
       type: CONTROL_TYPES.LIST,
@@ -120,26 +39,104 @@ describe('fetch with ancestors', () => {
       indexPattern: {} as any,
       parent: 'parent',
     };
-    parentControl = await listControlFactory(
-      parentControlParams,
-      useTimeFilter,
-      MockSearchSource,
-      deps
-    );
-    parentControl.clear();
-    listControl.setAncestors([parentControl]);
-  });
+    const useTimeFilter = false;
 
-  describe('ancestor does not have value', () => {
-    test('should disable control', async () => {
-      await listControl.fetch();
-      expect(listControl.isEnabled()).toBe(false);
+    let listControl: ListControl;
+    beforeEach(async () => {
+      listControl = await listControlFactory(controlParams, useTimeFilter, deps);
     });
 
-    test('should reset lastAncestorValues', async () => {
-      listControl.lastAncestorValues = 'last ancestor value';
+    test('should be false when control has no value', () => {
+      expect(listControl.hasValue()).toBe(false);
+    });
+
+    test('should be true when control has value', () => {
+      listControl.set([{ value: 'selected option', label: 'selection option' }]);
+      expect(listControl.hasValue()).toBe(true);
+    });
+
+    test('should be true when control has value that is the string "false"', () => {
+      listControl.set([{ value: 'false', label: 'selection option' }]);
+      expect(listControl.hasValue()).toBe(true);
+    });
+  });
+
+  describe('fetch', () => {
+    const controlParams: ControlParams = {
+      id: '1',
+      fieldName: 'myField',
+      options: {} as any,
+      type: CONTROL_TYPES.LIST,
+      label: 'test',
+      indexPattern: {} as any,
+      parent: 'parent',
+    };
+    const useTimeFilter = false;
+
+    let listControl: ListControl;
+    beforeEach(async () => {
+      listControl = await listControlFactory(controlParams, useTimeFilter, deps);
+    });
+
+    test('should pass in timeout parameters from injected vars', async () => {
       await listControl.fetch();
-      expect(listControl.lastAncestorValues).toBeUndefined();
+      expect(searchSourceMock).toHaveBeenCalledWith({
+        timeout: `1000ms`,
+        terminate_after: 100000,
+      });
+    });
+
+    test('should set selectOptions to results of terms aggregation', async () => {
+      await listControl.fetch();
+      expect(listControl.selectOptions).toEqual([
+        'Zurich Airport',
+        'Xi an Xianyang International Airport',
+      ]);
+    });
+  });
+
+  describe('fetch with ancestors', () => {
+    const controlParams: ControlParams = {
+      id: '1',
+      fieldName: 'myField',
+      options: {} as any,
+      type: CONTROL_TYPES.LIST,
+      label: 'test',
+      indexPattern: {} as any,
+      parent: 'parent',
+    };
+    const useTimeFilter = false;
+
+    let listControl: ListControl;
+    let parentControl;
+    beforeEach(async () => {
+      listControl = await listControlFactory(controlParams, useTimeFilter, deps);
+
+      const parentControlParams: ControlParams = {
+        id: 'parent',
+        fieldName: 'myField',
+        options: {} as any,
+        type: CONTROL_TYPES.LIST,
+        label: 'test',
+        indexPattern: {} as any,
+        parent: 'parent',
+      };
+      parentControl = await listControlFactory(parentControlParams, useTimeFilter, deps);
+      parentControl.clear();
+      listControl.setAncestors([parentControl]);
+    });
+
+    describe('ancestor does not have value', () => {
+      test('should disable control', async () => {
+        await listControl.fetch();
+        expect(listControl.isEnabled()).toBe(false);
+      });
+
+      test('should reset lastAncestorValues', async () => {
+        listControl.lastAncestorValues = 'last ancestor value';
+        await listControl.fetch();
+        expect(listControl.lastAncestorValues).toBeUndefined();
+      });
     });
   });
 });

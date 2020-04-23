@@ -191,7 +191,9 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
               />
             </EuiIcon>
           </span>
-          <span>
+          <span
+            className="euiIEFlexWrapFix"
+          >
             <FrameHeading
               isLibraryFrame={false}
               stackframe={
@@ -257,17 +259,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
         className="euiAccordion__childWrapper"
         id="test"
       >
-        <EuiMutationObserver
-          observerOptions={
-            Object {
-              "attributeFilter": Array [
-                "style",
-              ],
-              "childList": true,
-              "subtree": true,
-            }
-          }
-          onMutation={[Function]}
+        <EuiResizeObserver
+          onResize={[Function]}
         >
           <div>
             <div
@@ -1559,7 +1552,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
               <Variables />
             </div>
           </div>
-        </EuiMutationObserver>
+        </EuiResizeObserver>
       </div>
     </div>
   </EuiAccordion>
