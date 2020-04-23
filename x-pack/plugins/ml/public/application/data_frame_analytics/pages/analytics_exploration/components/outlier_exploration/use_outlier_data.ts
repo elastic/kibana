@@ -89,7 +89,10 @@ export const useOutlierData = (
       let backgroundColor;
 
       // column with feature values get color coded by its corresponding influencer value
-      if (fullItem[resultsField][`${FEATURE_INFLUENCE}.${columnId}`] !== undefined) {
+      if (
+        fullItem[resultsField] !== undefined &&
+        fullItem[resultsField][`${FEATURE_INFLUENCE}.${columnId}`] !== undefined
+      ) {
         backgroundColor = colorRange(fullItem[resultsField][`${FEATURE_INFLUENCE}.${columnId}`]);
       }
 
