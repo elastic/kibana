@@ -91,6 +91,17 @@ The distance filter is in addition to the tools for filtering data by custom sha
 image:release-notes/images/7-7-maps-distance-filter.png[Distance filters in Elastic Maps]
 
 [float]
+[[file-uploader-highlights]]
+=== File uploader now recommends Filebeat config
+
+experimental[] The file upload UI now has the ability to recommend a Filebeat 
+configuration based on the uploaded file that can be used to add more data of 
+the same structure to the same index that was created during an initial upload.
+
+[role="screenshot"]
+image:release-notes/images/7-7-file-uploader-filebeat.png[Recommended Filebeat config in File uploader]
+
+[float]
 === Learn more
 
 Get details on these release highlights and more in the {kib} 7.7 release blog.
