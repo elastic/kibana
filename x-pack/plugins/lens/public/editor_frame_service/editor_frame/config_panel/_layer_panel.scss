@@ -1,8 +1,8 @@
-.lnsConfigPanel__panel {
+.lnsLayerPanel {
   margin-bottom: $euiSizeS;
 }
 
-.lnsConfigPanel__row {
+.lnsLayerPanel__row {
   background: $euiColorLightestShade;
   padding: $euiSizeS;
   border-radius: $euiBorderRadius;
@@ -13,15 +13,7 @@
   }
 }
 
-.lnsConfigPanel__addLayerBtn {
-  color: transparentize($euiColorMediumShade, .3);
-  // Remove EuiButton's default shadow to make button more subtle
-  // sass-lint:disable-block no-important
-  box-shadow: none !important;
-  border: 1px dashed currentColor;
-}
-
-.lnsConfigPanel__dimension {
+.lnsLayerPanel__dimension {
   @include euiFontSizeS;
   background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
   border-radius: $euiBorderRadius;
@@ -31,12 +23,7 @@
   overflow: hidden;
 }
 
-.lnsConfigPanel__trigger {
-  max-width: 100%;
-  display: block;
-}
-
-.lnsConfigPanel__triggerLink {
+.lnsLayerPanel__triggerLink {
   padding: $euiSizeS;
   width: 100%;
   display: flex;
@@ -44,7 +31,3 @@
   min-height: $euiSizeXXL;
 }
 
-.lnsConfigPanel__popover {
-  line-height: 0;
-  flex-grow: 1;
-}

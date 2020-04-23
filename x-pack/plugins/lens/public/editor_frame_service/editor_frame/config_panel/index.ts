@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getCoreStart } from '../legacy';
-
-export const getAdvancedSettings = () => getCoreStart().uiSettings;
+export { ConfigPanelWrapper } from './config_panel';

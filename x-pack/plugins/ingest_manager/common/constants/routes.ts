@@ -66,7 +66,8 @@ export const AGENT_API_ROUTES = {
   ACKS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/acks`,
   ACTIONS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/actions`,
   ENROLL_PATTERN: `${FLEET_API_ROOT}/agents/enroll`,
-  UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/unenroll`,
+  UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/unenroll`,
+  REASSIGN_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/reassign`,
   STATUS_PATTERN: `${FLEET_API_ROOT}/agent-status`,
 };
 

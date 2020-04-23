@@ -40,6 +40,8 @@ export {
   GetOneAgentEventsResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
+  PutAgentReassignRequest,
+  PutAgentReassignResponse,
   // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,
   GetEnrollmentAPIKeysRequest,

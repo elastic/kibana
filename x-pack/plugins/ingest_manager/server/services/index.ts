@@ -6,7 +6,7 @@
 import * as settingsService from './settings';
 
 export { appContextService } from './app_context';
-export { ESIndexPatternService, ESIndexPatternSavedObjectService } from './es_index_pattern';
+export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 
 // Saved object services
 export { datasourceService } from './datasource';
