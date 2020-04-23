@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AuthenticationProvider } from '../../common/types';
 import { LegacyAPI } from '../plugin';
 
 export class SecurityAuditLogger {
@@ -58,7 +59,7 @@ export class SecurityAuditLogger {
     );
   }
 
-  accessAgreementAcknowledged(username: string, provider: { type: string; name: string }) {
+  accessAgreementAcknowledged(username: string, provider: AuthenticationProvider) {
     this.getAuditLogger().log(
       'access_agreement_acknowledged',
       `${username} acknowledged access agreement (${provider.type}/${provider.name}).`,

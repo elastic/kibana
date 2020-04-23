@@ -12,6 +12,7 @@ import {
   HttpResources,
   HttpResourcesRequestHandler,
 } from '../../../../../../src/core/server';
+import { AuthenticationProvider } from '../../../common/types';
 import { ConfigType } from '../../config';
 import { defineAccessAgreementRoutes } from './access_agreement';
 
@@ -113,7 +114,7 @@ describe('Access agreement view routes', () => {
         },
       }).config.authc;
 
-      const cases: Array<[{ type: string; name: string }, string]> = [
+      const cases: Array<[AuthenticationProvider, string]> = [
         [{ type: 'basic', name: 'basic1' }, ''],
         [{ type: 'saml', name: 'saml1' }, 'Some access agreement'],
         [{ type: 'unknown-type', name: 'unknown-name' }, ''],

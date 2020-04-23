@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * Type and name tuple to identify provider used to authenticate user.
+ */
+export interface AuthenticationProvider {
+  type: string;
+  name: string;
+}
+
 export interface SessionInfo {
   now: number;
   idleTimeoutExpiration: number | null;
   lifespanExpiration: number | null;
-  provider: { type: string; name: string };
+  provider: AuthenticationProvider;
 }

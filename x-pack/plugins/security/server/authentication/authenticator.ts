@@ -15,7 +15,7 @@ import {
   IClusterClient,
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
-import { SessionInfo } from '../../common/types';
+import { AuthenticationProvider, SessionInfo } from '../../common/types';
 import { SecurityAuditLogger } from '../audit';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
@@ -45,7 +45,7 @@ export interface ProviderSession {
   /**
    * Name and type of the provider this session belongs to.
    */
-  provider: { type: string; name: string };
+  provider: AuthenticationProvider;
 
   /**
    * The Unix time in ms when the session should be considered expired. If `null`, session will stay
@@ -88,7 +88,7 @@ export interface ProviderLoginAttempt {
   /**
    * Name or type of the provider this login attempt is targeted for.
    */
-  provider: { name: string } | { type: string };
+  provider: Pick<AuthenticationProvider, 'name'> | Pick<AuthenticationProvider, 'type'>;
 
   /**
    * Login attempt can have any form and defined by the specific provider.
@@ -154,7 +154,7 @@ function isLoginAttemptWithProviderName(
 
 function isLoginAttemptWithProviderType(
   attempt: unknown
-): attempt is { value: unknown; provider: { type: string } } {
+): attempt is { value: unknown; provider: Pick<AuthenticationProvider, 'type'> } {
   return (
     typeof attempt === 'object' &&
     (attempt as any)?.provider?.type &&
@@ -589,7 +589,7 @@ export class Authenticator {
       existingSession,
       isSystemRequest,
     }: {
-      provider: { type: string; name: string };
+      provider: AuthenticationProvider;
       authenticationResult: AuthenticationResult;
       existingSession: ProviderSession | null;
       isSystemRequest: boolean;
