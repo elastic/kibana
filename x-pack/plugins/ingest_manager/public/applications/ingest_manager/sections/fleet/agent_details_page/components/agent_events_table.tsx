@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
-import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../../types';
+import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { Agent, AgentEvent } from '../../../../types';
 import { usePagination, useGetOneAgentEvents } from '../../../../hooks';
 import { SearchBar } from '../../../../components/search_bar';
