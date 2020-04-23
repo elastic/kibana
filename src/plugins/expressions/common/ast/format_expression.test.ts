@@ -17,14 +17,23 @@
  * under the License.
  */
 
-import { ExpressionAstExpression } from './types';
-import { parse } from './parse';
+import { formatExpression } from './format_expression';
 
-/**
- * Given expression pipeline string, returns parsed AST.
- *
- * @param expression Expression pipeline string.
- */
-export function parseExpression(expression: string): ExpressionAstExpression {
-  return parse(expression, 'expression');
-}
+describe('formatExpression()', () => {
+  test('converts expression AST to string', () => {
+    const str = formatExpression({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          arguments: {
+            bar: ['baz'],
+          },
+          function: 'foo',
+        },
+      ],
+    });
+
+    expect(str).toMatchInlineSnapshot(`"foo bar=\\"baz\\""`);
+  });
+});

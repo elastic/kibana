@@ -17,7 +17,8 @@
  * under the License.
  */
 
-export * from './types';
-export * from './parse';
-export * from './parse_expression';
+export * from './format_expression';
 export * from './format';
+export * from './parse_expression';
+export * from './parse';
+export * from './types';
