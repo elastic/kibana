@@ -6,35 +6,60 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
-
-import { getUseField, Field } from '../../../../../shared_imports';
-
-const UseField = getUseField({ component: Field });
+import { EuiCodeBlock, EuiSpacer, EuiText, EuiSwitch, EuiLink, EuiIcon } from '@elastic/eui';
+import { useTestConfigContext } from '../../test_config_context';
 
 interface Props {
   executeOutput: { docs: object[] };
+  handleExecute: (documents: object[], verbose: boolean) => void;
 }
 
-export const OutputTab: React.FunctionComponent<Props> = ({ executeOutput }) => {
+export const OutputTab: React.FunctionComponent<Props> = ({ executeOutput, handleExecute }) => {
+  const { setCurrentTestConfig, testConfig } = useTestConfigContext();
+  const { verbose: cachedVerbose, documents: cachedDocuments } = testConfig;
+
+  const onEnableVerbose = (isVerboseEnabled: boolean) => {
+    setCurrentTestConfig({
+      ...testConfig,
+      verbose: isVerboseEnabled,
+    });
+
+    handleExecute(cachedDocuments!, isVerboseEnabled);
+  };
+
   return (
     <>
       <EuiText>
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionText"
-            defaultMessage="The output of the executed pipeline."
+            defaultMessage="The output of the executed pipeline. {runLink}"
+            values={{
+              runLink: (
+                <EuiLink onClick={() => handleExecute(cachedDocuments!, cachedVerbose)}>
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionLinkLabel"
+                    defaultMessage="Refresh output"
+                  />{' '}
+                  <EuiIcon type="refresh" />
+                </EuiLink>
+              ),
+            }}
           />
         </p>
       </EuiText>
 
       <EuiSpacer size="m" />
 
-      <UseField
-        path="verbose"
-        componentProps={{
-          ['data-test-subj']: 'verboseField',
-        }}
+      <EuiSwitch
+        label={
+          <FormattedMessage
+            id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchLabel"
+            defaultMessage="View verbose output"
+          />
+        }
+        checked={cachedVerbose}
+        onChange={e => onEnableVerbose(e.target.checked)}
       />
 
       <EuiSpacer size="m" />

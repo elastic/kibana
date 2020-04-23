@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useContext } from 'react';
 
 export interface TestConfig {
   documents?: object[] | undefined;
-  verbose?: boolean;
-  executeOutput?: {
-    docs: object[];
-  };
+  verbose: boolean;
 }
 
 interface TestConfigContext {
@@ -20,11 +17,23 @@ interface TestConfigContext {
 }
 
 const TEST_CONFIG_DEFAULT_VALUE = {
-  testConfig: {},
+  testConfig: {
+    verbose: false,
+  },
   setCurrentTestConfig: () => {},
 };
 
-export const TestConfigContext = React.createContext<TestConfigContext>(TEST_CONFIG_DEFAULT_VALUE);
+const TestConfigContext = React.createContext<TestConfigContext>(TEST_CONFIG_DEFAULT_VALUE);
+
+export const useTestConfigContext = () => {
+  const ctx = useContext(TestConfigContext);
+  if (!ctx) {
+    throw new Error(
+      '"useTestConfigContext" can only be called inside of TestConfigContext.Provider!'
+    );
+  }
+  return ctx;
+};
 
 export const TestConfigContextProvider = ({
   children,
@@ -37,7 +46,9 @@ export const TestConfigContextProvider = ({
 };
 
 export const useTestConfig = () => {
-  const [testConfig, setTestConfig] = useState<TestConfig>({});
+  const [testConfig, setTestConfig] = useState<TestConfig>({
+    verbose: false,
+  });
 
   const setCurrentTestConfig = useCallback((currentTestConfig: TestConfig): void => {
     setTestConfig(currentTestConfig);

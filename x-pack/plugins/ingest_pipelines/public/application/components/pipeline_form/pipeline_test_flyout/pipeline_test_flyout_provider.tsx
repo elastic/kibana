@@ -10,9 +10,12 @@ import { Pipeline } from '../../../../../common/types';
 import { useFormContext } from '../../../../shared_imports';
 import { PipelineTestFlyout, PipelineTestFlyoutProps } from './pipeline_test_flyout';
 
-type Props = Pick<PipelineTestFlyoutProps, 'closeFlyout'>;
+type Props = Omit<PipelineTestFlyoutProps, 'pipeline' | 'isPipelineValid'>;
 
-export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({ closeFlyout }) => {
+export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({
+  closeFlyout,
+  shouldExecuteImmediately,
+}) => {
   const form = useFormContext();
   const [formData, setFormData] = useState<Pipeline>({} as Pipeline);
   const [isFormDataValid, setIsFormDataValid] = useState<boolean>(false);
@@ -22,8 +25,8 @@ export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({ clo
       const isFormValid = isValid ?? (await validate());
       if (isFormValid) {
         setFormData(data.format() as Pipeline);
-        setIsFormDataValid(true);
       }
+      setIsFormDataValid(isFormValid);
     });
 
     return subscription.unsubscribe;
@@ -34,6 +37,7 @@ export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({ clo
       pipeline={formData}
       closeFlyout={closeFlyout}
       isPipelineValid={isFormDataValid}
+      shouldExecuteImmediately={shouldExecuteImmediately}
     />
   );
 };

@@ -16,10 +16,11 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+import { EuiCallOut } from '@elastic/eui';
 import { BASE_PATH } from '../../../../common/constants';
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
-import { PipelineForm, SectionError } from '../../components';
+import { PipelineForm } from '../../components';
 
 interface MatchParams {
   name: string;
@@ -77,16 +78,21 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
     );
   } else if (error) {
     content = (
-      <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.ingestPipelines.edit.fetchPipelineError"
-            defaultMessage="Error loading pipeline"
-          />
-        }
-        error={error}
-        data-test-subj="fetchPipelineError"
-      />
+      <>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.ingestPipelines.edit.fetchPipelineError"
+              defaultMessage="Error loading pipeline"
+            />
+          }
+          color="danger"
+          iconType="alert"
+        >
+          <p>{error.message}</p>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
     );
   } else if (pipeline) {
     content = (

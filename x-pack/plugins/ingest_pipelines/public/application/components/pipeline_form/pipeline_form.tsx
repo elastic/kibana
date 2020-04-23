@@ -11,13 +11,14 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from 
 import { useForm, Form, FormConfig } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
 
-import { SectionError, PipelineRequestFlyout } from '../';
-import { pipelineFormSchema } from './schema';
+import { PipelineRequestFlyout } from '../';
 import { PipelineTestFlyout } from './pipeline_test_flyout';
-import { TestConfigContextProvider, useTestConfig } from './test_config_context';
+import { useTestConfigContext } from './test_config_context';
 import { PipelineFormFields } from './pipeline_form_fields';
+import { PipelineFormError } from './pipeline_form_error';
+import { pipelineFormSchema } from './schema';
 
-interface Props {
+export interface PipelineFormProps {
   onSave: (pipeline: Pipeline) => void;
   onCancel: () => void;
   isSaving: boolean;
@@ -26,7 +27,7 @@ interface Props {
   isEditing?: boolean;
 }
 
-export const PipelineForm: React.FunctionComponent<Props> = ({
+export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   defaultValue = {
     name: '',
     description: '',
@@ -41,11 +42,24 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
   onCancel,
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
+
   const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
+  const [shouldExecuteImmediately, setShouldExecuteImmediately] = useState<boolean>(false);
 
   const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
     if (isValid) {
       onSave(formData as Pipeline);
+    }
+  };
+
+  const { testConfig } = useTestConfigContext();
+  const { documents: cachedDocuments } = testConfig;
+
+  const handleTestPipelineClick = () => {
+    setIsTestingPipeline(true);
+
+    if (cachedDocuments) {
+      setShouldExecuteImmediately(true);
     }
   };
 
@@ -72,110 +86,93 @@ export const PipelineForm: React.FunctionComponent<Props> = ({
     />
   );
 
-  const testConfigContextValue = useTestConfig();
-
   return (
     <>
-      <TestConfigContextProvider value={testConfigContextValue}>
-        <Form
-          form={form}
-          data-test-subj="pipelineForm"
-          isInvalid={form.isSubmitted && !form.isValid}
-          error={form.getErrors()}
-        >
-          <EuiSpacer size="l" />
+      <Form
+        form={form}
+        data-test-subj="pipelineForm"
+        isInvalid={form.isSubmitted && !form.isValid}
+        error={form.getErrors()}
+      >
+        <EuiSpacer size="l" />
 
-          {/* Request error */}
-          {saveError ? (
-            <>
-              <SectionError
-                title={
+        {/* Request error */}
+        {saveError && <PipelineFormError errorMessage={saveError.message} />}
+
+        {/* All form fields */}
+        <PipelineFormFields
+          hasVersion={Boolean(defaultValue.version)}
+          isTestButtonDisabled={isTestingPipeline || form.isValid === false}
+          onTestPipelineClick={handleTestPipelineClick}
+          hasOnFailure={Boolean(defaultValue.on_failure)}
+          isEditing={isEditing}
+        />
+
+        {/* Form submission */}
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiButton
+                  fill
+                  color="secondary"
+                  iconType="check"
+                  onClick={form.submit}
+                  data-test-subj="submitButton"
+                  disabled={form.isSubmitted && form.isValid === false}
+                  isLoading={isSaving}
+                >
+                  {saveButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonEmpty color="primary" onClick={onCancel}>
                   <FormattedMessage
-                    id="xpack.ingestPipelines.form.savePipelineError"
-                    defaultMessage="Unable to create pipeline"
+                    id="xpack.ingestPipelines.form.cancelButtonLabel"
+                    defaultMessage="Cancel"
                   />
-                }
-                error={saveError}
-                data-test-subj="savePipelineError"
-              />
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
+            >
+              {isRequestVisible ? (
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.hideRequestButtonLabel"
+                  defaultMessage="Hide request"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.showRequestButtonLabel"
+                  defaultMessage="Show request"
+                />
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-          {/* All form fields */}
-          <PipelineFormFields
-            hasVersion={Boolean(defaultValue.version)}
-            isTestButtonDisabled={isTestingPipeline || form.isValid === false}
-            onTestClick={() => setIsTestingPipeline(true)}
-            hasOnFailure={Boolean(defaultValue.on_failure)}
-            isEditing={isEditing}
+        {/* ES request flyout */}
+        {isRequestVisible ? (
+          <PipelineRequestFlyout
+            closeFlyout={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
           />
+        ) : null}
 
-          {/* Form submission */}
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiButton
-                    fill
-                    color="secondary"
-                    iconType="check"
-                    onClick={form.submit}
-                    data-test-subj="submitButton"
-                    disabled={form.isSubmitted && form.isValid === false}
-                    isLoading={isSaving}
-                  >
-                    {saveButtonLabel}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButtonEmpty color="primary" onClick={onCancel}>
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.form.cancelButtonLabel"
-                      defaultMessage="Cancel"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
-              >
-                {isRequestVisible ? (
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.form.hideRequestButtonLabel"
-                    defaultMessage="Hide request"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.form.showRequestButtonLabel"
-                    defaultMessage="Show request"
-                  />
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        {/* Test pipeline flyout */}
+        {isTestingPipeline ? (
+          <PipelineTestFlyout
+            shouldExecuteImmediately={shouldExecuteImmediately}
+            closeFlyout={() => {
+              setIsTestingPipeline(prevIsTestingPipeline => !prevIsTestingPipeline);
+            }}
+          />
+        ) : null}
+      </Form>
 
-          {/* ES request flyout */}
-          {isRequestVisible ? (
-            <PipelineRequestFlyout
-              closeFlyout={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
-            />
-          ) : null}
-
-          {/* Test pipeline flyout */}
-          {isTestingPipeline ? (
-            <PipelineTestFlyout
-              closeFlyout={() => {
-                setIsTestingPipeline(prevIsTestingPipeline => !prevIsTestingPipeline);
-              }}
-            />
-          ) : null}
-        </Form>
-
-        <EuiSpacer size="m" />
-      </TestConfigContextProvider>
+      <EuiSpacer size="m" />
     </>
   );
 };

@@ -4,124 +4,110 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiButtonEmpty,
-  EuiButton,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
 } from '@elastic/eui';
 
+import { useKibana } from '../../../../shared_imports';
 import { Pipeline } from '../../../../../common/types';
-import { useForm, Form, useKibana, FormConfig } from '../../../../shared_imports';
-import { SectionError } from '../../section_error';
-import { pipelineTestSchema } from './schema';
 import { Tabs, Tab, OutputTab, DocumentsTab } from './tabs';
-import { TestConfigContext, TestConfig } from '../test_config_context';
+import { useTestConfigContext } from '../test_config_context';
 
 export interface PipelineTestFlyoutProps {
   closeFlyout: () => void;
   pipeline: Pipeline;
   isPipelineValid: boolean;
+  shouldExecuteImmediately: boolean;
 }
 
 export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps> = ({
   closeFlyout,
   pipeline,
   isPipelineValid,
+  shouldExecuteImmediately,
 }) => {
   const { services } = useKibana();
 
-  const { setCurrentTestConfig, testConfig } = useContext(TestConfigContext);
-  const {
-    verbose: cachedVerbose,
-    documents: cachedDocuments,
-    executeOutput: cachedExecuteOutput,
-  } = testConfig;
+  const { testConfig } = useTestConfigContext();
+  const { documents: cachedDocuments, verbose: cachedVerbose } = testConfig;
 
-  const initialSelectedTab = cachedExecuteOutput ? 'output' : 'documents';
+  const initialSelectedTab = cachedDocuments ? 'output' : 'documents';
   const [selectedTab, setSelectedTab] = useState<Tab>(initialSelectedTab);
+  const [onInitialMount, setOnInitialMount] = useState<boolean>(true);
 
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [executeError, setExecuteError] = useState<any>(null);
+  const [executeOutput, setExecuteOutput] = useState<any>(undefined);
 
-  const { name: pipelineName, ...pipelineDefinition } = pipeline;
+  const handleExecute = useCallback(
+    async (documents: object[], verbose?: boolean) => {
+      const { name: pipelineName, ...pipelineDefinition } = pipeline;
 
-  const executePipeline: FormConfig['onSubmit'] = async (formData, isValid) => {
-    if (!isValid || !isPipelineValid) {
-      return;
-    }
+      setIsExecuting(true);
+      setExecuteError(null);
 
-    const { documents, verbose } = formData as TestConfig;
-    const isDocumentsTab = selectedTab === 'documents';
-    const isOutputTab = selectedTab === 'output';
-    const currentDocuments = isDocumentsTab ? documents : testConfig!.documents;
-    const currentVerbose = isOutputTab ? verbose : testConfig!.verbose;
+      const { error, data: output } = await services.api.simulatePipeline({
+        documents,
+        verbose,
+        pipeline: pipelineDefinition,
+      });
 
-    setIsExecuting(true);
-    setExecuteError(null);
+      setIsExecuting(false);
 
-    const { error, data: output } = await services.api.simulatePipeline({
-      documents: currentDocuments!,
-      pipeline: pipelineDefinition,
-      verbose: currentVerbose,
-    });
+      if (error) {
+        setExecuteError(error);
+        return;
+      }
 
-    setIsExecuting(false);
+      setExecuteOutput(output);
 
-    if (error) {
-      setExecuteError(error);
-      return;
-    }
-
-    // Update context if successful
-    setCurrentTestConfig({
-      verbose: currentVerbose,
-      documents: currentDocuments,
-      executeOutput: output,
-    });
-
-    services.notifications.toasts.addSuccess(
-      i18n.translate(
-        'xpack.ingestPipelines.testPipelineFlyout.successExecuteNotificationMessageText',
-        {
+      services.notifications.toasts.addSuccess(
+        i18n.translate('xpack.ingestPipelines.execute.successNotificationText', {
           defaultMessage: 'Pipeline executed',
-        }
-      )
-    );
+        })
+      );
 
-    setSelectedTab('output');
-  };
-
-  const { form } = useForm({
-    schema: pipelineTestSchema,
-    defaultValue: {
-      documents: cachedDocuments || '',
-      verbose: cachedVerbose || false,
+      setSelectedTab('output');
     },
-    onSubmit: executePipeline,
-  });
+    [pipeline, services.api, services.notifications.toasts]
+  );
+
+  useEffect(() => {
+    // If the user has already tested the pipeline once,
+    // use the cached test config and automatically execute the pipeline
+    if (onInitialMount && shouldExecuteImmediately && Object.entries(pipeline).length > 0) {
+      handleExecute(cachedDocuments!, cachedVerbose);
+      setOnInitialMount(false);
+    }
+  }, [
+    shouldExecuteImmediately,
+    pipeline,
+    handleExecute,
+    cachedDocuments,
+    cachedVerbose,
+    onInitialMount,
+  ]);
 
   // Default to "documents" tab
   let tabContent = (
     <DocumentsTab
-      changeTabs={() => setSelectedTab('output')}
-      isResultsLinkDisabled={isExecuting || Boolean(!cachedExecuteOutput)}
+      isExecuting={isExecuting}
+      isPipelineValid={isPipelineValid}
+      handleExecute={handleExecute}
     />
   );
 
   if (selectedTab === 'output') {
-    tabContent = <OutputTab executeOutput={cachedExecuteOutput!} />;
+    tabContent = <OutputTab executeOutput={executeOutput!} handleExecute={handleExecute} />;
   }
 
   return (
@@ -129,12 +115,12 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2>
-            {pipelineName ? (
+            {pipeline.name ? (
               <FormattedMessage
                 id="xpack.ingestPipelines.testPipelineFlyout.withPipelineNameTitle"
                 defaultMessage="Test pipeline '{pipelineName}'"
                 values={{
-                  pipelineName,
+                  pipelineName: pipeline.name,
                 }}
               />
             ) : (
@@ -151,7 +137,7 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
         <Tabs
           onTabChange={setSelectedTab}
           selectedTab={selectedTab}
-          getIsDisabled={tabId => !cachedExecuteOutput && tabId === 'output'}
+          getIsDisabled={tabId => !executeOutput && tabId === 'output'}
         />
 
         <EuiSpacer />
@@ -159,22 +145,24 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
         {/* Execute error */}
         {executeError ? (
           <>
-            <SectionError
+            <EuiCallOut
               title={
                 <FormattedMessage
                   id="xpack.ingestPipelines.testPipelineFlyout.executePipelineError"
                   defaultMessage="Unable to execute pipeline"
                 />
               }
-              error={executeError}
-              data-test-subj="executePipelineError"
-            />
+              color="danger"
+              iconType="alert"
+            >
+              <p>{executeError.message}</p>
+            </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         ) : null}
 
         {/* Invalid pipeline error */}
-        {!isPipelineValid && form.isSubmitted ? (
+        {!isPipelineValid ? (
           <>
             <EuiCallOut
               title={
@@ -190,49 +178,9 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
           </>
         ) : null}
 
-        <Form
-          form={form}
-          data-test-subj="testPipelineForm"
-          isInvalid={form.isSubmitted && !form.isValid && !isPipelineValid}
-          error={form.getErrors()}
-        >
-          {tabContent}
-        </Form>
+        {/* Documents or output tab content */}
+        {tabContent}
       </EuiFlyoutBody>
-
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-              <FormattedMessage
-                id="xpack.ingestPipelines.testPipelineFlyout.closeButtonLabel"
-                defaultMessage="Close"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={form.submit}
-              fill
-              iconType="play"
-              isLoading={isExecuting}
-              disabled={form.isSubmitted && (!form.isValid || !isPipelineValid)}
-            >
-              {isExecuting ? (
-                <FormattedMessage
-                  id="xpack.ingestPipelines.testPipelineFlyout.runningButtonLabel"
-                  defaultMessage="Running"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.ingestPipelines.testPipelineFlyout.runButtonLabel"
-                  defaultMessage="Run"
-                />
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };
