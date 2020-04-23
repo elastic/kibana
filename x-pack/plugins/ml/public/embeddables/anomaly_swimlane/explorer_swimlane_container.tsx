@@ -21,12 +21,14 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 
 export interface ExplorerSwimlaneContainerProps {
+  id: string;
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
   services: [CoreStart, MlStartDependencies, MlServices];
   refresh: Observable<any>;
 }
 
 export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
+  id,
   embeddableInput,
   services,
   refresh,
@@ -51,7 +53,11 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   }, [chartWidth]);
 
   useEffect(() => {
-    combineLatest([embeddableInput, chartWidth$, refresh.pipe(startWith(null))])
+    const subscription = combineLatest([
+      embeddableInput,
+      chartWidth$,
+      refresh.pipe(startWith(null)),
+    ])
       .pipe(
         debounceTime(500),
         map(([input]) => input),
@@ -114,6 +120,10 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
       .subscribe(data => {
         setSwimlaneData(data);
       });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const onResize = throttle((e: { width: number; height: number }) => {
@@ -125,7 +135,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
       {resizeRef => (
         <div
           style={{ width: '100%' }}
-          data-test-subj="mlMaxAnomalyScoreEmbeddable"
+          data-test-subj={`mlMaxAnomalyScoreEmbeddable_${id}`}
           ref={el => {
             resizeRef(el);
           }}

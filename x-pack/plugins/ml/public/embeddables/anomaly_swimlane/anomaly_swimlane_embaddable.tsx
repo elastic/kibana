@@ -32,7 +32,8 @@ export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEm
 
 export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
   jobs: Job[];
-  viewBy: string;
+  swimlaneType: string;
+  viewBy?: string;
 }
 
 export interface MlServices {
@@ -59,8 +60,9 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
       initialInput,
       {
         jobs: initialInput.jobs,
-        viewBy: initialInput.viewBy!,
+        swimlaneType: initialInput.swimlaneType,
         defaultTitle: initialInput.title,
+        ...(initialInput.viewBy ? { viewBy: initialInput.viewBy } : {}),
       },
       parent
     );
@@ -71,6 +73,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
 
     ReactDOM.render(
       <ExplorerSwimlaneContainer
+        id={this.input.id}
         embeddableInput={this.getInput$()}
         services={this.services}
         refresh={this.reload$.asObservable()}

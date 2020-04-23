@@ -42,7 +42,7 @@ export class AnomalySwimlaneEmbeddableFactory
   private services: AnomalySwimlaneEmbeddableServices | undefined;
 
   public async isEditable() {
-    return true;
+    return false;
   }
 
   public getDisplayName() {
@@ -52,7 +52,7 @@ export class AnomalySwimlaneEmbeddableFactory
   }
 
   public async getExplicitInput(): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-    await this.initServices();
+    await this.initializeServices();
 
     return new Promise(async (resolve, reject) => {
       const [{ overlays, uiSettings }, , { mlAnomalyDetectorService }] = this.services!;
@@ -124,9 +124,7 @@ export class AnomalySwimlaneEmbeddableFactory
     });
   }
 
-  private async initServices() {
-    if (this.services !== undefined) return;
-
+  private async initializeServices() {
     const [coreStart, pluginsStart] = await this.getStartServices();
 
     const httpService = new HttpService(coreStart.http);
@@ -145,7 +143,7 @@ export class AnomalySwimlaneEmbeddableFactory
     initialInput: AnomalySwimlaneEmbeddableInput,
     parent?: IContainer
   ): Promise<AnomalySwimlaneEmbeddable | ErrorEmbeddable> {
-    await this.initServices();
+    await this.initializeServices();
     return new AnomalySwimlaneEmbeddable(initialInput, this.services!, parent);
   }
 }
