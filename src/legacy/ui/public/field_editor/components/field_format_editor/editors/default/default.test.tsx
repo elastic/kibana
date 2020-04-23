@@ -32,13 +32,11 @@ const onError = jest.fn();
 
 describe('DefaultFormatEditor', () => {
   describe('convertSampleInput', () => {
-    const converter = input => {
+    const converter = (input: number) => {
       if (isNaN(input)) {
-        throw {
-          message: 'Input is not a number',
-        };
+        throw new Error('Input is not a number');
       } else {
-        return input * 2;
+        return (input * 2).toString();
       }
     };
 
@@ -70,6 +68,7 @@ describe('DefaultFormatEditor', () => {
   it('should render nothing', async () => {
     const component = shallow(
       <DefaultFormatEditor
+        basePath={''}
         fieldType={fieldType}
         format={format}
         formatParams={formatParams}
@@ -86,6 +85,7 @@ describe('DefaultFormatEditor', () => {
   it('should call prop onChange()', async () => {
     const component = shallow(
       <DefaultFormatEditor
+        basePath={''}
         fieldType={fieldType}
         format={format}
         formatParams={formatParams}
@@ -94,19 +94,20 @@ describe('DefaultFormatEditor', () => {
       />
     );
 
-    component.instance().onChange();
+    (component.instance() as DefaultFormatEditor).onChange();
     expect(onChange).toBeCalled();
   });
 
   it('should call prop onError() if converter throws an error', async () => {
     const newFormat = {
       getConverterFor: jest.fn().mockImplementation(() => () => {
-        throw { message: 'Test error message' };
+        throw new Error('Test error message');
       }),
     };
 
     shallow(
       <DefaultFormatEditor
+        basePath={''}
         fieldType={fieldType}
         format={newFormat}
         formatParams={formatParams}

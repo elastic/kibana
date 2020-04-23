@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { FieldFormat } from 'src/plugins/data/public';
 
 import { DateFormatEditor } from './date';
 
@@ -43,8 +44,9 @@ describe('DateFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
       <DateFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

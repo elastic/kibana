@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DefaultFormatEditor } from '../default';
 
-interface StaticLookupFormatEditorFormatParams {
+export interface StaticLookupFormatEditorFormatParams {
   lookupEntries: Array<{ key: string; value: string }>;
   unknownKeyValue: string;
 }

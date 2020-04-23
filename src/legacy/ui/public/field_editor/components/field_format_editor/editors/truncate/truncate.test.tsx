@@ -20,17 +20,20 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiFieldNumber } from '@elastic/eui';
+import { FieldFormat } from 'src/plugins/data/public';
 
 import { TruncateFormatEditor } from './truncate';
 
 const fieldType = 'string';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => input => input.substring(0, 10)),
+  getConverterFor: jest.fn().mockImplementation(() => (input: string) => input.substring(0, 10)),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { fieldLength: 10 };
   }),
 };
-const formatParams = {};
+const formatParams = {
+  fieldLength: 5,
+};
 const onChange = jest.fn();
 const onError = jest.fn();
 
@@ -47,8 +50,9 @@ describe('TruncateFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
       <TruncateFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -60,8 +64,9 @@ describe('TruncateFormatEditor', () => {
   it('should fire error, when input is invalid', async () => {
     const component = shallow(
       <TruncateFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -85,8 +90,9 @@ describe('TruncateFormatEditor', () => {
   it('should fire change, when input changed and is valid', async () => {
     const component = shallow(
       <TruncateFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

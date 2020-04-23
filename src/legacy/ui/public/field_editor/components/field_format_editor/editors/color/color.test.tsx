@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { FieldFormat } from 'src/plugins/data/public';
 
 import { ColorFormatEditor } from './color';
 import { fieldFormats } from '../../../../../../../../plugins/data/public';
@@ -41,8 +42,9 @@ describe('ColorFormatEditor', () => {
   it('should render string type normally (regex field)', async () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -55,8 +57,9 @@ describe('ColorFormatEditor', () => {
   it('should render other type normally (range field)', async () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor
+        basePath={''}
         fieldType={'number'}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -69,8 +72,9 @@ describe('ColorFormatEditor', () => {
   it('should render multiple colors', async () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={{ colors: [...formatParams.colors, ...formatParams.colors] }}
         onChange={onChange}
         onError={onError}

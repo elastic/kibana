@@ -19,12 +19,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { FieldFormat } from 'src/plugins/data/public';
 
 import { StringFormatEditor } from './string';
 
 const fieldType = 'string';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => input => input.toUpperCase()),
+  getConverterFor: jest.fn().mockImplementation(() => (input: string) => input.toUpperCase()),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { transform: 'upper' };
   }),
@@ -37,7 +38,9 @@ const format = {
     ],
   },
 };
-const formatParams = {};
+const formatParams = {
+  transform: '',
+};
 const onChange = jest.fn();
 const onError = jest.fn();
 
@@ -49,8 +52,9 @@ describe('StringFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
       <StringFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

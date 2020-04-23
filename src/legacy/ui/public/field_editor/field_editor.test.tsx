@@ -23,6 +23,7 @@ import React from 'react';
 
 import { npStart } from 'ui/new_platform';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { Field, IndexPattern } from 'src/plugins/data/public';
 
 jest.mock('brace/mode/groovy', () => ({}));
 jest.mock('ui/new_platform');
@@ -71,18 +72,15 @@ jest.mock('./components/field_format_editor', () => ({
   FieldFormatEditor: 'field-format-editor',
 }));
 
-const fields = [
+const fields: Field[] = [
   {
     name: 'foobar',
-  },
+  } as Field,
 ];
-fields.getByName = name => {
-  const flds = {
-    foobar: {
-      name: 'foobar',
-    },
-  };
-  return flds[name];
+
+// @ts-ignore
+fields.getByName = (name: string) => {
+  return fields.find(field => field.name === name);
 };
 
 class Format {
@@ -107,7 +105,7 @@ const helpers = {
 };
 
 describe('FieldEditor', () => {
-  let indexPattern;
+  let indexPattern: IndexPattern;
 
   beforeEach(() => {
     indexPattern = {
@@ -138,7 +136,7 @@ describe('FieldEditor', () => {
       name: 'test',
       script: 'doc.test.value',
     };
-    indexPattern.fields.push(testField);
+    indexPattern.fields.push(testField as Field);
     indexPattern.fields.getByName = name => {
       const flds = {
         [testField.name]: testField,
@@ -186,7 +184,7 @@ describe('FieldEditor', () => {
     );
 
     await new Promise(resolve => process.nextTick(resolve));
-    component.instance().onFieldChange('name', 'foobar');
+    (component.instance() as FieldEditor).onFieldChange('name', 'foobar');
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -205,7 +203,7 @@ describe('FieldEditor', () => {
     );
 
     await new Promise(resolve => process.nextTick(resolve));
-    component.instance().onFieldChange('name', 'foobar');
+    (component.instance() as FieldEditor).onFieldChange('name', 'foobar');
     component.update();
     expect(component).toMatchSnapshot();
   });

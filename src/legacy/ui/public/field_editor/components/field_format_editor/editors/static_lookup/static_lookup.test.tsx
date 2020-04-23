@@ -18,7 +18,9 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '../../../../../../../../test_utils/public/enzyme_helpers';
+import { StaticLookupFormatEditorFormatParams } from './static_lookup';
+import { FieldFormat } from '../../../../../../../../plugins/data/public';
 
 import { StaticLookupFormatEditor } from './static_lookup';
 
@@ -27,7 +29,7 @@ const format = {
   getConverterFor: jest.fn(),
 };
 const formatParams = {
-  lookupEntries: [{}],
+  lookupEntries: [{}] as StaticLookupFormatEditorFormatParams['lookupEntries'],
   unknownKeyValue: null,
 };
 const onChange = jest.fn();
@@ -41,8 +43,9 @@ describe('StaticLookupFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallowWithI18nProvider(
       <StaticLookupFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -55,9 +58,13 @@ describe('StaticLookupFormatEditor', () => {
   it('should render multiple lookup entries and unknown key value', async () => {
     const component = shallowWithI18nProvider(
       <StaticLookupFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
-        formatParams={{ lookupEntries: [{}, {}, {}], unknownKeyValue: 'test value' }}
+        format={(format as unknown) as FieldFormat}
+        formatParams={{
+          lookupEntries: [{}, {}, {}] as StaticLookupFormatEditorFormatParams['lookupEntries'],
+          unknownKeyValue: 'test value',
+        }}
         onChange={onChange}
         onError={onError}
       />

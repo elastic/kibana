@@ -18,14 +18,15 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
+import { DefaultFormatEditor } from '../../components/field_format_editor/editors/default';
 
 export interface FieldFormatEditorProps {
   fieldType: string;
-  fieldFormat: any; // todo
+  fieldFormat: DefaultFormatEditor;
   fieldFormatId: string;
-  fieldFormatParams: any; // todo
-  fieldFormatEditors: any; // todo
-  onChange: (change: { fieldType: string; [key: string]: any }) => void; // todo define next to caller
+  fieldFormatParams: { [key: string]: unknown };
+  fieldFormatEditors: any;
+  onChange: (change: { fieldType: string; [key: string]: any }) => void;
   onError: (error?: string) => void;
 }
 

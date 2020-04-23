@@ -19,36 +19,39 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { FieldFormat } from '../../../../../../../../plugins/data/public';
 
-import { DateNanosFormatEditor } from './date_nanos';
+import { PercentFormatEditor } from './percent';
 
-const fieldType = 'date_nanos';
+const fieldType = 'number';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => input => `converted date for ${input}`),
+  getConverterFor: jest.fn().mockImplementation(() => (input: number) => input * 2),
   getParamDefaults: jest.fn().mockImplementation(() => {
-    return { pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS' };
+    return { pattern: '0,0.[000]%' };
   }),
 };
-const formatParams = {};
+const formatParams = {
+  pattern: '',
+};
 const onChange = jest.fn();
 const onError = jest.fn();
 
-describe('DateFormatEditor', () => {
+describe('PercentFormatEditor', () => {
   it('should have a formatId', () => {
-    expect(DateNanosFormatEditor.formatId).toEqual('date_nanos');
+    expect(PercentFormatEditor.formatId).toEqual('percent');
   });
 
   it('should render normally', async () => {
     const component = shallow(
-      <DateNanosFormatEditor
+      <PercentFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
       />
     );
-
     expect(component).toMatchSnapshot();
   });
 });

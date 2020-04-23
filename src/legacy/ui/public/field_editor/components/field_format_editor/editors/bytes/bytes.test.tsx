@@ -21,6 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { BytesFormatEditor } from './bytes';
+import { FieldFormat } from 'src/plugins/data/public';
 
 const fieldType = 'number';
 const format = {
@@ -43,8 +44,9 @@ describe('BytesFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
       <BytesFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

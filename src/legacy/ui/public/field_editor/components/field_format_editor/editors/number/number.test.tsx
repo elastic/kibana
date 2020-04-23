@@ -19,17 +19,20 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { FieldFormat } from 'src/plugins/data/public';
 
 import { NumberFormatEditor } from './number';
 
 const fieldType = 'number';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => input => input * 2),
+  getConverterFor: jest.fn().mockImplementation(() => (input: number) => input * 2),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { pattern: '0,0.[000]' };
   }),
 };
-const formatParams = {};
+const formatParams = {
+  pattern: '',
+};
 const onChange = jest.fn();
 const onError = jest.fn();
 
@@ -41,8 +44,9 @@ describe('NumberFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
       <NumberFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

@@ -21,10 +21,13 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { DurationFormatEditor } from './duration';
+import { FieldFormat } from 'src/plugins/data/public';
 
 const fieldType = 'number';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => input => `converted duration for ${input}`),
+  getConverterFor: jest
+    .fn()
+    .mockImplementation(() => (input: string) => `converted duration for ${input}`),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return {
       inputFormat: 'seconds',
@@ -52,7 +55,11 @@ const format = {
     ],
   },
 };
-const formatParams = {};
+const formatParams = {
+  outputPrecision: 2,
+  inputFormat: '',
+  outputFormat: '',
+};
 const onChange = jest.fn();
 const onError = jest.fn();
 
@@ -64,8 +71,9 @@ describe('DurationFormatEditor', () => {
   it('should render human readable output normally', async () => {
     const component = shallow(
       <DurationFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -88,8 +96,9 @@ describe('DurationFormatEditor', () => {
     };
     const component = shallow(
       <DurationFormatEditor
+        basePath={''}
         fieldType={fieldType}
-        format={newFormat}
+        format={(newFormat as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

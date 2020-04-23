@@ -55,7 +55,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IndexPattern, IFieldType, KBN_FIELD_TYPES } from '../../../../plugins/data/public';
+import {
+  IndexPattern,
+  IFieldType,
+  KBN_FIELD_TYPES,
+  ES_FIELD_TYPES,
+} from '../../../../plugins/data/public';
 import { IFieldFormatType } from '../../../../plugins/data/common';
 import { Field } from '../../../../plugins/data/public';
 import {
@@ -66,6 +71,8 @@ import {
 import { ScriptingHelpFlyout } from './components/scripting_help';
 
 import { FieldFormatEditor } from './components/field_format_editor';
+
+import { DefaultFormatEditor } from './components/field_format_editor/editors/default';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { executeScript, isScriptValid } from './lib';
@@ -96,17 +103,30 @@ const getFieldTypeFormatsList = (field: IFieldType, defaultFieldFormat: IFieldFo
   ];
 };
 
+interface FieldTypeFormat {
+  id: string;
+  title: string;
+}
+
+interface InitialFieldTypeFormat extends FieldTypeFormat {
+  defaultFieldFormat: IFieldFormatType;
+}
+
+interface FieldClone extends Field {
+  format: any;
+}
+
 export interface FieldEditorState {
   isReady: boolean;
   isCreating: boolean;
   isDeprecatedLang: boolean;
   scriptingLangs: string[];
-  fieldTypes: any[]; // todo
-  fieldTypeFormats: any[];
+  fieldTypes: string[];
+  fieldTypeFormats: FieldTypeFormat[];
   existingFieldNames: string[];
-  field: any;
+  field: FieldClone;
   fieldFormatId?: string;
-  fieldFormatParams: any;
+  fieldFormatParams: { [key: string]: unknown };
   showScriptingHelp: boolean;
   showDeleteModal: boolean;
   hasFormatError: boolean;
@@ -121,7 +141,7 @@ export interface FieldEdiorProps {
   helpers: {
     getConfig: (key: string) => any;
     getHttpStart: () => HttpStart;
-    fieldFormatEditors: any;
+    fieldFormatEditors: DefaultFormatEditor[];
     redirectAway: () => void;
   };
 }
@@ -167,18 +187,21 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       enabledLangs,
       union(this.supportedLangs, this.deprecatedLangs)
     );
-    field.lang = scriptingLangs.includes(field.lang) ? field.lang : undefined;
+    field.lang = field.lang && scriptingLangs.includes(field.lang) ? field.lang : undefined;
 
-    const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang, DEFAULT_FIELD_TYPES);
+    const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang || '', DEFAULT_FIELD_TYPES);
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
     const fieldFormats = getFieldFormats();
-    const DefaultFieldFormat = fieldFormats.getDefaultType(field.type, field.esTypes);
+    const DefaultFieldFormat = fieldFormats.getDefaultType(
+      field.type as KBN_FIELD_TYPES,
+      field.esTypes as ES_FIELD_TYPES[]
+    );
 
     this.setState({
       isReady: true,
       isCreating: !indexPattern.fields.find(f => f.name === field.name),
-      isDeprecatedLang: this.deprecatedLangs.includes(field.lang),
+      isDeprecatedLang: this.deprecatedLangs.includes(field.lang || ''),
       errors: [],
       scriptingLangs,
       fieldTypes,
@@ -190,6 +213,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   onFieldChange = (fieldName: string, value: string | number) => {
     const { field } = this.state;
+    // @ts-ignore
     field[fieldName] = value;
     this.forceUpdate();
   };
@@ -225,7 +249,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const fieldFormats = getFieldFormats();
     const { field, fieldTypeFormats } = this.state;
     const FieldFormat = fieldFormats.getType(
-      formatId || fieldTypeFormats[0]?.defaultFieldFormat.id
+      formatId || (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.id
     ) as IFieldFormatType;
 
     field.format = new FieldFormat(params, this.props.helpers.getConfig);
@@ -392,6 +416,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
    */
   renderTypeConflict() {
     const { field = {} } = this.state;
+    // @ts-ignore
     if (!field.conflictDescriptions || typeof field.conflictDescriptions !== 'object') {
       return null;
     }
@@ -410,6 +435,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       },
     ];
 
+    // @ts-ignore
     const items = Object.entries(field.conflictDescriptions).map(([type, indices]) => ({
       type,
       indices: Array.isArray(indices) ? indices.join(', ') : 'Index names unavailable',
@@ -445,7 +471,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   renderFormat() {
     const { field, fieldTypeFormats, fieldFormatId, fieldFormatParams } = this.state;
     const { fieldFormatEditors } = this.props.helpers;
-    const defaultFormat = fieldTypeFormats[0]?.defaultFieldFormat.title;
+    const defaultFormat = (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.title;
 
     const label = defaultFormat ? (
       <FormattedMessage
@@ -720,7 +746,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           isVisible={showScriptingHelp}
           onClose={this.hideScriptingHelp}
           indexPattern={this.props.indexPattern}
-          lang={field.lang}
+          lang={field.lang as string}
           name={field.name}
           script={field.script}
           executeScript={executeScript}
@@ -761,8 +787,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
       const isValid = await isScriptValid({
         name: field.name,
-        lang: field.lang,
-        script: field.script,
+        lang: field.lang as string,
+        script: field.script as string,
         indexPatternTitle: indexPattern.title,
       });
 
