@@ -11,9 +11,9 @@ import { getDefaultDynamicProperties } from './styles/vector/vector_style_defaul
 import { IDynamicStyleProperty } from './styles/vector/properties/dynamic_style_property';
 import { IStyleProperty } from './styles/vector/properties/style_property';
 import {
+  SOURCE_TYPES,
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
-  ES_GEO_GRID,
   LAYER_TYPE,
   AGG_TYPE,
   RENDER_AS,
@@ -24,7 +24,7 @@ import {
 } from '../../common/constants';
 import { ESGeoGridSource } from './sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
-import { IVectorLayer, VectorLayerArguments } from './vector_layer';
+import { IVectorLayer } from './vector_layer';
 import { IESSource } from './sources/es_source';
 import { IESAggSource } from './sources/es_agg_source';
 import { ISource } from './sources/source';
@@ -34,7 +34,10 @@ import {
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
+  VectorLayerDescriptor,
 } from '../../common/descriptor_types';
+import { IStyle } from './styles/style';
+import { IVectorSource } from './sources/vector_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
@@ -144,10 +147,18 @@ function getClusterStyleDescriptor(
   return clusterStyleDescriptor;
 }
 
+export interface BlendedVectorLayerArguments {
+  source: IVectorSource;
+  layerDescriptor: VectorLayerDescriptor;
+}
+
 export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   static type = LAYER_TYPE.BLENDED_VECTOR;
 
-  static createDescriptor(options: VectorLayerArguments, mapColors: string[]) {
+  static createDescriptor(
+    options: VectorLayerDescriptor,
+    mapColors: string[]
+  ): VectorLayerDescriptor {
     const layerDescriptor = VectorLayer.createDescriptor(options, mapColors);
     layerDescriptor.type = BlendedVectorLayer.type;
     return layerDescriptor;
@@ -159,11 +170,14 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   private readonly _documentSource: IESSource;
   private readonly _documentStyle: IVectorStyle;
 
-  constructor(options: VectorLayerArguments) {
-    super(options);
+  constructor(options: BlendedVectorLayerArguments) {
+    super({
+      ...options,
+      joins: [],
+    });
 
     this._documentSource = this._source as IESSource; // VectorLayer constructor sets _source as document source
-    this._documentStyle = this._style; // VectorLayer constructor sets _style as document source
+    this._documentStyle = this._style as IVectorStyle; // VectorLayer constructor sets _style as document source
 
     this._clusterSource = getClusterSource(this._documentSource, this._documentStyle);
     const clusterStyleDescriptor = getClusterStyleDescriptor(
@@ -176,7 +190,11 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     const sourceDataRequest = this.getSourceDataRequest();
     if (sourceDataRequest) {
       const requestMeta = sourceDataRequest.getMeta();
-      if (requestMeta && requestMeta.sourceType && requestMeta.sourceType === ES_GEO_GRID) {
+      if (
+        requestMeta &&
+        requestMeta.sourceType &&
+        requestMeta.sourceType === SOURCE_TYPES.ES_GEO_GRID
+      ) {
         isClustered = true;
       }
     }
@@ -221,11 +239,11 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._documentSource;
   }
 
-  getCurrentStyle() {
+  getCurrentStyle(): IStyle {
     return this._isClustered ? this._clusterStyle : this._documentStyle;
   }
 
-  getStyleForEditing() {
+  getStyleForEditing(): IStyle {
     return this._documentStyle;
   }
 
@@ -234,8 +252,8 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
     const searchFilters = this._getSearchFilters(
       syncContext.dataFilters,
-      this.getSource(),
-      this.getCurrentStyle()
+      this.getSource() as IVectorSource,
+      this.getCurrentStyle() as IVectorStyle
     );
     const canSkipFetch = await canSkipSourceUpdate({
       source: this.getSource(),

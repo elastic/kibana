@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../../legacy/plugins/cross_cluster_replication/common/constants';
+import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../../plugins/cross_cluster_replication/common/constants';
 import { getFollowerIndexPayload } from './fixtures';
 import { registerHelpers as registerElasticSearchHelpers, getRandomString } from './lib';
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
@@ -21,6 +21,7 @@ export default function({ getService }) {
     loadFollowerIndices,
     getFollowerIndex,
     createFollowerIndex,
+    updateFollowerIndex,
     unfollowAll,
   } = registerFollowerIndicesnHelpers(supertest);
 
@@ -56,7 +57,8 @@ export default function({ getService }) {
         expect(body.attributes.cause[0]).to.contain('no such index');
       });
 
-      it('should create a follower index that follows an existing remote index', async () => {
+      // NOTE: If this test fails locally it's probably because you have another cluster running.
+      it('should create a follower index that follows an existing leader index', async () => {
         // First let's create an index to follow
         const leaderIndex = await createIndex();
 
@@ -64,7 +66,7 @@ export default function({ getService }) {
         const { body } = await createFollowerIndex(undefined, payload).expect(200);
 
         // There is a race condition in which Elasticsearch can respond without acknowledging,
-        // i.e. `body .follow_index_shards_acked` is sometimes true and sometimes false.
+        // i.e. `body.follow_index_shards_acked` is sometimes true and sometimes false.
         // By only asserting that `follow_index_created` is true, we eliminate this flakiness.
         expect(body.follow_index_created).to.eql(true);
       });
@@ -78,6 +80,7 @@ export default function({ getService }) {
         expect(body.attributes.cause[0]).to.contain('no such index');
       });
 
+      // NOTE: If this test fails locally it's probably because you have another cluster running.
       it('should return a follower index that was created', async () => {
         const leaderIndex = await createIndex();
 
@@ -89,6 +92,31 @@ export default function({ getService }) {
 
         expect(body.leaderIndex).to.eql(leaderIndex);
         expect(body.remoteCluster).to.eql(payload.remoteCluster);
+      });
+    });
+
+    describe('update()', () => {
+      it('should update a follower index advanced settings', async () => {
+        // Create a follower index
+        const leaderIndex = await createIndex();
+        const followerIndex = getRandomString();
+        const initialValue = 1234;
+        const payload = getFollowerIndexPayload(leaderIndex, undefined, {
+          maxReadRequestOperationCount: initialValue,
+        });
+        await createFollowerIndex(followerIndex, payload);
+
+        // Verify that its advanced settings are correctly set
+        const { body } = await getFollowerIndex(followerIndex, true);
+        expect(body.maxReadRequestOperationCount).to.be(initialValue);
+
+        // Update the follower index
+        const updatedValue = 7777;
+        await updateFollowerIndex(followerIndex, { maxReadRequestOperationCount: updatedValue });
+
+        // Verify that the advanced settings are updated
+        const { body: updatedBody } = await getFollowerIndex(followerIndex, true);
+        expect(updatedBody.maxReadRequestOperationCount).to.be(updatedValue);
       });
     });
 

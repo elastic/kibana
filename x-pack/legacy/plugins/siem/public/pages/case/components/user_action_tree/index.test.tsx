@@ -8,17 +8,13 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
-import { getFormMock } from '../__mock__/form';
+import { getFormMock, useFormMock } from '../__mock__/form';
 import { useUpdateComment } from '../../../../containers/case/use_update_comment';
-import { basicCase, getUserAction } from '../__mock__/case_data';
+import { basicCase, getUserAction } from '../../../../containers/case/mock';
 import { UserActionTree } from './';
 import { TestProviders } from '../../../../mock';
-import { useFormMock } from '../create/index.test';
 import { wait } from '../../../../lib/helpers';
 import { act } from 'react-dom/test-utils';
-jest.mock(
-  '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
-);
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();

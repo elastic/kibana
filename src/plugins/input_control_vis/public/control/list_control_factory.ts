@@ -19,14 +19,17 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';
-import { IFieldType, TimefilterContract, SearchSourceFields } from '../../../data/public';
-import { SearchSourceType } from '../types';
+import {
+  IFieldType,
+  TimefilterContract,
+  SearchSourceFields,
+  DataPublicPluginStart,
+} from '../../../../../plugins/data/public';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
@@ -75,6 +78,7 @@ const termsAgg = ({ field, size, direction, query }: TermsAggArgs) => {
 export class ListControl extends Control<PhraseFilterManager> {
   private getInjectedVar: InputControlVisDependencies['core']['injectedMetadata']['getInjectedVar'];
   private timefilter: TimefilterContract;
+  private searchSource: DataPublicPluginStart['search']['searchSource'];
 
   abortController?: AbortController;
   lastAncestorValues: any;
@@ -86,12 +90,13 @@ export class ListControl extends Control<PhraseFilterManager> {
     controlParams: ControlParams,
     filterManager: PhraseFilterManager,
     useTimeFilter: boolean,
-    SearchSource: SearchSourceType,
+    searchSource: DataPublicPluginStart['search']['searchSource'],
     deps: InputControlVisDependencies
   ) {
-    super(controlParams, filterManager, useTimeFilter, SearchSource);
+    super(controlParams, filterManager, useTimeFilter);
     this.getInjectedVar = deps.core.injectedMetadata.getInjectedVar;
     this.timefilter = deps.data.query.timefilter.timefilter;
+    this.searchSource = searchSource;
   }
 
   fetch = async (query?: string) => {
@@ -143,7 +148,7 @@ export class ListControl extends Control<PhraseFilterManager> {
       query,
     });
     const searchSource = createSearchSource(
-      this.SearchSource,
+      this.searchSource,
       initialSearchSourceState,
       indexPattern,
       aggs,
@@ -202,7 +207,6 @@ export class ListControl extends Control<PhraseFilterManager> {
 export async function listControlFactory(
   controlParams: ControlParams,
   useTimeFilter: boolean,
-  SearchSource: SearchSourceType,
   deps: InputControlVisDependencies
 ) {
   const [, { data: dataPluginStart }] = await deps.core.getStartServices();
@@ -225,7 +229,7 @@ export async function listControlFactory(
       deps.data.query.filterManager
     ),
     useTimeFilter,
-    SearchSource,
+    dataPluginStart.search.searchSource,
     deps
   );
   return listControl;

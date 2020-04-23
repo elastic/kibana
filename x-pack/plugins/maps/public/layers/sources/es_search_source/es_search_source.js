@@ -10,14 +10,14 @@ import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
-import { SearchSource } from '../../../kibana_services';
+import { getSearchService } from '../../../kibana_services';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { VectorLayer } from '../../vector_layer';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
-  ES_SEARCH,
+  SOURCE_TYPES,
   ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
   SORT_ORDER,
@@ -69,7 +69,7 @@ function getDocValueAndSourceFields(indexPattern, fieldNames) {
 }
 
 export class ESSearchSource extends AbstractESSource {
-  static type = ES_SEARCH;
+  static type = SOURCE_TYPES.ES_SEARCH;
 
   constructor(descriptor, inspectorAdapters) {
     super(
@@ -387,11 +387,21 @@ export class ESSearchSource extends AbstractESSource {
       });
       return properties;
     };
+    const epochMillisFields = searchFilters.fieldNames.filter(fieldName => {
+      const field = getField(indexPattern, fieldName);
+      return field.readFromDocValues && field.type === 'date';
+    });
 
     let featureCollection;
     try {
       const geoField = await this._getGeoField();
-      featureCollection = hitsToGeoJson(hits, flattenHit, geoField.name, geoField.type);
+      featureCollection = hitsToGeoJson(
+        hits,
+        flattenHit,
+        geoField.name,
+        geoField.type,
+        epochMillisFields
+      );
     } catch (error) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.convertToGeoJsonErrorMsg', {
@@ -404,7 +414,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       data: featureCollection,
-      meta: { ...meta, sourceType: ES_SEARCH },
+      meta: { ...meta, sourceType: SOURCE_TYPES.ES_SEARCH },
     };
   }
 
@@ -417,13 +427,17 @@ export class ESSearchSource extends AbstractESSource {
       return {};
     }
 
-    const searchSource = new SearchSource();
+    const searchService = getSearchService();
+    const searchSource = searchService.searchSource.create();
+
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);
+
     const query = {
       language: 'kuery',
       query: `_id:"${docId}" and _index:"${index}"`,
     };
+
     searchSource.setField('query', query);
     searchSource.setField('fields', this._getTooltipPropertyNames());
 
@@ -570,7 +584,7 @@ export class ESSearchSource extends AbstractESSource {
 
 registerSource({
   ConstructorFunction: ESSearchSource,
-  type: ES_SEARCH,
+  type: SOURCE_TYPES.ES_SEARCH,
 });
 
 export const esDocumentsLayerWizardConfig = {

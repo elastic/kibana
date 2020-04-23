@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedMapInput } from '../../../functions/common/saved_map';
+import { MapEmbeddableInput } from '../../../../../maps/public';
 
-export function toExpression(input: SavedMapInput): string {
+export function toExpression(input: MapEmbeddableInput): string {
   const expressionParts = [] as string[];
 
   expressionParts.push('savedMap');

@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { SearchSourceType } from '../types';
-
-export const getSearchSourceMock = (esSearchResponse?: any): SearchSourceType =>
+export const getSearchSourceMock = (esSearchResponse?: any) =>
   jest.fn().mockImplementation(() => ({
     setParent: jest.fn(),
     setField: jest.fn(),

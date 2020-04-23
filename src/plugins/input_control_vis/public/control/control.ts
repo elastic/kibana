@@ -22,12 +22,11 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { Filter } from '../../../data/public';
+import { Filter } from '../../../../../plugins/data/public';
 import { ControlParams, ControlParamsOptions, CONTROL_TYPES } from '../editor_utils';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { FilterManager as BaseFilterManager } from './filter_manager/filter_manager';
-import { SearchSourceType } from '../types';
 
 export function noValuesDisableMsg(fieldName: string, indexPatternName: string) {
   return i18n.translate('inputControl.control.noValuesDisableTooltip', {
@@ -61,8 +60,7 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
   constructor(
     public controlParams: ControlParams,
     public filterManager: FilterManager,
-    public useTimeFilter: boolean,
-    public SearchSource: SearchSourceType
+    public useTimeFilter: boolean
   ) {
     this.id = controlParams.id;
     this.controlParams = controlParams;

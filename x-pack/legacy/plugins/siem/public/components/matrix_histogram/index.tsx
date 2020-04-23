@@ -37,6 +37,7 @@ import {
 import { SetQuery } from '../../pages/hosts/navigation/types';
 import { QueryTemplateProps } from '../../containers/query_template';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { InputsModelId } from '../../store/inputs/constants';
 import { HistogramType } from '../../graphql/types';
 
 export interface OwnProps extends QueryTemplateProps {
@@ -46,9 +47,12 @@ export interface OwnProps extends QueryTemplateProps {
   hideHistogramIfEmpty?: boolean;
   histogramType: HistogramType;
   id: string;
+  indexToAdd?: string[] | null;
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
+  showSpacer?: boolean;
   setQuery: SetQuery;
+  setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
@@ -62,6 +66,7 @@ const HeaderChildrenFlexItem = styled(EuiFlexItem)`
   margin-left: 24px;
 `;
 
+// @ts-ignore - the EUI type definitions for Panel do no play nice with styled-components
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
   flex-direction: column;
@@ -79,16 +84,20 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   histogramType,
   hideHistogramIfEmpty = false,
   id,
+  indexToAdd,
   isInspected,
   legendPosition,
   mapping,
   panelHeight = DEFAULT_PANEL_HEIGHT,
+  setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
   showLegend,
+  showSpacer = true,
   stackByOptions,
   startDate,
   subtitle,
   title,
+  titleSize,
   dispatchSetAbsoluteRangeDatePicker,
   yTickFormatter,
 }) => {
@@ -100,7 +109,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
         legendPosition,
         to: endDate,
         onBrushEnd: (min: number, max: number) => {
-          dispatchSetAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+          dispatchSetAbsoluteRangeDatePicker({
+            id: setAbsoluteRangeDatePickerTarget,
+            from: min,
+            to: max,
+          });
         },
         yTickFormatter,
         showLegend,
@@ -122,7 +135,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
-        stackByOptions?.find(co => co.value === event.target.value) ?? defaultStackByOption
+        stackByOptions.find(co => co.value === event.target.value) ?? defaultStackByOption
       );
     },
     []
@@ -134,6 +147,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
       errorMessage,
       filterQuery,
       histogramType,
+      indexToAdd,
       startDate,
       isInspected,
       stackByField: selectedStackByOption.value,
@@ -144,10 +158,17 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
     [title, selectedStackByOption]
   );
-  const subtitleWithCounts = useMemo(
-    () => (subtitle != null && typeof subtitle === 'function' ? subtitle(totalCount) : subtitle),
-    [subtitle, totalCount]
-  );
+  const subtitleWithCounts = useMemo(() => {
+    if (isInitialLoading) {
+      return null;
+    }
+
+    if (typeof subtitle === 'function') {
+      return totalCount >= 0 ? subtitle(totalCount) : null;
+    }
+
+    return subtitle;
+  }, [isInitialLoading, subtitle, totalCount]);
   const hideHistogram = useMemo(() => (totalCount <= 0 && hideHistogramIfEmpty ? true : false), [
     totalCount,
     hideHistogramIfEmpty,
@@ -155,7 +176,9 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   const barChartData = useMemo(() => getCustomChartData(data, mapping), [data, mapping]);
 
   useEffect(() => {
-    setQuery({ id, inspect, loading, refetch });
+    if (!loading && !isInitialLoading) {
+      setQuery({ id, inspect, loading, refetch });
+    }
 
     if (isInitialLoading && !!barChartData && data) {
       setIsInitialLoading(false);
@@ -189,59 +212,39 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
             />
           )}
 
+          <HeaderSection
+            id={id}
+            title={titleWithStackByField}
+            titleSize={titleSize}
+            subtitle={subtitleWithCounts}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                {stackByOptions.length > 1 && (
+                  <EuiSelect
+                    onChange={setSelectedChartOptionCallback}
+                    options={stackByOptions}
+                    prepend={i18n.STACK_BY}
+                    value={selectedStackByOption?.value}
+                  />
+                )}
+              </EuiFlexItem>
+              <HeaderChildrenFlexItem grow={false}>{headerChildren}</HeaderChildrenFlexItem>
+            </EuiFlexGroup>
+          </HeaderSection>
+
           {isInitialLoading ? (
-            <>
-              <HeaderSection
-                id={id}
-                title={titleWithStackByField}
-                subtitle={!isInitialLoading && (totalCount >= 0 ? subtitleWithCounts : null)}
-              >
-                <EuiFlexGroup alignItems="center" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    {stackByOptions?.length > 1 && (
-                      <EuiSelect
-                        onChange={setSelectedChartOptionCallback}
-                        options={stackByOptions}
-                        prepend={i18n.STACK_BY}
-                        value={selectedStackByOption?.value}
-                      />
-                    )}
-                  </EuiFlexItem>
-                  <HeaderChildrenFlexItem grow={false}>{headerChildren}</HeaderChildrenFlexItem>
-                </EuiFlexGroup>
-              </HeaderSection>
-              <MatrixLoader />
-            </>
+            <MatrixLoader />
           ) : (
-            <>
-              <HeaderSection
-                id={id}
-                title={titleWithStackByField}
-                subtitle={
-                  !isInitialLoading &&
-                  (totalCount != null && totalCount >= 0 ? subtitleWithCounts : null)
-                }
-              >
-                <EuiFlexGroup alignItems="center" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    {stackByOptions?.length > 1 && (
-                      <EuiSelect
-                        onChange={setSelectedChartOptionCallback}
-                        options={stackByOptions}
-                        prepend={i18n.STACK_BY}
-                        value={selectedStackByOption?.value}
-                      />
-                    )}
-                  </EuiFlexItem>
-                  <HeaderChildrenFlexItem grow={false}>{headerChildren}</HeaderChildrenFlexItem>
-                </EuiFlexGroup>
-              </HeaderSection>
-              <BarChart barChart={barChartData} configs={barchartConfigs} />
-            </>
+            <BarChart
+              barChart={barChartData}
+              configs={barchartConfigs}
+              stackByField={selectedStackByOption.value}
+            />
           )}
         </HistogramPanel>
       </InspectButtonContainer>
-      <EuiSpacer size="l" />
+      {showSpacer && <EuiSpacer data-test-subj="spacer" size="l" />}
     </>
   );
 };
