@@ -11,12 +11,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { flattenCaseSavedObject, transformNewCase, wrapError, escapeHatch } from '../utils';
 
-import {
-  CasePostRequestRt,
-  throwErrors,
-  excess,
-  CaseResponseRt,
-} from '../../../../common/api';
+import { CasePostRequestRt, throwErrors, excess, CaseResponseRt } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
@@ -75,7 +70,13 @@ export function initPostCaseApi({
           ],
         });
 
-        return response.ok({ body: CaseResponseRt.encode(flattenCaseSavedObject(newCase, [])) });
+        return response.ok({
+          body: CaseResponseRt.encode(
+            flattenCaseSavedObject({
+              savedObject: newCase,
+            })
+          ),
+        });
       } catch (error) {
         return response.customError(wrapError(error));
       }

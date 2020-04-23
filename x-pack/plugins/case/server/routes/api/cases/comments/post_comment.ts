@@ -112,16 +112,16 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
 
         return response.ok({
           body: CaseResponseRt.encode(
-            flattenCaseSavedObject(
-              {
+            flattenCaseSavedObject({
+              savedObject: {
                 ...myCase,
                 ...updatedCase,
                 attributes: { ...myCase.attributes, ...updatedCase.attributes },
                 version: updatedCase.version ?? myCase.version,
                 references: myCase.references,
               },
-              comments.saved_objects
-            )
+              comments: comments.saved_objects,
+            })
           ),
         });
       } catch (error) {

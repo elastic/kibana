@@ -44,14 +44,11 @@ describe('GET case', () => {
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
-
+    const savedObject = (mockCases.find(s => s.id === 'mock-id-1') as unknown) as SavedObject<
+      CaseAttributes
+    >;
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(
-      flattenCaseSavedObject(
-        (mockCases.find(s => s.id === 'mock-id-1') as unknown) as SavedObject<CaseAttributes>,
-        []
-      )
-    );
+    expect(response.payload).toEqual(flattenCaseSavedObject({ savedObject }));
     expect(response.payload.comments).toEqual([]);
   });
   it(`returns an error when thrown from getCase`, async () => {

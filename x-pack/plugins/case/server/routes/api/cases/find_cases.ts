@@ -126,6 +126,11 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
                 client,
                 caseId: c.id,
               });
+              console.log('theCase', {
+                cId: c.id,
+                id: theCase.id,
+                version: theCase.version,
+              });
               caseVersion = theCase.version;
             } else {
               connectorId = c.attributes.connector_id;
@@ -141,6 +146,11 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
                 perPage: 1,
               },
             });
+            console.log('extraDataFindByCases[]', {
+              ...allCaseComments,
+              connectorId,
+              caseVersion,
+            });
             return {
               ...allCaseComments,
               connectorId,
@@ -148,7 +158,6 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
             };
           })
         );
-        console.log('extraDataFindByCases', extraDataFindByCases);
         const extraCaseData = extraDataFindByCases.reduce<ExtraCaseData[]>((acc, itemFind) => {
           if (itemFind.saved_objects.length > 0) {
             const caseId =

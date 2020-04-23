@@ -56,7 +56,7 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
 
         if (!includeComments) {
           return response.ok({
-            body: CaseResponseRt.encode(flattenCaseSavedObject(theCase, [])),
+            body: CaseResponseRt.encode(flattenCaseSavedObject({ savedObject: theCase })),
           });
         }
 
@@ -70,7 +70,9 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
         });
 
         return response.ok({
-          body: CaseResponseRt.encode(flattenCaseSavedObject(theCase, theComments.saved_objects)),
+          body: CaseResponseRt.encode(
+            flattenCaseSavedObject({ savedObject: theCase, comments: theComments.saved_objects })
+          ),
         });
       } catch (error) {
         return response.customError(wrapError(error));

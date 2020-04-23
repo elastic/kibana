@@ -210,24 +210,24 @@ describe('Utils', () => {
 
   describe('transformCases', () => {
     it('transforms correctly', () => {
-      const totalCommentsByCase = [
-        { caseId: mockCases[0].id, totalComments: 2 },
-        { caseId: mockCases[1].id, totalComments: 2 },
-        { caseId: mockCases[2].id, totalComments: 2 },
-        { caseId: mockCases[3].id, totalComments: 2 },
+      const extraCaseData = [
+        { caseId: mockCases[0].id, totalComments: 2, connectorId: '123', caseVersion: '700' },
+        { caseId: mockCases[1].id, totalComments: 2, connectorId: '123', caseVersion: '700' },
+        { caseId: mockCases[2].id, totalComments: 2, connectorId: '123', caseVersion: '700' },
+        { caseId: mockCases[3].id, totalComments: 2, connectorId: '123', caseVersion: '700' },
       ];
 
       const res = transformCases(
         { saved_objects: mockCases, total: mockCases.length, per_page: 10, page: 1 },
         2,
         2,
-        totalCommentsByCase
+        extraCaseData
       );
       expect(res).toEqual({
         page: 1,
         per_page: 10,
         total: mockCases.length,
-        cases: flattenCaseSavedObjects(mockCases, totalCommentsByCase),
+        cases: flattenCaseSavedObjects(mockCases, extraCaseData),
         count_open_cases: 2,
         count_closed_cases: 2,
       });
@@ -236,9 +236,85 @@ describe('Utils', () => {
 
   describe('flattenCaseSavedObjects', () => {
     it('flattens correctly', () => {
-      const totalCommentsByCase = [{ caseId: mockCases[0].id, totalComments: 2 }];
+      const extraCaseData = [
+        { caseId: mockCases[0].id, totalComments: 2, connectorId: '123', caseVersion: 'WzAsMV0=' },
+      ];
 
-      const res = flattenCaseSavedObjects([mockCases[0]], totalCommentsByCase);
+      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
+      expect(res).toEqual([
+        {
+          id: 'mock-id-1',
+          closed_at: null,
+          closed_by: null,
+          connector_id: null,
+          created_at: '2019-11-25T21:54:48.952Z',
+          created_by: {
+            full_name: 'elastic',
+            email: 'testemail@elastic.co',
+            username: 'elastic',
+          },
+          description: 'This is a brand new case of a bad meanie defacing data',
+          external_service: null,
+          title: 'Super Bad Security Issue',
+          status: 'open',
+          tags: ['defacement'],
+          updated_at: '2019-11-25T21:54:48.952Z',
+          updated_by: {
+            full_name: 'elastic',
+            email: 'testemail@elastic.co',
+            username: 'elastic',
+          },
+          comments: [],
+          totalComment: 2,
+          version: 'WzAsMV0=',
+        },
+      ]);
+    });
+
+    it('it handles total comments correctly when caseId is not in extraCaseData', () => {
+      const extraCaseData = [
+        { caseId: 'not-exist', totalComments: 2, connectorId: '123', caseVersion: '700' },
+      ];
+
+      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
+
+      expect(res).toEqual([
+        {
+          id: 'mock-id-1',
+          closed_at: null,
+          closed_by: null,
+          connector_id: null,
+          created_at: '2019-11-25T21:54:48.952Z',
+          created_by: {
+            full_name: 'elastic',
+            email: 'testemail@elastic.co',
+            username: 'elastic',
+          },
+          description: 'This is a brand new case of a bad meanie defacing data',
+          external_service: null,
+          title: 'Super Bad Security Issue',
+          status: 'open',
+          tags: ['defacement'],
+          updated_at: '2019-11-25T21:54:48.952Z',
+          updated_by: {
+            full_name: 'elastic',
+            email: 'testemail@elastic.co',
+            username: 'elastic',
+          },
+          comments: [],
+          totalComment: 0,
+          version: 'WzAsMV0=',
+        },
+      ]);
+    });
+    it('inserts missing connectorId', () => {
+      const extraCaseData = [
+        { caseId: mockCases[0].id, totalComments: 2, connectorId: '123', caseVersion: '700' },
+      ];
+      const noConnectorIdCase = { ...mockCases[0] };
+      delete noConnectorIdCase.attributes.connector_id;
+
+      const res = flattenCaseSavedObjects([noConnectorIdCase], extraCaseData);
       expect(res).toEqual([
         {
           id: 'mock-id-1',
@@ -264,42 +340,7 @@ describe('Utils', () => {
           },
           comments: [],
           totalComment: 2,
-          version: 'WzAsMV0=',
-        },
-      ]);
-    });
-
-    it('it handles total comments correctly', () => {
-      const totalCommentsByCase = [{ caseId: 'not-exist', totalComments: 2 }];
-
-      const res = flattenCaseSavedObjects([mockCases[0]], totalCommentsByCase);
-
-      expect(res).toEqual([
-        {
-          id: 'mock-id-1',
-          closed_at: null,
-          closed_by: null,
-          connector_id: '123',
-          created_at: '2019-11-25T21:54:48.952Z',
-          created_by: {
-            full_name: 'elastic',
-            email: 'testemail@elastic.co',
-            username: 'elastic',
-          },
-          description: 'This is a brand new case of a bad meanie defacing data',
-          external_service: null,
-          title: 'Super Bad Security Issue',
-          status: 'open',
-          tags: ['defacement'],
-          updated_at: '2019-11-25T21:54:48.952Z',
-          updated_by: {
-            full_name: 'elastic',
-            email: 'testemail@elastic.co',
-            username: 'elastic',
-          },
-          comments: [],
-          totalComment: 0,
-          version: 'WzAsMV0=',
+          version: '700',
         },
       ]);
     });
@@ -308,7 +349,7 @@ describe('Utils', () => {
   describe('flattenCaseSavedObject', () => {
     it('flattens correctly', () => {
       const myCase = { ...mockCases[0] };
-      const res = flattenCaseSavedObject(myCase, [], 2);
+      const res = flattenCaseSavedObject({ savedObject: myCase, totalComment: 2 });
       expect(res).toEqual({
         id: myCase.id,
         version: myCase.version,
@@ -321,7 +362,7 @@ describe('Utils', () => {
     it('flattens correctly without version', () => {
       const myCase = { ...mockCases[0] };
       myCase.version = undefined;
-      const res = flattenCaseSavedObject(myCase, [], 2);
+      const res = flattenCaseSavedObject({ savedObject: myCase, totalComment: 2 });
       expect(res).toEqual({
         id: myCase.id,
         version: '0',
@@ -334,7 +375,7 @@ describe('Utils', () => {
     it('flattens correctly with comments', () => {
       const myCase = { ...mockCases[0] };
       const comments = [{ ...mockCaseComments[0] }];
-      const res = flattenCaseSavedObject(myCase, comments, 2);
+      const res = flattenCaseSavedObject({ savedObject: myCase, comments, totalComment: 2 });
       expect(res).toEqual({
         id: myCase.id,
         version: myCase.version,

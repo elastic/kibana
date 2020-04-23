@@ -114,11 +114,13 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
             .map(myCase => {
               const updatedCase = updatedCases.saved_objects.find(c => c.id === myCase.id);
               return flattenCaseSavedObject({
-                ...myCase,
-                ...updatedCase,
-                attributes: { ...myCase.attributes, ...updatedCase?.attributes },
-                references: myCase.references,
-                version: updatedCase?.version ?? myCase.version,
+                savedObject: {
+                  ...myCase,
+                  ...updatedCase,
+                  attributes: { ...myCase.attributes, ...updatedCase?.attributes },
+                  references: myCase.references,
+                  version: updatedCase?.version ?? myCase.version,
+                },
               });
             });
 

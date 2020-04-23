@@ -89,12 +89,12 @@ export const transformCases = (
   cases: SavedObjectsFindResponse<CaseAttributes>,
   countOpenCases: number,
   countClosedCases: number,
-  totalCommentByCase: ExtraCaseData[]
+  extraCaseData: ExtraCaseData[]
 ): CasesFindResponse => ({
   page: cases.page,
   per_page: cases.per_page,
   total: cases.total,
-  cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase),
+  cases: flattenCaseSavedObjects(cases.saved_objects, extraCaseData),
   count_open_cases: countOpenCases,
   count_closed_cases: countClosedCases,
 });
@@ -107,28 +107,33 @@ export const flattenCaseSavedObjects = (
     const extraDataThisCase = extraCaseData.find(tc => tc.caseId === savedObject.id);
     return [
       ...acc,
-      flattenCaseSavedObject(
+      flattenCaseSavedObject({
         savedObject,
-        [],
-        extraDataThisCase?.totalComments ?? 0,
-        extraDataThisCase?.connectorId,
-        extraDataThisCase?.caseVersion
-      ),
+        totalComment: extraDataThisCase?.totalComments,
+        connectorId: extraDataThisCase?.connectorId,
+        version: extraDataThisCase?.caseVersion,
+      }),
     ];
   }, []);
 
-export const flattenCaseSavedObject = (
-  savedObject: SavedObject<CaseAttributes>,
-  comments: Array<SavedObject<CommentAttributes>> = [],
-  totalComment: number = 0,
-  connector_id: string | null = null,
-  version: string = '0'
-): CaseResponse => ({
-  id: savedObject.id,
+export const flattenCaseSavedObject = ({
+  savedObject,
+  comments = [],
+  totalComment = 0,
+  connectorId,
   version,
+}: {
+  savedObject: SavedObject<CaseAttributes>;
+  comments?: Array<SavedObject<CommentAttributes>>;
+  totalComment?: number;
+  connectorId?: string | null;
+  version?: string;
+}): CaseResponse => ({
   comments: flattenCommentSavedObjects(comments),
-  connector_id,
+  connector_id: connectorId ?? savedObject.attributes.connector_id,
+  id: savedObject.id,
   totalComment,
+  version: version ?? savedObject.version ?? '0',
   ...savedObject.attributes,
 });
 

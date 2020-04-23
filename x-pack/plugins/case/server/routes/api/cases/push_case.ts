@@ -143,14 +143,14 @@ export function initPushCaseUserActionApi({
         ]);
         return response.ok({
           body: CaseResponseRt.encode(
-            flattenCaseSavedObject(
-              {
+            flattenCaseSavedObject({
+              savedObject: {
                 ...myCase,
                 ...updatedCase,
                 attributes: { ...myCase.attributes, ...updatedCase?.attributes },
                 references: myCase.references,
               },
-              comments.saved_objects.map(origComment => {
+              comments: comments.saved_objects.map(origComment => {
                 const updatedComment = updatedComments.saved_objects.find(
                   c => c.id === origComment.id
                 );
@@ -164,8 +164,8 @@ export function initPushCaseUserActionApi({
                   version: updatedComment?.version ?? origComment.version,
                   references: origComment?.references ?? [],
                 };
-              })
-            )
+              }),
+            })
           ),
         });
       } catch (error) {
