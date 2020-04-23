@@ -191,7 +191,7 @@ describe('waterfall_helpers', () => {
             name: 'SELECT FROM products',
             id: 'mySpanIdB'
           },
-          child_ids: ['mySpanIdA', 'mySpanIdC']
+          child: { id: ['mySpanIdA', 'mySpanIdC'] }
         } as Span,
         {
           parent: { id: 'mySpanIdD' },
@@ -294,7 +294,7 @@ describe('waterfall_helpers', () => {
             name: 'SELECT FROM products',
             id: 'mySpanIdB'
           },
-          child_ids: ['incorrectId', 'mySpanIdC']
+          child: { id: ['incorrectId', 'mySpanIdC'] }
         } as Span,
         {
           parent: { id: 'mySpanIdD' },
