@@ -6,7 +6,7 @@
 
 import { TileLayer } from './tile_layer';
 import _ from 'lodash';
-import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../common/constants';
 import { isRetina } from '../meta';
 import {
   addSpriteSheetToMapFromImageData,
@@ -28,6 +28,7 @@ export class VectorTileLayer extends TileLayer {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = VectorTileLayer.type;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
+    tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
     return tileLayerDescriptor;
   }
 
