@@ -33,7 +33,6 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   Embeddable,
-  EmbeddableVisTriggerContext,
   IContainer,
 } from '../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
@@ -268,7 +267,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         if (!this.input.disableTriggers) {
           const triggerId =
             event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
-          const context: EmbeddableVisTriggerContext = {
+          const context = {
             embeddable: this,
             timeFieldName: this.vis.data.indexPattern!.timeFieldName!,
             data: event.data,

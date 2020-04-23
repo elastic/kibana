@@ -44,6 +44,11 @@ run(
       throw createFlagError('expected --cache to have no value');
     }
 
+    const includeCoreBundle = flags.core ?? true;
+    if (typeof includeCoreBundle !== 'boolean') {
+      throw createFlagError('expected --core to have no value');
+    }
+
     const dist = flags.dist ?? false;
     if (typeof dist !== 'boolean') {
       throw createFlagError('expected --dist to have no value');
@@ -87,6 +92,7 @@ run(
       profileWebpack,
       extraPluginScanDirs,
       inspectWorkers,
+      includeCoreBundle,
     });
 
     await runOptimizer(config)
@@ -95,9 +101,10 @@ run(
   },
   {
     flags: {
-      boolean: ['watch', 'oss', 'examples', 'dist', 'cache', 'profile', 'inspect-workers'],
+      boolean: ['core', 'watch', 'oss', 'examples', 'dist', 'cache', 'profile', 'inspect-workers'],
       string: ['workers', 'scan-dir'],
       default: {
+        core: true,
         examples: true,
         cache: true,
         'inspect-workers': true,
@@ -107,6 +114,7 @@ run(
         --workers          max number of workers to use
         --oss              only build oss plugins
         --profile          profile the webpack builds and write stats.json files to build outputs
+        --no-core          disable generating the core bundle
         --no-cache         disable the cache
         --no-examples      don't build the example plugins
         --dist             create bundles that are suitable for inclusion in the Kibana distributable

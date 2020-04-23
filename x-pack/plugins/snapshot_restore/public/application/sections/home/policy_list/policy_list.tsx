@@ -9,13 +9,19 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
+import {
+  SectionError,
+  Error,
+  WithPrivileges,
+  NotAuthorizedSection,
+} from '../../../../shared_imports';
+
 import { SlmPolicy } from '../../../../../common/types';
-import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
-import { SectionError, SectionLoading, Error } from '../../../components';
+import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
+import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
-import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 import { useServices } from '../../../app_context';
 
 import { PolicyDetails } from './policy_details';
