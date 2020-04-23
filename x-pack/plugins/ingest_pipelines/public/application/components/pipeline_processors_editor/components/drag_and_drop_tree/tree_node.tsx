@@ -23,6 +23,8 @@ interface Props {
   index: number;
 }
 
+const ON_FAILURE = 'onFailure';
+
 export const TreeNode: FunctionComponent<Props> = ({ processor, selector, index, component }) => {
   const id = selector.join('.');
   return (
@@ -40,7 +42,7 @@ export const TreeNode: FunctionComponent<Props> = ({ processor, selector, index,
             </EuiFlexGroup>
             {processor.onFailure && (
               <PrivateDragAndDropTree
-                selector={selector.concat(['onFailure'])}
+                selector={selector.concat([ON_FAILURE])}
                 processors={processor.onFailure}
                 nodeComponent={component}
               />

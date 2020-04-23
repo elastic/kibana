@@ -8,8 +8,7 @@ type Path = string[];
 
 /**
  * The below get and set functions are built with an API to make setting
- * and get values from nested arrays a bit easier and more usable with
- * immer.
+ * and getting and setting values more simple.
  *
  * @remark
  * NEVER use these with objects that contain keys created by user input.
@@ -29,38 +28,59 @@ export const getValue = <Result = any>(path: Path, source: any) => {
   return (current as unknown) as Result;
 };
 
+const ARRAY_TYPE = Object.prototype.toString.call([]);
+const OBJECT_TYPE = Object.prototype.toString.call({});
+
+const dumbCopy = <R>(value: R): R => {
+  const objectType = Object.prototype.toString.call(value);
+  if (objectType === ARRAY_TYPE) {
+    return ([...(value as any)] as unknown) as R;
+  } else if (objectType === OBJECT_TYPE) {
+    return { ...(value as any) } as R;
+  }
+
+  throw new Error(`Expected (${ARRAY_TYPE}|${OBJECT_TYPE}) but received ${objectType}`);
+};
+
 /**
  * Given a path, value and an object (array or object) set
- * the value at the path.
+ * the value at the path and copy objects values on the
+ * path only. This is a partial copy mechanism that is best
+ * effort for providing state updates to the UI, could break down
+ * if other updates are made to non-copied parts of state in external
+ * references - but this should not happen.
  *
  * @remark
- * If path is empty, do nothing
+ * If path is empty, just shallow copy source.
  */
 export const setValue = <Target = any, Value = any>(
   path: Path,
   source: Target,
   value: Value
-): void => {
-  let current: any;
-
+): Target => {
   if (!path.length) {
-    return;
+    return dumbCopy(source);
   }
+
+  let current: any;
+  let result: Target;
 
   for (let idx = 0; idx < path.length; ++idx) {
     const key = path[idx];
     const atRoot = !current;
 
     if (atRoot) {
-      current = source;
+      result = dumbCopy(source);
+      current = result;
     }
 
     if (idx + 1 === path.length) {
       current[key] = value;
     } else {
+      current[key] = dumbCopy(current[key]);
       current = current[key];
     }
   }
 
-  return;
+  return result!;
 };

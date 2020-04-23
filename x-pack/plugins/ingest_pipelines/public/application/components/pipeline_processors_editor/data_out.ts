@@ -12,7 +12,7 @@ type SerializeArgs = DeserializeResult;
 
 export interface SerializeResult {
   processors: Processor[];
-  onFailure?: Processor[];
+  on_failure?: Processor[];
 }
 
 const convertProcessorInternalToProcessor = (processor: ProcessorInternal): Processor => {
@@ -44,6 +44,6 @@ const convertProcessors = (processors: ProcessorInternal[]) => {
 export const serialize = ({ processors, onFailure }: SerializeArgs): SerializeResult => {
   return {
     processors: convertProcessors(processors),
-    onFailure: onFailure ? convertProcessors(onFailure) : undefined,
+    on_failure: onFailure ? convertProcessors(onFailure) : undefined,
   };
 };

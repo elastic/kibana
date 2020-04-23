@@ -7,32 +7,30 @@
 import { getValue, setValue } from './utils';
 
 describe('get and set values', () => {
+  const testObject = Object.freeze([{ a: [{ a: 1 }] }]);
   describe('#getValue', () => {
     it('gets a deeply nested value', () => {
-      const test = Object.freeze([{ a: [{ a: 1 }] }]);
-      expect(getValue(['0', 'a', '0', 'a'], test)).toBe(1);
+      expect(getValue(['0', 'a', '0', 'a'], testObject)).toBe(1);
     });
 
     it('empty array for path returns "root" value', () => {
-      const test = Object.freeze([{ a: [{ a: 1 }] }]);
-      const result = getValue([], test);
-      expect(result).toEqual(test);
+      const result = getValue([], testObject);
+      expect(result).toEqual(testObject);
       // Getting does not create a copy
-      expect(result).toBe(test);
+      expect(result).toBe(testObject);
     });
   });
 
   describe('#setValue', () => {
     it('sets a deeply nested value', () => {
-      const test = Object.freeze([{ a: [{ a: 1 }] }]);
-      setValue(['0', 'a', '0', 'a'], test, 2);
-      expect(test).toEqual([{ a: [{ a: 2 }] }]);
+      const result = setValue(['0', 'a', '0', 'a'], testObject, 2);
+      expect(result).toEqual([{ a: [{ a: 2 }] }]);
+      expect(result).not.toBe(testObject);
     });
 
     it('returns value if no path was provided', () => {
-      const test = Object.freeze([{ a: [{ a: 1 }] }]);
-      setValue([], test, 2);
-      expect(test).toEqual([{ a: [{ a: 1 }] }]);
+      setValue([], testObject, 2);
+      expect(testObject).toEqual([{ a: [{ a: 1 }] }]);
     });
   });
 });

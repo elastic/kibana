@@ -14,7 +14,7 @@ import { deserialize } from './data_in';
 import { serialize, SerializeResult } from './data_out';
 import { useProcessorsState } from './reducer';
 import { ProcessorInternal, ProcessorSelector } from './types';
-import { PipelineProcessor } from './pipeline_processor';
+import { PipelineProcessorEditorItem } from './pipeline_processor_editor_item';
 
 export interface OnUpdateHandlerArg {
   getData: () => SerializeResult;
@@ -32,10 +32,16 @@ export interface Props {
   onUpdate: (arg: OnUpdateHandlerArg) => void;
 }
 
+/**
+ * The editor can be in different modes. This enables us to hold
+ * a reference to data we will either use to render a form or dispatch to
+ * the reducer (like the {@link ProcessorSelector} which will be used to
+ * update the in-memory processors data structure.
+ */
 type Mode =
   | { id: 'creatingProcessor'; arg: ProcessorSelector }
   | { id: 'creatingOnFailureProcessor'; arg: ProcessorSelector }
-  | { id: 'updatingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
+  | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
   | { id: 'idle' };
 
 export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
@@ -68,30 +74,35 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
 
   const onSubmit = useCallback(
     processorTypeAndOptions => {
-      if (mode.id === 'creatingProcessor') {
-        dispatch({
-          type: 'addProcessor',
-          payload: { processor: processorTypeAndOptions, selector: mode.arg ?? [] },
-        });
-      } else if (mode.id === 'updatingProcessor') {
-        dispatch({
-          type: 'updateProcessor',
-          payload: {
-            processor: {
-              ...mode.arg.processor,
-              ...processorTypeAndOptions,
+      switch (mode.id) {
+        case 'creatingProcessor':
+          dispatch({
+            type: 'addProcessor',
+            payload: { processor: processorTypeAndOptions, selector: mode.arg ?? [] },
+          });
+          break;
+        case 'creatingOnFailureProcessor':
+          dispatch({
+            type: 'addOnFailureProcessor',
+            payload: {
+              onFailureProcessor: processorTypeAndOptions,
+              targetSelector: mode.arg,
             },
-            selector: mode.arg.selector,
-          },
-        });
-      } else if (mode.id === 'creatingOnFailureProcessor') {
-        dispatch({
-          type: 'addOnFailureProcessor',
-          payload: {
-            onFailureProcessor: processorTypeAndOptions,
-            targetSelector: mode.arg,
-          },
-        });
+          });
+          break;
+        case 'editingProcessor':
+          dispatch({
+            type: 'updateProcessor',
+            payload: {
+              processor: {
+                ...mode.arg.processor,
+                ...processorTypeAndOptions,
+              },
+              selector: mode.arg.selector,
+            },
+          });
+          break;
+        default:
       }
       setMode({ id: 'idle' });
       dismissFlyout();
@@ -115,11 +126,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
           }}
           processors={processors}
           nodeComponent={({ processor, selector }) => (
-            <PipelineProcessor
+            <PipelineProcessorEditorItem
               onClick={type => {
                 switch (type) {
                   case 'edit':
-                    setMode({ id: 'updatingProcessor', arg: { processor, selector } });
+                    setMode({ id: 'editingProcessor', arg: { processor, selector } });
                     break;
                   case 'delete':
                     // TODO: This should have a delete confirmation modal
@@ -146,7 +157,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
         <SettingsFormFlyout
           onFormUpdate={onFormUpdate}
           onSubmit={onSubmit}
-          processor={mode.id === 'updatingProcessor' ? mode.arg.processor : undefined}
+          processor={mode.id === 'editingProcessor' ? mode.arg.processor : undefined}
           onClose={() => {
             dismissFlyout();
             dispatch({ type: 'processorForm.close' });

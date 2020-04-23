@@ -43,14 +43,6 @@ const convertProcessors = (processors: Processor[]) => {
   return convertedProcessors;
 };
 
-export const createProcessorInternal = (args: {
-  type: string;
-  options: any;
-  onFailure?: ProcessorInternal[];
-}): ProcessorInternal => ({
-  ...args,
-});
-
 export const deserialize = ({ processors, onFailure }: DeserializeArgs): DeserializeResult => {
   return {
     processors: convertProcessors(processors),
