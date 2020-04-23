@@ -31,7 +31,8 @@ export default function({ getService, getPageObjects }) {
     'dateFormat:tz': 'Europe/Berlin',
   };
 
-  describe('discover histogram', function describeIndexTests() {
+  // https://github.com/elastic/kibana/issues/63928
+  describe.skip('discover histogram', function describeIndexTests() {
     before(async function() {
       log.debug('load kibana index with default index pattern');
       await PageObjects.common.navigateToApp('home');

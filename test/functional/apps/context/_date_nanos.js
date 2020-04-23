@@ -43,7 +43,8 @@ export default function({ getService, getPageObjects }) {
       return esArchiver.unload('date_nanos');
     });
 
-    it('displays predessors - anchor - successors in right order ', async function() {
+    // https://github.com/elastic/kibana/issues/58815
+    it.skip('displays predessors - anchor - successors in right order ', async function() {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qj999Z');
       const actualRowsText = await docTable.getRowsText();
       const expectedRowsText = [

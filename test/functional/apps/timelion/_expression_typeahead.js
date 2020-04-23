@@ -22,7 +22,8 @@ import expect from '@kbn/expect';
 export default function({ getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'timelion', 'settings', 'timePicker']);
 
-  describe('expression typeahead', () => {
+  // https://github.com/elastic/kibana/issues/58817
+  describe.skip('expression typeahead', () => {
     before(async () => {
       await PageObjects.timelion.initTests();
       await PageObjects.timePicker.setDefaultAbsoluteRange();

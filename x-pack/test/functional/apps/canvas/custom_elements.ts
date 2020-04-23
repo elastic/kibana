@@ -19,7 +19,8 @@ export default function canvasCustomElementTest({
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
 
-  describe('custom elements', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/62927
+  describe.skip('custom elements', function() {
     this.tags('skipFirefox');
 
     before(async () => {
@@ -55,7 +56,8 @@ export default function canvasCustomElementTest({
       });
     });
 
-    it('adds the custom element to the workpad when prompted', async () => {
+    // https://github.com/elastic/kibana/issues/63339
+    it.skip('adds the custom element to the workpad when prompted', async () => {
       await PageObjects.canvas.openAddElementModal();
 
       // open the custom elements tab
