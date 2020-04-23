@@ -29,13 +29,15 @@ export const TreeNode: FunctionComponent<Props> = ({ processor, selector, index,
     <EuiDraggable spacing="m" draggableId={id} key={id} index={index} customDragHandle={true}>
       {provided => (
         <EuiPanel paddingSize="m">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <div {...provided.dragHandleProps}>
-                <EuiIcon type="grab" />
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{component({ processor, selector })}</EuiFlexItem>
+          <EuiFlexGroup direction="column" alignItems="flexStart">
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <div {...provided.dragHandleProps}>
+                  <EuiIcon type="grab" />
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{component({ processor, selector })}</EuiFlexItem>
+            </EuiFlexGroup>
             {processor.onFailure && (
               <PrivateDragAndDropTree
                 selector={selector.concat(['onFailure'])}

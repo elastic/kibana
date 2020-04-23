@@ -25,7 +25,6 @@ export type ProcessorOptions<CustomProcessorOptions = {}> = ESCommonProcessorOpt
 
 /** @private */
 export interface ProcessorInternal<CustomProcessorOptions = {}> {
-  readonly id: string;
   type: string;
   options: ProcessorOptions<CustomProcessorOptions>;
   onFailure?: ProcessorInternal[];

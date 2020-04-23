@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
-
 import { Processor } from '../../../../common/types';
 import { ProcessorInternal } from './types';
 
@@ -29,11 +27,11 @@ const convertToPipelineInternalProcessor = (processor: Processor): ProcessorInte
   const onFailure = options.on_failure?.length
     ? convertProcessors(options.on_failure)
     : (options.on_failure as ProcessorInternal[] | undefined);
-  return createProcessorInternal({
+  return {
     type,
     onFailure,
     options,
-  });
+  };
 };
 
 const convertProcessors = (processors: Processor[]) => {
@@ -50,7 +48,6 @@ export const createProcessorInternal = (args: {
   options: any;
   onFailure?: ProcessorInternal[];
 }): ProcessorInternal => ({
-  id: uuid.v4(),
   ...args,
 });
 

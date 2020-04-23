@@ -35,7 +35,7 @@ export interface Props {
 type Mode =
   | { id: 'creatingProcessor'; arg: ProcessorSelector }
   | { id: 'creatingOnFailureProcessor'; arg: ProcessorSelector }
-  | { id: 'updatingProcessor'; arg: ProcessorInternal }
+  | { id: 'updatingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
   | { id: 'idle' };
 
 export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
@@ -67,27 +67,28 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   );
 
   const onSubmit = useCallback(
-    processorSettings => {
+    processorTypeAndOptions => {
       if (mode.id === 'creatingProcessor') {
         dispatch({
           type: 'addProcessor',
-          payload: { processor: processorSettings, selector: mode.arg ?? [] },
+          payload: { processor: processorTypeAndOptions, selector: mode.arg ?? [] },
         });
       } else if (mode.id === 'updatingProcessor') {
         dispatch({
           type: 'updateProcessor',
           payload: {
             processor: {
-              ...mode.arg,
-              ...processorSettings,
+              ...mode.arg.processor,
+              ...processorTypeAndOptions,
             },
+            selector: mode.arg.selector,
           },
         });
       } else if (mode.id === 'creatingOnFailureProcessor') {
         dispatch({
           type: 'addOnFailureProcessor',
           payload: {
-            onFailureProcessor: processorSettings,
+            onFailureProcessor: processorTypeAndOptions,
             targetSelector: mode.arg,
           },
         });
@@ -118,13 +119,13 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
               onClick={type => {
                 switch (type) {
                   case 'edit':
-                    setMode({ id: 'updatingProcessor', arg: processor });
+                    setMode({ id: 'updatingProcessor', arg: { processor, selector } });
                     break;
                   case 'delete':
                     // TODO: This should have a delete confirmation modal
                     dispatch({
                       type: 'removeProcessor',
-                      payload: { processor, selector },
+                      payload: { selector },
                     });
                     break;
                   case 'addOnFailure':
@@ -145,7 +146,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
         <SettingsFormFlyout
           onFormUpdate={onFormUpdate}
           onSubmit={onSubmit}
-          processor={mode.id === 'updatingProcessor' ? mode.arg : undefined}
+          processor={mode.id === 'updatingProcessor' ? mode.arg.processor : undefined}
           onClose={() => {
             dismissFlyout();
             dispatch({ type: 'processorForm.close' });
