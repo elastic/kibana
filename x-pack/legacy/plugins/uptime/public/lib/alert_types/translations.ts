@@ -22,8 +22,19 @@ export const MonitorStatusTranslations = {
 
 export const TlsTranslations = {
   defaultActionMessage: i18n.translate('xpack.uptime.alerts.tls.defaultActionMessage', {
-    // TODO: add something useful here
-    defaultMessage: 'TODO',
+    defaultMessage: `Detected {count} TLS certificates expiring or becoming too old.
+
+{expiringCount} expiring common names, including  {expiringCommonNameAndDate}.
+    
+{agingCount} aged common names, including  {agingCommonNameAndDate}.
+`,
+    values: {
+      count: '{{state.count}}',
+      expiringCount: '{{state.expiringCount}}',
+      expiringCommonNameAndDate: '{{state.expiringCommonNameAndDate}}',
+      agingCount: '{{state.agingCount}}',
+      agingCommonNameAndDate: '{{state.agingCommonNameAndDate}}',
+    },
   }),
   name: i18n.translate('xpack.uptime.alerts.tls.clientName', {
     defaultMessage: 'Uptime TLS',

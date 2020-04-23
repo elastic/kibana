@@ -69,6 +69,9 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
     },
   };
 
+  if (search || notValidBefore || notValidAfter) {
+    params.body.query.bool.should = [];
+  }
   if (search) {
     params.body.query.bool.should = [
       {
@@ -103,7 +106,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   }
 
   if (notValidBefore) {
-    params.body.query.bool.filter.push({
+    params.body.query.bool.should.push({
       range: {
         'tls.certificate_not_valid_before': {
           lte: notValidBefore,
@@ -113,7 +116,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   }
 
   if (notValidAfter) {
-    params.body.query.bool.filter.push({
+    params.body.query.bool.should.push({
       range: {
         'tls.certificate_not_valid_after': {
           lte: notValidAfter,

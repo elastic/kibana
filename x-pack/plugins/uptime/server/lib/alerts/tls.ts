@@ -18,10 +18,10 @@ import { Cert } from '../../../../../legacy/plugins/uptime/common/runtime_types'
 
 const { TLS } = ACTION_GROUP_DEFINITIONS;
 
-const DEFAULT_FROM = 'now-1d';
+const DEFAULT_FROM = 'now-7d';
 const DEFAULT_TO = 'now';
 const DEFAULT_INDEX = 0;
-const DEFAULT_SIZE = 1000;
+const DEFAULT_SIZE = 20;
 
 const sortCerts = (a: string, b: string) => new Date(a).valueOf() - new Date(b).valueOf();
 
@@ -74,16 +74,49 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
     },
   ],
   actionVariables: {
-    context: [
-      // TODO
-    ],
+    context: [],
     state: [
-      // TODO
+      {
+        name: 'count',
+        description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.count', {
+          defaultMessage: 'The number of certs detected by the alert executor',
+        }),
+      },
+      {
+        name: 'expiringCount',
+        description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.expiringCount', {
+          defaultMessage: 'The number of expiring certs detected by the alert.',
+        }),
+      },
+      {
+        name: 'expiringCommonNameAndDate',
+        description: i18n.translate(
+          'xpack.uptime.alerts.tls.actionVariables.state.expiringCommonNameAndDate',
+          {
+            defaultMessage: 'The common names and expiration date/time of the detected certs',
+          }
+        ),
+      },
+      {
+        name: 'agingCount',
+        description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.agingCount', {
+          defaultMessage: 'The number of detected certs that are becoming too old.',
+        }),
+      },
+
+      {
+        name: 'agingCommonNameAndDate',
+        description: i18n.translate(
+          'xpack.uptime.alerts.tls.actionVariables.state.agingCommonNameAndDate',
+          {
+            defaultMessage: 'The common names and expiration date/time of the detected certs.',
+          }
+        ),
+      },
     ],
   },
   async executor(options) {
     const {
-      params: { from, to, index, size, search },
       services: { alertInstanceFactory, callCluster, savedObjectsClient },
       state,
     } = options;
@@ -92,29 +125,27 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
     const certs = await libs.requests.getCerts({
       callES: callCluster,
       dynamicSettings,
-      from: from || DEFAULT_FROM,
-      to: to || DEFAULT_TO,
-      index: index || DEFAULT_INDEX,
-      size: size || DEFAULT_SIZE,
-      search,
-      notValidAfter: `now+${dynamicSettings.certificatesThresholds?.expiration ??
-        DYNAMIC_SETTINGS_DEFAULTS.certificatesThresholds?.expiration}d`,
-      notValidBefore: `now-${dynamicSettings.certificatesThresholds?.age ??
-        DYNAMIC_SETTINGS_DEFAULTS.certificatesThresholds?.age}d`,
+      from: DEFAULT_FROM,
+      to: DEFAULT_TO,
+      index: DEFAULT_INDEX,
+      size: DEFAULT_SIZE,
+      notValidAfter: `now+${dynamicSettings.certThresholds?.expiration ??
+        DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.expiration}d`,
+      notValidBefore: `now-${dynamicSettings.certThresholds?.age ??
+        DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.age}d`,
     });
 
     if (certs.length) {
       const absoluteExpirationThreshold = moment()
         .add(
-          dynamicSettings.certificatesThresholds?.expiration ??
-            DYNAMIC_SETTINGS_DEFAULTS.certificatesThresholds?.expiration,
+          dynamicSettings.certThresholds?.expiration ??
+            DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.expiration,
           'd'
         )
         .valueOf();
       const absoluteAgeThreshold = moment()
         .subtract(
-          dynamicSettings.certificatesThresholds?.age ??
-            DYNAMIC_SETTINGS_DEFAULTS.certificatesThresholds?.age,
+          dynamicSettings.certThresholds?.age ?? DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.age,
           'd'
         )
         .valueOf();
