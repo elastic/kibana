@@ -73,6 +73,7 @@ import {
   SavedObjectsManagementActionServiceStart,
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
+import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 
 interface ExportAllOption {
   id: string;
@@ -86,6 +87,7 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
+  search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
   notifications: NotificationsStart;
   applications: ApplicationStart;
@@ -467,6 +469,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         newIndexPatternUrl={newIndexPatternUrl}
         allowedTypes={this.props.allowedTypes}
         overlays={this.props.overlays}
+        search={this.props.search}
       />
     );
   }
