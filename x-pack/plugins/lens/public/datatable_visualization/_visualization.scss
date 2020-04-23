@@ -2,16 +2,18 @@
   align-self: flex-start;
 }
 
-.lnsDataTable__filterGroup {
+.lnsDataTable__filter {
+  cursor: pointer;
   visibility: hidden;
 }
 
-.lnsDataTable__filter {
-  cursor: pointer;
+.lnsDataTable__filterIcon {
+  fill: $euiColorPrimary;
+  vertical-align: text-bottom;
 }
 
 .lnsDataTable__cell:hover  {
-  .lnsDataTable__filterGroup {
+  .lnsDataTable__filter {
     visibility: visible;
   }
 }

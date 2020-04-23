@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { datatable, DatatableComponent } from './expression';
-import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { datatable, DatatableComponent } from './expression';
+import { LensMultiTable } from '../types';
 import { DatatableProps } from './expression';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 const executeTriggerActions = jest.fn();
 

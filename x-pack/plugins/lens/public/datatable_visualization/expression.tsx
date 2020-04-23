@@ -7,8 +7,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable } from '@elastic/eui';
-import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
+import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { EuiBasicTable, EuiFlexGroup, EuiIconTip, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormatFactory, LensMultiTable } from '../types';
 import {
   ExpressionFunctionDefinition,
@@ -20,6 +20,7 @@ import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { getExecuteTriggerActions } from '../services';
+import { Icon } from './filter_icon';
 
 export interface DatatableColumns {
   columnIds: string[];
@@ -131,12 +132,14 @@ export const getDatatableRenderer = (dependencies: {
     const executeTriggerActions = getExecuteTriggerActions();
     const resolvedGetType = await dependencies.getType;
     ReactDOM.render(
-      <DatatableComponent
-        {...config}
-        formatFactory={resolvedFormatFactory}
-        executeTriggerActions={executeTriggerActions}
-        getType={resolvedGetType}
-      />,
+      <I18nProvider>
+        <DatatableComponent
+          {...config}
+          formatFactory={resolvedFormatFactory}
+          executeTriggerActions={executeTriggerActions}
+          getType={resolvedGetType}
+        />
+      </I18nProvider>,
       domNode,
       () => {
         handlers.done();
@@ -197,47 +200,90 @@ export function DatatableComponent(props: DatatableRenderProps) {
                 const formattedValue = formatters[field]?.convert(value);
                 if (filterable && value) {
                   return (
-                    <EuiFlexGroup justifyContent="spaceBetween" className="lnsDataTable__cell">
+                    <EuiFlexGroup className="lnsDataTable__cell" gutterSize="xs">
                       <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
-                      <EuiFlexItem grow={false} data-test-subj="lensFilter">
-                        <EuiFlexGroup className="lnsDataTable__filterGroup">
-                          <EuiFlexItem
-                            className="lnsDataTable__filter"
-                            onClick={() => handleFilterClick(field, value, colIndex)}
-                            data-test-subj="lensFilterForCellValue"
-                          >
-                            <EuiIconTip
-                              type="magnifyWithPlus"
-                              content={i18n.translate(
-                                'xpack.lens.tableCellFilter.filterForValueTooltip',
-                                {
-                                  defaultMessage: 'Filter for value',
-                                }
-                              )}
-                              iconProps={{
-                                className: 'eui-alignTop',
-                              }}
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem
-                            className="lnsDataTable__filter"
-                            onClick={() => handleFilterClick(field, value, colIndex, true)}
-                            data-test-subj="lensFilterOutCellValue"
-                          >
-                            <EuiIconTip
-                              type="magnifyWithMinus"
-                              content={i18n.translate(
-                                'xpack.lens.tableCellFilter.filterOutValueTooltip',
-                                {
-                                  defaultMessage: 'Filter out value',
-                                }
-                              )}
-                              iconProps={{
-                                className: 'eui-alignTop',
-                              }}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
+                      <EuiFlexItem
+                        grow={false}
+                        className="lnsDataTable__filter"
+                        onClick={({ shiftKey }) =>
+                          handleFilterClick(field, value, colIndex, shiftKey ? true : false)
+                        }
+                        data-test-subj="lensFilterForCellValue"
+                      >
+                        <EuiIconTip
+                          color="primary"
+                          type={Icon}
+                          title={
+                            <EuiText size="s">
+                              <FormattedMessage
+                                id="xpack.lens.datatable.filter.tooltip.title"
+                                defaultMessage="Filter for {value}"
+                                values={{
+                                  value: <strong>{formattedValue}</strong>,
+                                }}
+                              />
+                            </EuiText>
+                          }
+                          content={
+                            <>
+                              <EuiText size="xs">
+                                <FormattedMessage
+                                  id="xpack.lens.datatable.filter.tooltip.filterFor"
+                                  defaultMessage="{click} to filter {for} value."
+                                  values={{
+                                    click: (
+                                      <code>
+                                        {i18n.translate(
+                                          'xpack.lens.datatable.filter.tooltip.filterFor.click',
+                                          {
+                                            defaultMessage: 'Click',
+                                            description: `Part of 'Click to filter for value'`,
+                                          }
+                                        )}
+                                      </code>
+                                    ),
+                                    for: (
+                                      <strong>
+                                        {i18n.translate('xpack.lens.datatable.filter.tooltip.for', {
+                                          defaultMessage: 'for',
+                                          description: `Part of 'Click to filter for value'`,
+                                        })}
+                                      </strong>
+                                    ),
+                                  }}
+                                />
+                              </EuiText>
+                              <EuiText size="xs">
+                                <FormattedMessage
+                                  id="xpack.lens.datatable.filter.tooltip.filterOut"
+                                  defaultMessage="{shiftClick} to filter {out} value"
+                                  values={{
+                                    shiftClick: (
+                                      <code>
+                                        {i18n.translate(
+                                          'xpack.lens.datatable.filter.tooltip.shiftClick',
+                                          {
+                                            defaultMessage: 'Shift + click',
+                                            description: `Part of 'Shift + click to filter out value'`,
+                                          }
+                                        )}
+                                      </code>
+                                    ),
+                                    // description:{}
+                                    out: (
+                                      <strong>
+                                        {i18n.translate('xpack.lens.datatable.filter.tooltip.out', {
+                                          defaultMessage: 'out',
+                                          description: `Part of 'Shift + click to filter out value'`,
+                                        })}
+                                      </strong>
+                                    ),
+                                  }}
+                                />
+                              </EuiText>
+                            </>
+                          }
+                        />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   );
