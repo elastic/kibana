@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { EuiBasicTable, EuiLink } from '@elastic/eui';
+
+import { KibanaContext, IKibanaContext } from '../../../index';
 
 interface IEngineTableProps {
   data: Array<{
@@ -19,20 +21,20 @@ interface IEngineTableProps {
     pageIndex: number;
     onPaginate(pageIndex: number);
   };
-  appSearchUrl: string;
 }
 
 export const EngineTable: ReactFC<IEngineTableProps> = ({
   data,
   pagination: { totalEngines, pageIndex = 0, onPaginate },
-  appSearchUrl,
 }) => {
+  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+
   const columns = [
     {
       field: 'name',
       name: 'Name',
       render: name => (
-        <EuiLink href={`${appSearchUrl}/as/engines/${name}`} target="_blank">
+        <EuiLink href={`${enterpriseSearchUrl}/as/engines/${name}`} target="_blank">
           {name}
         </EuiLink>
       ),
@@ -77,7 +79,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
       name: 'Actions',
       dataType: 'string',
       render: name => (
-        <EuiLink href={`${appSearchUrl}/as/engines/${name}`} target="_blank" color="primary">
+        <EuiLink href={`${enterpriseSearchUrl}/as/engines/${name}`} target="_blank" color="primary">
           Manage
         </EuiLink>
       ),
