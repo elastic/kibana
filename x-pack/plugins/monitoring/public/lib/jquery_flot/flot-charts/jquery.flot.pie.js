@@ -326,7 +326,7 @@ import { i18n } from '@kbn/i18n';
 
 			if (attempts >= REDRAW_ATTEMPTS) {
 				clear();
-				const errorMessage = i18n.translate('common.ui.flotCharts.pie.unableToDrawLabelsInsideCanvasErrorMessage', {
+				const errorMessage = i18n.translate('xpack.monitoring.pie.unableToDrawLabelsInsideCanvasErrorMessage', {
 					defaultMessage: 'Could not draw pie with labels contained inside canvas',
 				});
 				target.prepend(`<div class='error'>${errorMessage}</div>`);

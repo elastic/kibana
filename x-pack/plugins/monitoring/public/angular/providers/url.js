@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 
 export function KbnUrlProvider($injector, $location, $rootScope, $parse) {
   /**
@@ -95,12 +94,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse) {
 
       // if evaluation can't be made, throw
       if (_.isUndefined(p)) {
-        throw new Error(
-          i18n.translate('common.ui.url.replacementFailedErrorMessage', {
-            defaultMessage: 'Replacement failed, unresolved expression: {expr}',
-            values: { expr },
-          })
-        );
+        throw new Error(`Replacement failed, unresolved expression: ${expr}`);
       }
 
       return encodeURIComponent($parse(expr)(paramObj));

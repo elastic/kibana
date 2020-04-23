@@ -43,6 +43,11 @@ export class MonitoringPlugin
     const title = i18n.translate('xpack.monitoring.stackMonitoringTitle', {
       defaultMessage: 'Stack Monitoring',
     });
+    const monitoring = this.initializerContext.config.get();
+
+    if (!monitoring.ui.enabled || !monitoring.enabled) {
+      return;
+    }
 
     if (home) {
       home.featureCatalogue.register({

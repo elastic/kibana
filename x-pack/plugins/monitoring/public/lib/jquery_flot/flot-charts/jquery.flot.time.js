@@ -49,47 +49,47 @@ import { i18n } from '@kbn/i18n';
 
 		if (monthNames == null) {
 			monthNames = [
-        i18n.translate('common.ui.flotCharts.janLabel', {
+        i18n.translate('xpack.monitoring.janLabel', {
 					defaultMessage: 'Jan',
-				}), i18n.translate('common.ui.flotCharts.febLabel', {
+				}), i18n.translate('xpack.monitoring.febLabel', {
 					defaultMessage: 'Feb',
-				}), i18n.translate('common.ui.flotCharts.marLabel', {
+				}), i18n.translate('xpack.monitoring.marLabel', {
 					defaultMessage: 'Mar',
-				}), i18n.translate('common.ui.flotCharts.aprLabel', {
+				}), i18n.translate('xpack.monitoring.aprLabel', {
 					defaultMessage: 'Apr',
-				}), i18n.translate('common.ui.flotCharts.mayLabel', {
+				}), i18n.translate('xpack.monitoring.mayLabel', {
 					defaultMessage: 'May',
-				}), i18n.translate('common.ui.flotCharts.junLabel', {
+				}), i18n.translate('xpack.monitoring.junLabel', {
 					defaultMessage: 'Jun',
-				}), i18n.translate('common.ui.flotCharts.julLabel', {
+				}), i18n.translate('xpack.monitoring.julLabel', {
 					defaultMessage: 'Jul',
-				}), i18n.translate('common.ui.flotCharts.augLabel', {
+				}), i18n.translate('xpack.monitoring.augLabel', {
 					defaultMessage: 'Aug',
-				}), i18n.translate('common.ui.flotCharts.sepLabel', {
+				}), i18n.translate('xpack.monitoring.sepLabel', {
 					defaultMessage: 'Sep',
-				}), i18n.translate('common.ui.flotCharts.octLabel', {
+				}), i18n.translate('xpack.monitoring.octLabel', {
 					defaultMessage: 'Oct',
-				}), i18n.translate('common.ui.flotCharts.novLabel', {
+				}), i18n.translate('xpack.monitoring.novLabel', {
 					defaultMessage: 'Nov',
-				}), i18n.translate('common.ui.flotCharts.decLabel', {
+				}), i18n.translate('xpack.monitoring.decLabel', {
 					defaultMessage: 'Dec',
 				})];
 		}
 
 		if (dayNames == null) {
-			dayNames = [i18n.translate('common.ui.flotCharts.sunLabel', {
+			dayNames = [i18n.translate('xpack.monitoring.sunLabel', {
         defaultMessage: 'Sun',
-      }), i18n.translate('common.ui.flotCharts.monLabel', {
+      }), i18n.translate('xpack.monitoring.monLabel', {
         defaultMessage: 'Mon',
-      }), i18n.translate('common.ui.flotCharts.tueLabel', {
+      }), i18n.translate('xpack.monitoring.tueLabel', {
         defaultMessage: 'Tue',
-      }), i18n.translate('common.ui.flotCharts.wedLabel', {
+      }), i18n.translate('xpack.monitoring.wedLabel', {
         defaultMessage: 'Wed',
-      }), i18n.translate('common.ui.flotCharts.thuLabel', {
+      }), i18n.translate('xpack.monitoring.thuLabel', {
         defaultMessage: 'Thu',
-      }), i18n.translate('common.ui.flotCharts.friLabel', {
+      }), i18n.translate('xpack.monitoring.friLabel', {
         defaultMessage: 'Fri',
-      }), i18n.translate('common.ui.flotCharts.satLabel', {
+      }), i18n.translate('xpack.monitoring.satLabel', {
         defaultMessage: 'Sat',
       })];
 		}

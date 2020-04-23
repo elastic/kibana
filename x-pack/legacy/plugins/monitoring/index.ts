@@ -5,6 +5,7 @@
  */
 
 import Hapi from 'hapi';
+import { config } from './config';
 import { KIBANA_ALERTING_ENABLED } from '../../../plugins/monitoring/common/constants';
 
 /**
@@ -35,5 +36,6 @@ export const monitoring = (kibana: any) => {
         });
       }
     },
+    config,
   });
 };

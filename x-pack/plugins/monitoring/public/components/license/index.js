@@ -31,20 +31,20 @@ export const AddLicense = ({ uploadPath }) => {
     <EuiCard
       title={
         <FormattedMessage
-          id="xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseTitle"
+          id="xpack.monitoring.updateLicenseTitle"
           defaultMessage="Update your license"
         />
       }
       description={
         <FormattedMessage
-          id="xpack.licenseMgmt.licenseDashboard.addLicense.useAvailableLicenseDescription"
+          id="xpack.monitoring.useAvailableLicenseDescription"
           defaultMessage="If you already have a new license, upload it now."
         />
       }
       footer={
         <EuiButton data-test-subj="updateLicenseButton" href={uploadPath}>
           <FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseButtonLabel"
+            id="xpack.monitoring.updateLicenseButtonLabel"
             defaultMessage="Update license"
           />
         </EuiButton>
@@ -65,7 +65,7 @@ export class LicenseStatus extends React.PureComponent {
       message = (
         <Fragment>
           <FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusDescription"
+            id="xpack.monitoring.expiredLicenseStatusDescription"
             defaultMessage="Your license expired on {expiryDate}"
             values={{
               expiryDate: <strong>{expiryDate}</strong>,
@@ -75,7 +75,7 @@ export class LicenseStatus extends React.PureComponent {
       );
       title = (
         <FormattedMessage
-          id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusTitle"
+          id="xpack.monitoring.expiredLicenseStatusTitle"
           defaultMessage="Your {typeTitleCase} license has expired"
           values={{
             typeTitleCase,
@@ -87,7 +87,7 @@ export class LicenseStatus extends React.PureComponent {
       message = expiryDate ? (
         <Fragment>
           <FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusDescription"
+            id="xpack.monitoring.activeLicenseStatusDescription"
             defaultMessage="Your license will expire on {expiryDate}"
             values={{
               expiryDate: <strong>{expiryDate}</strong>,
@@ -97,14 +97,14 @@ export class LicenseStatus extends React.PureComponent {
       ) : (
         <Fragment>
           <FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.permanentActiveLicenseStatusDescription"
+            id="xpack.monitoring.permanentActiveLicenseStatusDescription"
             defaultMessage="Your license will never expire."
           />
         </Fragment>
       );
       title = (
         <FormattedMessage
-          id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusTitle"
+          id="xpack.monitoring.activeLicenseStatusTitle"
           defaultMessage="Your {typeTitleCase} license is {status}"
           values={{
             typeTitleCase,
