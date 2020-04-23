@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsType } from 'kibana/server';
+// @ts-ignore
 import { migrations } from './migrations';
 
 export const graphWorkspace: SavedObjectsType = {
