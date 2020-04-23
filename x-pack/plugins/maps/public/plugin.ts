@@ -31,7 +31,7 @@ import {
   setUiActions,
   setUiSettings,
   setVisualizations,
-  // @ts-ignore
+  setSearchService,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
@@ -68,6 +68,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setFileUpload(fileUpload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
+  setSearchService(data.search);
   setIndexPatternService(data.indexPatterns);
   setAutocompleteService(data.autocomplete);
   setCore(core);

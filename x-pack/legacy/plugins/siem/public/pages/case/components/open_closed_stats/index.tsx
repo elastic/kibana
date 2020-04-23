@@ -12,19 +12,28 @@ export interface Props {
   caseCount: number | null;
   caseStatus: 'open' | 'closed';
   isLoading: boolean;
+  dataTestSubj?: string;
 }
 
-export const OpenClosedStats = React.memo<Props>(({ caseCount, caseStatus, isLoading }) => {
-  const openClosedStats = useMemo(
-    () => [
-      {
-        title: caseStatus === 'open' ? i18n.OPEN_CASES : i18n.CLOSED_CASES,
-        description: isLoading ? <EuiLoadingSpinner /> : caseCount ?? 'N/A',
-      },
-    ],
-    [caseCount, caseStatus, isLoading]
-  );
-  return <EuiDescriptionList textStyle="reverse" listItems={openClosedStats} />;
-});
+export const OpenClosedStats = React.memo<Props>(
+  ({ caseCount, caseStatus, isLoading, dataTestSubj }) => {
+    const openClosedStats = useMemo(
+      () => [
+        {
+          title: caseStatus === 'open' ? i18n.OPEN_CASES : i18n.CLOSED_CASES,
+          description: isLoading ? <EuiLoadingSpinner /> : caseCount ?? 'N/A',
+        },
+      ],
+      [caseCount, caseStatus, isLoading, dataTestSubj]
+    );
+    return (
+      <EuiDescriptionList
+        data-test-subj={dataTestSubj}
+        textStyle="reverse"
+        listItems={openClosedStats}
+      />
+    );
+  }
+);
 
 OpenClosedStats.displayName = 'OpenClosedStats';
