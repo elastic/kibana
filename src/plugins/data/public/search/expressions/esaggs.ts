@@ -30,7 +30,7 @@ import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
 import { IAggConfigs } from '../aggs';
-import { ISearchSource, SearchSource } from '../search_source';
+import { ISearchSource } from '../search_source';
 import { tabifyAggResponse } from '../tabify';
 import {
   Filter,
@@ -282,7 +282,8 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
     const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
-    const searchSource = new SearchSource();
+    const searchSource = searchService.searchSource.create();
+
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 

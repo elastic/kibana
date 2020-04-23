@@ -69,26 +69,16 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     }
 
     load([
-        {{#each sharedJsDepFilenames}}
-          '{{../regularBundlePath}}/kbn-ui-shared-deps/{{this}}',
-        {{/each}}
-        '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedJsFilename}}',
-        '{{dllBundlePath}}/vendors_runtime.bundle.dll.js',
-        {{#each dllJsChunks}}
+        {{#each jsDependencyPaths}}
           '{{this}}',
         {{/each}}
-        '{{regularBundlePath}}/commons.bundle.js',
-        {{!-- '{{regularBundlePath}}/plugin:data/data.plugin.js', --}}
-        '{{regularBundlePath}}/plugin:kibanaUtils/kibanaUtils.plugin.js',
-        '{{regularBundlePath}}/plugin:esUiShared/esUiShared.plugin.js',
-        '{{regularBundlePath}}/plugin:kibanaReact/kibanaReact.plugin.js'
     ], function () {
       load([
-        '{{regularBundlePath}}/{{appId}}.bundle.js',
+        '{{entryBundlePath}}',
         {{#each styleSheetPaths}}
           '{{this}}',
         {{/each}}
-      ])
+      ]);
     });
-  };
+  }
 }

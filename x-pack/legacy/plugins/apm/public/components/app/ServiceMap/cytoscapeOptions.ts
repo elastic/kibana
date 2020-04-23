@@ -60,7 +60,7 @@ const style: cytoscape.Stylesheet[] = [
           ? theme.euiColorPrimary
           : theme.euiColorMediumShade,
       'border-width': 2,
-      color: theme.textColors.default,
+      color: theme.textColors.text,
       // theme.euiFontFamily doesn't work here for some reason, so we're just
       // specifying a subset of the fonts for the label text.
       'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',

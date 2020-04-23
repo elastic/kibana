@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { isAbsolute, extname } from 'path';
+import { isAbsolute, extname, join } from 'path';
 import LruCache from 'lru-cache';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { createDynamicAssetResponse } from './dynamic_asset_response';
 import { assertIsNpUiPluginPublicDirs } from '../np_ui_plugin_public_dirs';
+import { fromRoot } from '../../core/server/utils';
 
 /**
  *  Creates the routes that serves files from `bundlesPath` or from
@@ -79,11 +80,17 @@ export function createBundlesRoute({
     ),
     ...npUiPluginPublicDirs.map(({ id, path }) =>
       buildRouteForBundles(
-        `${basePublicPath}/bundles/plugin:${id}/`,
-        `/bundles/plugin:${id}/`,
+        `${basePublicPath}/bundles/plugin/${id}/`,
+        `/bundles/plugin/${id}/`,
         path,
         fileHashCache
       )
+    ),
+    buildRouteForBundles(
+      `${basePublicPath}/bundles/core/`,
+      `/bundles/core/`,
+      fromRoot(join('src', 'core', 'target', 'public')),
+      fileHashCache
     ),
     buildRouteForBundles(
       `${basePublicPath}/bundles/`,

@@ -42,6 +42,8 @@ export const TIMELINE_INSPECT_BUTTON = '[data-test-subj="inspect-empty-button"]'
 export const TIMELINE_NOT_READY_TO_DROP_BUTTON =
   '[data-test-subj="flyout-button-not-ready-to-drop"]';
 
+export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
+
 export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-gear"]';
 
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
