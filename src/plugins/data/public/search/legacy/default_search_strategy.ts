@@ -32,11 +32,11 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
 
 function msearch({
   searchRequests,
-  searchService,
+  legacySearchService,
   config,
   esShardTimeout,
 }: SearchStrategySearchParams) {
-  const es = searchService.__LEGACY.esClient;
+  const es = legacySearchService.esClient;
   const inlineRequests = searchRequests.map(({ index, body, search_type: searchType }) => {
     const inlineHeader = {
       index: index.title || index,

@@ -31,7 +31,7 @@ import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 } from './constants';
-
+import { registerEncryptedSavedObjects } from './saved_objects';
 import {
   registerEPMRoutes,
   registerDatasourceRoutes,
@@ -42,19 +42,9 @@ import {
   registerInstallScriptRoutes,
 } from './routes';
 
-import { IngestManagerConfigType, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../common';
-import {
-  appContextService,
-  ESIndexPatternService,
-  ESIndexPatternSavedObjectService,
-} from './services';
-
-/**
- * Describes public IngestManager plugin contract returned at the `setup` stage.
- */
-export interface IngestManagerSetupContract {
-  esIndexPatternService: ESIndexPatternService;
-}
+import { IngestManagerConfigType, IngestManagerStartupContract } from '../common';
+import { appContextService, ESIndexPatternSavedObjectService } from './services';
+import { getAgentStatusById } from './services/agents';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -80,7 +70,7 @@ const allSavedObjectTypes = [
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 ];
 
-export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
+export class IngestManagerPlugin implements Plugin<void, IngestManagerStartupContract> {
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
 
@@ -88,67 +78,12 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
   }
 
-  public async setup(
-    core: CoreSetup,
-    deps: IngestManagerSetupDeps
-  ): Promise<RecursiveReadonly<IngestManagerSetupContract>> {
+  public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     if (deps.security) {
       this.security = deps.security;
     }
 
-    // Encrypted saved objects
-    deps.encryptedSavedObjects.registerType({
-      type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-      attributesToEncrypt: new Set(['api_key']),
-      attributesToExcludeFromAAD: new Set([
-        'name',
-        'type',
-        'api_key_id',
-        'config_id',
-        'created_at',
-        'updated_at',
-        'expire_at',
-        'active',
-      ]),
-    });
-    deps.encryptedSavedObjects.registerType({
-      type: OUTPUT_SAVED_OBJECT_TYPE,
-      attributesToEncrypt: new Set(['fleet_enroll_username', 'fleet_enroll_password']),
-      attributesToExcludeFromAAD: new Set([
-        'name',
-        'type',
-        'is_default',
-        'hosts',
-        'ca_sha256',
-        'config',
-      ]),
-    });
-    deps.encryptedSavedObjects.registerType({
-      type: AGENT_SAVED_OBJECT_TYPE,
-      attributesToEncrypt: new Set(['default_api_key']),
-      attributesToExcludeFromAAD: new Set([
-        'shared_id',
-        'type',
-        'active',
-        'enrolled_at',
-        'access_api_key_id',
-        'version',
-        'user_provided_metadata',
-        'local_metadata',
-        'config_id',
-        'last_updated',
-        'last_checkin',
-        'config_revision',
-        'config_newest_revision',
-        'updated_at',
-        'current_error_events',
-      ]),
-    });
-    deps.encryptedSavedObjects.registerType({
-      type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-      attributesToEncrypt: new Set(['data']),
-      attributesToExcludeFromAAD: new Set(['agent_id', 'type', 'sent_at', 'created_at']),
-    });
+    registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
     // TODO: Flesh out privileges
@@ -204,9 +139,6 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
         basePath: core.http.basePath,
       });
     }
-    return deepFreeze({
-      esIndexPatternService: new ESIndexPatternSavedObjectService(),
-    });
   }
 
   public async start(
@@ -214,12 +146,18 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
     plugins: {
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
-  ) {
+  ): Promise<RecursiveReadonly<IngestManagerStartupContract>> {
     appContextService.start({
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,
       config$: this.config$,
       savedObjects: core.savedObjects,
+    });
+    return deepFreeze({
+      esIndexPatternService: new ESIndexPatternSavedObjectService(),
+      agentService: {
+        getAgentStatusById,
+      },
     });
   }
 

@@ -10,31 +10,7 @@ import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { getAgent } from './crud';
 import * as APIKeyService from '../api_keys';
 
-export async function unenrollAgents(
-  soClient: SavedObjectsClientContract,
-  toUnenrollIds: string[]
-) {
-  const response = [];
-  for (const id of toUnenrollIds) {
-    try {
-      await unenrollAgent(soClient, id);
-      response.push({
-        id,
-        success: true,
-      });
-    } catch (error) {
-      response.push({
-        id,
-        error,
-        success: false,
-      });
-    }
-  }
-
-  return response;
-}
-
-async function unenrollAgent(soClient: SavedObjectsClientContract, agentId: string) {
+export async function unenrollAgent(soClient: SavedObjectsClientContract, agentId: string) {
   const agent = await getAgent(soClient, agentId);
 
   await Promise.all([

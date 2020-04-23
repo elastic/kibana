@@ -69,7 +69,7 @@ interface AgentBase {
   default_api_key?: string;
   default_api_key_id?: string;
   config_id?: string;
-  config_revision?: number;
+  config_revision?: number | null;
   config_newest_revision?: number;
   last_checkin?: string;
 }
