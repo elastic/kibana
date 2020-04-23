@@ -39,7 +39,7 @@ const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
 const getKeyCount = (buckets: KeyCountBucket[]): { [key: string]: number } =>
   buckets.reduce((accum, { key, doc_count: count }) => ({ ...accum, [key]: count }), {});
 
-// indexes some key/count buckets by statusType > appName > jobType: statusCount
+// indexes some key/count buckets by statusType > jobType > appName: statusCount
 const getAppStatuses = (buckets: StatusByAppBucket[]) =>
   buckets.reduce((statuses, statusBucket) => {
     return {

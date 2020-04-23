@@ -79,8 +79,8 @@ interface StatusCounts {
 
 interface StatusByAppCounts {
   [statusType: string]: {
-    [appType: string]: {
-      [jobType: string]: number;
+    [jobType: string]: {
+      [appName: string]: number;
     };
   };
 }
