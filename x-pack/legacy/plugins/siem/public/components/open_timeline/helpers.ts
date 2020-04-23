@@ -260,7 +260,6 @@ export const epicUpdateTimeline = ({
   to,
   ruleNote,
 }: UpdateTimeline) => {
-  console.error('dupa 3', timeline);
   const actions: Array<Action<any>> = [
     dispatchSetTimelineRangeDatePicker({ from, to }),
     dispatchAddTimeline({ id, timeline }),

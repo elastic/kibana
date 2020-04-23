@@ -162,6 +162,13 @@ export const TimelineComponent: React.FC<Props> = ({
   });
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const timelineQueryFields = useMemo(() => columnsHeader.map(c => c.id), [columnsHeader]);
+  const timelineQuerySortField = useMemo(
+    () => ({
+      sortFieldId: sort.columnId,
+      direction: sort.sortDirection as Direction,
+    }),
+    [sort.columnId, sort.sortDirection]
+  );
 
   return (
     <TimelineContainer data-test-subj="timeline">
@@ -199,10 +206,7 @@ export const TimelineComponent: React.FC<Props> = ({
           sourceId="default"
           limit={itemsPerPage}
           filterQuery={combinedQueries.filterQuery}
-          sortField={{
-            sortFieldId: sort.columnId,
-            direction: sort.sortDirection as Direction,
-          }}
+          sortField={timelineQuerySortField}
         >
           {({
             events,
