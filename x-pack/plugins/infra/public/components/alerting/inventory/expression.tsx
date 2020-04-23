@@ -48,7 +48,6 @@ import { findInventoryModel } from '../../../../common/inventory_models';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
-import { SnapshotMetricInput } from '../../../../common/http_api/snapshot_api';
 import { MetricExpression } from './metric';
 
 interface AlertContextMeta {
@@ -95,16 +94,16 @@ export const Expressions: React.FC<Props> = props => {
     createDerivedIndexPattern,
   ]);
 
-  const options = useMemo<MetricsExplorerOptions>(() => {
-    if (alertsContext.metadata?.currentOptions?.metrics) {
-      return alertsContext.metadata.currentOptions as MetricsExplorerOptions;
-    } else {
-      return {
-        metrics: [],
-        aggregation: 'avg',
-      };
-    }
-  }, [alertsContext.metadata]);
+  // const options = useMemo<MetricsExplorerOptions>(() => {
+  //   if (alertsContext.metadata?.currentOptions?.metrics) {
+  //     return alertsContext.metadata.currentOptions as MetricsExplorerOptions;
+  //   } else {
+  //     return {
+  //       metrics: [],
+  //       aggregation: 'avg',
+  //     };
+  //   }
+  // }, [alertsContext.metadata]);
 
   const updateParams = useCallback(
     (id, e: InventoryMetricConditions) => {
@@ -135,13 +134,6 @@ export const Expressions: React.FC<Props> = props => {
   const onFilterQuerySubmit = useCallback(
     (filter: any) => {
       setAlertParams('filterQuery', filter);
-    },
-    [setAlertParams]
-  );
-
-  const onGroupByChange = useCallback(
-    (group: string | null) => {
-      setAlertParams('groupBy', group || undefined);
     },
     [setAlertParams]
   );

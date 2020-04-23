@@ -28,7 +28,7 @@ export function compose(core: CoreSetup, config: InfraConfig, plugins: InfraServ
   const sourceStatus = new InfraSourceStatus(new InfraElasticsearchSourceStatusAdapter(framework), {
     sources,
   });
-  const snapshot = new InfraSnapshot({ sources, framework });
+  const snapshot = new InfraSnapshot();
   const logEntryCategoriesAnalysis = new LogEntryCategoriesAnalysis({ framework });
   const logEntryRateAnalysis = new LogEntryRateAnalysis({ framework });
 

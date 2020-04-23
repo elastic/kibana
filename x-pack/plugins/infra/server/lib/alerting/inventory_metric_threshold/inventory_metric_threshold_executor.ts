@@ -14,7 +14,7 @@ import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/ser
 import { InfraSnapshot } from '../../snapshot';
 import { parseFilterQuery } from '../../../utils/serialized_query';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { SnapshotMetricInput, InfraTimerangeInput } from '../../../../common/http_api/snapshot_api';
+import { InfraTimerangeInput } from '../../../../common/http_api/snapshot_api';
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraBackendLibs } from '../../infra_types';
 
