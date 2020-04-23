@@ -36,7 +36,7 @@ To specify a relative or absolute time period, use the time filter.
 . Click *Copy POST URL*.
 +
 [role="screenshot"]
-image::images/report-automate-CSV.png[Generate Discover reports]
+image::images/report-automate-csv.png[Generate Discover reports]
 
 [float]
 === Use Watcher
