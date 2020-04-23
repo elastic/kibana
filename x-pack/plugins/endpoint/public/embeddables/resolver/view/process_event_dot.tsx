@@ -73,25 +73,37 @@ const subMenuAssets = {
   },
 };
 
-const OptionList = React.memo(() => {
-  const [options, setOptions] = useState([{ label: 'abc' }, { label: 'def' }]);
-  return useMemo(
-    () => (
-      <EuiSelectable
-        singleSelection={true}
-        options={options}
-        onChange={newOptions => {
-          // eslint-disable-next-line
-          console.log('reset options');
-          setOptions(newOptions);
-        }}
-      >
-        {list => list}
-      </EuiSelectable>
-    ),
-    [options]
-  );
-});
+type ResolverSubmenuOptionList = Array<{
+  optionTitle: string;
+  action: () => unknown;
+  prefix?: number | JSX.Element;
+}>;
+
+const OptionList = React.memo(
+  ({ subMenuOptions }: { subMenuOptions: ResolverSubmenuOptionList }) => {
+    const selectableOptions = subMenuOptions.map((opt, index) => {
+      return {
+        label: opt.optionTitle,
+      };
+    });
+    const [options, setOptions] = useState(selectableOptions);
+    return useMemo(
+      () => (
+        <EuiSelectable
+          singleSelection={true}
+          options={options}
+          onChange={newOptions => {
+            setOptions(newOptions);
+          }}
+          listProps={{ showIcons: true, bordered: true }}
+        >
+          {list => list}
+        </EuiSelectable>
+      ),
+      [options]
+    );
+  }
+);
 
 const NodeSubMenu = React.memo(
   ({
@@ -101,60 +113,57 @@ const NodeSubMenu = React.memo(
   }: { menuTitle: string } & (
     | {
         menuAction?: undefined;
-        optionsWithActions: Array<{
-          optionTitle: string;
-          action: () => unknown;
-          prefix?: number | JSX.Element;
-        }>;
+        optionsWithActions: ResolverSubmenuOptionList;
       }
     | { menuAction: () => unknown; optionsWithActions?: undefined }
   )) => {
-    if (!optionsWithActions && typeof menuAction === 'function') {
+    const [menuIsOpen, setMenuOpen] = useState(false);
+    const handleMenuOpenClick = useCallback(
+      (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+        setMenuOpen(!menuIsOpen);
+      },
+      [menuIsOpen]
+    );
+    const handleMenuActionClick = useCallback(
+      (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+        if (typeof menuAction === 'function') menuAction();
+      },
+      [menuAction]
+    );
+    if (!optionsWithActions) {
       /**
        * When called with a `menuAction`
        * Render without dropdown and call the supplied action when host button is clicked
        */
       return (
+        <EuiButton onClick={handleMenuActionClick} color="ghost" size="s" tabIndex={-1}>
+          {menuTitle}
+        </EuiButton>
+      );
+    }
+    /**
+     * When called with a set of `optionsWithActions`:
+     * Render with a panel of options that appear when the menu host button is clicked
+     */
+    return (
+      <>
         <EuiButton
-          onClick={useCallback(
-            (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-              clickEvent.preventDefault();
-              clickEvent.stopPropagation();
-              menuAction();
-            },
-            [menuAction]
-          )}
+          onClick={handleMenuOpenClick}
           color="ghost"
           size="s"
+          iconType="arrowDown"
+          iconSide="right"
           tabIndex={-1}
         >
           {menuTitle}
         </EuiButton>
-      );
-    } else {
-      /**
-       * When called with a set of `optionsWithActions`:
-       * Render with a panel of options that appear when the menu host button is clicked
-       */
-      return (
-        <>
-          <EuiButton
-            onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-              clickEvent.preventDefault();
-              clickEvent.stopPropagation();
-            }, [])}
-            color="ghost"
-            size="s"
-            iconType="arrowDown"
-            iconSide="right"
-            tabIndex={-1}
-          >
-            {menuTitle}
-          </EuiButton>
-          <OptionList />
-        </>
-      );
-    }
+        {menuIsOpen && <OptionList subMenuOptions={optionsWithActions} />}
+      </>
+    );
   }
 );
 
@@ -420,7 +429,10 @@ export const ProcessEventDot = styled(
                   <EuiFlexItem grow={false}>
                     <NodeSubMenu
                       menuTitle={subMenuAssets.relatedEvents.title}
-                      optionsWithActions={[{ optionTitle: 'a', action: () => {} }]}
+                      optionsWithActions={[
+                        { optionTitle: '10 DNS', action: () => {} },
+                        { optionTitle: '10 File', action: () => {} },
+                      ]}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -466,10 +478,20 @@ export const ProcessEventDot = styled(
     transition-duration: 1s;
     stroke-dashoffset: 0;
   }
+
+  & .euiSelectableListItem {
+    background-color: black;
+  }
+  & .euiSelectableListItem path {
+    fill: white;
+  }
+  & .euiSelectableListItem__text {
+    color: white;
+  }
 `;
 
 const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = {
-  processCreated: 'terminatedProcessCube',
+  processCreated: 'runningProcessCube',
   processRan: 'runningProcessCube',
   processTerminated: 'terminatedProcessCube',
   unknownProcessEvent: 'runningProcessCube',
