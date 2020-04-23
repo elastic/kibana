@@ -70,6 +70,58 @@ beforeEach(async () => {
 
 afterEach(() => (generatePdfObservableFactory as jest.Mock).mockReset());
 
+test(`passes browserTimezone to generatePdf`, async () => {
+  const encryptedHeaders = await encryptHeaders({});
+  const generatePdfObservable = (await generatePdfObservableFactory(mockReporting)) as jest.Mock;
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const browserTimezone = 'UTC';
+  await executeJob(
+    'pdfJobId',
+    getJobDocPayload({
+      relativeUrl: '/app/kibana#/something',
+      browserTimezone,
+      headers: encryptedHeaders,
+    }),
+    cancellationToken
+  );
+
+  expect(generatePdfObservable.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        LevelLogger {
+          "_logger": Object {
+            "get": [MockFunction],
+          },
+          "_tags": Array [
+            "printable_pdf",
+            "execute",
+            "pdfJobId",
+          ],
+          "warning": [Function],
+        },
+        undefined,
+        Array [
+          "http://localhost:5601/sbp/app/kibana#/something",
+        ],
+        "UTC",
+        Object {
+          "conditions": Object {
+            "basePath": "/sbp",
+            "hostname": "localhost",
+            "port": 5601,
+            "protocol": "http",
+          },
+          "headers": Object {},
+        },
+        undefined,
+        false,
+      ],
+    ]
+  `);
+});
+
 test(`returns content_type of application/pdf`, async () => {
   const logger = getMockLogger();
   const executeJob = await executeJobFactory(mockReporting, logger);

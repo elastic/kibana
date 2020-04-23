@@ -75,8 +75,8 @@ afterEach(() => (generatePngObservableFactory as jest.Mock).mockReset());
 
 test(`passes browserTimezone to generatePng`, async () => {
   const encryptedHeaders = await encryptHeaders({});
-  const generatePngObservable = await generatePngObservableFactory(mockReporting);
-  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of(Buffer.from('')));
+  const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
+  generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
@@ -90,21 +90,43 @@ test(`passes browserTimezone to generatePng`, async () => {
     cancellationToken
   );
 
-  expect(generatePngObservable).toBeCalledWith(
-    expect.any(LevelLogger),
-    'http://localhost:5601/sbp/app/kibana#/something',
-    browserTimezone,
-    expect.anything(),
-    undefined
-  );
+  expect(generatePngObservable.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        LevelLogger {
+          "_logger": Object {
+            "get": [MockFunction],
+          },
+          "_tags": Array [
+            "PNG",
+            "execute",
+            "pngJobId",
+          ],
+          "warning": [Function],
+        },
+        "http://localhost:5601/sbp/app/kibana#/something",
+        "UTC",
+        Object {
+          "conditions": Object {
+            "basePath": "/sbp",
+            "hostname": "localhost",
+            "port": 5601,
+            "protocol": "http",
+          },
+          "headers": Object {},
+        },
+        undefined,
+      ],
+    ]
+  `);
 });
 
 test(`returns content_type of application/png`, async () => {
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePngObservable = await generatePngObservableFactory(mockReporting);
-  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of(Buffer.from('')));
+  const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
+  generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const { content_type: contentType } = await executeJob(
     'pngJobId',
@@ -117,8 +139,8 @@ test(`returns content_type of application/png`, async () => {
 test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const testContent = 'test content';
 
-  const generatePngObservable = await generatePngObservableFactory(mockReporting);
-  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
+  const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
+  generatePngObservable.mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
