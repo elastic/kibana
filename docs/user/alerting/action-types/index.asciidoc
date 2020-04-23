@@ -1,6 +1,6 @@
 [role="xpack"]
 [[index-action-type]]
-== Index action type
+=== Index action
 
 The index action type will index a document into {es}.
 

@@ -76,6 +76,10 @@ export const HIDE_TOOLBAR_OVERLAY = 'HIDE_TOOLBAR_OVERLAY';
 export const HIDE_LAYER_CONTROL = 'HIDE_LAYER_CONTROL';
 export const HIDE_VIEW_CONTROL = 'HIDE_VIEW_CONTROL';
 export const SET_WAITING_FOR_READY_HIDDEN_LAYERS = 'SET_WAITING_FOR_READY_HIDDEN_LAYERS';
+export const SET_MAP_SETTINGS = 'SET_MAP_SETTINGS';
+export const ROLLBACK_MAP_SETTINGS = 'ROLLBACK_MAP_SETTINGS';
+export const TRACK_MAP_SETTINGS = 'TRACK_MAP_SETTINGS';
+export const UPDATE_MAP_SETTING = 'UPDATE_MAP_SETTING';
 
 function getLayerLoadingCallbacks(dispatch, getState, layerId) {
   return {
@@ -142,6 +146,29 @@ export function setMapInitError(errorMessage) {
   return {
     type: SET_MAP_INIT_ERROR,
     errorMessage,
+  };
+}
+
+export function setMapSettings(settings) {
+  return {
+    type: SET_MAP_SETTINGS,
+    settings,
+  };
+}
+
+export function rollbackMapSettings() {
+  return { type: ROLLBACK_MAP_SETTINGS };
+}
+
+export function trackMapSettings() {
+  return { type: TRACK_MAP_SETTINGS };
+}
+
+export function updateMapSetting(settingKey, settingValue) {
+  return {
+    type: UPDATE_MAP_SETTING,
+    settingKey,
+    settingValue,
   };
 }
 

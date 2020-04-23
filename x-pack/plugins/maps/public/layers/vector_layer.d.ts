@@ -19,7 +19,7 @@ import { IVectorStyle } from './styles/vector/vector_style';
 import { IField } from './fields/field';
 import { SyncContext } from '../actions/map_actions';
 
-type VectorLayerArguments = {
+export type VectorLayerArguments = {
   source: IVectorSource;
   joins?: IJoin[];
   layerDescriptor: VectorLayerDescriptor;
@@ -33,13 +33,11 @@ export interface IVectorLayer extends ILayer {
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
+  protected readonly _style: IVectorStyle;
   static createDescriptor(
     options: Partial<LayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor;
-
-  protected readonly _source: IVectorSource;
-  protected readonly _style: IVectorStyle;
 
   constructor(options: VectorLayerArguments);
   getLayerTypeIconName(): string;
