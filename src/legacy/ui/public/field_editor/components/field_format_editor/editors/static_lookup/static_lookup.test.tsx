@@ -30,7 +30,7 @@ const format = {
 };
 const formatParams = {
   lookupEntries: [{}] as StaticLookupFormatEditorFormatParams['lookupEntries'],
-  unknownKeyValue: null,
+  unknownKeyValue: '',
 };
 const onChange = jest.fn();
 const onError = jest.fn();

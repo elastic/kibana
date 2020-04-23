@@ -19,8 +19,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { FieldFormat } from 'src/plugins/data/public';
 
-import { DefaultFormatEditor, convertSampleInput } from './default';
+import { DefaultFormatEditor, convertSampleInput, ConvertSampleInputParams } from './default';
 
 const fieldType = 'number';
 const format = {
@@ -32,8 +33,8 @@ const onError = jest.fn();
 
 describe('DefaultFormatEditor', () => {
   describe('convertSampleInput', () => {
-    const converter = (input: number) => {
-      if (isNaN(input)) {
+    const converter = (input: ConvertSampleInputParams) => {
+      if (typeof input !== 'number') {
         throw new Error('Input is not a number');
       } else {
         return (input * 2).toString();
@@ -70,7 +71,7 @@ describe('DefaultFormatEditor', () => {
       <DefaultFormatEditor
         basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -87,7 +88,7 @@ describe('DefaultFormatEditor', () => {
       <DefaultFormatEditor
         basePath={''}
         fieldType={fieldType}
-        format={format}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -109,7 +110,7 @@ describe('DefaultFormatEditor', () => {
       <DefaultFormatEditor
         basePath={''}
         fieldType={fieldType}
-        format={newFormat}
+        format={(newFormat as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

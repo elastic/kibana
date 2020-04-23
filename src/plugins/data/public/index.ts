@@ -206,6 +206,7 @@ export const fieldFormats = {
 
 export {
   IFieldFormat,
+  IFieldFormatType,
   IFieldFormatsRegistry,
   FieldFormatsContentType,
   FieldFormatsGetConfigFn,

@@ -24,8 +24,10 @@ import { FieldFormat, FieldFormatsContentType } from 'src/plugins/data/public';
 import { Sample } from '../../../../types';
 import { FieldFormatEditorProps } from '../../field_format_editor';
 
+export type ConvertSampleInputParams = string | number | Array<string | number>;
+
 export const convertSampleInput = (
-  converter: (input: string | number | Array<string | number>) => string,
+  converter: (input: ConvertSampleInputParams) => string,
   inputs: Array<string | number | Array<string | number>>
 ) => {
   let error;
@@ -61,7 +63,6 @@ export interface FormatEditorProps<P> {
   formatParams: { type?: string } & P;
   onChange: (newParams: any) => void; // todo
   // onChange: FieldFormatEditorProps['onChange'];
-  // onError: (error: any) => void; // todo
   onError: FieldFormatEditorProps['onError'];
   basePath: string;
 }

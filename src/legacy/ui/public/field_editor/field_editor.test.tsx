@@ -23,7 +23,14 @@ import React from 'react';
 
 import { npStart } from 'ui/new_platform';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { Field, IndexPattern } from 'src/plugins/data/public';
+import {
+  Field,
+  IndexPattern,
+  IndexPatternFieldList,
+  IFieldFormatType,
+} from 'src/plugins/data/public';
+import { HttpStart } from '../../../../core/public';
+// import { Field}
 
 jest.mock('brace/mode/groovy', () => ({}));
 jest.mock('ui/new_platform');
@@ -99,8 +106,8 @@ const field = {
 const helpers = {
   Field: () => {},
   getConfig: () => {},
-  $http: () => {},
-  fieldFormatEditors: {},
+  getHttpStart: () => (({} as unknown) as HttpStart),
+  fieldFormatEditors: [],
   redirectAway: () => {},
 };
 
@@ -108,21 +115,29 @@ describe('FieldEditor', () => {
   let indexPattern: IndexPattern;
 
   beforeEach(() => {
-    indexPattern = {
-      fields,
-    };
+    indexPattern = ({
+      fields: fields as IndexPatternFieldList,
+    } as unknown) as IndexPattern;
 
-    npStart.plugins.data.fieldFormats.getDefaultType = jest.fn(() => Format);
+    npStart.plugins.data.fieldFormats.getDefaultType = jest.fn(
+      () => (({} as unknown) as IFieldFormatType)
+    );
     npStart.plugins.data.fieldFormats.getByFieldType = jest.fn(fieldType => {
       if (fieldType === 'number') {
-        return [Format];
+        return [({} as unknown) as IFieldFormatType];
+      } else {
+        return [];
       }
     });
   });
 
   it('should render create new scripted field correctly', async () => {
     const component = shallowWithI18nProvider(
-      <FieldEditor indexPattern={indexPattern} field={field} helpers={helpers} />
+      <FieldEditor
+        indexPattern={indexPattern}
+        field={(field as unknown) as Field}
+        helpers={helpers}
+      />
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -141,11 +156,15 @@ describe('FieldEditor', () => {
       const flds = {
         [testField.name]: testField,
       };
-      return flds[name];
+      return flds[name] as Field;
     };
 
     const component = shallowWithI18nProvider(
-      <FieldEditor indexPattern={indexPattern} field={testField} helpers={helpers} />
+      <FieldEditor
+        indexPattern={indexPattern}
+        field={(testField as unknown) as Field}
+        helpers={helpers}
+      />
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -160,16 +179,20 @@ describe('FieldEditor', () => {
       script: 'doc.test.value',
       lang: 'testlang',
     };
-    indexPattern.fields.push(testField);
+    indexPattern.fields.push((testField as unknown) as Field);
     indexPattern.fields.getByName = name => {
       const flds = {
         [testField.name]: testField,
       };
-      return flds[name];
+      return flds[name] as Field;
     };
 
     const component = shallowWithI18nProvider(
-      <FieldEditor indexPattern={indexPattern} field={testField} helpers={helpers} />
+      <FieldEditor
+        indexPattern={indexPattern}
+        field={(testField as unknown) as Field}
+        helpers={helpers}
+      />
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -180,7 +203,11 @@ describe('FieldEditor', () => {
   it('should show conflict field warning', async () => {
     const testField = { ...field };
     const component = shallowWithI18nProvider(
-      <FieldEditor indexPattern={indexPattern} field={testField} helpers={helpers} />
+      <FieldEditor
+        indexPattern={indexPattern}
+        field={(testField as unknown) as Field}
+        helpers={helpers}
+      />
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -199,7 +226,11 @@ describe('FieldEditor', () => {
       },
     };
     const component = shallowWithI18nProvider(
-      <FieldEditor indexPattern={indexPattern} field={testField} helpers={helpers} />
+      <FieldEditor
+        indexPattern={indexPattern}
+        field={(testField as unknown) as Field}
+        helpers={helpers}
+      />
     );
 
     await new Promise(resolve => process.nextTick(resolve));

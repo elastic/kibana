@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { shallow } from 'enzyme';
 import { EuiFieldNumber } from '@elastic/eui';
 import { FieldFormat } from 'src/plugins/data/public';
@@ -81,7 +81,8 @@ describe('TruncateFormatEditor', () => {
         validationMessage: 'Error!',
       },
     };
-    await input.invoke('onChange')(changeEvent);
+
+    await input!.invoke('onChange')!((changeEvent as unknown) as ChangeEvent<HTMLInputElement>);
 
     expect(onError).toBeCalledWith(changeEvent.target.validationMessage);
     expect(onChange).not.toBeCalled();
@@ -108,7 +109,7 @@ describe('TruncateFormatEditor', () => {
       },
     };
     onError.mockClear();
-    await input.invoke('onChange')(changeEvent);
+    await input!.invoke('onChange')!((changeEvent as unknown) as ChangeEvent<HTMLInputElement>);
     expect(onError).not.toBeCalled();
     expect(onChange).toBeCalledWith({ fieldLength: 123 });
   });
