@@ -10,11 +10,11 @@ import { documentationService, uiMetricService, apiService, breadcrumbService } 
 import { renderApp } from '.';
 
 export async function mountManagementSection(
-  coreSetup: CoreSetup,
+  { http, getStartServices, notifications }: CoreSetup,
   params: ManagementAppMountParams
 ) {
   const { element, setBreadcrumbs } = params;
-  const [coreStart] = await coreSetup.getStartServices();
+  const [coreStart] = await getStartServices();
   const {
     docLinks,
     i18n: { Context: I18nContext },
@@ -28,8 +28,8 @@ export async function mountManagementSection(
     metric: uiMetricService,
     documentation: documentationService,
     api: apiService,
-    notifications: coreSetup.notifications,
+    notifications,
   };
 
-  return renderApp(element, I18nContext, services);
+  return renderApp(element, I18nContext, services, { http });
 }
