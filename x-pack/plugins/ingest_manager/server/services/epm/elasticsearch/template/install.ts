@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dataset, RegistryPackage, ElasticsearchAssetType, TemplateRef } from '../../../../types';
+import {
+  Dataset,
+  RegistryPackage,
+  ElasticsearchAssetType,
+  TemplateRef,
+  IngestAssetType,
+} from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
@@ -18,7 +24,9 @@ export const installTemplates = async (
   pkgVersion: string
 ): Promise<TemplateRef[]> => {
   // install any pre-built index template assets,
-  // atm, this is only the base package's global template
+  // atm, this is only the base package's global index templates
+  // Install component templates first, as they are used by the index templates
+  installPreBuiltComponentTemplates(pkgName, pkgVersion, callCluster);
   installPreBuiltTemplates(pkgName, pkgVersion, callCluster);
 
   // build templates per dataset from yml files
@@ -41,7 +49,6 @@ export const installTemplates = async (
   return [];
 };
 
-// this is temporary until we update the registry to use index templates v2 structure
 const installPreBuiltTemplates = async (
   pkgName: string,
   pkgVersion: string,
@@ -52,20 +59,83 @@ const installPreBuiltTemplates = async (
     pkgVersion,
     (entry: Registry.ArchiveEntry) => isTemplate(entry)
   );
+  // templatePaths.forEach(async path => {
+  //   const { file } = Registry.pathParts(path);
+  //   const templateName = file.substr(0, file.lastIndexOf('.'));
+  //   const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
+  //   await callCluster('indices.putTemplate', {
+  //     name: templateName,
+  //     body: content,
+  //   });
+  // });
   templatePaths.forEach(async path => {
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
-    await callCluster('indices.putTemplate', {
-      name: templateName,
+
+    const callClusterParams: {
+      method: string;
+      path: string;
+      ignore: number[];
+      body: any;
+    } = {
+      method: 'PUT',
+      path: `/_index_template/${templateName}`,
+      ignore: [404],
       body: content,
-    });
+    };
+    // This uses the catch-all endpoint 'transport.request' because there is no
+    // convenience endpoint using the new _index_template API yet.
+    // The existing convenience endpoint `indices.putTemplate` sends to _template,
+    // which does not support v2 templates.
+    // See src/core/server/elasticsearch/api_types.ts for available endpoints.
+    await callCluster('transport.request', callClusterParams);
   });
 };
+
+const installPreBuiltComponentTemplates = async (
+  pkgName: string,
+  pkgVersion: string,
+  callCluster: CallESAsCurrentUser
+) => {
+  const templatePaths = await Registry.getArchiveInfo(
+    pkgName,
+    pkgVersion,
+    (entry: Registry.ArchiveEntry) => isComponentTemplate(entry)
+  );
+  templatePaths.forEach(async path => {
+    const { file } = Registry.pathParts(path);
+    const templateName = file.substr(0, file.lastIndexOf('.'));
+    const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
+
+    const callClusterParams: {
+      method: string;
+      path: string;
+      ignore: number[];
+      body: any;
+    } = {
+      method: 'PUT',
+      path: `/_component_template/${templateName}`,
+      ignore: [404],
+      body: content,
+    };
+    // This uses the catch-all endpoint 'transport.request' because there is no
+    // convenience endpoint for component templates yet.
+    // See src/core/server/elasticsearch/api_types.ts for available endpoints.
+    await callCluster('transport.request', callClusterParams);
+  });
+};
+
 const isTemplate = ({ path }: Registry.ArchiveEntry) => {
   const pathParts = Registry.pathParts(path);
   return pathParts.type === ElasticsearchAssetType.indexTemplate;
 };
+
+const isComponentTemplate = ({ path }: Registry.ArchiveEntry) => {
+  const pathParts = Registry.pathParts(path);
+  return pathParts.type === ElasticsearchAssetType.componentTemplate;
+};
+
 /**
  * installTemplatesForDataset installs one template for each dataset
  *

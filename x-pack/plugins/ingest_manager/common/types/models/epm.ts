@@ -32,6 +32,7 @@ export enum KibanaAssetType {
 }
 
 export enum ElasticsearchAssetType {
+  componentTemplate = 'component-template',
   ingestPipeline = 'ingest-pipeline',
   indexTemplate = 'index-template',
   ilmPolicy = 'ilm-policy',
@@ -246,6 +247,7 @@ export enum IngestAssetType {
   DataFrameTransform = 'data-frame-transform',
   IlmPolicy = 'ilm-policy',
   IndexTemplate = 'index-template',
+  ComponentTemplate = 'component-template',
   IngestPipeline = 'ingest-pipeline',
   MlJob = 'ml-job',
   RollupJob = 'rollup-job',
