@@ -29,8 +29,14 @@ import { HostAction } from '../../store/hosts/action';
 import { useHostListSelector } from './hooks';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
-import { HostMetadata, Immutable } from '../../../../../common/types';
+import { HostInfo, HostStatus, Immutable } from '../../../../../common/types';
 import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
+
+const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<{ [key in keyof typeof HostStatus]: string }>({
+  ERROR: 'danger',
+  ONLINE: 'success',
+  OFFLINE: 'subdued',
+});
 
 const HostLink = memo<{
   name: string;
@@ -81,17 +87,38 @@ export const HostList = () => {
     [dispatch]
   );
 
-  const columns: Array<EuiBasicTableColumn<Immutable<HostMetadata>>> = useMemo(() => {
+  const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
     return [
       {
-        field: '',
+        field: 'metadata.host',
         name: i18n.translate('xpack.endpoint.host.list.hostname', {
           defaultMessage: 'Hostname',
         }),
-        render: ({ host: { hostname, id } }: { host: { hostname: string; id: string } }) => {
+        render: ({ hostname, id }: HostInfo['metadata']['host']) => {
           const newQueryParams = urlFromQueryParams({ ...queryParams, selected_host: id });
           return (
             <HostLink name={hostname} href={'?' + newQueryParams.search} route={newQueryParams} />
+          );
+        },
+      },
+      {
+        field: 'host_status',
+        name: i18n.translate('xpack.endpoint.host.list.hostStatus', {
+          defaultMessage: 'Host Status',
+        }),
+        render: (hostStatus: HostInfo['host_status']) => {
+          return (
+            <EuiHealth
+              color={
+                HOST_STATUS_TO_HEALTH_COLOR[hostStatus.toUpperCase() as keyof typeof HostStatus]
+              }
+            >
+              <FormattedMessage
+                id="xpack.endpoint.host.list.hostStatusValue"
+                defaultMessage="{hostStatus, select, online {Online} error {Error} other {Offline}}"
+                values={{ hostStatus }}
+              />
+            </EuiHealth>
           );
         },
       },
@@ -124,25 +151,22 @@ export const HostList = () => {
         },
       },
       {
-        field: 'host.os.name',
+        field: 'metadata.host.os.name',
         name: i18n.translate('xpack.endpoint.host.list.os', {
           defaultMessage: 'Operating System',
         }),
       },
       {
-        field: 'host.ip',
+        field: 'metadata.host.ip',
         name: i18n.translate('xpack.endpoint.host.list.ip', {
           defaultMessage: 'IP Address',
         }),
       },
       {
-        field: '',
+        field: 'metadata.agent.version',
         name: i18n.translate('xpack.endpoint.host.list.sensorVersion', {
           defaultMessage: 'Sensor Version',
         }),
-        render: () => {
-          return 'version';
-        },
       },
       {
         field: '',

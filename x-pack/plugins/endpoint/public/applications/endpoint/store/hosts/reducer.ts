@@ -33,7 +33,7 @@ export const hostListReducer: ImmutableReducer<HostListState, AppAction> = (
     } = action.payload;
     return {
       ...state,
-      hosts: hosts.map(hostInfo => hostInfo.metadata),
+      hosts,
       total,
       pageSize,
       pageIndex,

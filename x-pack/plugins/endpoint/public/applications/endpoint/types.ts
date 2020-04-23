@@ -22,6 +22,7 @@ import {
   MalwareFields,
   UIPolicyConfig,
   PolicyData,
+  HostInfo,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
@@ -89,7 +90,7 @@ export type SubstateMiddlewareFactory = <Substate>(
 ) => Middleware<{}, GlobalState, Dispatch<AppAction | Immutable<AppAction>>>;
 
 export interface HostListState {
-  hosts: HostMetadata[];
+  hosts: HostInfo[];
   pageSize: number;
   pageIndex: number;
   total: number;
