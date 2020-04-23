@@ -323,7 +323,6 @@ export class AggConfig {
       if (deserializedParam && deserializedParam.toExpressionAst) {
         // If the param provides `toExpressionAst`, we call it with the value
         const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key));
-        // const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key), value);
         if (paramExpressionAst) {
           acc[key] = [
             {

@@ -53,8 +53,8 @@ export const aggTerms = (): FunctionDefinition => ({
     enabled: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('data.search.aggs.buckets.terms.field.help', {
-        defaultMessage: 'Field to use for this aggregation',
+      help: i18n.translate('data.search.aggs.buckets.terms.enabled.help', {
+        defaultMessage: 'Specifies whether this aggregation should be enabled',
       }),
     },
     schema: {
