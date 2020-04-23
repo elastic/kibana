@@ -23,7 +23,7 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
 
   if (isExpiringSoon) {
     return (
-      <EuiHealth color="#E9AA3C">
+      <EuiHealth color="warning">
         <span>{labels.EXPIRES_SOON}</span>
       </EuiHealth>
     );

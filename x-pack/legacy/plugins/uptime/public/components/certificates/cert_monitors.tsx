@@ -16,12 +16,12 @@ export const CertMonitors: React.FC<Props> = ({ monitors }) => {
   return (
     <span>
       {monitors.map((mon: CertMonitor, ind: number) => (
-        <>
+        <span key={mon.id}>
           {ind > 0 && ', '}
-          <MonitorPageLink key={mon.id} monitorId={mon.id!} linkParameters={''}>
+          <MonitorPageLink monitorId={mon.id!} linkParameters={''}>
             {mon.name || mon.id}
           </MonitorPageLink>
-        </>
+        </span>
       ))}
     </span>
   );

@@ -21,12 +21,6 @@ export const useCertStatus = (expiryDate?: string) => {
 
   const errorState = dss.settings?.certificatesThresholds.errorState;
 
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(getDynamicSettings());
-  }, [dispatch]);
-
   const certValidityDate = new Date(expiryDate ?? '');
 
   const isValidDate = !isNaN(certValidityDate.valueOf());

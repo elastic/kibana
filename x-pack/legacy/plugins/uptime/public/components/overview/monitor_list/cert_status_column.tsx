@@ -43,7 +43,7 @@ export const CertStatusColumn: React.FC<Props> = ({ cert }) => {
   };
 
   if (isExpiringSoon) {
-    return <CertStatus color="#E9AA3C" text={EXPIRES_SOON} />;
+    return <CertStatus color="warning" text={EXPIRES_SOON} />;
   }
   if (isExpired) {
     return <CertStatus color="danger" text={EXPIRED} />;

@@ -207,7 +207,7 @@ export const MonitorListComponent: React.FC<Props> = ({
               <Link to={CERTIFICATES_ROUTE}>
                 <FormattedMessage
                   id="xpack.uptime.monitorList.monitoringStatusTitle"
-                  defaultMessage="View Certificates Status"
+                  defaultMessage="View certificates status"
                 />
               </Link>
             </h5>

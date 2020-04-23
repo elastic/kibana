@@ -7,12 +7,13 @@
 import React from 'react';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
-import { Direction, EuiBasicTable, EuiCopy, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { Direction, EuiBasicTable } from '@elastic/eui';
 import { certificatesSelector } from '../../state/certificates/certificates';
 import { CertStatus } from './cert_status';
 import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
 import { Cert, CertMonitor } from '../../../common/runtime_types';
+import { FingerprintCol } from './fingerprint_col';
 
 interface Page {
   index: number;
@@ -62,7 +63,7 @@ const columns = [
     field: 'issuer',
   },
   {
-    name: labels.EXP_DATE_COL,
+    name: labels.VALID_UNTIL_COL,
     field: 'certificate_not_valid_after',
     sortable: true,
     render: (value: string) => {
@@ -70,33 +71,9 @@ const columns = [
     },
   },
   {
-    name: (
-      <EuiToolTip
-        content="Certificate fingerprint using the SHA256 digest of DER-encoded version
-      of certificate offered by the client."
-      >
-        <span>
-          SHA 256
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </span>
-      </EuiToolTip>
-    ),
-    width: '100px',
-    actions: [
-      {
-        render: (item: Cert) => {
-          return (
-            <EuiCopy textToCopy={item.sha256?.toUpperCase()}>
-              {copy => (
-                <EuiLink onClick={copy}>
-                  <EuiIcon type="copy" title="Click to Copy SHA 256 Value" />
-                </EuiLink>
-              )}
-            </EuiCopy>
-          );
-        },
-      },
-    ],
+    name: labels.FINGERPRINTS_COL,
+    field: 'sha256',
+    render: (val: string, item: Cert) => <FingerprintCol cert={item} />,
   },
 ];
 

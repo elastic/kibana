@@ -15,7 +15,7 @@ export const EXPIRED = i18n.translate('xpack.uptime.certs.expired', {
 });
 
 export const EXPIRES_SOON = i18n.translate('xpack.uptime.certs.expireSoon', {
-  defaultMessage: 'Expires Soon',
+  defaultMessage: 'Expires soon',
 });
 
 export const SEARCH_CERTS = i18n.translate('xpack.uptime.certs.searchCerts', {
@@ -27,7 +27,7 @@ export const STATUS_COL = i18n.translate('xpack.uptime.certs.list.status', {
 });
 
 export const COMMON_NAME_COL = i18n.translate('xpack.uptime.certs.list.commonName', {
-  defaultMessage: 'Common Name',
+  defaultMessage: 'Common name',
 });
 
 export const MONITORS_COL = i18n.translate('xpack.uptime.certs.list.monitors', {
@@ -35,9 +35,13 @@ export const MONITORS_COL = i18n.translate('xpack.uptime.certs.list.monitors', {
 });
 
 export const ISSUED_BY_COL = i18n.translate('xpack.uptime.certs.list.issuedBy', {
-  defaultMessage: 'Issued By',
+  defaultMessage: 'Issued by',
 });
 
-export const EXP_DATE_COL = i18n.translate('xpack.uptime.certs.list.expirationDate', {
-  defaultMessage: 'Expiration Date',
+export const VALID_UNTIL_COL = i18n.translate('xpack.uptime.certs.list.validUntil', {
+  defaultMessage: 'Valid until',
+});
+
+export const FINGERPRINTS_COL = i18n.translate('xpack.uptime.certs.list.expirationDate', {
+  defaultMessage: 'Fingerprints',
 });

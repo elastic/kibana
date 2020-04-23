@@ -39,7 +39,7 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
             ? i18n.translate(
                 'xpack.uptime.monitorStatusBar.sslCertificateExpired.label.ariaLabel',
                 {
-                  defaultMessage: 'SSL certificate Expired {validityDate}',
+                  defaultMessage: 'SSL certificate expired {validityDate}',
                   values: { validityDate: relativeDate },
                 }
               )

@@ -13,11 +13,20 @@ import { useUptimeTelemetry, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { CertificateList, CertSort } from '../components/certificates/certificates_list';
-import { CertificateSearch } from '../components/certificates/certificate_search';
+import { CertificateList, CertSort, CertificateSearch } from '../components/certificates';
 import { OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../common/constants';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { getCertificatesAction } from '../state/certificates/certificates';
+
+const DEFAULT_PAGE_SIZE = 10;
+const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
+const getPageSizeValue = () => {
+  const value = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '', 10);
+  if (isNaN(value)) {
+    return DEFAULT_PAGE_SIZE;
+  }
+  return value;
+};
 
 export const CertificatesPage: React.FC = () => {
   useUptimeTelemetry(UptimePage.Certificates);
@@ -27,7 +36,7 @@ export const CertificatesPage: React.FC = () => {
 
   useBreadcrumbs([{ text: 'Certificates' }]);
 
-  const [page, setPage] = useState({ index: 0, size: 10 });
+  const [page, setPage] = useState({ index: 0, size: getPageSizeValue() });
   const [sort, setSort] = useState<CertSort>({
     field: 'certificate_not_valid_after',
     direction: 'asc',
@@ -80,6 +89,7 @@ export const CertificatesPage: React.FC = () => {
           onChange={(pageVal, sortVal) => {
             setPage(pageVal);
             setSort(sortVal);
+            localStorage.setItem(LOCAL_STORAGE_KEY, pageVal.size);
           }}
           sort={sort}
         />
