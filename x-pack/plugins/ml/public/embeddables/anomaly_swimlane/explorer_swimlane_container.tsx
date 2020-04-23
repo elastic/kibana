@@ -14,14 +14,11 @@ import { CoreStart } from 'kibana/public';
 import { ChartTooltip } from '../../application/components/chart_tooltip';
 import { ExplorerSwimlane } from '../../application/explorer/explorer_swimlane';
 import { TimeBuckets } from '../../application/util/time_buckets';
-import {
-  initGetSwimlaneBucketInterval,
-  loadOverallData,
-  OverallSwimlaneData,
-} from '../../application/explorer/explorer_utils';
+import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { MlStartDependencies } from '../../plugin';
 import { AnomalySwimlaneEmbeddableInput, MlServices } from './anomaly_swimlane_embaddable';
 import { parseInterval } from '../../../common/util/parse_interval';
+import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 
 export interface ExplorerSwimlaneContainerProps {
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
@@ -34,10 +31,11 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   services,
   refresh,
 }) => {
-  const [{ uiSettings, notifications }, pluginStart] = services;
+  const [{ uiSettings, notifications }, , { explorerService }] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [chartWidth, setChartWidth] = useState<number>(0);
+  const [swimlaneType, setSwimlaneType] = useState<string>();
 
   const chartWidth$ = useMemo(() => new Subject(), []);
 
@@ -58,9 +56,13 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
         debounceTime(500),
         map(([input]) => input),
         switchMap(input => {
-          const { jobs } = input;
+          const { jobs, viewBy, swimlaneType: swimlaneTypeInput } = input;
 
-          const jobsBucketSpans = jobs.map(job => {
+          if (!swimlaneType) {
+            setSwimlaneType(swimlaneTypeInput);
+          }
+
+          const explorerJobs: ExplorerJob[] = jobs.map(job => {
             const bucketSpan = parseInterval(job.analysis_config.bucket_span);
             return {
               id: job.job_id,
@@ -69,27 +71,44 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             };
           });
 
-          const { timefilter } = pluginStart.data.query.timefilter;
-          timefilter.enableTimeRangeSelector();
+          return from(explorerService.loadOverallData(explorerJobs, chartWidth)).pipe(
+            switchMap(overallSwimlaneData => {
+              const { earliest, latest } = overallSwimlaneData;
 
-          const interval = initGetSwimlaneBucketInterval(
-            () => timefilter,
-            () => timeBuckets
-          )(jobsBucketSpans, chartWidth);
-
-          return from(loadOverallData(jobsBucketSpans, interval, timefilter.getBounds())).pipe(
-            catchError(error => {
-              notifications.toasts.addError(new Error(error), {
-                title: i18n.translate('xpack.ml.swimlaneEmbeddable.errorMessage', {
-                  defaultMessage: 'Unable to load the swimlane data',
-                }),
-              });
-              return of(null);
+              if (overallSwimlaneData && swimlaneTypeInput === SWIMLANE_TYPE.VIEW_BY) {
+                return from(
+                  explorerService.loadViewBySwimlane(
+                    [],
+                    {
+                      earliest,
+                      latest,
+                    },
+                    explorerJobs,
+                    viewBy!,
+                    5,
+                    chartWidth
+                  )
+                ).pipe(
+                  map(viewBySwimlaneData => {
+                    return {
+                      ...viewBySwimlaneData!,
+                      earliest,
+                      latest,
+                    };
+                  })
+                );
+              }
+              return of(overallSwimlaneData);
             })
           );
         }),
-        map(response => {
-          return response?.overallSwimlaneData;
+        catchError(error => {
+          notifications.toasts.addError(new Error(error), {
+            title: i18n.translate('xpack.ml.swimlaneEmbeddable.errorMessage', {
+              defaultMessage: 'Unable to load the swimlane data',
+            }),
+          });
+          return of(undefined);
         })
       )
       .subscribe(data => {
@@ -101,8 +120,6 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
     setChartWidth(e.width - 200);
   }, 200);
 
-  const swimlaneType = 'overall';
-
   return (
     <EuiResizeObserver onResize={onResize}>
       {resizeRef => (
@@ -113,7 +130,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             resizeRef(el);
           }}
         >
-          {chartWidth > 0 && swimlaneData && (
+          {chartWidth > 0 && swimlaneData && swimlaneType && (
             <>
               <ChartTooltip />
               <ExplorerSwimlane

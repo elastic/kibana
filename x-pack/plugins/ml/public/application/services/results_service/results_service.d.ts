@@ -20,7 +20,16 @@ export function getOverallBucketScores(
   latestMs: any,
   interval?: any
 ): Promise<any>;
-export function getInfluencerValueMaxScoreByTime(): Promise<any>;
+export function getInfluencerValueMaxScoreByTime(
+  jobIds: string[],
+  influencerFieldName: string,
+  influencerFieldValues: string[],
+  earliestMs: number,
+  latestMs: number,
+  interval: string,
+  maxResults: number,
+  influencersFilterQuery: any
+): Promise<any>;
 export function getRecordInfluencers(): Promise<any>;
 export function getRecordsForInfluencer(): Promise<any>;
 export function getRecordsForDetector(): Promise<any>;

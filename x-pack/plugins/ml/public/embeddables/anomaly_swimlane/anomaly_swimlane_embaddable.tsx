@@ -18,6 +18,7 @@ import { MlStartDependencies } from '../../plugin';
 import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
 import { MlAnomalyDetectorService } from '../../application/services/ml_anomanly_detector.service';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
+import { ExplorerService } from '../../application/services/explorer.service';
 
 export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
 
@@ -36,6 +37,7 @@ export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
 
 export interface MlServices {
   mlAnomalyDetectorService: MlAnomalyDetectorService;
+  explorerService: ExplorerService;
 }
 
 export type AnomalySwimlaneEmbeddableServices = [CoreStart, MlStartDependencies, MlServices];

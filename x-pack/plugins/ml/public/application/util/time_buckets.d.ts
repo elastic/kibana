@@ -6,9 +6,9 @@
 
 import { Moment } from 'moment';
 
-declare interface TimeRangeBounds {
-  min: Moment | undefined;
-  max: Moment | undefined;
+export interface TimeRangeBounds {
+  min?: Moment;
+  max?: Moment;
 }
 
 export declare interface TimeBucketsInterval {
@@ -36,3 +36,9 @@ export declare class TimeBuckets {
 }
 
 export declare function getTimeBucketsFromCache(): InstanceType<typeof TimeBuckets>;
+
+export declare function getBoundsRoundedToInterval(
+  bounds: TimeRangeBounds,
+  interval: TimeBucketsInterval,
+  inclusiveEnd?: boolean
+): Required<TimeRangeBounds>;

@@ -30,6 +30,8 @@ import { HttpService } from '../../application/services/http_service';
 import { MlAnomalyDetectorService } from '../../application/services/ml_anomanly_detector.service';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
+import { ExplorerService } from '../../application/services/explorer.service';
+import { mlResultsService } from '../../application/services/results_service';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
@@ -121,8 +123,14 @@ export class AnomalySwimlaneEmbeddableFactory
 
     const httpService = new HttpService(coreStart.http);
     const mlAnomalyDetectorService = new MlAnomalyDetectorService(httpService);
+    const explorerService = new ExplorerService(
+      pluginsStart.data.query.timefilter.timefilter,
+      coreStart.uiSettings,
+      // TODO mlResultsService to use DI
+      mlResultsService
+    );
 
-    this.services = [coreStart, pluginsStart, { mlAnomalyDetectorService }];
+    this.services = [coreStart, pluginsStart, { mlAnomalyDetectorService, explorerService }];
   }
 
   public async create(

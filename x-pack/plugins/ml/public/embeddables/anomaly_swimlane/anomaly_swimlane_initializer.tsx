@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 
 export interface AnomalySwimlaneInitializerProps {
   influencers: string[];
@@ -37,13 +38,13 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 
   const swimlaneTypeOptions = [
     {
-      value: 'overall',
+      value: SWIMLANE_TYPE.OVERALL,
       text: i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.overallOptionLabel', {
         defaultMessage: 'Overall',
       }),
     },
     {
-      value: 'viewBy',
+      value: SWIMLANE_TYPE.VIEW_BY,
       text: i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.viewByOptionLabel', {
         defaultMessage: 'viewBy',
       }),
@@ -88,7 +89,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
             />
           </EuiFormRow>
 
-          {swimlaneType === 'viewBy' && (
+          {swimlaneType === SWIMLANE_TYPE.VIEW_BY && (
             <EuiFormRow
               label={
                 <FormattedMessage id="xpack.ml.explorer.viewByLabel" defaultMessage="View by" />
