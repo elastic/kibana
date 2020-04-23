@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { KIBANA_ALERTING_ENABLED } from './common/constants';
+import { KIBANA_ALERTING_ENABLED } from '../../../plugins/monitoring/common/constants';
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana

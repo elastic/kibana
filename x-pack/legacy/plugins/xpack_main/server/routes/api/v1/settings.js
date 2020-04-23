@@ -6,7 +6,7 @@
 
 import { boomify } from 'boom';
 import { get } from 'lodash';
-import { KIBANA_SETTINGS_TYPE } from '../../../../../monitoring/common/constants';
+import { KIBANA_SETTINGS_TYPE } from '../../../../../../../plugins/monitoring/common/constants';
 
 const getClusterUuid = async callCluster => {
   const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
