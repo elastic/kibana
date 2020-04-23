@@ -119,12 +119,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   );
 
   const onClickAddConnector = useCallback(() => {
-    console.log('onClickAddConnector', {
-      connectors,
-      connectorId,
-      closureType,
-      currentConfiguration,
-    });
     setActionBarVisible(false);
     setAddFlyoutVisibility(true);
   }, [closureType]);
@@ -140,7 +134,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
       closureType,
       connectorName,
     ]).length;
-    console.log('unsavedChanges', unsavedChanges);
     setActionBarVisible(!(unsavedChanges === 0));
     setTotalConfigurationChanges(unsavedChanges);
   }, [currentConfiguration, connectorName, connectorId, closureType]);
@@ -203,7 +196,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   }, [connectors, connectorId]);
 
   useEffect(() => {
-    console.log('handleActionBar', { connectors, connectorId, closureType, currentConfiguration });
     handleActionBar();
   }, [
     connectors,

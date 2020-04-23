@@ -39,7 +39,7 @@ export const connectorsMock: Connector[] = [
         mapping,
       },
     },
-    isPreconfigured: true,
+    isPreconfigured: false,
   },
   {
     id: '456',
@@ -67,7 +67,7 @@ export const connectorsMock: Connector[] = [
         ],
       },
     },
-    isPreconfigured: true,
+    isPreconfigured: false,
   },
 ];
 
