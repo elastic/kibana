@@ -112,40 +112,6 @@ describe('write_list_items_to_stream', () => {
         done();
       });
     });
-
-    /*
-    test('It imports a set of items to a write buffer by calling "getListItemByValues" with an empty buffer', async () => {
-      ((getListItemByValues as unknown) as jest.Mock).mockResolvedValueOnce([]);
-      const options = getImportListItemsToStreamOptionsMock();
-      const promise = importListItemsToStream(options);
-      options.stream.push(null);
-      await promise;
-      expect(getListItemByValues).toBeCalledWith(expect.objectContaining({ value: [] }));
-    });
-
-    test('It imports a set of items to a write buffer by calling "getListItemByValues" with a single value given', async () => {
-      ((getListItemByValues as unknown) as jest.Mock).mockResolvedValueOnce([]);
-      const options = getImportListItemsToStreamOptionsMock();
-      const promise = importListItemsToStream(options);
-      options.stream.push('127.0.0.1\n');
-      options.stream.push(null);
-      await promise;
-      expect(getListItemByValues).toBeCalledWith(expect.objectContaining({ value: ['127.0.0.1'] }));
-    });
-
-    test('It imports a set of items to a write buffer by calling "getListItemByValues" with two values given', async () => {
-      ((getListItemByValues as unknown) as jest.Mock).mockResolvedValueOnce([]);
-      const options = getImportListItemsToStreamOptionsMock();
-      const promise = importListItemsToStream(options);
-      options.stream.push('127.0.0.1\n');
-      options.stream.push('127.0.0.2\n');
-      options.stream.push(null);
-      await promise;
-      expect(getListItemByValues).toBeCalledWith(
-        expect.objectContaining({ value: ['127.0.0.1', '127.0.0.2'] })
-      );
-    });
-    */
   });
 
   describe('writeNextResponse', () => {

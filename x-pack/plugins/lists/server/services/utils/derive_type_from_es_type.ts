@@ -18,7 +18,9 @@ export const deriveTypeFromItem = ({ item }: DeriveTypeFromItemOptions): Type =>
     return 'keyword';
   } else {
     throw new ErrorWithStatusCode(
-      `Was expecting a valid type from the Elastic Search List Item such as ip or keyword but did not found one here ${item}`,
+      `Was expecting a valid type from the Elastic Search List Item such as ip or keyword but did not found one here ${JSON.stringify(
+        item
+      )}`,
       400
     );
   }
