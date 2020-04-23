@@ -20,7 +20,7 @@ export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
   static createDescriptor(
-    descriptor: VectorLayerDescriptor,
+    descriptor: Partial<VectorLayerDescriptor>,
     mapColors: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(descriptor, mapColors);
