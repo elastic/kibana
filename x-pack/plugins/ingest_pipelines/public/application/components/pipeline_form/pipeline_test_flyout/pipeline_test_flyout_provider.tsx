@@ -15,17 +15,25 @@ type Props = Omit<PipelineTestFlyoutProps, 'pipeline'>;
 export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({ closeFlyout }) => {
   const form = useFormContext();
   const [formData, setFormData] = useState<Pipeline>({} as Pipeline);
+  const [isFormDataValid, setIsFormDataValid] = useState<boolean>(false);
 
   useEffect(() => {
     const subscription = form.subscribe(async ({ isValid, validate, data }) => {
       const isFormValid = isValid ?? (await validate());
       if (isFormValid) {
         setFormData(data.format() as Pipeline);
+        setIsFormDataValid(true);
       }
     });
 
     return subscription.unsubscribe;
   }, [form]);
 
-  return <PipelineTestFlyout pipeline={formData} closeFlyout={closeFlyout} />;
+  return (
+    <PipelineTestFlyout
+      pipeline={formData}
+      closeFlyout={closeFlyout}
+      isPipelineValid={isFormDataValid}
+    />
+  );
 };

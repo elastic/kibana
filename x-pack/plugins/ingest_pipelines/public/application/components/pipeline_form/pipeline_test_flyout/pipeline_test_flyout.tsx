@@ -19,6 +19,7 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../../common/types';
@@ -31,11 +32,13 @@ import { TestConfigContext, TestConfig } from '../test_config_context';
 export interface PipelineTestFlyoutProps {
   closeFlyout: () => void;
   pipeline: Pipeline;
+  isPipelineValid: boolean;
 }
 
 export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps> = ({
   closeFlyout,
   pipeline,
+  isPipelineValid,
 }) => {
   const { services } = useKibana();
 
@@ -55,7 +58,7 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
   const { name: pipelineName, ...pipelineDefinition } = pipeline;
 
   const executePipeline: FormConfig['onSubmit'] = async (formData, isValid) => {
-    if (!isValid) {
+    if (!isValid || !isPipelineValid) {
       return;
     }
 
@@ -170,7 +173,29 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
           </>
         ) : null}
 
-        <Form form={form} data-test-subj="testPipelineForm">
+        {/* Invalid pipeline error */}
+        {!isPipelineValid && form.isSubmitted ? (
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.ingestPipelines.testPipelineFlyout.invalidPipelineErrorMessage"
+                  defaultMessage="The pipeline to execute is invalid."
+                />
+              }
+              color="danger"
+              iconType="alert"
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+
+        <Form
+          form={form}
+          data-test-subj="testPipelineForm"
+          isInvalid={form.isSubmitted && !form.isValid && !isPipelineValid}
+          error={form.getErrors()}
+        >
           {tabContent}
         </Form>
       </EuiFlyoutBody>
@@ -186,7 +211,13 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={form.submit} fill iconType="play" isLoading={isExecuting}>
+            <EuiButton
+              onClick={form.submit}
+              fill
+              iconType="play"
+              isLoading={isExecuting}
+              disabled={form.isSubmitted && (!form.isValid || !isPipelineValid)}
+            >
               {isExecuting ? (
                 <FormattedMessage
                   id="xpack.ingestPipelines.testPipelineFlyout.runningButtonLabel"
