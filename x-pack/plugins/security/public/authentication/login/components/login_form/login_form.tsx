@@ -18,6 +18,12 @@ import {
   EuiSpacer,
   EuiText,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiLoadingSpinner,
+  EuiLink,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,6 +31,7 @@ import { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public'
 import { LoginValidator, LoginValidationResult } from './validate_login';
 import { parseNext } from '../../../../../common/parse_next';
 import { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
+import './login_form.scss';
 
 interface Props {
   http: HttpStart;
@@ -109,11 +116,12 @@ export class LoginForm extends Component<Props, State> {
     }
 
     return (
-      <Fragment>
-        <EuiText size="s">
+      <div className="lgnAssistanceMessage">
+        <EuiHorizontalRule size="half" />
+        <EuiText size="xs">
           <ReactMarkdown>{this.props.loginAssistanceMessage}</ReactMarkdown>
         </EuiText>
-      </Fragment>
+      </div>
     );
   };
 
@@ -167,26 +175,16 @@ export class LoginForm extends Component<Props, State> {
     const loginSelectorLink = this.props.selector.providers.some(
       provider => !provider.usesLoginForm
     ) ? (
-      <EuiFormRow>
-        <EuiText size="s" textAlign="left">
-          ????????
-          <EuiButtonEmpty onClick={() => this.switchMode(PageMode.Selector)}>
-            <EuiText>
-              <strong>
-                <FormattedMessage
-                  id="xpack.security.loginPage.loginSelectorLinkText"
-                  defaultMessage="Other options."
-                />
-              </strong>
-            </EuiText>
-          </EuiButtonEmpty>
-        </EuiText>
-      </EuiFormRow>
+      <EuiButtonEmpty size="xs" onClick={() => this.switchMode(PageMode.Selector)}>
+        <FormattedMessage
+          id="xpack.security.loginPage.loginSelectorLinkText"
+          defaultMessage="See more login options"
+        />
+      </EuiButtonEmpty>
     ) : null;
     return (
       <EuiPanel>
         <form onSubmit={this.submitLoginForm}>
-          {loginSelectorLink}
           <EuiFormRow
             label={
               <FormattedMessage
@@ -231,20 +229,27 @@ export class LoginForm extends Component<Props, State> {
             />
           </EuiFormRow>
 
-          <EuiButton
-            fill
-            type="submit"
-            color="primary"
-            onClick={this.submitLoginForm}
-            isDisabled={!this.isLoadingState(LoadingStateType.None)}
-            isLoading={this.isLoadingState(LoadingStateType.Form)}
-            data-test-subj="loginSubmit"
-          >
-            <FormattedMessage
-              id="xpack.security.login.basicLoginForm.logInButtonLabel"
-              defaultMessage="Log in"
-            />
-          </EuiButton>
+          <EuiSpacer />
+
+          <EuiFlexGroup repsonsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                type="submit"
+                color="primary"
+                onClick={this.submitLoginForm}
+                isDisabled={!this.isLoadingState(LoadingStateType.None)}
+                isLoading={this.isLoadingState(LoadingStateType.Form)}
+                data-test-subj="loginSubmit"
+              >
+                <FormattedMessage
+                  id="xpack.security.login.basicLoginForm.logInButtonLabel"
+                  defaultMessage="Log in"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{loginSelectorLink}</EuiFlexItem>
+          </EuiFlexGroup>
         </form>
       </EuiPanel>
     );
@@ -258,32 +263,47 @@ export class LoginForm extends Component<Props, State> {
     }
 
     return (
-      <>
+      <EuiPanel paddingSize="none">
         {this.props.selector.providers.map((provider, index) => (
-          <EuiCard
-            className="loginCard"
-            key={provider.name}
-            isDisabled={!this.isLoadingState(LoadingStateType.None)}
-            layout="horizontal"
-            icon={provider.icon ? <EuiIcon size="xl" type={provider.icon} /> : undefined}
-            title={
-              provider.description ?? (
-                <FormattedMessage
-                  id="xpack.security.loginPage.loginProviderDescription"
-                  defaultMessage="Login with {providerType}/{providerName}"
-                  values={{
-                    providerType: provider.type,
-                    providerName: provider.name,
-                  }}
-                />
-              )
-            }
-            titleSize="xs"
-            description={provider.hint || ''}
+          <button
+            disabled={!this.isLoadingState(LoadingStateType.None)}
             onClick={() => this.loginWithSelector(provider)}
-          />
+            className={`lgnCard ${
+              this.isLoadingState(LoadingStateType.Selector, provider.name)
+                ? 'lgnCard-isLoading'
+                : ''
+            }`}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="xl" type={provider.icon ? provider.icon : 'empty'} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="xs" className="lgnCard__title">
+                  <p>
+                    {provider.description ?? (
+                      <FormattedMessage
+                        id="xpack.security.loginPage.loginProviderDescription"
+                        defaultMessage="Login with {providerType}/{providerName}"
+                        values={{
+                          providerType: provider.type,
+                          providerName: provider.name,
+                        }}
+                      />
+                    )}
+                  </p>
+                </EuiTitle>
+                {provider.hint ? <p className="lgnCard__hint">{provider.hint}</p> : null}
+              </EuiFlexItem>
+              {this.isLoadingState(LoadingStateType.Selector, provider.name) ? (
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </button>
         ))}
-      </>
+      </EuiPanel>
     );
   };
 
@@ -348,34 +368,36 @@ export class LoginForm extends Component<Props, State> {
   private renderPageModeSwitchLink = () => {
     if (this.state.mode === PageMode.LoginHelp) {
       return (
-        <EuiButtonEmpty
-          style={{ fontWeight: 'bold' }}
-          onClick={() => this.switchMode(this.state.previousMode)}
-        >
-          <EuiText size="s">
-            <strong>
+        <Fragment>
+          <EuiSpacer />
+          <EuiText size="xs" className="eui-textCenter">
+            <EuiLink
+              style={{ fontWeight: 'bold' }}
+              onClick={() => this.switchMode(this.state.previousMode)}
+            >
               <FormattedMessage
                 id="xpack.security.loginPage.goBackToLoginLink"
                 defaultMessage="Take me back to Login"
               />
-            </strong>
+            </EuiLink>
           </EuiText>
-        </EuiButtonEmpty>
+        </Fragment>
       );
     }
 
     if (this.props.loginHelp) {
       return (
-        <EuiButtonEmpty onClick={() => this.switchMode(PageMode.LoginHelp)}>
-          <EuiText size="s">
-            <strong>
+        <Fragment>
+          <EuiSpacer />
+          <EuiText size="xs" className="eui-textCenter">
+            <EuiLink onClick={() => this.switchMode(PageMode.LoginHelp)}>
               <FormattedMessage
                 id="xpack.security.loginPage.loginHelpLinkText"
                 defaultMessage="Need help?"
               />
-            </strong>
+            </EuiLink>
           </EuiText>
-        </EuiButtonEmpty>
+        </Fragment>
       );
     }
 

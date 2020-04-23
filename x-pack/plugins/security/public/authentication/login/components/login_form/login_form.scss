@@ -1,0 +1,58 @@
+.lgnCard {
+  display: block;
+  box-shadow: none;
+  padding: $euiSize;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    .lgnCard__title {
+      text-decoration: underline;
+    }
+  }
+
+  &:disabled {
+    pointer-events: none;
+  }
+
+  &:not(.lgnCard-isLoading):disabled {
+    .lgnCard__title,
+    .lgnCard__hint {
+      color: $euiColorMediumShade;
+    }
+  }
+
+  &:focus {
+    border-color: transparent;
+    border-radius: $euiBorderRadius;
+    @include euiFocusRing;
+
+    .lgnCard__title {
+      text-decoration: underline;
+    }
+
+    // Make the focus ring clean and without borders
+    + .lgnCard {
+      border-color: transparent;
+    }
+  }
+
+  + .lgnCard {
+    border-top: $euiBorderThin;
+  }
+}
+
+.lgnCard__hint {
+  @include euiFontSizeXS;
+  color: $euiColorDarkShade;
+  margin-top: $euiSizeXS;
+}
+
+.lgnAssistanceMessage {
+  margin-top: -($euiSizeXXL + $euiSizeS); // This tightens up the layout if message is present
+  padding: 0 $euiSize;
+}
+
+.lgnPanel {
+  padding: 0 $euiSize;
+}
