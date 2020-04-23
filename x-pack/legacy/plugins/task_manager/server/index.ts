@@ -6,8 +6,6 @@
 
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import mappings from './mappings.json';
-import { migrations } from './migrations';
 
 import { createLegacyApi, getTaskManagerSetup } from './legacy';
 export { LegacyTaskManagerApi, getTaskManagerSetup, getTaskManagerStart } from './legacy';
@@ -15,17 +13,6 @@ export { LegacyTaskManagerApi, getTaskManagerSetup, getTaskManagerStart } from '
 // Once all plugins are migrated to NP, this can be removed
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TaskManager } from '../../../../plugins/task_manager/server/task_manager';
-
-const savedObjectSchemas = {
-  task: {
-    hidden: true,
-    isNamespaceAgnostic: true,
-    convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
-    indexPattern(config: any) {
-      return config.get('xpack.task_manager.index');
-    },
-  },
-};
 
 export function taskManager(kibana: any) {
   return new kibana.Plugin({
@@ -51,7 +38,7 @@ export function taskManager(kibana: any) {
       server.expose(
         createLegacyApi(
           getTaskManagerSetup(server)!
-            .registerLegacyAPI({})
+            .registerLegacyAPI()
             .then((taskManagerPlugin: TaskManager) => {
               // we can't tell the Kibana Platform Task Manager plugin to
               // to wait to `start` as that happens before legacy plugins
@@ -65,11 +52,6 @@ export function taskManager(kibana: any) {
             })
         )
       );
-    },
-    uiExports: {
-      mappings,
-      migrations,
-      savedObjectSchemas,
     },
   });
 }

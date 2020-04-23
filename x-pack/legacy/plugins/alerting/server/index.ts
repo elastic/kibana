@@ -6,7 +6,6 @@
 
 import { Legacy } from 'kibana';
 import { Root } from 'joi';
-import mappings from './mappings.json';
 
 export function alerting(kibana: any) {
   return new kibana.Plugin({
@@ -16,7 +15,6 @@ export function alerting(kibana: any) {
     isEnabled(config: Legacy.KibanaConfig) {
       return (
         config.get('xpack.alerting.enabled') === true &&
-        config.get('xpack.actions.enabled') === true &&
         config.get('xpack.encryptedSavedObjects.enabled') === true &&
         config.get('xpack.task_manager.enabled') === true
       );
@@ -27,9 +25,6 @@ export function alerting(kibana: any) {
           enabled: Joi.boolean().default(true),
         })
         .default();
-    },
-    uiExports: {
-      mappings,
     },
   });
 }

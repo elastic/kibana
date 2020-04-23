@@ -167,7 +167,6 @@
 
 # Kibana Alerting Services
 /x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
-/x-pack/legacy/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/alerting/ @elastic/kibana-alerting-services
 /x-pack/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/event_log/ @elastic/kibana-alerting-services

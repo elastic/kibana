@@ -5,7 +5,6 @@
  */
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import mappings from './mappings.json';
 
 export function actions(kibana: any) {
   return new kibana.Plugin({
@@ -25,9 +24,6 @@ export function actions(kibana: any) {
         config.get('xpack.actions.enabled') === true &&
         config.get('xpack.task_manager.enabled') === true
       );
-    },
-    uiExports: {
-      mappings,
     },
   });
 }

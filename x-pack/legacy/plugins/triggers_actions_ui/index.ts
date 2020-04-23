@@ -14,8 +14,7 @@ export function triggersActionsUI(kibana: any) {
     configPrefix: 'xpack.triggers_actions_ui',
     isEnabled(config: Legacy.KibanaConfig) {
       return (
-        config.get('xpack.triggers_actions_ui.enabled') &&
-        (config.get('xpack.actions.enabled') || config.get('xpack.alerting.enabled'))
+        config.get('xpack.triggers_actions_ui.enabled') && config.get('xpack.alerting.enabled')
       );
     },
     publicDir: resolve(__dirname, 'public'),
