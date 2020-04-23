@@ -8,6 +8,7 @@ import React, { FC, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiForm,
   EuiFormRow,
   EuiModalBody,
@@ -36,20 +37,20 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 
   const swimlaneTypeOptions = [
     {
-      value: SWIMLANE_TYPE.OVERALL,
-      text: i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.overallOptionLabel', {
+      id: SWIMLANE_TYPE.OVERALL,
+      label: i18n.translate('xpack.ml.explorer.overallLabel', {
         defaultMessage: 'Overall',
       }),
     },
     {
-      value: SWIMLANE_TYPE.VIEW_BY,
-      text: i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.viewByOptionLabel', {
-        defaultMessage: 'viewBy',
+      id: SWIMLANE_TYPE.VIEW_BY,
+      label: i18n.translate('xpack.ml.explorer.viewByLabel', {
+        defaultMessage: 'View by',
       }),
     },
   ];
 
-  const viewBySwimlaneOptions = influencers.map(influencer => {
+  const viewBySwimlaneOptions = ['', ...influencers].map(influencer => {
     return {
       value: influencer,
       text: influencer,
@@ -81,13 +82,17 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
               />
             }
           >
-            <EuiSelect
+            <EuiButtonGroup
               id="selectSwimlaneType"
               name="selectSwimlaneType"
+              color="primary"
+              isFullWidth
+              legend={i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel', {
+                defaultMessage: 'Swimlane type',
+              })}
               options={swimlaneTypeOptions}
-              value={swimlaneType}
-              onChange={e => setSwimlaneType(e.target.value as SWIMLANE_TYPE)}
-              data-test-subj="mlSwimlaneTypeCombobox"
+              idSelected={swimlaneType}
+              onChange={id => setSwimlaneType(id as SWIMLANE_TYPE)}
             />
           </EuiFormRow>
 
