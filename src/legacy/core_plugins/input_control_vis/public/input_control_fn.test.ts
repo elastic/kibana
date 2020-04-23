@@ -22,8 +22,6 @@ import { createInputControlVisFn } from './input_control_fn';
 // eslint-disable-next-line
 import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
 
-jest.mock('./legacy_imports.ts');
-
 describe('interpreter/functions#input_control_vis', () => {
   const fn = functionWrapper(createInputControlVisFn());
   const visConfig = {
@@ -48,8 +46,9 @@ describe('interpreter/functions#input_control_vis', () => {
     pinFilters: false,
   };
 
-  it('returns an object with the correct structure', async () => {
+  test('returns an object with the correct structure', async () => {
     const actual = await fn(null, { visConfig: JSON.stringify(visConfig) });
+
     expect(actual).toMatchSnapshot();
   });
 });
