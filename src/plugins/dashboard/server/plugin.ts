@@ -17,24 +17,37 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectReference } from '../../../../core/server';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '../../../core/server';
 
-export interface SavedObjectAttributes {
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: string;
-  };
-}
+import { dashboardSavedObjectType } from './saved_objects';
 
-export interface Doc<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
-  references: SavedObjectReference[];
-  attributes: Attributes;
-  id: string;
-  type: string;
-}
+import { DashboardPluginSetup, DashboardPluginStart } from './types';
 
-export interface DocPre700<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
-  attributes: Attributes;
-  id: string;
-  type: string;
+export class DashboardPlugin implements Plugin<DashboardPluginSetup, DashboardPluginStart> {
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
+  public setup(core: CoreSetup) {
+    this.logger.debug('dashboard: Setup');
+
+    core.savedObjects.registerType(dashboardSavedObjectType);
+
+    return {};
+  }
+
+  public start(core: CoreStart) {
+    this.logger.debug('dashboard: Started');
+    return {};
+  }
+
+  public stop() {}
 }

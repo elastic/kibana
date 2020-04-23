@@ -16,26 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// This file should be moved to dashboard/server/
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsMigrationLogger } from 'src/core/server';
+
 import { inspect } from 'util';
-import {
-  DashboardDoc730ToLatest,
-  DashboardDoc700To720,
-} from '../../../../../../plugins/dashboard/public';
+import { SavedObjectMigrationContext } from 'kibana/server';
+import { DashboardDoc730ToLatest } from '../../common';
 import { isDashboardDoc } from './is_dashboard_doc';
 import { moveFiltersToQuery } from './move_filters_to_query';
-import { migratePanelsTo730 } from './migrate_to_730_panels';
+import { migratePanelsTo730, DashboardDoc700To720 } from '../../common';
 
-export function migrations730(
-  doc:
-    | {
-        [key: string]: unknown;
-      }
-    | DashboardDoc700To720,
-  logger: SavedObjectsMigrationLogger
-): DashboardDoc730ToLatest | { [key: string]: unknown } {
+export const migrations730 = (doc: DashboardDoc700To720, { log }: SavedObjectMigrationContext) => {
   if (!isDashboardDoc(doc)) {
     // NOTE: we should probably throw an error here... but for now following suit and in the
     // case of errors, just returning the same document.
@@ -48,7 +37,7 @@ export function migrations730(
       moveFiltersToQuery(searchSource)
     );
   } catch (e) {
-    logger.warning(
+    log.warning(
       `Exception @ migrations730 while trying to migrate dashboard query filters!\n` +
         `${e.stack}\n` +
         `dashboard: ${inspect(doc, false, null)}`
@@ -75,7 +64,7 @@ export function migrations730(
 
     delete doc.attributes.uiStateJSON;
   } catch (e) {
-    logger.warning(
+    log.warning(
       `Exception @ migrations730 while trying to migrate dashboard panels!\n` +
         `Error: ${e.stack}\n` +
         `dashboard: ${inspect(doc, false, null)}`
@@ -84,4 +73,4 @@ export function migrations730(
   }
 
   return doc as DashboardDoc730ToLatest;
-}
+};
