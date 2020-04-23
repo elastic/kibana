@@ -13,10 +13,10 @@ describe('graph-workspace', () => {
 
     test('returns doc on empty object', () => {
       expect(migration({} as SavedObjectUnsanitizedDoc)).toMatchInlineSnapshot(`
-Object {
-  "references": Array [],
-}
-`);
+        Object {
+          "references": Array [],
+        }
+      `);
     });
 
     test('returns doc when wsState is not a string', () => {
@@ -28,14 +28,15 @@ Object {
         },
       };
       expect(migration(doc)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "wsState": true,
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "wsState": true,
+          },
+          "id": "1",
+          "references": Array [],
+          "type": "graph-workspace",
+        }
+      `);
     });
 
     test('returns doc when wsState is not valid JSON', () => {
@@ -47,14 +48,15 @@ Object {
         },
       };
       expect(migration(doc)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "wsState": "123abc",
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "wsState": "123abc",
+          },
+          "id": "1",
+          "references": Array [],
+          "type": "graph-workspace",
+        }
+      `);
     });
 
     test('returns doc when "indexPattern" is missing from wsState', () => {
@@ -66,14 +68,15 @@ Object {
         },
       };
       expect(migration(doc)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "wsState": "\\"{\\\\\\"foo\\\\\\":true}\\"",
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "wsState": "\\"{\\\\\\"foo\\\\\\":true}\\"",
+          },
+          "id": "1",
+          "references": Array [],
+          "type": "graph-workspace",
+        }
+      `);
     });
 
     test('extract "indexPattern" attribute from doc', () => {
@@ -87,21 +90,22 @@ Object {
       };
       const migratedDoc = migration(doc);
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "bar": true,
-    "wsState": "\\"{\\\\\\"foo\\\\\\":true,\\\\\\"indexPatternRefName\\\\\\":\\\\\\"indexPattern_0\\\\\\"}\\"",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "pattern*",
-      "name": "indexPattern_0",
-      "type": "index-pattern",
-    },
-  ],
-}
-`);
+        Object {
+          "attributes": Object {
+            "bar": true,
+            "wsState": "\\"{\\\\\\"foo\\\\\\":true,\\\\\\"indexPatternRefName\\\\\\":\\\\\\"indexPattern_0\\\\\\"}\\"",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "pattern*",
+              "name": "indexPattern_0",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "graph-workspace",
+        }
+      `);
     });
   });
 });
