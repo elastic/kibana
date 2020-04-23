@@ -45,45 +45,22 @@ describe('durationRt', () => {
 });
 
 describe('getDurationRt', () => {
-  describe('min/max amount validation', () => {
-    const customDurationRt = getDurationRt({ min: -1, max: 10 });
-    describe('it should not accept', () => {
-      ['-2ms', '-3s', '11m'].map(input => {
-        it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(customDurationRt.decode(input))).toBeFalsy();
-        });
-      });
-    });
-    describe('it should accept', () => {
-      ['-1ms', '0s', '1m', '10ms'].map(input => {
-        it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(customDurationRt.decode(input))).toBeTruthy();
-        });
-      });
-    });
-  });
-  describe('unit validation', () => {
-    const customDurationRt = getDurationRt({ unit: 'ms' });
-    describe('it should not accept', () => {
-      ['-2s', '-3s', '11m'].map(input => {
-        it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(customDurationRt.decode(input))).toBeFalsy();
-        });
-      });
-    });
-    describe('it should accept', () => {
-      ['-1ms', '0ms', '1ms', '10ms'].map(input => {
-        it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(customDurationRt.decode(input))).toBeTruthy();
-        });
-      });
-    });
-  });
-
   describe('must be at least 1m', () => {
-    const customDurationRt = getDurationRt({ min: 1, unit: 'm' });
+    const customDurationRt = getDurationRt({ min: '1m' });
     describe('it should not accept', () => {
-      ['0m', '-1m', '1ms', '1s'].map(input => {
+      [
+        undefined,
+        null,
+        '',
+        0,
+        'foo',
+        true,
+        false,
+        '0m',
+        '-1m',
+        '1ms',
+        '1s'
+      ].map(input => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(customDurationRt.decode(input))).toBeFalsy();
         });
@@ -98,14 +75,27 @@ describe('getDurationRt', () => {
     });
   });
 
-  describe('must be between 1ms(1ms - 1000ms) and 1s', () => {
-    const customDurationRt = getDurationRt([
-      { min: 1, max: 1, unit: 's' },
-      { min: 1, max: 1000, unit: 'ms' }
-    ]);
+  describe('must be between 1ms and 1s', () => {
+    const customDurationRt = getDurationRt({ min: '1ms', max: '1s' });
 
     describe('it should not accept', () => {
-      ['-1s', '0s', '2s', '1001ms', '0ms', '-1ms', '0m', '1m'].map(input => {
+      [
+        undefined,
+        null,
+        '',
+        0,
+        'foo',
+        true,
+        false,
+        '-1s',
+        '0s',
+        '2s',
+        '1001ms',
+        '0ms',
+        '-1ms',
+        '0m',
+        '1m'
+      ].map(input => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(customDurationRt.decode(input))).toBeFalsy();
         });
@@ -113,6 +103,26 @@ describe('getDurationRt', () => {
     });
     describe('it should accept', () => {
       ['1s', '1ms', '50ms', '1000ms'].map(input => {
+        it(`${JSON.stringify(input)}`, () => {
+          expect(isRight(customDurationRt.decode(input))).toBeTruthy();
+        });
+      });
+    });
+  });
+  describe('must be max 1m', () => {
+    const customDurationRt = getDurationRt({ max: '1m' });
+
+    describe('it should not accept', () => {
+      [undefined, null, '', 0, 'foo', true, false, '2m', '61s', '60001ms'].map(
+        input => {
+          it(`${JSON.stringify(input)}`, () => {
+            expect(isRight(customDurationRt.decode(input))).toBeFalsy();
+          });
+        }
+      );
+    });
+    describe('it should accept', () => {
+      ['1m', '0m', '-1m', '60s', '6000ms', '1ms', '1s'].map(input => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(customDurationRt.decode(input))).toBeTruthy();
         });

@@ -101,9 +101,7 @@ export const javaSettings: RawSettingDefinition[] = [
       }
     ),
     includeAgents: ['java'],
-    validation:
-      // must be at least 1m
-      getDurationRt({ min: 1, unit: 'm' }),
+    validation: getDurationRt({ min: '1m' }),
     validationError: i18n.translate(
       'xpack.apm.agentConfig.stressMonitorCpuDurationThreshold.errorText',
       { defaultMessage: "Must be at least '1m'" }
@@ -185,11 +183,7 @@ export const javaSettings: RawSettingDefinition[] = [
       }
     ),
     includeAgents: ['java'],
-    validation: getDurationRt([
-      // must be between 1ms(1ms - 1000ms) and 1s
-      { min: 1, max: 1, unit: 's' },
-      { min: 1, max: 1000, unit: 'ms' }
-    ]),
+    validation: getDurationRt({ min: '1ms', max: '1s' }),
     validationError: i18n.translate(
       'xpack.apm.agentConfig.profilingInferredSpansSamplingInterval.errorText',
       { defaultMessage: "Must be between '1ms' and '1s'" }

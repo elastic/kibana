@@ -6,42 +6,35 @@
 
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
+import moment, { unitOfTime } from 'moment';
 import { amountAndUnitToObject } from '../amount_and_unit';
 
-type DurationUnit = 'ms' | 's' | 'm';
 export const DURATION_UNITS = ['ms', 's', 'm'];
 
-interface Criteria {
-  min?: number;
-  max?: number;
-  unit?: DurationUnit;
+function getDuration({ amount, unit }: { amount: string; unit: string }) {
+  return moment.duration(parseInt(amount, 10), unit as unitOfTime.Base);
 }
 
-function validateDuration(inputAsString: string, { min, max, unit }: Criteria) {
-  const { amount, unit: inputUnit } = amountAndUnitToObject(inputAsString);
-  const amountAsInt = parseInt(amount, 10);
-  const isValidUnit =
-    DURATION_UNITS.includes(inputUnit) && (unit ? unit === inputUnit : true);
-
-  const isValidAmount =
-    (min ? amountAsInt >= min : true) && (max ? amountAsInt <= max : true);
-
-  return isValidUnit && isValidAmount;
-}
-
-export function getDurationRt(criteria: Criteria | Criteria[]) {
+export function getDurationRt({ min, max }: { min?: string; max?: string }) {
   return new t.Type<string, string, unknown>(
     'durationRt',
     t.string.is,
     (input, context) => {
       return either.chain(t.string.validate(input, context), inputAsString => {
-        const isValid = Array.isArray(criteria)
-          ? criteria
-              .map(_criteria => validateDuration(inputAsString, _criteria))
-              .some(result => result)
-          : validateDuration(inputAsString, criteria);
+        const { amount, unit } = amountAndUnitToObject(inputAsString);
+        const inputDuration = getDuration({ amount, unit });
+        const minDuration = min
+          ? getDuration(amountAndUnitToObject(min))
+          : inputDuration;
+        const maxDuration = max
+          ? getDuration(amountAndUnitToObject(max))
+          : inputDuration;
 
-        return isValid
+        const isValidUnit = DURATION_UNITS.includes(unit);
+        const isValidAmount =
+          inputDuration >= minDuration && inputDuration <= maxDuration;
+
+        return isValidUnit && isValidAmount
           ? t.success(inputAsString)
           : t.failure(
               input,
@@ -54,4 +47,4 @@ export function getDurationRt(criteria: Criteria | Criteria[]) {
   );
 }
 
-export const durationRt = getDurationRt({ min: 1 });
+export const durationRt = getDurationRt({ min: '1ms' });
