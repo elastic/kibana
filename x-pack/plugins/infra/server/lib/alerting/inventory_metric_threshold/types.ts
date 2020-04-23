@@ -13,6 +13,7 @@ export enum Comparator {
   GT_OR_EQ = '>=',
   LT_OR_EQ = '<=',
   BETWEEN = 'between',
+  OUTSIDE_RANGE = 'outside',
 }
 
 export enum AlertStates {
