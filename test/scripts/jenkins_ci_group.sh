@@ -7,9 +7,9 @@ if [[ -z "$CODE_COVERAGE" ]]; then
 
   if [ "$CI_GROUP" == "1" ]; then
     source test/scripts/jenkins_build_kbn_sample_panel_action.sh
-    yarn run grunt run:pluginFunctionalTestsRelease --from=source;
+    # yarn run grunt run:pluginFunctionalTestsRelease --from=source;
     yarn run grunt run:exampleFunctionalTestsRelease --from=source;
-    yarn run grunt run:interpreterFunctionalTestsRelease;
+    # yarn run grunt run:interpreterFunctionalTestsRelease;
   fi
 else
   echo " -> Running Functional tests with code coverage"
