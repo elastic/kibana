@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { SearchSource } from '../legacy_imports';
-
-export const getSearchSourceMock = (esSearchResponse?: any): SearchSource =>
+export const getSearchSourceMock = (esSearchResponse?: any) =>
   jest.fn().mockImplementation(() => ({
     setParent: jest.fn(),
     setField: jest.fn(),

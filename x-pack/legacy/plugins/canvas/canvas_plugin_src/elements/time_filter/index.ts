@@ -5,14 +5,13 @@
  */
 
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const timeFilter: ElementFactory = () => ({
-  name: 'time_filter',
+  name: 'timeFilter',
   displayName: 'Time filter',
-  tags: ['filter'],
+  type: 'filter',
   help: 'Set a time window',
-  image: header,
+  icon: 'calendar',
   height: 50,
   expression: `timefilterControl compact=true column=@timestamp
 | render`,

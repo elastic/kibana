@@ -21,7 +21,6 @@ import expect from '@kbn/expect';
 import { Control } from './control';
 import { ControlParams } from '../editor_utils';
 import { FilterManager as BaseFilterManager } from './filter_manager/filter_manager';
-import { SearchSource } from '../legacy_imports';
 
 function createControlParams(id: string, label: string): ControlParams {
   return {
@@ -51,18 +50,12 @@ class ControlMock extends Control<BaseFilterManager> {
 
   destroy() {}
 }
-const mockKbnApi: SearchSource = {} as SearchSource;
 
 describe('hasChanged', () => {
   let control: ControlMock;
 
   beforeEach(() => {
-    control = new ControlMock(
-      createControlParams('3', 'control'),
-      mockFilterManager,
-      false,
-      mockKbnApi
-    );
+    control = new ControlMock(createControlParams('3', 'control'), mockFilterManager, false);
   });
 
   afterEach(() => {
@@ -93,20 +86,17 @@ describe('ancestors', () => {
     grandParentControl = new ControlMock(
       createControlParams('1', 'grandparent control'),
       mockFilterManager,
-      false,
-      mockKbnApi
+      false
     );
     parentControl = new ControlMock(
       createControlParams('2', 'parent control'),
       mockFilterManager,
-      false,
-      mockKbnApi
+      false
     );
     childControl = new ControlMock(
       createControlParams('3', 'child control'),
       mockFilterManager,
-      false,
-      mockKbnApi
+      false
     );
   });
 
