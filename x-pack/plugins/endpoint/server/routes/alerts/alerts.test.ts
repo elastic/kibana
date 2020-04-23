@@ -13,24 +13,34 @@ import { registerAlertRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
 import { alertingIndexGetQuerySchema } from '../../../common/schema/alert_index';
 import { createMockAgentService, createMockIndexPatternRetriever } from '../../mocks';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
   let mockClusterClient: jest.Mocked<IClusterClient>;
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let endpointAppContextService: EndpointAppContextService;
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
-    registerAlertRoutes(routerMock, {
+
+    endpointAppContextService = new EndpointAppContextService();
+    endpointAppContextService.start({
       indexPatternRetriever: createMockIndexPatternRetriever('events-endpoint-*'),
       agentService: createMockAgentService(),
+    });
+
+    registerAlertRoutes(routerMock, {
       logFactory: loggingServiceMock.create(),
+      service: endpointAppContextService,
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });
   });
+
+  afterEach(() => endpointAppContextService.stop());
 
   it('should fail to validate when `page_size` is not a number', async () => {
     const validate = () => {

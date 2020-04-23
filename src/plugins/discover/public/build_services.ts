@@ -35,12 +35,16 @@ import {
 } from 'src/plugins/data/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 
-import { SharePluginStart } from '../../share/public';
-import { ChartsPluginStart } from '../../charts/public';
-import { VisualizationsStart } from '../../visualizations/public';
-import { createSavedSearchesLoader, SavedSearch } from '.';
 import { DiscoverStartPlugins } from './plugin';
-import { getHistory } from './kibana_services';
+import { SharePluginStart } from '../../../../../plugins/share/public';
+import { ChartsPluginStart } from '../../../../../plugins/charts/public';
+import { VisualizationsStart } from '../../../../../plugins/visualizations/public';
+import {
+  createSavedSearchesLoader,
+  DocViewerComponent,
+  SavedSearch,
+} from '../../../../../plugins/discover/public';
+import { SavedObjectKibanaServices } from '../../../../../plugins/saved_objects/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -63,12 +67,13 @@ export interface DiscoverServices {
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
 }
+
 export async function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext
 ): Promise<DiscoverServices> {
-  const services = {
+  const services: SavedObjectKibanaServices = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
     search: plugins.data.search,
