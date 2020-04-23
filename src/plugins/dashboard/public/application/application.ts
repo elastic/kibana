@@ -38,12 +38,7 @@ import { EmbeddableStart } from '../../../embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../navigation/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SharePluginStart } from '../../../share/public';
-import {
-  KibanaLegacyStart,
-  configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
-} from '../../../kibana_legacy/public';
+import { KibanaLegacyStart, configureAppAngularModule } from '../../../kibana_legacy/public';
 import { SavedObjectLoader } from '../../../saved_objects/public';
 
 // required for i18nIdDirective
@@ -118,13 +113,11 @@ function mountDashboardApp(appBasePath: string, element: HTMLElement) {
 
 function createLocalAngularModule(core: AppMountContext['core'], navigation: NavigationStart) {
   createLocalI18nModule();
-  createLocalTopNavModule(navigation);
   createLocalIconModule();
 
   const dashboardAngularModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
     'app/dashboard/I18n',
-    'app/dashboard/TopNav',
     'app/dashboard/icon',
   ]);
   return dashboardAngularModule;
@@ -134,13 +127,6 @@ function createLocalIconModule() {
   angular
     .module('app/dashboard/icon', ['react'])
     .directive('icon', reactDirective => reactDirective(EuiIcon));
-}
-
-function createLocalTopNavModule(navigation: NavigationStart) {
-  angular
-    .module('app/dashboard/TopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {

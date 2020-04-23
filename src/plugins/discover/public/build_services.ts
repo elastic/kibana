@@ -40,6 +40,7 @@ import { ChartsPluginStart } from '../../charts/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { createSavedSearchesLoader, SavedSearch } from '.';
 import { DiscoverStartPlugins } from './plugin';
+import { SavedObjectKibanaServices } from '../../../../../plugins/saved_objects/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -62,13 +63,14 @@ export interface DiscoverServices {
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
 }
+
 export async function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   getHistory: () => History,
   context: PluginInitializerContext
 ): Promise<DiscoverServices> {
-  const services = {
+  const services: SavedObjectKibanaServices = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
     search: plugins.data.search,

@@ -62,10 +62,10 @@ describe('defaultSearchStrategy', function() {
           },
         ],
         esShardTimeout: 0,
-        searchService,
+        legacySearchService: searchService.__LEGACY,
       };
 
-      es = searchArgs.searchService.__LEGACY.esClient;
+      es = searchArgs.legacySearchService.esClient;
     });
 
     test('does not send max_concurrent_shard_requests by default', async () => {
