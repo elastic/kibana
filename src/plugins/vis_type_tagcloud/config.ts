@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export const [getFormatService, setFormatService] = createGetterSetter<
-  DataPublicPluginStart['fieldFormats']
->('data.fieldFormats');
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+});
 
-export { npStart } from 'ui/new_platform';
+export type ConfigSchema = TypeOf<typeof configSchema>;
