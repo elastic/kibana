@@ -5,64 +5,63 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed } from '../helpers';
+import { componentHelpers, MappingsEditorTestBed, nextTick } from '../helpers';
 import { getFieldConfig } from '../../../lib';
 
-const { setup, expectDataUpdatedFactory } = componentHelpers.mappingsEditor;
+const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
 const onUpdateHandler = jest.fn();
-const expectDataUpdated = expectDataUpdatedFactory(onUpdateHandler);
+const getDataForwarded = getDataForwardedFactory(onUpdateHandler);
 
 describe('text datatype', () => {
-  const defaultMappings = {
-    properties: {
-      user: {
-        properties: {
-          address: {
-            properties: {
-              street: { type: 'text' },
-            },
-          },
-        },
-      },
-    },
-  };
-
   let testBed: MappingsEditorTestBed;
 
-  beforeEach(async done => {
-    await act(async () => {
-      testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
-      const {
-        actions: { expandAllFields },
-      } = testBed;
-
-      // Make sure all the fields are expanded and present in the DOM
-      await expandAllFields();
-    });
-
-    done();
-  });
+  /**
+   * Variable to store the mappings data forwarded to the consumer component
+   */
+  let data: any;
 
   afterEach(() => {
     onUpdateHandler.mockReset();
   });
 
   test('flyout details initial view', async () => {
+    const defaultMappings = {
+      properties: {
+        user: {
+          properties: {
+            address: {
+              properties: {
+                street: { type: 'text' },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    await act(async () => {
+      testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
+      // Make sure all the fields are expanded and present in the DOM
+      await testBed.actions.expandAllFields();
+    });
+
     const {
       find,
       actions: { startEditField, getToggleValue, showAdvancedSettings, updateFieldAndCloseFlyout },
     } = testBed;
-    const fieldPath = ['user', 'address', 'street'];
-    const fieldName = fieldPath[fieldPath.length - 1];
+    const fieldPathToEdit = ['user', 'address', 'street'];
+    const fieldName = fieldPathToEdit[fieldPathToEdit.length - 1];
 
     // Open the flyout to edit the field
-    await startEditField(fieldPath.join('.'));
+    await act(async () => {
+      await startEditField(fieldPathToEdit.join('.'));
+    });
 
     // It should have the correct title
     expect(find('mappingsEditorFieldEdit.flyoutTitle').text()).toEqual(`Edit field '${fieldName}'`);
 
     // It should have the correct field path
-    expect(find('mappingsEditorFieldEdit.fieldPath').text()).toEqual(fieldPath.join(' > '));
+    expect(find('mappingsEditorFieldEdit.fieldPath').text()).toEqual(fieldPathToEdit.join(' > '));
 
     // It should have searchable ("index" param) active by default
     const indexFieldConfig = getFieldConfig('index');
@@ -97,7 +96,10 @@ describe('text datatype', () => {
       },
     };
 
-    await expectDataUpdated(updatedMappings);
+    await act(async () => {
+      ({ data } = await getDataForwarded());
+    });
+    expect(data).toEqual(updatedMappings);
 
     // Save the field and close the flyout
     await act(async () => {
@@ -117,6 +119,8 @@ describe('text datatype', () => {
     };
     updatedMappings.properties.user.properties.address.properties.street = streetField;
 
-    await expectDataUpdated(updatedMappings);
+    ({ data } = await getDataForwarded());
+    expect(data).toEqual(updatedMappings);
   });
+
 });

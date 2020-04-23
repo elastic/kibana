@@ -25,6 +25,7 @@ interface Props {
   label?: string;
   config?: FieldConfig;
   allowsIndexDefaultOption?: boolean;
+  'data-test-subj'?: string;
 }
 
 const ANALYZER_OPTIONS = PARAMETERS_OPTIONS.analyzer!;
@@ -68,6 +69,7 @@ export const AnalyzerParameter = ({
   label,
   config,
   allowsIndexDefaultOption = true,
+  'data-test-subj': dataTestSubj,
 }: Props) => {
   const indexSettings = useIndexSettings();
   const customAnalyzers = getCustomAnalyzers(indexSettings);
@@ -169,7 +171,7 @@ export const AnalyzerParameter = ({
             // around the field.
             <EuiFlexGroup>
               <EuiFlexItem>
-                <TextField field={field} />
+                <TextField field={field} data-test-subj={`${dataTestSubj}-custom`} />
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : (
@@ -180,6 +182,7 @@ export const AnalyzerParameter = ({
               config={fieldConfigWithLabel}
               options={fieldOptions}
               mapOptionsToSubOptions={mapOptionsToSubOptions}
+              data-test-subj={dataTestSubj}
             />
           )}
         </div>
