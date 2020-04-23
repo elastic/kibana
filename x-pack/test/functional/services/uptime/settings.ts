@@ -33,11 +33,11 @@ export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
     },
     loadFields: async (): Promise<DynamicSettings> => {
       const indInput = await testSubjects.find('heartbeat-indices-input-loaded', 5000);
-      const errorInput = await testSubjects.find('expiration-threshold-input-loaded', 5000);
-      const warningInput = await testSubjects.find('age-threshold-input-loaded', 5000);
+      const expirationInput = await testSubjects.find('expiration-threshold-input-loaded', 5000);
+      const ageInput = await testSubjects.find('age-threshold-input-loaded', 5000);
       const heartbeatIndices = await indInput.getAttribute('value');
-      const expiration = await errorInput.getAttribute('value');
-      const age = await warningInput.getAttribute('value');
+      const expiration = await expirationInput.getAttribute('value');
+      const age = await ageInput.getAttribute('value');
 
       return {
         heartbeatIndices,
