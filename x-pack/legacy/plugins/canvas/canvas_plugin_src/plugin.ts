@@ -6,11 +6,14 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { CanvasSetup } from '../public';
+import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 
 import { functions } from './functions/browser';
 import { typeFunctions } from './expression_types';
 // @ts-ignore: untyped local
-import { renderFunctions } from './renderers';
+import { renderFunctions, renderFunctionFactories } from './renderers';
 
 import { elementSpecs } from './elements';
 // @ts-ignore Untyped Local
@@ -30,12 +33,25 @@ interface SetupDeps {
   canvas: CanvasSetup;
 }
 
+export interface StartDeps {
+  embeddable: EmbeddableStart;
+  uiActions: UiActionsStart;
+  inspector: InspectorStart;
+}
+
 /** @internal */
-export class CanvasSrcPlugin implements Plugin<{}, {}, SetupDeps, {}> {
-  public setup(core: CoreSetup, plugins: SetupDeps) {
+export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     plugins.canvas.addFunctions(functions);
     plugins.canvas.addTypes(typeFunctions);
+
     plugins.canvas.addRenderers(renderFunctions);
+
+    core.getStartServices().then(([coreStart, depsStart]) => {
+      plugins.canvas.addRenderers(
+        renderFunctionFactories.map((factory: any) => factory(coreStart, depsStart))
+      );
+    });
 
     plugins.canvas.addElements(elementSpecs);
     plugins.canvas.addDatasourceUIs(datasourceSpecs);
@@ -45,11 +61,7 @@ export class CanvasSrcPlugin implements Plugin<{}, {}, SetupDeps, {}> {
     plugins.canvas.addTagUIs(tagSpecs);
     plugins.canvas.addTemplates(templateSpecs);
     plugins.canvas.addTransformUIs(transformSpecs);
-
-    return {};
   }
 
-  public start(core: CoreStart, plugins: {}) {
-    return {};
-  }
+  public start(core: CoreStart, plugins: StartDeps) {}
 }
