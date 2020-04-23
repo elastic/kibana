@@ -1189,7 +1189,7 @@ describe('Authenticator', () => {
         const request = httpServerMock.createKibanaRequest();
         mockSessionStorage.get.mockResolvedValue({
           ...mockSessVal,
-          flags: { accessAgreementAcknowledged: true },
+          accessAgreementAcknowledged: true,
         });
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
@@ -1448,7 +1448,7 @@ describe('Authenticator', () => {
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
       expect(mockSessionStorage.set).toHaveBeenCalledWith({
         ...mockSessionValue,
-        flags: { accessAgreementAcknowledged: true },
+        accessAgreementAcknowledged: true,
       });
 
       expect(mockOptions.auditLogger.accessAgreementAcknowledged).toHaveBeenCalledTimes(1);

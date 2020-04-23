@@ -71,14 +71,9 @@ export interface ProviderSession {
   path: string;
 
   /**
-   * The set of flags used to describe various aspects of the user session.
+   * Indicates whether user acknowledged access agreement or not.
    */
-  flags?: {
-    /**
-     * Indicates whether user acknowledged agreement notice or not.
-     */
-    accessAgreementAcknowledged: boolean;
-  };
+  accessAgreementAcknowledged?: boolean;
 }
 
 /**
@@ -495,10 +490,7 @@ export class Authenticator {
       throw new Error('Cannot acknowledge access agreement for unauthenticated user.');
     }
 
-    sessionStorage.set({
-      ...existingSession,
-      flags: { ...(existingSession.flags || {}), accessAgreementAcknowledged: true },
-    });
+    sessionStorage.set({ ...existingSession, accessAgreementAcknowledged: true });
 
     this.options.auditLogger.accessAgreementAcknowledged(
       currentUser.username,
@@ -627,7 +619,7 @@ export class Authenticator {
         idleTimeoutExpiration,
         lifespanExpiration,
         path: this.serverBasePath,
-        flags: existingSession?.flags,
+        accessAgreementAcknowledged: existingSession?.accessAgreementAcknowledged,
       };
       sessionStorage.set(updatedSession);
       return updatedSession;
@@ -694,7 +686,7 @@ export class Authenticator {
     return (
       canRedirectRequest(request) &&
       session != null &&
-      !session.flags?.accessAgreementAcknowledged &&
+      !session.accessAgreementAcknowledged &&
       (this.options.config.authc.providers as Record<string, any>)[session.provider.type]?.[
         session.provider.name
       ]?.accessAgreement &&
