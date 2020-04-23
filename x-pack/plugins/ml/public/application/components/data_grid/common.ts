@@ -146,7 +146,7 @@ export const useRenderCellValue = (
   indexPattern: IndexPattern | undefined,
   pagination: IndexPagination,
   tableItems: DataGridItem[],
-  resultsField: string,
+  resultsField?: string,
   cellPropsCallback?: (
     columnId: string,
     cellValue: any,
@@ -183,7 +183,7 @@ export const useRenderCellValue = (
       }
 
       function getCellValue(cId: string) {
-        if (cId.includes(`.${FEATURE_INFLUENCE}.`)) {
+        if (cId.includes(`.${FEATURE_INFLUENCE}.`) && resultsField !== undefined) {
           const results = getNestedProperty(tableItems[adjustedRowIndex], resultsField, null);
           return results[cId.replace(`${resultsField}.`, '')];
         }
