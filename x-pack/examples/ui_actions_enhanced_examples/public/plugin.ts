@@ -30,7 +30,7 @@ export class UiActionsEnhancedExamplesPlugin
     const start = createStartServicesGetter(core.getStartServices);
 
     drilldowns.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
-    drilldowns.registerDrilldown(new DashboardToUrlDrilldown({ start }));
+    drilldowns.registerDrilldown(new DashboardToUrlDrilldown());
   }
 
   public start(core: CoreStart, plugins: StartDependencies) {}

@@ -8,14 +8,12 @@ import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiFieldText } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
 import { DrilldownDefinition as Drilldown } from '../../../../plugins/drilldowns/public';
-import { StartServicesGetter } from '../../../../../src/plugins/kibana_utils/public';
 import {
   EmbeddableContext,
   RangeSelectTriggerContext,
   ValueClickTriggerContext,
 } from '../../../../../src/plugins/embeddable/public';
 import { UiActionsCollectConfigProps } from '../../../../../src/plugins/ui_actions/public';
-import { StartDependencies } from '../plugin';
 
 export type PlaceContext = EmbeddableContext;
 export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
@@ -29,13 +27,7 @@ export type CollectConfigProps = UiActionsCollectConfigProps<Config>;
 
 const SAMPLE_DASHBOARD_TO_URL_DRILLDOWN = 'SAMPLE_DASHBOARD_TO_URL_DRILLDOWN';
 
-export interface Params {
-  start: StartServicesGetter<Pick<StartDependencies, 'data'>>;
-}
-
 export class DashboardToUrlDrilldown implements Drilldown<Config, PlaceContext, ActionContext> {
-  constructor(protected readonly params: Params) {}
-
   public readonly id = SAMPLE_DASHBOARD_TO_URL_DRILLDOWN;
 
   public readonly order = 25;
@@ -78,6 +70,10 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, PlaceContext, 
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
-    window.location.href = config.url;
+    if (config.openInNewTab) {
+      window.open(config.url, '_blank');
+    } else {
+      window.location.href = config.url;
+    }
   };
 }
