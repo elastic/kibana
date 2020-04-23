@@ -336,6 +336,7 @@ describe('<MappingsEditor />', () => {
       // Disbable dynamic mappings
       await act(async () => {
         form.toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
+        ({ data } = await getDataForwarded());
       });
 
       // When we disable dynamic mappings, we set it to "false" and remove date and numeric detections
@@ -347,7 +348,6 @@ describe('<MappingsEditor />', () => {
         numeric_detection: undefined,
       };
 
-      ({ data } = await getDataForwarded());
       expect(data).toEqual(updatedMappings);
     });
   });
