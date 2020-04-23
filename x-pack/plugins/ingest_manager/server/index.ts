@@ -22,7 +22,7 @@ export const config = {
     enabled: schema.boolean({ defaultValue: false }),
     epm: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
-      registryUrl: schema.uri({ defaultValue: 'https://epr-staging.elastic.co' }),
+      registryUrl: schema.maybe(schema.uri()),
     }),
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
