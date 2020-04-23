@@ -143,14 +143,69 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
 
   $scope.embeddableHandler = embeddableHandler;
 
+  const addToDashMode =
+    $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
+  removeQueryParam(history, DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
+
+  $scope.isAddToDashMode = () => addToDashMode;
+
+  const editFromDashMode =
+    $route.current.params[DashboardConstants.EDIT_VISUALIZATION_FROM_DASHBOARD_MODE_PARAM];
+  removeQueryParam(history, DashboardConstants.EDIT_VISUALIZATION_FROM_DASHBOARD_MODE_PARAM);
+
+  $scope.isEditFromDashMode = () => editFromDashMode;
+
   $scope.topNavMenu = [
+    ...($scope.isEditFromDashMode()
+      ? [
+          {
+            id: 'done',
+            label: i18n.translate('kbn.topNavMenu.doneVisualizationButtonLabel', {
+              defaultMessage: 'Done',
+            }),
+            emphasize: true,
+            iconType: 'check',
+            description: i18n.translate(
+              'kbn.visualize.topNavMenu.doneVisualizationButtonAriaLabel',
+              {
+                defaultMessage:
+                  'Finish editing visualization and return to the dashboard from whence you came',
+              }
+            ),
+            testId: 'visualizeDoneButton',
+            disableButton() {
+              return Boolean($scope.dirty);
+            },
+            tooltip() {
+              if ($scope.dirty) {
+                return i18n.translate(
+                  'kbn.visualize.topNavMenu.doneVisualizationDisabledButtonTooltip',
+                  {
+                    defaultMessage: 'Apply or Discard your changes before finishing',
+                  }
+                );
+              }
+            },
+            run: async () => {
+              const saveOptions = {
+                confirmOverwrite: false,
+              };
+              return doSave(saveOptions);
+            },
+          },
+        ]
+      : []),
     ...(visualizeCapabilities.save
       ? [
           {
             id: 'save',
-            label: i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
-              defaultMessage: 'save',
-            }),
+            label: $scope.isEditFromDashMode()
+              ? i18n.translate('kbn.topNavMenu.saveVisualizationAsButtonLabel', {
+                  defaultMessage: 'save as',
+                })
+              : i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', {
+                  defaultMessage: 'save',
+                }),
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
               defaultMessage: 'Save Visualization',
             }),
@@ -194,12 +249,22 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                 });
               };
 
-              const confirmButtonLabel = $scope.isAddToDashMode() ? (
-                <FormattedMessage
-                  id="visualize.saveDialog.saveAndAddToDashboardButtonLabel"
-                  defaultMessage="Save and add to dashboard"
-                />
-              ) : null;
+              let confirmButtonLabel = null;
+              if ($scope.isAddToDashMode()) {
+                confirmButtonLabel = (
+                  <FormattedMessage
+                    id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
+                    defaultMessage="Save and add to dashboard"
+                  />
+                );
+              } else if ($scope.isEditFromDashMode()) {
+                confirmButtonLabel = (
+                  <FormattedMessage
+                    id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
+                    defaultMessage="Save and return to dashboard"
+                  />
+                );
+              }
 
               const saveModal = (
                 <SavedObjectSaveModal
@@ -393,12 +458,6 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     $scope.searchSource = searchSource;
     $scope.refreshInterval = timefilter.getRefreshInterval();
     handleLinkedSearch(initialState.linked);
-
-    const addToDashMode =
-      $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
-    removeQueryParam(history, DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
-
-    $scope.isAddToDashMode = () => addToDashMode;
 
     $scope.showFilterBar = () => {
       return vis.type.options.showFilterBar;
@@ -626,14 +685,15 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               'data-test-subj': 'saveVisualizationSuccess',
             });
 
-            if ($scope.isAddToDashMode()) {
+            if ($scope.isAddToDashMode() || $scope.isEditFromDashMode()) {
               const appPath = `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(savedVis.id)}`;
               // Manually insert a new url so the back button will open the saved visualization.
               history.replace(appPath);
               setActiveUrl(appPath);
 
               const lastDashboardUrl = chrome.navLinks.get('kibana:dashboard').url;
-              const dashboardUrl = addEmbeddableToDashboardUrl(lastDashboardUrl, savedVis.id);
+              const visId = $scope.isAddToDashMode() ? savedVis.id : '';
+              const dashboardUrl = addEmbeddableToDashboardUrl(lastDashboardUrl, visId);
               history.push(dashboardUrl);
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);

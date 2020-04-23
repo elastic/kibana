@@ -23,6 +23,7 @@ import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { IEmbeddable } from '../embeddables';
 import { EmbeddableStart } from '../../plugin';
+// import { DashboardConstants, DASHBOARD_CONTAINER_TYPE } from '../../../../dashboard/public';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -36,6 +37,14 @@ export class EditPanelAction implements Action<ActionContext> {
   public order = 15;
 
   constructor(private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']) {}
+
+  private isOnDashboard(embeddable: IEmbeddable) {
+    return Boolean(
+      embeddable.getRoot() &&
+        embeddable.getRoot().isContainer &&
+        embeddable.getRoot().type === 'dashboard'
+    );
+  }
 
   public getDisplayName({ embeddable }: ActionContext) {
     const factory = this.getEmbeddableFactory(embeddable.type);
@@ -72,7 +81,11 @@ export class EditPanelAction implements Action<ActionContext> {
   }
 
   public async getHref({ embeddable }: ActionContext): Promise<string> {
-    const editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
+    let editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
+    if (this.isOnDashboard(embeddable)) {
+      // editUrl += `?${DashboardConstants.EDIT_VISUALIZATION_FROM_DASHBOARD_MODE_PARAM}`;
+      editUrl += `?${'editFromDashboard'}`;
+    }
     return editUrl ? editUrl : '';
   }
 }

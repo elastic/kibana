@@ -33,8 +33,10 @@ export function addEmbeddableToDashboardUrl(dashboardUrl: string, embeddableId: 
   const { url, query } = parseUrl(dashboardUrl);
   const [, dashboardId] = url.split(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
 
-  query[DashboardConstants.ADD_EMBEDDABLE_TYPE] = VISUALIZE_EMBEDDABLE_TYPE;
-  query[DashboardConstants.ADD_EMBEDDABLE_ID] = embeddableId;
+  if (embeddableId) {
+    query[DashboardConstants.ADD_EMBEDDABLE_TYPE] = VISUALIZE_EMBEDDABLE_TYPE;
+    query[DashboardConstants.ADD_EMBEDDABLE_ID] = embeddableId;
+  }
 
   return `${DashboardConstants.CREATE_NEW_DASHBOARD_URL}${dashboardId}?${stringify(query)}`;
 }
