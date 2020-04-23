@@ -25,36 +25,46 @@ const DEFAULT_SIZE = 20;
 
 const sortCerts = (a: string, b: string) => new Date(a).valueOf() - new Date(b).valueOf();
 
+const mapCertsToSummaryString = (certs: Cert[], maxSummaryItems: number): string =>
+  certs
+    .slice(0, maxSummaryItems)
+    .map(cert => `${cert.common_name} expiration date ${cert.certificate_not_valid_after}`)
+    .reduce((prev, cur) => prev.concat(`, ${cur}`), '');
+
+interface TlsAlertState {
+  count: number;
+  agingCount: number;
+  agingCommonNameAndDate: string;
+  expiringCount: number;
+  expiringCommonNameAndDate: string;
+}
+
 export const getCertSummary = (
   certs: Cert[],
   expirationThreshold: number,
   ageThreshold: number,
-  maxSummaryItems: number = 1000,
-  topLength: number = 3
-) => {
+  maxSummaryItems: number = 3
+): TlsAlertState => {
   certs.sort((a, b) =>
     sortCerts(a.certificate_not_valid_after ?? '', b.certificate_not_valid_after ?? '')
   );
   const expiring = certs.filter(
     cert => new Date(cert.certificate_not_valid_after ?? '').valueOf() < expirationThreshold
   );
+
   certs.sort((a, b) =>
     sortCerts(a.certificate_not_valid_before ?? '', b.certificate_not_valid_before ?? '')
   );
   const aging = certs.filter(
     cert => new Date(cert.certificate_not_valid_before ?? '').valueOf() < ageThreshold
   );
+
   return {
-    expiring: expiring.slice(0, maxSummaryItems),
-    topExpiring: expiring.slice(0, topLength).map(cert => ({
-      commonName: cert.common_name,
-      validUntil: cert.certificate_not_valid_after,
-    })),
-    aging: aging.slice(0, maxSummaryItems),
-    topAging: aging.slice(0, topLength).map(cert => ({
-      commonName: cert.common_name,
-      validAfter: cert.certificate_not_valid_before,
-    })),
+    count: certs.length,
+    agingCount: aging.length,
+    agingCommonNameAndDate: mapCertsToSummaryString(aging, maxSummaryItems),
+    expiringCommonNameAndDate: mapCertsToSummaryString(expiring, maxSummaryItems),
+    expiringCount: expiring.length,
   };
 };
 
