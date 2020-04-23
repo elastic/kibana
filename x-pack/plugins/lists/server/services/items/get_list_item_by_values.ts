@@ -10,7 +10,7 @@ import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../comm
 import { DataClient } from '../../types';
 import { getQueryFilterFromTypeValue, transformElasticToListItem } from '../utils';
 
-interface GetListItemByValuesOptions {
+export interface GetListItemByValuesOptions {
   listId: string;
   dataClient: DataClient;
   listItemIndex: string;

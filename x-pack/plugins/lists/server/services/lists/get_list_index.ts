@@ -15,6 +15,5 @@ interface GetListIndexOptions {
   listsIndexName: string;
 }
 
-export const getListIndex = ({ spaces, request, listsIndexName }: GetListIndexOptions): string => {
-  return `${listsIndexName}-${getSpace({ request, spaces })}`;
-};
+export const getListIndex = ({ spaces, request, listsIndexName }: GetListIndexOptions): string =>
+  `${listsIndexName}-${getSpace({ request, spaces })}`;

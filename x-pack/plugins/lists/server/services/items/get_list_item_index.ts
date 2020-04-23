@@ -7,7 +7,7 @@
 import { KibanaRequest } from 'kibana/server';
 
 import { SpacesServiceSetup } from '../../../../spaces/server';
-import { getSpace } from '../utils/get_space';
+import { getSpace } from '../utils';
 
 interface GetListItemIndexOptions {
   spaces: SpacesServiceSetup | undefined | null;
@@ -19,6 +19,4 @@ export const getListItemIndex = ({
   spaces,
   request,
   listsItemsIndexName,
-}: GetListItemIndexOptions): string => {
-  return `${listsItemsIndexName}-${getSpace({ request, spaces })}`;
-};
+}: GetListItemIndexOptions): string => `${listsItemsIndexName}-${getSpace({ request, spaces })}`;

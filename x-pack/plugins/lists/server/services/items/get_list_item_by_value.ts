@@ -9,7 +9,7 @@ import { DataClient } from '../../types';
 
 import { getListItemByValues } from '.';
 
-interface GetListItemByValueOptions {
+export interface GetListItemByValueOptions {
   listId: string;
   dataClient: DataClient;
   listItemIndex: string;
@@ -23,12 +23,11 @@ export const getListItemByValue = async ({
   listItemIndex,
   type,
   value,
-}: GetListItemByValueOptions): Promise<ListItemArraySchema> => {
-  return getListItemByValues({
+}: GetListItemByValueOptions): Promise<ListItemArraySchema> =>
+  getListItemByValues({
     dataClient,
     listId,
     listItemIndex,
     type,
     value: [value],
   });
-};

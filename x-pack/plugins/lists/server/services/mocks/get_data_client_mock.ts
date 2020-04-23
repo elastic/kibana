@@ -24,10 +24,10 @@ export const getEmptyCreateDocumentResponseMock = (): CreateDocumentResponse => 
   result: '',
 });
 
-export const getDataClientMock = (callAsCurrentUserData?: unknown): DataClientReturn => ({
-  callAsCurrentUser: jest
-    .fn()
-    .mockResolvedValue(callAsCurrentUserData ?? getEmptyCreateDocumentResponseMock()),
+export const getDataClientMock = (
+  callAsCurrentUserData: unknown = getEmptyCreateDocumentResponseMock()
+): DataClientReturn => ({
+  callAsCurrentUser: jest.fn().mockResolvedValue(callAsCurrentUserData),
   callAsInternalUser: (): Promise<never> => {
     throw new Error('This function should not be calling "callAsInternalUser"');
   },

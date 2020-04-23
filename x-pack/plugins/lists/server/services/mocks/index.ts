@@ -19,3 +19,8 @@ export * from './get_index_es_list_item_mock';
 export * from './get_create_list_item_bulk_options_mock';
 export * from './get_delete_list_item_by_value_options_mock';
 export * from './get_delete_list_item_options_mock';
+export * from './get_list_item_by_values_options_mock';
+export * from './get_search_es_list_mock';
+export * from './get_search_es_list_item_mock';
+export * from './get_list_item_by_value_options_mock';
+export * from './get_update_list_item_options_mock';

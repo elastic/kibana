@@ -17,13 +17,14 @@ import { DataClient } from '../../types';
 
 import { getListItem } from './get_list_item';
 
-interface UpdateListItemOptions {
+export interface UpdateListItemOptions {
   id: Id;
   value: string | null | undefined;
   dataClient: DataClient;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
+  dateNow?: string;
 }
 
 export const updateListItem = async ({
@@ -33,8 +34,9 @@ export const updateListItem = async ({
   listItemIndex,
   user,
   meta,
+  dateNow,
 }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
-  const updatedAt = new Date().toISOString();
+  const updatedAt = dateNow ?? new Date().toISOString();
   const listItem = await getListItem({ dataClient, id, listItemIndex });
   if (listItem == null) {
     return null;

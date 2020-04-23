@@ -5,7 +5,13 @@
  */
 
 import { ListSchema } from '../../../common/schemas';
-import { getDataClientMock, getListResponseMock, getSearchListMock } from '../mocks';
+import {
+  LIST_ID,
+  LIST_INDEX,
+  getDataClientMock,
+  getListResponseMock,
+  getSearchListMock,
+} from '../mocks';
 
 import { getList } from './get_list';
 
@@ -21,7 +27,7 @@ describe('get_list', () => {
   test('it returns a list as expected if the list is found', async () => {
     const data = getSearchListMock();
     const dataClient = getDataClientMock(data);
-    const list = await getList({ dataClient, id: '123', listIndex: '.lists' });
+    const list = await getList({ dataClient, id: LIST_ID, listIndex: LIST_INDEX });
     const expected: ListSchema = getListResponseMock();
     expect(list).toEqual(expected);
   });
@@ -30,7 +36,7 @@ describe('get_list', () => {
     const data = getSearchListMock();
     data.hits.hits = [];
     const dataClient = getDataClientMock(data);
-    const list = await getList({ dataClient, id: '123', listIndex: '.lists' });
+    const list = await getList({ dataClient, id: LIST_ID, listIndex: LIST_INDEX });
     expect(list).toEqual(null);
   });
 });

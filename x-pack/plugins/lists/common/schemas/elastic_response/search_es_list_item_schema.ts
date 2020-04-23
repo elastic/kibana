@@ -11,7 +11,6 @@ import * as t from 'io-ts';
 import {
   created_at,
   created_by,
-  esDataTypeUnion,
   ipOrUndefined,
   keywordOrUndefined,
   list_id,
@@ -21,21 +20,18 @@ import {
   updated_by,
 } from '../common/schemas';
 
-export const searchEsListItemSchema = t.intersection([
-  t.exact(
-    t.type({
-      created_at,
-      created_by,
-      ip: ipOrUndefined,
-      keyword: keywordOrUndefined,
-      list_id,
-      meta: metaOrUndefined,
-      tie_breaker_id,
-      updated_at,
-      updated_by,
-    })
-  ),
-  esDataTypeUnion,
-]);
+export const searchEsListItemSchema = t.exact(
+  t.type({
+    created_at,
+    created_by,
+    ip: ipOrUndefined,
+    keyword: keywordOrUndefined,
+    list_id,
+    meta: metaOrUndefined,
+    tie_breaker_id,
+    updated_at,
+    updated_by,
+  })
+);
 
 export type SearchEsListItemSchema = t.TypeOf<typeof searchEsListItemSchema>;

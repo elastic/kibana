@@ -6,22 +6,22 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { SearchEsListSchema } from '../../../common/schemas';
+import { SearchEsListItemSchema } from '../../../common/schemas';
 
 import { getShardMock } from './get_shard_mock';
-import { LIST_ID, LIST_INDEX } from './lists_services_mock_constants';
-import { getSearchEsListMock } from './get_search_es_list_mock';
+import { LIST_INDEX, LIST_ITEM_ID } from './lists_services_mock_constants';
+import { getSearchEsListItemMock } from './get_search_es_list_item_mock';
 
-export const getSearchListMock = (): SearchResponse<SearchEsListSchema> => ({
+export const getSearchListItemMock = (): SearchResponse<SearchEsListItemSchema> => ({
   _scroll_id: '123',
   _shards: getShardMock(),
   hits: {
     hits: [
       {
-        _id: LIST_ID,
+        _id: LIST_ITEM_ID,
         _index: LIST_INDEX,
         _score: 0,
-        _source: getSearchEsListMock(),
+        _source: getSearchEsListItemMock(),
         _type: '',
       },
     ],
