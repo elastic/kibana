@@ -26,6 +26,8 @@ run(
           'src/core/server/saved_objects/types.ts$',
           'src/core/public/overlays/banners/banners_service.tsx$',
           'src/core/public/saved_objects/saved_objects_client.ts$',
+          'src/plugins/data/public',
+          'src/plugins/ui_actions/public',
         ],
       }
     );
