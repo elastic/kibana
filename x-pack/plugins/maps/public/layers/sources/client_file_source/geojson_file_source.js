@@ -21,8 +21,6 @@ import { registerSource } from '../source_registry';
 export class GeojsonFileSource extends AbstractVectorSource {
   static type = SOURCE_TYPES.GEOJSON_FILE;
 
-  static isIndexingSource = true;
-
   static createDescriptor(geoJson, name) {
     // Wrap feature as feature collection if needed
     let featureCollection;
@@ -70,7 +68,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
   }
 
   shouldBeIndexed() {
-    return GeojsonFileSource.isIndexingSource;
+    return true;
   }
 }
 

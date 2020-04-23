@@ -23,6 +23,8 @@ import { shimHitsTotal } from './shim_hits_total';
 
 export interface AsyncSearchResponse<T> {
   id: string;
+  is_partial: boolean;
+  is_running: boolean;
   response: SearchResponse<T>;
 }
 
@@ -71,13 +73,19 @@ async function asyncSearch(
   // Wait up to 1s for the response to return
   const query = toSnakeCase({ waitForCompletionTimeout: '1s', ...queryParams });
 
-  const { response, id } = (await caller(
+  const { id, response, is_partial, is_running } = (await caller(
     'transport.request',
     { method, path, body, query },
     options
   )) as AsyncSearchResponse<any>;
 
-  return { id, rawResponse: shimHitsTotal(response), ...getTotalLoaded(response._shards) };
+  return {
+    id,
+    is_partial,
+    is_running,
+    rawResponse: shimHitsTotal(response),
+    ...getTotalLoaded(response._shards),
+  };
 }
 
 async function rollupSearch(
