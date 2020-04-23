@@ -447,26 +447,6 @@ export class SearchSource {
       delete searchRequest.highlightAll;
     }
 
-    const translateToQuery = (filter: Filter) => filter && (filter.query || filter);
-
-    // re-write filters within filter aggregations
-    (function recurse(aggBranch) {
-      if (!aggBranch) return;
-      Object.keys(aggBranch).forEach(function(id) {
-        const agg = aggBranch[id];
-
-        if (agg.filters) {
-          // translate filters aggregations
-          const { filters: aggFilters } = agg.filters;
-          Object.keys(aggFilters).forEach(filterId => {
-            aggFilters[filterId] = translateToQuery(aggFilters[filterId]);
-          });
-        }
-
-        recurse(agg.aggs || agg.aggregations);
-      });
-    })(body.aggs || body.aggregations);
-
     return searchRequest;
   }
 
