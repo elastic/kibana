@@ -52,14 +52,14 @@ export const epicDefaultTimeline = (
         ...callOutMsg,
         ...epicUpdateTimeline({
           duplicate: false,
-          from: timeline?.dateRange?.start ?? settingsFrom,
+          from: savedTimeline.dateRange.start ?? settingsFrom,
           id: 'timeline-1',
           notes,
           timeline: {
             ...timelineModel,
             show: savedTimeline?.show ?? false,
           },
-          to: timeline?.dateRange?.end ?? settingsTo,
+          to: savedTimeline.dateRange.end ?? settingsTo,
         }),
         endTimelineSaving({
           id: action.payload.id,
