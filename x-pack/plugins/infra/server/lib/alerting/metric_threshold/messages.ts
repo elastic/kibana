@@ -87,11 +87,16 @@ export const buildFiredAlertReason: (alertResult: {
     },
   });
 
-export const buildNoDataAlertReason = (metric: string) =>
+export const buildNoDataAlertReason: (alertResult: {
+  metric: string;
+  timeSize: number;
+  timeUnit: string;
+}) => string = ({ metric, timeSize, timeUnit }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.noDataAlertReason', {
-    defaultMessage: '{metric} has reported no data',
+    defaultMessage: '{metric} has reported no data over the past {interval}',
     values: {
       metric,
+      interval: `${timeSize}${timeUnit}`,
     },
   });
 

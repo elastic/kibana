@@ -276,9 +276,8 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
           const { threshold, comparator } = criterion;
           const comparisonFunction = comparatorMap[comparator];
           return mapValues(currentValues, value => ({
+            ...criterion,
             metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
-            threshold,
-            comparator,
             currentValue: value,
             shouldFire:
               value !== undefined && value !== null && comparisonFunction(value, threshold),
@@ -316,7 +315,7 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
         if (nextState === AlertStates.NO_DATA) {
           reason = alertResults
             .filter(result => result[group].isNoData)
-            .map(result => buildNoDataAlertReason(result[group].metric))
+            .map(result => buildNoDataAlertReason(result[group]))
             .join('; ');
         } else if (nextState === AlertStates.ERROR) {
           reason = alertResults
