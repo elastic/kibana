@@ -94,6 +94,16 @@ export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
     urlTemplate: string;
   };
 
+export enum MVTFieldType {
+  String = 'String',
+  Number = 'Number',
+}
+
+export type MVTFieldDescriptor = {
+  name: string;
+  type: MVTFieldType;
+};
+
 export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & {
   urlTemplate: string;
   layerName: string;
@@ -104,6 +114,8 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & 
   // e.g. EMS basemap data from level 14 is at most detailed resolution and can be displayed at higher levels
   minSourceZoom: number;
   maxSourceZoom: number;
+
+  fields?: MVTFieldDescriptor[];
 };
 
 export type JoinDescriptor = {
